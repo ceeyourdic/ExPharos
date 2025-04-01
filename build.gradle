@@ -52,6 +52,9 @@ dependencies {
 //    from a maven repo
 //    shade 'package-here'
 //    compile 'package-here'
+
+    compileOnly("org.projectlombok:lombok:1.18.38")
+    annotationProcessor("org.projectlombok:lombok:1.18.38")
 }
 
 project(':mcp') {
