@@ -1,0 +1,58 @@
+package dev.sxmurxy.mre.renderers.impl;
+
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat.Mode;
+import net.minecraft.client.renderer.CompiledShaderProgram;
+import net.minecraft.client.renderer.ShaderDefines;
+import net.minecraft.client.renderer.ShaderProgram;
+import org.joml.Matrix4f;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+
+import dev.sxmurxy.mre.builders.states.QuadColorState;
+import dev.sxmurxy.mre.builders.states.QuadRadiusState;
+import dev.sxmurxy.mre.builders.states.SizeState;
+import dev.sxmurxy.mre.providers.ResourceProvider;
+import dev.sxmurxy.mre.renderers.IRenderer;
+
+public record BuiltBorder(
+        SizeState size,
+        QuadRadiusState radius,
+        QuadColorState color,
+        float thickness,
+        float internalSmoothness, float externalSmoothness
+    ) implements IRenderer {
+
+    private static final ShaderProgram BORDER_SHADER = new ShaderProgram(ResourceProvider.getShaderLocation("border"),
+        DefaultVertexFormat.POSITION_COLOR, ShaderDefines.EMPTY);
+
+    @Override
+    public void render(Matrix4f matrix, float x, float y, float z) {
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.disableCull();
+
+        float width = this.size.width(), height = this.size.height();
+        CompiledShaderProgram shader = RenderSystem.setShader(BORDER_SHADER);
+        shader.safeGetUniform("Size").set(width, height);
+        shader.safeGetUniform("Radius").set(this.radius.radius1(), this.radius.radius2(),
+            this.radius.radius3(), this.radius.radius4());
+        shader.safeGetUniform("Thickness").set(thickness);
+        shader.safeGetUniform("Smoothness").set(this.internalSmoothness, this.externalSmoothness);
+
+        BufferBuilder builder = Tesselator.getInstance().begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        builder.addVertex(matrix, x, y, z).setColor(this.color.color1());
+        builder.addVertex(matrix, x, y + height, z).setColor(this.color.color2());
+        builder.addVertex(matrix, x + width, y + height, z).setColor(this.color.color3());
+        builder.addVertex(matrix, x + width, y, z).setColor(this.color.color4());
+
+        BufferUploader.drawWithShader(builder.buildOrThrow());
+
+        RenderSystem.enableCull();
+        RenderSystem.disableBlend();
+    }
+
+}
