@@ -1,4 +1,4 @@
-package org.clientbase.value;
+package a925mm.extinguished.pharos.value;
 
 import lombok.Getter;
 import lombok.Setter;

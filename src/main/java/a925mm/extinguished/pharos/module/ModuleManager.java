@@ -1,9 +1,9 @@
-package org.clientbase.module;
+package a925mm.extinguished.pharos.module;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.clientbase.module.impl.combat.KillAura;
-import org.clientbase.value.Value;
+import a925mm.extinguished.pharos.module.impl.combat.KillAura;
+import a925mm.extinguished.pharos.value.Value;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;

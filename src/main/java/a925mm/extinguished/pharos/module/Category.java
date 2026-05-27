@@ -1,4 +1,4 @@
-package org.clientbase.module;
+package a925mm.extinguished.pharos.module;
 
 /**
  * @author LangYa466

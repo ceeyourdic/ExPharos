@@ -1,4 +1,4 @@
-package org.clientbase.event;
+package a925mm.extinguished.pharos.event;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package org.clientbase.event.impl;
+package a925mm.extinguished.pharos.event.impl;
 
 /**
  * @author LangYa466

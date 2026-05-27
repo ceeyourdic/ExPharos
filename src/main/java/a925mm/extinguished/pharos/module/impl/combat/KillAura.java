@@ -1,13 +1,12 @@
-package org.clientbase.module.impl.combat;
+package a925mm.extinguished.pharos.module.impl.combat;
 
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import org.clientbase.event.EventTarget;
-import org.clientbase.event.impl.EventUpdate;
-import org.clientbase.module.Category;
-import org.clientbase.module.Module;
-import org.clientbase.value.impl.NumberValue;
+import a925mm.extinguished.pharos.event.EventTarget;
+import a925mm.extinguished.pharos.event.impl.EventUpdate;
+import a925mm.extinguished.pharos.module.Category;
+import a925mm.extinguished.pharos.module.Module;
+import a925mm.extinguished.pharos.value.impl.NumberValue;
 
 /**
  * @author LangYa466

@@ -1,6 +1,6 @@
-package org.clientbase.value.impl;
+package a925mm.extinguished.pharos.value.impl;
 
-import org.clientbase.value.Value;
+import a925mm.extinguished.pharos.value.Value;
 import java.util.function.Supplier;
 
 /**

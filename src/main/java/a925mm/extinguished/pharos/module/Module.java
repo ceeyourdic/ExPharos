@@ -1,10 +1,10 @@
-package org.clientbase.module;
+package a925mm.extinguished.pharos.module;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.clientbase.ClientBase;
-import org.clientbase.Wrapper;
-import org.clientbase.value.Value;
+import a925mm.extinguished.pharos.ExPharos;
+import a925mm.extinguished.pharos.Wrapper;
+import a925mm.extinguished.pharos.value.Value;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +32,9 @@ public class Module implements Wrapper {
         this.enabled = enabled;
 
         if (enabled) {
-            ClientBase.INSTANCE.getEventManager().register(this);
+            ExPharos.INSTANCE.getEventManager().register(this);
         } else {
-            ClientBase.INSTANCE.getEventManager().unregister(this);
+            ExPharos.INSTANCE.getEventManager().unregister(this);
         }
     }
 }

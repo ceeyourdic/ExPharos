@@ -25,11 +25,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -115,8 +113,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
-import org.clientbase.ClientBase;
-import org.clientbase.event.impl.EventUpdate;
+import a925mm.extinguished.pharos.ExPharos;
+import a925mm.extinguished.pharos.event.impl.EventUpdate;
 import org.slf4j.Logger;
 
 public abstract class Player extends LivingEntity {
@@ -253,7 +251,7 @@ public abstract class Player extends LivingEntity {
     @Override
     public void tick() {
         EventUpdate eventUpdate = new EventUpdate();
-        ClientBase.INSTANCE.getEventManager().post(eventUpdate);
+        ExPharos.INSTANCE.getEventManager().post(eventUpdate);
 
         this.noPhysics = this.isSpectator();
         if (this.isSpectator() || this.isPassenger()) {

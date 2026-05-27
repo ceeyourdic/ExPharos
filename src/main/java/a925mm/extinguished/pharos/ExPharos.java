@@ -1,20 +1,20 @@
-package org.clientbase;
+package a925mm.extinguished.pharos;
 
 import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.clientbase.event.EventManager;
-import org.clientbase.module.ModuleManager;
+import a925mm.extinguished.pharos.event.EventManager;
+import a925mm.extinguished.pharos.module.ModuleManager;
 
 /**
  * @author LangYa466
  * @since 4/2/2025 12:40 AM
  */
 @Getter
-public class ClientBase {
-    public static final ClientBase INSTANCE = new ClientBase();
+public class ExPharos {
+    public static final ExPharos INSTANCE = new ExPharos();
 
-    public static final String name = "ClientBase";
+    public static final String name = "Pharos";
     private static final Logger logger = LogManager.getLogger();
     private boolean initiated = false;
 

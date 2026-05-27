@@ -1,4 +1,4 @@
-package org.clientbase.event;
+package a925mm.extinguished.pharos.event;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

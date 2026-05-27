@@ -244,7 +244,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.io.FileUtils;
-import org.clientbase.ClientBase;
+import a925mm.extinguished.pharos.ExPharos;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
 import org.slf4j.Logger;
 
@@ -1155,7 +1155,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
     }
 
     private void runTick(boolean p_91384_) {
-        ClientBase.INSTANCE.init();
+        ExPharos.INSTANCE.init();
 
         this.window.setErrorSection("Pre render");
         if (this.window.shouldClose()) {

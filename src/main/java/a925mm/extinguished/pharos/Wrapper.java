@@ -1,4 +1,4 @@
-package org.clientbase;
+package a925mm.extinguished.pharos;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
