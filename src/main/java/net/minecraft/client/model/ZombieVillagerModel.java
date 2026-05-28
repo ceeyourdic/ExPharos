@@ -71,25 +71,25 @@ public class ZombieVillagerModel<S extends ZombieVillagerRenderState> extends Hu
         return LayerDefinition.create(meshdefinition, 64, 64);
     }
 
-    public static LayerDefinition createArmorLayer(CubeDeformation p_171094_) {
-        MeshDefinition meshdefinition = HumanoidModel.createMesh(p_171094_, 0.0F);
+    public static LayerDefinition createArmorLayer(CubeDeformation pCubeDeformation) {
+        MeshDefinition meshdefinition = HumanoidModel.createMesh(pCubeDeformation, 0.0F);
         PartDefinition partdefinition = meshdefinition.getRoot();
         PartDefinition partdefinition1 = partdefinition.addOrReplaceChild(
-            "head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 8.0F, 8.0F, p_171094_), PartPose.ZERO
+            "head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 8.0F, 8.0F, pCubeDeformation), PartPose.ZERO
         );
         partdefinition.addOrReplaceChild(
             "body",
-            CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, p_171094_.extend(0.1F)),
+            CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, pCubeDeformation.extend(0.1F)),
             PartPose.ZERO
         );
         partdefinition.addOrReplaceChild(
             "right_leg",
-            CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_171094_.extend(0.1F)),
+            CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, pCubeDeformation.extend(0.1F)),
             PartPose.offset(-2.0F, 12.0F, 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "left_leg",
-            CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_171094_.extend(0.1F)),
+            CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, pCubeDeformation.extend(0.1F)),
             PartPose.offset(2.0F, 12.0F, 0.0F)
         );
         partdefinition1.getChild("hat").addOrReplaceChild("hat_rim", CubeListBuilder.create(), PartPose.ZERO);

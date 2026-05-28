@@ -12,8 +12,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class BeeStingerModel extends Model {
-    public BeeStingerModel(ModelPart p_365461_) {
-        super(p_365461_, RenderType::entityCutout);
+    public BeeStingerModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entityCutout);
     }
 
     public static LayerDefinition createBodyLayer() {

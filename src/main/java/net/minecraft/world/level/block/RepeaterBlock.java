@@ -52,14 +52,14 @@ public class RepeaterBlock extends DiodeBlock {
     }
 
     @Override
-    protected int getDelay(BlockState p_55830_) {
-        return p_55830_.getValue(DELAY) * 2;
+    protected int getDelay(BlockState pState) {
+        return pState.getValue(DELAY) * 2;
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_55803_) {
-        BlockState blockstate = super.getStateForPlacement(p_55803_);
-        return blockstate.setValue(LOCKED, Boolean.valueOf(this.isLocked(p_55803_.getLevel(), p_55803_.getClickedPos(), blockstate)));
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockState blockstate = super.getStateForPlacement(pContext);
+        return blockstate.setValue(LOCKED, Boolean.valueOf(this.isLocked(pContext.getLevel(), pContext.getClickedPos(), blockstate)));
     }
 
     @Override
@@ -83,8 +83,8 @@ public class RepeaterBlock extends DiodeBlock {
     }
 
     @Override
-    public boolean isLocked(LevelReader p_55805_, BlockPos p_55806_, BlockState p_55807_) {
-        return this.getAlternateSignal(p_55805_, p_55806_, p_55807_) > 0;
+    public boolean isLocked(LevelReader pLevel, BlockPos pPos, BlockState pState) {
+        return this.getAlternateSignal(pLevel, pPos, pState) > 0;
     }
 
     @Override
@@ -112,7 +112,7 @@ public class RepeaterBlock extends DiodeBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_55828_) {
-        p_55828_.add(FACING, DELAY, LOCKED, POWERED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, DELAY, LOCKED, POWERED);
     }
 }

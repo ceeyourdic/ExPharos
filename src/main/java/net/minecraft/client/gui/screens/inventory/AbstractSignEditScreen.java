@@ -35,18 +35,18 @@ public abstract class AbstractSignEditScreen extends Screen {
     @Nullable
     private TextFieldHelper signField;
 
-    public AbstractSignEditScreen(SignBlockEntity p_277842_, boolean p_277719_, boolean p_277969_) {
-        this(p_277842_, p_277719_, p_277969_, Component.translatable("sign.edit"));
+    public AbstractSignEditScreen(SignBlockEntity pSign, boolean pIsFrontText, boolean pIsFiltered) {
+        this(pSign, pIsFrontText, pIsFiltered, Component.translatable("sign.edit"));
     }
 
-    public AbstractSignEditScreen(SignBlockEntity p_277792_, boolean p_277607_, boolean p_278039_, Component p_277393_) {
-        super(p_277393_);
-        this.sign = p_277792_;
-        this.text = p_277792_.getText(p_277607_);
-        this.isFrontText = p_277607_;
-        this.woodType = SignBlock.getWoodType(p_277792_.getBlockState().getBlock());
+    public AbstractSignEditScreen(SignBlockEntity pSign, boolean pIsFrontText, boolean pIsFiltered, Component pTitle) {
+        super(pTitle);
+        this.sign = pSign;
+        this.text = pSign.getText(pIsFrontText);
+        this.isFrontText = pIsFrontText;
+        this.woodType = SignBlock.getWoodType(pSign.getBlockState().getBlock());
         this.messages = IntStream.range(0, 4)
-            .mapToObj(p_277214_ -> this.text.getMessage(p_277214_, p_278039_))
+            .mapToObj(p_277214_ -> this.text.getMessage(p_277214_, pIsFiltered))
             .map(Component::getString)
             .toArray(String[]::new);
     }
@@ -141,28 +141,28 @@ public abstract class AbstractSignEditScreen extends Screen {
         return false;
     }
 
-    protected abstract void renderSignBackground(GuiGraphics p_281459_);
+    protected abstract void renderSignBackground(GuiGraphics pGuiGraphics);
 
     protected abstract Vector3f getSignTextScale();
 
-    protected void offsetSign(GuiGraphics p_282672_, BlockState p_283056_) {
-        p_282672_.pose().translate((float)this.width / 2.0F, 90.0F, 50.0F);
+    protected void offsetSign(GuiGraphics pGuiGraphics, BlockState pState) {
+        pGuiGraphics.pose().translate((float)this.width / 2.0F, 90.0F, 50.0F);
     }
 
-    private void renderSign(GuiGraphics p_282006_) {
-        p_282006_.pose().pushPose();
-        this.offsetSign(p_282006_, this.sign.getBlockState());
-        p_282006_.pose().pushPose();
-        this.renderSignBackground(p_282006_);
-        p_282006_.pose().popPose();
-        this.renderSignText(p_282006_);
-        p_282006_.pose().popPose();
+    private void renderSign(GuiGraphics pGuiGraphics) {
+        pGuiGraphics.pose().pushPose();
+        this.offsetSign(pGuiGraphics, this.sign.getBlockState());
+        pGuiGraphics.pose().pushPose();
+        this.renderSignBackground(pGuiGraphics);
+        pGuiGraphics.pose().popPose();
+        this.renderSignText(pGuiGraphics);
+        pGuiGraphics.pose().popPose();
     }
 
-    private void renderSignText(GuiGraphics p_282366_) {
-        p_282366_.pose().translate(0.0F, 0.0F, 4.0F);
+    private void renderSignText(GuiGraphics pGuiGraphics) {
+        pGuiGraphics.pose().translate(0.0F, 0.0F, 4.0F);
         Vector3f vector3f = this.getSignTextScale();
-        p_282366_.pose().scale(vector3f.x(), vector3f.y(), vector3f.z());
+        pGuiGraphics.pose().scale(vector3f.x(), vector3f.y(), vector3f.z());
         int i = this.text.hasGlowingText() ? this.text.getColor().getTextColor() : AbstractSignRenderer.getDarkColor(this.text);
         boolean flag = this.frame / 6 % 2 == 0;
         int j = this.signField.getCursorPos();
@@ -178,12 +178,12 @@ public abstract class AbstractSignEditScreen extends Screen {
                 }
 
                 int k1 = -this.font.width(s) / 2;
-                p_282366_.drawString(this.font, s, k1, j1 * this.sign.getTextLineHeight() - l, i, false);
+                pGuiGraphics.drawString(this.font, s, k1, j1 * this.sign.getTextLineHeight() - l, i, false);
                 if (j1 == this.line && j >= 0 && flag) {
                     int l1 = this.font.width(s.substring(0, Math.max(Math.min(j, s.length()), 0)));
                     int i2 = l1 - this.font.width(s) / 2;
                     if (j >= s.length()) {
-                        p_282366_.drawString(this.font, "_", i2, i1, i, false);
+                        pGuiGraphics.drawString(this.font, "_", i2, i1, i, false);
                     }
                 }
             }
@@ -195,7 +195,7 @@ public abstract class AbstractSignEditScreen extends Screen {
                 int l3 = this.font.width(s1.substring(0, Math.max(Math.min(j, s1.length()), 0)));
                 int i4 = l3 - this.font.width(s1) / 2;
                 if (flag && j < s1.length()) {
-                    p_282366_.fill(i4, i1 - 1, i4 + 1, i1 + this.sign.getTextLineHeight(), ARGB.opaque(i));
+                    pGuiGraphics.fill(i4, i1 - 1, i4 + 1, i1 + this.sign.getTextLineHeight(), ARGB.opaque(i));
                 }
 
                 if (k != j) {
@@ -205,15 +205,15 @@ public abstract class AbstractSignEditScreen extends Screen {
                     int l2 = this.font.width(s1.substring(0, j2)) - this.font.width(s1) / 2;
                     int i3 = Math.min(k2, l2);
                     int j3 = Math.max(k2, l2);
-                    p_282366_.fill(RenderType.guiTextHighlight(), i3, i1, j3, i1 + this.sign.getTextLineHeight(), -16776961);
+                    pGuiGraphics.fill(RenderType.guiTextHighlight(), i3, i1, j3, i1 + this.sign.getTextLineHeight(), -16776961);
                 }
             }
         }
     }
 
-    private void setMessage(String p_277913_) {
-        this.messages[this.line] = p_277913_;
-        this.text = this.text.setMessage(this.line, Component.literal(p_277913_));
+    private void setMessage(String pMessage) {
+        this.messages[this.line] = pMessage;
+        this.text = this.text.setMessage(this.line, Component.literal(pMessage));
         this.sign.setText(this.text, this.isFrontText);
     }
 

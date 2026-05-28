@@ -17,8 +17,8 @@ public class OutlineBufferSource implements MultiBufferSource {
     private int teamB = 255;
     private int teamA = 255;
 
-    public OutlineBufferSource(MultiBufferSource.BufferSource p_109927_) {
-        this.bufferSource = p_109927_;
+    public OutlineBufferSource(MultiBufferSource.BufferSource pBufferSource) {
+        this.bufferSource = pBufferSource;
     }
 
     @Override
@@ -41,11 +41,11 @@ public class OutlineBufferSource implements MultiBufferSource {
         }
     }
 
-    public void setColor(int p_109930_, int p_109931_, int p_109932_, int p_109933_) {
-        this.teamR = p_109930_;
-        this.teamG = p_109931_;
-        this.teamB = p_109932_;
-        this.teamA = p_109933_;
+    public void setColor(int pRed, int pGreen, int pBlue, int pAlpha) {
+        this.teamR = pRed;
+        this.teamG = pGreen;
+        this.teamB = pBlue;
+        this.teamA = pAlpha;
     }
 
     public void endOutlineBatch() {
@@ -54,8 +54,8 @@ public class OutlineBufferSource implements MultiBufferSource {
 
     @OnlyIn(Dist.CLIENT)
     static record EntityOutlineGenerator(VertexConsumer delegate, int color) implements VertexConsumer {
-        public EntityOutlineGenerator(VertexConsumer p_109943_, int p_109944_, int p_109945_, int p_109946_, int p_109947_) {
-            this(p_109943_, ARGB.color(p_109947_, p_109944_, p_109945_, p_109946_));
+        public EntityOutlineGenerator(VertexConsumer pDelegate, int pDefaultR, int pDefaultG, int pDefaultB, int pDefaultA) {
+            this(pDelegate, ARGB.color(pDefaultA, pDefaultR, pDefaultG, pDefaultB));
         }
 
         @Override

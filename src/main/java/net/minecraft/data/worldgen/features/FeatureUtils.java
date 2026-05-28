@@ -18,22 +18,22 @@ import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConf
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class FeatureUtils {
-    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> p_331696_) {
-        AquaticFeatures.bootstrap(p_331696_);
-        CaveFeatures.bootstrap(p_331696_);
-        EndFeatures.bootstrap(p_331696_);
-        MiscOverworldFeatures.bootstrap(p_331696_);
-        NetherFeatures.bootstrap(p_331696_);
-        OreFeatures.bootstrap(p_331696_);
-        PileFeatures.bootstrap(p_331696_);
-        TreeFeatures.bootstrap(p_331696_);
-        VegetationFeatures.bootstrap(p_331696_);
+    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> pContext) {
+        AquaticFeatures.bootstrap(pContext);
+        CaveFeatures.bootstrap(pContext);
+        EndFeatures.bootstrap(pContext);
+        MiscOverworldFeatures.bootstrap(pContext);
+        NetherFeatures.bootstrap(pContext);
+        OreFeatures.bootstrap(pContext);
+        PileFeatures.bootstrap(pContext);
+        TreeFeatures.bootstrap(pContext);
+        VegetationFeatures.bootstrap(pContext);
     }
 
-    private static BlockPredicate simplePatchPredicate(List<Block> p_195009_) {
+    private static BlockPredicate simplePatchPredicate(List<Block> pBlocks) {
         BlockPredicate blockpredicate;
-        if (!p_195009_.isEmpty()) {
-            blockpredicate = BlockPredicate.allOf(BlockPredicate.ONLY_IN_AIR_PREDICATE, BlockPredicate.matchesBlocks(Direction.DOWN.getUnitVec3i(), p_195009_));
+        if (!pBlocks.isEmpty()) {
+            blockpredicate = BlockPredicate.allOf(BlockPredicate.ONLY_IN_AIR_PREDICATE, BlockPredicate.matchesBlocks(Direction.DOWN.getUnitVec3i(), pBlocks));
         } else {
             blockpredicate = BlockPredicate.ONLY_IN_AIR_PREDICATE;
         }
@@ -41,37 +41,37 @@ public class FeatureUtils {
         return blockpredicate;
     }
 
-    public static RandomPatchConfiguration simpleRandomPatchConfiguration(int p_206471_, Holder<PlacedFeature> p_206472_) {
-        return new RandomPatchConfiguration(p_206471_, 7, 3, p_206472_);
+    public static RandomPatchConfiguration simpleRandomPatchConfiguration(int pTries, Holder<PlacedFeature> pFeature) {
+        return new RandomPatchConfiguration(pTries, 7, 3, pFeature);
     }
 
     public static <FC extends FeatureConfiguration, F extends Feature<FC>> RandomPatchConfiguration simplePatchConfiguration(
-        F p_206481_, FC p_206482_, List<Block> p_206483_, int p_206484_
+        F pFeature, FC pConfig, List<Block> pBlocks, int pTries
     ) {
-        return simpleRandomPatchConfiguration(p_206484_, PlacementUtils.filtered(p_206481_, p_206482_, simplePatchPredicate(p_206483_)));
+        return simpleRandomPatchConfiguration(pTries, PlacementUtils.filtered(pFeature, pConfig, simplePatchPredicate(pBlocks)));
     }
 
-    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RandomPatchConfiguration simplePatchConfiguration(F p_206477_, FC p_206478_, List<Block> p_206479_) {
-        return simplePatchConfiguration(p_206477_, p_206478_, p_206479_, 96);
+    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RandomPatchConfiguration simplePatchConfiguration(F pFeature, FC pConfig, List<Block> pBlocks) {
+        return simplePatchConfiguration(pFeature, pConfig, pBlocks, 96);
     }
 
-    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RandomPatchConfiguration simplePatchConfiguration(F p_206474_, FC p_206475_) {
-        return simplePatchConfiguration(p_206474_, p_206475_, List.of(), 96);
+    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RandomPatchConfiguration simplePatchConfiguration(F pFeature, FC pConfig) {
+        return simplePatchConfiguration(pFeature, pConfig, List.of(), 96);
     }
 
-    public static ResourceKey<ConfiguredFeature<?, ?>> createKey(String p_255643_) {
-        return ResourceKey.create(Registries.CONFIGURED_FEATURE, ResourceLocation.withDefaultNamespace(p_255643_));
+    public static ResourceKey<ConfiguredFeature<?, ?>> createKey(String pName) {
+        return ResourceKey.create(Registries.CONFIGURED_FEATURE, ResourceLocation.withDefaultNamespace(pName));
     }
 
     public static void register(
-        BootstrapContext<ConfiguredFeature<?, ?>> p_331914_, ResourceKey<ConfiguredFeature<?, ?>> p_256555_, Feature<NoneFeatureConfiguration> p_255921_
+        BootstrapContext<ConfiguredFeature<?, ?>> pContext, ResourceKey<ConfiguredFeature<?, ?>> pKey, Feature<NoneFeatureConfiguration> pFeature
     ) {
-        register(p_331914_, p_256555_, p_255921_, FeatureConfiguration.NONE);
+        register(pContext, pKey, pFeature, FeatureConfiguration.NONE);
     }
 
     public static <FC extends FeatureConfiguration, F extends Feature<FC>> void register(
-        BootstrapContext<ConfiguredFeature<?, ?>> p_330706_, ResourceKey<ConfiguredFeature<?, ?>> p_255983_, F p_255949_, FC p_256398_
+        BootstrapContext<ConfiguredFeature<?, ?>> pContext, ResourceKey<ConfiguredFeature<?, ?>> pKey, F pFeature, FC pConfig
     ) {
-        p_330706_.register(p_255983_, new ConfiguredFeature(p_255949_, p_256398_));
+        pContext.register(pKey, new ConfiguredFeature(pFeature, pConfig));
     }
 }

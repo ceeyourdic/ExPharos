@@ -36,10 +36,10 @@ public class EnchantWithLevelsFunction extends LootItemConditionalFunction {
     private final NumberProvider levels;
     private final Optional<HolderSet<Enchantment>> options;
 
-    EnchantWithLevelsFunction(List<LootItemCondition> p_300816_, NumberProvider p_165194_, Optional<HolderSet<Enchantment>> p_342551_) {
-        super(p_300816_);
-        this.levels = p_165194_;
-        this.options = p_342551_;
+    EnchantWithLevelsFunction(List<LootItemCondition> pCondtions, NumberProvider pLevels, Optional<HolderSet<Enchantment>> pOptions) {
+        super(pCondtions);
+        this.levels = pLevels;
+        this.options = pOptions;
     }
 
     @Override
@@ -53,30 +53,30 @@ public class EnchantWithLevelsFunction extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_80483_, LootContext p_80484_) {
-        RandomSource randomsource = p_80484_.getRandom();
-        RegistryAccess registryaccess = p_80484_.getLevel().registryAccess();
-        return EnchantmentHelper.enchantItem(randomsource, p_80483_, this.levels.getInt(p_80484_), registryaccess, this.options);
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        RandomSource randomsource = pContext.getRandom();
+        RegistryAccess registryaccess = pContext.getLevel().registryAccess();
+        return EnchantmentHelper.enchantItem(randomsource, pStack, this.levels.getInt(pContext), registryaccess, this.options);
     }
 
-    public static EnchantWithLevelsFunction.Builder enchantWithLevels(HolderLookup.Provider p_342807_, NumberProvider p_165197_) {
-        return new EnchantWithLevelsFunction.Builder(p_165197_).fromOptions(p_342807_.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(EnchantmentTags.ON_RANDOM_LOOT));
+    public static EnchantWithLevelsFunction.Builder enchantWithLevels(HolderLookup.Provider pRegistries, NumberProvider pLevels) {
+        return new EnchantWithLevelsFunction.Builder(pLevels).fromOptions(pRegistries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(EnchantmentTags.ON_RANDOM_LOOT));
     }
 
     public static class Builder extends LootItemConditionalFunction.Builder<EnchantWithLevelsFunction.Builder> {
         private final NumberProvider levels;
         private Optional<HolderSet<Enchantment>> options = Optional.empty();
 
-        public Builder(NumberProvider p_165200_) {
-            this.levels = p_165200_;
+        public Builder(NumberProvider pLevels) {
+            this.levels = pLevels;
         }
 
         protected EnchantWithLevelsFunction.Builder getThis() {
             return this;
         }
 
-        public EnchantWithLevelsFunction.Builder fromOptions(HolderSet<Enchantment> p_343865_) {
-            this.options = Optional.of(p_343865_);
+        public EnchantWithLevelsFunction.Builder fromOptions(HolderSet<Enchantment> pOptions) {
+            this.options = Optional.of(pOptions);
             return this;
         }
 

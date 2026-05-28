@@ -12,9 +12,9 @@ public class EntityTracker implements PositionTracker {
     private final Entity entity;
     private final boolean trackEyeHeight;
 
-    public EntityTracker(Entity p_22849_, boolean p_22850_) {
-        this.entity = p_22849_;
-        this.trackEyeHeight = p_22850_;
+    public EntityTracker(Entity pEntity, boolean pTrackEyeHeight) {
+        this.entity = pEntity;
+        this.trackEyeHeight = pTrackEyeHeight;
     }
 
     @Override
@@ -28,12 +28,12 @@ public class EntityTracker implements PositionTracker {
     }
 
     @Override
-    public boolean isVisibleBy(LivingEntity p_22853_) {
+    public boolean isVisibleBy(LivingEntity pEntity) {
         if (this.entity instanceof LivingEntity livingentity) {
             if (!livingentity.isAlive()) {
                 return false;
             } else {
-                Optional<NearestVisibleLivingEntities> optional = p_22853_.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
+                Optional<NearestVisibleLivingEntities> optional = pEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
                 return optional.isPresent() && optional.get().contains(livingentity);
             }
         } else {

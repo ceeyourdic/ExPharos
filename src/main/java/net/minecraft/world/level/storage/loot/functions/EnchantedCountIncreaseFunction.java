@@ -41,11 +41,11 @@ public class EnchantedCountIncreaseFunction extends LootItemConditionalFunction 
     private final NumberProvider value;
     private final int limit;
 
-    EnchantedCountIncreaseFunction(List<LootItemCondition> p_344991_, Holder<Enchantment> p_343841_, NumberProvider p_343472_, int p_342112_) {
-        super(p_344991_);
-        this.enchantment = p_343841_;
-        this.value = p_343472_;
-        this.limit = p_342112_;
+    EnchantedCountIncreaseFunction(List<LootItemCondition> pConditions, Holder<Enchantment> pEnchantment, NumberProvider pValue, int pLimit) {
+        super(pConditions);
+        this.enchantment = pEnchantment;
+        this.value = pValue;
+        this.limit = pLimit;
     }
 
     @Override
@@ -81,9 +81,9 @@ public class EnchantedCountIncreaseFunction extends LootItemConditionalFunction 
         return p_344964_;
     }
 
-    public static EnchantedCountIncreaseFunction.Builder lootingMultiplier(HolderLookup.Provider p_345331_, NumberProvider p_344068_) {
-        HolderLookup.RegistryLookup<Enchantment> registrylookup = p_345331_.lookupOrThrow(Registries.ENCHANTMENT);
-        return new EnchantedCountIncreaseFunction.Builder(registrylookup.getOrThrow(Enchantments.LOOTING), p_344068_);
+    public static EnchantedCountIncreaseFunction.Builder lootingMultiplier(HolderLookup.Provider pRegistries, NumberProvider pCount) {
+        HolderLookup.RegistryLookup<Enchantment> registrylookup = pRegistries.lookupOrThrow(Registries.ENCHANTMENT);
+        return new EnchantedCountIncreaseFunction.Builder(registrylookup.getOrThrow(Enchantments.LOOTING), pCount);
     }
 
     public static class Builder extends LootItemConditionalFunction.Builder<EnchantedCountIncreaseFunction.Builder> {
@@ -91,17 +91,17 @@ public class EnchantedCountIncreaseFunction extends LootItemConditionalFunction 
         private final NumberProvider count;
         private int limit = 0;
 
-        public Builder(Holder<Enchantment> p_342194_, NumberProvider p_343409_) {
-            this.enchantment = p_342194_;
-            this.count = p_343409_;
+        public Builder(Holder<Enchantment> pEnchantment, NumberProvider pCount) {
+            this.enchantment = pEnchantment;
+            this.count = pCount;
         }
 
         protected EnchantedCountIncreaseFunction.Builder getThis() {
             return this;
         }
 
-        public EnchantedCountIncreaseFunction.Builder setLimit(int p_343717_) {
-            this.limit = p_343717_;
+        public EnchantedCountIncreaseFunction.Builder setLimit(int pLimit) {
+            this.limit = pLimit;
             return this;
         }
 

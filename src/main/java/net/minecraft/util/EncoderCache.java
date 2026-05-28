@@ -12,9 +12,9 @@ import net.minecraft.nbt.Tag;
 public class EncoderCache {
     final LoadingCache<EncoderCache.Key<?, ?>, DataResult<?>> cache;
 
-    public EncoderCache(int p_328135_) {
+    public EncoderCache(int pMaxSize) {
         this.cache = CacheBuilder.newBuilder()
-            .maximumSize((long)p_328135_)
+            .maximumSize((long)pMaxSize)
             .concurrencyLevel(1)
             .softValues()
             .build(new CacheLoader<EncoderCache.Key<?, ?>, DataResult<?>>() {
@@ -24,17 +24,17 @@ public class EncoderCache {
             });
     }
 
-    public <A> Codec<A> wrap(final Codec<A> p_332774_) {
+    public <A> Codec<A> wrap(final Codec<A> pCodec) {
         return new Codec<A>() {
             @Override
             public <T> DataResult<Pair<A, T>> decode(DynamicOps<T> p_335845_, T p_329817_) {
-                return p_332774_.decode(p_335845_, p_329817_);
+                return pCodec.decode(p_335845_, p_329817_);
             }
 
             @Override
             public <T> DataResult<T> encode(A p_328409_, DynamicOps<T> p_330058_, T p_328392_) {
                 return (DataResult<T>) EncoderCache.this.cache
-                    .getUnchecked(new EncoderCache.Key<>(p_332774_, p_328409_, p_330058_))
+                    .getUnchecked(new EncoderCache.Key<>(pCodec, p_328409_, p_330058_))
                     .map(p_336406_ -> p_336406_ instanceof Tag tag ? tag.copy() : p_336406_);
             }
         };
@@ -46,11 +46,11 @@ public class EncoderCache {
         }
 
         @Override
-        public boolean equals(Object p_334040_) {
-            if (this == p_334040_) {
+        public boolean equals(Object pOther) {
+            if (this == pOther) {
                 return true;
             } else {
-                return !(p_334040_ instanceof EncoderCache.Key<?, ?> key)
+                return !(pOther instanceof EncoderCache.Key<?, ?> key)
                     ? false
                     : this.codec == key.codec && this.value.equals(key.value) && this.ops.equals(key.ops);
             }

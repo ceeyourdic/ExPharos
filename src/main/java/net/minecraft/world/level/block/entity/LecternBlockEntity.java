@@ -124,8 +124,8 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
     int page;
     private int pageCount;
 
-    public LecternBlockEntity(BlockPos p_155622_, BlockState p_155623_) {
-        super(BlockEntityType.LECTERN, p_155622_, p_155623_);
+    public LecternBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        super(BlockEntityType.LECTERN, pPos, pBlockState);
     }
 
     public ItemStack getBook() {
@@ -136,8 +136,8 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
         return this.book.has(DataComponents.WRITABLE_BOOK_CONTENT) || this.book.has(DataComponents.WRITTEN_BOOK_CONTENT);
     }
 
-    public void setBook(ItemStack p_59537_) {
-        this.setBook(p_59537_, null);
+    public void setBook(ItemStack pStack) {
+        this.setBook(pStack, null);
     }
 
     void onBookItemRemove() {
@@ -146,15 +146,15 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
         LecternBlock.resetBookState(null, this.getLevel(), this.getBlockPos(), this.getBlockState(), false);
     }
 
-    public void setBook(ItemStack p_59539_, @Nullable Player p_59540_) {
-        this.book = this.resolveBook(p_59539_, p_59540_);
+    public void setBook(ItemStack pStack, @Nullable Player pPlayer) {
+        this.book = this.resolveBook(pStack, pPlayer);
         this.page = 0;
         this.pageCount = getPageCount(this.book);
         this.setChanged();
     }
 
-    void setPage(int p_59533_) {
-        int i = Mth.clamp(p_59533_, 0, this.pageCount - 1);
+    void setPage(int pPage) {
+        int i = Mth.clamp(pPage, 0, this.pageCount - 1);
         if (i != this.page) {
             this.page = i;
             this.setChanged();
@@ -171,27 +171,27 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
         return Mth.floor(f * 14.0F) + (this.hasBook() ? 1 : 0);
     }
 
-    private ItemStack resolveBook(ItemStack p_59555_, @Nullable Player p_59556_) {
+    private ItemStack resolveBook(ItemStack pStack, @Nullable Player pPlayer) {
         if (this.level instanceof ServerLevel serverlevel) {
-            WrittenBookItem.resolveBookComponents(p_59555_, this.createCommandSourceStack(p_59556_, serverlevel), p_59556_);
+            WrittenBookItem.resolveBookComponents(pStack, this.createCommandSourceStack(pPlayer, serverlevel), pPlayer);
         }
 
-        return p_59555_;
+        return pStack;
     }
 
-    private CommandSourceStack createCommandSourceStack(@Nullable Player p_59535_, ServerLevel p_370159_) {
+    private CommandSourceStack createCommandSourceStack(@Nullable Player pPlayer, ServerLevel pLevel) {
         String s;
         Component component;
-        if (p_59535_ == null) {
+        if (pPlayer == null) {
             s = "Lectern";
             component = Component.literal("Lectern");
         } else {
-            s = p_59535_.getName().getString();
-            component = p_59535_.getDisplayName();
+            s = pPlayer.getName().getString();
+            component = pPlayer.getDisplayName();
         }
 
         Vec3 vec3 = Vec3.atCenterOf(this.worldPosition);
-        return new CommandSourceStack(CommandSource.NULL, vec3, Vec2.ZERO, p_370159_, 2, s, component, p_370159_.getServer(), p_59535_);
+        return new CommandSourceStack(CommandSource.NULL, vec3, Vec2.ZERO, pLevel, 2, s, component, pLevel.getServer(), pPlayer);
     }
 
     @Override
@@ -231,12 +231,12 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
         return Component.translatable("container.lectern");
     }
 
-    private static int getPageCount(ItemStack p_330049_) {
-        WrittenBookContent writtenbookcontent = p_330049_.get(DataComponents.WRITTEN_BOOK_CONTENT);
+    private static int getPageCount(ItemStack pStack) {
+        WrittenBookContent writtenbookcontent = pStack.get(DataComponents.WRITTEN_BOOK_CONTENT);
         if (writtenbookcontent != null) {
             return writtenbookcontent.pages().size();
         } else {
-            WritableBookContent writablebookcontent = p_330049_.get(DataComponents.WRITABLE_BOOK_CONTENT);
+            WritableBookContent writablebookcontent = pStack.get(DataComponents.WRITABLE_BOOK_CONTENT);
             return writablebookcontent != null ? writablebookcontent.pages().size() : 0;
         }
     }

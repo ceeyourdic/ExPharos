@@ -21,22 +21,22 @@ public class Objective {
     private NumberFormat numberFormat;
 
     public Objective(
-        Scoreboard p_83308_,
-        String p_83309_,
-        ObjectiveCriteria p_83310_,
-        Component p_83311_,
-        ObjectiveCriteria.RenderType p_83312_,
-        boolean p_311052_,
-        @Nullable NumberFormat p_309864_
+        Scoreboard pScoreboard,
+        String pName,
+        ObjectiveCriteria pCriteria,
+        Component pDisplayName,
+        ObjectiveCriteria.RenderType pRenderType,
+        boolean pDisplayAutoUpdate,
+        @Nullable NumberFormat pNumberFormat
     ) {
-        this.scoreboard = p_83308_;
-        this.name = p_83309_;
-        this.criteria = p_83310_;
-        this.displayName = p_83311_;
+        this.scoreboard = pScoreboard;
+        this.name = pName;
+        this.criteria = pCriteria;
+        this.displayName = pDisplayName;
         this.formattedDisplayName = this.createFormattedDisplayName();
-        this.renderType = p_83312_;
-        this.displayAutoUpdate = p_311052_;
-        this.numberFormat = p_309864_;
+        this.renderType = pRenderType;
+        this.displayAutoUpdate = pDisplayAutoUpdate;
+        this.numberFormat = pNumberFormat;
     }
 
     public Scoreboard getScoreboard() {
@@ -64,8 +64,8 @@ public class Objective {
         return this.numberFormat;
     }
 
-    public NumberFormat numberFormatOrDefault(NumberFormat p_309891_) {
-        return Objects.requireNonNullElse(this.numberFormat, p_309891_);
+    public NumberFormat numberFormatOrDefault(NumberFormat pDefaultValue) {
+        return Objects.requireNonNullElse(this.numberFormat, pDefaultValue);
     }
 
     private Component createFormattedDisplayName() {
@@ -78,8 +78,8 @@ public class Objective {
         return this.formattedDisplayName;
     }
 
-    public void setDisplayName(Component p_83317_) {
-        this.displayName = p_83317_;
+    public void setDisplayName(Component pDisplayName) {
+        this.displayName = pDisplayName;
         this.formattedDisplayName = this.createFormattedDisplayName();
         this.scoreboard.onObjectiveChanged(this);
     }
@@ -88,18 +88,18 @@ public class Objective {
         return this.renderType;
     }
 
-    public void setRenderType(ObjectiveCriteria.RenderType p_83315_) {
-        this.renderType = p_83315_;
+    public void setRenderType(ObjectiveCriteria.RenderType pRenderType) {
+        this.renderType = pRenderType;
         this.scoreboard.onObjectiveChanged(this);
     }
 
-    public void setDisplayAutoUpdate(boolean p_309636_) {
-        this.displayAutoUpdate = p_309636_;
+    public void setDisplayAutoUpdate(boolean pDisplayAutoUpdate) {
+        this.displayAutoUpdate = pDisplayAutoUpdate;
         this.scoreboard.onObjectiveChanged(this);
     }
 
-    public void setNumberFormat(@Nullable NumberFormat p_311380_) {
-        this.numberFormat = p_311380_;
+    public void setNumberFormat(@Nullable NumberFormat pNumberFormat) {
+        this.numberFormat = pNumberFormat;
         this.scoreboard.onObjectiveChanged(this);
     }
 }

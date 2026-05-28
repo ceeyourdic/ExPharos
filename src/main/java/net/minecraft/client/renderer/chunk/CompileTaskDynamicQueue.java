@@ -14,12 +14,12 @@ public class CompileTaskDynamicQueue {
     private int recompileQuota = 2;
     private final List<SectionRenderDispatcher.RenderSection.CompileTask> tasks = new ObjectArrayList<>();
 
-    public synchronized void add(SectionRenderDispatcher.RenderSection.CompileTask p_370020_) {
-        this.tasks.add(p_370020_);
+    public synchronized void add(SectionRenderDispatcher.RenderSection.CompileTask pTask) {
+        this.tasks.add(pTask);
     }
 
     @Nullable
-    public synchronized SectionRenderDispatcher.RenderSection.CompileTask poll(Vec3 p_369636_) {
+    public synchronized SectionRenderDispatcher.RenderSection.CompileTask poll(Vec3 pCameraPosition) {
         int i = -1;
         int j = -1;
         double d0 = Double.MAX_VALUE;
@@ -32,7 +32,7 @@ public class CompileTaskDynamicQueue {
             if (sectionrenderdispatcher$rendersection$compiletask.isCancelled.get()) {
                 listiterator.remove();
             } else {
-                double d2 = sectionrenderdispatcher$rendersection$compiletask.getOrigin().distToCenterSqr(p_369636_);
+                double d2 = sectionrenderdispatcher$rendersection$compiletask.getOrigin().distToCenterSqr(pCameraPosition);
                 if (!sectionrenderdispatcher$rendersection$compiletask.isRecompile() && d2 < d0) {
                     d0 = d2;
                     i = k;
@@ -61,8 +61,8 @@ public class CompileTaskDynamicQueue {
     }
 
     @Nullable
-    private SectionRenderDispatcher.RenderSection.CompileTask removeTaskByIndex(int p_364353_) {
-        return p_364353_ >= 0 ? this.tasks.remove(p_364353_) : null;
+    private SectionRenderDispatcher.RenderSection.CompileTask removeTaskByIndex(int pIndex) {
+        return pIndex >= 0 ? this.tasks.remove(pIndex) : null;
     }
 
     public synchronized void clear() {

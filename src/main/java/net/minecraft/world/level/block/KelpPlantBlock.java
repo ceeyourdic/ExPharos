@@ -32,7 +32,7 @@ public class KelpPlantBlock extends GrowingPlantBodyBlock implements LiquidBlock
     }
 
     @Override
-    protected FluidState getFluidState(BlockState p_54336_) {
+    protected FluidState getFluidState(BlockState pState) {
         return Fluids.WATER.getSource(false);
     }
 
@@ -47,7 +47,7 @@ public class KelpPlantBlock extends GrowingPlantBodyBlock implements LiquidBlock
     }
 
     @Override
-    public boolean placeLiquid(LevelAccessor p_54330_, BlockPos p_54331_, BlockState p_54332_, FluidState p_54333_) {
+    public boolean placeLiquid(LevelAccessor pLevel, BlockPos pPos, BlockState pState, FluidState pFluidState) {
         return false;
     }
 }

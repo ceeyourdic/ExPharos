@@ -21,9 +21,9 @@ public record ServerboundMoveVehiclePacket(Vec3 position, float yRot, float xRot
         ServerboundMoveVehiclePacket::new
     );
 
-    public static ServerboundMoveVehiclePacket fromEntity(Entity p_377579_) {
+    public static ServerboundMoveVehiclePacket fromEntity(Entity pEntity) {
         return new ServerboundMoveVehiclePacket(
-            new Vec3(p_377579_.lerpTargetX(), p_377579_.lerpTargetY(), p_377579_.lerpTargetZ()), p_377579_.getYRot(), p_377579_.getXRot(), p_377579_.onGround()
+            new Vec3(pEntity.lerpTargetX(), pEntity.lerpTargetY(), pEntity.lerpTargetZ()), pEntity.getYRot(), pEntity.getXRot(), pEntity.onGround()
         );
     }
 
@@ -32,7 +32,7 @@ public record ServerboundMoveVehiclePacket(Vec3 position, float yRot, float xRot
         return GamePacketTypes.SERVERBOUND_MOVE_VEHICLE;
     }
 
-    public void handle(ServerGamePacketListener p_134198_) {
-        p_134198_.handleMoveVehicle(this);
+    public void handle(ServerGamePacketListener pHandler) {
+        pHandler.handleMoveVehicle(this);
     }
 }

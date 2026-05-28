@@ -20,23 +20,23 @@ public class PiglinRenderer extends HumanoidMobRenderer<AbstractPiglin, PiglinRe
     public static final CustomHeadLayer.Transforms PIGLIN_CUSTOM_HEAD_TRANSFORMS = new CustomHeadLayer.Transforms(0.0F, 0.0F, 1.0019531F);
 
     public PiglinRenderer(
-        EntityRendererProvider.Context p_174344_,
-        ModelLayerLocation p_174345_,
-        ModelLayerLocation p_174346_,
-        ModelLayerLocation p_174347_,
-        ModelLayerLocation p_365005_,
-        ModelLayerLocation p_360866_,
-        ModelLayerLocation p_360847_
+        EntityRendererProvider.Context pContext,
+        ModelLayerLocation pAdultModelLayer,
+        ModelLayerLocation pBabyModelLayer,
+        ModelLayerLocation pInnerModel,
+        ModelLayerLocation pOuterModel,
+        ModelLayerLocation pInnerModelBaby,
+        ModelLayerLocation pOuterModelBaby
     ) {
-        super(p_174344_, new PiglinModel(p_174344_.bakeLayer(p_174345_)), new PiglinModel(p_174344_.bakeLayer(p_174346_)), 0.5F, PIGLIN_CUSTOM_HEAD_TRANSFORMS);
+        super(pContext, new PiglinModel(pContext.bakeLayer(pAdultModelLayer)), new PiglinModel(pContext.bakeLayer(pBabyModelLayer)), 0.5F, PIGLIN_CUSTOM_HEAD_TRANSFORMS);
         this.addLayer(
             new HumanoidArmorLayer<>(
                 this,
-                new HumanoidArmorModel(p_174344_.bakeLayer(p_174347_)),
-                new HumanoidArmorModel(p_174344_.bakeLayer(p_365005_)),
-                new HumanoidArmorModel(p_174344_.bakeLayer(p_360866_)),
-                new HumanoidArmorModel(p_174344_.bakeLayer(p_360847_)),
-                p_174344_.getEquipmentRenderer()
+                new HumanoidArmorModel(pContext.bakeLayer(pInnerModel)),
+                new HumanoidArmorModel(pContext.bakeLayer(pOuterModel)),
+                new HumanoidArmorModel(pContext.bakeLayer(pInnerModelBaby)),
+                new HumanoidArmorModel(pContext.bakeLayer(pOuterModelBaby)),
+                pContext.getEquipmentRenderer()
             )
         );
     }

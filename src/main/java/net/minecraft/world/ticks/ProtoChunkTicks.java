@@ -16,9 +16,9 @@ public class ProtoChunkTicks<T> implements SerializableTickContainer<T>, TickCon
         this.schedule(savedtick);
     }
 
-    private void schedule(SavedTick<T> p_193296_) {
-        if (this.ticksPerPosition.add(p_193296_)) {
-            this.ticks.add(p_193296_);
+    private void schedule(SavedTick<T> pTick) {
+        if (this.ticksPerPosition.add(pTick)) {
+            this.ticks.add(pTick);
         }
     }
 
@@ -41,9 +41,9 @@ public class ProtoChunkTicks<T> implements SerializableTickContainer<T>, TickCon
         return List.copyOf(this.ticks);
     }
 
-    public static <T> ProtoChunkTicks<T> load(List<SavedTick<T>> p_370194_) {
+    public static <T> ProtoChunkTicks<T> load(List<SavedTick<T>> pTicks) {
         ProtoChunkTicks<T> protochunkticks = new ProtoChunkTicks<>();
-        p_370194_.forEach(protochunkticks::schedule);
+        pTicks.forEach(protochunkticks::schedule);
         return protochunkticks;
     }
 }

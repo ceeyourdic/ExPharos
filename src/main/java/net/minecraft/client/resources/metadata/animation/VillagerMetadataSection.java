@@ -29,8 +29,8 @@ public record VillagerMetadataSection(VillagerMetadataSection.Hat hat) {
         public static final Codec<VillagerMetadataSection.Hat> CODEC = StringRepresentable.fromEnum(VillagerMetadataSection.Hat::values);
         private final String name;
 
-        private Hat(final String p_376657_) {
-            this.name = p_376657_;
+        private Hat(final String pName) {
+            this.name = pName;
         }
 
         @Override

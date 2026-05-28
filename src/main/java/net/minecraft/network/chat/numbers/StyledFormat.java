@@ -30,8 +30,8 @@ public class StyledFormat implements NumberFormat {
     public static final StyledFormat PLAYER_LIST_DEFAULT = new StyledFormat(Style.EMPTY.withColor(ChatFormatting.YELLOW));
     final Style style;
 
-    public StyledFormat(Style p_311279_) {
-        this.style = p_311279_;
+    public StyledFormat(Style pStyle) {
+        this.style = pStyle;
     }
 
     @Override

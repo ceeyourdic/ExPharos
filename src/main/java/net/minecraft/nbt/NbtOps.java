@@ -35,100 +35,100 @@ public class NbtOps implements DynamicOps<Tag> {
         return EndTag.INSTANCE;
     }
 
-    public <U> U convertTo(DynamicOps<U> p_128980_, Tag p_128981_) {
-        return (U)(switch (p_128981_.getId()) {
-            case 0 -> (Object)p_128980_.empty();
-            case 1 -> (Object)p_128980_.createByte(((NumericTag)p_128981_).getAsByte());
-            case 2 -> (Object)p_128980_.createShort(((NumericTag)p_128981_).getAsShort());
-            case 3 -> (Object)p_128980_.createInt(((NumericTag)p_128981_).getAsInt());
-            case 4 -> (Object)p_128980_.createLong(((NumericTag)p_128981_).getAsLong());
-            case 5 -> (Object)p_128980_.createFloat(((NumericTag)p_128981_).getAsFloat());
-            case 6 -> (Object)p_128980_.createDouble(((NumericTag)p_128981_).getAsDouble());
-            case 7 -> (Object)p_128980_.createByteList(ByteBuffer.wrap(((ByteArrayTag)p_128981_).getAsByteArray()));
-            case 8 -> (Object)p_128980_.createString(p_128981_.getAsString());
-            case 9 -> (Object)this.convertList(p_128980_, p_128981_);
-            case 10 -> (Object)this.convertMap(p_128980_, p_128981_);
-            case 11 -> (Object)p_128980_.createIntList(Arrays.stream(((IntArrayTag)p_128981_).getAsIntArray()));
-            case 12 -> (Object)p_128980_.createLongList(Arrays.stream(((LongArrayTag)p_128981_).getAsLongArray()));
-            default -> throw new IllegalStateException("Unknown tag type: " + p_128981_);
+    public <U> U convertTo(DynamicOps<U> pOps, Tag pTag) {
+        return (U)(switch (pTag.getId()) {
+            case 0 -> (Object)pOps.empty();
+            case 1 -> (Object)pOps.createByte(((NumericTag)pTag).getAsByte());
+            case 2 -> (Object)pOps.createShort(((NumericTag)pTag).getAsShort());
+            case 3 -> (Object)pOps.createInt(((NumericTag)pTag).getAsInt());
+            case 4 -> (Object)pOps.createLong(((NumericTag)pTag).getAsLong());
+            case 5 -> (Object)pOps.createFloat(((NumericTag)pTag).getAsFloat());
+            case 6 -> (Object)pOps.createDouble(((NumericTag)pTag).getAsDouble());
+            case 7 -> (Object)pOps.createByteList(ByteBuffer.wrap(((ByteArrayTag)pTag).getAsByteArray()));
+            case 8 -> (Object)pOps.createString(pTag.getAsString());
+            case 9 -> (Object)this.convertList(pOps, pTag);
+            case 10 -> (Object)this.convertMap(pOps, pTag);
+            case 11 -> (Object)pOps.createIntList(Arrays.stream(((IntArrayTag)pTag).getAsIntArray()));
+            case 12 -> (Object)pOps.createLongList(Arrays.stream(((LongArrayTag)pTag).getAsLongArray()));
+            default -> throw new IllegalStateException("Unknown tag type: " + pTag);
         });
     }
 
-    public DataResult<Number> getNumberValue(Tag p_129030_) {
-        return p_129030_ instanceof NumericTag numerictag ? DataResult.success(numerictag.getAsNumber()) : DataResult.error(() -> "Not a number");
+    public DataResult<Number> getNumberValue(Tag pTag) {
+        return pTag instanceof NumericTag numerictag ? DataResult.success(numerictag.getAsNumber()) : DataResult.error(() -> "Not a number");
     }
 
-    public Tag createNumeric(Number p_128983_) {
-        return DoubleTag.valueOf(p_128983_.doubleValue());
+    public Tag createNumeric(Number pData) {
+        return DoubleTag.valueOf(pData.doubleValue());
     }
 
-    public Tag createByte(byte p_128963_) {
-        return ByteTag.valueOf(p_128963_);
+    public Tag createByte(byte pData) {
+        return ByteTag.valueOf(pData);
     }
 
-    public Tag createShort(short p_129048_) {
-        return ShortTag.valueOf(p_129048_);
+    public Tag createShort(short pData) {
+        return ShortTag.valueOf(pData);
     }
 
-    public Tag createInt(int p_128976_) {
-        return IntTag.valueOf(p_128976_);
+    public Tag createInt(int pData) {
+        return IntTag.valueOf(pData);
     }
 
-    public Tag createLong(long p_128978_) {
-        return LongTag.valueOf(p_128978_);
+    public Tag createLong(long pData) {
+        return LongTag.valueOf(pData);
     }
 
-    public Tag createFloat(float p_128974_) {
-        return FloatTag.valueOf(p_128974_);
+    public Tag createFloat(float pData) {
+        return FloatTag.valueOf(pData);
     }
 
-    public Tag createDouble(double p_128972_) {
-        return DoubleTag.valueOf(p_128972_);
+    public Tag createDouble(double pData) {
+        return DoubleTag.valueOf(pData);
     }
 
-    public Tag createBoolean(boolean p_129050_) {
-        return ByteTag.valueOf(p_129050_);
+    public Tag createBoolean(boolean pData) {
+        return ByteTag.valueOf(pData);
     }
 
-    public DataResult<String> getStringValue(Tag p_129061_) {
-        return p_129061_ instanceof StringTag stringtag ? DataResult.success(stringtag.getAsString()) : DataResult.error(() -> "Not a string");
+    public DataResult<String> getStringValue(Tag pTag) {
+        return pTag instanceof StringTag stringtag ? DataResult.success(stringtag.getAsString()) : DataResult.error(() -> "Not a string");
     }
 
-    public Tag createString(String p_128985_) {
-        return StringTag.valueOf(p_128985_);
+    public Tag createString(String pData) {
+        return StringTag.valueOf(pData);
     }
 
-    public DataResult<Tag> mergeToList(Tag p_129041_, Tag p_129042_) {
-        return createCollector(p_129041_)
-            .map(p_248053_ -> DataResult.success(p_248053_.accept(p_129042_).result()))
-            .orElseGet(() -> DataResult.error(() -> "mergeToList called with not a list: " + p_129041_, p_129041_));
+    public DataResult<Tag> mergeToList(Tag pList, Tag pTag) {
+        return createCollector(pList)
+            .map(p_248053_ -> DataResult.success(p_248053_.accept(pTag).result()))
+            .orElseGet(() -> DataResult.error(() -> "mergeToList called with not a list: " + pList, pList));
     }
 
-    public DataResult<Tag> mergeToList(Tag p_129038_, List<Tag> p_129039_) {
-        return createCollector(p_129038_)
-            .map(p_248048_ -> DataResult.success(p_248048_.acceptAll(p_129039_).result()))
-            .orElseGet(() -> DataResult.error(() -> "mergeToList called with not a list: " + p_129038_, p_129038_));
+    public DataResult<Tag> mergeToList(Tag pList, List<Tag> pTags) {
+        return createCollector(pList)
+            .map(p_248048_ -> DataResult.success(p_248048_.acceptAll(pTags).result()))
+            .orElseGet(() -> DataResult.error(() -> "mergeToList called with not a list: " + pList, pList));
     }
 
-    public DataResult<Tag> mergeToMap(Tag p_129044_, Tag p_129045_, Tag p_129046_) {
-        if (!(p_129044_ instanceof CompoundTag) && !(p_129044_ instanceof EndTag)) {
-            return DataResult.error(() -> "mergeToMap called with not a map: " + p_129044_, p_129044_);
-        } else if (!(p_129045_ instanceof StringTag)) {
-            return DataResult.error(() -> "key is not a string: " + p_129045_, p_129044_);
+    public DataResult<Tag> mergeToMap(Tag pMap, Tag pKey, Tag pValue) {
+        if (!(pMap instanceof CompoundTag) && !(pMap instanceof EndTag)) {
+            return DataResult.error(() -> "mergeToMap called with not a map: " + pMap, pMap);
+        } else if (!(pKey instanceof StringTag)) {
+            return DataResult.error(() -> "key is not a string: " + pKey, pMap);
         } else {
-            CompoundTag compoundtag = p_129044_ instanceof CompoundTag compoundtag1 ? compoundtag1.shallowCopy() : new CompoundTag();
-            compoundtag.put(p_129045_.getAsString(), p_129046_);
+            CompoundTag compoundtag = pMap instanceof CompoundTag compoundtag1 ? compoundtag1.shallowCopy() : new CompoundTag();
+            compoundtag.put(pKey.getAsString(), pValue);
             return DataResult.success(compoundtag);
         }
     }
 
-    public DataResult<Tag> mergeToMap(Tag p_129032_, MapLike<Tag> p_129033_) {
-        if (!(p_129032_ instanceof CompoundTag) && !(p_129032_ instanceof EndTag)) {
-            return DataResult.error(() -> "mergeToMap called with not a map: " + p_129032_, p_129032_);
+    public DataResult<Tag> mergeToMap(Tag pMap, MapLike<Tag> pOtherMap) {
+        if (!(pMap instanceof CompoundTag) && !(pMap instanceof EndTag)) {
+            return DataResult.error(() -> "mergeToMap called with not a map: " + pMap, pMap);
         } else {
-            CompoundTag compoundtag = p_129032_ instanceof CompoundTag compoundtag1 ? compoundtag1.shallowCopy() : new CompoundTag();
+            CompoundTag compoundtag = pMap instanceof CompoundTag compoundtag1 ? compoundtag1.shallowCopy() : new CompoundTag();
             List<Tag> list = new ArrayList<>();
-            p_129033_.entries().forEach(p_128994_ -> {
+            pOtherMap.entries().forEach(p_128994_ -> {
                 Tag tag = p_128994_.getFirst();
                 if (!(tag instanceof StringTag)) {
                     list.add(tag);
@@ -160,22 +160,22 @@ public class NbtOps implements DynamicOps<Tag> {
         }
     }
 
-    public DataResult<Stream<Pair<Tag, Tag>>> getMapValues(Tag p_129070_) {
-        return p_129070_ instanceof CompoundTag compoundtag
+    public DataResult<Stream<Pair<Tag, Tag>>> getMapValues(Tag pMap) {
+        return pMap instanceof CompoundTag compoundtag
             ? DataResult.success(compoundtag.entrySet().stream().map(p_326024_ -> Pair.of(this.createString(p_326024_.getKey()), p_326024_.getValue())))
-            : DataResult.error(() -> "Not a map: " + p_129070_);
+            : DataResult.error(() -> "Not a map: " + pMap);
     }
 
-    public DataResult<Consumer<BiConsumer<Tag, Tag>>> getMapEntries(Tag p_129103_) {
-        return p_129103_ instanceof CompoundTag compoundtag ? DataResult.success(p_326020_ -> {
+    public DataResult<Consumer<BiConsumer<Tag, Tag>>> getMapEntries(Tag pMap) {
+        return pMap instanceof CompoundTag compoundtag ? DataResult.success(p_326020_ -> {
             for (Entry<String, Tag> entry : compoundtag.entrySet()) {
                 p_326020_.accept(this.createString(entry.getKey()), entry.getValue());
             }
-        }) : DataResult.error(() -> "Not a map: " + p_129103_);
+        }) : DataResult.error(() -> "Not a map: " + pMap);
     }
 
-    public DataResult<MapLike<Tag>> getMap(Tag p_129105_) {
-        return p_129105_ instanceof CompoundTag compoundtag ? DataResult.success(new MapLike<Tag>() {
+    public DataResult<MapLike<Tag>> getMap(Tag pMap) {
+        return pMap instanceof CompoundTag compoundtag ? DataResult.success(new MapLike<Tag>() {
             @Nullable
             public Tag get(Tag p_129174_) {
                 return compoundtag.get(p_129174_.getAsString());
@@ -195,96 +195,96 @@ public class NbtOps implements DynamicOps<Tag> {
             public String toString() {
                 return "MapLike[" + compoundtag + "]";
             }
-        }) : DataResult.error(() -> "Not a map: " + p_129105_);
+        }) : DataResult.error(() -> "Not a map: " + pMap);
     }
 
-    public Tag createMap(Stream<Pair<Tag, Tag>> p_129004_) {
+    public Tag createMap(Stream<Pair<Tag, Tag>> pData) {
         CompoundTag compoundtag = new CompoundTag();
-        p_129004_.forEach(p_129018_ -> compoundtag.put(p_129018_.getFirst().getAsString(), p_129018_.getSecond()));
+        pData.forEach(p_129018_ -> compoundtag.put(p_129018_.getFirst().getAsString(), p_129018_.getSecond()));
         return compoundtag;
     }
 
-    private static Tag tryUnwrap(CompoundTag p_251041_) {
-        if (p_251041_.size() == 1) {
-            Tag tag = p_251041_.get("");
+    private static Tag tryUnwrap(CompoundTag pTag) {
+        if (pTag.size() == 1) {
+            Tag tag = pTag.get("");
             if (tag != null) {
                 return tag;
             }
         }
 
-        return p_251041_;
+        return pTag;
     }
 
-    public DataResult<Stream<Tag>> getStream(Tag p_129108_) {
-        if (p_129108_ instanceof ListTag listtag) {
+    public DataResult<Stream<Tag>> getStream(Tag pTag) {
+        if (pTag instanceof ListTag listtag) {
             return listtag.getElementType() == 10
                 ? DataResult.success(listtag.stream().map(p_248049_ -> tryUnwrap((CompoundTag)p_248049_)))
                 : DataResult.success(listtag.stream());
         } else {
-            return p_129108_ instanceof CollectionTag<?> collectiontag
+            return pTag instanceof CollectionTag<?> collectiontag
                 ? DataResult.success(collectiontag.stream().map(p_129158_ -> p_129158_))
                 : DataResult.error(() -> "Not a list");
         }
     }
 
-    public DataResult<Consumer<Consumer<Tag>>> getList(Tag p_129110_) {
-        if (p_129110_ instanceof ListTag listtag) {
+    public DataResult<Consumer<Consumer<Tag>>> getList(Tag pTag) {
+        if (pTag instanceof ListTag listtag) {
             return listtag.getElementType() == 10 ? DataResult.success(p_326023_ -> {
                 for (Tag tag : listtag) {
                     p_326023_.accept(tryUnwrap((CompoundTag)tag));
                 }
             }) : DataResult.success(listtag::forEach);
         } else {
-            return p_129110_ instanceof CollectionTag<?> collectiontag
+            return pTag instanceof CollectionTag<?> collectiontag
                 ? DataResult.success(sink -> collectiontag.forEach(sink))
-                : DataResult.error(() -> "Not a list: " + p_129110_);
+                : DataResult.error(() -> "Not a list: " + pTag);
         }
     }
 
-    public DataResult<ByteBuffer> getByteBuffer(Tag p_129132_) {
-        return p_129132_ instanceof ByteArrayTag bytearraytag
+    public DataResult<ByteBuffer> getByteBuffer(Tag pTag) {
+        return pTag instanceof ByteArrayTag bytearraytag
             ? DataResult.success(ByteBuffer.wrap(bytearraytag.getAsByteArray()))
-            : DynamicOps.super.getByteBuffer(p_129132_);
+            : DynamicOps.super.getByteBuffer(pTag);
     }
 
-    public Tag createByteList(ByteBuffer p_128990_) {
-        ByteBuffer bytebuffer = p_128990_.duplicate().clear();
-        byte[] abyte = new byte[p_128990_.capacity()];
+    public Tag createByteList(ByteBuffer pData) {
+        ByteBuffer bytebuffer = pData.duplicate().clear();
+        byte[] abyte = new byte[pData.capacity()];
         bytebuffer.get(0, abyte, 0, abyte.length);
         return new ByteArrayTag(abyte);
     }
 
-    public DataResult<IntStream> getIntStream(Tag p_129134_) {
-        return p_129134_ instanceof IntArrayTag intarraytag
+    public DataResult<IntStream> getIntStream(Tag pTag) {
+        return pTag instanceof IntArrayTag intarraytag
             ? DataResult.success(Arrays.stream(intarraytag.getAsIntArray()))
-            : DynamicOps.super.getIntStream(p_129134_);
+            : DynamicOps.super.getIntStream(pTag);
     }
 
-    public Tag createIntList(IntStream p_129000_) {
-        return new IntArrayTag(p_129000_.toArray());
+    public Tag createIntList(IntStream pData) {
+        return new IntArrayTag(pData.toArray());
     }
 
-    public DataResult<LongStream> getLongStream(Tag p_129136_) {
-        return p_129136_ instanceof LongArrayTag longarraytag
+    public DataResult<LongStream> getLongStream(Tag pTag) {
+        return pTag instanceof LongArrayTag longarraytag
             ? DataResult.success(Arrays.stream(longarraytag.getAsLongArray()))
-            : DynamicOps.super.getLongStream(p_129136_);
+            : DynamicOps.super.getLongStream(pTag);
     }
 
-    public Tag createLongList(LongStream p_129002_) {
-        return new LongArrayTag(p_129002_.toArray());
+    public Tag createLongList(LongStream pData) {
+        return new LongArrayTag(pData.toArray());
     }
 
-    public Tag createList(Stream<Tag> p_129052_) {
-        return NbtOps.InitialListCollector.INSTANCE.acceptAll(p_129052_).result();
+    public Tag createList(Stream<Tag> pData) {
+        return NbtOps.InitialListCollector.INSTANCE.acceptAll(pData).result();
     }
 
-    public Tag remove(Tag p_129035_, String p_129036_) {
-        if (p_129035_ instanceof CompoundTag compoundtag) {
+    public Tag remove(Tag pMap, String pRemoveKey) {
+        if (pMap instanceof CompoundTag compoundtag) {
             CompoundTag compoundtag1 = compoundtag.shallowCopy();
-            compoundtag1.remove(p_129036_);
+            compoundtag1.remove(pRemoveKey);
             return compoundtag1;
         } else {
-            return p_129035_;
+            return pMap;
         }
     }
 
@@ -298,11 +298,11 @@ public class NbtOps implements DynamicOps<Tag> {
         return new NbtOps.NbtRecordBuilder();
     }
 
-    private static Optional<NbtOps.ListCollector> createCollector(Tag p_249503_) {
-        if (p_249503_ instanceof EndTag) {
+    private static Optional<NbtOps.ListCollector> createCollector(Tag pTag) {
+        if (pTag instanceof EndTag) {
             return Optional.of(NbtOps.InitialListCollector.INSTANCE);
         } else {
-            if (p_249503_ instanceof CollectionTag<?> collectiontag) {
+            if (pTag instanceof CollectionTag<?> collectiontag) {
                 if (collectiontag.isEmpty()) {
                     return Optional.of(NbtOps.InitialListCollector.INSTANCE);
                 }
@@ -335,12 +335,12 @@ public class NbtOps implements DynamicOps<Tag> {
     static class ByteListCollector implements NbtOps.ListCollector {
         private final ByteArrayList values = new ByteArrayList();
 
-        public ByteListCollector(byte p_249905_) {
-            this.values.add(p_249905_);
+        public ByteListCollector(byte pValue) {
+            this.values.add(pValue);
         }
 
-        public ByteListCollector(byte[] p_250457_) {
-            this.values.addElements(0, p_250457_);
+        public ByteListCollector(byte[] pValues) {
+            this.values.addElements(0, pValues);
         }
 
         @Override
@@ -365,37 +365,37 @@ public class NbtOps implements DynamicOps<Tag> {
         public HeterogenousListCollector() {
         }
 
-        public HeterogenousListCollector(Collection<Tag> p_249606_) {
-            this.result.addAll(p_249606_);
+        public HeterogenousListCollector(Collection<Tag> pTags) {
+            this.result.addAll(pTags);
         }
 
-        public HeterogenousListCollector(IntArrayList p_250270_) {
-            p_250270_.forEach(p_249166_ -> this.result.add(wrapElement(IntTag.valueOf(p_249166_))));
+        public HeterogenousListCollector(IntArrayList pData) {
+            pData.forEach(p_249166_ -> this.result.add(wrapElement(IntTag.valueOf(p_249166_))));
         }
 
-        public HeterogenousListCollector(ByteArrayList p_248575_) {
-            p_248575_.forEach(p_249160_ -> this.result.add(wrapElement(ByteTag.valueOf(p_249160_))));
+        public HeterogenousListCollector(ByteArrayList pData) {
+            pData.forEach(p_249160_ -> this.result.add(wrapElement(ByteTag.valueOf(p_249160_))));
         }
 
-        public HeterogenousListCollector(LongArrayList p_249410_) {
-            p_249410_.forEach(p_249754_ -> this.result.add(wrapElement(LongTag.valueOf(p_249754_))));
+        public HeterogenousListCollector(LongArrayList pData) {
+            pData.forEach(p_249754_ -> this.result.add(wrapElement(LongTag.valueOf(p_249754_))));
         }
 
-        private static boolean isWrapper(CompoundTag p_252073_) {
-            return p_252073_.size() == 1 && p_252073_.contains("");
+        private static boolean isWrapper(CompoundTag pTag) {
+            return pTag.size() == 1 && pTag.contains("");
         }
 
-        private static Tag wrapIfNeeded(Tag p_252042_) {
-            if (p_252042_ instanceof CompoundTag compoundtag && !isWrapper(compoundtag)) {
+        private static Tag wrapIfNeeded(Tag pTag) {
+            if (pTag instanceof CompoundTag compoundtag && !isWrapper(compoundtag)) {
                 return compoundtag;
             }
 
-            return wrapElement(p_252042_);
+            return wrapElement(pTag);
         }
 
-        private static CompoundTag wrapElement(Tag p_251263_) {
+        private static CompoundTag wrapElement(Tag pTag) {
             CompoundTag compoundtag = new CompoundTag();
-            compoundtag.put("", p_251263_);
+            compoundtag.put("", pTag);
             return compoundtag;
         }
 
@@ -414,12 +414,12 @@ public class NbtOps implements DynamicOps<Tag> {
     static class HomogenousListCollector implements NbtOps.ListCollector {
         private final ListTag result = new ListTag();
 
-        HomogenousListCollector(Tag p_249247_) {
-            this.result.add(p_249247_);
+        HomogenousListCollector(Tag pValue) {
+            this.result.add(pValue);
         }
 
-        HomogenousListCollector(ListTag p_249889_) {
-            this.result.addAll(p_249889_);
+        HomogenousListCollector(ListTag pValues) {
+            this.result.addAll(pValues);
         }
 
         @Override
@@ -468,12 +468,12 @@ public class NbtOps implements DynamicOps<Tag> {
     static class IntListCollector implements NbtOps.ListCollector {
         private final IntArrayList values = new IntArrayList();
 
-        public IntListCollector(int p_250274_) {
-            this.values.add(p_250274_);
+        public IntListCollector(int pValue) {
+            this.values.add(pValue);
         }
 
-        public IntListCollector(int[] p_249489_) {
-            this.values.addElements(0, p_249489_);
+        public IntListCollector(int[] pValues) {
+            this.values.addElements(0, pValues);
         }
 
         @Override
@@ -493,20 +493,20 @@ public class NbtOps implements DynamicOps<Tag> {
     }
 
     interface ListCollector {
-        NbtOps.ListCollector accept(Tag p_249030_);
+        NbtOps.ListCollector accept(Tag pTag);
 
-        default NbtOps.ListCollector acceptAll(Iterable<Tag> p_249781_) {
+        default NbtOps.ListCollector acceptAll(Iterable<Tag> pTags) {
             NbtOps.ListCollector nbtops$listcollector = this;
 
-            for (Tag tag : p_249781_) {
+            for (Tag tag : pTags) {
                 nbtops$listcollector = nbtops$listcollector.accept(tag);
             }
 
             return nbtops$listcollector;
         }
 
-        default NbtOps.ListCollector acceptAll(Stream<Tag> p_249876_) {
-            return this.acceptAll(p_249876_::iterator);
+        default NbtOps.ListCollector acceptAll(Stream<Tag> pTags) {
+            return this.acceptAll(pTags::iterator);
         }
 
         Tag result();
@@ -515,12 +515,12 @@ public class NbtOps implements DynamicOps<Tag> {
     static class LongListCollector implements NbtOps.ListCollector {
         private final LongArrayList values = new LongArrayList();
 
-        public LongListCollector(long p_249842_) {
-            this.values.add(p_249842_);
+        public LongListCollector(long pValue) {
+            this.values.add(pValue);
         }
 
-        public LongListCollector(long[] p_251409_) {
-            this.values.addElements(0, p_251409_);
+        public LongListCollector(long[] pValues) {
+            this.values.addElements(0, pValues);
         }
 
         @Override
@@ -548,9 +548,9 @@ public class NbtOps implements DynamicOps<Tag> {
             return new CompoundTag();
         }
 
-        protected CompoundTag append(String p_129186_, Tag p_129187_, CompoundTag p_129188_) {
-            p_129188_.put(p_129186_, p_129187_);
-            return p_129188_;
+        protected CompoundTag append(String pKey, Tag pValue, CompoundTag pTag) {
+            pTag.put(pKey, pValue);
+            return pTag;
         }
 
         protected DataResult<Tag> build(CompoundTag p_129190_, Tag p_129191_) {

@@ -8,7 +8,7 @@ public interface LootContextUser {
         return Set.of();
     }
 
-    default void validate(ValidationContext p_79022_) {
-        p_79022_.validateContextUsage(this);
+    default void validate(ValidationContext pContext) {
+        pContext.validateContextUsage(this);
     }
 }

@@ -46,7 +46,7 @@ public class OreFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_COPPER_LARGE = FeatureUtils.createKey("ore_copper_large");
     public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_CLAY = FeatureUtils.createKey("ore_clay");
 
-    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> p_329682_) {
+    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> pContext) {
         RuleTest ruletest = new TagMatchTest(BlockTags.BASE_STONE_OVERWORLD);
         RuleTest ruletest1 = new TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES);
         RuleTest ruletest2 = new TagMatchTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
@@ -70,26 +70,26 @@ public class OreFeatures {
         List<OreConfiguration.TargetBlockState> list5 = List.of(
             OreConfiguration.target(ruletest1, Blocks.COAL_ORE.defaultBlockState()), OreConfiguration.target(ruletest2, Blocks.DEEPSLATE_COAL_ORE.defaultBlockState())
         );
-        FeatureUtils.register(p_329682_, ORE_MAGMA, Feature.ORE, new OreConfiguration(ruletest3, Blocks.MAGMA_BLOCK.defaultBlockState(), 33));
-        FeatureUtils.register(p_329682_, ORE_SOUL_SAND, Feature.ORE, new OreConfiguration(ruletest3, Blocks.SOUL_SAND.defaultBlockState(), 12));
-        FeatureUtils.register(p_329682_, ORE_NETHER_GOLD, Feature.ORE, new OreConfiguration(ruletest3, Blocks.NETHER_GOLD_ORE.defaultBlockState(), 10));
-        FeatureUtils.register(p_329682_, ORE_QUARTZ, Feature.ORE, new OreConfiguration(ruletest3, Blocks.NETHER_QUARTZ_ORE.defaultBlockState(), 14));
-        FeatureUtils.register(p_329682_, ORE_GRAVEL_NETHER, Feature.ORE, new OreConfiguration(ruletest3, Blocks.GRAVEL.defaultBlockState(), 33));
-        FeatureUtils.register(p_329682_, ORE_BLACKSTONE, Feature.ORE, new OreConfiguration(ruletest3, Blocks.BLACKSTONE.defaultBlockState(), 33));
-        FeatureUtils.register(p_329682_, ORE_DIRT, Feature.ORE, new OreConfiguration(ruletest, Blocks.DIRT.defaultBlockState(), 33));
-        FeatureUtils.register(p_329682_, ORE_GRAVEL, Feature.ORE, new OreConfiguration(ruletest, Blocks.GRAVEL.defaultBlockState(), 33));
-        FeatureUtils.register(p_329682_, ORE_GRANITE, Feature.ORE, new OreConfiguration(ruletest, Blocks.GRANITE.defaultBlockState(), 64));
-        FeatureUtils.register(p_329682_, ORE_DIORITE, Feature.ORE, new OreConfiguration(ruletest, Blocks.DIORITE.defaultBlockState(), 64));
-        FeatureUtils.register(p_329682_, ORE_ANDESITE, Feature.ORE, new OreConfiguration(ruletest, Blocks.ANDESITE.defaultBlockState(), 64));
-        FeatureUtils.register(p_329682_, ORE_TUFF, Feature.ORE, new OreConfiguration(ruletest, Blocks.TUFF.defaultBlockState(), 64));
-        FeatureUtils.register(p_329682_, ORE_COAL, Feature.ORE, new OreConfiguration(list5, 17));
-        FeatureUtils.register(p_329682_, ORE_COAL_BURIED, Feature.ORE, new OreConfiguration(list5, 17, 0.5F));
-        FeatureUtils.register(p_329682_, ORE_IRON, Feature.ORE, new OreConfiguration(list, 9));
-        FeatureUtils.register(p_329682_, ORE_IRON_SMALL, Feature.ORE, new OreConfiguration(list, 4));
-        FeatureUtils.register(p_329682_, ORE_GOLD, Feature.ORE, new OreConfiguration(list1, 9));
-        FeatureUtils.register(p_329682_, ORE_GOLD_BURIED, Feature.ORE, new OreConfiguration(list1, 9, 0.5F));
+        FeatureUtils.register(pContext, ORE_MAGMA, Feature.ORE, new OreConfiguration(ruletest3, Blocks.MAGMA_BLOCK.defaultBlockState(), 33));
+        FeatureUtils.register(pContext, ORE_SOUL_SAND, Feature.ORE, new OreConfiguration(ruletest3, Blocks.SOUL_SAND.defaultBlockState(), 12));
+        FeatureUtils.register(pContext, ORE_NETHER_GOLD, Feature.ORE, new OreConfiguration(ruletest3, Blocks.NETHER_GOLD_ORE.defaultBlockState(), 10));
+        FeatureUtils.register(pContext, ORE_QUARTZ, Feature.ORE, new OreConfiguration(ruletest3, Blocks.NETHER_QUARTZ_ORE.defaultBlockState(), 14));
+        FeatureUtils.register(pContext, ORE_GRAVEL_NETHER, Feature.ORE, new OreConfiguration(ruletest3, Blocks.GRAVEL.defaultBlockState(), 33));
+        FeatureUtils.register(pContext, ORE_BLACKSTONE, Feature.ORE, new OreConfiguration(ruletest3, Blocks.BLACKSTONE.defaultBlockState(), 33));
+        FeatureUtils.register(pContext, ORE_DIRT, Feature.ORE, new OreConfiguration(ruletest, Blocks.DIRT.defaultBlockState(), 33));
+        FeatureUtils.register(pContext, ORE_GRAVEL, Feature.ORE, new OreConfiguration(ruletest, Blocks.GRAVEL.defaultBlockState(), 33));
+        FeatureUtils.register(pContext, ORE_GRANITE, Feature.ORE, new OreConfiguration(ruletest, Blocks.GRANITE.defaultBlockState(), 64));
+        FeatureUtils.register(pContext, ORE_DIORITE, Feature.ORE, new OreConfiguration(ruletest, Blocks.DIORITE.defaultBlockState(), 64));
+        FeatureUtils.register(pContext, ORE_ANDESITE, Feature.ORE, new OreConfiguration(ruletest, Blocks.ANDESITE.defaultBlockState(), 64));
+        FeatureUtils.register(pContext, ORE_TUFF, Feature.ORE, new OreConfiguration(ruletest, Blocks.TUFF.defaultBlockState(), 64));
+        FeatureUtils.register(pContext, ORE_COAL, Feature.ORE, new OreConfiguration(list5, 17));
+        FeatureUtils.register(pContext, ORE_COAL_BURIED, Feature.ORE, new OreConfiguration(list5, 17, 0.5F));
+        FeatureUtils.register(pContext, ORE_IRON, Feature.ORE, new OreConfiguration(list, 9));
+        FeatureUtils.register(pContext, ORE_IRON_SMALL, Feature.ORE, new OreConfiguration(list, 4));
+        FeatureUtils.register(pContext, ORE_GOLD, Feature.ORE, new OreConfiguration(list1, 9));
+        FeatureUtils.register(pContext, ORE_GOLD_BURIED, Feature.ORE, new OreConfiguration(list1, 9, 0.5F));
         FeatureUtils.register(
-            p_329682_,
+            pContext,
             ORE_REDSTONE,
             Feature.ORE,
             new OreConfiguration(
@@ -97,14 +97,14 @@ public class OreFeatures {
                 8
             )
         );
-        FeatureUtils.register(p_329682_, ORE_DIAMOND_SMALL, Feature.ORE, new OreConfiguration(list2, 4, 0.5F));
-        FeatureUtils.register(p_329682_, ORE_DIAMOND_LARGE, Feature.ORE, new OreConfiguration(list2, 12, 0.7F));
-        FeatureUtils.register(p_329682_, ORE_DIAMOND_BURIED, Feature.ORE, new OreConfiguration(list2, 8, 1.0F));
-        FeatureUtils.register(p_329682_, ORE_DIAMOND_MEDIUM, Feature.ORE, new OreConfiguration(list2, 8, 0.5F));
-        FeatureUtils.register(p_329682_, ORE_LAPIS, Feature.ORE, new OreConfiguration(list3, 7));
-        FeatureUtils.register(p_329682_, ORE_LAPIS_BURIED, Feature.ORE, new OreConfiguration(list3, 7, 1.0F));
+        FeatureUtils.register(pContext, ORE_DIAMOND_SMALL, Feature.ORE, new OreConfiguration(list2, 4, 0.5F));
+        FeatureUtils.register(pContext, ORE_DIAMOND_LARGE, Feature.ORE, new OreConfiguration(list2, 12, 0.7F));
+        FeatureUtils.register(pContext, ORE_DIAMOND_BURIED, Feature.ORE, new OreConfiguration(list2, 8, 1.0F));
+        FeatureUtils.register(pContext, ORE_DIAMOND_MEDIUM, Feature.ORE, new OreConfiguration(list2, 8, 0.5F));
+        FeatureUtils.register(pContext, ORE_LAPIS, Feature.ORE, new OreConfiguration(list3, 7));
+        FeatureUtils.register(pContext, ORE_LAPIS_BURIED, Feature.ORE, new OreConfiguration(list3, 7, 1.0F));
         FeatureUtils.register(
-            p_329682_,
+            pContext,
             ORE_INFESTED,
             Feature.ORE,
             new OreConfiguration(
@@ -113,7 +113,7 @@ public class OreFeatures {
             )
         );
         FeatureUtils.register(
-            p_329682_,
+            pContext,
             ORE_EMERALD,
             Feature.ORE,
             new OreConfiguration(
@@ -121,10 +121,10 @@ public class OreFeatures {
                 3
             )
         );
-        FeatureUtils.register(p_329682_, ORE_ANCIENT_DEBRIS_LARGE, Feature.SCATTERED_ORE, new OreConfiguration(ruletest4, Blocks.ANCIENT_DEBRIS.defaultBlockState(), 3, 1.0F));
-        FeatureUtils.register(p_329682_, ORE_ANCIENT_DEBRIS_SMALL, Feature.SCATTERED_ORE, new OreConfiguration(ruletest4, Blocks.ANCIENT_DEBRIS.defaultBlockState(), 2, 1.0F));
-        FeatureUtils.register(p_329682_, ORE_COPPPER_SMALL, Feature.ORE, new OreConfiguration(list4, 10));
-        FeatureUtils.register(p_329682_, ORE_COPPER_LARGE, Feature.ORE, new OreConfiguration(list4, 20));
-        FeatureUtils.register(p_329682_, ORE_CLAY, Feature.ORE, new OreConfiguration(ruletest, Blocks.CLAY.defaultBlockState(), 33));
+        FeatureUtils.register(pContext, ORE_ANCIENT_DEBRIS_LARGE, Feature.SCATTERED_ORE, new OreConfiguration(ruletest4, Blocks.ANCIENT_DEBRIS.defaultBlockState(), 3, 1.0F));
+        FeatureUtils.register(pContext, ORE_ANCIENT_DEBRIS_SMALL, Feature.SCATTERED_ORE, new OreConfiguration(ruletest4, Blocks.ANCIENT_DEBRIS.defaultBlockState(), 2, 1.0F));
+        FeatureUtils.register(pContext, ORE_COPPPER_SMALL, Feature.ORE, new OreConfiguration(list4, 10));
+        FeatureUtils.register(pContext, ORE_COPPER_LARGE, Feature.ORE, new OreConfiguration(list4, 20));
+        FeatureUtils.register(pContext, ORE_CLAY, Feature.ORE, new OreConfiguration(ruletest, Blocks.CLAY.defaultBlockState(), 33));
     }
 }

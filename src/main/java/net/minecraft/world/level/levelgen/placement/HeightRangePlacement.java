@@ -18,20 +18,20 @@ public class HeightRangePlacement extends PlacementModifier {
     );
     private final HeightProvider height;
 
-    private HeightRangePlacement(HeightProvider p_191677_) {
-        this.height = p_191677_;
+    private HeightRangePlacement(HeightProvider pHeight) {
+        this.height = pHeight;
     }
 
-    public static HeightRangePlacement of(HeightProvider p_191684_) {
-        return new HeightRangePlacement(p_191684_);
+    public static HeightRangePlacement of(HeightProvider pHeight) {
+        return new HeightRangePlacement(pHeight);
     }
 
-    public static HeightRangePlacement uniform(VerticalAnchor p_191681_, VerticalAnchor p_191682_) {
-        return of(UniformHeight.of(p_191681_, p_191682_));
+    public static HeightRangePlacement uniform(VerticalAnchor pMinInclusive, VerticalAnchor pMaxInclusive) {
+        return of(UniformHeight.of(pMinInclusive, pMaxInclusive));
     }
 
-    public static HeightRangePlacement triangle(VerticalAnchor p_191693_, VerticalAnchor p_191694_) {
-        return of(TrapezoidHeight.of(p_191693_, p_191694_));
+    public static HeightRangePlacement triangle(VerticalAnchor pMinInclusive, VerticalAnchor pMaxInclusive) {
+        return of(TrapezoidHeight.of(pMinInclusive, pMaxInclusive));
     }
 
     @Override

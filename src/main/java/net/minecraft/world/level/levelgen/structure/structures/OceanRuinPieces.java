@@ -120,12 +120,12 @@ public class OceanRuinPieces {
         ResourceLocation.withDefaultNamespace("underwater_ruin/big_warm_7")
     };
 
-    private static StructureProcessor archyRuleProcessor(Block p_277376_, Block p_277934_, ResourceKey<LootTable> p_330231_) {
+    private static StructureProcessor archyRuleProcessor(Block pBlock, Block pSuspiciousBlock, ResourceKey<LootTable> pLootTable) {
         return new CappedProcessor(
             new RuleProcessor(
                 List.of(
                     new ProcessorRule(
-                        new BlockMatchTest(p_277376_), AlwaysTrueTest.INSTANCE, PosAlwaysTrueTest.INSTANCE, p_277934_.defaultBlockState(), new AppendLoot(p_330231_)
+                        new BlockMatchTest(pBlock), AlwaysTrueTest.INSTANCE, PosAlwaysTrueTest.INSTANCE, pSuspiciousBlock.defaultBlockState(), new AppendLoot(pLootTable)
                     )
                 )
             ),
@@ -133,105 +133,105 @@ public class OceanRuinPieces {
         );
     }
 
-    private static ResourceLocation getSmallWarmRuin(RandomSource p_228983_) {
-        return Util.getRandom(WARM_RUINS, p_228983_);
+    private static ResourceLocation getSmallWarmRuin(RandomSource pRandom) {
+        return Util.getRandom(WARM_RUINS, pRandom);
     }
 
-    private static ResourceLocation getBigWarmRuin(RandomSource p_229011_) {
-        return Util.getRandom(BIG_WARM_RUINS, p_229011_);
+    private static ResourceLocation getBigWarmRuin(RandomSource pRandom) {
+        return Util.getRandom(BIG_WARM_RUINS, pRandom);
     }
 
     public static void addPieces(
-        StructureTemplateManager p_228995_,
-        BlockPos p_228996_,
-        Rotation p_228997_,
-        StructurePieceAccessor p_228998_,
-        RandomSource p_228999_,
-        OceanRuinStructure p_229000_
+        StructureTemplateManager pStructureTemplateManager,
+        BlockPos pPos,
+        Rotation pRotation,
+        StructurePieceAccessor pStructurePieceAccessor,
+        RandomSource pRandom,
+        OceanRuinStructure pStructure
     ) {
-        boolean flag = p_228999_.nextFloat() <= p_229000_.largeProbability;
+        boolean flag = pRandom.nextFloat() <= pStructure.largeProbability;
         float f = flag ? 0.9F : 0.8F;
-        addPiece(p_228995_, p_228996_, p_228997_, p_228998_, p_228999_, p_229000_, flag, f);
-        if (flag && p_228999_.nextFloat() <= p_229000_.clusterProbability) {
-            addClusterRuins(p_228995_, p_228999_, p_228997_, p_228996_, p_229000_, p_228998_);
+        addPiece(pStructureTemplateManager, pPos, pRotation, pStructurePieceAccessor, pRandom, pStructure, flag, f);
+        if (flag && pRandom.nextFloat() <= pStructure.clusterProbability) {
+            addClusterRuins(pStructureTemplateManager, pRandom, pRotation, pPos, pStructure, pStructurePieceAccessor);
         }
     }
 
     private static void addClusterRuins(
-        StructureTemplateManager p_228988_,
-        RandomSource p_228989_,
-        Rotation p_228990_,
-        BlockPos p_228991_,
-        OceanRuinStructure p_228992_,
-        StructurePieceAccessor p_228993_
+        StructureTemplateManager pStructureTemplateManager,
+        RandomSource pRandom,
+        Rotation pRotation,
+        BlockPos pPos,
+        OceanRuinStructure pStructure,
+        StructurePieceAccessor pStructurePieceAccessor
     ) {
-        BlockPos blockpos = new BlockPos(p_228991_.getX(), 90, p_228991_.getZ());
-        BlockPos blockpos1 = StructureTemplate.transform(new BlockPos(15, 0, 15), Mirror.NONE, p_228990_, BlockPos.ZERO).offset(blockpos);
+        BlockPos blockpos = new BlockPos(pPos.getX(), 90, pPos.getZ());
+        BlockPos blockpos1 = StructureTemplate.transform(new BlockPos(15, 0, 15), Mirror.NONE, pRotation, BlockPos.ZERO).offset(blockpos);
         BoundingBox boundingbox = BoundingBox.fromCorners(blockpos, blockpos1);
         BlockPos blockpos2 = new BlockPos(
             Math.min(blockpos.getX(), blockpos1.getX()), blockpos.getY(), Math.min(blockpos.getZ(), blockpos1.getZ())
         );
-        List<BlockPos> list = allPositions(p_228989_, blockpos2);
-        int i = Mth.nextInt(p_228989_, 4, 8);
+        List<BlockPos> list = allPositions(pRandom, blockpos2);
+        int i = Mth.nextInt(pRandom, 4, 8);
 
         for (int j = 0; j < i; j++) {
             if (!list.isEmpty()) {
-                int k = p_228989_.nextInt(list.size());
+                int k = pRandom.nextInt(list.size());
                 BlockPos blockpos3 = list.remove(k);
-                Rotation rotation = Rotation.getRandom(p_228989_);
+                Rotation rotation = Rotation.getRandom(pRandom);
                 BlockPos blockpos4 = StructureTemplate.transform(new BlockPos(5, 0, 6), Mirror.NONE, rotation, BlockPos.ZERO).offset(blockpos3);
                 BoundingBox boundingbox1 = BoundingBox.fromCorners(blockpos3, blockpos4);
                 if (!boundingbox1.intersects(boundingbox)) {
-                    addPiece(p_228988_, blockpos3, rotation, p_228993_, p_228989_, p_228992_, false, 0.8F);
+                    addPiece(pStructureTemplateManager, blockpos3, rotation, pStructurePieceAccessor, pRandom, pStructure, false, 0.8F);
                 }
             }
         }
     }
 
-    private static List<BlockPos> allPositions(RandomSource p_228985_, BlockPos p_228986_) {
+    private static List<BlockPos> allPositions(RandomSource pRandom, BlockPos pPos) {
         List<BlockPos> list = Lists.newArrayList();
-        list.add(p_228986_.offset(-16 + Mth.nextInt(p_228985_, 1, 8), 0, 16 + Mth.nextInt(p_228985_, 1, 7)));
-        list.add(p_228986_.offset(-16 + Mth.nextInt(p_228985_, 1, 8), 0, Mth.nextInt(p_228985_, 1, 7)));
-        list.add(p_228986_.offset(-16 + Mth.nextInt(p_228985_, 1, 8), 0, -16 + Mth.nextInt(p_228985_, 4, 8)));
-        list.add(p_228986_.offset(Mth.nextInt(p_228985_, 1, 7), 0, 16 + Mth.nextInt(p_228985_, 1, 7)));
-        list.add(p_228986_.offset(Mth.nextInt(p_228985_, 1, 7), 0, -16 + Mth.nextInt(p_228985_, 4, 6)));
-        list.add(p_228986_.offset(16 + Mth.nextInt(p_228985_, 1, 7), 0, 16 + Mth.nextInt(p_228985_, 3, 8)));
-        list.add(p_228986_.offset(16 + Mth.nextInt(p_228985_, 1, 7), 0, Mth.nextInt(p_228985_, 1, 7)));
-        list.add(p_228986_.offset(16 + Mth.nextInt(p_228985_, 1, 7), 0, -16 + Mth.nextInt(p_228985_, 4, 8)));
+        list.add(pPos.offset(-16 + Mth.nextInt(pRandom, 1, 8), 0, 16 + Mth.nextInt(pRandom, 1, 7)));
+        list.add(pPos.offset(-16 + Mth.nextInt(pRandom, 1, 8), 0, Mth.nextInt(pRandom, 1, 7)));
+        list.add(pPos.offset(-16 + Mth.nextInt(pRandom, 1, 8), 0, -16 + Mth.nextInt(pRandom, 4, 8)));
+        list.add(pPos.offset(Mth.nextInt(pRandom, 1, 7), 0, 16 + Mth.nextInt(pRandom, 1, 7)));
+        list.add(pPos.offset(Mth.nextInt(pRandom, 1, 7), 0, -16 + Mth.nextInt(pRandom, 4, 6)));
+        list.add(pPos.offset(16 + Mth.nextInt(pRandom, 1, 7), 0, 16 + Mth.nextInt(pRandom, 3, 8)));
+        list.add(pPos.offset(16 + Mth.nextInt(pRandom, 1, 7), 0, Mth.nextInt(pRandom, 1, 7)));
+        list.add(pPos.offset(16 + Mth.nextInt(pRandom, 1, 7), 0, -16 + Mth.nextInt(pRandom, 4, 8)));
         return list;
     }
 
     private static void addPiece(
-        StructureTemplateManager p_229002_,
-        BlockPos p_229003_,
-        Rotation p_229004_,
-        StructurePieceAccessor p_229005_,
-        RandomSource p_229006_,
-        OceanRuinStructure p_229007_,
-        boolean p_229008_,
-        float p_229009_
+        StructureTemplateManager pStructureTemplateManager,
+        BlockPos pPos,
+        Rotation pRotation,
+        StructurePieceAccessor pStructurePieceAccessor,
+        RandomSource pRandom,
+        OceanRuinStructure pStructure,
+        boolean pIsLarge,
+        float pIntegrity
     ) {
-        switch (p_229007_.biomeTemp) {
+        switch (pStructure.biomeTemp) {
             case WARM:
             default:
-                ResourceLocation resourcelocation = p_229008_ ? getBigWarmRuin(p_229006_) : getSmallWarmRuin(p_229006_);
-                p_229005_.addPiece(
-                    new OceanRuinPieces.OceanRuinPiece(p_229002_, resourcelocation, p_229003_, p_229004_, p_229009_, p_229007_.biomeTemp, p_229008_)
+                ResourceLocation resourcelocation = pIsLarge ? getBigWarmRuin(pRandom) : getSmallWarmRuin(pRandom);
+                pStructurePieceAccessor.addPiece(
+                    new OceanRuinPieces.OceanRuinPiece(pStructureTemplateManager, resourcelocation, pPos, pRotation, pIntegrity, pStructure.biomeTemp, pIsLarge)
                 );
                 break;
             case COLD:
-                ResourceLocation[] aresourcelocation = p_229008_ ? BIG_RUINS_BRICK : RUINS_BRICK;
-                ResourceLocation[] aresourcelocation1 = p_229008_ ? BIG_RUINS_CRACKED : RUINS_CRACKED;
-                ResourceLocation[] aresourcelocation2 = p_229008_ ? BIG_RUINS_MOSSY : RUINS_MOSSY;
-                int i = p_229006_.nextInt(aresourcelocation.length);
-                p_229005_.addPiece(
-                    new OceanRuinPieces.OceanRuinPiece(p_229002_, aresourcelocation[i], p_229003_, p_229004_, p_229009_, p_229007_.biomeTemp, p_229008_)
+                ResourceLocation[] aresourcelocation = pIsLarge ? BIG_RUINS_BRICK : RUINS_BRICK;
+                ResourceLocation[] aresourcelocation1 = pIsLarge ? BIG_RUINS_CRACKED : RUINS_CRACKED;
+                ResourceLocation[] aresourcelocation2 = pIsLarge ? BIG_RUINS_MOSSY : RUINS_MOSSY;
+                int i = pRandom.nextInt(aresourcelocation.length);
+                pStructurePieceAccessor.addPiece(
+                    new OceanRuinPieces.OceanRuinPiece(pStructureTemplateManager, aresourcelocation[i], pPos, pRotation, pIntegrity, pStructure.biomeTemp, pIsLarge)
                 );
-                p_229005_.addPiece(
-                    new OceanRuinPieces.OceanRuinPiece(p_229002_, aresourcelocation1[i], p_229003_, p_229004_, 0.7F, p_229007_.biomeTemp, p_229008_)
+                pStructurePieceAccessor.addPiece(
+                    new OceanRuinPieces.OceanRuinPiece(pStructureTemplateManager, aresourcelocation1[i], pPos, pRotation, 0.7F, pStructure.biomeTemp, pIsLarge)
                 );
-                p_229005_.addPiece(
-                    new OceanRuinPieces.OceanRuinPiece(p_229002_, aresourcelocation2[i], p_229003_, p_229004_, 0.5F, p_229007_.biomeTemp, p_229008_)
+                pStructurePieceAccessor.addPiece(
+                    new OceanRuinPieces.OceanRuinPiece(pStructureTemplateManager, aresourcelocation2[i], pPos, pRotation, 0.5F, pStructure.biomeTemp, pIsLarge)
                 );
         }
     }
@@ -242,50 +242,50 @@ public class OceanRuinPieces {
         private final boolean isLarge;
 
         public OceanRuinPiece(
-            StructureTemplateManager p_229018_,
-            ResourceLocation p_229019_,
-            BlockPos p_229020_,
-            Rotation p_229021_,
-            float p_229022_,
-            OceanRuinStructure.Type p_229023_,
-            boolean p_229024_
+            StructureTemplateManager pStructureTemplateManager,
+            ResourceLocation pLocation,
+            BlockPos pPos,
+            Rotation pRotation,
+            float pIntegrity,
+            OceanRuinStructure.Type pBiomeType,
+            boolean pIsLarge
         ) {
-            super(StructurePieceType.OCEAN_RUIN, 0, p_229018_, p_229019_, p_229019_.toString(), makeSettings(p_229021_, p_229022_, p_229023_), p_229020_);
-            this.integrity = p_229022_;
-            this.biomeType = p_229023_;
-            this.isLarge = p_229024_;
+            super(StructurePieceType.OCEAN_RUIN, 0, pStructureTemplateManager, pLocation, pLocation.toString(), makeSettings(pRotation, pIntegrity, pBiomeType), pPos);
+            this.integrity = pIntegrity;
+            this.biomeType = pBiomeType;
+            this.isLarge = pIsLarge;
         }
 
         private OceanRuinPiece(
-            StructureTemplateManager p_277563_,
-            CompoundTag p_277610_,
-            Rotation p_277637_,
-            float p_277437_,
-            OceanRuinStructure.Type p_277873_,
-            boolean p_277924_
+            StructureTemplateManager pStructureTemplateManager,
+            CompoundTag pGenDepth,
+            Rotation pRotation,
+            float pIntegrity,
+            OceanRuinStructure.Type pBiomeType,
+            boolean pIsLarge
         ) {
-            super(StructurePieceType.OCEAN_RUIN, p_277610_, p_277563_, p_277332_ -> makeSettings(p_277637_, p_277437_, p_277873_));
-            this.integrity = p_277437_;
-            this.biomeType = p_277873_;
-            this.isLarge = p_277924_;
+            super(StructurePieceType.OCEAN_RUIN, pGenDepth, pStructureTemplateManager, p_277332_ -> makeSettings(pRotation, pIntegrity, pBiomeType));
+            this.integrity = pIntegrity;
+            this.biomeType = pBiomeType;
+            this.isLarge = pIsLarge;
         }
 
-        private static StructurePlaceSettings makeSettings(Rotation p_277572_, float p_277489_, OceanRuinStructure.Type p_277631_) {
-            StructureProcessor structureprocessor = p_277631_ == OceanRuinStructure.Type.COLD ? OceanRuinPieces.COLD_SUSPICIOUS_BLOCK_PROCESSOR : OceanRuinPieces.WARM_SUSPICIOUS_BLOCK_PROCESSOR;
+        private static StructurePlaceSettings makeSettings(Rotation pRotation, float pIntegrity, OceanRuinStructure.Type pStructureType) {
+            StructureProcessor structureprocessor = pStructureType == OceanRuinStructure.Type.COLD ? OceanRuinPieces.COLD_SUSPICIOUS_BLOCK_PROCESSOR : OceanRuinPieces.WARM_SUSPICIOUS_BLOCK_PROCESSOR;
             return new StructurePlaceSettings()
-                .setRotation(p_277572_)
+                .setRotation(pRotation)
                 .setMirror(Mirror.NONE)
-                .addProcessor(new BlockRotProcessor(p_277489_))
+                .addProcessor(new BlockRotProcessor(pIntegrity))
                 .addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR)
                 .addProcessor(structureprocessor);
         }
 
-        public static OceanRuinPieces.OceanRuinPiece create(StructureTemplateManager p_277874_, CompoundTag p_277773_) {
-            Rotation rotation = Rotation.valueOf(p_277773_.getString("Rot"));
-            float f = p_277773_.getFloat("Integrity");
-            OceanRuinStructure.Type oceanruinstructure$type = OceanRuinStructure.Type.valueOf(p_277773_.getString("BiomeType"));
-            boolean flag = p_277773_.getBoolean("IsLarge");
-            return new OceanRuinPieces.OceanRuinPiece(p_277874_, p_277773_, rotation, f, oceanruinstructure$type, flag);
+        public static OceanRuinPieces.OceanRuinPiece create(StructureTemplateManager pStructureTemplateManager, CompoundTag pTag) {
+            Rotation rotation = Rotation.valueOf(pTag.getString("Rot"));
+            float f = pTag.getFloat("Integrity");
+            OceanRuinStructure.Type oceanruinstructure$type = OceanRuinStructure.Type.valueOf(pTag.getString("BiomeType"));
+            boolean flag = pTag.getBoolean("IsLarge");
+            return new OceanRuinPieces.OceanRuinPiece(pStructureTemplateManager, pTag, rotation, f, oceanruinstructure$type, flag);
         }
 
         @Override
@@ -348,26 +348,26 @@ public class OceanRuinPieces {
             super.postProcess(p_229029_, p_229030_, p_229031_, p_229032_, p_229033_, p_229034_, p_229035_);
         }
 
-        private int getHeight(BlockPos p_229042_, BlockGetter p_229043_, BlockPos p_229044_) {
-            int i = p_229042_.getY();
+        private int getHeight(BlockPos pTemplatePos, BlockGetter pLevel, BlockPos pPos) {
+            int i = pTemplatePos.getY();
             int j = 512;
             int k = i - 1;
             int l = 0;
 
-            for (BlockPos blockpos : BlockPos.betweenClosed(p_229042_, p_229044_)) {
+            for (BlockPos blockpos : BlockPos.betweenClosed(pTemplatePos, pPos)) {
                 int i1 = blockpos.getX();
                 int j1 = blockpos.getZ();
-                int k1 = p_229042_.getY() - 1;
+                int k1 = pTemplatePos.getY() - 1;
                 BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(i1, k1, j1);
-                BlockState blockstate = p_229043_.getBlockState(blockpos$mutableblockpos);
+                BlockState blockstate = pLevel.getBlockState(blockpos$mutableblockpos);
 
-                for (FluidState fluidstate = p_229043_.getFluidState(blockpos$mutableblockpos);
+                for (FluidState fluidstate = pLevel.getFluidState(blockpos$mutableblockpos);
                     (blockstate.isAir() || fluidstate.is(FluidTags.WATER) || blockstate.is(BlockTags.ICE))
-                        && k1 > p_229043_.getMinY() + 1;
-                    fluidstate = p_229043_.getFluidState(blockpos$mutableblockpos)
+                        && k1 > pLevel.getMinY() + 1;
+                    fluidstate = pLevel.getFluidState(blockpos$mutableblockpos)
                 ) {
                     blockpos$mutableblockpos.set(i1, --k1, j1);
-                    blockstate = p_229043_.getBlockState(blockpos$mutableblockpos);
+                    blockstate = pLevel.getBlockState(blockpos$mutableblockpos);
                 }
 
                 j = Math.min(j, k1);
@@ -376,7 +376,7 @@ public class OceanRuinPieces {
                 }
             }
 
-            int l1 = Math.abs(p_229042_.getX() - p_229044_.getX());
+            int l1 = Math.abs(pTemplatePos.getX() - pPos.getX());
             if (k - j > 2 && l > l1 - 2) {
                 i = j + 1;
             }

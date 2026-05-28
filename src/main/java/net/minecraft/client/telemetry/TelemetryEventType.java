@@ -90,17 +90,17 @@ public class TelemetryEventType {
     private final boolean isOptIn;
     private final MapCodec<TelemetryEventInstance> codec;
 
-    TelemetryEventType(String p_261787_, String p_262121_, List<TelemetryProperty<?>> p_261987_, boolean p_261511_) {
-        this.id = p_261787_;
-        this.exportKey = p_262121_;
-        this.properties = p_261987_;
-        this.isOptIn = p_261511_;
-        this.codec = TelemetryPropertyMap.createCodec(p_261987_)
+    TelemetryEventType(String pId, String pExportKey, List<TelemetryProperty<?>> pProperties, boolean pIsOptIn) {
+        this.id = pId;
+        this.exportKey = pExportKey;
+        this.properties = pProperties;
+        this.isOptIn = pIsOptIn;
+        this.codec = TelemetryPropertyMap.createCodec(pProperties)
             .xmap(p_261533_ -> new TelemetryEventInstance(this, p_261533_), TelemetryEventInstance::properties);
     }
 
-    public static TelemetryEventType.Builder builder(String p_261734_, String p_261807_) {
-        return new TelemetryEventType.Builder(p_261734_, p_261807_);
+    public static TelemetryEventType.Builder builder(String pId, String pExportKey) {
+        return new TelemetryEventType.Builder(pId, pExportKey);
     }
 
     public String id() {
@@ -119,18 +119,18 @@ public class TelemetryEventType {
         return this.isOptIn;
     }
 
-    public TelemetryEvent export(TelemetrySession p_262179_, TelemetryPropertyMap p_262018_) {
-        TelemetryEvent telemetryevent = p_262179_.createNewEvent(this.exportKey);
+    public TelemetryEvent export(TelemetrySession pSession, TelemetryPropertyMap pPropertyMap) {
+        TelemetryEvent telemetryevent = pSession.createNewEvent(this.exportKey);
 
         for (TelemetryProperty<?> telemetryproperty : this.properties) {
-            telemetryproperty.export(p_262018_, telemetryevent);
+            telemetryproperty.export(pPropertyMap, telemetryevent);
         }
 
         return telemetryevent;
     }
 
-    public <T> boolean contains(TelemetryProperty<T> p_262037_) {
-        return this.properties.contains(p_262037_);
+    public <T> boolean contains(TelemetryProperty<T> pProperty) {
+        return this.properties.contains(pProperty);
     }
 
     @Override
@@ -146,8 +146,8 @@ public class TelemetryEventType {
         return this.makeTranslation("description");
     }
 
-    private MutableComponent makeTranslation(String p_261909_) {
-        return Component.translatable("telemetry.event." + this.id + "." + p_261909_);
+    private MutableComponent makeTranslation(String pKey) {
+        return Component.translatable("telemetry.event." + this.id + "." + pKey);
     }
 
     public static List<TelemetryEventType> values() {
@@ -161,18 +161,18 @@ public class TelemetryEventType {
         private final List<TelemetryProperty<?>> properties = new ArrayList<>();
         private boolean isOptIn;
 
-        Builder(String p_261797_, String p_261777_) {
-            this.id = p_261797_;
-            this.exportKey = p_261777_;
+        Builder(String pId, String pExportKey) {
+            this.id = pId;
+            this.exportKey = pExportKey;
         }
 
-        public TelemetryEventType.Builder defineAll(List<TelemetryProperty<?>> p_261497_) {
-            this.properties.addAll(p_261497_);
+        public TelemetryEventType.Builder defineAll(List<TelemetryProperty<?>> pProperties) {
+            this.properties.addAll(pProperties);
             return this;
         }
 
-        public <T> TelemetryEventType.Builder define(TelemetryProperty<T> p_261756_) {
-            this.properties.add(p_261756_);
+        public <T> TelemetryEventType.Builder define(TelemetryProperty<T> pProperty) {
+            this.properties.add(pProperty);
             return this;
         }
 

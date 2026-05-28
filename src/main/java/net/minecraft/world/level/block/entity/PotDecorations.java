@@ -25,29 +25,29 @@ public record PotDecorations(Optional<Item> back, Optional<Item> left, Optional<
         .apply(ByteBufCodecs.list(4))
         .map(PotDecorations::new, PotDecorations::ordered);
 
-    private PotDecorations(List<Item> p_331996_) {
-        this(getItem(p_331996_, 0), getItem(p_331996_, 1), getItem(p_331996_, 2), getItem(p_331996_, 3));
+    private PotDecorations(List<Item> pDecorations) {
+        this(getItem(pDecorations, 0), getItem(pDecorations, 1), getItem(pDecorations, 2), getItem(pDecorations, 3));
     }
 
-    public PotDecorations(Item p_335624_, Item p_333843_, Item p_334423_, Item p_332271_) {
-        this(List.of(p_335624_, p_333843_, p_334423_, p_332271_));
+    public PotDecorations(Item pBack, Item pLeft, Item pRight, Item pFront) {
+        this(List.of(pBack, pLeft, pRight, pFront));
     }
 
-    private static Optional<Item> getItem(List<Item> p_329359_, int p_331055_) {
-        if (p_331055_ >= p_329359_.size()) {
+    private static Optional<Item> getItem(List<Item> pDecorations, int pIndex) {
+        if (pIndex >= pDecorations.size()) {
             return Optional.empty();
         } else {
-            Item item = p_329359_.get(p_331055_);
+            Item item = pDecorations.get(pIndex);
             return item == Items.BRICK ? Optional.empty() : Optional.of(item);
         }
     }
 
-    public CompoundTag save(CompoundTag p_332345_) {
+    public CompoundTag save(CompoundTag pTag) {
         if (this.equals(EMPTY)) {
-            return p_332345_;
+            return pTag;
         } else {
-            p_332345_.put("sherds", CODEC.encodeStart(NbtOps.INSTANCE, this).getOrThrow());
-            return p_332345_;
+            pTag.put("sherds", CODEC.encodeStart(NbtOps.INSTANCE, this).getOrThrow());
+            return pTag;
         }
     }
 
@@ -55,9 +55,9 @@ public record PotDecorations(Optional<Item> back, Optional<Item> left, Optional<
         return Stream.of(this.back, this.left, this.right, this.front).map(p_330456_ -> p_330456_.orElse(Items.BRICK)).toList();
     }
 
-    public static PotDecorations load(@Nullable CompoundTag p_334784_) {
-        return p_334784_ != null && p_334784_.contains("sherds")
-            ? CODEC.parse(NbtOps.INSTANCE, p_334784_.get("sherds")).result().orElse(EMPTY)
+    public static PotDecorations load(@Nullable CompoundTag pTag) {
+        return pTag != null && pTag.contains("sherds")
+            ? CODEC.parse(NbtOps.INSTANCE, pTag.get("sherds")).result().orElse(EMPTY)
             : EMPTY;
     }
 }

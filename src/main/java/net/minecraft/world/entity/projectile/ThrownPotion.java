@@ -41,12 +41,12 @@ public class ThrownPotion extends ThrowableItemProjectile {
         super(p_37527_, p_37528_);
     }
 
-    public ThrownPotion(Level p_37535_, LivingEntity p_37536_, ItemStack p_366952_) {
-        super(EntityType.POTION, p_37536_, p_37535_, p_366952_);
+    public ThrownPotion(Level pLevel, LivingEntity pOwner, ItemStack pItem) {
+        super(EntityType.POTION, pOwner, pLevel, pItem);
     }
 
-    public ThrownPotion(Level p_37530_, double p_37531_, double p_37532_, double p_37533_, ItemStack p_368100_) {
-        super(EntityType.POTION, p_37531_, p_37532_, p_37533_, p_37530_, p_368100_);
+    public ThrownPotion(Level pLevel, double pX, double pY, double pZ, ItemStack pItem) {
+        super(EntityType.POTION, pX, pY, pZ, pLevel, pItem);
     }
 
     @Override
@@ -80,8 +80,8 @@ public class ThrownPotion extends ThrowableItemProjectile {
     }
 
     @Override
-    protected void onHit(HitResult p_37543_) {
-        super.onHit(p_37543_);
+    protected void onHit(HitResult pResult) {
+        super.onHit(pResult);
         if (this.level() instanceof ServerLevel serverlevel) {
             ItemStack itemstack = this.getItem();
             PotionContents potioncontents = itemstack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
@@ -92,7 +92,7 @@ public class ThrownPotion extends ThrowableItemProjectile {
                     this.makeAreaOfEffectCloud(potioncontents);
                 } else {
                     this.applySplash(
-                        serverlevel, potioncontents.getAllEffects(), p_37543_.getType() == HitResult.Type.ENTITY ? ((EntityHitResult)p_37543_).getEntity() : null
+                        serverlevel, potioncontents.getAllEffects(), pResult.getType() == HitResult.Type.ENTITY ? ((EntityHitResult)pResult).getEntity() : null
                     );
                 }
             }
@@ -103,14 +103,14 @@ public class ThrownPotion extends ThrowableItemProjectile {
         }
     }
 
-    private void applyWater(ServerLevel p_362613_) {
+    private void applyWater(ServerLevel pLevel) {
         AABB aabb = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
 
         for (LivingEntity livingentity : this.level().getEntitiesOfClass(LivingEntity.class, aabb, WATER_SENSITIVE_OR_ON_FIRE)) {
             double d0 = this.distanceToSqr(livingentity);
             if (d0 < 16.0) {
                 if (livingentity.isSensitiveToWater()) {
-                    livingentity.hurtServer(p_362613_, this.damageSources().indirectMagic(this, this.getOwner()), 1.0F);
+                    livingentity.hurtServer(pLevel, this.damageSources().indirectMagic(this, this.getOwner()), 1.0F);
                 }
 
                 if (livingentity.isOnFire() && livingentity.isAlive()) {
@@ -124,9 +124,9 @@ public class ThrownPotion extends ThrowableItemProjectile {
         }
     }
 
-    private void applySplash(ServerLevel p_366171_, Iterable<MobEffectInstance> p_329810_, @Nullable Entity p_37549_) {
+    private void applySplash(ServerLevel pLevel, Iterable<MobEffectInstance> pEffects, @Nullable Entity pEntity) {
         AABB aabb = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
-        List<LivingEntity> list = p_366171_.getEntitiesOfClass(LivingEntity.class, aabb);
+        List<LivingEntity> list = pLevel.getEntitiesOfClass(LivingEntity.class, aabb);
         if (!list.isEmpty()) {
             Entity entity = this.getEffectSource();
 
@@ -135,16 +135,16 @@ public class ThrownPotion extends ThrowableItemProjectile {
                     double d0 = this.distanceToSqr(livingentity);
                     if (d0 < 16.0) {
                         double d1;
-                        if (livingentity == p_37549_) {
+                        if (livingentity == pEntity) {
                             d1 = 1.0;
                         } else {
                             d1 = 1.0 - Math.sqrt(d0) / 4.0;
                         }
 
-                        for (MobEffectInstance mobeffectinstance : p_329810_) {
+                        for (MobEffectInstance mobeffectinstance : pEffects) {
                             Holder<MobEffect> holder = mobeffectinstance.getEffect();
                             if (holder.value().isInstantenous()) {
-                                holder.value().applyInstantenousEffect(p_366171_, this, this.getOwner(), livingentity, mobeffectinstance.getAmplifier(), d1);
+                                holder.value().applyInstantenousEffect(pLevel, this, this.getOwner(), livingentity, mobeffectinstance.getAmplifier(), d1);
                             } else {
                                 int i = mobeffectinstance.mapDuration(p_267930_ -> (int)(d1 * (double)p_267930_ + 0.5));
                                 MobEffectInstance mobeffectinstance1 = new MobEffectInstance(
@@ -161,7 +161,7 @@ public class ThrownPotion extends ThrowableItemProjectile {
         }
     }
 
-    private void makeAreaOfEffectCloud(PotionContents p_331360_) {
+    private void makeAreaOfEffectCloud(PotionContents pPotionContents) {
         AreaEffectCloud areaeffectcloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
         if (this.getOwner() instanceof LivingEntity livingentity) {
             areaeffectcloud.setOwner(livingentity);
@@ -171,7 +171,7 @@ public class ThrownPotion extends ThrowableItemProjectile {
         areaeffectcloud.setRadiusOnUse(-0.5F);
         areaeffectcloud.setWaitTime(10);
         areaeffectcloud.setRadiusPerTick(-areaeffectcloud.getRadius() / (float)areaeffectcloud.getDuration());
-        areaeffectcloud.setPotionContents(p_331360_);
+        areaeffectcloud.setPotionContents(pPotionContents);
         this.level().addFreshEntity(areaeffectcloud);
     }
 
@@ -179,16 +179,16 @@ public class ThrownPotion extends ThrowableItemProjectile {
         return this.getItem().is(Items.LINGERING_POTION);
     }
 
-    private void dowseFire(BlockPos p_150193_) {
-        BlockState blockstate = this.level().getBlockState(p_150193_);
+    private void dowseFire(BlockPos pPos) {
+        BlockState blockstate = this.level().getBlockState(pPos);
         if (blockstate.is(BlockTags.FIRE)) {
-            this.level().destroyBlock(p_150193_, false, this);
+            this.level().destroyBlock(pPos, false, this);
         } else if (AbstractCandleBlock.isLit(blockstate)) {
-            AbstractCandleBlock.extinguish(null, blockstate, this.level(), p_150193_);
+            AbstractCandleBlock.extinguish(null, blockstate, this.level(), pPos);
         } else if (CampfireBlock.isLitCampfire(blockstate)) {
-            this.level().levelEvent(null, 1009, p_150193_, 0);
-            CampfireBlock.dowse(this.getOwner(), this.level(), p_150193_, blockstate);
-            this.level().setBlockAndUpdate(p_150193_, blockstate.setValue(CampfireBlock.LIT, Boolean.valueOf(false)));
+            this.level().levelEvent(null, 1009, pPos, 0);
+            CampfireBlock.dowse(this.getOwner(), this.level(), pPos, blockstate);
+            this.level().setBlockAndUpdate(pPos, blockstate.setValue(CampfireBlock.LIT, Boolean.valueOf(false)));
         }
     }
 

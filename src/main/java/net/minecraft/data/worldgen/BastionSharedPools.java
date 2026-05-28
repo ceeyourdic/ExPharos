@@ -9,11 +9,11 @@ import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 
 public class BastionSharedPools {
-    public static void bootstrap(BootstrapContext<StructureTemplatePool> p_331441_) {
-        HolderGetter<StructureTemplatePool> holdergetter = p_331441_.lookup(Registries.TEMPLATE_POOL);
+    public static void bootstrap(BootstrapContext<StructureTemplatePool> pContext) {
+        HolderGetter<StructureTemplatePool> holdergetter = pContext.lookup(Registries.TEMPLATE_POOL);
         Holder<StructureTemplatePool> holder = holdergetter.getOrThrow(Pools.EMPTY);
         Pools.register(
-            p_331441_,
+            pContext,
             "bastion/mobs/piglin",
             new StructureTemplatePool(
                 holder,
@@ -27,7 +27,7 @@ public class BastionSharedPools {
             )
         );
         Pools.register(
-            p_331441_,
+            pContext,
             "bastion/mobs/hoglin",
             new StructureTemplatePool(
                 holder,
@@ -38,7 +38,7 @@ public class BastionSharedPools {
             )
         );
         Pools.register(
-            p_331441_,
+            pContext,
             "bastion/blocks/gold",
             new StructureTemplatePool(
                 holder,
@@ -49,7 +49,7 @@ public class BastionSharedPools {
             )
         );
         Pools.register(
-            p_331441_,
+            pContext,
             "bastion/mobs/piglin_melee",
             new StructureTemplatePool(
                 holder,

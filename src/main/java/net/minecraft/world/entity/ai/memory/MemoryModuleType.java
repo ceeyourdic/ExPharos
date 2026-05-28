@@ -136,8 +136,8 @@ public class MemoryModuleType<U> {
     private final Optional<Codec<ExpirableValue<U>>> codec;
 
     @VisibleForTesting
-    public MemoryModuleType(Optional<Codec<U>> p_26386_) {
-        this.codec = p_26386_.map(ExpirableValue::codec);
+    public MemoryModuleType(Optional<Codec<U>> pOptionalCodec) {
+        this.codec = pOptionalCodec.map(ExpirableValue::codec);
     }
 
     @Override
@@ -149,11 +149,11 @@ public class MemoryModuleType<U> {
         return this.codec;
     }
 
-    private static <U> MemoryModuleType<U> register(String p_26391_, Codec<U> p_26392_) {
-        return Registry.register(BuiltInRegistries.MEMORY_MODULE_TYPE, ResourceLocation.withDefaultNamespace(p_26391_), new MemoryModuleType<>(Optional.of(p_26392_)));
+    private static <U> MemoryModuleType<U> register(String pIdentifier, Codec<U> pCodec) {
+        return Registry.register(BuiltInRegistries.MEMORY_MODULE_TYPE, ResourceLocation.withDefaultNamespace(pIdentifier), new MemoryModuleType<>(Optional.of(pCodec)));
     }
 
-    private static <U> MemoryModuleType<U> register(String p_26389_) {
-        return Registry.register(BuiltInRegistries.MEMORY_MODULE_TYPE, ResourceLocation.withDefaultNamespace(p_26389_), new MemoryModuleType<>(Optional.empty()));
+    private static <U> MemoryModuleType<U> register(String pIdentifier) {
+        return Registry.register(BuiltInRegistries.MEMORY_MODULE_TYPE, ResourceLocation.withDefaultNamespace(pIdentifier), new MemoryModuleType<>(Optional.empty()));
     }
 }

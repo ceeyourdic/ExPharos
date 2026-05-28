@@ -17,9 +17,9 @@ public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerIns
         return TradeTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_70960_, AbstractVillager p_70961_, ItemStack p_70962_) {
-        LootContext lootcontext = EntityPredicate.createContext(p_70960_, p_70961_);
-        this.trigger(p_70960_, p_70970_ -> p_70970_.matches(lootcontext, p_70962_));
+    public void trigger(ServerPlayer pPlayer, AbstractVillager pVillager, ItemStack pStack) {
+        LootContext lootcontext = EntityPredicate.createContext(pPlayer, pVillager);
+        this.trigger(pPlayer, p_70970_ -> p_70970_.matches(lootcontext, pStack));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ContextAwarePredicate> villager, Optional<ItemPredicate> item)
@@ -37,15 +37,15 @@ public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerIns
             return CriteriaTriggers.TRADE.createCriterion(new TradeTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty()));
         }
 
-        public static Criterion<TradeTrigger.TriggerInstance> tradedWithVillager(EntityPredicate.Builder p_191437_) {
+        public static Criterion<TradeTrigger.TriggerInstance> tradedWithVillager(EntityPredicate.Builder pVillager) {
             return CriteriaTriggers.TRADE
-                .createCriterion(new TradeTrigger.TriggerInstance(Optional.of(EntityPredicate.wrap(p_191437_)), Optional.empty(), Optional.empty()));
+                .createCriterion(new TradeTrigger.TriggerInstance(Optional.of(EntityPredicate.wrap(pVillager)), Optional.empty(), Optional.empty()));
         }
 
-        public boolean matches(LootContext p_70985_, ItemStack p_70986_) {
-            return this.villager.isPresent() && !this.villager.get().matches(p_70985_)
+        public boolean matches(LootContext pContext, ItemStack pStack) {
+            return this.villager.isPresent() && !this.villager.get().matches(pContext)
                 ? false
-                : !this.item.isPresent() || this.item.get().test(p_70986_);
+                : !this.item.isPresent() || this.item.get().test(pStack);
         }
 
         @Override

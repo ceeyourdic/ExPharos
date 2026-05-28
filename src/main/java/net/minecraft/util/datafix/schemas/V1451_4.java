@@ -13,8 +13,8 @@ public class V1451_4 extends NamespacedSchema {
     }
 
     @Override
-    public void registerTypes(Schema p_17523_, Map<String, Supplier<TypeTemplate>> p_17524_, Map<String, Supplier<TypeTemplate>> p_17525_) {
-        super.registerTypes(p_17523_, p_17524_, p_17525_);
-        p_17523_.registerType(false, References.BLOCK_NAME, () -> DSL.constType(namespacedString()));
+    public void registerTypes(Schema pSchema, Map<String, Supplier<TypeTemplate>> pEntityTypes, Map<String, Supplier<TypeTemplate>> pBlockEntityTypes) {
+        super.registerTypes(pSchema, pEntityTypes, pBlockEntityTypes);
+        pSchema.registerType(false, References.BLOCK_NAME, () -> DSL.constType(namespacedString()));
     }
 }

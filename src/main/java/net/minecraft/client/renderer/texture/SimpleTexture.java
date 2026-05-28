@@ -8,8 +8,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class SimpleTexture extends ReloadableTexture {
-    public SimpleTexture(ResourceLocation p_118133_) {
-        super(p_118133_);
+    public SimpleTexture(ResourceLocation pLocation) {
+        super(pLocation);
     }
 
     @Override

@@ -23,13 +23,13 @@ public class ChickenModel extends EntityModel<ChickenRenderState> {
     private final ModelPart rightWing;
     private final ModelPart leftWing;
 
-    public ChickenModel(ModelPart p_170490_) {
-        super(p_170490_);
-        this.head = p_170490_.getChild("head");
-        this.rightLeg = p_170490_.getChild("right_leg");
-        this.leftLeg = p_170490_.getChild("left_leg");
-        this.rightWing = p_170490_.getChild("right_wing");
-        this.leftWing = p_170490_.getChild("left_wing");
+    public ChickenModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
+        this.rightLeg = pRoot.getChild("right_leg");
+        this.leftLeg = pRoot.getChild("left_leg");
+        this.rightWing = pRoot.getChild("right_wing");
+        this.leftWing = pRoot.getChild("left_wing");
     }
 
     public static LayerDefinition createBodyLayer() {

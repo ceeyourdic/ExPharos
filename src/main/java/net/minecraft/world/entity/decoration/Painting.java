@@ -57,22 +57,22 @@ public class Painting extends HangingEntity implements VariantHolder<Holder<Pain
         }
     }
 
-    public void setVariant(Holder<PaintingVariant> p_218892_) {
-        this.entityData.set(DATA_PAINTING_VARIANT_ID, p_218892_);
+    public void setVariant(Holder<PaintingVariant> pVariant) {
+        this.entityData.set(DATA_PAINTING_VARIANT_ID, pVariant);
     }
 
     public Holder<PaintingVariant> getVariant() {
         return this.entityData.get(DATA_PAINTING_VARIANT_ID);
     }
 
-    public static Optional<Painting> create(Level p_218888_, BlockPos p_218889_, Direction p_218890_) {
-        Painting painting = new Painting(p_218888_, p_218889_);
+    public static Optional<Painting> create(Level pLevel, BlockPos pPos, Direction pDirection) {
+        Painting painting = new Painting(pLevel, pPos);
         List<Holder<PaintingVariant>> list = new ArrayList<>();
-        p_218888_.registryAccess().lookupOrThrow(Registries.PAINTING_VARIANT).getTagOrEmpty(PaintingVariantTags.PLACEABLE).forEach(list::add);
+        pLevel.registryAccess().lookupOrThrow(Registries.PAINTING_VARIANT).getTagOrEmpty(PaintingVariantTags.PLACEABLE).forEach(list::add);
         if (list.isEmpty()) {
             return Optional.empty();
         } else {
-            painting.setDirection(p_218890_);
+            painting.setDirection(pDirection);
             list.removeIf(p_359233_ -> {
                 painting.setVariant((Holder<PaintingVariant>)p_359233_);
                 return !painting.survives();
@@ -87,39 +87,39 @@ public class Painting extends HangingEntity implements VariantHolder<Holder<Pain
                     return Optional.empty();
                 } else {
                     painting.setVariant(optional.get());
-                    painting.setDirection(p_218890_);
+                    painting.setDirection(pDirection);
                     return Optional.of(painting);
                 }
             }
         }
     }
 
-    private static int variantArea(Holder<PaintingVariant> p_218899_) {
-        return p_218899_.value().area();
+    private static int variantArea(Holder<PaintingVariant> pVariant) {
+        return pVariant.value().area();
     }
 
-    private Painting(Level p_218874_, BlockPos p_218875_) {
-        super(EntityType.PAINTING, p_218874_, p_218875_);
+    private Painting(Level pLevel, BlockPos pPos) {
+        super(EntityType.PAINTING, pLevel, pPos);
     }
 
-    public Painting(Level p_218877_, BlockPos p_218878_, Direction p_218879_, Holder<PaintingVariant> p_218880_) {
-        this(p_218877_, p_218878_);
-        this.setVariant(p_218880_);
-        this.setDirection(p_218879_);
-    }
-
-    @Override
-    public void addAdditionalSaveData(CompoundTag p_31935_) {
-        VARIANT_CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), this.getVariant()).ifSuccess(p_327008_ -> p_31935_.merge((CompoundTag)p_327008_));
-        p_31935_.putByte("facing", (byte)this.direction.get2DDataValue());
-        super.addAdditionalSaveData(p_31935_);
+    public Painting(Level pLevel, BlockPos pPos, Direction pDirection, Holder<PaintingVariant> pVariant) {
+        this(pLevel, pPos);
+        this.setVariant(pVariant);
+        this.setDirection(pDirection);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_31927_) {
-        VARIANT_CODEC.parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), p_31927_).ifSuccess(this::setVariant);
-        this.direction = Direction.from2DDataValue(p_31927_.getByte("facing"));
-        super.readAdditionalSaveData(p_31927_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        VARIANT_CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), this.getVariant()).ifSuccess(p_327008_ -> pCompound.merge((CompoundTag)p_327008_));
+        pCompound.putByte("facing", (byte)this.direction.get2DDataValue());
+        super.addAdditionalSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        VARIANT_CODEC.parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), pCompound).ifSuccess(this::setVariant);
+        this.direction = Direction.from2DDataValue(pCompound.getByte("facing"));
+        super.readAdditionalSaveData(pCompound);
         this.setDirection(this.direction);
     }
 
@@ -139,8 +139,8 @@ public class Painting extends HangingEntity implements VariantHolder<Holder<Pain
         return AABB.ofSize(vec31, d2, d3, d4);
     }
 
-    private double offsetForPaintingSize(int p_344506_) {
-        return p_344506_ % 2 == 0 ? 0.5 : 0.0;
+    private double offsetForPaintingSize(int pSize) {
+        return pSize % 2 == 0 ? 0.5 : 0.0;
     }
 
     @Override
@@ -161,8 +161,8 @@ public class Painting extends HangingEntity implements VariantHolder<Holder<Pain
     }
 
     @Override
-    public void moveTo(double p_31929_, double p_31930_, double p_31931_, float p_31932_, float p_31933_) {
-        this.setPos(p_31929_, p_31930_, p_31931_);
+    public void moveTo(double pX, double pY, double pZ, float pYaw, float pPitch) {
+        this.setPos(pX, pY, pZ);
     }
 
     @Override

@@ -15,12 +15,12 @@ public class SurfaceWaterDepthFilter extends PlacementFilter {
     );
     private final int maxWaterDepth;
 
-    private SurfaceWaterDepthFilter(int p_191949_) {
-        this.maxWaterDepth = p_191949_;
+    private SurfaceWaterDepthFilter(int pMaxWaterDepth) {
+        this.maxWaterDepth = pMaxWaterDepth;
     }
 
-    public static SurfaceWaterDepthFilter forMaxDepth(int p_191951_) {
-        return new SurfaceWaterDepthFilter(p_191951_);
+    public static SurfaceWaterDepthFilter forMaxDepth(int pMaxWaterDepth) {
+        return new SurfaceWaterDepthFilter(pMaxWaterDepth);
     }
 
     @Override

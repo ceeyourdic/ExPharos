@@ -12,16 +12,16 @@ public class CountPlacement extends RepeatingPlacement {
         .xmap(CountPlacement::new, p_191633_ -> p_191633_.count);
     private final IntProvider count;
 
-    private CountPlacement(IntProvider p_191627_) {
-        this.count = p_191627_;
+    private CountPlacement(IntProvider pCount) {
+        this.count = pCount;
     }
 
-    public static CountPlacement of(IntProvider p_191631_) {
-        return new CountPlacement(p_191631_);
+    public static CountPlacement of(IntProvider pCount) {
+        return new CountPlacement(pCount);
     }
 
-    public static CountPlacement of(int p_191629_) {
-        return of(ConstantInt.of(p_191629_));
+    public static CountPlacement of(int pCount) {
+        return of(ConstantInt.of(pCount));
     }
 
     @Override

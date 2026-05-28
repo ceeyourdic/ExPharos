@@ -7,7 +7,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class OcelotModel extends FelineModel<FelineRenderState> {
-    public OcelotModel(ModelPart p_170767_) {
-        super(p_170767_);
+    public OcelotModel(ModelPart pRoot) {
+        super(pRoot);
     }
 }

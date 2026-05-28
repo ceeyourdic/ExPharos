@@ -8,7 +8,7 @@ import net.minecraft.world.scores.ScoreHolder;
 
 public interface ScoreboardNameProvider {
     @Nullable
-    ScoreHolder getScoreHolder(LootContext p_165867_);
+    ScoreHolder getScoreHolder(LootContext pContext);
 
     LootScoreProviderType getType();
 

@@ -55,10 +55,10 @@ public class Slide extends Behavior<Breeze> {
         }
     }
 
-    private static Vec3 randomPointInMiddleCircle(Breeze p_310635_, LivingEntity p_312574_) {
-        Vec3 vec3 = p_312574_.position().subtract(p_310635_.position());
-        double d0 = vec3.length() - Mth.lerp(p_310635_.getRandom().nextDouble(), 8.0, 4.0);
+    private static Vec3 randomPointInMiddleCircle(Breeze pBreeze, LivingEntity pTarget) {
+        Vec3 vec3 = pTarget.position().subtract(pBreeze.position());
+        double d0 = vec3.length() - Mth.lerp(pBreeze.getRandom().nextDouble(), 8.0, 4.0);
         Vec3 vec31 = vec3.normalize().multiply(d0, d0, d0);
-        return p_310635_.position().add(vec31);
+        return pBreeze.position().add(vec31);
     }
 }

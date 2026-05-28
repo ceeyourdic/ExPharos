@@ -10,17 +10,17 @@ import java.util.Map.Entry;
 public class EntityFieldsRenameFix extends NamedEntityFix {
     private final Map<String, String> renames;
 
-    public EntityFieldsRenameFix(Schema p_378547_, String p_378612_, String p_377255_, Map<String, String> p_377805_) {
-        super(p_378547_, false, p_378612_, References.ENTITY, p_377255_);
-        this.renames = p_377805_;
+    public EntityFieldsRenameFix(Schema pOutputSchema, String pName, String pEntityName, Map<String, String> pRenames) {
+        super(pOutputSchema, false, pName, References.ENTITY, pEntityName);
+        this.renames = pRenames;
     }
 
-    public Dynamic<?> fixTag(Dynamic<?> p_378263_) {
+    public Dynamic<?> fixTag(Dynamic<?> pTag) {
         for (Entry<String, String> entry : this.renames.entrySet()) {
-            p_378263_ = p_378263_.renameField(entry.getKey(), entry.getValue());
+            pTag = pTag.renameField(entry.getKey(), entry.getValue());
         }
 
-        return p_378263_;
+        return pTag;
     }
 
     @Override

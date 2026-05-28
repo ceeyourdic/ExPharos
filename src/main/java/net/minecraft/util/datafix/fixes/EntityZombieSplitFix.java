@@ -13,8 +13,8 @@ import net.minecraft.Util;
 public class EntityZombieSplitFix extends EntityRenameFix {
     private final Supplier<Type<?>> zombieVillagerType = Suppliers.memoize(() -> this.getOutputSchema().getChoiceType(References.ENTITY, "ZombieVillager"));
 
-    public EntityZombieSplitFix(Schema p_15798_) {
-        super("EntityZombieSplitFix", p_15798_, true);
+    public EntityZombieSplitFix(Schema pOutputSchema) {
+        super("EntityZombieSplitFix", pOutputSchema, true);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class EntityZombieSplitFix extends EntityRenameFix {
         }
     }
 
-    private Typed<?> changeSchemaToZombieVillager(Typed<?> p_336232_, int p_336308_) {
-        return Util.writeAndReadTypedOrThrow(p_336232_, this.zombieVillagerType.get(), p_329329_ -> p_329329_.set("Profession", p_329329_.createInt(p_336308_)));
+    private Typed<?> changeSchemaToZombieVillager(Typed<?> pTyped, int pProfession) {
+        return Util.writeAndReadTypedOrThrow(pTyped, this.zombieVillagerType.get(), p_329329_ -> p_329329_.set("Profession", p_329329_.createInt(pProfession)));
     }
 }

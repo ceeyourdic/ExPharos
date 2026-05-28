@@ -67,12 +67,12 @@ public record WrittenBookContent(Filterable<String> title, String author, int ge
         }
     }
 
-    private static Codec<Filterable<Component>> pageCodec(Codec<Component> p_335093_) {
-        return Filterable.codec(p_335093_);
+    private static Codec<Filterable<Component>> pageCodec(Codec<Component> pCodec) {
+        return Filterable.codec(pCodec);
     }
 
-    public static Codec<List<Filterable<Component>>> pagesCodec(Codec<Component> p_329056_) {
-        return pageCodec(p_329056_).listOf();
+    public static Codec<List<Filterable<Component>>> pagesCodec(Codec<Component> pCodec) {
+        return pageCodec(pCodec).listOf();
     }
 
     @Nullable
@@ -81,14 +81,14 @@ public record WrittenBookContent(Filterable<String> title, String author, int ge
     }
 
     @Nullable
-    public WrittenBookContent resolve(CommandSourceStack p_333228_, @Nullable Player p_329707_) {
+    public WrittenBookContent resolve(CommandSourceStack pSource, @Nullable Player pPlayer) {
         if (this.resolved) {
             return null;
         } else {
             Builder<Filterable<Component>> builder = ImmutableList.builderWithExpectedSize(this.pages.size());
 
             for (Filterable<Component> filterable : this.pages) {
-                Optional<Filterable<Component>> optional = resolvePage(p_333228_, p_329707_, filterable);
+                Optional<Filterable<Component>> optional = resolvePage(pSource, pPlayer, filterable);
                 if (optional.isEmpty()) {
                     return null;
                 }
@@ -104,23 +104,23 @@ public record WrittenBookContent(Filterable<String> title, String author, int ge
         return new WrittenBookContent(this.title, this.author, this.generation, this.pages, true);
     }
 
-    private static Optional<Filterable<Component>> resolvePage(CommandSourceStack p_335264_, @Nullable Player p_333342_, Filterable<Component> p_328841_) {
-        return p_328841_.resolve(p_335765_ -> {
+    private static Optional<Filterable<Component>> resolvePage(CommandSourceStack pSource, @Nullable Player pPlayer, Filterable<Component> pPages) {
+        return pPages.resolve(p_335765_ -> {
             try {
-                Component component = ComponentUtils.updateForEntity(p_335264_, p_335765_, p_333342_, 0);
-                return isPageTooLarge(component, p_335264_.registryAccess()) ? Optional.empty() : Optional.of(component);
+                Component component = ComponentUtils.updateForEntity(pSource, p_335765_, pPlayer, 0);
+                return isPageTooLarge(component, pSource.registryAccess()) ? Optional.empty() : Optional.of(component);
             } catch (Exception exception) {
                 return Optional.of(p_335765_);
             }
         });
     }
 
-    private static boolean isPageTooLarge(Component p_330243_, HolderLookup.Provider p_333440_) {
-        return Component.Serializer.toJson(p_330243_, p_333440_).length() > 32767;
+    private static boolean isPageTooLarge(Component pPage, HolderLookup.Provider pRegistryAccess) {
+        return Component.Serializer.toJson(pPage, pRegistryAccess).length() > 32767;
     }
 
-    public List<Component> getPages(boolean p_335499_) {
-        return Lists.transform(this.pages, p_330517_ -> p_330517_.get(p_335499_));
+    public List<Component> getPages(boolean pFiltered) {
+        return Lists.transform(this.pages, p_330517_ -> p_330517_.get(pFiltered));
     }
 
     public WrittenBookContent withReplacedPages(List<Filterable<Component>> p_330066_) {

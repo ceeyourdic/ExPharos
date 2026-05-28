@@ -23,11 +23,11 @@ public class CommonPacketTypes {
     public static final PacketType<ServerboundPongPacket> SERVERBOUND_PONG = createServerbound("pong");
     public static final PacketType<ServerboundResourcePackPacket> SERVERBOUND_RESOURCE_PACK = createServerbound("resource_pack");
 
-    private static <T extends Packet<ClientCommonPacketListener>> PacketType<T> createClientbound(String p_336356_) {
-        return new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.withDefaultNamespace(p_336356_));
+    private static <T extends Packet<ClientCommonPacketListener>> PacketType<T> createClientbound(String pName) {
+        return new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.withDefaultNamespace(pName));
     }
 
-    private static <T extends Packet<ServerCommonPacketListener>> PacketType<T> createServerbound(String p_335834_) {
-        return new PacketType<>(PacketFlow.SERVERBOUND, ResourceLocation.withDefaultNamespace(p_335834_));
+    private static <T extends Packet<ServerCommonPacketListener>> PacketType<T> createServerbound(String pName) {
+        return new PacketType<>(PacketFlow.SERVERBOUND, ResourceLocation.withDefaultNamespace(pName));
     }
 }

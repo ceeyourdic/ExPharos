@@ -16,17 +16,17 @@ public class HumanoidArmorModel<S extends HumanoidRenderState> extends HumanoidM
         super(p_270765_);
     }
 
-    public static MeshDefinition createBodyLayer(CubeDeformation p_270527_) {
-        MeshDefinition meshdefinition = HumanoidModel.createMesh(p_270527_, 0.0F);
+    public static MeshDefinition createBodyLayer(CubeDeformation pCubeDeformation) {
+        MeshDefinition meshdefinition = HumanoidModel.createMesh(pCubeDeformation, 0.0F);
         PartDefinition partdefinition = meshdefinition.getRoot();
         partdefinition.addOrReplaceChild(
             "right_leg",
-            CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_270527_.extend(-0.1F)),
+            CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, pCubeDeformation.extend(-0.1F)),
             PartPose.offset(-1.9F, 12.0F, 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "left_leg",
-            CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_270527_.extend(-0.1F)),
+            CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, pCubeDeformation.extend(-0.1F)),
             PartPose.offset(1.9F, 12.0F, 0.0F)
         );
         return meshdefinition;

@@ -34,19 +34,19 @@ public final class Ingredient implements StackedContents.IngredientInfo<Holder<I
     public static final Codec<Ingredient> CODEC = ExtraCodecs.nonEmptyHolderSet(NON_AIR_HOLDER_SET_CODEC).xmap(Ingredient::new, p_359811_ -> p_359811_.values);
     private final HolderSet<Item> values;
 
-    private Ingredient(HolderSet<Item> p_368516_) {
-        p_368516_.unwrap().ifRight(p_359817_ -> {
+    private Ingredient(HolderSet<Item> pValues) {
+        pValues.unwrap().ifRight(p_359817_ -> {
             if (p_359817_.isEmpty()) {
                 throw new UnsupportedOperationException("Ingredients can't be empty");
             } else if (p_359817_.contains(Items.AIR.builtInRegistryHolder())) {
                 throw new UnsupportedOperationException("Ingredient can't contain air");
             }
         });
-        this.values = p_368516_;
+        this.values = pValues;
     }
 
-    public static boolean testOptionalIngredient(Optional<Ingredient> p_367191_, ItemStack p_364232_) {
-        return p_367191_.<Boolean>map(p_359819_ -> p_359819_.test(p_364232_)).orElseGet(p_364232_::isEmpty);
+    public static boolean testOptionalIngredient(Optional<Ingredient> pIngredient, ItemStack pStack) {
+        return pIngredient.<Boolean>map(p_359819_ -> p_359819_.test(pStack)).orElseGet(pStack::isEmpty);
     }
 
     @Deprecated
@@ -58,8 +58,8 @@ public final class Ingredient implements StackedContents.IngredientInfo<Holder<I
         return this.values.size() == 0;
     }
 
-    public boolean test(ItemStack p_43914_) {
-        return p_43914_.is(this.values);
+    public boolean test(ItemStack pStack) {
+        return pStack.is(this.values);
     }
 
     public boolean acceptsItem(Holder<Item> p_378483_) {
@@ -67,24 +67,24 @@ public final class Ingredient implements StackedContents.IngredientInfo<Holder<I
     }
 
     @Override
-    public boolean equals(Object p_300457_) {
-        return p_300457_ instanceof Ingredient ingredient ? Objects.equals(this.values, ingredient.values) : false;
+    public boolean equals(Object pOther) {
+        return pOther instanceof Ingredient ingredient ? Objects.equals(this.values, ingredient.values) : false;
     }
 
-    public static Ingredient of(ItemLike p_361218_) {
-        return new Ingredient(HolderSet.direct(p_361218_.asItem().builtInRegistryHolder()));
+    public static Ingredient of(ItemLike pItem) {
+        return new Ingredient(HolderSet.direct(pItem.asItem().builtInRegistryHolder()));
     }
 
-    public static Ingredient of(ItemLike... p_43930_) {
-        return of(Arrays.stream(p_43930_));
+    public static Ingredient of(ItemLike... pItems) {
+        return of(Arrays.stream(pItems));
     }
 
-    public static Ingredient of(Stream<? extends ItemLike> p_43922_) {
-        return new Ingredient(HolderSet.direct(p_43922_.map(p_359813_ -> p_359813_.asItem().builtInRegistryHolder()).toList()));
+    public static Ingredient of(Stream<? extends ItemLike> pItems) {
+        return new Ingredient(HolderSet.direct(pItems.map(p_359813_ -> p_359813_.asItem().builtInRegistryHolder()).toList()));
     }
 
-    public static Ingredient of(HolderSet<Item> p_369402_) {
-        return new Ingredient(p_369402_);
+    public static Ingredient of(HolderSet<Item> pItems) {
+        return new Ingredient(pItems);
     }
 
     public SlotDisplay display() {
@@ -93,13 +93,13 @@ public final class Ingredient implements StackedContents.IngredientInfo<Holder<I
             .map(SlotDisplay.TagSlotDisplay::new, p_359812_ -> new SlotDisplay.Composite(p_359812_.stream().map(Ingredient::displayForSingleItem).toList()));
     }
 
-    public static SlotDisplay optionalIngredientToDisplay(Optional<Ingredient> p_361451_) {
-        return p_361451_.map(Ingredient::display).orElse(SlotDisplay.Empty.INSTANCE);
+    public static SlotDisplay optionalIngredientToDisplay(Optional<Ingredient> pIngredient) {
+        return pIngredient.map(Ingredient::display).orElse(SlotDisplay.Empty.INSTANCE);
     }
 
-    private static SlotDisplay displayForSingleItem(Holder<Item> p_363723_) {
-        SlotDisplay slotdisplay = new SlotDisplay.ItemSlotDisplay(p_363723_);
-        ItemStack itemstack = p_363723_.value().getCraftingRemainder();
+    private static SlotDisplay displayForSingleItem(Holder<Item> pItem) {
+        SlotDisplay slotdisplay = new SlotDisplay.ItemSlotDisplay(pItem);
+        ItemStack itemstack = pItem.value().getCraftingRemainder();
         if (!itemstack.isEmpty()) {
             SlotDisplay slotdisplay1 = new SlotDisplay.ItemStackSlotDisplay(itemstack);
             return new SlotDisplay.WithRemainder(slotdisplay, slotdisplay1);

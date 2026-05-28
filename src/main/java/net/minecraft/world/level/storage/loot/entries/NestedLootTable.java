@@ -29,10 +29,10 @@ public class NestedLootTable extends LootPoolSingletonContainer {
     private final Either<ResourceKey<LootTable>, LootTable> contents;
 
     private NestedLootTable(
-        Either<ResourceKey<LootTable>, LootTable> p_335218_, int p_332597_, int p_330218_, List<LootItemCondition> p_335913_, List<LootItemFunction> p_331388_
+        Either<ResourceKey<LootTable>, LootTable> pContents, int pWeight, int pQuality, List<LootItemCondition> pConditions, List<LootItemFunction> pFunctions
     ) {
-        super(p_332597_, p_330218_, p_335913_, p_331388_);
-        this.contents = p_335218_;
+        super(pWeight, pQuality, pConditions, pFunctions);
+        this.contents = pContents;
     }
 
     @Override
@@ -79,13 +79,13 @@ public class NestedLootTable extends LootPoolSingletonContainer {
             .ifRight(p_333644_ -> p_333644_.validate(p_331194_.forChild("->{inline}")));
     }
 
-    public static LootPoolSingletonContainer.Builder<?> lootTableReference(ResourceKey<LootTable> p_332425_) {
-        return simpleBuilder((p_331287_, p_328654_, p_335079_, p_330542_) -> new NestedLootTable(Either.left(p_332425_), p_331287_, p_328654_, p_335079_, p_330542_));
+    public static LootPoolSingletonContainer.Builder<?> lootTableReference(ResourceKey<LootTable> pLootTable) {
+        return simpleBuilder((p_331287_, p_328654_, p_335079_, p_330542_) -> new NestedLootTable(Either.left(pLootTable), p_331287_, p_328654_, p_335079_, p_330542_));
     }
 
-    public static LootPoolSingletonContainer.Builder<?> inlineLootTable(LootTable p_336216_) {
+    public static LootPoolSingletonContainer.Builder<?> inlineLootTable(LootTable pLootTable) {
         return simpleBuilder(
-            (p_327921_, p_332453_, p_332156_, p_328257_) -> new NestedLootTable(Either.right(p_336216_), p_327921_, p_332453_, p_332156_, p_328257_)
+            (p_327921_, p_332453_, p_332156_, p_328257_) -> new NestedLootTable(Either.right(pLootTable), p_327921_, p_332453_, p_332156_, p_328257_)
         );
     }
 }

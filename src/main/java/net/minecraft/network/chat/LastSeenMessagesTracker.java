@@ -13,31 +13,31 @@ public class LastSeenMessagesTracker {
     @Nullable
     private MessageSignature lastTrackedMessage;
 
-    public LastSeenMessagesTracker(int p_242388_) {
-        this.trackedMessages = new LastSeenTrackedEntry[p_242388_];
+    public LastSeenMessagesTracker(int pSize) {
+        this.trackedMessages = new LastSeenTrackedEntry[pSize];
     }
 
-    public boolean addPending(MessageSignature p_248926_, boolean p_250312_) {
-        if (Objects.equals(p_248926_, this.lastTrackedMessage)) {
+    public boolean addPending(MessageSignature pSignature, boolean pAcknowledged) {
+        if (Objects.equals(pSignature, this.lastTrackedMessage)) {
             return false;
         } else {
-            this.lastTrackedMessage = p_248926_;
-            this.addEntry(p_250312_ ? new LastSeenTrackedEntry(p_248926_, true) : null);
+            this.lastTrackedMessage = pSignature;
+            this.addEntry(pAcknowledged ? new LastSeenTrackedEntry(pSignature, true) : null);
             return true;
         }
     }
 
-    private void addEntry(@Nullable LastSeenTrackedEntry p_250255_) {
+    private void addEntry(@Nullable LastSeenTrackedEntry pEntry) {
         int i = this.tail;
         this.tail = (i + 1) % this.trackedMessages.length;
         this.offset++;
-        this.trackedMessages[i] = p_250255_;
+        this.trackedMessages[i] = pEntry;
     }
 
-    public void ignorePending(MessageSignature p_251020_) {
+    public void ignorePending(MessageSignature pSignature) {
         for (int i = 0; i < this.trackedMessages.length; i++) {
             LastSeenTrackedEntry lastseentrackedentry = this.trackedMessages[i];
-            if (lastseentrackedentry != null && lastseentrackedentry.pending() && p_251020_.equals(lastseentrackedentry.signature())) {
+            if (lastseentrackedentry != null && lastseentrackedentry.pending() && pSignature.equals(lastseentrackedentry.signature())) {
                 this.trackedMessages[i] = null;
                 break;
             }

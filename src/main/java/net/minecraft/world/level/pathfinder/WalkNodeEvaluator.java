@@ -101,15 +101,15 @@ public class WalkNodeEvaluator extends NodeEvaluator {
         return this.getStartNode(new BlockPos(blockpos.getX(), i, blockpos.getZ()));
     }
 
-    protected Node getStartNode(BlockPos p_230632_) {
-        Node node = this.getNode(p_230632_);
+    protected Node getStartNode(BlockPos pPos) {
+        Node node = this.getNode(pPos);
         node.type = this.getCachedPathType(node.x, node.y, node.z);
         node.costMalus = this.mob.getPathfindingMalus(node.type);
         return node;
     }
 
-    protected boolean canStartAt(BlockPos p_262596_) {
-        PathType pathtype = this.getCachedPathType(p_262596_.getX(), p_262596_.getY(), p_262596_.getZ());
+    protected boolean canStartAt(BlockPos pPos) {
+        PathType pathtype = this.getCachedPathType(pPos.getX(), pPos.getY(), pPos.getZ());
         return pathtype != PathType.OPEN && this.mob.getPathfindingMalus(pathtype) >= 0.0F;
     }
 
@@ -161,40 +161,40 @@ public class WalkNodeEvaluator extends NodeEvaluator {
         return i;
     }
 
-    protected boolean isNeighborValid(@Nullable Node p_77627_, Node p_77628_) {
-        return p_77627_ != null && !p_77627_.closed && (p_77627_.costMalus >= 0.0F || p_77628_.costMalus < 0.0F);
+    protected boolean isNeighborValid(@Nullable Node pNeighbor, Node pNode) {
+        return pNeighbor != null && !pNeighbor.closed && (pNeighbor.costMalus >= 0.0F || pNode.costMalus < 0.0F);
     }
 
-    protected boolean isDiagonalValid(Node p_77630_, @Nullable Node p_77631_, @Nullable Node p_77632_) {
-        if (p_77632_ == null || p_77631_ == null || p_77632_.y > p_77630_.y || p_77631_.y > p_77630_.y) {
+    protected boolean isDiagonalValid(Node pRoot, @Nullable Node pXNode, @Nullable Node pZNode) {
+        if (pZNode == null || pXNode == null || pZNode.y > pRoot.y || pXNode.y > pRoot.y) {
             return false;
-        } else if (p_77631_.type != PathType.WALKABLE_DOOR && p_77632_.type != PathType.WALKABLE_DOOR) {
-            boolean flag = p_77632_.type == PathType.FENCE && p_77631_.type == PathType.FENCE && (double)this.mob.getBbWidth() < 0.5;
-            return (p_77632_.y < p_77630_.y || p_77632_.costMalus >= 0.0F || flag)
-                && (p_77631_.y < p_77630_.y || p_77631_.costMalus >= 0.0F || flag);
+        } else if (pXNode.type != PathType.WALKABLE_DOOR && pZNode.type != PathType.WALKABLE_DOOR) {
+            boolean flag = pZNode.type == PathType.FENCE && pXNode.type == PathType.FENCE && (double)this.mob.getBbWidth() < 0.5;
+            return (pZNode.y < pRoot.y || pZNode.costMalus >= 0.0F || flag)
+                && (pXNode.y < pRoot.y || pXNode.costMalus >= 0.0F || flag);
         } else {
             return false;
         }
     }
 
-    protected boolean isDiagonalValid(@Nullable Node p_332817_) {
-        if (p_332817_ == null || p_332817_.closed) {
+    protected boolean isDiagonalValid(@Nullable Node pNode) {
+        if (pNode == null || pNode.closed) {
             return false;
         } else {
-            return p_332817_.type == PathType.WALKABLE_DOOR ? false : p_332817_.costMalus >= 0.0F;
+            return pNode.type == PathType.WALKABLE_DOOR ? false : pNode.costMalus >= 0.0F;
         }
     }
 
-    private static boolean doesBlockHavePartialCollision(PathType p_332557_) {
-        return p_332557_ == PathType.FENCE || p_332557_ == PathType.DOOR_WOOD_CLOSED || p_332557_ == PathType.DOOR_IRON_CLOSED;
+    private static boolean doesBlockHavePartialCollision(PathType pPathType) {
+        return pPathType == PathType.FENCE || pPathType == PathType.DOOR_WOOD_CLOSED || pPathType == PathType.DOOR_IRON_CLOSED;
     }
 
-    private boolean canReachWithoutCollision(Node p_77625_) {
+    private boolean canReachWithoutCollision(Node pNode) {
         AABB aabb = this.mob.getBoundingBox();
         Vec3 vec3 = new Vec3(
-            (double)p_77625_.x - this.mob.getX() + aabb.getXsize() / 2.0,
-            (double)p_77625_.y - this.mob.getY() + aabb.getYsize() / 2.0,
-            (double)p_77625_.z - this.mob.getZ() + aabb.getZsize() / 2.0
+            (double)pNode.x - this.mob.getX() + aabb.getXsize() / 2.0,
+            (double)pNode.y - this.mob.getY() + aabb.getYsize() / 2.0,
+            (double)pNode.z - this.mob.getZ() + aabb.getZsize() / 2.0
         );
         int i = Mth.ceil(vec3.length() / aabb.getSize());
         vec3 = vec3.scale((double)(1.0F / (float)i));
@@ -209,16 +209,16 @@ public class WalkNodeEvaluator extends NodeEvaluator {
         return true;
     }
 
-    protected double getFloorLevel(BlockPos p_164733_) {
+    protected double getFloorLevel(BlockPos pPos) {
         BlockGetter blockgetter = this.currentContext.level();
-        return (this.canFloat() || this.isAmphibious()) && blockgetter.getFluidState(p_164733_).is(FluidTags.WATER)
-            ? (double)p_164733_.getY() + 0.5
-            : getFloorLevel(blockgetter, p_164733_);
+        return (this.canFloat() || this.isAmphibious()) && blockgetter.getFluidState(pPos).is(FluidTags.WATER)
+            ? (double)pPos.getY() + 0.5
+            : getFloorLevel(blockgetter, pPos);
     }
 
-    public static double getFloorLevel(BlockGetter p_77612_, BlockPos p_77613_) {
-        BlockPos blockpos = p_77613_.below();
-        VoxelShape voxelshape = p_77612_.getBlockState(blockpos).getCollisionShape(p_77612_, blockpos);
+    public static double getFloorLevel(BlockGetter pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.below();
+        VoxelShape voxelshape = pLevel.getBlockState(blockpos).getCollisionShape(pLevel, blockpos);
         return (double)blockpos.getY() + (voxelshape.isEmpty() ? 0.0 : voxelshape.max(Direction.Axis.Y));
     }
 
@@ -227,37 +227,37 @@ public class WalkNodeEvaluator extends NodeEvaluator {
     }
 
     @Nullable
-    protected Node findAcceptedNode(int p_164726_, int p_164727_, int p_164728_, int p_164729_, double p_164730_, Direction p_164731_, PathType p_330077_) {
+    protected Node findAcceptedNode(int pX, int pY, int pZ, int pVerticalDeltaLimit, double pNodeFloorLevel, Direction pDirection, PathType pPathType) {
         Node node = null;
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-        double d0 = this.getFloorLevel(blockpos$mutableblockpos.set(p_164726_, p_164727_, p_164728_));
-        if (d0 - p_164730_ > this.getMobJumpHeight()) {
+        double d0 = this.getFloorLevel(blockpos$mutableblockpos.set(pX, pY, pZ));
+        if (d0 - pNodeFloorLevel > this.getMobJumpHeight()) {
             return null;
         } else {
-            PathType pathtype = this.getCachedPathType(p_164726_, p_164727_, p_164728_);
+            PathType pathtype = this.getCachedPathType(pX, pY, pZ);
             float f = this.mob.getPathfindingMalus(pathtype);
             if (f >= 0.0F) {
-                node = this.getNodeAndUpdateCostToMax(p_164726_, p_164727_, p_164728_, pathtype, f);
+                node = this.getNodeAndUpdateCostToMax(pX, pY, pZ, pathtype, f);
             }
 
-            if (doesBlockHavePartialCollision(p_330077_) && node != null && node.costMalus >= 0.0F && !this.canReachWithoutCollision(node)) {
+            if (doesBlockHavePartialCollision(pPathType) && node != null && node.costMalus >= 0.0F && !this.canReachWithoutCollision(node)) {
                 node = null;
             }
 
             if (pathtype != PathType.WALKABLE && (!this.isAmphibious() || pathtype != PathType.WATER)) {
                 if ((node == null || node.costMalus < 0.0F)
-                    && p_164729_ > 0
+                    && pVerticalDeltaLimit > 0
                     && (pathtype != PathType.FENCE || this.canWalkOverFences())
                     && pathtype != PathType.UNPASSABLE_RAIL
                     && pathtype != PathType.TRAPDOOR
                     && pathtype != PathType.POWDER_SNOW) {
-                    node = this.tryJumpOn(p_164726_, p_164727_, p_164728_, p_164729_, p_164730_, p_164731_, p_330077_, blockpos$mutableblockpos);
+                    node = this.tryJumpOn(pX, pY, pZ, pVerticalDeltaLimit, pNodeFloorLevel, pDirection, pPathType, blockpos$mutableblockpos);
                 } else if (!this.isAmphibious() && pathtype == PathType.WATER && !this.canFloat()) {
-                    node = this.tryFindFirstNonWaterBelow(p_164726_, p_164727_, p_164728_, node);
+                    node = this.tryFindFirstNonWaterBelow(pX, pY, pZ, node);
                 } else if (pathtype == PathType.OPEN) {
-                    node = this.tryFindFirstGroundNodeBelow(p_164726_, p_164727_, p_164728_);
+                    node = this.tryFindFirstGroundNodeBelow(pX, pY, pZ);
                 } else if (doesBlockHavePartialCollision(pathtype) && node == null) {
-                    node = this.getClosedNode(p_164726_, p_164727_, p_164728_, pathtype);
+                    node = this.getClosedNode(pX, pY, pZ, pathtype);
                 }
 
                 return node;
@@ -271,40 +271,40 @@ public class WalkNodeEvaluator extends NodeEvaluator {
         return Math.max(1.125, (double)this.mob.maxUpStep());
     }
 
-    private Node getNodeAndUpdateCostToMax(int p_230620_, int p_230621_, int p_230622_, PathType p_335762_, float p_230624_) {
-        Node node = this.getNode(p_230620_, p_230621_, p_230622_);
-        node.type = p_335762_;
-        node.costMalus = Math.max(node.costMalus, p_230624_);
+    private Node getNodeAndUpdateCostToMax(int pX, int pY, int pZ, PathType pPathType, float pMalus) {
+        Node node = this.getNode(pX, pY, pZ);
+        node.type = pPathType;
+        node.costMalus = Math.max(node.costMalus, pMalus);
         return node;
     }
 
-    private Node getBlockedNode(int p_230628_, int p_230629_, int p_230630_) {
-        Node node = this.getNode(p_230628_, p_230629_, p_230630_);
+    private Node getBlockedNode(int pX, int pY, int pZ) {
+        Node node = this.getNode(pX, pY, pZ);
         node.type = PathType.BLOCKED;
         node.costMalus = -1.0F;
         return node;
     }
 
-    private Node getClosedNode(int p_332713_, int p_333094_, int p_327804_, PathType p_334600_) {
-        Node node = this.getNode(p_332713_, p_333094_, p_327804_);
+    private Node getClosedNode(int pX, int pY, int pZ, PathType pPathType) {
+        Node node = this.getNode(pX, pY, pZ);
         node.closed = true;
-        node.type = p_334600_;
-        node.costMalus = p_334600_.getMalus();
+        node.type = pPathType;
+        node.costMalus = pPathType.getMalus();
         return node;
     }
 
     @Nullable
     private Node tryJumpOn(
-        int p_335353_,
-        int p_333388_,
-        int p_331837_,
-        int p_329120_,
-        double p_335627_,
-        Direction p_334618_,
-        PathType p_330418_,
-        BlockPos.MutableBlockPos p_329431_
+        int pX,
+        int pY,
+        int pZ,
+        int pVerticalDeltaLimit,
+        double pNodeFloorLevel,
+        Direction pDirection,
+        PathType pPathType,
+        BlockPos.MutableBlockPos pPos
     ) {
-        Node node = this.findAcceptedNode(p_335353_, p_333388_ + 1, p_331837_, p_329120_ - 1, p_335627_, p_334618_, p_330418_);
+        Node node = this.findAcceptedNode(pX, pY + 1, pZ, pVerticalDeltaLimit - 1, pNodeFloorLevel, pDirection, pPathType);
         if (node == null) {
             return null;
         } else if (this.mob.getBbWidth() >= 1.0F) {
@@ -312,16 +312,16 @@ public class WalkNodeEvaluator extends NodeEvaluator {
         } else if (node.type != PathType.OPEN && node.type != PathType.WALKABLE) {
             return node;
         } else {
-            double d0 = (double)(p_335353_ - p_334618_.getStepX()) + 0.5;
-            double d1 = (double)(p_331837_ - p_334618_.getStepZ()) + 0.5;
+            double d0 = (double)(pX - pDirection.getStepX()) + 0.5;
+            double d1 = (double)(pZ - pDirection.getStepZ()) + 0.5;
             double d2 = (double)this.mob.getBbWidth() / 2.0;
             AABB aabb = new AABB(
                 d0 - d2,
-                this.getFloorLevel(p_329431_.set(d0, (double)(p_333388_ + 1), d1)) + 0.001,
+                this.getFloorLevel(pPos.set(d0, (double)(pY + 1), d1)) + 0.001,
                 d1 - d2,
                 d0 + d2,
                 (double)this.mob.getBbHeight()
-                    + this.getFloorLevel(p_329431_.set((double)node.x, (double)node.y, (double)node.z))
+                    + this.getFloorLevel(pPos.set((double)node.x, (double)node.y, (double)node.z))
                     - 0.002,
                 d1 + d2
             );
@@ -330,51 +330,51 @@ public class WalkNodeEvaluator extends NodeEvaluator {
     }
 
     @Nullable
-    private Node tryFindFirstNonWaterBelow(int p_334565_, int p_335840_, int p_330496_, @Nullable Node p_327969_) {
-        p_335840_--;
+    private Node tryFindFirstNonWaterBelow(int pX, int pY, int pZ, @Nullable Node pNode) {
+        pY--;
 
-        while (p_335840_ > this.mob.level().getMinY()) {
-            PathType pathtype = this.getCachedPathType(p_334565_, p_335840_, p_330496_);
+        while (pY > this.mob.level().getMinY()) {
+            PathType pathtype = this.getCachedPathType(pX, pY, pZ);
             if (pathtype != PathType.WATER) {
-                return p_327969_;
+                return pNode;
             }
 
-            p_327969_ = this.getNodeAndUpdateCostToMax(p_334565_, p_335840_, p_330496_, pathtype, this.mob.getPathfindingMalus(pathtype));
-            p_335840_--;
+            pNode = this.getNodeAndUpdateCostToMax(pX, pY, pZ, pathtype, this.mob.getPathfindingMalus(pathtype));
+            pY--;
         }
 
-        return p_327969_;
+        return pNode;
     }
 
-    private Node tryFindFirstGroundNodeBelow(int p_335495_, int p_328639_, int p_335885_) {
-        for (int i = p_328639_ - 1; i >= this.mob.level().getMinY(); i--) {
-            if (p_328639_ - i > this.mob.getMaxFallDistance()) {
-                return this.getBlockedNode(p_335495_, i, p_335885_);
+    private Node tryFindFirstGroundNodeBelow(int pX, int pY, int pZ) {
+        for (int i = pY - 1; i >= this.mob.level().getMinY(); i--) {
+            if (pY - i > this.mob.getMaxFallDistance()) {
+                return this.getBlockedNode(pX, i, pZ);
             }
 
-            PathType pathtype = this.getCachedPathType(p_335495_, i, p_335885_);
+            PathType pathtype = this.getCachedPathType(pX, i, pZ);
             float f = this.mob.getPathfindingMalus(pathtype);
             if (pathtype != PathType.OPEN) {
                 if (f >= 0.0F) {
-                    return this.getNodeAndUpdateCostToMax(p_335495_, i, p_335885_, pathtype, f);
+                    return this.getNodeAndUpdateCostToMax(pX, i, pZ, pathtype, f);
                 }
 
-                return this.getBlockedNode(p_335495_, i, p_335885_);
+                return this.getBlockedNode(pX, i, pZ);
             }
         }
 
-        return this.getBlockedNode(p_335495_, p_328639_, p_335885_);
+        return this.getBlockedNode(pX, pY, pZ);
     }
 
-    private boolean hasCollisions(AABB p_77635_) {
-        return this.collisionCache.computeIfAbsent(p_77635_, p_327517_ -> !this.currentContext.level().noCollision(this.mob, p_77635_));
+    private boolean hasCollisions(AABB pBoundingBox) {
+        return this.collisionCache.computeIfAbsent(pBoundingBox, p_327517_ -> !this.currentContext.level().noCollision(this.mob, pBoundingBox));
     }
 
-    protected PathType getCachedPathType(int p_328411_, int p_334833_, int p_334446_) {
+    protected PathType getCachedPathType(int pX, int pY, int pZ) {
         return this.pathTypesByPosCacheByMob
             .computeIfAbsent(
-                BlockPos.asLong(p_328411_, p_334833_, p_334446_),
-                p_327521_ -> this.getPathTypeOfMob(this.currentContext, p_328411_, p_334833_, p_334446_, this.mob)
+                BlockPos.asLong(pX, pY, pZ),
+                p_327521_ -> this.getPathTypeOfMob(this.currentContext, pX, pY, pZ, this.mob)
             );
     }
 
@@ -407,16 +407,16 @@ public class WalkNodeEvaluator extends NodeEvaluator {
         }
     }
 
-    public Set<PathType> getPathTypeWithinMobBB(PathfindingContext p_334304_, int p_335980_, int p_330052_, int p_334476_) {
+    public Set<PathType> getPathTypeWithinMobBB(PathfindingContext pContext, int pX, int pY, int pZ) {
         EnumSet<PathType> enumset = EnumSet.noneOf(PathType.class);
 
         for (int i = 0; i < this.entityWidth; i++) {
             for (int j = 0; j < this.entityHeight; j++) {
                 for (int k = 0; k < this.entityDepth; k++) {
-                    int l = i + p_335980_;
-                    int i1 = j + p_330052_;
-                    int j1 = k + p_334476_;
-                    PathType pathtype = this.getPathType(p_334304_, l, i1, j1);
+                    int l = i + pX;
+                    int i1 = j + pY;
+                    int j1 = k + pZ;
+                    PathType pathtype = this.getPathType(pContext, l, i1, j1);
                     BlockPos blockpos = this.mob.blockPosition();
                     boolean flag = this.canPassDoors();
                     if (pathtype == PathType.DOOR_WOOD_CLOSED && this.canOpenDoors() && flag) {
@@ -428,8 +428,8 @@ public class WalkNodeEvaluator extends NodeEvaluator {
                     }
 
                     if (pathtype == PathType.RAIL
-                        && this.getPathType(p_334304_, blockpos.getX(), blockpos.getY(), blockpos.getZ()) != PathType.RAIL
-                        && this.getPathType(p_334304_, blockpos.getX(), blockpos.getY() - 1, blockpos.getZ()) != PathType.RAIL) {
+                        && this.getPathType(pContext, blockpos.getX(), blockpos.getY(), blockpos.getZ()) != PathType.RAIL
+                        && this.getPathType(pContext, blockpos.getX(), blockpos.getY() - 1, blockpos.getZ()) != PathType.RAIL) {
                         pathtype = PathType.UNPASSABLE_RAIL;
                     }
 
@@ -446,17 +446,17 @@ public class WalkNodeEvaluator extends NodeEvaluator {
         return getPathTypeStatic(p_333098_, new BlockPos.MutableBlockPos(p_327758_, p_329863_, p_328680_));
     }
 
-    public static PathType getPathTypeStatic(Mob p_332988_, BlockPos p_332803_) {
-        return getPathTypeStatic(new PathfindingContext(p_332988_.level(), p_332988_), p_332803_.mutable());
+    public static PathType getPathTypeStatic(Mob pMob, BlockPos pPos) {
+        return getPathTypeStatic(new PathfindingContext(pMob.level(), pMob), pPos.mutable());
     }
 
-    public static PathType getPathTypeStatic(PathfindingContext p_335315_, BlockPos.MutableBlockPos p_334167_) {
-        int i = p_334167_.getX();
-        int j = p_334167_.getY();
-        int k = p_334167_.getZ();
-        PathType pathtype = p_335315_.getPathTypeFromState(i, j, k);
-        if (pathtype == PathType.OPEN && j >= p_335315_.level().getMinY() + 1) {
-            return switch (p_335315_.getPathTypeFromState(i, j - 1, k)) {
+    public static PathType getPathTypeStatic(PathfindingContext pContext, BlockPos.MutableBlockPos pPos) {
+        int i = pPos.getX();
+        int j = pPos.getY();
+        int k = pPos.getZ();
+        PathType pathtype = pContext.getPathTypeFromState(i, j, k);
+        if (pathtype == PathType.OPEN && j >= pContext.level().getMinY() + 1) {
+            return switch (pContext.getPathTypeFromState(i, j - 1, k)) {
                 case OPEN, WATER, LAVA, WALKABLE -> PathType.OPEN;
                 case DAMAGE_FIRE -> PathType.DAMAGE_FIRE;
                 case DAMAGE_OTHER -> PathType.DAMAGE_OTHER;
@@ -464,19 +464,19 @@ public class WalkNodeEvaluator extends NodeEvaluator {
                 case POWDER_SNOW -> PathType.DANGER_POWDER_SNOW;
                 case DAMAGE_CAUTIOUS -> PathType.DAMAGE_CAUTIOUS;
                 case TRAPDOOR -> PathType.DANGER_TRAPDOOR;
-                default -> checkNeighbourBlocks(p_335315_, i, j, k, PathType.WALKABLE);
+                default -> checkNeighbourBlocks(pContext, i, j, k, PathType.WALKABLE);
             };
         } else {
             return pathtype;
         }
     }
 
-    public static PathType checkNeighbourBlocks(PathfindingContext p_334221_, int p_336062_, int p_335259_, int p_336315_, PathType p_333971_) {
+    public static PathType checkNeighbourBlocks(PathfindingContext pContext, int pX, int pY, int pZ, PathType pPathType) {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 for (int k = -1; k <= 1; k++) {
                     if (i != 0 || k != 0) {
-                        PathType pathtype = p_334221_.getPathTypeFromState(p_336062_ + i, p_335259_ + j, p_336315_ + k);
+                        PathType pathtype = pContext.getPathTypeFromState(pX + i, pY + j, pZ + k);
                         if (pathtype == PathType.DAMAGE_OTHER) {
                             return PathType.DANGER_OTHER;
                         }
@@ -497,11 +497,11 @@ public class WalkNodeEvaluator extends NodeEvaluator {
             }
         }
 
-        return p_333971_;
+        return pPathType;
     }
 
-    protected static PathType getPathTypeFromState(BlockGetter p_335222_, BlockPos p_331935_) {
-        BlockState blockstate = p_335222_.getBlockState(p_331935_);
+    protected static PathType getPathTypeFromState(BlockGetter pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
         Block block = blockstate.getBlock();
         if (blockstate.isAir()) {
             return PathType.OPEN;

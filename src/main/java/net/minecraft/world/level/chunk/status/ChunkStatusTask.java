@@ -8,6 +8,6 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 @FunctionalInterface
 public interface ChunkStatusTask {
     CompletableFuture<ChunkAccess> doWork(
-        WorldGenContext p_342387_, ChunkStep p_344134_, StaticCache2D<GenerationChunkHolder> p_345304_, ChunkAccess p_344075_
+        WorldGenContext pWorldGenContext, ChunkStep pStep, StaticCache2D<GenerationChunkHolder> pCache, ChunkAccess pChunk
     );
 }

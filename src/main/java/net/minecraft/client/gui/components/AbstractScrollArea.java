@@ -59,17 +59,17 @@ public abstract class AbstractScrollArea extends AbstractWidget {
         return this.scrollAmount;
     }
 
-    public void setScrollAmount(double p_378348_) {
-        this.scrollAmount = Mth.clamp(p_378348_, 0.0, (double)this.maxScrollAmount());
+    public void setScrollAmount(double pScrollAmount) {
+        this.scrollAmount = Mth.clamp(pScrollAmount, 0.0, (double)this.maxScrollAmount());
     }
 
-    public boolean updateScrolling(double p_377950_, double p_377713_, int p_377339_) {
+    public boolean updateScrolling(double pMouseX, double pMouseY, int pButton) {
         this.scrolling = this.scrollbarVisible()
-            && this.isValidClickButton(p_377339_)
-            && p_377950_ >= (double)this.scrollBarX()
-            && p_377950_ <= (double)(this.scrollBarX() + 6)
-            && p_377713_ >= (double)this.getY()
-            && p_377713_ < (double)this.getBottom();
+            && this.isValidClickButton(pButton)
+            && pMouseX >= (double)this.scrollBarX()
+            && pMouseX <= (double)(this.scrollBarX() + 6)
+            && pMouseY >= (double)this.getY()
+            && pMouseY < (double)this.getBottom();
         return this.scrolling;
     }
 
@@ -97,13 +97,13 @@ public abstract class AbstractScrollArea extends AbstractWidget {
         return Math.max(this.getY(), (int)this.scrollAmount * (this.height - this.scrollerHeight()) / this.maxScrollAmount() + this.getY());
     }
 
-    protected void renderScrollbar(GuiGraphics p_376117_) {
+    protected void renderScrollbar(GuiGraphics pGuiGraphics) {
         if (this.scrollbarVisible()) {
             int i = this.scrollBarX();
             int j = this.scrollerHeight();
             int k = this.scrollBarY();
-            p_376117_.blitSprite(RenderType::guiTextured, SCROLLER_BACKGROUND_SPRITE, i, this.getY(), 6, this.getHeight());
-            p_376117_.blitSprite(RenderType::guiTextured, SCROLLER_SPRITE, i, k, 6, j);
+            pGuiGraphics.blitSprite(RenderType::guiTextured, SCROLLER_BACKGROUND_SPRITE, i, this.getY(), 6, this.getHeight());
+            pGuiGraphics.blitSprite(RenderType::guiTextured, SCROLLER_SPRITE, i, k, 6, j);
         }
     }
 

@@ -57,13 +57,13 @@ public class RuinedPortalStructure extends Structure {
                 .apply(p_229304_, RuinedPortalStructure::new)
     );
 
-    public RuinedPortalStructure(Structure.StructureSettings p_229260_, List<RuinedPortalStructure.Setup> p_229261_) {
-        super(p_229260_);
-        this.setups = p_229261_;
+    public RuinedPortalStructure(Structure.StructureSettings pSettings, List<RuinedPortalStructure.Setup> pSetups) {
+        super(pSettings);
+        this.setups = pSetups;
     }
 
-    public RuinedPortalStructure(Structure.StructureSettings p_229257_, RuinedPortalStructure.Setup p_229258_) {
-        this(p_229257_, List.of(p_229258_));
+    public RuinedPortalStructure(Structure.StructureSettings pSettings, RuinedPortalStructure.Setup pSetup) {
+        this(pSettings, List.of(pSetup));
     }
 
     @Override
@@ -175,61 +175,61 @@ public class RuinedPortalStructure extends Structure {
         }
     }
 
-    private static boolean sample(WorldgenRandom p_229282_, float p_229283_) {
-        if (p_229283_ == 0.0F) {
+    private static boolean sample(WorldgenRandom pRandom, float pThreshold) {
+        if (pThreshold == 0.0F) {
             return false;
         } else {
-            return p_229283_ == 1.0F ? true : p_229282_.nextFloat() < p_229283_;
+            return pThreshold == 1.0F ? true : pRandom.nextFloat() < pThreshold;
         }
     }
 
-    private static boolean isCold(BlockPos p_229301_, Holder<Biome> p_229302_, int p_361622_) {
-        return p_229302_.value().coldEnoughToSnow(p_229301_, p_361622_);
+    private static boolean isCold(BlockPos pPos, Holder<Biome> pBiome, int pSeaLevel) {
+        return pBiome.value().coldEnoughToSnow(pPos, pSeaLevel);
     }
 
     private static int findSuitableY(
-        RandomSource p_229267_,
-        ChunkGenerator p_229268_,
-        RuinedPortalPiece.VerticalPlacement p_229269_,
-        boolean p_229270_,
-        int p_229271_,
-        int p_229272_,
-        BoundingBox p_229273_,
-        LevelHeightAccessor p_229274_,
-        RandomState p_229275_
+        RandomSource pRandom,
+        ChunkGenerator pChunkGenerator,
+        RuinedPortalPiece.VerticalPlacement pVerticalPlacement,
+        boolean pAirPocket,
+        int pHeight,
+        int pBlockCountY,
+        BoundingBox pBox,
+        LevelHeightAccessor pLevel,
+        RandomState pRandomState
     ) {
-        int j = p_229274_.getMinY() + 15;
+        int j = pLevel.getMinY() + 15;
         int i;
-        if (p_229269_ == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
-            if (p_229270_) {
-                i = Mth.randomBetweenInclusive(p_229267_, 32, 100);
-            } else if (p_229267_.nextFloat() < 0.5F) {
-                i = Mth.randomBetweenInclusive(p_229267_, 27, 29);
+        if (pVerticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
+            if (pAirPocket) {
+                i = Mth.randomBetweenInclusive(pRandom, 32, 100);
+            } else if (pRandom.nextFloat() < 0.5F) {
+                i = Mth.randomBetweenInclusive(pRandom, 27, 29);
             } else {
-                i = Mth.randomBetweenInclusive(p_229267_, 29, 100);
+                i = Mth.randomBetweenInclusive(pRandom, 29, 100);
             }
-        } else if (p_229269_ == RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN) {
-            int k = p_229271_ - p_229272_;
-            i = getRandomWithinInterval(p_229267_, 70, k);
-        } else if (p_229269_ == RuinedPortalPiece.VerticalPlacement.UNDERGROUND) {
-            int j1 = p_229271_ - p_229272_;
-            i = getRandomWithinInterval(p_229267_, j, j1);
-        } else if (p_229269_ == RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED) {
-            i = p_229271_ - p_229272_ + Mth.randomBetweenInclusive(p_229267_, 2, 8);
+        } else if (pVerticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN) {
+            int k = pHeight - pBlockCountY;
+            i = getRandomWithinInterval(pRandom, 70, k);
+        } else if (pVerticalPlacement == RuinedPortalPiece.VerticalPlacement.UNDERGROUND) {
+            int j1 = pHeight - pBlockCountY;
+            i = getRandomWithinInterval(pRandom, j, j1);
+        } else if (pVerticalPlacement == RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED) {
+            i = pHeight - pBlockCountY + Mth.randomBetweenInclusive(pRandom, 2, 8);
         } else {
-            i = p_229271_;
+            i = pHeight;
         }
 
         List<BlockPos> list1 = ImmutableList.of(
-            new BlockPos(p_229273_.minX(), 0, p_229273_.minZ()),
-            new BlockPos(p_229273_.maxX(), 0, p_229273_.minZ()),
-            new BlockPos(p_229273_.minX(), 0, p_229273_.maxZ()),
-            new BlockPos(p_229273_.maxX(), 0, p_229273_.maxZ())
+            new BlockPos(pBox.minX(), 0, pBox.minZ()),
+            new BlockPos(pBox.maxX(), 0, pBox.minZ()),
+            new BlockPos(pBox.minX(), 0, pBox.maxZ()),
+            new BlockPos(pBox.maxX(), 0, pBox.maxZ())
         );
         List<NoiseColumn> list = list1.stream()
-            .map(p_229280_ -> p_229268_.getBaseColumn(p_229280_.getX(), p_229280_.getZ(), p_229274_, p_229275_))
+            .map(p_229280_ -> pChunkGenerator.getBaseColumn(p_229280_.getX(), p_229280_.getZ(), pLevel, pRandomState))
             .collect(Collectors.toList());
-        Heightmap.Types heightmap$types = p_229269_ == RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR
+        Heightmap.Types heightmap$types = pVerticalPlacement == RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR
             ? Heightmap.Types.OCEAN_FLOOR_WG
             : Heightmap.Types.WORLD_SURFACE_WG;
 
@@ -250,8 +250,8 @@ public class RuinedPortalStructure extends Structure {
         return l;
     }
 
-    private static int getRandomWithinInterval(RandomSource p_229263_, int p_229264_, int p_229265_) {
-        return p_229264_ < p_229265_ ? Mth.randomBetweenInclusive(p_229263_, p_229264_, p_229265_) : p_229265_;
+    private static int getRandomWithinInterval(RandomSource pRandom, int pMin, int pMax) {
+        return pMin < pMax ? Mth.randomBetweenInclusive(pRandom, pMin, pMax) : pMax;
     }
 
     @Override

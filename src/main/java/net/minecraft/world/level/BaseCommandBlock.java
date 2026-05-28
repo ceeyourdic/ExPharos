@@ -37,50 +37,50 @@ public abstract class BaseCommandBlock implements CommandSource {
         return this.successCount;
     }
 
-    public void setSuccessCount(int p_45411_) {
-        this.successCount = p_45411_;
+    public void setSuccessCount(int pSuccessCount) {
+        this.successCount = pSuccessCount;
     }
 
     public Component getLastOutput() {
         return this.lastOutput == null ? CommonComponents.EMPTY : this.lastOutput;
     }
 
-    public CompoundTag save(CompoundTag p_45422_, HolderLookup.Provider p_329299_) {
-        p_45422_.putString("Command", this.command);
-        p_45422_.putInt("SuccessCount", this.successCount);
+    public CompoundTag save(CompoundTag pTag, HolderLookup.Provider pLevelRegistry) {
+        pTag.putString("Command", this.command);
+        pTag.putInt("SuccessCount", this.successCount);
         if (this.customName != null) {
-            p_45422_.putString("CustomName", Component.Serializer.toJson(this.customName, p_329299_));
+            pTag.putString("CustomName", Component.Serializer.toJson(this.customName, pLevelRegistry));
         }
 
-        p_45422_.putBoolean("TrackOutput", this.trackOutput);
+        pTag.putBoolean("TrackOutput", this.trackOutput);
         if (this.lastOutput != null && this.trackOutput) {
-            p_45422_.putString("LastOutput", Component.Serializer.toJson(this.lastOutput, p_329299_));
+            pTag.putString("LastOutput", Component.Serializer.toJson(this.lastOutput, pLevelRegistry));
         }
 
-        p_45422_.putBoolean("UpdateLastExecution", this.updateLastExecution);
+        pTag.putBoolean("UpdateLastExecution", this.updateLastExecution);
         if (this.updateLastExecution && this.lastExecution > 0L) {
-            p_45422_.putLong("LastExecution", this.lastExecution);
+            pTag.putLong("LastExecution", this.lastExecution);
         }
 
-        return p_45422_;
+        return pTag;
     }
 
-    public void load(CompoundTag p_45432_, HolderLookup.Provider p_329410_) {
-        this.command = p_45432_.getString("Command");
-        this.successCount = p_45432_.getInt("SuccessCount");
-        if (p_45432_.contains("CustomName", 8)) {
-            this.setCustomName(BlockEntity.parseCustomNameSafe(p_45432_.getString("CustomName"), p_329410_));
+    public void load(CompoundTag pTag, HolderLookup.Provider pLevelRegistry) {
+        this.command = pTag.getString("Command");
+        this.successCount = pTag.getInt("SuccessCount");
+        if (pTag.contains("CustomName", 8)) {
+            this.setCustomName(BlockEntity.parseCustomNameSafe(pTag.getString("CustomName"), pLevelRegistry));
         } else {
             this.setCustomName(null);
         }
 
-        if (p_45432_.contains("TrackOutput", 1)) {
-            this.trackOutput = p_45432_.getBoolean("TrackOutput");
+        if (pTag.contains("TrackOutput", 1)) {
+            this.trackOutput = pTag.getBoolean("TrackOutput");
         }
 
-        if (p_45432_.contains("LastOutput", 8) && this.trackOutput) {
+        if (pTag.contains("LastOutput", 8) && this.trackOutput) {
             try {
-                this.lastOutput = Component.Serializer.fromJson(p_45432_.getString("LastOutput"), p_329410_);
+                this.lastOutput = Component.Serializer.fromJson(pTag.getString("LastOutput"), pLevelRegistry);
             } catch (Throwable throwable) {
                 this.lastOutput = Component.literal(throwable.getMessage());
             }
@@ -88,19 +88,19 @@ public abstract class BaseCommandBlock implements CommandSource {
             this.lastOutput = null;
         }
 
-        if (p_45432_.contains("UpdateLastExecution")) {
-            this.updateLastExecution = p_45432_.getBoolean("UpdateLastExecution");
+        if (pTag.contains("UpdateLastExecution")) {
+            this.updateLastExecution = pTag.getBoolean("UpdateLastExecution");
         }
 
-        if (this.updateLastExecution && p_45432_.contains("LastExecution")) {
-            this.lastExecution = p_45432_.getLong("LastExecution");
+        if (this.updateLastExecution && pTag.contains("LastExecution")) {
+            this.lastExecution = pTag.getLong("LastExecution");
         } else {
             this.lastExecution = -1L;
         }
     }
 
-    public void setCommand(String p_45420_) {
-        this.command = p_45420_;
+    public void setCommand(String pCommand) {
+        this.command = pCommand;
         this.successCount = 0;
     }
 
@@ -108,8 +108,8 @@ public abstract class BaseCommandBlock implements CommandSource {
         return this.command;
     }
 
-    public boolean performCommand(Level p_45415_) {
-        if (p_45415_.isClientSide || p_45415_.getGameTime() == this.lastExecution) {
+    public boolean performCommand(Level pLevel) {
+        if (pLevel.isClientSide || pLevel.getGameTime() == this.lastExecution) {
             return false;
         } else if ("Searge".equalsIgnoreCase(this.command)) {
             this.lastOutput = Component.literal("#itzlipofutzli");
@@ -137,7 +137,7 @@ public abstract class BaseCommandBlock implements CommandSource {
             }
 
             if (this.updateLastExecution) {
-                this.lastExecution = p_45415_.getGameTime();
+                this.lastExecution = pLevel.getGameTime();
             } else {
                 this.lastExecution = -1L;
             }
@@ -155,8 +155,8 @@ public abstract class BaseCommandBlock implements CommandSource {
         return this.customName;
     }
 
-    public void setCustomName(@Nullable Component p_327944_) {
-        this.customName = p_327944_;
+    public void setCustomName(@Nullable Component pCustomName) {
+        this.customName = pCustomName;
     }
 
     @Override
@@ -171,24 +171,24 @@ public abstract class BaseCommandBlock implements CommandSource {
 
     public abstract void onUpdated();
 
-    public void setLastOutput(@Nullable Component p_45434_) {
-        this.lastOutput = p_45434_;
+    public void setLastOutput(@Nullable Component pLastOutputMessage) {
+        this.lastOutput = pLastOutputMessage;
     }
 
-    public void setTrackOutput(boolean p_45429_) {
-        this.trackOutput = p_45429_;
+    public void setTrackOutput(boolean pShouldTrackOutput) {
+        this.trackOutput = pShouldTrackOutput;
     }
 
     public boolean isTrackOutput() {
         return this.trackOutput;
     }
 
-    public InteractionResult usedBy(Player p_45413_) {
-        if (!p_45413_.canUseGameMasterBlocks()) {
+    public InteractionResult usedBy(Player pPlayer) {
+        if (!pPlayer.canUseGameMasterBlocks()) {
             return InteractionResult.PASS;
         } else {
-            if (p_45413_.getCommandSenderWorld().isClientSide) {
-                p_45413_.openMinecartCommandBlock(this);
+            if (pPlayer.getCommandSenderWorld().isClientSide) {
+                pPlayer.openMinecartCommandBlock(this);
             }
 
             return InteractionResult.SUCCESS;

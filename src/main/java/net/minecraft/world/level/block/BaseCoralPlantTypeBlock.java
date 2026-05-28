@@ -32,18 +32,18 @@ public abstract class BaseCoralPlantTypeBlock extends Block implements SimpleWat
     @Override
     protected abstract MapCodec<? extends BaseCoralPlantTypeBlock> codec();
 
-    protected void tryScheduleDieTick(BlockState p_49165_, BlockGetter p_369413_, ScheduledTickAccess p_368290_, RandomSource p_364394_, BlockPos p_49167_) {
-        if (!scanForWater(p_49165_, p_369413_, p_49167_)) {
-            p_368290_.scheduleTick(p_49167_, this, 60 + p_364394_.nextInt(40));
+    protected void tryScheduleDieTick(BlockState pState, BlockGetter pLevel, ScheduledTickAccess pScheduledTickAccess, RandomSource pRandom, BlockPos pPos) {
+        if (!scanForWater(pState, pLevel, pPos)) {
+            pScheduledTickAccess.scheduleTick(pPos, this, 60 + pRandom.nextInt(40));
         }
     }
 
-    protected static boolean scanForWater(BlockState p_49187_, BlockGetter p_49188_, BlockPos p_49189_) {
-        if (p_49187_.getValue(WATERLOGGED)) {
+    protected static boolean scanForWater(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        if (pState.getValue(WATERLOGGED)) {
             return true;
         } else {
             for (Direction direction : Direction.values()) {
-                if (p_49188_.getFluidState(p_49189_.relative(direction)).is(FluidTags.WATER)) {
+                if (pLevel.getFluidState(pPos.relative(direction)).is(FluidTags.WATER)) {
                     return true;
                 }
             }
@@ -54,13 +54,13 @@ public abstract class BaseCoralPlantTypeBlock extends Block implements SimpleWat
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_49163_) {
-        FluidState fluidstate = p_49163_.getLevel().getFluidState(p_49163_.getClickedPos());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
         return this.defaultBlockState().setValue(WATERLOGGED, Boolean.valueOf(fluidstate.is(FluidTags.WATER) && fluidstate.getAmount() == 8));
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_49182_, BlockGetter p_49183_, BlockPos p_49184_, CollisionContext p_49185_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return AABB;
     }
 
@@ -85,18 +85,18 @@ public abstract class BaseCoralPlantTypeBlock extends Block implements SimpleWat
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_49169_, LevelReader p_49170_, BlockPos p_49171_) {
-        BlockPos blockpos = p_49171_.below();
-        return p_49170_.getBlockState(blockpos).isFaceSturdy(p_49170_, blockpos, Direction.UP);
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.below();
+        return pLevel.getBlockState(blockpos).isFaceSturdy(pLevel, blockpos, Direction.UP);
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_49180_) {
-        p_49180_.add(WATERLOGGED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(WATERLOGGED);
     }
 
     @Override
-    protected FluidState getFluidState(BlockState p_49191_) {
-        return p_49191_.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(p_49191_);
+    protected FluidState getFluidState(BlockState pState) {
+        return pState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(pState);
     }
 }

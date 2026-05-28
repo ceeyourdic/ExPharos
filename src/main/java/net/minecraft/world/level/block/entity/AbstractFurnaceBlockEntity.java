@@ -101,10 +101,10 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
     private final RecipeManager.CachedCheck<SingleRecipeInput, ? extends AbstractCookingRecipe> quickCheck;
 
     protected AbstractFurnaceBlockEntity(
-        BlockEntityType<?> p_154991_, BlockPos p_154992_, BlockState p_154993_, RecipeType<? extends AbstractCookingRecipe> p_154994_
+        BlockEntityType<?> pType, BlockPos pPos, BlockState pBlockState, RecipeType<? extends AbstractCookingRecipe> pRecipeType
     ) {
-        super(p_154991_, p_154992_, p_154993_);
-        this.quickCheck = RecipeManager.createCheck((RecipeType)p_154994_);
+        super(pType, pPos, pBlockState);
+        this.quickCheck = RecipeManager.createCheck((RecipeType)pRecipeType);
     }
 
     private boolean isLit() {
@@ -140,90 +140,90 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
         p_187452_.put("RecipesUsed", compoundtag);
     }
 
-    public static void serverTick(ServerLevel p_364207_, BlockPos p_155015_, BlockState p_155016_, AbstractFurnaceBlockEntity p_155017_) {
-        boolean flag = p_155017_.isLit();
+    public static void serverTick(ServerLevel pLevel, BlockPos pPos, BlockState pState, AbstractFurnaceBlockEntity pFurnace) {
+        boolean flag = pFurnace.isLit();
         boolean flag1 = false;
-        if (p_155017_.isLit()) {
-            p_155017_.litTimeRemaining--;
+        if (pFurnace.isLit()) {
+            pFurnace.litTimeRemaining--;
         }
 
-        ItemStack itemstack = p_155017_.items.get(1);
-        ItemStack itemstack1 = p_155017_.items.get(0);
+        ItemStack itemstack = pFurnace.items.get(1);
+        ItemStack itemstack1 = pFurnace.items.get(0);
         boolean flag2 = !itemstack1.isEmpty();
         boolean flag3 = !itemstack.isEmpty();
-        if (p_155017_.isLit() || flag3 && flag2) {
+        if (pFurnace.isLit() || flag3 && flag2) {
             SingleRecipeInput singlerecipeinput = new SingleRecipeInput(itemstack1);
             RecipeHolder<? extends AbstractCookingRecipe> recipeholder;
             if (flag2) {
-                recipeholder = p_155017_.quickCheck.getRecipeFor(singlerecipeinput, p_364207_).orElse(null);
+                recipeholder = pFurnace.quickCheck.getRecipeFor(singlerecipeinput, pLevel).orElse(null);
             } else {
                 recipeholder = null;
             }
 
-            int i = p_155017_.getMaxStackSize();
-            if (!p_155017_.isLit() && canBurn(p_364207_.registryAccess(), recipeholder, singlerecipeinput, p_155017_.items, i)) {
-                p_155017_.litTimeRemaining = p_155017_.getBurnDuration(p_364207_.fuelValues(), itemstack);
-                p_155017_.litTotalTime = p_155017_.litTimeRemaining;
-                if (p_155017_.isLit()) {
+            int i = pFurnace.getMaxStackSize();
+            if (!pFurnace.isLit() && canBurn(pLevel.registryAccess(), recipeholder, singlerecipeinput, pFurnace.items, i)) {
+                pFurnace.litTimeRemaining = pFurnace.getBurnDuration(pLevel.fuelValues(), itemstack);
+                pFurnace.litTotalTime = pFurnace.litTimeRemaining;
+                if (pFurnace.isLit()) {
                     flag1 = true;
                     if (flag3) {
                         Item item = itemstack.getItem();
                         itemstack.shrink(1);
                         if (itemstack.isEmpty()) {
-                            p_155017_.items.set(1, item.getCraftingRemainder());
+                            pFurnace.items.set(1, item.getCraftingRemainder());
                         }
                     }
                 }
             }
 
-            if (p_155017_.isLit() && canBurn(p_364207_.registryAccess(), recipeholder, singlerecipeinput, p_155017_.items, i)) {
-                p_155017_.cookingTimer++;
-                if (p_155017_.cookingTimer == p_155017_.cookingTotalTime) {
-                    p_155017_.cookingTimer = 0;
-                    p_155017_.cookingTotalTime = getTotalCookTime(p_364207_, p_155017_);
-                    if (burn(p_364207_.registryAccess(), recipeholder, singlerecipeinput, p_155017_.items, i)) {
-                        p_155017_.setRecipeUsed(recipeholder);
+            if (pFurnace.isLit() && canBurn(pLevel.registryAccess(), recipeholder, singlerecipeinput, pFurnace.items, i)) {
+                pFurnace.cookingTimer++;
+                if (pFurnace.cookingTimer == pFurnace.cookingTotalTime) {
+                    pFurnace.cookingTimer = 0;
+                    pFurnace.cookingTotalTime = getTotalCookTime(pLevel, pFurnace);
+                    if (burn(pLevel.registryAccess(), recipeholder, singlerecipeinput, pFurnace.items, i)) {
+                        pFurnace.setRecipeUsed(recipeholder);
                     }
 
                     flag1 = true;
                 }
             } else {
-                p_155017_.cookingTimer = 0;
+                pFurnace.cookingTimer = 0;
             }
-        } else if (!p_155017_.isLit() && p_155017_.cookingTimer > 0) {
-            p_155017_.cookingTimer = Mth.clamp(p_155017_.cookingTimer - 2, 0, p_155017_.cookingTotalTime);
+        } else if (!pFurnace.isLit() && pFurnace.cookingTimer > 0) {
+            pFurnace.cookingTimer = Mth.clamp(pFurnace.cookingTimer - 2, 0, pFurnace.cookingTotalTime);
         }
 
-        if (flag != p_155017_.isLit()) {
+        if (flag != pFurnace.isLit()) {
             flag1 = true;
-            p_155016_ = p_155016_.setValue(AbstractFurnaceBlock.LIT, Boolean.valueOf(p_155017_.isLit()));
-            p_364207_.setBlock(p_155015_, p_155016_, 3);
+            pState = pState.setValue(AbstractFurnaceBlock.LIT, Boolean.valueOf(pFurnace.isLit()));
+            pLevel.setBlock(pPos, pState, 3);
         }
 
         if (flag1) {
-            setChanged(p_364207_, p_155015_, p_155016_);
+            setChanged(pLevel, pPos, pState);
         }
     }
 
     private static boolean canBurn(
-        RegistryAccess p_266924_,
-        @Nullable RecipeHolder<? extends AbstractCookingRecipe> p_299207_,
-        SingleRecipeInput p_364069_,
-        NonNullList<ItemStack> p_155007_,
-        int p_155008_
+        RegistryAccess pRegistryAccess,
+        @Nullable RecipeHolder<? extends AbstractCookingRecipe> pRecipe,
+        SingleRecipeInput pRecipeInput,
+        NonNullList<ItemStack> pItems,
+        int pMaxStackSize
     ) {
-        if (!p_155007_.get(0).isEmpty() && p_299207_ != null) {
-            ItemStack itemstack = p_299207_.value().assemble(p_364069_, p_266924_);
+        if (!pItems.get(0).isEmpty() && pRecipe != null) {
+            ItemStack itemstack = pRecipe.value().assemble(pRecipeInput, pRegistryAccess);
             if (itemstack.isEmpty()) {
                 return false;
             } else {
-                ItemStack itemstack1 = p_155007_.get(2);
+                ItemStack itemstack1 = pItems.get(2);
                 if (itemstack1.isEmpty()) {
                     return true;
                 } else if (!ItemStack.isSameItemSameComponents(itemstack1, itemstack)) {
                     return false;
                 } else {
-                    return itemstack1.getCount() < p_155008_ && itemstack1.getCount() < itemstack1.getMaxStackSize()
+                    return itemstack1.getCount() < pMaxStackSize && itemstack1.getCount() < itemstack1.getMaxStackSize()
                         ? true
                         : itemstack1.getCount() < itemstack.getMaxStackSize();
                 }
@@ -234,24 +234,24 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
     }
 
     private static boolean burn(
-        RegistryAccess p_266740_,
-        @Nullable RecipeHolder<? extends AbstractCookingRecipe> p_299450_,
-        SingleRecipeInput p_364092_,
-        NonNullList<ItemStack> p_267073_,
-        int p_267157_
+        RegistryAccess pRegistryAccess,
+        @Nullable RecipeHolder<? extends AbstractCookingRecipe> pRecipe,
+        SingleRecipeInput pRecipeInput,
+        NonNullList<ItemStack> pItems,
+        int pMaxStackSize
     ) {
-        if (p_299450_ != null && canBurn(p_266740_, p_299450_, p_364092_, p_267073_, p_267157_)) {
-            ItemStack itemstack = p_267073_.get(0);
-            ItemStack itemstack1 = p_299450_.value().assemble(p_364092_, p_266740_);
-            ItemStack itemstack2 = p_267073_.get(2);
+        if (pRecipe != null && canBurn(pRegistryAccess, pRecipe, pRecipeInput, pItems, pMaxStackSize)) {
+            ItemStack itemstack = pItems.get(0);
+            ItemStack itemstack1 = pRecipe.value().assemble(pRecipeInput, pRegistryAccess);
+            ItemStack itemstack2 = pItems.get(2);
             if (itemstack2.isEmpty()) {
-                p_267073_.set(2, itemstack1.copy());
+                pItems.set(2, itemstack1.copy());
             } else if (ItemStack.isSameItemSameComponents(itemstack2, itemstack1)) {
                 itemstack2.grow(1);
             }
 
-            if (itemstack.is(Blocks.WET_SPONGE.asItem()) && !p_267073_.get(1).isEmpty() && p_267073_.get(1).is(Items.BUCKET)) {
-                p_267073_.set(1, new ItemStack(Items.WATER_BUCKET));
+            if (itemstack.is(Blocks.WET_SPONGE.asItem()) && !pItems.get(1).isEmpty() && pItems.get(1).is(Items.BUCKET)) {
+                pItems.set(1, new ItemStack(Items.WATER_BUCKET));
             }
 
             itemstack.shrink(1);
@@ -261,32 +261,32 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
         }
     }
 
-    protected int getBurnDuration(FuelValues p_363312_, ItemStack p_58343_) {
-        return p_363312_.burnDuration(p_58343_);
+    protected int getBurnDuration(FuelValues pFuelValues, ItemStack pStack) {
+        return pFuelValues.burnDuration(pStack);
     }
 
-    private static int getTotalCookTime(ServerLevel p_364532_, AbstractFurnaceBlockEntity p_222694_) {
-        SingleRecipeInput singlerecipeinput = new SingleRecipeInput(p_222694_.getItem(0));
-        return p_222694_.quickCheck.getRecipeFor(singlerecipeinput, p_364532_).map(p_360485_ -> p_360485_.value().cookingTime()).orElse(200);
+    private static int getTotalCookTime(ServerLevel pLevel, AbstractFurnaceBlockEntity pFurnace) {
+        SingleRecipeInput singlerecipeinput = new SingleRecipeInput(pFurnace.getItem(0));
+        return pFurnace.quickCheck.getRecipeFor(singlerecipeinput, pLevel).map(p_360485_ -> p_360485_.value().cookingTime()).orElse(200);
     }
 
     @Override
-    public int[] getSlotsForFace(Direction p_58363_) {
-        if (p_58363_ == Direction.DOWN) {
+    public int[] getSlotsForFace(Direction pSide) {
+        if (pSide == Direction.DOWN) {
             return SLOTS_FOR_DOWN;
         } else {
-            return p_58363_ == Direction.UP ? SLOTS_FOR_UP : SLOTS_FOR_SIDES;
+            return pSide == Direction.UP ? SLOTS_FOR_UP : SLOTS_FOR_SIDES;
         }
     }
 
     @Override
-    public boolean canPlaceItemThroughFace(int p_58336_, ItemStack p_58337_, @Nullable Direction p_58338_) {
-        return this.canPlaceItem(p_58336_, p_58337_);
+    public boolean canPlaceItemThroughFace(int pIndex, ItemStack pItemStack, @Nullable Direction pDirection) {
+        return this.canPlaceItem(pIndex, pItemStack);
     }
 
     @Override
-    public boolean canTakeItemThroughFace(int p_58392_, ItemStack p_58393_, Direction p_58394_) {
-        return p_58394_ == Direction.DOWN && p_58392_ == 1 ? p_58393_.is(Items.WATER_BUCKET) || p_58393_.is(Items.BUCKET) : true;
+    public boolean canTakeItemThroughFace(int pIndex, ItemStack pStack, Direction pDirection) {
+        return pDirection == Direction.DOWN && pIndex == 1 ? pStack.is(Items.WATER_BUCKET) || pStack.is(Items.BUCKET) : true;
     }
 
     @Override
@@ -305,12 +305,12 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
     }
 
     @Override
-    public void setItem(int p_58333_, ItemStack p_58334_) {
-        ItemStack itemstack = this.items.get(p_58333_);
-        boolean flag = !p_58334_.isEmpty() && ItemStack.isSameItemSameComponents(itemstack, p_58334_);
-        this.items.set(p_58333_, p_58334_);
-        p_58334_.limitSize(this.getMaxStackSize(p_58334_));
-        if (p_58333_ == 0 && !flag && this.level instanceof ServerLevel serverlevel) {
+    public void setItem(int pIndex, ItemStack pStack) {
+        ItemStack itemstack = this.items.get(pIndex);
+        boolean flag = !pStack.isEmpty() && ItemStack.isSameItemSameComponents(itemstack, pStack);
+        this.items.set(pIndex, pStack);
+        pStack.limitSize(this.getMaxStackSize(pStack));
+        if (pIndex == 0 && !flag && this.level instanceof ServerLevel serverlevel) {
             this.cookingTotalTime = getTotalCookTime(serverlevel, this);
             this.cookingTimer = 0;
             this.setChanged();
@@ -318,14 +318,14 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
     }
 
     @Override
-    public boolean canPlaceItem(int p_58389_, ItemStack p_58390_) {
-        if (p_58389_ == 2) {
+    public boolean canPlaceItem(int pIndex, ItemStack pStack) {
+        if (pIndex == 2) {
             return false;
-        } else if (p_58389_ != 1) {
+        } else if (pIndex != 1) {
             return true;
         } else {
             ItemStack itemstack = this.items.get(1);
-            return this.level.fuelValues().isFuel(p_58390_) || p_58390_.is(Items.BUCKET) && !itemstack.is(Items.BUCKET);
+            return this.level.fuelValues().isFuel(pStack) || pStack.is(Items.BUCKET) && !itemstack.is(Items.BUCKET);
         }
     }
 
@@ -347,40 +347,40 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
     public void awardUsedRecipes(Player p_58396_, List<ItemStack> p_282202_) {
     }
 
-    public void awardUsedRecipesAndPopExperience(ServerPlayer p_155004_) {
-        List<RecipeHolder<?>> list = this.getRecipesToAwardAndPopExperience(p_155004_.serverLevel(), p_155004_.position());
-        p_155004_.awardRecipes(list);
+    public void awardUsedRecipesAndPopExperience(ServerPlayer pPlayer) {
+        List<RecipeHolder<?>> list = this.getRecipesToAwardAndPopExperience(pPlayer.serverLevel(), pPlayer.position());
+        pPlayer.awardRecipes(list);
 
         for (RecipeHolder<?> recipeholder : list) {
             if (recipeholder != null) {
-                p_155004_.triggerRecipeCrafted(recipeholder, this.items);
+                pPlayer.triggerRecipeCrafted(recipeholder, this.items);
             }
         }
 
         this.recipesUsed.clear();
     }
 
-    public List<RecipeHolder<?>> getRecipesToAwardAndPopExperience(ServerLevel p_154996_, Vec3 p_154997_) {
+    public List<RecipeHolder<?>> getRecipesToAwardAndPopExperience(ServerLevel pLevel, Vec3 pPopVec) {
         List<RecipeHolder<?>> list = Lists.newArrayList();
 
         for (Entry<ResourceKey<Recipe<?>>> entry : this.recipesUsed.reference2IntEntrySet()) {
-            p_154996_.recipeAccess().byKey(entry.getKey()).ifPresent(p_360484_ -> {
+            pLevel.recipeAccess().byKey(entry.getKey()).ifPresent(p_360484_ -> {
                 list.add((RecipeHolder<?>)p_360484_);
-                createExperience(p_154996_, p_154997_, entry.getIntValue(), ((AbstractCookingRecipe)p_360484_.value()).experience());
+                createExperience(pLevel, pPopVec, entry.getIntValue(), ((AbstractCookingRecipe)p_360484_.value()).experience());
             });
         }
 
         return list;
     }
 
-    private static void createExperience(ServerLevel p_154999_, Vec3 p_155000_, int p_155001_, float p_155002_) {
-        int i = Mth.floor((float)p_155001_ * p_155002_);
-        float f = Mth.frac((float)p_155001_ * p_155002_);
+    private static void createExperience(ServerLevel pLevel, Vec3 pPopVec, int pRecipeIndex, float pExperience) {
+        int i = Mth.floor((float)pRecipeIndex * pExperience);
+        float f = Mth.frac((float)pRecipeIndex * pExperience);
         if (f != 0.0F && Math.random() < (double)f) {
             i++;
         }
 
-        ExperienceOrb.award(p_154999_, p_155000_, i);
+        ExperienceOrb.award(pLevel, pPopVec, i);
     }
 
     @Override

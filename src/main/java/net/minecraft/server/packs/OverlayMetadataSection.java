@@ -17,12 +17,12 @@ public record OverlayMetadataSection(List<OverlayMetadataSection.OverlayEntry> o
     );
     public static final MetadataSectionType<OverlayMetadataSection> TYPE = new MetadataSectionType<>("overlays", CODEC);
 
-    private static DataResult<String> validateOverlayDir(String p_301366_) {
-        return !DIR_VALIDATOR.matcher(p_301366_).matches() ? DataResult.error(() -> p_301366_ + " is not accepted directory name") : DataResult.success(p_301366_);
+    private static DataResult<String> validateOverlayDir(String pDirectoryName) {
+        return !DIR_VALIDATOR.matcher(pDirectoryName).matches() ? DataResult.error(() -> pDirectoryName + " is not accepted directory name") : DataResult.success(pDirectoryName);
     }
 
-    public List<String> overlaysForVersion(int p_299136_) {
-        return this.overlays.stream().filter(p_301078_ -> p_301078_.isApplicable(p_299136_)).map(OverlayMetadataSection.OverlayEntry::overlay).toList();
+    public List<String> overlaysForVersion(int pVersion) {
+        return this.overlays.stream().filter(p_301078_ -> p_301078_.isApplicable(pVersion)).map(OverlayMetadataSection.OverlayEntry::overlay).toList();
     }
 
     public static record OverlayEntry(InclusiveRange<Integer> format, String overlay) {
@@ -34,8 +34,8 @@ public record OverlayMetadataSection(List<OverlayMetadataSection.OverlayEntry> o
                     .apply(p_326461_, OverlayMetadataSection.OverlayEntry::new)
         );
 
-        public boolean isApplicable(int p_300875_) {
-            return this.format.isValueInRange(p_300875_);
+        public boolean isApplicable(int pVersion) {
+            return this.format.isValueInRange(pVersion);
         }
     }
 }

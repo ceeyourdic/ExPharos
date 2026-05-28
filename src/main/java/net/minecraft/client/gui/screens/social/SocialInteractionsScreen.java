@@ -74,9 +74,9 @@ public class SocialInteractionsScreen extends Screen {
         this(null);
     }
 
-    public SocialInteractionsScreen(@Nullable Screen p_332869_) {
+    public SocialInteractionsScreen(@Nullable Screen pLastScreen) {
         super(TITLE);
-        this.lastScreen = p_332869_;
+        this.lastScreen = pLastScreen;
         this.updateServerLabel(Minecraft.getInstance());
     }
 
@@ -169,13 +169,13 @@ public class SocialInteractionsScreen extends Screen {
         this.minecraft.setScreen(this.lastScreen);
     }
 
-    private void showPage(SocialInteractionsScreen.Page p_100772_) {
-        this.page = p_100772_;
+    private void showPage(SocialInteractionsScreen.Page pPage) {
+        this.page = pPage;
         this.allButton.setMessage(TAB_ALL);
         this.hiddenButton.setMessage(TAB_HIDDEN);
         this.blockedButton.setMessage(TAB_BLOCKED);
         boolean flag = false;
-        switch (p_100772_) {
+        switch (pPage) {
             case ALL:
                 this.allButton.setMessage(TAB_ALL_SELECTED);
                 Collection<UUID> collection = this.minecraft.player.connection.getOnlinePlayerIds();
@@ -199,9 +199,9 @@ public class SocialInteractionsScreen extends Screen {
         if (!this.searchBox.getValue().isEmpty() && this.socialInteractionsPlayerList.isEmpty() && !this.searchBox.isFocused()) {
             gamenarrator.sayNow(EMPTY_SEARCH);
         } else if (flag) {
-            if (p_100772_ == SocialInteractionsScreen.Page.HIDDEN) {
+            if (pPage == SocialInteractionsScreen.Page.HIDDEN) {
                 gamenarrator.sayNow(EMPTY_HIDDEN);
-            } else if (p_100772_ == SocialInteractionsScreen.Page.BLOCKED) {
+            } else if (pPage == SocialInteractionsScreen.Page.BLOCKED) {
                 gamenarrator.sayNow(EMPTY_BLOCKED);
             }
         }
@@ -237,12 +237,12 @@ public class SocialInteractionsScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int p_100757_, int p_100758_, int p_100759_) {
-        if (!this.searchBox.isFocused() && this.minecraft.options.keySocialInteractions.matches(p_100757_, p_100758_)) {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (!this.searchBox.isFocused() && this.minecraft.options.keySocialInteractions.matches(pKeyCode, pScanCode)) {
             this.onClose();
             return true;
         } else {
-            return super.keyPressed(p_100757_, p_100758_, p_100759_);
+            return super.keyPressed(pKeyCode, pScanCode, pModifiers);
         }
     }
 
@@ -251,22 +251,22 @@ public class SocialInteractionsScreen extends Screen {
         return false;
     }
 
-    private void checkSearchStringUpdate(String p_100789_) {
-        p_100789_ = p_100789_.toLowerCase(Locale.ROOT);
-        if (!p_100789_.equals(this.lastSearch)) {
-            this.socialInteractionsPlayerList.setFilter(p_100789_);
-            this.lastSearch = p_100789_;
+    private void checkSearchStringUpdate(String pNewText) {
+        pNewText = pNewText.toLowerCase(Locale.ROOT);
+        if (!pNewText.equals(this.lastSearch)) {
+            this.socialInteractionsPlayerList.setFilter(pNewText);
+            this.lastSearch = pNewText;
             this.showPage(this.page);
         }
     }
 
-    private void updateServerLabel(Minecraft p_100768_) {
-        int i = p_100768_.getConnection().getOnlinePlayers().size();
+    private void updateServerLabel(Minecraft pMinecraft) {
+        int i = pMinecraft.getConnection().getOnlinePlayers().size();
         if (this.playerCount != i) {
             String s = "";
-            ServerData serverdata = p_100768_.getCurrentServer();
-            if (p_100768_.isLocalServer()) {
-                s = p_100768_.getSingleplayerServer().getMotd();
+            ServerData serverdata = pMinecraft.getCurrentServer();
+            if (pMinecraft.isLocalServer()) {
+                s = pMinecraft.getSingleplayerServer().getMotd();
             } else if (serverdata != null) {
                 s = serverdata.name;
             }
@@ -281,12 +281,12 @@ public class SocialInteractionsScreen extends Screen {
         }
     }
 
-    public void onAddPlayer(PlayerInfo p_100776_) {
-        this.socialInteractionsPlayerList.addPlayer(p_100776_, this.page);
+    public void onAddPlayer(PlayerInfo pPlayerInfo) {
+        this.socialInteractionsPlayerList.addPlayer(pPlayerInfo, this.page);
     }
 
-    public void onRemovePlayer(UUID p_100780_) {
-        this.socialInteractionsPlayerList.removePlayer(p_100780_);
+    public void onRemovePlayer(UUID pId) {
+        this.socialInteractionsPlayerList.removePlayer(pId);
     }
 
     @OnlyIn(Dist.CLIENT)

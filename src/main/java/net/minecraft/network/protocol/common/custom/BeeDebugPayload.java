@@ -19,12 +19,12 @@ public record BeeDebugPayload(BeeDebugPayload.BeeInfo beeInfo) implements Custom
     );
     public static final CustomPacketPayload.Type<BeeDebugPayload> TYPE = CustomPacketPayload.createType("debug/bee");
 
-    private BeeDebugPayload(FriendlyByteBuf p_297658_) {
-        this(new BeeDebugPayload.BeeInfo(p_297658_));
+    private BeeDebugPayload(FriendlyByteBuf pBuffer) {
+        this(new BeeDebugPayload.BeeInfo(pBuffer));
     }
 
-    private void write(FriendlyByteBuf p_300191_) {
-        this.beeInfo.write(p_300191_);
+    private void write(FriendlyByteBuf pBuffer) {
+        this.beeInfo.write(pBuffer);
     }
 
     @Override
@@ -43,34 +43,34 @@ public record BeeDebugPayload(BeeDebugPayload.BeeInfo beeInfo) implements Custom
         Set<String> goals,
         List<BlockPos> blacklistedHives
     ) {
-        public BeeInfo(FriendlyByteBuf p_299863_) {
+        public BeeInfo(FriendlyByteBuf pBuffer) {
             this(
-                p_299863_.readUUID(),
-                p_299863_.readInt(),
-                p_299863_.readVec3(),
-                p_299863_.readNullable(Path::createFromStream),
-                p_299863_.readNullable(BlockPos.STREAM_CODEC),
-                p_299863_.readNullable(BlockPos.STREAM_CODEC),
-                p_299863_.readInt(),
-                p_299863_.readCollection(HashSet::new, FriendlyByteBuf::readUtf),
-                p_299863_.readList(BlockPos.STREAM_CODEC)
+                pBuffer.readUUID(),
+                pBuffer.readInt(),
+                pBuffer.readVec3(),
+                pBuffer.readNullable(Path::createFromStream),
+                pBuffer.readNullable(BlockPos.STREAM_CODEC),
+                pBuffer.readNullable(BlockPos.STREAM_CODEC),
+                pBuffer.readInt(),
+                pBuffer.readCollection(HashSet::new, FriendlyByteBuf::readUtf),
+                pBuffer.readList(BlockPos.STREAM_CODEC)
             );
         }
 
-        public void write(FriendlyByteBuf p_299671_) {
-            p_299671_.writeUUID(this.uuid);
-            p_299671_.writeInt(this.id);
-            p_299671_.writeVec3(this.pos);
-            p_299671_.writeNullable(this.path, (p_297580_, p_297572_) -> p_297572_.writeToStream(p_297580_));
-            p_299671_.writeNullable(this.hivePos, BlockPos.STREAM_CODEC);
-            p_299671_.writeNullable(this.flowerPos, BlockPos.STREAM_CODEC);
-            p_299671_.writeInt(this.travelTicks);
-            p_299671_.writeCollection(this.goals, FriendlyByteBuf::writeUtf);
-            p_299671_.writeCollection(this.blacklistedHives, BlockPos.STREAM_CODEC);
+        public void write(FriendlyByteBuf pBuffer) {
+            pBuffer.writeUUID(this.uuid);
+            pBuffer.writeInt(this.id);
+            pBuffer.writeVec3(this.pos);
+            pBuffer.writeNullable(this.path, (p_297580_, p_297572_) -> p_297572_.writeToStream(p_297580_));
+            pBuffer.writeNullable(this.hivePos, BlockPos.STREAM_CODEC);
+            pBuffer.writeNullable(this.flowerPos, BlockPos.STREAM_CODEC);
+            pBuffer.writeInt(this.travelTicks);
+            pBuffer.writeCollection(this.goals, FriendlyByteBuf::writeUtf);
+            pBuffer.writeCollection(this.blacklistedHives, BlockPos.STREAM_CODEC);
         }
 
-        public boolean hasHive(BlockPos p_300739_) {
-            return Objects.equals(p_300739_, this.hivePos);
+        public boolean hasHive(BlockPos pPos) {
+            return Objects.equals(pPos, this.hivePos);
         }
 
         public String generateName() {

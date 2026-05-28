@@ -18,44 +18,44 @@ public class ScreenManager {
     private final Long2ObjectMap<Monitor> monitors = new Long2ObjectOpenHashMap<>();
     private final MonitorCreator monitorCreator;
 
-    public ScreenManager(MonitorCreator p_85265_) {
-        this.monitorCreator = p_85265_;
+    public ScreenManager(MonitorCreator pMonitorCreator) {
+        this.monitorCreator = pMonitorCreator;
         GLFW.glfwSetMonitorCallback(this::onMonitorChange);
         PointerBuffer pointerbuffer = GLFW.glfwGetMonitors();
         if (pointerbuffer != null) {
             for (int i = 0; i < pointerbuffer.limit(); i++) {
                 long j = pointerbuffer.get(i);
-                this.monitors.put(j, p_85265_.createMonitor(j));
+                this.monitors.put(j, pMonitorCreator.createMonitor(j));
             }
         }
     }
 
-    private void onMonitorChange(long p_85274_, int p_85275_) {
+    private void onMonitorChange(long pMonitorID, int pOpCode) {
         RenderSystem.assertOnRenderThread();
-        if (p_85275_ == 262145) {
-            this.monitors.put(p_85274_, this.monitorCreator.createMonitor(p_85274_));
-            LOGGER.debug("Monitor {} connected. Current monitors: {}", p_85274_, this.monitors);
-        } else if (p_85275_ == 262146) {
-            this.monitors.remove(p_85274_);
-            LOGGER.debug("Monitor {} disconnected. Current monitors: {}", p_85274_, this.monitors);
+        if (pOpCode == 262145) {
+            this.monitors.put(pMonitorID, this.monitorCreator.createMonitor(pMonitorID));
+            LOGGER.debug("Monitor {} connected. Current monitors: {}", pMonitorID, this.monitors);
+        } else if (pOpCode == 262146) {
+            this.monitors.remove(pMonitorID);
+            LOGGER.debug("Monitor {} disconnected. Current monitors: {}", pMonitorID, this.monitors);
         }
     }
 
     @Nullable
-    public Monitor getMonitor(long p_85272_) {
-        return this.monitors.get(p_85272_);
+    public Monitor getMonitor(long pMonitorID) {
+        return this.monitors.get(pMonitorID);
     }
 
     @Nullable
-    public Monitor findBestMonitor(Window p_85277_) {
-        long i = GLFW.glfwGetWindowMonitor(p_85277_.getWindow());
+    public Monitor findBestMonitor(Window pWindow) {
+        long i = GLFW.glfwGetWindowMonitor(pWindow.getWindow());
         if (i != 0L) {
             return this.getMonitor(i);
         } else {
-            int j = p_85277_.getX();
-            int k = j + p_85277_.getScreenWidth();
-            int l = p_85277_.getY();
-            int i1 = l + p_85277_.getScreenHeight();
+            int j = pWindow.getX();
+            int k = j + pWindow.getScreenWidth();
+            int l = pWindow.getY();
+            int i1 = l + pWindow.getScreenHeight();
             int j1 = -1;
             Monitor monitor = null;
             long k1 = GLFW.glfwGetPrimaryMonitor();
@@ -87,11 +87,11 @@ public class ScreenManager {
         }
     }
 
-    public static int clamp(int p_85268_, int p_85269_, int p_85270_) {
-        if (p_85268_ < p_85269_) {
-            return p_85269_;
+    public static int clamp(int pValue, int pMin, int pMax) {
+        if (pValue < pMin) {
+            return pMin;
         } else {
-            return p_85268_ > p_85270_ ? p_85270_ : p_85268_;
+            return pValue > pMax ? pMax : pValue;
         }
     }
 

@@ -43,20 +43,20 @@ public abstract class AbstractButton extends AbstractWidget {
         this.renderString(p_281670_, minecraft.font, i | Mth.ceil(this.alpha * 255.0F) << 24);
     }
 
-    public void renderString(GuiGraphics p_283366_, Font p_283054_, int p_281656_) {
-        this.renderScrollingString(p_283366_, p_283054_, 2, p_281656_);
+    public void renderString(GuiGraphics pGuiGraphics, Font pFont, int pColor) {
+        this.renderScrollingString(pGuiGraphics, pFont, 2, pColor);
     }
 
     @Override
-    public void onClick(double p_93371_, double p_93372_) {
+    public void onClick(double pMouseX, double pMouseY) {
         this.onPress();
     }
 
     @Override
-    public boolean keyPressed(int p_93374_, int p_93375_, int p_93376_) {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         if (!this.active || !this.visible) {
             return false;
-        } else if (CommonInputs.selected(p_93374_)) {
+        } else if (CommonInputs.selected(pKeyCode)) {
             this.playDownSound(Minecraft.getInstance().getSoundManager());
             this.onPress();
             return true;

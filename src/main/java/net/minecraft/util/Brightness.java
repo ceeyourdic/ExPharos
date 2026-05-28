@@ -16,9 +16,9 @@ public record Brightness(int block, int sky) {
         return this.block << 4 | this.sky << 20;
     }
 
-    public static Brightness unpack(int p_270207_) {
-        int i = p_270207_ >> 4 & 65535;
-        int j = p_270207_ >> 20 & 65535;
+    public static Brightness unpack(int pPackedBrightness) {
+        int i = pPackedBrightness >> 4 & 65535;
+        int j = pPackedBrightness >> 20 & 65535;
         return new Brightness(i, j);
     }
 }

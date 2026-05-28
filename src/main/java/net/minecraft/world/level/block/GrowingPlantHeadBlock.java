@@ -21,9 +21,9 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
     public static final int MAX_AGE = 25;
     private final double growPerTickProbability;
 
-    protected GrowingPlantHeadBlock(BlockBehaviour.Properties p_53928_, Direction p_53929_, VoxelShape p_53930_, boolean p_53931_, double p_53932_) {
-        super(p_53928_, p_53929_, p_53930_, p_53931_);
-        this.growPerTickProbability = p_53932_;
+    protected GrowingPlantHeadBlock(BlockBehaviour.Properties pProperties, Direction pGrowthDirection, VoxelShape pShape, boolean pScheduleFluidTicks, double pGrowPerTickProbability) {
+        super(pProperties, pGrowthDirection, pShape, pScheduleFluidTicks);
+        this.growPerTickProbability = pGrowPerTickProbability;
         this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)));
     }
 
@@ -36,8 +36,8 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
     }
 
     @Override
-    protected boolean isRandomlyTicking(BlockState p_53961_) {
-        return p_53961_.getValue(AGE) < 25;
+    protected boolean isRandomlyTicking(BlockState pState) {
+        return pState.getValue(AGE) < 25;
     }
 
     @Override
@@ -50,20 +50,20 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
         }
     }
 
-    protected BlockState getGrowIntoState(BlockState p_221347_, RandomSource p_221348_) {
-        return p_221347_.cycle(AGE);
+    protected BlockState getGrowIntoState(BlockState pState, RandomSource pRandom) {
+        return pState.cycle(AGE);
     }
 
-    public BlockState getMaxAgeState(BlockState p_187439_) {
-        return p_187439_.setValue(AGE, Integer.valueOf(25));
+    public BlockState getMaxAgeState(BlockState pState) {
+        return pState.setValue(AGE, Integer.valueOf(25));
     }
 
-    public boolean isMaxAge(BlockState p_187441_) {
-        return p_187441_.getValue(AGE) == 25;
+    public boolean isMaxAge(BlockState pState) {
+        return pState.getValue(AGE) == 25;
     }
 
-    protected BlockState updateBodyAfterConvertedFromHead(BlockState p_153329_, BlockState p_153330_) {
-        return p_153330_;
+    protected BlockState updateBodyAfterConvertedFromHead(BlockState pHead, BlockState pBody) {
+        return pBody;
     }
 
     @Override
@@ -93,8 +93,8 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_53958_) {
-        p_53958_.add(AGE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(AGE);
     }
 
     @Override
@@ -120,9 +120,9 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
         }
     }
 
-    protected abstract int getBlocksToGrowWhenBonemealed(RandomSource p_221341_);
+    protected abstract int getBlocksToGrowWhenBonemealed(RandomSource pRandom);
 
-    protected abstract boolean canGrowInto(BlockState p_53968_);
+    protected abstract boolean canGrowInto(BlockState pState);
 
     @Override
     protected GrowingPlantHeadBlock getHeadBlock() {

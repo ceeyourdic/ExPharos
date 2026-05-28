@@ -49,11 +49,11 @@ public class SinglePoolElement extends StructurePoolElement {
     protected final Holder<StructureProcessorList> processors;
     protected final Optional<LiquidSettings> overrideLiquidSettings;
 
-    private static <T> DataResult<T> encodeTemplate(Either<ResourceLocation, StructureTemplate> p_210425_, DynamicOps<T> p_210426_, T p_210427_) {
-        Optional<ResourceLocation> optional = p_210425_.left();
+    private static <T> DataResult<T> encodeTemplate(Either<ResourceLocation, StructureTemplate> pTemplate, DynamicOps<T> pOps, T pValues) {
+        Optional<ResourceLocation> optional = pTemplate.left();
         return optional.isEmpty()
             ? DataResult.error(() -> "Can not serialize a runtime pool element")
-            : ResourceLocation.CODEC.encode(optional.get(), p_210426_, p_210427_);
+            : ResourceLocation.CODEC.encode(optional.get(), pOps, pValues);
     }
 
     protected static <E extends SinglePoolElement> RecordCodecBuilder<E, Holder<StructureProcessorList>> processorsCodec() {
@@ -69,15 +69,15 @@ public class SinglePoolElement extends StructurePoolElement {
     }
 
     protected SinglePoolElement(
-        Either<ResourceLocation, StructureTemplate> p_210415_,
-        Holder<StructureProcessorList> p_210416_,
-        StructureTemplatePool.Projection p_210417_,
-        Optional<LiquidSettings> p_344439_
+        Either<ResourceLocation, StructureTemplate> pTemplate,
+        Holder<StructureProcessorList> pProcessors,
+        StructureTemplatePool.Projection pProjection,
+        Optional<LiquidSettings> pOverrideLiquidSettings
     ) {
-        super(p_210417_);
-        this.template = p_210415_;
-        this.processors = p_210416_;
-        this.overrideLiquidSettings = p_344439_;
+        super(pProjection);
+        this.template = pTemplate;
+        this.processors = pProcessors;
+        this.overrideLiquidSettings = pOverrideLiquidSettings;
     }
 
     @Override
@@ -86,14 +86,14 @@ public class SinglePoolElement extends StructurePoolElement {
         return structuretemplate.getSize(p_227314_);
     }
 
-    private StructureTemplate getTemplate(StructureTemplateManager p_227300_) {
-        return this.template.map(p_227300_::getOrCreate, Function.identity());
+    private StructureTemplate getTemplate(StructureTemplateManager pStructureTemplateManager) {
+        return this.template.map(pStructureTemplateManager::getOrCreate, Function.identity());
     }
 
-    public List<StructureTemplate.StructureBlockInfo> getDataMarkers(StructureTemplateManager p_227325_, BlockPos p_227326_, Rotation p_227327_, boolean p_227328_) {
-        StructureTemplate structuretemplate = this.getTemplate(p_227325_);
+    public List<StructureTemplate.StructureBlockInfo> getDataMarkers(StructureTemplateManager pStructureTemplateManager, BlockPos pPos, Rotation pRotation, boolean pRelativePosition) {
+        StructureTemplate structuretemplate = this.getTemplate(pStructureTemplateManager);
         List<StructureTemplate.StructureBlockInfo> list = structuretemplate.filterBlocks(
-            p_227326_, new StructurePlaceSettings().setRotation(p_227327_), Blocks.STRUCTURE_BLOCK, p_227328_
+            pPos, new StructurePlaceSettings().setRotation(pRotation), Blocks.STRUCTURE_BLOCK, pRelativePosition
         );
         List<StructureTemplate.StructureBlockInfo> list1 = Lists.newArrayList();
 
@@ -119,8 +119,8 @@ public class SinglePoolElement extends StructurePoolElement {
     }
 
     @VisibleForTesting
-    static void sortBySelectionPriority(List<StructureTemplate.JigsawBlockInfo> p_312992_) {
-        p_312992_.sort(HIGHEST_SELECTION_PRIORITY_FIRST);
+    static void sortBySelectionPriority(List<StructureTemplate.JigsawBlockInfo> pStructureBlockInfos) {
+        pStructureBlockInfos.sort(HIGHEST_SELECTION_PRIORITY_FIRST);
     }
 
     @Override
@@ -158,16 +158,16 @@ public class SinglePoolElement extends StructurePoolElement {
         }
     }
 
-    protected StructurePlaceSettings getSettings(Rotation p_210421_, BoundingBox p_210422_, LiquidSettings p_345518_, boolean p_210423_) {
+    protected StructurePlaceSettings getSettings(Rotation pRotation, BoundingBox pBoundingBox, LiquidSettings pLiquidSettings, boolean pOffset) {
         StructurePlaceSettings structureplacesettings = new StructurePlaceSettings();
-        structureplacesettings.setBoundingBox(p_210422_);
-        structureplacesettings.setRotation(p_210421_);
+        structureplacesettings.setBoundingBox(pBoundingBox);
+        structureplacesettings.setRotation(pRotation);
         structureplacesettings.setKnownShape(true);
         structureplacesettings.setIgnoreEntities(false);
         structureplacesettings.addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
         structureplacesettings.setFinalizeEntities(true);
-        structureplacesettings.setLiquidSettings(this.overrideLiquidSettings.orElse(p_345518_));
-        if (!p_210423_) {
+        structureplacesettings.setLiquidSettings(this.overrideLiquidSettings.orElse(pLiquidSettings));
+        if (!pOffset) {
             structureplacesettings.addProcessor(JigsawReplacementProcessor.INSTANCE);
         }
 

@@ -93,24 +93,24 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
     }
 
     public static boolean checkStriderSpawnRules(
-        EntityType<Strider> p_219129_, LevelAccessor p_219130_, EntitySpawnReason p_368751_, BlockPos p_219132_, RandomSource p_219133_
+        EntityType<Strider> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = p_219132_.mutable();
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.mutable();
 
         do {
             blockpos$mutableblockpos.move(Direction.UP);
-        } while (p_219130_.getFluidState(blockpos$mutableblockpos).is(FluidTags.LAVA));
+        } while (pLevel.getFluidState(blockpos$mutableblockpos).is(FluidTags.LAVA));
 
-        return p_219130_.getBlockState(blockpos$mutableblockpos).isAir();
+        return pLevel.getBlockState(blockpos$mutableblockpos).isAir();
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_33900_) {
-        if (DATA_BOOST_TIME.equals(p_33900_) && this.level().isClientSide) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        if (DATA_BOOST_TIME.equals(pKey) && this.level().isClientSide) {
             this.steering.onSynced();
         }
 
-        super.onSyncedDataUpdated(p_33900_);
+        super.onSyncedDataUpdated(pKey);
     }
 
     @Override
@@ -122,15 +122,15 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_33918_) {
-        super.addAdditionalSaveData(p_33918_);
-        this.steering.addAdditionalSaveData(p_33918_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.steering.addAdditionalSaveData(pCompound);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_33898_) {
-        super.readAdditionalSaveData(p_33898_);
-        this.steering.readAdditionalSaveData(p_33898_);
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.steering.readAdditionalSaveData(pCompound);
     }
 
     @Override
@@ -165,11 +165,11 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Strider.class, 8.0F));
     }
 
-    public void setSuffocating(boolean p_33952_) {
-        this.entityData.set(DATA_SUFFOCATING, p_33952_);
+    public void setSuffocating(boolean pSuffocating) {
+        this.entityData.set(DATA_SUFFOCATING, pSuffocating);
         AttributeInstance attributeinstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
         if (attributeinstance != null) {
-            if (p_33952_) {
+            if (pSuffocating) {
                 attributeinstance.addOrUpdateTransientModifier(SUFFOCATING_MODIFIER);
             } else {
                 attributeinstance.removeModifier(SUFFOCATING_MODIFIER_ID);
@@ -195,8 +195,8 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    public boolean checkSpawnObstruction(LevelReader p_33880_) {
-        return p_33880_.isUnobstructed(this);
+    public boolean checkSpawnObstruction(LevelReader pLevel) {
+        return pLevel.isUnobstructed(this);
     }
 
     @Nullable
@@ -206,13 +206,13 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    public Vec3 getDismountLocationForPassenger(LivingEntity p_33908_) {
+    public Vec3 getDismountLocationForPassenger(LivingEntity pLivingEntity) {
         Vec3[] avec3 = new Vec3[]{
-            getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)p_33908_.getBbWidth(), p_33908_.getYRot()),
-            getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)p_33908_.getBbWidth(), p_33908_.getYRot() - 22.5F),
-            getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)p_33908_.getBbWidth(), p_33908_.getYRot() + 22.5F),
-            getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)p_33908_.getBbWidth(), p_33908_.getYRot() - 45.0F),
-            getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)p_33908_.getBbWidth(), p_33908_.getYRot() + 45.0F)
+            getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)pLivingEntity.getBbWidth(), pLivingEntity.getYRot()),
+            getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)pLivingEntity.getBbWidth(), pLivingEntity.getYRot() - 22.5F),
+            getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)pLivingEntity.getBbWidth(), pLivingEntity.getYRot() + 22.5F),
+            getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)pLivingEntity.getBbWidth(), pLivingEntity.getYRot() - 45.0F),
+            getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)pLivingEntity.getBbWidth(), pLivingEntity.getYRot() + 45.0F)
         };
         Set<BlockPos> set = Sets.newLinkedHashSet();
         double d0 = this.getBoundingBox().maxY;
@@ -234,10 +234,10 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
                 if (DismountHelper.isBlockFloorValid(d3)) {
                     Vec3 vec31 = Vec3.upFromBottomCenterOf(blockpos, d3);
 
-                    for (Pose pose : p_33908_.getDismountPoses()) {
-                        AABB aabb = p_33908_.getLocalBoundsForPose(pose);
-                        if (DismountHelper.canDismountTo(this.level(), p_33908_, aabb.move(vec31))) {
-                            p_33908_.setPose(pose);
+                    for (Pose pose : pLivingEntity.getDismountPoses()) {
+                        AABB aabb = pLivingEntity.getLocalBoundsForPose(pose);
+                        if (DismountHelper.canDismountTo(this.level(), pLivingEntity, aabb.move(vec31))) {
+                            pLivingEntity.setPose(pose);
                             return vec31;
                         }
                     }
@@ -272,7 +272,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    protected void playStepSound(BlockPos p_33915_, BlockState p_33916_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(this.isInLava() ? SoundEvents.STRIDER_STEP_LAVA : SoundEvents.STRIDER_STEP, 1.0F, 1.0F);
     }
 
@@ -282,11 +282,11 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    protected void checkFallDamage(double p_33870_, boolean p_33871_, BlockState p_33872_, BlockPos p_33873_) {
+    protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {
         if (this.isInLava()) {
             this.resetFallDistance();
         } else {
-            super.checkFallDamage(p_33870_, p_33871_, p_33872_, p_33873_);
+            super.checkFallDamage(pY, pOnGround, pState, pPos);
         }
     }
 
@@ -352,7 +352,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_33934_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.STRIDER_HURT;
     }
 
@@ -362,7 +362,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    protected boolean canAddPassenger(Entity p_33950_) {
+    protected boolean canAddPassenger(Entity pPassenger) {
         return !this.isVehicle() && !this.isEyeInFluid(FluidTags.LAVA);
     }
 
@@ -377,13 +377,13 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    protected PathNavigation createNavigation(Level p_33913_) {
-        return new Strider.StriderPathNavigation(this, p_33913_);
+    protected PathNavigation createNavigation(Level pLevel) {
+        return new Strider.StriderPathNavigation(this, pLevel);
     }
 
     @Override
-    public float getWalkTargetValue(BlockPos p_33895_, LevelReader p_33896_) {
-        if (p_33896_.getBlockState(p_33895_).getFluidState().is(FluidTags.LAVA)) {
+    public float getWalkTargetValue(BlockPos pPos, LevelReader pLevel) {
+        if (pLevel.getBlockState(pPos).getFluidState().is(FluidTags.LAVA)) {
             return 10.0F;
         } else {
             return this.isInLava() ? Float.NEGATIVE_INFINITY : 0.0F;
@@ -396,8 +396,8 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    public boolean isFood(ItemStack p_33946_) {
-        return p_33946_.is(ItemTags.STRIDER_FOOD);
+    public boolean isFood(ItemStack pStack) {
+        return pStack.is(ItemTags.STRIDER_FOOD);
     }
 
     @Override
@@ -409,19 +409,19 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_33910_, InteractionHand p_33911_) {
-        boolean flag = this.isFood(p_33910_.getItemInHand(p_33911_));
-        if (!flag && this.isSaddled() && !this.isVehicle() && !p_33910_.isSecondaryUseActive()) {
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        boolean flag = this.isFood(pPlayer.getItemInHand(pHand));
+        if (!flag && this.isSaddled() && !this.isVehicle() && !pPlayer.isSecondaryUseActive()) {
             if (!this.level().isClientSide) {
-                p_33910_.startRiding(this);
+                pPlayer.startRiding(this);
             }
 
             return InteractionResult.SUCCESS;
         } else {
-            InteractionResult interactionresult = super.mobInteract(p_33910_, p_33911_);
+            InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
             if (!interactionresult.consumesAction()) {
-                ItemStack itemstack = p_33910_.getItemInHand(p_33911_);
-                return (InteractionResult)(itemstack.is(Items.SADDLE) ? itemstack.interactLivingEntity(p_33910_, this, p_33911_) : InteractionResult.PASS);
+                ItemStack itemstack = pPlayer.getItemInHand(pHand);
+                return (InteractionResult)(itemstack.is(Items.SADDLE) ? itemstack.interactLivingEntity(pPlayer, this, pHand) : InteractionResult.PASS);
             } else {
                 if (flag && !this.isSilent()) {
                     this.level()
@@ -475,19 +475,19 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
         }
     }
 
-    private SpawnGroupData spawnJockey(ServerLevelAccessor p_33882_, DifficultyInstance p_33883_, Mob p_33884_, @Nullable SpawnGroupData p_33885_) {
-        p_33884_.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
-        p_33884_.finalizeSpawn(p_33882_, p_33883_, EntitySpawnReason.JOCKEY, p_33885_);
-        p_33884_.startRiding(this, true);
+    private SpawnGroupData spawnJockey(ServerLevelAccessor pServerLevel, DifficultyInstance pDifficulty, Mob pJockey, @Nullable SpawnGroupData pSpawnData) {
+        pJockey.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
+        pJockey.finalizeSpawn(pServerLevel, pDifficulty, EntitySpawnReason.JOCKEY, pSpawnData);
+        pJockey.startRiding(this, true);
         return new AgeableMob.AgeableMobGroupData(0.0F);
     }
 
     static class StriderGoToLavaGoal extends MoveToBlockGoal {
         private final Strider strider;
 
-        StriderGoToLavaGoal(Strider p_33955_, double p_33956_) {
-            super(p_33955_, p_33956_, 8, 2);
-            this.strider = p_33955_;
+        StriderGoToLavaGoal(Strider pStrider, double pSpeedModifier) {
+            super(pStrider, pSpeedModifier, 8, 2);
+            this.strider = pStrider;
         }
 
         @Override
@@ -511,14 +511,14 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
         }
 
         @Override
-        protected boolean isValidTarget(LevelReader p_33963_, BlockPos p_33964_) {
-            return p_33963_.getBlockState(p_33964_).is(Blocks.LAVA) && p_33963_.getBlockState(p_33964_.above()).isPathfindable(PathComputationType.LAND);
+        protected boolean isValidTarget(LevelReader pLevel, BlockPos pPos) {
+            return pLevel.getBlockState(pPos).is(Blocks.LAVA) && pLevel.getBlockState(pPos.above()).isPathfindable(PathComputationType.LAND);
         }
     }
 
     static class StriderPathNavigation extends GroundPathNavigation {
-        StriderPathNavigation(Strider p_33969_, Level p_33970_) {
-            super(p_33969_, p_33970_);
+        StriderPathNavigation(Strider pStrider, Level pLevel) {
+            super(pStrider, pLevel);
         }
 
         @Override
@@ -533,8 +533,8 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
         }
 
         @Override
-        public boolean isStableDestination(BlockPos p_33976_) {
-            return this.level.getBlockState(p_33976_).is(Blocks.LAVA) || super.isStableDestination(p_33976_);
+        public boolean isStableDestination(BlockPos pPos) {
+            return this.level.getBlockState(pPos).is(Blocks.LAVA) || super.isStableDestination(pPos);
         }
     }
 }

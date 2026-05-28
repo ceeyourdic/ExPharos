@@ -57,20 +57,20 @@ public class NoteBlock extends Block {
         );
     }
 
-    private BlockState setInstrument(LevelReader p_363719_, BlockPos p_261908_, BlockState p_262130_) {
-        NoteBlockInstrument noteblockinstrument = p_363719_.getBlockState(p_261908_.above()).instrument();
+    private BlockState setInstrument(LevelReader pLevel, BlockPos pPos, BlockState pState) {
+        NoteBlockInstrument noteblockinstrument = pLevel.getBlockState(pPos.above()).instrument();
         if (noteblockinstrument.worksAboveNoteBlock()) {
-            return p_262130_.setValue(INSTRUMENT, noteblockinstrument);
+            return pState.setValue(INSTRUMENT, noteblockinstrument);
         } else {
-            NoteBlockInstrument noteblockinstrument1 = p_363719_.getBlockState(p_261908_.below()).instrument();
+            NoteBlockInstrument noteblockinstrument1 = pLevel.getBlockState(pPos.below()).instrument();
             NoteBlockInstrument noteblockinstrument2 = noteblockinstrument1.worksAboveNoteBlock() ? NoteBlockInstrument.HARP : noteblockinstrument1;
-            return p_262130_.setValue(INSTRUMENT, noteblockinstrument2);
+            return pState.setValue(INSTRUMENT, noteblockinstrument2);
         }
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_55018_) {
-        return this.setInstrument(p_55018_.getLevel(), p_55018_.getClickedPos(), this.defaultBlockState());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.setInstrument(pContext.getLevel(), pContext.getClickedPos(), this.defaultBlockState());
     }
 
     @Override
@@ -102,10 +102,10 @@ public class NoteBlock extends Block {
         }
     }
 
-    private void playNote(@Nullable Entity p_261664_, BlockState p_261606_, Level p_261819_, BlockPos p_262042_) {
-        if (p_261606_.getValue(INSTRUMENT).worksAboveNoteBlock() || p_261819_.getBlockState(p_262042_.above()).isAir()) {
-            p_261819_.blockEvent(p_262042_, this, 0, 0);
-            p_261819_.gameEvent(p_261664_, GameEvent.NOTE_BLOCK_PLAY, p_262042_);
+    private void playNote(@Nullable Entity pEntity, BlockState pState, Level pLevel, BlockPos pPos) {
+        if (pState.getValue(INSTRUMENT).worksAboveNoteBlock() || pLevel.getBlockState(pPos.above()).isAir()) {
+            pLevel.blockEvent(pPos, this, 0, 0);
+            pLevel.gameEvent(pEntity, GameEvent.NOTE_BLOCK_PLAY, pPos);
         }
     }
 
@@ -131,29 +131,29 @@ public class NoteBlock extends Block {
     }
 
     @Override
-    protected void attack(BlockState p_55029_, Level p_55030_, BlockPos p_55031_, Player p_55032_) {
-        if (!p_55030_.isClientSide) {
-            this.playNote(p_55032_, p_55029_, p_55030_, p_55031_);
-            p_55032_.awardStat(Stats.PLAY_NOTEBLOCK);
+    protected void attack(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer) {
+        if (!pLevel.isClientSide) {
+            this.playNote(pPlayer, pState, pLevel, pPos);
+            pPlayer.awardStat(Stats.PLAY_NOTEBLOCK);
         }
     }
 
-    public static float getPitchFromNote(int p_277409_) {
-        return (float)Math.pow(2.0, (double)(p_277409_ - 12) / 12.0);
+    public static float getPitchFromNote(int pNote) {
+        return (float)Math.pow(2.0, (double)(pNote - 12) / 12.0);
     }
 
     @Override
-    protected boolean triggerEvent(BlockState p_55023_, Level p_55024_, BlockPos p_55025_, int p_55026_, int p_55027_) {
-        NoteBlockInstrument noteblockinstrument = p_55023_.getValue(INSTRUMENT);
+    protected boolean triggerEvent(BlockState pState, Level pLevel, BlockPos pPos, int pId, int pParam) {
+        NoteBlockInstrument noteblockinstrument = pState.getValue(INSTRUMENT);
         float f;
         if (noteblockinstrument.isTunable()) {
-            int i = p_55023_.getValue(NOTE);
+            int i = pState.getValue(NOTE);
             f = getPitchFromNote(i);
-            p_55024_.addParticle(
+            pLevel.addParticle(
                 ParticleTypes.NOTE,
-                (double)p_55025_.getX() + 0.5,
-                (double)p_55025_.getY() + 1.2,
-                (double)p_55025_.getZ() + 0.5,
+                (double)pPos.getX() + 0.5,
+                (double)pPos.getY() + 1.2,
+                (double)pPos.getZ() + 0.5,
                 (double)i / 24.0,
                 0.0,
                 0.0
@@ -164,7 +164,7 @@ public class NoteBlock extends Block {
 
         Holder<SoundEvent> holder;
         if (noteblockinstrument.hasCustomSound()) {
-            ResourceLocation resourcelocation = this.getCustomSoundId(p_55024_, p_55025_);
+            ResourceLocation resourcelocation = this.getCustomSoundId(pLevel, pPos);
             if (resourcelocation == null) {
                 return false;
             }
@@ -174,27 +174,27 @@ public class NoteBlock extends Block {
             holder = noteblockinstrument.getSoundEvent();
         }
 
-        p_55024_.playSeededSound(
+        pLevel.playSeededSound(
             null,
-            (double)p_55025_.getX() + 0.5,
-            (double)p_55025_.getY() + 0.5,
-            (double)p_55025_.getZ() + 0.5,
+            (double)pPos.getX() + 0.5,
+            (double)pPos.getY() + 0.5,
+            (double)pPos.getZ() + 0.5,
             holder,
             SoundSource.RECORDS,
             3.0F,
             f,
-            p_55024_.random.nextLong()
+            pLevel.random.nextLong()
         );
         return true;
     }
 
     @Nullable
-    private ResourceLocation getCustomSoundId(Level p_263070_, BlockPos p_262999_) {
-        return p_263070_.getBlockEntity(p_262999_.above()) instanceof SkullBlockEntity skullblockentity ? skullblockentity.getNoteBlockSound() : null;
+    private ResourceLocation getCustomSoundId(Level pLevel, BlockPos pPos) {
+        return pLevel.getBlockEntity(pPos.above()) instanceof SkullBlockEntity skullblockentity ? skullblockentity.getNoteBlockSound() : null;
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_55055_) {
-        p_55055_.add(INSTRUMENT, POWERED, NOTE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(INSTRUMENT, POWERED, NOTE);
     }
 }

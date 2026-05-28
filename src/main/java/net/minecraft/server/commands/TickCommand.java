@@ -19,8 +19,8 @@ public class TickCommand {
     private static final float MAX_TICKRATE = 10000.0F;
     private static final String DEFAULT_TICKRATE = String.valueOf(20);
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_309698_) {
-        p_309698_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("tick")
                 .requires(p_313254_ -> p_313254_.hasPermission(3))
                 .then(Commands.literal("query").executes(p_310022_ -> tickQuery(p_310022_.getSource())))
@@ -56,61 +56,61 @@ public class TickCommand {
         );
     }
 
-    private static String nanosToMilisString(long p_312994_) {
-        return String.format(Locale.ROOT, "%.1f", (float)p_312994_ / (float)TimeUtil.NANOSECONDS_PER_MILLISECOND);
+    private static String nanosToMilisString(long pNanos) {
+        return String.format(Locale.ROOT, "%.1f", (float)pNanos / (float)TimeUtil.NANOSECONDS_PER_MILLISECOND);
     }
 
-    private static int setTickingRate(CommandSourceStack p_311838_, float p_312705_) {
-        ServerTickRateManager servertickratemanager = p_311838_.getServer().tickRateManager();
-        servertickratemanager.setTickRate(p_312705_);
-        String s = String.format(Locale.ROOT, "%.1f", p_312705_);
-        p_311838_.sendSuccess(() -> Component.translatable("commands.tick.rate.success", s), true);
-        return (int)p_312705_;
+    private static int setTickingRate(CommandSourceStack pSource, float pTickRate) {
+        ServerTickRateManager servertickratemanager = pSource.getServer().tickRateManager();
+        servertickratemanager.setTickRate(pTickRate);
+        String s = String.format(Locale.ROOT, "%.1f", pTickRate);
+        pSource.sendSuccess(() -> Component.translatable("commands.tick.rate.success", s), true);
+        return (int)pTickRate;
     }
 
-    private static int tickQuery(CommandSourceStack p_310546_) {
-        ServerTickRateManager servertickratemanager = p_310546_.getServer().tickRateManager();
-        String s = nanosToMilisString(p_310546_.getServer().getAverageTickTimeNanos());
+    private static int tickQuery(CommandSourceStack pSource) {
+        ServerTickRateManager servertickratemanager = pSource.getServer().tickRateManager();
+        String s = nanosToMilisString(pSource.getServer().getAverageTickTimeNanos());
         float f = servertickratemanager.tickrate();
         String s1 = String.format(Locale.ROOT, "%.1f", f);
         if (servertickratemanager.isSprinting()) {
-            p_310546_.sendSuccess(() -> Component.translatable("commands.tick.status.sprinting"), false);
-            p_310546_.sendSuccess(() -> Component.translatable("commands.tick.query.rate.sprinting", s1, s), false);
+            pSource.sendSuccess(() -> Component.translatable("commands.tick.status.sprinting"), false);
+            pSource.sendSuccess(() -> Component.translatable("commands.tick.query.rate.sprinting", s1, s), false);
         } else {
             if (servertickratemanager.isFrozen()) {
-                p_310546_.sendSuccess(() -> Component.translatable("commands.tick.status.frozen"), false);
-            } else if (servertickratemanager.nanosecondsPerTick() < p_310546_.getServer().getAverageTickTimeNanos()) {
-                p_310546_.sendSuccess(() -> Component.translatable("commands.tick.status.lagging"), false);
+                pSource.sendSuccess(() -> Component.translatable("commands.tick.status.frozen"), false);
+            } else if (servertickratemanager.nanosecondsPerTick() < pSource.getServer().getAverageTickTimeNanos()) {
+                pSource.sendSuccess(() -> Component.translatable("commands.tick.status.lagging"), false);
             } else {
-                p_310546_.sendSuccess(() -> Component.translatable("commands.tick.status.running"), false);
+                pSource.sendSuccess(() -> Component.translatable("commands.tick.status.running"), false);
             }
 
             String s2 = nanosToMilisString(servertickratemanager.nanosecondsPerTick());
-            p_310546_.sendSuccess(() -> Component.translatable("commands.tick.query.rate.running", s1, s, s2), false);
+            pSource.sendSuccess(() -> Component.translatable("commands.tick.query.rate.running", s1, s, s2), false);
         }
 
-        long[] along = Arrays.copyOf(p_310546_.getServer().getTickTimesNanos(), p_310546_.getServer().getTickTimesNanos().length);
+        long[] along = Arrays.copyOf(pSource.getServer().getTickTimesNanos(), pSource.getServer().getTickTimesNanos().length);
         Arrays.sort(along);
         String s3 = nanosToMilisString(along[along.length / 2]);
         String s4 = nanosToMilisString(along[(int)((double)along.length * 0.95)]);
         String s5 = nanosToMilisString(along[(int)((double)along.length * 0.99)]);
-        p_310546_.sendSuccess(() -> Component.translatable("commands.tick.query.percentiles", s3, s4, s5, along.length), false);
+        pSource.sendSuccess(() -> Component.translatable("commands.tick.query.percentiles", s3, s4, s5, along.length), false);
         return (int)f;
     }
 
-    private static int sprint(CommandSourceStack p_311527_, int p_312312_) {
-        boolean flag = p_311527_.getServer().tickRateManager().requestGameToSprint(p_312312_);
+    private static int sprint(CommandSourceStack pSource, int pSprintTime) {
+        boolean flag = pSource.getServer().tickRateManager().requestGameToSprint(pSprintTime);
         if (flag) {
-            p_311527_.sendSuccess(() -> Component.translatable("commands.tick.sprint.stop.success"), true);
+            pSource.sendSuccess(() -> Component.translatable("commands.tick.sprint.stop.success"), true);
         }
 
-        p_311527_.sendSuccess(() -> Component.translatable("commands.tick.status.sprinting"), true);
+        pSource.sendSuccess(() -> Component.translatable("commands.tick.status.sprinting"), true);
         return 1;
     }
 
-    private static int setFreeze(CommandSourceStack p_309500_, boolean p_312715_) {
-        ServerTickRateManager servertickratemanager = p_309500_.getServer().tickRateManager();
-        if (p_312715_) {
+    private static int setFreeze(CommandSourceStack pSource, boolean pFrozen) {
+        ServerTickRateManager servertickratemanager = pSource.getServer().tickRateManager();
+        if (pFrozen) {
             if (servertickratemanager.isSprinting()) {
                 servertickratemanager.stopSprinting();
             }
@@ -120,48 +120,48 @@ public class TickCommand {
             }
         }
 
-        servertickratemanager.setFrozen(p_312715_);
-        if (p_312715_) {
-            p_309500_.sendSuccess(() -> Component.translatable("commands.tick.status.frozen"), true);
+        servertickratemanager.setFrozen(pFrozen);
+        if (pFrozen) {
+            pSource.sendSuccess(() -> Component.translatable("commands.tick.status.frozen"), true);
         } else {
-            p_309500_.sendSuccess(() -> Component.translatable("commands.tick.status.running"), true);
+            pSource.sendSuccess(() -> Component.translatable("commands.tick.status.running"), true);
         }
 
-        return p_312715_ ? 1 : 0;
+        return pFrozen ? 1 : 0;
     }
 
-    private static int step(CommandSourceStack p_312155_, int p_311495_) {
-        ServerTickRateManager servertickratemanager = p_312155_.getServer().tickRateManager();
-        boolean flag = servertickratemanager.stepGameIfPaused(p_311495_);
+    private static int step(CommandSourceStack pSource, int pTicks) {
+        ServerTickRateManager servertickratemanager = pSource.getServer().tickRateManager();
+        boolean flag = servertickratemanager.stepGameIfPaused(pTicks);
         if (flag) {
-            p_312155_.sendSuccess(() -> Component.translatable("commands.tick.step.success", p_311495_), true);
+            pSource.sendSuccess(() -> Component.translatable("commands.tick.step.success", pTicks), true);
         } else {
-            p_312155_.sendFailure(Component.translatable("commands.tick.step.fail"));
+            pSource.sendFailure(Component.translatable("commands.tick.step.fail"));
         }
 
         return 1;
     }
 
-    private static int stopStepping(CommandSourceStack p_310383_) {
-        ServerTickRateManager servertickratemanager = p_310383_.getServer().tickRateManager();
+    private static int stopStepping(CommandSourceStack pSource) {
+        ServerTickRateManager servertickratemanager = pSource.getServer().tickRateManager();
         boolean flag = servertickratemanager.stopStepping();
         if (flag) {
-            p_310383_.sendSuccess(() -> Component.translatable("commands.tick.step.stop.success"), true);
+            pSource.sendSuccess(() -> Component.translatable("commands.tick.step.stop.success"), true);
             return 1;
         } else {
-            p_310383_.sendFailure(Component.translatable("commands.tick.step.stop.fail"));
+            pSource.sendFailure(Component.translatable("commands.tick.step.stop.fail"));
             return 0;
         }
     }
 
-    private static int stopSprinting(CommandSourceStack p_312590_) {
-        ServerTickRateManager servertickratemanager = p_312590_.getServer().tickRateManager();
+    private static int stopSprinting(CommandSourceStack pSource) {
+        ServerTickRateManager servertickratemanager = pSource.getServer().tickRateManager();
         boolean flag = servertickratemanager.stopSprinting();
         if (flag) {
-            p_312590_.sendSuccess(() -> Component.translatable("commands.tick.sprint.stop.success"), true);
+            pSource.sendSuccess(() -> Component.translatable("commands.tick.sprint.stop.success"), true);
             return 1;
         } else {
-            p_312590_.sendFailure(Component.translatable("commands.tick.sprint.stop.fail"));
+            pSource.sendFailure(Component.translatable("commands.tick.sprint.stop.fail"));
             return 0;
         }
     }

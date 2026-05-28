@@ -21,14 +21,14 @@ public class SurfaceRelativeThresholdFilter extends PlacementFilter {
     private final int minInclusive;
     private final int maxInclusive;
 
-    private SurfaceRelativeThresholdFilter(Heightmap.Types p_191925_, int p_191926_, int p_191927_) {
-        this.heightmap = p_191925_;
-        this.minInclusive = p_191926_;
-        this.maxInclusive = p_191927_;
+    private SurfaceRelativeThresholdFilter(Heightmap.Types pHeightmap, int pMinInclusive, int pMaxInclusive) {
+        this.heightmap = pHeightmap;
+        this.minInclusive = pMinInclusive;
+        this.maxInclusive = pMaxInclusive;
     }
 
-    public static SurfaceRelativeThresholdFilter of(Heightmap.Types p_191931_, int p_191932_, int p_191933_) {
-        return new SurfaceRelativeThresholdFilter(p_191931_, p_191932_, p_191933_);
+    public static SurfaceRelativeThresholdFilter of(Heightmap.Types pHeightmap, int pMinInclusive, int pMaxInclusive) {
+        return new SurfaceRelativeThresholdFilter(pHeightmap, pMinInclusive, pMaxInclusive);
     }
 
     @Override

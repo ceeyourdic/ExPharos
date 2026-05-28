@@ -14,8 +14,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 
 public class RotateCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> p_361568_) {
-        p_361568_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("rotate")
                 .requires(p_362688_ -> p_362688_.hasPermission(2))
                 .then(
@@ -75,16 +75,16 @@ public class RotateCommand {
         );
     }
 
-    private static int rotate(CommandSourceStack p_366764_, Entity p_367594_, Coordinates p_363288_) {
-        Vec2 vec2 = p_363288_.getRotation(p_366764_);
-        p_367594_.forceSetRotation(vec2.y, vec2.x);
-        p_366764_.sendSuccess(() -> Component.translatable("commands.rotate.success", p_367594_.getDisplayName()), true);
+    private static int rotate(CommandSourceStack pSource, Entity pEntity, Coordinates pCoordinates) {
+        Vec2 vec2 = pCoordinates.getRotation(pSource);
+        pEntity.forceSetRotation(vec2.y, vec2.x);
+        pSource.sendSuccess(() -> Component.translatable("commands.rotate.success", pEntity.getDisplayName()), true);
         return 1;
     }
 
-    private static int rotate(CommandSourceStack p_361401_, Entity p_364656_, LookAt p_364516_) {
-        p_364516_.perform(p_361401_, p_364656_);
-        p_361401_.sendSuccess(() -> Component.translatable("commands.rotate.success", p_364656_.getDisplayName()), true);
+    private static int rotate(CommandSourceStack pSource, Entity pEntity, LookAt pLookAt) {
+        pLookAt.perform(pSource, pEntity);
+        pSource.sendSuccess(() -> Component.translatable("commands.rotate.success", pEntity.getDisplayName()), true);
         return 1;
     }
 }

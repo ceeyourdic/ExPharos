@@ -54,17 +54,17 @@ public class GiantTrunkPlacer extends TrunkPlacer {
     }
 
     private void placeLogIfFreeWithOffset(
-        LevelSimulatedReader p_226130_,
-        BiConsumer<BlockPos, BlockState> p_226131_,
-        RandomSource p_226132_,
-        BlockPos.MutableBlockPos p_226133_,
-        TreeConfiguration p_226134_,
-        BlockPos p_226135_,
-        int p_226136_,
-        int p_226137_,
-        int p_226138_
+        LevelSimulatedReader pLevel,
+        BiConsumer<BlockPos, BlockState> pBlockSetter,
+        RandomSource pRandom,
+        BlockPos.MutableBlockPos pPos,
+        TreeConfiguration pConfig,
+        BlockPos pOffsetPos,
+        int pOffsetX,
+        int pOffsetY,
+        int pOffsetZ
     ) {
-        p_226133_.setWithOffset(p_226135_, p_226136_, p_226137_, p_226138_);
-        this.placeLogIfFree(p_226130_, p_226131_, p_226132_, p_226133_, p_226134_);
+        pPos.setWithOffset(pOffsetPos, pOffsetX, pOffsetY, pOffsetZ);
+        this.placeLogIfFree(pLevel, pBlockSetter, pRandom, pPos, pConfig);
     }
 }

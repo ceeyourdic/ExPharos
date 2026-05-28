@@ -15,12 +15,12 @@ public class ThrownExperienceBottle extends ThrowableItemProjectile {
         super(p_37510_, p_37511_);
     }
 
-    public ThrownExperienceBottle(Level p_37513_, LivingEntity p_362218_, ItemStack p_363138_) {
-        super(EntityType.EXPERIENCE_BOTTLE, p_362218_, p_37513_, p_363138_);
+    public ThrownExperienceBottle(Level pLevel, LivingEntity pOwner, ItemStack pItem) {
+        super(EntityType.EXPERIENCE_BOTTLE, pOwner, pLevel, pItem);
     }
 
-    public ThrownExperienceBottle(Level p_37518_, double p_366636_, double p_361047_, double p_366792_, ItemStack p_368998_) {
-        super(EntityType.EXPERIENCE_BOTTLE, p_366636_, p_361047_, p_366792_, p_37518_, p_368998_);
+    public ThrownExperienceBottle(Level pLevel, double pX, double pY, double pZ, ItemStack pItem) {
+        super(EntityType.EXPERIENCE_BOTTLE, pX, pY, pZ, pLevel, pItem);
     }
 
     @Override
@@ -34,8 +34,8 @@ public class ThrownExperienceBottle extends ThrowableItemProjectile {
     }
 
     @Override
-    protected void onHit(HitResult p_37521_) {
-        super.onHit(p_37521_);
+    protected void onHit(HitResult pResult) {
+        super.onHit(pResult);
         if (this.level() instanceof ServerLevel) {
             this.level().levelEvent(2002, this.blockPosition(), -13083194);
             int i = 3 + this.level().random.nextInt(5) + this.level().random.nextInt(5);

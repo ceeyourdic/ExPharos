@@ -62,11 +62,11 @@ import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
 public class Main {
-    @SuppressForbidden(
-        reason = "System.out needed before bootstrap"
-    )
+//    @SuppressForbidden(
+//        a = "System.out needed before bootstrap"
+//    )
     @DontObfuscate
-    public static void main(String[] p_129669_) throws IOException {
+    public static void main(String[] pArgs) throws IOException {
         SharedConstants.tryDetectVersion();
         OptionParser optionparser = new OptionParser();
         OptionSpec<Void> optionspec = optionparser.accepts("help", "Show the help menu").forHelp();
@@ -77,7 +77,7 @@ public class Main {
         OptionSpec<Void> optionspec4 = optionparser.accepts("all", "Include all generators");
         OptionSpec<String> optionspec5 = optionparser.accepts("output", "Output folder").withRequiredArg().defaultsTo("generated");
         OptionSpec<String> optionspec6 = optionparser.accepts("input", "Input folder").withRequiredArg();
-        OptionSet optionset = optionparser.parse(p_129669_);
+        OptionSet optionset = optionparser.parse(pArgs);
         if (!optionset.has(optionspec) && optionset.hasOptions()) {
             Path path = Paths.get(optionspec5.value(optionset));
             boolean flag = optionset.has(optionspec4);
@@ -94,16 +94,16 @@ public class Main {
     }
 
     private static <T extends DataProvider> DataProvider.Factory<T> bindRegistries(
-        BiFunction<PackOutput, CompletableFuture<HolderLookup.Provider>, T> p_256618_, CompletableFuture<HolderLookup.Provider> p_256515_
+        BiFunction<PackOutput, CompletableFuture<HolderLookup.Provider>, T> pTagProviderFactory, CompletableFuture<HolderLookup.Provider> pLookupProvider
     ) {
-        return p_255476_ -> p_256618_.apply(p_255476_, p_256515_);
+        return p_255476_ -> pTagProviderFactory.apply(p_255476_, pLookupProvider);
     }
 
-    public static void addServerProviders(DataGenerator p_378724_, Collection<Path> p_375786_, boolean p_376625_, boolean p_377749_, boolean p_378020_) {
-        DataGenerator.PackGenerator datagenerator$packgenerator = p_378724_.getVanillaPack(p_376625_);
-        datagenerator$packgenerator.addProvider(p_253388_ -> new SnbtToNbt(p_253388_, p_375786_).addFilter(new StructureUpdater()));
+    public static void addServerProviders(DataGenerator pDataGenerator, Collection<Path> pPaths, boolean pServer, boolean pDev, boolean pReports) {
+        DataGenerator.PackGenerator datagenerator$packgenerator = pDataGenerator.getVanillaPack(pServer);
+        datagenerator$packgenerator.addProvider(p_253388_ -> new SnbtToNbt(p_253388_, pPaths).addFilter(new StructureUpdater()));
         CompletableFuture<HolderLookup.Provider> completablefuture1 = CompletableFuture.supplyAsync(VanillaRegistries::createLookup, Util.backgroundExecutor());
-        DataGenerator.PackGenerator datagenerator$packgenerator1 = p_378724_.getVanillaPack(p_376625_);
+        DataGenerator.PackGenerator datagenerator$packgenerator1 = pDataGenerator.getVanillaPack(pServer);
         datagenerator$packgenerator1.addProvider(bindRegistries(RegistriesDatapackGenerator::new, completablefuture1));
         datagenerator$packgenerator1.addProvider(bindRegistries(VanillaAdvancementProvider::create, completablefuture1));
         datagenerator$packgenerator1.addProvider(bindRegistries(VanillaLootTableProvider::create, completablefuture1));
@@ -126,9 +126,9 @@ public class Main {
         datagenerator$packgenerator1.addProvider(bindRegistries(PoiTypeTagsProvider::new, completablefuture1));
         datagenerator$packgenerator1.addProvider(bindRegistries(WorldPresetTagsProvider::new, completablefuture1));
         datagenerator$packgenerator1.addProvider(bindRegistries(VanillaEnchantmentTagsProvider::new, completablefuture1));
-        datagenerator$packgenerator1 = p_378724_.getVanillaPack(p_377749_);
-        datagenerator$packgenerator1.addProvider(p_253386_ -> new NbtToSnbt(p_253386_, p_375786_));
-        datagenerator$packgenerator1 = p_378724_.getVanillaPack(p_378020_);
+        datagenerator$packgenerator1 = pDataGenerator.getVanillaPack(pDev);
+        datagenerator$packgenerator1.addProvider(p_253386_ -> new NbtToSnbt(p_253386_, pPaths));
+        datagenerator$packgenerator1 = pDataGenerator.getVanillaPack(pReports);
         datagenerator$packgenerator1.addProvider(bindRegistries(BiomeParametersDumpReport::new, completablefuture1));
         datagenerator$packgenerator1.addProvider(bindRegistries(ItemListReport::new, completablefuture1));
         datagenerator$packgenerator1.addProvider(bindRegistries(BlockListReport::new, completablefuture1));
@@ -138,7 +138,7 @@ public class Main {
         datagenerator$packgenerator1.addProvider(DatapackStructureReport::new);
         CompletableFuture<RegistrySetBuilder.PatchedRegistries> completablefuture2 = TradeRebalanceRegistries.createLookup(completablefuture1);
         CompletableFuture<HolderLookup.Provider> completablefuture = completablefuture2.thenApply(RegistrySetBuilder.PatchedRegistries::patches);
-        DataGenerator.PackGenerator datagenerator$packgenerator2 = p_378724_.getBuiltinDatapack(p_376625_, "trade_rebalance");
+        DataGenerator.PackGenerator datagenerator$packgenerator2 = pDataGenerator.getBuiltinDatapack(pServer, "trade_rebalance");
         datagenerator$packgenerator2.addProvider(bindRegistries(RegistriesDatapackGenerator::new, completablefuture));
         datagenerator$packgenerator2.addProvider(
             p_296336_ -> PackMetadataGenerator.forFeaturePack(
@@ -148,13 +148,13 @@ public class Main {
         datagenerator$packgenerator2.addProvider(bindRegistries(TradeRebalanceLootTableProvider::create, completablefuture1));
         datagenerator$packgenerator2.addProvider(bindRegistries(TradeRebalanceStructureTagsProvider::new, completablefuture1));
         datagenerator$packgenerator2.addProvider(bindRegistries(TradeRebalanceEnchantmentTagsProvider::new, completablefuture1));
-        datagenerator$packgenerator1 = p_378724_.getBuiltinDatapack(p_376625_, "redstone_experiments");
+        datagenerator$packgenerator1 = pDataGenerator.getBuiltinDatapack(pServer, "redstone_experiments");
         datagenerator$packgenerator1.addProvider(
             p_358165_ -> PackMetadataGenerator.forFeaturePack(
                     p_358165_, Component.translatable("dataPack.redstone_experiments.description"), FeatureFlagSet.of(FeatureFlags.REDSTONE_EXPERIMENTS)
                 )
         );
-        datagenerator$packgenerator1 = p_378724_.getBuiltinDatapack(p_376625_, "minecart_improvements");
+        datagenerator$packgenerator1 = pDataGenerator.getBuiltinDatapack(pServer, "minecart_improvements");
         datagenerator$packgenerator1.addProvider(
             p_358177_ -> PackMetadataGenerator.forFeaturePack(
                     p_358177_, Component.translatable("dataPack.minecart_improvements.description"), FeatureFlagSet.of(FeatureFlags.MINECART_IMPROVEMENTS)

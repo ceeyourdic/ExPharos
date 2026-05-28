@@ -14,10 +14,10 @@ public class ShriekParticle extends TextureSheetParticle {
     private static final float MAGICAL_X_ROT = 1.0472F;
     private int delay;
 
-    ShriekParticle(ClientLevel p_233976_, double p_233977_, double p_233978_, double p_233979_, int p_233980_) {
-        super(p_233976_, p_233977_, p_233978_, p_233979_, 0.0, 0.0, 0.0);
+    ShriekParticle(ClientLevel pLevel, double pX, double pY, double pZ, int pDelay) {
+        super(pLevel, pX, pY, pZ, 0.0, 0.0, 0.0);
         this.quadSize = 0.85F;
-        this.delay = p_233980_;
+        this.delay = pDelay;
         this.lifetime = 30;
         this.gravity = 0.0F;
         this.xd = 0.0;
@@ -65,8 +65,8 @@ public class ShriekParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<ShriekParticleOption> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_234008_) {
-            this.sprite = p_234008_;
+        public Provider(SpriteSet pSprite) {
+            this.sprite = pSprite;
         }
 
         public Particle createParticle(

@@ -21,39 +21,39 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
     private final short[] positions;
     private final BlockState[] states;
 
-    public ClientboundSectionBlocksUpdatePacket(SectionPos p_284963_, ShortSet p_285027_, LevelChunkSection p_285414_) {
-        this.sectionPos = p_284963_;
-        int i = p_285027_.size();
+    public ClientboundSectionBlocksUpdatePacket(SectionPos pSectionPos, ShortSet pPositions, LevelChunkSection pSection) {
+        this.sectionPos = pSectionPos;
+        int i = pPositions.size();
         this.positions = new short[i];
         this.states = new BlockState[i];
         int j = 0;
 
-        for (short short1 : p_285027_) {
+        for (short short1 : pPositions) {
             this.positions[j] = short1;
-            this.states[j] = p_285414_.getBlockState(SectionPos.sectionRelativeX(short1), SectionPos.sectionRelativeY(short1), SectionPos.sectionRelativeZ(short1));
+            this.states[j] = pSection.getBlockState(SectionPos.sectionRelativeX(short1), SectionPos.sectionRelativeY(short1), SectionPos.sectionRelativeZ(short1));
             j++;
         }
     }
 
-    private ClientboundSectionBlocksUpdatePacket(FriendlyByteBuf p_179196_) {
-        this.sectionPos = SectionPos.of(p_179196_.readLong());
-        int i = p_179196_.readVarInt();
+    private ClientboundSectionBlocksUpdatePacket(FriendlyByteBuf pBuffer) {
+        this.sectionPos = SectionPos.of(pBuffer.readLong());
+        int i = pBuffer.readVarInt();
         this.positions = new short[i];
         this.states = new BlockState[i];
 
         for (int j = 0; j < i; j++) {
-            long k = p_179196_.readVarLong();
+            long k = pBuffer.readVarLong();
             this.positions[j] = (short)((int)(k & 4095L));
             this.states[j] = Block.BLOCK_STATE_REGISTRY.byId((int)(k >>> 12));
         }
     }
 
-    private void write(FriendlyByteBuf p_133002_) {
-        p_133002_.writeLong(this.sectionPos.asLong());
-        p_133002_.writeVarInt(this.positions.length);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeLong(this.sectionPos.asLong());
+        pBuffer.writeVarInt(this.positions.length);
 
         for (int i = 0; i < this.positions.length; i++) {
-            p_133002_.writeVarLong((long)Block.getId(this.states[i]) << 12 | (long)this.positions[i]);
+            pBuffer.writeVarLong((long)Block.getId(this.states[i]) << 12 | (long)this.positions[i]);
         }
     }
 
@@ -62,17 +62,17 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
         return GamePacketTypes.CLIENTBOUND_SECTION_BLOCKS_UPDATE;
     }
 
-    public void handle(ClientGamePacketListener p_132999_) {
-        p_132999_.handleChunkBlocksUpdate(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleChunkBlocksUpdate(this);
     }
 
-    public void runUpdates(BiConsumer<BlockPos, BlockState> p_132993_) {
+    public void runUpdates(BiConsumer<BlockPos, BlockState> pConsumer) {
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
         for (int i = 0; i < this.positions.length; i++) {
             short short1 = this.positions[i];
             blockpos$mutableblockpos.set(this.sectionPos.relativeToBlockX(short1), this.sectionPos.relativeToBlockY(short1), this.sectionPos.relativeToBlockZ(short1));
-            p_132993_.accept(blockpos$mutableblockpos, this.states[i]);
+            pConsumer.accept(blockpos$mutableblockpos, this.states[i]);
         }
     }
 }

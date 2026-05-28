@@ -8,5 +8,5 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public interface RecipeUpdateListener {
     void recipesUpdated();
 
-    void fillGhostRecipe(RecipeDisplay p_369548_);
+    void fillGhostRecipe(RecipeDisplay pRecipeDisplay);
 }

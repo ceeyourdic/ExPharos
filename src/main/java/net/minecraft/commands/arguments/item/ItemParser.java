@@ -62,15 +62,15 @@ public class ItemParser {
     final HolderLookup.RegistryLookup<Item> items;
     final DynamicOps<Tag> registryOps;
 
-    public ItemParser(HolderLookup.Provider p_332470_) {
-        this.items = p_332470_.lookupOrThrow(Registries.ITEM);
-        this.registryOps = p_332470_.createSerializationContext(NbtOps.INSTANCE);
+    public ItemParser(HolderLookup.Provider pRegistries) {
+        this.items = pRegistries.lookupOrThrow(Registries.ITEM);
+        this.registryOps = pRegistries.createSerializationContext(NbtOps.INSTANCE);
     }
 
-    public ItemParser.ItemResult parse(StringReader p_329942_) throws CommandSyntaxException {
+    public ItemParser.ItemResult parse(StringReader pReader) throws CommandSyntaxException {
         final MutableObject<Holder<Item>> mutableobject = new MutableObject<>();
         final DataComponentPatch.Builder datacomponentpatch$builder = DataComponentPatch.builder();
-        this.parse(p_329942_, new ItemParser.Visitor() {
+        this.parse(pReader, new ItemParser.Visitor() {
             @Override
             public void visitItem(Holder<Item> p_328041_) {
                 mutableobject.setValue(p_328041_);
@@ -88,30 +88,30 @@ public class ItemParser {
         });
         Holder<Item> holder = Objects.requireNonNull(mutableobject.getValue(), "Parser gave no item");
         DataComponentPatch datacomponentpatch = datacomponentpatch$builder.build();
-        validateComponents(p_329942_, holder, datacomponentpatch);
+        validateComponents(pReader, holder, datacomponentpatch);
         return new ItemParser.ItemResult(holder, datacomponentpatch);
     }
 
-    private static void validateComponents(StringReader p_331709_, Holder<Item> p_331328_, DataComponentPatch p_344694_) throws CommandSyntaxException {
-        DataComponentMap datacomponentmap = PatchedDataComponentMap.fromPatch(p_331328_.value().components(), p_344694_);
+    private static void validateComponents(StringReader pReader, Holder<Item> pItem, DataComponentPatch pComponents) throws CommandSyntaxException {
+        DataComponentMap datacomponentmap = PatchedDataComponentMap.fromPatch(pItem.value().components(), pComponents);
         DataResult<Unit> dataresult = ItemStack.validateComponents(datacomponentmap);
-        dataresult.getOrThrow(p_325612_ -> ERROR_MALFORMED_ITEM.createWithContext(p_331709_, p_325612_));
+        dataresult.getOrThrow(p_325612_ -> ERROR_MALFORMED_ITEM.createWithContext(pReader, p_325612_));
     }
 
-    public void parse(StringReader p_328566_, ItemParser.Visitor p_331669_) throws CommandSyntaxException {
-        int i = p_328566_.getCursor();
+    public void parse(StringReader pReader, ItemParser.Visitor pVisitor) throws CommandSyntaxException {
+        int i = pReader.getCursor();
 
         try {
-            new ItemParser.State(p_328566_, p_331669_).parse();
+            new ItemParser.State(pReader, pVisitor).parse();
         } catch (CommandSyntaxException commandsyntaxexception) {
-            p_328566_.setCursor(i);
+            pReader.setCursor(i);
             throw commandsyntaxexception;
         }
     }
 
-    public CompletableFuture<Suggestions> fillSuggestions(SuggestionsBuilder p_235310_) {
-        StringReader stringreader = new StringReader(p_235310_.getInput());
-        stringreader.setCursor(p_235310_.getStart());
+    public CompletableFuture<Suggestions> fillSuggestions(SuggestionsBuilder pBuilder) {
+        StringReader stringreader = new StringReader(pBuilder.getInput());
+        stringreader.setCursor(pBuilder.getStart());
         ItemParser.SuggestionsVisitor itemparser$suggestionsvisitor = new ItemParser.SuggestionsVisitor();
         ItemParser.State itemparser$state = new ItemParser.State(stringreader, itemparser$suggestionsvisitor);
 
@@ -120,7 +120,7 @@ public class ItemParser {
         } catch (CommandSyntaxException commandsyntaxexception) {
         }
 
-        return itemparser$suggestionsvisitor.resolveSuggestions(p_235310_, stringreader);
+        return itemparser$suggestionsvisitor.resolveSuggestions(pBuilder, stringreader);
     }
 
     public static record ItemResult(Holder<Item> item, DataComponentPatch components) {
@@ -130,9 +130,9 @@ public class ItemParser {
         private final StringReader reader;
         private final ItemParser.Visitor visitor;
 
-        State(final StringReader p_334622_, final ItemParser.Visitor p_332237_) {
-            this.reader = p_334622_;
-            this.visitor = p_332237_;
+        State(final StringReader pReader, final ItemParser.Visitor pVisitor) {
+            this.reader = pReader;
+            this.visitor = pVisitor;
         }
 
         public void parse() throws CommandSyntaxException {
@@ -204,80 +204,80 @@ public class ItemParser {
             this.visitor.visitSuggestions(ItemParser.SUGGEST_NOTHING);
         }
 
-        public static DataComponentType<?> readComponentType(StringReader p_330692_) throws CommandSyntaxException {
-            if (!p_330692_.canRead()) {
-                throw ItemParser.ERROR_EXPECTED_COMPONENT.createWithContext(p_330692_);
+        public static DataComponentType<?> readComponentType(StringReader pReader) throws CommandSyntaxException {
+            if (!pReader.canRead()) {
+                throw ItemParser.ERROR_EXPECTED_COMPONENT.createWithContext(pReader);
             } else {
-                int i = p_330692_.getCursor();
-                ResourceLocation resourcelocation = ResourceLocation.read(p_330692_);
+                int i = pReader.getCursor();
+                ResourceLocation resourcelocation = ResourceLocation.read(pReader);
                 DataComponentType<?> datacomponenttype = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(resourcelocation);
                 if (datacomponenttype != null && !datacomponenttype.isTransient()) {
                     return datacomponenttype;
                 } else {
-                    p_330692_.setCursor(i);
-                    throw ItemParser.ERROR_UNKNOWN_COMPONENT.createWithContext(p_330692_, resourcelocation);
+                    pReader.setCursor(i);
+                    throw ItemParser.ERROR_UNKNOWN_COMPONENT.createWithContext(pReader, resourcelocation);
                 }
             }
         }
 
-        private <T> void readComponent(DataComponentType<T> p_330643_) throws CommandSyntaxException {
+        private <T> void readComponent(DataComponentType<T> pComponentType) throws CommandSyntaxException {
             int i = this.reader.getCursor();
             Tag tag = new TagParser(this.reader).readValue();
-            DataResult<T> dataresult = p_330643_.codecOrThrow().parse(ItemParser.this.registryOps, tag);
-            this.visitor.visitComponent(p_330643_, dataresult.getOrThrow(p_335662_ -> {
+            DataResult<T> dataresult = pComponentType.codecOrThrow().parse(ItemParser.this.registryOps, tag);
+            this.visitor.visitComponent(pComponentType, dataresult.getOrThrow(p_335662_ -> {
                 this.reader.setCursor(i);
-                return ItemParser.ERROR_MALFORMED_COMPONENT.createWithContext(this.reader, p_330643_.toString(), p_335662_);
+                return ItemParser.ERROR_MALFORMED_COMPONENT.createWithContext(this.reader, pComponentType.toString(), p_335662_);
             }));
         }
 
-        private CompletableFuture<Suggestions> suggestStartComponents(SuggestionsBuilder p_333169_) {
-            if (p_333169_.getRemaining().isEmpty()) {
-                p_333169_.suggest(String.valueOf('['));
+        private CompletableFuture<Suggestions> suggestStartComponents(SuggestionsBuilder pBuilder) {
+            if (pBuilder.getRemaining().isEmpty()) {
+                pBuilder.suggest(String.valueOf('['));
             }
 
-            return p_333169_.buildFuture();
+            return pBuilder.buildFuture();
         }
 
-        private CompletableFuture<Suggestions> suggestNextOrEndComponents(SuggestionsBuilder p_335586_) {
-            if (p_335586_.getRemaining().isEmpty()) {
-                p_335586_.suggest(String.valueOf(','));
-                p_335586_.suggest(String.valueOf(']'));
+        private CompletableFuture<Suggestions> suggestNextOrEndComponents(SuggestionsBuilder pBuilder) {
+            if (pBuilder.getRemaining().isEmpty()) {
+                pBuilder.suggest(String.valueOf(','));
+                pBuilder.suggest(String.valueOf(']'));
             }
 
-            return p_335586_.buildFuture();
+            return pBuilder.buildFuture();
         }
 
-        private CompletableFuture<Suggestions> suggestAssignment(SuggestionsBuilder p_335223_) {
-            if (p_335223_.getRemaining().isEmpty()) {
-                p_335223_.suggest(String.valueOf('='));
+        private CompletableFuture<Suggestions> suggestAssignment(SuggestionsBuilder pBuilder) {
+            if (pBuilder.getRemaining().isEmpty()) {
+                pBuilder.suggest(String.valueOf('='));
             }
 
-            return p_335223_.buildFuture();
+            return pBuilder.buildFuture();
         }
 
-        private CompletableFuture<Suggestions> suggestItem(SuggestionsBuilder p_329594_) {
-            return SharedSuggestionProvider.suggestResource(ItemParser.this.items.listElementIds().map(ResourceKey::location), p_329594_);
+        private CompletableFuture<Suggestions> suggestItem(SuggestionsBuilder pBuilder) {
+            return SharedSuggestionProvider.suggestResource(ItemParser.this.items.listElementIds().map(ResourceKey::location), pBuilder);
         }
 
-        private CompletableFuture<Suggestions> suggestComponentAssignmentOrRemoval(SuggestionsBuilder p_343738_) {
-            p_343738_.suggest(String.valueOf('!'));
-            return this.suggestComponent(p_343738_, String.valueOf('='));
+        private CompletableFuture<Suggestions> suggestComponentAssignmentOrRemoval(SuggestionsBuilder pBuilder) {
+            pBuilder.suggest(String.valueOf('!'));
+            return this.suggestComponent(pBuilder, String.valueOf('='));
         }
 
-        private CompletableFuture<Suggestions> suggestComponent(SuggestionsBuilder p_342558_) {
-            return this.suggestComponent(p_342558_, "");
+        private CompletableFuture<Suggestions> suggestComponent(SuggestionsBuilder pBuilder) {
+            return this.suggestComponent(pBuilder, "");
         }
 
-        private CompletableFuture<Suggestions> suggestComponent(SuggestionsBuilder p_345392_, String p_345411_) {
-            String s = p_345392_.getRemaining().toLowerCase(Locale.ROOT);
+        private CompletableFuture<Suggestions> suggestComponent(SuggestionsBuilder pBuilder, String pSuffix) {
+            String s = pBuilder.getRemaining().toLowerCase(Locale.ROOT);
             SharedSuggestionProvider.filterResources(BuiltInRegistries.DATA_COMPONENT_TYPE.entrySet(), s, p_328035_ -> p_328035_.getKey().location(), p_340973_ -> {
                 DataComponentType<?> datacomponenttype = p_340973_.getValue();
                 if (datacomponenttype.codec() != null) {
                     ResourceLocation resourcelocation = p_340973_.getKey().location();
-                    p_345392_.suggest(resourcelocation + p_345411_);
+                    pBuilder.suggest(resourcelocation + pSuffix);
                 }
             });
-            return p_345392_.buildFuture();
+            return pBuilder.buildFuture();
         }
     }
 
@@ -289,22 +289,22 @@ public class ItemParser {
             this.suggestions = p_328999_;
         }
 
-        public CompletableFuture<Suggestions> resolveSuggestions(SuggestionsBuilder p_335628_, StringReader p_329757_) {
-            return this.suggestions.apply(p_335628_.createOffset(p_329757_.getCursor()));
+        public CompletableFuture<Suggestions> resolveSuggestions(SuggestionsBuilder pBuilder, StringReader pReader) {
+            return this.suggestions.apply(pBuilder.createOffset(pReader.getCursor()));
         }
     }
 
     public interface Visitor {
-        default void visitItem(Holder<Item> p_333631_) {
+        default void visitItem(Holder<Item> pItem) {
         }
 
-        default <T> void visitComponent(DataComponentType<T> p_331805_, T p_331331_) {
+        default <T> void visitComponent(DataComponentType<T> pComponentType, T pValue) {
         }
 
-        default <T> void visitRemovedComponent(DataComponentType<T> p_343605_) {
+        default <T> void visitRemovedComponent(DataComponentType<T> pComponentType) {
         }
 
-        default void visitSuggestions(Function<SuggestionsBuilder, CompletableFuture<Suggestions>> p_330945_) {
+        default void visitSuggestions(Function<SuggestionsBuilder, CompletableFuture<Suggestions>> pSuggestions) {
         }
     }
 }

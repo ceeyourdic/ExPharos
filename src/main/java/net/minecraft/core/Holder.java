@@ -16,16 +16,16 @@ public interface Holder<T> {
 
     boolean isBound();
 
-    boolean is(ResourceLocation p_205713_);
+    boolean is(ResourceLocation pLocation);
 
-    boolean is(ResourceKey<T> p_205712_);
+    boolean is(ResourceKey<T> pResourceKey);
 
-    boolean is(Predicate<ResourceKey<T>> p_205711_);
+    boolean is(Predicate<ResourceKey<T>> pPredicate);
 
-    boolean is(TagKey<T> p_205705_);
+    boolean is(TagKey<T> pTagKey);
 
     @Deprecated
-    boolean is(Holder<T> p_334336_);
+    boolean is(Holder<T> pHolder);
 
     Stream<TagKey<T>> tags();
 
@@ -35,14 +35,14 @@ public interface Holder<T> {
 
     Holder.Kind kind();
 
-    boolean canSerializeIn(HolderOwner<T> p_255833_);
+    boolean canSerializeIn(HolderOwner<T> pOwner);
 
     default String getRegisteredName() {
         return this.unwrapKey().map(p_335124_ -> p_335124_.location().toString()).orElse("[unregistered]");
     }
 
-    static <T> Holder<T> direct(T p_205710_) {
-        return new Holder.Direct<>(p_205710_);
+    static <T> Holder<T> direct(T pValue) {
+        return new Holder.Direct<>(pValue);
     }
 
     public static record Direct<T>(T value) implements Holder<T> {
@@ -127,20 +127,20 @@ public interface Holder<T> {
         @Nullable
         private T value;
 
-        protected Reference(Holder.Reference.Type p_256425_, HolderOwner<T> p_256562_, @Nullable ResourceKey<T> p_256636_, @Nullable T p_255889_) {
-            this.owner = p_256562_;
-            this.type = p_256425_;
-            this.key = p_256636_;
-            this.value = p_255889_;
+        protected Reference(Holder.Reference.Type pType, HolderOwner<T> pOwner, @Nullable ResourceKey<T> pKey, @Nullable T pValue) {
+            this.owner = pOwner;
+            this.type = pType;
+            this.key = pKey;
+            this.value = pValue;
         }
 
-        public static <T> Holder.Reference<T> createStandAlone(HolderOwner<T> p_255955_, ResourceKey<T> p_255958_) {
-            return new Holder.Reference<>(Holder.Reference.Type.STAND_ALONE, p_255955_, p_255958_, null);
+        public static <T> Holder.Reference<T> createStandAlone(HolderOwner<T> pOwner, ResourceKey<T> pKey) {
+            return new Holder.Reference<>(Holder.Reference.Type.STAND_ALONE, pOwner, pKey, null);
         }
 
         @Deprecated
-        public static <T> Holder.Reference<T> createIntrusive(HolderOwner<T> p_256106_, @Nullable T p_255948_) {
-            return new Holder.Reference<>(Holder.Reference.Type.INTRUSIVE, p_256106_, null, p_255948_);
+        public static <T> Holder.Reference<T> createIntrusive(HolderOwner<T> pOwner, @Nullable T pValue) {
+            return new Holder.Reference<>(Holder.Reference.Type.INTRUSIVE, pOwner, null, pValue);
         }
 
         public ResourceKey<T> key() {
@@ -218,24 +218,24 @@ public interface Holder<T> {
             return this.key != null && this.value != null;
         }
 
-        void bindKey(ResourceKey<T> p_251943_) {
-            if (this.key != null && p_251943_ != this.key) {
-                throw new IllegalStateException("Can't change holder key: existing=" + this.key + ", new=" + p_251943_);
+        void bindKey(ResourceKey<T> pKey) {
+            if (this.key != null && pKey != this.key) {
+                throw new IllegalStateException("Can't change holder key: existing=" + this.key + ", new=" + pKey);
             } else {
-                this.key = p_251943_;
+                this.key = pKey;
             }
         }
 
-        protected void bindValue(T p_249418_) {
-            if (this.type == Holder.Reference.Type.INTRUSIVE && this.value != p_249418_) {
-                throw new IllegalStateException("Can't change holder " + this.key + " value: existing=" + this.value + ", new=" + p_249418_);
+        protected void bindValue(T pValue) {
+            if (this.type == Holder.Reference.Type.INTRUSIVE && this.value != pValue) {
+                throw new IllegalStateException("Can't change holder " + this.key + " value: existing=" + this.value + ", new=" + pValue);
             } else {
-                this.value = p_249418_;
+                this.value = pValue;
             }
         }
 
-        void bindTags(Collection<TagKey<T>> p_205770_) {
-            this.tags = Set.copyOf(p_205770_);
+        void bindTags(Collection<TagKey<T>> pTags) {
+            this.tags = Set.copyOf(pTags);
         }
 
         @Override

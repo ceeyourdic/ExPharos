@@ -35,25 +35,25 @@ public class RecipeButton extends AbstractWidget {
     private final SlotSelectTime slotSelectTime;
     private float animationTime;
 
-    public RecipeButton(SlotSelectTime p_361785_) {
+    public RecipeButton(SlotSelectTime pSlotSelectTime) {
         super(0, 0, 25, 25, CommonComponents.EMPTY);
-        this.slotSelectTime = p_361785_;
+        this.slotSelectTime = pSlotSelectTime;
     }
 
-    public void init(RecipeCollection p_100480_, boolean p_363893_, RecipeBookPage p_100481_, ContextMap p_364354_) {
-        this.collection = p_100480_;
-        List<RecipeDisplayEntry> list = p_100480_.getSelectedRecipes(p_363893_ ? RecipeCollection.CraftableStatus.CRAFTABLE : RecipeCollection.CraftableStatus.ANY);
-        this.selectedEntries = list.stream().map(p_367596_ -> new RecipeButton.ResolvedEntry(p_367596_.id(), p_367596_.resultItems(p_364354_))).toList();
+    public void init(RecipeCollection pCollection, boolean pIsFiltering, RecipeBookPage pPage, ContextMap pContextMap) {
+        this.collection = pCollection;
+        List<RecipeDisplayEntry> list = pCollection.getSelectedRecipes(pIsFiltering ? RecipeCollection.CraftableStatus.CRAFTABLE : RecipeCollection.CraftableStatus.ANY);
+        this.selectedEntries = list.stream().map(p_367596_ -> new RecipeButton.ResolvedEntry(p_367596_.id(), p_367596_.resultItems(pContextMap))).toList();
         this.allRecipesHaveSameResultDisplay = allRecipesHaveSameResultDisplay(this.selectedEntries);
-        List<RecipeDisplayId> list1 = list.stream().map(RecipeDisplayEntry::id).filter(p_100481_.getRecipeBook()::willHighlight).toList();
+        List<RecipeDisplayId> list1 = list.stream().map(RecipeDisplayEntry::id).filter(pPage.getRecipeBook()::willHighlight).toList();
         if (!list1.isEmpty()) {
-            list1.forEach(p_100481_::recipeShown);
+            list1.forEach(pPage::recipeShown);
             this.animationTime = 15.0F;
         }
     }
 
-    private static boolean allRecipesHaveSameResultDisplay(List<RecipeButton.ResolvedEntry> p_377185_) {
-        Iterator<ItemStack> iterator = p_377185_.stream().flatMap(p_374583_ -> p_374583_.displayItems().stream()).iterator();
+    private static boolean allRecipesHaveSameResultDisplay(List<RecipeButton.ResolvedEntry> pEntries) {
+        Iterator<ItemStack> iterator = pEntries.stream().flatMap(p_374583_ -> p_374583_.displayItems().stream()).iterator();
         if (!iterator.hasNext()) {
             return true;
         } else {
@@ -134,8 +134,8 @@ public class RecipeButton extends AbstractWidget {
         return this.selectedEntries.get(l).selectItem(k);
     }
 
-    public List<Component> getTooltipText(ItemStack p_363067_) {
-        List<Component> list = new ArrayList<>(Screen.getTooltipFromItem(Minecraft.getInstance(), p_363067_));
+    public List<Component> getTooltipText(ItemStack pStack) {
+        List<Component> list = new ArrayList<>(Screen.getTooltipFromItem(Minecraft.getInstance(), pStack));
         if (this.hasMultipleRecipes()) {
             list.add(MORE_RECIPES_TOOLTIP);
         }
@@ -161,17 +161,17 @@ public class RecipeButton extends AbstractWidget {
     }
 
     @Override
-    protected boolean isValidClickButton(int p_100473_) {
-        return p_100473_ == 0 || p_100473_ == 1;
+    protected boolean isValidClickButton(int pButton) {
+        return pButton == 0 || pButton == 1;
     }
 
     @OnlyIn(Dist.CLIENT)
     static record ResolvedEntry(RecipeDisplayId id, List<ItemStack> displayItems) {
-        public ItemStack selectItem(int p_361103_) {
+        public ItemStack selectItem(int pIndex) {
             if (this.displayItems.isEmpty()) {
                 return ItemStack.EMPTY;
             } else {
-                int i = p_361103_ % this.displayItems.size();
+                int i = pIndex % this.displayItems.size();
                 return this.displayItems.get(i);
             }
         }

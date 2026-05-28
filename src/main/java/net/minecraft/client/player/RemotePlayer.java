@@ -21,14 +21,14 @@ public class RemotePlayer extends AbstractClientPlayer {
     }
 
     @Override
-    public boolean shouldRenderAtSqrDistance(double p_108770_) {
+    public boolean shouldRenderAtSqrDistance(double pDistance) {
         double d0 = this.getBoundingBox().getSize() * 10.0;
         if (Double.isNaN(d0)) {
             d0 = 1.0;
         }
 
         d0 *= 64.0 * getViewScale();
-        return p_108770_ < d0 * d0;
+        return pDistance < d0 * d0;
     }
 
     @Override

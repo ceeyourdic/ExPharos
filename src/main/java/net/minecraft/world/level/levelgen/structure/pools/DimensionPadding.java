@@ -22,8 +22,8 @@ public record DimensionPadding(int bottom, int top) {
         );
     public static final DimensionPadding ZERO = new DimensionPadding(0);
 
-    public DimensionPadding(int p_345079_) {
-        this(p_345079_, p_345079_);
+    public DimensionPadding(int pPadding) {
+        this(pPadding, pPadding);
     }
 
     public boolean hasEqualTopAndBottom() {

@@ -14,37 +14,37 @@ public class MatrixUtil {
     private MatrixUtil() {
     }
 
-    public static Matrix4f mulComponentWise(Matrix4f p_254173_, float p_253864_) {
-        return p_254173_.set(
-            p_254173_.m00() * p_253864_,
-            p_254173_.m01() * p_253864_,
-            p_254173_.m02() * p_253864_,
-            p_254173_.m03() * p_253864_,
-            p_254173_.m10() * p_253864_,
-            p_254173_.m11() * p_253864_,
-            p_254173_.m12() * p_253864_,
-            p_254173_.m13() * p_253864_,
-            p_254173_.m20() * p_253864_,
-            p_254173_.m21() * p_253864_,
-            p_254173_.m22() * p_253864_,
-            p_254173_.m23() * p_253864_,
-            p_254173_.m30() * p_253864_,
-            p_254173_.m31() * p_253864_,
-            p_254173_.m32() * p_253864_,
-            p_254173_.m33() * p_253864_
+    public static Matrix4f mulComponentWise(Matrix4f pMatrix, float pScalar) {
+        return pMatrix.set(
+            pMatrix.m00() * pScalar,
+            pMatrix.m01() * pScalar,
+            pMatrix.m02() * pScalar,
+            pMatrix.m03() * pScalar,
+            pMatrix.m10() * pScalar,
+            pMatrix.m11() * pScalar,
+            pMatrix.m12() * pScalar,
+            pMatrix.m13() * pScalar,
+            pMatrix.m20() * pScalar,
+            pMatrix.m21() * pScalar,
+            pMatrix.m22() * pScalar,
+            pMatrix.m23() * pScalar,
+            pMatrix.m30() * pScalar,
+            pMatrix.m31() * pScalar,
+            pMatrix.m32() * pScalar,
+            pMatrix.m33() * pScalar
         );
     }
 
-    private static GivensParameters approxGivensQuat(float p_276275_, float p_276276_, float p_276282_) {
-        float f = 2.0F * (p_276275_ - p_276282_);
-        return G * p_276276_ * p_276276_ < f * f ? GivensParameters.fromUnnormalized(p_276276_, f) : PI_4;
+    private static GivensParameters approxGivensQuat(float pTopCorner, float pOppositeDiagonalAverage, float pBottomCorner) {
+        float f = 2.0F * (pTopCorner - pBottomCorner);
+        return G * pOppositeDiagonalAverage * pOppositeDiagonalAverage < f * f ? GivensParameters.fromUnnormalized(pOppositeDiagonalAverage, f) : PI_4;
     }
 
-    private static GivensParameters qrGivensQuat(float p_253897_, float p_254413_) {
-        float f = (float)java.lang.Math.hypot((double)p_253897_, (double)p_254413_);
-        float f1 = f > 1.0E-6F ? p_254413_ : 0.0F;
-        float f2 = Math.abs(p_253897_) + Math.max(f, 1.0E-6F);
-        if (p_253897_ < 0.0F) {
+    private static GivensParameters qrGivensQuat(float pInput1, float pInput2) {
+        float f = (float)java.lang.Math.hypot((double)pInput1, (double)pInput2);
+        float f1 = f > 1.0E-6F ? pInput2 : 0.0F;
+        float f2 = Math.abs(pInput1) + Math.max(f, 1.0E-6F);
+        if (pInput1 < 0.0F) {
             float f3 = f1;
             f1 = f2;
             f2 = f3;
@@ -53,62 +53,62 @@ public class MatrixUtil {
         return GivensParameters.fromUnnormalized(f1, f2);
     }
 
-    private static void similarityTransform(Matrix3f p_276319_, Matrix3f p_276263_) {
-        p_276319_.mul(p_276263_);
-        p_276263_.transpose();
-        p_276263_.mul(p_276319_);
-        p_276319_.set(p_276263_);
+    private static void similarityTransform(Matrix3f pInput, Matrix3f pTempStorage) {
+        pInput.mul(pTempStorage);
+        pTempStorage.transpose();
+        pTempStorage.mul(pInput);
+        pInput.set(pTempStorage);
     }
 
-    private static void stepJacobi(Matrix3f p_276262_, Matrix3f p_276279_, Quaternionf p_276314_, Quaternionf p_276299_) {
-        if (p_276262_.m01 * p_276262_.m01 + p_276262_.m10 * p_276262_.m10 > 1.0E-6F) {
-            GivensParameters givensparameters = approxGivensQuat(p_276262_.m00, 0.5F * (p_276262_.m01 + p_276262_.m10), p_276262_.m11);
-            Quaternionf quaternionf = givensparameters.aroundZ(p_276314_);
-            p_276299_.mul(quaternionf);
-            givensparameters.aroundZ(p_276279_);
-            similarityTransform(p_276262_, p_276279_);
+    private static void stepJacobi(Matrix3f pInput, Matrix3f pTempStorage, Quaternionf pResultEigenvector, Quaternionf pResultEigenvalue) {
+        if (pInput.m01 * pInput.m01 + pInput.m10 * pInput.m10 > 1.0E-6F) {
+            GivensParameters givensparameters = approxGivensQuat(pInput.m00, 0.5F * (pInput.m01 + pInput.m10), pInput.m11);
+            Quaternionf quaternionf = givensparameters.aroundZ(pResultEigenvector);
+            pResultEigenvalue.mul(quaternionf);
+            givensparameters.aroundZ(pTempStorage);
+            similarityTransform(pInput, pTempStorage);
         }
 
-        if (p_276262_.m02 * p_276262_.m02 + p_276262_.m20 * p_276262_.m20 > 1.0E-6F) {
-            GivensParameters givensparameters1 = approxGivensQuat(p_276262_.m00, 0.5F * (p_276262_.m02 + p_276262_.m20), p_276262_.m22).inverse();
-            Quaternionf quaternionf1 = givensparameters1.aroundY(p_276314_);
-            p_276299_.mul(quaternionf1);
-            givensparameters1.aroundY(p_276279_);
-            similarityTransform(p_276262_, p_276279_);
+        if (pInput.m02 * pInput.m02 + pInput.m20 * pInput.m20 > 1.0E-6F) {
+            GivensParameters givensparameters1 = approxGivensQuat(pInput.m00, 0.5F * (pInput.m02 + pInput.m20), pInput.m22).inverse();
+            Quaternionf quaternionf1 = givensparameters1.aroundY(pResultEigenvector);
+            pResultEigenvalue.mul(quaternionf1);
+            givensparameters1.aroundY(pTempStorage);
+            similarityTransform(pInput, pTempStorage);
         }
 
-        if (p_276262_.m12 * p_276262_.m12 + p_276262_.m21 * p_276262_.m21 > 1.0E-6F) {
-            GivensParameters givensparameters2 = approxGivensQuat(p_276262_.m11, 0.5F * (p_276262_.m12 + p_276262_.m21), p_276262_.m22);
-            Quaternionf quaternionf2 = givensparameters2.aroundX(p_276314_);
-            p_276299_.mul(quaternionf2);
-            givensparameters2.aroundX(p_276279_);
-            similarityTransform(p_276262_, p_276279_);
+        if (pInput.m12 * pInput.m12 + pInput.m21 * pInput.m21 > 1.0E-6F) {
+            GivensParameters givensparameters2 = approxGivensQuat(pInput.m11, 0.5F * (pInput.m12 + pInput.m21), pInput.m22);
+            Quaternionf quaternionf2 = givensparameters2.aroundX(pResultEigenvector);
+            pResultEigenvalue.mul(quaternionf2);
+            givensparameters2.aroundX(pTempStorage);
+            similarityTransform(pInput, pTempStorage);
         }
     }
 
-    public static Quaternionf eigenvalueJacobi(Matrix3f p_276278_, int p_276269_) {
+    public static Quaternionf eigenvalueJacobi(Matrix3f pInput, int pIterations) {
         Quaternionf quaternionf = new Quaternionf();
         Matrix3f matrix3f = new Matrix3f();
         Quaternionf quaternionf1 = new Quaternionf();
 
-        for (int i = 0; i < p_276269_; i++) {
-            stepJacobi(p_276278_, matrix3f, quaternionf1, quaternionf);
+        for (int i = 0; i < pIterations; i++) {
+            stepJacobi(pInput, matrix3f, quaternionf1, quaternionf);
         }
 
         quaternionf.normalize();
         return quaternionf;
     }
 
-    public static Triple<Quaternionf, Vector3f, Quaternionf> svdDecompose(Matrix3f p_253947_) {
-        Matrix3f matrix3f = new Matrix3f(p_253947_);
+    public static Triple<Quaternionf, Vector3f, Quaternionf> svdDecompose(Matrix3f pMatrix) {
+        Matrix3f matrix3f = new Matrix3f(pMatrix);
         matrix3f.transpose();
-        matrix3f.mul(p_253947_);
+        matrix3f.mul(pMatrix);
         Quaternionf quaternionf = eigenvalueJacobi(matrix3f, 5);
         float f = matrix3f.m00;
         float f1 = matrix3f.m11;
         boolean flag = (double)f < 1.0E-6;
         boolean flag1 = (double)f1 < 1.0E-6;
-        Matrix3f matrix3f1 = p_253947_.rotate(quaternionf);
+        Matrix3f matrix3f1 = pMatrix.rotate(quaternionf);
         Quaternionf quaternionf1 = new Quaternionf();
         Quaternionf quaternionf2 = new Quaternionf();
         GivensParameters givensparameters;
@@ -147,15 +147,15 @@ public class MatrixUtil {
         return Triple.of(quaternionf1, vector3f, quaternionf.conjugate());
     }
 
-    public static boolean isIdentity(Matrix4f p_378006_) {
-        return (p_378006_.properties() & 4) != 0;
+    public static boolean isIdentity(Matrix4f pMatrix) {
+        return (pMatrix.properties() & 4) != 0;
     }
 
-    public static boolean isPureTranslation(Matrix4f p_328643_) {
-        return (p_328643_.properties() & 8) != 0;
+    public static boolean isPureTranslation(Matrix4f pMatrix) {
+        return (pMatrix.properties() & 8) != 0;
     }
 
-    public static boolean isOrthonormal(Matrix4f p_335941_) {
-        return (p_335941_.properties() & 16) != 0;
+    public static boolean isOrthonormal(Matrix4f pMatrix) {
+        return (pMatrix.properties() & 16) != 0;
     }
 }

@@ -33,11 +33,11 @@ public class MetricsPersister {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final String rootFolderName;
 
-    public MetricsPersister(String p_146217_) {
-        this.rootFolderName = p_146217_;
+    public MetricsPersister(String pRootFolderName) {
+        this.rootFolderName = pRootFolderName;
     }
 
-    public Path saveReports(Set<MetricSampler> p_146251_, Map<MetricSampler, List<RecordedDeviation>> p_146252_, ProfileResults p_146253_) {
+    public Path saveReports(Set<MetricSampler> pSamplers, Map<MetricSampler, List<RecordedDeviation>> pDeviations, ProfileResults pResults) {
         try {
             Files.createDirectories(PROFILING_RESULTS_DIR);
         } catch (IOException ioexception1) {
@@ -50,29 +50,29 @@ public class MetricsPersister {
             Files.createDirectories(PROFILING_RESULTS_DIR);
             Path path1 = path.resolve(this.rootFolderName);
             Path path2 = path1.resolve("metrics");
-            this.saveMetrics(p_146251_, path2);
-            if (!p_146252_.isEmpty()) {
-                this.saveDeviations(p_146252_, path1.resolve("deviations"));
+            this.saveMetrics(pSamplers, path2);
+            if (!pDeviations.isEmpty()) {
+                this.saveDeviations(pDeviations, path1.resolve("deviations"));
             }
 
-            this.saveProfilingTaskExecutionResult(p_146253_, path1);
+            this.saveProfilingTaskExecutionResult(pResults, path1);
             return path;
         } catch (IOException ioexception) {
             throw new UncheckedIOException(ioexception);
         }
     }
 
-    private void saveMetrics(Set<MetricSampler> p_146248_, Path p_146249_) {
-        if (p_146248_.isEmpty()) {
+    private void saveMetrics(Set<MetricSampler> pSamplers, Path pPath) {
+        if (pSamplers.isEmpty()) {
             throw new IllegalArgumentException("Expected at least one sampler to persist");
         } else {
-            Map<MetricCategory, List<MetricSampler>> map = p_146248_.stream().collect(Collectors.groupingBy(MetricSampler::getCategory));
-            map.forEach((p_146232_, p_146233_) -> this.saveCategory(p_146232_, (List<MetricSampler>)p_146233_, p_146249_));
+            Map<MetricCategory, List<MetricSampler>> map = pSamplers.stream().collect(Collectors.groupingBy(MetricSampler::getCategory));
+            map.forEach((p_146232_, p_146233_) -> this.saveCategory(p_146232_, (List<MetricSampler>)p_146233_, pPath));
         }
     }
 
-    private void saveCategory(MetricCategory p_146227_, List<MetricSampler> p_146228_, Path p_146229_) {
-        Path path = p_146229_.resolve(Util.sanitizeName(p_146227_.getDescription(), ResourceLocation::validPathChar) + ".csv");
+    private void saveCategory(MetricCategory pCategory, List<MetricSampler> pSamplers, Path pPath) {
+        Path path = pPath.resolve(Util.sanitizeName(pCategory.getDescription(), ResourceLocation::validPathChar) + ".csv");
         Writer writer = null;
 
         try {
@@ -81,12 +81,12 @@ public class MetricsPersister {
             CsvOutput.Builder csvoutput$builder = CsvOutput.builder();
             csvoutput$builder.addColumn("@tick");
 
-            for (MetricSampler metricsampler : p_146228_) {
+            for (MetricSampler metricsampler : pSamplers) {
                 csvoutput$builder.addColumn(metricsampler.getName());
             }
 
             CsvOutput csvoutput = csvoutput$builder.build(writer);
-            List<MetricSampler.SamplerResult> list = p_146228_.stream().map(MetricSampler::result).collect(Collectors.toList());
+            List<MetricSampler.SamplerResult> list = pSamplers.stream().map(MetricSampler::result).collect(Collectors.toList());
             int i = list.stream().mapToInt(MetricSampler.SamplerResult::getFirstTick).summaryStatistics().getMin();
             int j = list.stream().mapToInt(MetricSampler.SamplerResult::getLastTick).summaryStatistics().getMax();
 
@@ -105,13 +105,13 @@ public class MetricsPersister {
         }
     }
 
-    private void saveDeviations(Map<MetricSampler, List<RecordedDeviation>> p_146245_, Path p_146246_) {
+    private void saveDeviations(Map<MetricSampler, List<RecordedDeviation>> pDeviations, Path pPath) {
         DateTimeFormatter datetimeformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss.SSS", Locale.UK).withZone(ZoneId.systemDefault());
-        p_146245_.forEach(
+        pDeviations.forEach(
             (p_146242_, p_146243_) -> p_146243_.forEach(
                     p_146238_ -> {
                         String s = datetimeformatter.format(p_146238_.timestamp);
-                        Path path = p_146246_.resolve(Util.sanitizeName(p_146242_.getName(), ResourceLocation::validPathChar))
+                        Path path = pPath.resolve(Util.sanitizeName(p_146242_.getName(), ResourceLocation::validPathChar))
                             .resolve(String.format(Locale.ROOT, "%d@%s.txt", p_146238_.tick, s));
                         p_146238_.profilerResultAtTick.saveResults(path);
                     }
@@ -119,7 +119,7 @@ public class MetricsPersister {
         );
     }
 
-    private void saveProfilingTaskExecutionResult(ProfileResults p_146224_, Path p_146225_) {
-        p_146224_.saveResults(p_146225_.resolve("profiling.txt"));
+    private void saveProfilingTaskExecutionResult(ProfileResults pResults, Path pOutputPath) {
+        pResults.saveResults(pOutputPath.resolve("profiling.txt"));
     }
 }

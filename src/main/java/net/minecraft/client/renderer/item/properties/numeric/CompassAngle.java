@@ -13,12 +13,12 @@ public class CompassAngle implements RangeSelectItemModelProperty {
     public static final MapCodec<CompassAngle> MAP_CODEC = CompassAngleState.MAP_CODEC.xmap(CompassAngle::new, p_375840_ -> p_375840_.state);
     private final CompassAngleState state;
 
-    public CompassAngle(boolean p_378444_, CompassAngleState.CompassTarget p_378609_) {
-        this(new CompassAngleState(p_378444_, p_378609_));
+    public CompassAngle(boolean pWobble, CompassAngleState.CompassTarget pCompassTarget) {
+        this(new CompassAngleState(pWobble, pCompassTarget));
     }
 
-    private CompassAngle(CompassAngleState p_377062_) {
-        this.state = p_377062_;
+    private CompassAngle(CompassAngleState pState) {
+        this.state = pState;
     }
 
     @Override

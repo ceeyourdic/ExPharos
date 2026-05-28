@@ -17,16 +17,16 @@ public record ClientboundChunksBiomesPacket(List<ClientboundChunksBiomesPacket.C
     );
     private static final int TWO_MEGABYTES = 2097152;
 
-    private ClientboundChunksBiomesPacket(FriendlyByteBuf p_275221_) {
-        this(p_275221_.readList(ClientboundChunksBiomesPacket.ChunkBiomeData::new));
+    private ClientboundChunksBiomesPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readList(ClientboundChunksBiomesPacket.ChunkBiomeData::new));
     }
 
-    public static ClientboundChunksBiomesPacket forChunks(List<LevelChunk> p_275394_) {
-        return new ClientboundChunksBiomesPacket(p_275394_.stream().map(ClientboundChunksBiomesPacket.ChunkBiomeData::new).toList());
+    public static ClientboundChunksBiomesPacket forChunks(List<LevelChunk> pChunks) {
+        return new ClientboundChunksBiomesPacket(pChunks.stream().map(ClientboundChunksBiomesPacket.ChunkBiomeData::new).toList());
     }
 
-    private void write(FriendlyByteBuf p_275376_) {
-        p_275376_.writeCollection(this.chunkBiomeData, (p_275199_, p_275200_) -> p_275200_.write(p_275199_));
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeCollection(this.chunkBiomeData, (p_275199_, p_275200_) -> p_275200_.write(p_275199_));
     }
 
     @Override
@@ -39,19 +39,19 @@ public record ClientboundChunksBiomesPacket(List<ClientboundChunksBiomesPacket.C
     }
 
     public static record ChunkBiomeData(ChunkPos pos, byte[] buffer) {
-        public ChunkBiomeData(LevelChunk p_275569_) {
-            this(p_275569_.getPos(), new byte[calculateChunkSize(p_275569_)]);
-            extractChunkData(new FriendlyByteBuf(this.getWriteBuffer()), p_275569_);
+        public ChunkBiomeData(LevelChunk pChunk) {
+            this(pChunk.getPos(), new byte[calculateChunkSize(pChunk)]);
+            extractChunkData(new FriendlyByteBuf(this.getWriteBuffer()), pChunk);
         }
 
-        public ChunkBiomeData(FriendlyByteBuf p_275255_) {
-            this(p_275255_.readChunkPos(), p_275255_.readByteArray(2097152));
+        public ChunkBiomeData(FriendlyByteBuf pBuffer) {
+            this(pBuffer.readChunkPos(), pBuffer.readByteArray(2097152));
         }
 
-        private static int calculateChunkSize(LevelChunk p_275324_) {
+        private static int calculateChunkSize(LevelChunk pChunk) {
             int i = 0;
 
-            for (LevelChunkSection levelchunksection : p_275324_.getSections()) {
+            for (LevelChunkSection levelchunksection : pChunk.getSections()) {
                 i += levelchunksection.getBiomes().getSerializedSize();
             }
 
@@ -68,15 +68,15 @@ public record ClientboundChunksBiomesPacket(List<ClientboundChunksBiomesPacket.C
             return bytebuf;
         }
 
-        public static void extractChunkData(FriendlyByteBuf p_275626_, LevelChunk p_275570_) {
-            for (LevelChunkSection levelchunksection : p_275570_.getSections()) {
-                levelchunksection.getBiomes().write(p_275626_);
+        public static void extractChunkData(FriendlyByteBuf pBuffer, LevelChunk pChunk) {
+            for (LevelChunkSection levelchunksection : pChunk.getSections()) {
+                levelchunksection.getBiomes().write(pBuffer);
             }
         }
 
-        public void write(FriendlyByteBuf p_275467_) {
-            p_275467_.writeChunkPos(this.pos);
-            p_275467_.writeByteArray(this.buffer);
+        public void write(FriendlyByteBuf pBuffer) {
+            pBuffer.writeChunkPos(this.pos);
+            pBuffer.writeByteArray(this.buffer);
         }
     }
 }

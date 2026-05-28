@@ -15,9 +15,9 @@ public class CommandsReport implements DataProvider {
     private final PackOutput output;
     private final CompletableFuture<HolderLookup.Provider> registries;
 
-    public CommandsReport(PackOutput p_256167_, CompletableFuture<HolderLookup.Provider> p_256506_) {
-        this.output = p_256167_;
-        this.registries = p_256506_;
+    public CommandsReport(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pRegistries) {
+        this.output = pOutput;
+        this.registries = pRegistries;
     }
 
     @Override

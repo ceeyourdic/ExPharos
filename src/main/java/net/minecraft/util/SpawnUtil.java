@@ -17,38 +17,38 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class SpawnUtil {
     public static <T extends Mob> Optional<T> trySpawnMob(
-        EntityType<T> p_216404_,
-        EntitySpawnReason p_369127_,
-        ServerLevel p_216406_,
-        BlockPos p_216407_,
-        int p_216408_,
-        int p_216409_,
-        int p_216410_,
-        SpawnUtil.Strategy p_216411_,
-        boolean p_378332_
+        EntityType<T> pEntityType,
+        EntitySpawnReason pSpawnReason,
+        ServerLevel pLevel,
+        BlockPos pPos,
+        int pAttempts,
+        int pRange,
+        int pYOffset,
+        SpawnUtil.Strategy pStrategy,
+        boolean pCheckCollision
     ) {
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = p_216407_.mutable();
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.mutable();
 
-        for (int i = 0; i < p_216408_; i++) {
-            int j = Mth.randomBetweenInclusive(p_216406_.random, -p_216409_, p_216409_);
-            int k = Mth.randomBetweenInclusive(p_216406_.random, -p_216409_, p_216409_);
-            blockpos$mutableblockpos.setWithOffset(p_216407_, j, p_216410_, k);
-            if (p_216406_.getWorldBorder().isWithinBounds(blockpos$mutableblockpos)
-                && moveToPossibleSpawnPosition(p_216406_, p_216410_, blockpos$mutableblockpos, p_216411_)
+        for (int i = 0; i < pAttempts; i++) {
+            int j = Mth.randomBetweenInclusive(pLevel.random, -pRange, pRange);
+            int k = Mth.randomBetweenInclusive(pLevel.random, -pRange, pRange);
+            blockpos$mutableblockpos.setWithOffset(pPos, j, pYOffset, k);
+            if (pLevel.getWorldBorder().isWithinBounds(blockpos$mutableblockpos)
+                && moveToPossibleSpawnPosition(pLevel, pYOffset, blockpos$mutableblockpos, pStrategy)
                 && (
-                    !p_378332_
-                        || p_216406_.noCollision(
-                            p_216404_.getSpawnAABB(
+                    !pCheckCollision
+                        || pLevel.noCollision(
+                            pEntityType.getSpawnAABB(
                                 (double)blockpos$mutableblockpos.getX() + 0.5,
                                 (double)blockpos$mutableblockpos.getY(),
                                 (double)blockpos$mutableblockpos.getZ() + 0.5
                             )
                         )
                 )) {
-                T t = (T)p_216404_.create(p_216406_, null, blockpos$mutableblockpos, p_369127_, false, false);
+                T t = (T)pEntityType.create(pLevel, null, blockpos$mutableblockpos, pSpawnReason, false, false);
                 if (t != null) {
-                    if (t.checkSpawnRules(p_216406_, p_369127_) && t.checkSpawnObstruction(p_216406_)) {
-                        p_216406_.addFreshEntityWithPassengers(t);
+                    if (t.checkSpawnRules(pLevel, pSpawnReason) && t.checkSpawnObstruction(pLevel)) {
+                        pLevel.addFreshEntityWithPassengers(t);
                         t.playAmbientSound();
                         return Optional.of(t);
                     }
@@ -61,16 +61,16 @@ public class SpawnUtil {
         return Optional.empty();
     }
 
-    private static boolean moveToPossibleSpawnPosition(ServerLevel p_216399_, int p_216400_, BlockPos.MutableBlockPos p_216401_, SpawnUtil.Strategy p_216402_) {
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos().set(p_216401_);
-        BlockState blockstate = p_216399_.getBlockState(blockpos$mutableblockpos);
+    private static boolean moveToPossibleSpawnPosition(ServerLevel pLevel, int pYOffset, BlockPos.MutableBlockPos pPos, SpawnUtil.Strategy pStrategy) {
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos().set(pPos);
+        BlockState blockstate = pLevel.getBlockState(blockpos$mutableblockpos);
 
-        for (int i = p_216400_; i >= -p_216400_; i--) {
-            p_216401_.move(Direction.DOWN);
-            blockpos$mutableblockpos.setWithOffset(p_216401_, Direction.UP);
-            BlockState blockstate1 = p_216399_.getBlockState(p_216401_);
-            if (p_216402_.canSpawnOn(p_216399_, p_216401_, blockstate1, blockpos$mutableblockpos, blockstate)) {
-                p_216401_.move(Direction.UP);
+        for (int i = pYOffset; i >= -pYOffset; i--) {
+            pPos.move(Direction.DOWN);
+            blockpos$mutableblockpos.setWithOffset(pPos, Direction.UP);
+            BlockState blockstate1 = pLevel.getBlockState(pPos);
+            if (pStrategy.canSpawnOn(pLevel, pPos, blockstate1, blockpos$mutableblockpos, blockstate)) {
+                pPos.move(Direction.UP);
                 return true;
             }
 
@@ -105,6 +105,6 @@ public class SpawnUtil {
                 && !p_358809_.is(BlockTags.LEAVES)
                 && Block.isFaceFull(p_358809_.getCollisionShape(p_358807_, p_358808_), Direction.UP);
 
-        boolean canSpawnOn(ServerLevel p_216428_, BlockPos p_216429_, BlockState p_216430_, BlockPos p_216431_, BlockState p_216432_);
+        boolean canSpawnOn(ServerLevel pLevel, BlockPos pTargetPos, BlockState pTargetState, BlockPos pAttemptedPos, BlockState pAttemptedState);
     }
 }

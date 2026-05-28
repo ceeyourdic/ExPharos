@@ -10,7 +10,7 @@ public abstract class RuleTest {
         .byNameCodec()
         .dispatch("predicate_type", RuleTest::getType, RuleTestType::codec);
 
-    public abstract boolean test(BlockState p_230322_, RandomSource p_230323_);
+    public abstract boolean test(BlockState pState, RandomSource pRandom);
 
     protected abstract RuleTestType<?> getType();
 }

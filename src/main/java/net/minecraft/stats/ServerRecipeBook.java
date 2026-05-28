@@ -37,35 +37,35 @@ public class ServerRecipeBook extends RecipeBook {
     @VisibleForTesting
     protected final Set<ResourceKey<Recipe<?>>> highlight = Sets.newIdentityHashSet();
 
-    public ServerRecipeBook(ServerRecipeBook.DisplayResolver p_361467_) {
-        this.displayResolver = p_361467_;
+    public ServerRecipeBook(ServerRecipeBook.DisplayResolver pDisplayResolver) {
+        this.displayResolver = pDisplayResolver;
     }
 
-    public void add(ResourceKey<Recipe<?>> p_369732_) {
-        this.known.add(p_369732_);
+    public void add(ResourceKey<Recipe<?>> pRecipe) {
+        this.known.add(pRecipe);
     }
 
-    public boolean contains(ResourceKey<Recipe<?>> p_360909_) {
-        return this.known.contains(p_360909_);
+    public boolean contains(ResourceKey<Recipe<?>> pRecipe) {
+        return this.known.contains(pRecipe);
     }
 
-    public void remove(ResourceKey<Recipe<?>> p_366423_) {
-        this.known.remove(p_366423_);
-        this.highlight.remove(p_366423_);
+    public void remove(ResourceKey<Recipe<?>> pRecipe) {
+        this.known.remove(pRecipe);
+        this.highlight.remove(pRecipe);
     }
 
-    public void removeHighlight(ResourceKey<Recipe<?>> p_366458_) {
-        this.highlight.remove(p_366458_);
+    public void removeHighlight(ResourceKey<Recipe<?>> pRecipe) {
+        this.highlight.remove(pRecipe);
     }
 
-    private void addHighlight(ResourceKey<Recipe<?>> p_365655_) {
-        this.highlight.add(p_365655_);
+    private void addHighlight(ResourceKey<Recipe<?>> pRecipe) {
+        this.highlight.add(pRecipe);
     }
 
-    public int addRecipes(Collection<RecipeHolder<?>> p_12792_, ServerPlayer p_12793_) {
+    public int addRecipes(Collection<RecipeHolder<?>> pRecipes, ServerPlayer pPlayer) {
         List<ClientboundRecipeBookAddPacket.Entry> list = new ArrayList<>();
 
-        for (RecipeHolder<?> recipeholder : p_12792_) {
+        for (RecipeHolder<?> recipeholder : pRecipes) {
             ResourceKey<Recipe<?>> resourcekey = recipeholder.id();
             if (!this.known.contains(resourcekey) && !recipeholder.value().isSpecial()) {
                 this.add(resourcekey);
@@ -74,21 +74,21 @@ public class ServerRecipeBook extends RecipeBook {
                     .displaysForRecipe(
                         resourcekey, p_363687_ -> list.add(new ClientboundRecipeBookAddPacket.Entry(p_363687_, recipeholder.value().showNotification(), true))
                     );
-                CriteriaTriggers.RECIPE_UNLOCKED.trigger(p_12793_, recipeholder);
+                CriteriaTriggers.RECIPE_UNLOCKED.trigger(pPlayer, recipeholder);
             }
         }
 
         if (!list.isEmpty()) {
-            p_12793_.connection.send(new ClientboundRecipeBookAddPacket(list, false));
+            pPlayer.connection.send(new ClientboundRecipeBookAddPacket(list, false));
         }
 
         return list.size();
     }
 
-    public int removeRecipes(Collection<RecipeHolder<?>> p_12807_, ServerPlayer p_12808_) {
+    public int removeRecipes(Collection<RecipeHolder<?>> pRecipes, ServerPlayer pPlayer) {
         List<RecipeDisplayId> list = Lists.newArrayList();
 
-        for (RecipeHolder<?> recipeholder : p_12807_) {
+        for (RecipeHolder<?> recipeholder : pRecipes) {
             ResourceKey<Recipe<?>> resourcekey = recipeholder.id();
             if (this.known.contains(resourcekey)) {
                 this.remove(resourcekey);
@@ -97,7 +97,7 @@ public class ServerRecipeBook extends RecipeBook {
         }
 
         if (!list.isEmpty()) {
-            p_12808_.connection.send(new ClientboundRecipeBookRemovePacket(list));
+            pPlayer.connection.send(new ClientboundRecipeBookRemovePacket(list));
         }
 
         return list.size();
@@ -123,24 +123,24 @@ public class ServerRecipeBook extends RecipeBook {
         return compoundtag;
     }
 
-    public void fromNbt(CompoundTag p_12795_, Predicate<ResourceKey<Recipe<?>>> p_362297_) {
-        this.setBookSettings(RecipeBookSettings.read(p_12795_));
-        ListTag listtag = p_12795_.getList("recipes", 8);
-        this.loadRecipes(listtag, this::add, p_362297_);
-        ListTag listtag1 = p_12795_.getList("toBeDisplayed", 8);
-        this.loadRecipes(listtag1, this::addHighlight, p_362297_);
+    public void fromNbt(CompoundTag pTag, Predicate<ResourceKey<Recipe<?>>> pIsRecognized) {
+        this.setBookSettings(RecipeBookSettings.read(pTag));
+        ListTag listtag = pTag.getList("recipes", 8);
+        this.loadRecipes(listtag, this::add, pIsRecognized);
+        ListTag listtag1 = pTag.getList("toBeDisplayed", 8);
+        this.loadRecipes(listtag1, this::addHighlight, pIsRecognized);
     }
 
-    private void loadRecipes(ListTag p_12798_, Consumer<ResourceKey<Recipe<?>>> p_12799_, Predicate<ResourceKey<Recipe<?>>> p_367349_) {
-        for (int i = 0; i < p_12798_.size(); i++) {
-            String s = p_12798_.getString(i);
+    private void loadRecipes(ListTag pTag, Consumer<ResourceKey<Recipe<?>>> pOutput, Predicate<ResourceKey<Recipe<?>>> pIsRecognized) {
+        for (int i = 0; i < pTag.size(); i++) {
+            String s = pTag.getString(i);
 
             try {
                 ResourceKey<Recipe<?>> resourcekey = ResourceKey.create(Registries.RECIPE, ResourceLocation.parse(s));
-                if (!p_367349_.test(resourcekey)) {
+                if (!pIsRecognized.test(resourcekey)) {
                     LOGGER.error("Tried to load unrecognized recipe: {} removed now.", resourcekey);
                 } else {
-                    p_12799_.accept(resourcekey);
+                    pOutput.accept(resourcekey);
                 }
             } catch (ResourceLocationException resourcelocationexception) {
                 LOGGER.error("Tried to load improperly formatted recipe: {} removed now.", s);
@@ -148,8 +148,8 @@ public class ServerRecipeBook extends RecipeBook {
         }
     }
 
-    public void sendInitialRecipeBook(ServerPlayer p_12790_) {
-        p_12790_.connection.send(new ClientboundRecipeBookSettingsPacket(this.getBookSettings()));
+    public void sendInitialRecipeBook(ServerPlayer pPlayer) {
+        pPlayer.connection.send(new ClientboundRecipeBookSettingsPacket(this.getBookSettings()));
         List<ClientboundRecipeBookAddPacket.Entry> list = new ArrayList<>(this.known.size());
 
         for (ResourceKey<Recipe<?>> resourcekey : this.known) {
@@ -157,19 +157,19 @@ public class ServerRecipeBook extends RecipeBook {
                 .displaysForRecipe(resourcekey, p_369028_ -> list.add(new ClientboundRecipeBookAddPacket.Entry(p_369028_, false, this.highlight.contains(resourcekey))));
         }
 
-        p_12790_.connection.send(new ClientboundRecipeBookAddPacket(list, true));
+        pPlayer.connection.send(new ClientboundRecipeBookAddPacket(list, true));
     }
 
-    public void copyOverData(ServerRecipeBook p_369276_) {
+    public void copyOverData(ServerRecipeBook pOther) {
         this.known.clear();
         this.highlight.clear();
-        this.bookSettings.replaceFrom(p_369276_.bookSettings);
-        this.known.addAll(p_369276_.known);
-        this.highlight.addAll(p_369276_.highlight);
+        this.bookSettings.replaceFrom(pOther.bookSettings);
+        this.known.addAll(pOther.known);
+        this.highlight.addAll(pOther.highlight);
     }
 
     @FunctionalInterface
     public interface DisplayResolver {
-        void displaysForRecipe(ResourceKey<Recipe<?>> p_367891_, Consumer<RecipeDisplayEntry> p_363395_);
+        void displaysForRecipe(ResourceKey<Recipe<?>> pRecipe, Consumer<RecipeDisplayEntry> pOutput);
     }
 }

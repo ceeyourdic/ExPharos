@@ -13,8 +13,8 @@ import java.util.stream.Stream;
 import net.minecraft.util.datafix.ComponentDataFixUtils;
 
 public class ItemLoreFix extends DataFix {
-    public ItemLoreFix(Schema p_15958_, boolean p_15959_) {
-        super(p_15958_, p_15959_);
+    public ItemLoreFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class ItemLoreFix extends DataFix {
         );
     }
 
-    private static <T> Stream<Dynamic<T>> fixLoreList(Stream<Dynamic<T>> p_15970_) {
-        return p_15970_.map(ComponentDataFixUtils::wrapLiteralStringAsComponent);
+    private static <T> Stream<Dynamic<T>> fixLoreList(Stream<Dynamic<T>> pLoreListTags) {
+        return pLoreListTags.map(ComponentDataFixUtils::wrapLiteralStringAsComponent);
     }
 }

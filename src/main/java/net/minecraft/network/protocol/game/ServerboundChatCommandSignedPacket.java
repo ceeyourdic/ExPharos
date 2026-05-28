@@ -15,16 +15,16 @@ public record ServerboundChatCommandSignedPacket(
         ServerboundChatCommandSignedPacket::write, ServerboundChatCommandSignedPacket::new
     );
 
-    private ServerboundChatCommandSignedPacket(FriendlyByteBuf p_333361_) {
-        this(p_333361_.readUtf(), p_333361_.readInstant(), p_333361_.readLong(), new ArgumentSignatures(p_333361_), new LastSeenMessages.Update(p_333361_));
+    private ServerboundChatCommandSignedPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readUtf(), pBuffer.readInstant(), pBuffer.readLong(), new ArgumentSignatures(pBuffer), new LastSeenMessages.Update(pBuffer));
     }
 
-    private void write(FriendlyByteBuf p_332640_) {
-        p_332640_.writeUtf(this.command);
-        p_332640_.writeInstant(this.timeStamp);
-        p_332640_.writeLong(this.salt);
-        this.argumentSignatures.write(p_332640_);
-        this.lastSeenMessages.write(p_332640_);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeUtf(this.command);
+        pBuffer.writeInstant(this.timeStamp);
+        pBuffer.writeLong(this.salt);
+        this.argumentSignatures.write(pBuffer);
+        this.lastSeenMessages.write(pBuffer);
     }
 
     @Override

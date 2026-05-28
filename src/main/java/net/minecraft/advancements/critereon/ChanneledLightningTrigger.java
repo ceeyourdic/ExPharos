@@ -19,9 +19,9 @@ public class ChanneledLightningTrigger extends SimpleCriterionTrigger<ChanneledL
         return ChanneledLightningTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_21722_, Collection<? extends Entity> p_21723_) {
-        List<LootContext> list = p_21723_.stream().map(p_21720_ -> EntityPredicate.createContext(p_21722_, p_21720_)).collect(Collectors.toList());
-        this.trigger(p_21722_, p_21730_ -> p_21730_.matches(list));
+    public void trigger(ServerPlayer pPlayer, Collection<? extends Entity> pEntityTriggered) {
+        List<LootContext> list = pEntityTriggered.stream().map(p_21720_ -> EntityPredicate.createContext(pPlayer, p_21720_)).collect(Collectors.toList());
+        this.trigger(pPlayer, p_21730_ -> p_21730_.matches(list));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, List<ContextAwarePredicate> victims)
@@ -34,15 +34,15 @@ public class ChanneledLightningTrigger extends SimpleCriterionTrigger<ChanneledL
                     .apply(p_325195_, ChanneledLightningTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<ChanneledLightningTrigger.TriggerInstance> channeledLightning(EntityPredicate.Builder... p_299370_) {
-            return CriteriaTriggers.CHANNELED_LIGHTNING.createCriterion(new ChanneledLightningTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(p_299370_)));
+        public static Criterion<ChanneledLightningTrigger.TriggerInstance> channeledLightning(EntityPredicate.Builder... pVictims) {
+            return CriteriaTriggers.CHANNELED_LIGHTNING.createCriterion(new ChanneledLightningTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(pVictims)));
         }
 
-        public boolean matches(Collection<? extends LootContext> p_21745_) {
+        public boolean matches(Collection<? extends LootContext> pVictims) {
             for (ContextAwarePredicate contextawarepredicate : this.victims) {
                 boolean flag = false;
 
-                for (LootContext lootcontext : p_21745_) {
+                for (LootContext lootcontext : pVictims) {
                     if (contextawarepredicate.matches(lootcontext)) {
                         flag = true;
                         break;

@@ -43,8 +43,8 @@ public class ConduitBlock extends BaseEntityBlock implements SimpleWaterloggedBl
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_52118_) {
-        p_52118_.add(WATERLOGGED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(WATERLOGGED);
     }
 
     @Override
@@ -59,8 +59,8 @@ public class ConduitBlock extends BaseEntityBlock implements SimpleWaterloggedBl
     }
 
     @Override
-    protected FluidState getFluidState(BlockState p_52127_) {
-        return p_52127_.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(p_52127_);
+    protected FluidState getFluidState(BlockState pState) {
+        return pState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(pState);
     }
 
     @Override
@@ -82,14 +82,14 @@ public class ConduitBlock extends BaseEntityBlock implements SimpleWaterloggedBl
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_52122_, BlockGetter p_52123_, BlockPos p_52124_, CollisionContext p_52125_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_52096_) {
-        FluidState fluidstate = p_52096_.getLevel().getFluidState(p_52096_.getClickedPos());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
         return this.defaultBlockState().setValue(WATERLOGGED, Boolean.valueOf(fluidstate.is(FluidTags.WATER) && fluidstate.getAmount() == 8));
     }
 

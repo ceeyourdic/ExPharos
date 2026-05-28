@@ -54,10 +54,10 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
     private final Holder<Enchantment> enchantment;
     private final ApplyBonusCount.Formula formula;
 
-    private ApplyBonusCount(List<LootItemCondition> p_298095_, Holder<Enchantment> p_298508_, ApplyBonusCount.Formula p_79905_) {
-        super(p_298095_);
-        this.enchantment = p_298508_;
-        this.formula = p_79905_;
+    private ApplyBonusCount(List<LootItemCondition> pPredicates, Holder<Enchantment> pEnchantment, ApplyBonusCount.Formula pFormula) {
+        super(pPredicates);
+        this.enchantment = pEnchantment;
+        this.formula = pFormula;
     }
 
     @Override
@@ -71,31 +71,31 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_79913_, LootContext p_79914_) {
-        ItemStack itemstack = p_79914_.getOptionalParameter(LootContextParams.TOOL);
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        ItemStack itemstack = pContext.getOptionalParameter(LootContextParams.TOOL);
         if (itemstack != null) {
             int i = EnchantmentHelper.getItemEnchantmentLevel(this.enchantment, itemstack);
-            int j = this.formula.calculateNewCount(p_79914_.getRandom(), p_79913_.getCount(), i);
-            p_79913_.setCount(j);
+            int j = this.formula.calculateNewCount(pContext.getRandom(), pStack.getCount(), i);
+            pStack.setCount(j);
         }
 
-        return p_79913_;
+        return pStack;
     }
 
-    public static LootItemConditionalFunction.Builder<?> addBonusBinomialDistributionCount(Holder<Enchantment> p_345010_, float p_79919_, int p_79920_) {
-        return simpleBuilder(p_341983_ -> new ApplyBonusCount(p_341983_, p_345010_, new ApplyBonusCount.BinomialWithBonusCount(p_79920_, p_79919_)));
+    public static LootItemConditionalFunction.Builder<?> addBonusBinomialDistributionCount(Holder<Enchantment> pEnchantment, float pProbability, int pExtraRounds) {
+        return simpleBuilder(p_341983_ -> new ApplyBonusCount(p_341983_, pEnchantment, new ApplyBonusCount.BinomialWithBonusCount(pExtraRounds, pProbability)));
     }
 
-    public static LootItemConditionalFunction.Builder<?> addOreBonusCount(Holder<Enchantment> p_344898_) {
-        return simpleBuilder(p_341979_ -> new ApplyBonusCount(p_341979_, p_344898_, new ApplyBonusCount.OreDrops()));
+    public static LootItemConditionalFunction.Builder<?> addOreBonusCount(Holder<Enchantment> pEnchantment) {
+        return simpleBuilder(p_341979_ -> new ApplyBonusCount(p_341979_, pEnchantment, new ApplyBonusCount.OreDrops()));
     }
 
-    public static LootItemConditionalFunction.Builder<?> addUniformBonusCount(Holder<Enchantment> p_344489_) {
-        return simpleBuilder(p_341988_ -> new ApplyBonusCount(p_341988_, p_344489_, new ApplyBonusCount.UniformBonusCount(1)));
+    public static LootItemConditionalFunction.Builder<?> addUniformBonusCount(Holder<Enchantment> pEnchantment) {
+        return simpleBuilder(p_341988_ -> new ApplyBonusCount(p_341988_, pEnchantment, new ApplyBonusCount.UniformBonusCount(1)));
     }
 
-    public static LootItemConditionalFunction.Builder<?> addUniformBonusCount(Holder<Enchantment> p_344963_, int p_79923_) {
-        return simpleBuilder(p_341986_ -> new ApplyBonusCount(p_341986_, p_344963_, new ApplyBonusCount.UniformBonusCount(p_79923_)));
+    public static LootItemConditionalFunction.Builder<?> addUniformBonusCount(Holder<Enchantment> pEnchantment, int pBonusMultiplier) {
+        return simpleBuilder(p_341986_ -> new ApplyBonusCount(p_341986_, pEnchantment, new ApplyBonusCount.UniformBonusCount(pBonusMultiplier)));
     }
 
     static record BinomialWithBonusCount(int extraRounds, float probability) implements ApplyBonusCount.Formula {
@@ -128,7 +128,7 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
     }
 
     interface Formula {
-        int calculateNewCount(RandomSource p_230968_, int p_230969_, int p_230970_);
+        int calculateNewCount(RandomSource pRandom, int pOriginalCount, int pEnchantmentLevel);
 
         ApplyBonusCount.FormulaType getType();
     }

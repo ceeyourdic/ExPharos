@@ -27,8 +27,8 @@ public class FrogModel extends EntityModel<FrogRenderState> {
     private final ModelPart rightLeg = this.root.getChild("right_leg");
     private final ModelPart croakingBody = this.body.getChild("croaking_body");
 
-    public FrogModel(ModelPart p_233362_) {
-        super(p_233362_.getChild("root"));
+    public FrogModel(ModelPart pRoot) {
+        super(pRoot.getChild("root"));
     }
 
     public static LayerDefinition createBodyLayer() {

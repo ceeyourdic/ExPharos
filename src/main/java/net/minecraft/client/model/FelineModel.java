@@ -34,39 +34,39 @@ public class FelineModel<T extends FelineRenderState> extends EntityModel<T> {
     protected final ModelPart head;
     protected final ModelPart body;
 
-    public FelineModel(ModelPart p_365812_) {
-        super(p_365812_);
-        this.head = p_365812_.getChild("head");
-        this.body = p_365812_.getChild("body");
-        this.tail1 = p_365812_.getChild("tail1");
-        this.tail2 = p_365812_.getChild("tail2");
-        this.leftHindLeg = p_365812_.getChild("left_hind_leg");
-        this.rightHindLeg = p_365812_.getChild("right_hind_leg");
-        this.leftFrontLeg = p_365812_.getChild("left_front_leg");
-        this.rightFrontLeg = p_365812_.getChild("right_front_leg");
+    public FelineModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
+        this.body = pRoot.getChild("body");
+        this.tail1 = pRoot.getChild("tail1");
+        this.tail2 = pRoot.getChild("tail2");
+        this.leftHindLeg = pRoot.getChild("left_hind_leg");
+        this.rightHindLeg = pRoot.getChild("right_hind_leg");
+        this.leftFrontLeg = pRoot.getChild("left_front_leg");
+        this.rightFrontLeg = pRoot.getChild("right_front_leg");
     }
 
-    public static MeshDefinition createBodyMesh(CubeDeformation p_369358_) {
+    public static MeshDefinition createBodyMesh(CubeDeformation pCubeDeformation) {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
         CubeDeformation cubedeformation = new CubeDeformation(-0.02F);
         partdefinition.addOrReplaceChild(
             "head",
             CubeListBuilder.create()
-                .addBox("main", -2.5F, -2.0F, -3.0F, 5.0F, 4.0F, 5.0F, p_369358_)
-                .addBox("nose", -1.5F, -0.001F, -4.0F, 3, 2, 2, p_369358_, 0, 24)
-                .addBox("ear1", -2.0F, -3.0F, 0.0F, 1, 1, 2, p_369358_, 0, 10)
-                .addBox("ear2", 1.0F, -3.0F, 0.0F, 1, 1, 2, p_369358_, 6, 10),
+                .addBox("main", -2.5F, -2.0F, -3.0F, 5.0F, 4.0F, 5.0F, pCubeDeformation)
+                .addBox("nose", -1.5F, -0.001F, -4.0F, 3, 2, 2, pCubeDeformation, 0, 24)
+                .addBox("ear1", -2.0F, -3.0F, 0.0F, 1, 1, 2, pCubeDeformation, 0, 10)
+                .addBox("ear2", 1.0F, -3.0F, 0.0F, 1, 1, 2, pCubeDeformation, 6, 10),
             PartPose.offset(0.0F, 15.0F, -9.0F)
         );
         partdefinition.addOrReplaceChild(
             "body",
-            CubeListBuilder.create().texOffs(20, 0).addBox(-2.0F, 3.0F, -8.0F, 4.0F, 16.0F, 6.0F, p_369358_),
+            CubeListBuilder.create().texOffs(20, 0).addBox(-2.0F, 3.0F, -8.0F, 4.0F, 16.0F, 6.0F, pCubeDeformation),
             PartPose.offsetAndRotation(0.0F, 12.0F, -10.0F, (float) (Math.PI / 2), 0.0F, 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "tail1",
-            CubeListBuilder.create().texOffs(0, 15).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 8.0F, 1.0F, p_369358_),
+            CubeListBuilder.create().texOffs(0, 15).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 8.0F, 1.0F, pCubeDeformation),
             PartPose.offsetAndRotation(0.0F, 15.0F, 8.0F, 0.9F, 0.0F, 0.0F)
         );
         partdefinition.addOrReplaceChild(
@@ -74,10 +74,10 @@ public class FelineModel<T extends FelineRenderState> extends EntityModel<T> {
             CubeListBuilder.create().texOffs(4, 15).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 8.0F, 1.0F, cubedeformation),
             PartPose.offset(0.0F, 20.0F, 14.0F)
         );
-        CubeListBuilder cubelistbuilder = CubeListBuilder.create().texOffs(8, 13).addBox(-1.0F, 0.0F, 1.0F, 2.0F, 6.0F, 2.0F, p_369358_);
+        CubeListBuilder cubelistbuilder = CubeListBuilder.create().texOffs(8, 13).addBox(-1.0F, 0.0F, 1.0F, 2.0F, 6.0F, 2.0F, pCubeDeformation);
         partdefinition.addOrReplaceChild("left_hind_leg", cubelistbuilder, PartPose.offset(1.1F, 18.0F, 5.0F));
         partdefinition.addOrReplaceChild("right_hind_leg", cubelistbuilder, PartPose.offset(-1.1F, 18.0F, 5.0F));
-        CubeListBuilder cubelistbuilder1 = CubeListBuilder.create().texOffs(40, 0).addBox(-1.0F, 0.0F, 0.0F, 2.0F, 10.0F, 2.0F, p_369358_);
+        CubeListBuilder cubelistbuilder1 = CubeListBuilder.create().texOffs(40, 0).addBox(-1.0F, 0.0F, 0.0F, 2.0F, 10.0F, 2.0F, pCubeDeformation);
         partdefinition.addOrReplaceChild("left_front_leg", cubelistbuilder1, PartPose.offset(1.2F, 14.1F, -5.0F));
         partdefinition.addOrReplaceChild("right_front_leg", cubelistbuilder1, PartPose.offset(-1.2F, 14.1F, -5.0F));
         return meshdefinition;

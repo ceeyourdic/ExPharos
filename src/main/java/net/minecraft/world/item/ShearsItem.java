@@ -43,20 +43,20 @@ public class ShearsItem extends Item {
     }
 
     @Override
-    public boolean mineBlock(ItemStack p_43078_, Level p_43079_, BlockState p_43080_, BlockPos p_43081_, LivingEntity p_43082_) {
-        if (!p_43079_.isClientSide && !p_43080_.is(BlockTags.FIRE)) {
-            p_43078_.hurtAndBreak(1, p_43082_, EquipmentSlot.MAINHAND);
+    public boolean mineBlock(ItemStack pStack, Level pLevel, BlockState pState, BlockPos pPos, LivingEntity pEntityLiving) {
+        if (!pLevel.isClientSide && !pState.is(BlockTags.FIRE)) {
+            pStack.hurtAndBreak(1, pEntityLiving, EquipmentSlot.MAINHAND);
         }
 
-        return p_43080_.is(BlockTags.LEAVES)
-            || p_43080_.is(Blocks.COBWEB)
-            || p_43080_.is(Blocks.SHORT_GRASS)
-            || p_43080_.is(Blocks.FERN)
-            || p_43080_.is(Blocks.DEAD_BUSH)
-            || p_43080_.is(Blocks.HANGING_ROOTS)
-            || p_43080_.is(Blocks.VINE)
-            || p_43080_.is(Blocks.TRIPWIRE)
-            || p_43080_.is(BlockTags.WOOL);
+        return pState.is(BlockTags.LEAVES)
+            || pState.is(Blocks.COBWEB)
+            || pState.is(Blocks.SHORT_GRASS)
+            || pState.is(Blocks.FERN)
+            || pState.is(Blocks.DEAD_BUSH)
+            || pState.is(Blocks.HANGING_ROOTS)
+            || pState.is(Blocks.VINE)
+            || pState.is(Blocks.TRIPWIRE)
+            || pState.is(BlockTags.WOOL);
     }
 
     @Override

@@ -15,17 +15,17 @@ public class RecreatingSimpleRegionStorage extends SimpleRegionStorage {
     private final Path writeFolder;
 
     public RecreatingSimpleRegionStorage(
-        RegionStorageInfo p_330416_,
-        Path p_334038_,
-        RegionStorageInfo p_332972_,
-        Path p_334447_,
-        DataFixer p_330614_,
-        boolean p_331908_,
-        DataFixTypes p_333003_
+        RegionStorageInfo pInfo,
+        Path pFolder,
+        RegionStorageInfo pWriteInfo,
+        Path pWriteFolder,
+        DataFixer pFixerUpper,
+        boolean pSync,
+        DataFixTypes pDataFixType
     ) {
-        super(p_330416_, p_334038_, p_330614_, p_331908_, p_333003_);
-        this.writeFolder = p_334447_;
-        this.writeWorker = new IOWorker(p_332972_, p_334447_, p_331908_);
+        super(pInfo, pFolder, pFixerUpper, pSync, pDataFixType);
+        this.writeFolder = pWriteFolder;
+        this.writeWorker = new IOWorker(pWriteInfo, pWriteFolder, pSync);
     }
 
     @Override

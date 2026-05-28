@@ -49,43 +49,43 @@ public class ConnectScreen extends Screen {
     private long lastNarration = -1L;
     final Component connectFailedTitle;
 
-    private ConnectScreen(Screen p_279215_, Component p_279228_) {
+    private ConnectScreen(Screen pParent, Component pConnectFailedTitle) {
         super(GameNarrator.NO_TITLE);
-        this.parent = p_279215_;
-        this.connectFailedTitle = p_279228_;
+        this.parent = pParent;
+        this.connectFailedTitle = pConnectFailedTitle;
     }
 
     public static void startConnecting(
-        Screen p_279473_, Minecraft p_279200_, ServerAddress p_279150_, ServerData p_279481_, boolean p_279117_, @Nullable TransferState p_329293_
+        Screen pParent, Minecraft pMinecraft, ServerAddress pServerAddress, ServerData pServerData, boolean pIsQuickPlay, @Nullable TransferState pTransferState
     ) {
-        if (p_279200_.screen instanceof ConnectScreen) {
+        if (pMinecraft.screen instanceof ConnectScreen) {
             LOGGER.error("Attempt to connect while already connecting");
         } else {
             Component component;
-            if (p_329293_ != null) {
+            if (pTransferState != null) {
                 component = CommonComponents.TRANSFER_CONNECT_FAILED;
-            } else if (p_279117_) {
+            } else if (pIsQuickPlay) {
                 component = QuickPlay.ERROR_TITLE;
             } else {
                 component = CommonComponents.CONNECT_FAILED;
             }
 
-            ConnectScreen connectscreen = new ConnectScreen(p_279473_, component);
-            if (p_329293_ != null) {
+            ConnectScreen connectscreen = new ConnectScreen(pParent, component);
+            if (pTransferState != null) {
                 connectscreen.updateStatus(Component.translatable("connect.transferring"));
             }
 
-            p_279200_.disconnect();
-            p_279200_.prepareForMultiplayer();
-            p_279200_.updateReportEnvironment(ReportEnvironment.thirdParty(p_279481_.ip));
-            p_279200_.quickPlayLog().setWorldData(QuickPlayLog.Type.MULTIPLAYER, p_279481_.ip, p_279481_.name);
-            p_279200_.setScreen(connectscreen);
-            connectscreen.connect(p_279200_, p_279150_, p_279481_, p_329293_);
+            pMinecraft.disconnect();
+            pMinecraft.prepareForMultiplayer();
+            pMinecraft.updateReportEnvironment(ReportEnvironment.thirdParty(pServerData.ip));
+            pMinecraft.quickPlayLog().setWorldData(QuickPlayLog.Type.MULTIPLAYER, pServerData.ip, pServerData.name);
+            pMinecraft.setScreen(connectscreen);
+            connectscreen.connect(pMinecraft, pServerAddress, pServerData, pTransferState);
         }
     }
 
-    private void connect(final Minecraft p_251955_, final ServerAddress p_249536_, final ServerData p_252078_, @Nullable final TransferState p_330037_) {
-        LOGGER.info("Connecting to {}, {}", p_249536_.getHost(), p_249536_.getPort());
+    private void connect(final Minecraft pMinecraft, final ServerAddress pServerAddress, final ServerData pServerData, @Nullable final TransferState pTransferState) {
+        LOGGER.info("Connecting to {}, {}", pServerAddress.getHost(), pServerAddress.getPort());
         Thread thread = new Thread("Server Connector #" + UNIQUE_THREAD_ID.incrementAndGet()) {
             @Override
             public void run() {
@@ -96,14 +96,14 @@ public class ConnectScreen extends Screen {
                         return;
                     }
 
-                    Optional<InetSocketAddress> optional = ServerNameResolver.DEFAULT.resolveAddress(p_249536_).map(ResolvedServerAddress::asInetSocketAddress);
+                    Optional<InetSocketAddress> optional = ServerNameResolver.DEFAULT.resolveAddress(pServerAddress).map(ResolvedServerAddress::asInetSocketAddress);
                     if (ConnectScreen.this.aborted) {
                         return;
                     }
 
                     if (optional.isEmpty()) {
-                        p_251955_.execute(
-                            () -> p_251955_.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, ConnectScreen.this.connectFailedTitle, ConnectScreen.UNKNOWN_HOST_MESSAGE))
+                        pMinecraft.execute(
+                            () -> pMinecraft.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, ConnectScreen.this.connectFailedTitle, ConnectScreen.UNKNOWN_HOST_MESSAGE))
                         );
                         return;
                     }
@@ -116,8 +116,8 @@ public class ConnectScreen extends Screen {
                         }
 
                         connection = new Connection(PacketFlow.CLIENTBOUND);
-                        connection.setBandwidthLogger(p_251955_.getDebugOverlay().getBandwidthLogger());
-                        ConnectScreen.this.channelFuture = Connection.connect(inetsocketaddress, p_251955_.options.useNativeTransport(), connection);
+                        connection.setBandwidthLogger(pMinecraft.getDebugOverlay().getBandwidthLogger());
+                        ConnectScreen.this.channelFuture = Connection.connect(inetsocketaddress, pMinecraft.options.useNativeTransport(), connection);
                     }
 
                     ConnectScreen.this.channelFuture.syncUninterruptibly();
@@ -128,7 +128,7 @@ public class ConnectScreen extends Screen {
                         }
 
                         ConnectScreen.this.connection = connection;
-                        p_251955_.getDownloadedPackSource().configureForServerControl(connection, convertPackStatus(p_252078_.getResourcePackStatus()));
+                        pMinecraft.getDownloadedPackSource().configureForServerControl(connection, convertPackStatus(pServerData.getResourcePackStatus()));
                     }
 
                     ConnectScreen.this.connection
@@ -139,17 +139,17 @@ public class ConnectScreen extends Screen {
                             LoginProtocols.CLIENTBOUND,
                             new ClientHandshakePacketListenerImpl(
                                 ConnectScreen.this.connection,
-                                p_251955_,
-                                p_252078_,
+                                pMinecraft,
+                                pServerData,
                                 ConnectScreen.this.parent,
                                 false,
                                 null,
                                 ConnectScreen.this::updateStatus,
-                                p_330037_
+                                pTransferState
                             ),
-                            p_330037_ != null
+                            pTransferState != null
                         );
-                    ConnectScreen.this.connection.send(new ServerboundHelloPacket(p_251955_.getUser().getName(), p_251955_.getUser().getProfileId()));
+                    ConnectScreen.this.connection.send(new ServerboundHelloPacket(pMinecraft.getUser().getName(), pMinecraft.getUser().getProfileId()));
                 } catch (Exception exception2) {
                     if (ConnectScreen.this.aborted) {
                         return;
@@ -168,8 +168,8 @@ public class ConnectScreen extends Screen {
                         : exception.getMessage()
                             .replaceAll(inetsocketaddress.getHostName() + ":" + inetsocketaddress.getPort(), "")
                             .replaceAll(inetsocketaddress.toString(), "");
-                    p_251955_.execute(
-                        () -> p_251955_.setScreen(
+                    pMinecraft.execute(
+                        () -> pMinecraft.setScreen(
                                 new DisconnectedScreen(
                                     ConnectScreen.this.parent, ConnectScreen.this.connectFailedTitle, Component.translatable("disconnect.genericReason", s)
                                 )
@@ -190,8 +190,8 @@ public class ConnectScreen extends Screen {
         thread.start();
     }
 
-    private void updateStatus(Component p_95718_) {
-        this.status = p_95718_;
+    private void updateStatus(Component pStatus) {
+        this.status = pStatus;
     }
 
     @Override

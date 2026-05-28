@@ -21,36 +21,36 @@ public class FrameGraphBuilder {
     private final List<FrameGraphBuilder.ExternalResource<?>> externalResources = new ArrayList<>();
     private final List<FrameGraphBuilder.Pass> passes = new ArrayList<>();
 
-    public FramePass addPass(String p_362791_) {
-        FrameGraphBuilder.Pass framegraphbuilder$pass = new FrameGraphBuilder.Pass(this.passes.size(), p_362791_);
+    public FramePass addPass(String pName) {
+        FrameGraphBuilder.Pass framegraphbuilder$pass = new FrameGraphBuilder.Pass(this.passes.size(), pName);
         this.passes.add(framegraphbuilder$pass);
         return framegraphbuilder$pass;
     }
 
-    public <T> ResourceHandle<T> importExternal(String p_363754_, T p_369377_) {
-        FrameGraphBuilder.ExternalResource<T> externalresource = new FrameGraphBuilder.ExternalResource<>(p_363754_, null, p_369377_);
+    public <T> ResourceHandle<T> importExternal(String pName, T pResource) {
+        FrameGraphBuilder.ExternalResource<T> externalresource = new FrameGraphBuilder.ExternalResource<>(pName, null, pResource);
         this.externalResources.add(externalresource);
         return externalresource.handle;
     }
 
-    public <T> ResourceHandle<T> createInternal(String p_360750_, ResourceDescriptor<T> p_363637_) {
-        return this.createInternalResource(p_360750_, p_363637_, null).handle;
+    public <T> ResourceHandle<T> createInternal(String pName, ResourceDescriptor<T> pDescriptor) {
+        return this.createInternalResource(pName, pDescriptor, null).handle;
     }
 
-    <T> FrameGraphBuilder.InternalVirtualResource<T> createInternalResource(String p_368654_, ResourceDescriptor<T> p_360922_, @Nullable FrameGraphBuilder.Pass p_362192_) {
+    <T> FrameGraphBuilder.InternalVirtualResource<T> createInternalResource(String pName, ResourceDescriptor<T> pDescriptor, @Nullable FrameGraphBuilder.Pass pCreatedBy) {
         int i = this.internalResources.size();
         FrameGraphBuilder.InternalVirtualResource<T> internalvirtualresource = new FrameGraphBuilder.InternalVirtualResource<>(
-            i, p_368654_, p_362192_, p_360922_
+            i, pName, pCreatedBy, pDescriptor
         );
         this.internalResources.add(internalvirtualresource);
         return internalvirtualresource;
     }
 
-    public void execute(GraphicsResourceAllocator p_368856_) {
-        this.execute(p_368856_, FrameGraphBuilder.Inspector.NONE);
+    public void execute(GraphicsResourceAllocator pAllocator) {
+        this.execute(pAllocator, FrameGraphBuilder.Inspector.NONE);
     }
 
-    public void execute(GraphicsResourceAllocator p_367017_, FrameGraphBuilder.Inspector p_366308_) {
+    public void execute(GraphicsResourceAllocator pAllocator, FrameGraphBuilder.Inspector pInspector) {
         BitSet bitset = this.identifyPassesToKeep();
         List<FrameGraphBuilder.Pass> list = new ArrayList<>(bitset.cardinality());
         BitSet bitset1 = new BitSet(this.passes.size());
@@ -63,18 +63,18 @@ public class FrameGraphBuilder {
 
         for (FrameGraphBuilder.Pass framegraphbuilder$pass1 : list) {
             for (FrameGraphBuilder.InternalVirtualResource<?> internalvirtualresource : framegraphbuilder$pass1.resourcesToAcquire) {
-                p_366308_.acquireResource(internalvirtualresource.name);
-                internalvirtualresource.acquire(p_367017_);
+                pInspector.acquireResource(internalvirtualresource.name);
+                internalvirtualresource.acquire(pAllocator);
             }
 
-            p_366308_.beforeExecutePass(framegraphbuilder$pass1.name);
+            pInspector.beforeExecutePass(framegraphbuilder$pass1.name);
             framegraphbuilder$pass1.task.run();
-            p_366308_.afterExecutePass(framegraphbuilder$pass1.name);
+            pInspector.afterExecutePass(framegraphbuilder$pass1.name);
 
             for (int i = framegraphbuilder$pass1.resourcesToRelease.nextSetBit(0); i >= 0; i = framegraphbuilder$pass1.resourcesToRelease.nextSetBit(i + 1)) {
                 FrameGraphBuilder.InternalVirtualResource<?> internalvirtualresource1 = this.internalResources.get(i);
-                p_366308_.releaseResource(internalvirtualresource1.name);
-                internalvirtualresource1.release(p_367017_);
+                pInspector.releaseResource(internalvirtualresource1.name);
+                internalvirtualresource1.release(pAllocator);
             }
         }
     }
@@ -99,50 +99,50 @@ public class FrameGraphBuilder {
         return bitset;
     }
 
-    private void discoverAllRequiredPasses(FrameGraphBuilder.Pass p_362979_, BitSet p_368956_, Deque<FrameGraphBuilder.Pass> p_369416_) {
-        p_369416_.add(p_362979_);
+    private void discoverAllRequiredPasses(FrameGraphBuilder.Pass pPass, BitSet pPassesToKeep, Deque<FrameGraphBuilder.Pass> pOutput) {
+        pOutput.add(pPass);
 
-        while (!p_369416_.isEmpty()) {
-            FrameGraphBuilder.Pass framegraphbuilder$pass = p_369416_.poll();
-            if (!p_368956_.get(framegraphbuilder$pass.id)) {
-                p_368956_.set(framegraphbuilder$pass.id);
+        while (!pOutput.isEmpty()) {
+            FrameGraphBuilder.Pass framegraphbuilder$pass = pOutput.poll();
+            if (!pPassesToKeep.get(framegraphbuilder$pass.id)) {
+                pPassesToKeep.set(framegraphbuilder$pass.id);
 
                 for (int i = framegraphbuilder$pass.requiredPassIds.nextSetBit(0); i >= 0; i = framegraphbuilder$pass.requiredPassIds.nextSetBit(i + 1)) {
-                    p_369416_.add(this.passes.get(i));
+                    pOutput.add(this.passes.get(i));
                 }
             }
         }
     }
 
-    private void resolvePassOrder(FrameGraphBuilder.Pass p_364839_, BitSet p_370123_, BitSet p_365587_, List<FrameGraphBuilder.Pass> p_366834_) {
-        if (p_365587_.get(p_364839_.id)) {
-            String s = p_365587_.stream().mapToObj(p_368248_ -> this.passes.get(p_368248_).name).collect(Collectors.joining(", "));
+    private void resolvePassOrder(FrameGraphBuilder.Pass pPass, BitSet pPassesToKeep, BitSet pOutput, List<FrameGraphBuilder.Pass> pOrderedPasses) {
+        if (pOutput.get(pPass.id)) {
+            String s = pOutput.stream().mapToObj(p_368248_ -> this.passes.get(p_368248_).name).collect(Collectors.joining(", "));
             throw new IllegalStateException("Frame graph cycle detected between " + s);
-        } else if (p_370123_.get(p_364839_.id)) {
-            p_365587_.set(p_364839_.id);
-            p_370123_.clear(p_364839_.id);
+        } else if (pPassesToKeep.get(pPass.id)) {
+            pOutput.set(pPass.id);
+            pPassesToKeep.clear(pPass.id);
 
-            for (int i = p_364839_.requiredPassIds.nextSetBit(0); i >= 0; i = p_364839_.requiredPassIds.nextSetBit(i + 1)) {
-                this.resolvePassOrder(this.passes.get(i), p_370123_, p_365587_, p_366834_);
+            for (int i = pPass.requiredPassIds.nextSetBit(0); i >= 0; i = pPass.requiredPassIds.nextSetBit(i + 1)) {
+                this.resolvePassOrder(this.passes.get(i), pPassesToKeep, pOutput, pOrderedPasses);
             }
 
-            for (FrameGraphBuilder.Handle<?> handle : p_364839_.writesFrom) {
+            for (FrameGraphBuilder.Handle<?> handle : pPass.writesFrom) {
                 for (int j = handle.readBy.nextSetBit(0); j >= 0; j = handle.readBy.nextSetBit(j + 1)) {
-                    if (j != p_364839_.id) {
-                        this.resolvePassOrder(this.passes.get(j), p_370123_, p_365587_, p_366834_);
+                    if (j != pPass.id) {
+                        this.resolvePassOrder(this.passes.get(j), pPassesToKeep, pOutput, pOrderedPasses);
                     }
                 }
             }
 
-            p_366834_.add(p_364839_);
-            p_365587_.clear(p_364839_.id);
+            pOrderedPasses.add(pPass);
+            pOutput.clear(pPass.id);
         }
     }
 
-    private void assignResourceLifetimes(Collection<FrameGraphBuilder.Pass> p_366752_) {
+    private void assignResourceLifetimes(Collection<FrameGraphBuilder.Pass> pPasses) {
         FrameGraphBuilder.Pass[] aframegraphbuilder$pass = new FrameGraphBuilder.Pass[this.internalResources.size()];
 
-        for (FrameGraphBuilder.Pass framegraphbuilder$pass : p_366752_) {
+        for (FrameGraphBuilder.Pass framegraphbuilder$pass : pPasses) {
             for (int i = framegraphbuilder$pass.requiredResourceIds.nextSetBit(0); i >= 0; i = framegraphbuilder$pass.requiredResourceIds.nextSetBit(i + 1)) {
                 FrameGraphBuilder.InternalVirtualResource<?> internalvirtualresource = this.internalResources.get(i);
                 FrameGraphBuilder.Pass framegraphbuilder$pass1 = aframegraphbuilder$pass[i];
@@ -162,9 +162,9 @@ public class FrameGraphBuilder {
     static class ExternalResource<T> extends FrameGraphBuilder.VirtualResource<T> {
         private final T resource;
 
-        public ExternalResource(String p_361702_, @Nullable FrameGraphBuilder.Pass p_362591_, T p_364944_) {
-            super(p_361702_, p_362591_);
-            this.resource = p_364944_;
+        public ExternalResource(String pName, @Nullable FrameGraphBuilder.Pass pCreatedBy, T pResource) {
+            super(pName, pCreatedBy);
+            this.resource = pResource;
         }
 
         @Override
@@ -183,10 +183,10 @@ public class FrameGraphBuilder {
         @Nullable
         private FrameGraphBuilder.Handle<T> aliasedBy;
 
-        Handle(FrameGraphBuilder.VirtualResource<T> p_368119_, int p_368761_, @Nullable FrameGraphBuilder.Pass p_368110_) {
-            this.holder = p_368119_;
-            this.version = p_368761_;
-            this.createdBy = p_368110_;
+        Handle(FrameGraphBuilder.VirtualResource<T> pHolder, int pVersion, @Nullable FrameGraphBuilder.Pass pCreatedBy) {
+            this.holder = pHolder;
+            this.version = pVersion;
+            this.createdBy = pCreatedBy;
         }
 
         @Override
@@ -194,11 +194,11 @@ public class FrameGraphBuilder {
             return this.holder.get();
         }
 
-        FrameGraphBuilder.Handle<T> writeAndAlias(FrameGraphBuilder.Pass p_368239_) {
+        FrameGraphBuilder.Handle<T> writeAndAlias(FrameGraphBuilder.Pass pAlias) {
             if (this.holder.handle != this) {
                 throw new IllegalStateException("Handle " + this + " is no longer valid, as its contents were moved into " + this.aliasedBy);
             } else {
-                FrameGraphBuilder.Handle<T> handle = new FrameGraphBuilder.Handle<>(this.holder, this.version + 1, p_368239_);
+                FrameGraphBuilder.Handle<T> handle = new FrameGraphBuilder.Handle<>(this.holder, this.version + 1, pAlias);
                 this.holder.handle = handle;
                 this.aliasedBy = handle;
                 return handle;
@@ -216,16 +216,16 @@ public class FrameGraphBuilder {
         FrameGraphBuilder.Inspector NONE = new FrameGraphBuilder.Inspector() {
         };
 
-        default void acquireResource(String p_362031_) {
+        default void acquireResource(String pName) {
         }
 
-        default void releaseResource(String p_370224_) {
+        default void releaseResource(String pName) {
         }
 
-        default void beforeExecutePass(String p_363319_) {
+        default void beforeExecutePass(String pName) {
         }
 
-        default void afterExecutePass(String p_368799_) {
+        default void afterExecutePass(String pName) {
         }
     }
 
@@ -236,10 +236,10 @@ public class FrameGraphBuilder {
         @Nullable
         private T physicalResource;
 
-        public InternalVirtualResource(int p_369414_, String p_364574_, @Nullable FrameGraphBuilder.Pass p_361395_, ResourceDescriptor<T> p_364455_) {
-            super(p_364574_, p_361395_);
-            this.id = p_369414_;
-            this.descriptor = p_364455_;
+        public InternalVirtualResource(int pId, String pName, @Nullable FrameGraphBuilder.Pass pCreatedBy, ResourceDescriptor<T> pDescriptor) {
+            super(pName, pCreatedBy);
+            this.id = pId;
+            this.descriptor = pDescriptor;
         }
 
         @Override
@@ -247,19 +247,19 @@ public class FrameGraphBuilder {
             return Objects.requireNonNull(this.physicalResource, "Resource is not currently available");
         }
 
-        public void acquire(GraphicsResourceAllocator p_367587_) {
+        public void acquire(GraphicsResourceAllocator pAllocator) {
             if (this.physicalResource != null) {
                 throw new IllegalStateException("Tried to acquire physical resource, but it was already assigned");
             } else {
-                this.physicalResource = p_367587_.acquire(this.descriptor);
+                this.physicalResource = pAllocator.acquire(this.descriptor);
             }
         }
 
-        public void release(GraphicsResourceAllocator p_363217_) {
+        public void release(GraphicsResourceAllocator pAllocator) {
             if (this.physicalResource == null) {
                 throw new IllegalStateException("Tried to release physical resource that was not allocated");
             } else {
-                p_363217_.release(this.descriptor, this.physicalResource);
+                pAllocator.release(this.descriptor, this.physicalResource);
                 this.physicalResource = null;
             }
         }
@@ -278,19 +278,19 @@ public class FrameGraphBuilder {
         final BitSet resourcesToRelease = new BitSet();
         boolean disableCulling;
 
-        public Pass(final int p_367383_, final String p_361566_) {
-            this.id = p_367383_;
-            this.name = p_361566_;
+        public Pass(final int pId, final String pName) {
+            this.id = pId;
+            this.name = pName;
         }
 
-        private <T> void markResourceRequired(FrameGraphBuilder.Handle<T> p_364152_) {
-            if (p_364152_.holder instanceof FrameGraphBuilder.InternalVirtualResource<?> internalvirtualresource) {
+        private <T> void markResourceRequired(FrameGraphBuilder.Handle<T> pHandle) {
+            if (pHandle.holder instanceof FrameGraphBuilder.InternalVirtualResource<?> internalvirtualresource) {
                 this.requiredResourceIds.set(internalvirtualresource.id);
             }
         }
 
-        private void markPassRequired(FrameGraphBuilder.Pass p_365988_) {
-            this.requiredPassIds.set(p_365988_.id);
+        private void markPassRequired(FrameGraphBuilder.Pass pPass) {
+            this.requiredPassIds.set(pPass.id);
         }
 
         @Override
@@ -305,13 +305,13 @@ public class FrameGraphBuilder {
             this._reads((FrameGraphBuilder.Handle<T>)p_366230_);
         }
 
-        private <T> void _reads(FrameGraphBuilder.Handle<T> p_362181_) {
-            this.markResourceRequired(p_362181_);
-            if (p_362181_.createdBy != null) {
-                this.markPassRequired(p_362181_.createdBy);
+        private <T> void _reads(FrameGraphBuilder.Handle<T> pHandle) {
+            this.markResourceRequired(pHandle);
+            if (pHandle.createdBy != null) {
+                this.markPassRequired(pHandle.createdBy);
             }
 
-            p_362181_.readBy.set(this.id);
+            pHandle.readBy.set(this.id);
         }
 
         @Override
@@ -329,10 +329,10 @@ public class FrameGraphBuilder {
             this.disableCulling = true;
         }
 
-        private <T> FrameGraphBuilder.Handle<T> _readsAndWrites(FrameGraphBuilder.Handle<T> p_361681_) {
-            this.writesFrom.add(p_361681_);
-            this._reads(p_361681_);
-            return p_361681_.writeAndAlias(this);
+        private <T> FrameGraphBuilder.Handle<T> _readsAndWrites(FrameGraphBuilder.Handle<T> pHandle) {
+            this.writesFrom.add(pHandle);
+            this._reads(pHandle);
+            return pHandle.writeAndAlias(this);
         }
 
         @Override
@@ -351,9 +351,9 @@ public class FrameGraphBuilder {
         public final String name;
         public FrameGraphBuilder.Handle<T> handle;
 
-        public VirtualResource(String p_364878_, @Nullable FrameGraphBuilder.Pass p_363310_) {
-            this.name = p_364878_;
-            this.handle = new FrameGraphBuilder.Handle<>(this, 0, p_363310_);
+        public VirtualResource(String pName, @Nullable FrameGraphBuilder.Pass pCreatedBy) {
+            this.name = pName;
+            this.handle = new FrameGraphBuilder.Handle<>(this, 0, pCreatedBy);
         }
 
         public abstract T get();

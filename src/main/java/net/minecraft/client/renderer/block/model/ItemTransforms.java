@@ -32,8 +32,8 @@ public record ItemTransforms(
         ItemTransform.NO_TRANSFORM
     );
 
-    public ItemTransform getTransform(ItemDisplayContext p_270619_) {
-        return switch (p_270619_) {
+    public ItemTransform getTransform(ItemDisplayContext pDisplayContext) {
+        return switch (pDisplayContext) {
             case THIRD_PERSON_LEFT_HAND -> this.thirdPersonLeftHand;
             case THIRD_PERSON_RIGHT_HAND -> this.thirdPersonRightHand;
             case FIRST_PERSON_LEFT_HAND -> this.firstPersonLeftHand;
@@ -48,32 +48,32 @@ public record ItemTransforms(
 
     @OnlyIn(Dist.CLIENT)
     protected static class Deserializer implements JsonDeserializer<ItemTransforms> {
-        public ItemTransforms deserialize(JsonElement p_111820_, Type p_111821_, JsonDeserializationContext p_111822_) throws JsonParseException {
-            JsonObject jsonobject = p_111820_.getAsJsonObject();
-            ItemTransform itemtransform = this.getTransform(p_111822_, jsonobject, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND);
-            ItemTransform itemtransform1 = this.getTransform(p_111822_, jsonobject, ItemDisplayContext.THIRD_PERSON_LEFT_HAND);
+        public ItemTransforms deserialize(JsonElement pJson, Type pType, JsonDeserializationContext pContext) throws JsonParseException {
+            JsonObject jsonobject = pJson.getAsJsonObject();
+            ItemTransform itemtransform = this.getTransform(pContext, jsonobject, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND);
+            ItemTransform itemtransform1 = this.getTransform(pContext, jsonobject, ItemDisplayContext.THIRD_PERSON_LEFT_HAND);
             if (itemtransform1 == ItemTransform.NO_TRANSFORM) {
                 itemtransform1 = itemtransform;
             }
 
-            ItemTransform itemtransform2 = this.getTransform(p_111822_, jsonobject, ItemDisplayContext.FIRST_PERSON_RIGHT_HAND);
-            ItemTransform itemtransform3 = this.getTransform(p_111822_, jsonobject, ItemDisplayContext.FIRST_PERSON_LEFT_HAND);
+            ItemTransform itemtransform2 = this.getTransform(pContext, jsonobject, ItemDisplayContext.FIRST_PERSON_RIGHT_HAND);
+            ItemTransform itemtransform3 = this.getTransform(pContext, jsonobject, ItemDisplayContext.FIRST_PERSON_LEFT_HAND);
             if (itemtransform3 == ItemTransform.NO_TRANSFORM) {
                 itemtransform3 = itemtransform2;
             }
 
-            ItemTransform itemtransform4 = this.getTransform(p_111822_, jsonobject, ItemDisplayContext.HEAD);
-            ItemTransform itemtransform5 = this.getTransform(p_111822_, jsonobject, ItemDisplayContext.GUI);
-            ItemTransform itemtransform6 = this.getTransform(p_111822_, jsonobject, ItemDisplayContext.GROUND);
-            ItemTransform itemtransform7 = this.getTransform(p_111822_, jsonobject, ItemDisplayContext.FIXED);
+            ItemTransform itemtransform4 = this.getTransform(pContext, jsonobject, ItemDisplayContext.HEAD);
+            ItemTransform itemtransform5 = this.getTransform(pContext, jsonobject, ItemDisplayContext.GUI);
+            ItemTransform itemtransform6 = this.getTransform(pContext, jsonobject, ItemDisplayContext.GROUND);
+            ItemTransform itemtransform7 = this.getTransform(pContext, jsonobject, ItemDisplayContext.FIXED);
             return new ItemTransforms(
                 itemtransform1, itemtransform, itemtransform3, itemtransform2, itemtransform4, itemtransform5, itemtransform6, itemtransform7
             );
         }
 
-        private ItemTransform getTransform(JsonDeserializationContext p_270385_, JsonObject p_270436_, ItemDisplayContext p_270100_) {
-            String s = p_270100_.getSerializedName();
-            return p_270436_.has(s) ? p_270385_.deserialize(p_270436_.get(s), ItemTransform.class) : ItemTransform.NO_TRANSFORM;
+        private ItemTransform getTransform(JsonDeserializationContext pDeserializationContext, JsonObject pJson, ItemDisplayContext pDisplayContext) {
+            String s = pDisplayContext.getSerializedName();
+            return pJson.has(s) ? pDeserializationContext.deserialize(pJson.get(s), ItemTransform.class) : ItemTransform.NO_TRANSFORM;
         }
     }
 }

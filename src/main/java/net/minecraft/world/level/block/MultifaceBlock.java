@@ -71,14 +71,14 @@ public class MultifaceBlock extends Block implements SimpleWaterloggedBlock {
         this.canMirrorZ = Direction.Plane.HORIZONTAL.stream().filter(Direction.Axis.Z).filter(this::isFaceSupported).count() % 2L == 0L;
     }
 
-    public static Set<Direction> availableFaces(BlockState p_221585_) {
-        if (!(p_221585_.getBlock() instanceof MultifaceBlock)) {
+    public static Set<Direction> availableFaces(BlockState pState) {
+        if (!(pState.getBlock() instanceof MultifaceBlock)) {
             return Set.of();
         } else {
             Set<Direction> set = EnumSet.noneOf(Direction.class);
 
             for (Direction direction : Direction.values()) {
-                if (hasFace(p_221585_, direction)) {
+                if (hasFace(pState, direction)) {
                     set.add(direction);
                 }
             }
@@ -87,11 +87,11 @@ public class MultifaceBlock extends Block implements SimpleWaterloggedBlock {
         }
     }
 
-    public static Set<Direction> unpack(byte p_221570_) {
+    public static Set<Direction> unpack(byte pPackedDirections) {
         Set<Direction> set = EnumSet.noneOf(Direction.class);
 
         for (Direction direction : Direction.values()) {
-            if ((p_221570_ & (byte)(1 << direction.ordinal())) > 0) {
+            if ((pPackedDirections & (byte)(1 << direction.ordinal())) > 0) {
                 set.add(direction);
             }
         }
@@ -99,17 +99,17 @@ public class MultifaceBlock extends Block implements SimpleWaterloggedBlock {
         return set;
     }
 
-    public static byte pack(Collection<Direction> p_221577_) {
+    public static byte pack(Collection<Direction> pDirections) {
         byte b0 = 0;
 
-        for (Direction direction : p_221577_) {
+        for (Direction direction : pDirections) {
             b0 = (byte)(b0 | 1 << direction.ordinal());
         }
 
         return b0;
     }
 
-    protected boolean isFaceSupported(Direction p_153921_) {
+    protected boolean isFaceSupported(Direction pFace) {
         return true;
     }
 
@@ -193,30 +193,30 @@ public class MultifaceBlock extends Block implements SimpleWaterloggedBlock {
             .orElse(null);
     }
 
-    public boolean isValidStateForPlacement(BlockGetter p_221572_, BlockState p_221573_, BlockPos p_221574_, Direction p_221575_) {
-        if (this.isFaceSupported(p_221575_) && (!p_221573_.is(this) || !hasFace(p_221573_, p_221575_))) {
-            BlockPos blockpos = p_221574_.relative(p_221575_);
-            return canAttachTo(p_221572_, p_221575_, blockpos, p_221572_.getBlockState(blockpos));
+    public boolean isValidStateForPlacement(BlockGetter pLevel, BlockState pState, BlockPos pPos, Direction pDirection) {
+        if (this.isFaceSupported(pDirection) && (!pState.is(this) || !hasFace(pState, pDirection))) {
+            BlockPos blockpos = pPos.relative(pDirection);
+            return canAttachTo(pLevel, pDirection, blockpos, pLevel.getBlockState(blockpos));
         } else {
             return false;
         }
     }
 
     @Nullable
-    public BlockState getStateForPlacement(BlockState p_153941_, BlockGetter p_153942_, BlockPos p_153943_, Direction p_153944_) {
-        if (!this.isValidStateForPlacement(p_153942_, p_153941_, p_153943_, p_153944_)) {
+    public BlockState getStateForPlacement(BlockState pCurrentState, BlockGetter pLevel, BlockPos pPos, Direction pLookingDirection) {
+        if (!this.isValidStateForPlacement(pLevel, pCurrentState, pPos, pLookingDirection)) {
             return null;
         } else {
             BlockState blockstate;
-            if (p_153941_.is(this)) {
-                blockstate = p_153941_;
-            } else if (p_153941_.getFluidState().isSourceOfType(Fluids.WATER)) {
+            if (pCurrentState.is(this)) {
+                blockstate = pCurrentState;
+            } else if (pCurrentState.getFluidState().isSourceOfType(Fluids.WATER)) {
                 blockstate = this.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true));
             } else {
                 blockstate = this.defaultBlockState();
             }
 
-            return blockstate.setValue(getFaceProperty(p_153944_), Boolean.valueOf(true));
+            return blockstate.setValue(getFaceProperty(pLookingDirection), Boolean.valueOf(true));
         }
     }
 
@@ -234,45 +234,45 @@ public class MultifaceBlock extends Block implements SimpleWaterloggedBlock {
         }
     }
 
-    private BlockState mapDirections(BlockState p_153911_, Function<Direction, Direction> p_153912_) {
-        BlockState blockstate = p_153911_;
+    private BlockState mapDirections(BlockState pState, Function<Direction, Direction> pDirectionalFunction) {
+        BlockState blockstate = pState;
 
         for (Direction direction : DIRECTIONS) {
             if (this.isFaceSupported(direction)) {
-                blockstate = blockstate.setValue(getFaceProperty(p_153912_.apply(direction)), p_153911_.getValue(getFaceProperty(direction)));
+                blockstate = blockstate.setValue(getFaceProperty(pDirectionalFunction.apply(direction)), pState.getValue(getFaceProperty(direction)));
             }
         }
 
         return blockstate;
     }
 
-    public static boolean hasFace(BlockState p_153901_, Direction p_153902_) {
-        BooleanProperty booleanproperty = getFaceProperty(p_153902_);
-        return p_153901_.getValueOrElse(booleanproperty, Boolean.valueOf(false));
+    public static boolean hasFace(BlockState pState, Direction pDirection) {
+        BooleanProperty booleanproperty = getFaceProperty(pDirection);
+        return pState.getValueOrElse(booleanproperty, Boolean.valueOf(false));
     }
 
-    public static boolean canAttachTo(BlockGetter p_376779_, BlockPos p_375819_, Direction p_378815_) {
-        BlockPos blockpos = p_375819_.relative(p_378815_);
-        BlockState blockstate = p_376779_.getBlockState(blockpos);
-        return canAttachTo(p_376779_, p_378815_, blockpos, blockstate);
+    public static boolean canAttachTo(BlockGetter pLevel, BlockPos pPos, Direction pDirection) {
+        BlockPos blockpos = pPos.relative(pDirection);
+        BlockState blockstate = pLevel.getBlockState(blockpos);
+        return canAttachTo(pLevel, pDirection, blockpos, blockstate);
     }
 
-    public static boolean canAttachTo(BlockGetter p_153830_, Direction p_153831_, BlockPos p_153832_, BlockState p_153833_) {
-        return Block.isFaceFull(p_153833_.getBlockSupportShape(p_153830_, p_153832_), p_153831_.getOpposite())
-            || Block.isFaceFull(p_153833_.getCollisionShape(p_153830_, p_153832_), p_153831_.getOpposite());
+    public static boolean canAttachTo(BlockGetter pLevel, Direction pDirection, BlockPos pPos, BlockState pState) {
+        return Block.isFaceFull(pState.getBlockSupportShape(pLevel, pPos), pDirection.getOpposite())
+            || Block.isFaceFull(pState.getCollisionShape(pLevel, pPos), pDirection.getOpposite());
     }
 
-    private static BlockState removeFace(BlockState p_153898_, BooleanProperty p_153899_) {
-        BlockState blockstate = p_153898_.setValue(p_153899_, Boolean.valueOf(false));
+    private static BlockState removeFace(BlockState pState, BooleanProperty pFaceProp) {
+        BlockState blockstate = pState.setValue(pFaceProp, Boolean.valueOf(false));
         return hasAnyFace(blockstate) ? blockstate : Blocks.AIR.defaultBlockState();
     }
 
-    public static BooleanProperty getFaceProperty(Direction p_153934_) {
-        return PROPERTY_BY_DIRECTION.get(p_153934_);
+    public static BooleanProperty getFaceProperty(Direction pDirection) {
+        return PROPERTY_BY_DIRECTION.get(pDirection);
     }
 
-    private static BlockState getDefaultMultifaceState(StateDefinition<Block, BlockState> p_153919_) {
-        BlockState blockstate = p_153919_.any().setValue(WATERLOGGED, Boolean.valueOf(false));
+    private static BlockState getDefaultMultifaceState(StateDefinition<Block, BlockState> pStateDefinition) {
+        BlockState blockstate = pStateDefinition.any().setValue(WATERLOGGED, Boolean.valueOf(false));
 
         for (BooleanProperty booleanproperty : PROPERTY_BY_DIRECTION.values()) {
             blockstate = blockstate.trySetValue(booleanproperty, Boolean.valueOf(false));
@@ -281,11 +281,11 @@ public class MultifaceBlock extends Block implements SimpleWaterloggedBlock {
         return blockstate;
     }
 
-    private static VoxelShape calculateMultifaceShape(BlockState p_153959_) {
+    private static VoxelShape calculateMultifaceShape(BlockState pState) {
         VoxelShape voxelshape = Shapes.empty();
 
         for (Direction direction : DIRECTIONS) {
-            if (hasFace(p_153959_, direction)) {
+            if (hasFace(pState, direction)) {
                 voxelshape = Shapes.or(voxelshape, SHAPE_BY_DIRECTION.get(direction));
             }
         }
@@ -293,9 +293,9 @@ public class MultifaceBlock extends Block implements SimpleWaterloggedBlock {
         return voxelshape.isEmpty() ? Shapes.block() : voxelshape;
     }
 
-    protected static boolean hasAnyFace(BlockState p_153961_) {
+    protected static boolean hasAnyFace(BlockState pState) {
         for (Direction direction : DIRECTIONS) {
-            if (hasFace(p_153961_, direction)) {
+            if (hasFace(pState, direction)) {
                 return true;
             }
         }
@@ -303,9 +303,9 @@ public class MultifaceBlock extends Block implements SimpleWaterloggedBlock {
         return false;
     }
 
-    private static boolean hasAnyVacantFace(BlockState p_153963_) {
+    private static boolean hasAnyVacantFace(BlockState pState) {
         for (Direction direction : DIRECTIONS) {
-            if (!hasFace(p_153963_, direction)) {
+            if (!hasFace(pState, direction)) {
                 return true;
             }
         }

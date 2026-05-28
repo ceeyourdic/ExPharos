@@ -21,11 +21,11 @@ public class DeltaFeatureConfiguration implements FeatureConfiguration {
     private final IntProvider size;
     private final IntProvider rimSize;
 
-    public DeltaFeatureConfiguration(BlockState p_160731_, BlockState p_160732_, IntProvider p_160733_, IntProvider p_160734_) {
-        this.contents = p_160731_;
-        this.rim = p_160732_;
-        this.size = p_160733_;
-        this.rimSize = p_160734_;
+    public DeltaFeatureConfiguration(BlockState pContents, BlockState pRim, IntProvider pSize, IntProvider pRimSize) {
+        this.contents = pContents;
+        this.rim = pRim;
+        this.size = pSize;
+        this.rimSize = pRimSize;
     }
 
     public BlockState contents() {

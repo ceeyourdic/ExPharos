@@ -75,8 +75,8 @@ public class LanternBlock extends Block implements SimpleWaterloggedBlock {
         return Block.canSupportCenter(p_153480_, p_153481_.relative(direction), direction.getOpposite());
     }
 
-    protected static Direction getConnectedDirection(BlockState p_153496_) {
-        return p_153496_.getValue(HANGING) ? Direction.DOWN : Direction.UP;
+    protected static Direction getConnectedDirection(BlockState pState) {
+        return pState.getValue(HANGING) ? Direction.DOWN : Direction.UP;
     }
 
     @Override

@@ -26,16 +26,16 @@ public class LavaParticle extends TextureSheetParticle {
     }
 
     @Override
-    public int getLightColor(float p_107086_) {
-        int i = super.getLightColor(p_107086_);
+    public int getLightColor(float pPartialTick) {
+        int i = super.getLightColor(pPartialTick);
         int j = 240;
         int k = i >> 16 & 0xFF;
         return 240 | k << 16;
     }
 
     @Override
-    public float getQuadSize(float p_107089_) {
-        float f = ((float)this.age + p_107089_) / (float)this.lifetime;
+    public float getQuadSize(float pScaleFactor) {
+        float f = ((float)this.age + pScaleFactor) / (float)this.lifetime;
         return this.quadSize * (1.0F - f * f);
     }
 
@@ -54,21 +54,21 @@ public class LavaParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_107092_) {
-            this.sprite = p_107092_;
+        public Provider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_107103_,
-            ClientLevel p_107104_,
-            double p_107105_,
-            double p_107106_,
-            double p_107107_,
-            double p_107108_,
-            double p_107109_,
-            double p_107110_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            LavaParticle lavaparticle = new LavaParticle(p_107104_, p_107105_, p_107106_, p_107107_);
+            LavaParticle lavaparticle = new LavaParticle(pLevel, pX, pY, pZ);
             lavaparticle.pickSprite(this.sprite);
             return lavaparticle;
         }

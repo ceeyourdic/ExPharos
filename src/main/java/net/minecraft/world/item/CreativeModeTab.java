@@ -30,27 +30,27 @@ public class CreativeModeTab {
     private final CreativeModeTab.DisplayItemsGenerator displayItemsGenerator;
 
     CreativeModeTab(
-        CreativeModeTab.Row p_260217_,
-        int p_259557_,
-        CreativeModeTab.Type p_260176_,
-        Component p_260100_,
-        Supplier<ItemStack> p_259543_,
-        CreativeModeTab.DisplayItemsGenerator p_259085_
+        CreativeModeTab.Row pRow,
+        int pColumn,
+        CreativeModeTab.Type pType,
+        Component pDisplayName,
+        Supplier<ItemStack> pIconGenerator,
+        CreativeModeTab.DisplayItemsGenerator pDisplayItemGenerator
     ) {
-        this.row = p_260217_;
-        this.column = p_259557_;
-        this.displayName = p_260100_;
-        this.iconGenerator = p_259543_;
-        this.displayItemsGenerator = p_259085_;
-        this.type = p_260176_;
+        this.row = pRow;
+        this.column = pColumn;
+        this.displayName = pDisplayName;
+        this.iconGenerator = pIconGenerator;
+        this.displayItemsGenerator = pDisplayItemGenerator;
+        this.type = pType;
     }
 
-    public static ResourceLocation createTextureLocation(String p_343491_) {
-        return ResourceLocation.withDefaultNamespace("textures/gui/container/creative_inventory/tab_" + p_343491_ + ".png");
+    public static ResourceLocation createTextureLocation(String pName) {
+        return ResourceLocation.withDefaultNamespace("textures/gui/container/creative_inventory/tab_" + pName + ".png");
     }
 
-    public static CreativeModeTab.Builder builder(CreativeModeTab.Row p_259342_, int p_260312_) {
-        return new CreativeModeTab.Builder(p_259342_, p_260312_);
+    public static CreativeModeTab.Builder builder(CreativeModeTab.Row pRow, int pColumn) {
+        return new CreativeModeTab.Builder(pRow, pColumn);
     }
 
     public Component getDisplayName() {
@@ -101,12 +101,12 @@ public class CreativeModeTab {
         return this.type;
     }
 
-    public void buildContents(CreativeModeTab.ItemDisplayParameters p_270156_) {
-        CreativeModeTab.ItemDisplayBuilder creativemodetab$itemdisplaybuilder = new CreativeModeTab.ItemDisplayBuilder(this, p_270156_.enabledFeatures);
+    public void buildContents(CreativeModeTab.ItemDisplayParameters pParameters) {
+        CreativeModeTab.ItemDisplayBuilder creativemodetab$itemdisplaybuilder = new CreativeModeTab.ItemDisplayBuilder(this, pParameters.enabledFeatures);
         ResourceKey<CreativeModeTab> resourcekey = BuiltInRegistries.CREATIVE_MODE_TAB
             .getResourceKey(this)
             .orElseThrow(() -> new IllegalStateException("Unregistered creative tab: " + this));
-        this.displayItemsGenerator.accept(p_270156_, creativemodetab$itemdisplaybuilder);
+        this.displayItemsGenerator.accept(pParameters, creativemodetab$itemdisplaybuilder);
         this.displayItems = creativemodetab$itemdisplaybuilder.tabContents;
         this.displayItemsSearchTab = creativemodetab$itemdisplaybuilder.searchTabContents;
     }
@@ -119,8 +119,8 @@ public class CreativeModeTab {
         return this.displayItemsSearchTab;
     }
 
-    public boolean contains(ItemStack p_259317_) {
-        return this.displayItemsSearchTab.contains(p_259317_);
+    public boolean contains(ItemStack pStack) {
+        return this.displayItemsSearchTab.contains(pStack);
     }
 
     public static class Builder {
@@ -137,23 +137,23 @@ public class CreativeModeTab {
         private CreativeModeTab.Type type = CreativeModeTab.Type.CATEGORY;
         private ResourceLocation backgroundTexture = CreativeModeTab.DEFAULT_BACKGROUND;
 
-        public Builder(CreativeModeTab.Row p_259171_, int p_259661_) {
-            this.row = p_259171_;
-            this.column = p_259661_;
+        public Builder(CreativeModeTab.Row pRow, int pColumn) {
+            this.row = pRow;
+            this.column = pColumn;
         }
 
-        public CreativeModeTab.Builder title(Component p_259616_) {
-            this.displayName = p_259616_;
+        public CreativeModeTab.Builder title(Component pTitle) {
+            this.displayName = pTitle;
             return this;
         }
 
-        public CreativeModeTab.Builder icon(Supplier<ItemStack> p_259333_) {
-            this.iconGenerator = p_259333_;
+        public CreativeModeTab.Builder icon(Supplier<ItemStack> pIcon) {
+            this.iconGenerator = pIcon;
             return this;
         }
 
-        public CreativeModeTab.Builder displayItems(CreativeModeTab.DisplayItemsGenerator p_259814_) {
-            this.displayItemsGenerator = p_259814_;
+        public CreativeModeTab.Builder displayItems(CreativeModeTab.DisplayItemsGenerator pDisplayItemsGenerator) {
+            this.displayItemsGenerator = pDisplayItemsGenerator;
             return this;
         }
 
@@ -172,13 +172,13 @@ public class CreativeModeTab {
             return this;
         }
 
-        protected CreativeModeTab.Builder type(CreativeModeTab.Type p_259283_) {
-            this.type = p_259283_;
+        protected CreativeModeTab.Builder type(CreativeModeTab.Type pType) {
+            this.type = pType;
             return this;
         }
 
-        public CreativeModeTab.Builder backgroundTexture(ResourceLocation p_344105_) {
-            this.backgroundTexture = p_344105_;
+        public CreativeModeTab.Builder backgroundTexture(ResourceLocation pBackgroundTexture) {
+            this.backgroundTexture = pBackgroundTexture;
             return this;
         }
 
@@ -200,7 +200,7 @@ public class CreativeModeTab {
 
     @FunctionalInterface
     public interface DisplayItemsGenerator {
-        void accept(CreativeModeTab.ItemDisplayParameters p_270258_, CreativeModeTab.Output p_259752_);
+        void accept(CreativeModeTab.ItemDisplayParameters pParameters, CreativeModeTab.Output pOutput);
     }
 
     static class ItemDisplayBuilder implements CreativeModeTab.Output {
@@ -209,9 +209,9 @@ public class CreativeModeTab {
         private final CreativeModeTab tab;
         private final FeatureFlagSet featureFlagSet;
 
-        public ItemDisplayBuilder(CreativeModeTab p_251040_, FeatureFlagSet p_249331_) {
-            this.tab = p_251040_;
-            this.featureFlagSet = p_249331_;
+        public ItemDisplayBuilder(CreativeModeTab pTab, FeatureFlagSet pFeatureFlagSet) {
+            this.tab = pTab;
+            this.featureFlagSet = pFeatureFlagSet;
         }
 
         @Override
@@ -247,32 +247,32 @@ public class CreativeModeTab {
     }
 
     public static record ItemDisplayParameters(FeatureFlagSet enabledFeatures, boolean hasPermissions, HolderLookup.Provider holders) {
-        public boolean needsUpdate(FeatureFlagSet p_270338_, boolean p_270835_, HolderLookup.Provider p_270575_) {
-            return !this.enabledFeatures.equals(p_270338_) || this.hasPermissions != p_270835_ || this.holders != p_270575_;
+        public boolean needsUpdate(FeatureFlagSet pEnabledFeatures, boolean pHasPermissions, HolderLookup.Provider pHolders) {
+            return !this.enabledFeatures.equals(pEnabledFeatures) || this.hasPermissions != pHasPermissions || this.holders != pHolders;
         }
     }
 
     public interface Output {
-        void accept(ItemStack p_251806_, CreativeModeTab.TabVisibility p_249603_);
+        void accept(ItemStack pStack, CreativeModeTab.TabVisibility pTabVisibility);
 
-        default void accept(ItemStack p_249977_) {
-            this.accept(p_249977_, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+        default void accept(ItemStack pStack) {
+            this.accept(pStack, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
         }
 
-        default void accept(ItemLike p_251528_, CreativeModeTab.TabVisibility p_249821_) {
-            this.accept(new ItemStack(p_251528_), p_249821_);
+        default void accept(ItemLike pItem, CreativeModeTab.TabVisibility pTabVisibility) {
+            this.accept(new ItemStack(pItem), pTabVisibility);
         }
 
-        default void accept(ItemLike p_248610_) {
-            this.accept(new ItemStack(p_248610_), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+        default void accept(ItemLike pItem) {
+            this.accept(new ItemStack(pItem), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
         }
 
-        default void acceptAll(Collection<ItemStack> p_251548_, CreativeModeTab.TabVisibility p_252285_) {
-            p_251548_.forEach(p_252337_ -> this.accept(p_252337_, p_252285_));
+        default void acceptAll(Collection<ItemStack> pStacks, CreativeModeTab.TabVisibility pTabVisibility) {
+            pStacks.forEach(p_252337_ -> this.accept(p_252337_, pTabVisibility));
         }
 
-        default void acceptAll(Collection<ItemStack> p_250244_) {
-            this.acceptAll(p_250244_, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+        default void acceptAll(Collection<ItemStack> pStacks) {
+            this.acceptAll(pStacks, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
         }
     }
 

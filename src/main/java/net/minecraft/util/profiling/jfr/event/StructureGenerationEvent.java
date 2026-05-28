@@ -39,11 +39,11 @@ public class StructureGenerationEvent extends Event {
     @Label("Success")
     public boolean success;
 
-    public StructureGenerationEvent(ChunkPos p_378583_, Holder<Structure> p_376451_, ResourceKey<Level> p_377292_) {
-        this.chunkPosX = p_378583_.x;
-        this.chunkPosZ = p_378583_.z;
-        this.structure = p_376451_.getRegisteredName();
-        this.level = p_377292_.location().toString();
+    public StructureGenerationEvent(ChunkPos pChunkPos, Holder<Structure> pStructure, ResourceKey<Level> pLevel) {
+        this.chunkPosX = pChunkPos.x;
+        this.chunkPosZ = pChunkPos.z;
+        this.structure = pStructure.getRegisteredName();
+        this.level = pLevel.location().toString();
     }
 
     public interface Fields {

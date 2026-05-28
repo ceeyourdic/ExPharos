@@ -29,17 +29,17 @@ public abstract class BaseRailBlock extends Block implements SimpleWaterloggedBl
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     private final boolean isStraight;
 
-    public static boolean isRail(Level p_49365_, BlockPos p_49366_) {
-        return isRail(p_49365_.getBlockState(p_49366_));
+    public static boolean isRail(Level pLevel, BlockPos pPos) {
+        return isRail(pLevel.getBlockState(pPos));
     }
 
-    public static boolean isRail(BlockState p_49417_) {
-        return p_49417_.is(BlockTags.RAILS) && p_49417_.getBlock() instanceof BaseRailBlock;
+    public static boolean isRail(BlockState pState) {
+        return pState.is(BlockTags.RAILS) && pState.getBlock() instanceof BaseRailBlock;
     }
 
-    protected BaseRailBlock(boolean p_49360_, BlockBehaviour.Properties p_49361_) {
-        super(p_49361_);
-        this.isStraight = p_49360_;
+    protected BaseRailBlock(boolean pIsStraight, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.isStraight = pIsStraight;
     }
 
     @Override
@@ -50,30 +50,30 @@ public abstract class BaseRailBlock extends Block implements SimpleWaterloggedBl
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_49403_, BlockGetter p_49404_, BlockPos p_49405_, CollisionContext p_49406_) {
-        RailShape railshape = p_49403_.is(this) ? p_49403_.getValue(this.getShapeProperty()) : null;
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        RailShape railshape = pState.is(this) ? pState.getValue(this.getShapeProperty()) : null;
         return railshape != null && railshape.isSlope() ? HALF_BLOCK_AABB : FLAT_AABB;
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_49395_, LevelReader p_49396_, BlockPos p_49397_) {
-        return canSupportRigidBlock(p_49396_, p_49397_.below());
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        return canSupportRigidBlock(pLevel, pPos.below());
     }
 
     @Override
-    protected void onPlace(BlockState p_49408_, Level p_49409_, BlockPos p_49410_, BlockState p_49411_, boolean p_49412_) {
-        if (!p_49411_.is(p_49408_.getBlock())) {
-            this.updateState(p_49408_, p_49409_, p_49410_, p_49412_);
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        if (!pOldState.is(pState.getBlock())) {
+            this.updateState(pState, pLevel, pPos, pIsMoving);
         }
     }
 
-    protected BlockState updateState(BlockState p_49390_, Level p_49391_, BlockPos p_49392_, boolean p_49393_) {
-        p_49390_ = this.updateDir(p_49391_, p_49392_, p_49390_, true);
+    protected BlockState updateState(BlockState pState, Level pLevel, BlockPos pPos, boolean pMovedByPiston) {
+        pState = this.updateDir(pLevel, pPos, pState, true);
         if (this.isStraight) {
-            p_49391_.neighborChanged(p_49390_, p_49392_, this, null, p_49393_);
+            pLevel.neighborChanged(pState, pPos, this, null, pMovedByPiston);
         }
 
-        return p_49390_;
+        return pState;
     }
 
     @Override
@@ -89,58 +89,58 @@ public abstract class BaseRailBlock extends Block implements SimpleWaterloggedBl
         }
     }
 
-    private static boolean shouldBeRemoved(BlockPos p_49399_, Level p_49400_, RailShape p_49401_) {
-        if (!canSupportRigidBlock(p_49400_, p_49399_.below())) {
+    private static boolean shouldBeRemoved(BlockPos pPos, Level pLevel, RailShape pShape) {
+        if (!canSupportRigidBlock(pLevel, pPos.below())) {
             return true;
         } else {
-            switch (p_49401_) {
+            switch (pShape) {
                 case ASCENDING_EAST:
-                    return !canSupportRigidBlock(p_49400_, p_49399_.east());
+                    return !canSupportRigidBlock(pLevel, pPos.east());
                 case ASCENDING_WEST:
-                    return !canSupportRigidBlock(p_49400_, p_49399_.west());
+                    return !canSupportRigidBlock(pLevel, pPos.west());
                 case ASCENDING_NORTH:
-                    return !canSupportRigidBlock(p_49400_, p_49399_.north());
+                    return !canSupportRigidBlock(pLevel, pPos.north());
                 case ASCENDING_SOUTH:
-                    return !canSupportRigidBlock(p_49400_, p_49399_.south());
+                    return !canSupportRigidBlock(pLevel, pPos.south());
                 default:
                     return false;
             }
         }
     }
 
-    protected void updateState(BlockState p_49372_, Level p_49373_, BlockPos p_49374_, Block p_49375_) {
+    protected void updateState(BlockState pState, Level pLevel, BlockPos pPos, Block pNeighborBlock) {
     }
 
-    protected BlockState updateDir(Level p_49368_, BlockPos p_49369_, BlockState p_49370_, boolean p_49371_) {
-        if (p_49368_.isClientSide) {
-            return p_49370_;
+    protected BlockState updateDir(Level pLevel, BlockPos pPos, BlockState pState, boolean pAlwaysPlace) {
+        if (pLevel.isClientSide) {
+            return pState;
         } else {
-            RailShape railshape = p_49370_.getValue(this.getShapeProperty());
-            return new RailState(p_49368_, p_49369_, p_49370_).place(p_49368_.hasNeighborSignal(p_49369_), p_49371_, railshape).getState();
+            RailShape railshape = pState.getValue(this.getShapeProperty());
+            return new RailState(pLevel, pPos, pState).place(pLevel.hasNeighborSignal(pPos), pAlwaysPlace, railshape).getState();
         }
     }
 
     @Override
-    protected void onRemove(BlockState p_49384_, Level p_49385_, BlockPos p_49386_, BlockState p_49387_, boolean p_49388_) {
-        if (!p_49388_) {
-            super.onRemove(p_49384_, p_49385_, p_49386_, p_49387_, p_49388_);
-            if (p_49384_.getValue(this.getShapeProperty()).isSlope()) {
-                p_49385_.updateNeighborsAt(p_49386_.above(), this);
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        if (!pIsMoving) {
+            super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+            if (pState.getValue(this.getShapeProperty()).isSlope()) {
+                pLevel.updateNeighborsAt(pPos.above(), this);
             }
 
             if (this.isStraight) {
-                p_49385_.updateNeighborsAt(p_49386_, this);
-                p_49385_.updateNeighborsAt(p_49386_.below(), this);
+                pLevel.updateNeighborsAt(pPos, this);
+                pLevel.updateNeighborsAt(pPos.below(), this);
             }
         }
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_49363_) {
-        FluidState fluidstate = p_49363_.getLevel().getFluidState(p_49363_.getClickedPos());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
         boolean flag = fluidstate.getType() == Fluids.WATER;
         BlockState blockstate = super.defaultBlockState();
-        Direction direction = p_49363_.getHorizontalDirection();
+        Direction direction = pContext.getHorizontalDirection();
         boolean flag1 = direction == Direction.EAST || direction == Direction.WEST;
         return blockstate.setValue(this.getShapeProperty(), flag1 ? RailShape.EAST_WEST : RailShape.NORTH_SOUTH).setValue(WATERLOGGED, Boolean.valueOf(flag));
     }

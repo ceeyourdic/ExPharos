@@ -120,14 +120,14 @@ public class Enchantments {
     public static final ResourceKey<Enchantment> MENDING = key("mending");
     public static final ResourceKey<Enchantment> VANISHING_CURSE = key("vanishing_curse");
 
-    public static void bootstrap(BootstrapContext<Enchantment> p_343249_) {
-        HolderGetter<DamageType> holdergetter = p_343249_.lookup(Registries.DAMAGE_TYPE);
-        HolderGetter<Enchantment> holdergetter1 = p_343249_.lookup(Registries.ENCHANTMENT);
-        HolderGetter<Item> holdergetter2 = p_343249_.lookup(Registries.ITEM);
-        HolderGetter<Block> holdergetter3 = p_343249_.lookup(Registries.BLOCK);
-        HolderGetter<EntityType<?>> holdergetter4 = p_343249_.lookup(Registries.ENTITY_TYPE);
+    public static void bootstrap(BootstrapContext<Enchantment> pContext) {
+        HolderGetter<DamageType> holdergetter = pContext.lookup(Registries.DAMAGE_TYPE);
+        HolderGetter<Enchantment> holdergetter1 = pContext.lookup(Registries.ENCHANTMENT);
+        HolderGetter<Item> holdergetter2 = pContext.lookup(Registries.ITEM);
+        HolderGetter<Block> holdergetter3 = pContext.lookup(Registries.BLOCK);
+        HolderGetter<EntityType<?>> holdergetter4 = pContext.lookup(Registries.ENTITY_TYPE);
         register(
-            p_343249_,
+            pContext,
             PROTECTION,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -148,7 +148,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             FIRE_PROTECTION,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -184,7 +184,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             FEATHER_FALLING,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -208,7 +208,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             BLAST_PROTECTION,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -242,7 +242,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             PROJECTILE_PROTECTION,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -267,7 +267,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             RESPIRATION,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -291,7 +291,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             AQUA_AFFINITY,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -309,7 +309,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             THORNS,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -335,7 +335,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             DEPTH_STRIDER,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -360,7 +360,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             FROST_WALKER,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -413,7 +413,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             BINDING_CURSE,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -476,7 +476,7 @@ public class Enchantments {
             )
         );
         register(
-            p_343249_,
+            pContext,
             SOUL_SPEED,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -547,7 +547,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             SWIFT_SNEAK,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -571,7 +571,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             SHARPNESS,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -589,7 +589,7 @@ public class Enchantments {
                 .withEffect(EnchantmentEffectComponents.DAMAGE, new AddValue(LevelBasedValue.perLevel(1.0F, 0.5F)))
         );
         register(
-            p_343249_,
+            pContext,
             SMITE,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -614,7 +614,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             BANE_OF_ARTHROPODS,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -656,7 +656,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             KNOCKBACK,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -672,7 +672,7 @@ public class Enchantments {
                 .withEffect(EnchantmentEffectComponents.KNOCKBACK, new AddValue(LevelBasedValue.perLevel(1.0F)))
         );
         register(
-            p_343249_,
+            pContext,
             FIRE_ASPECT,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -695,7 +695,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             LOOTING,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -720,7 +720,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             SWEEPING_EDGE,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -744,7 +744,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             EFFICIENCY,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -768,7 +768,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             SILK_TOUCH,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -779,7 +779,7 @@ public class Enchantments {
                 .withEffect(EnchantmentEffectComponents.BLOCK_EXPERIENCE, new SetValue(LevelBasedValue.constant(0.0F)))
         );
         register(
-            p_343249_,
+            pContext,
             UNBREAKING,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -798,7 +798,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             FORTUNE,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -814,7 +814,7 @@ public class Enchantments {
                 .exclusiveWith(holdergetter1.getOrThrow(EnchantmentTags.MINING_EXCLUSIVE))
         );
         register(
-            p_343249_,
+            pContext,
             POWER,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -837,7 +837,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             PUNCH,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -860,7 +860,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             FLAME,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -870,7 +870,7 @@ public class Enchantments {
                 .withEffect(EnchantmentEffectComponents.PROJECTILE_SPAWNED, new Ignite(LevelBasedValue.constant(100.0F)))
         );
         register(
-            p_343249_,
+            pContext,
             INFINITY,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -885,7 +885,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             LUCK_OF_THE_SEA,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -901,7 +901,7 @@ public class Enchantments {
                 .withEffect(EnchantmentEffectComponents.FISHING_LUCK_BONUS, new AddValue(LevelBasedValue.perLevel(1.0F)))
         );
         register(
-            p_343249_,
+            pContext,
             LURE,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -917,7 +917,7 @@ public class Enchantments {
                 .withEffect(EnchantmentEffectComponents.FISHING_TIME_REDUCTION, new AddValue(LevelBasedValue.perLevel(5.0F)))
         );
         register(
-            p_343249_,
+            pContext,
             LOYALTY,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -933,7 +933,7 @@ public class Enchantments {
                 .withEffect(EnchantmentEffectComponents.TRIDENT_RETURN_ACCELERATION, new AddValue(LevelBasedValue.perLevel(1.0F)))
         );
         register(
-            p_343249_,
+            pContext,
             IMPALING,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -957,7 +957,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             RIPTIDE,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -969,7 +969,7 @@ public class Enchantments {
                 .withSpecialEffect(EnchantmentEffectComponents.TRIDENT_SOUND, List.of(SoundEvents.TRIDENT_RIPTIDE_1, SoundEvents.TRIDENT_RIPTIDE_2, SoundEvents.TRIDENT_RIPTIDE_3))
         );
         register(
-            p_343249_,
+            pContext,
             CHANNELING,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -1011,7 +1011,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             MULTISHOT,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -1023,7 +1023,7 @@ public class Enchantments {
                 .withEffect(EnchantmentEffectComponents.PROJECTILE_SPREAD, new AddValue(LevelBasedValue.perLevel(10.0F)))
         );
         register(
-            p_343249_,
+            pContext,
             QUICK_CHARGE,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -1048,7 +1048,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             PIERCING,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -1065,7 +1065,7 @@ public class Enchantments {
                 .withEffect(EnchantmentEffectComponents.PROJECTILE_PIERCING, new AddValue(LevelBasedValue.perLevel(1.0F)))
         );
         register(
-            p_343249_,
+            pContext,
             DENSITY,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -1082,7 +1082,7 @@ public class Enchantments {
                 .withEffect(EnchantmentEffectComponents.SMASH_DAMAGE_PER_FALLEN_BLOCK, new AddValue(LevelBasedValue.perLevel(0.5F)))
         );
         register(
-            p_343249_,
+            pContext,
             BREACH,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -1099,7 +1099,7 @@ public class Enchantments {
                 .withEffect(EnchantmentEffectComponents.ARMOR_EFFECTIVENESS, new AddValue(LevelBasedValue.perLevel(-0.15F)))
         );
         register(
-            p_343249_,
+            pContext,
             WIND_BURST,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -1138,7 +1138,7 @@ public class Enchantments {
                 )
         );
         register(
-            p_343249_,
+            pContext,
             MENDING,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -1154,7 +1154,7 @@ public class Enchantments {
                 .withEffect(EnchantmentEffectComponents.REPAIR_WITH_XP, new MultiplyValue(LevelBasedValue.constant(2.0F)))
         );
         register(
-            p_343249_,
+            pContext,
             VANISHING_CURSE,
             Enchantment.enchantment(
                     Enchantment.definition(
@@ -1165,11 +1165,11 @@ public class Enchantments {
         );
     }
 
-    private static void register(BootstrapContext<Enchantment> p_345097_, ResourceKey<Enchantment> p_342560_, Enchantment.Builder p_344763_) {
-        p_345097_.register(p_342560_, p_344763_.build(p_342560_.location()));
+    private static void register(BootstrapContext<Enchantment> pContext, ResourceKey<Enchantment> pKey, Enchantment.Builder pBuilder) {
+        pContext.register(pKey, pBuilder.build(pKey.location()));
     }
 
-    private static ResourceKey<Enchantment> key(String p_344280_) {
-        return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.withDefaultNamespace(p_344280_));
+    private static ResourceKey<Enchantment> key(String pName) {
+        return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.withDefaultNamespace(pName));
     }
 }

@@ -21,7 +21,7 @@ public record Repairable(HolderSet<Item> items) {
         ByteBufCodecs.holderSet(Registries.ITEM), Repairable::items, Repairable::new
     );
 
-    public boolean isValidRepairItem(ItemStack p_368072_) {
-        return p_368072_.is(this.items);
+    public boolean isValidRepairItem(ItemStack pStack) {
+        return pStack.is(this.items);
     }
 }

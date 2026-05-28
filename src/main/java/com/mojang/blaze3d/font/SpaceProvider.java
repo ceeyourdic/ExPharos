@@ -22,9 +22,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class SpaceProvider implements GlyphProvider {
     private final Int2ObjectMap<GlyphInfo.SpaceGlyphInfo> glyphs;
 
-    public SpaceProvider(Map<Integer, Float> p_286456_) {
-        this.glyphs = new Int2ObjectOpenHashMap<>(p_286456_.size());
-        p_286456_.forEach((p_286113_, p_286114_) -> this.glyphs.put(p_286113_.intValue(), () -> p_286114_));
+    public SpaceProvider(Map<Integer, Float> pGlyphs) {
+        this.glyphs = new Int2ObjectOpenHashMap<>(pGlyphs.size());
+        pGlyphs.forEach((p_286113_, p_286114_) -> this.glyphs.put(p_286113_.intValue(), () -> p_286114_));
     }
 
     @Nullable

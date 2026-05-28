@@ -128,8 +128,8 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
         );
     }
 
-    public static DedicatedServerProperties fromFile(Path p_180930_) {
-        return new DedicatedServerProperties(loadFromFile(p_180930_));
+    public static DedicatedServerProperties fromFile(Path pPath) {
+        return new DedicatedServerProperties(loadFromFile(pPath));
     }
 
     protected DedicatedServerProperties reload(RegistryAccess p_139761_, Properties p_139762_) {
@@ -137,12 +137,12 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
     }
 
     @Nullable
-    private static Component parseResourcePackPrompt(String p_214815_) {
-        if (!Strings.isNullOrEmpty(p_214815_)) {
+    private static Component parseResourcePackPrompt(String pJson) {
+        if (!Strings.isNullOrEmpty(pJson)) {
             try {
-                return Component.Serializer.fromJson(p_214815_, RegistryAccess.EMPTY);
+                return Component.Serializer.fromJson(pJson, RegistryAccess.EMPTY);
             } catch (Exception exception) {
-                LOGGER.warn("Failed to parse resource pack prompt '{}'", p_214815_, exception);
+                LOGGER.warn("Failed to parse resource pack prompt '{}'", pJson, exception);
             }
         }
 
@@ -150,20 +150,20 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
     }
 
     private static Optional<MinecraftServer.ServerResourcePackInfo> getServerPackInfo(
-        String p_214809_, String p_214810_, String p_214811_, @Nullable String p_214813_, boolean p_214812_, String p_312092_
+        String pId, String pUrl, String pSha1, @Nullable String pHash, boolean pIsRequired, String pPromptJson
     ) {
-        if (p_214810_.isEmpty()) {
+        if (pUrl.isEmpty()) {
             return Optional.empty();
         } else {
             String s;
-            if (!p_214811_.isEmpty()) {
-                s = p_214811_;
-                if (!Strings.isNullOrEmpty(p_214813_)) {
+            if (!pSha1.isEmpty()) {
+                s = pSha1;
+                if (!Strings.isNullOrEmpty(pHash)) {
                     LOGGER.warn("resource-pack-hash is deprecated and found along side resource-pack-sha1. resource-pack-hash will be ignored.");
                 }
-            } else if (!Strings.isNullOrEmpty(p_214813_)) {
+            } else if (!Strings.isNullOrEmpty(pHash)) {
                 LOGGER.warn("resource-pack-hash is deprecated. Please use resource-pack-sha1 instead.");
-                s = p_214813_;
+                s = pHash;
             } else {
                 s = "";
             }
@@ -176,39 +176,39 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
                 LOGGER.warn("Invalid sha1 for resource-pack-sha1");
             }
 
-            Component component = parseResourcePackPrompt(p_312092_);
+            Component component = parseResourcePackPrompt(pPromptJson);
             UUID uuid;
-            if (p_214809_.isEmpty()) {
-                uuid = UUID.nameUUIDFromBytes(p_214810_.getBytes(StandardCharsets.UTF_8));
+            if (pId.isEmpty()) {
+                uuid = UUID.nameUUIDFromBytes(pUrl.getBytes(StandardCharsets.UTF_8));
                 LOGGER.warn("resource-pack-id missing, using default of {}", uuid);
             } else {
                 try {
-                    uuid = UUID.fromString(p_214809_);
+                    uuid = UUID.fromString(pId);
                 } catch (IllegalArgumentException illegalargumentexception) {
-                    LOGGER.warn("Failed to parse '{}' into UUID", p_214809_);
+                    LOGGER.warn("Failed to parse '{}' into UUID", pId);
                     return Optional.empty();
                 }
             }
 
-            return Optional.of(new MinecraftServer.ServerResourcePackInfo(uuid, p_214810_, s, p_214812_, component));
+            return Optional.of(new MinecraftServer.ServerResourcePackInfo(uuid, pUrl, s, pIsRequired, component));
         }
     }
 
-    private static DataPackConfig getDatapackConfig(String p_251757_, String p_249979_) {
-        List<String> list = COMMA_SPLITTER.splitToList(p_251757_);
-        List<String> list1 = COMMA_SPLITTER.splitToList(p_249979_);
+    private static DataPackConfig getDatapackConfig(String pInitalEnabledPacks, String pInitialDisabledPacks) {
+        List<String> list = COMMA_SPLITTER.splitToList(pInitalEnabledPacks);
+        List<String> list1 = COMMA_SPLITTER.splitToList(pInitialDisabledPacks);
         return new DataPackConfig(list, list1);
     }
 
-    public WorldDimensions createDimensions(HolderLookup.Provider p_364968_) {
-        return this.worldDimensionData.create(p_364968_);
+    public WorldDimensions createDimensions(HolderLookup.Provider pRegistries) {
+        return this.worldDimensionData.create(pRegistries);
     }
 
     static record WorldDimensionData(JsonObject generatorSettings, String levelType) {
         private static final Map<String, ResourceKey<WorldPreset>> LEGACY_PRESET_NAMES = Map.of("default", WorldPresets.NORMAL, "largebiomes", WorldPresets.LARGE_BIOMES);
 
-        public WorldDimensions create(HolderLookup.Provider p_363968_) {
-            HolderLookup<WorldPreset> holderlookup = p_363968_.lookupOrThrow(Registries.WORLD_PRESET);
+        public WorldDimensions create(HolderLookup.Provider pRegistries) {
+            HolderLookup<WorldPreset> holderlookup = pRegistries.lookupOrThrow(Registries.WORLD_PRESET);
             Holder.Reference<WorldPreset> reference = holderlookup.get(WorldPresets.NORMAL)
                 .or(() -> holderlookup.listElements().findAny())
                 .orElseThrow(() -> new IllegalStateException("Invalid datapack contents: can't find default preset"));
@@ -223,12 +223,12 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
                 });
             WorldDimensions worlddimensions = holder.value().createWorldDimensions();
             if (holder.is(WorldPresets.FLAT)) {
-                RegistryOps<JsonElement> registryops = p_363968_.createSerializationContext(JsonOps.INSTANCE);
+                RegistryOps<JsonElement> registryops = pRegistries.createSerializationContext(JsonOps.INSTANCE);
                 Optional<FlatLevelGeneratorSettings> optional = FlatLevelGeneratorSettings.CODEC
                     .parse(new Dynamic<>(registryops, this.generatorSettings()))
                     .resultOrPartial(DedicatedServerProperties.LOGGER::error);
                 if (optional.isPresent()) {
-                    return worlddimensions.replaceOverworldGenerator(p_363968_, new FlatLevelSource(optional.get()));
+                    return worlddimensions.replaceOverworldGenerator(pRegistries, new FlatLevelSource(optional.get()));
                 }
             }
 

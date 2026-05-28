@@ -30,8 +30,8 @@ public class ChatListener {
     private long messageDelay;
     private long previousMessageTime;
 
-    public ChatListener(Minecraft p_240569_) {
-        this.minecraft = p_240569_;
+    public ChatListener(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
     public void tick() {
@@ -46,8 +46,8 @@ public class ChatListener {
         }
     }
 
-    public void setMessageDelay(double p_240785_) {
-        long i = (long)(p_240785_ * 1000.0);
+    public void setMessageDelay(double pDelaySeconds) {
+        long i = (long)(pDelaySeconds * 1000.0);
         if (i == 0L && this.messageDelay > 0L) {
             this.delayedMessageQueue.forEach(ChatListener.Message::accept);
             this.delayedMessageQueue.clear();
@@ -69,44 +69,44 @@ public class ChatListener {
         this.delayedMessageQueue.clear();
     }
 
-    public boolean removeFromDelayedMessageQueue(MessageSignature p_241445_) {
-        return this.delayedMessageQueue.removeIf(p_247887_ -> p_241445_.equals(p_247887_.signature()));
+    public boolean removeFromDelayedMessageQueue(MessageSignature pSignature) {
+        return this.delayedMessageQueue.removeIf(p_247887_ -> pSignature.equals(p_247887_.signature()));
     }
 
     private boolean willDelayMessages() {
         return this.messageDelay > 0L && Util.getMillis() < this.previousMessageTime + this.messageDelay;
     }
 
-    private void handleMessage(@Nullable MessageSignature p_249408_, BooleanSupplier p_250870_) {
+    private void handleMessage(@Nullable MessageSignature pSignature, BooleanSupplier pHandler) {
         if (this.willDelayMessages()) {
-            this.delayedMessageQueue.add(new ChatListener.Message(p_249408_, p_250870_));
+            this.delayedMessageQueue.add(new ChatListener.Message(pSignature, pHandler));
         } else {
-            p_250870_.getAsBoolean();
+            pHandler.getAsBoolean();
         }
     }
 
-    public void handlePlayerChatMessage(PlayerChatMessage p_251553_, GameProfile p_250022_, ChatType.Bound p_252158_) {
+    public void handlePlayerChatMessage(PlayerChatMessage pChatMessage, GameProfile pGameProfile, ChatType.Bound pBoundChatType) {
         boolean flag = this.minecraft.options.onlyShowSecureChat().get();
-        PlayerChatMessage playerchatmessage = flag ? p_251553_.removeUnsignedContent() : p_251553_;
-        Component component = p_252158_.decorate(playerchatmessage.decoratedContent());
+        PlayerChatMessage playerchatmessage = flag ? pChatMessage.removeUnsignedContent() : pChatMessage;
+        Component component = pBoundChatType.decorate(playerchatmessage.decoratedContent());
         Instant instant = Instant.now();
-        this.handleMessage(p_251553_.signature(), () -> {
-            boolean flag1 = this.showMessageToPlayer(p_252158_, p_251553_, component, p_250022_, flag, instant);
+        this.handleMessage(pChatMessage.signature(), () -> {
+            boolean flag1 = this.showMessageToPlayer(pBoundChatType, pChatMessage, component, pGameProfile, flag, instant);
             ClientPacketListener clientpacketlistener = this.minecraft.getConnection();
             if (clientpacketlistener != null) {
-                clientpacketlistener.markMessageAsProcessed(p_251553_, flag1);
+                clientpacketlistener.markMessageAsProcessed(pChatMessage, flag1);
             }
 
             return flag1;
         });
     }
 
-    public void handleChatMessageError(UUID p_299386_, ChatType.Bound p_299443_) {
+    public void handleChatMessageError(UUID pSender, ChatType.Bound pBoundChatType) {
         this.handleMessage(null, () -> {
-            if (this.minecraft.isBlocked(p_299386_)) {
+            if (this.minecraft.isBlocked(pSender)) {
                 return false;
             } else {
-                Component component = p_299443_.decorate(CHAT_VALIDATION_ERROR);
+                Component component = pBoundChatType.decorate(CHAT_VALIDATION_ERROR);
                 this.minecraft.gui.getChat().addMessage(component, null, GuiMessageTag.chatError());
                 this.previousMessageTime = Util.getMillis();
                 return true;
@@ -114,12 +114,12 @@ public class ChatListener {
         });
     }
 
-    public void handleDisguisedChatMessage(Component p_250375_, ChatType.Bound p_251256_) {
+    public void handleDisguisedChatMessage(Component pMessage, ChatType.Bound pBoundChatType) {
         Instant instant = Instant.now();
         this.handleMessage(null, () -> {
-            Component component = p_251256_.decorate(p_250375_);
+            Component component = pBoundChatType.decorate(pMessage);
             this.minecraft.gui.getChat().addMessage(component);
-            this.narrateChatMessage(p_251256_, p_250375_);
+            this.narrateChatMessage(pBoundChatType, pMessage);
             this.logSystemMessage(component, instant);
             this.previousMessageTime = Util.getMillis();
             return true;
@@ -127,27 +127,27 @@ public class ChatListener {
     }
 
     private boolean showMessageToPlayer(
-        ChatType.Bound p_251766_, PlayerChatMessage p_249430_, Component p_249231_, GameProfile p_249177_, boolean p_251638_, Instant p_249665_
+        ChatType.Bound pBoundChatType, PlayerChatMessage pChatMessage, Component pDecoratedServerContent, GameProfile pGameProfile, boolean pOnlyShowSecureChat, Instant pTimestamp
     ) {
-        ChatTrustLevel chattrustlevel = this.evaluateTrustLevel(p_249430_, p_249231_, p_249665_);
-        if (p_251638_ && chattrustlevel.isNotSecure()) {
+        ChatTrustLevel chattrustlevel = this.evaluateTrustLevel(pChatMessage, pDecoratedServerContent, pTimestamp);
+        if (pOnlyShowSecureChat && chattrustlevel.isNotSecure()) {
             return false;
-        } else if (!this.minecraft.isBlocked(p_249430_.sender()) && !p_249430_.isFullyFiltered()) {
-            GuiMessageTag guimessagetag = chattrustlevel.createTag(p_249430_);
-            MessageSignature messagesignature = p_249430_.signature();
-            FilterMask filtermask = p_249430_.filterMask();
+        } else if (!this.minecraft.isBlocked(pChatMessage.sender()) && !pChatMessage.isFullyFiltered()) {
+            GuiMessageTag guimessagetag = chattrustlevel.createTag(pChatMessage);
+            MessageSignature messagesignature = pChatMessage.signature();
+            FilterMask filtermask = pChatMessage.filterMask();
             if (filtermask.isEmpty()) {
-                this.minecraft.gui.getChat().addMessage(p_249231_, messagesignature, guimessagetag);
-                this.narrateChatMessage(p_251766_, p_249430_.decoratedContent());
+                this.minecraft.gui.getChat().addMessage(pDecoratedServerContent, messagesignature, guimessagetag);
+                this.narrateChatMessage(pBoundChatType, pChatMessage.decoratedContent());
             } else {
-                Component component = filtermask.applyWithFormatting(p_249430_.signedContent());
+                Component component = filtermask.applyWithFormatting(pChatMessage.signedContent());
                 if (component != null) {
-                    this.minecraft.gui.getChat().addMessage(p_251766_.decorate(component), messagesignature, guimessagetag);
-                    this.narrateChatMessage(p_251766_, component);
+                    this.minecraft.gui.getChat().addMessage(pBoundChatType.decorate(component), messagesignature, guimessagetag);
+                    this.narrateChatMessage(pBoundChatType, component);
                 }
             }
 
-            this.logPlayerMessage(p_249430_, p_251766_, p_249177_, chattrustlevel);
+            this.logPlayerMessage(pChatMessage, pBoundChatType, pGameProfile, chattrustlevel);
             this.previousMessageTime = Util.getMillis();
             return true;
         } else {
@@ -155,47 +155,47 @@ public class ChatListener {
         }
     }
 
-    private void narrateChatMessage(ChatType.Bound p_241352_, Component p_243262_) {
-        this.minecraft.getNarrator().sayChat(p_241352_.decorateNarration(p_243262_));
+    private void narrateChatMessage(ChatType.Bound pBoundChatType, Component pMessage) {
+        this.minecraft.getNarrator().sayChat(pBoundChatType.decorateNarration(pMessage));
     }
 
-    private ChatTrustLevel evaluateTrustLevel(PlayerChatMessage p_251246_, Component p_250576_, Instant p_249995_) {
-        return this.isSenderLocalPlayer(p_251246_.sender()) ? ChatTrustLevel.SECURE : ChatTrustLevel.evaluate(p_251246_, p_250576_, p_249995_);
+    private ChatTrustLevel evaluateTrustLevel(PlayerChatMessage pChatMessage, Component pDecoratedServerContent, Instant pTimestamp) {
+        return this.isSenderLocalPlayer(pChatMessage.sender()) ? ChatTrustLevel.SECURE : ChatTrustLevel.evaluate(pChatMessage, pDecoratedServerContent, pTimestamp);
     }
 
-    private void logPlayerMessage(PlayerChatMessage p_252155_, ChatType.Bound p_249730_, GameProfile p_248589_, ChatTrustLevel p_248881_) {
+    private void logPlayerMessage(PlayerChatMessage pMessage, ChatType.Bound pBoundChatType, GameProfile pGameProfile, ChatTrustLevel pTrustLevel) {
         ChatLog chatlog = this.minecraft.getReportingContext().chatLog();
-        chatlog.push(LoggedChatMessage.player(p_248589_, p_252155_, p_248881_));
+        chatlog.push(LoggedChatMessage.player(pGameProfile, pMessage, pTrustLevel));
     }
 
-    private void logSystemMessage(Component p_240609_, Instant p_240541_) {
+    private void logSystemMessage(Component pMessage, Instant pTimestamp) {
         ChatLog chatlog = this.minecraft.getReportingContext().chatLog();
-        chatlog.push(LoggedChatMessage.system(p_240609_, p_240541_));
+        chatlog.push(LoggedChatMessage.system(pMessage, pTimestamp));
     }
 
-    public void handleSystemMessage(Component p_240522_, boolean p_240642_) {
-        if (!this.minecraft.options.hideMatchedNames().get() || !this.minecraft.isBlocked(this.guessChatUUID(p_240522_))) {
-            if (p_240642_) {
-                this.minecraft.gui.setOverlayMessage(p_240522_, false);
+    public void handleSystemMessage(Component pMessage, boolean pIsOverlay) {
+        if (!this.minecraft.options.hideMatchedNames().get() || !this.minecraft.isBlocked(this.guessChatUUID(pMessage))) {
+            if (pIsOverlay) {
+                this.minecraft.gui.setOverlayMessage(pMessage, false);
             } else {
-                this.minecraft.gui.getChat().addMessage(p_240522_);
-                this.logSystemMessage(p_240522_, Instant.now());
+                this.minecraft.gui.getChat().addMessage(pMessage);
+                this.logSystemMessage(pMessage, Instant.now());
             }
 
-            this.minecraft.getNarrator().say(p_240522_);
+            this.minecraft.getNarrator().say(pMessage);
         }
     }
 
-    private UUID guessChatUUID(Component p_240595_) {
-        String s = StringDecomposer.getPlainText(p_240595_);
+    private UUID guessChatUUID(Component pMessage) {
+        String s = StringDecomposer.getPlainText(pMessage);
         String s1 = StringUtils.substringBetween(s, "<", ">");
         return s1 == null ? Util.NIL_UUID : this.minecraft.getPlayerSocialManager().getDiscoveredUUID(s1);
     }
 
-    private boolean isSenderLocalPlayer(UUID p_241343_) {
+    private boolean isSenderLocalPlayer(UUID pSender) {
         if (this.minecraft.isLocalServer() && this.minecraft.player != null) {
             UUID uuid = this.minecraft.player.getGameProfile().getId();
-            return uuid.equals(p_241343_);
+            return uuid.equals(pSender);
         } else {
             return false;
         }

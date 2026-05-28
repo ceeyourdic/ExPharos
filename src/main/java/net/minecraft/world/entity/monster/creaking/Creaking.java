@@ -89,8 +89,8 @@ public class Creaking extends Monster {
         this.xpReward = 0;
     }
 
-    public void setTransient(BlockPos p_376073_) {
-        this.setHomePos(p_376073_);
+    public void setTransient(BlockPos pHomePos) {
+        this.setHomePos(pHomePos);
         this.setPathfindingMalus(PathType.DAMAGE_OTHER, 8.0F);
         this.setPathfindingMalus(PathType.POWDER_SNOW, 8.0F);
         this.setPathfindingMalus(PathType.LAVA, 8.0F);
@@ -178,9 +178,9 @@ public class Creaking extends Monster {
         }
     }
 
-    public Player blameSourceForDamage(DamageSource p_375908_) {
-        this.resolveMobResponsibleForDamage(p_375908_);
-        return this.resolvePlayerResponsibleForDamage(p_375908_);
+    public Player blameSourceForDamage(DamageSource pDamageSource) {
+        this.resolveMobResponsibleForDamage(pDamageSource);
+        return this.resolvePlayerResponsibleForDamage(pDamageSource);
     }
 
     @Override
@@ -327,9 +327,9 @@ public class Creaking extends Monster {
         this.remove(Entity.RemovalReason.DISCARDED);
     }
 
-    public void creakingDeathEffects(DamageSource p_377960_) {
-        this.blameSourceForDamage(p_377960_);
-        this.die(p_377960_);
+    public void creakingDeathEffects(DamageSource pDamageSource) {
+        this.blameSourceForDamage(pDamageSource);
+        this.die(pDamageSource);
         this.makeSound(SoundEvents.CREAKING_TWITCH);
     }
 
@@ -420,8 +420,8 @@ public class Creaking extends Monster {
         }
     }
 
-    public void setHomePos(BlockPos p_376376_) {
-        this.entityData.set(HOME_POS, Optional.of(p_376376_));
+    public void setHomePos(BlockPos pHomePos) {
+        this.entityData.set(HOME_POS, Optional.of(pHomePos));
     }
 
     @Nullable
@@ -535,8 +535,8 @@ public class Creaking extends Monster {
         }
     }
 
-    public void activate(Player p_376101_) {
-        this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, p_376101_);
+    public void activate(Player pPlayer) {
+        this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, pPlayer);
         this.gameEvent(GameEvent.ENTITY_ACTION);
         this.makeSound(SoundEvents.CREAKING_ACTIVATE);
         this.setIsActive(true);
@@ -549,8 +549,8 @@ public class Creaking extends Monster {
         this.setIsActive(false);
     }
 
-    public void setIsActive(boolean p_366535_) {
-        this.entityData.set(IS_ACTIVE, p_366535_);
+    public void setIsActive(boolean pIsActive) {
+        this.entityData.set(IS_ACTIVE, pIsActive);
     }
 
     public boolean isActive() {
@@ -563,8 +563,8 @@ public class Creaking extends Monster {
     }
 
     class CreakingBodyRotationControl extends BodyRotationControl {
-        public CreakingBodyRotationControl(final Creaking p_364588_) {
-            super(p_364588_);
+        public CreakingBodyRotationControl(final Creaking pCreaking) {
+            super(pCreaking);
         }
 
         @Override
@@ -576,8 +576,8 @@ public class Creaking extends Monster {
     }
 
     class CreakingJumpControl extends JumpControl {
-        public CreakingJumpControl(final Creaking p_368023_) {
-            super(p_368023_);
+        public CreakingJumpControl(final Creaking pCreaking) {
+            super(pCreaking);
         }
 
         @Override
@@ -591,8 +591,8 @@ public class Creaking extends Monster {
     }
 
     class CreakingLookControl extends LookControl {
-        public CreakingLookControl(final Creaking p_367583_) {
-            super(p_367583_);
+        public CreakingLookControl(final Creaking pCreaking) {
+            super(pCreaking);
         }
 
         @Override
@@ -604,8 +604,8 @@ public class Creaking extends Monster {
     }
 
     class CreakingMoveControl extends MoveControl {
-        public CreakingMoveControl(final Creaking p_365109_) {
-            super(p_365109_);
+        public CreakingMoveControl(final Creaking pCreaking) {
+            super(pCreaking);
         }
 
         @Override
@@ -617,8 +617,8 @@ public class Creaking extends Monster {
     }
 
     class CreakingPathNavigation extends GroundPathNavigation {
-        CreakingPathNavigation(final Creaking p_377680_, final Level p_375587_) {
-            super(p_377680_, p_375587_);
+        CreakingPathNavigation(final Creaking pCreaking, final Level pLevel) {
+            super(pCreaking, pLevel);
         }
 
         @Override

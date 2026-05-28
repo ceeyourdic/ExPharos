@@ -27,19 +27,19 @@ public class ClientboundBlockEntityDataPacket implements Packet<ClientGamePacket
     private final BlockEntityType<?> type;
     private final CompoundTag tag;
 
-    public static ClientboundBlockEntityDataPacket create(BlockEntity p_195643_, BiFunction<BlockEntity, RegistryAccess, CompoundTag> p_335361_) {
-        RegistryAccess registryaccess = p_195643_.getLevel().registryAccess();
-        return new ClientboundBlockEntityDataPacket(p_195643_.getBlockPos(), p_195643_.getType(), p_335361_.apply(p_195643_, registryaccess));
+    public static ClientboundBlockEntityDataPacket create(BlockEntity pBlockEntity, BiFunction<BlockEntity, RegistryAccess, CompoundTag> pDataGetter) {
+        RegistryAccess registryaccess = pBlockEntity.getLevel().registryAccess();
+        return new ClientboundBlockEntityDataPacket(pBlockEntity.getBlockPos(), pBlockEntity.getType(), pDataGetter.apply(pBlockEntity, registryaccess));
     }
 
-    public static ClientboundBlockEntityDataPacket create(BlockEntity p_195641_) {
-        return create(p_195641_, BlockEntity::getUpdateTag);
+    public static ClientboundBlockEntityDataPacket create(BlockEntity pBlockEntity) {
+        return create(pBlockEntity, BlockEntity::getUpdateTag);
     }
 
-    private ClientboundBlockEntityDataPacket(BlockPos p_195637_, BlockEntityType<?> p_195638_, CompoundTag p_195639_) {
-        this.pos = p_195637_;
-        this.type = p_195638_;
-        this.tag = p_195639_;
+    private ClientboundBlockEntityDataPacket(BlockPos pPos, BlockEntityType<?> pType, CompoundTag pTag) {
+        this.pos = pPos;
+        this.type = pType;
+        this.tag = pTag;
     }
 
     @Override
@@ -47,8 +47,8 @@ public class ClientboundBlockEntityDataPacket implements Packet<ClientGamePacket
         return GamePacketTypes.CLIENTBOUND_BLOCK_ENTITY_DATA;
     }
 
-    public void handle(ClientGamePacketListener p_131703_) {
-        p_131703_.handleBlockEntityData(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleBlockEntityData(this);
     }
 
     public BlockPos getPos() {

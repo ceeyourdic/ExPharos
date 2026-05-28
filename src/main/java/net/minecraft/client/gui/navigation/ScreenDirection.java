@@ -36,12 +36,12 @@ public enum ScreenDirection {
         };
     }
 
-    public boolean isAfter(int p_265461_, int p_265553_) {
-        return this.isPositive() ? p_265461_ > p_265553_ : p_265553_ > p_265461_;
+    public boolean isAfter(int pFirst, int pSecond) {
+        return this.isPositive() ? pFirst > pSecond : pSecond > pFirst;
     }
 
-    public boolean isBefore(int p_265215_, int p_265040_) {
-        return this.isPositive() ? p_265215_ < p_265040_ : p_265040_ < p_265215_;
+    public boolean isBefore(int pFirst, int pSecond) {
+        return this.isPositive() ? pFirst < pSecond : pSecond < pFirst;
     }
 
     public IntComparator coordinateValueComparator() {

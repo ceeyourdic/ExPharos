@@ -11,14 +11,14 @@ public class EntityModelSet {
     public static final EntityModelSet EMPTY = new EntityModelSet(Map.of());
     private final Map<ModelLayerLocation, LayerDefinition> roots;
 
-    public EntityModelSet(Map<ModelLayerLocation, LayerDefinition> p_378805_) {
-        this.roots = p_378805_;
+    public EntityModelSet(Map<ModelLayerLocation, LayerDefinition> pRoots) {
+        this.roots = pRoots;
     }
 
-    public ModelPart bakeLayer(ModelLayerLocation p_171104_) {
-        LayerDefinition layerdefinition = this.roots.get(p_171104_);
+    public ModelPart bakeLayer(ModelLayerLocation pModelLayerLocation) {
+        LayerDefinition layerdefinition = this.roots.get(pModelLayerLocation);
         if (layerdefinition == null) {
-            throw new IllegalArgumentException("No model for layer " + p_171104_);
+            throw new IllegalArgumentException("No model for layer " + pModelLayerLocation);
         } else {
             return layerdefinition.bakeRoot();
         }

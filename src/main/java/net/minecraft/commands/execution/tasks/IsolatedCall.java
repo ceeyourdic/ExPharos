@@ -12,9 +12,9 @@ public class IsolatedCall<T extends ExecutionCommandSource<T>> implements EntryA
     private final Consumer<ExecutionControl<T>> taskProducer;
     private final CommandResultCallback output;
 
-    public IsolatedCall(Consumer<ExecutionControl<T>> p_309522_, CommandResultCallback p_309763_) {
-        this.taskProducer = p_309522_;
-        this.output = p_309763_;
+    public IsolatedCall(Consumer<ExecutionControl<T>> pTaskProducer, CommandResultCallback pOutput) {
+        this.taskProducer = pTaskProducer;
+        this.output = pOutput;
     }
 
     @Override

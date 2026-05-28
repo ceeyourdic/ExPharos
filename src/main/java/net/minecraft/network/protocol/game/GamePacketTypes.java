@@ -181,11 +181,11 @@ public class GamePacketTypes {
     public static final PacketType<ClientboundSetCursorItemPacket> CLIENTBOUND_SET_CURSOR_ITEM = createClientbound("set_cursor_item");
     public static final PacketType<ClientboundSetPlayerInventoryPacket> CLIENTBOUND_SET_PLAYER_INVENTORY = createClientbound("set_player_inventory");
 
-    private static <T extends Packet<ClientGamePacketListener>> PacketType<T> createClientbound(String p_331613_) {
-        return new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.withDefaultNamespace(p_331613_));
+    private static <T extends Packet<ClientGamePacketListener>> PacketType<T> createClientbound(String pId) {
+        return new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.withDefaultNamespace(pId));
     }
 
-    private static <T extends Packet<ServerGamePacketListener>> PacketType<T> createServerbound(String p_330894_) {
-        return new PacketType<>(PacketFlow.SERVERBOUND, ResourceLocation.withDefaultNamespace(p_330894_));
+    private static <T extends Packet<ServerGamePacketListener>> PacketType<T> createServerbound(String pId) {
+        return new PacketType<>(PacketFlow.SERVERBOUND, ResourceLocation.withDefaultNamespace(pId));
     }
 }

@@ -22,8 +22,8 @@ public record WeatherCheck(Optional<Boolean> isRaining, Optional<Boolean> isThun
         return LootItemConditions.WEATHER_CHECK;
     }
 
-    public boolean test(LootContext p_82066_) {
-        ServerLevel serverlevel = p_82066_.getLevel();
+    public boolean test(LootContext pContext) {
+        ServerLevel serverlevel = pContext.getLevel();
         return this.isRaining.isPresent() && this.isRaining.get() != serverlevel.isRaining()
             ? false
             : !this.isThundering.isPresent() || this.isThundering.get() == serverlevel.isThundering();
@@ -37,13 +37,13 @@ public record WeatherCheck(Optional<Boolean> isRaining, Optional<Boolean> isThun
         private Optional<Boolean> isRaining = Optional.empty();
         private Optional<Boolean> isThundering = Optional.empty();
 
-        public WeatherCheck.Builder setRaining(boolean p_298370_) {
-            this.isRaining = Optional.of(p_298370_);
+        public WeatherCheck.Builder setRaining(boolean pIsRaining) {
+            this.isRaining = Optional.of(pIsRaining);
             return this;
         }
 
-        public WeatherCheck.Builder setThundering(boolean p_299917_) {
-            this.isThundering = Optional.of(p_299917_);
+        public WeatherCheck.Builder setThundering(boolean pIsThundering) {
+            this.isThundering = Optional.of(pIsThundering);
             return this;
         }
 

@@ -8,13 +8,13 @@ import com.mojang.serialization.Dynamic;
 import java.util.stream.Stream;
 
 public class BlockEntityBannerColorFix extends NamedEntityFix {
-    public BlockEntityBannerColorFix(Schema p_14793_, boolean p_14794_) {
-        super(p_14793_, p_14794_, "BlockEntityBannerColorFix", References.BLOCK_ENTITY, "minecraft:banner");
+    public BlockEntityBannerColorFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType, "BlockEntityBannerColorFix", References.BLOCK_ENTITY, "minecraft:banner");
     }
 
-    public Dynamic<?> fixTag(Dynamic<?> p_14798_) {
-        p_14798_ = p_14798_.update("Base", p_14808_ -> p_14808_.createInt(15 - p_14808_.asInt(0)));
-        return p_14798_.update(
+    public Dynamic<?> fixTag(Dynamic<?> pTag) {
+        pTag = pTag.update("Base", p_14808_ -> p_14808_.createInt(15 - p_14808_.asInt(0)));
+        return pTag.update(
             "Patterns",
             p_326553_ -> DataFixUtils.orElse(
                     p_326553_.asStreamOpt()

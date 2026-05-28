@@ -24,10 +24,10 @@ public class ExplosionCondition implements LootItemCondition {
         return Set.of(LootContextParams.EXPLOSION_RADIUS);
     }
 
-    public boolean test(LootContext p_81659_) {
-        Float f = p_81659_.getOptionalParameter(LootContextParams.EXPLOSION_RADIUS);
+    public boolean test(LootContext pContext) {
+        Float f = pContext.getOptionalParameter(LootContextParams.EXPLOSION_RADIUS);
         if (f != null) {
-            RandomSource randomsource = p_81659_.getRandom();
+            RandomSource randomsource = pContext.getRandom();
             float f1 = 1.0F / f;
             return randomsource.nextFloat() <= f1;
         } else {

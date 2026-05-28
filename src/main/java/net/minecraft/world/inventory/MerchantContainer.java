@@ -18,8 +18,8 @@ public class MerchantContainer implements Container {
     private int selectionHint;
     private int futureXp;
 
-    public MerchantContainer(Merchant p_40003_) {
-        this.merchant = p_40003_;
+    public MerchantContainer(Merchant pMerchant) {
+        this.merchant = pMerchant;
     }
 
     @Override
@@ -39,18 +39,18 @@ public class MerchantContainer implements Container {
     }
 
     @Override
-    public ItemStack getItem(int p_40008_) {
-        return this.itemStacks.get(p_40008_);
+    public ItemStack getItem(int pIndex) {
+        return this.itemStacks.get(pIndex);
     }
 
     @Override
-    public ItemStack removeItem(int p_40010_, int p_40011_) {
-        ItemStack itemstack = this.itemStacks.get(p_40010_);
-        if (p_40010_ == 2 && !itemstack.isEmpty()) {
-            return ContainerHelper.removeItem(this.itemStacks, p_40010_, itemstack.getCount());
+    public ItemStack removeItem(int pIndex, int pCount) {
+        ItemStack itemstack = this.itemStacks.get(pIndex);
+        if (pIndex == 2 && !itemstack.isEmpty()) {
+            return ContainerHelper.removeItem(this.itemStacks, pIndex, itemstack.getCount());
         } else {
-            ItemStack itemstack1 = ContainerHelper.removeItem(this.itemStacks, p_40010_, p_40011_);
-            if (!itemstack1.isEmpty() && this.isPaymentSlot(p_40010_)) {
+            ItemStack itemstack1 = ContainerHelper.removeItem(this.itemStacks, pIndex, pCount);
+            if (!itemstack1.isEmpty() && this.isPaymentSlot(pIndex)) {
                 this.updateSellItem();
             }
 
@@ -58,27 +58,27 @@ public class MerchantContainer implements Container {
         }
     }
 
-    private boolean isPaymentSlot(int p_40023_) {
-        return p_40023_ == 0 || p_40023_ == 1;
+    private boolean isPaymentSlot(int pSlot) {
+        return pSlot == 0 || pSlot == 1;
     }
 
     @Override
-    public ItemStack removeItemNoUpdate(int p_40018_) {
-        return ContainerHelper.takeItem(this.itemStacks, p_40018_);
+    public ItemStack removeItemNoUpdate(int pIndex) {
+        return ContainerHelper.takeItem(this.itemStacks, pIndex);
     }
 
     @Override
-    public void setItem(int p_40013_, ItemStack p_40014_) {
-        this.itemStacks.set(p_40013_, p_40014_);
-        p_40014_.limitSize(this.getMaxStackSize(p_40014_));
-        if (this.isPaymentSlot(p_40013_)) {
+    public void setItem(int pIndex, ItemStack pStack) {
+        this.itemStacks.set(pIndex, pStack);
+        pStack.limitSize(this.getMaxStackSize(pStack));
+        if (this.isPaymentSlot(pIndex)) {
             this.updateSellItem();
         }
     }
 
     @Override
-    public boolean stillValid(Player p_40016_) {
-        return this.merchant.getTradingPlayer() == p_40016_;
+    public boolean stillValid(Player pPlayer) {
+        return this.merchant.getTradingPlayer() == pPlayer;
     }
 
     @Override
@@ -129,8 +129,8 @@ public class MerchantContainer implements Container {
         return this.activeOffer;
     }
 
-    public void setSelectionHint(int p_40021_) {
-        this.selectionHint = p_40021_;
+    public void setSelectionHint(int pCurrentRecipeIndex) {
+        this.selectionHint = pCurrentRecipeIndex;
         this.updateSellItem();
     }
 

@@ -19,12 +19,12 @@ public class EmptyFluid extends Fluid {
     }
 
     @Override
-    public boolean canBeReplacedWith(FluidState p_75930_, BlockGetter p_75931_, BlockPos p_75932_, Fluid p_75933_, Direction p_75934_) {
+    public boolean canBeReplacedWith(FluidState pFluidState, BlockGetter pBlockReader, BlockPos pPos, Fluid pFluid, Direction pDirection) {
         return true;
     }
 
     @Override
-    public Vec3 getFlow(BlockGetter p_75918_, BlockPos p_75919_, FluidState p_75920_) {
+    public Vec3 getFlow(BlockGetter pBlockReader, BlockPos pPos, FluidState pFluidState) {
         return Vec3.ZERO;
     }
 
@@ -54,17 +54,17 @@ public class EmptyFluid extends Fluid {
     }
 
     @Override
-    protected BlockState createLegacyBlock(FluidState p_75937_) {
+    protected BlockState createLegacyBlock(FluidState pState) {
         return Blocks.AIR.defaultBlockState();
     }
 
     @Override
-    public boolean isSource(FluidState p_75944_) {
+    public boolean isSource(FluidState pState) {
         return false;
     }
 
     @Override
-    public int getAmount(FluidState p_75946_) {
+    public int getAmount(FluidState pState) {
         return 0;
     }
 

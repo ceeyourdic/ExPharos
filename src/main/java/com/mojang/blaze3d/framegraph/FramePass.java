@@ -7,15 +7,15 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface FramePass {
-    <T> ResourceHandle<T> createsInternal(String p_361163_, ResourceDescriptor<T> p_364869_);
+    <T> ResourceHandle<T> createsInternal(String pName, ResourceDescriptor<T> pDescriptor);
 
-    <T> void reads(ResourceHandle<T> p_368457_);
+    <T> void reads(ResourceHandle<T> pHandle);
 
-    <T> ResourceHandle<T> readsAndWrites(ResourceHandle<T> p_363072_);
+    <T> ResourceHandle<T> readsAndWrites(ResourceHandle<T> pHandle);
 
-    void requires(FramePass p_362517_);
+    void requires(FramePass pPass);
 
     void disableCulling();
 
-    void executes(Runnable p_362191_);
+    void executes(Runnable pTask);
 }

@@ -21,26 +21,26 @@ public class ClientboundPlayerAbilitiesPacket implements Packet<ClientGamePacket
     private final float flyingSpeed;
     private final float walkingSpeed;
 
-    public ClientboundPlayerAbilitiesPacket(Abilities p_132667_) {
-        this.invulnerable = p_132667_.invulnerable;
-        this.isFlying = p_132667_.flying;
-        this.canFly = p_132667_.mayfly;
-        this.instabuild = p_132667_.instabuild;
-        this.flyingSpeed = p_132667_.getFlyingSpeed();
-        this.walkingSpeed = p_132667_.getWalkingSpeed();
+    public ClientboundPlayerAbilitiesPacket(Abilities pAbilities) {
+        this.invulnerable = pAbilities.invulnerable;
+        this.isFlying = pAbilities.flying;
+        this.canFly = pAbilities.mayfly;
+        this.instabuild = pAbilities.instabuild;
+        this.flyingSpeed = pAbilities.getFlyingSpeed();
+        this.walkingSpeed = pAbilities.getWalkingSpeed();
     }
 
-    private ClientboundPlayerAbilitiesPacket(FriendlyByteBuf p_179033_) {
-        byte b0 = p_179033_.readByte();
+    private ClientboundPlayerAbilitiesPacket(FriendlyByteBuf pBuffer) {
+        byte b0 = pBuffer.readByte();
         this.invulnerable = (b0 & 1) != 0;
         this.isFlying = (b0 & 2) != 0;
         this.canFly = (b0 & 4) != 0;
         this.instabuild = (b0 & 8) != 0;
-        this.flyingSpeed = p_179033_.readFloat();
-        this.walkingSpeed = p_179033_.readFloat();
+        this.flyingSpeed = pBuffer.readFloat();
+        this.walkingSpeed = pBuffer.readFloat();
     }
 
-    private void write(FriendlyByteBuf p_132676_) {
+    private void write(FriendlyByteBuf pBuffer) {
         byte b0 = 0;
         if (this.invulnerable) {
             b0 = (byte)(b0 | 1);
@@ -58,9 +58,9 @@ public class ClientboundPlayerAbilitiesPacket implements Packet<ClientGamePacket
             b0 = (byte)(b0 | 8);
         }
 
-        p_132676_.writeByte(b0);
-        p_132676_.writeFloat(this.flyingSpeed);
-        p_132676_.writeFloat(this.walkingSpeed);
+        pBuffer.writeByte(b0);
+        pBuffer.writeFloat(this.flyingSpeed);
+        pBuffer.writeFloat(this.walkingSpeed);
     }
 
     @Override
@@ -68,8 +68,8 @@ public class ClientboundPlayerAbilitiesPacket implements Packet<ClientGamePacket
         return GamePacketTypes.CLIENTBOUND_PLAYER_ABILITIES;
     }
 
-    public void handle(ClientGamePacketListener p_132673_) {
-        p_132673_.handlePlayerAbilities(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handlePlayerAbilities(this);
     }
 
     public boolean isInvulnerable() {

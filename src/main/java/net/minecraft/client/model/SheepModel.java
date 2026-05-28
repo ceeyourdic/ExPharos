@@ -17,8 +17,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class SheepModel extends QuadrupedModel<SheepRenderState> {
     public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(false, 8.0F, 4.0F, 2.0F, 2.0F, 24.0F, Set.of("head"));
 
-    public SheepModel(ModelPart p_170903_) {
-        super(p_170903_);
+    public SheepModel(ModelPart pRoot) {
+        super(pRoot);
     }
 
     public static LayerDefinition createBodyLayer() {

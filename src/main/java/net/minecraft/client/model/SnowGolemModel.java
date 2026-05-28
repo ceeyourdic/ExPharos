@@ -20,12 +20,12 @@ public class SnowGolemModel extends EntityModel<LivingEntityRenderState> {
     private final ModelPart leftArm;
     private final ModelPart rightArm;
 
-    public SnowGolemModel(ModelPart p_170965_) {
-        super(p_170965_);
-        this.head = p_170965_.getChild("head");
-        this.leftArm = p_170965_.getChild("left_arm");
-        this.rightArm = p_170965_.getChild("right_arm");
-        this.upperBody = p_170965_.getChild("upper_body");
+    public SnowGolemModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
+        this.leftArm = pRoot.getChild("left_arm");
+        this.rightArm = pRoot.getChild("right_arm");
+        this.upperBody = pRoot.getChild("upper_body");
     }
 
     public static LayerDefinition createBodyLayer() {

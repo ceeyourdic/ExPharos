@@ -119,16 +119,16 @@ public class RespawnAnchorBlock extends Block {
         }
     }
 
-    private static boolean isRespawnFuel(ItemStack p_55849_) {
-        return p_55849_.is(Items.GLOWSTONE);
+    private static boolean isRespawnFuel(ItemStack pStack) {
+        return pStack.is(Items.GLOWSTONE);
     }
 
-    private static boolean canBeCharged(BlockState p_55895_) {
-        return p_55895_.getValue(CHARGE) < 4;
+    private static boolean canBeCharged(BlockState pState) {
+        return pState.getValue(CHARGE) < 4;
     }
 
-    private static boolean isWaterThatWouldFlow(BlockPos p_55888_, Level p_55889_) {
-        FluidState fluidstate = p_55889_.getFluidState(p_55888_);
+    private static boolean isWaterThatWouldFlow(BlockPos pPos, Level pLevel) {
+        FluidState fluidstate = pLevel.getFluidState(pPos);
         if (!fluidstate.is(FluidTags.WATER)) {
             return false;
         } else if (fluidstate.isSource()) {
@@ -138,41 +138,41 @@ public class RespawnAnchorBlock extends Block {
             if (f < 2.0F) {
                 return false;
             } else {
-                FluidState fluidstate1 = p_55889_.getFluidState(p_55888_.below());
+                FluidState fluidstate1 = pLevel.getFluidState(pPos.below());
                 return !fluidstate1.is(FluidTags.WATER);
             }
         }
     }
 
-    private void explode(BlockState p_55891_, Level p_55892_, final BlockPos p_55893_) {
-        p_55892_.removeBlock(p_55893_, false);
-        boolean flag = Direction.Plane.HORIZONTAL.stream().map(p_55893_::relative).anyMatch(p_55854_ -> isWaterThatWouldFlow(p_55854_, p_55892_));
-        final boolean flag1 = flag || p_55892_.getFluidState(p_55893_.above()).is(FluidTags.WATER);
+    private void explode(BlockState pState, Level pLevel, final BlockPos pPos2) {
+        pLevel.removeBlock(pPos2, false);
+        boolean flag = Direction.Plane.HORIZONTAL.stream().map(pPos2::relative).anyMatch(p_55854_ -> isWaterThatWouldFlow(p_55854_, pLevel));
+        final boolean flag1 = flag || pLevel.getFluidState(pPos2.above()).is(FluidTags.WATER);
         ExplosionDamageCalculator explosiondamagecalculator = new ExplosionDamageCalculator() {
             @Override
             public Optional<Float> getBlockExplosionResistance(Explosion p_55904_, BlockGetter p_55905_, BlockPos p_55906_, BlockState p_55907_, FluidState p_55908_) {
-                return p_55906_.equals(p_55893_) && flag1
+                return p_55906_.equals(pPos2) && flag1
                     ? Optional.of(Blocks.WATER.getExplosionResistance())
                     : super.getBlockExplosionResistance(p_55904_, p_55905_, p_55906_, p_55907_, p_55908_);
             }
         };
-        Vec3 vec3 = p_55893_.getCenter();
-        p_55892_.explode(null, p_55892_.damageSources().badRespawnPointExplosion(vec3), explosiondamagecalculator, vec3, 5.0F, true, Level.ExplosionInteraction.BLOCK);
+        Vec3 vec3 = pPos2.getCenter();
+        pLevel.explode(null, pLevel.damageSources().badRespawnPointExplosion(vec3), explosiondamagecalculator, vec3, 5.0F, true, Level.ExplosionInteraction.BLOCK);
     }
 
-    public static boolean canSetSpawn(Level p_55851_) {
-        return p_55851_.dimensionType().respawnAnchorWorks();
+    public static boolean canSetSpawn(Level pLevel) {
+        return pLevel.dimensionType().respawnAnchorWorks();
     }
 
-    public static void charge(@Nullable Entity p_270997_, Level p_270172_, BlockPos p_270534_, BlockState p_270661_) {
-        BlockState blockstate = p_270661_.setValue(CHARGE, Integer.valueOf(p_270661_.getValue(CHARGE) + 1));
-        p_270172_.setBlock(p_270534_, blockstate, 3);
-        p_270172_.gameEvent(GameEvent.BLOCK_CHANGE, p_270534_, GameEvent.Context.of(p_270997_, blockstate));
-        p_270172_.playSound(
+    public static void charge(@Nullable Entity pEntity, Level pLevel, BlockPos pPos, BlockState pState) {
+        BlockState blockstate = pState.setValue(CHARGE, Integer.valueOf(pState.getValue(CHARGE) + 1));
+        pLevel.setBlock(pPos, blockstate, 3);
+        pLevel.gameEvent(GameEvent.BLOCK_CHANGE, pPos, GameEvent.Context.of(pEntity, blockstate));
+        pLevel.playSound(
             null,
-            (double)p_270534_.getX() + 0.5,
-            (double)p_270534_.getY() + 0.5,
-            (double)p_270534_.getZ() + 0.5,
+            (double)pPos.getX() + 0.5,
+            (double)pPos.getY() + 0.5,
+            (double)pPos.getZ() + 0.5,
             SoundEvents.RESPAWN_ANCHOR_CHARGE,
             SoundSource.BLOCKS,
             1.0F,
@@ -196,35 +196,35 @@ public class RespawnAnchorBlock extends Block {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_55886_) {
-        p_55886_.add(CHARGE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(CHARGE);
     }
 
     @Override
-    protected boolean hasAnalogOutputSignal(BlockState p_55860_) {
+    protected boolean hasAnalogOutputSignal(BlockState pState) {
         return true;
     }
 
-    public static int getScaledChargeLevel(BlockState p_55862_, int p_55863_) {
-        return Mth.floor((float)(p_55862_.getValue(CHARGE) - 0) / 4.0F * (float)p_55863_);
+    public static int getScaledChargeLevel(BlockState pState, int pScale) {
+        return Mth.floor((float)(pState.getValue(CHARGE) - 0) / 4.0F * (float)pScale);
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState p_55870_, Level p_55871_, BlockPos p_55872_) {
-        return getScaledChargeLevel(p_55870_, 15);
+    protected int getAnalogOutputSignal(BlockState pBlockState, Level pLevel, BlockPos pPos) {
+        return getScaledChargeLevel(pBlockState, 15);
     }
 
-    public static Optional<Vec3> findStandUpPosition(EntityType<?> p_55840_, CollisionGetter p_55841_, BlockPos p_55842_) {
-        Optional<Vec3> optional = findStandUpPosition(p_55840_, p_55841_, p_55842_, true);
-        return optional.isPresent() ? optional : findStandUpPosition(p_55840_, p_55841_, p_55842_, false);
+    public static Optional<Vec3> findStandUpPosition(EntityType<?> pEntityType, CollisionGetter pLevel, BlockPos pPos) {
+        Optional<Vec3> optional = findStandUpPosition(pEntityType, pLevel, pPos, true);
+        return optional.isPresent() ? optional : findStandUpPosition(pEntityType, pLevel, pPos, false);
     }
 
-    private static Optional<Vec3> findStandUpPosition(EntityType<?> p_55844_, CollisionGetter p_55845_, BlockPos p_55846_, boolean p_55847_) {
+    private static Optional<Vec3> findStandUpPosition(EntityType<?> pEntityType, CollisionGetter pLevel, BlockPos pPos, boolean pSimulate) {
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
         for (Vec3i vec3i : RESPAWN_OFFSETS) {
-            blockpos$mutableblockpos.set(p_55846_).move(vec3i);
-            Vec3 vec3 = DismountHelper.findSafeDismountLocation(p_55844_, p_55845_, blockpos$mutableblockpos, p_55847_);
+            blockpos$mutableblockpos.set(pPos).move(vec3i);
+            Vec3 vec3 = DismountHelper.findSafeDismountLocation(pEntityType, pLevel, blockpos$mutableblockpos, pSimulate);
             if (vec3 != null) {
                 return Optional.of(vec3);
             }

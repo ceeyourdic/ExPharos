@@ -27,19 +27,19 @@ public class SkeletonModel<S extends SkeletonRenderState> extends HumanoidModel<
         return LayerDefinition.create(meshdefinition, 64, 32);
     }
 
-    protected static void createDefaultSkeletonMesh(PartDefinition p_329924_) {
-        p_329924_.addOrReplaceChild(
+    protected static void createDefaultSkeletonMesh(PartDefinition pPartDefinition) {
+        pPartDefinition.addOrReplaceChild(
             "right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 12.0F, 2.0F), PartPose.offset(-5.0F, 2.0F, 0.0F)
         );
-        p_329924_.addOrReplaceChild(
+        pPartDefinition.addOrReplaceChild(
             "left_arm",
             CubeListBuilder.create().texOffs(40, 16).mirror().addBox(-1.0F, -2.0F, -1.0F, 2.0F, 12.0F, 2.0F),
             PartPose.offset(5.0F, 2.0F, 0.0F)
         );
-        p_329924_.addOrReplaceChild(
+        pPartDefinition.addOrReplaceChild(
             "right_leg", CubeListBuilder.create().texOffs(0, 16).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 12.0F, 2.0F), PartPose.offset(-2.0F, 12.0F, 0.0F)
         );
-        p_329924_.addOrReplaceChild(
+        pPartDefinition.addOrReplaceChild(
             "left_leg",
             CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-1.0F, 0.0F, -1.0F, 2.0F, 12.0F, 2.0F),
             PartPose.offset(2.0F, 12.0F, 0.0F)
@@ -65,12 +65,12 @@ public class SkeletonModel<S extends SkeletonRenderState> extends HumanoidModel<
     }
 
     @Override
-    public void translateToHand(HumanoidArm p_103778_, PoseStack p_103779_) {
-        this.root().translateAndRotate(p_103779_);
-        float f = p_103778_ == HumanoidArm.RIGHT ? 1.0F : -1.0F;
-        ModelPart modelpart = this.getArm(p_103778_);
+    public void translateToHand(HumanoidArm pSide, PoseStack pPoseStack) {
+        this.root().translateAndRotate(pPoseStack);
+        float f = pSide == HumanoidArm.RIGHT ? 1.0F : -1.0F;
+        ModelPart modelpart = this.getArm(pSide);
         modelpart.x += f;
-        modelpart.translateAndRotate(p_103779_);
+        modelpart.translateAndRotate(pPoseStack);
         modelpart.x -= f;
     }
 }

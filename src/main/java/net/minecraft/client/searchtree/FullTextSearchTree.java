@@ -13,9 +13,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class FullTextSearchTree<T> extends IdSearchTree<T> {
     private final SearchTree<T> plainTextSearchTree;
 
-    public FullTextSearchTree(Function<T, Stream<String>> p_235155_, Function<T, Stream<ResourceLocation>> p_235156_, List<T> p_235157_) {
-        super(p_235156_, p_235157_);
-        this.plainTextSearchTree = SearchTree.plainText(p_235157_, p_235155_);
+    public FullTextSearchTree(Function<T, Stream<String>> pFilter, Function<T, Stream<ResourceLocation>> pIdGetter, List<T> pContents) {
+        super(pIdGetter, pContents);
+        this.plainTextSearchTree = SearchTree.plainText(pContents, pFilter);
     }
 
     @Override

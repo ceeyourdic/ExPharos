@@ -47,22 +47,22 @@ public class WallSkullBlock extends AbstractSkullBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_58114_, BlockGetter p_58115_, BlockPos p_58116_, CollisionContext p_58117_) {
-        return AABBS.get(p_58114_.getValue(FACING));
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return AABBS.get(pState.getValue(FACING));
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_58104_) {
-        BlockState blockstate = super.getStateForPlacement(p_58104_);
-        BlockGetter blockgetter = p_58104_.getLevel();
-        BlockPos blockpos = p_58104_.getClickedPos();
-        Direction[] adirection = p_58104_.getNearestLookingDirections();
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockState blockstate = super.getStateForPlacement(pContext);
+        BlockGetter blockgetter = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
+        Direction[] adirection = pContext.getNearestLookingDirections();
 
         for (Direction direction : adirection) {
             if (direction.getAxis().isHorizontal()) {
                 Direction direction1 = direction.getOpposite();
                 blockstate = blockstate.setValue(FACING, direction1);
-                if (!blockgetter.getBlockState(blockpos.relative(direction)).canBeReplaced(p_58104_)) {
+                if (!blockgetter.getBlockState(blockpos.relative(direction)).canBeReplaced(pContext)) {
                     return blockstate;
                 }
             }
@@ -72,18 +72,18 @@ public class WallSkullBlock extends AbstractSkullBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState p_58109_, Rotation p_58110_) {
-        return p_58109_.setValue(FACING, p_58110_.rotate(p_58109_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_58106_, Mirror p_58107_) {
-        return p_58106_.rotate(p_58107_.getRotation(p_58106_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_58112_) {
-        super.createBlockStateDefinition(p_58112_);
-        p_58112_.add(FACING);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        super.createBlockStateDefinition(pBuilder);
+        pBuilder.add(FACING);
     }
 }

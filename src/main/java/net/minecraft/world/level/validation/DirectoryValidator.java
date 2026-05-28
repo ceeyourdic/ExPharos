@@ -15,55 +15,55 @@ import java.util.List;
 public class DirectoryValidator {
     private final PathMatcher symlinkTargetAllowList;
 
-    public DirectoryValidator(PathMatcher p_299405_) {
-        this.symlinkTargetAllowList = p_299405_;
+    public DirectoryValidator(PathMatcher pSymlinkTargetAllowList) {
+        this.symlinkTargetAllowList = pSymlinkTargetAllowList;
     }
 
-    public void validateSymlink(Path p_289934_, List<ForbiddenSymlinkInfo> p_289972_) throws IOException {
-        Path path = Files.readSymbolicLink(p_289934_);
+    public void validateSymlink(Path pDirectory, List<ForbiddenSymlinkInfo> pEntries) throws IOException {
+        Path path = Files.readSymbolicLink(pDirectory);
         if (!this.symlinkTargetAllowList.matches(path)) {
-            p_289972_.add(new ForbiddenSymlinkInfo(p_289934_, path));
+            pEntries.add(new ForbiddenSymlinkInfo(pDirectory, path));
         }
     }
 
-    public List<ForbiddenSymlinkInfo> validateSymlink(Path p_299520_) throws IOException {
+    public List<ForbiddenSymlinkInfo> validateSymlink(Path pDirectory) throws IOException {
         List<ForbiddenSymlinkInfo> list = new ArrayList<>();
-        this.validateSymlink(p_299520_, list);
+        this.validateSymlink(pDirectory, list);
         return list;
     }
 
-    public List<ForbiddenSymlinkInfo> validateDirectory(Path p_301110_, boolean p_298035_) throws IOException {
+    public List<ForbiddenSymlinkInfo> validateDirectory(Path pDirectory, boolean pValidateSymlinks) throws IOException {
         List<ForbiddenSymlinkInfo> list = new ArrayList<>();
 
         BasicFileAttributes basicfileattributes;
         try {
-            basicfileattributes = Files.readAttributes(p_301110_, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+            basicfileattributes = Files.readAttributes(pDirectory, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
         } catch (NoSuchFileException nosuchfileexception) {
             return list;
         }
 
         if (basicfileattributes.isRegularFile()) {
-            throw new IOException("Path " + p_301110_ + " is not a directory");
+            throw new IOException("Path " + pDirectory + " is not a directory");
         } else {
             if (basicfileattributes.isSymbolicLink()) {
-                if (!p_298035_) {
-                    this.validateSymlink(p_301110_, list);
+                if (!pValidateSymlinks) {
+                    this.validateSymlink(pDirectory, list);
                     return list;
                 }
 
-                p_301110_ = Files.readSymbolicLink(p_301110_);
+                pDirectory = Files.readSymbolicLink(pDirectory);
             }
 
-            this.validateKnownDirectory(p_301110_, list);
+            this.validateKnownDirectory(pDirectory, list);
             return list;
         }
     }
 
-    public void validateKnownDirectory(Path p_297387_, final List<ForbiddenSymlinkInfo> p_298980_) throws IOException {
-        Files.walkFileTree(p_297387_, new SimpleFileVisitor<Path>() {
+    public void validateKnownDirectory(Path pDirectory, final List<ForbiddenSymlinkInfo> pForbiddenSymlinkInfos) throws IOException {
+        Files.walkFileTree(pDirectory, new SimpleFileVisitor<Path>() {
             private void validateSymlink(Path p_289935_, BasicFileAttributes p_289941_) throws IOException {
                 if (p_289941_.isSymbolicLink()) {
-                    DirectoryValidator.this.validateSymlink(p_289935_, p_298980_);
+                    DirectoryValidator.this.validateSymlink(p_289935_, pForbiddenSymlinkInfos);
                 }
             }
 

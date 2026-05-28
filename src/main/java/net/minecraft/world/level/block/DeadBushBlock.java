@@ -24,12 +24,12 @@ public class DeadBushBlock extends BushBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_52419_, BlockGetter p_52420_, BlockPos p_52421_, CollisionContext p_52422_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
     @Override
-    protected boolean mayPlaceOn(BlockState p_52424_, BlockGetter p_52425_, BlockPos p_52426_) {
-        return p_52424_.is(BlockTags.DEAD_BUSH_MAY_PLACE_ON);
+    protected boolean mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return pState.is(BlockTags.DEAD_BUSH_MAY_PLACE_ON);
     }
 }

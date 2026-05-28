@@ -28,12 +28,12 @@ public record ClientboundCommandSuggestionsPacket(int id, int start, int length,
         ClientboundCommandSuggestionsPacket::new
     );
 
-    public ClientboundCommandSuggestionsPacket(int p_131846_, Suggestions p_131847_) {
+    public ClientboundCommandSuggestionsPacket(int pId, Suggestions pSuggestions) {
         this(
-            p_131846_,
-            p_131847_.getRange().getStart(),
-            p_131847_.getRange().getLength(),
-            p_131847_.getList()
+            pId,
+            pSuggestions.getRange().getStart(),
+            pSuggestions.getRange().getLength(),
+            pSuggestions.getList()
                 .stream()
                 .map(
                     p_326097_ -> new ClientboundCommandSuggestionsPacket.Entry(
@@ -49,8 +49,8 @@ public record ClientboundCommandSuggestionsPacket(int id, int start, int length,
         return GamePacketTypes.CLIENTBOUND_COMMAND_SUGGESTIONS;
     }
 
-    public void handle(ClientGamePacketListener p_131853_) {
-        p_131853_.handleCommandSuggestions(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleCommandSuggestions(this);
     }
 
     public Suggestions toSuggestions() {

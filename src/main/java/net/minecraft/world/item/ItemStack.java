@@ -186,21 +186,21 @@ public final class ItemStack implements DataComponentHolder {
     @Nullable
     private Entity entityRepresentation;
 
-    private static DataResult<ItemStack> validateStrict(ItemStack p_332181_) {
-        DataResult<Unit> dataresult = validateComponents(p_332181_.getComponents());
+    private static DataResult<ItemStack> validateStrict(ItemStack pStack) {
+        DataResult<Unit> dataresult = validateComponents(pStack.getComponents());
         if (dataresult.isError()) {
-            return dataresult.map(p_327165_ -> p_332181_);
+            return dataresult.map(p_327165_ -> pStack);
         } else {
-            return p_332181_.getCount() > p_332181_.getMaxStackSize()
-                ? DataResult.error(() -> "Item stack with stack size of " + p_332181_.getCount() + " was larger than maximum: " + p_332181_.getMaxStackSize())
-                : DataResult.success(p_332181_);
+            return pStack.getCount() > pStack.getMaxStackSize()
+                ? DataResult.error(() -> "Item stack with stack size of " + pStack.getCount() + " was larger than maximum: " + pStack.getMaxStackSize())
+                : DataResult.success(pStack);
         }
     }
 
-    public static StreamCodec<RegistryFriendlyByteBuf, ItemStack> validatedStreamCodec(final StreamCodec<RegistryFriendlyByteBuf, ItemStack> p_332790_) {
+    public static StreamCodec<RegistryFriendlyByteBuf, ItemStack> validatedStreamCodec(final StreamCodec<RegistryFriendlyByteBuf, ItemStack> pCodec) {
         return new StreamCodec<RegistryFriendlyByteBuf, ItemStack>() {
             public ItemStack decode(RegistryFriendlyByteBuf p_330762_) {
-                ItemStack itemstack = p_332790_.decode(p_330762_);
+                ItemStack itemstack = pCodec.decode(p_330762_);
                 if (!itemstack.isEmpty()) {
                     RegistryOps<Unit> registryops = p_330762_.registryAccess().createSerializationContext(NullOps.INSTANCE);
                     ItemStack.CODEC.encodeStart(registryops, itemstack).getOrThrow(DecoderException::new);
@@ -210,7 +210,7 @@ public final class ItemStack implements DataComponentHolder {
             }
 
             public void encode(RegistryFriendlyByteBuf p_336131_, ItemStack p_329943_) {
-                p_332790_.encode(p_336131_, p_329943_);
+                pCodec.encode(p_336131_, p_329943_);
             }
         };
     }
@@ -236,47 +236,47 @@ public final class ItemStack implements DataComponentHolder {
         return !this.isEmpty() ? this.components.toImmutableMap() : DataComponentMap.EMPTY;
     }
 
-    public boolean hasNonDefault(DataComponentType<?> p_377204_) {
-        return !this.isEmpty() && this.components.hasNonDefault(p_377204_);
+    public boolean hasNonDefault(DataComponentType<?> pComponent) {
+        return !this.isEmpty() && this.components.hasNonDefault(pComponent);
     }
 
-    public ItemStack(ItemLike p_41599_) {
-        this(p_41599_, 1);
+    public ItemStack(ItemLike pItem) {
+        this(pItem, 1);
     }
 
-    public ItemStack(Holder<Item> p_204116_) {
-        this(p_204116_.value(), 1);
+    public ItemStack(Holder<Item> pTag) {
+        this(pTag.value(), 1);
     }
 
-    public ItemStack(Holder<Item> p_310702_, int p_41605_, DataComponentPatch p_328221_) {
-        this(p_310702_.value(), p_41605_, PatchedDataComponentMap.fromPatch(p_310702_.value().components(), p_328221_));
+    public ItemStack(Holder<Item> pTag, int pCount, DataComponentPatch pComponents) {
+        this(pTag.value(), pCount, PatchedDataComponentMap.fromPatch(pTag.value().components(), pComponents));
     }
 
-    public ItemStack(Holder<Item> p_220155_, int p_220156_) {
-        this(p_220155_.value(), p_220156_);
+    public ItemStack(Holder<Item> pItem, int pCount) {
+        this(pItem.value(), pCount);
     }
 
-    public ItemStack(ItemLike p_41601_, int p_41602_) {
-        this(p_41601_, p_41602_, new PatchedDataComponentMap(p_41601_.asItem().components()));
+    public ItemStack(ItemLike pItem, int pCount) {
+        this(pItem, pCount, new PatchedDataComponentMap(pItem.asItem().components()));
     }
 
-    private ItemStack(ItemLike p_331826_, int p_332766_, PatchedDataComponentMap p_333722_) {
-        this.item = p_331826_.asItem();
-        this.count = p_332766_;
-        this.components = p_333722_;
+    private ItemStack(ItemLike pItem, int pCount, PatchedDataComponentMap pComponents) {
+        this.item = pItem.asItem();
+        this.count = pCount;
+        this.components = pComponents;
         this.getItem().verifyComponentsAfterLoad(this);
     }
 
-    private ItemStack(@Nullable Void p_282703_) {
+    private ItemStack(@Nullable Void pUnused) {
         this.item = null;
         this.components = new PatchedDataComponentMap(DataComponentMap.EMPTY);
     }
 
-    public static DataResult<Unit> validateComponents(DataComponentMap p_336343_) {
-        if (p_336343_.has(DataComponents.MAX_DAMAGE) && p_336343_.getOrDefault(DataComponents.MAX_STACK_SIZE, 1) > 1) {
+    public static DataResult<Unit> validateComponents(DataComponentMap pComponents) {
+        if (pComponents.has(DataComponents.MAX_DAMAGE) && pComponents.getOrDefault(DataComponents.MAX_STACK_SIZE, 1) > 1) {
             return DataResult.error(() -> "Item cannot be both damageable and stackable");
         } else {
-            ItemContainerContents itemcontainercontents = p_336343_.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
+            ItemContainerContents itemcontainercontents = pComponents.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
 
             for (ItemStack itemstack : itemcontainercontents.nonEmptyItems()) {
                 int i = itemstack.getCount();
@@ -290,25 +290,25 @@ public final class ItemStack implements DataComponentHolder {
         }
     }
 
-    public static Optional<ItemStack> parse(HolderLookup.Provider p_332204_, Tag p_336056_) {
-        return CODEC.parse(p_332204_.createSerializationContext(NbtOps.INSTANCE), p_336056_)
+    public static Optional<ItemStack> parse(HolderLookup.Provider pLookupProvider, Tag pTag) {
+        return CODEC.parse(pLookupProvider.createSerializationContext(NbtOps.INSTANCE), pTag)
             .resultOrPartial(p_327167_ -> LOGGER.error("Tried to load invalid item: '{}'", p_327167_));
     }
 
-    public static ItemStack parseOptional(HolderLookup.Provider p_333870_, CompoundTag p_328391_) {
-        return p_328391_.isEmpty() ? EMPTY : parse(p_333870_, p_328391_).orElse(EMPTY);
+    public static ItemStack parseOptional(HolderLookup.Provider pLookupProvider, CompoundTag pTag) {
+        return pTag.isEmpty() ? EMPTY : parse(pLookupProvider, pTag).orElse(EMPTY);
     }
 
     public boolean isEmpty() {
         return this == EMPTY || this.item == Items.AIR || this.count <= 0;
     }
 
-    public boolean isItemEnabled(FeatureFlagSet p_250869_) {
-        return this.isEmpty() || this.getItem().isEnabled(p_250869_);
+    public boolean isItemEnabled(FeatureFlagSet pEnabledFlags) {
+        return this.isEmpty() || this.getItem().isEnabled(pEnabledFlags);
     }
 
-    public ItemStack split(int p_41621_) {
-        int i = Math.min(p_41621_, this.getCount());
+    public ItemStack split(int pAmount) {
+        int i = Math.min(pAmount, this.getCount());
         ItemStack itemstack = this.copyWithCount(i);
         this.shrink(i);
         return itemstack;
@@ -332,38 +332,48 @@ public final class ItemStack implements DataComponentHolder {
         return this.getItem().builtInRegistryHolder();
     }
 
-    public boolean is(TagKey<Item> p_204118_) {
-        return this.getItem().builtInRegistryHolder().is(p_204118_);
+    public boolean is(TagKey<Item> pTag) {
+        return this.getItem().builtInRegistryHolder().is(pTag);
     }
 
-    public boolean is(Item p_150931_) {
-        return this.getItem() == p_150931_;
+    public boolean is(Item pItem) {
+        return this.getItem() == pItem;
     }
 
-    public boolean is(Predicate<Holder<Item>> p_220168_) {
-        return p_220168_.test(this.getItem().builtInRegistryHolder());
+    // Arcane mixin port: Yarn name for official is(Item).
+    public boolean isOf(Item pItem) {
+        return this.is(pItem);
     }
 
-    public boolean is(Holder<Item> p_220166_) {
-        return this.getItem().builtInRegistryHolder() == p_220166_;
+    // Arcane mixin port: Yarn name for official is(TagKey<Item>).
+    public boolean isIn(TagKey<Item> pTag) {
+        return this.is(pTag);
     }
 
-    public boolean is(HolderSet<Item> p_299078_) {
-        return p_299078_.contains(this.getItemHolder());
+    public boolean is(Predicate<Holder<Item>> pItem) {
+        return pItem.test(this.getItem().builtInRegistryHolder());
+    }
+
+    public boolean is(Holder<Item> pItem) {
+        return this.getItem().builtInRegistryHolder() == pItem;
+    }
+
+    public boolean is(HolderSet<Item> pItem) {
+        return pItem.contains(this.getItemHolder());
     }
 
     public Stream<TagKey<Item>> getTags() {
         return this.getItem().builtInRegistryHolder().tags();
     }
 
-    public InteractionResult useOn(UseOnContext p_41662_) {
-        Player player = p_41662_.getPlayer();
-        BlockPos blockpos = p_41662_.getClickedPos();
-        if (player != null && !player.getAbilities().mayBuild && !this.canPlaceOnBlockInAdventureMode(new BlockInWorld(p_41662_.getLevel(), blockpos, false))) {
+    public InteractionResult useOn(UseOnContext pContext) {
+        Player player = pContext.getPlayer();
+        BlockPos blockpos = pContext.getClickedPos();
+        if (player != null && !player.getAbilities().mayBuild && !this.canPlaceOnBlockInAdventureMode(new BlockInWorld(pContext.getLevel(), blockpos, false))) {
             return InteractionResult.PASS;
         } else {
             Item item = this.getItem();
-            InteractionResult interactionresult = item.useOn(p_41662_);
+            InteractionResult interactionresult = item.useOn(pContext);
             if (player != null && interactionresult instanceof InteractionResult.Success interactionresult$success && interactionresult$success.wasItemInteraction()) {
                 player.awardStat(Stats.ITEM_USED.get(item));
             }
@@ -372,63 +382,63 @@ public final class ItemStack implements DataComponentHolder {
         }
     }
 
-    public float getDestroySpeed(BlockState p_41692_) {
-        return this.getItem().getDestroySpeed(this, p_41692_);
+    public float getDestroySpeed(BlockState pState) {
+        return this.getItem().getDestroySpeed(this, pState);
     }
 
-    public InteractionResult use(Level p_41683_, Player p_41684_, InteractionHand p_41685_) {
+    public InteractionResult use(Level pLevel, Player pPlayer, InteractionHand pHand) {
         ItemStack itemstack = this.copy();
-        boolean flag = this.getUseDuration(p_41684_) <= 0;
-        InteractionResult interactionresult = this.getItem().use(p_41683_, p_41684_, p_41685_);
+        boolean flag = this.getUseDuration(pPlayer) <= 0;
+        InteractionResult interactionresult = this.getItem().use(pLevel, pPlayer, pHand);
         return (InteractionResult)(flag && interactionresult instanceof InteractionResult.Success interactionresult$success
             ? interactionresult$success.heldItemTransformedTo(
                 interactionresult$success.heldItemTransformedTo() == null
-                    ? this.applyAfterUseComponentSideEffects(p_41684_, itemstack)
-                    : interactionresult$success.heldItemTransformedTo().applyAfterUseComponentSideEffects(p_41684_, itemstack)
+                    ? this.applyAfterUseComponentSideEffects(pPlayer, itemstack)
+                    : interactionresult$success.heldItemTransformedTo().applyAfterUseComponentSideEffects(pPlayer, itemstack)
             )
             : interactionresult);
     }
 
-    public ItemStack finishUsingItem(Level p_41672_, LivingEntity p_41673_) {
+    public ItemStack finishUsingItem(Level pLevel, LivingEntity pLivingEntity) {
         ItemStack itemstack = this.copy();
-        ItemStack itemstack1 = this.getItem().finishUsingItem(this, p_41672_, p_41673_);
-        return itemstack1.applyAfterUseComponentSideEffects(p_41673_, itemstack);
+        ItemStack itemstack1 = this.getItem().finishUsingItem(this, pLevel, pLivingEntity);
+        return itemstack1.applyAfterUseComponentSideEffects(pLivingEntity, itemstack);
     }
 
-    private ItemStack applyAfterUseComponentSideEffects(LivingEntity p_367870_, ItemStack p_361647_) {
-        UseRemainder useremainder = p_361647_.get(DataComponents.USE_REMAINDER);
-        UseCooldown usecooldown = p_361647_.get(DataComponents.USE_COOLDOWN);
-        int i = p_361647_.getCount();
+    private ItemStack applyAfterUseComponentSideEffects(LivingEntity pEntity, ItemStack pStack) {
+        UseRemainder useremainder = pStack.get(DataComponents.USE_REMAINDER);
+        UseCooldown usecooldown = pStack.get(DataComponents.USE_COOLDOWN);
+        int i = pStack.getCount();
         ItemStack itemstack = this;
         if (useremainder != null) {
-            itemstack = useremainder.convertIntoRemainder(this, i, p_367870_.hasInfiniteMaterials(), p_367870_::handleExtraItemsCreatedOnUse);
+            itemstack = useremainder.convertIntoRemainder(this, i, pEntity.hasInfiniteMaterials(), pEntity::handleExtraItemsCreatedOnUse);
         }
 
         if (usecooldown != null) {
-            usecooldown.apply(p_361647_, p_367870_);
+            usecooldown.apply(pStack, pEntity);
         }
 
         return itemstack;
     }
 
-    public Tag save(HolderLookup.Provider p_330500_, Tag p_332574_) {
+    public Tag save(HolderLookup.Provider pLevelRegistryAccess, Tag pOutputTag) {
         if (this.isEmpty()) {
             throw new IllegalStateException("Cannot encode empty ItemStack");
         } else {
-            return CODEC.encode(this, p_330500_.createSerializationContext(NbtOps.INSTANCE), p_332574_).getOrThrow();
+            return CODEC.encode(this, pLevelRegistryAccess.createSerializationContext(NbtOps.INSTANCE), pOutputTag).getOrThrow();
         }
     }
 
-    public Tag save(HolderLookup.Provider p_328490_) {
+    public Tag save(HolderLookup.Provider pLevelRegistryAccess) {
         if (this.isEmpty()) {
             throw new IllegalStateException("Cannot encode empty ItemStack");
         } else {
-            return CODEC.encodeStart(p_328490_.createSerializationContext(NbtOps.INSTANCE), this).getOrThrow();
+            return CODEC.encodeStart(pLevelRegistryAccess.createSerializationContext(NbtOps.INSTANCE), this).getOrThrow();
         }
     }
 
-    public Tag saveOptional(HolderLookup.Provider p_335413_) {
-        return (Tag)(this.isEmpty() ? new CompoundTag() : this.save(p_335413_, new CompoundTag()));
+    public Tag saveOptional(HolderLookup.Provider pLevelRegistryAccess) {
+        return (Tag)(this.isEmpty() ? new CompoundTag() : this.save(pLevelRegistryAccess, new CompoundTag()));
     }
 
     public int getMaxStackSize() {
@@ -451,8 +461,8 @@ public final class ItemStack implements DataComponentHolder {
         return Mth.clamp(this.getOrDefault(DataComponents.DAMAGE, Integer.valueOf(0)), 0, this.getMaxDamage());
     }
 
-    public void setDamageValue(int p_41722_) {
-        this.set(DataComponents.DAMAGE, Mth.clamp(p_41722_, 0, this.getMaxDamage()));
+    public void setDamageValue(int pDamage) {
+        this.set(DataComponents.DAMAGE, Mth.clamp(pDamage, 0, this.getMaxDamage()));
     }
 
     public int getMaxDamage() {
@@ -467,39 +477,39 @@ public final class ItemStack implements DataComponentHolder {
         return this.isDamageableItem() && this.getDamageValue() >= this.getMaxDamage() - 1;
     }
 
-    public void hurtAndBreak(int p_220158_, ServerLevel p_342197_, @Nullable ServerPlayer p_220160_, Consumer<Item> p_343361_) {
-        int i = this.processDurabilityChange(p_220158_, p_342197_, p_220160_);
+    public void hurtAndBreak(int pDamage, ServerLevel pLevel, @Nullable ServerPlayer pPlayer, Consumer<Item> pOnBreak) {
+        int i = this.processDurabilityChange(pDamage, pLevel, pPlayer);
         if (i != 0) {
-            this.applyDamage(this.getDamageValue() + i, p_220160_, p_343361_);
+            this.applyDamage(this.getDamageValue() + i, pPlayer, pOnBreak);
         }
     }
 
-    private int processDurabilityChange(int p_362423_, ServerLevel p_364910_, @Nullable ServerPlayer p_365570_) {
+    private int processDurabilityChange(int pDamage, ServerLevel pLevel, @Nullable ServerPlayer pPlayer) {
         if (!this.isDamageableItem()) {
             return 0;
-        } else if (p_365570_ != null && p_365570_.hasInfiniteMaterials()) {
+        } else if (pPlayer != null && pPlayer.hasInfiniteMaterials()) {
             return 0;
         } else {
-            return p_362423_ > 0 ? EnchantmentHelper.processDurabilityChange(p_364910_, this, p_362423_) : p_362423_;
+            return pDamage > 0 ? EnchantmentHelper.processDurabilityChange(pLevel, this, pDamage) : pDamage;
         }
     }
 
-    private void applyDamage(int p_365629_, @Nullable ServerPlayer p_367167_, Consumer<Item> p_364849_) {
-        if (p_367167_ != null) {
-            CriteriaTriggers.ITEM_DURABILITY_CHANGED.trigger(p_367167_, this, p_365629_);
+    private void applyDamage(int pDamage, @Nullable ServerPlayer pPlayer, Consumer<Item> pOnBreak) {
+        if (pPlayer != null) {
+            CriteriaTriggers.ITEM_DURABILITY_CHANGED.trigger(pPlayer, this, pDamage);
         }
 
-        this.setDamageValue(p_365629_);
+        this.setDamageValue(pDamage);
         if (this.isBroken()) {
             Item item = this.getItem();
             this.shrink(1);
-            p_364849_.accept(item);
+            pOnBreak.accept(item);
         }
     }
 
-    public void hurtWithoutBreaking(int p_363289_, Player p_369700_) {
-        if (p_369700_ instanceof ServerPlayer serverplayer) {
-            int i = this.processDurabilityChange(p_363289_, serverplayer.serverLevel(), serverplayer);
+    public void hurtWithoutBreaking(int pDamage, Player pPlayer) {
+        if (pPlayer instanceof ServerPlayer serverplayer) {
+            int i = this.processDurabilityChange(pDamage, serverplayer.serverLevel(), serverplayer);
             if (i == 0) {
                 return;
             }
@@ -510,21 +520,21 @@ public final class ItemStack implements DataComponentHolder {
         }
     }
 
-    public void hurtAndBreak(int p_41623_, LivingEntity p_41624_, EquipmentSlot p_335324_) {
-        if (p_41624_.level() instanceof ServerLevel serverlevel) {
+    public void hurtAndBreak(int pAmount, LivingEntity pEntity, EquipmentSlot pSlot) {
+        if (pEntity.level() instanceof ServerLevel serverlevel) {
             this.hurtAndBreak(
-                p_41623_,
+                pAmount,
                 serverlevel,
-                p_41624_ instanceof ServerPlayer serverplayer ? serverplayer : null,
-                p_341563_ -> p_41624_.onEquippedItemBroken(p_341563_, p_335324_)
+                pEntity instanceof ServerPlayer serverplayer ? serverplayer : null,
+                p_341563_ -> pEntity.onEquippedItemBroken(p_341563_, pSlot)
             );
         }
     }
 
-    public ItemStack hurtAndConvertOnBreak(int p_343792_, ItemLike p_344647_, LivingEntity p_342270_, EquipmentSlot p_345347_) {
-        this.hurtAndBreak(p_343792_, p_342270_, p_345347_);
+    public ItemStack hurtAndConvertOnBreak(int pAmount, ItemLike pItem, LivingEntity pEntity, EquipmentSlot pSlot) {
+        this.hurtAndBreak(pAmount, pEntity, pSlot);
         if (this.isEmpty()) {
-            ItemStack itemstack = this.transmuteCopyIgnoreEmpty(p_344647_, 1);
+            ItemStack itemstack = this.transmuteCopyIgnoreEmpty(pItem, 1);
             if (itemstack.isDamageableItem()) {
                 itemstack.setDamageValue(0);
             }
@@ -547,18 +557,18 @@ public final class ItemStack implements DataComponentHolder {
         return this.getItem().getBarColor(this);
     }
 
-    public boolean overrideStackedOnOther(Slot p_150927_, ClickAction p_150928_, Player p_150929_) {
-        return this.getItem().overrideStackedOnOther(this, p_150927_, p_150928_, p_150929_);
+    public boolean overrideStackedOnOther(Slot pSlot, ClickAction pAction, Player pPlayer) {
+        return this.getItem().overrideStackedOnOther(this, pSlot, pAction, pPlayer);
     }
 
-    public boolean overrideOtherStackedOnMe(ItemStack p_150933_, Slot p_150934_, ClickAction p_150935_, Player p_150936_, SlotAccess p_150937_) {
-        return this.getItem().overrideOtherStackedOnMe(this, p_150933_, p_150934_, p_150935_, p_150936_, p_150937_);
+    public boolean overrideOtherStackedOnMe(ItemStack pStack, Slot pSlot, ClickAction pAction, Player pPlayer, SlotAccess pAccess) {
+        return this.getItem().overrideOtherStackedOnMe(this, pStack, pSlot, pAction, pPlayer, pAccess);
     }
 
-    public boolean hurtEnemy(LivingEntity p_41641_, LivingEntity p_366644_) {
+    public boolean hurtEnemy(LivingEntity pEnemy, LivingEntity pAttacker) {
         Item item = this.getItem();
-        if (item.hurtEnemy(this, p_41641_, p_366644_)) {
-            if (p_366644_ instanceof Player player) {
+        if (item.hurtEnemy(this, pEnemy, pAttacker)) {
+            if (pAttacker instanceof Player player) {
                 player.awardStat(Stats.ITEM_USED.get(item));
             }
 
@@ -568,23 +578,23 @@ public final class ItemStack implements DataComponentHolder {
         }
     }
 
-    public void postHurtEnemy(LivingEntity p_343236_, LivingEntity p_363977_) {
-        this.getItem().postHurtEnemy(this, p_343236_, p_363977_);
+    public void postHurtEnemy(LivingEntity pEnemy, LivingEntity pAttacker) {
+        this.getItem().postHurtEnemy(this, pEnemy, pAttacker);
     }
 
-    public void mineBlock(Level p_41687_, BlockState p_41688_, BlockPos p_41689_, Player p_41690_) {
+    public void mineBlock(Level pLevel, BlockState pState, BlockPos pPos, Player pPlayer) {
         Item item = this.getItem();
-        if (item.mineBlock(this, p_41687_, p_41688_, p_41689_, p_41690_)) {
-            p_41690_.awardStat(Stats.ITEM_USED.get(item));
+        if (item.mineBlock(this, pLevel, pState, pPos, pPlayer)) {
+            pPlayer.awardStat(Stats.ITEM_USED.get(item));
         }
     }
 
-    public boolean isCorrectToolForDrops(BlockState p_41736_) {
-        return this.getItem().isCorrectToolForDrops(this, p_41736_);
+    public boolean isCorrectToolForDrops(BlockState pState) {
+        return this.getItem().isCorrectToolForDrops(this, pState);
     }
 
-    public InteractionResult interactLivingEntity(Player p_41648_, LivingEntity p_41649_, InteractionHand p_41650_) {
-        return this.getItem().interactLivingEntity(this, p_41648_, p_41649_, p_41650_);
+    public InteractionResult interactLivingEntity(Player pPlayer, LivingEntity pEntity, InteractionHand pUsedHand) {
+        return this.getItem().interactLivingEntity(this, pPlayer, pEntity, pUsedHand);
     }
 
     public ItemStack copy() {
@@ -597,43 +607,43 @@ public final class ItemStack implements DataComponentHolder {
         }
     }
 
-    public ItemStack copyWithCount(int p_256354_) {
+    public ItemStack copyWithCount(int pCount) {
         if (this.isEmpty()) {
             return EMPTY;
         } else {
             ItemStack itemstack = this.copy();
-            itemstack.setCount(p_256354_);
+            itemstack.setCount(pCount);
             return itemstack;
         }
     }
 
-    public ItemStack transmuteCopy(ItemLike p_345281_) {
-        return this.transmuteCopy(p_345281_, this.getCount());
+    public ItemStack transmuteCopy(ItemLike pItem) {
+        return this.transmuteCopy(pItem, this.getCount());
     }
 
-    public ItemStack transmuteCopy(ItemLike p_334328_, int p_334821_) {
-        return this.isEmpty() ? EMPTY : this.transmuteCopyIgnoreEmpty(p_334328_, p_334821_);
+    public ItemStack transmuteCopy(ItemLike pItem, int pCount) {
+        return this.isEmpty() ? EMPTY : this.transmuteCopyIgnoreEmpty(pItem, pCount);
     }
 
-    private ItemStack transmuteCopyIgnoreEmpty(ItemLike p_332114_, int p_333334_) {
-        return new ItemStack(p_332114_.asItem().builtInRegistryHolder(), p_333334_, this.components.asPatch());
+    private ItemStack transmuteCopyIgnoreEmpty(ItemLike pItem, int pCount) {
+        return new ItemStack(pItem.asItem().builtInRegistryHolder(), pCount, this.components.asPatch());
     }
 
-    public static boolean matches(ItemStack p_41729_, ItemStack p_41730_) {
-        if (p_41729_ == p_41730_) {
+    public static boolean matches(ItemStack pStack, ItemStack pOther) {
+        if (pStack == pOther) {
             return true;
         } else {
-            return p_41729_.getCount() != p_41730_.getCount() ? false : isSameItemSameComponents(p_41729_, p_41730_);
+            return pStack.getCount() != pOther.getCount() ? false : isSameItemSameComponents(pStack, pOther);
         }
     }
 
     @Deprecated
-    public static boolean listMatches(List<ItemStack> p_335471_, List<ItemStack> p_334624_) {
-        if (p_335471_.size() != p_334624_.size()) {
+    public static boolean listMatches(List<ItemStack> pList, List<ItemStack> pOther) {
+        if (pList.size() != pOther.size()) {
             return false;
         } else {
-            for (int i = 0; i < p_335471_.size(); i++) {
-                if (!matches(p_335471_.get(i), p_334624_.get(i))) {
+            for (int i = 0; i < pList.size(); i++) {
+                if (!matches(pList.get(i), pOther.get(i))) {
                     return false;
                 }
             }
@@ -642,37 +652,37 @@ public final class ItemStack implements DataComponentHolder {
         }
     }
 
-    public static boolean isSameItem(ItemStack p_287761_, ItemStack p_287676_) {
-        return p_287761_.is(p_287676_.getItem());
+    public static boolean isSameItem(ItemStack pStack, ItemStack pOther) {
+        return pStack.is(pOther.getItem());
     }
 
-    public static boolean isSameItemSameComponents(ItemStack p_334397_, ItemStack p_331609_) {
-        if (!p_334397_.is(p_331609_.getItem())) {
+    public static boolean isSameItemSameComponents(ItemStack pStack, ItemStack pOther) {
+        if (!pStack.is(pOther.getItem())) {
             return false;
         } else {
-            return p_334397_.isEmpty() && p_331609_.isEmpty() ? true : Objects.equals(p_334397_.components, p_331609_.components);
+            return pStack.isEmpty() && pOther.isEmpty() ? true : Objects.equals(pStack.components, pOther.components);
         }
     }
 
-    public static MapCodec<ItemStack> lenientOptionalFieldOf(String p_336149_) {
-        return CODEC.lenientOptionalFieldOf(p_336149_)
+    public static MapCodec<ItemStack> lenientOptionalFieldOf(String pFieldName) {
+        return CODEC.lenientOptionalFieldOf(pFieldName)
             .xmap(p_327174_ -> p_327174_.orElse(EMPTY), p_327162_ -> p_327162_.isEmpty() ? Optional.empty() : Optional.of(p_327162_));
     }
 
-    public static int hashItemAndComponents(@Nullable ItemStack p_334004_) {
-        if (p_334004_ != null) {
-            int i = 31 + p_334004_.getItem().hashCode();
-            return 31 * i + p_334004_.getComponents().hashCode();
+    public static int hashItemAndComponents(@Nullable ItemStack pStack) {
+        if (pStack != null) {
+            int i = 31 + pStack.getItem().hashCode();
+            return 31 * i + pStack.getComponents().hashCode();
         } else {
             return 0;
         }
     }
 
     @Deprecated
-    public static int hashStackList(List<ItemStack> p_333449_) {
+    public static int hashStackList(List<ItemStack> pList) {
         int i = 0;
 
-        for (ItemStack itemstack : p_333449_) {
+        for (ItemStack itemstack : pList) {
             i = i * 31 + hashItemAndComponents(itemstack);
         }
 
@@ -684,39 +694,44 @@ public final class ItemStack implements DataComponentHolder {
         return this.getCount() + " " + this.getItem();
     }
 
-    public void inventoryTick(Level p_41667_, Entity p_41668_, int p_41669_, boolean p_41670_) {
+    public void inventoryTick(Level pLevel, Entity pEntity, int pInventorySlot, boolean pIsCurrentItem) {
         if (this.popTime > 0) {
             this.popTime--;
         }
 
         if (this.getItem() != null) {
-            this.getItem().inventoryTick(this, p_41667_, p_41668_, p_41669_, p_41670_);
+            this.getItem().inventoryTick(this, pLevel, pEntity, pInventorySlot, pIsCurrentItem);
         }
     }
 
-    public void onCraftedBy(Level p_41679_, Player p_41680_, int p_41681_) {
-        p_41680_.awardStat(Stats.ITEM_CRAFTED.get(this.getItem()), p_41681_);
-        this.getItem().onCraftedBy(this, p_41679_, p_41680_);
+    public void onCraftedBy(Level pLevel, Player pPlayer, int pAmount) {
+        pPlayer.awardStat(Stats.ITEM_CRAFTED.get(this.getItem()), pAmount);
+        this.getItem().onCraftedBy(this, pLevel, pPlayer);
     }
 
-    public void onCraftedBySystem(Level p_311164_) {
-        this.getItem().onCraftedPostProcess(this, p_311164_);
+    public void onCraftedBySystem(Level pLevel) {
+        this.getItem().onCraftedPostProcess(this, pLevel);
     }
 
-    public int getUseDuration(LivingEntity p_343439_) {
-        return this.getItem().getUseDuration(this, p_343439_);
+    public int getUseDuration(LivingEntity pEntity) {
+        return this.getItem().getUseDuration(this, pEntity);
     }
 
     public ItemUseAnimation getUseAnimation() {
         return this.getItem().getUseAnimation(this);
     }
 
-    public void releaseUsing(Level p_41675_, LivingEntity p_41676_, int p_41677_) {
+    // Arcane mixin port: Yarn name for official getUseAnimation().
+    public ItemUseAnimation getItemUseAnimation() {
+        return this.getUseAnimation();
+    }
+
+    public void releaseUsing(Level pLevel, LivingEntity pLivingEntity, int pTimeLeft) {
         ItemStack itemstack = this.copy();
-        if (this.getItem().releaseUsing(this, p_41675_, p_41676_, p_41677_)) {
-            ItemStack itemstack1 = this.applyAfterUseComponentSideEffects(p_41676_, itemstack);
+        if (this.getItem().releaseUsing(this, pLevel, pLivingEntity, pTimeLeft)) {
+            ItemStack itemstack1 = this.applyAfterUseComponentSideEffects(pLivingEntity, itemstack);
             if (itemstack1 != this) {
-                p_41676_.setItemInHand(p_41676_.getUsedItemHand(), itemstack1);
+                pLivingEntity.setItemInHand(pLivingEntity.getUsedItemHand(), itemstack1);
             }
         }
     }
@@ -726,45 +741,45 @@ public final class ItemStack implements DataComponentHolder {
     }
 
     @Nullable
-    public <T> T set(DataComponentType<? super T> p_332666_, @Nullable T p_335655_) {
-        return this.components.set(p_332666_, p_335655_);
+    public <T> T set(DataComponentType<? super T> pComponent, @Nullable T pValue) {
+        return this.components.set(pComponent, pValue);
     }
 
     @Nullable
-    public <T, U> T update(DataComponentType<T> p_331418_, T p_327708_, U p_332086_, BiFunction<T, U, T> p_329834_) {
-        return this.set(p_331418_, p_329834_.apply(this.getOrDefault(p_331418_, p_327708_), p_332086_));
+    public <T, U> T update(DataComponentType<T> pComponent, T pDefaultValue, U pUpdateValue, BiFunction<T, U, T> pUpdater) {
+        return this.set(pComponent, pUpdater.apply(this.getOrDefault(pComponent, pDefaultValue), pUpdateValue));
     }
 
     @Nullable
-    public <T> T update(DataComponentType<T> p_329905_, T p_329705_, UnaryOperator<T> p_335114_) {
-        T t = this.getOrDefault(p_329905_, p_329705_);
-        return this.set(p_329905_, p_335114_.apply(t));
+    public <T> T update(DataComponentType<T> pComponent, T pDefaultValue, UnaryOperator<T> pUpdater) {
+        T t = this.getOrDefault(pComponent, pDefaultValue);
+        return this.set(pComponent, pUpdater.apply(t));
     }
 
     @Nullable
-    public <T> T remove(DataComponentType<? extends T> p_333259_) {
-        return this.components.remove(p_333259_);
+    public <T> T remove(DataComponentType<? extends T> pComponent) {
+        return this.components.remove(pComponent);
     }
 
-    public void applyComponentsAndValidate(DataComponentPatch p_336111_) {
+    public void applyComponentsAndValidate(DataComponentPatch pComponents) {
         DataComponentPatch datacomponentpatch = this.components.asPatch();
-        this.components.applyPatch(p_336111_);
+        this.components.applyPatch(pComponents);
         Optional<Error<ItemStack>> optional = validateStrict(this).error();
         if (optional.isPresent()) {
-            LOGGER.error("Failed to apply component patch '{}' to item: '{}'", p_336111_, optional.get().message());
+            LOGGER.error("Failed to apply component patch '{}' to item: '{}'", pComponents, optional.get().message());
             this.components.restorePatch(datacomponentpatch);
         } else {
             this.getItem().verifyComponentsAfterLoad(this);
         }
     }
 
-    public void applyComponents(DataComponentPatch p_328534_) {
-        this.components.applyPatch(p_328534_);
+    public void applyComponents(DataComponentPatch pComponents) {
+        this.components.applyPatch(pComponents);
         this.getItem().verifyComponentsAfterLoad(this);
     }
 
-    public void applyComponents(DataComponentMap p_335208_) {
-        this.components.setAll(p_335208_);
+    public void applyComponents(DataComponentMap pComponents) {
+        this.components.setAll(pComponents);
         this.getItem().verifyComponentsAfterLoad(this);
     }
 
@@ -805,22 +820,22 @@ public final class ItemStack implements DataComponentHolder {
     }
 
     private <T extends TooltipProvider> void addToTooltip(
-        DataComponentType<T> p_331934_, Item.TooltipContext p_333562_, Consumer<Component> p_334534_, TooltipFlag p_333715_
+        DataComponentType<T> pComponent, Item.TooltipContext pContext, Consumer<Component> pTooltipAdder, TooltipFlag pTooltipFlag
     ) {
-        T t = (T)this.get(p_331934_);
+        T t = (T)this.get(pComponent);
         if (t != null) {
-            t.addToTooltip(p_333562_, p_334534_, p_333715_);
+            t.addToTooltip(pContext, pTooltipAdder, pTooltipFlag);
         }
     }
 
-    public List<Component> getTooltipLines(Item.TooltipContext p_331329_, @Nullable Player p_41652_, TooltipFlag p_41653_) {
-        boolean flag = this.getItem().shouldPrintOpWarning(this, p_41652_);
-        if (!p_41653_.isCreative() && this.has(DataComponents.HIDE_TOOLTIP)) {
+    public List<Component> getTooltipLines(Item.TooltipContext pTooltipContext, @Nullable Player pPlayer, TooltipFlag pTooltipFlag) {
+        boolean flag = this.getItem().shouldPrintOpWarning(this, pPlayer);
+        if (!pTooltipFlag.isCreative() && this.has(DataComponents.HIDE_TOOLTIP)) {
             return flag ? OP_NBT_WARNING : List.of();
         } else {
             List<Component> list = Lists.newArrayList();
             list.add(this.getStyledHoverName());
-            if (!p_41653_.isAdvanced() && !this.has(DataComponents.CUSTOM_NAME)) {
+            if (!pTooltipFlag.isAdvanced() && !this.has(DataComponents.CUSTOM_NAME)) {
                 MapId mapid = this.get(DataComponents.MAP_ID);
                 if (mapid != null) {
                     list.add(MapItem.getTooltipForId(mapid));
@@ -829,19 +844,19 @@ public final class ItemStack implements DataComponentHolder {
 
             Consumer<Component> consumer = list::add;
             if (!this.has(DataComponents.HIDE_ADDITIONAL_TOOLTIP)) {
-                this.getItem().appendHoverText(this, p_331329_, list, p_41653_);
+                this.getItem().appendHoverText(this, pTooltipContext, list, pTooltipFlag);
             }
 
-            this.addToTooltip(DataComponents.JUKEBOX_PLAYABLE, p_331329_, consumer, p_41653_);
-            this.addToTooltip(DataComponents.TRIM, p_331329_, consumer, p_41653_);
-            this.addToTooltip(DataComponents.STORED_ENCHANTMENTS, p_331329_, consumer, p_41653_);
-            this.addToTooltip(DataComponents.ENCHANTMENTS, p_331329_, consumer, p_41653_);
-            this.addToTooltip(DataComponents.DYED_COLOR, p_331329_, consumer, p_41653_);
-            this.addToTooltip(DataComponents.LORE, p_331329_, consumer, p_41653_);
-            this.addAttributeTooltips(consumer, p_41652_);
-            this.addToTooltip(DataComponents.UNBREAKABLE, p_331329_, consumer, p_41653_);
-            this.addToTooltip(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, p_331329_, consumer, p_41653_);
-            this.addToTooltip(DataComponents.SUSPICIOUS_STEW_EFFECTS, p_331329_, consumer, p_41653_);
+            this.addToTooltip(DataComponents.JUKEBOX_PLAYABLE, pTooltipContext, consumer, pTooltipFlag);
+            this.addToTooltip(DataComponents.TRIM, pTooltipContext, consumer, pTooltipFlag);
+            this.addToTooltip(DataComponents.STORED_ENCHANTMENTS, pTooltipContext, consumer, pTooltipFlag);
+            this.addToTooltip(DataComponents.ENCHANTMENTS, pTooltipContext, consumer, pTooltipFlag);
+            this.addToTooltip(DataComponents.DYED_COLOR, pTooltipContext, consumer, pTooltipFlag);
+            this.addToTooltip(DataComponents.LORE, pTooltipContext, consumer, pTooltipFlag);
+            this.addAttributeTooltips(consumer, pPlayer);
+            this.addToTooltip(DataComponents.UNBREAKABLE, pTooltipContext, consumer, pTooltipFlag);
+            this.addToTooltip(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, pTooltipContext, consumer, pTooltipFlag);
+            this.addToTooltip(DataComponents.SUSPICIOUS_STEW_EFFECTS, pTooltipContext, consumer, pTooltipFlag);
             AdventureModePredicate adventuremodepredicate = this.get(DataComponents.CAN_BREAK);
             if (adventuremodepredicate != null && adventuremodepredicate.showInTooltip()) {
                 consumer.accept(CommonComponents.EMPTY);
@@ -856,7 +871,7 @@ public final class ItemStack implements DataComponentHolder {
                 adventuremodepredicate1.addToTooltip(consumer);
             }
 
-            if (p_41653_.isAdvanced()) {
+            if (pTooltipFlag.isAdvanced()) {
                 if (this.isDamaged()) {
                     list.add(Component.translatable("item.durability", this.getMaxDamage() - this.getDamageValue(), this.getMaxDamage()));
                 }
@@ -868,7 +883,7 @@ public final class ItemStack implements DataComponentHolder {
                 }
             }
 
-            if (p_41652_ != null && !this.getItem().isEnabled(p_41652_.level().enabledFeatures())) {
+            if (pPlayer != null && !this.getItem().isEnabled(pPlayer.level().enabledFeatures())) {
                 list.add(DISABLED_ITEM_TOOLTIP);
             }
 
@@ -880,77 +895,77 @@ public final class ItemStack implements DataComponentHolder {
         }
     }
 
-    private void addAttributeTooltips(Consumer<Component> p_333346_, @Nullable Player p_332769_) {
+    private void addAttributeTooltips(Consumer<Component> pTooltipAdder, @Nullable Player pPlayer) {
         ItemAttributeModifiers itemattributemodifiers = this.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         if (itemattributemodifiers.showInTooltip()) {
             for (EquipmentSlotGroup equipmentslotgroup : EquipmentSlotGroup.values()) {
                 MutableBoolean mutableboolean = new MutableBoolean(true);
                 this.forEachModifier(equipmentslotgroup, (p_341553_, p_341554_) -> {
                     if (mutableboolean.isTrue()) {
-                        p_333346_.accept(CommonComponents.EMPTY);
-                        p_333346_.accept(Component.translatable("item.modifiers." + equipmentslotgroup.getSerializedName()).withStyle(ChatFormatting.GRAY));
+                        pTooltipAdder.accept(CommonComponents.EMPTY);
+                        pTooltipAdder.accept(Component.translatable("item.modifiers." + equipmentslotgroup.getSerializedName()).withStyle(ChatFormatting.GRAY));
                         mutableboolean.setFalse();
                     }
 
-                    this.addModifierTooltip(p_333346_, p_332769_, p_341553_, p_341554_);
+                    this.addModifierTooltip(pTooltipAdder, pPlayer, p_341553_, p_341554_);
                 });
             }
         }
     }
 
-    private void addModifierTooltip(Consumer<Component> p_332944_, @Nullable Player p_328442_, Holder<Attribute> p_336373_, AttributeModifier p_332746_) {
-        double d0 = p_332746_.amount();
+    private void addModifierTooltip(Consumer<Component> pTooltipAdder, @Nullable Player pPlayer, Holder<Attribute> pAttribute, AttributeModifier pModifier) {
+        double d0 = pModifier.amount();
         boolean flag = false;
-        if (p_328442_ != null) {
-            if (p_332746_.is(Item.BASE_ATTACK_DAMAGE_ID)) {
-                d0 += p_328442_.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
+        if (pPlayer != null) {
+            if (pModifier.is(Item.BASE_ATTACK_DAMAGE_ID)) {
+                d0 += pPlayer.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
                 flag = true;
-            } else if (p_332746_.is(Item.BASE_ATTACK_SPEED_ID)) {
-                d0 += p_328442_.getAttributeBaseValue(Attributes.ATTACK_SPEED);
+            } else if (pModifier.is(Item.BASE_ATTACK_SPEED_ID)) {
+                d0 += pPlayer.getAttributeBaseValue(Attributes.ATTACK_SPEED);
                 flag = true;
             }
         }
 
         double d1;
-        if (p_332746_.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_BASE || p_332746_.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+        if (pModifier.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_BASE || pModifier.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
             )
          {
             d1 = d0 * 100.0;
-        } else if (p_336373_.is(Attributes.KNOCKBACK_RESISTANCE)) {
+        } else if (pAttribute.is(Attributes.KNOCKBACK_RESISTANCE)) {
             d1 = d0 * 10.0;
         } else {
             d1 = d0;
         }
 
         if (flag) {
-            p_332944_.accept(
+            pTooltipAdder.accept(
                 CommonComponents.space()
                     .append(
                         Component.translatable(
-                            "attribute.modifier.equals." + p_332746_.operation().id(),
+                            "attribute.modifier.equals." + pModifier.operation().id(),
                             ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(d1),
-                            Component.translatable(p_336373_.value().getDescriptionId())
+                            Component.translatable(pAttribute.value().getDescriptionId())
                         )
                     )
                     .withStyle(ChatFormatting.DARK_GREEN)
             );
         } else if (d0 > 0.0) {
-            p_332944_.accept(
+            pTooltipAdder.accept(
                 Component.translatable(
-                        "attribute.modifier.plus." + p_332746_.operation().id(),
+                        "attribute.modifier.plus." + pModifier.operation().id(),
                         ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(d1),
-                        Component.translatable(p_336373_.value().getDescriptionId())
+                        Component.translatable(pAttribute.value().getDescriptionId())
                     )
-                    .withStyle(p_336373_.value().getStyle(true))
+                    .withStyle(pAttribute.value().getStyle(true))
             );
         } else if (d0 < 0.0) {
-            p_332944_.accept(
+            pTooltipAdder.accept(
                 Component.translatable(
-                        "attribute.modifier.take." + p_332746_.operation().id(),
+                        "attribute.modifier.take." + pModifier.operation().id(),
                         ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(-d1),
-                        Component.translatable(p_336373_.value().getDescriptionId())
+                        Component.translatable(pAttribute.value().getDescriptionId())
                     )
-                    .withStyle(p_336373_.value().getStyle(false))
+                    .withStyle(pAttribute.value().getStyle(false))
             );
         }
     }
@@ -982,8 +997,8 @@ public final class ItemStack implements DataComponentHolder {
         }
     }
 
-    public void enchant(Holder<Enchantment> p_342791_, int p_41665_) {
-        EnchantmentHelper.updateEnchantments(this, p_341557_ -> p_341557_.upgrade(p_342791_, p_41665_));
+    public void enchant(Holder<Enchantment> pEnchantment, int pLevel) {
+        EnchantmentHelper.updateEnchantments(this, p_341557_ -> p_341557_.upgrade(pEnchantment, pLevel));
     }
 
     public boolean isEnchanted() {
@@ -998,9 +1013,9 @@ public final class ItemStack implements DataComponentHolder {
         return this.entityRepresentation instanceof ItemFrame;
     }
 
-    public void setEntityRepresentation(@Nullable Entity p_41637_) {
+    public void setEntityRepresentation(@Nullable Entity pEntity) {
         if (!this.isEmpty()) {
-            this.entityRepresentation = p_41637_;
+            this.entityRepresentation = pEntity;
         }
     }
 
@@ -1014,16 +1029,16 @@ public final class ItemStack implements DataComponentHolder {
         return !this.isEmpty() ? this.entityRepresentation : null;
     }
 
-    public void forEachModifier(EquipmentSlotGroup p_344758_, BiConsumer<Holder<Attribute>, AttributeModifier> p_342345_) {
+    public void forEachModifier(EquipmentSlotGroup pSlotGroup, BiConsumer<Holder<Attribute>, AttributeModifier> pAction) {
         ItemAttributeModifiers itemattributemodifiers = this.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
-        itemattributemodifiers.forEach(p_344758_, p_342345_);
-        EnchantmentHelper.forEachModifier(this, p_344758_, p_342345_);
+        itemattributemodifiers.forEach(pSlotGroup, pAction);
+        EnchantmentHelper.forEachModifier(this, pSlotGroup, pAction);
     }
 
-    public void forEachModifier(EquipmentSlot p_331036_, BiConsumer<Holder<Attribute>, AttributeModifier> p_334430_) {
+    public void forEachModifier(EquipmentSlot pEquipmentSLot, BiConsumer<Holder<Attribute>, AttributeModifier> pAction) {
         ItemAttributeModifiers itemattributemodifiers = this.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
-        itemattributemodifiers.forEach(p_331036_, p_334430_);
-        EnchantmentHelper.forEachModifier(this, p_331036_, p_334430_);
+        itemattributemodifiers.forEach(pEquipmentSLot, pAction);
+        EnchantmentHelper.forEachModifier(this, pEquipmentSLot, pAction);
     }
 
     public Component getDisplayName() {
@@ -1041,82 +1056,82 @@ public final class ItemStack implements DataComponentHolder {
         return mutablecomponent1;
     }
 
-    public boolean canPlaceOnBlockInAdventureMode(BlockInWorld p_331134_) {
+    public boolean canPlaceOnBlockInAdventureMode(BlockInWorld pBlock) {
         AdventureModePredicate adventuremodepredicate = this.get(DataComponents.CAN_PLACE_ON);
-        return adventuremodepredicate != null && adventuremodepredicate.test(p_331134_);
+        return adventuremodepredicate != null && adventuremodepredicate.test(pBlock);
     }
 
-    public boolean canBreakBlockInAdventureMode(BlockInWorld p_333133_) {
+    public boolean canBreakBlockInAdventureMode(BlockInWorld pBlock) {
         AdventureModePredicate adventuremodepredicate = this.get(DataComponents.CAN_BREAK);
-        return adventuremodepredicate != null && adventuremodepredicate.test(p_333133_);
+        return adventuremodepredicate != null && adventuremodepredicate.test(pBlock);
     }
 
     public int getPopTime() {
         return this.popTime;
     }
 
-    public void setPopTime(int p_41755_) {
-        this.popTime = p_41755_;
+    public void setPopTime(int pPopTime) {
+        this.popTime = pPopTime;
     }
 
     public int getCount() {
         return this.isEmpty() ? 0 : this.count;
     }
 
-    public void setCount(int p_41765_) {
-        this.count = p_41765_;
+    public void setCount(int pCount) {
+        this.count = pCount;
     }
 
-    public void limitSize(int p_328100_) {
-        if (!this.isEmpty() && this.getCount() > p_328100_) {
-            this.setCount(p_328100_);
+    public void limitSize(int pMaxSize) {
+        if (!this.isEmpty() && this.getCount() > pMaxSize) {
+            this.setCount(pMaxSize);
         }
     }
 
-    public void grow(int p_41770_) {
-        this.setCount(this.getCount() + p_41770_);
+    public void grow(int pIncrement) {
+        this.setCount(this.getCount() + pIncrement);
     }
 
-    public void shrink(int p_41775_) {
-        this.grow(-p_41775_);
+    public void shrink(int pDecrement) {
+        this.grow(-pDecrement);
     }
 
-    public void consume(int p_329683_, @Nullable LivingEntity p_334302_) {
-        if (p_334302_ == null || !p_334302_.hasInfiniteMaterials()) {
-            this.shrink(p_329683_);
+    public void consume(int pAmount, @Nullable LivingEntity pEntity) {
+        if (pEntity == null || !pEntity.hasInfiniteMaterials()) {
+            this.shrink(pAmount);
         }
     }
 
-    public ItemStack consumeAndReturn(int p_343693_, @Nullable LivingEntity p_344112_) {
-        ItemStack itemstack = this.copyWithCount(p_343693_);
-        this.consume(p_343693_, p_344112_);
+    public ItemStack consumeAndReturn(int pAmount, @Nullable LivingEntity pEntity) {
+        ItemStack itemstack = this.copyWithCount(pAmount);
+        this.consume(pAmount, pEntity);
         return itemstack;
     }
 
-    public void onUseTick(Level p_41732_, LivingEntity p_41733_, int p_41734_) {
+    public void onUseTick(Level pLevel, LivingEntity pLivingEntity, int pRemainingUseDuration) {
         Consumable consumable = this.get(DataComponents.CONSUMABLE);
-        if (consumable != null && consumable.shouldEmitParticlesAndSounds(p_41734_)) {
-            consumable.emitParticlesAndSounds(p_41733_.getRandom(), p_41733_, this, 5);
+        if (consumable != null && consumable.shouldEmitParticlesAndSounds(pRemainingUseDuration)) {
+            consumable.emitParticlesAndSounds(pLivingEntity.getRandom(), pLivingEntity, this, 5);
         }
 
-        this.getItem().onUseTick(p_41732_, p_41733_, this, p_41734_);
+        this.getItem().onUseTick(pLevel, pLivingEntity, this, pRemainingUseDuration);
     }
 
-    public void onDestroyed(ItemEntity p_150925_) {
-        this.getItem().onDestroyed(p_150925_);
+    public void onDestroyed(ItemEntity pItemEntity) {
+        this.getItem().onDestroyed(pItemEntity);
     }
 
     public SoundEvent getBreakingSound() {
         return this.getItem().getBreakingSound();
     }
 
-    public boolean canBeHurtBy(DamageSource p_334859_) {
+    public boolean canBeHurtBy(DamageSource pDamageSource) {
         DamageResistant damageresistant = this.get(DataComponents.DAMAGE_RESISTANT);
-        return damageresistant == null || !damageresistant.isResistantTo(p_334859_);
+        return damageresistant == null || !damageresistant.isResistantTo(pDamageSource);
     }
 
-    public boolean isValidRepairItem(ItemStack p_368140_) {
+    public boolean isValidRepairItem(ItemStack pItem) {
         Repairable repairable = this.get(DataComponents.REPAIRABLE);
-        return repairable != null && repairable.isValidRepairItem(p_368140_);
+        return repairable != null && repairable.isValidRepairItem(pItem);
     }
 }

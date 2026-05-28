@@ -30,11 +30,11 @@ public record ValueCheckCondition(NumberProvider provider, IntRange range) imple
         return Sets.union(this.provider.getReferencedContextParams(), this.range.getReferencedContextParams());
     }
 
-    public boolean test(LootContext p_165527_) {
-        return this.range.test(p_165527_, this.provider.getInt(p_165527_));
+    public boolean test(LootContext pContext) {
+        return this.range.test(pContext, this.provider.getInt(pContext));
     }
 
-    public static LootItemCondition.Builder hasValue(NumberProvider p_165529_, IntRange p_165530_) {
-        return () -> new ValueCheckCondition(p_165529_, p_165530_);
+    public static LootItemCondition.Builder hasValue(NumberProvider pProvider, IntRange pRange) {
+        return () -> new ValueCheckCondition(pProvider, pRange);
     }
 }

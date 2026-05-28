@@ -177,24 +177,24 @@ public class Interaction extends Entity implements Attackable, Targeting {
         return this.interaction != null ? this.level().getPlayerByUUID(this.interaction.player()) : null;
     }
 
-    private void setWidth(float p_273385_) {
-        this.entityData.set(DATA_WIDTH_ID, p_273385_);
+    private void setWidth(float pWidth) {
+        this.entityData.set(DATA_WIDTH_ID, pWidth);
     }
 
     private float getWidth() {
         return this.entityData.get(DATA_WIDTH_ID);
     }
 
-    private void setHeight(float p_273733_) {
-        this.entityData.set(DATA_HEIGHT_ID, p_273733_);
+    private void setHeight(float pHeight) {
+        this.entityData.set(DATA_HEIGHT_ID, pHeight);
     }
 
     private float getHeight() {
         return this.entityData.get(DATA_HEIGHT_ID);
     }
 
-    private void setResponse(boolean p_273657_) {
-        this.entityData.set(DATA_RESPONSE_ID, p_273657_);
+    private void setResponse(boolean pResponse) {
+        this.entityData.set(DATA_RESPONSE_ID, pResponse);
     }
 
     private boolean getResponse() {

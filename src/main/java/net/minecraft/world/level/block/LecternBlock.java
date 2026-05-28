@@ -94,15 +94,15 @@ public class LecternBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected boolean useShapeForLightOcclusion(BlockState p_54582_) {
+    protected boolean useShapeForLightOcclusion(BlockState pState) {
         return true;
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_54481_) {
-        Level level = p_54481_.getLevel();
-        ItemStack itemstack = p_54481_.getItemInHand();
-        Player player = p_54481_.getPlayer();
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        Level level = pContext.getLevel();
+        ItemStack itemstack = pContext.getItemInHand();
+        Player player = pContext.getPlayer();
         boolean flag = false;
         if (!level.isClientSide && player != null && player.canUseGameMasterBlocks()) {
             CustomData customdata = itemstack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
@@ -111,17 +111,17 @@ public class LecternBlock extends BaseEntityBlock {
             }
         }
 
-        return this.defaultBlockState().setValue(FACING, p_54481_.getHorizontalDirection().getOpposite()).setValue(HAS_BOOK, Boolean.valueOf(flag));
+        return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite()).setValue(HAS_BOOK, Boolean.valueOf(flag));
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState p_54577_, BlockGetter p_54578_, BlockPos p_54579_, CollisionContext p_54580_) {
+    protected VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE_COLLISION;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_54561_, BlockGetter p_54562_, BlockPos p_54563_, CollisionContext p_54564_) {
-        switch ((Direction)p_54561_.getValue(FACING)) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        switch ((Direction)pState.getValue(FACING)) {
             case NORTH:
                 return SHAPE_NORTH;
             case SOUTH:
@@ -136,18 +136,18 @@ public class LecternBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState p_54540_, Rotation p_54541_) {
-        return p_54540_.setValue(FACING, p_54541_.rotate(p_54540_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_54537_, Mirror p_54538_) {
-        return p_54537_.rotate(p_54538_.getRotation(p_54537_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_54543_) {
-        p_54543_.add(FACING, POWERED, HAS_BOOK);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, POWERED, HAS_BOOK);
     }
 
     @Override
@@ -155,10 +155,10 @@ public class LecternBlock extends BaseEntityBlock {
         return new LecternBlockEntity(p_153573_, p_153574_);
     }
 
-    public static boolean tryPlaceBook(@Nullable LivingEntity p_344930_, Level p_270604_, BlockPos p_270276_, BlockState p_270445_, ItemStack p_270458_) {
-        if (!p_270445_.getValue(HAS_BOOK)) {
-            if (!p_270604_.isClientSide) {
-                placeBook(p_344930_, p_270604_, p_270276_, p_270445_, p_270458_);
+    public static boolean tryPlaceBook(@Nullable LivingEntity pEntity, Level pLevel, BlockPos pPos, BlockState pState, ItemStack pStack) {
+        if (!pState.getValue(HAS_BOOK)) {
+            if (!pLevel.isClientSide) {
+                placeBook(pEntity, pLevel, pPos, pState, pStack);
             }
 
             return true;
@@ -167,35 +167,35 @@ public class LecternBlock extends BaseEntityBlock {
         }
     }
 
-    private static void placeBook(@Nullable LivingEntity p_343476_, Level p_270065_, BlockPos p_270155_, BlockState p_270753_, ItemStack p_270173_) {
-        if (p_270065_.getBlockEntity(p_270155_) instanceof LecternBlockEntity lecternblockentity) {
-            lecternblockentity.setBook(p_270173_.consumeAndReturn(1, p_343476_));
-            resetBookState(p_343476_, p_270065_, p_270155_, p_270753_, true);
-            p_270065_.playSound(null, p_270155_, SoundEvents.BOOK_PUT, SoundSource.BLOCKS, 1.0F, 1.0F);
+    private static void placeBook(@Nullable LivingEntity pEntity, Level pLevel, BlockPos pPos, BlockState pState, ItemStack pStack) {
+        if (pLevel.getBlockEntity(pPos) instanceof LecternBlockEntity lecternblockentity) {
+            lecternblockentity.setBook(pStack.consumeAndReturn(1, pEntity));
+            resetBookState(pEntity, pLevel, pPos, pState, true);
+            pLevel.playSound(null, pPos, SoundEvents.BOOK_PUT, SoundSource.BLOCKS, 1.0F, 1.0F);
         }
     }
 
-    public static void resetBookState(@Nullable Entity p_270231_, Level p_270114_, BlockPos p_270251_, BlockState p_270758_, boolean p_270452_) {
-        BlockState blockstate = p_270758_.setValue(POWERED, Boolean.valueOf(false)).setValue(HAS_BOOK, Boolean.valueOf(p_270452_));
-        p_270114_.setBlock(p_270251_, blockstate, 3);
-        p_270114_.gameEvent(GameEvent.BLOCK_CHANGE, p_270251_, GameEvent.Context.of(p_270231_, blockstate));
-        updateBelow(p_270114_, p_270251_, p_270758_);
+    public static void resetBookState(@Nullable Entity pEntity, Level pLevel, BlockPos pPos, BlockState pState, boolean pHasBook) {
+        BlockState blockstate = pState.setValue(POWERED, Boolean.valueOf(false)).setValue(HAS_BOOK, Boolean.valueOf(pHasBook));
+        pLevel.setBlock(pPos, blockstate, 3);
+        pLevel.gameEvent(GameEvent.BLOCK_CHANGE, pPos, GameEvent.Context.of(pEntity, blockstate));
+        updateBelow(pLevel, pPos, pState);
     }
 
-    public static void signalPageChange(Level p_54489_, BlockPos p_54490_, BlockState p_54491_) {
-        changePowered(p_54489_, p_54490_, p_54491_, true);
-        p_54489_.scheduleTick(p_54490_, p_54491_.getBlock(), 2);
-        p_54489_.levelEvent(1043, p_54490_, 0);
+    public static void signalPageChange(Level pLevel, BlockPos pPos, BlockState pState) {
+        changePowered(pLevel, pPos, pState, true);
+        pLevel.scheduleTick(pPos, pState.getBlock(), 2);
+        pLevel.levelEvent(1043, pPos, 0);
     }
 
-    private static void changePowered(Level p_54554_, BlockPos p_54555_, BlockState p_54556_, boolean p_54557_) {
-        p_54554_.setBlock(p_54555_, p_54556_.setValue(POWERED, Boolean.valueOf(p_54557_)), 3);
-        updateBelow(p_54554_, p_54555_, p_54556_);
+    private static void changePowered(Level pLevel, BlockPos pPos, BlockState pState, boolean pPowered) {
+        pLevel.setBlock(pPos, pState.setValue(POWERED, Boolean.valueOf(pPowered)), 3);
+        updateBelow(pLevel, pPos, pState);
     }
 
-    private static void updateBelow(Level p_54545_, BlockPos p_54546_, BlockState p_54547_) {
-        Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(p_54545_, p_54547_.getValue(FACING).getOpposite(), Direction.UP);
-        p_54545_.updateNeighborsAt(p_54546_.below(), p_54547_.getBlock(), orientation);
+    private static void updateBelow(Level pLevel, BlockPos pPos, BlockState pState) {
+        Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(pLevel, pState.getValue(FACING).getOpposite(), Direction.UP);
+        pLevel.updateNeighborsAt(pPos.below(), pState.getBlock(), orientation);
     }
 
     @Override
@@ -204,62 +204,62 @@ public class LecternBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void onRemove(BlockState p_54531_, Level p_54532_, BlockPos p_54533_, BlockState p_54534_, boolean p_54535_) {
-        if (!p_54531_.is(p_54534_.getBlock())) {
-            if (p_54531_.getValue(HAS_BOOK)) {
-                this.popBook(p_54531_, p_54532_, p_54533_);
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        if (!pState.is(pNewState.getBlock())) {
+            if (pState.getValue(HAS_BOOK)) {
+                this.popBook(pState, pLevel, pPos);
             }
 
-            super.onRemove(p_54531_, p_54532_, p_54533_, p_54534_, p_54535_);
-            if (p_54531_.getValue(POWERED)) {
-                updateBelow(p_54532_, p_54533_, p_54531_);
+            super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+            if (pState.getValue(POWERED)) {
+                updateBelow(pLevel, pPos, pState);
             }
         }
     }
 
-    private void popBook(BlockState p_54588_, Level p_54589_, BlockPos p_54590_) {
-        if (p_54589_.getBlockEntity(p_54590_) instanceof LecternBlockEntity lecternblockentity) {
-            Direction direction = p_54588_.getValue(FACING);
+    private void popBook(BlockState pState, Level pLevel, BlockPos pPos) {
+        if (pLevel.getBlockEntity(pPos) instanceof LecternBlockEntity lecternblockentity) {
+            Direction direction = pState.getValue(FACING);
             ItemStack itemstack = lecternblockentity.getBook().copy();
             float f = 0.25F * (float)direction.getStepX();
             float f1 = 0.25F * (float)direction.getStepZ();
             ItemEntity itementity = new ItemEntity(
-                p_54589_,
-                (double)p_54590_.getX() + 0.5 + (double)f,
-                (double)(p_54590_.getY() + 1),
-                (double)p_54590_.getZ() + 0.5 + (double)f1,
+                pLevel,
+                (double)pPos.getX() + 0.5 + (double)f,
+                (double)(pPos.getY() + 1),
+                (double)pPos.getZ() + 0.5 + (double)f1,
                 itemstack
             );
             itementity.setDefaultPickUpDelay();
-            p_54589_.addFreshEntity(itementity);
+            pLevel.addFreshEntity(itementity);
             lecternblockentity.clearContent();
         }
     }
 
     @Override
-    protected boolean isSignalSource(BlockState p_54575_) {
+    protected boolean isSignalSource(BlockState pState) {
         return true;
     }
 
     @Override
-    protected int getSignal(BlockState p_54515_, BlockGetter p_54516_, BlockPos p_54517_, Direction p_54518_) {
-        return p_54515_.getValue(POWERED) ? 15 : 0;
+    protected int getSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
+        return pBlockState.getValue(POWERED) ? 15 : 0;
     }
 
     @Override
-    protected int getDirectSignal(BlockState p_54566_, BlockGetter p_54567_, BlockPos p_54568_, Direction p_54569_) {
-        return p_54569_ == Direction.UP && p_54566_.getValue(POWERED) ? 15 : 0;
+    protected int getDirectSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
+        return pSide == Direction.UP && pBlockState.getValue(POWERED) ? 15 : 0;
     }
 
     @Override
-    protected boolean hasAnalogOutputSignal(BlockState p_54503_) {
+    protected boolean hasAnalogOutputSignal(BlockState pState) {
         return true;
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState p_54520_, Level p_54521_, BlockPos p_54522_) {
-        if (p_54520_.getValue(HAS_BOOK)) {
-            BlockEntity blockentity = p_54521_.getBlockEntity(p_54522_);
+    protected int getAnalogOutputSignal(BlockState pBlockState, Level pLevel, BlockPos pPos) {
+        if (pBlockState.getValue(HAS_BOOK)) {
+            BlockEntity blockentity = pLevel.getBlockEntity(pPos);
             if (blockentity instanceof LecternBlockEntity) {
                 return ((LecternBlockEntity)blockentity).getRedstoneSignal();
             }
@@ -300,15 +300,15 @@ public class LecternBlock extends BaseEntityBlock {
 
     @Nullable
     @Override
-    protected MenuProvider getMenuProvider(BlockState p_54571_, Level p_54572_, BlockPos p_54573_) {
-        return !p_54571_.getValue(HAS_BOOK) ? null : super.getMenuProvider(p_54571_, p_54572_, p_54573_);
+    protected MenuProvider getMenuProvider(BlockState pState, Level pLevel, BlockPos pPos) {
+        return !pState.getValue(HAS_BOOK) ? null : super.getMenuProvider(pState, pLevel, pPos);
     }
 
-    private void openScreen(Level p_54485_, BlockPos p_54486_, Player p_54487_) {
-        BlockEntity blockentity = p_54485_.getBlockEntity(p_54486_);
+    private void openScreen(Level pLevel, BlockPos pPos, Player pPlayer) {
+        BlockEntity blockentity = pLevel.getBlockEntity(pPos);
         if (blockentity instanceof LecternBlockEntity) {
-            p_54487_.openMenu((LecternBlockEntity)blockentity);
-            p_54487_.awardStat(Stats.INTERACT_WITH_LECTERN);
+            pPlayer.openMenu((LecternBlockEntity)blockentity);
+            pPlayer.awardStat(Stats.INTERACT_WITH_LECTERN);
         }
     }
 

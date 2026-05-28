@@ -6,7 +6,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface SpriteGetter {
-    TextureAtlasSprite get(Material p_376066_);
+    TextureAtlasSprite get(Material pMaterial);
 
-    TextureAtlasSprite reportMissingReference(String p_377389_);
+    TextureAtlasSprite reportMissingReference(String pReference);
 }

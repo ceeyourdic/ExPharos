@@ -54,8 +54,8 @@ public abstract class AbstractTextAreaWidget extends AbstractScrollArea {
         }
     }
 
-    protected void renderDecorations(GuiGraphics p_376435_) {
-        this.renderScrollbar(p_376435_);
+    protected void renderDecorations(GuiGraphics pGuiGraphics) {
+        this.renderScrollbar(pGuiGraphics);
     }
 
     protected int innerPadding() {
@@ -86,23 +86,23 @@ public abstract class AbstractTextAreaWidget extends AbstractScrollArea {
         return this.getInnerHeight() + this.totalInnerPadding();
     }
 
-    protected void renderBackground(GuiGraphics p_378043_) {
-        this.renderBorder(p_378043_, this.getX(), this.getY(), this.getWidth(), this.getHeight());
+    protected void renderBackground(GuiGraphics pGuiGraphics) {
+        this.renderBorder(pGuiGraphics, this.getX(), this.getY(), this.getWidth(), this.getHeight());
     }
 
-    protected void renderBorder(GuiGraphics p_376239_, int p_378450_, int p_375463_, int p_377865_, int p_375612_) {
+    protected void renderBorder(GuiGraphics pGuiGraphics, int pX, int pY, int pWidth, int pHeight) {
         ResourceLocation resourcelocation = BACKGROUND_SPRITES.get(this.isActive(), this.isFocused());
-        p_376239_.blitSprite(RenderType::guiTextured, resourcelocation, p_378450_, p_375463_, p_377865_, p_375612_);
+        pGuiGraphics.blitSprite(RenderType::guiTextured, resourcelocation, pX, pY, pWidth, pHeight);
     }
 
-    protected boolean withinContentAreaTopBottom(int p_376309_, int p_378518_) {
-        return (double)p_378518_ - this.scrollAmount() >= (double)this.getY()
-            && (double)p_376309_ - this.scrollAmount() <= (double)(this.getY() + this.height);
+    protected boolean withinContentAreaTopBottom(int pTop, int pBottom) {
+        return (double)pBottom - this.scrollAmount() >= (double)this.getY()
+            && (double)pTop - this.scrollAmount() <= (double)(this.getY() + this.height);
     }
 
     protected abstract int getInnerHeight();
 
-    protected abstract void renderContents(GuiGraphics p_375874_, int p_377970_, int p_376165_, float p_376358_);
+    protected abstract void renderContents(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick);
 
     protected int getInnerLeft() {
         return this.getX() + this.innerPadding();

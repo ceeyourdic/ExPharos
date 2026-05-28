@@ -9,9 +9,9 @@ public class DoNothing implements BehaviorControl<LivingEntity> {
     private Behavior.Status status = Behavior.Status.STOPPED;
     private long endTimestamp;
 
-    public DoNothing(int p_22840_, int p_22841_) {
-        this.minDuration = p_22840_;
-        this.maxDuration = p_22841_;
+    public DoNothing(int pMinDuration, int pMaxDuration) {
+        this.minDuration = pMinDuration;
+        this.maxDuration = pMaxDuration;
     }
 
     @Override

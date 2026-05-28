@@ -15,16 +15,16 @@ public abstract class DynamicGraphMinFixedPoint {
     private final Long2ByteMap computedLevels;
     private volatile boolean hasWork;
 
-    protected DynamicGraphMinFixedPoint(int p_75543_, int p_75544_, final int p_75545_) {
-        if (p_75543_ >= 254) {
+    protected DynamicGraphMinFixedPoint(int pFirstQueuedLevel, int pWidth, final int pHeight) {
+        if (pFirstQueuedLevel >= 254) {
             throw new IllegalArgumentException("Level count must be < 254.");
         } else {
-            this.levelCount = p_75543_;
-            this.priorityQueue = new LeveledPriorityQueue(p_75543_, p_75544_);
-            this.computedLevels = new Long2ByteOpenHashMap(p_75545_, 0.5F) {
+            this.levelCount = pFirstQueuedLevel;
+            this.priorityQueue = new LeveledPriorityQueue(pFirstQueuedLevel, pWidth);
+            this.computedLevels = new Long2ByteOpenHashMap(pHeight, 0.5F) {
                 @Override
                 protected void rehash(int p_75611_) {
-                    if (p_75611_ > p_75545_) {
+                    if (p_75611_ > pHeight) {
                         super.rehash(p_75611_);
                     }
                 }
@@ -33,87 +33,87 @@ public abstract class DynamicGraphMinFixedPoint {
         }
     }
 
-    protected void removeFromQueue(long p_75601_) {
-        int i = this.computedLevels.remove(p_75601_) & 255;
+    protected void removeFromQueue(long pPosition) {
+        int i = this.computedLevels.remove(pPosition) & 255;
         if (i != 255) {
-            int j = this.getLevel(p_75601_);
+            int j = this.getLevel(pPosition);
             int k = this.calculatePriority(j, i);
-            this.priorityQueue.dequeue(p_75601_, k, this.levelCount);
+            this.priorityQueue.dequeue(pPosition, k, this.levelCount);
             this.hasWork = !this.priorityQueue.isEmpty();
         }
     }
 
-    public void removeIf(LongPredicate p_75582_) {
+    public void removeIf(LongPredicate pPredicate) {
         LongList longlist = new LongArrayList();
         this.computedLevels.keySet().forEach((long p_75586_) -> {
-            if (p_75582_.test(p_75586_)) {
+            if (pPredicate.test(p_75586_)) {
                 longlist.add(p_75586_);
             }
         });
         longlist.forEach((java.util.function.LongConsumer)this::removeFromQueue);
     }
 
-    private int calculatePriority(int p_278256_, int p_278328_) {
-        return Math.min(Math.min(p_278256_, p_278328_), this.levelCount - 1);
+    private int calculatePriority(int pOldLevel, int pNewLevel) {
+        return Math.min(Math.min(pOldLevel, pNewLevel), this.levelCount - 1);
     }
 
-    protected void checkNode(long p_75602_) {
-        this.checkEdge(p_75602_, p_75602_, this.levelCount - 1, false);
+    protected void checkNode(long pLevelPos) {
+        this.checkEdge(pLevelPos, pLevelPos, this.levelCount - 1, false);
     }
 
-    protected void checkEdge(long p_75577_, long p_75578_, int p_75579_, boolean p_75580_) {
-        this.checkEdge(p_75577_, p_75578_, p_75579_, this.getLevel(p_75578_), this.computedLevels.get(p_75578_) & 255, p_75580_);
+    protected void checkEdge(long pFromPos, long pToPos, int pNewLevel, boolean pIsDecreasing) {
+        this.checkEdge(pFromPos, pToPos, pNewLevel, this.getLevel(pToPos), this.computedLevels.get(pToPos) & 255, pIsDecreasing);
         this.hasWork = !this.priorityQueue.isEmpty();
     }
 
-    private void checkEdge(long p_75570_, long p_75571_, int p_75572_, int p_75573_, int p_75574_, boolean p_75575_) {
-        if (!this.isSource(p_75571_)) {
-            p_75572_ = Mth.clamp(p_75572_, 0, this.levelCount - 1);
-            p_75573_ = Mth.clamp(p_75573_, 0, this.levelCount - 1);
-            boolean flag = p_75574_ == 255;
+    private void checkEdge(long pFromPos, long pToPos, int pNewLevel, int pPreviousLevel, int pPropagationLevel, boolean pIsDecreasing) {
+        if (!this.isSource(pToPos)) {
+            pNewLevel = Mth.clamp(pNewLevel, 0, this.levelCount - 1);
+            pPreviousLevel = Mth.clamp(pPreviousLevel, 0, this.levelCount - 1);
+            boolean flag = pPropagationLevel == 255;
             if (flag) {
-                p_75574_ = p_75573_;
+                pPropagationLevel = pPreviousLevel;
             }
 
             int i;
-            if (p_75575_) {
-                i = Math.min(p_75574_, p_75572_);
+            if (pIsDecreasing) {
+                i = Math.min(pPropagationLevel, pNewLevel);
             } else {
-                i = Mth.clamp(this.getComputedLevel(p_75571_, p_75570_, p_75572_), 0, this.levelCount - 1);
+                i = Mth.clamp(this.getComputedLevel(pToPos, pFromPos, pNewLevel), 0, this.levelCount - 1);
             }
 
-            int j = this.calculatePriority(p_75573_, p_75574_);
-            if (p_75573_ != i) {
-                int k = this.calculatePriority(p_75573_, i);
+            int j = this.calculatePriority(pPreviousLevel, pPropagationLevel);
+            if (pPreviousLevel != i) {
+                int k = this.calculatePriority(pPreviousLevel, i);
                 if (j != k && !flag) {
-                    this.priorityQueue.dequeue(p_75571_, j, k);
+                    this.priorityQueue.dequeue(pToPos, j, k);
                 }
 
-                this.priorityQueue.enqueue(p_75571_, k);
-                this.computedLevels.put(p_75571_, (byte)i);
+                this.priorityQueue.enqueue(pToPos, k);
+                this.computedLevels.put(pToPos, (byte)i);
             } else if (!flag) {
-                this.priorityQueue.dequeue(p_75571_, j, this.levelCount);
-                this.computedLevels.remove(p_75571_);
+                this.priorityQueue.dequeue(pToPos, j, this.levelCount);
+                this.computedLevels.remove(pToPos);
             }
         }
     }
 
-    protected final void checkNeighbor(long p_75594_, long p_75595_, int p_75596_, boolean p_75597_) {
-        int i = this.computedLevels.get(p_75595_) & 255;
-        int j = Mth.clamp(this.computeLevelFromNeighbor(p_75594_, p_75595_, p_75596_), 0, this.levelCount - 1);
-        if (p_75597_) {
-            this.checkEdge(p_75594_, p_75595_, j, this.getLevel(p_75595_), i, p_75597_);
+    protected final void checkNeighbor(long pFromPos, long pToPos, int pSourceLevel, boolean pIsDecreasing) {
+        int i = this.computedLevels.get(pToPos) & 255;
+        int j = Mth.clamp(this.computeLevelFromNeighbor(pFromPos, pToPos, pSourceLevel), 0, this.levelCount - 1);
+        if (pIsDecreasing) {
+            this.checkEdge(pFromPos, pToPos, j, this.getLevel(pToPos), i, pIsDecreasing);
         } else {
             boolean flag = i == 255;
             int k;
             if (flag) {
-                k = Mth.clamp(this.getLevel(p_75595_), 0, this.levelCount - 1);
+                k = Mth.clamp(this.getLevel(pToPos), 0, this.levelCount - 1);
             } else {
                 k = i;
             }
 
             if (j == k) {
-                this.checkEdge(p_75594_, p_75595_, this.levelCount - 1, flag ? k : this.getLevel(p_75595_), i, p_75597_);
+                this.checkEdge(pFromPos, pToPos, this.levelCount - 1, flag ? k : this.getLevel(pToPos), i, pIsDecreasing);
             }
         }
     }
@@ -122,12 +122,12 @@ public abstract class DynamicGraphMinFixedPoint {
         return this.hasWork;
     }
 
-    protected final int runUpdates(int p_75589_) {
+    protected final int runUpdates(int pToUpdateCount) {
         if (this.priorityQueue.isEmpty()) {
-            return p_75589_;
+            return pToUpdateCount;
         } else {
-            while (!this.priorityQueue.isEmpty() && p_75589_ > 0) {
-                p_75589_--;
+            while (!this.priorityQueue.isEmpty() && pToUpdateCount > 0) {
+                pToUpdateCount--;
                 long i = this.priorityQueue.removeFirstLong();
                 int j = Mth.clamp(this.getLevel(i), 0, this.levelCount - 1);
                 int k = this.computedLevels.remove(i) & 255;
@@ -146,7 +146,7 @@ public abstract class DynamicGraphMinFixedPoint {
             }
 
             this.hasWork = !this.priorityQueue.isEmpty();
-            return p_75589_;
+            return pToUpdateCount;
         }
     }
 
@@ -154,17 +154,17 @@ public abstract class DynamicGraphMinFixedPoint {
         return this.computedLevels.size();
     }
 
-    protected boolean isSource(long p_75551_) {
-        return p_75551_ == Long.MAX_VALUE;
+    protected boolean isSource(long pPos) {
+        return pPos == Long.MAX_VALUE;
     }
 
-    protected abstract int getComputedLevel(long p_75566_, long p_75567_, int p_75568_);
+    protected abstract int getComputedLevel(long pPos, long pExcludedSourcePos, int pLevel);
 
-    protected abstract void checkNeighborsAfterUpdate(long p_75563_, int p_75564_, boolean p_75565_);
+    protected abstract void checkNeighborsAfterUpdate(long pPos, int pLevel, boolean pIsDecreasing);
 
-    protected abstract int getLevel(long p_75599_);
+    protected abstract int getLevel(long pChunkPos);
 
-    protected abstract void setLevel(long p_75552_, int p_75553_);
+    protected abstract void setLevel(long pChunkPos, int pLevel);
 
-    protected abstract int computeLevelFromNeighbor(long p_75590_, long p_75591_, int p_75592_);
+    protected abstract int computeLevelFromNeighbor(long pStartPos, long pEndPos, int pStartLevel);
 }

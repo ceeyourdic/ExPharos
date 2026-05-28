@@ -49,7 +49,7 @@ public class BuddingAmethystBlock extends AmethystBlock {
         }
     }
 
-    public static boolean canClusterGrowAtState(BlockState p_152735_) {
-        return p_152735_.isAir() || p_152735_.is(Blocks.WATER) && p_152735_.getFluidState().getAmount() == 8;
+    public static boolean canClusterGrowAtState(BlockState pState) {
+        return pState.isAir() || pState.is(Blocks.WATER) && pState.getFluidState().getAmount() == 8;
     }
 }

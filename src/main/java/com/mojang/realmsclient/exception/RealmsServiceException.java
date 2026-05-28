@@ -8,8 +8,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class RealmsServiceException extends Exception {
     public final RealmsError realmsError;
 
-    public RealmsServiceException(RealmsError p_299387_) {
-        this.realmsError = p_299387_;
+    public RealmsServiceException(RealmsError pRealmsError) {
+        this.realmsError = pRealmsError;
     }
 
     @Override

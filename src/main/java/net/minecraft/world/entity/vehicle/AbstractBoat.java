@@ -83,17 +83,17 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
     private Leashable.LeashData leashData;
     private final Supplier<Item> dropItem;
 
-    public AbstractBoat(EntityType<? extends AbstractBoat> p_361501_, Level p_362983_, Supplier<Item> p_365566_) {
-        super(p_361501_, p_362983_);
-        this.dropItem = p_365566_;
+    public AbstractBoat(EntityType<? extends AbstractBoat> pEntityType, Level pLevel, Supplier<Item> pDropItem) {
+        super(pEntityType, pLevel);
+        this.dropItem = pDropItem;
         this.blocksBuilding = true;
     }
 
-    public void setInitialPos(double p_364862_, double p_363329_, double p_361885_) {
-        this.setPos(p_364862_, p_363329_, p_361885_);
-        this.xo = p_364862_;
-        this.yo = p_363329_;
-        this.zo = p_361885_;
+    public void setInitialPos(double pX, double pY, double pZ) {
+        this.setPos(pX, pY, pZ);
+        this.xo = pX;
+        this.yo = pY;
+        this.zo = pZ;
     }
 
     @Override
@@ -114,8 +114,8 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
         return canVehicleCollide(this, p_364219_);
     }
 
-    public static boolean canVehicleCollide(Entity p_362540_, Entity p_368220_) {
-        return (p_368220_.canBeCollidedWith() || p_368220_.isPushable()) && !p_362540_.isPassengerOfSameVehicle(p_368220_);
+    public static boolean canVehicleCollide(Entity pFirst, Entity pSecond) {
+        return (pSecond.canBeCollidedWith() || pSecond.isPushable()) && !pFirst.isPassengerOfSameVehicle(pSecond);
     }
 
     @Override
@@ -133,7 +133,7 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
         return LivingEntity.resetForwardDirectionOfRelativePortalPosition(super.getRelativePortalPosition(p_368283_, p_365178_));
     }
 
-    protected abstract double rideHeight(EntityDimensions p_363309_);
+    protected abstract double rideHeight(EntityDimensions pDimensions);
 
     @Override
     protected Vec3 getPassengerAttachmentPoint(Entity p_369514_, EntityDimensions p_366303_, float p_367794_) {
@@ -407,13 +407,13 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
         }
     }
 
-    public void setPaddleState(boolean p_364965_, boolean p_365347_) {
-        this.entityData.set(DATA_ID_PADDLE_LEFT, p_364965_);
-        this.entityData.set(DATA_ID_PADDLE_RIGHT, p_365347_);
+    public void setPaddleState(boolean pLeft, boolean pRight) {
+        this.entityData.set(DATA_ID_PADDLE_LEFT, pLeft);
+        this.entityData.set(DATA_ID_PADDLE_RIGHT, pRight);
     }
 
-    public float getRowingTime(int p_364511_, float p_368779_) {
-        return this.getPaddleState(p_364511_) ? Mth.clampedLerp(this.paddlePositions[p_364511_] - (float) (Math.PI / 8), this.paddlePositions[p_364511_], p_368779_) : 0.0F;
+    public float getRowingTime(int pSide, float pPartialTick) {
+        return this.getPaddleState(pSide) ? Mth.clampedLerp(this.paddlePositions[pSide] - (float) (Math.PI / 8), this.paddlePositions[pSide], pPartialTick) : 0.0F;
     }
 
     @Nullable
@@ -684,8 +684,8 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
         return 0.0F;
     }
 
-    public boolean hasEnoughSpaceFor(Entity p_363801_) {
-        return p_363801_.getBbWidth() < this.getBbWidth();
+    public boolean hasEnoughSpaceFor(Entity pEntity) {
+        return pEntity.getBbWidth() < this.getBbWidth();
     }
 
     @Override
@@ -735,13 +735,13 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
         return super.getDismountLocationForPassenger(p_367609_);
     }
 
-    protected void clampRotation(Entity p_365128_) {
-        p_365128_.setYBodyRot(this.getYRot());
-        float f = Mth.wrapDegrees(p_365128_.getYRot() - this.getYRot());
+    protected void clampRotation(Entity pEntity) {
+        pEntity.setYBodyRot(this.getYRot());
+        float f = Mth.wrapDegrees(pEntity.getYRot() - this.getYRot());
         float f1 = Mth.clamp(f, -105.0F, 105.0F);
-        p_365128_.yRotO += f1 - f;
-        p_365128_.setYRot(p_365128_.getYRot() + f1 - f);
-        p_365128_.setYHeadRot(p_365128_.getYRot());
+        pEntity.yRotO += f1 - f;
+        pEntity.setYRot(pEntity.getYRot() + f1 - f);
+        pEntity.setYHeadRot(pEntity.getYRot());
     }
 
     @Override
@@ -792,20 +792,20 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
         }
     }
 
-    public boolean getPaddleState(int p_363453_) {
-        return this.entityData.get(p_363453_ == 0 ? DATA_ID_PADDLE_LEFT : DATA_ID_PADDLE_RIGHT) && this.getControllingPassenger() != null;
+    public boolean getPaddleState(int pSide) {
+        return this.entityData.get(pSide == 0 ? DATA_ID_PADDLE_LEFT : DATA_ID_PADDLE_RIGHT) && this.getControllingPassenger() != null;
     }
 
-    private void setBubbleTime(int p_362638_) {
-        this.entityData.set(DATA_ID_BUBBLE_TIME, p_362638_);
+    private void setBubbleTime(int pBubbleTime) {
+        this.entityData.set(DATA_ID_BUBBLE_TIME, pBubbleTime);
     }
 
     private int getBubbleTime() {
         return this.entityData.get(DATA_ID_BUBBLE_TIME);
     }
 
-    public float getBubbleAngle(float p_361198_) {
-        return Mth.lerp(p_361198_, this.bubbleAngleO, this.bubbleAngle);
+    public float getBubbleAngle(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.bubbleAngleO, this.bubbleAngle);
     }
 
     @Override
@@ -823,11 +823,11 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
         return this.getFirstPassenger() instanceof LivingEntity livingentity ? livingentity : super.getControllingPassenger();
     }
 
-    public void setInput(boolean p_370030_, boolean p_363750_, boolean p_364020_, boolean p_369506_) {
-        this.inputLeft = p_370030_;
-        this.inputRight = p_363750_;
-        this.inputUp = p_364020_;
-        this.inputDown = p_369506_;
+    public void setInput(boolean pLeft, boolean pRight, boolean pUp, boolean pDown) {
+        this.inputLeft = pLeft;
+        this.inputRight = pRight;
+        this.inputUp = pUp;
+        this.inputDown = pDown;
     }
 
     @Override

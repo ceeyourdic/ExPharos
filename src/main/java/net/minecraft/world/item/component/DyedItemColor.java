@@ -33,16 +33,16 @@ public record DyedItemColor(int rgb, boolean showInTooltip) implements TooltipPr
     );
     public static final int LEATHER_COLOR = -6265536;
 
-    public static int getOrDefault(ItemStack p_327803_, int p_334743_) {
-        DyedItemColor dyeditemcolor = p_327803_.get(DataComponents.DYED_COLOR);
-        return dyeditemcolor != null ? ARGB.opaque(dyeditemcolor.rgb()) : p_334743_;
+    public static int getOrDefault(ItemStack pStack, int pDefaultValue) {
+        DyedItemColor dyeditemcolor = pStack.get(DataComponents.DYED_COLOR);
+        return dyeditemcolor != null ? ARGB.opaque(dyeditemcolor.rgb()) : pDefaultValue;
     }
 
-    public static ItemStack applyDyes(ItemStack p_333863_, List<DyeItem> p_329585_) {
-        if (!p_333863_.is(ItemTags.DYEABLE)) {
+    public static ItemStack applyDyes(ItemStack pStack, List<DyeItem> pDyes) {
+        if (!pStack.is(ItemTags.DYEABLE)) {
             return ItemStack.EMPTY;
         } else {
-            ItemStack itemstack = p_333863_.copyWithCount(1);
+            ItemStack itemstack = pStack.copyWithCount(1);
             int i = 0;
             int j = 0;
             int k = 0;
@@ -60,7 +60,7 @@ public record DyedItemColor(int rgb, boolean showInTooltip) implements TooltipPr
                 i1++;
             }
 
-            for (DyeItem dyeitem : p_329585_) {
+            for (DyeItem dyeitem : pDyes) {
                 int j3 = dyeitem.getDyeColor().getTextureDiffuseColor();
                 int i2 = ARGB.red(j3);
                 int j2 = ARGB.green(j3);
@@ -98,7 +98,7 @@ public record DyedItemColor(int rgb, boolean showInTooltip) implements TooltipPr
         }
     }
 
-    public DyedItemColor withTooltip(boolean p_328256_) {
-        return new DyedItemColor(this.rgb, p_328256_);
+    public DyedItemColor withTooltip(boolean pShowInTooltip) {
+        return new DyedItemColor(this.rgb, pShowInTooltip);
     }
 }

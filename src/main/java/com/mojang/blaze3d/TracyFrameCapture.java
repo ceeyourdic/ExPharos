@@ -28,25 +28,25 @@ public class TracyFrameCapture implements AutoCloseable {
     private int lastCaptureDelay;
     private boolean capturedThisFrame;
 
-    private void resize(int p_361808_, int p_365044_) {
-        float f = (float)p_361808_ / (float)p_365044_;
-        if (p_361808_ > 320) {
-            p_361808_ = 320;
-            p_365044_ = (int)(320.0F / f);
+    private void resize(int pWidth, int pHeight) {
+        float f = (float)pWidth / (float)pHeight;
+        if (pWidth > 320) {
+            pWidth = 320;
+            pHeight = (int)(320.0F / f);
         }
 
-        if (p_365044_ > 180) {
-            p_361808_ = (int)(180.0F * f);
-            p_365044_ = 180;
+        if (pHeight > 180) {
+            pWidth = (int)(180.0F * f);
+            pHeight = 180;
         }
 
-        p_361808_ = p_361808_ / 4 * 4;
-        p_365044_ = p_365044_ / 4 * 4;
-        if (this.width != p_361808_ || this.height != p_365044_) {
-            this.width = p_361808_;
-            this.height = p_365044_;
-            this.frameBuffer.resize(p_361808_, p_365044_);
-            this.pixelbuffer.resize(p_361808_ * p_365044_ * 4);
+        pWidth = pWidth / 4 * 4;
+        pHeight = pHeight / 4 * 4;
+        if (this.width != pWidth || this.height != pHeight) {
+            this.width = pWidth;
+            this.height = pHeight;
+            this.frameBuffer.resize(pWidth, pHeight);
+            this.pixelbuffer.resize(pWidth * pHeight * 4);
             if (this.fence != null) {
                 this.fence.close();
                 this.fence = null;
@@ -54,18 +54,18 @@ public class TracyFrameCapture implements AutoCloseable {
         }
     }
 
-    public void capture(RenderTarget p_367460_) {
+    public void capture(RenderTarget pRenderTarget) {
         if (this.fence == null && !this.capturedThisFrame) {
             this.capturedThisFrame = true;
-            if (p_367460_.width != this.targetWidth || p_367460_.height != this.targetHeight) {
-                this.targetWidth = p_367460_.width;
-                this.targetHeight = p_367460_.height;
+            if (pRenderTarget.width != this.targetWidth || pRenderTarget.height != this.targetHeight) {
+                this.targetWidth = pRenderTarget.width;
+                this.targetHeight = pRenderTarget.height;
                 this.resize(this.targetWidth, this.targetHeight);
             }
 
             GlStateManager._glBindFramebuffer(36009, this.frameBuffer.frameBufferId);
-            GlStateManager._glBindFramebuffer(36008, p_367460_.frameBufferId);
-            GlStateManager._glBlitFrameBuffer(0, 0, p_367460_.width, p_367460_.height, 0, 0, this.width, this.height, 16384, 9729);
+            GlStateManager._glBindFramebuffer(36008, pRenderTarget.frameBufferId);
+            GlStateManager._glBlitFrameBuffer(0, 0, pRenderTarget.width, pRenderTarget.height, 0, 0, this.width, this.height, 16384, 9729);
             GlStateManager._glBindFramebuffer(36008, 0);
             GlStateManager._glBindFramebuffer(36009, 0);
             this.pixelbuffer.bind();

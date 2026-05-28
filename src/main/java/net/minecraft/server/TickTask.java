@@ -4,9 +4,9 @@ public class TickTask implements Runnable {
     private final int tick;
     private final Runnable runnable;
 
-    public TickTask(int p_136252_, Runnable p_136253_) {
-        this.tick = p_136252_;
-        this.runnable = p_136253_;
+    public TickTask(int pTick, Runnable pRunnable) {
+        this.tick = pTick;
+        this.runnable = pRunnable;
     }
 
     public int getTick() {

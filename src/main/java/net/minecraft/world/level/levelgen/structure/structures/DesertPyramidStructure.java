@@ -64,11 +64,11 @@ public class DesertPyramidStructure extends SinglePieceStructure {
         }
     }
 
-    private static void placeSuspiciousSand(BoundingBox p_279472_, WorldGenLevel p_279193_, BlockPos p_279136_) {
-        if (p_279472_.isInside(p_279136_)) {
-            p_279193_.setBlock(p_279136_, Blocks.SUSPICIOUS_SAND.defaultBlockState(), 2);
-            p_279193_.getBlockEntity(p_279136_, BlockEntityType.BRUSHABLE_BLOCK)
-                .ifPresent(p_327492_ -> p_327492_.setLootTable(BuiltInLootTables.DESERT_PYRAMID_ARCHAEOLOGY, p_279136_.asLong()));
+    private static void placeSuspiciousSand(BoundingBox pBoundingBox, WorldGenLevel pWorldGenLevel, BlockPos pPos) {
+        if (pBoundingBox.isInside(pPos)) {
+            pWorldGenLevel.setBlock(pPos, Blocks.SUSPICIOUS_SAND.defaultBlockState(), 2);
+            pWorldGenLevel.getBlockEntity(pPos, BlockEntityType.BRUSHABLE_BLOCK)
+                .ifPresent(p_327492_ -> p_327492_.setLootTable(BuiltInLootTables.DESERT_PYRAMID_ARCHAEOLOGY, pPos.asLong()));
         }
     }
 

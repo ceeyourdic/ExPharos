@@ -16,16 +16,16 @@ public class MultiLineTextWidget extends AbstractStringWidget {
     private final SingleKeyCache<MultiLineTextWidget.CacheKey, MultiLineLabel> cache;
     private boolean centered = false;
 
-    public MultiLineTextWidget(Component p_270532_, Font p_270639_) {
-        this(0, 0, p_270532_, p_270639_);
+    public MultiLineTextWidget(Component pMessage, Font pFont) {
+        this(0, 0, pMessage, pFont);
     }
 
-    public MultiLineTextWidget(int p_270325_, int p_270355_, Component p_270069_, Font p_270673_) {
-        super(p_270325_, p_270355_, 0, 0, p_270069_, p_270673_);
+    public MultiLineTextWidget(int pX, int pY, Component pMessage, Font pFont) {
+        super(pX, pY, 0, 0, pMessage, pFont);
         this.cache = Util.singleKeyCache(
             p_340776_ -> p_340776_.maxRows.isPresent()
-                    ? MultiLineLabel.create(p_270673_, p_340776_.maxWidth, p_340776_.maxRows.getAsInt(), p_340776_.message)
-                    : MultiLineLabel.create(p_270673_, p_340776_.message, p_340776_.maxWidth)
+                    ? MultiLineLabel.create(pFont, p_340776_.maxWidth, p_340776_.maxRows.getAsInt(), p_340776_.message)
+                    : MultiLineLabel.create(pFont, p_340776_.message, p_340776_.maxWidth)
         );
         this.active = false;
     }
@@ -35,18 +35,18 @@ public class MultiLineTextWidget extends AbstractStringWidget {
         return this;
     }
 
-    public MultiLineTextWidget setMaxWidth(int p_270776_) {
-        this.maxWidth = OptionalInt.of(p_270776_);
+    public MultiLineTextWidget setMaxWidth(int pMaxWidth) {
+        this.maxWidth = OptionalInt.of(pMaxWidth);
         return this;
     }
 
-    public MultiLineTextWidget setMaxRows(int p_270085_) {
-        this.maxRows = OptionalInt.of(p_270085_);
+    public MultiLineTextWidget setMaxRows(int pMaxRows) {
+        this.maxRows = OptionalInt.of(pMaxRows);
         return this;
     }
 
-    public MultiLineTextWidget setCentered(boolean p_270493_) {
-        this.centered = p_270493_;
+    public MultiLineTextWidget setCentered(boolean pCentered) {
+        this.centered = pCentered;
         return this;
     }
 

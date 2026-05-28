@@ -16,8 +16,8 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
         return BrewedPotionTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_19121_, Holder<Potion> p_311358_) {
-        this.trigger(p_19121_, p_308115_ -> p_308115_.matches(p_311358_));
+    public void trigger(ServerPlayer pPlayer, Holder<Potion> pPotion) {
+        this.trigger(pPlayer, p_308115_ -> p_308115_.matches(pPotion));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<Holder<Potion>> potion)
@@ -34,8 +34,8 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
             return CriteriaTriggers.BREWED_POTION.createCriterion(new BrewedPotionTrigger.TriggerInstance(Optional.empty(), Optional.empty()));
         }
 
-        public boolean matches(Holder<Potion> p_311152_) {
-            return !this.potion.isPresent() || this.potion.get().equals(p_311152_);
+        public boolean matches(Holder<Potion> pPotion) {
+            return !this.potion.isPresent() || this.potion.get().equals(pPotion);
         }
 
         @Override

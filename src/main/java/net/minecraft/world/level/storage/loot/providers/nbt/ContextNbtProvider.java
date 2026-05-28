@@ -48,29 +48,29 @@ public class ContextNbtProvider implements NbtProvider {
     public static final Codec<ContextNbtProvider> INLINE_CODEC = GETTER_CODEC.xmap(ContextNbtProvider::new, p_298349_ -> p_298349_.getter);
     private final ContextNbtProvider.Getter getter;
 
-    private static ContextNbtProvider.Getter forEntity(final LootContext.EntityTarget p_165578_) {
+    private static ContextNbtProvider.Getter forEntity(final LootContext.EntityTarget pEntityTarget) {
         return new ContextNbtProvider.Getter() {
             @Nullable
             @Override
             public Tag get(LootContext p_165589_) {
-                Entity entity = p_165589_.getOptionalParameter(p_165578_.getParam());
+                Entity entity = p_165589_.getOptionalParameter(pEntityTarget.getParam());
                 return entity != null ? NbtPredicate.getEntityTagToCompare(entity) : null;
             }
 
             @Override
             public String getId() {
-                return p_165578_.name();
+                return pEntityTarget.name();
             }
 
             @Override
             public Set<ContextKey<?>> getReferencedContextParams() {
-                return Set.of(p_165578_.getParam());
+                return Set.of(pEntityTarget.getParam());
             }
         };
     }
 
-    private ContextNbtProvider(ContextNbtProvider.Getter p_165568_) {
-        this.getter = p_165568_;
+    private ContextNbtProvider(ContextNbtProvider.Getter pGetter) {
+        this.getter = pGetter;
     }
 
     @Override
@@ -89,13 +89,13 @@ public class ContextNbtProvider implements NbtProvider {
         return this.getter.getReferencedContextParams();
     }
 
-    public static NbtProvider forContextEntity(LootContext.EntityTarget p_165571_) {
-        return new ContextNbtProvider(forEntity(p_165571_));
+    public static NbtProvider forContextEntity(LootContext.EntityTarget pEntityTarget) {
+        return new ContextNbtProvider(forEntity(pEntityTarget));
     }
 
     interface Getter {
         @Nullable
-        Tag get(LootContext p_165591_);
+        Tag get(LootContext pLootContext);
 
         String getId();
 

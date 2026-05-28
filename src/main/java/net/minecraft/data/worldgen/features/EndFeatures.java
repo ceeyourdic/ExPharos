@@ -17,12 +17,12 @@ public class EndFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> CHORUS_PLANT = FeatureUtils.createKey("chorus_plant");
     public static final ResourceKey<ConfiguredFeature<?, ?>> END_ISLAND = FeatureUtils.createKey("end_island");
 
-    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> p_329122_) {
-        FeatureUtils.register(p_329122_, END_PLATFORM, Feature.END_PLATFORM);
-        FeatureUtils.register(p_329122_, END_SPIKE, Feature.END_SPIKE, new SpikeConfiguration(false, ImmutableList.of(), null));
-        FeatureUtils.register(p_329122_, END_GATEWAY_RETURN, Feature.END_GATEWAY, EndGatewayConfiguration.knownExit(ServerLevel.END_SPAWN_POINT, true));
-        FeatureUtils.register(p_329122_, END_GATEWAY_DELAYED, Feature.END_GATEWAY, EndGatewayConfiguration.delayedExitSearch());
-        FeatureUtils.register(p_329122_, CHORUS_PLANT, Feature.CHORUS_PLANT);
-        FeatureUtils.register(p_329122_, END_ISLAND, Feature.END_ISLAND);
+    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> pContext) {
+        FeatureUtils.register(pContext, END_PLATFORM, Feature.END_PLATFORM);
+        FeatureUtils.register(pContext, END_SPIKE, Feature.END_SPIKE, new SpikeConfiguration(false, ImmutableList.of(), null));
+        FeatureUtils.register(pContext, END_GATEWAY_RETURN, Feature.END_GATEWAY, EndGatewayConfiguration.knownExit(ServerLevel.END_SPAWN_POINT, true));
+        FeatureUtils.register(pContext, END_GATEWAY_DELAYED, Feature.END_GATEWAY, EndGatewayConfiguration.delayedExitSearch());
+        FeatureUtils.register(pContext, CHORUS_PLANT, Feature.CHORUS_PLANT);
+        FeatureUtils.register(pContext, END_ISLAND, Feature.END_ISLAND);
     }
 }

@@ -29,13 +29,13 @@ public class ClientRecipeBook extends RecipeBook {
     private Map<ExtendedRecipeBookCategory, List<RecipeCollection>> collectionsByTab = Map.of();
     private List<RecipeCollection> allCollections = List.of();
 
-    public void add(RecipeDisplayEntry p_367545_) {
-        this.known.put(p_367545_.id(), p_367545_);
+    public void add(RecipeDisplayEntry pRecipe) {
+        this.known.put(pRecipe.id(), pRecipe);
     }
 
-    public void remove(RecipeDisplayId p_365017_) {
-        this.known.remove(p_365017_);
-        this.highlight.remove(p_365017_);
+    public void remove(RecipeDisplayId pRecipe) {
+        this.known.remove(pRecipe);
+        this.highlight.remove(pRecipe);
     }
 
     public void clear() {
@@ -43,16 +43,16 @@ public class ClientRecipeBook extends RecipeBook {
         this.highlight.clear();
     }
 
-    public boolean willHighlight(RecipeDisplayId p_364304_) {
-        return this.highlight.contains(p_364304_);
+    public boolean willHighlight(RecipeDisplayId pRecipe) {
+        return this.highlight.contains(pRecipe);
     }
 
-    public void removeHighlight(RecipeDisplayId p_365808_) {
-        this.highlight.remove(p_365808_);
+    public void removeHighlight(RecipeDisplayId pRecipe) {
+        this.highlight.remove(pRecipe);
     }
 
-    public void addHighlight(RecipeDisplayId p_364710_) {
-        this.highlight.add(p_364710_);
+    public void addHighlight(RecipeDisplayId pRecipe) {
+        this.highlight.add(pRecipe);
     }
 
     public void rebuildCollections() {
@@ -79,11 +79,11 @@ public class ClientRecipeBook extends RecipeBook {
         this.allCollections = builder.build();
     }
 
-    private static Map<RecipeBookCategory, List<List<RecipeDisplayEntry>>> categorizeAndGroupRecipes(Iterable<RecipeDisplayEntry> p_90643_) {
+    private static Map<RecipeBookCategory, List<List<RecipeDisplayEntry>>> categorizeAndGroupRecipes(Iterable<RecipeDisplayEntry> pRecipes) {
         Map<RecipeBookCategory, List<List<RecipeDisplayEntry>>> map = new HashMap<>();
         Table<RecipeBookCategory, Integer, List<RecipeDisplayEntry>> table = HashBasedTable.create();
 
-        for (RecipeDisplayEntry recipedisplayentry : p_90643_) {
+        for (RecipeDisplayEntry recipedisplayentry : pRecipes) {
             RecipeBookCategory recipebookcategory = recipedisplayentry.category();
             OptionalInt optionalint = recipedisplayentry.group();
             if (optionalint.isEmpty()) {
@@ -107,7 +107,7 @@ public class ClientRecipeBook extends RecipeBook {
         return this.allCollections;
     }
 
-    public List<RecipeCollection> getCollection(ExtendedRecipeBookCategory p_362967_) {
-        return this.collectionsByTab.getOrDefault(p_362967_, Collections.emptyList());
+    public List<RecipeCollection> getCollection(ExtendedRecipeBookCategory pCategory) {
+        return this.collectionsByTab.getOrDefault(pCategory, Collections.emptyList());
     }
 }

@@ -18,18 +18,18 @@ public class ClassInstanceMultiMap<T> extends AbstractCollection<T> {
     private final Class<T> baseClass;
     private final List<T> allInstances = Lists.newArrayList();
 
-    public ClassInstanceMultiMap(Class<T> p_13531_) {
-        this.baseClass = p_13531_;
-        this.byClass.put(p_13531_, this.allInstances);
+    public ClassInstanceMultiMap(Class<T> pBaseClass) {
+        this.baseClass = pBaseClass;
+        this.byClass.put(pBaseClass, this.allInstances);
     }
 
     @Override
-    public boolean add(T p_13536_) {
+    public boolean add(T pValue) {
         boolean flag = false;
 
         for (Entry<Class<?>, List<T>> entry : this.byClass.entrySet()) {
-            if (entry.getKey().isInstance(p_13536_)) {
-                flag |= entry.getValue().add(p_13536_);
+            if (entry.getKey().isInstance(pValue)) {
+                flag |= entry.getValue().add(pValue);
             }
         }
 
@@ -37,13 +37,13 @@ public class ClassInstanceMultiMap<T> extends AbstractCollection<T> {
     }
 
     @Override
-    public boolean remove(Object p_13543_) {
+    public boolean remove(Object pKey) {
         boolean flag = false;
 
         for (Entry<Class<?>, List<T>> entry : this.byClass.entrySet()) {
-            if (entry.getKey().isInstance(p_13543_)) {
+            if (entry.getKey().isInstance(pKey)) {
                 List<T> list = entry.getValue();
-                flag |= list.remove(p_13543_);
+                flag |= list.remove(pKey);
             }
         }
 
@@ -51,16 +51,16 @@ public class ClassInstanceMultiMap<T> extends AbstractCollection<T> {
     }
 
     @Override
-    public boolean contains(Object p_13540_) {
-        return this.find(p_13540_.getClass()).contains(p_13540_);
+    public boolean contains(Object pKey) {
+        return this.find(pKey.getClass()).contains(pKey);
     }
 
-    public <S> Collection<S> find(Class<S> p_13534_) {
-        if (!this.baseClass.isAssignableFrom(p_13534_)) {
-            throw new IllegalArgumentException("Don't know how to search for " + p_13534_);
+    public <S> Collection<S> find(Class<S> pType) {
+        if (!this.baseClass.isAssignableFrom(pType)) {
+            throw new IllegalArgumentException("Don't know how to search for " + pType);
         } else {
             List<? extends T> list = this.byClass
-                .computeIfAbsent(p_13534_, p_326490_ -> this.allInstances.stream().filter(p_326490_::isInstance).collect(Util.toMutableList()));
+                .computeIfAbsent(pType, class2In -> this.allInstances.stream().filter(class2In::isInstance).collect(Util.toMutableList()));
             return (Collection<S>)Collections.unmodifiableCollection(list);
         }
     }
@@ -77,5 +77,9 @@ public class ClassInstanceMultiMap<T> extends AbstractCollection<T> {
     @Override
     public int size() {
         return this.allInstances.size();
+    }
+
+    public List<T> getValues() {
+        return this.allInstances;
     }
 }

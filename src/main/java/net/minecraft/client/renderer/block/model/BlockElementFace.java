@@ -20,26 +20,26 @@ public record BlockElementFace(@Nullable Direction cullForDirection, int tintInd
     protected static class Deserializer implements JsonDeserializer<BlockElementFace> {
         private static final int DEFAULT_TINT_INDEX = -1;
 
-        public BlockElementFace deserialize(JsonElement p_111365_, Type p_111366_, JsonDeserializationContext p_111367_) throws JsonParseException {
-            JsonObject jsonobject = p_111365_.getAsJsonObject();
+        public BlockElementFace deserialize(JsonElement pJson, Type pType, JsonDeserializationContext pContext) throws JsonParseException {
+            JsonObject jsonobject = pJson.getAsJsonObject();
             Direction direction = this.getCullFacing(jsonobject);
             int i = this.getTintIndex(jsonobject);
             String s = this.getTexture(jsonobject);
-            BlockFaceUV blockfaceuv = p_111367_.deserialize(jsonobject, BlockFaceUV.class);
+            BlockFaceUV blockfaceuv = pContext.deserialize(jsonobject, BlockFaceUV.class);
             return new BlockElementFace(direction, i, s, blockfaceuv);
         }
 
-        protected int getTintIndex(JsonObject p_111369_) {
-            return GsonHelper.getAsInt(p_111369_, "tintindex", -1);
+        protected int getTintIndex(JsonObject pJson) {
+            return GsonHelper.getAsInt(pJson, "tintindex", -1);
         }
 
-        private String getTexture(JsonObject p_111371_) {
-            return GsonHelper.getAsString(p_111371_, "texture");
+        private String getTexture(JsonObject pJson) {
+            return GsonHelper.getAsString(pJson, "texture");
         }
 
         @Nullable
-        private Direction getCullFacing(JsonObject p_111373_) {
-            String s = GsonHelper.getAsString(p_111373_, "cullface", "");
+        private Direction getCullFacing(JsonObject pJson) {
+            String s = GsonHelper.getAsString(pJson, "cullface", "");
             return Direction.byName(s);
         }
     }

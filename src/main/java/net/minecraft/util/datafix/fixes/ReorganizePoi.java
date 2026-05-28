@@ -15,8 +15,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class ReorganizePoi extends DataFix {
-    public ReorganizePoi(Schema p_16853_, boolean p_16854_) {
-        super(p_16853_, p_16854_);
+    public ReorganizePoi(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
     }
 
     @Override
@@ -29,20 +29,20 @@ public class ReorganizePoi extends DataFix {
         }
     }
 
-    private static <T> Dynamic<T> cap(Dynamic<T> p_16858_) {
+    private static <T> Dynamic<T> cap(Dynamic<T> pDynamic) {
         Map<Dynamic<T>, Dynamic<T>> map = Maps.newHashMap();
 
         for (int i = 0; i < 16; i++) {
             String s = String.valueOf(i);
-            Optional<Dynamic<T>> optional = p_16858_.get(s).result();
+            Optional<Dynamic<T>> optional = pDynamic.get(s).result();
             if (optional.isPresent()) {
                 Dynamic<T> dynamic = optional.get();
-                Dynamic<T> dynamic1 = p_16858_.createMap(ImmutableMap.of(p_16858_.createString("Records"), dynamic));
-                map.put(p_16858_.createInt(i), dynamic1);
-                p_16858_ = p_16858_.remove(s);
+                Dynamic<T> dynamic1 = pDynamic.createMap(ImmutableMap.of(pDynamic.createString("Records"), dynamic));
+                map.put(pDynamic.createInt(i), dynamic1);
+                pDynamic = pDynamic.remove(s);
             }
         }
 
-        return p_16858_.set("Sections", p_16858_.createMap(map));
+        return pDynamic.set("Sections", pDynamic.createMap(map));
     }
 }

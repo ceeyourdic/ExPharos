@@ -26,51 +26,51 @@ public class PathFinder {
     private static final boolean DEBUG = false;
     private final BinaryHeap openSet = new BinaryHeap();
 
-    public PathFinder(NodeEvaluator p_77425_, int p_77426_) {
-        this.nodeEvaluator = p_77425_;
-        this.maxVisitedNodes = p_77426_;
+    public PathFinder(NodeEvaluator pNodeEvaluator, int pMaxVisitedNodes) {
+        this.nodeEvaluator = pNodeEvaluator;
+        this.maxVisitedNodes = pMaxVisitedNodes;
     }
 
-    public void setMaxVisitedNodes(int p_364339_) {
-        this.maxVisitedNodes = p_364339_;
+    public void setMaxVisitedNodes(int pMaxVisitedNodes) {
+        this.maxVisitedNodes = pMaxVisitedNodes;
     }
 
     @Nullable
-    public Path findPath(PathNavigationRegion p_77428_, Mob p_77429_, Set<BlockPos> p_77430_, float p_77431_, int p_77432_, float p_77433_) {
+    public Path findPath(PathNavigationRegion pRegion, Mob pMob, Set<BlockPos> pTargetPositions, float pMaxRange, int pAccuracy, float pSearchDepthMultiplier) {
         this.openSet.clear();
-        this.nodeEvaluator.prepare(p_77428_, p_77429_);
+        this.nodeEvaluator.prepare(pRegion, pMob);
         Node node = this.nodeEvaluator.getStart();
         if (node == null) {
             return null;
         } else {
-            Map<Target, BlockPos> map = p_77430_.stream()
+            Map<Target, BlockPos> map = pTargetPositions.stream()
                 .collect(
                     Collectors.toMap(
                         p_327511_ -> this.nodeEvaluator.getTarget((double)p_327511_.getX(), (double)p_327511_.getY(), (double)p_327511_.getZ()),
                         Function.identity()
                     )
                 );
-            Path path = this.findPath(node, map, p_77431_, p_77432_, p_77433_);
+            Path path = this.findPath(node, map, pMaxRange, pAccuracy, pSearchDepthMultiplier);
             this.nodeEvaluator.done();
             return path;
         }
     }
 
     @Nullable
-    private Path findPath(Node p_164718_, Map<Target, BlockPos> p_164719_, float p_164720_, int p_164721_, float p_164722_) {
+    private Path findPath(Node pNode, Map<Target, BlockPos> pTargetPositions, float pMaxRange, int pAccuracy, float pSearchDepthMultiplier) {
         ProfilerFiller profilerfiller = Profiler.get();
         profilerfiller.push("find_path");
         profilerfiller.markForCharting(MetricCategory.PATH_FINDING);
-        Set<Target> set = p_164719_.keySet();
-        p_164718_.g = 0.0F;
-        p_164718_.h = this.getBestH(p_164718_, set);
-        p_164718_.f = p_164718_.h;
+        Set<Target> set = pTargetPositions.keySet();
+        pNode.g = 0.0F;
+        pNode.h = this.getBestH(pNode, set);
+        pNode.f = pNode.h;
         this.openSet.clear();
-        this.openSet.insert(p_164718_);
+        this.openSet.insert(pNode);
         Set<Node> set1 = ImmutableSet.of();
         int i = 0;
         Set<Target> set2 = Sets.newHashSetWithExpectedSize(set.size());
-        int j = (int)((float)this.maxVisitedNodes * p_164722_);
+        int j = (int)((float)this.maxVisitedNodes * pSearchDepthMultiplier);
 
         while (!this.openSet.isEmpty()) {
             if (++i >= j) {
@@ -81,7 +81,7 @@ public class PathFinder {
             node.closed = true;
 
             for (Target target : set) {
-                if (node.distanceManhattan(target) <= (float)p_164721_) {
+                if (node.distanceManhattan(target) <= (float)pAccuracy) {
                     target.setReached();
                     set2.add(target);
                 }
@@ -91,7 +91,7 @@ public class PathFinder {
                 break;
             }
 
-            if (!(node.distanceTo(p_164718_) >= p_164720_)) {
+            if (!(node.distanceTo(pNode) >= pMaxRange)) {
                 int k = this.nodeEvaluator.getNeighbors(this.neighbors, node);
 
                 for (int l = 0; l < k; l++) {
@@ -99,7 +99,7 @@ public class PathFinder {
                     float f = this.distance(node, node1);
                     node1.walkedDistance = node.walkedDistance + f;
                     float f1 = node.g + f + node1.costMalus;
-                    if (node1.walkedDistance < p_164720_ && (!node1.inOpenSet() || f1 < node1.g)) {
+                    if (node1.walkedDistance < pMaxRange && (!node1.inOpenSet() || f1 < node1.g)) {
                         node1.cameFrom = node;
                         node1.g = f1;
                         node1.h = this.getBestH(node1, set) * 1.5F;
@@ -115,40 +115,40 @@ public class PathFinder {
         }
 
         Optional<Path> optional = !set2.isEmpty()
-            ? set2.stream().map(p_77454_ -> this.reconstructPath(p_77454_.getBestNode(), p_164719_.get(p_77454_), true)).min(Comparator.comparingInt(Path::getNodeCount))
+            ? set2.stream().map(p_77454_ -> this.reconstructPath(p_77454_.getBestNode(), pTargetPositions.get(p_77454_), true)).min(Comparator.comparingInt(Path::getNodeCount))
             : set.stream()
-                .map(p_77451_ -> this.reconstructPath(p_77451_.getBestNode(), p_164719_.get(p_77451_), false))
+                .map(p_77451_ -> this.reconstructPath(p_77451_.getBestNode(), pTargetPositions.get(p_77451_), false))
                 .min(Comparator.comparingDouble(Path::getDistToTarget).thenComparingInt(Path::getNodeCount));
         profilerfiller.pop();
         return optional.isEmpty() ? null : optional.get();
     }
 
-    protected float distance(Node p_230617_, Node p_230618_) {
-        return p_230617_.distanceTo(p_230618_);
+    protected float distance(Node pFirst, Node pSecond) {
+        return pFirst.distanceTo(pSecond);
     }
 
-    private float getBestH(Node p_77445_, Set<Target> p_77446_) {
+    private float getBestH(Node pNode, Set<Target> pTargets) {
         float f = Float.MAX_VALUE;
 
-        for (Target target : p_77446_) {
-            float f1 = p_77445_.distanceTo(target);
-            target.updateBest(f1, p_77445_);
+        for (Target target : pTargets) {
+            float f1 = pNode.distanceTo(target);
+            target.updateBest(f1, pNode);
             f = Math.min(f1, f);
         }
 
         return f;
     }
 
-    private Path reconstructPath(Node p_77435_, BlockPos p_77436_, boolean p_77437_) {
+    private Path reconstructPath(Node pPoint, BlockPos pTargetPos, boolean pReachesTarget) {
         List<Node> list = Lists.newArrayList();
-        Node node = p_77435_;
-        list.add(0, p_77435_);
+        Node node = pPoint;
+        list.add(0, pPoint);
 
         while (node.cameFrom != null) {
             node = node.cameFrom;
             list.add(0, node);
         }
 
-        return new Path(list, p_77436_, p_77437_);
+        return new Path(list, pTargetPos, pReachesTarget);
     }
 }

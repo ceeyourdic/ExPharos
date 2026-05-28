@@ -56,9 +56,9 @@ public class MovingPistonBlock extends BaseEntityBlock {
     }
 
     public static BlockEntity newMovingBlockEntity(
-        BlockPos p_155882_, BlockState p_155883_, BlockState p_155884_, Direction p_155885_, boolean p_155886_, boolean p_155887_
+        BlockPos pPos, BlockState pBlockState, BlockState pMovedState, Direction pDirection, boolean pExtending, boolean pIsSourcePiston
     ) {
-        return new PistonMovingBlockEntity(p_155882_, p_155883_, p_155884_, p_155885_, p_155886_, p_155887_);
+        return new PistonMovingBlockEntity(pPos, pBlockState, pMovedState, pDirection, pExtending, pIsSourcePiston);
     }
 
     @Nullable
@@ -68,9 +68,9 @@ public class MovingPistonBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void onRemove(BlockState p_60077_, Level p_60078_, BlockPos p_60079_, BlockState p_60080_, boolean p_60081_) {
-        if (!p_60077_.is(p_60080_.getBlock())) {
-            BlockEntity blockentity = p_60078_.getBlockEntity(p_60079_);
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        if (!pState.is(pNewState.getBlock())) {
+            BlockEntity blockentity = pLevel.getBlockEntity(pPos);
             if (blockentity instanceof PistonMovingBlockEntity) {
                 ((PistonMovingBlockEntity)blockentity).finalTick();
             }
@@ -78,11 +78,11 @@ public class MovingPistonBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void destroy(LevelAccessor p_60061_, BlockPos p_60062_, BlockState p_60063_) {
-        BlockPos blockpos = p_60062_.relative(p_60063_.getValue(FACING).getOpposite());
-        BlockState blockstate = p_60061_.getBlockState(blockpos);
+    public void destroy(LevelAccessor pLevel, BlockPos pPos, BlockState pState) {
+        BlockPos blockpos = pPos.relative(pState.getValue(FACING).getOpposite());
+        BlockState blockstate = pLevel.getBlockState(blockpos);
         if (blockstate.getBlock() instanceof PistonBaseBlock && blockstate.getValue(PistonBaseBlock.EXTENDED)) {
-            p_60061_.removeBlock(blockpos, false);
+            pLevel.removeBlock(blockpos, false);
         }
     }
 
@@ -105,19 +105,19 @@ public class MovingPistonBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_60099_, BlockGetter p_60100_, BlockPos p_60101_, CollisionContext p_60102_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return Shapes.empty();
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState p_60104_, BlockGetter p_60105_, BlockPos p_60106_, CollisionContext p_60107_) {
-        PistonMovingBlockEntity pistonmovingblockentity = this.getBlockEntity(p_60105_, p_60106_);
-        return pistonmovingblockentity != null ? pistonmovingblockentity.getCollisionShape(p_60105_, p_60106_) : Shapes.empty();
+    protected VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        PistonMovingBlockEntity pistonmovingblockentity = this.getBlockEntity(pLevel, pPos);
+        return pistonmovingblockentity != null ? pistonmovingblockentity.getCollisionShape(pLevel, pPos) : Shapes.empty();
     }
 
     @Nullable
-    private PistonMovingBlockEntity getBlockEntity(BlockGetter p_60054_, BlockPos p_60055_) {
-        BlockEntity blockentity = p_60054_.getBlockEntity(p_60055_);
+    private PistonMovingBlockEntity getBlockEntity(BlockGetter pBlockReader, BlockPos pPos) {
+        BlockEntity blockentity = pBlockReader.getBlockEntity(pPos);
         return blockentity instanceof PistonMovingBlockEntity ? (PistonMovingBlockEntity)blockentity : null;
     }
 
@@ -132,18 +132,18 @@ public class MovingPistonBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState p_60086_, Rotation p_60087_) {
-        return p_60086_.setValue(FACING, p_60087_.rotate(p_60086_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRot) {
+        return pState.setValue(FACING, pRot.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_60083_, Mirror p_60084_) {
-        return p_60083_.rotate(p_60084_.getRotation(p_60083_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_60097_) {
-        p_60097_.add(FACING, TYPE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, TYPE);
     }
 
     @Override

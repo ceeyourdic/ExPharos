@@ -22,7 +22,7 @@ public record ClientboundSetTimePacket(long gameTime, long dayTime, boolean tick
         return GamePacketTypes.CLIENTBOUND_SET_TIME;
     }
 
-    public void handle(ClientGamePacketListener p_133357_) {
-        p_133357_.handleSetTime(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleSetTime(this);
     }
 }

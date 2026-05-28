@@ -11,13 +11,13 @@ public record ClientboundDebugSamplePacket(long[] sample, RemoteDebugSampleType 
         ClientboundDebugSamplePacket::write, ClientboundDebugSamplePacket::new
     );
 
-    private ClientboundDebugSamplePacket(FriendlyByteBuf p_330326_) {
-        this(p_330326_.readLongArray(), p_330326_.readEnum(RemoteDebugSampleType.class));
+    private ClientboundDebugSamplePacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readLongArray(), pBuffer.readEnum(RemoteDebugSampleType.class));
     }
 
-    private void write(FriendlyByteBuf p_330431_) {
-        p_330431_.writeLongArray(this.sample);
-        p_330431_.writeEnum(this.debugSampleType);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeLongArray(this.sample);
+        pBuffer.writeEnum(this.debugSampleType);
     }
 
     @Override

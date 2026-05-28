@@ -10,7 +10,7 @@ public class BedItem extends BlockItem {
     }
 
     @Override
-    protected boolean placeBlock(BlockPlaceContext p_40561_, BlockState p_40562_) {
-        return p_40561_.getLevel().setBlock(p_40561_.getClickedPos(), p_40562_, 26);
+    protected boolean placeBlock(BlockPlaceContext pContext, BlockState pState) {
+        return pContext.getLevel().setBlock(pContext.getClickedPos(), pState, 26);
     }
 }

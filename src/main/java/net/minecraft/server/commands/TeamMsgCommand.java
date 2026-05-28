@@ -26,8 +26,8 @@ public class TeamMsgCommand {
         .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/teammsg "));
     private static final SimpleCommandExceptionType ERROR_NOT_ON_TEAM = new SimpleCommandExceptionType(Component.translatable("commands.teammsg.failed.noteam"));
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_139000_) {
-        LiteralCommandNode<CommandSourceStack> literalcommandnode = p_139000_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        LiteralCommandNode<CommandSourceStack> literalcommandnode = pDispatcher.register(
             Commands.literal("teammsg")
                 .then(
                     Commands.argument("message", MessageArgument.message())
@@ -57,27 +57,27 @@ public class TeamMsgCommand {
                         )
                 )
         );
-        p_139000_.register(Commands.literal("tm").redirect(literalcommandnode));
+        pDispatcher.register(Commands.literal("tm").redirect(literalcommandnode));
     }
 
     private static void sendMessage(
-        CommandSourceStack p_248778_, Entity p_248891_, PlayerTeam p_250504_, List<ServerPlayer> p_249706_, PlayerChatMessage p_249707_
+        CommandSourceStack pSource, Entity pSender, PlayerTeam pTeam, List<ServerPlayer> pTeamMembers, PlayerChatMessage pChatMessage
     ) {
-        Component component = p_250504_.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
-        ChatType.Bound chattype$bound = ChatType.bind(ChatType.TEAM_MSG_COMMAND_INCOMING, p_248778_).withTargetName(component);
-        ChatType.Bound chattype$bound1 = ChatType.bind(ChatType.TEAM_MSG_COMMAND_OUTGOING, p_248778_).withTargetName(component);
-        OutgoingChatMessage outgoingchatmessage = OutgoingChatMessage.create(p_249707_);
+        Component component = pTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
+        ChatType.Bound chattype$bound = ChatType.bind(ChatType.TEAM_MSG_COMMAND_INCOMING, pSource).withTargetName(component);
+        ChatType.Bound chattype$bound1 = ChatType.bind(ChatType.TEAM_MSG_COMMAND_OUTGOING, pSource).withTargetName(component);
+        OutgoingChatMessage outgoingchatmessage = OutgoingChatMessage.create(pChatMessage);
         boolean flag = false;
 
-        for (ServerPlayer serverplayer : p_249706_) {
-            ChatType.Bound chattype$bound2 = serverplayer == p_248891_ ? chattype$bound1 : chattype$bound;
-            boolean flag1 = p_248778_.shouldFilterMessageTo(serverplayer);
+        for (ServerPlayer serverplayer : pTeamMembers) {
+            ChatType.Bound chattype$bound2 = serverplayer == pSender ? chattype$bound1 : chattype$bound;
+            boolean flag1 = pSource.shouldFilterMessageTo(serverplayer);
             serverplayer.sendChatMessage(outgoingchatmessage, flag1, chattype$bound2);
-            flag |= flag1 && p_249707_.isFullyFiltered();
+            flag |= flag1 && pChatMessage.isFullyFiltered();
         }
 
         if (flag) {
-            p_248778_.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
+            pSource.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
         }
     }
 }

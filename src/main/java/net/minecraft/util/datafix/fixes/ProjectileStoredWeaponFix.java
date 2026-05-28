@@ -13,8 +13,8 @@ import net.minecraft.Util;
 import net.minecraft.util.datafix.ExtraDataFixUtils;
 
 public class ProjectileStoredWeaponFix extends DataFix {
-    public ProjectileStoredWeaponFix(Schema p_343496_) {
-        super(p_343496_, true);
+    public ProjectileStoredWeaponFix(Schema pOutputSchema) {
+        super(pOutputSchema, true);
     }
 
     @Override
@@ -26,14 +26,14 @@ public class ProjectileStoredWeaponFix extends DataFix {
         );
     }
 
-    private Function<Typed<?>, Typed<?>> fixChoice(String p_344208_) {
-        Type<?> type = this.getInputSchema().getChoiceType(References.ENTITY, p_344208_);
-        Type<?> type1 = this.getOutputSchema().getChoiceType(References.ENTITY, p_344208_);
-        return fixChoiceCap(p_344208_, type, type1);
+    private Function<Typed<?>, Typed<?>> fixChoice(String pEntityId) {
+        Type<?> type = this.getInputSchema().getChoiceType(References.ENTITY, pEntityId);
+        Type<?> type1 = this.getOutputSchema().getChoiceType(References.ENTITY, pEntityId);
+        return fixChoiceCap(pEntityId, type, type1);
     }
 
-    private static <T> Function<Typed<?>, Typed<?>> fixChoiceCap(String p_344095_, Type<?> p_343078_, Type<T> p_343868_) {
-        OpticFinder<?> opticfinder = DSL.namedChoice(p_344095_, p_343078_);
-        return p_344956_ -> p_344956_.updateTyped(opticfinder, p_343868_, p_344764_ -> Util.writeAndReadTypedOrThrow(p_344764_, p_343868_, UnaryOperator.identity()));
+    private static <T> Function<Typed<?>, Typed<?>> fixChoiceCap(String pEntityId, Type<?> pInputType, Type<T> pOutputType) {
+        OpticFinder<?> opticfinder = DSL.namedChoice(pEntityId, pInputType);
+        return p_344956_ -> p_344956_.updateTyped(opticfinder, pOutputType, p_344764_ -> Util.writeAndReadTypedOrThrow(p_344764_, pOutputType, UnaryOperator.identity()));
     }
 }

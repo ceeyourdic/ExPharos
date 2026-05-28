@@ -75,20 +75,20 @@ public abstract class EntityLootSubProvider implements LootTableSubProvider {
         );
     }
 
-    protected EntityLootSubProvider(FeatureFlagSet p_251971_, HolderLookup.Provider p_343057_) {
-        this(p_251971_, p_251971_, p_343057_);
+    protected EntityLootSubProvider(FeatureFlagSet pRequired, HolderLookup.Provider pRegistries) {
+        this(pRequired, pRequired, pRegistries);
     }
 
-    protected EntityLootSubProvider(FeatureFlagSet p_266989_, FeatureFlagSet p_267138_, HolderLookup.Provider p_342748_) {
-        this.allowed = p_266989_;
-        this.required = p_267138_;
-        this.registries = p_342748_;
+    protected EntityLootSubProvider(FeatureFlagSet pAllowed, FeatureFlagSet pRequired, HolderLookup.Provider pRegistries) {
+        this.allowed = pAllowed;
+        this.required = pRequired;
+        this.registries = pRegistries;
     }
 
-    public static LootPool.Builder createSheepDispatchPool(Map<DyeColor, ResourceKey<LootTable>> p_362310_) {
+    public static LootPool.Builder createSheepDispatchPool(Map<DyeColor, ResourceKey<LootTable>> pLootTables) {
         AlternativesEntry.Builder alternativesentry$builder = AlternativesEntry.alternatives();
 
-        for (Entry<DyeColor, ResourceKey<LootTable>> entry : p_362310_.entrySet()) {
+        for (Entry<DyeColor, ResourceKey<LootTable>> entry : pLootTables.entrySet()) {
             alternativesentry$builder = alternativesentry$builder.otherwise(
                 NestedLootTable.lootTableReference(entry.getValue())
                     .when(
@@ -157,28 +157,28 @@ public abstract class EntityLootSubProvider implements LootTableSubProvider {
         }
     }
 
-    protected LootItemCondition.Builder killedByFrog(HolderGetter<EntityType<?>> p_369169_) {
+    protected LootItemCondition.Builder killedByFrog(HolderGetter<EntityType<?>> pEntityTypeRegistry) {
         return DamageSourceCondition.hasDamageSource(
-            DamageSourcePredicate.Builder.damageType().source(EntityPredicate.Builder.entity().of(p_369169_, EntityType.FROG))
+            DamageSourcePredicate.Builder.damageType().source(EntityPredicate.Builder.entity().of(pEntityTypeRegistry, EntityType.FROG))
         );
     }
 
-    protected LootItemCondition.Builder killedByFrogVariant(HolderGetter<EntityType<?>> p_364902_, ResourceKey<FrogVariant> p_330466_) {
+    protected LootItemCondition.Builder killedByFrogVariant(HolderGetter<EntityType<?>> pEntityTypeRegistry, ResourceKey<FrogVariant> pFrogVariant) {
         return DamageSourceCondition.hasDamageSource(
             DamageSourcePredicate.Builder.damageType()
                 .source(
                     EntityPredicate.Builder.entity()
-                        .of(p_364902_, EntityType.FROG)
-                        .subPredicate(EntitySubPredicates.frogVariant(BuiltInRegistries.FROG_VARIANT.getOrThrow(p_330466_)))
+                        .of(pEntityTypeRegistry, EntityType.FROG)
+                        .subPredicate(EntitySubPredicates.frogVariant(BuiltInRegistries.FROG_VARIANT.getOrThrow(pFrogVariant)))
                 )
         );
     }
 
-    protected void add(EntityType<?> p_248740_, LootTable.Builder p_249440_) {
-        this.add(p_248740_, p_248740_.getDefaultLootTable().orElseThrow(() -> new IllegalStateException("Entity " + p_248740_ + " has no loot table")), p_249440_);
+    protected void add(EntityType<?> pEntityType, LootTable.Builder pBuilder) {
+        this.add(pEntityType, pEntityType.getDefaultLootTable().orElseThrow(() -> new IllegalStateException("Entity " + pEntityType + " has no loot table")), pBuilder);
     }
 
-    protected void add(EntityType<?> p_252130_, ResourceKey<LootTable> p_332898_, LootTable.Builder p_249357_) {
-        this.map.computeIfAbsent(p_252130_, p_251466_ -> new HashMap<>()).put(p_332898_, p_249357_);
+    protected void add(EntityType<?> pEntityType, ResourceKey<LootTable> pDefaultLootTable, LootTable.Builder pBuilder) {
+        this.map.computeIfAbsent(pEntityType, p_251466_ -> new HashMap<>()).put(pDefaultLootTable, pBuilder);
     }
 }

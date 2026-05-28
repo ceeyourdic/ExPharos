@@ -17,13 +17,13 @@ public class Cursor3D {
     private int y;
     private int z;
 
-    public Cursor3D(int p_122298_, int p_122299_, int p_122300_, int p_122301_, int p_122302_, int p_122303_) {
-        this.originX = p_122298_;
-        this.originY = p_122299_;
-        this.originZ = p_122300_;
-        this.width = p_122301_ - p_122298_ + 1;
-        this.height = p_122302_ - p_122299_ + 1;
-        this.depth = p_122303_ - p_122300_ + 1;
+    public Cursor3D(int pOriginX, int pOriginY, int pOriginZ, int pEndX, int pEndY, int pEndZ) {
+        this.originX = pOriginX;
+        this.originY = pOriginY;
+        this.originZ = pOriginZ;
+        this.width = pEndX - pOriginX + 1;
+        this.height = pEndY - pOriginY + 1;
+        this.depth = pEndZ - pOriginZ + 1;
         this.end = this.width * this.height * this.depth;
     }
 

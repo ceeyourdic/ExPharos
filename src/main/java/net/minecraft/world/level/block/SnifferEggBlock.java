@@ -53,12 +53,12 @@ public class SnifferEggBlock extends Block {
         return SHAPE;
     }
 
-    public int getHatchLevel(BlockState p_279125_) {
-        return p_279125_.getValue(HATCH);
+    public int getHatchLevel(BlockState pState) {
+        return pState.getValue(HATCH);
     }
 
-    private boolean isReadyToHatch(BlockState p_278021_) {
-        return this.getHatchLevel(p_278021_) == 2;
+    private boolean isReadyToHatch(BlockState pState) {
+        return this.getHatchLevel(pState) == 2;
     }
 
     @Override
@@ -97,7 +97,7 @@ public class SnifferEggBlock extends Block {
         return false;
     }
 
-    public static boolean hatchBoost(BlockGetter p_277485_, BlockPos p_278065_) {
-        return p_277485_.getBlockState(p_278065_.below()).is(BlockTags.SNIFFER_EGG_HATCH_BOOST);
+    public static boolean hatchBoost(BlockGetter pLevel, BlockPos pPos) {
+        return pLevel.getBlockState(pPos.below()).is(BlockTags.SNIFFER_EGG_HATCH_BOOST);
     }
 }

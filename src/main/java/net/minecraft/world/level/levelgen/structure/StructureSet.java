@@ -20,16 +20,16 @@ public record StructureSet(List<StructureSet.StructureSelectionEntry> structures
     );
     public static final Codec<Holder<StructureSet>> CODEC = RegistryFileCodec.create(Registries.STRUCTURE_SET, DIRECT_CODEC);
 
-    public StructureSet(Holder<Structure> p_210007_, StructurePlacement p_210008_) {
-        this(List.of(new StructureSet.StructureSelectionEntry(p_210007_, 1)), p_210008_);
+    public StructureSet(Holder<Structure> pStructure, StructurePlacement pPlacement) {
+        this(List.of(new StructureSet.StructureSelectionEntry(pStructure, 1)), pPlacement);
     }
 
-    public static StructureSet.StructureSelectionEntry entry(Holder<Structure> p_210018_, int p_210019_) {
-        return new StructureSet.StructureSelectionEntry(p_210018_, p_210019_);
+    public static StructureSet.StructureSelectionEntry entry(Holder<Structure> pStructure, int pWeight) {
+        return new StructureSet.StructureSelectionEntry(pStructure, pWeight);
     }
 
-    public static StructureSet.StructureSelectionEntry entry(Holder<Structure> p_210016_) {
-        return new StructureSet.StructureSelectionEntry(p_210016_, 1);
+    public static StructureSet.StructureSelectionEntry entry(Holder<Structure> pStructure) {
+        return new StructureSet.StructureSelectionEntry(pStructure, 1);
     }
 
     public static record StructureSelectionEntry(Holder<Structure> structure, int weight) {

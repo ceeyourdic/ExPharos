@@ -16,9 +16,9 @@ import net.minecraft.util.datafix.ExtraDataFixUtils;
 public abstract class EntityRenameFix extends DataFix {
     protected final String name;
 
-    public EntityRenameFix(String p_15618_, Schema p_15619_, boolean p_15620_) {
-        super(p_15619_, p_15620_);
-        this.name = p_15618_;
+    public EntityRenameFix(String pName, Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
+        this.name = pName;
     }
 
     @Override
@@ -49,9 +49,9 @@ public abstract class EntityRenameFix extends DataFix {
         );
     }
 
-    private <A> Typed<A> getEntity(Object p_15631_, DynamicOps<?> p_15632_, Type<A> p_15633_) {
-        return new Typed<>(p_15633_, p_15632_, (A)p_15631_);
+    private <A> Typed<A> getEntity(Object pValue, DynamicOps<?> pOps, Type<A> pType) {
+        return new Typed<>(pType, pOps, (A)pValue);
     }
 
-    protected abstract Pair<String, Typed<?>> fix(String p_15634_, Typed<?> p_15635_);
+    protected abstract Pair<String, Typed<?>> fix(String pEntityName, Typed<?> pTyped);
 }

@@ -40,8 +40,8 @@ public class ChainBlock extends RotatedPillarBlock implements SimpleWaterloggedB
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_51470_, BlockGetter p_51471_, BlockPos p_51472_, CollisionContext p_51473_) {
-        switch ((Direction.Axis)p_51470_.getValue(AXIS)) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        switch ((Direction.Axis)pState.getValue(AXIS)) {
             case X:
             default:
                 return X_AXIS_AABB;
@@ -54,10 +54,10 @@ public class ChainBlock extends RotatedPillarBlock implements SimpleWaterloggedB
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_51454_) {
-        FluidState fluidstate = p_51454_.getLevel().getFluidState(p_51454_.getClickedPos());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
         boolean flag = fluidstate.getType() == Fluids.WATER;
-        return super.getStateForPlacement(p_51454_).setValue(WATERLOGGED, Boolean.valueOf(flag));
+        return super.getStateForPlacement(pContext).setValue(WATERLOGGED, Boolean.valueOf(flag));
     }
 
     @Override
@@ -79,13 +79,13 @@ public class ChainBlock extends RotatedPillarBlock implements SimpleWaterloggedB
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_51468_) {
-        p_51468_.add(WATERLOGGED).add(AXIS);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(WATERLOGGED).add(AXIS);
     }
 
     @Override
-    protected FluidState getFluidState(BlockState p_51475_) {
-        return p_51475_.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(p_51475_);
+    protected FluidState getFluidState(BlockState pState) {
+        return pState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(pState);
     }
 
     @Override

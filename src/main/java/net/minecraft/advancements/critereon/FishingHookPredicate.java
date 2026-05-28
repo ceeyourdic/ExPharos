@@ -18,8 +18,8 @@ public record FishingHookPredicate(Optional<Boolean> inOpenWater) implements Ent
                 .apply(p_325213_, FishingHookPredicate::new)
     );
 
-    public static FishingHookPredicate inOpenWater(boolean p_39767_) {
-        return new FishingHookPredicate(Optional.of(p_39767_));
+    public static FishingHookPredicate inOpenWater(boolean pInOpenWater) {
+        return new FishingHookPredicate(Optional.of(pInOpenWater));
     }
 
     @Override

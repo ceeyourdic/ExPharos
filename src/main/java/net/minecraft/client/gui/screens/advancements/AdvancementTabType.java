@@ -77,38 +77,38 @@ enum AdvancementTabType {
     private final int max;
 
     private AdvancementTabType(
-        final AdvancementTabType.Sprites p_300993_, final AdvancementTabType.Sprites p_299630_, final int p_97205_, final int p_97206_, final int p_97207_
+        final AdvancementTabType.Sprites pSelectedSprites, final AdvancementTabType.Sprites pUnselectedSprites, final int pWidth, final int pHeight, final int pMax
     ) {
-        this.selectedSprites = p_300993_;
-        this.unselectedSprites = p_299630_;
-        this.width = p_97205_;
-        this.height = p_97206_;
-        this.max = p_97207_;
+        this.selectedSprites = pSelectedSprites;
+        this.unselectedSprites = pUnselectedSprites;
+        this.width = pWidth;
+        this.height = pHeight;
+        this.max = pMax;
     }
 
     public int getMax() {
         return this.max;
     }
 
-    public void draw(GuiGraphics p_283216_, int p_282432_, int p_283617_, boolean p_282320_, int p_281898_) {
-        AdvancementTabType.Sprites advancementtabtype$sprites = p_282320_ ? this.selectedSprites : this.unselectedSprites;
+    public void draw(GuiGraphics pGuiGraphics, int pOffsetX, int pOffsetY, boolean pIsSelected, int pIndex) {
+        AdvancementTabType.Sprites advancementtabtype$sprites = pIsSelected ? this.selectedSprites : this.unselectedSprites;
         ResourceLocation resourcelocation;
-        if (p_281898_ == 0) {
+        if (pIndex == 0) {
             resourcelocation = advancementtabtype$sprites.first();
-        } else if (p_281898_ == this.max - 1) {
+        } else if (pIndex == this.max - 1) {
             resourcelocation = advancementtabtype$sprites.last();
         } else {
             resourcelocation = advancementtabtype$sprites.middle();
         }
 
-        p_283216_.blitSprite(
-            RenderType::guiTextured, resourcelocation, p_282432_ + this.getX(p_281898_), p_283617_ + this.getY(p_281898_), this.width, this.height
+        pGuiGraphics.blitSprite(
+            RenderType::guiTextured, resourcelocation, pOffsetX + this.getX(pIndex), pOffsetY + this.getY(pIndex), this.width, this.height
         );
     }
 
-    public void drawIcon(GuiGraphics p_281370_, int p_283209_, int p_282807_, int p_282968_, ItemStack p_283383_) {
-        int i = p_283209_ + this.getX(p_282968_);
-        int j = p_282807_ + this.getY(p_282968_);
+    public void drawIcon(GuiGraphics pGuiGraphics, int pOffsetX, int pOffsetY, int pIndex, ItemStack pStack) {
+        int i = pOffsetX + this.getX(pIndex);
+        int j = pOffsetY + this.getY(pIndex);
         switch (this) {
             case ABOVE:
                 i += 6;
@@ -127,15 +127,15 @@ enum AdvancementTabType {
                 j += 5;
         }
 
-        p_281370_.renderFakeItem(p_283383_, i, j);
+        pGuiGraphics.renderFakeItem(pStack, i, j);
     }
 
-    public int getX(int p_97212_) {
+    public int getX(int pIndex) {
         switch (this) {
             case ABOVE:
-                return (this.width + 4) * p_97212_;
+                return (this.width + 4) * pIndex;
             case BELOW:
-                return (this.width + 4) * p_97212_;
+                return (this.width + 4) * pIndex;
             case LEFT:
                 return -this.width + 4;
             case RIGHT:
@@ -145,25 +145,25 @@ enum AdvancementTabType {
         }
     }
 
-    public int getY(int p_97233_) {
+    public int getY(int pIndex) {
         switch (this) {
             case ABOVE:
                 return -this.height + 4;
             case BELOW:
                 return 136;
             case LEFT:
-                return this.height * p_97233_;
+                return this.height * pIndex;
             case RIGHT:
-                return this.height * p_97233_;
+                return this.height * pIndex;
             default:
                 throw new UnsupportedOperationException("Don't know what this tab type is!" + this);
         }
     }
 
-    public boolean isMouseOver(int p_97214_, int p_97215_, int p_97216_, double p_97217_, double p_97218_) {
-        int i = p_97214_ + this.getX(p_97216_);
-        int j = p_97215_ + this.getY(p_97216_);
-        return p_97217_ > (double)i && p_97217_ < (double)(i + this.width) && p_97218_ > (double)j && p_97218_ < (double)(j + this.height);
+    public boolean isMouseOver(int pOffsetX, int pOffsetY, int pIndex, double pMouseX, double pMouseY) {
+        int i = pOffsetX + this.getX(pIndex);
+        int j = pOffsetY + this.getY(pIndex);
+        return pMouseX > (double)i && pMouseX < (double)(i + this.width) && pMouseY > (double)j && pMouseY < (double)(j + this.height);
     }
 
     @OnlyIn(Dist.CLIENT)

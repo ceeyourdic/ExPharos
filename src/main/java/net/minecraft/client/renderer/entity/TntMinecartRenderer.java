@@ -9,10 +9,9 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.shaders.Shaders;
 
-@OnlyIn(Dist.CLIENT)
 public class TntMinecartRenderer extends AbstractMinecartRenderer<MinecartTNT, MinecartTntRenderState> {
     private final BlockRenderDispatcher blockRenderer;
 
@@ -36,16 +35,23 @@ public class TntMinecartRenderer extends AbstractMinecartRenderer<MinecartTNT, M
     }
 
     public static void renderWhiteSolidBlock(
-        BlockRenderDispatcher p_234662_, BlockState p_234663_, PoseStack p_234664_, MultiBufferSource p_234665_, int p_234666_, boolean p_234667_
+        BlockRenderDispatcher pBlockRenderDispatcher, BlockState pState, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, boolean pWhiteOverlay
     ) {
         int i;
-        if (p_234667_) {
+        if (pWhiteOverlay) {
             i = OverlayTexture.pack(OverlayTexture.u(1.0F), 10);
         } else {
             i = OverlayTexture.NO_OVERLAY;
         }
 
-        p_234662_.renderSingleBlock(p_234663_, p_234664_, p_234665_, p_234666_, i);
+        if (Config.isShaders() && pWhiteOverlay) {
+            Shaders.setEntityColor(1.0F, 1.0F, 1.0F, 0.5F);
+        }
+
+        pBlockRenderDispatcher.renderSingleBlock(pState, pPoseStack, pBuffer, pPackedLight, i);
+        if (Config.isShaders()) {
+            Shaders.setEntityColor(0.0F, 0.0F, 0.0F, 0.0F);
+        }
     }
 
     public MinecartTntRenderState createRenderState() {

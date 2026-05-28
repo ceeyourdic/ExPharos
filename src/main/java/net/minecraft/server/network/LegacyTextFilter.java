@@ -25,28 +25,28 @@ public class LegacyTextFilter extends ServerTextFilter {
     private final String authKey;
 
     private LegacyTextFilter(
-        URL p_366922_,
-        ServerTextFilter.MessageEncoder p_362103_,
-        URL p_369617_,
-        LegacyTextFilter.JoinOrLeaveEncoder p_364840_,
-        URL p_367665_,
-        LegacyTextFilter.JoinOrLeaveEncoder p_365794_,
-        String p_363705_,
-        ServerTextFilter.IgnoreStrategy p_368934_,
-        ExecutorService p_369275_
+        URL pChatEndpoint,
+        ServerTextFilter.MessageEncoder pChatEncoder,
+        URL pJoinEndpoint,
+        LegacyTextFilter.JoinOrLeaveEncoder pJoinEncoder,
+        URL pLeaveEndpoint,
+        LegacyTextFilter.JoinOrLeaveEncoder pLeaveEncoder,
+        String pAuthKey,
+        ServerTextFilter.IgnoreStrategy pChatIgnoreStrategy,
+        ExecutorService pWorkerPool
     ) {
-        super(p_366922_, p_362103_, p_368934_, p_369275_);
-        this.joinEndpoint = p_369617_;
-        this.joinEncoder = p_364840_;
-        this.leaveEndpoint = p_367665_;
-        this.leaveEncoder = p_365794_;
-        this.authKey = p_363705_;
+        super(pChatEndpoint, pChatEncoder, pChatIgnoreStrategy, pWorkerPool);
+        this.joinEndpoint = pJoinEndpoint;
+        this.joinEncoder = pJoinEncoder;
+        this.leaveEndpoint = pLeaveEndpoint;
+        this.leaveEncoder = pLeaveEncoder;
+        this.authKey = pAuthKey;
     }
 
     @Nullable
-    public static ServerTextFilter createTextFilterFromConfig(String p_364392_) {
+    public static ServerTextFilter createTextFilterFromConfig(String pConfig) {
         try {
-            JsonObject jsonobject = GsonHelper.parse(p_364392_);
+            JsonObject jsonobject = GsonHelper.parse(pConfig);
             URI uri = new URI(GsonHelper.getAsString(jsonobject, "apiServer"));
             String s = GsonHelper.getAsString(jsonobject, "apiKey");
             if (s.isEmpty()) {
@@ -115,7 +115,7 @@ public class LegacyTextFilter extends ServerTextFilter {
                 );
             }
         } catch (Exception exception) {
-            LOGGER.warn("Failed to parse chat filter config {}", p_364392_, exception);
+            LOGGER.warn("Failed to parse chat filter config {}", pConfig, exception);
             return null;
         }
     }
@@ -135,20 +135,20 @@ public class LegacyTextFilter extends ServerTextFilter {
         };
     }
 
-    void processJoinOrLeave(GameProfile p_365389_, URL p_361745_, LegacyTextFilter.JoinOrLeaveEncoder p_361630_, Executor p_362353_) {
-        p_362353_.execute(() -> {
-            JsonObject jsonobject = p_361630_.encode(p_365389_);
+    void processJoinOrLeave(GameProfile pProfile, URL pEndpoint, LegacyTextFilter.JoinOrLeaveEncoder pEncoder, Executor pStreamExecutor) {
+        pStreamExecutor.execute(() -> {
+            JsonObject jsonobject = pEncoder.encode(pProfile);
 
             try {
-                this.processRequest(jsonobject, p_361745_);
+                this.processRequest(jsonobject, pEndpoint);
             } catch (Exception exception) {
-                LOGGER.warn("Failed to send join/leave packet to {} for player {}", p_361745_, p_365389_, exception);
+                LOGGER.warn("Failed to send join/leave packet to {} for player {}", pEndpoint, pProfile, exception);
             }
         });
     }
 
-    private void processRequest(JsonObject p_365130_, URL p_369729_) throws IOException {
-        HttpURLConnection httpurlconnection = this.makeRequest(p_365130_, p_369729_);
+    private void processRequest(JsonObject pRequest, URL pEndpoint) throws IOException {
+        HttpURLConnection httpurlconnection = this.makeRequest(pRequest, pEndpoint);
 
         try (InputStream inputstream = httpurlconnection.getInputStream()) {
             this.drainStream(inputstream);
@@ -179,6 +179,6 @@ public class LegacyTextFilter extends ServerTextFilter {
 
     @FunctionalInterface
     interface JoinOrLeaveEncoder {
-        JsonObject encode(GameProfile p_365193_);
+        JsonObject encode(GameProfile pProfile);
     }
 }

@@ -12,8 +12,8 @@ public class UploadStatus {
     private long previousBytesWritten;
     private long bytesPerSecond;
 
-    public void setTotalBytes(long p_363757_) {
-        this.totalBytes = p_363757_;
+    public void setTotalBytes(long pTotalBytes) {
+        this.totalBytes = pTotalBytes;
     }
 
     public long getTotalBytes() {
@@ -24,8 +24,8 @@ public class UploadStatus {
         return this.bytesWritten;
     }
 
-    public void onWrite(long p_368608_) {
-        this.bytesWritten += p_368608_;
+    public void onWrite(long pBytes) {
+        this.bytesWritten += pBytes;
     }
 
     public boolean uploadStarted() {

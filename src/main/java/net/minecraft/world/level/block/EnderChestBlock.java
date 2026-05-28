@@ -58,20 +58,20 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 
     @Override
     public DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> combine(
-        BlockState p_53149_, Level p_53150_, BlockPos p_53151_, boolean p_53152_
+        BlockState pState, Level pLevel, BlockPos pPos, boolean pOverride
     ) {
         return DoubleBlockCombiner.Combiner::acceptNone;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_53171_, BlockGetter p_53172_, BlockPos p_53173_, CollisionContext p_53174_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_53128_) {
-        FluidState fluidstate = p_53128_.getLevel().getFluidState(p_53128_.getClickedPos());
-        return this.defaultBlockState().setValue(FACING, p_53128_.getHorizontalDirection().getOpposite()).setValue(WATERLOGGED, Boolean.valueOf(fluidstate.getType() == Fluids.WATER));
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
+        return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite()).setValue(WATERLOGGED, Boolean.valueOf(fluidstate.getType() == Fluids.WATER));
     }
 
     @Override
@@ -125,23 +125,23 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
     }
 
     @Override
-    protected BlockState rotate(BlockState p_53157_, Rotation p_53158_) {
-        return p_53157_.setValue(FACING, p_53158_.rotate(p_53157_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRot) {
+        return pState.setValue(FACING, pRot.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_53154_, Mirror p_53155_) {
-        return p_53154_.rotate(p_53155_.getRotation(p_53154_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_53167_) {
-        p_53167_.add(FACING, WATERLOGGED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, WATERLOGGED);
     }
 
     @Override
-    protected FluidState getFluidState(BlockState p_53177_) {
-        return p_53177_.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(p_53177_);
+    protected FluidState getFluidState(BlockState pState) {
+        return pState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(pState);
     }
 
     @Override

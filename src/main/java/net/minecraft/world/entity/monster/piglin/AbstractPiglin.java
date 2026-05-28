@@ -42,8 +42,8 @@ public abstract class AbstractPiglin extends Monster {
 
     protected abstract boolean canHunt();
 
-    public void setImmuneToZombification(boolean p_34671_) {
-        this.getEntityData().set(DATA_IMMUNE_TO_ZOMBIFICATION, p_34671_);
+    public void setImmuneToZombification(boolean pImmuneToZombification) {
+        this.getEntityData().set(DATA_IMMUNE_TO_ZOMBIFICATION, pImmuneToZombification);
     }
 
     protected boolean isImmuneToZombification() {
@@ -57,20 +57,20 @@ public abstract class AbstractPiglin extends Monster {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_34661_) {
-        super.addAdditionalSaveData(p_34661_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
         if (this.isImmuneToZombification()) {
-            p_34661_.putBoolean("IsImmuneToZombification", true);
+            pCompound.putBoolean("IsImmuneToZombification", true);
         }
 
-        p_34661_.putInt("TimeInOverworld", this.timeInOverworld);
+        pCompound.putInt("TimeInOverworld", this.timeInOverworld);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_34659_) {
-        super.readAdditionalSaveData(p_34659_);
-        this.setImmuneToZombification(p_34659_.getBoolean("IsImmuneToZombification"));
-        this.timeInOverworld = p_34659_.getInt("TimeInOverworld");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setImmuneToZombification(pCompound.getBoolean("IsImmuneToZombification"));
+        this.timeInOverworld = pCompound.getInt("TimeInOverworld");
     }
 
     @Override
@@ -89,15 +89,15 @@ public abstract class AbstractPiglin extends Monster {
     }
 
     @VisibleForTesting
-    public void setTimeInOverworld(int p_367590_) {
-        this.timeInOverworld = p_367590_;
+    public void setTimeInOverworld(int pTimeInOverworld) {
+        this.timeInOverworld = pTimeInOverworld;
     }
 
     public boolean isConverting() {
         return !this.level().dimensionType().piglinSafe() && !this.isImmuneToZombification() && !this.isNoAi();
     }
 
-    protected void finishConversion(ServerLevel p_34663_) {
+    protected void finishConversion(ServerLevel pServerLevel) {
         this.convertTo(
             EntityType.ZOMBIFIED_PIGLIN,
             ConversionParams.single(this, true, true),

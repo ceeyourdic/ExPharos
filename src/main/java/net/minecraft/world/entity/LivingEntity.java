@@ -11,6 +11,11 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
+import cn.lazymoon.Client;
+import cn.lazymoon.component.rotation.RotationComponent;
+import cn.lazymoon.event.impl.player.JumpEvent;
+import cn.lazymoon.features.module.impl.visual.Animations;
+import cn.lazymoon.features.module.impl.visual.AntiBlind;
 import it.unimi.dsi.fastutil.doubles.DoubleDoubleImmutablePair;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
@@ -30,6 +35,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.BlockUtil;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -245,6 +251,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
     protected int fallFlyTicks;
     private BlockPos lastPos;
     private Optional<BlockPos> lastClimbablePos = Optional.empty();
+    private JumpEvent arcane$jumpEvent;
+    private float arcane$preJumpYaw;
     @Nullable
     private DamageSource lastDamageSource;
     private long lastDamageStamp;
@@ -281,8 +289,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return Brain.provider(ImmutableList.of(), ImmutableList.of());
     }
 
-    protected Brain<?> makeBrain(Dynamic<?> p_21069_) {
-        return this.brainProvider().makeBrain(p_21069_);
+    protected Brain<?> makeBrain(Dynamic<?> pDynamic) {
+        return this.brainProvider().makeBrain(pDynamic);
     }
 
     @Override
@@ -290,7 +298,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
         this.hurtServer(p_367431_, this.damageSources().genericKill(), Float.MAX_VALUE);
     }
 
-    public boolean canAttackType(EntityType<?> p_21032_) {
+    public boolean canAttackType(EntityType<?> pEntityType) {
         return true;
     }
 
@@ -328,36 +336,36 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
 
     @Override
-    protected void checkFallDamage(double p_20990_, boolean p_20991_, BlockState p_20992_, BlockPos p_20993_) {
+    protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {
         if (!this.isInWater()) {
             this.updateInWaterStateAndDoWaterCurrentPushing();
         }
 
-        if (this.level() instanceof ServerLevel serverlevel && p_20991_ && this.fallDistance > 0.0F) {
-            this.onChangedBlock(serverlevel, p_20993_);
+        if (this.level() instanceof ServerLevel serverlevel && pOnGround && this.fallDistance > 0.0F) {
+            this.onChangedBlock(serverlevel, pPos);
             double d7 = this.getAttributeValue(Attributes.SAFE_FALL_DISTANCE);
-            if ((double)this.fallDistance > d7 && !p_20992_.isAir()) {
+            if ((double)this.fallDistance > d7 && !pState.isAir()) {
                 double d0 = this.getX();
                 double d1 = this.getY();
                 double d2 = this.getZ();
                 BlockPos blockpos = this.blockPosition();
-                if (p_20993_.getX() != blockpos.getX() || p_20993_.getZ() != blockpos.getZ()) {
-                    double d3 = d0 - (double)p_20993_.getX() - 0.5;
-                    double d5 = d2 - (double)p_20993_.getZ() - 0.5;
+                if (pPos.getX() != blockpos.getX() || pPos.getZ() != blockpos.getZ()) {
+                    double d3 = d0 - (double)pPos.getX() - 0.5;
+                    double d5 = d2 - (double)pPos.getZ() - 0.5;
                     double d6 = Math.max(Math.abs(d3), Math.abs(d5));
-                    d0 = (double)p_20993_.getX() + 0.5 + d3 / d6 * 0.5;
-                    d2 = (double)p_20993_.getZ() + 0.5 + d5 / d6 * 0.5;
+                    d0 = (double)pPos.getX() + 0.5 + d3 / d6 * 0.5;
+                    d2 = (double)pPos.getZ() + 0.5 + d5 / d6 * 0.5;
                 }
 
                 float f = (float)Mth.ceil((double)this.fallDistance - d7);
                 double d4 = Math.min((double)(0.2F + f / 15.0F), 2.5);
                 int i = (int)(150.0 * d4);
-                serverlevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, p_20992_), d0, d1, d2, i, 0.0, 0.0, 0.0, 0.15F);
+                serverlevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, pState), d0, d1, d2, i, 0.0, 0.0, 0.0, 0.15F);
             }
         }
 
-        super.checkFallDamage(p_20990_, p_20991_, p_20992_, p_20993_);
-        if (p_20991_) {
+        super.checkFallDamage(pY, pOnGround, pState, pPos);
+        if (pOnGround) {
             this.lastClimbablePos = Optional.empty();
         }
     }
@@ -366,8 +374,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.getType().is(EntityTypeTags.CAN_BREATHE_UNDER_WATER);
     }
 
-    public float getSwimAmount(float p_20999_) {
-        return Mth.lerp(p_20999_, this.swimAmountO, this.swimAmount);
+    public float getSwimAmount(float pPartialTicks) {
+        return Mth.lerp(pPartialTicks, this.swimAmountO, this.swimAmount);
     }
 
     public boolean hasLandedInLiquid() {
@@ -527,8 +535,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected void onChangedBlock(ServerLevel p_343619_, BlockPos p_21175_) {
-        EnchantmentHelper.runLocationChangedEffects(p_343619_, this);
+    protected void onChangedBlock(ServerLevel pLevel, BlockPos pPos) {
+        EnchantmentHelper.runLocationChangedEffects(pLevel, this);
     }
 
     public boolean isBaby() {
@@ -544,8 +552,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return attributemap == null ? 1.0F : this.sanitizeScale((float)attributemap.getValue(Attributes.SCALE));
     }
 
-    protected float sanitizeScale(float p_330116_) {
-        return p_330116_;
+    protected float sanitizeScale(float pScale) {
+        return pScale;
     }
 
     protected boolean isAffectedByFluids() {
@@ -568,7 +576,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return !this.isBaby();
     }
 
-    protected int decreaseAirSupply(int p_21303_) {
+    protected int decreaseAirSupply(int pCurrentAir) {
         AttributeInstance attributeinstance = this.getAttribute(Attributes.OXYGEN_BONUS);
         double d0;
         if (attributeinstance != null) {
@@ -577,18 +585,18 @@ public abstract class LivingEntity extends Entity implements Attackable {
             d0 = 0.0;
         }
 
-        return d0 > 0.0 && this.random.nextDouble() >= 1.0 / (d0 + 1.0) ? p_21303_ : p_21303_ - 1;
+        return d0 > 0.0 && this.random.nextDouble() >= 1.0 / (d0 + 1.0) ? pCurrentAir : pCurrentAir - 1;
     }
 
-    protected int increaseAirSupply(int p_21307_) {
-        return Math.min(p_21307_ + 4, this.getMaxAirSupply());
+    protected int increaseAirSupply(int pCurrentAir) {
+        return Math.min(pCurrentAir + 4, this.getMaxAirSupply());
     }
 
-    public final int getExperienceReward(ServerLevel p_342563_, @Nullable Entity p_343916_) {
-        return EnchantmentHelper.processMobExperience(p_342563_, p_343916_, this, this.getBaseExperienceReward(p_342563_));
+    public final int getExperienceReward(ServerLevel pLevel, @Nullable Entity pKiller) {
+        return EnchantmentHelper.processMobExperience(pLevel, pKiller, this, this.getBaseExperienceReward(pLevel));
     }
 
-    protected int getBaseExperienceReward(ServerLevel p_361539_) {
+    protected int getBaseExperienceReward(ServerLevel pLevel) {
         return 0;
     }
 
@@ -610,13 +618,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.lastHurtByMobTimestamp;
     }
 
-    public void setLastHurtByPlayer(@Nullable Player p_21248_) {
-        this.lastHurtByPlayer = p_21248_;
+    public void setLastHurtByPlayer(@Nullable Player pPlayer) {
+        this.lastHurtByPlayer = pPlayer;
         this.lastHurtByPlayerTime = this.tickCount;
     }
 
-    public void setLastHurtByMob(@Nullable LivingEntity p_21039_) {
-        this.lastHurtByMob = p_21039_;
+    public void setLastHurtByMob(@Nullable LivingEntity pLivingEntity) {
+        this.lastHurtByMob = pLivingEntity;
         this.lastHurtByMobTimestamp = this.tickCount;
     }
 
@@ -629,9 +637,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.lastHurtMobTimestamp;
     }
 
-    public void setLastHurtMob(Entity p_21336_) {
-        if (p_21336_ instanceof LivingEntity) {
-            this.lastHurtMob = (LivingEntity)p_21336_;
+    public void setLastHurtMob(Entity pEntity) {
+        if (pEntity instanceof LivingEntity) {
+            this.lastHurtMob = (LivingEntity)pEntity;
         } else {
             this.lastHurtMob = null;
         }
@@ -643,28 +651,28 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.noActionTime;
     }
 
-    public void setNoActionTime(int p_21311_) {
-        this.noActionTime = p_21311_;
+    public void setNoActionTime(int pIdleTime) {
+        this.noActionTime = pIdleTime;
     }
 
     public boolean shouldDiscardFriction() {
         return this.discardFriction;
     }
 
-    public void setDiscardFriction(boolean p_147245_) {
-        this.discardFriction = p_147245_;
+    public void setDiscardFriction(boolean pDiscardFriction) {
+        this.discardFriction = pDiscardFriction;
     }
 
-    protected boolean doesEmitEquipEvent(EquipmentSlot p_217035_) {
+    protected boolean doesEmitEquipEvent(EquipmentSlot pSlot) {
         return true;
     }
 
-    public void onEquipItem(EquipmentSlot p_238393_, ItemStack p_238394_, ItemStack p_238395_) {
+    public void onEquipItem(EquipmentSlot pSlot, ItemStack pOldItem, ItemStack pNewItem) {
         if (!this.level().isClientSide() && !this.isSpectator()) {
-            boolean flag = p_238395_.isEmpty() && p_238394_.isEmpty();
-            if (!flag && !ItemStack.isSameItemSameComponents(p_238394_, p_238395_) && !this.firstTick) {
-                Equippable equippable = p_238395_.get(DataComponents.EQUIPPABLE);
-                if (!this.isSilent() && equippable != null && p_238393_ == equippable.slot()) {
+            boolean flag = pNewItem.isEmpty() && pOldItem.isEmpty();
+            if (!flag && !ItemStack.isSameItemSameComponents(pOldItem, pNewItem) && !this.firstTick) {
+                Equippable equippable = pNewItem.get(DataComponents.EQUIPPABLE);
+                if (!this.isSilent() && equippable != null && pSlot == equippable.slot()) {
                     this.level()
                         .playSeededSound(
                             null,
@@ -679,7 +687,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
                         );
                 }
 
-                if (this.doesEmitEquipEvent(p_238393_)) {
+                if (this.doesEmitEquipEvent(pSlot)) {
                     this.gameEvent(equippable != null ? GameEvent.EQUIP : GameEvent.UNEQUIP);
                 }
             }
@@ -696,22 +704,22 @@ public abstract class LivingEntity extends Entity implements Attackable {
         this.brain.clearMemories();
     }
 
-    protected void triggerOnDeathMobEffects(ServerLevel p_366893_, Entity.RemovalReason p_344022_) {
+    protected void triggerOnDeathMobEffects(ServerLevel pLevel, Entity.RemovalReason pRemovalReason) {
         for (MobEffectInstance mobeffectinstance : this.getActiveEffects()) {
-            mobeffectinstance.onMobRemoved(p_366893_, this, p_344022_);
+            mobeffectinstance.onMobRemoved(pLevel, this, pRemovalReason);
         }
 
         this.activeEffects.clear();
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_21145_) {
-        p_21145_.putFloat("Health", this.getHealth());
-        p_21145_.putShort("HurtTime", (short)this.hurtTime);
-        p_21145_.putInt("HurtByTimestamp", this.lastHurtByMobTimestamp);
-        p_21145_.putShort("DeathTime", (short)this.deathTime);
-        p_21145_.putFloat("AbsorptionAmount", this.getAbsorptionAmount());
-        p_21145_.put("attributes", this.getAttributes().save());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        pCompound.putFloat("Health", this.getHealth());
+        pCompound.putShort("HurtTime", (short)this.hurtTime);
+        pCompound.putInt("HurtByTimestamp", this.lastHurtByMobTimestamp);
+        pCompound.putShort("DeathTime", (short)this.deathTime);
+        pCompound.putFloat("AbsorptionAmount", this.getAbsorptionAmount());
+        pCompound.put("attributes", this.getAttributes().save());
         if (!this.activeEffects.isEmpty()) {
             ListTag listtag = new ListTag();
 
@@ -719,28 +727,28 @@ public abstract class LivingEntity extends Entity implements Attackable {
                 listtag.add(mobeffectinstance.save());
             }
 
-            p_21145_.put("active_effects", listtag);
+            pCompound.put("active_effects", listtag);
         }
 
-        p_21145_.putBoolean("FallFlying", this.isFallFlying());
+        pCompound.putBoolean("FallFlying", this.isFallFlying());
         this.getSleepingPos().ifPresent(p_21099_ -> {
-            p_21145_.putInt("SleepingX", p_21099_.getX());
-            p_21145_.putInt("SleepingY", p_21099_.getY());
-            p_21145_.putInt("SleepingZ", p_21099_.getZ());
+            pCompound.putInt("SleepingX", p_21099_.getX());
+            pCompound.putInt("SleepingY", p_21099_.getY());
+            pCompound.putInt("SleepingZ", p_21099_.getZ());
         });
         DataResult<Tag> dataresult = this.brain.serializeStart(NbtOps.INSTANCE);
-        dataresult.resultOrPartial(LOGGER::error).ifPresent(p_21102_ -> p_21145_.put("Brain", p_21102_));
+        dataresult.resultOrPartial(LOGGER::error).ifPresent(p_21102_ -> pCompound.put("Brain", p_21102_));
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_21096_) {
-        this.internalSetAbsorptionAmount(p_21096_.getFloat("AbsorptionAmount"));
-        if (p_21096_.contains("attributes", 9) && this.level() != null && !this.level().isClientSide) {
-            this.getAttributes().load(p_21096_.getList("attributes", 10));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        this.internalSetAbsorptionAmount(pCompound.getFloat("AbsorptionAmount"));
+        if (pCompound.contains("attributes", 9) && this.level() != null && !this.level().isClientSide) {
+            this.getAttributes().load(pCompound.getList("attributes", 10));
         }
 
-        if (p_21096_.contains("active_effects", 9)) {
-            ListTag listtag = p_21096_.getList("active_effects", 10);
+        if (pCompound.contains("active_effects", 9)) {
+            ListTag listtag = pCompound.getList("active_effects", 10);
 
             for (int i = 0; i < listtag.size(); i++) {
                 CompoundTag compoundtag = listtag.getCompound(i);
@@ -751,15 +759,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
             }
         }
 
-        if (p_21096_.contains("Health", 99)) {
-            this.setHealth(p_21096_.getFloat("Health"));
+        if (pCompound.contains("Health", 99)) {
+            this.setHealth(pCompound.getFloat("Health"));
         }
 
-        this.hurtTime = p_21096_.getShort("HurtTime");
-        this.deathTime = p_21096_.getShort("DeathTime");
-        this.lastHurtByMobTimestamp = p_21096_.getInt("HurtByTimestamp");
-        if (p_21096_.contains("Team", 8)) {
-            String s = p_21096_.getString("Team");
+        this.hurtTime = pCompound.getShort("HurtTime");
+        this.deathTime = pCompound.getShort("DeathTime");
+        this.lastHurtByMobTimestamp = pCompound.getInt("HurtByTimestamp");
+        if (pCompound.contains("Team", 8)) {
+            String s = pCompound.getString("Team");
             Scoreboard scoreboard = this.level().getScoreboard();
             PlayerTeam playerteam = scoreboard.getPlayerTeam(s);
             boolean flag = playerteam != null && scoreboard.addPlayerToTeam(this.getStringUUID(), playerteam);
@@ -768,12 +776,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
             }
         }
 
-        if (p_21096_.getBoolean("FallFlying")) {
+        if (pCompound.getBoolean("FallFlying")) {
             this.setSharedFlag(7, true);
         }
 
-        if (p_21096_.contains("SleepingX", 99) && p_21096_.contains("SleepingY", 99) && p_21096_.contains("SleepingZ", 99)) {
-            BlockPos blockpos = new BlockPos(p_21096_.getInt("SleepingX"), p_21096_.getInt("SleepingY"), p_21096_.getInt("SleepingZ"));
+        if (pCompound.contains("SleepingX", 99) && pCompound.contains("SleepingY", 99) && pCompound.contains("SleepingZ", 99)) {
+            BlockPos blockpos = new BlockPos(pCompound.getInt("SleepingX"), pCompound.getInt("SleepingY"), pCompound.getInt("SleepingZ"));
             this.setSleepingPos(blockpos);
             this.entityData.set(DATA_POSE, Pose.SLEEPING);
             if (!this.firstTick) {
@@ -781,8 +789,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
             }
         }
 
-        if (p_21096_.contains("Brain", 10)) {
-            this.brain = this.makeBrain(new Dynamic<>(NbtOps.INSTANCE, p_21096_.get("Brain")));
+        if (pCompound.contains("Brain", 10)) {
+            this.brain = this.makeBrain(new Dynamic<>(NbtOps.INSTANCE, pCompound.get("Brain")));
         }
     }
 
@@ -848,7 +856,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    public double getVisibilityPercent(@Nullable Entity p_20969_) {
+    public double getVisibilityPercent(@Nullable Entity pLookingEntity) {
         double d0 = 1.0;
         if (this.isDiscrete()) {
             d0 *= 0.8;
@@ -863,9 +871,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
             d0 *= 0.7 * (double)f;
         }
 
-        if (p_20969_ != null) {
+        if (pLookingEntity != null) {
             ItemStack itemstack = this.getItemBySlot(EquipmentSlot.HEAD);
-            EntityType<?> entitytype = p_20969_.getType();
+            EntityType<?> entitytype = pLookingEntity.getType();
             if (entitytype == EntityType.SKELETON && itemstack.is(Items.SKELETON_SKULL)
                 || entitytype == EntityType.ZOMBIE && itemstack.is(Items.ZOMBIE_HEAD)
                 || entitytype == EntityType.PIGLIN && itemstack.is(Items.PIGLIN_HEAD)
@@ -878,8 +886,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return d0;
     }
 
-    public boolean canAttack(LivingEntity p_21171_) {
-        return p_21171_ instanceof Player && this.level().getDifficulty() == Difficulty.PEACEFUL ? false : p_21171_.canBeSeenAsEnemy();
+    public boolean canAttack(LivingEntity pTarget) {
+        return pTarget instanceof Player && this.level().getDifficulty() == Difficulty.PEACEFUL ? false : pTarget.canBeSeenAsEnemy();
     }
 
     public boolean canBeSeenAsEnemy() {
@@ -890,8 +898,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return !this.isSpectator() && this.isAlive();
     }
 
-    public static boolean areAllEffectsAmbient(Collection<MobEffectInstance> p_21180_) {
-        for (MobEffectInstance mobeffectinstance : p_21180_) {
+    public static boolean areAllEffectsAmbient(Collection<MobEffectInstance> pPotionEffects) {
+        for (MobEffectInstance mobeffectinstance : pPotionEffects) {
             if (mobeffectinstance.isVisible() && !mobeffectinstance.isAmbient()) {
                 return false;
             }
@@ -925,60 +933,71 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.activeEffects;
     }
 
-    public boolean hasEffect(Holder<MobEffect> p_329256_) {
-        return this.activeEffects.containsKey(p_329256_);
+    public boolean hasEffect(Holder<MobEffect> pEffect) {
+        // Arcane mixin port: AntiBlind.nausea can make nausea invisible to vanilla checks.
+        AntiBlind antiBlind = Client.INSTANCE.getModuleManager().getModule(AntiBlind.class);
+        if (pEffect == MobEffects.CONFUSION && !(antiBlind != null && antiBlind.isState() && AntiBlind.nausea.get())) {
+            return false;
+        }
+
+        return this.activeEffects.containsKey(pEffect);
+    }
+
+    // Arcane mixin port: Yarn name for official hasEffect().
+    public boolean hasStatusEffect(Holder<MobEffect> pEffect) {
+        return this.hasEffect(pEffect);
     }
 
     @Nullable
-    public MobEffectInstance getEffect(Holder<MobEffect> p_328338_) {
-        return this.activeEffects.get(p_328338_);
+    public MobEffectInstance getEffect(Holder<MobEffect> pEffect) {
+        return this.activeEffects.get(pEffect);
     }
 
-    public final boolean addEffect(MobEffectInstance p_21165_) {
-        return this.addEffect(p_21165_, null);
+    public final boolean addEffect(MobEffectInstance pEffectInstance) {
+        return this.addEffect(pEffectInstance, null);
     }
 
-    public boolean addEffect(MobEffectInstance p_147208_, @Nullable Entity p_147209_) {
-        if (!this.canBeAffected(p_147208_)) {
+    public boolean addEffect(MobEffectInstance pEffectInstance, @Nullable Entity pEntity) {
+        if (!this.canBeAffected(pEffectInstance)) {
             return false;
         } else {
-            MobEffectInstance mobeffectinstance = this.activeEffects.get(p_147208_.getEffect());
+            MobEffectInstance mobeffectinstance = this.activeEffects.get(pEffectInstance.getEffect());
             boolean flag = false;
             if (mobeffectinstance == null) {
-                this.activeEffects.put(p_147208_.getEffect(), p_147208_);
-                this.onEffectAdded(p_147208_, p_147209_);
+                this.activeEffects.put(pEffectInstance.getEffect(), pEffectInstance);
+                this.onEffectAdded(pEffectInstance, pEntity);
                 flag = true;
-                p_147208_.onEffectAdded(this);
-            } else if (mobeffectinstance.update(p_147208_)) {
-                this.onEffectUpdated(mobeffectinstance, true, p_147209_);
+                pEffectInstance.onEffectAdded(this);
+            } else if (mobeffectinstance.update(pEffectInstance)) {
+                this.onEffectUpdated(mobeffectinstance, true, pEntity);
                 flag = true;
             }
 
-            p_147208_.onEffectStarted(this);
+            pEffectInstance.onEffectStarted(this);
             return flag;
         }
     }
 
-    public boolean canBeAffected(MobEffectInstance p_21197_) {
+    public boolean canBeAffected(MobEffectInstance pEffectInstance) {
         if (this.getType().is(EntityTypeTags.IMMUNE_TO_INFESTED)) {
-            return !p_21197_.is(MobEffects.INFESTED);
+            return !pEffectInstance.is(MobEffects.INFESTED);
         } else if (this.getType().is(EntityTypeTags.IMMUNE_TO_OOZING)) {
-            return !p_21197_.is(MobEffects.OOZING);
+            return !pEffectInstance.is(MobEffects.OOZING);
         } else {
             return !this.getType().is(EntityTypeTags.IGNORES_POISON_AND_REGEN)
                 ? true
-                : !p_21197_.is(MobEffects.REGENERATION) && !p_21197_.is(MobEffects.POISON);
+                : !pEffectInstance.is(MobEffects.REGENERATION) && !pEffectInstance.is(MobEffects.POISON);
         }
     }
 
-    public void forceAddEffect(MobEffectInstance p_147216_, @Nullable Entity p_147217_) {
-        if (this.canBeAffected(p_147216_)) {
-            MobEffectInstance mobeffectinstance = this.activeEffects.put(p_147216_.getEffect(), p_147216_);
+    public void forceAddEffect(MobEffectInstance pInstance, @Nullable Entity pEntity) {
+        if (this.canBeAffected(pInstance)) {
+            MobEffectInstance mobeffectinstance = this.activeEffects.put(pInstance.getEffect(), pInstance);
             if (mobeffectinstance == null) {
-                this.onEffectAdded(p_147216_, p_147217_);
+                this.onEffectAdded(pInstance, pEntity);
             } else {
-                p_147216_.copyBlendState(mobeffectinstance);
-                this.onEffectUpdated(p_147216_, true, p_147217_);
+                pInstance.copyBlendState(mobeffectinstance);
+                this.onEffectUpdated(pInstance, true, pEntity);
             }
         }
     }
@@ -988,12 +1007,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
 
     @Nullable
-    public MobEffectInstance removeEffectNoUpdate(Holder<MobEffect> p_329442_) {
-        return this.activeEffects.remove(p_329442_);
+    public MobEffectInstance removeEffectNoUpdate(Holder<MobEffect> pEffect) {
+        return this.activeEffects.remove(pEffect);
     }
 
-    public boolean removeEffect(Holder<MobEffect> p_335910_) {
-        MobEffectInstance mobeffectinstance = this.removeEffectNoUpdate(p_335910_);
+    public boolean removeEffect(Holder<MobEffect> pEffect) {
+        MobEffectInstance mobeffectinstance = this.removeEffectNoUpdate(pEffect);
         if (mobeffectinstance != null) {
             this.onEffectsRemoved(List.of(mobeffectinstance));
             return true;
@@ -1002,40 +1021,40 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected void onEffectAdded(MobEffectInstance p_147190_, @Nullable Entity p_147191_) {
+    protected void onEffectAdded(MobEffectInstance pEffectInstance, @Nullable Entity pEntity) {
         this.effectsDirty = true;
         if (!this.level().isClientSide) {
-            p_147190_.getEffect().value().addAttributeModifiers(this.getAttributes(), p_147190_.getAmplifier());
-            this.sendEffectToPassengers(p_147190_);
+            pEffectInstance.getEffect().value().addAttributeModifiers(this.getAttributes(), pEffectInstance.getAmplifier());
+            this.sendEffectToPassengers(pEffectInstance);
         }
     }
 
-    public void sendEffectToPassengers(MobEffectInstance p_289695_) {
+    public void sendEffectToPassengers(MobEffectInstance pEffectInstance) {
         for (Entity entity : this.getPassengers()) {
             if (entity instanceof ServerPlayer serverplayer) {
-                serverplayer.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), p_289695_, false));
+                serverplayer.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), pEffectInstance, false));
             }
         }
     }
 
-    protected void onEffectUpdated(MobEffectInstance p_147192_, boolean p_147193_, @Nullable Entity p_147194_) {
+    protected void onEffectUpdated(MobEffectInstance pEffectInstance, boolean pForced, @Nullable Entity pEntity) {
         this.effectsDirty = true;
-        if (p_147193_ && !this.level().isClientSide) {
-            MobEffect mobeffect = p_147192_.getEffect().value();
+        if (pForced && !this.level().isClientSide) {
+            MobEffect mobeffect = pEffectInstance.getEffect().value();
             mobeffect.removeAttributeModifiers(this.getAttributes());
-            mobeffect.addAttributeModifiers(this.getAttributes(), p_147192_.getAmplifier());
+            mobeffect.addAttributeModifiers(this.getAttributes(), pEffectInstance.getAmplifier());
             this.refreshDirtyAttributes();
         }
 
         if (!this.level().isClientSide) {
-            this.sendEffectToPassengers(p_147192_);
+            this.sendEffectToPassengers(pEffectInstance);
         }
     }
 
-    protected void onEffectsRemoved(Collection<MobEffectInstance> p_364717_) {
+    protected void onEffectsRemoved(Collection<MobEffectInstance> pEffects) {
         this.effectsDirty = true;
         if (!this.level().isClientSide) {
-            for (MobEffectInstance mobeffectinstance : p_364717_) {
+            for (MobEffectInstance mobeffectinstance : pEffects) {
                 mobeffectinstance.getEffect().value().removeAttributeModifiers(this.getAttributes());
 
                 for (Entity entity : this.getPassengers()) {
@@ -1059,13 +1078,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
         set.clear();
     }
 
-    protected void onAttributeUpdated(Holder<Attribute> p_328945_) {
-        if (p_328945_.is(Attributes.MAX_HEALTH)) {
+    protected void onAttributeUpdated(Holder<Attribute> pAttribute) {
+        if (pAttribute.is(Attributes.MAX_HEALTH)) {
             float f = this.getMaxHealth();
             if (this.getHealth() > f) {
                 this.setHealth(f);
             }
-        } else if (p_328945_.is(Attributes.MAX_ABSORPTION)) {
+        } else if (pAttribute.is(Attributes.MAX_ABSORPTION)) {
             float f1 = this.getMaxAbsorption();
             if (this.getAbsorptionAmount() > f1) {
                 this.setAbsorptionAmount(f1);
@@ -1073,10 +1092,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    public void heal(float p_21116_) {
+    public void heal(float pHealAmount) {
         float f = this.getHealth();
         if (f > 0.0F) {
-            this.setHealth(f + p_21116_);
+            this.setHealth(f + pHealAmount);
         }
     }
 
@@ -1084,8 +1103,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.entityData.get(DATA_HEALTH_ID);
     }
 
-    public void setHealth(float p_21154_) {
-        this.entityData.set(DATA_HEALTH_ID, Mth.clamp(p_21154_, 0.0F, this.getMaxHealth()));
+    public void setHealth(float pHealth) {
+        this.entityData.set(DATA_HEALTH_ID, Mth.clamp(pHealth, 0.0F, this.getMaxHealth()));
     }
 
     public boolean isDeadOrDying() {
@@ -1224,17 +1243,17 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected void resolveMobResponsibleForDamage(DamageSource p_377003_) {
-        if (p_377003_.getEntity() instanceof LivingEntity livingentity
-            && !p_377003_.is(DamageTypeTags.NO_ANGER)
-            && (!p_377003_.is(DamageTypes.WIND_CHARGE) || !this.getType().is(EntityTypeTags.NO_ANGER_FROM_WIND_CHARGE))) {
+    protected void resolveMobResponsibleForDamage(DamageSource pDamageSource) {
+        if (pDamageSource.getEntity() instanceof LivingEntity livingentity
+            && !pDamageSource.is(DamageTypeTags.NO_ANGER)
+            && (!pDamageSource.is(DamageTypes.WIND_CHARGE) || !this.getType().is(EntityTypeTags.NO_ANGER_FROM_WIND_CHARGE))) {
             this.setLastHurtByMob(livingentity);
         }
     }
 
     @Nullable
-    protected Player resolvePlayerResponsibleForDamage(DamageSource p_378258_) {
-        Entity entity = p_378258_.getEntity();
+    protected Player resolvePlayerResponsibleForDamage(DamageSource pDamageSource) {
+        Entity entity = pDamageSource.getEntity();
         if (entity instanceof Player player) {
             this.lastHurtByPlayerTime = 100;
             this.lastHurtByPlayer = player;
@@ -1255,16 +1274,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected void blockUsingShield(LivingEntity p_21200_) {
-        p_21200_.blockedByShield(this);
+    protected void blockUsingShield(LivingEntity pAttacker) {
+        pAttacker.blockedByShield(this);
     }
 
-    protected void blockedByShield(LivingEntity p_21246_) {
-        p_21246_.knockback(0.5, p_21246_.getX() - this.getX(), p_21246_.getZ() - this.getZ());
+    protected void blockedByShield(LivingEntity pDefender) {
+        pDefender.knockback(0.5, pDefender.getX() - this.getX(), pDefender.getZ() - this.getZ());
     }
 
-    private boolean checkTotemDeathProtection(DamageSource p_21263_) {
-        if (p_21263_.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+    private boolean checkTotemDeathProtection(DamageSource pDamageSource) {
+        if (pDamageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return false;
         } else {
             ItemStack itemstack = null;
@@ -1305,26 +1324,26 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.lastDamageSource;
     }
 
-    protected void playHurtSound(DamageSource p_21160_) {
-        this.makeSound(this.getHurtSound(p_21160_));
+    protected void playHurtSound(DamageSource pSource) {
+        this.makeSound(this.getHurtSound(pSource));
     }
 
-    public void makeSound(@Nullable SoundEvent p_334191_) {
-        if (p_334191_ != null) {
-            this.playSound(p_334191_, this.getSoundVolume(), this.getVoicePitch());
+    public void makeSound(@Nullable SoundEvent pSound) {
+        if (pSound != null) {
+            this.playSound(pSound, this.getSoundVolume(), this.getVoicePitch());
         }
     }
 
-    public boolean isDamageSourceBlocked(DamageSource p_21276_) {
-        Entity entity = p_21276_.getDirectEntity();
+    public boolean isDamageSourceBlocked(DamageSource pDamageSource) {
+        Entity entity = pDamageSource.getDirectEntity();
         boolean flag = false;
         if (entity instanceof AbstractArrow abstractarrow && abstractarrow.getPierceLevel() > 0) {
             flag = true;
         }
 
         ItemStack itemstack = this.getItemBlockingWith();
-        if (!p_21276_.is(DamageTypeTags.BYPASSES_SHIELD) && itemstack != null && itemstack.getItem() instanceof ShieldItem && !flag) {
-            Vec3 vec3 = p_21276_.getSourcePosition();
+        if (!pDamageSource.is(DamageTypeTags.BYPASSES_SHIELD) && itemstack != null && itemstack.getItem() instanceof ShieldItem && !flag) {
+            Vec3 vec3 = pDamageSource.getSourcePosition();
             if (vec3 != null) {
                 Vec3 vec31 = this.calculateViewVector(0.0F, this.getYHeadRot());
                 Vec3 vec32 = vec3.vectorTo(this.position());
@@ -1336,15 +1355,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return false;
     }
 
-    private void breakItem(ItemStack p_21279_) {
-        if (!p_21279_.isEmpty()) {
+    private void breakItem(ItemStack pStack) {
+        if (!pStack.isEmpty()) {
             if (!this.isSilent()) {
                 this.level()
                     .playLocalSound(
                         this.getX(),
                         this.getY(),
                         this.getZ(),
-                        p_21279_.getBreakingSound(),
+                        pStack.getBreakingSound(),
                         this.getSoundSource(),
                         0.8F,
                         0.8F + this.level().random.nextFloat() * 0.4F,
@@ -1352,16 +1371,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
                     );
             }
 
-            this.spawnItemParticles(p_21279_, 5);
+            this.spawnItemParticles(pStack, 5);
         }
     }
 
-    public void die(DamageSource p_21014_) {
+    public void die(DamageSource pDamageSource) {
         if (!this.isRemoved() && !this.dead) {
-            Entity entity = p_21014_.getEntity();
+            Entity entity = pDamageSource.getEntity();
             LivingEntity livingentity = this.getKillCredit();
             if (livingentity != null) {
-                livingentity.awardKillScore(this, p_21014_);
+                livingentity.awardKillScore(this, pDamageSource);
             }
 
             if (this.isSleeping()) {
@@ -1377,7 +1396,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
             if (this.level() instanceof ServerLevel serverlevel) {
                 if (entity == null || entity.killedEntity(serverlevel, this)) {
                     this.gameEvent(GameEvent.ENTITY_DIE);
-                    this.dropAllDeathLoot(serverlevel, p_21014_);
+                    this.dropAllDeathLoot(serverlevel, pDamageSource);
                     this.createWitherRose(livingentity);
                 }
 
@@ -1388,10 +1407,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected void createWitherRose(@Nullable LivingEntity p_21269_) {
+    protected void createWitherRose(@Nullable LivingEntity pEntitySource) {
         if (this.level() instanceof ServerLevel serverlevel) {
             boolean flag = false;
-            if (p_21269_ instanceof WitherBoss) {
+            if (pEntitySource instanceof WitherBoss) {
                 if (serverlevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
                     BlockPos blockpos = this.blockPosition();
                     BlockState blockstate = Blocks.WITHER_ROSE.defaultBlockState();
@@ -1409,122 +1428,122 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected void dropAllDeathLoot(ServerLevel p_342160_, DamageSource p_21192_) {
+    protected void dropAllDeathLoot(ServerLevel pLevel, DamageSource pDamageSource) {
         boolean flag = this.lastHurtByPlayerTime > 0;
-        if (this.shouldDropLoot() && p_342160_.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-            this.dropFromLootTable(p_342160_, p_21192_, flag);
-            this.dropCustomDeathLoot(p_342160_, p_21192_, flag);
+        if (this.shouldDropLoot() && pLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+            this.dropFromLootTable(pLevel, pDamageSource, flag);
+            this.dropCustomDeathLoot(pLevel, pDamageSource, flag);
         }
 
-        this.dropEquipment(p_342160_);
-        this.dropExperience(p_342160_, p_21192_.getEntity());
+        this.dropEquipment(pLevel);
+        this.dropExperience(pLevel, pDamageSource.getEntity());
     }
 
-    protected void dropEquipment(ServerLevel p_365823_) {
+    protected void dropEquipment(ServerLevel pLevel) {
     }
 
-    protected void dropExperience(ServerLevel p_370040_, @Nullable Entity p_342525_) {
-        if (!this.wasExperienceConsumed() && (this.isAlwaysExperienceDropper() || this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && p_370040_.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT))) {
-            ExperienceOrb.award(p_370040_, this.position(), this.getExperienceReward(p_370040_, p_342525_));
+    protected void dropExperience(ServerLevel pLevel, @Nullable Entity pEntity) {
+        if (!this.wasExperienceConsumed() && (this.isAlwaysExperienceDropper() || this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && pLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT))) {
+            ExperienceOrb.award(pLevel, this.position(), this.getExperienceReward(pLevel, pEntity));
         }
     }
 
-    protected void dropCustomDeathLoot(ServerLevel p_344205_, DamageSource p_21018_, boolean p_21020_) {
+    protected void dropCustomDeathLoot(ServerLevel pLevel, DamageSource pDamageSource, boolean pRecentlyHit) {
     }
 
     public long getLootTableSeed() {
         return 0L;
     }
 
-    protected float getKnockback(Entity p_344037_, DamageSource p_343881_) {
+    protected float getKnockback(Entity pAttacker, DamageSource pDamageSource) {
         float f = (float)this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
-        return this.level() instanceof ServerLevel serverlevel ? EnchantmentHelper.modifyKnockback(serverlevel, this.getWeaponItem(), p_344037_, p_343881_, f) : f;
+        return this.level() instanceof ServerLevel serverlevel ? EnchantmentHelper.modifyKnockback(serverlevel, this.getWeaponItem(), pAttacker, pDamageSource, f) : f;
     }
 
-    protected void dropFromLootTable(ServerLevel p_365510_, DamageSource p_364726_, boolean p_367117_) {
+    protected void dropFromLootTable(ServerLevel pLevel, DamageSource pDamageSource, boolean pPlayerKill) {
         Optional<ResourceKey<LootTable>> optional = this.getLootTable();
         if (!optional.isEmpty()) {
-            LootTable loottable = p_365510_.getServer().reloadableRegistries().getLootTable(optional.get());
-            LootParams.Builder lootparams$builder = new LootParams.Builder(p_365510_)
+            LootTable loottable = pLevel.getServer().reloadableRegistries().getLootTable(optional.get());
+            LootParams.Builder lootparams$builder = new LootParams.Builder(pLevel)
                 .withParameter(LootContextParams.THIS_ENTITY, this)
                 .withParameter(LootContextParams.ORIGIN, this.position())
-                .withParameter(LootContextParams.DAMAGE_SOURCE, p_364726_)
-                .withOptionalParameter(LootContextParams.ATTACKING_ENTITY, p_364726_.getEntity())
-                .withOptionalParameter(LootContextParams.DIRECT_ATTACKING_ENTITY, p_364726_.getDirectEntity());
-            if (p_367117_ && this.lastHurtByPlayer != null) {
+                .withParameter(LootContextParams.DAMAGE_SOURCE, pDamageSource)
+                .withOptionalParameter(LootContextParams.ATTACKING_ENTITY, pDamageSource.getEntity())
+                .withOptionalParameter(LootContextParams.DIRECT_ATTACKING_ENTITY, pDamageSource.getDirectEntity());
+            if (pPlayerKill && this.lastHurtByPlayer != null) {
                 lootparams$builder = lootparams$builder.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, this.lastHurtByPlayer).withLuck(this.lastHurtByPlayer.getLuck());
             }
 
             LootParams lootparams = lootparams$builder.create(LootContextParamSets.ENTITY);
-            loottable.getRandomItems(lootparams, this.getLootTableSeed(), p_358880_ -> this.spawnAtLocation(p_365510_, p_358880_));
+            loottable.getRandomItems(lootparams, this.getLootTableSeed(), p_358880_ -> this.spawnAtLocation(pLevel, p_358880_));
         }
     }
 
-    public boolean dropFromGiftLootTable(ServerLevel p_363120_, ResourceKey<LootTable> p_363326_, BiConsumer<ServerLevel, ItemStack> p_368812_) {
+    public boolean dropFromGiftLootTable(ServerLevel pLevel, ResourceKey<LootTable> pLootTable, BiConsumer<ServerLevel, ItemStack> pDropConsumer) {
         return this.dropFromLootTable(
-            p_363120_,
-            p_363326_,
+            pLevel,
+            pLootTable,
             p_374930_ -> p_374930_.withParameter(LootContextParams.ORIGIN, this.position())
                     .withParameter(LootContextParams.THIS_ENTITY, this)
                     .create(LootContextParamSets.GIFT),
-            p_368812_
+            pDropConsumer
         );
     }
 
-    protected void dropFromShearingLootTable(ServerLevel p_361428_, ResourceKey<LootTable> p_365429_, ItemStack p_361064_, BiConsumer<ServerLevel, ItemStack> p_369621_) {
+    protected void dropFromShearingLootTable(ServerLevel pLevel, ResourceKey<LootTable> pLootTable, ItemStack pShears, BiConsumer<ServerLevel, ItemStack> pDropConsumer) {
         this.dropFromLootTable(
-            p_361428_,
-            p_365429_,
+            pLevel,
+            pLootTable,
             p_374933_ -> p_374933_.withParameter(LootContextParams.ORIGIN, this.position())
                     .withParameter(LootContextParams.THIS_ENTITY, this)
-                    .withParameter(LootContextParams.TOOL, p_361064_)
+                    .withParameter(LootContextParams.TOOL, pShears)
                     .create(LootContextParamSets.SHEARING),
-            p_369621_
+            pDropConsumer
         );
     }
 
     protected boolean dropFromLootTable(
-        ServerLevel p_363272_,
-        ResourceKey<LootTable> p_363593_,
-        Function<LootParams.Builder, LootParams> p_362309_,
-        BiConsumer<ServerLevel, ItemStack> p_366393_
+        ServerLevel pLevel,
+        ResourceKey<LootTable> pLootTable,
+        Function<LootParams.Builder, LootParams> pParamsBuilder,
+        BiConsumer<ServerLevel, ItemStack> pDropConsumer
     ) {
-        LootTable loottable = p_363272_.getServer().reloadableRegistries().getLootTable(p_363593_);
-        LootParams lootparams = p_362309_.apply(new LootParams.Builder(p_363272_));
+        LootTable loottable = pLevel.getServer().reloadableRegistries().getLootTable(pLootTable);
+        LootParams lootparams = pParamsBuilder.apply(new LootParams.Builder(pLevel));
         List<ItemStack> list = loottable.getRandomItems(lootparams);
         if (!list.isEmpty()) {
-            list.forEach(p_358893_ -> p_366393_.accept(p_363272_, p_358893_));
+            list.forEach(p_358893_ -> pDropConsumer.accept(pLevel, p_358893_));
             return true;
         } else {
             return false;
         }
     }
 
-    public void knockback(double p_147241_, double p_147242_, double p_147243_) {
-        p_147241_ *= 1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
-        if (!(p_147241_ <= 0.0)) {
+    public void knockback(double pStrength, double pX, double pZ) {
+        pStrength *= 1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+        if (!(pStrength <= 0.0)) {
             this.hasImpulse = true;
             Vec3 vec3 = this.getDeltaMovement();
 
-            while (p_147242_ * p_147242_ + p_147243_ * p_147243_ < 1.0E-5F) {
-                p_147242_ = (Math.random() - Math.random()) * 0.01;
-                p_147243_ = (Math.random() - Math.random()) * 0.01;
+            while (pX * pX + pZ * pZ < 1.0E-5F) {
+                pX = (Math.random() - Math.random()) * 0.01;
+                pZ = (Math.random() - Math.random()) * 0.01;
             }
 
-            Vec3 vec31 = new Vec3(p_147242_, 0.0, p_147243_).normalize().scale(p_147241_);
+            Vec3 vec31 = new Vec3(pX, 0.0, pZ).normalize().scale(pStrength);
             this.setDeltaMovement(
                 vec3.x / 2.0 - vec31.x,
-                this.onGround() ? Math.min(0.4, vec3.y / 2.0 + p_147241_) : vec3.y,
+                this.onGround() ? Math.min(0.4, vec3.y / 2.0 + pStrength) : vec3.y,
                 vec3.z / 2.0 - vec31.z
             );
         }
     }
 
-    public void indicateDamage(double p_270514_, double p_270826_) {
+    public void indicateDamage(double pXDistance, double pZDistance) {
     }
 
     @Nullable
-    protected SoundEvent getHurtSound(DamageSource p_21239_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.GENERIC_HURT;
     }
 
@@ -1533,8 +1552,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return SoundEvents.GENERIC_DEATH;
     }
 
-    private SoundEvent getFallDamageSound(int p_21313_) {
-        return p_21313_ > 4 ? this.getFallSounds().big() : this.getFallSounds().small();
+    private SoundEvent getFallDamageSound(int pHeight) {
+        return pHeight > 4 ? this.getFallSounds().big() : this.getFallSounds().small();
     }
 
     public void skipDropExperience() {
@@ -1560,8 +1579,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    public Map<Enchantment, Set<EnchantmentLocationBasedEffect>> activeLocationDependentEnchantments(EquipmentSlot p_363512_) {
-        return this.activeLocationDependentEnchantments.computeIfAbsent(p_363512_, p_358895_ -> new Reference2ObjectArrayMap<>());
+    public Map<Enchantment, Set<EnchantmentLocationBasedEffect>> activeLocationDependentEnchantments(EquipmentSlot pSlot) {
+        return this.activeLocationDependentEnchantments.computeIfAbsent(pSlot, p_358895_ -> new Reference2ObjectArrayMap<>());
     }
 
     public boolean canBeNameTagged() {
@@ -1594,12 +1613,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    private boolean trapdoorUsableAsLadder(BlockPos p_21177_, BlockState p_21178_) {
-        if (!p_21178_.getValue(TrapDoorBlock.OPEN)) {
+    private boolean trapdoorUsableAsLadder(BlockPos pPos, BlockState pState) {
+        if (!pState.getValue(TrapDoorBlock.OPEN)) {
             return false;
         } else {
-            BlockState blockstate = this.level().getBlockState(p_21177_.below());
-            return blockstate.is(Blocks.LADDER) && blockstate.getValue(LadderBlock.FACING) == p_21178_.getValue(TrapDoorBlock.FACING);
+            BlockState blockstate = this.level().getBlockState(pPos.below());
+            return blockstate.is(Blocks.LADDER) && blockstate.getValue(LadderBlock.FACING) == pState.getValue(TrapDoorBlock.FACING);
         }
     }
 
@@ -1608,16 +1627,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return !this.isRemoved() && this.getHealth() > 0.0F;
     }
 
-    public boolean isLookingAtMe(LivingEntity p_365362_, double p_366130_, boolean p_364554_, boolean p_368791_, double... p_377772_) {
-        Vec3 vec3 = p_365362_.getViewVector(1.0F).normalize();
+    public boolean isLookingAtMe(LivingEntity pEntity, double pTolerance, boolean pScaleByDistance, boolean pVisual, double... pYValues) {
+        Vec3 vec3 = pEntity.getViewVector(1.0F).normalize();
 
-        for (double d0 : p_377772_) {
-            Vec3 vec31 = new Vec3(this.getX() - p_365362_.getX(), d0 - p_365362_.getEyeY(), this.getZ() - p_365362_.getZ());
+        for (double d0 : pYValues) {
+            Vec3 vec31 = new Vec3(this.getX() - pEntity.getX(), d0 - pEntity.getEyeY(), this.getZ() - pEntity.getZ());
             double d1 = vec31.length();
             vec31 = vec31.normalize();
             double d2 = vec3.dot(vec31);
-            if (d2 > 1.0 - p_366130_ / (p_364554_ ? d1 : 1.0)
-                && p_365362_.hasLineOfSight(this, p_368791_ ? ClipContext.Block.VISUAL : ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, d0)) {
+            if (d2 > 1.0 - pTolerance / (pScaleByDistance ? d1 : 1.0)
+                && pEntity.hasLineOfSight(this, pVisual ? ClipContext.Block.VISUAL : ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, d0)) {
                 return true;
             }
         }
@@ -1630,8 +1649,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.getComfortableFallDistance(0.0F);
     }
 
-    protected final int getComfortableFallDistance(float p_327795_) {
-        return Mth.floor(p_327795_ + 3.0F);
+    protected final int getComfortableFallDistance(float pHealth) {
+        return Mth.floor(pHealth + 3.0F);
     }
 
     @Override
@@ -1648,13 +1667,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected int calculateFallDamage(float p_21237_, float p_21238_) {
+    protected int calculateFallDamage(float pFallDistance, float pDamageMultiplier) {
         if (this.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE)) {
             return 0;
         } else {
             float f = (float)this.getAttributeValue(Attributes.SAFE_FALL_DISTANCE);
-            float f1 = p_21237_ - f;
-            return Mth.ceil((double)(f1 * p_21238_) * this.getAttributeValue(Attributes.FALL_DAMAGE_MULTIPLIER));
+            float f1 = pFallDistance - f;
+            return Mth.ceil((double)(f1 * pDamageMultiplier) * this.getAttributeValue(Attributes.FALL_DAMAGE_MULTIPLIER));
         }
     }
 
@@ -1681,92 +1700,92 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return Mth.floor(this.getAttributeValue(Attributes.ARMOR));
     }
 
-    protected void hurtArmor(DamageSource p_21122_, float p_21123_) {
+    protected void hurtArmor(DamageSource pDamageSource, float pDamageAmount) {
     }
 
-    protected void hurtHelmet(DamageSource p_147213_, float p_147214_) {
+    protected void hurtHelmet(DamageSource pDamageSource, float pDamageAmount) {
     }
 
-    protected void hurtCurrentlyUsedShield(float p_21316_) {
+    protected void hurtCurrentlyUsedShield(float pDamageAmount) {
     }
 
-    protected void doHurtEquipment(DamageSource p_330939_, float p_333962_, EquipmentSlot... p_335230_) {
-        if (!(p_333962_ <= 0.0F)) {
-            int i = (int)Math.max(1.0F, p_333962_ / 4.0F);
+    protected void doHurtEquipment(DamageSource pDamageSource, float pDamageAmount, EquipmentSlot... pSlots) {
+        if (!(pDamageAmount <= 0.0F)) {
+            int i = (int)Math.max(1.0F, pDamageAmount / 4.0F);
 
-            for (EquipmentSlot equipmentslot : p_335230_) {
+            for (EquipmentSlot equipmentslot : pSlots) {
                 ItemStack itemstack = this.getItemBySlot(equipmentslot);
                 Equippable equippable = itemstack.get(DataComponents.EQUIPPABLE);
-                if (equippable != null && equippable.damageOnHurt() && itemstack.isDamageableItem() && itemstack.canBeHurtBy(p_330939_)) {
+                if (equippable != null && equippable.damageOnHurt() && itemstack.isDamageableItem() && itemstack.canBeHurtBy(pDamageSource)) {
                     itemstack.hurtAndBreak(i, this, equipmentslot);
                 }
             }
         }
     }
 
-    protected float getDamageAfterArmorAbsorb(DamageSource p_21162_, float p_21163_) {
-        if (!p_21162_.is(DamageTypeTags.BYPASSES_ARMOR)) {
-            this.hurtArmor(p_21162_, p_21163_);
-            p_21163_ = CombatRules.getDamageAfterAbsorb(this, p_21163_, p_21162_, (float)this.getArmorValue(), (float)this.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
+    protected float getDamageAfterArmorAbsorb(DamageSource pDamageSource, float pDamageAmount) {
+        if (!pDamageSource.is(DamageTypeTags.BYPASSES_ARMOR)) {
+            this.hurtArmor(pDamageSource, pDamageAmount);
+            pDamageAmount = CombatRules.getDamageAfterAbsorb(this, pDamageAmount, pDamageSource, (float)this.getArmorValue(), (float)this.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
         }
 
-        return p_21163_;
+        return pDamageAmount;
     }
 
-    protected float getDamageAfterMagicAbsorb(DamageSource p_21193_, float p_21194_) {
-        if (p_21193_.is(DamageTypeTags.BYPASSES_EFFECTS)) {
-            return p_21194_;
+    protected float getDamageAfterMagicAbsorb(DamageSource pDamageSource, float pDamageAmount) {
+        if (pDamageSource.is(DamageTypeTags.BYPASSES_EFFECTS)) {
+            return pDamageAmount;
         } else {
-            if (this.hasEffect(MobEffects.DAMAGE_RESISTANCE) && !p_21193_.is(DamageTypeTags.BYPASSES_RESISTANCE)) {
+            if (this.hasEffect(MobEffects.DAMAGE_RESISTANCE) && !pDamageSource.is(DamageTypeTags.BYPASSES_RESISTANCE)) {
                 int i = (this.getEffect(MobEffects.DAMAGE_RESISTANCE).getAmplifier() + 1) * 5;
                 int j = 25 - i;
-                float f = p_21194_ * (float)j;
-                float f1 = p_21194_;
-                p_21194_ = Math.max(f / 25.0F, 0.0F);
-                float f2 = f1 - p_21194_;
+                float f = pDamageAmount * (float)j;
+                float f1 = pDamageAmount;
+                pDamageAmount = Math.max(f / 25.0F, 0.0F);
+                float f2 = f1 - pDamageAmount;
                 if (f2 > 0.0F && f2 < 3.4028235E37F) {
                     if (this instanceof ServerPlayer) {
                         ((ServerPlayer)this).awardStat(Stats.DAMAGE_RESISTED, Math.round(f2 * 10.0F));
-                    } else if (p_21193_.getEntity() instanceof ServerPlayer) {
-                        ((ServerPlayer)p_21193_.getEntity()).awardStat(Stats.DAMAGE_DEALT_RESISTED, Math.round(f2 * 10.0F));
+                    } else if (pDamageSource.getEntity() instanceof ServerPlayer) {
+                        ((ServerPlayer)pDamageSource.getEntity()).awardStat(Stats.DAMAGE_DEALT_RESISTED, Math.round(f2 * 10.0F));
                     }
                 }
             }
 
-            if (p_21194_ <= 0.0F) {
+            if (pDamageAmount <= 0.0F) {
                 return 0.0F;
-            } else if (p_21193_.is(DamageTypeTags.BYPASSES_ENCHANTMENTS)) {
-                return p_21194_;
+            } else if (pDamageSource.is(DamageTypeTags.BYPASSES_ENCHANTMENTS)) {
+                return pDamageAmount;
             } else {
                 float f3;
                 if (this.level() instanceof ServerLevel serverlevel) {
-                    f3 = EnchantmentHelper.getDamageProtection(serverlevel, this, p_21193_);
+                    f3 = EnchantmentHelper.getDamageProtection(serverlevel, this, pDamageSource);
                 } else {
                     f3 = 0.0F;
                 }
 
                 if (f3 > 0.0F) {
-                    p_21194_ = CombatRules.getDamageAfterMagicAbsorb(p_21194_, f3);
+                    pDamageAmount = CombatRules.getDamageAfterMagicAbsorb(pDamageAmount, f3);
                 }
 
-                return p_21194_;
+                return pDamageAmount;
             }
         }
     }
 
-    protected void actuallyHurt(ServerLevel p_365124_, DamageSource p_21240_, float p_21241_) {
-        if (!this.isInvulnerableTo(p_365124_, p_21240_)) {
-            p_21241_ = this.getDamageAfterArmorAbsorb(p_21240_, p_21241_);
-            p_21241_ = this.getDamageAfterMagicAbsorb(p_21240_, p_21241_);
-            float f1 = Math.max(p_21241_ - this.getAbsorptionAmount(), 0.0F);
-            this.setAbsorptionAmount(this.getAbsorptionAmount() - (p_21241_ - f1));
-            float f = p_21241_ - f1;
-            if (f > 0.0F && f < 3.4028235E37F && p_21240_.getEntity() instanceof ServerPlayer serverplayer) {
+    protected void actuallyHurt(ServerLevel pLevel, DamageSource pDamageSource, float pAmount) {
+        if (!this.isInvulnerableTo(pLevel, pDamageSource)) {
+            pAmount = this.getDamageAfterArmorAbsorb(pDamageSource, pAmount);
+            pAmount = this.getDamageAfterMagicAbsorb(pDamageSource, pAmount);
+            float f1 = Math.max(pAmount - this.getAbsorptionAmount(), 0.0F);
+            this.setAbsorptionAmount(this.getAbsorptionAmount() - (pAmount - f1));
+            float f = pAmount - f1;
+            if (f > 0.0F && f < 3.4028235E37F && pDamageSource.getEntity() instanceof ServerPlayer serverplayer) {
                 serverplayer.awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(f * 10.0F));
             }
 
             if (f1 != 0.0F) {
-                this.getCombatTracker().recordDamage(p_21240_, f1);
+                this.getCombatTracker().recordDamage(pDamageSource, f1);
                 this.setHealth(this.getHealth() - f1);
                 this.setAbsorptionAmount(this.getAbsorptionAmount() - f1);
                 this.gameEvent(GameEvent.ENTITY_DAMAGE);
@@ -1799,19 +1818,25 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.entityData.get(DATA_ARROW_COUNT_ID);
     }
 
-    public final void setArrowCount(int p_21318_) {
-        this.entityData.set(DATA_ARROW_COUNT_ID, p_21318_);
+    public final void setArrowCount(int pCount) {
+        this.entityData.set(DATA_ARROW_COUNT_ID, pCount);
     }
 
     public final int getStingerCount() {
         return this.entityData.get(DATA_STINGER_COUNT_ID);
     }
 
-    public final void setStingerCount(int p_21322_) {
-        this.entityData.set(DATA_STINGER_COUNT_ID, p_21322_);
+    public final void setStingerCount(int pStingerCount) {
+        this.entityData.set(DATA_STINGER_COUNT_ID, pStingerCount);
     }
 
     private int getCurrentSwingDuration() {
+        // Arcane mixin port: Animations.swingSpeed overrides the vanilla hand swing duration.
+        Animations animations = Client.INSTANCE.getModuleManager().getModule(Animations.class);
+        if (animations != null && animations.isState()) {
+            return Animations.swingSpeed.get().intValue();
+        }
+
         if (MobEffectUtil.hasDigSpeed(this)) {
             return 6 - (1 + MobEffectUtil.getDigSpeedAmplification(this));
         } else {
@@ -1819,19 +1844,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    public void swing(InteractionHand p_21007_) {
-        this.swing(p_21007_, false);
+    public void swing(InteractionHand pHand) {
+        this.swing(pHand, false);
     }
 
-    public void swing(InteractionHand p_21012_, boolean p_21013_) {
+    public void swing(InteractionHand pHand, boolean pUpdateSelf) {
         if (!this.swinging || this.swingTime >= this.getCurrentSwingDuration() / 2 || this.swingTime < 0) {
             this.swingTime = -1;
             this.swinging = true;
-            this.swingingArm = p_21012_;
+            this.swingingArm = pHand;
             if (this.level() instanceof ServerLevel) {
-                ClientboundAnimatePacket clientboundanimatepacket = new ClientboundAnimatePacket(this, p_21012_ == InteractionHand.MAIN_HAND ? 0 : 3);
+                ClientboundAnimatePacket clientboundanimatepacket = new ClientboundAnimatePacket(this, pHand == InteractionHand.MAIN_HAND ? 0 : 3);
                 ServerChunkCache serverchunkcache = ((ServerLevel)this.level()).getChunkSource();
-                if (p_21013_) {
+                if (pUpdateSelf) {
                     serverchunkcache.broadcastAndSend(this, clientboundanimatepacket);
                 } else {
                     serverchunkcache.broadcast(this, clientboundanimatepacket);
@@ -1856,8 +1881,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
 
     @Override
-    public void handleEntityEvent(byte p_20975_) {
-        switch (p_20975_) {
+    public void handleEntityEvent(byte pId) {
+        switch (pId) {
             case 3:
                 SoundEvent soundevent = this.getDeathSound();
                 if (soundevent != null) {
@@ -1920,7 +1945,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
                 this.breakItem(this.getItemBySlot(EquipmentSlot.BODY));
                 break;
             default:
-                super.handleEntityEvent(p_20975_);
+                super.handleEntityEvent(pId);
         }
     }
 
@@ -1962,16 +1987,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
 
     @Nullable
-    public AttributeInstance getAttribute(Holder<Attribute> p_332356_) {
-        return this.getAttributes().getInstance(p_332356_);
+    public AttributeInstance getAttribute(Holder<Attribute> pAttribute) {
+        return this.getAttributes().getInstance(pAttribute);
     }
 
-    public double getAttributeValue(Holder<Attribute> p_251296_) {
-        return this.getAttributes().getValue(p_251296_);
+    public double getAttributeValue(Holder<Attribute> pAttribute) {
+        return this.getAttributes().getValue(pAttribute);
     }
 
-    public double getAttributeBaseValue(Holder<Attribute> p_248605_) {
-        return this.getAttributes().getBaseValue(p_248605_);
+    public double getAttributeBaseValue(Holder<Attribute> pAttribute) {
+        return this.getAttributes().getBaseValue(pAttribute);
     }
 
     public AttributeMap getAttributes() {
@@ -1986,8 +2011,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.getItemBySlot(EquipmentSlot.OFFHAND);
     }
 
-    public ItemStack getItemHeldByArm(HumanoidArm p_365937_) {
-        return this.getMainArm() == p_365937_ ? this.getMainHandItem() : this.getOffhandItem();
+    public ItemStack getItemHeldByArm(HumanoidArm pArm) {
+        return this.getMainArm() == pArm ? this.getMainHandItem() : this.getOffhandItem();
     }
 
     @Nonnull
@@ -1996,49 +2021,49 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.getMainHandItem();
     }
 
-    public boolean isHolding(Item p_21056_) {
-        return this.isHolding(p_147200_ -> p_147200_.is(p_21056_));
+    public boolean isHolding(Item pItem) {
+        return this.isHolding(p_147200_ -> p_147200_.is(pItem));
     }
 
-    public boolean isHolding(Predicate<ItemStack> p_21094_) {
-        return p_21094_.test(this.getMainHandItem()) || p_21094_.test(this.getOffhandItem());
+    public boolean isHolding(Predicate<ItemStack> pPredicate) {
+        return pPredicate.test(this.getMainHandItem()) || pPredicate.test(this.getOffhandItem());
     }
 
-    public ItemStack getItemInHand(InteractionHand p_21121_) {
-        if (p_21121_ == InteractionHand.MAIN_HAND) {
+    public ItemStack getItemInHand(InteractionHand pHand) {
+        if (pHand == InteractionHand.MAIN_HAND) {
             return this.getItemBySlot(EquipmentSlot.MAINHAND);
-        } else if (p_21121_ == InteractionHand.OFF_HAND) {
+        } else if (pHand == InteractionHand.OFF_HAND) {
             return this.getItemBySlot(EquipmentSlot.OFFHAND);
         } else {
-            throw new IllegalArgumentException("Invalid hand " + p_21121_);
+            throw new IllegalArgumentException("Invalid hand " + pHand);
         }
     }
 
-    public void setItemInHand(InteractionHand p_21009_, ItemStack p_21010_) {
-        if (p_21009_ == InteractionHand.MAIN_HAND) {
-            this.setItemSlot(EquipmentSlot.MAINHAND, p_21010_);
+    public void setItemInHand(InteractionHand pHand, ItemStack pStack) {
+        if (pHand == InteractionHand.MAIN_HAND) {
+            this.setItemSlot(EquipmentSlot.MAINHAND, pStack);
         } else {
-            if (p_21009_ != InteractionHand.OFF_HAND) {
-                throw new IllegalArgumentException("Invalid hand " + p_21009_);
+            if (pHand != InteractionHand.OFF_HAND) {
+                throw new IllegalArgumentException("Invalid hand " + pHand);
             }
 
-            this.setItemSlot(EquipmentSlot.OFFHAND, p_21010_);
+            this.setItemSlot(EquipmentSlot.OFFHAND, pStack);
         }
     }
 
-    public boolean hasItemInSlot(EquipmentSlot p_21034_) {
-        return !this.getItemBySlot(p_21034_).isEmpty();
+    public boolean hasItemInSlot(EquipmentSlot pSlot) {
+        return !this.getItemBySlot(pSlot).isEmpty();
     }
 
-    public boolean canUseSlot(EquipmentSlot p_328587_) {
+    public boolean canUseSlot(EquipmentSlot pSlot) {
         return false;
     }
 
     public abstract Iterable<ItemStack> getArmorSlots();
 
-    public abstract ItemStack getItemBySlot(EquipmentSlot p_21127_);
+    public abstract ItemStack getItemBySlot(EquipmentSlot pSlot);
 
-    public abstract void setItemSlot(EquipmentSlot p_21036_, ItemStack p_21037_);
+    public abstract void setItemSlot(EquipmentSlot pSlot, ItemStack pStack);
 
     public Iterable<ItemStack> getHandSlots() {
         return List.of();
@@ -2052,8 +2077,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return Iterables.concat(this.getHandSlots(), this.getArmorAndBodyArmorSlots());
     }
 
-    protected void verifyEquippedItem(ItemStack p_181123_) {
-        p_181123_.getItem().verifyComponentsAfterLoad(p_181123_);
+    protected void verifyEquippedItem(ItemStack pStack) {
+        pStack.getItem().verifyComponentsAfterLoad(pStack);
     }
 
     public float getArmorCoverPercentage() {
@@ -2073,11 +2098,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
 
     @Override
-    public void setSprinting(boolean p_21284_) {
-        super.setSprinting(p_21284_);
+    public void setSprinting(boolean pSprinting) {
+        super.setSprinting(pSprinting);
         AttributeInstance attributeinstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
         attributeinstance.removeModifier(SPEED_MODIFIER_SPRINTING.id());
-        if (p_21284_) {
+        if (pSprinting) {
             attributeinstance.addTransientModifier(SPEED_MODIFIER_SPRINTING);
         }
     }
@@ -2097,20 +2122,20 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
 
     @Override
-    public void push(Entity p_21294_) {
+    public void push(Entity pEntity) {
         if (!this.isSleeping()) {
-            super.push(p_21294_);
+            super.push(pEntity);
         }
     }
 
-    private void dismountVehicle(Entity p_21029_) {
+    private void dismountVehicle(Entity pVehicle) {
         Vec3 vec3;
         if (this.isRemoved()) {
             vec3 = this.position();
-        } else if (!p_21029_.isRemoved() && !this.level().getBlockState(p_21029_.blockPosition()).is(BlockTags.PORTALS)) {
-            vec3 = p_21029_.getDismountLocationForPassenger(this);
+        } else if (!pVehicle.isRemoved() && !this.level().getBlockState(pVehicle.blockPosition()).is(BlockTags.PORTALS)) {
+            vec3 = pVehicle.getDismountLocationForPassenger(this);
         } else {
-            double d0 = Math.max(this.getY(), p_21029_.getY());
+            double d0 = Math.max(this.getY(), pVehicle.getY());
             vec3 = new Vec3(this.getX(), d0, this.getZ());
             boolean flag = this.getBbWidth() <= 4.0F && this.getBbHeight() <= 4.0F;
             if (flag) {
@@ -2136,8 +2161,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.getJumpPower(1.0F);
     }
 
-    protected float getJumpPower(float p_329899_) {
-        return (float)this.getAttributeValue(Attributes.JUMP_STRENGTH) * p_329899_ * this.getBlockJumpFactor() + this.getJumpBoostPower();
+    protected float getJumpPower(float pMultiplier) {
+        return (float)this.getAttributeValue(Attributes.JUMP_STRENGTH) * pMultiplier * this.getBlockJumpFactor() + this.getJumpBoostPower();
     }
 
     public float getJumpBoostPower() {
@@ -2146,6 +2171,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
     @VisibleForTesting
     public void jumpFromGround() {
+        // Arcane mixin port: JumpEvent can adjust/cancel the local player's jump yaw.
+        if (this == Minecraft.getInstance().player) {
+            this.arcane$jumpEvent = new JumpEvent(this.getYRot());
+            Client.INSTANCE.getEventManager().call(this.arcane$jumpEvent);
+            if (this.arcane$jumpEvent.isCancelled()) {
+                this.arcane$jumpEvent = null;
+                return;
+            }
+
+            this.arcane$preJumpYaw = this.getYRot();
+            this.setYRot(this.arcane$jumpEvent.yaw);
+        }
+
         float f = this.getJumpPower();
         if (!(f <= 1.0E-5F)) {
             Vec3 vec3 = this.getDeltaMovement();
@@ -2157,13 +2195,18 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
             this.hasImpulse = true;
         }
+
+        if (this == Minecraft.getInstance().player && this.arcane$jumpEvent != null) {
+            this.arcane$jumpEvent = null;
+            this.setYRot(this.arcane$preJumpYaw);
+        }
     }
 
     protected void goDownInWater() {
         this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04F, 0.0));
     }
 
-    protected void jumpInLiquid(TagKey<Fluid> p_204043_) {
+    protected void jumpInLiquid(TagKey<Fluid> pFluidTag) {
         this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.04F, 0.0));
     }
 
@@ -2171,7 +2214,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return 0.8F;
     }
 
-    public boolean canStandOnFluid(FluidState p_204042_) {
+    public boolean canStandOnFluid(FluidState pFluidState) {
         return false;
     }
 
@@ -2185,24 +2228,24 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return flag && this.hasEffect(MobEffects.SLOW_FALLING) ? Math.min(this.getGravity(), 0.01) : this.getGravity();
     }
 
-    public void travel(Vec3 p_21280_) {
+    public void travel(Vec3 pTravelVector) {
         if (this.isControlledByLocalInstance()) {
             FluidState fluidstate = this.level().getFluidState(this.blockPosition());
             if ((this.isInWater() || this.isInLava()) && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate)) {
-                this.travelInFluid(p_21280_);
+                this.travelInFluid(pTravelVector);
             } else if (this.isFallFlying()) {
                 this.travelFallFlying();
             } else {
-                this.travelInAir(p_21280_);
+                this.travelInAir(pTravelVector);
             }
         }
     }
 
-    private void travelInAir(Vec3 p_362087_) {
+    private void travelInAir(Vec3 pTravelVector) {
         BlockPos blockpos = this.getBlockPosBelowThatAffectsMyMovement();
         float f = this.onGround() ? this.level().getBlockState(blockpos).getBlock().getFriction() : 1.0F;
         float f1 = f * 0.91F;
-        Vec3 vec3 = this.handleRelativeFrictionAndCalculateMovement(p_362087_, f);
+        Vec3 vec3 = this.handleRelativeFrictionAndCalculateMovement(pTravelVector, f);
         double d0 = vec3.y;
         MobEffectInstance mobeffectinstance = this.getEffect(MobEffects.LEVITATION);
         if (mobeffectinstance != null) {
@@ -2223,7 +2266,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    private void travelInFluid(Vec3 p_362114_) {
+    private void travelInFluid(Vec3 pTravelVector) {
         boolean flag = this.getDeltaMovement().y <= 0.0;
         double d0 = this.getY();
         double d1 = this.getEffectiveGravity();
@@ -2244,7 +2287,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
                 f = 0.96F;
             }
 
-            this.moveRelative(f1, p_362114_);
+            this.moveRelative(f1, pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             Vec3 vec3 = this.getDeltaMovement();
             if (this.horizontalCollision && this.onClimbable()) {
@@ -2254,7 +2297,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
             vec3 = vec3.multiply((double)f, 0.8F, (double)f);
             this.setDeltaMovement(this.getFluidFallingAdjustedMovement(d1, flag, vec3));
         } else {
-            this.moveRelative(0.02F, p_362114_);
+            this.moveRelative(0.02F, pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             if (this.getFluidHeight(FluidTags.LAVA) <= this.getFluidJumpThreshold()) {
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.5, 0.8F, 0.5));
@@ -2286,34 +2329,34 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    private Vec3 updateFallFlyingMovement(Vec3 p_366729_) {
+    private Vec3 updateFallFlyingMovement(Vec3 pDeltaMovement) {
         Vec3 vec3 = this.getLookAngle();
         float f = this.getXRot() * (float) (Math.PI / 180.0);
         double d0 = Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z);
-        double d1 = p_366729_.horizontalDistance();
+        double d1 = pDeltaMovement.horizontalDistance();
         double d2 = this.getEffectiveGravity();
         double d3 = Mth.square(Math.cos((double)f));
-        p_366729_ = p_366729_.add(0.0, d2 * (-1.0 + d3 * 0.75), 0.0);
-        if (p_366729_.y < 0.0 && d0 > 0.0) {
-            double d4 = p_366729_.y * -0.1 * d3;
-            p_366729_ = p_366729_.add(vec3.x * d4 / d0, d4, vec3.z * d4 / d0);
+        pDeltaMovement = pDeltaMovement.add(0.0, d2 * (-1.0 + d3 * 0.75), 0.0);
+        if (pDeltaMovement.y < 0.0 && d0 > 0.0) {
+            double d4 = pDeltaMovement.y * -0.1 * d3;
+            pDeltaMovement = pDeltaMovement.add(vec3.x * d4 / d0, d4, vec3.z * d4 / d0);
         }
 
         if (f < 0.0F && d0 > 0.0) {
             double d5 = d1 * (double)(-Mth.sin(f)) * 0.04;
-            p_366729_ = p_366729_.add(-vec3.x * d5 / d0, d5 * 3.2, -vec3.z * d5 / d0);
+            pDeltaMovement = pDeltaMovement.add(-vec3.x * d5 / d0, d5 * 3.2, -vec3.z * d5 / d0);
         }
 
         if (d0 > 0.0) {
-            p_366729_ = p_366729_.add((vec3.x / d0 * d1 - p_366729_.x) * 0.1, 0.0, (vec3.z / d0 * d1 - p_366729_.z) * 0.1);
+            pDeltaMovement = pDeltaMovement.add((vec3.x / d0 * d1 - pDeltaMovement.x) * 0.1, 0.0, (vec3.z / d0 * d1 - pDeltaMovement.z) * 0.1);
         }
 
-        return p_366729_.multiply(0.99F, 0.98F, 0.99F);
+        return pDeltaMovement.multiply(0.99F, 0.98F, 0.99F);
     }
 
-    private void handleFallFlyingCollisions(double p_368432_, double p_367807_) {
+    private void handleFallFlyingCollisions(double pOldSpeed, double pNewSpeed) {
         if (this.horizontalCollision) {
-            double d0 = p_368432_ - p_367807_;
+            double d0 = pOldSpeed - pNewSpeed;
             float f = (float)(d0 * 10.0 - 3.0);
             if (f > 0.0F) {
                 this.playSound(this.getFallDamageSound((int)f), 1.0F, 1.0F);
@@ -2322,30 +2365,30 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    private void travelRidden(Player p_278244_, Vec3 p_278231_) {
-        Vec3 vec3 = this.getRiddenInput(p_278244_, p_278231_);
-        this.tickRidden(p_278244_, vec3);
+    private void travelRidden(Player pPlayer, Vec3 pTravelVector) {
+        Vec3 vec3 = this.getRiddenInput(pPlayer, pTravelVector);
+        this.tickRidden(pPlayer, vec3);
         if (this.isControlledByLocalInstance()) {
-            this.setSpeed(this.getRiddenSpeed(p_278244_));
+            this.setSpeed(this.getRiddenSpeed(pPlayer));
             this.travel(vec3);
         } else {
             this.setDeltaMovement(Vec3.ZERO);
         }
     }
 
-    protected void tickRidden(Player p_278262_, Vec3 p_275242_) {
+    protected void tickRidden(Player pPlayer, Vec3 pTravelVector) {
     }
 
-    protected Vec3 getRiddenInput(Player p_278326_, Vec3 p_275300_) {
-        return p_275300_;
+    protected Vec3 getRiddenInput(Player pPlayer, Vec3 pTravelVector) {
+        return pTravelVector;
     }
 
-    protected float getRiddenSpeed(Player p_278286_) {
+    protected float getRiddenSpeed(Player pPlayer) {
         return this.getSpeed();
     }
 
-    public void calculateEntityAnimation(boolean p_268129_) {
-        float f = (float)Mth.length(this.getX() - this.xo, p_268129_ ? this.getY() - this.yo : 0.0, this.getZ() - this.zo);
+    public void calculateEntityAnimation(boolean pIncludeHeight) {
+        float f = (float)Mth.length(this.getX() - this.xo, pIncludeHeight ? this.getY() - this.yo : 0.0, this.getZ() - this.zo);
         if (!this.isPassenger() && this.isAlive()) {
             this.updateWalkAnimation(f);
         } else {
@@ -2353,13 +2396,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected void updateWalkAnimation(float p_268283_) {
-        float f = Math.min(p_268283_ * 4.0F, 1.0F);
+    protected void updateWalkAnimation(float pPartialTick) {
+        float f = Math.min(pPartialTick * 4.0F, 1.0F);
         this.walkAnimation.update(f, 0.4F, this.isBaby() ? 3.0F : 1.0F);
     }
 
-    private Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 p_21075_, float p_21076_) {
-        this.moveRelative(this.getFrictionInfluencedSpeed(p_21076_), p_21075_);
+    private Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 pDeltaMovement, float pFriction) {
+        this.moveRelative(this.getFrictionInfluencedSpeed(pFriction), pDeltaMovement);
         this.setDeltaMovement(this.handleOnClimbable(this.getDeltaMovement()));
         this.move(MoverType.SELF, this.getDeltaMovement());
         Vec3 vec3 = this.getDeltaMovement();
@@ -2370,40 +2413,40 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return vec3;
     }
 
-    public Vec3 getFluidFallingAdjustedMovement(double p_20995_, boolean p_20996_, Vec3 p_20997_) {
-        if (p_20995_ != 0.0 && !this.isSprinting()) {
+    public Vec3 getFluidFallingAdjustedMovement(double pGravity, boolean pIsFalling, Vec3 pDeltaMovement) {
+        if (pGravity != 0.0 && !this.isSprinting()) {
             double d0;
-            if (p_20996_ && Math.abs(p_20997_.y - 0.005) >= 0.003 && Math.abs(p_20997_.y - p_20995_ / 16.0) < 0.003) {
+            if (pIsFalling && Math.abs(pDeltaMovement.y - 0.005) >= 0.003 && Math.abs(pDeltaMovement.y - pGravity / 16.0) < 0.003) {
                 d0 = -0.003;
             } else {
-                d0 = p_20997_.y - p_20995_ / 16.0;
+                d0 = pDeltaMovement.y - pGravity / 16.0;
             }
 
-            return new Vec3(p_20997_.x, d0, p_20997_.z);
+            return new Vec3(pDeltaMovement.x, d0, pDeltaMovement.z);
         } else {
-            return p_20997_;
+            return pDeltaMovement;
         }
     }
 
-    private Vec3 handleOnClimbable(Vec3 p_21298_) {
+    private Vec3 handleOnClimbable(Vec3 pDeltaMovement) {
         if (this.onClimbable()) {
             this.resetFallDistance();
             float f = 0.15F;
-            double d0 = Mth.clamp(p_21298_.x, -0.15F, 0.15F);
-            double d1 = Mth.clamp(p_21298_.z, -0.15F, 0.15F);
-            double d2 = Math.max(p_21298_.y, -0.15F);
+            double d0 = Mth.clamp(pDeltaMovement.x, -0.15F, 0.15F);
+            double d1 = Mth.clamp(pDeltaMovement.z, -0.15F, 0.15F);
+            double d2 = Math.max(pDeltaMovement.y, -0.15F);
             if (d2 < 0.0 && !this.getInBlockState().is(Blocks.SCAFFOLDING) && this.isSuppressingSlidingDownLadder() && this instanceof Player) {
                 d2 = 0.0;
             }
 
-            p_21298_ = new Vec3(d0, d2, d1);
+            pDeltaMovement = new Vec3(d0, d2, d1);
         }
 
-        return p_21298_;
+        return pDeltaMovement;
     }
 
-    private float getFrictionInfluencedSpeed(float p_21331_) {
-        return this.onGround() ? this.getSpeed() * (0.21600002F / (p_21331_ * p_21331_ * p_21331_)) : this.getFlyingSpeed();
+    private float getFrictionInfluencedSpeed(float pFriction) {
+        return this.onGround() ? this.getSpeed() * (0.21600002F / (pFriction * pFriction * pFriction)) : this.getFlyingSpeed();
     }
 
     protected float getFlyingSpeed() {
@@ -2414,12 +2457,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.speed;
     }
 
-    public void setSpeed(float p_21320_) {
-        this.speed = p_21320_;
+    public void setSpeed(float pSpeed) {
+        this.speed = pSpeed;
     }
 
-    public boolean doHurtTarget(ServerLevel p_366333_, Entity p_20970_) {
-        this.setLastHurtMob(p_20970_);
+    public boolean doHurtTarget(ServerLevel pLevel, Entity pSource) {
+        this.setLastHurtMob(pSource);
         return false;
     }
 
@@ -2611,28 +2654,28 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return map;
     }
 
-    public boolean equipmentHasChanged(ItemStack p_252265_, ItemStack p_251043_) {
-        return !ItemStack.matches(p_251043_, p_252265_);
+    public boolean equipmentHasChanged(ItemStack pOldItem, ItemStack pNewItem) {
+        return !ItemStack.matches(pNewItem, pOldItem);
     }
 
-    private void handleHandSwap(Map<EquipmentSlot, ItemStack> p_21092_) {
-        ItemStack itemstack = p_21092_.get(EquipmentSlot.MAINHAND);
-        ItemStack itemstack1 = p_21092_.get(EquipmentSlot.OFFHAND);
+    private void handleHandSwap(Map<EquipmentSlot, ItemStack> pHands) {
+        ItemStack itemstack = pHands.get(EquipmentSlot.MAINHAND);
+        ItemStack itemstack1 = pHands.get(EquipmentSlot.OFFHAND);
         if (itemstack != null
             && itemstack1 != null
             && ItemStack.matches(itemstack, this.getLastHandItem(EquipmentSlot.OFFHAND))
             && ItemStack.matches(itemstack1, this.getLastHandItem(EquipmentSlot.MAINHAND))) {
             ((ServerLevel)this.level()).getChunkSource().broadcast(this, new ClientboundEntityEventPacket(this, (byte)55));
-            p_21092_.remove(EquipmentSlot.MAINHAND);
-            p_21092_.remove(EquipmentSlot.OFFHAND);
+            pHands.remove(EquipmentSlot.MAINHAND);
+            pHands.remove(EquipmentSlot.OFFHAND);
             this.setLastHandItem(EquipmentSlot.MAINHAND, itemstack.copy());
             this.setLastHandItem(EquipmentSlot.OFFHAND, itemstack1.copy());
         }
     }
 
-    private void handleEquipmentChanges(Map<EquipmentSlot, ItemStack> p_21143_) {
-        List<Pair<EquipmentSlot, ItemStack>> list = Lists.newArrayListWithCapacity(p_21143_.size());
-        p_21143_.forEach((p_326783_, p_326784_) -> {
+    private void handleEquipmentChanges(Map<EquipmentSlot, ItemStack> pEquipments) {
+        List<Pair<EquipmentSlot, ItemStack>> list = Lists.newArrayListWithCapacity(pEquipments.size());
+        pEquipments.forEach((p_326783_, p_326784_) -> {
             ItemStack itemstack = p_326784_.copy();
             list.add(Pair.of(p_326783_, itemstack));
             switch (p_326783_.getType()) {
@@ -2649,24 +2692,39 @@ public abstract class LivingEntity extends Entity implements Attackable {
         ((ServerLevel)this.level()).getChunkSource().broadcast(this, new ClientboundSetEquipmentPacket(this.getId(), list));
     }
 
-    private ItemStack getLastArmorItem(EquipmentSlot p_21199_) {
-        return this.lastArmorItemStacks.get(p_21199_.getIndex());
+    private ItemStack getLastArmorItem(EquipmentSlot pSlot) {
+        return this.lastArmorItemStacks.get(pSlot.getIndex());
     }
 
-    private void setLastArmorItem(EquipmentSlot p_21129_, ItemStack p_21130_) {
-        this.lastArmorItemStacks.set(p_21129_.getIndex(), p_21130_);
+    private void setLastArmorItem(EquipmentSlot pSlot, ItemStack pStack) {
+        this.lastArmorItemStacks.set(pSlot.getIndex(), pStack);
     }
 
-    private ItemStack getLastHandItem(EquipmentSlot p_21245_) {
-        return this.lastHandItemStacks.get(p_21245_.getIndex());
+    private ItemStack getLastHandItem(EquipmentSlot pSlot) {
+        return this.lastHandItemStacks.get(pSlot.getIndex());
     }
 
-    private void setLastHandItem(EquipmentSlot p_21169_, ItemStack p_21170_) {
-        this.lastHandItemStacks.set(p_21169_.getIndex(), p_21170_);
+    private void setLastHandItem(EquipmentSlot pSlot, ItemStack pStack) {
+        this.lastHandItemStacks.set(pSlot.getIndex(), pStack);
     }
 
-    protected float tickHeadTurn(float p_21260_, float p_21261_) {
-        float f = Mth.wrapDegrees(p_21260_ - this.yBodyRot);
+    protected float tickHeadTurn(float pYRot, float pAnimStep) {
+        // Arcane mixin port: server rotation controls the local player's body/head turn calculation.
+        if (this == Minecraft.getInstance().player && RotationComponent.serverRotation != null) {
+            float targetYaw = RotationComponent.serverRotation.getYaw();
+            float f = Mth.wrapDegrees(pYRot - this.yBodyRot);
+            this.yBodyRot += f * 0.3F;
+            float f1 = Mth.wrapDegrees(targetYaw - this.yBodyRot);
+            f1 = Mth.clamp(f1, -75.0F, 75.0F);
+            this.yBodyRot = targetYaw - f1;
+            if (Math.abs(f1) > 50.0F) {
+                this.yBodyRot += f1 * 0.2F;
+            }
+
+            return (f1 < -90.0F || f1 >= 90.0F) ? -pAnimStep : pAnimStep;
+        }
+
+        float f = Mth.wrapDegrees(pYRot - this.yBodyRot);
         this.yBodyRot += f * 0.3F;
         float f1 = Mth.wrapDegrees(this.getYRot() - this.yBodyRot);
         float f2 = this.getMaxHeadRotationRelativeToBody();
@@ -2676,10 +2734,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
         boolean flag = f1 < -90.0F || f1 >= 90.0F;
         if (flag) {
-            p_21261_ *= -1.0F;
+            pAnimStep *= -1.0F;
         }
 
-        return p_21261_;
+        return pAnimStep;
     }
 
     protected float getMaxHeadRotationRelativeToBody() {
@@ -2890,8 +2948,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected void checkAutoSpinAttack(AABB p_21072_, AABB p_21073_) {
-        AABB aabb = p_21072_.minmax(p_21073_);
+    protected void checkAutoSpinAttack(AABB pBoundingBoxBeforeSpin, AABB pBoundingBoxAfterSpin) {
+        AABB aabb = pBoundingBoxBeforeSpin.minmax(pBoundingBoxAfterSpin);
         List<Entity> list = this.level().getEntities(this, aabb);
         if (!list.isEmpty()) {
             for (Entity entity : list) {
@@ -2913,11 +2971,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected void doPush(Entity p_20971_) {
-        p_20971_.push(this);
+    protected void doPush(Entity pEntity) {
+        pEntity.push(this);
     }
 
-    protected void doAutoAttackOnTouch(LivingEntity p_21277_) {
+    protected void doAutoAttackOnTouch(LivingEntity pTarget) {
     }
 
     public boolean isAutoSpinAttack() {
@@ -2982,58 +3040,58 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
 
     @Override
-    public void lerpHeadTo(float p_21005_, int p_21006_) {
-        this.lerpYHeadRot = (double)p_21005_;
-        this.lerpHeadSteps = p_21006_;
+    public void lerpHeadTo(float pYaw, int pPitch) {
+        this.lerpYHeadRot = (double)pYaw;
+        this.lerpHeadSteps = pPitch;
     }
 
-    public void setJumping(boolean p_21314_) {
-        this.jumping = p_21314_;
+    public void setJumping(boolean pJumping) {
+        this.jumping = pJumping;
     }
 
-    public void onItemPickup(ItemEntity p_21054_) {
-        Entity entity = p_21054_.getOwner();
+    public void onItemPickup(ItemEntity pItemEntity) {
+        Entity entity = pItemEntity.getOwner();
         if (entity instanceof ServerPlayer) {
-            CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.trigger((ServerPlayer)entity, p_21054_.getItem(), this);
+            CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.trigger((ServerPlayer)entity, pItemEntity.getItem(), this);
         }
     }
 
-    public void take(Entity p_21030_, int p_21031_) {
-        if (!p_21030_.isRemoved()
+    public void take(Entity pEntity, int pAmount) {
+        if (!pEntity.isRemoved()
             && !this.level().isClientSide
-            && (p_21030_ instanceof ItemEntity || p_21030_ instanceof AbstractArrow || p_21030_ instanceof ExperienceOrb)) {
-            ((ServerLevel)this.level()).getChunkSource().broadcast(p_21030_, new ClientboundTakeItemEntityPacket(p_21030_.getId(), this.getId(), p_21031_));
+            && (pEntity instanceof ItemEntity || pEntity instanceof AbstractArrow || pEntity instanceof ExperienceOrb)) {
+            ((ServerLevel)this.level()).getChunkSource().broadcast(pEntity, new ClientboundTakeItemEntityPacket(pEntity.getId(), this.getId(), pAmount));
         }
     }
 
-    public boolean hasLineOfSight(Entity p_147185_) {
-        return this.hasLineOfSight(p_147185_, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p_147185_.getEyeY());
+    public boolean hasLineOfSight(Entity pEntity) {
+        return this.hasLineOfSight(pEntity, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, pEntity.getEyeY());
     }
 
-    public boolean hasLineOfSight(Entity p_364584_, ClipContext.Block p_368226_, ClipContext.Fluid p_368626_, double p_375593_) {
-        if (p_364584_.level() != this.level()) {
+    public boolean hasLineOfSight(Entity pEntity, ClipContext.Block pBlock, ClipContext.Fluid pFluid, double pY) {
+        if (pEntity.level() != this.level()) {
             return false;
         } else {
             Vec3 vec3 = new Vec3(this.getX(), this.getEyeY(), this.getZ());
-            Vec3 vec31 = new Vec3(p_364584_.getX(), p_375593_, p_364584_.getZ());
+            Vec3 vec31 = new Vec3(pEntity.getX(), pY, pEntity.getZ());
             return vec31.distanceTo(vec3) > 128.0
                 ? false
-                : this.level().clip(new ClipContext(vec3, vec31, p_368226_, p_368626_, this)).getType() == HitResult.Type.MISS;
+                : this.level().clip(new ClipContext(vec3, vec31, pBlock, pFluid, this)).getType() == HitResult.Type.MISS;
         }
     }
 
     @Override
-    public float getViewYRot(float p_21286_) {
-        return p_21286_ == 1.0F ? this.yHeadRot : Mth.rotLerp(p_21286_, this.yHeadRotO, this.yHeadRot);
+    public float getViewYRot(float pPartialTicks) {
+        return pPartialTicks == 1.0F ? this.yHeadRot : Mth.rotLerp(pPartialTicks, this.yHeadRotO, this.yHeadRot);
     }
 
-    public float getAttackAnim(float p_21325_) {
+    public float getAttackAnim(float pPartialTick) {
         float f = this.attackAnim - this.oAttackAnim;
         if (f < 0.0F) {
             f++;
         }
 
-        return this.oAttackAnim + f * p_21325_;
+        return this.oAttackAnim + f * pPartialTick;
     }
 
     @Override
@@ -3052,13 +3110,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
 
     @Override
-    public void setYHeadRot(float p_21306_) {
-        this.yHeadRot = p_21306_;
+    public void setYHeadRot(float pRotation) {
+        this.yHeadRot = pRotation;
     }
 
     @Override
-    public void setYBodyRot(float p_21309_) {
-        this.yBodyRot = p_21309_;
+    public void setYBodyRot(float pOffset) {
+        this.yBodyRot = pOffset;
     }
 
     @Override
@@ -3066,20 +3124,20 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return resetForwardDirectionOfRelativePortalPosition(super.getRelativePortalPosition(p_21085_, p_21086_));
     }
 
-    public static Vec3 resetForwardDirectionOfRelativePortalPosition(Vec3 p_21290_) {
-        return new Vec3(p_21290_.x, p_21290_.y, 0.0);
+    public static Vec3 resetForwardDirectionOfRelativePortalPosition(Vec3 pRelativePortalPosition) {
+        return new Vec3(pRelativePortalPosition.x, pRelativePortalPosition.y, 0.0);
     }
 
     public float getAbsorptionAmount() {
         return this.absorptionAmount;
     }
 
-    public final void setAbsorptionAmount(float p_21328_) {
-        this.internalSetAbsorptionAmount(Mth.clamp(p_21328_, 0.0F, this.getMaxAbsorption()));
+    public final void setAbsorptionAmount(float pAbsorptionAmount) {
+        this.internalSetAbsorptionAmount(Mth.clamp(pAbsorptionAmount, 0.0F, this.getMaxAbsorption()));
     }
 
-    protected void internalSetAbsorptionAmount(float p_299471_) {
-        this.absorptionAmount = p_299471_;
+    protected void internalSetAbsorptionAmount(float pAbsorptionAmount) {
+        this.absorptionAmount = pAbsorptionAmount;
     }
 
     public void onEnterCombat() {
@@ -3113,9 +3171,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected void updateUsingItem(ItemStack p_147201_) {
-        p_147201_.onUseTick(this.level(), this, this.getUseItemRemainingTicks());
-        if (--this.useItemRemaining == 0 && !this.level().isClientSide && !p_147201_.useOnRelease()) {
+    protected void updateUsingItem(ItemStack pUsingItem) {
+        pUsingItem.onUseTick(this.level(), this, this.getUseItemRemainingTicks());
+        if (--this.useItemRemaining == 0 && !this.level().isClientSide && !pUsingItem.useOnRelease()) {
             this.completeUsingItem();
         }
     }
@@ -3129,38 +3187,38 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected void setLivingEntityFlag(int p_21156_, boolean p_21157_) {
+    protected void setLivingEntityFlag(int pKey, boolean pValue) {
         int i = this.entityData.get(DATA_LIVING_ENTITY_FLAGS);
-        if (p_21157_) {
-            i |= p_21156_;
+        if (pValue) {
+            i |= pKey;
         } else {
-            i &= ~p_21156_;
+            i &= ~pKey;
         }
 
         this.entityData.set(DATA_LIVING_ENTITY_FLAGS, (byte)i);
     }
 
-    public void startUsingItem(InteractionHand p_21159_) {
-        ItemStack itemstack = this.getItemInHand(p_21159_);
+    public void startUsingItem(InteractionHand pHand) {
+        ItemStack itemstack = this.getItemInHand(pHand);
         if (!itemstack.isEmpty() && !this.isUsingItem()) {
             this.useItem = itemstack;
             this.useItemRemaining = itemstack.getUseDuration(this);
             if (!this.level().isClientSide) {
                 this.setLivingEntityFlag(1, true);
-                this.setLivingEntityFlag(2, p_21159_ == InteractionHand.OFF_HAND);
+                this.setLivingEntityFlag(2, pHand == InteractionHand.OFF_HAND);
                 this.gameEvent(GameEvent.ITEM_INTERACT_START);
             }
         }
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_21104_) {
-        super.onSyncedDataUpdated(p_21104_);
-        if (SLEEPING_POS_ID.equals(p_21104_)) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        super.onSyncedDataUpdated(pKey);
+        if (SLEEPING_POS_ID.equals(pKey)) {
             if (this.level().isClientSide) {
                 this.getSleepingPos().ifPresent(this::setPosToBed);
             }
-        } else if (DATA_LIVING_ENTITY_FLAGS.equals(p_21104_) && this.level().isClientSide) {
+        } else if (DATA_LIVING_ENTITY_FLAGS.equals(pKey) && this.level().isClientSide) {
             if (this.isUsingItem() && this.useItem.isEmpty()) {
                 this.useItem = this.getItemInHand(this.getUsedItemHand());
                 if (!this.useItem.isEmpty()) {
@@ -3174,8 +3232,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
 
     @Override
-    public void lookAt(EntityAnchorArgument.Anchor p_21078_, Vec3 p_21079_) {
-        super.lookAt(p_21078_, p_21079_);
+    public void lookAt(EntityAnchorArgument.Anchor pAnchor, Vec3 pTarget) {
+        super.lookAt(pAnchor, pTarget);
         this.yHeadRotO = this.yHeadRot;
         this.yBodyRot = this.yHeadRot;
         this.yBodyRotO = this.yBodyRot;
@@ -3186,8 +3244,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return Mth.lerp(p_345405_, this.yBodyRotO, this.yBodyRot);
     }
 
-    public void spawnItemParticles(ItemStack p_21061_, int p_21062_) {
-        for (int i = 0; i < p_21062_; i++) {
+    public void spawnItemParticles(ItemStack pStack, int pAmount) {
+        for (int i = 0; i < pAmount; i++) {
             Vec3 vec3 = new Vec3(((double)this.random.nextFloat() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, 0.0);
             vec3 = vec3.xRot(-this.getXRot() * (float) (Math.PI / 180.0));
             vec3 = vec3.yRot(-this.getYRot() * (float) (Math.PI / 180.0));
@@ -3198,7 +3256,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
             vec31 = vec31.add(this.getX(), this.getEyeY(), this.getZ());
             this.level()
                 .addParticle(
-                    new ItemParticleOption(ParticleTypes.ITEM, p_21061_),
+                    new ItemParticleOption(ParticleTypes.ITEM, pStack),
                     vec31.x,
                     vec31.y,
                     vec31.z,
@@ -3227,7 +3285,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    public void handleExtraItemsCreatedOnUse(ItemStack p_367452_) {
+    public void handleExtraItemsCreatedOnUse(ItemStack pStack) {
     }
 
     public ItemStack getUseItem() {
@@ -3301,13 +3359,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.fallFlyTicks;
     }
 
-    public boolean randomTeleport(double p_20985_, double p_20986_, double p_20987_, boolean p_20988_) {
+    public boolean randomTeleport(double pX, double pY, double pZ, boolean pBroadcastTeleport) {
         double d0 = this.getX();
         double d1 = this.getY();
         double d2 = this.getZ();
-        double d3 = p_20986_;
+        double d3 = pY;
         boolean flag = false;
-        BlockPos blockpos = BlockPos.containing(p_20985_, p_20986_, p_20987_);
+        BlockPos blockpos = BlockPos.containing(pX, pY, pZ);
         Level level = this.level();
         if (level.hasChunkAt(blockpos)) {
             boolean flag1 = false;
@@ -3324,7 +3382,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
             }
 
             if (flag1) {
-                this.teleportTo(p_20985_, d3, p_20987_);
+                this.teleportTo(pX, d3, pZ);
                 if (level.noCollision(this) && !level.containsAnyLiquid(this.getBoundingBox())) {
                     flag = true;
                 }
@@ -3335,7 +3393,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
             this.teleportTo(d0, d1, d2);
             return false;
         } else {
-            if (p_20988_) {
+            if (pBroadcastTeleport) {
                 level.broadcastEntityEvent(this, (byte)46);
             }
 
@@ -3355,7 +3413,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return true;
     }
 
-    public void setRecordPlayingNearby(BlockPos p_21082_, boolean p_21083_) {
+    public void setRecordPlayingNearby(BlockPos pJukebox, boolean pPartyParrot) {
     }
 
     public boolean canPickUpLoot() {
@@ -3363,11 +3421,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
 
     @Override
-    public final EntityDimensions getDimensions(Pose p_21047_) {
-        return p_21047_ == Pose.SLEEPING ? SLEEPING_DIMENSIONS : this.getDefaultDimensions(p_21047_).scale(this.getScale());
+    public final EntityDimensions getDimensions(Pose pPose) {
+        return pPose == Pose.SLEEPING ? SLEEPING_DIMENSIONS : this.getDefaultDimensions(pPose).scale(this.getScale());
     }
 
-    protected EntityDimensions getDefaultDimensions(Pose p_334284_) {
+    protected EntityDimensions getDefaultDimensions(Pose pPose) {
         return this.getType().getDimensions().scale(this.getAgeScale());
     }
 
@@ -3375,8 +3433,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return ImmutableList.of(Pose.STANDING);
     }
 
-    public AABB getLocalBoundsForPose(Pose p_21271_) {
-        EntityDimensions entitydimensions = this.getDimensions(p_21271_);
+    public AABB getLocalBoundsForPose(Pose pPose) {
+        EntityDimensions entitydimensions = this.getDimensions(pPose);
         return new AABB(
             (double)(-entitydimensions.width() / 2.0F),
             0.0,
@@ -3387,8 +3445,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         );
     }
 
-    protected boolean wouldNotSuffocateAtTargetPose(Pose p_297537_) {
-        AABB aabb = this.getDimensions(p_297537_).makeBoundingBox(this.position());
+    protected boolean wouldNotSuffocateAtTargetPose(Pose pPose) {
+        AABB aabb = this.getDimensions(pPose).makeBoundingBox(this.position());
         return this.level().noBlockCollision(this, aabb);
     }
 
@@ -3401,8 +3459,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.entityData.get(SLEEPING_POS_ID);
     }
 
-    public void setSleepingPos(BlockPos p_21251_) {
-        this.entityData.set(SLEEPING_POS_ID, Optional.of(p_21251_));
+    public void setSleepingPos(BlockPos pPos) {
+        this.entityData.set(SLEEPING_POS_ID, Optional.of(pPos));
     }
 
     public void clearSleepingPos() {
@@ -3413,25 +3471,25 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.getSleepingPos().isPresent();
     }
 
-    public void startSleeping(BlockPos p_21141_) {
+    public void startSleeping(BlockPos pPos) {
         if (this.isPassenger()) {
             this.stopRiding();
         }
 
-        BlockState blockstate = this.level().getBlockState(p_21141_);
+        BlockState blockstate = this.level().getBlockState(pPos);
         if (blockstate.getBlock() instanceof BedBlock) {
-            this.level().setBlock(p_21141_, blockstate.setValue(BedBlock.OCCUPIED, Boolean.valueOf(true)), 3);
+            this.level().setBlock(pPos, blockstate.setValue(BedBlock.OCCUPIED, Boolean.valueOf(true)), 3);
         }
 
         this.setPose(Pose.SLEEPING);
-        this.setPosToBed(p_21141_);
-        this.setSleepingPos(p_21141_);
+        this.setPosToBed(pPos);
+        this.setSleepingPos(pPos);
         this.setDeltaMovement(Vec3.ZERO);
         this.hasImpulse = true;
     }
 
-    private void setPosToBed(BlockPos p_21081_) {
-        this.setPos((double)p_21081_.getX() + 0.5, (double)p_21081_.getY() + 0.6875, (double)p_21081_.getZ() + 0.5);
+    private void setPosToBed(BlockPos pPos) {
+        this.setPos((double)pPos.getX() + 0.5, (double)pPos.getY() + 0.6875, (double)pPos.getZ() + 0.5);
     }
 
     private boolean checkBedExists() {
@@ -3472,12 +3530,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return !this.isSleeping() && super.isInWall();
     }
 
-    public ItemStack getProjectile(ItemStack p_21272_) {
+    public ItemStack getProjectile(ItemStack pWeaponStack) {
         return ItemStack.EMPTY;
     }
 
-    private static byte entityEventForEquipmentBreak(EquipmentSlot p_21267_) {
-        return switch (p_21267_) {
+    private static byte entityEventForEquipmentBreak(EquipmentSlot pSlot) {
+        return switch (pSlot) {
             case MAINHAND -> 47;
             case OFFHAND -> 48;
             case HEAD -> 49;
@@ -3488,28 +3546,28 @@ public abstract class LivingEntity extends Entity implements Attackable {
         };
     }
 
-    public void onEquippedItemBroken(Item p_343772_, EquipmentSlot p_345353_) {
-        this.level().broadcastEntityEvent(this, entityEventForEquipmentBreak(p_345353_));
-        this.stopLocationBasedEffects(this.getItemBySlot(p_345353_), p_345353_, this.attributes);
+    public void onEquippedItemBroken(Item pItem, EquipmentSlot pSlot) {
+        this.level().broadcastEntityEvent(this, entityEventForEquipmentBreak(pSlot));
+        this.stopLocationBasedEffects(this.getItemBySlot(pSlot), pSlot, this.attributes);
     }
 
-    private void stopLocationBasedEffects(ItemStack p_369098_, EquipmentSlot p_365471_, AttributeMap p_363505_) {
-        p_369098_.forEachModifier(p_365471_, (p_358882_, p_358883_) -> {
-            AttributeInstance attributeinstance = p_363505_.getInstance(p_358882_);
+    private void stopLocationBasedEffects(ItemStack pStack, EquipmentSlot pSlot, AttributeMap pAttributeMap) {
+        pStack.forEachModifier(pSlot, (p_358882_, p_358883_) -> {
+            AttributeInstance attributeinstance = pAttributeMap.getInstance(p_358882_);
             if (attributeinstance != null) {
                 attributeinstance.removeModifier(p_358883_);
             }
         });
-        EnchantmentHelper.stopLocationBasedEffects(p_369098_, this, p_365471_);
+        EnchantmentHelper.stopLocationBasedEffects(pStack, this, pSlot);
     }
 
-    public static EquipmentSlot getSlotForHand(InteractionHand p_333846_) {
-        return p_333846_ == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
+    public static EquipmentSlot getSlotForHand(InteractionHand pHand) {
+        return pHand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
     }
 
-    public final boolean canEquipWithDispenser(ItemStack p_362526_) {
+    public final boolean canEquipWithDispenser(ItemStack pStack) {
         if (this.isAlive() && !this.isSpectator()) {
-            Equippable equippable = p_362526_.get(DataComponents.EQUIPPABLE);
+            Equippable equippable = pStack.get(DataComponents.EQUIPPABLE);
             if (equippable != null && equippable.dispensable()) {
                 EquipmentSlot equipmentslot = equippable.slot();
                 return this.canUseSlot(equipmentslot) && equippable.canBeEquippedBy(this.getType())
@@ -3523,44 +3581,44 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
     }
 
-    protected boolean canDispenserEquipIntoSlot(EquipmentSlot p_362370_) {
+    protected boolean canDispenserEquipIntoSlot(EquipmentSlot pSlot) {
         return true;
     }
 
-    public final EquipmentSlot getEquipmentSlotForItem(ItemStack p_147234_) {
-        Equippable equippable = p_147234_.get(DataComponents.EQUIPPABLE);
+    public final EquipmentSlot getEquipmentSlotForItem(ItemStack pStack) {
+        Equippable equippable = pStack.get(DataComponents.EQUIPPABLE);
         return equippable != null && this.canUseSlot(equippable.slot()) ? equippable.slot() : EquipmentSlot.MAINHAND;
     }
 
-    public final boolean isEquippableInSlot(ItemStack p_21138_, EquipmentSlot p_361200_) {
-        Equippable equippable = p_21138_.get(DataComponents.EQUIPPABLE);
+    public final boolean isEquippableInSlot(ItemStack pStack, EquipmentSlot pSlot) {
+        Equippable equippable = pStack.get(DataComponents.EQUIPPABLE);
         return equippable == null
-            ? p_361200_ == EquipmentSlot.MAINHAND && this.canUseSlot(EquipmentSlot.MAINHAND)
-            : p_361200_ == equippable.slot() && this.canUseSlot(equippable.slot()) && equippable.canBeEquippedBy(this.getType());
+            ? pSlot == EquipmentSlot.MAINHAND && this.canUseSlot(EquipmentSlot.MAINHAND)
+            : pSlot == equippable.slot() && this.canUseSlot(equippable.slot()) && equippable.canBeEquippedBy(this.getType());
     }
 
-    private static SlotAccess createEquipmentSlotAccess(LivingEntity p_147196_, EquipmentSlot p_147197_) {
-        return p_147197_ != EquipmentSlot.HEAD && p_147197_ != EquipmentSlot.MAINHAND && p_147197_ != EquipmentSlot.OFFHAND
-            ? SlotAccess.forEquipmentSlot(p_147196_, p_147197_, p_341262_ -> p_341262_.isEmpty() || p_147196_.getEquipmentSlotForItem(p_341262_) == p_147197_)
-            : SlotAccess.forEquipmentSlot(p_147196_, p_147197_);
+    private static SlotAccess createEquipmentSlotAccess(LivingEntity pEntity, EquipmentSlot pSlot) {
+        return pSlot != EquipmentSlot.HEAD && pSlot != EquipmentSlot.MAINHAND && pSlot != EquipmentSlot.OFFHAND
+            ? SlotAccess.forEquipmentSlot(pEntity, pSlot, p_341262_ -> p_341262_.isEmpty() || pEntity.getEquipmentSlotForItem(p_341262_) == pSlot)
+            : SlotAccess.forEquipmentSlot(pEntity, pSlot);
     }
 
     @Nullable
-    private static EquipmentSlot getEquipmentSlot(int p_147212_) {
-        if (p_147212_ == 100 + EquipmentSlot.HEAD.getIndex()) {
+    private static EquipmentSlot getEquipmentSlot(int pIndex) {
+        if (pIndex == 100 + EquipmentSlot.HEAD.getIndex()) {
             return EquipmentSlot.HEAD;
-        } else if (p_147212_ == 100 + EquipmentSlot.CHEST.getIndex()) {
+        } else if (pIndex == 100 + EquipmentSlot.CHEST.getIndex()) {
             return EquipmentSlot.CHEST;
-        } else if (p_147212_ == 100 + EquipmentSlot.LEGS.getIndex()) {
+        } else if (pIndex == 100 + EquipmentSlot.LEGS.getIndex()) {
             return EquipmentSlot.LEGS;
-        } else if (p_147212_ == 100 + EquipmentSlot.FEET.getIndex()) {
+        } else if (pIndex == 100 + EquipmentSlot.FEET.getIndex()) {
             return EquipmentSlot.FEET;
-        } else if (p_147212_ == 98) {
+        } else if (pIndex == 98) {
             return EquipmentSlot.MAINHAND;
-        } else if (p_147212_ == 99) {
+        } else if (pIndex == 99) {
             return EquipmentSlot.OFFHAND;
         } else {
-            return p_147212_ == 105 ? EquipmentSlot.BODY : null;
+            return pIndex == 105 ? EquipmentSlot.BODY : null;
         }
     }
 
@@ -3627,8 +3685,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return this.position().add(this.getPassengerAttachmentPoint(p_299288_, this.getDimensions(this.getPose()), this.getScale() * this.getAgeScale()));
     }
 
-    protected void lerpHeadRotationStep(int p_297258_, double p_301409_) {
-        this.yHeadRot = (float)Mth.rotLerp(1.0 / (double)p_297258_, (double)this.yHeadRot, p_301409_);
+    protected void lerpHeadRotationStep(int pLerpHeadSteps, double pLerpYHeadRot) {
+        this.yHeadRot = (float)Mth.rotLerp(1.0 / (double)pLerpHeadSteps, (double)this.yHeadRot, pLerpYHeadRot);
     }
 
     @Override
@@ -3640,16 +3698,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
         return false;
     }
 
-    public boolean isInvulnerableTo(ServerLevel p_361436_, DamageSource p_345519_) {
-        return this.isInvulnerableToBase(p_345519_) || EnchantmentHelper.isImmuneToDamage(p_361436_, this, p_345519_);
+    public boolean isInvulnerableTo(ServerLevel pLevel, DamageSource pDamageSource) {
+        return this.isInvulnerableToBase(pDamageSource) || EnchantmentHelper.isImmuneToDamage(pLevel, this, pDamageSource);
     }
 
-    public static boolean canGlideUsing(ItemStack p_369788_, EquipmentSlot p_365879_) {
-        if (!p_369788_.has(DataComponents.GLIDER)) {
+    public static boolean canGlideUsing(ItemStack pStack, EquipmentSlot pSlot) {
+        if (!pStack.has(DataComponents.GLIDER)) {
             return false;
         } else {
-            Equippable equippable = p_369788_.get(DataComponents.EQUIPPABLE);
-            return equippable != null && p_365879_ == equippable.slot() && !p_369788_.nextDamageWillBreak();
+            Equippable equippable = pStack.get(DataComponents.EQUIPPABLE);
+            return equippable != null && pSlot == equippable.slot() && !pStack.nextDamageWillBreak();
         }
     }
 

@@ -26,28 +26,28 @@ public class EntityCollisionContext implements CollisionContext {
     @Nullable
     private final Entity entity;
 
-    protected EntityCollisionContext(boolean p_198916_, double p_198917_, ItemStack p_198918_, Predicate<FluidState> p_198919_, @Nullable Entity p_198920_) {
-        this.descending = p_198916_;
-        this.entityBottom = p_198917_;
-        this.heldItem = p_198918_;
-        this.canStandOnFluid = p_198919_;
-        this.entity = p_198920_;
+    protected EntityCollisionContext(boolean pDescending, double pEntityBottom, ItemStack pHeldItem, Predicate<FluidState> pCanStandOnFluid, @Nullable Entity pEntity) {
+        this.descending = pDescending;
+        this.entityBottom = pEntityBottom;
+        this.heldItem = pHeldItem;
+        this.canStandOnFluid = pCanStandOnFluid;
+        this.entity = pEntity;
     }
 
     @Deprecated
-    protected EntityCollisionContext(Entity p_82872_, boolean p_365888_) {
+    protected EntityCollisionContext(Entity pEntity, boolean pCanStandOnFluid) {
         this(
-            p_82872_.isDescending(),
-            p_82872_.getY(),
-            p_82872_ instanceof LivingEntity ? ((LivingEntity)p_82872_).getMainHandItem() : ItemStack.EMPTY,
-            p_365888_ ? p_360701_ -> true : (p_82872_ instanceof LivingEntity ? ((LivingEntity)p_82872_)::canStandOnFluid : p_205113_ -> false),
-            p_82872_
+            pEntity.isDescending(),
+            pEntity.getY(),
+            pEntity instanceof LivingEntity ? ((LivingEntity)pEntity).getMainHandItem() : ItemStack.EMPTY,
+            pCanStandOnFluid ? p_360701_ -> true : (pEntity instanceof LivingEntity ? ((LivingEntity)pEntity)::canStandOnFluid : p_205113_ -> false),
+            pEntity
         );
     }
 
     @Override
-    public boolean isHoldingItem(Item p_82879_) {
-        return this.heldItem.is(p_82879_);
+    public boolean isHoldingItem(Item pItem) {
+        return this.heldItem.is(pItem);
     }
 
     @Override

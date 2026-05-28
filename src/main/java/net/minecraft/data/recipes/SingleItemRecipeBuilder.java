@@ -28,20 +28,20 @@ public class SingleItemRecipeBuilder implements RecipeBuilder {
     private String group;
     private final SingleItemRecipe.Factory<?> factory;
 
-    public SingleItemRecipeBuilder(RecipeCategory p_251425_, SingleItemRecipe.Factory<?> p_311287_, Ingredient p_251221_, ItemLike p_251302_, int p_250964_) {
-        this.category = p_251425_;
-        this.factory = p_311287_;
-        this.result = p_251302_.asItem();
-        this.ingredient = p_251221_;
-        this.count = p_250964_;
+    public SingleItemRecipeBuilder(RecipeCategory pCategory, SingleItemRecipe.Factory<?> pFactory, Ingredient pIngredient, ItemLike pResult, int pCount) {
+        this.category = pCategory;
+        this.factory = pFactory;
+        this.result = pResult.asItem();
+        this.ingredient = pIngredient;
+        this.count = pCount;
     }
 
-    public static SingleItemRecipeBuilder stonecutting(Ingredient p_248596_, RecipeCategory p_250503_, ItemLike p_250269_) {
-        return new SingleItemRecipeBuilder(p_250503_, StonecutterRecipe::new, p_248596_, p_250269_, 1);
+    public static SingleItemRecipeBuilder stonecutting(Ingredient pIngredient, RecipeCategory pCategory, ItemLike pResult) {
+        return new SingleItemRecipeBuilder(pCategory, StonecutterRecipe::new, pIngredient, pResult, 1);
     }
 
-    public static SingleItemRecipeBuilder stonecutting(Ingredient p_251375_, RecipeCategory p_248984_, ItemLike p_250105_, int p_249506_) {
-        return new SingleItemRecipeBuilder(p_248984_, StonecutterRecipe::new, p_251375_, p_250105_, p_249506_);
+    public static SingleItemRecipeBuilder stonecutting(Ingredient pIngredient, RecipeCategory pCategory, ItemLike pResult, int pCount) {
+        return new SingleItemRecipeBuilder(pCategory, StonecutterRecipe::new, pIngredient, pResult, pCount);
     }
 
     public SingleItemRecipeBuilder unlockedBy(String p_176810_, Criterion<?> p_298188_) {
@@ -74,9 +74,9 @@ public class SingleItemRecipeBuilder implements RecipeBuilder {
         );
     }
 
-    private void ensureValid(ResourceKey<Recipe<?>> p_364816_) {
+    private void ensureValid(ResourceKey<Recipe<?>> pRecipe) {
         if (this.criteria.isEmpty()) {
-            throw new IllegalStateException("No way of obtaining recipe " + p_364816_.location());
+            throw new IllegalStateException("No way of obtaining recipe " + pRecipe.location());
         }
     }
 }

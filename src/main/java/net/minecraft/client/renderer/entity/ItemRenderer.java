@@ -8,6 +8,7 @@ import com.mojang.math.MatrixUtil;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
@@ -23,10 +24,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.EmissiveTextures;
+import net.optifine.reflect.Reflector;
+import net.optifine.render.VertexBuilderWrapper;
+import net.optifine.shaders.Shaders;
 
-@OnlyIn(Dist.CLIENT)
 public class ItemRenderer {
     public static final ResourceLocation ENCHANTED_GLINT_ENTITY = ResourceLocation.withDefaultNamespace("textures/misc/enchanted_glint_entity.png");
     public static final ResourceLocation ENCHANTED_GLINT_ITEM = ResourceLocation.withDefaultNamespace("textures/misc/enchanted_glint_item.png");
@@ -39,90 +41,133 @@ public class ItemRenderer {
     public static final int NO_TINT = -1;
     private final ItemModelResolver resolver;
     private final ItemStackRenderState scratchItemStackRenderState = new ItemStackRenderState();
+    private static boolean renderItemGui = false;
 
-    public ItemRenderer(ItemModelResolver p_377469_) {
-        this.resolver = p_377469_;
+    public ItemRenderer(ItemModelResolver pResolver) {
+        this.resolver = pResolver;
     }
 
-    private static void renderModelLists(BakedModel p_115190_, int[] p_376482_, int p_115192_, int p_115193_, PoseStack p_115194_, VertexConsumer p_115195_) {
+    public static void renderModelLists(BakedModel pModel, int[] pTintLayers, int pPackedLight, int pPackedOverlay, PoseStack pPoseStack, VertexConsumer pBuffer) {
         RandomSource randomsource = RandomSource.create();
         long i = 42L;
 
-        for (Direction direction : Direction.values()) {
+        for (Direction direction : Direction.VALUES) {
             randomsource.setSeed(42L);
-            renderQuadList(p_115194_, p_115195_, p_115190_.getQuads(null, direction, randomsource), p_376482_, p_115192_, p_115193_);
+            renderQuadList(pPoseStack, pBuffer, pModel.getQuads(null, direction, randomsource), pTintLayers, pPackedLight, pPackedOverlay);
         }
 
         randomsource.setSeed(42L);
-        renderQuadList(p_115194_, p_115195_, p_115190_.getQuads(null, null, randomsource), p_376482_, p_115192_, p_115193_);
+        renderQuadList(pPoseStack, pBuffer, pModel.getQuads(null, null, randomsource), pTintLayers, pPackedLight, pPackedOverlay);
     }
 
     public static void renderItem(
-        ItemDisplayContext p_362035_,
-        PoseStack p_370127_,
-        MultiBufferSource p_365365_,
-        int p_363416_,
-        int p_367651_,
-        int[] p_378157_,
-        BakedModel p_367824_,
-        RenderType p_377949_,
-        ItemStackRenderState.FoilType p_378770_
+        ItemDisplayContext pDisplayContext,
+        PoseStack pPoseStack,
+        MultiBufferSource pBufferSource,
+        int pPackedLight,
+        int pPackedOverlay,
+        int[] pTintLayers,
+        BakedModel pModel,
+        RenderType pRenderType,
+        ItemStackRenderState.FoilType pFoilType
     ) {
         VertexConsumer vertexconsumer;
-        if (p_378770_ == ItemStackRenderState.FoilType.SPECIAL) {
-            PoseStack.Pose posestack$pose = p_370127_.last().copy();
-            if (p_362035_ == ItemDisplayContext.GUI) {
+        if (pFoilType == ItemStackRenderState.FoilType.SPECIAL) {
+            PoseStack.Pose posestack$pose = pPoseStack.last().copy();
+            if (pDisplayContext == ItemDisplayContext.GUI) {
                 MatrixUtil.mulComponentWise(posestack$pose.pose(), 0.5F);
-            } else if (p_362035_.firstPerson()) {
+            } else if (pDisplayContext.firstPerson()) {
                 MatrixUtil.mulComponentWise(posestack$pose.pose(), 0.75F);
             }
 
-            vertexconsumer = getCompassFoilBuffer(p_365365_, p_377949_, posestack$pose);
+            vertexconsumer = getCompassFoilBuffer(pBufferSource, pRenderType, posestack$pose);
         } else {
-            vertexconsumer = getFoilBuffer(p_365365_, p_377949_, true, p_378770_ != ItemStackRenderState.FoilType.NONE);
+            vertexconsumer = getFoilBuffer(pBufferSource, pRenderType, true, pFoilType != ItemStackRenderState.FoilType.NONE);
         }
 
-        renderModelLists(p_367824_, p_378157_, p_363416_, p_367651_, p_370127_, vertexconsumer);
+        if (EmissiveTextures.isActive()) {
+            EmissiveTextures.beginRender();
+        }
+
+        renderModelLists(pModel, pTintLayers, pPackedLight, pPackedOverlay, pPoseStack, vertexconsumer);
+        if (EmissiveTextures.isActive()) {
+            if (EmissiveTextures.hasEmissive()) {
+                EmissiveTextures.beginRenderEmissive();
+                VertexConsumer vertexconsumer1 = vertexconsumer instanceof VertexBuilderWrapper
+                    ? ((VertexBuilderWrapper)vertexconsumer).getVertexBuilder()
+                    : vertexconsumer;
+                renderModelLists(pModel, pTintLayers, LightTexture.MAX_BRIGHTNESS, pPackedOverlay, pPoseStack, vertexconsumer1);
+                EmissiveTextures.endRenderEmissive();
+            }
+
+            EmissiveTextures.endRender();
+        }
     }
 
-    public static VertexConsumer getArmorFoilBuffer(MultiBufferSource p_115185_, RenderType p_115186_, boolean p_115187_) {
-        return p_115187_ ? VertexMultiConsumer.create(p_115185_.getBuffer(RenderType.armorEntityGlint()), p_115185_.getBuffer(p_115186_)) : p_115185_.getBuffer(p_115186_);
+    public static VertexConsumer getArmorFoilBuffer(MultiBufferSource pBufferSource, RenderType pRenderType, boolean pHasFoil) {
+        if (Shaders.isShadowPass) {
+            pHasFoil = false;
+        }
+
+        if (EmissiveTextures.isRenderEmissive()) {
+            pHasFoil = false;
+        }
+
+        return pHasFoil ? VertexMultiConsumer.create(pBufferSource.getBuffer(RenderType.armorEntityGlint()), pBufferSource.getBuffer(pRenderType)) : pBufferSource.getBuffer(pRenderType);
     }
 
-    private static VertexConsumer getCompassFoilBuffer(MultiBufferSource p_115181_, RenderType p_115182_, PoseStack.Pose p_115183_) {
+    private static VertexConsumer getCompassFoilBuffer(MultiBufferSource pBufferSource, RenderType pRenderType, PoseStack.Pose pPose) {
         return VertexMultiConsumer.create(
-            new SheetedDecalTextureGenerator(p_115181_.getBuffer(RenderType.glint()), p_115183_, 0.0078125F), p_115181_.getBuffer(p_115182_)
+            new SheetedDecalTextureGenerator(pBufferSource.getBuffer(RenderType.glint()), pPose, 0.0078125F), pBufferSource.getBuffer(pRenderType)
         );
     }
 
-    public static VertexConsumer getFoilBuffer(MultiBufferSource p_115212_, RenderType p_115213_, boolean p_115214_, boolean p_115215_) {
-        if (p_115215_) {
-            return Minecraft.useShaderTransparency() && p_115213_ == Sheets.translucentItemSheet()
-                ? VertexMultiConsumer.create(p_115212_.getBuffer(RenderType.glintTranslucent()), p_115212_.getBuffer(p_115213_))
-                : VertexMultiConsumer.create(p_115212_.getBuffer(p_115214_ ? RenderType.glint() : RenderType.entityGlint()), p_115212_.getBuffer(p_115213_));
+    public static VertexConsumer getFoilBuffer(MultiBufferSource pBufferSource, RenderType pRenderType, boolean pIsItem, boolean pGlint) {
+        if (Shaders.isShadowPass) {
+            pGlint = false;
+        }
+
+        if (EmissiveTextures.isRenderEmissive()) {
+            pGlint = false;
+        }
+
+        if (!pGlint) {
+            return pBufferSource.getBuffer(pRenderType);
         } else {
-            return p_115212_.getBuffer(p_115213_);
+            return Minecraft.useShaderTransparency() && pRenderType == Sheets.translucentItemSheet()
+                ? VertexMultiConsumer.create(pBufferSource.getBuffer(RenderType.glintTranslucent()), pBufferSource.getBuffer(pRenderType))
+                : VertexMultiConsumer.create(pBufferSource.getBuffer(pIsItem ? RenderType.glint() : RenderType.entityGlint()), pBufferSource.getBuffer(pRenderType));
         }
     }
 
-    private static int getLayerColorSafe(int[] p_377342_, int p_378491_) {
-        return p_378491_ >= p_377342_.length ? -1 : p_377342_[p_378491_];
+    private static int getLayerColorSafe(int[] pTintLayers, int pIndex) {
+        return pIndex >= pTintLayers.length ? -1 : pTintLayers[pIndex];
     }
 
-    private static void renderQuadList(PoseStack p_115163_, VertexConsumer p_115164_, List<BakedQuad> p_115165_, int[] p_375549_, int p_115167_, int p_115168_) {
-        PoseStack.Pose posestack$pose = p_115163_.last();
+    private static void renderQuadList(PoseStack pPoseStack, VertexConsumer pBuffer, List<BakedQuad> pQuads, int[] pTintLayers, int pPackedLight, int pPackedOverlay) {
+        PoseStack.Pose posestack$pose = pPoseStack.last();
+        boolean flag = EmissiveTextures.isActive();
+        int i = pQuads.size();
 
-        for (BakedQuad bakedquad : p_115165_) {
+        for (int j = 0; j < i; j++) {
+            BakedQuad bakedquad = pQuads.get(j);
+            if (flag) {
+                bakedquad = EmissiveTextures.getEmissiveQuad(bakedquad);
+                if (bakedquad == null) {
+                    continue;
+                }
+            }
+
             float f;
             float f1;
             float f2;
             float f3;
             if (bakedquad.isTinted()) {
-                int i = getLayerColorSafe(p_375549_, bakedquad.getTintIndex());
-                f = (float)ARGB.alpha(i) / 255.0F;
-                f1 = (float)ARGB.red(i) / 255.0F;
-                f2 = (float)ARGB.green(i) / 255.0F;
-                f3 = (float)ARGB.blue(i) / 255.0F;
+                int k = getLayerColorSafe(pTintLayers, bakedquad.getTintIndex());
+                f = (float)ARGB.alpha(k) / 255.0F;
+                f1 = (float)ARGB.red(k) / 255.0F;
+                f2 = (float)ARGB.green(k) / 255.0F;
+                f3 = (float)ARGB.blue(k) / 255.0F;
             } else {
                 f = 1.0F;
                 f1 = 1.0F;
@@ -130,36 +175,48 @@ public class ItemRenderer {
                 f3 = 1.0F;
             }
 
-            p_115164_.putBulkData(posestack$pose, bakedquad, f1, f2, f3, f, p_115167_, p_115168_);
+            if (Reflector.ForgeHooksClient.exists()) {
+                pBuffer.putBulkData(posestack$pose, bakedquad, f1, f2, f3, f, pPackedLight, pPackedOverlay, true);
+            } else {
+                pBuffer.putBulkData(posestack$pose, bakedquad, f1, f2, f3, f, pPackedLight, pPackedOverlay);
+            }
         }
     }
 
     public void renderStatic(
-        ItemStack p_270761_,
-        ItemDisplayContext p_270648_,
-        int p_270410_,
-        int p_270894_,
-        PoseStack p_270430_,
-        MultiBufferSource p_270457_,
-        @Nullable Level p_270149_,
-        int p_270509_
+        ItemStack pStack,
+        ItemDisplayContext pDisplayContext,
+        int pCombinedLight,
+        int pCombinedOverlay,
+        PoseStack pPoseStack,
+        MultiBufferSource pBufferSource,
+        @Nullable Level pLevel,
+        int pSeed
     ) {
-        this.renderStatic(null, p_270761_, p_270648_, false, p_270430_, p_270457_, p_270149_, p_270410_, p_270894_, p_270509_);
+        this.renderStatic(null, pStack, pDisplayContext, false, pPoseStack, pBufferSource, pLevel, pCombinedLight, pCombinedOverlay, pSeed);
     }
 
     public void renderStatic(
-        @Nullable LivingEntity p_270101_,
-        ItemStack p_270637_,
-        ItemDisplayContext p_270437_,
-        boolean p_270434_,
-        PoseStack p_270230_,
-        MultiBufferSource p_270411_,
-        @Nullable Level p_270641_,
-        int p_270595_,
-        int p_270927_,
-        int p_270845_
+        @Nullable LivingEntity pEntity,
+        ItemStack pItemStack,
+        ItemDisplayContext pDiplayContext,
+        boolean pLeftHand,
+        PoseStack pPoseStack,
+        MultiBufferSource pBufferSource,
+        @Nullable Level pLevel,
+        int pCombinedLight,
+        int pCombinedOverlay,
+        int pSeed
     ) {
-        this.resolver.updateForTopItem(this.scratchItemStackRenderState, p_270637_, p_270437_, p_270434_, p_270641_, p_270101_, p_270845_);
-        this.scratchItemStackRenderState.render(p_270230_, p_270411_, p_270595_, p_270927_);
+        this.resolver.updateForTopItem(this.scratchItemStackRenderState, pItemStack, pDiplayContext, pLeftHand, pLevel, pEntity, pSeed);
+        this.scratchItemStackRenderState.render(pPoseStack, pBufferSource, pCombinedLight, pCombinedOverlay);
+    }
+
+    public static boolean isRenderItemGui() {
+        return renderItemGui;
+    }
+
+    public static void setRenderItemGui(boolean renderItemGui) {
+        ItemRenderer.renderItemGui = renderItemGui;
     }
 }

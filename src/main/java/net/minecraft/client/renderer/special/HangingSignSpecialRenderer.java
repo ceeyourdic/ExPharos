@@ -22,9 +22,9 @@ public class HangingSignSpecialRenderer implements NoDataSpecialModelRenderer {
     private final Model model;
     private final Material material;
 
-    public HangingSignSpecialRenderer(Model p_376811_, Material p_378581_) {
-        this.model = p_376811_;
-        this.material = p_378581_;
+    public HangingSignSpecialRenderer(Model pModel, Material pMaterial) {
+        this.model = pModel;
+        this.material = pMaterial;
     }
 
     @Override
@@ -42,8 +42,8 @@ public class HangingSignSpecialRenderer implements NoDataSpecialModelRenderer {
                     .apply(p_375993_, HangingSignSpecialRenderer.Unbaked::new)
         );
 
-        public Unbaked(WoodType p_375515_) {
-            this(p_375515_, Optional.empty());
+        public Unbaked(WoodType pWoodType) {
+            this(pWoodType, Optional.empty());
         }
 
         @Override

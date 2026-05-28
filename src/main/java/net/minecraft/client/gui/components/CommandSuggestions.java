@@ -16,6 +16,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import cn.lazymoon.command.completion.CommandCompleter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -78,46 +79,46 @@ public class CommandSuggestions {
     private boolean allowHiding = true;
 
     public CommandSuggestions(
-        Minecraft p_93871_,
-        Screen p_93872_,
-        EditBox p_93873_,
-        Font p_93874_,
-        boolean p_93875_,
-        boolean p_93876_,
-        int p_93877_,
-        int p_93878_,
-        boolean p_93879_,
-        int p_93880_
+        Minecraft pMinecraft,
+        Screen pScreen,
+        EditBox pInput,
+        Font pFont,
+        boolean pCommandsOnly,
+        boolean pOnlyShowIfCursorPastError,
+        int pLineStartOffset,
+        int pSuggestionLineLimit,
+        boolean pAnchorToBottom,
+        int pFillColor
     ) {
-        this.minecraft = p_93871_;
-        this.screen = p_93872_;
-        this.input = p_93873_;
-        this.font = p_93874_;
-        this.commandsOnly = p_93875_;
-        this.onlyShowIfCursorPastError = p_93876_;
-        this.lineStartOffset = p_93877_;
-        this.suggestionLineLimit = p_93878_;
-        this.anchorToBottom = p_93879_;
-        this.fillColor = p_93880_;
-        p_93873_.setFormatter(this::formatChat);
+        this.minecraft = pMinecraft;
+        this.screen = pScreen;
+        this.input = pInput;
+        this.font = pFont;
+        this.commandsOnly = pCommandsOnly;
+        this.onlyShowIfCursorPastError = pOnlyShowIfCursorPastError;
+        this.lineStartOffset = pLineStartOffset;
+        this.suggestionLineLimit = pSuggestionLineLimit;
+        this.anchorToBottom = pAnchorToBottom;
+        this.fillColor = pFillColor;
+        pInput.setFormatter(this::formatChat);
     }
 
-    public void setAllowSuggestions(boolean p_93923_) {
-        this.allowSuggestions = p_93923_;
-        if (!p_93923_) {
+    public void setAllowSuggestions(boolean pAutoSuggest) {
+        this.allowSuggestions = pAutoSuggest;
+        if (!pAutoSuggest) {
             this.suggestions = null;
         }
     }
 
-    public void setAllowHiding(boolean p_301612_) {
-        this.allowHiding = p_301612_;
+    public void setAllowHiding(boolean pAllowHiding) {
+        this.allowHiding = pAllowHiding;
     }
 
-    public boolean keyPressed(int p_93889_, int p_93890_, int p_93891_) {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         boolean flag = this.suggestions != null;
-        if (flag && this.suggestions.keyPressed(p_93889_, p_93890_, p_93891_)) {
+        if (flag && this.suggestions.keyPressed(pKeyCode, pScanCode, pModifiers)) {
             return true;
-        } else if (this.screen.getFocused() != this.input || p_93889_ != 258 || this.allowHiding && !flag) {
+        } else if (this.screen.getFocused() != this.input || pKeyCode != 258 || this.allowHiding && !flag) {
             return false;
         } else {
             this.showSuggestions(true);
@@ -125,15 +126,15 @@ public class CommandSuggestions {
         }
     }
 
-    public boolean mouseScrolled(double p_93883_) {
-        return this.suggestions != null && this.suggestions.mouseScrolled(Mth.clamp(p_93883_, -1.0, 1.0));
+    public boolean mouseScrolled(double pDelta) {
+        return this.suggestions != null && this.suggestions.mouseScrolled(Mth.clamp(pDelta, -1.0, 1.0));
     }
 
-    public boolean mouseClicked(double p_93885_, double p_93886_, int p_93887_) {
-        return this.suggestions != null && this.suggestions.mouseClicked((int)p_93885_, (int)p_93886_, p_93887_);
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pMouseButton) {
+        return this.suggestions != null && this.suggestions.mouseClicked((int)pMouseX, (int)pMouseY, pMouseButton);
     }
 
-    public void showSuggestions(boolean p_93931_) {
+    public void showSuggestions(boolean pNarrateFirstSuggestion) {
         if (this.pendingSuggestions != null && this.pendingSuggestions.isDone()) {
             Suggestions suggestions = this.pendingSuggestions.join();
             if (!suggestions.isEmpty()) {
@@ -145,7 +146,7 @@ public class CommandSuggestions {
 
                 int j = Mth.clamp(this.input.getScreenX(suggestions.getRange().getStart()), 0, this.input.getScreenX(0) + this.input.getInnerWidth() - i);
                 int k = this.anchorToBottom ? this.screen.height - 12 : 72;
-                this.suggestions = new CommandSuggestions.SuggestionsList(j, k, i, this.sortSuggestions(suggestions), p_93931_);
+                this.suggestions = new CommandSuggestions.SuggestionsList(j, k, i, this.sortSuggestions(suggestions), pNarrateFirstSuggestion);
             }
         }
     }
@@ -170,14 +171,14 @@ public class CommandSuggestions {
         this.suggestions = null;
     }
 
-    private List<Suggestion> sortSuggestions(Suggestions p_93899_) {
+    private List<Suggestion> sortSuggestions(Suggestions pSuggestions) {
         String s = this.input.getValue().substring(0, this.input.getCursorPosition());
         int i = getLastWordIndex(s);
         String s1 = s.substring(i).toLowerCase(Locale.ROOT);
         List<Suggestion> list = Lists.newArrayList();
         List<Suggestion> list1 = Lists.newArrayList();
 
-        for (Suggestion suggestion : p_93899_.getList()) {
+        for (Suggestion suggestion : pSuggestions.getList()) {
             if (!suggestion.getText().startsWith(s1) && !suggestion.getText().startsWith("minecraft:" + s1)) {
                 list1.add(suggestion);
             } else {
@@ -191,6 +192,28 @@ public class CommandSuggestions {
 
     public void updateCommandInfo() {
         String s = this.input.getValue();
+        // Arcane mixin port: dot-prefixed Arcane commands use the client command completer instead of Brigadier.
+        if (s.startsWith(".")) {
+            if (!this.keepSuggestions) {
+                this.input.setSuggestion(null);
+                this.suggestions = null;
+            }
+
+            String inputText = s.substring(1);
+            String[] args = inputText.split(" ", -1);
+            int cursor = this.input.getCursorPosition();
+            int start = Math.max(s.lastIndexOf(' ', cursor - 1) + 1, 1);
+            SuggestionsBuilder builder = new SuggestionsBuilder(s, start);
+            CommandCompleter.getSuggestions(args).forEach(builder::suggest);
+            this.pendingSuggestions = builder.buildFuture();
+            this.pendingSuggestions.thenRun(() -> {
+                if (this.pendingSuggestions.isDone()) {
+                    this.updateUsageInfo();
+                }
+            });
+            return;
+        }
+
         if (this.currentParse != null && !this.currentParse.getReader().getString().equals(s)) {
             this.currentParse = null;
         }
@@ -232,12 +255,12 @@ public class CommandSuggestions {
         }
     }
 
-    private static int getLastWordIndex(String p_93913_) {
-        if (Strings.isNullOrEmpty(p_93913_)) {
+    private static int getLastWordIndex(String pText) {
+        if (Strings.isNullOrEmpty(pText)) {
             return 0;
         } else {
             int i = 0;
-            Matcher matcher = WHITESPACE_PATTERN.matcher(p_93913_);
+            Matcher matcher = WHITESPACE_PATTERN.matcher(pText);
 
             while (matcher.find()) {
                 i = matcher.end();
@@ -247,10 +270,10 @@ public class CommandSuggestions {
         }
     }
 
-    private static FormattedCharSequence getExceptionMessage(CommandSyntaxException p_93897_) {
-        Component component = ComponentUtils.fromMessage(p_93897_.getRawMessage());
-        String s = p_93897_.getContext();
-        return s == null ? component.getVisualOrderText() : Component.translatable("command.context.parse_error", component, p_93897_.getCursor(), s).getVisualOrderText();
+    private static FormattedCharSequence getExceptionMessage(CommandSyntaxException pException) {
+        Component component = ComponentUtils.fromMessage(pException.getRawMessage());
+        String s = pException.getContext();
+        return s == null ? component.getVisualOrderText() : Component.translatable("command.context.parse_error", component, pException.getCursor(), s).getVisualOrderText();
     }
 
     private void updateUsageInfo() {
@@ -288,7 +311,7 @@ public class CommandSuggestions {
         }
     }
 
-    private boolean fillNodeUsage(ChatFormatting p_289002_) {
+    private boolean fillNodeUsage(ChatFormatting pChatFormatting) {
         CommandContextBuilder<SharedSuggestionProvider> commandcontextbuilder = this.currentParse.getContext();
         SuggestionContext<SharedSuggestionProvider> suggestioncontext = commandcontextbuilder.findSuggestionContext(this.input.getCursorPosition());
         Map<CommandNode<SharedSuggestionProvider>, String> map = this.minecraft
@@ -298,7 +321,7 @@ public class CommandSuggestions {
             .getSmartUsage(suggestioncontext.parent, this.minecraft.player.connection.getSuggestionsProvider());
         List<FormattedCharSequence> list = Lists.newArrayList();
         int i = 0;
-        Style style = Style.EMPTY.withColor(p_289002_);
+        Style style = Style.EMPTY.withColor(pChatFormatting);
 
         for (Entry<CommandNode<SharedSuggestionProvider>, String> entry : map.entrySet()) {
             if (!(entry.getKey() instanceof LiteralCommandNode)) {
@@ -317,75 +340,75 @@ public class CommandSuggestions {
         }
     }
 
-    private FormattedCharSequence formatChat(String p_93915_, int p_93916_) {
-        return this.currentParse != null ? formatText(this.currentParse, p_93915_, p_93916_) : FormattedCharSequence.forward(p_93915_, Style.EMPTY);
+    private FormattedCharSequence formatChat(String pCommand, int pMaxLength) {
+        return this.currentParse != null ? formatText(this.currentParse, pCommand, pMaxLength) : FormattedCharSequence.forward(pCommand, Style.EMPTY);
     }
 
     @Nullable
-    static String calculateSuggestionSuffix(String p_93928_, String p_93929_) {
-        return p_93929_.startsWith(p_93928_) ? p_93929_.substring(p_93928_.length()) : null;
+    static String calculateSuggestionSuffix(String pInputText, String pSuggestionText) {
+        return pSuggestionText.startsWith(pInputText) ? pSuggestionText.substring(pInputText.length()) : null;
     }
 
-    private static FormattedCharSequence formatText(ParseResults<SharedSuggestionProvider> p_93893_, String p_93894_, int p_93895_) {
+    private static FormattedCharSequence formatText(ParseResults<SharedSuggestionProvider> pProvider, String pCommand, int pMaxLength) {
         List<FormattedCharSequence> list = Lists.newArrayList();
         int i = 0;
         int j = -1;
-        CommandContextBuilder<SharedSuggestionProvider> commandcontextbuilder = p_93893_.getContext().getLastChild();
+        CommandContextBuilder<SharedSuggestionProvider> commandcontextbuilder = pProvider.getContext().getLastChild();
 
         for (ParsedArgument<SharedSuggestionProvider, ?> parsedargument : commandcontextbuilder.getArguments().values()) {
             if (++j >= ARGUMENT_STYLES.size()) {
                 j = 0;
             }
 
-            int k = Math.max(parsedargument.getRange().getStart() - p_93895_, 0);
-            if (k >= p_93894_.length()) {
+            int k = Math.max(parsedargument.getRange().getStart() - pMaxLength, 0);
+            if (k >= pCommand.length()) {
                 break;
             }
 
-            int l = Math.min(parsedargument.getRange().getEnd() - p_93895_, p_93894_.length());
+            int l = Math.min(parsedargument.getRange().getEnd() - pMaxLength, pCommand.length());
             if (l > 0) {
-                list.add(FormattedCharSequence.forward(p_93894_.substring(i, k), LITERAL_STYLE));
-                list.add(FormattedCharSequence.forward(p_93894_.substring(k, l), ARGUMENT_STYLES.get(j)));
+                list.add(FormattedCharSequence.forward(pCommand.substring(i, k), LITERAL_STYLE));
+                list.add(FormattedCharSequence.forward(pCommand.substring(k, l), ARGUMENT_STYLES.get(j)));
                 i = l;
             }
         }
 
-        if (p_93893_.getReader().canRead()) {
-            int i1 = Math.max(p_93893_.getReader().getCursor() - p_93895_, 0);
-            if (i1 < p_93894_.length()) {
-                int j1 = Math.min(i1 + p_93893_.getReader().getRemainingLength(), p_93894_.length());
-                list.add(FormattedCharSequence.forward(p_93894_.substring(i, i1), LITERAL_STYLE));
-                list.add(FormattedCharSequence.forward(p_93894_.substring(i1, j1), UNPARSED_STYLE));
+        if (pProvider.getReader().canRead()) {
+            int i1 = Math.max(pProvider.getReader().getCursor() - pMaxLength, 0);
+            if (i1 < pCommand.length()) {
+                int j1 = Math.min(i1 + pProvider.getReader().getRemainingLength(), pCommand.length());
+                list.add(FormattedCharSequence.forward(pCommand.substring(i, i1), LITERAL_STYLE));
+                list.add(FormattedCharSequence.forward(pCommand.substring(i1, j1), UNPARSED_STYLE));
                 i = j1;
             }
         }
 
-        list.add(FormattedCharSequence.forward(p_93894_.substring(i), LITERAL_STYLE));
+        list.add(FormattedCharSequence.forward(pCommand.substring(i), LITERAL_STYLE));
         return FormattedCharSequence.composite(list);
     }
 
-    public void render(GuiGraphics p_282650_, int p_282266_, int p_281963_) {
-        if (!this.renderSuggestions(p_282650_, p_282266_, p_281963_)) {
-            this.renderUsage(p_282650_);
+    public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
+        if (!this.renderSuggestions(pGuiGraphics, pMouseX, pMouseY)) {
+            this.renderUsage(pGuiGraphics);
         }
     }
 
-    public boolean renderSuggestions(GuiGraphics p_283503_, int p_281628_, int p_282260_) {
+    public boolean renderSuggestions(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
         if (this.suggestions != null) {
-            this.suggestions.render(p_283503_, p_281628_, p_282260_);
+            this.suggestions.render(pGuiGraphics, pMouseX, pMouseY);
             return true;
         } else {
             return false;
         }
     }
 
-    public void renderUsage(GuiGraphics p_282763_) {
+    public void renderUsage(GuiGraphics pGuiGraphics) {
         int i = 0;
 
         for (FormattedCharSequence formattedcharsequence : this.commandUsage) {
             int j = this.anchorToBottom ? this.screen.height - 14 - 13 - 12 * i : 72 + 12 * i;
-            p_282763_.fill(this.commandUsagePosition - 1, j, this.commandUsagePosition + this.commandUsageWidth + 1, j + 12, this.fillColor);
-            p_282763_.drawString(this.font, formattedcharsequence, this.commandUsagePosition, j + 2, -1);
+            pGuiGraphics.fill(this.commandUsagePosition - 1, j, this.commandUsagePosition + this.commandUsageWidth + 1, j + 12, this.fillColor);
+            pGuiGraphics.drawString(this.font, formattedcharsequence, this.commandUsagePosition, j + 2, -1);
             i++;
         }
     }
@@ -405,38 +428,38 @@ public class CommandSuggestions {
         boolean tabCycles;
         private int lastNarratedEntry;
 
-        SuggestionsList(final int p_93957_, final int p_93958_, final int p_93959_, final List<Suggestion> p_93960_, final boolean p_93961_) {
-            int i = p_93957_ - (CommandSuggestions.this.input.isBordered() ? 0 : 1);
+        SuggestionsList(final int pXPos, final int pYPos, final int pWidth, final List<Suggestion> pSuggestionList, final boolean pNarrateFirstSuggestion) {
+            int i = pXPos - (CommandSuggestions.this.input.isBordered() ? 0 : 1);
             int j = CommandSuggestions.this.anchorToBottom
-                ? p_93958_ - 3 - Math.min(p_93960_.size(), CommandSuggestions.this.suggestionLineLimit) * 12
-                : p_93958_ - (CommandSuggestions.this.input.isBordered() ? 1 : 0);
-            this.rect = new Rect2i(i, j, p_93959_ + 1, Math.min(p_93960_.size(), CommandSuggestions.this.suggestionLineLimit) * 12);
+                ? pYPos - 3 - Math.min(pSuggestionList.size(), CommandSuggestions.this.suggestionLineLimit) * 12
+                : pYPos - (CommandSuggestions.this.input.isBordered() ? 1 : 0);
+            this.rect = new Rect2i(i, j, pWidth + 1, Math.min(pSuggestionList.size(), CommandSuggestions.this.suggestionLineLimit) * 12);
             this.originalContents = CommandSuggestions.this.input.getValue();
-            this.lastNarratedEntry = p_93961_ ? -1 : 0;
-            this.suggestionList = p_93960_;
+            this.lastNarratedEntry = pNarrateFirstSuggestion ? -1 : 0;
+            this.suggestionList = pSuggestionList;
             this.select(0);
         }
 
-        public void render(GuiGraphics p_282264_, int p_283591_, int p_283236_) {
+        public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
             int i = Math.min(this.suggestionList.size(), CommandSuggestions.this.suggestionLineLimit);
             int j = -5592406;
             boolean flag = this.offset > 0;
             boolean flag1 = this.suggestionList.size() > this.offset + i;
             boolean flag2 = flag || flag1;
-            boolean flag3 = this.lastMouse.x != (float)p_283591_ || this.lastMouse.y != (float)p_283236_;
+            boolean flag3 = this.lastMouse.x != (float)pMouseX || this.lastMouse.y != (float)pMouseY;
             if (flag3) {
-                this.lastMouse = new Vec2((float)p_283591_, (float)p_283236_);
+                this.lastMouse = new Vec2((float)pMouseX, (float)pMouseY);
             }
 
             if (flag2) {
-                p_282264_.fill(
+                pGuiGraphics.fill(
                     this.rect.getX(),
                     this.rect.getY() - 1,
                     this.rect.getX() + this.rect.getWidth(),
                     this.rect.getY(),
                     CommandSuggestions.this.fillColor
                 );
-                p_282264_.fill(
+                pGuiGraphics.fill(
                     this.rect.getX(),
                     this.rect.getY() + this.rect.getHeight(),
                     this.rect.getX() + this.rect.getWidth(),
@@ -446,7 +469,7 @@ public class CommandSuggestions {
                 if (flag) {
                     for (int k = 0; k < this.rect.getWidth(); k++) {
                         if (k % 2 == 0) {
-                            p_282264_.fill(
+                            pGuiGraphics.fill(
                                 this.rect.getX() + k, this.rect.getY() - 1, this.rect.getX() + k + 1, this.rect.getY(), -1
                             );
                         }
@@ -456,7 +479,7 @@ public class CommandSuggestions {
                 if (flag1) {
                     for (int i1 = 0; i1 < this.rect.getWidth(); i1++) {
                         if (i1 % 2 == 0) {
-                            p_282264_.fill(
+                            pGuiGraphics.fill(
                                 this.rect.getX() + i1,
                                 this.rect.getY() + this.rect.getHeight(),
                                 this.rect.getX() + i1 + 1,
@@ -472,17 +495,17 @@ public class CommandSuggestions {
 
             for (int l = 0; l < i; l++) {
                 Suggestion suggestion = this.suggestionList.get(l + this.offset);
-                p_282264_.fill(
+                pGuiGraphics.fill(
                     this.rect.getX(),
                     this.rect.getY() + 12 * l,
                     this.rect.getX() + this.rect.getWidth(),
                     this.rect.getY() + 12 * l + 12,
                     CommandSuggestions.this.fillColor
                 );
-                if (p_283591_ > this.rect.getX()
-                    && p_283591_ < this.rect.getX() + this.rect.getWidth()
-                    && p_283236_ > this.rect.getY() + 12 * l
-                    && p_283236_ < this.rect.getY() + 12 * l + 12) {
+                if (pMouseX > this.rect.getX()
+                    && pMouseX < this.rect.getX() + this.rect.getWidth()
+                    && pMouseY > this.rect.getY() + 12 * l
+                    && pMouseY < this.rect.getY() + 12 * l + 12) {
                     if (flag3) {
                         this.select(l + this.offset);
                     }
@@ -490,7 +513,7 @@ public class CommandSuggestions {
                     flag4 = true;
                 }
 
-                p_282264_.drawString(
+                pGuiGraphics.drawString(
                     CommandSuggestions.this.font,
                     suggestion.getText(),
                     this.rect.getX() + 1,
@@ -502,16 +525,16 @@ public class CommandSuggestions {
             if (flag4) {
                 Message message = this.suggestionList.get(this.current).getTooltip();
                 if (message != null) {
-                    p_282264_.renderTooltip(CommandSuggestions.this.font, ComponentUtils.fromMessage(message), p_283591_, p_283236_);
+                    pGuiGraphics.renderTooltip(CommandSuggestions.this.font, ComponentUtils.fromMessage(message), pMouseX, pMouseY);
                 }
             }
         }
 
-        public boolean mouseClicked(int p_93976_, int p_93977_, int p_93978_) {
-            if (!this.rect.contains(p_93976_, p_93977_)) {
+        public boolean mouseClicked(int pMouseX, int pMouseY, int pMouseButton) {
+            if (!this.rect.contains(pMouseX, pMouseY)) {
                 return false;
             } else {
-                int i = (p_93977_ - this.rect.getY()) / 12 + this.offset;
+                int i = (pMouseY - this.rect.getY()) / 12 + this.offset;
                 if (i >= 0 && i < this.suggestionList.size()) {
                     this.select(i);
                     this.useSuggestion();
@@ -521,7 +544,7 @@ public class CommandSuggestions {
             }
         }
 
-        public boolean mouseScrolled(double p_93972_) {
+        public boolean mouseScrolled(double pDelta) {
             int i = (int)(
                 CommandSuggestions.this.minecraft.mouseHandler.xpos()
                     * (double)CommandSuggestions.this.minecraft.getWindow().getGuiScaledWidth()
@@ -533,30 +556,30 @@ public class CommandSuggestions {
                     / (double)CommandSuggestions.this.minecraft.getWindow().getScreenHeight()
             );
             if (this.rect.contains(i, j)) {
-                this.offset = Mth.clamp((int)((double)this.offset - p_93972_), 0, Math.max(this.suggestionList.size() - CommandSuggestions.this.suggestionLineLimit, 0));
+                this.offset = Mth.clamp((int)((double)this.offset - pDelta), 0, Math.max(this.suggestionList.size() - CommandSuggestions.this.suggestionLineLimit, 0));
                 return true;
             } else {
                 return false;
             }
         }
 
-        public boolean keyPressed(int p_93989_, int p_93990_, int p_93991_) {
-            if (p_93989_ == 265) {
+        public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+            if (pKeyCode == 265) {
                 this.cycle(-1);
                 this.tabCycles = false;
                 return true;
-            } else if (p_93989_ == 264) {
+            } else if (pKeyCode == 264) {
                 this.cycle(1);
                 this.tabCycles = false;
                 return true;
-            } else if (p_93989_ == 258) {
+            } else if (pKeyCode == 258) {
                 if (this.tabCycles) {
                     this.cycle(Screen.hasShiftDown() ? -1 : 1);
                 }
 
                 this.useSuggestion();
                 return true;
-            } else if (p_93989_ == 256) {
+            } else if (pKeyCode == 256) {
                 CommandSuggestions.this.hide();
                 CommandSuggestions.this.input.setSuggestion(null);
                 return true;
@@ -565,8 +588,8 @@ public class CommandSuggestions {
             }
         }
 
-        public void cycle(int p_93974_) {
-            this.select(this.current + p_93974_);
+        public void cycle(int pChange) {
+            this.select(this.current + pChange);
             int i = this.offset;
             int j = this.offset + CommandSuggestions.this.suggestionLineLimit - 1;
             if (this.current < i) {
@@ -580,8 +603,8 @@ public class CommandSuggestions {
             }
         }
 
-        public void select(int p_93987_) {
-            this.current = p_93987_;
+        public void select(int pIndex) {
+            this.current = pIndex;
             if (this.current < 0) {
                 this.current = this.current + this.suggestionList.size();
             }

@@ -27,9 +27,9 @@ public enum ItemUseAnimation implements StringRepresentable {
     private final int id;
     private final String name;
 
-    private ItemUseAnimation(final int p_369223_, final String p_370001_) {
-        this.id = p_369223_;
-        this.name = p_370001_;
+    private ItemUseAnimation(final int pId, final String pName) {
+        this.id = pId;
+        this.name = pName;
     }
 
     public int getId() {

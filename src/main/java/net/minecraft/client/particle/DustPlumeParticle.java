@@ -11,17 +11,17 @@ public class DustPlumeParticle extends BaseAshSmokeParticle {
     private static final int COLOR_RGB24 = 12235202;
 
     protected DustPlumeParticle(
-        ClientLevel p_310558_,
-        double p_313232_,
-        double p_311124_,
-        double p_309990_,
-        double p_312124_,
-        double p_313045_,
-        double p_310834_,
-        float p_312915_,
-        SpriteSet p_312671_
+        ClientLevel pLevel,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed,
+        float pQuadSizeMultiplier,
+        SpriteSet pSprites
     ) {
-        super(p_310558_, p_313232_, p_311124_, p_309990_, 0.7F, 0.6F, 0.7F, p_312124_, p_313045_ + 0.15F, p_310834_, p_312915_, p_312671_, 0.5F, 7, 0.5F, false);
+        super(pLevel, pX, pY, pZ, 0.7F, 0.6F, 0.7F, pXSpeed, pYSpeed + 0.15F, pZSpeed, pQuadSizeMultiplier, pSprites, 0.5F, 7, 0.5F, false);
         float f = (float)Math.random() * 0.2F;
         this.rCol = (float)ARGB.red(12235202) / 255.0F - f;
         this.gCol = (float)ARGB.green(12235202) / 255.0F - f;
@@ -39,8 +39,8 @@ public class DustPlumeParticle extends BaseAshSmokeParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public Provider(SpriteSet p_310852_) {
-            this.sprites = p_310852_;
+        public Provider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(

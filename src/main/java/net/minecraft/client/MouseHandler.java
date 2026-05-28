@@ -44,38 +44,38 @@ public class MouseHandler {
     private double lastHandleMovementTime = Double.MIN_VALUE;
     private boolean mouseGrabbed;
 
-    public MouseHandler(Minecraft p_91522_) {
-        this.minecraft = p_91522_;
+    public MouseHandler(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
         this.scrollWheelHandler = new ScrollWheelHandler();
     }
 
-    private void onPress(long p_91531_, int p_91532_, int p_91533_, int p_91534_) {
-        if (p_91531_ == this.minecraft.getWindow().getWindow()) {
+    private void onPress(long pWindowPointer, int pButton, int pAction, int pModifiers) {
+        if (pWindowPointer == this.minecraft.getWindow().getWindow()) {
             this.minecraft.getFramerateLimitTracker().onInputReceived();
             if (this.minecraft.screen != null) {
                 this.minecraft.setLastInputType(InputType.MOUSE);
             }
 
-            boolean flag = p_91533_ == 1;
-            if (Minecraft.ON_OSX && p_91532_ == 0) {
+            boolean flag = pAction == 1;
+            if (Minecraft.ON_OSX && pButton == 0) {
                 if (flag) {
-                    if ((p_91534_ & 2) == 2) {
-                        p_91532_ = 1;
+                    if ((pModifiers & 2) == 2) {
+                        pButton = 1;
                         this.fakeRightMouse++;
                     }
                 } else if (this.fakeRightMouse > 0) {
-                    p_91532_ = 1;
+                    pButton = 1;
                     this.fakeRightMouse--;
                 }
             }
 
-            int i = p_91532_;
+            int i = pButton;
             if (flag) {
                 if (this.minecraft.options.touchscreen().get() && this.clickDepth++ > 0) {
                     return;
                 }
 
-                this.activeButton = p_91532_;
+                this.activeButton = pButton;
                 this.mousePressedTime = Blaze3D.getTime();
             } else if (this.activeButton != -1) {
                 if (this.minecraft.options.touchscreen().get() && --this.clickDepth > 0) {
@@ -107,7 +107,7 @@ public class MouseHandler {
                             CrashReportCategory crashreportcategory = crashreport.addCategory("Mouse");
                             crashreportcategory.setDetail("Scaled X", d0);
                             crashreportcategory.setDetail("Scaled Y", d1);
-                            crashreportcategory.setDetail("Button", p_91532_);
+                            crashreportcategory.setDetail("Button", pButton);
                             throw new ReportedException(crashreport);
                         }
                     } else {
@@ -121,7 +121,7 @@ public class MouseHandler {
                             CrashReportCategory crashreportcategory1 = crashreport1.addCategory("Mouse");
                             crashreportcategory1.setDetail("Scaled X", d0);
                             crashreportcategory1.setDetail("Scaled Y", d1);
-                            crashreportcategory1.setDetail("Button", p_91532_);
+                            crashreportcategory1.setDetail("Button", pButton);
                             throw new ReportedException(crashreport1);
                         }
                     }
@@ -129,33 +129,33 @@ public class MouseHandler {
             }
 
             if (this.minecraft.screen == null && this.minecraft.getOverlay() == null) {
-                if (p_91532_ == 0) {
+                if (pButton == 0) {
                     this.isLeftPressed = flag;
-                } else if (p_91532_ == 2) {
+                } else if (pButton == 2) {
                     this.isMiddlePressed = flag;
-                } else if (p_91532_ == 1) {
+                } else if (pButton == 1) {
                     this.isRightPressed = flag;
                 }
 
-                KeyMapping.set(InputConstants.Type.MOUSE.getOrCreate(p_91532_), flag);
+                KeyMapping.set(InputConstants.Type.MOUSE.getOrCreate(pButton), flag);
                 if (flag) {
-                    if (this.minecraft.player.isSpectator() && p_91532_ == 2) {
+                    if (this.minecraft.player.isSpectator() && pButton == 2) {
                         this.minecraft.gui.getSpectatorGui().onMouseMiddleClick();
                     } else {
-                        KeyMapping.click(InputConstants.Type.MOUSE.getOrCreate(p_91532_));
+                        KeyMapping.click(InputConstants.Type.MOUSE.getOrCreate(pButton));
                     }
                 }
             }
         }
     }
 
-    private void onScroll(long p_91527_, double p_91528_, double p_91529_) {
-        if (p_91527_ == Minecraft.getInstance().getWindow().getWindow()) {
+    private void onScroll(long pWindowPointer, double pXOffset, double pYOffset) {
+        if (pWindowPointer == Minecraft.getInstance().getWindow().getWindow()) {
             this.minecraft.getFramerateLimitTracker().onInputReceived();
             boolean flag = this.minecraft.options.discreteMouseScroll().get();
             double d0 = this.minecraft.options.mouseWheelSensitivity().get();
-            double d1 = (flag ? Math.signum(p_91528_) : p_91528_) * d0;
-            double d2 = (flag ? Math.signum(p_91529_) : p_91529_) * d0;
+            double d1 = (flag ? Math.signum(pXOffset) : pXOffset) * d0;
+            double d2 = (flag ? Math.signum(pYOffset) : pYOffset) * d0;
             if (this.minecraft.getOverlay() == null) {
                 if (this.minecraft.screen != null) {
                     double d3 = this.xpos * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
@@ -185,20 +185,20 @@ public class MouseHandler {
         }
     }
 
-    private void onDrop(long p_91540_, List<Path> p_91541_, int p_343779_) {
+    private void onDrop(long pWindowPointer, List<Path> pFiles, int pFailedFiles) {
         this.minecraft.getFramerateLimitTracker().onInputReceived();
         if (this.minecraft.screen != null) {
-            this.minecraft.screen.onFilesDrop(p_91541_);
+            this.minecraft.screen.onFilesDrop(pFiles);
         }
 
-        if (p_343779_ > 0) {
-            SystemToast.onFileDropFailure(this.minecraft, p_343779_);
+        if (pFailedFiles > 0) {
+            SystemToast.onFileDropFailure(this.minecraft, pFailedFiles);
         }
     }
 
-    public void setup(long p_91525_) {
+    public void setup(long pWindowPointer) {
         InputConstants.setupMouseCallbacks(
-            p_91525_,
+            pWindowPointer,
             (p_91591_, p_91592_, p_91593_) -> this.minecraft.execute(() -> this.onMove(p_91591_, p_91592_, p_91593_)),
             (p_91566_, p_91567_, p_91568_, p_91569_) -> this.minecraft.execute(() -> this.onPress(p_91566_, p_91567_, p_91568_, p_91569_)),
             (p_91576_, p_91577_, p_91578_) -> this.minecraft.execute(() -> this.onScroll(p_91576_, p_91577_, p_91578_)),
@@ -225,20 +225,20 @@ public class MouseHandler {
         );
     }
 
-    private void onMove(long p_91562_, double p_91563_, double p_91564_) {
-        if (p_91562_ == Minecraft.getInstance().getWindow().getWindow()) {
+    private void onMove(long pWindowPointer, double pXpos, double pYpos) {
+        if (pWindowPointer == Minecraft.getInstance().getWindow().getWindow()) {
             if (this.ignoreFirstMove) {
-                this.xpos = p_91563_;
-                this.ypos = p_91564_;
+                this.xpos = pXpos;
+                this.ypos = pYpos;
                 this.ignoreFirstMove = false;
             } else {
                 if (this.minecraft.isWindowActive()) {
-                    this.accumulatedDX = this.accumulatedDX + (p_91563_ - this.xpos);
-                    this.accumulatedDY = this.accumulatedDY + (p_91564_ - this.ypos);
+                    this.accumulatedDX = this.accumulatedDX + (pXpos - this.xpos);
+                    this.accumulatedDY = this.accumulatedDY + (pYpos - this.ypos);
                 }
 
-                this.xpos = p_91563_;
-                this.ypos = p_91564_;
+                this.xpos = pXpos;
+                this.ypos = pYpos;
             }
         }
     }
@@ -297,15 +297,15 @@ public class MouseHandler {
         this.accumulatedDY = 0.0;
     }
 
-    private void turnPlayer(double p_330750_) {
+    private void turnPlayer(double pMovementTime) {
         double d2 = this.minecraft.options.sensitivity().get() * 0.6F + 0.2F;
         double d3 = d2 * d2 * d2;
         double d4 = d3 * 8.0;
         double d0;
         double d1;
         if (this.minecraft.options.smoothCamera) {
-            double d5 = this.smoothTurnX.getNewDeltaValue(this.accumulatedDX * d4, p_330750_ * d4);
-            double d6 = this.smoothTurnY.getNewDeltaValue(this.accumulatedDY * d4, p_330750_ * d4);
+            double d5 = this.smoothTurnX.getNewDeltaValue(this.accumulatedDX * d4, pMovementTime * d4);
+            double d6 = this.smoothTurnY.getNewDeltaValue(this.accumulatedDY * d4, pMovementTime * d4);
             d0 = d5;
             d1 = d6;
         } else if (this.minecraft.options.getCameraType().isFirstPerson() && this.minecraft.player.isScoping()) {

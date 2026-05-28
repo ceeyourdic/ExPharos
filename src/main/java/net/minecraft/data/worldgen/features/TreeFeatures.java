@@ -107,13 +107,13 @@ public class TreeFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> CHERRY_BEES_005 = FeatureUtils.createKey("cherry_bees_005");
 
     private static TreeConfiguration.TreeConfigurationBuilder createStraightBlobTree(
-        Block p_195147_, Block p_195148_, int p_195149_, int p_195150_, int p_195151_, int p_195152_
+        Block pLogBlock, Block pLeavesBlock, int pBaseHeight, int pHeightRandA, int pHeightRandB, int pRadius
     ) {
         return new TreeConfiguration.TreeConfigurationBuilder(
-            BlockStateProvider.simple(p_195147_),
-            new StraightTrunkPlacer(p_195149_, p_195150_, p_195151_),
-            BlockStateProvider.simple(p_195148_),
-            new BlobFoliagePlacer(ConstantInt.of(p_195152_), ConstantInt.of(0), 3),
+            BlockStateProvider.simple(pLogBlock),
+            new StraightTrunkPlacer(pBaseHeight, pHeightRandA, pHeightRandB),
+            BlockStateProvider.simple(pLeavesBlock),
+            new BlobFoliagePlacer(ConstantInt.of(pRadius), ConstantInt.of(0), 3),
             new TwoLayersFeatureSize(1, 0, 1)
         );
     }
@@ -170,8 +170,8 @@ public class TreeFeatures {
             .ignoreVines();
     }
 
-    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> p_334110_) {
-        HolderGetter<Block> holdergetter = p_334110_.lookup(Registries.BLOCK);
+    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> pContext) {
+        HolderGetter<Block> holdergetter = pContext.lookup(Registries.BLOCK);
         BlockPredicate blockpredicate = BlockPredicate.matchesBlocks(
             Blocks.OAK_SAPLING,
             Blocks.SPRUCE_SAPLING,
@@ -233,7 +233,7 @@ public class TreeFeatures {
             Blocks.SMALL_DRIPLEAF
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             CRIMSON_FUNGUS,
             Feature.HUGE_FUNGUS,
             new HugeFungusConfiguration(
@@ -241,7 +241,7 @@ public class TreeFeatures {
             )
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             CRIMSON_FUNGUS_PLANTED,
             Feature.HUGE_FUNGUS,
             new HugeFungusConfiguration(
@@ -249,7 +249,7 @@ public class TreeFeatures {
             )
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             WARPED_FUNGUS,
             Feature.HUGE_FUNGUS,
             new HugeFungusConfiguration(
@@ -257,7 +257,7 @@ public class TreeFeatures {
             )
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             WARPED_FUNGUS_PLANTED,
             Feature.HUGE_FUNGUS,
             new HugeFungusConfiguration(
@@ -265,7 +265,7 @@ public class TreeFeatures {
             )
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             HUGE_BROWN_MUSHROOM,
             Feature.HUGE_BROWN_MUSHROOM,
             new HugeMushroomFeatureConfiguration(
@@ -285,7 +285,7 @@ public class TreeFeatures {
             )
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             HUGE_RED_MUSHROOM,
             Feature.HUGE_RED_MUSHROOM,
             new HugeMushroomFeatureConfiguration(
@@ -304,9 +304,9 @@ public class TreeFeatures {
         BeehiveDecorator beehivedecorator2 = new BeehiveDecorator(0.02F);
         BeehiveDecorator beehivedecorator3 = new BeehiveDecorator(0.05F);
         BeehiveDecorator beehivedecorator4 = new BeehiveDecorator(1.0F);
-        FeatureUtils.register(p_334110_, OAK, Feature.TREE, createOak().build());
+        FeatureUtils.register(pContext, OAK, Feature.TREE, createOak().build());
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             DARK_OAK,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -320,7 +320,7 @@ public class TreeFeatures {
                 .build()
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             PALE_OAK,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -335,7 +335,7 @@ public class TreeFeatures {
                 .build()
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             PALE_OAK_BONEMEAL,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -349,7 +349,7 @@ public class TreeFeatures {
                 .build()
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             PALE_OAK_CREAKING,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -363,9 +363,9 @@ public class TreeFeatures {
                 .ignoreVines()
                 .build()
         );
-        FeatureUtils.register(p_334110_, BIRCH, Feature.TREE, createBirch().build());
+        FeatureUtils.register(pContext, BIRCH, Feature.TREE, createBirch().build());
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             ACACIA,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -378,10 +378,10 @@ public class TreeFeatures {
                 .ignoreVines()
                 .build()
         );
-        FeatureUtils.register(p_334110_, CHERRY, Feature.TREE, cherry().build());
-        FeatureUtils.register(p_334110_, CHERRY_BEES_005, Feature.TREE, cherry().decorators(List.of(beehivedecorator3)).build());
+        FeatureUtils.register(pContext, CHERRY, Feature.TREE, cherry().build());
+        FeatureUtils.register(pContext, CHERRY_BEES_005, Feature.TREE, cherry().decorators(List.of(beehivedecorator3)).build());
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             SPRUCE,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -395,7 +395,7 @@ public class TreeFeatures {
                 .build()
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             PINE,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -409,15 +409,15 @@ public class TreeFeatures {
                 .build()
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             JUNGLE_TREE,
             Feature.TREE,
             createJungleTree().decorators(ImmutableList.of(new CocoaDecorator(0.2F), TrunkVineDecorator.INSTANCE, new LeaveVineDecorator(0.25F))).ignoreVines().build()
         );
-        FeatureUtils.register(p_334110_, FANCY_OAK, Feature.TREE, createFancyOak().build());
-        FeatureUtils.register(p_334110_, JUNGLE_TREE_NO_VINE, Feature.TREE, createJungleTree().ignoreVines().build());
+        FeatureUtils.register(pContext, FANCY_OAK, Feature.TREE, createFancyOak().build());
+        FeatureUtils.register(pContext, JUNGLE_TREE_NO_VINE, Feature.TREE, createJungleTree().ignoreVines().build());
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             MEGA_JUNGLE_TREE,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -431,7 +431,7 @@ public class TreeFeatures {
                 .build()
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             MEGA_SPRUCE,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -445,7 +445,7 @@ public class TreeFeatures {
                 .build()
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             MEGA_PINE,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -458,16 +458,16 @@ public class TreeFeatures {
                 .decorators(ImmutableList.of(new AlterGroundDecorator(BlockStateProvider.simple(Blocks.PODZOL))))
                 .build()
         );
-        FeatureUtils.register(p_334110_, SUPER_BIRCH_BEES_0002, Feature.TREE, createSuperBirch().decorators(ImmutableList.of(beehivedecorator)).build());
-        FeatureUtils.register(p_334110_, SUPER_BIRCH_BEES, Feature.TREE, createSuperBirch().decorators(ImmutableList.of(beehivedecorator4)).build());
+        FeatureUtils.register(pContext, SUPER_BIRCH_BEES_0002, Feature.TREE, createSuperBirch().decorators(ImmutableList.of(beehivedecorator)).build());
+        FeatureUtils.register(pContext, SUPER_BIRCH_BEES, Feature.TREE, createSuperBirch().decorators(ImmutableList.of(beehivedecorator4)).build());
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             SWAMP_OAK,
             Feature.TREE,
             createStraightBlobTree(Blocks.OAK_LOG, Blocks.OAK_LEAVES, 5, 3, 0, 3).decorators(ImmutableList.of(new LeaveVineDecorator(0.25F))).build()
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             JUNGLE_BUSH,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -480,7 +480,7 @@ public class TreeFeatures {
                 .build()
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             AZALEA_TREE,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -497,7 +497,7 @@ public class TreeFeatures {
                 .build()
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             MANGROVE,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -546,7 +546,7 @@ public class TreeFeatures {
                 .build()
         );
         FeatureUtils.register(
-            p_334110_,
+            pContext,
             TALL_MANGROVE,
             Feature.TREE,
             new TreeConfiguration.TreeConfigurationBuilder(
@@ -594,15 +594,15 @@ public class TreeFeatures {
                 .ignoreVines()
                 .build()
         );
-        FeatureUtils.register(p_334110_, OAK_BEES_0002, Feature.TREE, createOak().decorators(List.of(beehivedecorator)).build());
-        FeatureUtils.register(p_334110_, OAK_BEES_002, Feature.TREE, createOak().decorators(List.of(beehivedecorator2)).build());
-        FeatureUtils.register(p_334110_, OAK_BEES_005, Feature.TREE, createOak().decorators(List.of(beehivedecorator3)).build());
-        FeatureUtils.register(p_334110_, BIRCH_BEES_0002, Feature.TREE, createBirch().decorators(List.of(beehivedecorator)).build());
-        FeatureUtils.register(p_334110_, BIRCH_BEES_002, Feature.TREE, createBirch().decorators(List.of(beehivedecorator2)).build());
-        FeatureUtils.register(p_334110_, BIRCH_BEES_005, Feature.TREE, createBirch().decorators(List.of(beehivedecorator3)).build());
-        FeatureUtils.register(p_334110_, FANCY_OAK_BEES_0002, Feature.TREE, createFancyOak().decorators(List.of(beehivedecorator)).build());
-        FeatureUtils.register(p_334110_, FANCY_OAK_BEES_002, Feature.TREE, createFancyOak().decorators(List.of(beehivedecorator2)).build());
-        FeatureUtils.register(p_334110_, FANCY_OAK_BEES_005, Feature.TREE, createFancyOak().decorators(List.of(beehivedecorator3)).build());
-        FeatureUtils.register(p_334110_, FANCY_OAK_BEES, Feature.TREE, createFancyOak().decorators(List.of(beehivedecorator4)).build());
+        FeatureUtils.register(pContext, OAK_BEES_0002, Feature.TREE, createOak().decorators(List.of(beehivedecorator)).build());
+        FeatureUtils.register(pContext, OAK_BEES_002, Feature.TREE, createOak().decorators(List.of(beehivedecorator2)).build());
+        FeatureUtils.register(pContext, OAK_BEES_005, Feature.TREE, createOak().decorators(List.of(beehivedecorator3)).build());
+        FeatureUtils.register(pContext, BIRCH_BEES_0002, Feature.TREE, createBirch().decorators(List.of(beehivedecorator)).build());
+        FeatureUtils.register(pContext, BIRCH_BEES_002, Feature.TREE, createBirch().decorators(List.of(beehivedecorator2)).build());
+        FeatureUtils.register(pContext, BIRCH_BEES_005, Feature.TREE, createBirch().decorators(List.of(beehivedecorator3)).build());
+        FeatureUtils.register(pContext, FANCY_OAK_BEES_0002, Feature.TREE, createFancyOak().decorators(List.of(beehivedecorator)).build());
+        FeatureUtils.register(pContext, FANCY_OAK_BEES_002, Feature.TREE, createFancyOak().decorators(List.of(beehivedecorator2)).build());
+        FeatureUtils.register(pContext, FANCY_OAK_BEES_005, Feature.TREE, createFancyOak().decorators(List.of(beehivedecorator3)).build());
+        FeatureUtils.register(pContext, FANCY_OAK_BEES, Feature.TREE, createFancyOak().decorators(List.of(beehivedecorator4)).build());
     }
 }

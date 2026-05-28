@@ -6,5 +6,5 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface Renderable {
-    void render(GuiGraphics p_281245_, int p_253973_, int p_254325_, float p_254004_);
+    void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick);
 }

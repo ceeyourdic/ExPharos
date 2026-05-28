@@ -11,9 +11,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class IllagerRenderer<T extends AbstractIllager, S extends IllagerRenderState> extends MobRenderer<T, S, IllagerModel<S>> {
-    protected IllagerRenderer(EntityRendererProvider.Context p_174182_, IllagerModel<S> p_174183_, float p_174184_) {
-        super(p_174182_, p_174183_, p_174184_);
-        this.addLayer(new CustomHeadLayer<>(this, p_174182_.getModelSet()));
+    protected IllagerRenderer(EntityRendererProvider.Context pContext, IllagerModel<S> pModel, float pShadowRadius) {
+        super(pContext, pModel, pShadowRadius);
+        this.addLayer(new CustomHeadLayer<>(this, pContext.getModelSet()));
     }
 
     public void extractRenderState(T p_360998_, S p_365392_, float p_369885_) {

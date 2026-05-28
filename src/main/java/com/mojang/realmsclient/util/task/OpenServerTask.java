@@ -22,11 +22,11 @@ public class OpenServerTask extends LongRunningTask {
     private final boolean join;
     private final Minecraft minecraft;
 
-    public OpenServerTask(RealmsServer p_181344_, Screen p_181345_, boolean p_181347_, Minecraft p_181348_) {
-        this.serverData = p_181344_;
-        this.returnScreen = p_181345_;
-        this.join = p_181347_;
-        this.minecraft = p_181348_;
+    public OpenServerTask(RealmsServer pServerData, Screen pReturnScreen, boolean pJoin, Minecraft pMinecraft) {
+        this.serverData = pServerData;
+        this.returnScreen = pReturnScreen;
+        this.join = pJoin;
+        this.minecraft = pMinecraft;
     }
 
     @Override

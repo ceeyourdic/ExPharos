@@ -9,10 +9,10 @@ public class HorseBodyArmorItemFix extends NamedEntityWriteReadFix {
     private final String previousBodyArmorTag;
     private final boolean clearArmorItems;
 
-    public HorseBodyArmorItemFix(Schema p_328584_, String p_334943_, String p_330348_, boolean p_334013_) {
-        super(p_328584_, true, "Horse armor fix for " + p_334943_, References.ENTITY, p_334943_);
-        this.previousBodyArmorTag = p_330348_;
-        this.clearArmorItems = p_334013_;
+    public HorseBodyArmorItemFix(Schema pOutputSchema, String pEntityName, String pPreviousBodyArmorTag, boolean pClearArmorItems) {
+        super(pOutputSchema, true, "Horse armor fix for " + pEntityName, References.ENTITY, pEntityName);
+        this.previousBodyArmorTag = pPreviousBodyArmorTag;
+        this.clearArmorItems = pClearArmorItems;
     }
 
     @Override

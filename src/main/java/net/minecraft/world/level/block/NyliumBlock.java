@@ -30,10 +30,10 @@ public class NyliumBlock extends Block implements BonemealableBlock {
         super(p_55057_);
     }
 
-    private static boolean canBeNylium(BlockState p_55079_, LevelReader p_55080_, BlockPos p_55081_) {
-        BlockPos blockpos = p_55081_.above();
-        BlockState blockstate = p_55080_.getBlockState(blockpos);
-        int i = LightEngine.getLightBlockInto(p_55079_, blockstate, Direction.UP, blockstate.getLightBlock());
+    private static boolean canBeNylium(BlockState pState, LevelReader pReader, BlockPos pPos) {
+        BlockPos blockpos = pPos.above();
+        BlockState blockstate = pReader.getBlockState(blockpos);
+        int i = LightEngine.getLightBlockInto(pState, blockstate, Direction.UP, blockstate.getLightBlock());
         return i < 15;
     }
 
@@ -72,14 +72,14 @@ public class NyliumBlock extends Block implements BonemealableBlock {
     }
 
     private void place(
-        Registry<ConfiguredFeature<?, ?>> p_255879_,
-        ResourceKey<ConfiguredFeature<?, ?>> p_256032_,
-        ServerLevel p_255631_,
-        ChunkGenerator p_256445_,
-        RandomSource p_255709_,
-        BlockPos p_256019_
+        Registry<ConfiguredFeature<?, ?>> pFeatureRegistry,
+        ResourceKey<ConfiguredFeature<?, ?>> pFeatureKey,
+        ServerLevel pLevel,
+        ChunkGenerator pChunkGenerator,
+        RandomSource pRandom,
+        BlockPos pPos
     ) {
-        p_255879_.get(p_256032_).ifPresent(p_255920_ -> p_255920_.value().place(p_255631_, p_256445_, p_255709_, p_256019_));
+        pFeatureRegistry.get(pFeatureKey).ifPresent(p_255920_ -> p_255920_.value().place(pLevel, pChunkGenerator, pRandom, pPos));
     }
 
     @Override

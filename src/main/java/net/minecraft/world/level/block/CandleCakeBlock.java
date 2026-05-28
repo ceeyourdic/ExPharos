@@ -50,14 +50,14 @@ public class CandleCakeBlock extends AbstractCandleBlock {
         return CODEC;
     }
 
-    protected CandleCakeBlock(Block p_152859_, BlockBehaviour.Properties p_152860_) {
-        super(p_152860_);
+    protected CandleCakeBlock(Block pCandleBlock, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
         this.registerDefaultState(this.stateDefinition.any().setValue(LIT, Boolean.valueOf(false)));
-        if (p_152859_ instanceof CandleBlock candleblock) {
+        if (pCandleBlock instanceof CandleBlock candleblock) {
             BY_CANDLE.put(candleblock, this);
             this.candleBlock = candleblock;
         } else {
-            throw new IllegalArgumentException("Expected block to be of " + CandleBlock.class + " was " + p_152859_.getClass());
+            throw new IllegalArgumentException("Expected block to be of " + CandleBlock.class + " was " + pCandleBlock.getClass());
         }
     }
 
@@ -95,8 +95,8 @@ public class CandleCakeBlock extends AbstractCandleBlock {
         return interactionresult;
     }
 
-    private static boolean candleHit(BlockHitResult p_152907_) {
-        return p_152907_.getLocation().y - (double)p_152907_.getBlockPos().getY() > 0.5;
+    private static boolean candleHit(BlockHitResult pHit) {
+        return pHit.getLocation().y - (double)pHit.getBlockPos().getY() > 0.5;
     }
 
     @Override
@@ -145,11 +145,11 @@ public class CandleCakeBlock extends AbstractCandleBlock {
         return false;
     }
 
-    public static BlockState byCandle(CandleBlock p_332754_) {
-        return BY_CANDLE.get(p_332754_).defaultBlockState();
+    public static BlockState byCandle(CandleBlock pCandle) {
+        return BY_CANDLE.get(pCandle).defaultBlockState();
     }
 
-    public static boolean canLight(BlockState p_152911_) {
-        return p_152911_.is(BlockTags.CANDLE_CAKES, p_152896_ -> p_152896_.hasProperty(LIT) && !p_152911_.getValue(LIT));
+    public static boolean canLight(BlockState pState) {
+        return pState.is(BlockTags.CANDLE_CAKES, p_152896_ -> p_152896_.hasProperty(LIT) && !pState.getValue(LIT));
     }
 }

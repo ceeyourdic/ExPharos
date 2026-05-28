@@ -26,14 +26,14 @@ public class SwampHutPiece extends ScatteredFeaturePiece {
     private boolean spawnedWitch;
     private boolean spawnedCat;
 
-    public SwampHutPiece(RandomSource p_229952_, int p_229953_, int p_229954_) {
-        super(StructurePieceType.SWAMPLAND_HUT, p_229953_, 64, p_229954_, 7, 7, 9, getRandomHorizontalDirection(p_229952_));
+    public SwampHutPiece(RandomSource pRandom, int pX, int pZ) {
+        super(StructurePieceType.SWAMPLAND_HUT, pX, 64, pZ, 7, 7, 9, getRandomHorizontalDirection(pRandom));
     }
 
-    public SwampHutPiece(CompoundTag p_229956_) {
-        super(StructurePieceType.SWAMPLAND_HUT, p_229956_);
-        this.spawnedWitch = p_229956_.getBoolean("Witch");
-        this.spawnedCat = p_229956_.getBoolean("Cat");
+    public SwampHutPiece(CompoundTag pTag) {
+        super(StructurePieceType.SWAMPLAND_HUT, pTag);
+        this.spawnedWitch = pTag.getBoolean("Witch");
+        this.spawnedCat = pTag.getBoolean("Cat");
     }
 
     @Override
@@ -112,17 +112,17 @@ public class SwampHutPiece extends ScatteredFeaturePiece {
         }
     }
 
-    private void spawnCat(ServerLevelAccessor p_229958_, BoundingBox p_229959_) {
+    private void spawnCat(ServerLevelAccessor pLevel, BoundingBox pBox) {
         if (!this.spawnedCat) {
             BlockPos blockpos = this.getWorldPos(2, 2, 5);
-            if (p_229959_.isInside(blockpos)) {
+            if (pBox.isInside(blockpos)) {
                 this.spawnedCat = true;
-                Cat cat = EntityType.CAT.create(p_229958_.getLevel(), EntitySpawnReason.STRUCTURE);
+                Cat cat = EntityType.CAT.create(pLevel.getLevel(), EntitySpawnReason.STRUCTURE);
                 if (cat != null) {
                     cat.setPersistenceRequired();
                     cat.moveTo((double)blockpos.getX() + 0.5, (double)blockpos.getY(), (double)blockpos.getZ() + 0.5, 0.0F, 0.0F);
-                    cat.finalizeSpawn(p_229958_, p_229958_.getCurrentDifficultyAt(blockpos), EntitySpawnReason.STRUCTURE, null);
-                    p_229958_.addFreshEntityWithPassengers(cat);
+                    cat.finalizeSpawn(pLevel, pLevel.getCurrentDifficultyAt(blockpos), EntitySpawnReason.STRUCTURE, null);
+                    pLevel.addFreshEntityWithPassengers(cat);
                 }
             }
         }

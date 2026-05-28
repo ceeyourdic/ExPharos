@@ -8,5 +8,5 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface Dumpable {
-    void dumpContents(ResourceLocation p_276124_, Path p_276123_) throws IOException;
+    void dumpContents(ResourceLocation pResourceLocation, Path pPath) throws IOException;
 }

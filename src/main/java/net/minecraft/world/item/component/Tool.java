@@ -34,9 +34,9 @@ public record Tool(List<Tool.Rule> rules, float defaultMiningSpeed, int damagePe
         Tool::new
     );
 
-    public float getMiningSpeed(BlockState p_330264_) {
+    public float getMiningSpeed(BlockState pState) {
         for (Tool.Rule tool$rule : this.rules) {
-            if (tool$rule.speed.isPresent() && p_330264_.is(tool$rule.blocks)) {
+            if (tool$rule.speed.isPresent() && pState.is(tool$rule.blocks)) {
                 return tool$rule.speed.get();
             }
         }
@@ -44,9 +44,9 @@ public record Tool(List<Tool.Rule> rules, float defaultMiningSpeed, int damagePe
         return this.defaultMiningSpeed;
     }
 
-    public boolean isCorrectForDrops(BlockState p_332652_) {
+    public boolean isCorrectForDrops(BlockState pState) {
         for (Tool.Rule tool$rule : this.rules) {
-            if (tool$rule.correctForDrops.isPresent() && p_332652_.is(tool$rule.blocks)) {
+            if (tool$rule.correctForDrops.isPresent() && pState.is(tool$rule.blocks)) {
                 return tool$rule.correctForDrops.get();
             }
         }
@@ -73,16 +73,16 @@ public record Tool(List<Tool.Rule> rules, float defaultMiningSpeed, int damagePe
             Tool.Rule::new
         );
 
-        public static Tool.Rule minesAndDrops(HolderSet<Block> p_367681_, float p_329194_) {
-            return new Tool.Rule(p_367681_, Optional.of(p_329194_), Optional.of(true));
+        public static Tool.Rule minesAndDrops(HolderSet<Block> pBlocks, float pSpeed) {
+            return new Tool.Rule(pBlocks, Optional.of(pSpeed), Optional.of(true));
         }
 
-        public static Tool.Rule deniesDrops(HolderSet<Block> p_368367_) {
-            return new Tool.Rule(p_368367_, Optional.empty(), Optional.of(false));
+        public static Tool.Rule deniesDrops(HolderSet<Block> pBlocks) {
+            return new Tool.Rule(pBlocks, Optional.empty(), Optional.of(false));
         }
 
-        public static Tool.Rule overrideSpeed(HolderSet<Block> p_368126_, float p_329347_) {
-            return new Tool.Rule(p_368126_, Optional.of(p_329347_), Optional.empty());
+        public static Tool.Rule overrideSpeed(HolderSet<Block> pBlocks, float pSpeed) {
+            return new Tool.Rule(pBlocks, Optional.of(pSpeed), Optional.empty());
         }
     }
 }

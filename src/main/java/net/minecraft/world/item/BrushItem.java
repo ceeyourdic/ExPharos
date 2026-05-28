@@ -97,28 +97,28 @@ public class BrushItem extends Item {
         }
     }
 
-    private HitResult calculateHitResult(Player p_311819_) {
-        return ProjectileUtil.getHitResultOnViewVector(p_311819_, EntitySelector.CAN_BE_PICKED, p_311819_.blockInteractionRange());
+    private HitResult calculateHitResult(Player pPlayer) {
+        return ProjectileUtil.getHitResultOnViewVector(pPlayer, EntitySelector.CAN_BE_PICKED, pPlayer.blockInteractionRange());
     }
 
-    private void spawnDustParticles(Level p_278327_, BlockHitResult p_278272_, BlockState p_278235_, Vec3 p_278337_, HumanoidArm p_285071_) {
+    private void spawnDustParticles(Level pLevel, BlockHitResult pHitResult, BlockState pState, Vec3 pPos, HumanoidArm pArm) {
         double d0 = 3.0;
-        int i = p_285071_ == HumanoidArm.RIGHT ? 1 : -1;
-        int j = p_278327_.getRandom().nextInt(7, 12);
-        BlockParticleOption blockparticleoption = new BlockParticleOption(ParticleTypes.BLOCK, p_278235_);
-        Direction direction = p_278272_.getDirection();
-        BrushItem.DustParticlesDelta brushitem$dustparticlesdelta = BrushItem.DustParticlesDelta.fromDirection(p_278337_, direction);
-        Vec3 vec3 = p_278272_.getLocation();
+        int i = pArm == HumanoidArm.RIGHT ? 1 : -1;
+        int j = pLevel.getRandom().nextInt(7, 12);
+        BlockParticleOption blockparticleoption = new BlockParticleOption(ParticleTypes.BLOCK, pState);
+        Direction direction = pHitResult.getDirection();
+        BrushItem.DustParticlesDelta brushitem$dustparticlesdelta = BrushItem.DustParticlesDelta.fromDirection(pPos, direction);
+        Vec3 vec3 = pHitResult.getLocation();
 
         for (int k = 0; k < j; k++) {
-            p_278327_.addParticle(
+            pLevel.addParticle(
                 blockparticleoption,
                 vec3.x - (double)(direction == Direction.WEST ? 1.0E-6F : 0.0F),
                 vec3.y,
                 vec3.z - (double)(direction == Direction.NORTH ? 1.0E-6F : 0.0F),
-                brushitem$dustparticlesdelta.xd() * (double)i * 3.0 * p_278327_.getRandom().nextDouble(),
+                brushitem$dustparticlesdelta.xd() * (double)i * 3.0 * pLevel.getRandom().nextDouble(),
                 0.0,
-                brushitem$dustparticlesdelta.zd() * (double)i * 3.0 * p_278327_.getRandom().nextDouble()
+                brushitem$dustparticlesdelta.zd() * (double)i * 3.0 * pLevel.getRandom().nextDouble()
             );
         }
     }
@@ -127,11 +127,11 @@ public class BrushItem extends Item {
         private static final double ALONG_SIDE_DELTA = 1.0;
         private static final double OUT_FROM_SIDE_DELTA = 0.1;
 
-        public static BrushItem.DustParticlesDelta fromDirection(Vec3 p_273421_, Direction p_272987_) {
+        public static BrushItem.DustParticlesDelta fromDirection(Vec3 pPos, Direction pDirection) {
             double d0 = 0.0;
 
-            return switch (p_272987_) {
-                case DOWN, UP -> new BrushItem.DustParticlesDelta(p_273421_.z(), 0.0, -p_273421_.x());
+            return switch (pDirection) {
+                case DOWN, UP -> new BrushItem.DustParticlesDelta(pPos.z(), 0.0, -pPos.x());
                 case NORTH -> new BrushItem.DustParticlesDelta(1.0, 0.0, -0.1);
                 case SOUTH -> new BrushItem.DustParticlesDelta(-1.0, 0.0, 0.1);
                 case WEST -> new BrushItem.DustParticlesDelta(-0.1, 0.0, -1.0);

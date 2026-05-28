@@ -20,19 +20,19 @@ public class ScaffoldingBlockItem extends BlockItem {
 
     @Nullable
     @Override
-    public BlockPlaceContext updatePlacementContext(BlockPlaceContext p_43063_) {
-        BlockPos blockpos = p_43063_.getClickedPos();
-        Level level = p_43063_.getLevel();
+    public BlockPlaceContext updatePlacementContext(BlockPlaceContext pContext) {
+        BlockPos blockpos = pContext.getClickedPos();
+        Level level = pContext.getLevel();
         BlockState blockstate = level.getBlockState(blockpos);
         Block block = this.getBlock();
         if (!blockstate.is(block)) {
-            return ScaffoldingBlock.getDistance(level, blockpos) == 7 ? null : p_43063_;
+            return ScaffoldingBlock.getDistance(level, blockpos) == 7 ? null : pContext;
         } else {
             Direction direction;
-            if (p_43063_.isSecondaryUseActive()) {
-                direction = p_43063_.isInside() ? p_43063_.getClickedFace().getOpposite() : p_43063_.getClickedFace();
+            if (pContext.isSecondaryUseActive()) {
+                direction = pContext.isInside() ? pContext.getClickedFace().getOpposite() : pContext.getClickedFace();
             } else {
-                direction = p_43063_.getClickedFace() == Direction.UP ? p_43063_.getHorizontalDirection() : Direction.UP;
+                direction = pContext.getClickedFace() == Direction.UP ? pContext.getHorizontalDirection() : Direction.UP;
             }
 
             int i = 0;
@@ -40,7 +40,7 @@ public class ScaffoldingBlockItem extends BlockItem {
 
             while (i < 7) {
                 if (!level.isClientSide && !level.isInWorldBounds(blockpos$mutableblockpos)) {
-                    Player player = p_43063_.getPlayer();
+                    Player player = pContext.getPlayer();
                     int j = level.getMaxY();
                     if (player instanceof ServerPlayer && blockpos$mutableblockpos.getY() > j) {
                         ((ServerPlayer)player).sendSystemMessage(Component.translatable("build.tooHigh", j).withStyle(ChatFormatting.RED), true);
@@ -50,8 +50,8 @@ public class ScaffoldingBlockItem extends BlockItem {
 
                 blockstate = level.getBlockState(blockpos$mutableblockpos);
                 if (!blockstate.is(this.getBlock())) {
-                    if (blockstate.canBeReplaced(p_43063_)) {
-                        return BlockPlaceContext.at(p_43063_, blockpos$mutableblockpos, direction);
+                    if (blockstate.canBeReplaced(pContext)) {
+                        return BlockPlaceContext.at(pContext, blockpos$mutableblockpos, direction);
                     }
                     break;
                 }

@@ -31,11 +31,11 @@ public class SetFireworksFunction extends LootItemConditionalFunction {
     private final Optional<Integer> flightDuration;
 
     protected SetFireworksFunction(
-        List<LootItemCondition> p_335106_, Optional<ListOperation.StandAlone<FireworkExplosion>> p_334501_, Optional<Integer> p_334583_
+        List<LootItemCondition> pConditions, Optional<ListOperation.StandAlone<FireworkExplosion>> pExplosions, Optional<Integer> pFlightDuration
     ) {
-        super(p_335106_);
-        this.explosions = p_334501_;
-        this.flightDuration = p_334583_;
+        super(pConditions);
+        this.explosions = pExplosions;
+        this.flightDuration = pFlightDuration;
     }
 
     @Override
@@ -44,10 +44,10 @@ public class SetFireworksFunction extends LootItemConditionalFunction {
         return p_331574_;
     }
 
-    private Fireworks apply(Fireworks p_332116_) {
+    private Fireworks apply(Fireworks pFireworks) {
         return new Fireworks(
-            this.flightDuration.orElseGet(p_332116_::flightDuration),
-            this.explosions.<List<FireworkExplosion>>map(p_331021_ -> p_331021_.apply(p_332116_.explosions())).orElse(p_332116_.explosions())
+            this.flightDuration.orElseGet(pFireworks::flightDuration),
+            this.explosions.<List<FireworkExplosion>>map(p_331021_ -> p_331021_.apply(pFireworks.explosions())).orElse(pFireworks.explosions())
         );
     }
 

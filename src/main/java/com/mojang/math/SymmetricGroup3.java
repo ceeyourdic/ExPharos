@@ -30,20 +30,20 @@ public enum SymmetricGroup3 {
         }
     });
 
-    private SymmetricGroup3(final int p_109176_, final int p_109177_, final int p_109178_) {
-        this.permutation = new int[]{p_109176_, p_109177_, p_109178_};
+    private SymmetricGroup3(final int pFirst, final int pSecond, final int pThird) {
+        this.permutation = new int[]{pFirst, pSecond, pThird};
         this.transformation = new Matrix3f();
         this.transformation.set(this.permutation(0), 0, 1.0F);
         this.transformation.set(this.permutation(1), 1, 1.0F);
         this.transformation.set(this.permutation(2), 2, 1.0F);
     }
 
-    public SymmetricGroup3 compose(SymmetricGroup3 p_109183_) {
-        return cayleyTable[this.ordinal()][p_109183_.ordinal()];
+    public SymmetricGroup3 compose(SymmetricGroup3 pOther) {
+        return cayleyTable[this.ordinal()][pOther.ordinal()];
     }
 
-    public int permutation(int p_109181_) {
-        return this.permutation[p_109181_];
+    public int permutation(int pElement) {
+        return this.permutation[pElement];
     }
 
     public Matrix3f transformation() {

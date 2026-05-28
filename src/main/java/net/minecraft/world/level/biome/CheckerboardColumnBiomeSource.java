@@ -20,10 +20,10 @@ public class CheckerboardColumnBiomeSource extends BiomeSource {
     private final int bitShift;
     private final int size;
 
-    public CheckerboardColumnBiomeSource(HolderSet<Biome> p_204243_, int p_204244_) {
-        this.allowedBiomes = p_204243_;
-        this.bitShift = p_204244_ + 2;
-        this.size = p_204244_;
+    public CheckerboardColumnBiomeSource(HolderSet<Biome> pAllowedBiomes, int pSize) {
+        this.allowedBiomes = pAllowedBiomes;
+        this.bitShift = pSize + 2;
+        this.size = pSize;
     }
 
     @Override

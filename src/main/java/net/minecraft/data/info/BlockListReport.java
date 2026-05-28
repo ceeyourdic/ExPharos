@@ -24,9 +24,9 @@ public class BlockListReport implements DataProvider {
     private final PackOutput output;
     private final CompletableFuture<HolderLookup.Provider> registries;
 
-    public BlockListReport(PackOutput p_251533_, CompletableFuture<HolderLookup.Provider> p_336286_) {
-        this.output = p_251533_;
-        this.registries = p_336286_;
+    public BlockListReport(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pRegistries) {
+        this.output = pOutput;
+        this.registries = pRegistries;
     }
 
     @Override

@@ -10,14 +10,14 @@ public record PathfindingDebugPayload(int entityId, Path path, float maxNodeDist
     );
     public static final CustomPacketPayload.Type<PathfindingDebugPayload> TYPE = CustomPacketPayload.createType("debug/path");
 
-    private PathfindingDebugPayload(FriendlyByteBuf p_297728_) {
-        this(p_297728_.readInt(), Path.createFromStream(p_297728_), p_297728_.readFloat());
+    private PathfindingDebugPayload(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readInt(), Path.createFromStream(pBuffer), pBuffer.readFloat());
     }
 
-    private void write(FriendlyByteBuf p_298780_) {
-        p_298780_.writeInt(this.entityId);
-        this.path.writeToStream(p_298780_);
-        p_298780_.writeFloat(this.maxNodeDistance);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeInt(this.entityId);
+        this.path.writeToStream(pBuffer);
+        pBuffer.writeFloat(this.maxNodeDistance);
     }
 
     @Override

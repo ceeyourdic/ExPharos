@@ -31,9 +31,9 @@ public class MineshaftStructure extends Structure {
     );
     private final MineshaftStructure.Type type;
 
-    public MineshaftStructure(Structure.StructureSettings p_227961_, MineshaftStructure.Type p_227962_) {
-        super(p_227961_);
-        this.type = p_227962_;
+    public MineshaftStructure(Structure.StructureSettings pSettings, MineshaftStructure.Type pType) {
+        super(pSettings);
+        this.type = pType;
     }
 
     @Override
@@ -46,27 +46,27 @@ public class MineshaftStructure extends Structure {
         return Optional.of(new Structure.GenerationStub(blockpos.offset(0, i, 0), Either.right(structurepiecesbuilder)));
     }
 
-    private int generatePiecesAndAdjust(StructurePiecesBuilder p_227966_, Structure.GenerationContext p_227967_) {
-        ChunkPos chunkpos = p_227967_.chunkPos();
-        WorldgenRandom worldgenrandom = p_227967_.random();
-        ChunkGenerator chunkgenerator = p_227967_.chunkGenerator();
+    private int generatePiecesAndAdjust(StructurePiecesBuilder pBuilder, Structure.GenerationContext pContext) {
+        ChunkPos chunkpos = pContext.chunkPos();
+        WorldgenRandom worldgenrandom = pContext.random();
+        ChunkGenerator chunkgenerator = pContext.chunkGenerator();
         MineshaftPieces.MineShaftRoom mineshaftpieces$mineshaftroom = new MineshaftPieces.MineShaftRoom(
             0, worldgenrandom, chunkpos.getBlockX(2), chunkpos.getBlockZ(2), this.type
         );
-        p_227966_.addPiece(mineshaftpieces$mineshaftroom);
-        mineshaftpieces$mineshaftroom.addChildren(mineshaftpieces$mineshaftroom, p_227966_, worldgenrandom);
+        pBuilder.addPiece(mineshaftpieces$mineshaftroom);
+        mineshaftpieces$mineshaftroom.addChildren(mineshaftpieces$mineshaftroom, pBuilder, worldgenrandom);
         int i = chunkgenerator.getSeaLevel();
         if (this.type == MineshaftStructure.Type.MESA) {
-            BlockPos blockpos = p_227966_.getBoundingBox().getCenter();
+            BlockPos blockpos = pBuilder.getBoundingBox().getCenter();
             int j = chunkgenerator.getBaseHeight(
-                blockpos.getX(), blockpos.getZ(), Heightmap.Types.WORLD_SURFACE_WG, p_227967_.heightAccessor(), p_227967_.randomState()
+                blockpos.getX(), blockpos.getZ(), Heightmap.Types.WORLD_SURFACE_WG, pContext.heightAccessor(), pContext.randomState()
             );
             int k = j <= i ? i : Mth.randomBetweenInclusive(worldgenrandom, i, j);
             int l = k - blockpos.getY();
-            p_227966_.offsetPiecesVertically(l);
+            pBuilder.offsetPiecesVertically(l);
             return l;
         } else {
-            return p_227966_.moveBelowSeaLevel(i, chunkgenerator.getMinY(), worldgenrandom, 10);
+            return pBuilder.moveBelowSeaLevel(i, chunkgenerator.getMinY(), worldgenrandom, 10);
         }
     }
 
@@ -86,19 +86,19 @@ public class MineshaftStructure extends Structure {
         private final BlockState planksState;
         private final BlockState fenceState;
 
-        private Type(final String p_227985_, final Block p_227986_, final Block p_227987_, final Block p_227988_) {
-            this.name = p_227985_;
-            this.woodState = p_227986_.defaultBlockState();
-            this.planksState = p_227987_.defaultBlockState();
-            this.fenceState = p_227988_.defaultBlockState();
+        private Type(final String pName, final Block pWoodBlock, final Block pPlanksBlock, final Block pFenceBlock) {
+            this.name = pName;
+            this.woodState = pWoodBlock.defaultBlockState();
+            this.planksState = pPlanksBlock.defaultBlockState();
+            this.fenceState = pFenceBlock.defaultBlockState();
         }
 
         public String getName() {
             return this.name;
         }
 
-        public static MineshaftStructure.Type byId(int p_227991_) {
-            return BY_ID.apply(p_227991_);
+        public static MineshaftStructure.Type byId(int pId) {
+            return BY_ID.apply(pId);
         }
 
         public BlockState getWoodState() {

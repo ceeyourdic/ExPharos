@@ -16,15 +16,15 @@ public final class SequencedPriorityIterator<T> extends AbstractIterator<T> {
     private int highestPrio = Integer.MIN_VALUE;
     private final Int2ObjectMap<Deque<T>> queuesByPriority = new Int2ObjectOpenHashMap<>();
 
-    public void add(T p_312570_, int p_312199_) {
-        if (p_312199_ == this.highestPrio && this.highestPrioQueue != null) {
-            this.highestPrioQueue.addLast(p_312570_);
+    public void add(T pValue, int pPriority) {
+        if (pPriority == this.highestPrio && this.highestPrioQueue != null) {
+            this.highestPrioQueue.addLast(pValue);
         } else {
-            Deque<T> deque = this.queuesByPriority.computeIfAbsent(p_312199_, p_310516_ -> Queues.newArrayDeque());
-            deque.addLast(p_312570_);
-            if (p_312199_ >= this.highestPrio) {
+            Deque<T> deque = this.queuesByPriority.computeIfAbsent(pPriority, p_310516_ -> Queues.newArrayDeque());
+            deque.addLast(pValue);
+            if (pPriority >= this.highestPrio) {
                 this.highestPrioQueue = deque;
-                this.highestPrio = p_312199_;
+                this.highestPrio = pPriority;
             }
         }
     }

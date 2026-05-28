@@ -18,9 +18,9 @@ public interface Toast {
 
     Toast.Visibility getWantedVisibility();
 
-    void update(ToastManager p_369172_, long p_365500_);
+    void update(ToastManager pToastManager, long pVisibilityTime);
 
-    void render(GuiGraphics p_361731_, Font p_363216_, long p_366222_);
+    void render(GuiGraphics pGuiGraphics, Font pFont, long pVisibilityTime);
 
     default Object getToken() {
         return NO_TOKEN;
@@ -45,12 +45,12 @@ public interface Toast {
 
         private final SoundEvent soundEvent;
 
-        private Visibility(final SoundEvent p_94908_) {
-            this.soundEvent = p_94908_;
+        private Visibility(final SoundEvent pSoundEvent) {
+            this.soundEvent = pSoundEvent;
         }
 
-        public void playSound(SoundManager p_94910_) {
-            p_94910_.play(SimpleSoundInstance.forUI(this.soundEvent, 1.0F, 1.0F));
+        public void playSound(SoundManager pHandler) {
+            pHandler.play(SimpleSoundInstance.forUI(this.soundEvent, 1.0F, 1.0F));
         }
     }
 }

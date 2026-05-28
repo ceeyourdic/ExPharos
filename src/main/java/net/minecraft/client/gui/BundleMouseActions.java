@@ -18,8 +18,8 @@ public class BundleMouseActions implements ItemSlotMouseAction {
     private final Minecraft minecraft;
     private final ScrollWheelHandler scrollWheelHandler;
 
-    public BundleMouseActions(Minecraft p_361523_) {
-        this.minecraft = p_361523_;
+    public BundleMouseActions(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
         this.scrollWheelHandler = new ScrollWheelHandler();
     }
 
@@ -60,15 +60,15 @@ public class BundleMouseActions implements ItemSlotMouseAction {
         }
     }
 
-    private void toggleSelectedBundleItem(ItemStack p_364505_, int p_362156_, int p_360940_) {
-        if (this.minecraft.getConnection() != null && p_360940_ < BundleItem.getNumberOfItemsToShow(p_364505_)) {
+    private void toggleSelectedBundleItem(ItemStack pStack, int pIndex, int pNextIndex) {
+        if (this.minecraft.getConnection() != null && pNextIndex < BundleItem.getNumberOfItemsToShow(pStack)) {
             ClientPacketListener clientpacketlistener = this.minecraft.getConnection();
-            BundleItem.toggleSelectedItem(p_364505_, p_360940_);
-            clientpacketlistener.send(new ServerboundSelectBundleItemPacket(p_362156_, p_360940_));
+            BundleItem.toggleSelectedItem(pStack, pNextIndex);
+            clientpacketlistener.send(new ServerboundSelectBundleItemPacket(pIndex, pNextIndex));
         }
     }
 
-    public void unselectedBundleItem(ItemStack p_368991_, int p_367977_) {
-        this.toggleSelectedBundleItem(p_368991_, p_367977_, -1);
+    public void unselectedBundleItem(ItemStack pBundle, int pSlotIndex) {
+        this.toggleSelectedBundleItem(pBundle, pSlotIndex, -1);
     }
 }

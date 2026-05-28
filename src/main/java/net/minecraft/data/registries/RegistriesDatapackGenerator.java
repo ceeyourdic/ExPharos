@@ -21,9 +21,9 @@ public class RegistriesDatapackGenerator implements DataProvider {
     private final PackOutput output;
     private final CompletableFuture<HolderLookup.Provider> registries;
 
-    public RegistriesDatapackGenerator(PackOutput p_256643_, CompletableFuture<HolderLookup.Provider> p_255780_) {
-        this.registries = p_255780_;
-        this.output = p_256643_;
+    public RegistriesDatapackGenerator(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pRegistries) {
+        this.registries = pRegistries;
+        this.output = pOutput;
     }
 
     @Override
@@ -43,10 +43,10 @@ public class RegistriesDatapackGenerator implements DataProvider {
     }
 
     private <T> Optional<CompletableFuture<?>> dumpRegistryCap(
-        CachedOutput p_256502_, HolderLookup.Provider p_256492_, DynamicOps<JsonElement> p_256000_, RegistryDataLoader.RegistryData<T> p_256449_
+        CachedOutput pOutput, HolderLookup.Provider pRegistries, DynamicOps<JsonElement> pOps, RegistryDataLoader.RegistryData<T> pRegistryData
     ) {
-        ResourceKey<? extends Registry<T>> resourcekey = p_256449_.key();
-        return p_256492_.lookup(resourcekey)
+        ResourceKey<? extends Registry<T>> resourcekey = pRegistryData.key();
+        return pRegistries.lookup(resourcekey)
             .map(
                 p_358460_ -> {
                     PackOutput.PathProvider packoutput$pathprovider = this.output.createRegistryElementsPathProvider(resourcekey);
@@ -55,9 +55,9 @@ public class RegistriesDatapackGenerator implements DataProvider {
                             .map(
                                 p_256105_ -> dumpValue(
                                         packoutput$pathprovider.json(p_256105_.key().location()),
-                                        p_256502_,
-                                        p_256000_,
-                                        p_256449_.elementCodec(),
+                                        pOutput,
+                                        pOps,
+                                        pRegistryData.elementCodec(),
                                         p_256105_.value()
                                     )
                             )
@@ -68,12 +68,12 @@ public class RegistriesDatapackGenerator implements DataProvider {
     }
 
     private static <E> CompletableFuture<?> dumpValue(
-        Path p_255678_, CachedOutput p_256438_, DynamicOps<JsonElement> p_256127_, Encoder<E> p_255938_, E p_256590_
+        Path pValuePath, CachedOutput pOutput, DynamicOps<JsonElement> pOps, Encoder<E> pEncoder, E pValue
     ) {
-        return p_255938_.encodeStart(p_256127_, p_256590_)
+        return pEncoder.encodeStart(pOps, pValue)
             .mapOrElse(
-                p_341074_ -> DataProvider.saveStable(p_256438_, p_341074_, p_255678_),
-                p_341071_ -> CompletableFuture.failedFuture(new IllegalStateException("Couldn't generate file '" + p_255678_ + "': " + p_341071_.message()))
+                p_341074_ -> DataProvider.saveStable(pOutput, p_341074_, pValuePath),
+                p_341071_ -> CompletableFuture.failedFuture(new IllegalStateException("Couldn't generate file '" + pValuePath + "': " + p_341071_.message()))
             );
     }
 

@@ -62,17 +62,17 @@ public record ItemAttributeModifiersPredicate(
                     .apply(p_340758_, ItemAttributeModifiersPredicate.EntryPredicate::new)
         );
 
-        public boolean test(ItemAttributeModifiers.Entry p_332302_) {
-            if (this.attribute.isPresent() && !this.attribute.get().contains(p_332302_.attribute())) {
+        public boolean test(ItemAttributeModifiers.Entry pEntry) {
+            if (this.attribute.isPresent() && !this.attribute.get().contains(pEntry.attribute())) {
                 return false;
-            } else if (this.id.isPresent() && !this.id.get().equals(p_332302_.modifier().id())) {
+            } else if (this.id.isPresent() && !this.id.get().equals(pEntry.modifier().id())) {
                 return false;
-            } else if (!this.amount.matches(p_332302_.modifier().amount())) {
+            } else if (!this.amount.matches(pEntry.modifier().amount())) {
                 return false;
             } else {
-                return this.operation.isPresent() && this.operation.get() != p_332302_.modifier().operation()
+                return this.operation.isPresent() && this.operation.get() != pEntry.modifier().operation()
                     ? false
-                    : !this.slot.isPresent() || this.slot.get() == p_332302_.slot();
+                    : !this.slot.isPresent() || this.slot.get() == pEntry.slot();
             }
         }
     }

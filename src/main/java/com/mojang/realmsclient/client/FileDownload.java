@@ -83,13 +83,13 @@ public class FileDownload {
         "LPT9"
     };
 
-    public long contentLength(String p_86990_) {
+    public long contentLength(String pUri) {
         CloseableHttpClient closeablehttpclient = null;
         HttpGet httpget = null;
 
         long i;
         try {
-            httpget = new HttpGet(p_86990_);
+            httpget = new HttpGet(pUri);
             closeablehttpclient = HttpClientBuilder.create().setDefaultRequestConfig(this.requestConfig).build();
             CloseableHttpResponse closeablehttpresponse = closeablehttpclient.execute(httpget);
             return Long.parseLong(closeablehttpresponse.getFirstHeader("Content-Length").getValue());
@@ -113,7 +113,7 @@ public class FileDownload {
         return i;
     }
 
-    public void download(WorldDownload p_86983_, String p_86984_, RealmsDownloadLatestWorldScreen.DownloadStatus p_86985_, LevelStorageSource p_86986_) {
+    public void download(WorldDownload pDownload, String pWorldName, RealmsDownloadLatestWorldScreen.DownloadStatus pStatus, LevelStorageSource pSource) {
         if (this.currentThread == null) {
             this.currentThread = new Thread(
                 () -> {
@@ -121,14 +121,14 @@ public class FileDownload {
 
                     try {
                         this.tempFile = File.createTempFile("backup", ".tar.gz");
-                        this.request = new HttpGet(p_86983_.downloadLink);
+                        this.request = new HttpGet(pDownload.downloadLink);
                         closeablehttpclient = HttpClientBuilder.create().setDefaultRequestConfig(this.requestConfig).build();
                         HttpResponse httpresponse = closeablehttpclient.execute(this.request);
-                        p_86985_.totalBytes = Long.parseLong(httpresponse.getFirstHeader("Content-Length").getValue());
+                        pStatus.totalBytes = Long.parseLong(httpresponse.getFirstHeader("Content-Length").getValue());
                         if (httpresponse.getStatusLine().getStatusCode() == 200) {
                             OutputStream outputstream = new FileOutputStream(this.tempFile);
                             FileDownload.ProgressListener filedownload$progresslistener = new FileDownload.ProgressListener(
-                                p_86984_.trim(), this.tempFile, p_86986_, p_86985_
+                                pWorldName.trim(), this.tempFile, pSource, pStatus
                             );
                             FileDownload.DownloadCountingOutputStream filedownload$downloadcountingoutputstream = new FileDownload.DownloadCountingOutputStream(
                                 outputstream
@@ -151,12 +151,12 @@ public class FileDownload {
                         }
 
                         if (!this.error) {
-                            if (!p_86983_.resourcePackUrl.isEmpty() && !p_86983_.resourcePackHash.isEmpty()) {
+                            if (!pDownload.resourcePackUrl.isEmpty() && !pDownload.resourcePackHash.isEmpty()) {
                                 try {
                                     this.tempFile = File.createTempFile("resources", ".tar.gz");
-                                    this.request = new HttpGet(p_86983_.resourcePackUrl);
+                                    this.request = new HttpGet(pDownload.resourcePackUrl);
                                     HttpResponse httpresponse1 = closeablehttpclient.execute(this.request);
-                                    p_86985_.totalBytes = Long.parseLong(httpresponse1.getFirstHeader("Content-Length").getValue());
+                                    pStatus.totalBytes = Long.parseLong(httpresponse1.getFirstHeader("Content-Length").getValue());
                                     if (httpresponse1.getStatusLine().getStatusCode() != 200) {
                                         this.error = true;
                                         this.request.abort();
@@ -165,7 +165,7 @@ public class FileDownload {
 
                                     OutputStream outputstream1 = new FileOutputStream(this.tempFile);
                                     FileDownload.ResourcePackProgressListener filedownload$resourcepackprogresslistener = new FileDownload.ResourcePackProgressListener(
-                                        this.tempFile, p_86985_, p_86983_
+                                        this.tempFile, pStatus, pDownload
                                     );
                                     FileDownload.DownloadCountingOutputStream filedownload$downloadcountingoutputstream1 = new FileDownload.DownloadCountingOutputStream(
                                         outputstream1
@@ -225,36 +225,36 @@ public class FileDownload {
         return this.extracting;
     }
 
-    public static String findAvailableFolderName(String p_87002_) {
-        p_87002_ = p_87002_.replaceAll("[\\./\"]", "_");
+    public static String findAvailableFolderName(String pFolderName) {
+        pFolderName = pFolderName.replaceAll("[\\./\"]", "_");
 
         for (String s : INVALID_FILE_NAMES) {
-            if (p_87002_.equalsIgnoreCase(s)) {
-                p_87002_ = "_" + p_87002_ + "_";
+            if (pFolderName.equalsIgnoreCase(s)) {
+                pFolderName = "_" + pFolderName + "_";
             }
         }
 
-        return p_87002_;
+        return pFolderName;
     }
 
-    void untarGzipArchive(String p_86992_, @Nullable File p_86993_, LevelStorageSource p_86994_) throws IOException {
+    void untarGzipArchive(String pWorldName, @Nullable File pTempFile, LevelStorageSource pLevelStorageSource) throws IOException {
         Pattern pattern = Pattern.compile(".*-([0-9]+)$");
         int i = 1;
 
         for (char c0 : SharedConstants.ILLEGAL_FILE_CHARACTERS) {
-            p_86992_ = p_86992_.replace(c0, '_');
+            pWorldName = pWorldName.replace(c0, '_');
         }
 
-        if (StringUtils.isEmpty(p_86992_)) {
-            p_86992_ = "Realm";
+        if (StringUtils.isEmpty(pWorldName)) {
+            pWorldName = "Realm";
         }
 
-        p_86992_ = findAvailableFolderName(p_86992_);
+        pWorldName = findAvailableFolderName(pWorldName);
 
         try {
-            for (LevelStorageSource.LevelDirectory levelstoragesource$leveldirectory : p_86994_.findLevelCandidates()) {
+            for (LevelStorageSource.LevelDirectory levelstoragesource$leveldirectory : pLevelStorageSource.findLevelCandidates()) {
                 String s1 = levelstoragesource$leveldirectory.directoryName();
-                if (s1.toLowerCase(Locale.ROOT).startsWith(p_86992_.toLowerCase(Locale.ROOT))) {
+                if (s1.toLowerCase(Locale.ROOT).startsWith(pWorldName.toLowerCase(Locale.ROOT))) {
                     Matcher matcher = pattern.matcher(s1);
                     if (matcher.matches()) {
                         int j = Integer.parseInt(matcher.group(1));
@@ -273,17 +273,17 @@ public class FileDownload {
         }
 
         String s;
-        if (p_86994_.isNewLevelIdAcceptable(p_86992_) && i <= 1) {
-            s = p_86992_;
+        if (pLevelStorageSource.isNewLevelIdAcceptable(pWorldName) && i <= 1) {
+            s = pWorldName;
         } else {
-            s = p_86992_ + (i == 1 ? "" : "-" + i);
-            if (!p_86994_.isNewLevelIdAcceptable(s)) {
+            s = pWorldName + (i == 1 ? "" : "-" + i);
+            if (!pLevelStorageSource.isNewLevelIdAcceptable(s)) {
                 boolean flag = false;
 
                 while (!flag) {
                     i++;
-                    s = p_86992_ + (i == 1 ? "" : "-" + i);
-                    if (p_86994_.isNewLevelIdAcceptable(s)) {
+                    s = pWorldName + (i == 1 ? "" : "-" + i);
+                    if (pLevelStorageSource.isNewLevelIdAcceptable(s)) {
                         flag = true;
                     }
                 }
@@ -295,7 +295,7 @@ public class FileDownload {
 
         try {
             file1.mkdir();
-            tararchiveinputstream = new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(p_86993_))));
+            tararchiveinputstream = new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(pTempFile))));
 
             for (TarArchiveEntry tararchiveentry = tararchiveinputstream.getNextTarEntry();
                 tararchiveentry != null;
@@ -320,11 +320,11 @@ public class FileDownload {
                 tararchiveinputstream.close();
             }
 
-            if (p_86993_ != null) {
-                p_86993_.delete();
+            if (pTempFile != null) {
+                pTempFile.delete();
             }
 
-            try (LevelStorageSource.LevelStorageAccess levelstoragesource$levelstorageaccess = p_86994_.validateAndCreateAccess(s)) {
+            try (LevelStorageSource.LevelStorageAccess levelstoragesource$levelstorageaccess = pLevelStorageSource.validateAndCreateAccess(s)) {
                 levelstoragesource$levelstorageaccess.renameAndDropPlayer(s);
             } catch (NbtException | ReportedNbtException | IOException ioexception) {
                 LOGGER.error("Failed to modify unpacked realms level {}", s, ioexception);
@@ -341,17 +341,17 @@ public class FileDownload {
         @Nullable
         private ActionListener listener;
 
-        public DownloadCountingOutputStream(OutputStream p_193509_) {
-            super(p_193509_);
+        public DownloadCountingOutputStream(OutputStream pOut) {
+            super(pOut);
         }
 
-        public void setListener(ActionListener p_87017_) {
-            this.listener = p_87017_;
+        public void setListener(ActionListener pListener) {
+            this.listener = pListener;
         }
 
         @Override
-        protected void afterWrite(int p_87019_) throws IOException {
-            super.afterWrite(p_87019_);
+        protected void afterWrite(int pBytesWritten) throws IOException {
+            super.afterWrite(pBytesWritten);
             if (this.listener != null) {
                 this.listener.actionPerformed(new ActionEvent(this, 0, null));
             }
@@ -366,17 +366,17 @@ public class FileDownload {
         private final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
 
         ProgressListener(
-            final String p_87027_, final File p_87028_, final LevelStorageSource p_87029_, final RealmsDownloadLatestWorldScreen.DownloadStatus p_87030_
+            final String pWorldName, final File pTempFile, final LevelStorageSource pLevelStorageSource, final RealmsDownloadLatestWorldScreen.DownloadStatus pDownloadStatus
         ) {
-            this.worldName = p_87027_;
-            this.tempFile = p_87028_;
-            this.levelStorageSource = p_87029_;
-            this.downloadStatus = p_87030_;
+            this.worldName = pWorldName;
+            this.tempFile = pTempFile;
+            this.levelStorageSource = pLevelStorageSource;
+            this.downloadStatus = pDownloadStatus;
         }
 
         @Override
-        public void actionPerformed(ActionEvent p_87039_) {
-            this.downloadStatus.bytesWritten = ((FileDownload.DownloadCountingOutputStream)p_87039_.getSource()).getByteCount();
+        public void actionPerformed(ActionEvent pAction) {
+            this.downloadStatus.bytesWritten = ((FileDownload.DownloadCountingOutputStream)pAction.getSource()).getByteCount();
             if (this.downloadStatus.bytesWritten >= this.downloadStatus.totalBytes && !FileDownload.this.cancelled && !FileDownload.this.error) {
                 try {
                     FileDownload.this.extracting = true;
@@ -395,15 +395,15 @@ public class FileDownload {
         private final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
         private final WorldDownload worldDownload;
 
-        ResourcePackProgressListener(final File p_87046_, final RealmsDownloadLatestWorldScreen.DownloadStatus p_87047_, final WorldDownload p_87048_) {
-            this.tempFile = p_87046_;
-            this.downloadStatus = p_87047_;
-            this.worldDownload = p_87048_;
+        ResourcePackProgressListener(final File pTempFile, final RealmsDownloadLatestWorldScreen.DownloadStatus pDownloadStatus, final WorldDownload pWorldDownload) {
+            this.tempFile = pTempFile;
+            this.downloadStatus = pDownloadStatus;
+            this.worldDownload = pWorldDownload;
         }
 
         @Override
-        public void actionPerformed(ActionEvent p_87056_) {
-            this.downloadStatus.bytesWritten = ((FileDownload.DownloadCountingOutputStream)p_87056_.getSource()).getByteCount();
+        public void actionPerformed(ActionEvent pAction) {
+            this.downloadStatus.bytesWritten = ((FileDownload.DownloadCountingOutputStream)pAction.getSource()).getByteCount();
             if (this.downloadStatus.bytesWritten >= this.downloadStatus.totalBytes && !FileDownload.this.cancelled) {
                 try {
                     String s = Hashing.sha1().hashBytes(Files.toByteArray(this.tempFile)).toString();

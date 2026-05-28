@@ -14,8 +14,8 @@ import java.util.Map;
 import net.minecraft.util.datafix.ComponentDataFixUtils;
 
 public class BannerEntityCustomNameToOverrideComponentFix extends DataFix {
-    public BannerEntityCustomNameToOverrideComponentFix(Schema p_335786_) {
-        super(p_335786_, false);
+    public BannerEntityCustomNameToOverrideComponentFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override
@@ -29,8 +29,8 @@ public class BannerEntityCustomNameToOverrideComponentFix extends DataFix {
         });
     }
 
-    private Typed<?> fix(Typed<?> p_328297_, OpticFinder<?> p_334644_) {
-        Dynamic<?> dynamic = p_328297_.getOptional(DSL.remainderFinder()).orElseThrow();
+    private Typed<?> fix(Typed<?> pData, OpticFinder<?> pFinder) {
+        Dynamic<?> dynamic = pData.getOptional(DSL.remainderFinder()).orElseThrow();
         OptionalDynamic<?> optionaldynamic = dynamic.get("CustomName");
         boolean flag = optionaldynamic.asString()
             .result()
@@ -38,15 +38,15 @@ public class BannerEntityCustomNameToOverrideComponentFix extends DataFix {
             .filter(p_334057_ -> p_334057_.equals("block.minecraft.ominous_banner"))
             .isPresent();
         if (flag) {
-            Typed<?> typed = p_328297_.getOrCreateTyped(p_334644_)
+            Typed<?> typed = pData.getOrCreateTyped(pFinder)
                 .update(
                     DSL.remainderFinder(),
                     p_335676_ -> p_335676_.set("minecraft:item_name", optionaldynamic.result().get())
                             .set("minecraft:hide_additional_tooltip", p_335676_.createMap(Map.of()))
                 );
-            return p_328297_.set(p_334644_, typed).set(DSL.remainderFinder(), dynamic.remove("CustomName"));
+            return pData.set(pFinder, typed).set(DSL.remainderFinder(), dynamic.remove("CustomName"));
         } else {
-            return p_328297_;
+            return pData;
         }
     }
 }

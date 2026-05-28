@@ -16,23 +16,23 @@ public abstract class LootPoolEntryContainer implements ComposableEntryContainer
     protected final List<LootItemCondition> conditions;
     private final Predicate<LootContext> compositeCondition;
 
-    protected LootPoolEntryContainer(List<LootItemCondition> p_298327_) {
-        this.conditions = p_298327_;
-        this.compositeCondition = Util.allOf(p_298327_);
+    protected LootPoolEntryContainer(List<LootItemCondition> pConditions) {
+        this.conditions = pConditions;
+        this.compositeCondition = Util.allOf(pConditions);
     }
 
-    protected static <T extends LootPoolEntryContainer> P1<Mu<T>, List<LootItemCondition>> commonFields(Instance<T> p_297717_) {
-        return p_297717_.group(LootItemCondition.DIRECT_CODEC.listOf().optionalFieldOf("conditions", List.of()).forGetter(p_297410_ -> p_297410_.conditions));
+    protected static <T extends LootPoolEntryContainer> P1<Mu<T>, List<LootItemCondition>> commonFields(Instance<T> pInstance) {
+        return pInstance.group(LootItemCondition.DIRECT_CODEC.listOf().optionalFieldOf("conditions", List.of()).forGetter(p_297410_ -> p_297410_.conditions));
     }
 
-    public void validate(ValidationContext p_79641_) {
+    public void validate(ValidationContext pValidationContext) {
         for (int i = 0; i < this.conditions.size(); i++) {
-            this.conditions.get(i).validate(p_79641_.forChild(".condition[" + i + "]"));
+            this.conditions.get(i).validate(pValidationContext.forChild(".condition[" + i + "]"));
         }
     }
 
-    protected final boolean canRun(LootContext p_79640_) {
-        return this.compositeCondition.test(p_79640_);
+    protected final boolean canRun(LootContext pLootContext) {
+        return this.compositeCondition.test(pLootContext);
     }
 
     public abstract LootPoolEntryType getType();
@@ -55,16 +55,16 @@ public abstract class LootPoolEntryContainer implements ComposableEntryContainer
             return this.conditions.build();
         }
 
-        public AlternativesEntry.Builder otherwise(LootPoolEntryContainer.Builder<?> p_79644_) {
-            return new AlternativesEntry.Builder(this, p_79644_);
+        public AlternativesEntry.Builder otherwise(LootPoolEntryContainer.Builder<?> pChildBuilder) {
+            return new AlternativesEntry.Builder(this, pChildBuilder);
         }
 
-        public EntryGroup.Builder append(LootPoolEntryContainer.Builder<?> p_165148_) {
-            return new EntryGroup.Builder(this, p_165148_);
+        public EntryGroup.Builder append(LootPoolEntryContainer.Builder<?> pChildBuilder) {
+            return new EntryGroup.Builder(this, pChildBuilder);
         }
 
-        public SequentialEntry.Builder then(LootPoolEntryContainer.Builder<?> p_165149_) {
-            return new SequentialEntry.Builder(this, p_165149_);
+        public SequentialEntry.Builder then(LootPoolEntryContainer.Builder<?> pChildBuilder) {
+            return new SequentialEntry.Builder(this, pChildBuilder);
         }
 
         public abstract LootPoolEntryContainer build();

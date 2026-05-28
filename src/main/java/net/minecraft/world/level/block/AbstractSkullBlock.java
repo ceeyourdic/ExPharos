@@ -21,9 +21,9 @@ public abstract class AbstractSkullBlock extends BaseEntityBlock {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     private final SkullBlock.Type type;
 
-    public AbstractSkullBlock(SkullBlock.Type p_48745_, BlockBehaviour.Properties p_48746_) {
-        super(p_48746_);
-        this.type = p_48745_;
+    public AbstractSkullBlock(SkullBlock.Type pType, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.type = pType;
         this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, Boolean.valueOf(false)));
     }
 

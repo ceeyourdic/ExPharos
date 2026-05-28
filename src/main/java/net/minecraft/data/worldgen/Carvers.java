@@ -24,13 +24,13 @@ public class Carvers {
     public static final ResourceKey<ConfiguredWorldCarver<?>> CANYON = createKey("canyon");
     public static final ResourceKey<ConfiguredWorldCarver<?>> NETHER_CAVE = createKey("nether_cave");
 
-    private static ResourceKey<ConfiguredWorldCarver<?>> createKey(String p_256085_) {
-        return ResourceKey.create(Registries.CONFIGURED_CARVER, ResourceLocation.withDefaultNamespace(p_256085_));
+    private static ResourceKey<ConfiguredWorldCarver<?>> createKey(String pName) {
+        return ResourceKey.create(Registries.CONFIGURED_CARVER, ResourceLocation.withDefaultNamespace(pName));
     }
 
-    public static void bootstrap(BootstrapContext<ConfiguredWorldCarver<?>> p_334235_) {
-        HolderGetter<Block> holdergetter = p_334235_.lookup(Registries.BLOCK);
-        p_334235_.register(
+    public static void bootstrap(BootstrapContext<ConfiguredWorldCarver<?>> pContext) {
+        HolderGetter<Block> holdergetter = pContext.lookup(Registries.BLOCK);
+        pContext.register(
             CAVE,
             WorldCarver.CAVE
                 .configured(
@@ -47,7 +47,7 @@ public class Carvers {
                     )
                 )
         );
-        p_334235_.register(
+        pContext.register(
             CAVE_EXTRA_UNDERGROUND,
             WorldCarver.CAVE
                 .configured(
@@ -64,7 +64,7 @@ public class Carvers {
                     )
                 )
         );
-        p_334235_.register(
+        pContext.register(
             CANYON,
             WorldCarver.CANYON
                 .configured(
@@ -82,7 +82,7 @@ public class Carvers {
                     )
                 )
         );
-        p_334235_.register(
+        pContext.register(
             NETHER_CAVE,
             WorldCarver.NETHER_CAVE
                 .configured(

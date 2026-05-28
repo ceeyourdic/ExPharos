@@ -27,9 +27,9 @@ public class WeatheringCopperDoorBlock extends DoorBlock implements WeatheringCo
         return CODEC;
     }
 
-    protected WeatheringCopperDoorBlock(BlockSetType p_312938_, WeatheringCopper.WeatherState p_310944_, BlockBehaviour.Properties p_312284_) {
-        super(p_312938_, p_312284_);
-        this.weatherState = p_310944_;
+    protected WeatheringCopperDoorBlock(BlockSetType pType, WeatheringCopper.WeatherState pWeatherState, BlockBehaviour.Properties pProperties) {
+        super(pType, pProperties);
+        this.weatherState = pWeatherState;
     }
 
     @Override

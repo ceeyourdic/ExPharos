@@ -37,21 +37,21 @@ public class MenuType<T extends AbstractContainerMenu> implements FeatureElement
     private final FeatureFlagSet requiredFeatures;
     private final MenuType.MenuSupplier<T> constructor;
 
-    private static <T extends AbstractContainerMenu> MenuType<T> register(String p_39989_, MenuType.MenuSupplier<T> p_39990_) {
-        return Registry.register(BuiltInRegistries.MENU, p_39989_, new MenuType<>(p_39990_, FeatureFlags.VANILLA_SET));
+    private static <T extends AbstractContainerMenu> MenuType<T> register(String pKey, MenuType.MenuSupplier<T> pFactory) {
+        return Registry.register(BuiltInRegistries.MENU, pKey, new MenuType<>(pFactory, FeatureFlags.VANILLA_SET));
     }
 
-    private static <T extends AbstractContainerMenu> MenuType<T> register(String p_267295_, MenuType.MenuSupplier<T> p_266945_, FeatureFlag... p_267055_) {
-        return Registry.register(BuiltInRegistries.MENU, p_267295_, new MenuType<>(p_266945_, FeatureFlags.REGISTRY.subset(p_267055_)));
+    private static <T extends AbstractContainerMenu> MenuType<T> register(String pKey, MenuType.MenuSupplier<T> pFactory, FeatureFlag... pRequiredFeatures) {
+        return Registry.register(BuiltInRegistries.MENU, pKey, new MenuType<>(pFactory, FeatureFlags.REGISTRY.subset(pRequiredFeatures)));
     }
 
-    private MenuType(MenuType.MenuSupplier<T> p_267054_, FeatureFlagSet p_266909_) {
-        this.constructor = p_267054_;
-        this.requiredFeatures = p_266909_;
+    private MenuType(MenuType.MenuSupplier<T> pConstructor, FeatureFlagSet pRequiredFeatures) {
+        this.constructor = pConstructor;
+        this.requiredFeatures = pRequiredFeatures;
     }
 
-    public T create(int p_39986_, Inventory p_39987_) {
-        return this.constructor.create(p_39986_, p_39987_);
+    public T create(int pContainerId, Inventory pPlayerInventory) {
+        return this.constructor.create(pContainerId, pPlayerInventory);
     }
 
     @Override
@@ -60,6 +60,6 @@ public class MenuType<T extends AbstractContainerMenu> implements FeatureElement
     }
 
     interface MenuSupplier<T extends AbstractContainerMenu> {
-        T create(int p_39995_, Inventory p_39996_);
+        T create(int pContainerId, Inventory pPlayerInventory);
     }
 }

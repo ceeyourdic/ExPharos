@@ -126,7 +126,7 @@ public class RealmsNotificationsScreen extends RealmsScreen {
     public void renderBackground(GuiGraphics p_300621_, int p_300416_, int p_300236_, float p_299573_) {
     }
 
-    private void drawIcons(GuiGraphics p_282966_) {
+    private void drawIcons(GuiGraphics pGuiGraphics) {
         int i = this.numberOfPendingInvites;
         int j = 24;
         int k = this.height / 4 + 48;
@@ -134,38 +134,38 @@ public class RealmsNotificationsScreen extends RealmsScreen {
         int i1 = k + 48 + 2;
         int j1 = l - 3;
         if (hasUnseenNotifications) {
-            p_282966_.blitSprite(RenderType::guiTextured, UNSEEN_NOTIFICATION_SPRITE, j1 - 12, i1 + 3, 10, 10);
+            pGuiGraphics.blitSprite(RenderType::guiTextured, UNSEEN_NOTIFICATION_SPRITE, j1 - 12, i1 + 3, 10, 10);
             j1 -= 16;
         }
 
         if (this.currentConfiguration != null && this.currentConfiguration.showOldNotifications()) {
             if (hasUnreadNews) {
-                p_282966_.blitSprite(RenderType::guiTextured, NEWS_SPRITE, j1 - 14, i1 + 1, 14, 14);
+                pGuiGraphics.blitSprite(RenderType::guiTextured, NEWS_SPRITE, j1 - 14, i1 + 1, 14, 14);
                 j1 -= 16;
             }
 
             if (i != 0) {
-                p_282966_.blitSprite(RenderType::guiTextured, INVITE_SPRITE, j1 - 14, i1 + 1, 14, 14);
+                pGuiGraphics.blitSprite(RenderType::guiTextured, INVITE_SPRITE, j1 - 14, i1 + 1, 14, 14);
                 j1 -= 16;
             }
 
             if (trialAvailable) {
-                p_282966_.blitSprite(RenderType::guiTextured, TRIAL_AVAILABLE_SPRITE, j1 - 10, i1 + 4, 8, 8);
+                pGuiGraphics.blitSprite(RenderType::guiTextured, TRIAL_AVAILABLE_SPRITE, j1 - 10, i1 + 4, 8, 8);
             }
         }
     }
 
-    void addNewsAndInvitesSubscriptions(RealmsDataFetcher p_275490_, DataFetcher.Subscription p_275623_) {
-        p_275623_.subscribe(p_275490_.pendingInvitesTask, p_239521_ -> this.numberOfPendingInvites = p_239521_);
-        p_275623_.subscribe(p_275490_.trialAvailabilityTask, p_239494_ -> trialAvailable = p_239494_);
-        p_275623_.subscribe(p_275490_.newsTask, p_238946_ -> {
-            p_275490_.newsManager.updateUnreadNews(p_238946_);
-            hasUnreadNews = p_275490_.newsManager.hasUnreadNews();
+    void addNewsAndInvitesSubscriptions(RealmsDataFetcher pDataFetcher, DataFetcher.Subscription pSubscription) {
+        pSubscription.subscribe(pDataFetcher.pendingInvitesTask, p_239521_ -> this.numberOfPendingInvites = p_239521_);
+        pSubscription.subscribe(pDataFetcher.trialAvailabilityTask, p_239494_ -> trialAvailable = p_239494_);
+        pSubscription.subscribe(pDataFetcher.newsTask, p_238946_ -> {
+            pDataFetcher.newsManager.updateUnreadNews(p_238946_);
+            hasUnreadNews = pDataFetcher.newsManager.hasUnreadNews();
         });
     }
 
-    void addNotificationsSubscriptions(RealmsDataFetcher p_275619_, DataFetcher.Subscription p_275628_) {
-        p_275628_.subscribe(p_275619_.notificationsTask, p_274637_ -> {
+    void addNotificationsSubscriptions(RealmsDataFetcher pDataFetcher, DataFetcher.Subscription pSubscription) {
+        pSubscription.subscribe(pDataFetcher.notificationsTask, p_274637_ -> {
             hasUnseenNotifications = false;
 
             for (RealmsNotification realmsnotification : p_274637_) {
@@ -179,7 +179,7 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 
     @OnlyIn(Dist.CLIENT)
     interface DataFetcherConfiguration {
-        DataFetcher.Subscription initDataFetcher(RealmsDataFetcher p_275608_);
+        DataFetcher.Subscription initDataFetcher(RealmsDataFetcher pDataFetcher);
 
         boolean showOldNotifications();
     }

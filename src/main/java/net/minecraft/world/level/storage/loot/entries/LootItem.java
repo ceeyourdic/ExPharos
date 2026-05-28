@@ -21,9 +21,9 @@ public class LootItem extends LootPoolSingletonContainer {
     );
     private final Holder<Item> item;
 
-    private LootItem(Holder<Item> p_298860_, int p_79567_, int p_79568_, List<LootItemCondition> p_299681_, List<LootItemFunction> p_298494_) {
-        super(p_79567_, p_79568_, p_299681_, p_298494_);
-        this.item = p_298860_;
+    private LootItem(Holder<Item> pItem, int pWeight, int pQuality, List<LootItemCondition> pConditions, List<LootItemFunction> pFunctions) {
+        super(pWeight, pQuality, pConditions, pFunctions);
+        this.item = pItem;
     }
 
     @Override
@@ -36,9 +36,9 @@ public class LootItem extends LootPoolSingletonContainer {
         p_79590_.accept(new ItemStack(this.item));
     }
 
-    public static LootPoolSingletonContainer.Builder<?> lootTableItem(ItemLike p_79580_) {
+    public static LootPoolSingletonContainer.Builder<?> lootTableItem(ItemLike pItem) {
         return simpleBuilder(
-            (p_297030_, p_297031_, p_297032_, p_297033_) -> new LootItem(p_79580_.asItem().builtInRegistryHolder(), p_297030_, p_297031_, p_297032_, p_297033_)
+            (p_297030_, p_297031_, p_297032_, p_297033_) -> new LootItem(pItem.asItem().builtInRegistryHolder(), p_297030_, p_297031_, p_297032_, p_297033_)
         );
     }
 }

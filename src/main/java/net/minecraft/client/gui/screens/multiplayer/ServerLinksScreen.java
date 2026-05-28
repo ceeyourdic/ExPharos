@@ -29,10 +29,10 @@ public class ServerLinksScreen extends Screen {
     final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
     final ServerLinks links;
 
-    public ServerLinksScreen(Screen p_342231_, ServerLinks p_343353_) {
+    public ServerLinksScreen(Screen pLastScreen, ServerLinks pLinks) {
         super(TITLE);
-        this.lastScreen = p_342231_;
-        this.links = p_343353_;
+        this.lastScreen = pLastScreen;
+        this.links = pLinks;
     }
 
     @Override
@@ -61,9 +61,9 @@ public class ServerLinksScreen extends Screen {
 
     @OnlyIn(Dist.CLIENT)
     static class LinkList extends ContainerObjectSelectionList<ServerLinksScreen.LinkListEntry> {
-        public LinkList(Minecraft p_343649_, int p_342240_, ServerLinksScreen p_344656_) {
-            super(p_343649_, p_342240_, p_344656_.layout.getContentHeight(), p_344656_.layout.getHeaderHeight(), 25);
-            p_344656_.links.entries().forEach(p_345105_ -> this.addEntry(new ServerLinksScreen.LinkListEntry(p_344656_, p_345105_)));
+        public LinkList(Minecraft pMinecraft, int pWidth, ServerLinksScreen pParent) {
+            super(pMinecraft, pWidth, pParent.layout.getContentHeight(), pParent.layout.getHeaderHeight(), 25);
+            pParent.links.entries().forEach(p_345105_ -> this.addEntry(new ServerLinksScreen.LinkListEntry(pParent, p_345105_)));
         }
 
         @Override
@@ -83,8 +83,8 @@ public class ServerLinksScreen extends Screen {
     static class LinkListEntry extends ContainerObjectSelectionList.Entry<ServerLinksScreen.LinkListEntry> {
         final AbstractWidget button;
 
-        LinkListEntry(Screen p_344819_, ServerLinks.Entry p_343451_) {
-            this.button = Button.builder(p_343451_.displayName(), ConfirmLinkScreen.confirmLink(p_344819_, p_343451_.link(), false))
+        LinkListEntry(Screen pScreen, ServerLinks.Entry pEntry) {
+            this.button = Button.builder(pEntry.displayName(), ConfirmLinkScreen.confirmLink(pScreen, pEntry.link(), false))
                 .width(310)
                 .build();
         }

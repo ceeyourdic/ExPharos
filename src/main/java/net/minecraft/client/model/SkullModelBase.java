@@ -7,9 +7,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class SkullModelBase extends Model {
-    public SkullModelBase(ModelPart p_365382_) {
-        super(p_365382_, RenderType::entityTranslucent);
+    public SkullModelBase(ModelPart pRoot) {
+        super(pRoot, RenderType::entityTranslucent);
     }
 
-    public abstract void setupAnim(float p_170950_, float p_170951_, float p_170952_);
+    public abstract void setupAnim(float pMouthAnimation, float pYRot, float pXRot);
 }

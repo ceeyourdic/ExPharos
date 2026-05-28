@@ -20,17 +20,17 @@ public class MultiPartBakedModel extends DelegateBakedModel {
     private final List<MultiPartBakedModel.Selector> selectors;
     private final Map<BlockState, BitSet> selectorCache = new Reference2ObjectOpenHashMap<>();
 
-    private static BakedModel getFirstModel(List<MultiPartBakedModel.Selector> p_367507_) {
-        if (p_367507_.isEmpty()) {
+    private static BakedModel getFirstModel(List<MultiPartBakedModel.Selector> pSelectors) {
+        if (pSelectors.isEmpty()) {
             throw new IllegalArgumentException("Model must have at least one selector");
         } else {
-            return p_367507_.getFirst().model();
+            return pSelectors.getFirst().model();
         }
     }
 
-    public MultiPartBakedModel(List<MultiPartBakedModel.Selector> p_119462_) {
-        super(getFirstModel(p_119462_));
-        this.selectors = p_119462_;
+    public MultiPartBakedModel(List<MultiPartBakedModel.Selector> pSelectors) {
+        super(getFirstModel(pSelectors));
+        this.selectors = pSelectors;
     }
 
     @Override

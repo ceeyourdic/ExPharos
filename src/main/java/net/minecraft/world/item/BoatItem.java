@@ -22,9 +22,9 @@ import net.minecraft.world.phys.Vec3;
 public class BoatItem extends Item {
     private final EntityType<? extends AbstractBoat> entityType;
 
-    public BoatItem(EntityType<? extends AbstractBoat> p_363828_, Item.Properties p_220015_) {
-        super(p_220015_);
-        this.entityType = p_363828_;
+    public BoatItem(EntityType<? extends AbstractBoat> pEntityType, Item.Properties pProperties) {
+        super(pProperties);
+        this.entityType = pEntityType;
     }
 
     @Override
@@ -74,13 +74,13 @@ public class BoatItem extends Item {
     }
 
     @Nullable
-    private AbstractBoat getBoat(Level p_220017_, HitResult p_220018_, ItemStack p_311821_, Player p_313119_) {
-        AbstractBoat abstractboat = this.entityType.create(p_220017_, EntitySpawnReason.SPAWN_ITEM_USE);
+    private AbstractBoat getBoat(Level pLevel, HitResult pHitResult, ItemStack pStack, Player pPlayer) {
+        AbstractBoat abstractboat = this.entityType.create(pLevel, EntitySpawnReason.SPAWN_ITEM_USE);
         if (abstractboat != null) {
-            Vec3 vec3 = p_220018_.getLocation();
+            Vec3 vec3 = pHitResult.getLocation();
             abstractboat.setInitialPos(vec3.x, vec3.y, vec3.z);
-            if (p_220017_ instanceof ServerLevel serverlevel) {
-                EntityType.<AbstractBoat>createDefaultStackConfig(serverlevel, p_311821_, p_313119_).accept(abstractboat);
+            if (pLevel instanceof ServerLevel serverlevel) {
+                EntityType.<AbstractBoat>createDefaultStackConfig(serverlevel, pStack, pPlayer).accept(abstractboat);
             }
         }
 

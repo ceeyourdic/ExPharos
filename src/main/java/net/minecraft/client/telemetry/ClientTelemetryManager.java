@@ -37,12 +37,12 @@ public class ClientTelemetryManager implements AutoCloseable {
     private final CompletableFuture<Optional<TelemetryLogManager>> logManager;
     private final Supplier<TelemetryEventSender> outsideSessionSender = Suppliers.memoize(this::createEventSender);
 
-    public ClientTelemetryManager(Minecraft p_261610_, UserApiService p_261552_, User p_262159_) {
-        this.minecraft = p_261610_;
-        this.userApiService = p_261552_;
+    public ClientTelemetryManager(Minecraft pMinecraft, UserApiService pUserApiService, User pUser) {
+        this.minecraft = pMinecraft;
+        this.userApiService = pUserApiService;
         TelemetryPropertyMap.Builder telemetrypropertymap$builder = TelemetryPropertyMap.builder();
-        p_262159_.getXuid().ifPresent(p_261810_ -> telemetrypropertymap$builder.put(TelemetryProperty.USER_ID, p_261810_));
-        p_262159_.getClientId().ifPresent(p_261690_ -> telemetrypropertymap$builder.put(TelemetryProperty.CLIENT_ID, p_261690_));
+        pUser.getXuid().ifPresent(p_261810_ -> telemetrypropertymap$builder.put(TelemetryProperty.USER_ID, p_261810_));
+        pUser.getClientId().ifPresent(p_261690_ -> telemetrypropertymap$builder.put(TelemetryProperty.CLIENT_ID, p_261690_));
         telemetrypropertymap$builder.put(TelemetryProperty.MINECRAFT_SESSION_ID, UUID.randomUUID());
         telemetrypropertymap$builder.put(TelemetryProperty.GAME_VERSION, SharedConstants.getCurrentVersion().getId());
         telemetrypropertymap$builder.put(TelemetryProperty.OPERATING_SYSTEM, Util.getPlatform().telemetryName());
@@ -50,12 +50,12 @@ public class ClientTelemetryManager implements AutoCloseable {
         telemetrypropertymap$builder.put(TelemetryProperty.CLIENT_MODDED, Minecraft.checkModStatus().shouldReportAsModified());
         telemetrypropertymap$builder.putIfNotNull(TelemetryProperty.LAUNCHER_NAME, Minecraft.getLauncherBrand());
         this.deviceSessionProperties = telemetrypropertymap$builder.build();
-        this.logDirectory = p_261610_.gameDirectory.toPath().resolve("logs/telemetry");
+        this.logDirectory = pMinecraft.gameDirectory.toPath().resolve("logs/telemetry");
         this.logManager = TelemetryLogManager.open(this.logDirectory);
     }
 
-    public WorldSessionTelemetryManager createWorldSessionManager(boolean p_286373_, @Nullable Duration p_286752_, @Nullable String p_286568_) {
-        return new WorldSessionTelemetryManager(this.createEventSender(), p_286373_, p_286752_, p_286568_);
+    public WorldSessionTelemetryManager createWorldSessionManager(boolean pNewWorld, @Nullable Duration pWorldLoadDuration, @Nullable String pMinigameName) {
+        return new WorldSessionTelemetryManager(this.createEventSender(), pNewWorld, pWorldLoadDuration, pMinigameName);
     }
 
     public TelemetryEventSender getOutsideSessionSender() {

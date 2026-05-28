@@ -38,22 +38,22 @@ public class BubbleColumnUpParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_105753_) {
-            this.sprite = p_105753_;
+        public Provider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_105764_,
-            ClientLevel p_105765_,
-            double p_105766_,
-            double p_105767_,
-            double p_105768_,
-            double p_105769_,
-            double p_105770_,
-            double p_105771_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
             BubbleColumnUpParticle bubblecolumnupparticle = new BubbleColumnUpParticle(
-                p_105765_, p_105766_, p_105767_, p_105768_, p_105769_, p_105770_, p_105771_
+                pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed
             );
             bubblecolumnupparticle.pickSprite(this.sprite);
             return bubblecolumnupparticle;

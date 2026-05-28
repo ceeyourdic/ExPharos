@@ -45,32 +45,32 @@ public class RootSystemConfiguration implements FeatureConfiguration {
     public final BlockPredicate allowedTreePosition;
 
     public RootSystemConfiguration(
-        Holder<PlacedFeature> p_204824_,
-        int p_204825_,
-        int p_204826_,
-        TagKey<Block> p_204827_,
-        BlockStateProvider p_204828_,
-        int p_204829_,
-        int p_204830_,
-        int p_204831_,
-        int p_204832_,
-        BlockStateProvider p_204833_,
-        int p_204834_,
-        int p_204835_,
-        BlockPredicate p_204836_
+        Holder<PlacedFeature> pTreeFeature,
+        int pRequiredVerticalSpaceForTree,
+        int pRootRadius,
+        TagKey<Block> pRootReplaceable,
+        BlockStateProvider pRootStateProvider,
+        int pRootPlacementAttempts,
+        int pRootColumnMaxHeight,
+        int pHangingRootRadius,
+        int pHangingRootsVerticalSpawn,
+        BlockStateProvider pHangingRootStateProvider,
+        int pHangingRootPlacementAttempts,
+        int pAllowedVerticalWaterForTree,
+        BlockPredicate pAllowedTreePosition
     ) {
-        this.treeFeature = p_204824_;
-        this.requiredVerticalSpaceForTree = p_204825_;
-        this.rootRadius = p_204826_;
-        this.rootReplaceable = p_204827_;
-        this.rootStateProvider = p_204828_;
-        this.rootPlacementAttempts = p_204829_;
-        this.rootColumnMaxHeight = p_204830_;
-        this.hangingRootRadius = p_204831_;
-        this.hangingRootsVerticalSpan = p_204832_;
-        this.hangingRootStateProvider = p_204833_;
-        this.hangingRootPlacementAttempts = p_204834_;
-        this.allowedVerticalWaterForTree = p_204835_;
-        this.allowedTreePosition = p_204836_;
+        this.treeFeature = pTreeFeature;
+        this.requiredVerticalSpaceForTree = pRequiredVerticalSpaceForTree;
+        this.rootRadius = pRootRadius;
+        this.rootReplaceable = pRootReplaceable;
+        this.rootStateProvider = pRootStateProvider;
+        this.rootPlacementAttempts = pRootPlacementAttempts;
+        this.rootColumnMaxHeight = pRootColumnMaxHeight;
+        this.hangingRootRadius = pHangingRootRadius;
+        this.hangingRootsVerticalSpan = pHangingRootsVerticalSpawn;
+        this.hangingRootStateProvider = pHangingRootStateProvider;
+        this.hangingRootPlacementAttempts = pHangingRootPlacementAttempts;
+        this.allowedVerticalWaterForTree = pAllowedVerticalWaterForTree;
+        this.allowedTreePosition = pAllowedTreePosition;
     }
 }

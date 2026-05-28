@@ -10,12 +10,12 @@ public record ServerboundChunkBatchReceivedPacket(float desiredChunksPerTick) im
         ServerboundChunkBatchReceivedPacket::write, ServerboundChunkBatchReceivedPacket::new
     );
 
-    private ServerboundChunkBatchReceivedPacket(FriendlyByteBuf p_297860_) {
-        this(p_297860_.readFloat());
+    private ServerboundChunkBatchReceivedPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readFloat());
     }
 
-    private void write(FriendlyByteBuf p_299711_) {
-        p_299711_.writeFloat(this.desiredChunksPerTick);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeFloat(this.desiredChunksPerTick);
     }
 
     @Override

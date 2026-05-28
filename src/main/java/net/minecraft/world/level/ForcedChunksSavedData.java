@@ -16,16 +16,16 @@ public class ForcedChunksSavedData extends SavedData {
         return new SavedData.Factory<>(ForcedChunksSavedData::new, ForcedChunksSavedData::load, DataFixTypes.SAVED_DATA_FORCED_CHUNKS);
     }
 
-    private ForcedChunksSavedData(LongSet p_151482_) {
-        this.chunks = p_151482_;
+    private ForcedChunksSavedData(LongSet pChunks) {
+        this.chunks = pChunks;
     }
 
     public ForcedChunksSavedData() {
         this(new LongOpenHashSet());
     }
 
-    public static ForcedChunksSavedData load(CompoundTag p_151484_, HolderLookup.Provider p_329967_) {
-        return new ForcedChunksSavedData(new LongOpenHashSet(p_151484_.getLongArray("Forced")));
+    public static ForcedChunksSavedData load(CompoundTag pTag, HolderLookup.Provider pRegistries) {
+        return new ForcedChunksSavedData(new LongOpenHashSet(pTag.getLongArray("Forced")));
     }
 
     @Override

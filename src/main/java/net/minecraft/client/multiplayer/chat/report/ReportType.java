@@ -12,8 +12,8 @@ public enum ReportType {
 
     private final String backendName;
 
-    private ReportType(final String p_298674_) {
-        this.backendName = p_298674_.toUpperCase(Locale.ROOT);
+    private ReportType(final String pName) {
+        this.backendName = pName.toUpperCase(Locale.ROOT);
     }
 
     public String backendName() {

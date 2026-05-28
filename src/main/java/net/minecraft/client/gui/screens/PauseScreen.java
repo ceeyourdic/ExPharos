@@ -53,9 +53,9 @@ public class PauseScreen extends Screen {
     @Nullable
     private Button disconnectButton;
 
-    public PauseScreen(boolean p_96308_) {
-        super(p_96308_ ? GAME : PAUSED);
-        this.showPauseMenu = p_96308_;
+    public PauseScreen(boolean pShowPauseMenu) {
+        super(pShowPauseMenu ? GAME : PAUSED);
+        this.showPauseMenu = pShowPauseMenu;
     }
 
     public boolean showsPauseMenu() {
@@ -106,9 +106,9 @@ public class PauseScreen extends Screen {
         gridlayout.visitWidgets(this::addRenderableWidget);
     }
 
-    static void addFeedbackButtons(Screen p_342955_, GridLayout.RowHelper p_344682_) {
-        p_344682_.addChild(openLinkButton(p_342955_, SEND_FEEDBACK, SharedConstants.getCurrentVersion().isStable() ? CommonLinks.RELEASE_FEEDBACK : CommonLinks.SNAPSHOT_FEEDBACK));
-        p_344682_.addChild(openLinkButton(p_342955_, REPORT_BUGS, CommonLinks.SNAPSHOT_BUGS_FEEDBACK)).active = !SharedConstants.getCurrentVersion().getDataVersion().isSideSeries();
+    static void addFeedbackButtons(Screen pLastScreen, GridLayout.RowHelper pRowHelper) {
+        pRowHelper.addChild(openLinkButton(pLastScreen, SEND_FEEDBACK, SharedConstants.getCurrentVersion().isStable() ? CommonLinks.RELEASE_FEEDBACK : CommonLinks.SNAPSHOT_FEEDBACK));
+        pRowHelper.addChild(openLinkButton(pLastScreen, REPORT_BUGS, CommonLinks.SNAPSHOT_BUGS_FEEDBACK)).active = !SharedConstants.getCurrentVersion().getDataVersion().isSideSeries();
     }
 
     private void onDisconnect() {
@@ -153,12 +153,12 @@ public class PauseScreen extends Screen {
         }
     }
 
-    private Button openScreenButton(Component p_262567_, Supplier<Screen> p_262581_) {
-        return Button.builder(p_262567_, p_280817_ -> this.minecraft.setScreen(p_262581_.get())).width(98).build();
+    private Button openScreenButton(Component pMessage, Supplier<Screen> pScreenSupplier) {
+        return Button.builder(pMessage, p_280817_ -> this.minecraft.setScreen(pScreenSupplier.get())).width(98).build();
     }
 
-    private static Button openLinkButton(Screen p_343161_, Component p_262593_, URI p_343969_) {
-        return Button.builder(p_262593_, ConfirmLinkScreen.confirmLink(p_343161_, p_343969_)).width(98).build();
+    private static Button openLinkButton(Screen pLastScreen, Component pButtonText, URI pUri) {
+        return Button.builder(pButtonText, ConfirmLinkScreen.confirmLink(pLastScreen, pUri)).width(98).build();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -167,9 +167,9 @@ public class PauseScreen extends Screen {
         public final Screen parent;
         private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 
-        protected FeedbackSubScreen(Screen p_343282_) {
+        protected FeedbackSubScreen(Screen pParent) {
             super(TITLE);
-            this.parent = p_343282_;
+            this.parent = pParent;
         }
 
         @Override

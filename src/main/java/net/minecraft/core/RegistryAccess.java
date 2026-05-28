@@ -29,17 +29,17 @@ public interface RegistryAccess extends HolderLookup.Provider {
         return this.registries().map(p_358094_ -> p_358094_.key);
     }
 
-    static RegistryAccess.Frozen fromRegistryOfRegistries(final Registry<? extends Registry<?>> p_206166_) {
+    static RegistryAccess.Frozen fromRegistryOfRegistries(final Registry<? extends Registry<?>> pRegistryOfRegistries) {
         return new RegistryAccess.Frozen() {
             @Override
             public <T> Optional<Registry<T>> lookup(ResourceKey<? extends Registry<? extends T>> p_206220_) {
-                Registry<Registry<T>> registry = (Registry<Registry<T>>)p_206166_;
+                Registry<Registry<T>> registry = (Registry<Registry<T>>)pRegistryOfRegistries;
                 return registry.getOptional((ResourceKey<Registry<T>>)p_206220_);
             }
 
             @Override
             public Stream<RegistryAccess.RegistryEntry<?>> registries() {
-                return p_206166_.entrySet().stream().map(RegistryAccess.RegistryEntry::fromMapEntry);
+                return pRegistryOfRegistries.entrySet().stream().map(RegistryAccess.RegistryEntry::fromMapEntry);
             }
 
             @Override
@@ -65,16 +65,16 @@ public interface RegistryAccess extends HolderLookup.Provider {
     public static class ImmutableRegistryAccess implements RegistryAccess {
         private final Map<? extends ResourceKey<? extends Registry<?>>, ? extends Registry<?>> registries;
 
-        public ImmutableRegistryAccess(List<? extends Registry<?>> p_248540_) {
-            this.registries = p_248540_.stream().collect(Collectors.toUnmodifiableMap(Registry::key, p_247993_ -> p_247993_));
+        public ImmutableRegistryAccess(List<? extends Registry<?>> pRegistries) {
+            this.registries = pRegistries.stream().collect(Collectors.toUnmodifiableMap(Registry::key, p_247993_ -> p_247993_));
         }
 
-        public ImmutableRegistryAccess(Map<? extends ResourceKey<? extends Registry<?>>, ? extends Registry<?>> p_206225_) {
-            this.registries = Map.copyOf(p_206225_);
+        public ImmutableRegistryAccess(Map<? extends ResourceKey<? extends Registry<?>>, ? extends Registry<?>> pRegistries) {
+            this.registries = Map.copyOf(pRegistries);
         }
 
-        public ImmutableRegistryAccess(Stream<RegistryAccess.RegistryEntry<?>> p_206227_) {
-            this.registries = p_206227_.collect(ImmutableMap.toImmutableMap(RegistryAccess.RegistryEntry::key, RegistryAccess.RegistryEntry::value));
+        public ImmutableRegistryAccess(Stream<RegistryAccess.RegistryEntry<?>> pRegistries) {
+            this.registries = pRegistries.collect(ImmutableMap.toImmutableMap(RegistryAccess.RegistryEntry::key, RegistryAccess.RegistryEntry::value));
         }
 
         @Override
@@ -90,13 +90,13 @@ public interface RegistryAccess extends HolderLookup.Provider {
 
     public static record RegistryEntry<T>(ResourceKey<? extends Registry<T>> key, Registry<T> value) {
         private static <T, R extends Registry<? extends T>> RegistryAccess.RegistryEntry<T> fromMapEntry(
-            Entry<? extends ResourceKey<? extends Registry<?>>, R> p_206242_
+            Entry<? extends ResourceKey<? extends Registry<?>>, R> pMapEntry
         ) {
-            return fromUntyped((ResourceKey<? extends Registry<?>>)p_206242_.getKey(), p_206242_.getValue());
+            return fromUntyped((ResourceKey<? extends Registry<?>>)pMapEntry.getKey(), pMapEntry.getValue());
         }
 
-        private static <T> RegistryAccess.RegistryEntry<T> fromUntyped(ResourceKey<? extends Registry<?>> p_206244_, Registry<?> p_206245_) {
-            return new RegistryAccess.RegistryEntry<>((ResourceKey<? extends Registry<T>>)p_206244_, (Registry<T>)p_206245_);
+        private static <T> RegistryAccess.RegistryEntry<T> fromUntyped(ResourceKey<? extends Registry<?>> pKey, Registry<?> pValue) {
+            return new RegistryAccess.RegistryEntry<>((ResourceKey<? extends Registry<T>>)pKey, (Registry<T>)pValue);
         }
 
         private RegistryAccess.RegistryEntry<T> freeze() {

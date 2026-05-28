@@ -106,8 +106,8 @@ public class Sheets {
         return CHEST_SHEET_TYPE;
     }
 
-    public static RenderType armorTrimsSheet(boolean p_298447_) {
-        return p_298447_ ? ARMOR_TRIMS_DECAL_SHEET_TYPE : ARMOR_TRIMS_SHEET_TYPE;
+    public static RenderType armorTrimsSheet(boolean pDecal) {
+        return pDecal ? ARMOR_TRIMS_DECAL_SHEET_TYPE : ARMOR_TRIMS_SHEET_TYPE;
     }
 
     public static RenderType solidBlockSheet() {
@@ -122,114 +122,114 @@ public class Sheets {
         return TRANSLUCENT_ITEM_CULL_BLOCK_SHEET;
     }
 
-    public static Material getBedMaterial(DyeColor p_376566_) {
-        return BED_TEXTURES[p_376566_.getId()];
+    public static Material getBedMaterial(DyeColor pColor) {
+        return BED_TEXTURES[pColor.getId()];
     }
 
-    public static ResourceLocation colorToResourceMaterial(DyeColor p_377128_) {
-        return ResourceLocation.withDefaultNamespace(p_377128_.getName());
+    public static ResourceLocation colorToResourceMaterial(DyeColor pColor) {
+        return ResourceLocation.withDefaultNamespace(pColor.getName());
     }
 
-    public static Material createBedMaterial(DyeColor p_375626_) {
-        return createBedMaterial(colorToResourceMaterial(p_375626_));
+    public static Material createBedMaterial(DyeColor pColor) {
+        return createBedMaterial(colorToResourceMaterial(pColor));
     }
 
-    public static Material createBedMaterial(ResourceLocation p_378402_) {
-        return new Material(BED_SHEET, p_378402_.withPrefix("entity/bed/"));
+    public static Material createBedMaterial(ResourceLocation pAssetId) {
+        return new Material(BED_SHEET, pAssetId.withPrefix("entity/bed/"));
     }
 
-    public static Material getShulkerBoxMaterial(DyeColor p_375589_) {
-        return SHULKER_TEXTURE_LOCATION.get(p_375589_.getId());
+    public static Material getShulkerBoxMaterial(DyeColor pColor) {
+        return SHULKER_TEXTURE_LOCATION.get(pColor.getId());
     }
 
-    public static ResourceLocation colorToShulkerMaterial(DyeColor p_375971_) {
-        return ResourceLocation.withDefaultNamespace("shulker_" + p_375971_.getName());
+    public static ResourceLocation colorToShulkerMaterial(DyeColor pColor) {
+        return ResourceLocation.withDefaultNamespace("shulker_" + pColor.getName());
     }
 
-    public static Material createShulkerMaterial(DyeColor p_375485_) {
-        return createShulkerMaterial(colorToShulkerMaterial(p_375485_));
+    public static Material createShulkerMaterial(DyeColor pColor) {
+        return createShulkerMaterial(colorToShulkerMaterial(pColor));
     }
 
-    public static Material createShulkerMaterial(ResourceLocation p_376425_) {
-        return new Material(SHULKER_SHEET, p_376425_.withPrefix("entity/shulker/"));
+    public static Material createShulkerMaterial(ResourceLocation pAssetId) {
+        return new Material(SHULKER_SHEET, pAssetId.withPrefix("entity/shulker/"));
     }
 
-    private static Material createSignMaterial(WoodType p_173386_) {
-        return createSignMaterial(ResourceLocation.withDefaultNamespace(p_173386_.name()));
+    private static Material createSignMaterial(WoodType pWoodType) {
+        return createSignMaterial(ResourceLocation.withDefaultNamespace(pWoodType.name()));
     }
 
-    public static Material createSignMaterial(ResourceLocation p_378064_) {
-        return new Material(SIGN_SHEET, p_378064_.withPrefix("entity/signs/"));
+    public static Material createSignMaterial(ResourceLocation pAssetId) {
+        return new Material(SIGN_SHEET, pAssetId.withPrefix("entity/signs/"));
     }
 
-    private static Material createHangingSignMaterial(WoodType p_251735_) {
-        return createHangingSignMaterial(ResourceLocation.withDefaultNamespace(p_251735_.name()));
+    private static Material createHangingSignMaterial(WoodType pWoodType) {
+        return createHangingSignMaterial(ResourceLocation.withDefaultNamespace(pWoodType.name()));
     }
 
-    public static Material createHangingSignMaterial(ResourceLocation p_377324_) {
-        return new Material(SIGN_SHEET, p_377324_.withPrefix("entity/signs/hanging/"));
+    public static Material createHangingSignMaterial(ResourceLocation pAssetId) {
+        return new Material(SIGN_SHEET, pAssetId.withPrefix("entity/signs/hanging/"));
     }
 
-    public static Material getSignMaterial(WoodType p_173382_) {
-        return SIGN_MATERIALS.get(p_173382_);
+    public static Material getSignMaterial(WoodType pWoodType) {
+        return SIGN_MATERIALS.get(pWoodType);
     }
 
-    public static Material getHangingSignMaterial(WoodType p_250958_) {
-        return HANGING_SIGN_MATERIALS.get(p_250958_);
+    public static Material getHangingSignMaterial(WoodType pWoodType) {
+        return HANGING_SIGN_MATERIALS.get(pWoodType);
     }
 
-    public static Material getBannerMaterial(Holder<BannerPattern> p_332638_) {
-        return BANNER_MATERIALS.computeIfAbsent(p_332638_.value().assetId(), p_325514_ -> {
+    public static Material getBannerMaterial(Holder<BannerPattern> pPattern) {
+        return BANNER_MATERIALS.computeIfAbsent(pPattern.value().assetId(), p_325514_ -> {
             ResourceLocation resourcelocation = p_325514_.withPrefix("entity/banner/");
             return new Material(BANNER_SHEET, resourcelocation);
         });
     }
 
-    public static Material getShieldMaterial(Holder<BannerPattern> p_333940_) {
-        return SHIELD_MATERIALS.computeIfAbsent(p_333940_.value().assetId(), p_325515_ -> {
+    public static Material getShieldMaterial(Holder<BannerPattern> pPattern) {
+        return SHIELD_MATERIALS.computeIfAbsent(pPattern.value().assetId(), p_325515_ -> {
             ResourceLocation resourcelocation = p_325515_.withPrefix("entity/shield/");
             return new Material(SHIELD_SHEET, resourcelocation);
         });
     }
 
-    private static Material chestMaterial(String p_110779_) {
-        return new Material(CHEST_SHEET, ResourceLocation.withDefaultNamespace("entity/chest/" + p_110779_));
+    private static Material chestMaterial(String pChestName) {
+        return new Material(CHEST_SHEET, ResourceLocation.withDefaultNamespace("entity/chest/" + pChestName));
     }
 
-    public static Material chestMaterial(ResourceLocation p_376049_) {
-        return new Material(CHEST_SHEET, p_376049_.withPrefix("entity/chest/"));
+    public static Material chestMaterial(ResourceLocation pAssetId) {
+        return new Material(CHEST_SHEET, pAssetId.withPrefix("entity/chest/"));
     }
 
-    private static Material createDecoratedPotMaterial(ResourceLocation p_343178_) {
-        return new Material(DECORATED_POT_SHEET, p_343178_.withPrefix("entity/decorated_pot/"));
+    private static Material createDecoratedPotMaterial(ResourceLocation pAssetId) {
+        return new Material(DECORATED_POT_SHEET, pAssetId.withPrefix("entity/decorated_pot/"));
     }
 
     @Nullable
-    public static Material getDecoratedPotMaterial(@Nullable ResourceKey<DecoratedPotPattern> p_273567_) {
-        return p_273567_ == null ? null : DECORATED_POT_MATERIALS.get(p_273567_);
+    public static Material getDecoratedPotMaterial(@Nullable ResourceKey<DecoratedPotPattern> pKey) {
+        return pKey == null ? null : DECORATED_POT_MATERIALS.get(pKey);
     }
 
-    public static Material chooseMaterial(BlockEntity p_110768_, ChestType p_110769_, boolean p_110770_) {
-        if (p_110768_ instanceof EnderChestBlockEntity) {
+    public static Material chooseMaterial(BlockEntity pBlockEntity, ChestType pChestType, boolean pHoliday) {
+        if (pBlockEntity instanceof EnderChestBlockEntity) {
             return ENDER_CHEST_LOCATION;
-        } else if (p_110770_) {
-            return chooseMaterial(p_110769_, CHEST_XMAS_LOCATION, CHEST_XMAS_LOCATION_LEFT, CHEST_XMAS_LOCATION_RIGHT);
+        } else if (pHoliday) {
+            return chooseMaterial(pChestType, CHEST_XMAS_LOCATION, CHEST_XMAS_LOCATION_LEFT, CHEST_XMAS_LOCATION_RIGHT);
         } else {
-            return p_110768_ instanceof TrappedChestBlockEntity
-                ? chooseMaterial(p_110769_, CHEST_TRAP_LOCATION, CHEST_TRAP_LOCATION_LEFT, CHEST_TRAP_LOCATION_RIGHT)
-                : chooseMaterial(p_110769_, CHEST_LOCATION, CHEST_LOCATION_LEFT, CHEST_LOCATION_RIGHT);
+            return pBlockEntity instanceof TrappedChestBlockEntity
+                ? chooseMaterial(pChestType, CHEST_TRAP_LOCATION, CHEST_TRAP_LOCATION_LEFT, CHEST_TRAP_LOCATION_RIGHT)
+                : chooseMaterial(pChestType, CHEST_LOCATION, CHEST_LOCATION_LEFT, CHEST_LOCATION_RIGHT);
         }
     }
 
-    private static Material chooseMaterial(ChestType p_110772_, Material p_110773_, Material p_110774_, Material p_110775_) {
-        switch (p_110772_) {
+    private static Material chooseMaterial(ChestType pChestType, Material pDoubleMaterial, Material pLeftMaterial, Material pRightMaterial) {
+        switch (pChestType) {
             case LEFT:
-                return p_110774_;
+                return pLeftMaterial;
             case RIGHT:
-                return p_110775_;
+                return pRightMaterial;
             case SINGLE:
             default:
-                return p_110773_;
+                return pDoubleMaterial;
         }
     }
 }

@@ -22,9 +22,9 @@ public class DropExperienceBlock extends Block {
         return CODEC;
     }
 
-    public DropExperienceBlock(IntProvider p_221084_, BlockBehaviour.Properties p_221083_) {
-        super(p_221083_);
-        this.xpRange = p_221084_;
+    public DropExperienceBlock(IntProvider pXpRange, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.xpRange = pXpRange;
     }
 
     @Override

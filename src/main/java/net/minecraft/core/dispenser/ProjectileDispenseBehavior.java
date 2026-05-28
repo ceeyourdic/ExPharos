@@ -13,12 +13,12 @@ public class ProjectileDispenseBehavior extends DefaultDispenseItemBehavior {
     private final ProjectileItem projectileItem;
     private final ProjectileItem.DispenseConfig dispenseConfig;
 
-    public ProjectileDispenseBehavior(Item p_328671_) {
-        if (p_328671_ instanceof ProjectileItem projectileitem) {
+    public ProjectileDispenseBehavior(Item pProjectile) {
+        if (pProjectile instanceof ProjectileItem projectileitem) {
             this.projectileItem = projectileitem;
             this.dispenseConfig = projectileitem.createDispenseConfig();
         } else {
-            throw new IllegalArgumentException(p_328671_ + " not instance of " + ProjectileItem.class.getSimpleName());
+            throw new IllegalArgumentException(pProjectile + " not instance of " + ProjectileItem.class.getSimpleName());
         }
     }
 

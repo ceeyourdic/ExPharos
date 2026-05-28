@@ -13,18 +13,18 @@ public class WeightedStateProvider extends BlockStateProvider {
         .fieldOf("entries");
     private final SimpleWeightedRandomList<BlockState> weightedList;
 
-    private static DataResult<WeightedStateProvider> create(SimpleWeightedRandomList<BlockState> p_161598_) {
-        return p_161598_.isEmpty()
+    private static DataResult<WeightedStateProvider> create(SimpleWeightedRandomList<BlockState> pWeightedList) {
+        return pWeightedList.isEmpty()
             ? DataResult.error(() -> "WeightedStateProvider with no states")
-            : DataResult.success(new WeightedStateProvider(p_161598_));
+            : DataResult.success(new WeightedStateProvider(pWeightedList));
     }
 
-    public WeightedStateProvider(SimpleWeightedRandomList<BlockState> p_161596_) {
-        this.weightedList = p_161596_;
+    public WeightedStateProvider(SimpleWeightedRandomList<BlockState> pWeightedList) {
+        this.weightedList = pWeightedList;
     }
 
-    public WeightedStateProvider(SimpleWeightedRandomList.Builder<BlockState> p_161594_) {
-        this(p_161594_.build());
+    public WeightedStateProvider(SimpleWeightedRandomList.Builder<BlockState> pBuilder) {
+        this(pBuilder.build());
     }
 
     @Override

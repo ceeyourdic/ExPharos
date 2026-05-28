@@ -11,13 +11,13 @@ public record ClientboundResetScorePacket(String owner, @Nullable String objecti
         ClientboundResetScorePacket::write, ClientboundResetScorePacket::new
     );
 
-    private ClientboundResetScorePacket(FriendlyByteBuf p_312061_) {
-        this(p_312061_.readUtf(), p_312061_.readNullable(FriendlyByteBuf::readUtf));
+    private ClientboundResetScorePacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readUtf(), pBuffer.readNullable(FriendlyByteBuf::readUtf));
     }
 
-    private void write(FriendlyByteBuf p_310951_) {
-        p_310951_.writeUtf(this.owner);
-        p_310951_.writeNullable(this.objectiveName, FriendlyByteBuf::writeUtf);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeUtf(this.owner);
+        pBuffer.writeNullable(this.objectiveName, FriendlyByteBuf::writeUtf);
     }
 
     @Override

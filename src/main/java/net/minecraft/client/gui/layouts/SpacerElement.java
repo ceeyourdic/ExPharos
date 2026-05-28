@@ -12,23 +12,23 @@ public class SpacerElement implements LayoutElement {
     private final int width;
     private final int height;
 
-    public SpacerElement(int p_265229_, int p_265527_) {
-        this(0, 0, p_265229_, p_265527_);
+    public SpacerElement(int pWidth, int pHeight) {
+        this(0, 0, pWidth, pHeight);
     }
 
-    public SpacerElement(int p_265199_, int p_265495_, int p_265101_, int p_265469_) {
-        this.x = p_265199_;
-        this.y = p_265495_;
-        this.width = p_265101_;
-        this.height = p_265469_;
+    public SpacerElement(int pX, int pY, int pWidth, int pHeight) {
+        this.x = pX;
+        this.y = pY;
+        this.width = pWidth;
+        this.height = pHeight;
     }
 
-    public static SpacerElement width(int p_265056_) {
-        return new SpacerElement(p_265056_, 0);
+    public static SpacerElement width(int pWidth) {
+        return new SpacerElement(pWidth, 0);
     }
 
-    public static SpacerElement height(int p_265087_) {
-        return new SpacerElement(0, p_265087_);
+    public static SpacerElement height(int pHeight) {
+        return new SpacerElement(0, pHeight);
     }
 
     @Override

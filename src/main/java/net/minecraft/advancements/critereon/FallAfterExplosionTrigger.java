@@ -19,10 +19,10 @@ public class FallAfterExplosionTrigger extends SimpleCriterionTrigger<FallAfterE
         return FallAfterExplosionTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_335354_, Vec3 p_333990_, @Nullable Entity p_335867_) {
-        Vec3 vec3 = p_335354_.position();
-        LootContext lootcontext = p_335867_ != null ? EntityPredicate.createContext(p_335354_, p_335867_) : null;
-        this.trigger(p_335354_, p_328967_ -> p_328967_.matches(p_335354_.serverLevel(), p_333990_, vec3, lootcontext));
+    public void trigger(ServerPlayer pPlayer, Vec3 pPos, @Nullable Entity pEntity) {
+        Vec3 vec3 = pPlayer.position();
+        LootContext lootcontext = pEntity != null ? EntityPredicate.createContext(pPlayer, pEntity) : null;
+        this.trigger(pPlayer, p_328967_ -> p_328967_.matches(pPlayer.serverLevel(), pPos, vec3, lootcontext));
     }
 
     public static record TriggerInstance(
@@ -41,11 +41,11 @@ public class FallAfterExplosionTrigger extends SimpleCriterionTrigger<FallAfterE
                     .apply(p_334472_, FallAfterExplosionTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<FallAfterExplosionTrigger.TriggerInstance> fallAfterExplosion(DistancePredicate p_331300_, EntityPredicate.Builder p_329821_) {
+        public static Criterion<FallAfterExplosionTrigger.TriggerInstance> fallAfterExplosion(DistancePredicate pDistance, EntityPredicate.Builder pCause) {
             return CriteriaTriggers.FALL_AFTER_EXPLOSION
                 .createCriterion(
                     new FallAfterExplosionTrigger.TriggerInstance(
-                        Optional.empty(), Optional.empty(), Optional.of(p_331300_), Optional.of(EntityPredicate.wrap(p_329821_))
+                        Optional.empty(), Optional.empty(), Optional.of(pDistance), Optional.of(EntityPredicate.wrap(pCause))
                     )
                 );
         }
@@ -56,16 +56,16 @@ public class FallAfterExplosionTrigger extends SimpleCriterionTrigger<FallAfterE
             p_336137_.validateEntity(this.cause(), ".cause");
         }
 
-        public boolean matches(ServerLevel p_329103_, Vec3 p_328213_, Vec3 p_332081_, @Nullable LootContext p_327871_) {
-            if (this.startPosition.isPresent() && !this.startPosition.get().matches(p_329103_, p_328213_.x, p_328213_.y, p_328213_.z)) {
+        public boolean matches(ServerLevel pLevel, Vec3 pStartPosition, Vec3 pEndPosition, @Nullable LootContext pContext) {
+            if (this.startPosition.isPresent() && !this.startPosition.get().matches(pLevel, pStartPosition.x, pStartPosition.y, pStartPosition.z)) {
                 return false;
             } else {
                 return this.distance.isPresent()
                         && !this.distance
                             .get()
-                            .matches(p_328213_.x, p_328213_.y, p_328213_.z, p_332081_.x, p_332081_.y, p_332081_.z)
+                            .matches(pStartPosition.x, pStartPosition.y, pStartPosition.z, pEndPosition.x, pEndPosition.y, pEndPosition.z)
                     ? false
-                    : !this.cause.isPresent() || p_327871_ != null && this.cause.get().matches(p_327871_);
+                    : !this.cause.isPresent() || pContext != null && this.cause.get().matches(pContext);
             }
         }
 

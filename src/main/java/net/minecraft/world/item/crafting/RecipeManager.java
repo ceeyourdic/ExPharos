@@ -64,8 +64,8 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
     private List<RecipeManager.ServerDisplayInfo> allDisplays = List.of();
     private Map<ResourceKey<Recipe<?>>, List<RecipeManager.ServerDisplayInfo>> recipeToDisplay = Map.of();
 
-    public RecipeManager(HolderLookup.Provider p_330459_) {
-        this.registries = p_330459_;
+    public RecipeManager(HolderLookup.Provider pRegistries) {
+        this.registries = pRegistries;
     }
 
     protected RecipeMap prepare(ResourceManager p_368640_, ProfilerFiller p_361102_) {
@@ -85,7 +85,7 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
         LOGGER.info("Loaded {} recipes", p_369166_.values().size());
     }
 
-    public void finalizeRecipeLoading(FeatureFlagSet p_360842_) {
+    public void finalizeRecipeLoading(FeatureFlagSet pEnabledFeatures) {
         List<SelectableRecipe.SingleInputEntry<StonecutterRecipe>> list = new ArrayList<>();
         List<RecipeManager.IngredientCollector> list1 = RECIPE_PROPERTY_SETS.entrySet()
             .stream()
@@ -101,8 +101,8 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
                     } else {
                         list1.forEach(p_359842_ -> p_359842_.accept(recipe));
                         if (recipe instanceof StonecutterRecipe stonecutterrecipe
-                            && isIngredientEnabled(p_360842_, stonecutterrecipe.input())
-                            && stonecutterrecipe.resultDisplay().isEnabled(p_360842_)) {
+                            && isIngredientEnabled(pEnabledFeatures, stonecutterrecipe.input())
+                            && stonecutterrecipe.resultDisplay().isEnabled(pEnabledFeatures)) {
                             list.add(
                                 new SelectableRecipe.SingleInputEntry<>(
                                     stonecutterrecipe.input(),
@@ -113,50 +113,50 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
                     }
                 }
             );
-        this.propertySets = list1.stream().collect(Collectors.toUnmodifiableMap(p_359830_ -> p_359830_.key, p_359826_ -> p_359826_.asPropertySet(p_360842_)));
+        this.propertySets = list1.stream().collect(Collectors.toUnmodifiableMap(p_359830_ -> p_359830_.key, p_359826_ -> p_359826_.asPropertySet(pEnabledFeatures)));
         this.stonecutterRecipes = new SelectableRecipe.SingleInputSet<>(list);
-        this.allDisplays = unpackRecipeInfo(this.recipes.values(), p_360842_);
+        this.allDisplays = unpackRecipeInfo(this.recipes.values(), pEnabledFeatures);
         this.recipeToDisplay = this.allDisplays
             .stream()
             .collect(Collectors.groupingBy(p_359820_ -> p_359820_.parent.id(), IdentityHashMap::new, Collectors.toList()));
     }
 
-    static List<Ingredient> filterDisabled(FeatureFlagSet p_369580_, List<Ingredient> p_367920_) {
-        p_367920_.removeIf(p_359829_ -> !isIngredientEnabled(p_369580_, p_359829_));
-        return p_367920_;
+    static List<Ingredient> filterDisabled(FeatureFlagSet pEnabledFeatures, List<Ingredient> pIngredients) {
+        pIngredients.removeIf(p_359829_ -> !isIngredientEnabled(pEnabledFeatures, p_359829_));
+        return pIngredients;
     }
 
-    private static boolean isIngredientEnabled(FeatureFlagSet p_361535_, Ingredient p_369900_) {
-        return p_369900_.items().allMatch(p_359822_ -> p_359822_.value().isEnabled(p_361535_));
-    }
-
-    public <I extends RecipeInput, T extends Recipe<I>> Optional<RecipeHolder<T>> getRecipeFor(
-        RecipeType<T> p_220249_, I p_344518_, Level p_220251_, @Nullable ResourceKey<Recipe<?>> p_361142_
-    ) {
-        RecipeHolder<T> recipeholder = p_361142_ != null ? this.byKeyTyped(p_220249_, p_361142_) : null;
-        return this.getRecipeFor(p_220249_, p_344518_, p_220251_, recipeholder);
+    private static boolean isIngredientEnabled(FeatureFlagSet pEnabledFeatures, Ingredient pIngredient) {
+        return pIngredient.items().allMatch(p_359822_ -> p_359822_.value().isEnabled(pEnabledFeatures));
     }
 
     public <I extends RecipeInput, T extends Recipe<I>> Optional<RecipeHolder<T>> getRecipeFor(
-        RecipeType<T> p_343647_, I p_342793_, Level p_344483_, @Nullable RecipeHolder<T> p_345187_
+        RecipeType<T> pRecipeType, I pInput, Level pLevel, @Nullable ResourceKey<Recipe<?>> pRecipe
     ) {
-        return p_345187_ != null && p_345187_.value().matches(p_342793_, p_344483_)
-            ? Optional.of(p_345187_)
-            : this.getRecipeFor(p_343647_, p_342793_, p_344483_);
+        RecipeHolder<T> recipeholder = pRecipe != null ? this.byKeyTyped(pRecipeType, pRecipe) : null;
+        return this.getRecipeFor(pRecipeType, pInput, pLevel, recipeholder);
     }
 
-    public <I extends RecipeInput, T extends Recipe<I>> Optional<RecipeHolder<T>> getRecipeFor(RecipeType<T> p_44016_, I p_344358_, Level p_44018_) {
-        return this.recipes.getRecipesFor(p_44016_, p_344358_, p_44018_).findFirst();
+    public <I extends RecipeInput, T extends Recipe<I>> Optional<RecipeHolder<T>> getRecipeFor(
+        RecipeType<T> pRecipeType, I pInput, Level pLevel, @Nullable RecipeHolder<T> pLastRecipe
+    ) {
+        return pLastRecipe != null && pLastRecipe.value().matches(pInput, pLevel)
+            ? Optional.of(pLastRecipe)
+            : this.getRecipeFor(pRecipeType, pInput, pLevel);
     }
 
-    public Optional<RecipeHolder<?>> byKey(ResourceKey<Recipe<?>> p_364678_) {
-        return Optional.ofNullable(this.recipes.byKey(p_364678_));
+    public <I extends RecipeInput, T extends Recipe<I>> Optional<RecipeHolder<T>> getRecipeFor(RecipeType<T> pRecipeType, I pInput, Level pLevel) {
+        return this.recipes.getRecipesFor(pRecipeType, pInput, pLevel).findFirst();
+    }
+
+    public Optional<RecipeHolder<?>> byKey(ResourceKey<Recipe<?>> pKey) {
+        return Optional.ofNullable(this.recipes.byKey(pKey));
     }
 
     @Nullable
-    private <T extends Recipe<?>> RecipeHolder<T> byKeyTyped(RecipeType<T> p_332930_, ResourceKey<Recipe<?>> p_367936_) {
-        RecipeHolder<?> recipeholder = this.recipes.byKey(p_367936_);
-        return (RecipeHolder<T>)(recipeholder != null && recipeholder.value().getType().equals(p_332930_) ? recipeholder : null);
+    private <T extends Recipe<?>> RecipeHolder<T> byKeyTyped(RecipeType<T> pType, ResourceKey<Recipe<?>> pKey) {
+        RecipeHolder<?> recipeholder = this.recipes.byKey(pKey);
+        return (RecipeHolder<T>)(recipeholder != null && recipeholder.value().getType().equals(pType) ? recipeholder : null);
     }
 
     public Map<ResourceKey<RecipePropertySet>, RecipePropertySet> getSynchronizedItemProperties() {
@@ -182,24 +182,24 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
     }
 
     @Nullable
-    public RecipeManager.ServerDisplayInfo getRecipeFromDisplay(RecipeDisplayId p_362633_) {
-        return this.allDisplays.get(p_362633_.index());
+    public RecipeManager.ServerDisplayInfo getRecipeFromDisplay(RecipeDisplayId pDisplay) {
+        return this.allDisplays.get(pDisplay.index());
     }
 
-    public void listDisplaysForRecipe(ResourceKey<Recipe<?>> p_360782_, Consumer<RecipeDisplayEntry> p_368559_) {
-        List<RecipeManager.ServerDisplayInfo> list = this.recipeToDisplay.get(p_360782_);
+    public void listDisplaysForRecipe(ResourceKey<Recipe<?>> pRecipe, Consumer<RecipeDisplayEntry> pOutput) {
+        List<RecipeManager.ServerDisplayInfo> list = this.recipeToDisplay.get(pRecipe);
         if (list != null) {
-            list.forEach(p_359824_ -> p_368559_.accept(p_359824_.display));
+            list.forEach(p_359824_ -> pOutput.accept(p_359824_.display));
         }
     }
 
     @VisibleForTesting
-    protected static RecipeHolder<?> fromJson(ResourceKey<Recipe<?>> p_366256_, JsonObject p_44047_, HolderLookup.Provider p_328308_) {
-        Recipe<?> recipe = Recipe.CODEC.parse(p_328308_.createSerializationContext(JsonOps.INSTANCE), p_44047_).getOrThrow(JsonParseException::new);
-        return new RecipeHolder<>(p_366256_, recipe);
+    protected static RecipeHolder<?> fromJson(ResourceKey<Recipe<?>> pRecipe, JsonObject pJson, HolderLookup.Provider pRegistries) {
+        Recipe<?> recipe = Recipe.CODEC.parse(pRegistries.createSerializationContext(JsonOps.INSTANCE), pJson).getOrThrow(JsonParseException::new);
+        return new RecipeHolder<>(pRecipe, recipe);
     }
 
-    public static <I extends RecipeInput, T extends Recipe<I>> RecipeManager.CachedCheck<I, T> createCheck(final RecipeType<T> p_220268_) {
+    public static <I extends RecipeInput, T extends Recipe<I>> RecipeManager.CachedCheck<I, T> createCheck(final RecipeType<T> pRecipeType) {
         return new RecipeManager.CachedCheck<I, T>() {
             @Nullable
             private ResourceKey<Recipe<?>> lastRecipe;
@@ -207,7 +207,7 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
             @Override
             public Optional<RecipeHolder<T>> getRecipeFor(I p_343525_, ServerLevel p_364008_) {
                 RecipeManager recipemanager = p_364008_.recipeAccess();
-                Optional<RecipeHolder<T>> optional = recipemanager.getRecipeFor(p_220268_, p_343525_, p_364008_, this.lastRecipe);
+                Optional<RecipeHolder<T>> optional = recipemanager.getRecipeFor(pRecipeType, p_343525_, p_364008_, this.lastRecipe);
                 if (optional.isPresent()) {
                     RecipeHolder<T> recipeholder = optional.get();
                     this.lastRecipe = recipeholder.id();
@@ -219,11 +219,11 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
         };
     }
 
-    private static List<RecipeManager.ServerDisplayInfo> unpackRecipeInfo(Iterable<RecipeHolder<?>> p_361848_, FeatureFlagSet p_362319_) {
+    private static List<RecipeManager.ServerDisplayInfo> unpackRecipeInfo(Iterable<RecipeHolder<?>> pRecipes, FeatureFlagSet pEnabledFeatures) {
         List<RecipeManager.ServerDisplayInfo> list = new ArrayList<>();
         Object2IntMap<String> object2intmap = new Object2IntOpenHashMap<>();
 
-        for (RecipeHolder<?> recipeholder : p_361848_) {
+        for (RecipeHolder<?> recipeholder : pRecipes) {
             Recipe<?> recipe = recipeholder.value();
             OptionalInt optionalint;
             if (recipe.group().isEmpty()) {
@@ -240,7 +240,7 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
             }
 
             for (RecipeDisplay recipedisplay : recipe.display()) {
-                if (recipedisplay.isEnabled(p_362319_)) {
+                if (recipedisplay.isEnabled(pEnabledFeatures)) {
                     int i = list.size();
                     RecipeDisplayId recipedisplayid = new RecipeDisplayId(i);
                     RecipeDisplayEntry recipedisplayentry = new RecipeDisplayEntry(recipedisplayid, recipedisplay, optionalint, recipe.recipeBookCategory(), optional);
@@ -252,14 +252,14 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
         return list;
     }
 
-    private static RecipeManager.IngredientExtractor forSingleInput(RecipeType<? extends SingleItemRecipe> p_361054_) {
-        return p_359846_ -> p_359846_.getType() == p_361054_ && p_359846_ instanceof SingleItemRecipe singleitemrecipe
+    private static RecipeManager.IngredientExtractor forSingleInput(RecipeType<? extends SingleItemRecipe> pRecipeType) {
+        return p_359846_ -> p_359846_.getType() == pRecipeType && p_359846_ instanceof SingleItemRecipe singleitemrecipe
                 ? Optional.of(singleitemrecipe.input())
                 : Optional.empty();
     }
 
     public interface CachedCheck<I extends RecipeInput, T extends Recipe<I>> {
-        Optional<RecipeHolder<T>> getRecipeFor(I p_343520_, ServerLevel p_367515_);
+        Optional<RecipeHolder<T>> getRecipeFor(I pInput, ServerLevel pLevel);
     }
 
     public static class IngredientCollector implements Consumer<Recipe<?>> {
@@ -267,23 +267,23 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
         private final RecipeManager.IngredientExtractor extractor;
         private final List<Ingredient> ingredients = new ArrayList<>();
 
-        protected IngredientCollector(ResourceKey<RecipePropertySet> p_364661_, RecipeManager.IngredientExtractor p_368104_) {
-            this.key = p_364661_;
-            this.extractor = p_368104_;
+        protected IngredientCollector(ResourceKey<RecipePropertySet> pKey, RecipeManager.IngredientExtractor pExtractor) {
+            this.key = pKey;
+            this.extractor = pExtractor;
         }
 
-        public void accept(Recipe<?> p_361793_) {
-            this.extractor.apply(p_361793_).ifPresent(this.ingredients::add);
+        public void accept(Recipe<?> pRecipe) {
+            this.extractor.apply(pRecipe).ifPresent(this.ingredients::add);
         }
 
-        public RecipePropertySet asPropertySet(FeatureFlagSet p_363031_) {
-            return RecipePropertySet.create(RecipeManager.filterDisabled(p_363031_, this.ingredients));
+        public RecipePropertySet asPropertySet(FeatureFlagSet pEnabledFeatures) {
+            return RecipePropertySet.create(RecipeManager.filterDisabled(pEnabledFeatures, this.ingredients));
         }
     }
 
     @FunctionalInterface
     public interface IngredientExtractor {
-        Optional<Ingredient> apply(Recipe<?> p_363412_);
+        Optional<Ingredient> apply(Recipe<?> pRecipe);
     }
 
     public static record ServerDisplayInfo(RecipeDisplayEntry display, RecipeHolder<?> parent) {

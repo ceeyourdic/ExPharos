@@ -21,9 +21,9 @@ public enum ItemDisplayContext implements StringRepresentable {
     private final byte id;
     private final String name;
 
-    private ItemDisplayContext(final int p_270624_, final String p_270851_) {
-        this.name = p_270851_;
-        this.id = (byte)p_270624_;
+    private ItemDisplayContext(final int pId, final String pName) {
+        this.name = pName;
+        this.id = (byte)pId;
     }
 
     @Override

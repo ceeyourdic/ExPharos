@@ -20,9 +20,9 @@ public class SnifferModel extends EntityModel<SnifferRenderState> {
     private static final float WALK_ANIMATION_SCALE_FACTOR = 100.0F;
     private final ModelPart head;
 
-    public SnifferModel(ModelPart p_272867_) {
-        super(p_272867_);
-        this.head = p_272867_.getChild("bone").getChild("body").getChild("head");
+    public SnifferModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("bone").getChild("body").getChild("head");
     }
 
     public static LayerDefinition createBodyLayer() {

@@ -14,41 +14,41 @@ public class DispenserMenu extends AbstractContainerMenu {
     private static final int USE_ROW_SLOT_END = 45;
     private final Container dispenser;
 
-    public DispenserMenu(int p_39433_, Inventory p_39434_) {
-        this(p_39433_, p_39434_, new SimpleContainer(9));
+    public DispenserMenu(int pContainerId, Inventory pPlayerInventory) {
+        this(pContainerId, pPlayerInventory, new SimpleContainer(9));
     }
 
-    public DispenserMenu(int p_39436_, Inventory p_39437_, Container p_39438_) {
-        super(MenuType.GENERIC_3x3, p_39436_);
-        checkContainerSize(p_39438_, 9);
-        this.dispenser = p_39438_;
-        p_39438_.startOpen(p_39437_.player);
-        this.add3x3GridSlots(p_39438_, 62, 17);
-        this.addStandardInventorySlots(p_39437_, 8, 84);
+    public DispenserMenu(int pContainerId, Inventory pPlayerInventory, Container pContainer) {
+        super(MenuType.GENERIC_3x3, pContainerId);
+        checkContainerSize(pContainer, 9);
+        this.dispenser = pContainer;
+        pContainer.startOpen(pPlayerInventory.player);
+        this.add3x3GridSlots(pContainer, 62, 17);
+        this.addStandardInventorySlots(pPlayerInventory, 8, 84);
     }
 
-    protected void add3x3GridSlots(Container p_363126_, int p_368501_, int p_366608_) {
+    protected void add3x3GridSlots(Container pContainer, int pX, int pY) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 int k = j + i * 3;
-                this.addSlot(new Slot(p_363126_, k, p_368501_ + j * 18, p_366608_ + i * 18));
+                this.addSlot(new Slot(pContainer, k, pX + j * 18, pY + i * 18));
             }
         }
     }
 
     @Override
-    public boolean stillValid(Player p_39440_) {
-        return this.dispenser.stillValid(p_39440_);
+    public boolean stillValid(Player pPlayer) {
+        return this.dispenser.stillValid(pPlayer);
     }
 
     @Override
-    public ItemStack quickMoveStack(Player p_39444_, int p_39445_) {
+    public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(p_39445_);
+        Slot slot = this.slots.get(pIndex);
         if (slot != null && slot.hasItem()) {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
-            if (p_39445_ < 9) {
+            if (pIndex < 9) {
                 if (!this.moveItemStackTo(itemstack1, 9, 45, true)) {
                     return ItemStack.EMPTY;
                 }
@@ -66,15 +66,15 @@ public class DispenserMenu extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
 
-            slot.onTake(p_39444_, itemstack1);
+            slot.onTake(pPlayer, itemstack1);
         }
 
         return itemstack;
     }
 
     @Override
-    public void removed(Player p_39442_) {
-        super.removed(p_39442_);
-        this.dispenser.stopOpen(p_39442_);
+    public void removed(Player pPlayer) {
+        super.removed(pPlayer);
+        this.dispenser.stopOpen(pPlayer);
     }
 }

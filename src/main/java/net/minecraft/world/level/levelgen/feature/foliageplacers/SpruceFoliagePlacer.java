@@ -17,9 +17,9 @@ public class SpruceFoliagePlacer extends FoliagePlacer {
     );
     private final IntProvider trunkHeight;
 
-    public SpruceFoliagePlacer(IntProvider p_161539_, IntProvider p_161540_, IntProvider p_161541_) {
-        super(p_161539_, p_161540_);
-        this.trunkHeight = p_161541_;
+    public SpruceFoliagePlacer(IntProvider pRadius, IntProvider pOffset, IntProvider pTrunkHeight) {
+        super(pRadius, pOffset);
+        this.trunkHeight = pTrunkHeight;
     }
 
     @Override

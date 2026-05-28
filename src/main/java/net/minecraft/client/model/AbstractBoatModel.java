@@ -23,11 +23,11 @@ public abstract class AbstractBoatModel extends EntityModel<BoatRenderState> {
         animatePaddle(p_369502_.rowingTimeRight, 1, this.rightPaddle);
     }
 
-    private static void animatePaddle(float p_369972_, int p_367778_, ModelPart p_361377_) {
-        p_361377_.xRot = Mth.clampedLerp((float) (-Math.PI / 3), (float) (-Math.PI / 12), (Mth.sin(-p_369972_) + 1.0F) / 2.0F);
-        p_361377_.yRot = Mth.clampedLerp((float) (-Math.PI / 4), (float) (Math.PI / 4), (Mth.sin(-p_369972_ + 1.0F) + 1.0F) / 2.0F);
-        if (p_367778_ == 1) {
-            p_361377_.yRot = (float) Math.PI - p_361377_.yRot;
+    private static void animatePaddle(float pRowingTime, int pSide, ModelPart pPart) {
+        pPart.xRot = Mth.clampedLerp((float) (-Math.PI / 3), (float) (-Math.PI / 12), (Mth.sin(-pRowingTime) + 1.0F) / 2.0F);
+        pPart.yRot = Mth.clampedLerp((float) (-Math.PI / 4), (float) (Math.PI / 4), (Mth.sin(-pRowingTime + 1.0F) + 1.0F) / 2.0F);
+        if (pSide == 1) {
+            pPart.yRot = (float) Math.PI - pPart.yRot;
         }
     }
 }

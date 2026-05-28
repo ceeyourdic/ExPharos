@@ -60,11 +60,11 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
     private final String serverId = "";
     private final boolean transferred;
 
-    public ServerLoginPacketListenerImpl(MinecraftServer p_10027_, Connection p_10028_, boolean p_332648_) {
-        this.server = p_10027_;
-        this.connection = p_10028_;
+    public ServerLoginPacketListenerImpl(MinecraftServer pServer, Connection pConnection, boolean pTransferred) {
+        this.server = pServer;
+        this.connection = pConnection;
         this.challenge = Ints.toByteArray(RandomSource.create().nextInt());
-        this.transferred = p_332648_;
+        this.transferred = pTransferred;
     }
 
     @Override
@@ -87,18 +87,18 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
         return this.connection.isConnected();
     }
 
-    public void disconnect(Component p_10054_) {
+    public void disconnect(Component pReason) {
         try {
-            LOGGER.info("Disconnecting {}: {}", this.getUserName(), p_10054_.getString());
-            this.connection.send(new ClientboundLoginDisconnectPacket(p_10054_));
-            this.connection.disconnect(p_10054_);
+            LOGGER.info("Disconnecting {}: {}", this.getUserName(), pReason.getString());
+            this.connection.send(new ClientboundLoginDisconnectPacket(pReason));
+            this.connection.disconnect(pReason);
         } catch (Exception exception) {
             LOGGER.error("Error whilst disconnecting player", (Throwable)exception);
         }
     }
 
-    private boolean isPlayerAlreadyInWorld(GameProfile p_298499_) {
-        return this.server.getPlayerList().getPlayer(p_298499_.getId()) != null;
+    private boolean isPlayerAlreadyInWorld(GameProfile pProfile) {
+        return this.server.getPlayerList().getPlayer(pProfile.getId()) != null;
     }
 
     @Override
@@ -112,10 +112,10 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
     }
 
     @Override
-    public void handleHello(ServerboundHelloPacket p_10047_) {
+    public void handleHello(ServerboundHelloPacket pPacket) {
         Validate.validState(this.state == ServerLoginPacketListenerImpl.State.HELLO, "Unexpected hello packet");
-        Validate.validState(StringUtil.isValidPlayerName(p_10047_.name()), "Invalid characters in username");
-        this.requestedUsername = p_10047_.name();
+        Validate.validState(StringUtil.isValidPlayerName(pPacket.name()), "Invalid characters in username");
+        this.requestedUsername = pPacket.name();
         GameProfile gameprofile = this.server.getSingleplayerProfile();
         if (gameprofile != null && this.requestedUsername.equalsIgnoreCase(gameprofile.getName())) {
             this.startClientVerification(gameprofile);
@@ -129,14 +129,14 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
         }
     }
 
-    void startClientVerification(GameProfile p_301095_) {
-        this.authenticatedProfile = p_301095_;
+    void startClientVerification(GameProfile pAuthenticatedProfile) {
+        this.authenticatedProfile = pAuthenticatedProfile;
         this.state = ServerLoginPacketListenerImpl.State.VERIFYING;
     }
 
-    private void verifyLoginAndFinishConnectionSetup(GameProfile p_299507_) {
+    private void verifyLoginAndFinishConnectionSetup(GameProfile pProfile) {
         PlayerList playerlist = this.server.getPlayerList();
-        Component component = playerlist.canPlayerLogin(this.connection.getRemoteAddress(), p_299507_);
+        Component component = playerlist.canPlayerLogin(this.connection.getRemoteAddress(), pProfile);
         if (component != null) {
             this.disconnect(component);
         } else {
@@ -148,32 +148,32 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
                     );
             }
 
-            boolean flag = playerlist.disconnectAllPlayersWithProfile(p_299507_);
+            boolean flag = playerlist.disconnectAllPlayersWithProfile(pProfile);
             if (flag) {
                 this.state = ServerLoginPacketListenerImpl.State.WAITING_FOR_DUPE_DISCONNECT;
             } else {
-                this.finishLoginAndWaitForClient(p_299507_);
+                this.finishLoginAndWaitForClient(pProfile);
             }
         }
     }
 
-    private void finishLoginAndWaitForClient(GameProfile p_300150_) {
+    private void finishLoginAndWaitForClient(GameProfile pProfile) {
         this.state = ServerLoginPacketListenerImpl.State.PROTOCOL_SWITCHING;
-        this.connection.send(new ClientboundLoginFinishedPacket(p_300150_));
+        this.connection.send(new ClientboundLoginFinishedPacket(pProfile));
     }
 
     @Override
-    public void handleKey(ServerboundKeyPacket p_10049_) {
+    public void handleKey(ServerboundKeyPacket pPacket) {
         Validate.validState(this.state == ServerLoginPacketListenerImpl.State.KEY, "Unexpected key packet");
 
         final String s;
         try {
             PrivateKey privatekey = this.server.getKeyPair().getPrivate();
-            if (!p_10049_.isChallengeValid(this.challenge, privatekey)) {
+            if (!pPacket.isChallengeValid(this.challenge, privatekey)) {
                 throw new IllegalStateException("Protocol error");
             }
 
-            SecretKey secretkey = p_10049_.getSecretKey(privatekey);
+            SecretKey secretkey = pPacket.getSecretKey(privatekey);
             Cipher cipher = Crypt.getCipher(2, secretkey);
             Cipher cipher1 = Crypt.getCipher(1, secretkey);
             s = new BigInteger(Crypt.digestData("", this.server.getKeyPair().getPublic(), secretkey)).toString(16);

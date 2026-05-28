@@ -22,8 +22,8 @@ public record GlobalPos(ResourceKey<Level> dimension, BlockPos pos) {
         ResourceKey.streamCodec(Registries.DIMENSION), GlobalPos::dimension, BlockPos.STREAM_CODEC, GlobalPos::pos, GlobalPos::of
     );
 
-    public static GlobalPos of(ResourceKey<Level> p_122644_, BlockPos p_122645_) {
-        return new GlobalPos(p_122644_, p_122645_);
+    public static GlobalPos of(ResourceKey<Level> pDimension, BlockPos pPos) {
+        return new GlobalPos(pDimension, pPos);
     }
 
     @Override
@@ -31,7 +31,7 @@ public record GlobalPos(ResourceKey<Level> dimension, BlockPos pos) {
         return this.dimension + " " + this.pos;
     }
 
-    public boolean isCloseEnough(ResourceKey<Level> p_366757_, BlockPos p_363686_, int p_364819_) {
-        return this.dimension.equals(p_366757_) && this.pos.distChessboard(p_363686_) <= p_364819_;
+    public boolean isCloseEnough(ResourceKey<Level> pDimension, BlockPos pPos, int pMaxDistance) {
+        return this.dimension.equals(pDimension) && this.pos.distChessboard(pPos) <= pMaxDistance;
     }
 }

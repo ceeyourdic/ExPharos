@@ -40,27 +40,27 @@ public class FungusBlock extends BushBlock implements BonemealableBlock {
         return CODEC;
     }
 
-    protected FungusBlock(ResourceKey<ConfiguredFeature<?, ?>> p_259087_, Block p_260223_, BlockBehaviour.Properties p_259749_) {
-        super(p_259749_);
-        this.feature = p_259087_;
-        this.requiredBlock = p_260223_;
+    protected FungusBlock(ResourceKey<ConfiguredFeature<?, ?>> pFeature, Block pRequiredBlock, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.feature = pFeature;
+        this.requiredBlock = pRequiredBlock;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_53618_, BlockGetter p_53619_, BlockPos p_53620_, CollisionContext p_53621_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
     @Override
-    protected boolean mayPlaceOn(BlockState p_53623_, BlockGetter p_53624_, BlockPos p_53625_) {
-        return p_53623_.is(BlockTags.NYLIUM)
-            || p_53623_.is(Blocks.MYCELIUM)
-            || p_53623_.is(Blocks.SOUL_SOIL)
-            || super.mayPlaceOn(p_53623_, p_53624_, p_53625_);
+    protected boolean mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return pState.is(BlockTags.NYLIUM)
+            || pState.is(Blocks.MYCELIUM)
+            || pState.is(Blocks.SOUL_SOIL)
+            || super.mayPlaceOn(pState, pLevel, pPos);
     }
 
-    private Optional<? extends Holder<ConfiguredFeature<?, ?>>> getFeature(LevelReader p_256589_) {
-        return p_256589_.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).get(this.feature);
+    private Optional<? extends Holder<ConfiguredFeature<?, ?>>> getFeature(LevelReader pLevel) {
+        return pLevel.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).get(this.feature);
     }
 
     @Override

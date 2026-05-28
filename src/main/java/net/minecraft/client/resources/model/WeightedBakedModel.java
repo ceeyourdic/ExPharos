@@ -15,9 +15,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class WeightedBakedModel extends DelegateBakedModel {
     private final SimpleWeightedRandomList<BakedModel> list;
 
-    public WeightedBakedModel(SimpleWeightedRandomList<BakedModel> p_366085_) {
-        super(p_366085_.unwrap().getFirst().data());
-        this.list = p_366085_;
+    public WeightedBakedModel(SimpleWeightedRandomList<BakedModel> pList) {
+        super(pList.unwrap().getFirst().data());
+        this.list = pList;
     }
 
     @Override

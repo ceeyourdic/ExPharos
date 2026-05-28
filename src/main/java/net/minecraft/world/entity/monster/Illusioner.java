@@ -129,11 +129,11 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
         return SoundEvents.ILLUSIONER_AMBIENT;
     }
 
-    public Vec3[] getIllusionOffsets(float p_32940_) {
+    public Vec3[] getIllusionOffsets(float pPartialTick) {
         if (this.clientSideIllusionTicks <= 0) {
             return this.clientSideIllusionOffsets[1];
         } else {
-            double d0 = (double)(((float)this.clientSideIllusionTicks - p_32940_) / 3.0F);
+            double d0 = (double)(((float)this.clientSideIllusionTicks - pPartialTick) / 3.0F);
             d0 = Math.pow(d0, 0.25);
             Vec3[] avec3 = new Vec3[4];
 
@@ -156,7 +156,7 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_32930_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.ILLUSIONER_HURT;
     }
 
@@ -170,13 +170,13 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
     }
 
     @Override
-    public void performRangedAttack(LivingEntity p_32918_, float p_32919_) {
+    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
         ItemStack itemstack = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
         ItemStack itemstack1 = this.getProjectile(itemstack);
-        AbstractArrow abstractarrow = ProjectileUtil.getMobArrow(this, itemstack1, p_32919_, itemstack);
-        double d0 = p_32918_.getX() - this.getX();
-        double d1 = p_32918_.getY(0.3333333333333333) - abstractarrow.getY();
-        double d2 = p_32918_.getZ() - this.getZ();
+        AbstractArrow abstractarrow = ProjectileUtil.getMobArrow(this, itemstack1, pDistanceFactor, itemstack);
+        double d0 = pTarget.getX() - this.getX();
+        double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
+        double d2 = pTarget.getZ() - this.getZ();
         double d3 = Math.sqrt(d0 * d0 + d2 * d2);
         if (this.level() instanceof ServerLevel serverlevel) {
             Projectile.spawnProjectileUsingShoot(abstractarrow, serverlevel, itemstack1, d0, d1 + d3 * 0.2F, d2, 1.6F, (float)(14 - serverlevel.getDifficulty().getId() * 4));

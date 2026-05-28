@@ -25,10 +25,10 @@ public class SetWritableBookPagesFunction extends LootItemConditionalFunction {
     private final List<Filterable<String>> pages;
     private final ListOperation pageOperation;
 
-    protected SetWritableBookPagesFunction(List<LootItemCondition> p_330949_, List<Filterable<String>> p_330006_, ListOperation p_334902_) {
-        super(p_330949_);
-        this.pages = p_330006_;
-        this.pageOperation = p_334902_;
+    protected SetWritableBookPagesFunction(List<LootItemCondition> pConditions, List<Filterable<String>> pPages, ListOperation pPageOperation) {
+        super(pConditions);
+        this.pages = pPages;
+        this.pageOperation = pPageOperation;
     }
 
     @Override
@@ -37,9 +37,9 @@ public class SetWritableBookPagesFunction extends LootItemConditionalFunction {
         return p_329402_;
     }
 
-    public WritableBookContent apply(WritableBookContent p_328886_) {
-        List<Filterable<String>> list = this.pageOperation.apply(p_328886_.pages(), this.pages, 100);
-        return p_328886_.withReplacedPages(list);
+    public WritableBookContent apply(WritableBookContent pWritableBookContent) {
+        List<Filterable<String>> list = this.pageOperation.apply(pWritableBookContent.pages(), this.pages, 100);
+        return pWritableBookContent.withReplacedPages(list);
     }
 
     @Override

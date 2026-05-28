@@ -13,22 +13,22 @@ public enum ProjectionType {
     private final VertexSorting vertexSorting;
     private final ProjectionType.LayeringTransform layeringTransform;
 
-    private ProjectionType(final VertexSorting p_370067_, final ProjectionType.LayeringTransform p_367962_) {
-        this.vertexSorting = p_370067_;
-        this.layeringTransform = p_367962_;
+    private ProjectionType(final VertexSorting pVertexSorting, final ProjectionType.LayeringTransform pLayeringTransform) {
+        this.vertexSorting = pVertexSorting;
+        this.layeringTransform = pLayeringTransform;
     }
 
     public VertexSorting vertexSorting() {
         return this.vertexSorting;
     }
 
-    public void applyLayeringTransform(Matrix4f p_364350_, float p_368134_) {
-        this.layeringTransform.apply(p_364350_, p_368134_);
+    public void applyLayeringTransform(Matrix4f pModelViewMatrix, float pDistance) {
+        this.layeringTransform.apply(pModelViewMatrix, pDistance);
     }
 
     @FunctionalInterface
     @OnlyIn(Dist.CLIENT)
     interface LayeringTransform {
-        void apply(Matrix4f p_366580_, float p_361121_);
+        void apply(Matrix4f pModelViewMatrix, float pDistance);
     }
 }

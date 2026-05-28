@@ -30,14 +30,14 @@ public class CoralPlantBlock extends BaseCoralPlantTypeBlock {
         return CODEC;
     }
 
-    protected CoralPlantBlock(Block p_52175_, BlockBehaviour.Properties p_52176_) {
-        super(p_52176_);
-        this.deadBlock = p_52175_;
+    protected CoralPlantBlock(Block pDeadBlock, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.deadBlock = pDeadBlock;
     }
 
     @Override
-    protected void onPlace(BlockState p_52195_, Level p_52196_, BlockPos p_52197_, BlockState p_52198_, boolean p_52199_) {
-        this.tryScheduleDieTick(p_52195_, p_52196_, p_52196_, p_52196_.random, p_52197_);
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        this.tryScheduleDieTick(pState, pLevel, pLevel, pLevel.random, pPos);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class CoralPlantBlock extends BaseCoralPlantTypeBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_52190_, BlockGetter p_52191_, BlockPos p_52192_, CollisionContext p_52193_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 }

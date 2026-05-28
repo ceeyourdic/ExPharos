@@ -27,26 +27,26 @@ public record ClientboundPlayerChatPacket(
         ClientboundPlayerChatPacket::write, ClientboundPlayerChatPacket::new
     );
 
-    private ClientboundPlayerChatPacket(RegistryFriendlyByteBuf p_329037_) {
+    private ClientboundPlayerChatPacket(RegistryFriendlyByteBuf pBuffer) {
         this(
-            p_329037_.readUUID(),
-            p_329037_.readVarInt(),
-            p_329037_.readNullable(MessageSignature::read),
-            new SignedMessageBody.Packed(p_329037_),
-            FriendlyByteBuf.readNullable(p_329037_, ComponentSerialization.TRUSTED_STREAM_CODEC),
-            FilterMask.read(p_329037_),
-            ChatType.Bound.STREAM_CODEC.decode(p_329037_)
+            pBuffer.readUUID(),
+            pBuffer.readVarInt(),
+            pBuffer.readNullable(MessageSignature::read),
+            new SignedMessageBody.Packed(pBuffer),
+            FriendlyByteBuf.readNullable(pBuffer, ComponentSerialization.TRUSTED_STREAM_CODEC),
+            FilterMask.read(pBuffer),
+            ChatType.Bound.STREAM_CODEC.decode(pBuffer)
         );
     }
 
-    private void write(RegistryFriendlyByteBuf p_329687_) {
-        p_329687_.writeUUID(this.sender);
-        p_329687_.writeVarInt(this.index);
-        p_329687_.writeNullable(this.signature, MessageSignature::write);
-        this.body.write(p_329687_);
-        FriendlyByteBuf.writeNullable(p_329687_, this.unsignedContent, ComponentSerialization.TRUSTED_STREAM_CODEC);
-        FilterMask.write(p_329687_, this.filterMask);
-        ChatType.Bound.STREAM_CODEC.encode(p_329687_, this.chatType);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeUUID(this.sender);
+        pBuffer.writeVarInt(this.index);
+        pBuffer.writeNullable(this.signature, MessageSignature::write);
+        this.body.write(pBuffer);
+        FriendlyByteBuf.writeNullable(pBuffer, this.unsignedContent, ComponentSerialization.TRUSTED_STREAM_CODEC);
+        FilterMask.write(pBuffer, this.filterMask);
+        ChatType.Bound.STREAM_CODEC.encode(pBuffer, this.chatType);
     }
 
     @Override

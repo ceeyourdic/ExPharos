@@ -10,8 +10,8 @@ public enum FogShape {
 
     private final int index;
 
-    private FogShape(final int p_202323_) {
-        this.index = p_202323_;
+    private FogShape(final int pIndex) {
+        this.index = pIndex;
     }
 
     public int getIndex() {

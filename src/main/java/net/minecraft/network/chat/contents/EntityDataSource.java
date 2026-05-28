@@ -22,14 +22,14 @@ public record EntityDataSource(String selectorPattern, @Nullable EntitySelector 
     );
     public static final DataSource.Type<EntityDataSource> TYPE = new DataSource.Type<>(SUB_CODEC, "entity");
 
-    public EntityDataSource(String p_237330_) {
-        this(p_237330_, compileSelector(p_237330_));
+    public EntityDataSource(String pSelectorPattern) {
+        this(pSelectorPattern, compileSelector(pSelectorPattern));
     }
 
     @Nullable
-    private static EntitySelector compileSelector(String p_237336_) {
+    private static EntitySelector compileSelector(String pSelectorPattern) {
         try {
-            EntitySelectorParser entityselectorparser = new EntitySelectorParser(new StringReader(p_237336_), true);
+            EntitySelectorParser entityselectorparser = new EntitySelectorParser(new StringReader(pSelectorPattern), true);
             return entityselectorparser.parse();
         } catch (CommandSyntaxException commandsyntaxexception) {
             return null;
@@ -57,11 +57,11 @@ public record EntityDataSource(String selectorPattern, @Nullable EntitySelector 
     }
 
     @Override
-    public boolean equals(Object p_237339_) {
-        if (this == p_237339_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            if (p_237339_ instanceof EntityDataSource entitydatasource && this.selectorPattern.equals(entitydatasource.selectorPattern)) {
+            if (pOther instanceof EntityDataSource entitydatasource && this.selectorPattern.equals(entitydatasource.selectorPattern)) {
                 return true;
             }
 

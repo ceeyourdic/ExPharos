@@ -23,19 +23,19 @@ public class StructurePiecesBuilder implements StructurePieceAccessor {
     }
 
     @Deprecated
-    public void offsetPiecesVertically(int p_192782_) {
+    public void offsetPiecesVertically(int pOffset) {
         for (StructurePiece structurepiece : this.pieces) {
-            structurepiece.move(0, p_192782_, 0);
+            structurepiece.move(0, pOffset, 0);
         }
     }
 
     @Deprecated
-    public int moveBelowSeaLevel(int p_226966_, int p_226967_, RandomSource p_226968_, int p_226969_) {
-        int i = p_226966_ - p_226969_;
+    public int moveBelowSeaLevel(int pSeaLevel, int pMinY, RandomSource pRandom, int pAmount) {
+        int i = pSeaLevel - pAmount;
         BoundingBox boundingbox = this.getBoundingBox();
-        int j = boundingbox.getYSpan() + p_226967_ + 1;
+        int j = boundingbox.getYSpan() + pMinY + 1;
         if (j < i) {
-            j += p_226968_.nextInt(i - j);
+            j += pRandom.nextInt(i - j);
         }
 
         int k = j - boundingbox.maxY();
@@ -44,14 +44,14 @@ public class StructurePiecesBuilder implements StructurePieceAccessor {
     }
 
     /** @deprecated */
-    public void moveInsideHeights(RandomSource p_226971_, int p_226972_, int p_226973_) {
+    public void moveInsideHeights(RandomSource pRandom, int pMinY, int pMaxY) {
         BoundingBox boundingbox = this.getBoundingBox();
-        int i = p_226973_ - p_226972_ + 1 - boundingbox.getYSpan();
+        int i = pMaxY - pMinY + 1 - boundingbox.getYSpan();
         int j;
         if (i > 1) {
-            j = p_226972_ + p_226971_.nextInt(i);
+            j = pMinY + pRandom.nextInt(i);
         } else {
-            j = p_226972_;
+            j = pMinY;
         }
 
         int k = j - boundingbox.minY();

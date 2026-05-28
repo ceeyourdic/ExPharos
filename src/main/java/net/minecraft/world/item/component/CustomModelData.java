@@ -34,27 +34,27 @@ public record CustomModelData(List<Float> floats, List<Boolean> flags, List<Stri
     );
 
     @Nullable
-    private static <T> T getSafe(List<T> p_378266_, int p_376966_) {
-        return p_376966_ >= 0 && p_376966_ < p_378266_.size() ? p_378266_.get(p_376966_) : null;
+    private static <T> T getSafe(List<T> pValues, int pIndex) {
+        return pIndex >= 0 && pIndex < pValues.size() ? pValues.get(pIndex) : null;
     }
 
     @Nullable
-    public Float getFloat(int p_378793_) {
-        return getSafe(this.floats, p_378793_);
+    public Float getFloat(int pIndex) {
+        return getSafe(this.floats, pIndex);
     }
 
     @Nullable
-    public Boolean getBoolean(int p_378052_) {
-        return getSafe(this.flags, p_378052_);
+    public Boolean getBoolean(int pIndex) {
+        return getSafe(this.flags, pIndex);
     }
 
     @Nullable
-    public String getString(int p_378544_) {
-        return getSafe(this.strings, p_378544_);
+    public String getString(int pIndex) {
+        return getSafe(this.strings, pIndex);
     }
 
     @Nullable
-    public Integer getColor(int p_376081_) {
-        return getSafe(this.colors, p_376081_);
+    public Integer getColor(int pIndex) {
+        return getSafe(this.colors, pIndex);
     }
 }

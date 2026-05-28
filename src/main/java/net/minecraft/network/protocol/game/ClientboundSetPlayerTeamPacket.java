@@ -31,67 +31,67 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
     private final Optional<ClientboundSetPlayerTeamPacket.Parameters> parameters;
 
     private ClientboundSetPlayerTeamPacket(
-        String p_179318_, int p_179319_, Optional<ClientboundSetPlayerTeamPacket.Parameters> p_179320_, Collection<String> p_179321_
+        String pName, int pMethod, Optional<ClientboundSetPlayerTeamPacket.Parameters> pParameters, Collection<String> pPlayers
     ) {
-        this.name = p_179318_;
-        this.method = p_179319_;
-        this.parameters = p_179320_;
-        this.players = ImmutableList.copyOf(p_179321_);
+        this.name = pName;
+        this.method = pMethod;
+        this.parameters = pParameters;
+        this.players = ImmutableList.copyOf(pPlayers);
     }
 
-    public static ClientboundSetPlayerTeamPacket createAddOrModifyPacket(PlayerTeam p_179333_, boolean p_179334_) {
+    public static ClientboundSetPlayerTeamPacket createAddOrModifyPacket(PlayerTeam pTeam, boolean pUseAdd) {
         return new ClientboundSetPlayerTeamPacket(
-            p_179333_.getName(),
-            p_179334_ ? 0 : 2,
-            Optional.of(new ClientboundSetPlayerTeamPacket.Parameters(p_179333_)),
-            (Collection<String>)(p_179334_ ? p_179333_.getPlayers() : ImmutableList.of())
+            pTeam.getName(),
+            pUseAdd ? 0 : 2,
+            Optional.of(new ClientboundSetPlayerTeamPacket.Parameters(pTeam)),
+            (Collection<String>)(pUseAdd ? pTeam.getPlayers() : ImmutableList.of())
         );
     }
 
-    public static ClientboundSetPlayerTeamPacket createRemovePacket(PlayerTeam p_179327_) {
-        return new ClientboundSetPlayerTeamPacket(p_179327_.getName(), 1, Optional.empty(), ImmutableList.of());
+    public static ClientboundSetPlayerTeamPacket createRemovePacket(PlayerTeam pTeam) {
+        return new ClientboundSetPlayerTeamPacket(pTeam.getName(), 1, Optional.empty(), ImmutableList.of());
     }
 
-    public static ClientboundSetPlayerTeamPacket createPlayerPacket(PlayerTeam p_179329_, String p_179330_, ClientboundSetPlayerTeamPacket.Action p_179331_) {
+    public static ClientboundSetPlayerTeamPacket createPlayerPacket(PlayerTeam pTeam, String pPlayerName, ClientboundSetPlayerTeamPacket.Action pAction) {
         return new ClientboundSetPlayerTeamPacket(
-            p_179329_.getName(), p_179331_ == ClientboundSetPlayerTeamPacket.Action.ADD ? 3 : 4, Optional.empty(), ImmutableList.of(p_179330_)
+            pTeam.getName(), pAction == ClientboundSetPlayerTeamPacket.Action.ADD ? 3 : 4, Optional.empty(), ImmutableList.of(pPlayerName)
         );
     }
 
-    private ClientboundSetPlayerTeamPacket(RegistryFriendlyByteBuf p_332992_) {
-        this.name = p_332992_.readUtf();
-        this.method = p_332992_.readByte();
+    private ClientboundSetPlayerTeamPacket(RegistryFriendlyByteBuf pBuffer) {
+        this.name = pBuffer.readUtf();
+        this.method = pBuffer.readByte();
         if (shouldHaveParameters(this.method)) {
-            this.parameters = Optional.of(new ClientboundSetPlayerTeamPacket.Parameters(p_332992_));
+            this.parameters = Optional.of(new ClientboundSetPlayerTeamPacket.Parameters(pBuffer));
         } else {
             this.parameters = Optional.empty();
         }
 
         if (shouldHavePlayerList(this.method)) {
-            this.players = p_332992_.readList(FriendlyByteBuf::readUtf);
+            this.players = pBuffer.readList(FriendlyByteBuf::readUtf);
         } else {
             this.players = ImmutableList.of();
         }
     }
 
-    private void write(RegistryFriendlyByteBuf p_332768_) {
-        p_332768_.writeUtf(this.name);
-        p_332768_.writeByte(this.method);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeUtf(this.name);
+        pBuffer.writeByte(this.method);
         if (shouldHaveParameters(this.method)) {
-            this.parameters.orElseThrow(() -> new IllegalStateException("Parameters not present, but method is" + this.method)).write(p_332768_);
+            this.parameters.orElseThrow(() -> new IllegalStateException("Parameters not present, but method is" + this.method)).write(pBuffer);
         }
 
         if (shouldHavePlayerList(this.method)) {
-            p_332768_.writeCollection(this.players, FriendlyByteBuf::writeUtf);
+            pBuffer.writeCollection(this.players, FriendlyByteBuf::writeUtf);
         }
     }
 
-    private static boolean shouldHavePlayerList(int p_179325_) {
-        return p_179325_ == 0 || p_179325_ == 3 || p_179325_ == 4;
+    private static boolean shouldHavePlayerList(int pMethod) {
+        return pMethod == 0 || pMethod == 3 || pMethod == 4;
     }
 
-    private static boolean shouldHaveParameters(int p_179337_) {
-        return p_179337_ == 0 || p_179337_ == 2;
+    private static boolean shouldHaveParameters(int pMethod) {
+        return pMethod == 0 || pMethod == 2;
     }
 
     @Nullable
@@ -117,8 +117,8 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
         return GamePacketTypes.CLIENTBOUND_SET_PLAYER_TEAM;
     }
 
-    public void handle(ClientGamePacketListener p_133310_) {
-        p_133310_.handleSetPlayerTeamPacket(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleSetPlayerTeamPacket(this);
     }
 
     public String getName() {
@@ -147,24 +147,24 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
         private final ChatFormatting color;
         private final int options;
 
-        public Parameters(PlayerTeam p_179360_) {
-            this.displayName = p_179360_.getDisplayName();
-            this.options = p_179360_.packOptions();
-            this.nametagVisibility = p_179360_.getNameTagVisibility().name;
-            this.collisionRule = p_179360_.getCollisionRule().name;
-            this.color = p_179360_.getColor();
-            this.playerPrefix = p_179360_.getPlayerPrefix();
-            this.playerSuffix = p_179360_.getPlayerSuffix();
+        public Parameters(PlayerTeam pTeam) {
+            this.displayName = pTeam.getDisplayName();
+            this.options = pTeam.packOptions();
+            this.nametagVisibility = pTeam.getNameTagVisibility().name;
+            this.collisionRule = pTeam.getCollisionRule().name;
+            this.color = pTeam.getColor();
+            this.playerPrefix = pTeam.getPlayerPrefix();
+            this.playerSuffix = pTeam.getPlayerSuffix();
         }
 
-        public Parameters(RegistryFriendlyByteBuf p_329115_) {
-            this.displayName = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(p_329115_);
-            this.options = p_329115_.readByte();
-            this.nametagVisibility = p_329115_.readUtf(40);
-            this.collisionRule = p_329115_.readUtf(40);
-            this.color = p_329115_.readEnum(ChatFormatting.class);
-            this.playerPrefix = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(p_329115_);
-            this.playerSuffix = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(p_329115_);
+        public Parameters(RegistryFriendlyByteBuf pBuffer) {
+            this.displayName = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(pBuffer);
+            this.options = pBuffer.readByte();
+            this.nametagVisibility = pBuffer.readUtf(40);
+            this.collisionRule = pBuffer.readUtf(40);
+            this.color = pBuffer.readEnum(ChatFormatting.class);
+            this.playerPrefix = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(pBuffer);
+            this.playerSuffix = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(pBuffer);
         }
 
         public Component getDisplayName() {
@@ -195,14 +195,14 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
             return this.playerSuffix;
         }
 
-        public void write(RegistryFriendlyByteBuf p_333283_) {
-            ComponentSerialization.TRUSTED_STREAM_CODEC.encode(p_333283_, this.displayName);
-            p_333283_.writeByte(this.options);
-            p_333283_.writeUtf(this.nametagVisibility);
-            p_333283_.writeUtf(this.collisionRule);
-            p_333283_.writeEnum(this.color);
-            ComponentSerialization.TRUSTED_STREAM_CODEC.encode(p_333283_, this.playerPrefix);
-            ComponentSerialization.TRUSTED_STREAM_CODEC.encode(p_333283_, this.playerSuffix);
+        public void write(RegistryFriendlyByteBuf pBuffer) {
+            ComponentSerialization.TRUSTED_STREAM_CODEC.encode(pBuffer, this.displayName);
+            pBuffer.writeByte(this.options);
+            pBuffer.writeUtf(this.nametagVisibility);
+            pBuffer.writeUtf(this.collisionRule);
+            pBuffer.writeEnum(this.color);
+            ComponentSerialization.TRUSTED_STREAM_CODEC.encode(pBuffer, this.playerPrefix);
+            ComponentSerialization.TRUSTED_STREAM_CODEC.encode(pBuffer, this.playerSuffix);
         }
     }
 }

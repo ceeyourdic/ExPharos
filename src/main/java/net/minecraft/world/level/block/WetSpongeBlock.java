@@ -24,11 +24,11 @@ public class WetSpongeBlock extends Block {
     }
 
     @Override
-    protected void onPlace(BlockState p_58229_, Level p_58230_, BlockPos p_58231_, BlockState p_58232_, boolean p_58233_) {
-        if (p_58230_.dimensionType().ultraWarm()) {
-            p_58230_.setBlock(p_58231_, Blocks.SPONGE.defaultBlockState(), 3);
-            p_58230_.levelEvent(2009, p_58231_, 0);
-            p_58230_.playSound(null, p_58231_, SoundEvents.WET_SPONGE_DRIES, SoundSource.BLOCKS, 1.0F, (1.0F + p_58230_.getRandom().nextFloat() * 0.2F) * 0.7F);
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        if (pLevel.dimensionType().ultraWarm()) {
+            pLevel.setBlock(pPos, Blocks.SPONGE.defaultBlockState(), 3);
+            pLevel.levelEvent(2009, pPos, 0);
+            pLevel.playSound(null, pPos, SoundEvents.WET_SPONGE_DRIES, SoundSource.BLOCKS, 1.0F, (1.0F + pLevel.getRandom().nextFloat() * 0.2F) * 0.7F);
         }
     }
 

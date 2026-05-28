@@ -13,8 +13,8 @@ public class PacketEncoder<T extends PacketListener> extends MessageToByteEncode
     private static final Logger LOGGER = LogUtils.getLogger();
     private final ProtocolInfo<T> protocolInfo;
 
-    public PacketEncoder(ProtocolInfo<T> p_327768_) {
-        this.protocolInfo = p_327768_;
+    public PacketEncoder(ProtocolInfo<T> pProtocolInfo) {
+        this.protocolInfo = pProtocolInfo;
     }
 
     protected void encode(ChannelHandlerContext p_130545_, Packet<T> p_130546_, ByteBuf p_130547_) throws Exception {

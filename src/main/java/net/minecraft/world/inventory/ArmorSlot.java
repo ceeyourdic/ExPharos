@@ -17,12 +17,12 @@ class ArmorSlot extends Slot {
     private final ResourceLocation emptyIcon;
 
     public ArmorSlot(
-        Container p_344669_, LivingEntity p_343390_, EquipmentSlot p_343712_, int p_344144_, int p_345211_, int p_342796_, @Nullable ResourceLocation p_343420_
+        Container pContainer, LivingEntity pOwner, EquipmentSlot pSlot, int pSlotIndex, int pX, int pY, @Nullable ResourceLocation pEmptyIcon
     ) {
-        super(p_344669_, p_344144_, p_345211_, p_342796_);
-        this.owner = p_343390_;
-        this.slot = p_343712_;
-        this.emptyIcon = p_343420_;
+        super(pContainer, pSlotIndex, pX, pY);
+        this.owner = pOwner;
+        this.slot = pSlot;
+        this.emptyIcon = pEmptyIcon;
     }
 
     @Override

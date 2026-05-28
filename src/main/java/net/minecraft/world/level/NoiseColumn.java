@@ -8,9 +8,9 @@ public final class NoiseColumn implements BlockColumn {
     private final int minY;
     private final BlockState[] column;
 
-    public NoiseColumn(int p_151623_, BlockState[] p_151624_) {
-        this.minY = p_151623_;
-        this.column = p_151624_;
+    public NoiseColumn(int pMinY, BlockState[] pColumn) {
+        this.minY = pMinY;
+        this.column = pColumn;
     }
 
     @Override

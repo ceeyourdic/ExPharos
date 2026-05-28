@@ -15,13 +15,13 @@ public class EndPodiumFeature extends Feature<NoneFeatureConfiguration> {
     private static final BlockPos END_PODIUM_LOCATION = BlockPos.ZERO;
     private final boolean active;
 
-    public static BlockPos getLocation(BlockPos p_287614_) {
-        return END_PODIUM_LOCATION.offset(p_287614_);
+    public static BlockPos getLocation(BlockPos pPos) {
+        return END_PODIUM_LOCATION.offset(pPos);
     }
 
-    public EndPodiumFeature(boolean p_65718_) {
+    public EndPodiumFeature(boolean pActive) {
         super(NoneFeatureConfiguration.CODEC);
-        this.active = p_65718_;
+        this.active = pActive;
     }
 
     @Override

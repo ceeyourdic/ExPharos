@@ -22,10 +22,10 @@ public class MeleeAttackGoal extends Goal {
     private long lastCanUseCheck;
     private static final long COOLDOWN_BETWEEN_CAN_USE_CHECKS = 20L;
 
-    public MeleeAttackGoal(PathfinderMob p_25552_, double p_25553_, boolean p_25554_) {
-        this.mob = p_25552_;
-        this.speedModifier = p_25553_;
-        this.followingTargetEvenIfNotSeen = p_25554_;
+    public MeleeAttackGoal(PathfinderMob pMob, double pSpeedModifier, boolean pFollowingTargetEvenIfNotSeen) {
+        this.mob = pMob;
+        this.speedModifier = pSpeedModifier;
+        this.followingTargetEvenIfNotSeen = pFollowingTargetEvenIfNotSeen;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
@@ -124,11 +124,11 @@ public class MeleeAttackGoal extends Goal {
         }
     }
 
-    protected void checkAndPerformAttack(LivingEntity p_25557_) {
-        if (this.canPerformAttack(p_25557_)) {
+    protected void checkAndPerformAttack(LivingEntity pTarget) {
+        if (this.canPerformAttack(pTarget)) {
             this.resetAttackCooldown();
             this.mob.swing(InteractionHand.MAIN_HAND);
-            this.mob.doHurtTarget(getServerLevel(this.mob), p_25557_);
+            this.mob.doHurtTarget(getServerLevel(this.mob), pTarget);
         }
     }
 
@@ -140,8 +140,8 @@ public class MeleeAttackGoal extends Goal {
         return this.ticksUntilNextAttack <= 0;
     }
 
-    protected boolean canPerformAttack(LivingEntity p_301160_) {
-        return this.isTimeToAttack() && this.mob.isWithinMeleeAttackRange(p_301160_) && this.mob.getSensing().hasLineOfSight(p_301160_);
+    protected boolean canPerformAttack(LivingEntity pEntity) {
+        return this.isTimeToAttack() && this.mob.isWithinMeleeAttackRange(pEntity) && this.mob.getSensing().hasLineOfSight(pEntity);
     }
 
     protected int getTicksUntilNextAttack() {

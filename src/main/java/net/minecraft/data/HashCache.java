@@ -44,22 +44,22 @@ public class HashCache {
     private final int initialCount;
     private int writes;
 
-    private Path getProviderCachePath(String p_254395_) {
-        return this.cacheDir.resolve(Hashing.sha1().hashString(p_254395_, StandardCharsets.UTF_8).toString());
+    private Path getProviderCachePath(String pProvider) {
+        return this.cacheDir.resolve(Hashing.sha1().hashString(pProvider, StandardCharsets.UTF_8).toString());
     }
 
-    public HashCache(Path p_236087_, Collection<String> p_253748_, WorldVersion p_236089_) throws IOException {
-        this.versionId = p_236089_.getName();
-        this.rootDir = p_236087_;
-        this.cacheDir = p_236087_.resolve(".cache");
+    public HashCache(Path pRootDir, Collection<String> pProviders, WorldVersion pVersion) throws IOException {
+        this.versionId = pVersion.getName();
+        this.rootDir = pRootDir;
+        this.cacheDir = pRootDir.resolve(".cache");
         Files.createDirectories(this.cacheDir);
         Map<String, HashCache.ProviderCache> map = new HashMap<>();
         int i = 0;
 
-        for (String s : p_253748_) {
+        for (String s : pProviders) {
             Path path = this.getProviderCachePath(s);
             this.cachePaths.add(path);
-            HashCache.ProviderCache hashcache$providercache = readCache(p_236087_, path);
+            HashCache.ProviderCache hashcache$providercache = readCache(pRootDir, path);
             map.put(s, hashcache$providercache);
             i += hashcache$providercache.count();
         }
@@ -68,37 +68,37 @@ public class HashCache {
         this.initialCount = i;
     }
 
-    private static HashCache.ProviderCache readCache(Path p_236093_, Path p_236094_) {
-        if (Files.isReadable(p_236094_)) {
+    private static HashCache.ProviderCache readCache(Path pRootDir, Path pCachePath) {
+        if (Files.isReadable(pCachePath)) {
             try {
-                return HashCache.ProviderCache.load(p_236093_, p_236094_);
+                return HashCache.ProviderCache.load(pRootDir, pCachePath);
             } catch (Exception exception) {
-                LOGGER.warn("Failed to parse cache {}, discarding", p_236094_, exception);
+                LOGGER.warn("Failed to parse cache {}, discarding", pCachePath, exception);
             }
         }
 
         return new HashCache.ProviderCache("unknown", ImmutableMap.of());
     }
 
-    public boolean shouldRunInThisVersion(String p_254319_) {
-        HashCache.ProviderCache hashcache$providercache = this.caches.get(p_254319_);
+    public boolean shouldRunInThisVersion(String pProvider) {
+        HashCache.ProviderCache hashcache$providercache = this.caches.get(pProvider);
         return hashcache$providercache == null || !hashcache$providercache.version.equals(this.versionId);
     }
 
-    public CompletableFuture<HashCache.UpdateResult> generateUpdate(String p_253944_, HashCache.UpdateFunction p_254321_) {
-        HashCache.ProviderCache hashcache$providercache = this.caches.get(p_253944_);
+    public CompletableFuture<HashCache.UpdateResult> generateUpdate(String pProvider, HashCache.UpdateFunction pUpdateFunction) {
+        HashCache.ProviderCache hashcache$providercache = this.caches.get(pProvider);
         if (hashcache$providercache == null) {
-            throw new IllegalStateException("Provider not registered: " + p_253944_);
+            throw new IllegalStateException("Provider not registered: " + pProvider);
         } else {
-            HashCache.CacheUpdater hashcache$cacheupdater = new HashCache.CacheUpdater(p_253944_, this.versionId, hashcache$providercache);
-            return p_254321_.update(hashcache$cacheupdater).thenApply(p_253376_ -> hashcache$cacheupdater.close());
+            HashCache.CacheUpdater hashcache$cacheupdater = new HashCache.CacheUpdater(pProvider, this.versionId, hashcache$providercache);
+            return pUpdateFunction.update(hashcache$cacheupdater).thenApply(p_253376_ -> hashcache$cacheupdater.close());
         }
     }
 
-    public void applyUpdate(HashCache.UpdateResult p_253725_) {
-        this.caches.put(p_253725_.providerId(), p_253725_.cache());
-        this.cachesToWrite.add(p_253725_.providerId());
-        this.writes = this.writes + p_253725_.writes();
+    public void applyUpdate(HashCache.UpdateResult pUpdateResult) {
+        this.caches.put(pUpdateResult.providerId(), pUpdateResult.cache());
+        this.cachesToWrite.add(pUpdateResult.providerId());
+        this.writes = this.writes + pUpdateResult.writes();
     }
 
     public void purgeStaleAndWrite() throws IOException {
@@ -152,14 +152,14 @@ public class HashCache {
         private final AtomicInteger writes = new AtomicInteger();
         private volatile boolean closed;
 
-        CacheUpdater(String p_253971_, String p_254002_, HashCache.ProviderCache p_254244_) {
-            this.provider = p_253971_;
-            this.oldCache = p_254244_;
-            this.newCache = new HashCache.ProviderCacheBuilder(p_254002_);
+        CacheUpdater(String pProvider, String pVersion, HashCache.ProviderCache pOldCache) {
+            this.provider = pProvider;
+            this.oldCache = pOldCache;
+            this.newCache = new HashCache.ProviderCacheBuilder(pVersion);
         }
 
-        private boolean shouldWrite(Path p_236120_, HashCode p_236121_) {
-            return !Objects.equals(this.oldCache.get(p_236120_), p_236121_) || !Files.exists(p_236120_);
+        private boolean shouldWrite(Path pKey, HashCode pValue) {
+            return !Objects.equals(this.oldCache.get(pKey), pValue) || !Files.exists(pKey);
         }
 
         @Override
@@ -185,17 +185,17 @@ public class HashCache {
 
     static record ProviderCache(String version, ImmutableMap<Path, HashCode> data) {
         @Nullable
-        public HashCode get(Path p_236135_) {
-            return this.data.get(p_236135_);
+        public HashCode get(Path pPath) {
+            return this.data.get(pPath);
         }
 
         public int count() {
             return this.data.size();
         }
 
-        public static HashCache.ProviderCache load(Path p_236140_, Path p_236141_) throws IOException {
+        public static HashCache.ProviderCache load(Path pRootDir, Path pCachePath) throws IOException {
             HashCache.ProviderCache hashcache$providercache;
-            try (BufferedReader bufferedreader = Files.newBufferedReader(p_236141_, StandardCharsets.UTF_8)) {
+            try (BufferedReader bufferedreader = Files.newBufferedReader(pCachePath, StandardCharsets.UTF_8)) {
                 String s = bufferedreader.readLine();
                 if (!s.startsWith("// ")) {
                     throw new IllegalStateException("Missing cache file header");
@@ -206,7 +206,7 @@ public class HashCache {
                 Builder<Path, HashCode> builder = ImmutableMap.builder();
                 bufferedreader.lines().forEach(p_253382_ -> {
                     int i = p_253382_.indexOf(32);
-                    builder.put(p_236140_.resolve(p_253382_.substring(i + 1)), HashCode.fromString(p_253382_.substring(0, i)));
+                    builder.put(pRootDir.resolve(p_253382_.substring(i + 1)), HashCode.fromString(p_253382_.substring(0, i)));
                 });
                 hashcache$providercache = new HashCache.ProviderCache(s1, builder.build());
             }
@@ -214,33 +214,33 @@ public class HashCache {
             return hashcache$providercache;
         }
 
-        public void save(Path p_236143_, Path p_236144_, String p_236145_) {
-            try (BufferedWriter bufferedwriter = Files.newBufferedWriter(p_236144_, StandardCharsets.UTF_8)) {
+        public void save(Path pRootDir, Path pCachePath, String pDate) {
+            try (BufferedWriter bufferedwriter = Files.newBufferedWriter(pCachePath, StandardCharsets.UTF_8)) {
                 bufferedwriter.write("// ");
                 bufferedwriter.write(this.version);
                 bufferedwriter.write(9);
-                bufferedwriter.write(p_236145_);
+                bufferedwriter.write(pDate);
                 bufferedwriter.newLine();
 
                 for (Entry<Path, HashCode> entry : this.data.entrySet()) {
                     bufferedwriter.write(entry.getValue().toString());
                     bufferedwriter.write(32);
-                    bufferedwriter.write(p_236143_.relativize(entry.getKey()).toString());
+                    bufferedwriter.write(pRootDir.relativize(entry.getKey()).toString());
                     bufferedwriter.newLine();
                 }
             } catch (IOException ioexception) {
-                HashCache.LOGGER.warn("Unable write cachefile {}: {}", p_236144_, ioexception);
+                HashCache.LOGGER.warn("Unable write cachefile {}: {}", pCachePath, ioexception);
             }
         }
     }
 
     static record ProviderCacheBuilder(String version, ConcurrentMap<Path, HashCode> data) {
-        ProviderCacheBuilder(String p_254186_) {
-            this(p_254186_, new ConcurrentHashMap<>());
+        ProviderCacheBuilder(String pVersion) {
+            this(pVersion, new ConcurrentHashMap<>());
         }
 
-        public void put(Path p_254121_, HashCode p_254288_) {
-            this.data.put(p_254121_, p_254288_);
+        public void put(Path pKey, HashCode pValue) {
+            this.data.put(pKey, pValue);
         }
 
         public HashCache.ProviderCache build() {
@@ -250,7 +250,7 @@ public class HashCache {
 
     @FunctionalInterface
     public interface UpdateFunction {
-        CompletableFuture<?> update(CachedOutput p_253936_);
+        CompletableFuture<?> update(CachedOutput pOutput);
     }
 
     public static record UpdateResult(String providerId, HashCache.ProviderCache cache, int writes) {

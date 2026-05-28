@@ -22,19 +22,19 @@ public class BackupConfirmScreen extends Screen {
     protected int id;
     private Checkbox eraseCache;
 
-    public BackupConfirmScreen(Runnable p_309995_, BackupConfirmScreen.Listener p_95544_, Component p_95545_, Component p_95546_, boolean p_95547_) {
-        this(p_309995_, p_95544_, p_95545_, p_95546_, BACKUP_AND_JOIN, p_95547_);
+    public BackupConfirmScreen(Runnable pOnCancel, BackupConfirmScreen.Listener pOnProceed, Component pTitle, Component pDescription, boolean pPromptForCacheErase) {
+        this(pOnCancel, pOnProceed, pTitle, pDescription, BACKUP_AND_JOIN, pPromptForCacheErase);
     }
 
     public BackupConfirmScreen(
-        Runnable p_364937_, BackupConfirmScreen.Listener p_370062_, Component p_361532_, Component p_369162_, Component p_369010_, boolean p_363018_
+        Runnable pOnCancel, BackupConfirmScreen.Listener pOnProceed, Component pTitle, Component pDescription, Component pConfirmation, boolean pPromptForCacheErase
     ) {
-        super(p_361532_);
-        this.onCancel = p_364937_;
-        this.onProceed = p_370062_;
-        this.description = p_369162_;
-        this.promptForCacheErase = p_363018_;
-        this.confirmation = p_369010_;
+        super(pTitle);
+        this.onCancel = pOnCancel;
+        this.onProceed = pOnProceed;
+        this.description = pDescription;
+        this.promptForCacheErase = pPromptForCacheErase;
+        this.confirmation = pConfirmation;
     }
 
     @Override
@@ -79,17 +79,17 @@ public class BackupConfirmScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int p_95549_, int p_95550_, int p_95551_) {
-        if (p_95549_ == 256) {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (pKeyCode == 256) {
             this.onCancel.run();
             return true;
         } else {
-            return super.keyPressed(p_95549_, p_95550_, p_95551_);
+            return super.keyPressed(pKeyCode, pScanCode, pModifiers);
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     public interface Listener {
-        void proceed(boolean p_95566_, boolean p_95567_);
+        void proceed(boolean pConfirmed, boolean pEraseCache);
     }
 }

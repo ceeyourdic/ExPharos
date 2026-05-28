@@ -16,8 +16,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class GoatModel extends QuadrupedModel<GoatRenderState> {
     public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(true, 19.0F, 1.0F, 2.5F, 2.0F, 24.0F, Set.of("head"));
 
-    public GoatModel(ModelPart p_170578_) {
-        super(p_170578_);
+    public GoatModel(ModelPart pRoot) {
+        super(pRoot);
     }
 
     public static LayerDefinition createBodyLayer() {

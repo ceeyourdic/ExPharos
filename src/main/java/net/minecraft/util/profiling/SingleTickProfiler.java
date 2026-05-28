@@ -15,10 +15,10 @@ public class SingleTickProfiler {
     private final File location;
     private ProfileCollector profiler = InactiveProfiler.INSTANCE;
 
-    public SingleTickProfiler(LongSupplier p_145963_, String p_145964_, long p_145965_) {
-        this.realTime = p_145963_;
-        this.location = new File("debug", p_145964_);
-        this.saveThreshold = p_145965_;
+    public SingleTickProfiler(LongSupplier pRealTime, String pLocation, long pSaveThreshold) {
+        this.realTime = pRealTime;
+        this.location = new File("debug", pLocation);
+        this.saveThreshold = pSaveThreshold;
     }
 
     public ProfilerFiller startTick() {
@@ -40,11 +40,11 @@ public class SingleTickProfiler {
     }
 
     @Nullable
-    public static SingleTickProfiler createTickProfiler(String p_18633_) {
+    public static SingleTickProfiler createTickProfiler(String pName) {
         return null;
     }
 
-    public static ProfilerFiller decorateFiller(ProfilerFiller p_18630_, @Nullable SingleTickProfiler p_18631_) {
-        return p_18631_ != null ? ProfilerFiller.combine(p_18631_.startTick(), p_18630_) : p_18630_;
+    public static ProfilerFiller decorateFiller(ProfilerFiller pProfiler, @Nullable SingleTickProfiler pSingleTickProfiler) {
+        return pSingleTickProfiler != null ? ProfilerFiller.combine(pSingleTickProfiler.startTick(), pProfiler) : pProfiler;
     }
 }

@@ -45,15 +45,15 @@ public class InBedChatScreen extends ChatScreen {
     }
 
     @Override
-    public boolean keyPressed(int p_96070_, int p_96071_, int p_96072_) {
-        if (p_96070_ == 256) {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (pKeyCode == 256) {
             this.sendWakeUp();
         }
 
         if (!this.minecraft.getChatStatus().isChatAllowed(this.minecraft.isLocalServer())) {
             return true;
-        } else if (p_96070_ != 257 && p_96070_ != 335) {
-            return super.keyPressed(p_96070_, p_96071_, p_96072_);
+        } else if (pKeyCode != 257 && pKeyCode != 335) {
+            return super.keyPressed(pKeyCode, pScanCode, pModifiers);
         } else {
             this.handleChatInput(this.input.getValue(), true);
             this.input.setValue("");

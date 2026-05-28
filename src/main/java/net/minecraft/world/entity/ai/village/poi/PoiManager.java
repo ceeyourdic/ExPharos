@@ -45,120 +45,120 @@ public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> {
     private final LongSet loadedChunks = new LongOpenHashSet();
 
     public PoiManager(
-        RegionStorageInfo p_332478_,
-        Path p_217869_,
-        DataFixer p_217870_,
-        boolean p_217871_,
-        RegistryAccess p_217872_,
-        ChunkIOErrorReporter p_343386_,
-        LevelHeightAccessor p_217873_
+        RegionStorageInfo pInfo,
+        Path pFolder,
+        DataFixer pFixerUpper,
+        boolean pSync,
+        RegistryAccess pRegistryAccess,
+        ChunkIOErrorReporter pErrorReporter,
+        LevelHeightAccessor pLevelHeightAccessor
     ) {
         super(
-            new SimpleRegionStorage(p_332478_, p_217869_, p_217870_, p_217871_, DataFixTypes.POI_CHUNK),
+            new SimpleRegionStorage(pInfo, pFolder, pFixerUpper, pSync, DataFixTypes.POI_CHUNK),
             PoiSection.Packed.CODEC,
             PoiSection::pack,
             PoiSection.Packed::unpack,
             PoiSection::new,
-            p_217872_,
-            p_343386_,
-            p_217873_
+            pRegistryAccess,
+            pErrorReporter,
+            pLevelHeightAccessor
         );
         this.distanceTracker = new PoiManager.DistanceTracker();
     }
 
-    public void add(BlockPos p_217920_, Holder<PoiType> p_217921_) {
-        this.getOrCreate(SectionPos.asLong(p_217920_)).add(p_217920_, p_217921_);
+    public void add(BlockPos pPos, Holder<PoiType> pType) {
+        this.getOrCreate(SectionPos.asLong(pPos)).add(pPos, pType);
     }
 
-    public void remove(BlockPos p_27080_) {
-        this.getOrLoad(SectionPos.asLong(p_27080_)).ifPresent(p_148657_ -> p_148657_.remove(p_27080_));
+    public void remove(BlockPos pPos) {
+        this.getOrLoad(SectionPos.asLong(pPos)).ifPresent(p_148657_ -> p_148657_.remove(pPos));
     }
 
-    public long getCountInRange(Predicate<Holder<PoiType>> p_27122_, BlockPos p_27123_, int p_27124_, PoiManager.Occupancy p_27125_) {
-        return this.getInRange(p_27122_, p_27123_, p_27124_, p_27125_).count();
+    public long getCountInRange(Predicate<Holder<PoiType>> pTypePredicate, BlockPos pPos, int pDistance, PoiManager.Occupancy pStatus) {
+        return this.getInRange(pTypePredicate, pPos, pDistance, pStatus).count();
     }
 
-    public boolean existsAtPosition(ResourceKey<PoiType> p_217875_, BlockPos p_217876_) {
-        return this.exists(p_217876_, p_217879_ -> p_217879_.is(p_217875_));
+    public boolean existsAtPosition(ResourceKey<PoiType> pType, BlockPos pPos) {
+        return this.exists(pPos, p_217879_ -> p_217879_.is(pType));
     }
 
-    public Stream<PoiRecord> getInSquare(Predicate<Holder<PoiType>> p_27167_, BlockPos p_27168_, int p_27169_, PoiManager.Occupancy p_27170_) {
-        int i = Math.floorDiv(p_27169_, 16) + 1;
-        return ChunkPos.rangeClosed(new ChunkPos(p_27168_), i).flatMap(p_217938_ -> this.getInChunk(p_27167_, p_217938_, p_27170_)).filter(p_217971_ -> {
+    public Stream<PoiRecord> getInSquare(Predicate<Holder<PoiType>> pTypePredicate, BlockPos pPos, int pDistance, PoiManager.Occupancy pStatus) {
+        int i = Math.floorDiv(pDistance, 16) + 1;
+        return ChunkPos.rangeClosed(new ChunkPos(pPos), i).flatMap(p_217938_ -> this.getInChunk(pTypePredicate, p_217938_, pStatus)).filter(p_217971_ -> {
             BlockPos blockpos = p_217971_.getPos();
-            return Math.abs(blockpos.getX() - p_27168_.getX()) <= p_27169_ && Math.abs(blockpos.getZ() - p_27168_.getZ()) <= p_27169_;
+            return Math.abs(blockpos.getX() - pPos.getX()) <= pDistance && Math.abs(blockpos.getZ() - pPos.getZ()) <= pDistance;
         });
     }
 
-    public Stream<PoiRecord> getInRange(Predicate<Holder<PoiType>> p_27182_, BlockPos p_27183_, int p_27184_, PoiManager.Occupancy p_27185_) {
-        int i = p_27184_ * p_27184_;
-        return this.getInSquare(p_27182_, p_27183_, p_27184_, p_27185_).filter(p_217906_ -> p_217906_.getPos().distSqr(p_27183_) <= (double)i);
+    public Stream<PoiRecord> getInRange(Predicate<Holder<PoiType>> pTypePredicate, BlockPos pPos, int pDistance, PoiManager.Occupancy pStatus) {
+        int i = pDistance * pDistance;
+        return this.getInSquare(pTypePredicate, pPos, pDistance, pStatus).filter(p_217906_ -> p_217906_.getPos().distSqr(pPos) <= (double)i);
     }
 
     @VisibleForDebug
-    public Stream<PoiRecord> getInChunk(Predicate<Holder<PoiType>> p_27118_, ChunkPos p_27119_, PoiManager.Occupancy p_27120_) {
+    public Stream<PoiRecord> getInChunk(Predicate<Holder<PoiType>> pTypePredicate, ChunkPos pPosChunk, PoiManager.Occupancy pStatus) {
         return IntStream.rangeClosed(this.levelHeightAccessor.getMinSectionY(), this.levelHeightAccessor.getMaxSectionY())
             .boxed()
-            .map(p_217886_ -> this.getOrLoad(SectionPos.of(p_27119_, p_217886_).asLong()))
+            .map(p_217886_ -> this.getOrLoad(SectionPos.of(pPosChunk, p_217886_).asLong()))
             .filter(Optional::isPresent)
-            .flatMap(p_217942_ -> p_217942_.get().getRecords(p_27118_, p_27120_));
+            .flatMap(p_217942_ -> p_217942_.get().getRecords(pTypePredicate, pStatus));
     }
 
     public Stream<BlockPos> findAll(
-        Predicate<Holder<PoiType>> p_27139_, Predicate<BlockPos> p_27140_, BlockPos p_27141_, int p_27142_, PoiManager.Occupancy p_27143_
+        Predicate<Holder<PoiType>> pTypePredicate, Predicate<BlockPos> pPosPredicate, BlockPos pPos, int pDistance, PoiManager.Occupancy pStatus
     ) {
-        return this.getInRange(p_27139_, p_27141_, p_27142_, p_27143_).map(PoiRecord::getPos).filter(p_27140_);
+        return this.getInRange(pTypePredicate, pPos, pDistance, pStatus).map(PoiRecord::getPos).filter(pPosPredicate);
     }
 
     public Stream<Pair<Holder<PoiType>, BlockPos>> findAllWithType(
-        Predicate<Holder<PoiType>> p_217984_, Predicate<BlockPos> p_217985_, BlockPos p_217986_, int p_217987_, PoiManager.Occupancy p_217988_
+        Predicate<Holder<PoiType>> pTypePredicate, Predicate<BlockPos> pPosPredicate, BlockPos pPos, int pDistance, PoiManager.Occupancy pStatus
     ) {
-        return this.getInRange(p_217984_, p_217986_, p_217987_, p_217988_)
-            .filter(p_217982_ -> p_217985_.test(p_217982_.getPos()))
+        return this.getInRange(pTypePredicate, pPos, pDistance, pStatus)
+            .filter(p_217982_ -> pPosPredicate.test(p_217982_.getPos()))
             .map(p_217990_ -> Pair.of(p_217990_.getPoiType(), p_217990_.getPos()));
     }
 
     public Stream<Pair<Holder<PoiType>, BlockPos>> findAllClosestFirstWithType(
-        Predicate<Holder<PoiType>> p_217995_, Predicate<BlockPos> p_217996_, BlockPos p_217997_, int p_217998_, PoiManager.Occupancy p_217999_
+        Predicate<Holder<PoiType>> pTypePredicate, Predicate<BlockPos> pPosPredicate, BlockPos pPos, int pDistance, PoiManager.Occupancy pStatus
     ) {
-        return this.findAllWithType(p_217995_, p_217996_, p_217997_, p_217998_, p_217999_)
-            .sorted(Comparator.comparingDouble(p_217915_ -> p_217915_.getSecond().distSqr(p_217997_)));
+        return this.findAllWithType(pTypePredicate, pPosPredicate, pPos, pDistance, pStatus)
+            .sorted(Comparator.comparingDouble(p_217915_ -> p_217915_.getSecond().distSqr(pPos)));
     }
 
     public Optional<BlockPos> find(
-        Predicate<Holder<PoiType>> p_27187_, Predicate<BlockPos> p_27188_, BlockPos p_27189_, int p_27190_, PoiManager.Occupancy p_27191_
+        Predicate<Holder<PoiType>> pTypePredicate, Predicate<BlockPos> pPosPredicate, BlockPos pPos, int pDistance, PoiManager.Occupancy pStatus
     ) {
-        return this.findAll(p_27187_, p_27188_, p_27189_, p_27190_, p_27191_).findFirst();
+        return this.findAll(pTypePredicate, pPosPredicate, pPos, pDistance, pStatus).findFirst();
     }
 
-    public Optional<BlockPos> findClosest(Predicate<Holder<PoiType>> p_27193_, BlockPos p_27194_, int p_27195_, PoiManager.Occupancy p_27196_) {
-        return this.getInRange(p_27193_, p_27194_, p_27195_, p_27196_)
+    public Optional<BlockPos> findClosest(Predicate<Holder<PoiType>> pTypePredicate, BlockPos pPos, int pDistance, PoiManager.Occupancy pStatus) {
+        return this.getInRange(pTypePredicate, pPos, pDistance, pStatus)
             .map(PoiRecord::getPos)
-            .min(Comparator.comparingDouble(p_217977_ -> p_217977_.distSqr(p_27194_)));
+            .min(Comparator.comparingDouble(p_217977_ -> p_217977_.distSqr(pPos)));
     }
 
     public Optional<Pair<Holder<PoiType>, BlockPos>> findClosestWithType(
-        Predicate<Holder<PoiType>> p_218003_, BlockPos p_218004_, int p_218005_, PoiManager.Occupancy p_218006_
+        Predicate<Holder<PoiType>> pTypePredicate, BlockPos pPos, int pDistance, PoiManager.Occupancy pStatus
     ) {
-        return this.getInRange(p_218003_, p_218004_, p_218005_, p_218006_)
-            .min(Comparator.comparingDouble(p_217909_ -> p_217909_.getPos().distSqr(p_218004_)))
+        return this.getInRange(pTypePredicate, pPos, pDistance, pStatus)
+            .min(Comparator.comparingDouble(p_217909_ -> p_217909_.getPos().distSqr(pPos)))
             .map(p_217959_ -> Pair.of(p_217959_.getPoiType(), p_217959_.getPos()));
     }
 
     public Optional<BlockPos> findClosest(
-        Predicate<Holder<PoiType>> p_148659_, Predicate<BlockPos> p_148660_, BlockPos p_148661_, int p_148662_, PoiManager.Occupancy p_148663_
+        Predicate<Holder<PoiType>> pTypePredicate, Predicate<BlockPos> pPosPredicate, BlockPos pPos, int pDistance, PoiManager.Occupancy pStatus
     ) {
-        return this.getInRange(p_148659_, p_148661_, p_148662_, p_148663_)
+        return this.getInRange(pTypePredicate, pPos, pDistance, pStatus)
             .map(PoiRecord::getPos)
-            .filter(p_148660_)
-            .min(Comparator.comparingDouble(p_217918_ -> p_217918_.distSqr(p_148661_)));
+            .filter(pPosPredicate)
+            .min(Comparator.comparingDouble(p_217918_ -> p_217918_.distSqr(pPos)));
     }
 
     public Optional<BlockPos> take(
-        Predicate<Holder<PoiType>> p_217947_, BiPredicate<Holder<PoiType>, BlockPos> p_217948_, BlockPos p_217949_, int p_217950_
+        Predicate<Holder<PoiType>> pTypePredicate, BiPredicate<Holder<PoiType>, BlockPos> pCombinedTypePosPredicate, BlockPos pPos, int pDistance
     ) {
-        return this.getInRange(p_217947_, p_217949_, p_217950_, PoiManager.Occupancy.HAS_SPACE)
-            .filter(p_217934_ -> p_217948_.test(p_217934_.getPoiType(), p_217934_.getPos()))
+        return this.getInRange(pTypePredicate, pPos, pDistance, PoiManager.Occupancy.HAS_SPACE)
+            .filter(p_217934_ -> pCombinedTypePosPredicate.test(p_217934_.getPoiType(), p_217934_.getPos()))
             .findFirst()
             .map(p_217881_ -> {
                 p_217881_.acquireTicket();
@@ -167,44 +167,44 @@ public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> {
     }
 
     public Optional<BlockPos> getRandom(
-        Predicate<Holder<PoiType>> p_217952_,
-        Predicate<BlockPos> p_217953_,
-        PoiManager.Occupancy p_217954_,
-        BlockPos p_217955_,
-        int p_217956_,
-        RandomSource p_217957_
+        Predicate<Holder<PoiType>> pTypePredicate,
+        Predicate<BlockPos> pPosPredicate,
+        PoiManager.Occupancy pStatus,
+        BlockPos pPos,
+        int pDistance,
+        RandomSource pRandom
     ) {
-        List<PoiRecord> list = Util.toShuffledList(this.getInRange(p_217952_, p_217955_, p_217956_, p_217954_), p_217957_);
-        return list.stream().filter(p_217945_ -> p_217953_.test(p_217945_.getPos())).findFirst().map(PoiRecord::getPos);
+        List<PoiRecord> list = Util.toShuffledList(this.getInRange(pTypePredicate, pPos, pDistance, pStatus), pRandom);
+        return list.stream().filter(p_217945_ -> pPosPredicate.test(p_217945_.getPos())).findFirst().map(PoiRecord::getPos);
     }
 
-    public boolean release(BlockPos p_27155_) {
-        return this.getOrLoad(SectionPos.asLong(p_27155_))
-            .map(p_217993_ -> p_217993_.release(p_27155_))
-            .orElseThrow(() -> Util.pauseInIde(new IllegalStateException("POI never registered at " + p_27155_)));
+    public boolean release(BlockPos pPos) {
+        return this.getOrLoad(SectionPos.asLong(pPos))
+            .map(p_217993_ -> p_217993_.release(pPos))
+            .orElseThrow(() -> Util.pauseInIde(new IllegalStateException("POI never registered at " + pPos)));
     }
 
-    public boolean exists(BlockPos p_27092_, Predicate<Holder<PoiType>> p_27093_) {
-        return this.getOrLoad(SectionPos.asLong(p_27092_)).map(p_217925_ -> p_217925_.exists(p_27092_, p_27093_)).orElse(false);
+    public boolean exists(BlockPos pPos, Predicate<Holder<PoiType>> pTypePredicate) {
+        return this.getOrLoad(SectionPos.asLong(pPos)).map(p_217925_ -> p_217925_.exists(pPos, pTypePredicate)).orElse(false);
     }
 
-    public Optional<Holder<PoiType>> getType(BlockPos p_27178_) {
-        return this.getOrLoad(SectionPos.asLong(p_27178_)).flatMap(p_217974_ -> p_217974_.getType(p_27178_));
+    public Optional<Holder<PoiType>> getType(BlockPos pPos) {
+        return this.getOrLoad(SectionPos.asLong(pPos)).flatMap(p_217974_ -> p_217974_.getType(pPos));
     }
 
     @Deprecated
     @VisibleForDebug
-    public int getFreeTickets(BlockPos p_148654_) {
-        return this.getOrLoad(SectionPos.asLong(p_148654_)).map(p_217912_ -> p_217912_.getFreeTickets(p_148654_)).orElse(0);
+    public int getFreeTickets(BlockPos pPos) {
+        return this.getOrLoad(SectionPos.asLong(pPos)).map(p_217912_ -> p_217912_.getFreeTickets(pPos)).orElse(0);
     }
 
-    public int sectionsToVillage(SectionPos p_27099_) {
+    public int sectionsToVillage(SectionPos pSectionPos) {
         this.distanceTracker.runAllUpdates();
-        return this.distanceTracker.getLevel(p_27099_.asLong());
+        return this.distanceTracker.getLevel(pSectionPos.asLong());
     }
 
-    boolean isVillageCenter(long p_27198_) {
-        Optional<PoiSection> optional = this.get(p_27198_);
+    boolean isVillageCenter(long pChunkPos) {
+        Optional<PoiSection> optional = this.get(pChunkPos);
         return optional == null
             ? false
             : optional.<Boolean>map(
@@ -222,9 +222,9 @@ public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> {
     }
 
     @Override
-    protected void setDirty(long p_27036_) {
-        super.setDirty(p_27036_);
-        this.distanceTracker.update(p_27036_, this.distanceTracker.getLevelFromSource(p_27036_), false);
+    protected void setDirty(long pSectionPos) {
+        super.setDirty(pSectionPos);
+        this.distanceTracker.update(pSectionPos, this.distanceTracker.getLevelFromSource(pSectionPos), false);
     }
 
     @Override
@@ -232,42 +232,42 @@ public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> {
         this.distanceTracker.update(p_27145_, this.distanceTracker.getLevelFromSource(p_27145_), false);
     }
 
-    public void checkConsistencyWithBlocks(SectionPos p_281731_, LevelChunkSection p_281893_) {
-        Util.ifElse(this.getOrLoad(p_281731_.asLong()), p_217898_ -> p_217898_.refresh(p_217967_ -> {
-                if (mayHavePoi(p_281893_)) {
-                    this.updateFromSection(p_281893_, p_281731_, p_217967_);
+    public void checkConsistencyWithBlocks(SectionPos pSectionPos, LevelChunkSection pLevelChunkSection) {
+        Util.ifElse(this.getOrLoad(pSectionPos.asLong()), p_217898_ -> p_217898_.refresh(p_217967_ -> {
+                if (mayHavePoi(pLevelChunkSection)) {
+                    this.updateFromSection(pLevelChunkSection, pSectionPos, p_217967_);
                 }
             }), () -> {
-            if (mayHavePoi(p_281893_)) {
-                PoiSection poisection = this.getOrCreate(p_281731_.asLong());
-                this.updateFromSection(p_281893_, p_281731_, poisection::add);
+            if (mayHavePoi(pLevelChunkSection)) {
+                PoiSection poisection = this.getOrCreate(pSectionPos.asLong());
+                this.updateFromSection(pLevelChunkSection, pSectionPos, poisection::add);
             }
         });
     }
 
-    private static boolean mayHavePoi(LevelChunkSection p_27061_) {
-        return p_27061_.maybeHas(PoiTypes::hasPoi);
+    private static boolean mayHavePoi(LevelChunkSection pSection) {
+        return pSection.maybeHas(PoiTypes::hasPoi);
     }
 
-    private void updateFromSection(LevelChunkSection p_27070_, SectionPos p_27071_, BiConsumer<BlockPos, Holder<PoiType>> p_27072_) {
-        p_27071_.blocksInside()
+    private void updateFromSection(LevelChunkSection pSection, SectionPos pSectionPos, BiConsumer<BlockPos, Holder<PoiType>> pPosToTypeConsumer) {
+        pSectionPos.blocksInside()
             .forEach(
                 p_217902_ -> {
-                    BlockState blockstate = p_27070_.getBlockState(
+                    BlockState blockstate = pSection.getBlockState(
                         SectionPos.sectionRelative(p_217902_.getX()), SectionPos.sectionRelative(p_217902_.getY()), SectionPos.sectionRelative(p_217902_.getZ())
                     );
-                    PoiTypes.forState(blockstate).ifPresent(p_217931_ -> p_27072_.accept(p_217902_, (Holder<PoiType>)p_217931_));
+                    PoiTypes.forState(blockstate).ifPresent(p_217931_ -> pPosToTypeConsumer.accept(p_217902_, (Holder<PoiType>)p_217931_));
                 }
             );
     }
 
-    public void ensureLoadedAndValid(LevelReader p_27057_, BlockPos p_27058_, int p_27059_) {
-        SectionPos.aroundChunk(new ChunkPos(p_27058_), Math.floorDiv(p_27059_, 16), this.levelHeightAccessor.getMinSectionY(), this.levelHeightAccessor.getMaxSectionY())
+    public void ensureLoadedAndValid(LevelReader pLevelReader, BlockPos pPos, int pCoordinateOffset) {
+        SectionPos.aroundChunk(new ChunkPos(pPos), Math.floorDiv(pCoordinateOffset, 16), this.levelHeightAccessor.getMinSectionY(), this.levelHeightAccessor.getMaxSectionY())
             .map(p_217979_ -> Pair.of(p_217979_, this.getOrLoad(p_217979_.asLong())))
             .filter(p_217963_ -> !p_217963_.getSecond().map(PoiSection::isValid).orElse(false))
             .map(p_217891_ -> p_217891_.getFirst().chunk())
             .filter(p_217961_ -> this.loadedChunks.add(p_217961_.toLong()))
-            .forEach(p_326965_ -> p_27057_.getChunk(p_326965_.x, p_326965_.z, ChunkStatus.EMPTY));
+            .forEach(p_326965_ -> pLevelReader.getChunk(p_326965_.x, p_326965_.z, ChunkStatus.EMPTY));
     }
 
     final class DistanceTracker extends SectionTracker {
@@ -279,21 +279,21 @@ public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> {
         }
 
         @Override
-        protected int getLevelFromSource(long p_27208_) {
-            return PoiManager.this.isVillageCenter(p_27208_) ? 0 : 7;
+        protected int getLevelFromSource(long pPos) {
+            return PoiManager.this.isVillageCenter(pPos) ? 0 : 7;
         }
 
         @Override
-        protected int getLevel(long p_27210_) {
-            return this.levels.get(p_27210_);
+        protected int getLevel(long pSectionPos) {
+            return this.levels.get(pSectionPos);
         }
 
         @Override
-        protected void setLevel(long p_27205_, int p_27206_) {
-            if (p_27206_ > 6) {
-                this.levels.remove(p_27205_);
+        protected void setLevel(long pSectionPos, int pLevel) {
+            if (pLevel > 6) {
+                this.levels.remove(pSectionPos);
             } else {
-                this.levels.put(p_27205_, (byte)p_27206_);
+                this.levels.put(pSectionPos, (byte)pLevel);
             }
         }
 
@@ -309,8 +309,8 @@ public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> {
 
         private final Predicate<? super PoiRecord> test;
 
-        private Occupancy(final Predicate<? super PoiRecord> p_27220_) {
-            this.test = p_27220_;
+        private Occupancy(final Predicate<? super PoiRecord> pTest) {
+            this.test = pTest;
         }
 
         public Predicate<? super PoiRecord> getTest() {

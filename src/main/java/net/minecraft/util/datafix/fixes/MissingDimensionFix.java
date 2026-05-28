@@ -19,22 +19,22 @@ import java.util.List;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class MissingDimensionFix extends DataFix {
-    public MissingDimensionFix(Schema p_16420_, boolean p_16421_) {
-        super(p_16420_, p_16421_);
+    public MissingDimensionFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
     }
 
-    protected static <A> Type<Pair<A, Dynamic<?>>> fields(String p_16439_, Type<A> p_16440_) {
-        return DSL.and(DSL.field(p_16439_, p_16440_), DSL.remainderType());
+    protected static <A> Type<Pair<A, Dynamic<?>>> fields(String pName, Type<A> pElement) {
+        return DSL.and(DSL.field(pName, pElement), DSL.remainderType());
     }
 
-    protected static <A> Type<Pair<Either<A, Unit>, Dynamic<?>>> optionalFields(String p_16447_, Type<A> p_16448_) {
-        return DSL.and(DSL.optional(DSL.field(p_16447_, p_16448_)), DSL.remainderType());
+    protected static <A> Type<Pair<Either<A, Unit>, Dynamic<?>>> optionalFields(String pName, Type<A> pElement) {
+        return DSL.and(DSL.optional(DSL.field(pName, pElement)), DSL.remainderType());
     }
 
     protected static <A1, A2> Type<Pair<Either<A1, Unit>, Pair<Either<A2, Unit>, Dynamic<?>>>> optionalFields(
-        String p_16442_, Type<A1> p_16443_, String p_16444_, Type<A2> p_16445_
+        String pName1, Type<A1> pElement1, String pName2, Type<A2> pElement2
     ) {
-        return DSL.and(DSL.optional(DSL.field(p_16442_, p_16443_)), DSL.optional(DSL.field(p_16444_, p_16445_)), DSL.remainderType());
+        return DSL.and(DSL.optional(DSL.field(pName1, pElement1)), DSL.optional(DSL.field(pName2, pElement2)), DSL.remainderType());
     }
 
     @Override
@@ -97,16 +97,16 @@ public class MissingDimensionFix extends DataFix {
     }
 
     protected static Type<? extends Pair<? extends Either<? extends Pair<? extends Either<?, Unit>, ? extends Pair<? extends Either<? extends List<? extends Pair<? extends Either<?, Unit>, Dynamic<?>>>, Unit>, Dynamic<?>>>, Unit>, Dynamic<?>>> flatType(
-        Schema p_185131_
+        Schema pSchema
     ) {
         return optionalFields(
             "settings",
-            optionalFields("biome", p_185131_.getType(References.BIOME), "layers", DSL.list(optionalFields("block", p_185131_.getType(References.BLOCK_NAME))))
+            optionalFields("biome", pSchema.getType(References.BIOME), "layers", DSL.list(optionalFields("block", pSchema.getType(References.BLOCK_NAME))))
         );
     }
 
-    private <T> Dynamic<T> recreateSettings(Dynamic<T> p_16437_) {
-        long i = p_16437_.get("seed").asLong(0L);
-        return new Dynamic<>(p_16437_.getOps(), WorldGenSettingsFix.vanillaLevels(p_16437_, i, WorldGenSettingsFix.defaultOverworld(p_16437_, i), false));
+    private <T> Dynamic<T> recreateSettings(Dynamic<T> pDynamic) {
+        long i = pDynamic.get("seed").asLong(0L);
+        return new Dynamic<>(pDynamic.getOps(), WorldGenSettingsFix.vanillaLevels(pDynamic, i, WorldGenSettingsFix.defaultOverworld(pDynamic, i), false));
     }
 }

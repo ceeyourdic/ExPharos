@@ -16,9 +16,9 @@ public class ServerStatusPacketListenerImpl implements ServerStatusPacketListene
     private final Connection connection;
     private boolean hasRequestedStatus;
 
-    public ServerStatusPacketListenerImpl(ServerStatus p_272864_, Connection p_273586_) {
-        this.status = p_272864_;
-        this.connection = p_273586_;
+    public ServerStatusPacketListenerImpl(ServerStatus pStatus, Connection pConnection) {
+        this.status = pStatus;
+        this.connection = pConnection;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class ServerStatusPacketListenerImpl implements ServerStatusPacketListene
     }
 
     @Override
-    public void handleStatusRequest(ServerboundStatusRequestPacket p_10095_) {
+    public void handleStatusRequest(ServerboundStatusRequestPacket pPacket) {
         if (this.hasRequestedStatus) {
             this.connection.disconnect(DISCONNECT_REASON);
         } else {

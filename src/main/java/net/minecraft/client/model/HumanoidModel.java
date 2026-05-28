@@ -42,56 +42,56 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
     public final ModelPart rightLeg;
     public final ModelPart leftLeg;
 
-    public HumanoidModel(ModelPart p_170677_) {
-        this(p_170677_, RenderType::entityCutoutNoCull);
+    public HumanoidModel(ModelPart pRoot) {
+        this(pRoot, RenderType::entityCutoutNoCull);
     }
 
-    public HumanoidModel(ModelPart p_170679_, Function<ResourceLocation, RenderType> p_170680_) {
-        super(p_170679_, p_170680_);
-        this.head = p_170679_.getChild("head");
+    public HumanoidModel(ModelPart pRoot, Function<ResourceLocation, RenderType> pRenderType) {
+        super(pRoot, pRenderType);
+        this.head = pRoot.getChild("head");
         this.hat = this.head.getChild("hat");
-        this.body = p_170679_.getChild("body");
-        this.rightArm = p_170679_.getChild("right_arm");
-        this.leftArm = p_170679_.getChild("left_arm");
-        this.rightLeg = p_170679_.getChild("right_leg");
-        this.leftLeg = p_170679_.getChild("left_leg");
+        this.body = pRoot.getChild("body");
+        this.rightArm = pRoot.getChild("right_arm");
+        this.leftArm = pRoot.getChild("left_arm");
+        this.rightLeg = pRoot.getChild("right_leg");
+        this.leftLeg = pRoot.getChild("left_leg");
     }
 
-    public static MeshDefinition createMesh(CubeDeformation p_170682_, float p_170683_) {
+    public static MeshDefinition createMesh(CubeDeformation pCubeDeformation, float pYOffset) {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
         PartDefinition partdefinition1 = partdefinition.addOrReplaceChild(
             "head",
-            CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, p_170682_),
-            PartPose.offset(0.0F, 0.0F + p_170683_, 0.0F)
+            CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, pCubeDeformation),
+            PartPose.offset(0.0F, 0.0F + pYOffset, 0.0F)
         );
         partdefinition1.addOrReplaceChild(
-            "hat", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, p_170682_.extend(0.5F)), PartPose.ZERO
+            "hat", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, pCubeDeformation.extend(0.5F)), PartPose.ZERO
         );
         partdefinition.addOrReplaceChild(
             "body",
-            CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, p_170682_),
-            PartPose.offset(0.0F, 0.0F + p_170683_, 0.0F)
+            CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, pCubeDeformation),
+            PartPose.offset(0.0F, 0.0F + pYOffset, 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "right_arm",
-            CubeListBuilder.create().texOffs(40, 16).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_170682_),
-            PartPose.offset(-5.0F, 2.0F + p_170683_, 0.0F)
+            CubeListBuilder.create().texOffs(40, 16).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, pCubeDeformation),
+            PartPose.offset(-5.0F, 2.0F + pYOffset, 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "left_arm",
-            CubeListBuilder.create().texOffs(40, 16).mirror().addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_170682_),
-            PartPose.offset(5.0F, 2.0F + p_170683_, 0.0F)
+            CubeListBuilder.create().texOffs(40, 16).mirror().addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, pCubeDeformation),
+            PartPose.offset(5.0F, 2.0F + pYOffset, 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "right_leg",
-            CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_170682_),
-            PartPose.offset(-1.9F, 12.0F + p_170683_, 0.0F)
+            CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, pCubeDeformation),
+            PartPose.offset(-1.9F, 12.0F + pYOffset, 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "left_leg",
-            CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_170682_),
-            PartPose.offset(1.9F, 12.0F + p_170683_, 0.0F)
+            CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, pCubeDeformation),
+            PartPose.offset(1.9F, 12.0F + pYOffset, 0.0F)
         );
         return meshdefinition;
     }
@@ -214,8 +214,8 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
         }
     }
 
-    private void poseRightArm(T p_362371_, HumanoidModel.ArmPose p_366231_) {
-        switch (p_366231_) {
+    private void poseRightArm(T pRenderState, HumanoidModel.ArmPose pPose) {
+        switch (pPose) {
             case EMPTY:
                 this.rightArm.yRot = 0.0F;
                 break;
@@ -237,14 +237,14 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
                 this.rightArm.yRot = 0.0F;
                 break;
             case CROSSBOW_CHARGE:
-                AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, p_362371_.maxCrossbowChargeDuration, p_362371_.ticksUsingItem, true);
+                AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, pRenderState.maxCrossbowChargeDuration, pRenderState.ticksUsingItem, true);
                 break;
             case CROSSBOW_HOLD:
                 AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
                 break;
             case SPYGLASS:
                 this.rightArm.xRot = Mth.clamp(
-                    this.head.xRot - 1.9198622F - (p_362371_.isCrouching ? (float) (Math.PI / 12) : 0.0F), -2.4F, 3.3F
+                    this.head.xRot - 1.9198622F - (pRenderState.isCrouching ? (float) (Math.PI / 12) : 0.0F), -2.4F, 3.3F
                 );
                 this.rightArm.yRot = this.head.yRot - (float) (Math.PI / 12);
                 break;
@@ -258,8 +258,8 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
         }
     }
 
-    private void poseLeftArm(T p_363560_, HumanoidModel.ArmPose p_370002_) {
-        switch (p_370002_) {
+    private void poseLeftArm(T pRenderState, HumanoidModel.ArmPose pPose) {
+        switch (pPose) {
             case EMPTY:
                 this.leftArm.yRot = 0.0F;
                 break;
@@ -281,14 +281,14 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
                 this.leftArm.yRot = 0.0F;
                 break;
             case CROSSBOW_CHARGE:
-                AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, p_363560_.maxCrossbowChargeDuration, p_363560_.ticksUsingItem, false);
+                AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, pRenderState.maxCrossbowChargeDuration, pRenderState.ticksUsingItem, false);
                 break;
             case CROSSBOW_HOLD:
                 AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, false);
                 break;
             case SPYGLASS:
                 this.leftArm.xRot = Mth.clamp(
-                    this.head.xRot - 1.9198622F - (p_363560_.isCrouching ? (float) (Math.PI / 12) : 0.0F), -2.4F, 3.3F
+                    this.head.xRot - 1.9198622F - (pRenderState.isCrouching ? (float) (Math.PI / 12) : 0.0F), -2.4F, 3.3F
                 );
                 this.leftArm.yRot = this.head.yRot + (float) (Math.PI / 12);
                 break;
@@ -302,23 +302,23 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
         }
     }
 
-    private void poseBlockingArm(ModelPart p_312070_, boolean p_311335_) {
-        p_312070_.xRot = p_312070_.xRot * 0.5F - 0.9424779F + Mth.clamp(this.head.xRot, (float) (-Math.PI * 4.0 / 9.0), 0.43633232F);
-        p_312070_.yRot = (p_311335_ ? -30.0F : 30.0F) * (float) (Math.PI / 180.0)
+    private void poseBlockingArm(ModelPart pArm, boolean pIsRightArm) {
+        pArm.xRot = pArm.xRot * 0.5F - 0.9424779F + Mth.clamp(this.head.xRot, (float) (-Math.PI * 4.0 / 9.0), 0.43633232F);
+        pArm.yRot = (pIsRightArm ? -30.0F : 30.0F) * (float) (Math.PI / 180.0)
             + Mth.clamp(this.head.yRot, (float) (-Math.PI / 6), (float) (Math.PI / 6));
     }
 
-    protected void setupAttackAnimation(T p_367078_, float p_102859_) {
-        float f = p_367078_.attackTime;
+    protected void setupAttackAnimation(T pRenderState, float pAgeInTicks) {
+        float f = pRenderState.attackTime;
         if (!(f <= 0.0F)) {
-            HumanoidArm humanoidarm = p_367078_.attackArm;
+            HumanoidArm humanoidarm = pRenderState.attackArm;
             ModelPart modelpart = this.getArm(humanoidarm);
             this.body.yRot = Mth.sin(Mth.sqrt(f) * (float) (Math.PI * 2)) * 0.2F;
             if (humanoidarm == HumanoidArm.LEFT) {
                 this.body.yRot *= -1.0F;
             }
 
-            float f2 = p_367078_.ageScale;
+            float f2 = pRenderState.ageScale;
             this.rightArm.z = Mth.sin(this.body.yRot) * 5.0F * f2;
             this.rightArm.x = -Mth.cos(this.body.yRot) * 5.0F * f2;
             this.leftArm.z = -Mth.sin(this.body.yRot) * 5.0F * f2;
@@ -338,37 +338,37 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
         }
     }
 
-    private float quadraticArmUpdate(float p_102834_) {
-        return -65.0F * p_102834_ + p_102834_ * p_102834_;
+    private float quadraticArmUpdate(float pLimbSwing) {
+        return -65.0F * pLimbSwing + pLimbSwing * pLimbSwing;
     }
 
-    public void copyPropertiesTo(HumanoidModel<T> p_102873_) {
-        p_102873_.head.copyFrom(this.head);
-        p_102873_.body.copyFrom(this.body);
-        p_102873_.rightArm.copyFrom(this.rightArm);
-        p_102873_.leftArm.copyFrom(this.leftArm);
-        p_102873_.rightLeg.copyFrom(this.rightLeg);
-        p_102873_.leftLeg.copyFrom(this.leftLeg);
+    public void copyPropertiesTo(HumanoidModel<T> pModel) {
+        pModel.head.copyFrom(this.head);
+        pModel.body.copyFrom(this.body);
+        pModel.rightArm.copyFrom(this.rightArm);
+        pModel.leftArm.copyFrom(this.leftArm);
+        pModel.rightLeg.copyFrom(this.rightLeg);
+        pModel.leftLeg.copyFrom(this.leftLeg);
     }
 
-    public void setAllVisible(boolean p_102880_) {
-        this.head.visible = p_102880_;
-        this.hat.visible = p_102880_;
-        this.body.visible = p_102880_;
-        this.rightArm.visible = p_102880_;
-        this.leftArm.visible = p_102880_;
-        this.rightLeg.visible = p_102880_;
-        this.leftLeg.visible = p_102880_;
+    public void setAllVisible(boolean pVisible) {
+        this.head.visible = pVisible;
+        this.hat.visible = pVisible;
+        this.body.visible = pVisible;
+        this.rightArm.visible = pVisible;
+        this.leftArm.visible = pVisible;
+        this.rightLeg.visible = pVisible;
+        this.leftLeg.visible = pVisible;
     }
 
     @Override
-    public void translateToHand(HumanoidArm p_102854_, PoseStack p_102855_) {
-        this.root.translateAndRotate(p_102855_);
-        this.getArm(p_102854_).translateAndRotate(p_102855_);
+    public void translateToHand(HumanoidArm pSide, PoseStack pPoseStack) {
+        this.root.translateAndRotate(pPoseStack);
+        this.getArm(pSide).translateAndRotate(pPoseStack);
     }
 
-    protected ModelPart getArm(HumanoidArm p_102852_) {
-        return p_102852_ == HumanoidArm.LEFT ? this.leftArm : this.rightArm;
+    protected ModelPart getArm(HumanoidArm pSide) {
+        return pSide == HumanoidArm.LEFT ? this.leftArm : this.rightArm;
     }
 
     @Override
@@ -391,8 +391,8 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
 
         private final boolean twoHanded;
 
-        private ArmPose(final boolean p_102896_) {
-            this.twoHanded = p_102896_;
+        private ArmPose(final boolean pTwoHanded) {
+            this.twoHanded = pTwoHanded;
         }
 
         public boolean isTwoHanded() {

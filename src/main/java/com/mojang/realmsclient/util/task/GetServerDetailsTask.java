@@ -38,9 +38,9 @@ public class GetServerDetailsTask extends LongRunningTask {
     private final RealmsServer server;
     private final Screen lastScreen;
 
-    public GetServerDetailsTask(Screen p_90333_, RealmsServer p_90334_) {
-        this.lastScreen = p_90333_;
-        this.server = p_90334_;
+    public GetServerDetailsTask(Screen pLastScreen, RealmsServer pServer) {
+        this.lastScreen = pLastScreen;
+        this.server = pServer;
     }
 
     @Override
@@ -91,11 +91,11 @@ public class GetServerDetailsTask extends LongRunningTask {
         }
     }
 
-    private static UUID generatePackId(RealmsServer p_311215_) {
-        return p_311215_.minigameName != null
-            ? UUID.nameUUIDFromBytes(("minigame:" + p_311215_.minigameName).getBytes(StandardCharsets.UTF_8))
+    private static UUID generatePackId(RealmsServer pRealmsServer) {
+        return pRealmsServer.minigameName != null
+            ? UUID.nameUUIDFromBytes(("minigame:" + pRealmsServer.minigameName).getBytes(StandardCharsets.UTF_8))
             : UUID.nameUUIDFromBytes(
-                ("realms:" + Objects.requireNonNullElse(p_311215_.name, "") + ":" + p_311215_.activeSlot).getBytes(StandardCharsets.UTF_8)
+                ("realms:" + Objects.requireNonNullElse(pRealmsServer.name, "") + ":" + pRealmsServer.activeSlot).getBytes(StandardCharsets.UTF_8)
             );
     }
 
@@ -122,34 +122,34 @@ public class GetServerDetailsTask extends LongRunningTask {
         throw new TimeoutException();
     }
 
-    public RealmsLongRunningMcoTaskScreen connectScreen(RealmsServerAddress p_167638_) {
-        return new RealmsLongRunningMcoTickTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, this.server, p_167638_));
+    public RealmsLongRunningMcoTaskScreen connectScreen(RealmsServerAddress pServerAddress) {
+        return new RealmsLongRunningMcoTickTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, this.server, pServerAddress));
     }
 
-    private PopupScreen resourcePackDownloadConfirmationScreen(RealmsServerAddress p_167640_, UUID p_309510_, Function<RealmsServerAddress, Screen> p_167641_) {
+    private PopupScreen resourcePackDownloadConfirmationScreen(RealmsServerAddress pServerAddress, UUID pPackId, Function<RealmsServerAddress, Screen> pConnectScreen) {
         Component component = Component.translatable("mco.configure.world.resourcepack.question");
         return RealmsPopups.infoPopupScreen(this.lastScreen, component, p_340735_ -> {
             setScreen(new GenericMessageScreen(APPLYING_PACK_TEXT));
-            this.scheduleResourcePackDownload(p_167640_, p_309510_).thenRun(() -> setScreen(p_167641_.apply(p_167640_))).exceptionally(p_287306_ -> {
+            this.scheduleResourcePackDownload(pServerAddress, pPackId).thenRun(() -> setScreen(pConnectScreen.apply(pServerAddress))).exceptionally(p_287306_ -> {
                 Minecraft.getInstance().getDownloadedPackSource().cleanupAfterDisconnect();
-                LOGGER.error("Failed to download resource pack from {}", p_167640_, p_287306_);
+                LOGGER.error("Failed to download resource pack from {}", pServerAddress, p_287306_);
                 setScreen(new RealmsGenericErrorScreen(Component.translatable("mco.download.resourcePack.fail"), this.lastScreen));
                 return null;
             });
         });
     }
 
-    private CompletableFuture<?> scheduleResourcePackDownload(RealmsServerAddress p_167652_, UUID p_312305_) {
+    private CompletableFuture<?> scheduleResourcePackDownload(RealmsServerAddress pServerAddress, UUID pId) {
         try {
-            if (p_167652_.resourcePackUrl == null) {
+            if (pServerAddress.resourcePackUrl == null) {
                 return CompletableFuture.failedFuture(new IllegalStateException("resourcePackUrl was null"));
-            } else if (p_167652_.resourcePackHash == null) {
+            } else if (pServerAddress.resourcePackHash == null) {
                 return CompletableFuture.failedFuture(new IllegalStateException("resourcePackHash was null"));
             } else {
                 DownloadedPackSource downloadedpacksource = Minecraft.getInstance().getDownloadedPackSource();
-                CompletableFuture<Void> completablefuture = downloadedpacksource.waitForPackFeedback(p_312305_);
+                CompletableFuture<Void> completablefuture = downloadedpacksource.waitForPackFeedback(pId);
                 downloadedpacksource.allowServerPacks();
-                downloadedpacksource.pushPack(p_312305_, new URL(p_167652_.resourcePackUrl), p_167652_.resourcePackHash);
+                downloadedpacksource.pushPack(pId, new URL(pServerAddress.resourcePackUrl), pServerAddress.resourcePackHash);
                 return completablefuture;
             }
         } catch (Exception exception) {

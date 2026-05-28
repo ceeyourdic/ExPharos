@@ -6,26 +6,30 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.EmissiveTextures;
+import net.optifine.shaders.ShadersTex;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class ReloadableTexture extends AbstractTexture {
     private final ResourceLocation resourceId;
+    private ResourceManager resourceManager = Config.getResourceManager();
+    public ResourceLocation locationEmissive;
+    public boolean isEmissive;
+    public long size;
 
-    public ReloadableTexture(ResourceLocation p_378292_) {
-        this.resourceId = p_378292_;
+    public ReloadableTexture(ResourceLocation pResourceId) {
+        this.resourceId = pResourceId;
     }
 
     public ResourceLocation resourceId() {
         return this.resourceId;
     }
 
-    public void apply(TextureContents p_376644_) {
-        boolean flag = p_376644_.clamp();
-        boolean flag1 = p_376644_.blur();
+    public void apply(TextureContents pTextureContents) {
+        boolean flag = pTextureContents.clamp();
+        boolean flag1 = pTextureContents.blur();
         this.defaultBlur = flag1;
-        NativeImage nativeimage = p_376644_.image();
+        NativeImage nativeimage = pTextureContents.image();
         if (!RenderSystem.isOnRenderThreadOrInit()) {
             RenderSystem.recordRenderCall(() -> this.doLoad(nativeimage, flag1, flag));
         } else {
@@ -33,12 +37,21 @@ public abstract class ReloadableTexture extends AbstractTexture {
         }
     }
 
-    private void doLoad(NativeImage p_378310_, boolean p_378225_, boolean p_378337_) {
-        TextureUtil.prepareImage(this.getId(), 0, p_378310_.getWidth(), p_378310_.getHeight());
-        this.setFilter(p_378225_, false);
-        this.setClamp(p_378337_);
-        p_378310_.upload(0, 0, 0, 0, 0, p_378310_.getWidth(), p_378310_.getHeight(), true);
+    private void doLoad(NativeImage pImage, boolean pBlur, boolean pClamp) {
+        TextureUtil.prepareImage(this.getId(), 0, pImage.getWidth(), pImage.getHeight());
+        this.setFilter(pBlur, false);
+        this.setClamp(pClamp);
+        pImage.upload(0, 0, 0, 0, 0, pImage.getWidth(), pImage.getHeight(), true);
+        if (Config.isShaders()) {
+            ShadersTex.loadSimpleTextureNS(this.getId(), pImage, pBlur, pClamp, this.resourceManager, this.resourceId, this.getMultiTexID());
+        }
+
+        if (EmissiveTextures.isActive()) {
+            EmissiveTextures.loadTexture(this.resourceId, this);
+        }
+
+        this.size = pImage.getSize();
     }
 
-    public abstract TextureContents loadContents(ResourceManager p_378474_) throws IOException;
+    public abstract TextureContents loadContents(ResourceManager pResourceManager) throws IOException;
 }

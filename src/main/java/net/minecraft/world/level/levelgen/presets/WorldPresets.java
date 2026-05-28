@@ -39,16 +39,16 @@ public class WorldPresets {
     public static final ResourceKey<WorldPreset> SINGLE_BIOME_SURFACE = register("single_biome_surface");
     public static final ResourceKey<WorldPreset> DEBUG = register("debug_all_block_states");
 
-    public static void bootstrap(BootstrapContext<WorldPreset> p_329030_) {
-        new WorldPresets.Bootstrap(p_329030_).bootstrap();
+    public static void bootstrap(BootstrapContext<WorldPreset> pContext) {
+        new WorldPresets.Bootstrap(pContext).bootstrap();
     }
 
-    private static ResourceKey<WorldPreset> register(String p_226460_) {
-        return ResourceKey.create(Registries.WORLD_PRESET, ResourceLocation.withDefaultNamespace(p_226460_));
+    private static ResourceKey<WorldPreset> register(String pName) {
+        return ResourceKey.create(Registries.WORLD_PRESET, ResourceLocation.withDefaultNamespace(pName));
     }
 
-    public static Optional<ResourceKey<WorldPreset>> fromSettings(WorldDimensions p_329954_) {
-        return p_329954_.get(LevelStem.OVERWORLD).flatMap(p_341908_ -> {
+    public static Optional<ResourceKey<WorldPreset>> fromSettings(WorldDimensions pWorldDimensions) {
+        return pWorldDimensions.get(LevelStem.OVERWORLD).flatMap(p_341908_ -> {
             return switch (p_341908_.generator()) {
                 case FlatLevelSource flatlevelsource -> Optional.of(FLAT);
                 case DebugLevelSource debuglevelsource -> Optional.of(DEBUG);
@@ -58,16 +58,16 @@ public class WorldPresets {
         });
     }
 
-    public static WorldDimensions createNormalWorldDimensions(HolderLookup.Provider p_369091_) {
-        return p_369091_.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(NORMAL).value().createWorldDimensions();
+    public static WorldDimensions createNormalWorldDimensions(HolderLookup.Provider pRegistries) {
+        return pRegistries.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(NORMAL).value().createWorldDimensions();
     }
 
-    public static LevelStem getNormalOverworld(HolderLookup.Provider p_365099_) {
-        return p_365099_.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(NORMAL).value().overworld().orElseThrow();
+    public static LevelStem getNormalOverworld(HolderLookup.Provider pRegistries) {
+        return pRegistries.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(NORMAL).value().overworld().orElseThrow();
     }
 
-    public static WorldDimensions createFlatWorldDimensions(HolderLookup.Provider p_363959_) {
-        return p_363959_.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(FLAT).value().createWorldDimensions();
+    public static WorldDimensions createFlatWorldDimensions(HolderLookup.Provider pRegistries) {
+        return pRegistries.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(FLAT).value().createWorldDimensions();
     }
 
     static class Bootstrap {
@@ -81,14 +81,14 @@ public class WorldPresets {
         private final LevelStem netherStem;
         private final LevelStem endStem;
 
-        Bootstrap(BootstrapContext<WorldPreset> p_335809_) {
-            this.context = p_335809_;
-            HolderGetter<DimensionType> holdergetter = p_335809_.lookup(Registries.DIMENSION_TYPE);
-            this.noiseSettings = p_335809_.lookup(Registries.NOISE_SETTINGS);
-            this.biomes = p_335809_.lookup(Registries.BIOME);
-            this.placedFeatures = p_335809_.lookup(Registries.PLACED_FEATURE);
-            this.structureSets = p_335809_.lookup(Registries.STRUCTURE_SET);
-            this.multiNoiseBiomeSourceParameterLists = p_335809_.lookup(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+        Bootstrap(BootstrapContext<WorldPreset> pContext) {
+            this.context = pContext;
+            HolderGetter<DimensionType> holdergetter = pContext.lookup(Registries.DIMENSION_TYPE);
+            this.noiseSettings = pContext.lookup(Registries.NOISE_SETTINGS);
+            this.biomes = pContext.lookup(Registries.BIOME);
+            this.placedFeatures = pContext.lookup(Registries.PLACED_FEATURE);
+            this.structureSets = pContext.lookup(Registries.STRUCTURE_SET);
+            this.multiNoiseBiomeSourceParameterLists = pContext.lookup(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
             this.overworldDimensionType = holdergetter.getOrThrow(BuiltinDimensionTypes.OVERWORLD);
             Holder<DimensionType> holder = holdergetter.getOrThrow(BuiltinDimensionTypes.NETHER);
             Holder<NoiseGeneratorSettings> holder1 = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.NETHER);
@@ -99,29 +99,29 @@ public class WorldPresets {
             this.endStem = new LevelStem(holder2, new NoiseBasedChunkGenerator(TheEndBiomeSource.create(this.biomes), holder3));
         }
 
-        private LevelStem makeOverworld(ChunkGenerator p_226488_) {
-            return new LevelStem(this.overworldDimensionType, p_226488_);
+        private LevelStem makeOverworld(ChunkGenerator pGenerator) {
+            return new LevelStem(this.overworldDimensionType, pGenerator);
         }
 
-        private LevelStem makeNoiseBasedOverworld(BiomeSource p_226485_, Holder<NoiseGeneratorSettings> p_226486_) {
-            return this.makeOverworld(new NoiseBasedChunkGenerator(p_226485_, p_226486_));
+        private LevelStem makeNoiseBasedOverworld(BiomeSource pBiomeSource, Holder<NoiseGeneratorSettings> pSettings) {
+            return this.makeOverworld(new NoiseBasedChunkGenerator(pBiomeSource, pSettings));
         }
 
-        private WorldPreset createPresetWithCustomOverworld(LevelStem p_226490_) {
-            return new WorldPreset(Map.of(LevelStem.OVERWORLD, p_226490_, LevelStem.NETHER, this.netherStem, LevelStem.END, this.endStem));
+        private WorldPreset createPresetWithCustomOverworld(LevelStem pOverworldStem) {
+            return new WorldPreset(Map.of(LevelStem.OVERWORLD, pOverworldStem, LevelStem.NETHER, this.netherStem, LevelStem.END, this.endStem));
         }
 
-        private void registerCustomOverworldPreset(ResourceKey<WorldPreset> p_256570_, LevelStem p_256269_) {
-            this.context.register(p_256570_, this.createPresetWithCustomOverworld(p_256269_));
+        private void registerCustomOverworldPreset(ResourceKey<WorldPreset> pDimensionKey, LevelStem pLevelStem) {
+            this.context.register(pDimensionKey, this.createPresetWithCustomOverworld(pLevelStem));
         }
 
-        private void registerOverworlds(BiomeSource p_273133_) {
+        private void registerOverworlds(BiomeSource pBiomeSource) {
             Holder<NoiseGeneratorSettings> holder = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
-            this.registerCustomOverworldPreset(WorldPresets.NORMAL, this.makeNoiseBasedOverworld(p_273133_, holder));
+            this.registerCustomOverworldPreset(WorldPresets.NORMAL, this.makeNoiseBasedOverworld(pBiomeSource, holder));
             Holder<NoiseGeneratorSettings> holder1 = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.LARGE_BIOMES);
-            this.registerCustomOverworldPreset(WorldPresets.LARGE_BIOMES, this.makeNoiseBasedOverworld(p_273133_, holder1));
+            this.registerCustomOverworldPreset(WorldPresets.LARGE_BIOMES, this.makeNoiseBasedOverworld(pBiomeSource, holder1));
             Holder<NoiseGeneratorSettings> holder2 = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.AMPLIFIED);
-            this.registerCustomOverworldPreset(WorldPresets.AMPLIFIED, this.makeNoiseBasedOverworld(p_273133_, holder2));
+            this.registerCustomOverworldPreset(WorldPresets.AMPLIFIED, this.makeNoiseBasedOverworld(pBiomeSource, holder2));
         }
 
         public void bootstrap() {

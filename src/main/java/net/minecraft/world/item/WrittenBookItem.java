@@ -39,16 +39,16 @@ public class WrittenBookItem extends Item {
         return InteractionResult.SUCCESS;
     }
 
-    public static boolean resolveBookComponents(ItemStack p_43462_, CommandSourceStack p_43463_, @Nullable Player p_43464_) {
-        WrittenBookContent writtenbookcontent = p_43462_.get(DataComponents.WRITTEN_BOOK_CONTENT);
+    public static boolean resolveBookComponents(ItemStack pBookStack, CommandSourceStack pResolvingSource, @Nullable Player pResolvingPlayer) {
+        WrittenBookContent writtenbookcontent = pBookStack.get(DataComponents.WRITTEN_BOOK_CONTENT);
         if (writtenbookcontent != null && !writtenbookcontent.resolved()) {
-            WrittenBookContent writtenbookcontent1 = writtenbookcontent.resolve(p_43463_, p_43464_);
+            WrittenBookContent writtenbookcontent1 = writtenbookcontent.resolve(pResolvingSource, pResolvingPlayer);
             if (writtenbookcontent1 != null) {
-                p_43462_.set(DataComponents.WRITTEN_BOOK_CONTENT, writtenbookcontent1);
+                pBookStack.set(DataComponents.WRITTEN_BOOK_CONTENT, writtenbookcontent1);
                 return true;
             }
 
-            p_43462_.set(DataComponents.WRITTEN_BOOK_CONTENT, writtenbookcontent.markResolved());
+            pBookStack.set(DataComponents.WRITTEN_BOOK_CONTENT, writtenbookcontent.markResolved());
         }
 
         return false;

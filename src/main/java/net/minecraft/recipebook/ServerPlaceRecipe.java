@@ -25,48 +25,48 @@ public class ServerPlaceRecipe<R extends Recipe<?>> {
     private final List<Slot> slotsToClear;
 
     public static <I extends RecipeInput, R extends Recipe<I>> RecipeBookMenu.PostPlaceAction placeRecipe(
-        ServerPlaceRecipe.CraftingMenuAccess<R> p_361168_,
-        int p_364309_,
-        int p_363223_,
-        List<Slot> p_362609_,
-        List<Slot> p_366501_,
-        Inventory p_367037_,
-        RecipeHolder<R> p_365886_,
-        boolean p_366586_,
-        boolean p_362700_
+        ServerPlaceRecipe.CraftingMenuAccess<R> pMenu,
+        int pGridWidth,
+        int pGridHeight,
+        List<Slot> pInputGridSlots,
+        List<Slot> pSlotsToClear,
+        Inventory pInventory,
+        RecipeHolder<R> pRecipe,
+        boolean pUseMaxItems,
+        boolean pIsCreative
     ) {
-        ServerPlaceRecipe<R> serverplacerecipe = new ServerPlaceRecipe<>(p_361168_, p_367037_, p_366586_, p_364309_, p_363223_, p_362609_, p_366501_);
-        if (!p_362700_ && !serverplacerecipe.testClearGrid()) {
+        ServerPlaceRecipe<R> serverplacerecipe = new ServerPlaceRecipe<>(pMenu, pInventory, pUseMaxItems, pGridWidth, pGridHeight, pInputGridSlots, pSlotsToClear);
+        if (!pIsCreative && !serverplacerecipe.testClearGrid()) {
             return RecipeBookMenu.PostPlaceAction.NOTHING;
         } else {
             StackedItemContents stackeditemcontents = new StackedItemContents();
-            p_367037_.fillStackedContents(stackeditemcontents);
-            p_361168_.fillCraftSlotsStackedContents(stackeditemcontents);
-            return serverplacerecipe.tryPlaceRecipe(p_365886_, stackeditemcontents);
+            pInventory.fillStackedContents(stackeditemcontents);
+            pMenu.fillCraftSlotsStackedContents(stackeditemcontents);
+            return serverplacerecipe.tryPlaceRecipe(pRecipe, stackeditemcontents);
         }
     }
 
     private ServerPlaceRecipe(
-        ServerPlaceRecipe.CraftingMenuAccess<R> p_364245_,
-        Inventory p_366205_,
-        boolean p_362556_,
-        int p_368821_,
-        int p_369958_,
-        List<Slot> p_364688_,
-        List<Slot> p_367687_
+        ServerPlaceRecipe.CraftingMenuAccess<R> pMenu,
+        Inventory pInventory,
+        boolean pUseMaxItems,
+        int pGridWidth,
+        int pGridHeight,
+        List<Slot> pInputGridSlots,
+        List<Slot> pSlotsToClear
     ) {
-        this.menu = p_364245_;
-        this.inventory = p_366205_;
-        this.useMaxItems = p_362556_;
-        this.gridWidth = p_368821_;
-        this.gridHeight = p_369958_;
-        this.inputGridSlots = p_364688_;
-        this.slotsToClear = p_367687_;
+        this.menu = pMenu;
+        this.inventory = pInventory;
+        this.useMaxItems = pUseMaxItems;
+        this.gridWidth = pGridWidth;
+        this.gridHeight = pGridHeight;
+        this.inputGridSlots = pInputGridSlots;
+        this.slotsToClear = pSlotsToClear;
     }
 
-    private RecipeBookMenu.PostPlaceAction tryPlaceRecipe(RecipeHolder<R> p_365851_, StackedItemContents p_368441_) {
-        if (p_368441_.canCraft(p_365851_.value(), null)) {
-            this.placeRecipe(p_365851_, p_368441_);
+    private RecipeBookMenu.PostPlaceAction tryPlaceRecipe(RecipeHolder<R> pRecipe, StackedItemContents pStackedItemContents) {
+        if (pStackedItemContents.canCraft(pRecipe.value(), null)) {
+            this.placeRecipe(pRecipe, pStackedItemContents);
             this.inventory.setChanged();
             return RecipeBookMenu.PostPlaceAction.NOTHING;
         } else {
@@ -86,9 +86,9 @@ public class ServerPlaceRecipe<R extends Recipe<?>> {
         this.menu.clearCraftingContent();
     }
 
-    private void placeRecipe(RecipeHolder<R> p_369245_, StackedItemContents p_365814_) {
-        boolean flag = this.menu.recipeMatches(p_369245_);
-        int i = p_365814_.getBiggestCraftableStack(p_369245_.value(), null);
+    private void placeRecipe(RecipeHolder<R> pRecipe, StackedItemContents pStackedItemContents) {
+        boolean flag = this.menu.recipeMatches(pRecipe);
+        int i = pStackedItemContents.getBiggestCraftableStack(pRecipe.value(), null);
         if (flag) {
             for (Slot slot : this.inputGridSlots) {
                 ItemStack itemstack = slot.getItem();
@@ -100,11 +100,11 @@ public class ServerPlaceRecipe<R extends Recipe<?>> {
 
         int j = this.calculateAmountToCraft(i, flag);
         List<Holder<Item>> list = new ArrayList<>();
-        if (p_365814_.canCraft(p_369245_.value(), j, list::add)) {
+        if (pStackedItemContents.canCraft(pRecipe.value(), j, list::add)) {
             int k = clampToMaxStackSize(j, list);
             if (k != j) {
                 list.clear();
-                if (!p_365814_.canCraft(p_369245_.value(), k, list::add)) {
+                if (!pStackedItemContents.canCraft(pRecipe.value(), k, list::add)) {
                     return;
                 }
             }
@@ -113,8 +113,8 @@ public class ServerPlaceRecipe<R extends Recipe<?>> {
             PlaceRecipeHelper.placeRecipe(
                 this.gridWidth,
                 this.gridHeight,
-                p_369245_.value(),
-                p_369245_.value().placementInfo().slotsToIngredientIndex(),
+                pRecipe.value(),
+                pRecipe.value().placementInfo().slotsToIngredientIndex(),
                 (p_374854_, p_374855_, p_374856_, p_374857_) -> {
                     if (p_374854_ != -1) {
                         Slot slot1 = this.inputGridSlots.get(p_374855_);
@@ -133,18 +133,18 @@ public class ServerPlaceRecipe<R extends Recipe<?>> {
         }
     }
 
-    private static int clampToMaxStackSize(int p_376825_, List<Holder<Item>> p_377337_) {
-        for (Holder<Item> holder : p_377337_) {
-            p_376825_ = Math.min(p_376825_, holder.value().getDefaultMaxStackSize());
+    private static int clampToMaxStackSize(int pAmount, List<Holder<Item>> pItems) {
+        for (Holder<Item> holder : pItems) {
+            pAmount = Math.min(pAmount, holder.value().getDefaultMaxStackSize());
         }
 
-        return p_376825_;
+        return pAmount;
     }
 
-    private int calculateAmountToCraft(int p_362229_, boolean p_364254_) {
+    private int calculateAmountToCraft(int pMax, boolean pRecipeMatches) {
         if (this.useMaxItems) {
-            return p_362229_;
-        } else if (p_364254_) {
+            return pMax;
+        } else if (pRecipeMatches) {
             int i = Integer.MAX_VALUE;
 
             for (Slot slot : this.inputGridSlots) {
@@ -164,28 +164,28 @@ public class ServerPlaceRecipe<R extends Recipe<?>> {
         }
     }
 
-    private int moveItemToGrid(Slot p_135439_, Holder<Item> p_363932_, int p_342870_) {
-        ItemStack itemstack = p_135439_.getItem();
-        int i = this.inventory.findSlotMatchingCraftingIngredient(p_363932_, itemstack);
+    private int moveItemToGrid(Slot pSlot, Holder<Item> pItem, int pCount) {
+        ItemStack itemstack = pSlot.getItem();
+        int i = this.inventory.findSlotMatchingCraftingIngredient(pItem, itemstack);
         if (i == -1) {
             return -1;
         } else {
             ItemStack itemstack1 = this.inventory.getItem(i);
             ItemStack itemstack2;
-            if (p_342870_ < itemstack1.getCount()) {
-                itemstack2 = this.inventory.removeItem(i, p_342870_);
+            if (pCount < itemstack1.getCount()) {
+                itemstack2 = this.inventory.removeItem(i, pCount);
             } else {
                 itemstack2 = this.inventory.removeItemNoUpdate(i);
             }
 
             int j = itemstack2.getCount();
             if (itemstack.isEmpty()) {
-                p_135439_.set(itemstack2);
+                pSlot.set(itemstack2);
             } else {
                 itemstack.grow(j);
             }
 
-            return p_342870_ - j;
+            return pCount - j;
         }
     }
 
@@ -237,10 +237,10 @@ public class ServerPlaceRecipe<R extends Recipe<?>> {
     }
 
     public interface CraftingMenuAccess<T extends Recipe<?>> {
-        void fillCraftSlotsStackedContents(StackedItemContents p_362886_);
+        void fillCraftSlotsStackedContents(StackedItemContents pStackedItemContents);
 
         void clearCraftingContent();
 
-        boolean recipeMatches(RecipeHolder<T> p_361326_);
+        boolean recipeMatches(RecipeHolder<T> pRecipe);
     }
 }

@@ -6,10 +6,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface ResolvableModel {
-    void resolveDependencies(ResolvableModel.Resolver p_376736_);
+    void resolveDependencies(ResolvableModel.Resolver pResolver);
 
     @OnlyIn(Dist.CLIENT)
     public interface Resolver {
-        UnbakedModel resolve(ResourceLocation p_377700_);
+        UnbakedModel resolve(ResourceLocation pModel);
     }
 }

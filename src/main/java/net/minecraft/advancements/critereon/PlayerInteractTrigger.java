@@ -17,9 +17,9 @@ public class PlayerInteractTrigger extends SimpleCriterionTrigger<PlayerInteract
         return PlayerInteractTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_61495_, ItemStack p_61496_, Entity p_61497_) {
-        LootContext lootcontext = EntityPredicate.createContext(p_61495_, p_61497_);
-        this.trigger(p_61495_, p_61501_ -> p_61501_.matches(p_61496_, lootcontext));
+    public void trigger(ServerPlayer pPlayer, ItemStack pItem, Entity pEntity) {
+        LootContext lootcontext = EntityPredicate.createContext(pPlayer, pEntity);
+        this.trigger(pPlayer, p_61501_ -> p_61501_.matches(pItem, lootcontext));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item, Optional<ContextAwarePredicate> entity)
@@ -34,19 +34,19 @@ public class PlayerInteractTrigger extends SimpleCriterionTrigger<PlayerInteract
         );
 
         public static Criterion<PlayerInteractTrigger.TriggerInstance> itemUsedOnEntity(
-            Optional<ContextAwarePredicate> p_297673_, ItemPredicate.Builder p_286235_, Optional<ContextAwarePredicate> p_301321_
+            Optional<ContextAwarePredicate> pPlayer, ItemPredicate.Builder pItem, Optional<ContextAwarePredicate> pEntity
         ) {
-            return CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.createCriterion(new PlayerInteractTrigger.TriggerInstance(p_297673_, Optional.of(p_286235_.build()), p_301321_));
+            return CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.createCriterion(new PlayerInteractTrigger.TriggerInstance(pPlayer, Optional.of(pItem.build()), pEntity));
         }
 
-        public static Criterion<PlayerInteractTrigger.TriggerInstance> itemUsedOnEntity(ItemPredicate.Builder p_286289_, Optional<ContextAwarePredicate> p_297754_) {
-            return itemUsedOnEntity(Optional.empty(), p_286289_, p_297754_);
+        public static Criterion<PlayerInteractTrigger.TriggerInstance> itemUsedOnEntity(ItemPredicate.Builder pItem, Optional<ContextAwarePredicate> pEntity) {
+            return itemUsedOnEntity(Optional.empty(), pItem, pEntity);
         }
 
-        public boolean matches(ItemStack p_61522_, LootContext p_61523_) {
-            return this.item.isPresent() && !this.item.get().test(p_61522_)
+        public boolean matches(ItemStack pItem, LootContext pLootContext) {
+            return this.item.isPresent() && !this.item.get().test(pItem)
                 ? false
-                : this.entity.isEmpty() || this.entity.get().matches(p_61523_);
+                : this.entity.isEmpty() || this.entity.get().matches(pLootContext);
         }
 
         @Override

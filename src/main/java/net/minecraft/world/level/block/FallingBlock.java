@@ -26,8 +26,8 @@ public abstract class FallingBlock extends Block implements Fallable {
     protected abstract MapCodec<? extends FallingBlock> codec();
 
     @Override
-    protected void onPlace(BlockState p_53233_, Level p_53234_, BlockPos p_53235_, BlockState p_53236_, boolean p_53237_) {
-        p_53234_.scheduleTick(p_53235_, this, this.getDelayAfterPlace());
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        pLevel.scheduleTick(pPos, this, this.getDelayAfterPlace());
     }
 
     @Override
@@ -53,15 +53,15 @@ public abstract class FallingBlock extends Block implements Fallable {
         }
     }
 
-    protected void falling(FallingBlockEntity p_53206_) {
+    protected void falling(FallingBlockEntity pEntity) {
     }
 
     protected int getDelayAfterPlace() {
         return 2;
     }
 
-    public static boolean isFree(BlockState p_53242_) {
-        return p_53242_.isAir() || p_53242_.is(BlockTags.FIRE) || p_53242_.liquid() || p_53242_.canBeReplaced();
+    public static boolean isFree(BlockState pState) {
+        return pState.isAir() || pState.is(BlockTags.FIRE) || pState.liquid() || pState.canBeReplaced();
     }
 
     @Override
@@ -74,7 +74,7 @@ public abstract class FallingBlock extends Block implements Fallable {
         }
     }
 
-    public int getDustColor(BlockState p_53238_, BlockGetter p_53239_, BlockPos p_53240_) {
+    public int getDustColor(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
         return -16777216;
     }
 }

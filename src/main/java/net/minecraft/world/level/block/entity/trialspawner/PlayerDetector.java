@@ -45,13 +45,13 @@ public interface PlayerDetector {
             .toList();
     };
 
-    List<UUID> detect(ServerLevel p_309619_, PlayerDetector.EntitySelector p_330942_, BlockPos p_311426_, double p_331401_, boolean p_334733_);
+    List<UUID> detect(ServerLevel pLevel, PlayerDetector.EntitySelector pEntitySelector, BlockPos pPos, double pMaxDistance, boolean pRequireLineOfSight);
 
-    private static boolean inLineOfSight(Level p_332656_, Vec3 p_329624_, Vec3 p_332220_) {
-        BlockHitResult blockhitresult = p_332656_.clip(
-            new ClipContext(p_332220_, p_329624_, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, CollisionContext.empty())
+    private static boolean inLineOfSight(Level pLevel, Vec3 pPos, Vec3 pTargetPos) {
+        BlockHitResult blockhitresult = pLevel.clip(
+            new ClipContext(pTargetPos, pPos, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, CollisionContext.empty())
         );
-        return blockhitresult.getBlockPos().equals(BlockPos.containing(p_329624_)) || blockhitresult.getType() == HitResult.Type.MISS;
+        return blockhitresult.getBlockPos().equals(BlockPos.containing(pPos)) || blockhitresult.getType() == HitResult.Type.MISS;
     }
 
     public interface EntitySelector {
@@ -69,26 +69,26 @@ public interface PlayerDetector {
             }
         };
 
-        List<? extends Player> getPlayers(ServerLevel p_332311_, Predicate<? super Player> p_333154_);
+        List<? extends Player> getPlayers(ServerLevel pLevel, Predicate<? super Player> pPredicate);
 
-        <T extends Entity> List<T> getEntities(ServerLevel p_334481_, EntityTypeTest<Entity, T> p_330467_, AABB p_330961_, Predicate<? super T> p_332077_);
+        <T extends Entity> List<T> getEntities(ServerLevel pLevel, EntityTypeTest<Entity, T> pTypeTest, AABB pBoundingBox, Predicate<? super T> pPredicate);
 
-        static PlayerDetector.EntitySelector onlySelectPlayer(Player p_329336_) {
-            return onlySelectPlayers(List.of(p_329336_));
+        static PlayerDetector.EntitySelector onlySelectPlayer(Player pPlayer) {
+            return onlySelectPlayers(List.of(pPlayer));
         }
 
-        static PlayerDetector.EntitySelector onlySelectPlayers(final List<Player> p_329097_) {
+        static PlayerDetector.EntitySelector onlySelectPlayers(final List<Player> pPlayers) {
             return new PlayerDetector.EntitySelector() {
                 @Override
                 public List<Player> getPlayers(ServerLevel p_332526_, Predicate<? super Player> p_329353_) {
-                    return p_329097_.stream().filter(p_329353_).toList();
+                    return pPlayers.stream().filter(p_329353_).toList();
                 }
 
                 @Override
                 public <T extends Entity> List<T> getEntities(
                     ServerLevel p_330015_, EntityTypeTest<Entity, T> p_329558_, AABB p_328059_, Predicate<? super T> p_334090_
                 ) {
-                    return p_329097_.stream().map(p_329558_::tryCast).filter(Objects::nonNull).filter(p_334090_).toList();
+                    return pPlayers.stream().map(p_329558_::tryCast).filter(Objects::nonNull).filter(p_334090_).toList();
                 }
             };
         }

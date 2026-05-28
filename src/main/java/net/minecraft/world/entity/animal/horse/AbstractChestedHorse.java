@@ -55,8 +55,8 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
         return this.entityData.get(DATA_ID_CHEST);
     }
 
-    public void setChest(boolean p_30505_) {
-        this.entityData.set(DATA_ID_CHEST, p_30505_);
+    public void setChest(boolean pChested) {
+        this.entityData.set(DATA_ID_CHEST, pChested);
     }
 
     @Override
@@ -74,9 +74,9 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_30496_) {
-        super.addAdditionalSaveData(p_30496_);
-        p_30496_.putBoolean("ChestedHorse", this.hasChest());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("ChestedHorse", this.hasChest());
         if (this.hasChest()) {
             ListTag listtag = new ListTag();
 
@@ -89,17 +89,17 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
                 }
             }
 
-            p_30496_.put("Items", listtag);
+            pCompound.put("Items", listtag);
         }
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_30488_) {
-        super.readAdditionalSaveData(p_30488_);
-        this.setChest(p_30488_.getBoolean("ChestedHorse"));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setChest(pCompound.getBoolean("ChestedHorse"));
         this.createInventory();
         if (this.hasChest()) {
-            ListTag listtag = p_30488_.getList("Items", 10);
+            ListTag listtag = pCompound.getList("Items", 10);
 
             for (int i = 0; i < listtag.size(); i++) {
                 CompoundTag compoundtag = listtag.getCompound(i);
@@ -145,13 +145,13 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_30493_, InteractionHand p_30494_) {
-        boolean flag = !this.isBaby() && this.isTamed() && p_30493_.isSecondaryUseActive();
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        boolean flag = !this.isBaby() && this.isTamed() && pPlayer.isSecondaryUseActive();
         if (!this.isVehicle() && !flag) {
-            ItemStack itemstack = p_30493_.getItemInHand(p_30494_);
+            ItemStack itemstack = pPlayer.getItemInHand(pHand);
             if (!itemstack.isEmpty()) {
                 if (this.isFood(itemstack)) {
-                    return this.fedFood(p_30493_, itemstack);
+                    return this.fedFood(pPlayer, itemstack);
                 }
 
                 if (!this.isTamed()) {
@@ -160,21 +160,21 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
                 }
 
                 if (!this.hasChest() && itemstack.is(Items.CHEST)) {
-                    this.equipChest(p_30493_, itemstack);
+                    this.equipChest(pPlayer, itemstack);
                     return InteractionResult.SUCCESS;
                 }
             }
 
-            return super.mobInteract(p_30493_, p_30494_);
+            return super.mobInteract(pPlayer, pHand);
         } else {
-            return super.mobInteract(p_30493_, p_30494_);
+            return super.mobInteract(pPlayer, pHand);
         }
     }
 
-    private void equipChest(Player p_250937_, ItemStack p_251558_) {
+    private void equipChest(Player pPlayer, ItemStack pChestStack) {
         this.setChest(true);
         this.playChestEquipsSound();
-        p_251558_.consume(1, p_250937_);
+        pChestStack.consume(1, pPlayer);
         this.createInventory();
     }
 

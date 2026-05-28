@@ -13,8 +13,8 @@ public class TagMatchTest extends RuleTest {
         .xmap(TagMatchTest::new, p_205065_ -> p_205065_.tag);
     private final TagKey<Block> tag;
 
-    public TagMatchTest(TagKey<Block> p_205063_) {
-        this.tag = p_205063_;
+    public TagMatchTest(TagKey<Block> pTag) {
+        this.tag = pTag;
     }
 
     @Override

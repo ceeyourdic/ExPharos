@@ -12,18 +12,18 @@ import com.mojang.serialization.Dynamic;
 import net.minecraft.util.datafix.ExtraDataFixUtils;
 
 public class BeehiveFieldRenameFix extends DataFix {
-    public BeehiveFieldRenameFix(Schema p_336393_) {
-        super(p_336393_, true);
+    public BeehiveFieldRenameFix(Schema pOutputSchema) {
+        super(pOutputSchema, true);
     }
 
-    private Dynamic<?> fixBeehive(Dynamic<?> p_334771_) {
-        return p_334771_.remove("Bees");
+    private Dynamic<?> fixBeehive(Dynamic<?> pTag) {
+        return pTag.remove("Bees");
     }
 
-    private Dynamic<?> fixBee(Dynamic<?> p_335732_) {
-        p_335732_ = p_335732_.remove("EntityData");
-        p_335732_ = p_335732_.renameField("TicksInHive", "ticks_in_hive");
-        return p_335732_.renameField("MinOccupationTicks", "min_ticks_in_hive");
+    private Dynamic<?> fixBee(Dynamic<?> pTag) {
+        pTag = pTag.remove("EntityData");
+        pTag = pTag.renameField("TicksInHive", "ticks_in_hive");
+        return pTag.renameField("MinOccupationTicks", "min_ticks_in_hive");
     }
 
     @Override

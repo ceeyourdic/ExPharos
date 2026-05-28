@@ -175,12 +175,12 @@ public class DefaultAttributes {
         .put(EntityType.ZOMBIFIED_PIGLIN, ZombifiedPiglin.createAttributes().build())
         .build();
 
-    public static AttributeSupplier getSupplier(EntityType<? extends LivingEntity> p_22298_) {
-        return SUPPLIERS.get(p_22298_);
+    public static AttributeSupplier getSupplier(EntityType<? extends LivingEntity> pLivingEntity) {
+        return SUPPLIERS.get(pLivingEntity);
     }
 
-    public static boolean hasSupplier(EntityType<?> p_22302_) {
-        return SUPPLIERS.containsKey(p_22302_);
+    public static boolean hasSupplier(EntityType<?> pEntityType) {
+        return SUPPLIERS.containsKey(pEntityType);
     }
 
     public static void validate() {

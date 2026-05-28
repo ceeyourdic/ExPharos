@@ -9,10 +9,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class GustParticle extends TextureSheetParticle {
     private final SpriteSet sprites;
 
-    protected GustParticle(ClientLevel p_311562_, double p_310593_, double p_310162_, double p_311255_, SpriteSet p_312103_) {
-        super(p_311562_, p_310593_, p_310162_, p_311255_);
-        this.sprites = p_312103_;
-        this.setSpriteFromAge(p_312103_);
+    protected GustParticle(ClientLevel pLevel, double pX, double pY, double pZ, SpriteSet pSprites) {
+        super(pLevel, pX, pY, pZ);
+        this.sprites = pSprites;
+        this.setSpriteFromAge(pSprites);
         this.lifetime = 12 + this.random.nextInt(4);
         this.quadSize = 1.0F;
         this.setSize(1.0F, 1.0F);
@@ -41,8 +41,8 @@ public class GustParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public Provider(SpriteSet p_312576_) {
-            this.sprites = p_312576_;
+        public Provider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(
@@ -63,8 +63,8 @@ public class GustParticle extends TextureSheetParticle {
     public static class SmallProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public SmallProvider(SpriteSet p_334883_) {
-            this.sprites = p_334883_;
+        public SmallProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(

@@ -19,10 +19,10 @@ public class ShieldModel extends Model {
     private final ModelPart plate;
     private final ModelPart handle;
 
-    public ShieldModel(ModelPart p_170911_) {
-        super(p_170911_, RenderType::entitySolid);
-        this.plate = p_170911_.getChild("plate");
-        this.handle = p_170911_.getChild("handle");
+    public ShieldModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entitySolid);
+        this.plate = pRoot.getChild("plate");
+        this.handle = pRoot.getChild("handle");
     }
 
     public static LayerDefinition createLayer() {

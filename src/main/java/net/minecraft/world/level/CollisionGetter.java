@@ -22,53 +22,53 @@ public interface CollisionGetter extends BlockGetter {
     WorldBorder getWorldBorder();
 
     @Nullable
-    BlockGetter getChunkForCollisions(int p_45774_, int p_45775_);
+    BlockGetter getChunkForCollisions(int pChunkX, int pChunkZ);
 
-    default boolean isUnobstructed(@Nullable Entity p_45750_, VoxelShape p_45751_) {
+    default boolean isUnobstructed(@Nullable Entity pEntity, VoxelShape pShape) {
         return true;
     }
 
-    default boolean isUnobstructed(BlockState p_45753_, BlockPos p_45754_, CollisionContext p_45755_) {
-        VoxelShape voxelshape = p_45753_.getCollisionShape(this, p_45754_, p_45755_);
+    default boolean isUnobstructed(BlockState pState, BlockPos pPos, CollisionContext pContext) {
+        VoxelShape voxelshape = pState.getCollisionShape(this, pPos, pContext);
         return voxelshape.isEmpty()
-            || this.isUnobstructed(null, voxelshape.move((double)p_45754_.getX(), (double)p_45754_.getY(), (double)p_45754_.getZ()));
+            || this.isUnobstructed(null, voxelshape.move((double)pPos.getX(), (double)pPos.getY(), (double)pPos.getZ()));
     }
 
-    default boolean isUnobstructed(Entity p_45785_) {
-        return this.isUnobstructed(p_45785_, Shapes.create(p_45785_.getBoundingBox()));
+    default boolean isUnobstructed(Entity pEntity) {
+        return this.isUnobstructed(pEntity, Shapes.create(pEntity.getBoundingBox()));
     }
 
-    default boolean noCollision(AABB p_45773_) {
-        return this.noCollision(null, p_45773_);
+    default boolean noCollision(AABB pCollisionBox) {
+        return this.noCollision(null, pCollisionBox);
     }
 
-    default boolean noCollision(Entity p_45787_) {
-        return this.noCollision(p_45787_, p_45787_.getBoundingBox());
+    default boolean noCollision(Entity pEntity) {
+        return this.noCollision(pEntity, pEntity.getBoundingBox());
     }
 
-    default boolean noCollision(@Nullable Entity p_45757_, AABB p_45758_) {
-        return this.noCollision(p_45757_, p_45758_, false);
+    default boolean noCollision(@Nullable Entity pEntity, AABB pCollisionBox) {
+        return this.noCollision(pEntity, pCollisionBox, false);
     }
 
-    default boolean noCollision(@Nullable Entity p_361913_, AABB p_361643_, boolean p_370219_) {
-        for (VoxelShape voxelshape : p_370219_ ? this.getBlockAndLiquidCollisions(p_361913_, p_361643_) : this.getBlockCollisions(p_361913_, p_361643_)) {
+    default boolean noCollision(@Nullable Entity pEntity, AABB pCollisionBox, boolean pCheckLiquid) {
+        for (VoxelShape voxelshape : pCheckLiquid ? this.getBlockAndLiquidCollisions(pEntity, pCollisionBox) : this.getBlockCollisions(pEntity, pCollisionBox)) {
             if (!voxelshape.isEmpty()) {
                 return false;
             }
         }
 
-        if (!this.getEntityCollisions(p_361913_, p_361643_).isEmpty()) {
+        if (!this.getEntityCollisions(pEntity, pCollisionBox).isEmpty()) {
             return false;
-        } else if (p_361913_ == null) {
+        } else if (pEntity == null) {
             return true;
         } else {
-            VoxelShape voxelshape1 = this.borderCollision(p_361913_, p_361643_);
-            return voxelshape1 == null || !Shapes.joinIsNotEmpty(voxelshape1, Shapes.create(p_361643_), BooleanOp.AND);
+            VoxelShape voxelshape1 = this.borderCollision(pEntity, pCollisionBox);
+            return voxelshape1 == null || !Shapes.joinIsNotEmpty(voxelshape1, Shapes.create(pCollisionBox), BooleanOp.AND);
         }
     }
 
-    default boolean noBlockCollision(@Nullable Entity p_299893_, AABB p_300925_) {
-        for (VoxelShape voxelshape : this.getBlockCollisions(p_299893_, p_300925_)) {
+    default boolean noBlockCollision(@Nullable Entity pEntity, AABB pBoundingBox) {
+        for (VoxelShape voxelshape : this.getBlockCollisions(pEntity, pBoundingBox)) {
             if (!voxelshape.isEmpty()) {
                 return false;
             }
@@ -77,33 +77,33 @@ public interface CollisionGetter extends BlockGetter {
         return true;
     }
 
-    List<VoxelShape> getEntityCollisions(@Nullable Entity p_186427_, AABB p_186428_);
+    List<VoxelShape> getEntityCollisions(@Nullable Entity pEntity, AABB pCollisionBox);
 
-    default Iterable<VoxelShape> getCollisions(@Nullable Entity p_186432_, AABB p_186433_) {
-        List<VoxelShape> list = this.getEntityCollisions(p_186432_, p_186433_);
-        Iterable<VoxelShape> iterable = this.getBlockCollisions(p_186432_, p_186433_);
+    default Iterable<VoxelShape> getCollisions(@Nullable Entity pEntity, AABB pCollisionBox) {
+        List<VoxelShape> list = this.getEntityCollisions(pEntity, pCollisionBox);
+        Iterable<VoxelShape> iterable = this.getBlockCollisions(pEntity, pCollisionBox);
         return list.isEmpty() ? iterable : Iterables.concat(list, iterable);
     }
 
-    default Iterable<VoxelShape> getBlockCollisions(@Nullable Entity p_186435_, AABB p_186436_) {
-        return () -> new BlockCollisions<>(this, p_186435_, p_186436_, false, (p_359944_, p_359945_) -> p_359945_);
+    default Iterable<VoxelShape> getBlockCollisions(@Nullable Entity pEntity, AABB pCollisionBox) {
+        return () -> new BlockCollisions<>(this, pEntity, pCollisionBox, false, (p_359944_, p_359945_) -> p_359945_);
     }
 
-    default Iterable<VoxelShape> getBlockAndLiquidCollisions(@Nullable Entity p_367195_, AABB p_366686_) {
-        return () -> new BlockCollisions<>(this, CollisionContext.of(p_367195_, true), p_366686_, false, (p_286215_, p_286216_) -> p_286216_);
+    default Iterable<VoxelShape> getBlockAndLiquidCollisions(@Nullable Entity pEntity, AABB pCollisionBox) {
+        return () -> new BlockCollisions<>(this, CollisionContext.of(pEntity, true), pCollisionBox, false, (p_286215_, p_286216_) -> p_286216_);
     }
 
     @Nullable
-    private VoxelShape borderCollision(Entity p_186441_, AABB p_186442_) {
+    private VoxelShape borderCollision(Entity pEntity, AABB pBox) {
         WorldBorder worldborder = this.getWorldBorder();
-        return worldborder.isInsideCloseToBorder(p_186441_, p_186442_) ? worldborder.getCollisionShape() : null;
+        return worldborder.isInsideCloseToBorder(pEntity, pBox) ? worldborder.getCollisionShape() : null;
     }
 
-    default BlockHitResult clipIncludingBorder(ClipContext p_362143_) {
-        BlockHitResult blockhitresult = this.clip(p_362143_);
+    default BlockHitResult clipIncludingBorder(ClipContext pClipContext) {
+        BlockHitResult blockhitresult = this.clip(pClipContext);
         WorldBorder worldborder = this.getWorldBorder();
-        if (worldborder.isWithinBounds(p_362143_.getFrom()) && !worldborder.isWithinBounds(blockhitresult.getLocation())) {
-            Vec3 vec3 = blockhitresult.getLocation().subtract(p_362143_.getFrom());
+        if (worldborder.isWithinBounds(pClipContext.getFrom()) && !worldborder.isWithinBounds(blockhitresult.getLocation())) {
+            Vec3 vec3 = blockhitresult.getLocation().subtract(pClipContext.getFrom());
             Direction direction = Direction.getApproximateNearest(vec3.x, vec3.y, vec3.z);
             Vec3 vec31 = worldborder.clampVec3ToBound(blockhitresult.getLocation());
             return new BlockHitResult(vec31, direction, BlockPos.containing(vec31), false, true);
@@ -112,8 +112,8 @@ public interface CollisionGetter extends BlockGetter {
         }
     }
 
-    default boolean collidesWithSuffocatingBlock(@Nullable Entity p_186438_, AABB p_186439_) {
-        BlockCollisions<VoxelShape> blockcollisions = new BlockCollisions<>(this, p_186438_, p_186439_, true, (p_286211_, p_286212_) -> p_286212_);
+    default boolean collidesWithSuffocatingBlock(@Nullable Entity pEntity, AABB pBox) {
+        BlockCollisions<VoxelShape> blockcollisions = new BlockCollisions<>(this, pEntity, pBox, true, (p_286211_, p_286212_) -> p_286212_);
 
         while (blockcollisions.hasNext()) {
             if (!blockcollisions.next().isEmpty()) {
@@ -124,14 +124,14 @@ public interface CollisionGetter extends BlockGetter {
         return false;
     }
 
-    default Optional<BlockPos> findSupportingBlock(Entity p_286468_, AABB p_286792_) {
+    default Optional<BlockPos> findSupportingBlock(Entity pEntity, AABB pBox) {
         BlockPos blockpos = null;
         double d0 = Double.MAX_VALUE;
-        BlockCollisions<BlockPos> blockcollisions = new BlockCollisions<>(this, p_286468_, p_286792_, false, (p_286213_, p_286214_) -> p_286213_);
+        BlockCollisions<BlockPos> blockcollisions = new BlockCollisions<>(this, pEntity, pBox, false, (p_286213_, p_286214_) -> p_286213_);
 
         while (blockcollisions.hasNext()) {
             BlockPos blockpos1 = blockcollisions.next();
-            double d1 = blockpos1.distToCenterSqr(p_286468_.position());
+            double d1 = blockpos1.distToCenterSqr(pEntity.position());
             if (d1 < d0 || d1 == d0 && (blockpos == null || blockpos.compareTo(blockpos1) < 0)) {
                 blockpos = blockpos1.immutable();
                 d0 = d1;
@@ -141,19 +141,19 @@ public interface CollisionGetter extends BlockGetter {
         return Optional.ofNullable(blockpos);
     }
 
-    default Optional<Vec3> findFreePosition(@Nullable Entity p_151419_, VoxelShape p_151420_, Vec3 p_151421_, double p_151422_, double p_151423_, double p_151424_) {
-        if (p_151420_.isEmpty()) {
+    default Optional<Vec3> findFreePosition(@Nullable Entity pEntity, VoxelShape pShape, Vec3 pPos, double pX, double pY, double pZ) {
+        if (pShape.isEmpty()) {
             return Optional.empty();
         } else {
-            AABB aabb = p_151420_.bounds().inflate(p_151422_, p_151423_, p_151424_);
-            VoxelShape voxelshape = StreamSupport.stream(this.getBlockCollisions(p_151419_, aabb).spliterator(), false)
+            AABB aabb = pShape.bounds().inflate(pX, pY, pZ);
+            VoxelShape voxelshape = StreamSupport.stream(this.getBlockCollisions(pEntity, aabb).spliterator(), false)
                 .filter(p_186430_ -> this.getWorldBorder() == null || this.getWorldBorder().isWithinBounds(p_186430_.bounds()))
                 .flatMap(p_186426_ -> p_186426_.toAabbs().stream())
-                .map(p_186424_ -> p_186424_.inflate(p_151422_ / 2.0, p_151423_ / 2.0, p_151424_ / 2.0))
+                .map(p_186424_ -> p_186424_.inflate(pX / 2.0, pY / 2.0, pZ / 2.0))
                 .map(Shapes::create)
                 .reduce(Shapes.empty(), Shapes::or);
-            VoxelShape voxelshape1 = Shapes.join(p_151420_, voxelshape, BooleanOp.ONLY_FIRST);
-            return voxelshape1.closestPointTo(p_151421_);
+            VoxelShape voxelshape1 = Shapes.join(pShape, voxelshape, BooleanOp.ONLY_FIRST);
+            return voxelshape1.closestPointTo(pPos);
         }
     }
 }

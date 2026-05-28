@@ -26,15 +26,15 @@ public class AxisAlignedLinearPosTest extends PosRuleTest {
     private final int maxDist;
     private final Direction.Axis axis;
 
-    public AxisAlignedLinearPosTest(float p_73970_, float p_73971_, int p_73972_, int p_73973_, Direction.Axis p_73974_) {
-        if (p_73972_ >= p_73973_) {
-            throw new IllegalArgumentException("Invalid range: [" + p_73972_ + "," + p_73973_ + "]");
+    public AxisAlignedLinearPosTest(float pMinChance, float pMaxChance, int pMinDist, int pMaxDist, Direction.Axis pAxis) {
+        if (pMinDist >= pMaxDist) {
+            throw new IllegalArgumentException("Invalid range: [" + pMinDist + "," + pMaxDist + "]");
         } else {
-            this.minChance = p_73970_;
-            this.maxChance = p_73971_;
-            this.minDist = p_73972_;
-            this.maxDist = p_73973_;
-            this.axis = p_73974_;
+            this.minChance = pMinChance;
+            this.maxChance = pMaxChance;
+            this.minDist = pMinDist;
+            this.maxDist = pMaxDist;
+            this.axis = pAxis;
         }
     }
 

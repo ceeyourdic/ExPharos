@@ -13,14 +13,14 @@ public class V3327 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_273248_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_273248_);
-        p_273248_.register(
+    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(pSchema);
+        pSchema.register(
             map,
             "minecraft:decorated_pot",
-            () -> DSL.optionalFields("shards", DSL.list(References.ITEM_NAME.in(p_273248_)), "item", References.ITEM_STACK.in(p_273248_))
+            () -> DSL.optionalFields("shards", DSL.list(References.ITEM_NAME.in(pSchema)), "item", References.ITEM_STACK.in(pSchema))
         );
-        p_273248_.register(map, "minecraft:suspicious_sand", () -> DSL.optionalFields("item", References.ITEM_STACK.in(p_273248_)));
+        pSchema.register(map, "minecraft:suspicious_sand", () -> DSL.optionalFields("item", References.ITEM_STACK.in(pSchema)));
         return map;
     }
 }

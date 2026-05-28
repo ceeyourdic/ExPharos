@@ -45,7 +45,7 @@ public class EndPortalBlock extends BaseEntityBlock implements Portal {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_53038_, BlockGetter p_53039_, BlockPos p_53040_, CollisionContext p_53041_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
@@ -55,14 +55,14 @@ public class EndPortalBlock extends BaseEntityBlock implements Portal {
     }
 
     @Override
-    protected void entityInside(BlockState p_53025_, Level p_53026_, BlockPos p_53027_, Entity p_53028_) {
-        if (p_53028_.canUsePortal(false)) {
-            if (!p_53026_.isClientSide && p_53026_.dimension() == Level.END && p_53028_ instanceof ServerPlayer serverplayer && !serverplayer.seenCredits) {
+    protected void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
+        if (pEntity.canUsePortal(false)) {
+            if (!pLevel.isClientSide && pLevel.dimension() == Level.END && pEntity instanceof ServerPlayer serverplayer && !serverplayer.seenCredits) {
                 serverplayer.showEndCredits();
                 return;
             }
 
-            p_53028_.setAsInsidePortal(this, p_53027_);
+            pEntity.setAsInsidePortal(this, pPos);
         }
     }
 
@@ -113,7 +113,7 @@ public class EndPortalBlock extends BaseEntityBlock implements Portal {
     }
 
     @Override
-    protected boolean canBeReplaced(BlockState p_53035_, Fluid p_53036_) {
+    protected boolean canBeReplaced(BlockState pState, Fluid pFluid) {
         return false;
     }
 

@@ -26,9 +26,9 @@ public class MangroveRootPlacer extends RootPlacer {
     );
     private final MangroveRootPlacement mangroveRootPlacement;
 
-    public MangroveRootPlacer(IntProvider p_225817_, BlockStateProvider p_225818_, Optional<AboveRootPlacement> p_225819_, MangroveRootPlacement p_225820_) {
-        super(p_225817_, p_225818_, p_225819_);
-        this.mangroveRootPlacement = p_225820_;
+    public MangroveRootPlacer(IntProvider pTrunkOffset, BlockStateProvider pRootProvider, Optional<AboveRootPlacement> pAboveRootPlacement, MangroveRootPlacement pMangroveRootPlacement) {
+        super(pTrunkOffset, pRootProvider, pAboveRootPlacement);
+        this.mangroveRootPlacement = pMangroveRootPlacement;
     }
 
     @Override
@@ -72,20 +72,20 @@ public class MangroveRootPlacer extends RootPlacer {
     }
 
     private boolean simulateRoots(
-        LevelSimulatedReader p_225823_,
-        RandomSource p_225824_,
-        BlockPos p_225825_,
-        Direction p_225826_,
-        BlockPos p_225827_,
-        List<BlockPos> p_225828_,
-        int p_225829_
+        LevelSimulatedReader pLevel,
+        RandomSource pRandom,
+        BlockPos pPos,
+        Direction pDirection,
+        BlockPos pTrunkOrigin,
+        List<BlockPos> pRoots,
+        int pLength
     ) {
         int i = this.mangroveRootPlacement.maxRootLength();
-        if (p_225829_ != i && p_225828_.size() <= i) {
-            for (BlockPos blockpos : this.potentialRootPositions(p_225825_, p_225826_, p_225824_, p_225827_)) {
-                if (this.canPlaceRoot(p_225823_, blockpos)) {
-                    p_225828_.add(blockpos);
-                    if (!this.simulateRoots(p_225823_, p_225824_, blockpos, p_225826_, p_225827_, p_225828_, p_225829_ + 1)) {
+        if (pLength != i && pRoots.size() <= i) {
+            for (BlockPos blockpos : this.potentialRootPositions(pPos, pDirection, pRandom, pTrunkOrigin)) {
+                if (this.canPlaceRoot(pLevel, blockpos)) {
+                    pRoots.add(blockpos);
+                    if (!this.simulateRoots(pLevel, pRandom, blockpos, pDirection, pTrunkOrigin, pRoots, pLength + 1)) {
                         return false;
                     }
                 }
@@ -97,20 +97,20 @@ public class MangroveRootPlacer extends RootPlacer {
         }
     }
 
-    protected List<BlockPos> potentialRootPositions(BlockPos p_225851_, Direction p_225852_, RandomSource p_225853_, BlockPos p_225854_) {
-        BlockPos blockpos = p_225851_.below();
-        BlockPos blockpos1 = p_225851_.relative(p_225852_);
-        int i = p_225851_.distManhattan(p_225854_);
+    protected List<BlockPos> potentialRootPositions(BlockPos pPos, Direction pDirection, RandomSource pRandom, BlockPos pTrunkOrigin) {
+        BlockPos blockpos = pPos.below();
+        BlockPos blockpos1 = pPos.relative(pDirection);
+        int i = pPos.distManhattan(pTrunkOrigin);
         int j = this.mangroveRootPlacement.maxRootWidth();
         float f = this.mangroveRootPlacement.randomSkewChance();
         if (i > j - 3 && i <= j) {
-            return p_225853_.nextFloat() < f ? List.of(blockpos, blockpos1.below()) : List.of(blockpos);
+            return pRandom.nextFloat() < f ? List.of(blockpos, blockpos1.below()) : List.of(blockpos);
         } else if (i > j) {
             return List.of(blockpos);
-        } else if (p_225853_.nextFloat() < f) {
+        } else if (pRandom.nextFloat() < f) {
             return List.of(blockpos);
         } else {
-            return p_225853_.nextBoolean() ? List.of(blockpos1) : List.of(blockpos);
+            return pRandom.nextBoolean() ? List.of(blockpos1) : List.of(blockpos);
         }
     }
 

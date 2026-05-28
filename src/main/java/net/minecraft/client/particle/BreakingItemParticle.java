@@ -21,22 +21,22 @@ public class BreakingItemParticle extends TextureSheetParticle {
     private final float vo;
 
     BreakingItemParticle(
-        ClientLevel p_105646_,
-        double p_105647_,
-        double p_105648_,
-        double p_105649_,
-        double p_105650_,
-        double p_105651_,
-        double p_105652_,
-        ItemStackRenderState p_376788_
+        ClientLevel pLevel,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed,
+        ItemStackRenderState pRenderState
     ) {
-        this(p_105646_, p_105647_, p_105648_, p_105649_, p_376788_);
+        this(pLevel, pX, pY, pZ, pRenderState);
         this.xd *= 0.1F;
         this.yd *= 0.1F;
         this.zd *= 0.1F;
-        this.xd += p_105650_;
-        this.yd += p_105651_;
-        this.zd += p_105652_;
+        this.xd += pXSpeed;
+        this.yd += pYSpeed;
+        this.zd += pZSpeed;
     }
 
     @Override
@@ -44,9 +44,9 @@ public class BreakingItemParticle extends TextureSheetParticle {
         return ParticleRenderType.TERRAIN_SHEET;
     }
 
-    protected BreakingItemParticle(ClientLevel p_105665_, double p_105666_, double p_105667_, double p_105668_, ItemStackRenderState p_375605_) {
-        super(p_105665_, p_105666_, p_105667_, p_105668_, 0.0, 0.0, 0.0);
-        TextureAtlasSprite textureatlassprite = p_375605_.pickParticleIcon(this.random);
+    protected BreakingItemParticle(ClientLevel pLevel, double pX, double pY, double pZ, ItemStackRenderState pRenderState) {
+        super(pLevel, pX, pY, pZ, 0.0, 0.0, 0.0);
+        TextureAtlasSprite textureatlassprite = pRenderState.pickParticleIcon(this.random);
         if (textureatlassprite != null) {
             this.setSprite(textureatlassprite);
         } else {
@@ -99,8 +99,8 @@ public class BreakingItemParticle extends TextureSheetParticle {
     public abstract static class ItemParticleProvider<T extends ParticleOptions> implements ParticleProvider<T> {
         private final ItemStackRenderState scratchRenderState = new ItemStackRenderState();
 
-        protected ItemStackRenderState calculateState(ItemStack p_376099_, ClientLevel p_377180_) {
-            Minecraft.getInstance().getItemModelResolver().updateForTopItem(this.scratchRenderState, p_376099_, ItemDisplayContext.GROUND, false, p_377180_, null, 0);
+        protected ItemStackRenderState calculateState(ItemStack pStack, ClientLevel pLevel) {
+            Minecraft.getInstance().getItemModelResolver().updateForTopItem(this.scratchRenderState, pStack, ItemDisplayContext.GROUND, false, pLevel, null, 0);
             return this.scratchRenderState;
         }
     }
@@ -108,17 +108,17 @@ public class BreakingItemParticle extends TextureSheetParticle {
     @OnlyIn(Dist.CLIENT)
     public static class Provider extends BreakingItemParticle.ItemParticleProvider<ItemParticleOption> {
         public Particle createParticle(
-            ItemParticleOption p_105677_,
-            ClientLevel p_105678_,
-            double p_105679_,
-            double p_105680_,
-            double p_105681_,
-            double p_105682_,
-            double p_105683_,
-            double p_105684_
+            ItemParticleOption pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
             return new BreakingItemParticle(
-                p_105678_, p_105679_, p_105680_, p_105681_, p_105682_, p_105683_, p_105684_, this.calculateState(p_105677_.getItem(), p_105678_)
+                pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.calculateState(pType.getItem(), pLevel)
             );
         }
     }
@@ -126,32 +126,32 @@ public class BreakingItemParticle extends TextureSheetParticle {
     @OnlyIn(Dist.CLIENT)
     public static class SlimeProvider extends BreakingItemParticle.ItemParticleProvider<SimpleParticleType> {
         public Particle createParticle(
-            SimpleParticleType p_105705_,
-            ClientLevel p_105706_,
-            double p_105707_,
-            double p_105708_,
-            double p_105709_,
-            double p_105710_,
-            double p_105711_,
-            double p_105712_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            return new BreakingItemParticle(p_105706_, p_105707_, p_105708_, p_105709_, this.calculateState(new ItemStack(Items.SLIME_BALL), p_105706_));
+            return new BreakingItemParticle(pLevel, pX, pY, pZ, this.calculateState(new ItemStack(Items.SLIME_BALL), pLevel));
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     public static class SnowballProvider extends BreakingItemParticle.ItemParticleProvider<SimpleParticleType> {
         public Particle createParticle(
-            SimpleParticleType p_105724_,
-            ClientLevel p_105725_,
-            double p_105726_,
-            double p_105727_,
-            double p_105728_,
-            double p_105729_,
-            double p_105730_,
-            double p_105731_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            return new BreakingItemParticle(p_105725_, p_105726_, p_105727_, p_105728_, this.calculateState(new ItemStack(Items.SNOWBALL), p_105725_));
+            return new BreakingItemParticle(pLevel, pX, pY, pZ, this.calculateState(new ItemStack(Items.SNOWBALL), pLevel));
         }
     }
 }

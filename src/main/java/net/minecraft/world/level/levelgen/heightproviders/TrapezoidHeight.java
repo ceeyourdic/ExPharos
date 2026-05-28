@@ -25,18 +25,18 @@ public class TrapezoidHeight extends HeightProvider {
     private final VerticalAnchor maxInclusive;
     private final int plateau;
 
-    private TrapezoidHeight(VerticalAnchor p_162000_, VerticalAnchor p_162001_, int p_162002_) {
-        this.minInclusive = p_162000_;
-        this.maxInclusive = p_162001_;
-        this.plateau = p_162002_;
+    private TrapezoidHeight(VerticalAnchor pMinInclusive, VerticalAnchor pMaxInclusive, int pPlateau) {
+        this.minInclusive = pMinInclusive;
+        this.maxInclusive = pMaxInclusive;
+        this.plateau = pPlateau;
     }
 
-    public static TrapezoidHeight of(VerticalAnchor p_162010_, VerticalAnchor p_162011_, int p_162012_) {
-        return new TrapezoidHeight(p_162010_, p_162011_, p_162012_);
+    public static TrapezoidHeight of(VerticalAnchor pMinInclusive, VerticalAnchor pMaxInclusive, int pPlateau) {
+        return new TrapezoidHeight(pMinInclusive, pMaxInclusive, pPlateau);
     }
 
-    public static TrapezoidHeight of(VerticalAnchor p_162007_, VerticalAnchor p_162008_) {
-        return of(p_162007_, p_162008_, 0);
+    public static TrapezoidHeight of(VerticalAnchor pMinInclusive, VerticalAnchor pMaxInclusive) {
+        return of(pMinInclusive, pMaxInclusive, 0);
     }
 
     @Override

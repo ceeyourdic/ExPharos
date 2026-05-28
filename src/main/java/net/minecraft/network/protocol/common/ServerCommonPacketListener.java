@@ -3,13 +3,13 @@ package net.minecraft.network.protocol.common;
 import net.minecraft.network.protocol.cookie.ServerCookiePacketListener;
 
 public interface ServerCommonPacketListener extends ServerCookiePacketListener {
-    void handleKeepAlive(ServerboundKeepAlivePacket p_300190_);
+    void handleKeepAlive(ServerboundKeepAlivePacket pPacket);
 
-    void handlePong(ServerboundPongPacket p_297980_);
+    void handlePong(ServerboundPongPacket pPacket);
 
-    void handleCustomPayload(ServerboundCustomPayloadPacket p_297952_);
+    void handleCustomPayload(ServerboundCustomPayloadPacket pPacket);
 
-    void handleResourcePackResponse(ServerboundResourcePackPacket p_300293_);
+    void handleResourcePackResponse(ServerboundResourcePackPacket pPacket);
 
-    void handleClientInformation(ServerboundClientInformationPacket p_301286_);
+    void handleClientInformation(ServerboundClientInformationPacket pPacket);
 }

@@ -31,14 +31,14 @@ public class AnimalPanic<E extends PathfinderMob> extends Behavior<E> {
     private final float speedMultiplier;
     private final Function<PathfinderMob, TagKey<DamageType>> panicCausingDamageTypes;
 
-    public AnimalPanic(float p_147385_) {
-        this(p_147385_, p_341293_ -> DamageTypeTags.PANIC_CAUSES);
+    public AnimalPanic(float pSpeedMultiplier) {
+        this(pSpeedMultiplier, p_341293_ -> DamageTypeTags.PANIC_CAUSES);
     }
 
-    public AnimalPanic(float p_275357_, Function<PathfinderMob, TagKey<DamageType>> p_343027_) {
+    public AnimalPanic(float pSpeedMultiplier, Function<PathfinderMob, TagKey<DamageType>> pPanicCausingDamageTypes) {
         super(Map.of(MemoryModuleType.IS_PANICKING, MemoryStatus.REGISTERED, MemoryModuleType.HURT_BY, MemoryStatus.REGISTERED), 100, 120);
-        this.speedMultiplier = p_275357_;
-        this.panicCausingDamageTypes = p_343027_;
+        this.speedMultiplier = pSpeedMultiplier;
+        this.panicCausingDamageTypes = pPanicCausingDamageTypes;
     }
 
     protected boolean checkExtraStartConditions(ServerLevel p_275286_, E p_275721_) {
@@ -70,27 +70,27 @@ public class AnimalPanic<E extends PathfinderMob> extends Behavior<E> {
     }
 
     @Nullable
-    private Vec3 getPanicPos(E p_196639_, ServerLevel p_196640_) {
-        if (p_196639_.isOnFire()) {
-            Optional<Vec3> optional = this.lookForWater(p_196640_, p_196639_).map(Vec3::atBottomCenterOf);
+    private Vec3 getPanicPos(E pPathfinder, ServerLevel pLevel) {
+        if (pPathfinder.isOnFire()) {
+            Optional<Vec3> optional = this.lookForWater(pLevel, pPathfinder).map(Vec3::atBottomCenterOf);
             if (optional.isPresent()) {
                 return optional.get();
             }
         }
 
-        return LandRandomPos.getPos(p_196639_, 5, 4);
+        return LandRandomPos.getPos(pPathfinder, 5, 4);
     }
 
-    private Optional<BlockPos> lookForWater(BlockGetter p_196642_, Entity p_196643_) {
-        BlockPos blockpos = p_196643_.blockPosition();
-        if (!p_196642_.getBlockState(blockpos).getCollisionShape(p_196642_, blockpos).isEmpty()) {
+    private Optional<BlockPos> lookForWater(BlockGetter pLevel, Entity pEntity) {
+        BlockPos blockpos = pEntity.blockPosition();
+        if (!pLevel.getBlockState(blockpos).getCollisionShape(pLevel, blockpos).isEmpty()) {
             return Optional.empty();
         } else {
             Predicate<BlockPos> predicate;
-            if (Mth.ceil(p_196643_.getBbWidth()) == 2) {
-                predicate = p_284705_ -> BlockPos.squareOutSouthEast(p_284705_).allMatch(p_196646_ -> p_196642_.getFluidState(p_196646_).is(FluidTags.WATER));
+            if (Mth.ceil(pEntity.getBbWidth()) == 2) {
+                predicate = p_284705_ -> BlockPos.squareOutSouthEast(p_284705_).allMatch(p_196646_ -> pLevel.getFluidState(p_196646_).is(FluidTags.WATER));
             } else {
-                predicate = p_284707_ -> p_196642_.getFluidState(p_284707_).is(FluidTags.WATER);
+                predicate = p_284707_ -> pLevel.getFluidState(p_284707_).is(FluidTags.WATER);
             }
 
             return BlockPos.findClosestMatch(blockpos, 5, 1, predicate);

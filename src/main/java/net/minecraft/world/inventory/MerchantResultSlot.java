@@ -12,36 +12,36 @@ public class MerchantResultSlot extends Slot {
     private int removeCount;
     private final Merchant merchant;
 
-    public MerchantResultSlot(Player p_40083_, Merchant p_40084_, MerchantContainer p_40085_, int p_40086_, int p_40087_, int p_40088_) {
-        super(p_40085_, p_40086_, p_40087_, p_40088_);
-        this.player = p_40083_;
-        this.merchant = p_40084_;
-        this.slots = p_40085_;
+    public MerchantResultSlot(Player pPlayer, Merchant pMerchant, MerchantContainer pSlots, int pSlot, int pXPosition, int pYPosition) {
+        super(pSlots, pSlot, pXPosition, pYPosition);
+        this.player = pPlayer;
+        this.merchant = pMerchant;
+        this.slots = pSlots;
     }
 
     @Override
-    public boolean mayPlace(ItemStack p_40095_) {
+    public boolean mayPlace(ItemStack pStack) {
         return false;
     }
 
     @Override
-    public ItemStack remove(int p_40090_) {
+    public ItemStack remove(int pAmount) {
         if (this.hasItem()) {
-            this.removeCount = this.removeCount + Math.min(p_40090_, this.getItem().getCount());
+            this.removeCount = this.removeCount + Math.min(pAmount, this.getItem().getCount());
         }
 
-        return super.remove(p_40090_);
+        return super.remove(pAmount);
     }
 
     @Override
-    protected void onQuickCraft(ItemStack p_40097_, int p_40098_) {
-        this.removeCount += p_40098_;
-        this.checkTakeAchievements(p_40097_);
+    protected void onQuickCraft(ItemStack pStack, int pAmount) {
+        this.removeCount += pAmount;
+        this.checkTakeAchievements(pStack);
     }
 
     @Override
-    protected void checkTakeAchievements(ItemStack p_40100_) {
-        p_40100_.onCraftedBy(this.player.level(), this.player, this.removeCount);
+    protected void checkTakeAchievements(ItemStack pStack) {
+        pStack.onCraftedBy(this.player.level(), this.player, this.removeCount);
         this.removeCount = 0;
     }
 

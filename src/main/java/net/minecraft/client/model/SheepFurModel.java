@@ -13,8 +13,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class SheepFurModel extends QuadrupedModel<SheepRenderState> {
-    public SheepFurModel(ModelPart p_170900_) {
-        super(p_170900_);
+    public SheepFurModel(ModelPart pRoot) {
+        super(pRoot);
     }
 
     public static LayerDefinition createFurLayer() {

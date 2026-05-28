@@ -31,11 +31,11 @@ public class StriderModel extends EntityModel<StriderRenderState> {
     private final ModelPart leftMiddleBristle;
     private final ModelPart leftBottomBristle;
 
-    public StriderModel(ModelPart p_171011_) {
-        super(p_171011_);
-        this.rightLeg = p_171011_.getChild("right_leg");
-        this.leftLeg = p_171011_.getChild("left_leg");
-        this.body = p_171011_.getChild("body");
+    public StriderModel(ModelPart pRoot) {
+        super(pRoot);
+        this.rightLeg = pRoot.getChild("right_leg");
+        this.leftLeg = pRoot.getChild("left_leg");
+        this.body = pRoot.getChild("body");
         this.rightBottomBristle = this.body.getChild("right_bottom_bristle");
         this.rightMiddleBristle = this.body.getChild("right_middle_bristle");
         this.rightTopBristle = this.body.getChild("right_top_bristle");

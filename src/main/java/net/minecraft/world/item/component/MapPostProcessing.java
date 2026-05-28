@@ -14,8 +14,8 @@ public enum MapPostProcessing {
     public static final StreamCodec<ByteBuf, MapPostProcessing> STREAM_CODEC = ByteBufCodecs.idMapper(ID_MAP, MapPostProcessing::id);
     private final int id;
 
-    private MapPostProcessing(final int p_331501_) {
-        this.id = p_331501_;
+    private MapPostProcessing(final int pId) {
+        this.id = pId;
     }
 
     public int id() {

@@ -22,19 +22,19 @@ public abstract class TextureAtlasHolder implements PreparableReloadListener, Au
     private final ResourceLocation atlasInfoLocation;
     private final Set<MetadataSectionType<?>> metadataSections;
 
-    public TextureAtlasHolder(TextureManager p_262057_, ResourceLocation p_261554_, ResourceLocation p_262147_) {
-        this(p_262057_, p_261554_, p_262147_, SpriteLoader.DEFAULT_METADATA_SECTIONS);
+    public TextureAtlasHolder(TextureManager pTextureManager, ResourceLocation pTextureAtlasLocation, ResourceLocation pAtlasInfoLocation) {
+        this(pTextureManager, pTextureAtlasLocation, pAtlasInfoLocation, SpriteLoader.DEFAULT_METADATA_SECTIONS);
     }
 
-    public TextureAtlasHolder(TextureManager p_299844_, ResourceLocation p_299366_, ResourceLocation p_297647_, Set<MetadataSectionType<?>> p_298542_) {
-        this.atlasInfoLocation = p_297647_;
-        this.textureAtlas = new TextureAtlas(p_299366_);
-        p_299844_.register(this.textureAtlas.location(), this.textureAtlas);
-        this.metadataSections = p_298542_;
+    public TextureAtlasHolder(TextureManager pTextureManager, ResourceLocation pTextureAtlasLocation, ResourceLocation pAtlasInfoLocation, Set<MetadataSectionType<?>> pMetadataSections) {
+        this.atlasInfoLocation = pAtlasInfoLocation;
+        this.textureAtlas = new TextureAtlas(pTextureAtlasLocation);
+        pTextureManager.register(this.textureAtlas.location(), this.textureAtlas);
+        this.metadataSections = pMetadataSections;
     }
 
-    protected TextureAtlasSprite getSprite(ResourceLocation p_118902_) {
-        return this.textureAtlas.getSprite(p_118902_);
+    protected TextureAtlasSprite getSprite(ResourceLocation pLocation) {
+        return this.textureAtlas.getSprite(pLocation);
     }
 
     @Override
@@ -48,9 +48,9 @@ public abstract class TextureAtlasHolder implements PreparableReloadListener, Au
             .thenAcceptAsync(this::apply, p_250510_);
     }
 
-    private void apply(SpriteLoader.Preparations p_252333_) {
+    private void apply(SpriteLoader.Preparations pPreparations) {
         try (Zone zone = Profiler.get().zone("upload")) {
-            this.textureAtlas.upload(p_252333_);
+            this.textureAtlas.upload(pPreparations);
         }
     }
 

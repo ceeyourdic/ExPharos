@@ -50,14 +50,14 @@ public class AddRealmPopupScreen extends RealmsScreen {
     private int carouselIndex;
     private int carouselTick;
 
-    public AddRealmPopupScreen(Screen p_343518_, boolean p_342705_) {
+    public AddRealmPopupScreen(Screen pBackgroundScreen, boolean pTrialAvailable) {
         super(POPUP_TEXT);
-        this.backgroundScreen = p_343518_;
-        this.trialAvailable = p_342705_;
+        this.backgroundScreen = pBackgroundScreen;
+        this.trialAvailable = pTrialAvailable;
     }
 
-    public static void updateCarouselImages(ResourceManager p_345419_) {
-        Collection<ResourceLocation> collection = p_345419_.listResources("textures/gui/images", p_343705_ -> p_343705_.getPath().endsWith(".png")).keySet();
+    public static void updateCarouselImages(ResourceManager pResourceManager) {
+        Collection<ResourceLocation> collection = pResourceManager.listResources("textures/gui/images", p_343705_ -> p_343705_.getPath().endsWith(".png")).keySet();
         carouselImages = collection.stream().filter(p_344363_ -> p_344363_.getNamespace().equals("realms")).toList();
     }
 
@@ -109,14 +109,14 @@ public class AddRealmPopupScreen extends RealmsScreen {
         }
     }
 
-    public static void renderDiamond(GuiGraphics p_343266_, Button p_345176_) {
+    public static void renderDiamond(GuiGraphics pGuiGraphics, Button pButton) {
         int i = 8;
-        p_343266_.pose().pushPose();
-        p_343266_.pose().translate(0.0F, 0.0F, 110.0F);
-        p_343266_.blitSprite(
-            RenderType::guiTextured, TRIAL_AVAILABLE_SPRITE, p_345176_.getX() + p_345176_.getWidth() - 8 - 4, p_345176_.getY() + p_345176_.getHeight() / 2 - 4, 8, 8
+        pGuiGraphics.pose().pushPose();
+        pGuiGraphics.pose().translate(0.0F, 0.0F, 110.0F);
+        pGuiGraphics.blitSprite(
+            RenderType::guiTextured, TRIAL_AVAILABLE_SPRITE, pButton.getX() + pButton.getWidth() - 8 - 4, pButton.getY() + pButton.getHeight() / 2 - 4, 8, 8
         );
-        p_343266_.pose().popPose();
+        pGuiGraphics.pose().popPose();
     }
 
     @Override

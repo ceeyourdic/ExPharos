@@ -19,26 +19,26 @@ public class ClientboundLevelChunkWithLightPacket implements Packet<ClientGamePa
     private final ClientboundLevelChunkPacketData chunkData;
     private final ClientboundLightUpdatePacketData lightData;
 
-    public ClientboundLevelChunkWithLightPacket(LevelChunk p_285290_, LevelLightEngine p_285254_, @Nullable BitSet p_285350_, @Nullable BitSet p_285304_) {
-        ChunkPos chunkpos = p_285290_.getPos();
+    public ClientboundLevelChunkWithLightPacket(LevelChunk pChunk, LevelLightEngine pLightEngine, @Nullable BitSet pSkyLight, @Nullable BitSet pBlockLight) {
+        ChunkPos chunkpos = pChunk.getPos();
         this.x = chunkpos.x;
         this.z = chunkpos.z;
-        this.chunkData = new ClientboundLevelChunkPacketData(p_285290_);
-        this.lightData = new ClientboundLightUpdatePacketData(chunkpos, p_285254_, p_285350_, p_285304_);
+        this.chunkData = new ClientboundLevelChunkPacketData(pChunk);
+        this.lightData = new ClientboundLightUpdatePacketData(chunkpos, pLightEngine, pSkyLight, pBlockLight);
     }
 
-    private ClientboundLevelChunkWithLightPacket(RegistryFriendlyByteBuf p_331782_) {
-        this.x = p_331782_.readInt();
-        this.z = p_331782_.readInt();
-        this.chunkData = new ClientboundLevelChunkPacketData(p_331782_, this.x, this.z);
-        this.lightData = new ClientboundLightUpdatePacketData(p_331782_, this.x, this.z);
+    private ClientboundLevelChunkWithLightPacket(RegistryFriendlyByteBuf pBuffer) {
+        this.x = pBuffer.readInt();
+        this.z = pBuffer.readInt();
+        this.chunkData = new ClientboundLevelChunkPacketData(pBuffer, this.x, this.z);
+        this.lightData = new ClientboundLightUpdatePacketData(pBuffer, this.x, this.z);
     }
 
-    private void write(RegistryFriendlyByteBuf p_327690_) {
-        p_327690_.writeInt(this.x);
-        p_327690_.writeInt(this.z);
-        this.chunkData.write(p_327690_);
-        this.lightData.write(p_327690_);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeInt(this.x);
+        pBuffer.writeInt(this.z);
+        this.chunkData.write(pBuffer);
+        this.lightData.write(pBuffer);
     }
 
     @Override

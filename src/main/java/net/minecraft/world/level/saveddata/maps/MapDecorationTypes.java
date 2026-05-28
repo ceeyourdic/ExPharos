@@ -46,19 +46,19 @@ public class MapDecorationTypes {
     public static final Holder<MapDecorationType> SWAMP_HUT = register("swamp_hut", "swamp_hut", true, MapColor.COLOR_LIGHT_GRAY.col, false, true);
     public static final Holder<MapDecorationType> TRIAL_CHAMBERS = register("trial_chambers", "trial_chambers", true, 12741452, false, true);
 
-    public static Holder<MapDecorationType> bootstrap(Registry<MapDecorationType> p_329539_) {
+    public static Holder<MapDecorationType> bootstrap(Registry<MapDecorationType> pRegistry) {
         return PLAYER;
     }
 
-    private static Holder<MapDecorationType> register(String p_329494_, String p_335821_, boolean p_327749_, boolean p_330406_) {
-        return register(p_329494_, p_335821_, p_327749_, -1, p_330406_, false);
+    private static Holder<MapDecorationType> register(String pName, String pAssetId, boolean pShowOnItemFrame, boolean pTrackCount) {
+        return register(pName, pAssetId, pShowOnItemFrame, -1, pTrackCount, false);
     }
 
     private static Holder<MapDecorationType> register(
-        String p_329296_, String p_330955_, boolean p_335378_, int p_330214_, boolean p_328908_, boolean p_332062_
+        String pName, String pAssetId, boolean pShowOnItemFrame, int pMapColor, boolean pExplorationMapElement, boolean pTrackCount
     ) {
-        ResourceKey<MapDecorationType> resourcekey = ResourceKey.create(Registries.MAP_DECORATION_TYPE, ResourceLocation.withDefaultNamespace(p_329296_));
-        MapDecorationType mapdecorationtype = new MapDecorationType(ResourceLocation.withDefaultNamespace(p_330955_), p_335378_, p_330214_, p_332062_, p_328908_);
+        ResourceKey<MapDecorationType> resourcekey = ResourceKey.create(Registries.MAP_DECORATION_TYPE, ResourceLocation.withDefaultNamespace(pName));
+        MapDecorationType mapdecorationtype = new MapDecorationType(ResourceLocation.withDefaultNamespace(pAssetId), pShowOnItemFrame, pMapColor, pTrackCount, pExplorationMapElement);
         return Registry.registerForHolder(BuiltInRegistries.MAP_DECORATION_TYPE, resourcekey, mapdecorationtype);
     }
 }

@@ -26,20 +26,20 @@ public enum AdvancementWidgetType {
     private final ResourceLocation goalFrameSprite;
 
     private AdvancementWidgetType(
-        final ResourceLocation p_300112_, final ResourceLocation p_300140_, final ResourceLocation p_299008_, final ResourceLocation p_301311_
+        final ResourceLocation pBoxSprite, final ResourceLocation pTaskFrameSprite, final ResourceLocation pChallengeFrameSprite, final ResourceLocation pGoalFrameSprite
     ) {
-        this.boxSprite = p_300112_;
-        this.taskFrameSprite = p_300140_;
-        this.challengeFrameSprite = p_299008_;
-        this.goalFrameSprite = p_301311_;
+        this.boxSprite = pBoxSprite;
+        this.taskFrameSprite = pTaskFrameSprite;
+        this.challengeFrameSprite = pChallengeFrameSprite;
+        this.goalFrameSprite = pGoalFrameSprite;
     }
 
     public ResourceLocation boxSprite() {
         return this.boxSprite;
     }
 
-    public ResourceLocation frameSprite(AdvancementType p_311711_) {
-        return switch (p_311711_) {
+    public ResourceLocation frameSprite(AdvancementType pType) {
+        return switch (pType) {
             case TASK -> this.taskFrameSprite;
             case CHALLENGE -> this.challengeFrameSprite;
             case GOAL -> this.goalFrameSprite;

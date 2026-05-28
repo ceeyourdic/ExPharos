@@ -25,28 +25,28 @@ public class GameLoadTimesEvent {
     private final Map<TelemetryProperty<GameLoadTimesEvent.Measurement>, Stopwatch> measurements = new HashMap<>();
     private OptionalLong bootstrapTime = OptionalLong.empty();
 
-    protected GameLoadTimesEvent(Ticker p_286506_) {
-        this.timeSource = p_286506_;
+    protected GameLoadTimesEvent(Ticker pTimeSource) {
+        this.timeSource = pTimeSource;
     }
 
-    public synchronized void beginStep(TelemetryProperty<GameLoadTimesEvent.Measurement> p_286394_) {
-        this.beginStep(p_286394_, p_286494_ -> Stopwatch.createStarted(this.timeSource));
+    public synchronized void beginStep(TelemetryProperty<GameLoadTimesEvent.Measurement> pMeasurement) {
+        this.beginStep(pMeasurement, p_286494_ -> Stopwatch.createStarted(this.timeSource));
     }
 
-    public synchronized void beginStep(TelemetryProperty<GameLoadTimesEvent.Measurement> p_286396_, Stopwatch p_286822_) {
-        this.beginStep(p_286396_, p_286421_ -> p_286822_);
+    public synchronized void beginStep(TelemetryProperty<GameLoadTimesEvent.Measurement> pMeasurement, Stopwatch pStopwatch) {
+        this.beginStep(pMeasurement, p_286421_ -> pStopwatch);
     }
 
     private synchronized void beginStep(
-        TelemetryProperty<GameLoadTimesEvent.Measurement> p_286311_, Function<TelemetryProperty<GameLoadTimesEvent.Measurement>, Stopwatch> p_286454_
+        TelemetryProperty<GameLoadTimesEvent.Measurement> pMeasurement, Function<TelemetryProperty<GameLoadTimesEvent.Measurement>, Stopwatch> pStopwatchGetter
     ) {
-        this.measurements.computeIfAbsent(p_286311_, p_286454_);
+        this.measurements.computeIfAbsent(pMeasurement, pStopwatchGetter);
     }
 
-    public synchronized void endStep(TelemetryProperty<GameLoadTimesEvent.Measurement> p_286634_) {
-        Stopwatch stopwatch = this.measurements.get(p_286634_);
+    public synchronized void endStep(TelemetryProperty<GameLoadTimesEvent.Measurement> pMeasurement) {
+        Stopwatch stopwatch = this.measurements.get(pMeasurement);
         if (stopwatch == null) {
-            LOGGER.warn("Attempted to end step for {} before starting it", p_286634_.id());
+            LOGGER.warn("Attempted to end step for {} before starting it", pMeasurement.id());
         } else {
             if (stopwatch.isRunning()) {
                 stopwatch.stop();
@@ -54,8 +54,8 @@ public class GameLoadTimesEvent {
         }
     }
 
-    public void send(TelemetryEventSender p_286524_) {
-        p_286524_.send(
+    public void send(TelemetryEventSender pSender) {
+        pSender.send(
             TelemetryEventType.GAME_LOAD_TIMES,
             p_286285_ -> {
                 synchronized (this) {
@@ -83,8 +83,8 @@ public class GameLoadTimesEvent {
         );
     }
 
-    public synchronized void setBootstrapTime(long p_286847_) {
-        this.bootstrapTime = OptionalLong.of(p_286847_);
+    public synchronized void setBootstrapTime(long pBootstrapTime) {
+        this.bootstrapTime = OptionalLong.of(pBootstrapTime);
     }
 
     @OnlyIn(Dist.CLIENT)

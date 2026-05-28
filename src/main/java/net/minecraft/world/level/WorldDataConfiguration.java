@@ -17,7 +17,7 @@ public record WorldDataConfiguration(DataPackConfig dataPacks, FeatureFlagSet en
     );
     public static final WorldDataConfiguration DEFAULT = new WorldDataConfiguration(DataPackConfig.DEFAULT, FeatureFlags.DEFAULT_FLAGS);
 
-    public WorldDataConfiguration expandFeatures(FeatureFlagSet p_249090_) {
-        return new WorldDataConfiguration(this.dataPacks, this.enabledFeatures.join(p_249090_));
+    public WorldDataConfiguration expandFeatures(FeatureFlagSet pNewFeatures) {
+        return new WorldDataConfiguration(this.dataPacks, this.enabledFeatures.join(pNewFeatures));
     }
 }

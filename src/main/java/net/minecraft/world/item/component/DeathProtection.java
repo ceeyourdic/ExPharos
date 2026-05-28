@@ -36,9 +36,9 @@ public record DeathProtection(List<ConsumeEffect> deathEffects) {
         )
     );
 
-    public void applyEffects(ItemStack p_368337_, LivingEntity p_363527_) {
+    public void applyEffects(ItemStack pStack, LivingEntity pEntity) {
         for (ConsumeEffect consumeeffect : this.deathEffects) {
-            consumeeffect.apply(p_363527_.level(), p_368337_, p_363527_);
+            consumeeffect.apply(pEntity.level(), pStack, pEntity);
         }
     }
 }

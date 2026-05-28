@@ -11,17 +11,17 @@ public class LinearLayout implements Layout {
     private final LinearLayout.Orientation orientation;
     private int nextChildIndex = 0;
 
-    private LinearLayout(LinearLayout.Orientation p_265341_) {
-        this(0, 0, p_265341_);
+    private LinearLayout(LinearLayout.Orientation pOrientation) {
+        this(0, 0, pOrientation);
     }
 
-    public LinearLayout(int p_265093_, int p_265502_, LinearLayout.Orientation p_265112_) {
-        this.wrapped = new GridLayout(p_265093_, p_265502_);
-        this.orientation = p_265112_;
+    public LinearLayout(int pWidth, int pHeight, LinearLayout.Orientation pOrientation) {
+        this.wrapped = new GridLayout(pWidth, pHeight);
+        this.orientation = pOrientation;
     }
 
-    public LinearLayout spacing(int p_298391_) {
-        this.orientation.setSpacing(this.wrapped, p_298391_);
+    public LinearLayout spacing(int pSpacing) {
+        this.orientation.setSpacing(this.wrapped, pSpacing);
         return this;
     }
 
@@ -33,16 +33,16 @@ public class LinearLayout implements Layout {
         return this.wrapped.defaultCellSetting();
     }
 
-    public <T extends LayoutElement> T addChild(T p_265475_, LayoutSettings p_265684_) {
-        return this.orientation.addChild(this.wrapped, p_265475_, this.nextChildIndex++, p_265684_);
+    public <T extends LayoutElement> T addChild(T pChild, LayoutSettings pLayoutSettings) {
+        return this.orientation.addChild(this.wrapped, pChild, this.nextChildIndex++, pLayoutSettings);
     }
 
-    public <T extends LayoutElement> T addChild(T p_265140_) {
-        return this.addChild(p_265140_, this.newCellSettings());
+    public <T extends LayoutElement> T addChild(T pChild) {
+        return this.addChild(pChild, this.newCellSettings());
     }
 
-    public <T extends LayoutElement> T addChild(T p_300762_, Consumer<LayoutSettings> p_300497_) {
-        return this.orientation.addChild(this.wrapped, p_300762_, this.nextChildIndex++, Util.make(this.newCellSettings(), p_300497_));
+    public <T extends LayoutElement> T addChild(T pChild, Consumer<LayoutSettings> pLayoutSettingsFactory) {
+        return this.orientation.addChild(this.wrapped, pChild, this.nextChildIndex++, Util.make(this.newCellSettings(), pLayoutSettingsFactory));
     }
 
     @Override
@@ -98,20 +98,20 @@ public class LinearLayout implements Layout {
         HORIZONTAL,
         VERTICAL;
 
-        void setSpacing(GridLayout p_299858_, int p_299775_) {
+        void setSpacing(GridLayout pLayout, int pSpacing) {
             switch (this) {
                 case HORIZONTAL:
-                    p_299858_.columnSpacing(p_299775_);
+                    pLayout.columnSpacing(pSpacing);
                     break;
                 case VERTICAL:
-                    p_299858_.rowSpacing(p_299775_);
+                    pLayout.rowSpacing(pSpacing);
             }
         }
 
-        public <T extends LayoutElement> T addChild(GridLayout p_298633_, T p_297548_, int p_300692_, LayoutSettings p_298693_) {
+        public <T extends LayoutElement> T addChild(GridLayout pLayout, T pElement, int pIndex, LayoutSettings pLayoutSettings) {
             return (T)(switch (this) {
-                case HORIZONTAL -> (LayoutElement)p_298633_.addChild(p_297548_, 0, p_300692_, p_298693_);
-                case VERTICAL -> (LayoutElement)p_298633_.addChild(p_297548_, p_300692_, 0, p_298693_);
+                case HORIZONTAL -> (LayoutElement)pLayout.addChild(pElement, 0, pIndex, pLayoutSettings);
+                case VERTICAL -> (LayoutElement)pLayout.addChild(pElement, pIndex, 0, pLayoutSettings);
             });
         }
     }

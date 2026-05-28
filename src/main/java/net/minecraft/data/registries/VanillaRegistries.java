@@ -73,16 +73,16 @@ public class VanillaRegistries {
         .add(Registries.JUKEBOX_SONG, JukeboxSongs::bootstrap)
         .add(Registries.INSTRUMENT, Instruments::bootstrap);
 
-    private static void validateThatAllBiomeFeaturesHaveBiomeFilter(HolderLookup.Provider p_256242_) {
-        validateThatAllBiomeFeaturesHaveBiomeFilter(p_256242_.lookupOrThrow(Registries.PLACED_FEATURE), p_256242_.lookupOrThrow(Registries.BIOME));
+    private static void validateThatAllBiomeFeaturesHaveBiomeFilter(HolderLookup.Provider pProvider) {
+        validateThatAllBiomeFeaturesHaveBiomeFilter(pProvider.lookupOrThrow(Registries.PLACED_FEATURE), pProvider.lookupOrThrow(Registries.BIOME));
     }
 
-    public static void validateThatAllBiomeFeaturesHaveBiomeFilter(HolderGetter<PlacedFeature> p_272963_, HolderLookup<Biome> p_273693_) {
-        p_273693_.listElements().forEach(p_256326_ -> {
+    public static void validateThatAllBiomeFeaturesHaveBiomeFilter(HolderGetter<PlacedFeature> pFeatures, HolderLookup<Biome> pBiomes) {
+        pBiomes.listElements().forEach(p_256326_ -> {
             ResourceLocation resourcelocation = p_256326_.key().location();
             List<HolderSet<PlacedFeature>> list = p_256326_.value().getGenerationSettings().features();
             list.stream().flatMap(HolderSet::stream).forEach(p_256657_ -> p_256657_.unwrap().ifLeft(p_325923_ -> {
-                    Holder.Reference<PlacedFeature> reference = p_272963_.getOrThrow((ResourceKey<PlacedFeature>)p_325923_);
+                    Holder.Reference<PlacedFeature> reference = pFeatures.getOrThrow((ResourceKey<PlacedFeature>)p_325923_);
                     if (!validatePlacedFeature(reference.value())) {
                         Util.logAndPauseIfInIde("Placed feature " + p_325923_.location() + " in biome " + resourcelocation + " is missing BiomeFilter.biome()");
                     }
@@ -94,8 +94,8 @@ public class VanillaRegistries {
         });
     }
 
-    private static boolean validatePlacedFeature(PlacedFeature p_255656_) {
-        return p_255656_.placement().contains(BiomeFilter.biome());
+    private static boolean validatePlacedFeature(PlacedFeature pFeature) {
+        return pFeature.placement().contains(BiomeFilter.biome());
     }
 
     public static HolderLookup.Provider createLookup() {

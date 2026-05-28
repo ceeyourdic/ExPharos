@@ -6,10 +6,17 @@ import io.netty.handler.codec.EncoderException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.ClassTreeIdRegistry;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.optifine.util.BiomeUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 
@@ -20,50 +27,58 @@ public class SynchedEntityData {
     private final SyncedDataHolder entity;
     private final SynchedEntityData.DataItem<?>[] itemsById;
     private boolean isDirty;
+    public Biome spawnBiome = BiomeUtils.PLAINS;
+    public BlockPos spawnPosition = BlockPos.ZERO;
+    public BlockState blockStateOn = Blocks.AIR.defaultBlockState();
+    public long blockStateOnUpdateMs = 0L;
+    public Map<String, Object> modelVariables;
+    public CompoundTag nbtTag;
+    public long nbtTagUpdateMs = 0L;
 
-    SynchedEntityData(SyncedDataHolder p_334075_, SynchedEntityData.DataItem<?>[] p_331536_) {
-        this.entity = p_334075_;
-        this.itemsById = p_331536_;
+    SynchedEntityData(SyncedDataHolder pEntity, SynchedEntityData.DataItem<?>[] pItemsById) {
+        this.entity = pEntity;
+        this.itemsById = pItemsById;
     }
 
-    public static <T> EntityDataAccessor<T> defineId(Class<? extends SyncedDataHolder> p_135354_, EntityDataSerializer<T> p_135355_) {
+    public static <T> EntityDataAccessor<T> defineId(Class<? extends SyncedDataHolder> pClazz, EntityDataSerializer<T> pSerializer) {
         if (LOGGER.isDebugEnabled()) {
             try {
                 Class<?> oclass = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
-                if (!oclass.equals(p_135354_)) {
-                    LOGGER.debug("defineId called for: {} from {}", p_135354_, oclass, new RuntimeException());
+                if (!oclass.equals(pClazz)) {
+                    LOGGER.debug("defineId called for: {} from {}", pClazz, oclass, new RuntimeException());
                 }
             } catch (ClassNotFoundException classnotfoundexception) {
             }
         }
 
-        int i = ID_REGISTRY.define(p_135354_);
+        int i = ID_REGISTRY.define(pClazz);
         if (i > 254) {
             throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is 254)");
         } else {
-            return p_135355_.createAccessor(i);
+            return pSerializer.createAccessor(i);
         }
     }
 
-    private <T> SynchedEntityData.DataItem<T> getItem(EntityDataAccessor<T> p_135380_) {
-        return (SynchedEntityData.DataItem<T>)this.itemsById[p_135380_.id()];
+    private <T> SynchedEntityData.DataItem<T> getItem(EntityDataAccessor<T> pKey) {
+        return (SynchedEntityData.DataItem<T>)this.itemsById[pKey.id()];
     }
 
-    public <T> T get(EntityDataAccessor<T> p_135371_) {
-        return this.getItem(p_135371_).getValue();
+    public <T> T get(EntityDataAccessor<T> pKey) {
+        return this.getItem(pKey).getValue();
     }
 
-    public <T> void set(EntityDataAccessor<T> p_135382_, T p_135383_) {
-        this.set(p_135382_, p_135383_, false);
+    public <T> void set(EntityDataAccessor<T> pKey, T pValue) {
+        this.set(pKey, pValue, false);
     }
 
-    public <T> void set(EntityDataAccessor<T> p_276368_, T p_276363_, boolean p_276370_) {
-        SynchedEntityData.DataItem<T> dataitem = this.getItem(p_276368_);
-        if (p_276370_ || ObjectUtils.notEqual(p_276363_, dataitem.getValue())) {
-            dataitem.setValue(p_276363_);
-            this.entity.onSyncedDataUpdated(p_276368_);
+    public <T> void set(EntityDataAccessor<T> pKey, T pValue, boolean pForce) {
+        SynchedEntityData.DataItem<T> dataitem = this.getItem(pKey);
+        if (pForce || ObjectUtils.notEqual(pValue, dataitem.getValue())) {
+            dataitem.setValue(pValue);
+            this.entity.onSyncedDataUpdated(pKey);
             dataitem.setDirty(true);
             this.isDirty = true;
+            this.nbtTag = null;
         }
     }
 
@@ -107,32 +122,33 @@ public class SynchedEntityData {
         return list;
     }
 
-    public void assignValues(List<SynchedEntityData.DataValue<?>> p_135357_) {
-        for (SynchedEntityData.DataValue<?> datavalue : p_135357_) {
+    public void assignValues(List<SynchedEntityData.DataValue<?>> pEntries) {
+        for (SynchedEntityData.DataValue<?> datavalue : pEntries) {
             SynchedEntityData.DataItem<?> dataitem = this.itemsById[datavalue.id];
             this.assignValue(dataitem, datavalue);
             this.entity.onSyncedDataUpdated(dataitem.getAccessor());
+            this.nbtTag = null;
         }
 
-        this.entity.onSyncedDataUpdated(p_135357_);
+        this.entity.onSyncedDataUpdated(pEntries);
     }
 
-    private <T> void assignValue(SynchedEntityData.DataItem<T> p_135376_, SynchedEntityData.DataValue<?> p_254484_) {
-        if (!Objects.equals(p_254484_.serializer(), p_135376_.accessor.serializer())) {
+    private <T> void assignValue(SynchedEntityData.DataItem<T> pTarget, SynchedEntityData.DataValue<?> pEntry) {
+        if (!Objects.equals(pEntry.serializer(), pTarget.accessor.serializer())) {
             throw new IllegalStateException(
                 String.format(
                     Locale.ROOT,
                     "Invalid entity data item type for field %d on entity %s: old=%s(%s), new=%s(%s)",
-                    p_135376_.accessor.id(),
+                    pTarget.accessor.id(),
                     this.entity,
-                    p_135376_.value,
-                    p_135376_.value.getClass(),
-                    p_254484_.value,
-                    p_254484_.value.getClass()
+                    pTarget.value,
+                    pTarget.value.getClass(),
+                    pEntry.value,
+                    pEntry.value.getClass()
                 )
             );
         } else {
-            p_135376_.setValue((T)p_254484_.value);
+            pTarget.setValue((T)pEntry.value);
         }
     }
 
@@ -140,21 +156,21 @@ public class SynchedEntityData {
         private final SyncedDataHolder entity;
         private final SynchedEntityData.DataItem<?>[] itemsById;
 
-        public Builder(SyncedDataHolder p_334752_) {
-            this.entity = p_334752_;
-            this.itemsById = new SynchedEntityData.DataItem[SynchedEntityData.ID_REGISTRY.getCount(p_334752_.getClass())];
+        public Builder(SyncedDataHolder pEntity) {
+            this.entity = pEntity;
+            this.itemsById = new SynchedEntityData.DataItem[SynchedEntityData.ID_REGISTRY.getCount(pEntity.getClass())];
         }
 
-        public <T> SynchedEntityData.Builder define(EntityDataAccessor<T> p_329741_, T p_330016_) {
-            int i = p_329741_.id();
+        public <T> SynchedEntityData.Builder define(EntityDataAccessor<T> pAccessor, T pValue) {
+            int i = pAccessor.id();
             if (i > this.itemsById.length) {
                 throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + this.itemsById.length + ")");
             } else if (this.itemsById[i] != null) {
                 throw new IllegalArgumentException("Duplicate id value for " + i + "!");
-            } else if (EntityDataSerializers.getSerializedId(p_329741_.serializer()) < 0) {
-                throw new IllegalArgumentException("Unregistered serializer " + p_329741_.serializer() + " for " + i + "!");
+            } else if (EntityDataSerializers.getSerializedId(pAccessor.serializer()) < 0) {
+                throw new IllegalArgumentException("Unregistered serializer " + pAccessor.serializer() + " for " + i + "!");
             } else {
-                this.itemsById[p_329741_.id()] = new SynchedEntityData.DataItem<>(p_329741_, p_330016_);
+                this.itemsById[pAccessor.id()] = new SynchedEntityData.DataItem<>(pAccessor, pValue);
                 return this;
             }
         }
@@ -176,18 +192,18 @@ public class SynchedEntityData {
         private final T initialValue;
         private boolean dirty;
 
-        public DataItem(EntityDataAccessor<T> p_135394_, T p_135395_) {
-            this.accessor = p_135394_;
-            this.initialValue = p_135395_;
-            this.value = p_135395_;
+        public DataItem(EntityDataAccessor<T> pAccessor, T pValue) {
+            this.accessor = pAccessor;
+            this.initialValue = pValue;
+            this.value = pValue;
         }
 
         public EntityDataAccessor<T> getAccessor() {
             return this.accessor;
         }
 
-        public void setValue(T p_135398_) {
-            this.value = p_135398_;
+        public void setValue(T pValue) {
+            this.value = pValue;
         }
 
         public T getValue() {
@@ -198,8 +214,8 @@ public class SynchedEntityData {
             return this.dirty;
         }
 
-        public void setDirty(boolean p_135402_) {
-            this.dirty = p_135402_;
+        public void setDirty(boolean pDirty) {
+            this.dirty = pDirty;
         }
 
         public boolean isSetToDefault() {
@@ -212,34 +228,34 @@ public class SynchedEntityData {
     }
 
     public static record DataValue<T>(int id, EntityDataSerializer<T> serializer, T value) {
-        public static <T> SynchedEntityData.DataValue<T> create(EntityDataAccessor<T> p_254543_, T p_254138_) {
-            EntityDataSerializer<T> entitydataserializer = p_254543_.serializer();
-            return new SynchedEntityData.DataValue<>(p_254543_.id(), entitydataserializer, entitydataserializer.copy(p_254138_));
+        public static <T> SynchedEntityData.DataValue<T> create(EntityDataAccessor<T> pDataAccessor, T pValue) {
+            EntityDataSerializer<T> entitydataserializer = pDataAccessor.serializer();
+            return new SynchedEntityData.DataValue<>(pDataAccessor.id(), entitydataserializer, entitydataserializer.copy(pValue));
         }
 
-        public void write(RegistryFriendlyByteBuf p_328126_) {
+        public void write(RegistryFriendlyByteBuf pBuffer) {
             int i = EntityDataSerializers.getSerializedId(this.serializer);
             if (i < 0) {
                 throw new EncoderException("Unknown serializer type " + this.serializer);
             } else {
-                p_328126_.writeByte(this.id);
-                p_328126_.writeVarInt(i);
-                this.serializer.codec().encode(p_328126_, this.value);
+                pBuffer.writeByte(this.id);
+                pBuffer.writeVarInt(i);
+                this.serializer.codec().encode(pBuffer, this.value);
             }
         }
 
-        public static SynchedEntityData.DataValue<?> read(RegistryFriendlyByteBuf p_335154_, int p_254356_) {
-            int i = p_335154_.readVarInt();
+        public static SynchedEntityData.DataValue<?> read(RegistryFriendlyByteBuf pBuffer, int pId) {
+            int i = pBuffer.readVarInt();
             EntityDataSerializer<?> entitydataserializer = EntityDataSerializers.getSerializer(i);
             if (entitydataserializer == null) {
                 throw new DecoderException("Unknown serializer type " + i);
             } else {
-                return read(p_335154_, p_254356_, entitydataserializer);
+                return read(pBuffer, pId, entitydataserializer);
             }
         }
 
-        private static <T> SynchedEntityData.DataValue<T> read(RegistryFriendlyByteBuf p_333448_, int p_253899_, EntityDataSerializer<T> p_254222_) {
-            return new SynchedEntityData.DataValue<>(p_253899_, p_254222_, p_254222_.codec().decode(p_333448_));
+        private static <T> SynchedEntityData.DataValue<T> read(RegistryFriendlyByteBuf pBuffer, int pId, EntityDataSerializer<T> pSerializer) {
+            return new SynchedEntityData.DataValue<>(pId, pSerializer, pSerializer.codec().decode(pBuffer));
         }
     }
 }

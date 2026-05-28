@@ -9,8 +9,8 @@ import com.mojang.serialization.Dynamic;
 import java.util.Optional;
 
 public class InvalidBlockEntityLockFix extends DataFix {
-    public InvalidBlockEntityLockFix(Schema p_376685_) {
-        super(p_376685_, false);
+    public InvalidBlockEntityLockFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override

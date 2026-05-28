@@ -16,7 +16,7 @@ public interface DataSource {
         "source"
     );
 
-    Stream<CompoundTag> getData(CommandSourceStack p_237326_) throws CommandSyntaxException;
+    Stream<CompoundTag> getData(CommandSourceStack pSource) throws CommandSyntaxException;
 
     DataSource.Type<?> type();
 

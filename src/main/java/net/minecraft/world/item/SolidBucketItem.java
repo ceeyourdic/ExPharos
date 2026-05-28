@@ -16,9 +16,9 @@ import net.minecraft.world.phys.BlockHitResult;
 public class SolidBucketItem extends BlockItem implements DispensibleContainerItem {
     private final SoundEvent placeSound;
 
-    public SolidBucketItem(Block p_151187_, SoundEvent p_151188_, Item.Properties p_151189_) {
-        super(p_151187_, p_151189_);
-        this.placeSound = p_151188_;
+    public SolidBucketItem(Block pBlock, SoundEvent pPlaceSound, Item.Properties pProperties) {
+        super(pBlock, pProperties);
+        this.placeSound = pPlaceSound;
     }
 
     @Override

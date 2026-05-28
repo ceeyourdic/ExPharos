@@ -26,16 +26,16 @@ public class SkinReportScreen extends AbstractReportScreen<SkinReport.Builder> {
     private MultiLineEditBox commentBox;
     private Button selectReasonButton;
 
-    private SkinReportScreen(Screen p_297956_, ReportingContext p_297244_, SkinReport.Builder p_297725_) {
-        super(TITLE, p_297956_, p_297244_, p_297725_);
+    private SkinReportScreen(Screen pLastScreen, ReportingContext pReportingContext, SkinReport.Builder pReportBuilder) {
+        super(TITLE, pLastScreen, pReportingContext, pReportBuilder);
     }
 
-    public SkinReportScreen(Screen p_297357_, ReportingContext p_300387_, UUID p_300713_, Supplier<PlayerSkin> p_299154_) {
-        this(p_297357_, p_300387_, new SkinReport.Builder(p_300713_, p_299154_, p_300387_.sender().reportLimits()));
+    public SkinReportScreen(Screen pLastScreen, ReportingContext pReportingContext, UUID pReportId, Supplier<PlayerSkin> pSkinGetter) {
+        this(pLastScreen, pReportingContext, new SkinReport.Builder(pReportId, pSkinGetter, pReportingContext.sender().reportLimits()));
     }
 
-    public SkinReportScreen(Screen p_300918_, ReportingContext p_298862_, SkinReport p_299017_) {
-        this(p_300918_, p_298862_, new SkinReport.Builder(p_299017_, p_298862_.sender().reportLimits()));
+    public SkinReportScreen(Screen pLastScreen, ReportingContext pReportingContext, SkinReport pReport) {
+        this(pLastScreen, pReportingContext, new SkinReport.Builder(pReport, pReportingContext.sender().reportLimits()));
     }
 
     @Override

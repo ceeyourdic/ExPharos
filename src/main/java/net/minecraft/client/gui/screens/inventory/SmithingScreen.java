@@ -49,8 +49,8 @@ public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
     @Nullable
     private ArmorStand armorStandPreview;
 
-    public SmithingScreen(SmithingMenu p_99290_, Inventory p_99291_, Component p_99292_) {
-        super(p_99290_, p_99291_, p_99292_, ResourceLocation.withDefaultNamespace("textures/gui/container/smithing.png"));
+    public SmithingScreen(SmithingMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, pPlayerInventory, pTitle, ResourceLocation.withDefaultNamespace("textures/gui/container/smithing.png"));
         this.titleLabelX = 44;
         this.titleLabelY = 15;
     }
@@ -105,16 +105,16 @@ public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
         }
     }
 
-    private void updateArmorStandPreview(ItemStack p_268225_) {
+    private void updateArmorStandPreview(ItemStack pStack) {
         if (this.armorStandPreview != null) {
             for (EquipmentSlot equipmentslot : EquipmentSlot.VALUES) {
                 this.armorStandPreview.setItemSlot(equipmentslot, ItemStack.EMPTY);
             }
 
-            if (!p_268225_.isEmpty()) {
-                Equippable equippable = p_268225_.get(DataComponents.EQUIPPABLE);
+            if (!pStack.isEmpty()) {
+                Equippable equippable = pStack.get(DataComponents.EQUIPPABLE);
                 EquipmentSlot equipmentslot1 = equippable != null ? equippable.slot() : EquipmentSlot.OFFHAND;
-                this.armorStandPreview.setItemSlot(equipmentslot1, p_268225_.copy());
+                this.armorStandPreview.setItemSlot(equipmentslot1, pStack.copy());
             }
         }
     }
@@ -126,9 +126,9 @@ public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
         }
     }
 
-    private void renderOnboardingTooltips(GuiGraphics p_281668_, int p_267192_, int p_266859_) {
+    private void renderOnboardingTooltips(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
         Optional<Component> optional = Optional.empty();
-        if (this.hasRecipeError() && this.isHovering(65, 46, 28, 21, (double)p_267192_, (double)p_266859_)) {
+        if (this.hasRecipeError() && this.isHovering(65, 46, 28, 21, (double)pMouseX, (double)pMouseY)) {
             optional = Optional.of(ERROR_TOOLTIP);
         }
 
@@ -148,7 +148,7 @@ public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
             }
         }
 
-        optional.ifPresent(p_280863_ -> p_281668_.renderTooltip(this.font, this.font.split(p_280863_, 115), p_267192_, p_266859_));
+        optional.ifPresent(p_280863_ -> pGuiGraphics.renderTooltip(this.font, this.font.split(p_280863_, 115), pMouseX, pMouseY));
     }
 
     private boolean hasRecipeError() {

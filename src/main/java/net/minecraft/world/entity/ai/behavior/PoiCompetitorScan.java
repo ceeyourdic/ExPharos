@@ -38,27 +38,27 @@ public class PoiCompetitorScan {
         );
     }
 
-    private static Villager selectWinner(Villager p_23725_, Villager p_23726_) {
+    private static Villager selectWinner(Villager pVillagerA, Villager pVillagerB) {
         Villager villager;
         Villager villager1;
-        if (p_23725_.getVillagerXp() > p_23726_.getVillagerXp()) {
-            villager = p_23725_;
-            villager1 = p_23726_;
+        if (pVillagerA.getVillagerXp() > pVillagerB.getVillagerXp()) {
+            villager = pVillagerA;
+            villager1 = pVillagerB;
         } else {
-            villager = p_23726_;
-            villager1 = p_23725_;
+            villager = pVillagerB;
+            villager1 = pVillagerA;
         }
 
         villager1.getBrain().eraseMemory(MemoryModuleType.JOB_SITE);
         return villager;
     }
 
-    private static boolean competesForSameJobsite(GlobalPos p_217330_, Holder<PoiType> p_217331_, Villager p_217332_) {
-        Optional<GlobalPos> optional = p_217332_.getBrain().getMemory(MemoryModuleType.JOB_SITE);
-        return optional.isPresent() && p_217330_.equals(optional.get()) && hasMatchingProfession(p_217331_, p_217332_.getVillagerData().getProfession());
+    private static boolean competesForSameJobsite(GlobalPos pJobSitePos, Holder<PoiType> pPoi, Villager pPoiType) {
+        Optional<GlobalPos> optional = pPoiType.getBrain().getMemory(MemoryModuleType.JOB_SITE);
+        return optional.isPresent() && pJobSitePos.equals(optional.get()) && hasMatchingProfession(pPoi, pPoiType.getVillagerData().getProfession());
     }
 
-    private static boolean hasMatchingProfession(Holder<PoiType> p_217334_, VillagerProfession p_217335_) {
-        return p_217335_.heldJobSite().test(p_217334_);
+    private static boolean hasMatchingProfession(Holder<PoiType> pPoi, VillagerProfession pPoiType) {
+        return pPoiType.heldJobSite().test(pPoi);
     }
 }

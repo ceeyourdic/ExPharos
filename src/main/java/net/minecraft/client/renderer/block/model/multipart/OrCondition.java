@@ -14,8 +14,8 @@ public class OrCondition implements Condition {
     public static final String TOKEN = "OR";
     private final Iterable<? extends Condition> conditions;
 
-    public OrCondition(Iterable<? extends Condition> p_112003_) {
-        this.conditions = p_112003_;
+    public OrCondition(Iterable<? extends Condition> pConditions) {
+        this.conditions = pConditions;
     }
 
     @Override

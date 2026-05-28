@@ -18,16 +18,16 @@ public class CountOnEveryLayerPlacement extends PlacementModifier {
         .xmap(CountOnEveryLayerPlacement::new, p_191611_ -> p_191611_.count);
     private final IntProvider count;
 
-    private CountOnEveryLayerPlacement(IntProvider p_191603_) {
-        this.count = p_191603_;
+    private CountOnEveryLayerPlacement(IntProvider pCount) {
+        this.count = pCount;
     }
 
-    public static CountOnEveryLayerPlacement of(IntProvider p_191607_) {
-        return new CountOnEveryLayerPlacement(p_191607_);
+    public static CountOnEveryLayerPlacement of(IntProvider pCount) {
+        return new CountOnEveryLayerPlacement(pCount);
     }
 
-    public static CountOnEveryLayerPlacement of(int p_191605_) {
-        return of(ConstantInt.of(p_191605_));
+    public static CountOnEveryLayerPlacement of(int pCount) {
+        return of(ConstantInt.of(pCount));
     }
 
     @Override
@@ -61,16 +61,16 @@ public class CountOnEveryLayerPlacement extends PlacementModifier {
         return PlacementModifierType.COUNT_ON_EVERY_LAYER;
     }
 
-    private static int findOnGroundYPosition(PlacementContext p_191613_, int p_191614_, int p_191615_, int p_191616_, int p_191617_) {
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(p_191614_, p_191615_, p_191616_);
+    private static int findOnGroundYPosition(PlacementContext pContext, int pX, int pY, int pZ, int pCount) {
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(pX, pY, pZ);
         int i = 0;
-        BlockState blockstate = p_191613_.getBlockState(blockpos$mutableblockpos);
+        BlockState blockstate = pContext.getBlockState(blockpos$mutableblockpos);
 
-        for (int j = p_191615_; j >= p_191613_.getMinY() + 1; j--) {
+        for (int j = pY; j >= pContext.getMinY() + 1; j--) {
             blockpos$mutableblockpos.setY(j - 1);
-            BlockState blockstate1 = p_191613_.getBlockState(blockpos$mutableblockpos);
+            BlockState blockstate1 = pContext.getBlockState(blockpos$mutableblockpos);
             if (!isEmpty(blockstate1) && isEmpty(blockstate) && !blockstate1.is(Blocks.BEDROCK)) {
-                if (i == p_191617_) {
+                if (i == pCount) {
                     return blockpos$mutableblockpos.getY() + 1;
                 }
 
@@ -83,7 +83,7 @@ public class CountOnEveryLayerPlacement extends PlacementModifier {
         return Integer.MAX_VALUE;
     }
 
-    private static boolean isEmpty(BlockState p_191609_) {
-        return p_191609_.isAir() || p_191609_.is(Blocks.WATER) || p_191609_.is(Blocks.LAVA);
+    private static boolean isEmpty(BlockState pState) {
+        return pState.isAir() || pState.is(Blocks.WATER) || pState.is(Blocks.LAVA);
     }
 }

@@ -27,13 +27,13 @@ public class EffectsInInventory {
     private final AbstractContainerScreen<?> screen;
     private final Minecraft minecraft;
 
-    public EffectsInInventory(AbstractContainerScreen<?> p_367800_) {
-        this.screen = p_367800_;
+    public EffectsInInventory(AbstractContainerScreen<?> pScreen) {
+        this.screen = pScreen;
         this.minecraft = Minecraft.getInstance();
     }
 
-    public void render(GuiGraphics p_361248_, int p_363009_, int p_366978_, float p_361526_) {
-        this.renderEffects(p_361248_, p_363009_, p_366978_);
+    public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+        this.renderEffects(pGuiGraphics, pMouseX, pMouseY);
     }
 
     public boolean canSeeEffects() {
@@ -42,7 +42,7 @@ public class EffectsInInventory {
         return j >= 32;
     }
 
-    private void renderEffects(GuiGraphics p_362146_, int p_370153_, int p_365612_) {
+    private void renderEffects(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
         int i = this.screen.leftPos + this.screen.imageWidth + 2;
         int j = this.screen.width - i;
         Collection<MobEffectInstance> collection = this.minecraft.player.getActiveEffects();
@@ -54,16 +54,16 @@ public class EffectsInInventory {
             }
 
             Iterable<MobEffectInstance> iterable = Ordering.natural().sortedCopy(collection);
-            this.renderBackgrounds(p_362146_, i, k, iterable, flag);
-            this.renderIcons(p_362146_, i, k, iterable, flag);
+            this.renderBackgrounds(pGuiGraphics, i, k, iterable, flag);
+            this.renderIcons(pGuiGraphics, i, k, iterable, flag);
             if (flag) {
-                this.renderLabels(p_362146_, i, k, iterable);
-            } else if (p_370153_ >= i && p_370153_ <= i + 33) {
+                this.renderLabels(pGuiGraphics, i, k, iterable);
+            } else if (pMouseX >= i && pMouseX <= i + 33) {
                 int l = this.screen.topPos;
                 MobEffectInstance mobeffectinstance = null;
 
                 for (MobEffectInstance mobeffectinstance1 : iterable) {
-                    if (p_365612_ >= l && p_365612_ <= l + k) {
+                    if (pMouseY >= l && pMouseY <= l + k) {
                         mobeffectinstance = mobeffectinstance1;
                     }
 
@@ -74,54 +74,54 @@ public class EffectsInInventory {
                     List<Component> list = List.of(
                         this.getEffectName(mobeffectinstance), MobEffectUtil.formatDuration(mobeffectinstance, 1.0F, this.minecraft.level.tickRateManager().tickrate())
                     );
-                    p_362146_.renderTooltip(this.screen.getFont(), list, Optional.empty(), p_370153_, p_365612_);
+                    pGuiGraphics.renderTooltip(this.screen.getFont(), list, Optional.empty(), pMouseX, pMouseY);
                 }
             }
         }
     }
 
-    private void renderBackgrounds(GuiGraphics p_363087_, int p_362702_, int p_362968_, Iterable<MobEffectInstance> p_366617_, boolean p_366522_) {
+    private void renderBackgrounds(GuiGraphics pGuiGraphics, int pX, int pY, Iterable<MobEffectInstance> pActiveEffects, boolean pLarge) {
         int i = this.screen.topPos;
 
-        for (MobEffectInstance mobeffectinstance : p_366617_) {
-            if (p_366522_) {
-                p_363087_.blitSprite(RenderType::guiTextured, EFFECT_BACKGROUND_LARGE_SPRITE, p_362702_, i, 120, 32);
+        for (MobEffectInstance mobeffectinstance : pActiveEffects) {
+            if (pLarge) {
+                pGuiGraphics.blitSprite(RenderType::guiTextured, EFFECT_BACKGROUND_LARGE_SPRITE, pX, i, 120, 32);
             } else {
-                p_363087_.blitSprite(RenderType::guiTextured, EFFECT_BACKGROUND_SMALL_SPRITE, p_362702_, i, 32, 32);
+                pGuiGraphics.blitSprite(RenderType::guiTextured, EFFECT_BACKGROUND_SMALL_SPRITE, pX, i, 32, 32);
             }
 
-            i += p_362968_;
+            i += pY;
         }
     }
 
-    private void renderIcons(GuiGraphics p_367085_, int p_367644_, int p_367522_, Iterable<MobEffectInstance> p_361981_, boolean p_368681_) {
+    private void renderIcons(GuiGraphics pGuiGraphics, int pX, int pY, Iterable<MobEffectInstance> pActiveEffects, boolean pLarge) {
         MobEffectTextureManager mobeffecttexturemanager = this.minecraft.getMobEffectTextures();
         int i = this.screen.topPos;
 
-        for (MobEffectInstance mobeffectinstance : p_361981_) {
+        for (MobEffectInstance mobeffectinstance : pActiveEffects) {
             Holder<MobEffect> holder = mobeffectinstance.getEffect();
             TextureAtlasSprite textureatlassprite = mobeffecttexturemanager.get(holder);
-            p_367085_.blitSprite(RenderType::guiTextured, textureatlassprite, p_367644_ + (p_368681_ ? 6 : 7), i + 7, 18, 18);
-            i += p_367522_;
+            pGuiGraphics.blitSprite(RenderType::guiTextured, textureatlassprite, pX + (pLarge ? 6 : 7), i + 7, 18, 18);
+            i += pY;
         }
     }
 
-    private void renderLabels(GuiGraphics p_361851_, int p_367468_, int p_365556_, Iterable<MobEffectInstance> p_365480_) {
+    private void renderLabels(GuiGraphics pGuiGraphics, int pX, int pY, Iterable<MobEffectInstance> pActiveEffects) {
         int i = this.screen.topPos;
 
-        for (MobEffectInstance mobeffectinstance : p_365480_) {
+        for (MobEffectInstance mobeffectinstance : pActiveEffects) {
             Component component = this.getEffectName(mobeffectinstance);
-            p_361851_.drawString(this.screen.getFont(), component, p_367468_ + 10 + 18, i + 6, 16777215);
+            pGuiGraphics.drawString(this.screen.getFont(), component, pX + 10 + 18, i + 6, 16777215);
             Component component1 = MobEffectUtil.formatDuration(mobeffectinstance, 1.0F, this.minecraft.level.tickRateManager().tickrate());
-            p_361851_.drawString(this.screen.getFont(), component1, p_367468_ + 10 + 18, i + 6 + 10, 8355711);
-            i += p_365556_;
+            pGuiGraphics.drawString(this.screen.getFont(), component1, pX + 10 + 18, i + 6 + 10, 8355711);
+            i += pY;
         }
     }
 
-    private Component getEffectName(MobEffectInstance p_368169_) {
-        MutableComponent mutablecomponent = p_368169_.getEffect().value().getDisplayName().copy();
-        if (p_368169_.getAmplifier() >= 1 && p_368169_.getAmplifier() <= 9) {
-            mutablecomponent.append(CommonComponents.SPACE).append(Component.translatable("enchantment.level." + (p_368169_.getAmplifier() + 1)));
+    private Component getEffectName(MobEffectInstance pEffect) {
+        MutableComponent mutablecomponent = pEffect.getEffect().value().getDisplayName().copy();
+        if (pEffect.getAmplifier() >= 1 && pEffect.getAmplifier() <= 9) {
+            mutablecomponent.append(CommonComponents.SPACE).append(Component.translatable("enchantment.level." + (pEffect.getAmplifier() + 1)));
         }
 
         return mutablecomponent;

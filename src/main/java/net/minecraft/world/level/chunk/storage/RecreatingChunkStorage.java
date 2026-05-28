@@ -14,11 +14,11 @@ public class RecreatingChunkStorage extends ChunkStorage {
     private final Path writeFolder;
 
     public RecreatingChunkStorage(
-        RegionStorageInfo p_335619_, Path p_328786_, RegionStorageInfo p_335564_, Path p_329291_, DataFixer p_334361_, boolean p_329095_
+        RegionStorageInfo pInfo, Path pFolder, RegionStorageInfo pWriteInfo, Path pWriteFolder, DataFixer pFixerUpper, boolean pSync
     ) {
-        super(p_335619_, p_328786_, p_334361_, p_329095_);
-        this.writeFolder = p_329291_;
-        this.writeWorker = new IOWorker(p_335564_, p_329291_, p_329095_);
+        super(pInfo, pFolder, pFixerUpper, pSync);
+        this.writeFolder = pWriteFolder;
+        this.writeWorker = new IOWorker(pWriteInfo, pWriteFolder, pSync);
     }
 
     @Override

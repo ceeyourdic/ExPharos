@@ -11,31 +11,31 @@ public class DustParticleBase<T extends ScalableParticleOptionsBase> extends Tex
     private final SpriteSet sprites;
 
     protected DustParticleBase(
-        ClientLevel p_172094_,
-        double p_172095_,
-        double p_172096_,
-        double p_172097_,
-        double p_172098_,
-        double p_172099_,
-        double p_172100_,
-        T p_335358_,
-        SpriteSet p_172102_
+        ClientLevel pLevel,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed,
+        T pOptions,
+        SpriteSet pSprites
     ) {
-        super(p_172094_, p_172095_, p_172096_, p_172097_, p_172098_, p_172099_, p_172100_);
+        super(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
         this.friction = 0.96F;
         this.speedUpWhenYMotionIsBlocked = true;
-        this.sprites = p_172102_;
+        this.sprites = pSprites;
         this.xd *= 0.1F;
         this.yd *= 0.1F;
         this.zd *= 0.1F;
-        this.quadSize = this.quadSize * 0.75F * p_335358_.getScale();
+        this.quadSize = this.quadSize * 0.75F * pOptions.getScale();
         int i = (int)(8.0 / (this.random.nextDouble() * 0.8 + 0.2));
-        this.lifetime = (int)Math.max((float)i * p_335358_.getScale(), 1.0F);
-        this.setSpriteFromAge(p_172102_);
+        this.lifetime = (int)Math.max((float)i * pOptions.getScale(), 1.0F);
+        this.setSpriteFromAge(pSprites);
     }
 
-    protected float randomizeColor(float p_172105_, float p_172106_) {
-        return (this.random.nextFloat() * 0.2F + 0.8F) * p_172105_ * p_172106_;
+    protected float randomizeColor(float pCoordMultiplier, float pMultiplier) {
+        return (this.random.nextFloat() * 0.2F + 0.8F) * pCoordMultiplier * pMultiplier;
     }
 
     @Override

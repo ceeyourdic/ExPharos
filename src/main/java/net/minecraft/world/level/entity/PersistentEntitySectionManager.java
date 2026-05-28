@@ -42,112 +42,112 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
     private final LongSet chunksToUnload = new LongOpenHashSet();
     private final Queue<ChunkEntities<T>> loadingInbox = Queues.newConcurrentLinkedQueue();
 
-    public PersistentEntitySectionManager(Class<T> p_157503_, LevelCallback<T> p_157504_, EntityPersistentStorage<T> p_157505_) {
+    public PersistentEntitySectionManager(Class<T> pEntityClass, LevelCallback<T> pCallbacks, EntityPersistentStorage<T> pPermanentStorage) {
         this.visibleEntityStorage = new EntityLookup<>();
-        this.sectionStorage = new EntitySectionStorage<>(p_157503_, this.chunkVisibility);
+        this.sectionStorage = new EntitySectionStorage<>(pEntityClass, this.chunkVisibility);
         this.chunkVisibility.defaultReturnValue(Visibility.HIDDEN);
         this.chunkLoadStatuses.defaultReturnValue(PersistentEntitySectionManager.ChunkLoadStatus.FRESH);
-        this.callbacks = p_157504_;
-        this.permanentStorage = p_157505_;
+        this.callbacks = pCallbacks;
+        this.permanentStorage = pPermanentStorage;
         this.entityGetter = new LevelEntityGetterAdapter<>(this.visibleEntityStorage, this.sectionStorage);
     }
 
-    void removeSectionIfEmpty(long p_157510_, EntitySection<T> p_157511_) {
-        if (p_157511_.isEmpty()) {
-            this.sectionStorage.remove(p_157510_);
+    void removeSectionIfEmpty(long pSectionKey, EntitySection<T> pSection) {
+        if (pSection.isEmpty()) {
+            this.sectionStorage.remove(pSectionKey);
         }
     }
 
-    private boolean addEntityUuid(T p_157558_) {
-        if (!this.knownUuids.add(p_157558_.getUUID())) {
-            LOGGER.warn("UUID of added entity already exists: {}", p_157558_);
+    private boolean addEntityUuid(T pEntity) {
+        if (!this.knownUuids.add(pEntity.getUUID())) {
+            LOGGER.warn("UUID of added entity already exists: {}", pEntity);
             return false;
         } else {
             return true;
         }
     }
 
-    public boolean addNewEntity(T p_157534_) {
-        return this.addEntity(p_157534_, false);
+    public boolean addNewEntity(T pEntity) {
+        return this.addEntity(pEntity, false);
     }
 
-    private boolean addEntity(T p_157539_, boolean p_157540_) {
-        if (!this.addEntityUuid(p_157539_)) {
+    private boolean addEntity(T pEntity, boolean pWorldGenSpawned) {
+        if (!this.addEntityUuid(pEntity)) {
             return false;
         } else {
-            long i = SectionPos.asLong(p_157539_.blockPosition());
+            long i = SectionPos.asLong(pEntity.blockPosition());
             EntitySection<T> entitysection = this.sectionStorage.getOrCreateSection(i);
-            entitysection.add(p_157539_);
-            p_157539_.setLevelCallback(new PersistentEntitySectionManager.Callback(p_157539_, i, entitysection));
-            if (!p_157540_) {
-                this.callbacks.onCreated(p_157539_);
+            entitysection.add(pEntity);
+            pEntity.setLevelCallback(new PersistentEntitySectionManager.Callback(pEntity, i, entitysection));
+            if (!pWorldGenSpawned) {
+                this.callbacks.onCreated(pEntity);
             }
 
-            Visibility visibility = getEffectiveStatus(p_157539_, entitysection.getStatus());
+            Visibility visibility = getEffectiveStatus(pEntity, entitysection.getStatus());
             if (visibility.isAccessible()) {
-                this.startTracking(p_157539_);
+                this.startTracking(pEntity);
             }
 
             if (visibility.isTicking()) {
-                this.startTicking(p_157539_);
+                this.startTicking(pEntity);
             }
 
             return true;
         }
     }
 
-    static <T extends EntityAccess> Visibility getEffectiveStatus(T p_157536_, Visibility p_157537_) {
-        return p_157536_.isAlwaysTicking() ? Visibility.TICKING : p_157537_;
+    static <T extends EntityAccess> Visibility getEffectiveStatus(T pEntity, Visibility pVisibility) {
+        return pEntity.isAlwaysTicking() ? Visibility.TICKING : pVisibility;
     }
 
-    public void addLegacyChunkEntities(Stream<T> p_157553_) {
-        p_157553_.forEach(p_157607_ -> this.addEntity((T)p_157607_, true));
+    public void addLegacyChunkEntities(Stream<T> pEntities) {
+        pEntities.forEach(p_157607_ -> this.addEntity((T)p_157607_, true));
     }
 
-    public void addWorldGenChunkEntities(Stream<T> p_157560_) {
-        p_157560_.forEach(p_157605_ -> this.addEntity((T)p_157605_, false));
+    public void addWorldGenChunkEntities(Stream<T> pEntities) {
+        pEntities.forEach(p_157605_ -> this.addEntity((T)p_157605_, false));
     }
 
-    void startTicking(T p_157565_) {
-        this.callbacks.onTickingStart(p_157565_);
+    void startTicking(T pEntity) {
+        this.callbacks.onTickingStart(pEntity);
     }
 
-    void stopTicking(T p_157571_) {
-        this.callbacks.onTickingEnd(p_157571_);
+    void stopTicking(T pEntity) {
+        this.callbacks.onTickingEnd(pEntity);
     }
 
-    void startTracking(T p_157576_) {
-        this.visibleEntityStorage.add(p_157576_);
-        this.callbacks.onTrackingStart(p_157576_);
+    void startTracking(T pEntity) {
+        this.visibleEntityStorage.add(pEntity);
+        this.callbacks.onTrackingStart(pEntity);
     }
 
-    void stopTracking(T p_157581_) {
-        this.callbacks.onTrackingEnd(p_157581_);
-        this.visibleEntityStorage.remove(p_157581_);
+    void stopTracking(T pEntity) {
+        this.callbacks.onTrackingEnd(pEntity);
+        this.visibleEntityStorage.remove(pEntity);
     }
 
-    public void updateChunkStatus(ChunkPos p_287590_, FullChunkStatus p_287623_) {
-        Visibility visibility = Visibility.fromFullChunkStatus(p_287623_);
-        this.updateChunkStatus(p_287590_, visibility);
+    public void updateChunkStatus(ChunkPos pChunkPos, FullChunkStatus pFullChunkStatus) {
+        Visibility visibility = Visibility.fromFullChunkStatus(pFullChunkStatus);
+        this.updateChunkStatus(pChunkPos, visibility);
     }
 
-    public void updateChunkStatus(ChunkPos p_157528_, Visibility p_157529_) {
-        long i = p_157528_.toLong();
-        if (p_157529_ == Visibility.HIDDEN) {
+    public void updateChunkStatus(ChunkPos pPos, Visibility pVisibility) {
+        long i = pPos.toLong();
+        if (pVisibility == Visibility.HIDDEN) {
             this.chunkVisibility.remove(i);
             this.chunksToUnload.add(i);
         } else {
-            this.chunkVisibility.put(i, p_157529_);
+            this.chunkVisibility.put(i, pVisibility);
             this.chunksToUnload.remove(i);
             this.ensureChunkQueuedForLoad(i);
         }
 
         this.sectionStorage.getExistingSectionsInChunk(i).forEach(p_157545_ -> {
-            Visibility visibility = p_157545_.updateChunkStatus(p_157529_);
+            Visibility visibility = p_157545_.updateChunkStatus(pVisibility);
             boolean flag = visibility.isAccessible();
-            boolean flag1 = p_157529_.isAccessible();
+            boolean flag1 = pVisibility.isAccessible();
             boolean flag2 = visibility.isTicking();
-            boolean flag3 = p_157529_.isTicking();
+            boolean flag3 = pVisibility.isTicking();
             if (flag2 && !flag3) {
                 p_157545_.getEntities().filter(p_157603_ -> !p_157603_.isAlwaysTicking()).forEach(this::stopTicking);
             }
@@ -164,61 +164,61 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
         });
     }
 
-    private void ensureChunkQueuedForLoad(long p_157556_) {
-        PersistentEntitySectionManager.ChunkLoadStatus persistententitysectionmanager$chunkloadstatus = this.chunkLoadStatuses.get(p_157556_);
+    private void ensureChunkQueuedForLoad(long pChunkPosValue) {
+        PersistentEntitySectionManager.ChunkLoadStatus persistententitysectionmanager$chunkloadstatus = this.chunkLoadStatuses.get(pChunkPosValue);
         if (persistententitysectionmanager$chunkloadstatus == PersistentEntitySectionManager.ChunkLoadStatus.FRESH) {
-            this.requestChunkLoad(p_157556_);
+            this.requestChunkLoad(pChunkPosValue);
         }
     }
 
-    private boolean storeChunkSections(long p_157513_, Consumer<T> p_157514_) {
-        PersistentEntitySectionManager.ChunkLoadStatus persistententitysectionmanager$chunkloadstatus = this.chunkLoadStatuses.get(p_157513_);
+    private boolean storeChunkSections(long pChunkPosValue, Consumer<T> pEntityAction) {
+        PersistentEntitySectionManager.ChunkLoadStatus persistententitysectionmanager$chunkloadstatus = this.chunkLoadStatuses.get(pChunkPosValue);
         if (persistententitysectionmanager$chunkloadstatus == PersistentEntitySectionManager.ChunkLoadStatus.PENDING) {
             return false;
         } else {
             List<T> list = this.sectionStorage
-                .getExistingSectionsInChunk(p_157513_)
+                .getExistingSectionsInChunk(pChunkPosValue)
                 .flatMap(p_157542_ -> p_157542_.getEntities().filter(EntityAccess::shouldBeSaved))
                 .collect(Collectors.toList());
             if (list.isEmpty()) {
                 if (persistententitysectionmanager$chunkloadstatus == PersistentEntitySectionManager.ChunkLoadStatus.LOADED) {
-                    this.permanentStorage.storeEntities(new ChunkEntities<>(new ChunkPos(p_157513_), ImmutableList.of()));
+                    this.permanentStorage.storeEntities(new ChunkEntities<>(new ChunkPos(pChunkPosValue), ImmutableList.of()));
                 }
 
                 return true;
             } else if (persistententitysectionmanager$chunkloadstatus == PersistentEntitySectionManager.ChunkLoadStatus.FRESH) {
-                this.requestChunkLoad(p_157513_);
+                this.requestChunkLoad(pChunkPosValue);
                 return false;
             } else {
-                this.permanentStorage.storeEntities(new ChunkEntities<>(new ChunkPos(p_157513_), list));
-                list.forEach(p_157514_);
+                this.permanentStorage.storeEntities(new ChunkEntities<>(new ChunkPos(pChunkPosValue), list));
+                list.forEach(pEntityAction);
                 return true;
             }
         }
     }
 
-    private void requestChunkLoad(long p_157563_) {
-        this.chunkLoadStatuses.put(p_157563_, PersistentEntitySectionManager.ChunkLoadStatus.PENDING);
-        ChunkPos chunkpos = new ChunkPos(p_157563_);
+    private void requestChunkLoad(long pChunkPosValue) {
+        this.chunkLoadStatuses.put(pChunkPosValue, PersistentEntitySectionManager.ChunkLoadStatus.PENDING);
+        ChunkPos chunkpos = new ChunkPos(pChunkPosValue);
         this.permanentStorage.loadEntities(chunkpos).thenAccept(this.loadingInbox::add).exceptionally(p_157532_ -> {
             LOGGER.error("Failed to read chunk {}", chunkpos, p_157532_);
             return null;
         });
     }
 
-    private boolean processChunkUnload(long p_157569_) {
-        boolean flag = this.storeChunkSections(p_157569_, p_157595_ -> p_157595_.getPassengersAndSelf().forEach(this::unloadEntity));
+    private boolean processChunkUnload(long pChunkPosValue) {
+        boolean flag = this.storeChunkSections(pChunkPosValue, p_157595_ -> p_157595_.getPassengersAndSelf().forEach(this::unloadEntity));
         if (!flag) {
             return false;
         } else {
-            this.chunkLoadStatuses.remove(p_157569_);
+            this.chunkLoadStatuses.remove(pChunkPosValue);
             return true;
         }
     }
 
-    private void unloadEntity(EntityAccess p_157586_) {
-        p_157586_.setRemoved(Entity.RemovalReason.UNLOADED_TO_CHUNK);
-        p_157586_.setLevelCallback(EntityInLevelCallback.NULL);
+    private void unloadEntity(EntityAccess pEntity) {
+        pEntity.setRemoved(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+        pEntity.setLevelCallback(EntityInLevelCallback.NULL);
     }
 
     private void processUnloads() {
@@ -284,27 +284,27 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
         this.permanentStorage.close();
     }
 
-    public boolean isLoaded(UUID p_157551_) {
-        return this.knownUuids.contains(p_157551_);
+    public boolean isLoaded(UUID pUuid) {
+        return this.knownUuids.contains(pUuid);
     }
 
     public LevelEntityGetter<T> getEntityGetter() {
         return this.entityGetter;
     }
 
-    public boolean canPositionTick(BlockPos p_202168_) {
-        return this.chunkVisibility.get(ChunkPos.asLong(p_202168_)).isTicking();
+    public boolean canPositionTick(BlockPos pPos) {
+        return this.chunkVisibility.get(ChunkPos.asLong(pPos)).isTicking();
     }
 
-    public boolean canPositionTick(ChunkPos p_202166_) {
-        return this.chunkVisibility.get(p_202166_.toLong()).isTicking();
+    public boolean canPositionTick(ChunkPos pChunkPos) {
+        return this.chunkVisibility.get(pChunkPos.toLong()).isTicking();
     }
 
-    public boolean areEntitiesLoaded(long p_157508_) {
-        return this.chunkLoadStatuses.get(p_157508_) == PersistentEntitySectionManager.ChunkLoadStatus.LOADED;
+    public boolean areEntitiesLoaded(long pChunkPos) {
+        return this.chunkLoadStatuses.get(pChunkPos) == PersistentEntitySectionManager.ChunkLoadStatus.LOADED;
     }
 
-    public void dumpSections(Writer p_157549_) throws IOException {
+    public void dumpSections(Writer pWriter) throws IOException {
         CsvOutput csvoutput = CsvOutput.builder()
             .addColumn("x")
             .addColumn("y")
@@ -312,7 +312,7 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
             .addColumn("visibility")
             .addColumn("load_status")
             .addColumn("entity_count")
-            .build(p_157549_);
+            .build(pWriter);
         this.sectionStorage
             .getAllChunksWithExistingSections()
             .forEach(
@@ -370,10 +370,10 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
         private long currentSectionKey;
         private EntitySection<T> currentSection;
 
-        Callback(final T p_157614_, final long p_157615_, final EntitySection<T> p_157616_) {
-            this.entity = p_157614_;
-            this.currentSectionKey = p_157615_;
-            this.currentSection = p_157616_;
+        Callback(final T pEntity, final long pCurrentSectionKey, final EntitySection<T> pCurrentSection) {
+            this.entity = pEntity;
+            this.currentSectionKey = pCurrentSectionKey;
+            this.currentSection = pCurrentSection;
         }
 
         @Override
@@ -396,9 +396,9 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
             }
         }
 
-        private void updateStatus(Visibility p_157621_, Visibility p_157622_) {
-            Visibility visibility = PersistentEntitySectionManager.getEffectiveStatus(this.entity, p_157621_);
-            Visibility visibility1 = PersistentEntitySectionManager.getEffectiveStatus(this.entity, p_157622_);
+        private void updateStatus(Visibility pOldVisibility, Visibility pNewVisibility) {
+            Visibility visibility = PersistentEntitySectionManager.getEffectiveStatus(this.entity, pOldVisibility);
+            Visibility visibility1 = PersistentEntitySectionManager.getEffectiveStatus(this.entity, pNewVisibility);
             if (visibility == visibility1) {
                 if (visibility1.isAccessible()) {
                     PersistentEntitySectionManager.this.callbacks.onSectionChange(this.entity);

@@ -1,11 +1,10 @@
 package net.minecraft.client.particle;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Quaternionf;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class TextureSheetParticle extends SingleQuadParticle {
     protected TextureAtlasSprite sprite;
 
@@ -19,8 +18,8 @@ public abstract class TextureSheetParticle extends SingleQuadParticle {
         super(p_108328_, p_108329_, p_108330_, p_108331_, p_108332_, p_108333_, p_108334_);
     }
 
-    protected void setSprite(TextureAtlasSprite p_108338_) {
-        this.sprite = p_108338_;
+    protected void setSprite(TextureAtlasSprite pSprite) {
+        this.sprite = pSprite;
     }
 
     @Override
@@ -43,13 +42,19 @@ public abstract class TextureSheetParticle extends SingleQuadParticle {
         return this.sprite.getV1();
     }
 
-    public void pickSprite(SpriteSet p_108336_) {
-        this.setSprite(p_108336_.get(this.random));
+    public void pickSprite(SpriteSet pSprite) {
+        this.setSprite(pSprite.get(this.random));
     }
 
-    public void setSpriteFromAge(SpriteSet p_108340_) {
+    public void setSpriteFromAge(SpriteSet pSprite) {
         if (!this.removed) {
-            this.setSprite(p_108340_.get(this.age, this.lifetime));
+            this.setSprite(pSprite.get(this.age, this.lifetime));
         }
+    }
+
+    @Override
+    protected void renderRotatedQuad(VertexConsumer bufferIn, Quaternionf quatIn, float xIn, float yIn, float zIn, float partialTicks) {
+        bufferIn.setSprite(this.sprite);
+        super.renderRotatedQuad(bufferIn, quatIn, xIn, yIn, zIn, partialTicks);
     }
 }

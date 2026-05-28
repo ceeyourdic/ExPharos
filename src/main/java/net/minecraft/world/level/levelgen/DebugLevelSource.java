@@ -45,8 +45,8 @@ public class DebugLevelSource extends ChunkGenerator {
     public static final int HEIGHT = 70;
     public static final int BARRIER_HEIGHT = 60;
 
-    public DebugLevelSource(Holder.Reference<Biome> p_255723_) {
-        super(new FixedBiomeSource(p_255723_));
+    public DebugLevelSource(Holder.Reference<Biome> pBiome) {
+        super(new FixedBiomeSource(pBiome));
     }
 
     @Override
@@ -95,13 +95,13 @@ public class DebugLevelSource extends ChunkGenerator {
     public void addDebugScreenInfo(List<String> p_223987_, RandomState p_223988_, BlockPos p_223989_) {
     }
 
-    public static BlockState getBlockStateFor(int p_64149_, int p_64150_) {
+    public static BlockState getBlockStateFor(int pChunkX, int pChunkZ) {
         BlockState blockstate = AIR;
-        if (p_64149_ > 0 && p_64150_ > 0 && p_64149_ % 2 != 0 && p_64150_ % 2 != 0) {
-            p_64149_ /= 2;
-            p_64150_ /= 2;
-            if (p_64149_ <= GRID_WIDTH && p_64150_ <= GRID_HEIGHT) {
-                int i = Mth.abs(p_64149_ * GRID_WIDTH + p_64150_);
+        if (pChunkX > 0 && pChunkZ > 0 && pChunkX % 2 != 0 && pChunkZ % 2 != 0) {
+            pChunkX /= 2;
+            pChunkZ /= 2;
+            if (pChunkX <= GRID_WIDTH && pChunkZ <= GRID_HEIGHT) {
+                int i = Mth.abs(pChunkX * GRID_WIDTH + pChunkZ);
                 if (i < ALL_BLOCKS.size()) {
                     blockstate = ALL_BLOCKS.get(i);
                 }

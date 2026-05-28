@@ -48,10 +48,10 @@ public class EditGameRulesScreen extends Screen {
     @Nullable
     private Button doneButton;
 
-    public EditGameRulesScreen(GameRules p_101051_, Consumer<Optional<GameRules>> p_101052_) {
+    public EditGameRulesScreen(GameRules pGameRules, Consumer<Optional<GameRules>> pExitCallback) {
         super(TITLE);
-        this.gameRules = p_101051_;
-        this.exitCallback = p_101052_;
+        this.gameRules = pGameRules;
+        this.exitCallback = pExitCallback;
     }
 
     @Override
@@ -88,13 +88,13 @@ public class EditGameRulesScreen extends Screen {
         }
     }
 
-    void markInvalid(EditGameRulesScreen.RuleEntry p_101061_) {
-        this.invalidEntries.add(p_101061_);
+    void markInvalid(EditGameRulesScreen.RuleEntry pRuleEntry) {
+        this.invalidEntries.add(pRuleEntry);
         this.updateDoneButton();
     }
 
-    void clearInvalid(EditGameRulesScreen.RuleEntry p_101075_) {
-        this.invalidEntries.remove(p_101075_);
+    void clearInvalid(EditGameRulesScreen.RuleEntry pRuleEntry) {
+        this.invalidEntries.remove(pRuleEntry);
         this.updateDoneButton();
     }
 
@@ -103,13 +103,13 @@ public class EditGameRulesScreen extends Screen {
         private final CycleButton<Boolean> checkbox;
 
         public BooleanRuleEntry(
-            final Component p_101101_, final List<FormattedCharSequence> p_101102_, final String p_101103_, final GameRules.BooleanValue p_101104_
+            final Component pLabel, final List<FormattedCharSequence> pTooltip, final String pDescription, final GameRules.BooleanValue pValue
         ) {
-            super(p_101102_, p_101101_);
-            this.checkbox = CycleButton.onOffBuilder(p_101104_.get())
+            super(pTooltip, pLabel);
+            this.checkbox = CycleButton.onOffBuilder(pValue.get())
                 .displayOnlyValue()
-                .withCustomNarration(p_170219_ -> p_170219_.createDefaultNarrationMessage().append("\n").append(p_101103_))
-                .create(10, 5, 44, 20, p_101101_, (p_170215_, p_170216_) -> p_101104_.set(p_170216_, null));
+                .withCustomNarration(p_170219_ -> p_170219_.createDefaultNarrationMessage().append("\n").append(pDescription))
+                .create(10, 5, 44, 20, pLabel, (p_170215_, p_170216_) -> pValue.set(p_170216_, null));
             this.children.add(this.checkbox);
         }
 
@@ -137,9 +137,9 @@ public class EditGameRulesScreen extends Screen {
     public class CategoryRuleEntry extends EditGameRulesScreen.RuleEntry {
         final Component label;
 
-        public CategoryRuleEntry(final Component p_101141_) {
+        public CategoryRuleEntry(final Component pLabel) {
             super(null);
-            this.label = p_101141_;
+            this.label = pLabel;
         }
 
         @Override
@@ -182,7 +182,7 @@ public class EditGameRulesScreen extends Screen {
     @FunctionalInterface
     @OnlyIn(Dist.CLIENT)
     interface EntryFactory<T extends GameRules.Value<T>> {
-        EditGameRulesScreen.RuleEntry create(Component p_101155_, List<FormattedCharSequence> p_101156_, String p_101157_, T p_101158_);
+        EditGameRulesScreen.RuleEntry create(Component pLabel, List<FormattedCharSequence> pTooltip, String pDescription, T pValue);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -190,9 +190,9 @@ public class EditGameRulesScreen extends Screen {
         private final List<FormattedCharSequence> label;
         protected final List<AbstractWidget> children = Lists.newArrayList();
 
-        public GameRuleEntry(@Nullable final List<FormattedCharSequence> p_101164_, final Component p_101165_) {
-            super(p_101164_);
-            this.label = EditGameRulesScreen.this.minecraft.font.split(p_101165_, 175);
+        public GameRuleEntry(@Nullable final List<FormattedCharSequence> pTooltip, final Component pLabel) {
+            super(pTooltip);
+            this.label = EditGameRulesScreen.this.minecraft.font.split(pLabel, 175);
         }
 
         @Override
@@ -205,12 +205,12 @@ public class EditGameRulesScreen extends Screen {
             return this.children;
         }
 
-        protected void renderLabel(GuiGraphics p_282711_, int p_281539_, int p_281414_) {
+        protected void renderLabel(GuiGraphics pGuiGraphics, int pX, int pY) {
             if (this.label.size() == 1) {
-                p_282711_.drawString(EditGameRulesScreen.this.minecraft.font, this.label.get(0), p_281414_, p_281539_ + 5, -1);
+                pGuiGraphics.drawString(EditGameRulesScreen.this.minecraft.font, this.label.get(0), pY, pX + 5, -1);
             } else if (this.label.size() >= 2) {
-                p_282711_.drawString(EditGameRulesScreen.this.minecraft.font, this.label.get(0), p_281414_, p_281539_, -1);
-                p_282711_.drawString(EditGameRulesScreen.this.minecraft.font, this.label.get(1), p_281414_, p_281539_ + 10, -1);
+                pGuiGraphics.drawString(EditGameRulesScreen.this.minecraft.font, this.label.get(0), pY, pX, -1);
+                pGuiGraphics.drawString(EditGameRulesScreen.this.minecraft.font, this.label.get(1), pY, pX + 10, -1);
             }
         }
     }
@@ -220,15 +220,15 @@ public class EditGameRulesScreen extends Screen {
         private final EditBox input;
 
         public IntegerRuleEntry(
-            final Component p_101175_, final List<FormattedCharSequence> p_101176_, final String p_101177_, final GameRules.IntegerValue p_101178_
+            final Component pLabel, final List<FormattedCharSequence> pTooltip, final String pDescription, final GameRules.IntegerValue pValue
         ) {
-            super(p_101176_, p_101175_);
+            super(pTooltip, pLabel);
             this.input = new EditBox(
-                EditGameRulesScreen.this.minecraft.font, 10, 5, 44, 20, p_101175_.copy().append("\n").append(p_101177_).append("\n")
+                EditGameRulesScreen.this.minecraft.font, 10, 5, 44, 20, pLabel.copy().append("\n").append(pDescription).append("\n")
             );
-            this.input.setValue(Integer.toString(p_101178_.get()));
+            this.input.setValue(Integer.toString(pValue.get()));
             this.input.setResponder(p_101181_ -> {
-                if (p_101178_.tryDeserialize(p_101181_)) {
+                if (pValue.tryDeserialize(p_101181_)) {
                     this.input.setTextColor(14737632);
                     EditGameRulesScreen.this.clearInvalid(this);
                 } else {
@@ -264,8 +264,8 @@ public class EditGameRulesScreen extends Screen {
         @Nullable
         final List<FormattedCharSequence> tooltip;
 
-        public RuleEntry(@Nullable List<FormattedCharSequence> p_194062_) {
-            this.tooltip = p_194062_;
+        public RuleEntry(@Nullable List<FormattedCharSequence> pTooltip) {
+            this.tooltip = pTooltip;
         }
     }
 
@@ -273,7 +273,7 @@ public class EditGameRulesScreen extends Screen {
     public class RuleList extends ContainerObjectSelectionList<EditGameRulesScreen.RuleEntry> {
         private static final int ITEM_HEIGHT = 24;
 
-        public RuleList(final GameRules p_101203_) {
+        public RuleList(final GameRules pGameRules) {
             super(
                 Minecraft.getInstance(),
                 EditGameRulesScreen.this.width,
@@ -282,7 +282,7 @@ public class EditGameRulesScreen extends Screen {
                 24
             );
             final Map<GameRules.Category, Map<GameRules.Key<?>, EditGameRulesScreen.RuleEntry>> map = Maps.newHashMap();
-            p_101203_.visitGameRuleTypes(
+            pGameRules.visitGameRuleTypes(
                 new GameRules.GameRuleTypeVisitor() {
                     @Override
                     public void visitBoolean(GameRules.Key<GameRules.BooleanValue> p_101238_, GameRules.Type<GameRules.BooleanValue> p_101239_) {
@@ -307,7 +307,7 @@ public class EditGameRulesScreen extends Screen {
                     private <T extends GameRules.Value<T>> void addEntry(GameRules.Key<T> p_101225_, EditGameRulesScreen.EntryFactory<T> p_101226_) {
                         Component component = Component.translatable(p_101225_.getDescriptionId());
                         Component component1 = Component.literal(p_101225_.getId()).withStyle(ChatFormatting.YELLOW);
-                        T t = p_101203_.getRule(p_101225_);
+                        T t = pGameRules.getRule(p_101225_);
                         String s = t.serialize();
                         Component component2 = Component.translatable("editGamerule.default", Component.literal(s)).withStyle(ChatFormatting.GRAY);
                         String s1 = p_101225_.getDescriptionId() + ".description";

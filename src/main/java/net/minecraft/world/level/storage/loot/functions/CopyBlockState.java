@@ -36,14 +36,14 @@ public class CopyBlockState extends LootItemConditionalFunction {
     private final Holder<Block> block;
     private final Set<Property<?>> properties;
 
-    CopyBlockState(List<LootItemCondition> p_301076_, Holder<Block> p_298008_, Set<Property<?>> p_80052_) {
-        super(p_301076_);
-        this.block = p_298008_;
-        this.properties = p_80052_;
+    CopyBlockState(List<LootItemCondition> pConditions, Holder<Block> pBlock, Set<Property<?>> pProperties) {
+        super(pConditions);
+        this.block = pBlock;
+        this.properties = pProperties;
     }
 
-    private CopyBlockState(List<LootItemCondition> p_297498_, Holder<Block> p_299449_, List<String> p_298231_) {
-        this(p_297498_, p_299449_, p_298231_.stream().map(p_299449_.value().getStateDefinition()::getProperty).filter(Objects::nonNull).collect(Collectors.toSet()));
+    private CopyBlockState(List<LootItemCondition> pConditions, Holder<Block> pBlock, List<String> pProperties) {
+        this(pConditions, pBlock, pProperties.stream().map(pBlock.value().getStateDefinition()::getProperty).filter(Objects::nonNull).collect(Collectors.toSet()));
     }
 
     @Override
@@ -57,10 +57,10 @@ public class CopyBlockState extends LootItemConditionalFunction {
     }
 
     @Override
-    protected ItemStack run(ItemStack p_80060_, LootContext p_80061_) {
-        BlockState blockstate = p_80061_.getOptionalParameter(LootContextParams.BLOCK_STATE);
+    protected ItemStack run(ItemStack pStack, LootContext pContext) {
+        BlockState blockstate = pContext.getOptionalParameter(LootContextParams.BLOCK_STATE);
         if (blockstate != null) {
-            p_80060_.update(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY, p_327562_ -> {
+            pStack.update(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY, p_327562_ -> {
                 for (Property<?> property : this.properties) {
                     if (blockstate.hasProperty(property)) {
                         p_327562_ = p_327562_.with(property, blockstate);
@@ -71,26 +71,26 @@ public class CopyBlockState extends LootItemConditionalFunction {
             });
         }
 
-        return p_80060_;
+        return pStack;
     }
 
-    public static CopyBlockState.Builder copyState(Block p_80063_) {
-        return new CopyBlockState.Builder(p_80063_);
+    public static CopyBlockState.Builder copyState(Block pBlock) {
+        return new CopyBlockState.Builder(pBlock);
     }
 
     public static class Builder extends LootItemConditionalFunction.Builder<CopyBlockState.Builder> {
         private final Holder<Block> block;
         private final ImmutableSet.Builder<Property<?>> properties = ImmutableSet.builder();
 
-        Builder(Block p_80079_) {
-            this.block = p_80079_.builtInRegistryHolder();
+        Builder(Block pBlock) {
+            this.block = pBlock.builtInRegistryHolder();
         }
 
-        public CopyBlockState.Builder copy(Property<?> p_80085_) {
-            if (!this.block.value().getStateDefinition().getProperties().contains(p_80085_)) {
-                throw new IllegalStateException("Property " + p_80085_ + " is not present on block " + this.block);
+        public CopyBlockState.Builder copy(Property<?> pProperty) {
+            if (!this.block.value().getStateDefinition().getProperties().contains(pProperty)) {
+                throw new IllegalStateException("Property " + pProperty + " is not present on block " + this.block);
             } else {
-                this.properties.add(p_80085_);
+                this.properties.add(pProperty);
                 return this;
             }
         }

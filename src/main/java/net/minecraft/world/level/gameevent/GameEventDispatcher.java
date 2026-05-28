@@ -14,13 +14,13 @@ import net.minecraft.world.phys.Vec3;
 public class GameEventDispatcher {
     private final ServerLevel level;
 
-    public GameEventDispatcher(ServerLevel p_251921_) {
-        this.level = p_251921_;
+    public GameEventDispatcher(ServerLevel pLevel) {
+        this.level = pLevel;
     }
 
-    public void post(Holder<GameEvent> p_335078_, Vec3 p_250613_, GameEvent.Context p_251777_) {
-        int i = p_335078_.value().notificationRadius();
-        BlockPos blockpos = BlockPos.containing(p_250613_);
+    public void post(Holder<GameEvent> pGameEvent, Vec3 pPos, GameEvent.Context pContext) {
+        int i = pGameEvent.value().notificationRadius();
+        BlockPos blockpos = BlockPos.containing(pPos);
         int j = SectionPos.blockToSectionCoord(blockpos.getX() - i);
         int k = SectionPos.blockToSectionCoord(blockpos.getY() - i);
         int l = SectionPos.blockToSectionCoord(blockpos.getZ() - i);
@@ -30,9 +30,9 @@ public class GameEventDispatcher {
         List<GameEvent.ListenerInfo> list = new ArrayList<>();
         GameEventListenerRegistry.ListenerVisitor gameeventlistenerregistry$listenervisitor = (p_327435_, p_327436_) -> {
             if (p_327435_.getDeliveryMode() == GameEventListener.DeliveryMode.BY_DISTANCE) {
-                list.add(new GameEvent.ListenerInfo(p_335078_, p_250613_, p_251777_, p_327435_, p_327436_));
+                list.add(new GameEvent.ListenerInfo(pGameEvent, pPos, pContext, p_327435_, p_327436_));
             } else {
-                p_327435_.handleGameEvent(this.level, p_335078_, p_251777_, p_250613_);
+                p_327435_.handleGameEvent(this.level, pGameEvent, pContext, pPos);
             }
         };
         boolean flag = false;
@@ -42,7 +42,7 @@ public class GameEventDispatcher {
                 ChunkAccess chunkaccess = this.level.getChunkSource().getChunkNow(l1, i2);
                 if (chunkaccess != null) {
                     for (int j2 = k; j2 <= j1; j2++) {
-                        flag |= chunkaccess.getListenerRegistry(j2).visitInRangeListeners(p_335078_, p_250613_, p_251777_, gameeventlistenerregistry$listenervisitor);
+                        flag |= chunkaccess.getListenerRegistry(j2).visitInRangeListeners(pGameEvent, pPos, pContext, gameeventlistenerregistry$listenervisitor);
                     }
                 }
             }
@@ -53,14 +53,14 @@ public class GameEventDispatcher {
         }
 
         if (flag) {
-            DebugPackets.sendGameEventInfo(this.level, p_335078_, p_250613_);
+            DebugPackets.sendGameEventInfo(this.level, pGameEvent, pPos);
         }
     }
 
-    private void handleGameEventMessagesInQueue(List<GameEvent.ListenerInfo> p_251433_) {
-        Collections.sort(p_251433_);
+    private void handleGameEventMessagesInQueue(List<GameEvent.ListenerInfo> pListenerInfos) {
+        Collections.sort(pListenerInfos);
 
-        for (GameEvent.ListenerInfo gameevent$listenerinfo : p_251433_) {
+        for (GameEvent.ListenerInfo gameevent$listenerinfo : pListenerInfos) {
             GameEventListener gameeventlistener = gameevent$listenerinfo.recipient();
             gameeventlistener.handleGameEvent(
                 this.level, gameevent$listenerinfo.gameEvent(), gameevent$listenerinfo.context(), gameevent$listenerinfo.source()

@@ -11,48 +11,48 @@ import net.minecraft.world.item.crafting.Recipe;
 public class StackedItemContents {
     private final StackedContents<Holder<Item>> raw = new StackedContents<>();
 
-    public void accountSimpleStack(ItemStack p_364422_) {
-        if (Inventory.isUsableForCrafting(p_364422_)) {
-            this.accountStack(p_364422_);
+    public void accountSimpleStack(ItemStack pStack) {
+        if (Inventory.isUsableForCrafting(pStack)) {
+            this.accountStack(pStack);
         }
     }
 
-    public void accountStack(ItemStack p_367488_) {
-        this.accountStack(p_367488_, p_367488_.getMaxStackSize());
+    public void accountStack(ItemStack pStack) {
+        this.accountStack(pStack, pStack.getMaxStackSize());
     }
 
-    public void accountStack(ItemStack p_363064_, int p_362894_) {
-        if (!p_363064_.isEmpty()) {
-            int i = Math.min(p_362894_, p_363064_.getCount());
-            this.raw.account(p_363064_.getItemHolder(), i);
+    public void accountStack(ItemStack pStack, int pMaxStackSize) {
+        if (!pStack.isEmpty()) {
+            int i = Math.min(pMaxStackSize, pStack.getCount());
+            this.raw.account(pStack.getItemHolder(), i);
         }
     }
 
-    public boolean canCraft(Recipe<?> p_366312_, @Nullable StackedContents.Output<Holder<Item>> p_369339_) {
-        return this.canCraft(p_366312_, 1, p_369339_);
+    public boolean canCraft(Recipe<?> pRecipe, @Nullable StackedContents.Output<Holder<Item>> pOutput) {
+        return this.canCraft(pRecipe, 1, pOutput);
     }
 
-    public boolean canCraft(Recipe<?> p_365279_, int p_366048_, @Nullable StackedContents.Output<Holder<Item>> p_369851_) {
-        PlacementInfo placementinfo = p_365279_.placementInfo();
-        return placementinfo.isImpossibleToPlace() ? false : this.canCraft(placementinfo.ingredients(), p_366048_, p_369851_);
+    public boolean canCraft(Recipe<?> pRecipe, int pMaxCount, @Nullable StackedContents.Output<Holder<Item>> pOutput) {
+        PlacementInfo placementinfo = pRecipe.placementInfo();
+        return placementinfo.isImpossibleToPlace() ? false : this.canCraft(placementinfo.ingredients(), pMaxCount, pOutput);
     }
 
-    public boolean canCraft(List<? extends StackedContents.IngredientInfo<Holder<Item>>> p_366143_, @Nullable StackedContents.Output<Holder<Item>> p_370013_) {
-        return this.canCraft(p_366143_, 1, p_370013_);
+    public boolean canCraft(List<? extends StackedContents.IngredientInfo<Holder<Item>>> pIngredients, @Nullable StackedContents.Output<Holder<Item>> pOutput) {
+        return this.canCraft(pIngredients, 1, pOutput);
     }
 
     private boolean canCraft(
-        List<? extends StackedContents.IngredientInfo<Holder<Item>>> p_366198_, int p_367643_, @Nullable StackedContents.Output<Holder<Item>> p_366621_
+        List<? extends StackedContents.IngredientInfo<Holder<Item>>> pIngredients, int pMaxCount, @Nullable StackedContents.Output<Holder<Item>> pOutput
     ) {
-        return this.raw.tryPick(p_366198_, p_367643_, p_366621_);
+        return this.raw.tryPick(pIngredients, pMaxCount, pOutput);
     }
 
-    public int getBiggestCraftableStack(Recipe<?> p_369356_, @Nullable StackedContents.Output<Holder<Item>> p_368498_) {
-        return this.getBiggestCraftableStack(p_369356_, Integer.MAX_VALUE, p_368498_);
+    public int getBiggestCraftableStack(Recipe<?> pRecipe, @Nullable StackedContents.Output<Holder<Item>> pOutput) {
+        return this.getBiggestCraftableStack(pRecipe, Integer.MAX_VALUE, pOutput);
     }
 
-    public int getBiggestCraftableStack(Recipe<?> p_366627_, int p_361474_, @Nullable StackedContents.Output<Holder<Item>> p_366799_) {
-        return this.raw.tryPickAll(p_366627_.placementInfo().ingredients(), p_361474_, p_366799_);
+    public int getBiggestCraftableStack(Recipe<?> pRecipe, int pMaxCount, @Nullable StackedContents.Output<Holder<Item>> pOutput) {
+        return this.raw.tryPickAll(pRecipe.placementInfo().ingredients(), pMaxCount, pOutput);
     }
 
     public void clear() {

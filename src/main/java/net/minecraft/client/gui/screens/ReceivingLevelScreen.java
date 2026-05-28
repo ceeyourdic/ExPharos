@@ -9,10 +9,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.CustomLoadingScreen;
+import net.optifine.CustomLoadingScreens;
 
-@OnlyIn(Dist.CLIENT)
 public class ReceivingLevelScreen extends Screen {
     private static final Component DOWNLOADING_TERRAIN_TEXT = Component.translatable("multiplayer.downloadingTerrain");
     private static final long CHUNK_LOADING_START_WAIT_LIMIT_MS = 30000L;
@@ -21,11 +20,12 @@ public class ReceivingLevelScreen extends Screen {
     private final ReceivingLevelScreen.Reason reason;
     @Nullable
     private TextureAtlasSprite cachedNetherPortalSprite;
+    private CustomLoadingScreen customLoadingScreen = CustomLoadingScreens.getCustomLoadingScreen();
 
-    public ReceivingLevelScreen(BooleanSupplier p_310110_, ReceivingLevelScreen.Reason p_336020_) {
+    public ReceivingLevelScreen(BooleanSupplier pLevelReceived, ReceivingLevelScreen.Reason pReason) {
         super(GameNarrator.NO_TITLE);
-        this.levelReceived = p_310110_;
-        this.reason = p_336020_;
+        this.levelReceived = pLevelReceived;
+        this.reason = pReason;
         this.createdAt = Util.getMillis();
     }
 
@@ -47,17 +47,21 @@ public class ReceivingLevelScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics p_298240_, int p_297552_, int p_298125_, float p_297335_) {
-        switch (this.reason) {
-            case NETHER_PORTAL:
-                p_298240_.blitSprite(RenderType::guiOpaqueTexturedBackground, this.getNetherPortalSprite(), 0, 0, p_298240_.guiWidth(), p_298240_.guiHeight());
-                break;
-            case END_PORTAL:
-                p_298240_.fillRenderType(RenderType.endPortal(), 0, 0, this.width, this.height, 0);
-                break;
-            case OTHER:
-                this.renderPanorama(p_298240_, p_297335_);
-                this.renderBlurredBackground();
-                this.renderMenuBackground(p_298240_);
+        if (this.customLoadingScreen != null) {
+            this.customLoadingScreen.drawBackground(this.width, this.height);
+        } else {
+            switch (this.reason) {
+                case NETHER_PORTAL:
+                    p_298240_.blitSprite(RenderType::guiOpaqueTexturedBackground, this.getNetherPortalSprite(), 0, 0, p_298240_.guiWidth(), p_298240_.guiHeight());
+                    break;
+                case END_PORTAL:
+                    p_298240_.fillRenderType(RenderType.endPortal(), 0, 0, this.width, this.height, 0);
+                    break;
+                case OTHER:
+                    this.renderPanorama(p_298240_, p_297335_);
+                    this.renderBlurredBackground();
+                    this.renderMenuBackground(p_298240_);
+            }
         }
     }
 
@@ -88,7 +92,6 @@ public class ReceivingLevelScreen extends Screen {
         return false;
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static enum Reason {
         NETHER_PORTAL,
         END_PORTAL,

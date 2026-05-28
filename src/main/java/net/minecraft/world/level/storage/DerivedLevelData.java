@@ -15,9 +15,9 @@ public class DerivedLevelData implements ServerLevelData {
     private final WorldData worldData;
     private final ServerLevelData wrapped;
 
-    public DerivedLevelData(WorldData p_78079_, ServerLevelData p_78080_) {
-        this.worldData = p_78079_;
-        this.wrapped = p_78080_;
+    public DerivedLevelData(WorldData pWorldData, ServerLevelData pWrapped) {
+        this.worldData = pWorldData;
+        this.wrapped = pWrapped;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class DerivedLevelData implements ServerLevelData {
     }
 
     @Override
-    public void setClearWeatherTime(int p_78085_) {
+    public void setClearWeatherTime(int pTime) {
     }
 
     @Override
@@ -80,35 +80,35 @@ public class DerivedLevelData implements ServerLevelData {
     }
 
     @Override
-    public void setGameTime(long p_78087_) {
+    public void setGameTime(long pTime) {
     }
 
     @Override
-    public void setDayTime(long p_78105_) {
+    public void setDayTime(long pTime) {
     }
 
     @Override
-    public void setSpawn(BlockPos p_78093_, float p_78094_) {
+    public void setSpawn(BlockPos pSpawnPoint, float pAngle) {
     }
 
     @Override
-    public void setThundering(boolean p_78100_) {
+    public void setThundering(boolean pThundering) {
     }
 
     @Override
-    public void setThunderTime(int p_78118_) {
+    public void setThunderTime(int pTime) {
     }
 
     @Override
-    public void setRaining(boolean p_78107_) {
+    public void setRaining(boolean pIsRaining) {
     }
 
     @Override
-    public void setRainTime(int p_78121_) {
+    public void setRainTime(int pTime) {
     }
 
     @Override
-    public void setGameType(GameType p_78089_) {
+    public void setGameType(GameType pType) {
     }
 
     @Override
@@ -127,7 +127,7 @@ public class DerivedLevelData implements ServerLevelData {
     }
 
     @Override
-    public void setInitialized(boolean p_78112_) {
+    public void setInitialized(boolean pInitialized) {
     }
 
     @Override
@@ -141,7 +141,7 @@ public class DerivedLevelData implements ServerLevelData {
     }
 
     @Override
-    public void setWorldBorder(WorldBorder.Settings p_78091_) {
+    public void setWorldBorder(WorldBorder.Settings pSerializer) {
     }
 
     @Override
@@ -165,7 +165,7 @@ public class DerivedLevelData implements ServerLevelData {
     }
 
     @Override
-    public void setWanderingTraderSpawnDelay(int p_78124_) {
+    public void setWanderingTraderSpawnDelay(int pDelay) {
     }
 
     @Override
@@ -174,7 +174,7 @@ public class DerivedLevelData implements ServerLevelData {
     }
 
     @Override
-    public void setWanderingTraderSpawnChance(int p_78127_) {
+    public void setWanderingTraderSpawnChance(int pChance) {
     }
 
     @Override
@@ -183,7 +183,7 @@ public class DerivedLevelData implements ServerLevelData {
     }
 
     @Override
-    public void setWanderingTraderId(UUID p_78096_) {
+    public void setWanderingTraderId(UUID pId) {
     }
 
     @Override

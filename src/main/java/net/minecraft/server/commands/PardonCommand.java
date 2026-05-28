@@ -17,8 +17,8 @@ import net.minecraft.server.players.UserBanList;
 public class PardonCommand {
     private static final SimpleCommandExceptionType ERROR_NOT_BANNED = new SimpleCommandExceptionType(Component.translatable("commands.pardon.failed"));
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_138094_) {
-        p_138094_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("pardon")
                 .requires(p_138101_ -> p_138101_.hasPermission(3))
                 .then(
@@ -33,15 +33,15 @@ public class PardonCommand {
         );
     }
 
-    private static int pardonPlayers(CommandSourceStack p_138103_, Collection<GameProfile> p_138104_) throws CommandSyntaxException {
-        UserBanList userbanlist = p_138103_.getServer().getPlayerList().getBans();
+    private static int pardonPlayers(CommandSourceStack pSource, Collection<GameProfile> pGameProfiles) throws CommandSyntaxException {
+        UserBanList userbanlist = pSource.getServer().getPlayerList().getBans();
         int i = 0;
 
-        for (GameProfile gameprofile : p_138104_) {
+        for (GameProfile gameprofile : pGameProfiles) {
             if (userbanlist.isBanned(gameprofile)) {
                 userbanlist.remove(gameprofile);
                 i++;
-                p_138103_.sendSuccess(() -> Component.translatable("commands.pardon.success", Component.literal(gameprofile.getName())), true);
+                pSource.sendSuccess(() -> Component.translatable("commands.pardon.success", Component.literal(gameprofile.getName())), true);
             }
         }
 

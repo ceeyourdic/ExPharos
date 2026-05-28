@@ -6,17 +6,15 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class CreeperPowerLayer extends EnergySwirlLayer<CreeperRenderState, CreeperModel> {
     private static final ResourceLocation POWER_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/creeper/creeper_armor.png");
-    private final CreeperModel model;
+    public CreeperModel model;
+    public ResourceLocation customTextureLocation;
 
-    public CreeperPowerLayer(RenderLayerParent<CreeperRenderState, CreeperModel> p_174471_, EntityModelSet p_174472_) {
-        super(p_174471_);
-        this.model = new CreeperModel(p_174472_.bakeLayer(ModelLayers.CREEPER_ARMOR));
+    public CreeperPowerLayer(RenderLayerParent<CreeperRenderState, CreeperModel> pRenderer, EntityModelSet pModelSet) {
+        super(pRenderer);
+        this.model = new CreeperModel(pModelSet.bakeLayer(ModelLayers.CREEPER_ARMOR));
     }
 
     protected boolean isPowered(CreeperRenderState p_367950_) {
@@ -30,7 +28,7 @@ public class CreeperPowerLayer extends EnergySwirlLayer<CreeperRenderState, Cree
 
     @Override
     protected ResourceLocation getTextureLocation() {
-        return POWER_LOCATION;
+        return this.customTextureLocation != null ? this.customTextureLocation : POWER_LOCATION;
     }
 
     protected CreeperModel model() {

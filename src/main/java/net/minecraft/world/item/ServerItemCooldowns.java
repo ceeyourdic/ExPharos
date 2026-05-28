@@ -7,8 +7,8 @@ import net.minecraft.server.level.ServerPlayer;
 public class ServerItemCooldowns extends ItemCooldowns {
     private final ServerPlayer player;
 
-    public ServerItemCooldowns(ServerPlayer p_43067_) {
-        this.player = p_43067_;
+    public ServerItemCooldowns(ServerPlayer pPlayer) {
+        this.player = pPlayer;
     }
 
     @Override

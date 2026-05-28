@@ -43,15 +43,15 @@ public class LootTableProvider implements DataProvider {
     private final CompletableFuture<HolderLookup.Provider> registries;
 
     public LootTableProvider(
-        PackOutput p_254123_,
-        Set<ResourceKey<LootTable>> p_254481_,
-        List<LootTableProvider.SubProviderEntry> p_253798_,
-        CompletableFuture<HolderLookup.Provider> p_330862_
+        PackOutput pOutput,
+        Set<ResourceKey<LootTable>> pRequiredTables,
+        List<LootTableProvider.SubProviderEntry> pSubProviders,
+        CompletableFuture<HolderLookup.Provider> pRegistries
     ) {
-        this.pathProvider = p_254123_.createRegistryElementsPathProvider(Registries.LOOT_TABLE);
-        this.subProviders = p_253798_;
-        this.requiredTables = p_254481_;
-        this.registries = p_330862_;
+        this.pathProvider = pOutput.createRegistryElementsPathProvider(Registries.LOOT_TABLE);
+        this.subProviders = pSubProviders;
+        this.requiredTables = pRequiredTables;
+        this.registries = pRegistries;
     }
 
     @Override
@@ -59,10 +59,10 @@ public class LootTableProvider implements DataProvider {
         return this.registries.thenCompose(p_325860_ -> this.run(p_254060_, p_325860_));
     }
 
-    private CompletableFuture<?> run(CachedOutput p_327970_, HolderLookup.Provider p_331092_) {
+    private CompletableFuture<?> run(CachedOutput pOutput, HolderLookup.Provider pProvider) {
         WritableRegistry<LootTable> writableregistry = new MappedRegistry<>(Registries.LOOT_TABLE, Lifecycle.experimental());
         Map<RandomSupport.Seed128bit, ResourceLocation> map = new Object2ObjectOpenHashMap<>();
-        this.subProviders.forEach(p_341016_ -> p_341016_.provider().apply(p_331092_).generate((p_358218_, p_358219_) -> {
+        this.subProviders.forEach(p_341016_ -> p_341016_.provider().apply(pProvider).generate((p_358218_, p_358219_) -> {
                 ResourceLocation resourcelocation = sequenceIdForLootTable(p_358218_);
                 ResourceLocation resourcelocation1 = map.put(RandomSequence.seedForKey(resourcelocation), resourcelocation);
                 if (resourcelocation1 != null) {
@@ -99,13 +99,13 @@ public class LootTableProvider implements DataProvider {
                 ResourceKey<LootTable> resourcekey1 = p_325852_.getKey();
                 LootTable loottable = p_325852_.getValue();
                 Path path = this.pathProvider.json(resourcekey1.location());
-                return DataProvider.saveStable(p_327970_, p_331092_, LootTable.DIRECT_CODEC, loottable, path);
+                return DataProvider.saveStable(pOutput, pProvider, LootTable.DIRECT_CODEC, loottable, path);
             }).toArray(CompletableFuture[]::new));
         }
     }
 
-    private static ResourceLocation sequenceIdForLootTable(ResourceKey<LootTable> p_331928_) {
-        return p_331928_.location();
+    private static ResourceLocation sequenceIdForLootTable(ResourceKey<LootTable> pLootTable) {
+        return pLootTable.location();
     }
 
     @Override

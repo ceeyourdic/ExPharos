@@ -37,8 +37,8 @@ public record ItemWritableBookPredicate(Optional<CollectionPredicate<Filterable<
         public static final Codec<ItemWritableBookPredicate.PagePredicate> CODEC = Codec.STRING
             .xmap(ItemWritableBookPredicate.PagePredicate::new, ItemWritableBookPredicate.PagePredicate::contents);
 
-        public boolean test(Filterable<String> p_327840_) {
-            return p_327840_.raw().equals(this.contents);
+        public boolean test(Filterable<String> pContents) {
+            return pContents.raw().equals(this.contents);
         }
     }
 }

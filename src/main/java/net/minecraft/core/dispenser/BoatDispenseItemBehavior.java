@@ -15,8 +15,8 @@ public class BoatDispenseItemBehavior extends DefaultDispenseItemBehavior {
     private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
     private final EntityType<? extends AbstractBoat> type;
 
-    public BoatDispenseItemBehavior(EntityType<? extends AbstractBoat> p_369323_) {
-        this.type = p_369323_;
+    public BoatDispenseItemBehavior(EntityType<? extends AbstractBoat> pType) {
+        this.type = pType;
     }
 
     @Override

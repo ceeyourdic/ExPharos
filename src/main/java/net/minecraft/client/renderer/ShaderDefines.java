@@ -27,18 +27,18 @@ public record ShaderDefines(Map<String, String> values, Set<String> flags) {
         return new ShaderDefines.Builder();
     }
 
-    public ShaderDefines withOverrides(ShaderDefines p_361942_) {
+    public ShaderDefines withOverrides(ShaderDefines pDefines) {
         if (this.isEmpty()) {
-            return p_361942_;
-        } else if (p_361942_.isEmpty()) {
+            return pDefines;
+        } else if (pDefines.isEmpty()) {
             return this;
         } else {
-            ImmutableMap.Builder<String, String> builder = ImmutableMap.builderWithExpectedSize(this.values.size() + p_361942_.values.size());
+            ImmutableMap.Builder<String, String> builder = ImmutableMap.builderWithExpectedSize(this.values.size() + pDefines.values.size());
             builder.putAll(this.values);
-            builder.putAll(p_361942_.values);
-            ImmutableSet.Builder<String> builder1 = ImmutableSet.builderWithExpectedSize(this.flags.size() + p_361942_.flags.size());
+            builder.putAll(pDefines.values);
+            ImmutableSet.Builder<String> builder1 = ImmutableSet.builderWithExpectedSize(this.flags.size() + pDefines.flags.size());
             builder1.addAll(this.flags);
-            builder1.addAll(p_361942_.flags);
+            builder1.addAll(pDefines.flags);
             return new ShaderDefines(builder.buildKeepingLast(), builder1.build());
         }
     }
@@ -71,26 +71,26 @@ public record ShaderDefines(Map<String, String> values, Set<String> flags) {
         Builder() {
         }
 
-        public ShaderDefines.Builder define(String p_360918_, String p_368570_) {
-            if (p_368570_.isBlank()) {
+        public ShaderDefines.Builder define(String pKey, String pValue) {
+            if (pValue.isBlank()) {
                 throw new IllegalArgumentException("Cannot define empty string");
             } else {
-                this.values.put(p_360918_, escapeNewLines(p_368570_));
+                this.values.put(pKey, escapeNewLines(pValue));
                 return this;
             }
         }
 
-        private static String escapeNewLines(String p_363744_) {
-            return p_363744_.replaceAll("\n", "\\\\\n");
+        private static String escapeNewLines(String pStr) {
+            return pStr.replaceAll("\n", "\\\\\n");
         }
 
-        public ShaderDefines.Builder define(String p_363194_, float p_365800_) {
-            this.values.put(p_363194_, String.valueOf(p_365800_));
+        public ShaderDefines.Builder define(String pKey, float pValue) {
+            this.values.put(pKey, String.valueOf(pValue));
             return this;
         }
 
-        public ShaderDefines.Builder define(String p_367054_) {
-            this.flags.add(p_367054_);
+        public ShaderDefines.Builder define(String pFlag) {
+            this.flags.add(pFlag);
             return this;
         }
 

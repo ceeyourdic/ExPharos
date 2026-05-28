@@ -21,7 +21,7 @@ public class NbtProviders {
     public static final LootNbtProviderType STORAGE = register("storage", StorageNbtProvider.CODEC);
     public static final LootNbtProviderType CONTEXT = register("context", ContextNbtProvider.CODEC);
 
-    private static LootNbtProviderType register(String p_165629_, MapCodec<? extends NbtProvider> p_335713_) {
-        return Registry.register(BuiltInRegistries.LOOT_NBT_PROVIDER_TYPE, ResourceLocation.withDefaultNamespace(p_165629_), new LootNbtProviderType(p_335713_));
+    private static LootNbtProviderType register(String pName, MapCodec<? extends NbtProvider> pCodec) {
+        return Registry.register(BuiltInRegistries.LOOT_NBT_PROVIDER_TYPE, ResourceLocation.withDefaultNamespace(pName), new LootNbtProviderType(pCodec));
     }
 }

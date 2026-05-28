@@ -117,8 +117,8 @@ public class StructuresBecomeConfiguredFix extends DataFix {
         .put("bastion_remnant", StructuresBecomeConfiguredFix.Conversion.trivial("minecraft:bastion_remnant"))
         .build();
 
-    public StructuresBecomeConfiguredFix(Schema p_207679_) {
-        super(p_207679_, false);
+    public StructuresBecomeConfiguredFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override
@@ -128,20 +128,20 @@ public class StructuresBecomeConfiguredFix extends DataFix {
         return this.writeFixAndRead("StucturesToConfiguredStructures", type, type1, this::fix);
     }
 
-    private Dynamic<?> fix(Dynamic<?> p_207692_) {
-        return p_207692_.update(
+    private Dynamic<?> fix(Dynamic<?> pData) {
+        return pData.update(
             "structures",
-            p_207728_ -> p_207728_.update("starts", p_207734_ -> this.updateStarts(p_207734_, p_207692_))
-                    .update("References", p_207731_ -> this.updateReferences(p_207731_, p_207692_))
+            p_207728_ -> p_207728_.update("starts", p_207734_ -> this.updateStarts(p_207734_, pData))
+                    .update("References", p_207731_ -> this.updateReferences(p_207731_, pData))
         );
     }
 
-    private Dynamic<?> updateStarts(Dynamic<?> p_207700_, Dynamic<?> p_207701_) {
-        Map<? extends Dynamic<?>, ? extends Dynamic<?>> map = p_207700_.getMapValues().result().orElse(Map.of());
+    private Dynamic<?> updateStarts(Dynamic<?> pStarts, Dynamic<?> pData) {
+        Map<? extends Dynamic<?>, ? extends Dynamic<?>> map = pStarts.getMapValues().result().orElse(Map.of());
         HashMap<Dynamic<?>, Dynamic<?>> hashmap = Maps.newHashMap();
         map.forEach((p_326658_, p_326659_) -> {
             if (!p_326659_.get("id").asString("INVALID").equals("INVALID")) {
-                Dynamic<?> dynamic = this.findUpdatedStructureType((Dynamic<?>)p_326658_, p_207701_);
+                Dynamic<?> dynamic = this.findUpdatedStructureType((Dynamic<?>)p_326658_, pData);
                 if (dynamic == null) {
                     LOGGER.warn("Encountered unknown structure in datafixer: " + p_326658_.asString("<missing key>"));
                 } else {
@@ -149,16 +149,16 @@ public class StructuresBecomeConfiguredFix extends DataFix {
                 }
             }
         });
-        return p_207701_.createMap(hashmap);
+        return pData.createMap(hashmap);
     }
 
-    private Dynamic<?> updateReferences(Dynamic<?> p_207717_, Dynamic<?> p_207718_) {
-        Map<? extends Dynamic<?>, ? extends Dynamic<?>> map = p_207717_.getMapValues().result().orElse(Map.of());
+    private Dynamic<?> updateReferences(Dynamic<?> pReferences, Dynamic<?> pData) {
+        Map<? extends Dynamic<?>, ? extends Dynamic<?>> map = pReferences.getMapValues().result().orElse(Map.of());
         HashMap<Dynamic<?>, Dynamic<?>> hashmap = Maps.newHashMap();
         map.forEach(
             (p_326654_, p_326655_) -> {
                 if (p_326655_.asLongStream().count() != 0L) {
-                    Dynamic<?> dynamic = this.findUpdatedStructureType((Dynamic<?>)p_326654_, p_207718_);
+                    Dynamic<?> dynamic = this.findUpdatedStructureType((Dynamic<?>)p_326654_, pData);
                     if (dynamic == null) {
                         LOGGER.warn("Encountered unknown structure in datafixer: " + p_326654_.asString("<missing key>"));
                     } else {
@@ -172,34 +172,34 @@ public class StructuresBecomeConfiguredFix extends DataFix {
                 }
             }
         );
-        return p_207718_.createMap(hashmap);
+        return pData.createMap(hashmap);
     }
 
     @Nullable
-    private Dynamic<?> findUpdatedStructureType(Dynamic<?> p_207725_, Dynamic<?> p_329413_) {
-        String s = p_207725_.asString("UNKNOWN").toLowerCase(Locale.ROOT);
+    private Dynamic<?> findUpdatedStructureType(Dynamic<?> pStructureName, Dynamic<?> pData) {
+        String s = pStructureName.asString("UNKNOWN").toLowerCase(Locale.ROOT);
         StructuresBecomeConfiguredFix.Conversion structuresbecomeconfiguredfix$conversion = CONVERSION_MAP.get(s);
         if (structuresbecomeconfiguredfix$conversion == null) {
             return null;
         } else {
             String s1 = structuresbecomeconfiguredfix$conversion.fallback;
             if (!structuresbecomeconfiguredfix$conversion.biomeMapping().isEmpty()) {
-                Optional<String> optional = this.guessConfiguration(p_329413_, structuresbecomeconfiguredfix$conversion);
+                Optional<String> optional = this.guessConfiguration(pData, structuresbecomeconfiguredfix$conversion);
                 if (optional.isPresent()) {
                     s1 = optional.get();
                 }
             }
 
-            return p_329413_.createString(s1);
+            return pData.createString(s1);
         }
     }
 
-    private Optional<String> guessConfiguration(Dynamic<?> p_207694_, StructuresBecomeConfiguredFix.Conversion p_207695_) {
+    private Optional<String> guessConfiguration(Dynamic<?> pData, StructuresBecomeConfiguredFix.Conversion pConversion) {
         Object2IntArrayMap<String> object2intarraymap = new Object2IntArrayMap<>();
-        p_207694_.get("sections")
+        pData.get("sections")
             .asList(Function.identity())
             .forEach(p_207683_ -> p_207683_.get("biomes").get("palette").asList(Function.identity()).forEach(p_207709_ -> {
-                    String s = p_207695_.biomeMapping().get(p_207709_.asString(""));
+                    String s = pConversion.biomeMapping().get(p_207709_.asString(""));
                     if (s != null) {
                         object2intarraymap.mergeInt(s, 1, Integer::sum);
                     }
@@ -211,18 +211,18 @@ public class StructuresBecomeConfiguredFix extends DataFix {
     }
 
     static record Conversion(Map<String, String> biomeMapping, String fallback) {
-        public static StructuresBecomeConfiguredFix.Conversion trivial(String p_207747_) {
-            return new StructuresBecomeConfiguredFix.Conversion(Map.of(), p_207747_);
+        public static StructuresBecomeConfiguredFix.Conversion trivial(String pFallback) {
+            return new StructuresBecomeConfiguredFix.Conversion(Map.of(), pFallback);
         }
 
-        public static StructuresBecomeConfiguredFix.Conversion biomeMapped(Map<List<String>, String> p_207751_, String p_207752_) {
-            return new StructuresBecomeConfiguredFix.Conversion(unpack(p_207751_), p_207752_);
+        public static StructuresBecomeConfiguredFix.Conversion biomeMapped(Map<List<String>, String> pBiomeMapping, String pFallback) {
+            return new StructuresBecomeConfiguredFix.Conversion(unpack(pBiomeMapping), pFallback);
         }
 
-        private static Map<String, String> unpack(Map<List<String>, String> p_207749_) {
+        private static Map<String, String> unpack(Map<List<String>, String> pMapping) {
             Builder<String, String> builder = ImmutableMap.builder();
 
-            for (Entry<List<String>, String> entry : p_207749_.entrySet()) {
+            for (Entry<List<String>, String> entry : pMapping.entrySet()) {
                 entry.getKey().forEach(p_207745_ -> builder.put(p_207745_, entry.getValue()));
             }
 

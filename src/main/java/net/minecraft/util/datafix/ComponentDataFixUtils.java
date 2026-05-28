@@ -13,35 +13,35 @@ import net.minecraft.util.GsonHelper;
 public class ComponentDataFixUtils {
     private static final String EMPTY_CONTENTS = createTextComponentJson("");
 
-    public static <T> Dynamic<T> createPlainTextComponent(DynamicOps<T> p_312596_, String p_312893_) {
-        String s = createTextComponentJson(p_312893_);
-        return new Dynamic<>(p_312596_, p_312596_.createString(s));
+    public static <T> Dynamic<T> createPlainTextComponent(DynamicOps<T> pOps, String pText) {
+        String s = createTextComponentJson(pText);
+        return new Dynamic<>(pOps, pOps.createString(s));
     }
 
-    public static <T> Dynamic<T> createEmptyComponent(DynamicOps<T> p_310010_) {
-        return new Dynamic<>(p_310010_, p_310010_.createString(EMPTY_CONTENTS));
+    public static <T> Dynamic<T> createEmptyComponent(DynamicOps<T> pOps) {
+        return new Dynamic<>(pOps, pOps.createString(EMPTY_CONTENTS));
     }
 
-    private static String createTextComponentJson(String p_309616_) {
+    private static String createTextComponentJson(String pText) {
         JsonObject jsonobject = new JsonObject();
-        jsonobject.addProperty("text", p_309616_);
+        jsonobject.addProperty("text", pText);
         return GsonHelper.toStableString(jsonobject);
     }
 
-    public static <T> Dynamic<T> createTranslatableComponent(DynamicOps<T> p_310384_, String p_313033_) {
+    public static <T> Dynamic<T> createTranslatableComponent(DynamicOps<T> pOps, String pTranslationKey) {
         JsonObject jsonobject = new JsonObject();
-        jsonobject.addProperty("translate", p_313033_);
-        return new Dynamic<>(p_310384_, p_310384_.createString(GsonHelper.toStableString(jsonobject)));
+        jsonobject.addProperty("translate", pTranslationKey);
+        return new Dynamic<>(pOps, pOps.createString(GsonHelper.toStableString(jsonobject)));
     }
 
-    public static <T> Dynamic<T> wrapLiteralStringAsComponent(Dynamic<T> p_309728_) {
-        return DataFixUtils.orElse(p_309728_.asString().map(p_312090_ -> createPlainTextComponent(p_309728_.getOps(), p_312090_)).result(), p_309728_);
+    public static <T> Dynamic<T> wrapLiteralStringAsComponent(Dynamic<T> pDynamic) {
+        return DataFixUtils.orElse(pDynamic.asString().map(p_312090_ -> createPlainTextComponent(pDynamic.getOps(), p_312090_)).result(), pDynamic);
     }
 
-    public static Dynamic<?> rewriteFromLenient(Dynamic<?> p_328370_) {
-        Optional<String> optional = p_328370_.asString().result();
+    public static Dynamic<?> rewriteFromLenient(Dynamic<?> pDynamic) {
+        Optional<String> optional = pDynamic.asString().result();
         if (optional.isEmpty()) {
-            return p_328370_;
+            return pDynamic;
         } else {
             String s = optional.get();
             if (!s.isEmpty() && !s.equals("null")) {
@@ -51,24 +51,24 @@ public class ComponentDataFixUtils {
                     try {
                         JsonElement jsonelement = JsonParser.parseString(s);
                         if (jsonelement.isJsonPrimitive()) {
-                            return createPlainTextComponent(p_328370_.getOps(), jsonelement.getAsString());
+                            return createPlainTextComponent(pDynamic.getOps(), jsonelement.getAsString());
                         }
 
-                        return p_328370_.createString(GsonHelper.toStableString(jsonelement));
+                        return pDynamic.createString(GsonHelper.toStableString(jsonelement));
                     } catch (JsonParseException jsonparseexception) {
                     }
                 }
 
-                return createPlainTextComponent(p_328370_.getOps(), s);
+                return createPlainTextComponent(pDynamic.getOps(), s);
             } else {
-                return createEmptyComponent(p_328370_.getOps());
+                return createEmptyComponent(pDynamic.getOps());
             }
         }
     }
 
-    public static Optional<String> extractTranslationString(String p_331580_) {
+    public static Optional<String> extractTranslationString(String pData) {
         try {
-            JsonElement jsonelement = JsonParser.parseString(p_331580_);
+            JsonElement jsonelement = JsonParser.parseString(pData);
             if (jsonelement.isJsonObject()) {
                 JsonObject jsonobject = jsonelement.getAsJsonObject();
                 JsonElement jsonelement1 = jsonobject.get("translate");

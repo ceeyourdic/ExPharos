@@ -14,9 +14,11 @@ import net.minecraft.SharedConstants;
 import net.minecraft.SystemReport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -25,15 +27,16 @@ import net.minecraft.util.ModCheck;
 import net.minecraft.util.debugchart.LocalSampleLogger;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.reflect.Reflector;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class IntegratedServer extends MinecraftServer {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final int MIN_SIM_DISTANCE = 2;
@@ -47,21 +50,25 @@ public class IntegratedServer extends MinecraftServer {
     @Nullable
     private UUID uuid;
     private int previousSimulationDistance = 0;
+    private long ticksSaveLast = 0L;
+    public Level difficultyUpdateWorld = null;
+    public BlockPos difficultyUpdatePos = null;
+    public DifficultyInstance difficultyLast = null;
 
     public IntegratedServer(
-        Thread p_235248_,
-        Minecraft p_235249_,
-        LevelStorageSource.LevelStorageAccess p_235250_,
-        PackRepository p_235251_,
-        WorldStem p_235252_,
-        Services p_235253_,
-        ChunkProgressListenerFactory p_235254_
+        Thread pServerThread,
+        Minecraft pMinecraft,
+        LevelStorageSource.LevelStorageAccess pStorageSource,
+        PackRepository pPackRepository,
+        WorldStem pWorldStem,
+        Services pServices,
+        ChunkProgressListenerFactory pProgressListenerFactory
     ) {
-        super(p_235248_, p_235250_, p_235251_, p_235252_, p_235249_.getProxy(), p_235249_.getFixerUpper(), p_235253_, p_235254_);
-        this.setSingleplayerProfile(p_235249_.getGameProfile());
-        this.setDemo(p_235249_.isDemo());
+        super(pServerThread, pStorageSource, pPackRepository, pWorldStem, pMinecraft.getProxy(), pMinecraft.getFixerUpper(), pServices, pProgressListenerFactory);
+        this.setSingleplayerProfile(pMinecraft.getGameProfile());
+        this.setDemo(pMinecraft.isDemo());
         this.setPlayerList(new IntegratedPlayerList(this, this.registries(), this.playerDataStorage));
-        this.minecraft = p_235249_;
+        this.minecraft = pMinecraft;
     }
 
     @Override
@@ -71,11 +78,18 @@ public class IntegratedServer extends MinecraftServer {
         this.setPvpAllowed(true);
         this.setFlightAllowed(true);
         this.initializeKeyPair();
-        this.loadLevel();
-        GameProfile gameprofile = this.getSingleplayerProfile();
-        String s = this.getWorldData().getLevelName();
-        this.setMotd(gameprofile != null ? gameprofile.getName() + " - " + s : s);
-        return true;
+        if (Reflector.ServerLifecycleHooks_handleServerAboutToStart.exists()
+            && !Reflector.callBoolean(Reflector.ServerLifecycleHooks_handleServerAboutToStart, this)) {
+            return false;
+        } else {
+            this.loadLevel();
+            GameProfile gameprofile = this.getSingleplayerProfile();
+            String s = this.getWorldData().getLevelName();
+            this.setMotd(gameprofile != null ? gameprofile.getName() + " - " + s : s);
+            return Reflector.ServerLifecycleHooks_handleServerStarting.exists()
+                ? Reflector.callBoolean(Reflector.ServerLifecycleHooks_handleServerStarting, this)
+                : true;
+        }
     }
 
     @Override
@@ -84,7 +98,8 @@ public class IntegratedServer extends MinecraftServer {
     }
 
     @Override
-    public void tickServer(BooleanSupplier p_120049_) {
+    public void tickServer(BooleanSupplier pHasTimeLeft) {
+        this.onTick();
         boolean flag = this.paused;
         this.paused = Minecraft.getInstance().isPaused();
         ProfilerFiller profilerfiller = Profiler.get();
@@ -103,7 +118,7 @@ public class IntegratedServer extends MinecraftServer {
                 this.forceTimeSynchronization();
             }
 
-            super.tickServer(p_120049_);
+            super.tickServer(pHasTimeLeft);
             int i = Math.max(2, this.minecraft.options.renderDistance().get());
             if (i != this.getPlayerList().getViewDistance()) {
                 LOGGER.info("Changing view distance to {}, from {}", i, this.getPlayerList().getViewDistance());
@@ -165,8 +180,8 @@ public class IntegratedServer extends MinecraftServer {
     }
 
     @Override
-    public void onServerCrash(CrashReport p_120051_) {
-        this.minecraft.delayCrashRaw(p_120051_);
+    public void onServerCrash(CrashReport pReport) {
+        this.minecraft.delayCrashRaw(pReport);
     }
 
     @Override
@@ -183,17 +198,17 @@ public class IntegratedServer extends MinecraftServer {
     }
 
     @Override
-    public boolean publishServer(@Nullable GameType p_120041_, boolean p_120042_, int p_120043_) {
+    public boolean publishServer(@Nullable GameType pGameMode, boolean pCheats, int pPort) {
         try {
             this.minecraft.prepareForMultiplayer();
             this.minecraft.getConnection().prepareKeyPair();
-            this.getConnection().startTcpServerListener(null, p_120043_);
-            LOGGER.info("Started serving on {}", p_120043_);
-            this.publishedPort = p_120043_;
-            this.lanPinger = new LanServerPinger(this.getMotd(), p_120043_ + "");
+            this.getConnection().startTcpServerListener(null, pPort);
+            LOGGER.info("Started serving on {}", pPort);
+            this.publishedPort = pPort;
+            this.lanPinger = new LanServerPinger(this.getMotd(), pPort + "");
             this.lanPinger.start();
-            this.publishedGameType = p_120041_;
-            this.getPlayerList().setAllowCommandsForAllPlayers(p_120042_);
+            this.publishedGameType = pGameMode;
+            this.getPlayerList().setAllowCommandsForAllPlayers(pCheats);
             int i = this.getProfilePermissions(this.minecraft.player.getGameProfile());
             this.minecraft.player.setPermissionLevel(i);
 
@@ -202,7 +217,7 @@ public class IntegratedServer extends MinecraftServer {
             }
 
             return true;
-        } catch (IOException ioexception) {
+        } catch (IOException ioexception1) {
             return false;
         }
     }
@@ -217,15 +232,18 @@ public class IntegratedServer extends MinecraftServer {
     }
 
     @Override
-    public void halt(boolean p_120053_) {
-        this.executeBlocking(() -> {
-            for (ServerPlayer serverplayer : Lists.newArrayList(this.getPlayerList().getPlayers())) {
-                if (!serverplayer.getUUID().equals(this.uuid)) {
-                    this.getPlayerList().remove(serverplayer);
+    public void halt(boolean pWaitForServer) {
+        if (!Reflector.MinecraftForge.exists() || this.isRunning()) {
+            this.executeBlocking(() -> {
+                for (ServerPlayer serverplayer : Lists.newArrayList(this.getPlayerList().getPlayers())) {
+                    if (!serverplayer.getUUID().equals(this.uuid)) {
+                        this.getPlayerList().remove(serverplayer);
+                    }
                 }
-            }
-        });
-        super.halt(p_120053_);
+            });
+        }
+
+        super.halt(pWaitForServer);
         if (this.lanPinger != null) {
             this.lanPinger.interrupt();
             this.lanPinger = null;
@@ -243,8 +261,8 @@ public class IntegratedServer extends MinecraftServer {
     }
 
     @Override
-    public void setDefaultGameType(GameType p_120039_) {
-        super.setDefaultGameType(p_120039_);
+    public void setDefaultGameType(GameType pGameMode) {
+        super.setDefaultGameType(pGameMode);
         this.publishedGameType = null;
     }
 
@@ -263,13 +281,13 @@ public class IntegratedServer extends MinecraftServer {
         return 2;
     }
 
-    public void setUUID(UUID p_120047_) {
-        this.uuid = p_120047_;
+    public void setUUID(UUID pUuid) {
+        this.uuid = pUuid;
     }
 
     @Override
-    public boolean isSingleplayerOwner(GameProfile p_120045_) {
-        return this.getSingleplayerProfile() != null && p_120045_.getName().equalsIgnoreCase(this.getSingleplayerProfile().getName());
+    public boolean isSingleplayerOwner(GameProfile pProfile) {
+        return this.getSingleplayerProfile() != null && pProfile.getName().equalsIgnoreCase(this.getSingleplayerProfile().getName());
     }
 
     @Override
@@ -313,5 +331,80 @@ public class IntegratedServer extends MinecraftServer {
         super.reportChunkSaveFailure(p_345295_, p_345019_, p_328809_);
         this.warnOnLowDiskSpace();
         this.minecraft.execute(() -> SystemToast.onChunkSaveFailure(this.minecraft, p_328809_));
+    }
+
+    private void onTick() {
+        for (ServerLevel serverlevel : this.getAllLevels()) {
+            this.onTick(serverlevel);
+        }
+    }
+
+    private void onTick(ServerLevel ws) {
+        if (!Config.isTimeDefault()) {
+            this.fixWorldTime(ws);
+        }
+
+        if (!Config.isWeatherEnabled()) {
+            this.fixWorldWeather(ws);
+        }
+
+        if (this.difficultyUpdateWorld == ws && this.difficultyUpdatePos != null) {
+            this.difficultyLast = ws.getCurrentDifficultyAt(this.difficultyUpdatePos);
+            this.difficultyUpdateWorld = null;
+            this.difficultyUpdatePos = null;
+        }
+    }
+
+    public DifficultyInstance getDifficultyAsync(Level world, BlockPos blockPos) {
+        this.difficultyUpdateWorld = world;
+        this.difficultyUpdatePos = blockPos;
+        return this.difficultyLast;
+    }
+
+    private void fixWorldWeather(ServerLevel ws) {
+        if (ws.getRainLevel(1.0F) > 0.0F || ws.isThundering()) {
+            ws.setWeatherParameters(6000, 0, false, false);
+        }
+    }
+
+    private void fixWorldTime(ServerLevel ws) {
+        if (this.getDefaultGameType() == GameType.CREATIVE) {
+            long i = ws.getDayTime();
+            long j = i % 24000L;
+            if (Config.isTimeDayOnly()) {
+                if (j <= 1000L) {
+                    ws.setDayTime(i - j + 1001L);
+                }
+
+                if (j >= 11000L) {
+                    ws.setDayTime(i - j + 24001L);
+                }
+            }
+
+            if (Config.isTimeNightOnly()) {
+                if (j <= 14000L) {
+                    ws.setDayTime(i - j + 14001L);
+                }
+
+                if (j >= 22000L) {
+                    ws.setDayTime(i - j + 24000L + 14001L);
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean saveAllChunks(boolean silentIn, boolean flushIn, boolean commandIn) {
+        if (silentIn) {
+            int i = this.getTickCount();
+            int j = this.minecraft.options.ofAutoSaveTicks;
+            if ((long)i < this.ticksSaveLast + (long)j) {
+                return false;
+            }
+
+            this.ticksSaveLast = (long)i;
+        }
+
+        return super.saveAllChunks(silentIn, flushIn, commandIn);
     }
 }

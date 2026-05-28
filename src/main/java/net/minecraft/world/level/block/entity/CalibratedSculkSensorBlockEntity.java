@@ -22,8 +22,8 @@ public class CalibratedSculkSensorBlockEntity extends SculkSensorBlockEntity {
     }
 
     protected class VibrationUser extends SculkSensorBlockEntity.VibrationUser {
-        public VibrationUser(final BlockPos p_281602_) {
-            super(p_281602_);
+        public VibrationUser(final BlockPos pPos) {
+            super(pPos);
         }
 
         @Override
@@ -37,9 +37,9 @@ public class CalibratedSculkSensorBlockEntity extends SculkSensorBlockEntity {
             return i != 0 && VibrationSystem.getGameEventFrequency(p_329832_) != i ? false : super.canReceiveVibration(p_282061_, p_282550_, p_329832_, p_281456_);
         }
 
-        private int getBackSignal(Level p_282204_, BlockPos p_282397_, BlockState p_282240_) {
-            Direction direction = p_282240_.getValue(CalibratedSculkSensorBlock.FACING).getOpposite();
-            return p_282204_.getSignal(p_282397_.relative(direction), direction);
+        private int getBackSignal(Level pLevel, BlockPos pPos, BlockState pState) {
+            Direction direction = pState.getValue(CalibratedSculkSensorBlock.FACING).getOpposite();
+            return pLevel.getSignal(pPos.relative(direction), direction);
         }
     }
 }

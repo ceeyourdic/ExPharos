@@ -10,13 +10,13 @@ public record PoiTicketCountDebugPayload(BlockPos pos, int freeTicketCount) impl
     );
     public static final CustomPacketPayload.Type<PoiTicketCountDebugPayload> TYPE = CustomPacketPayload.createType("debug/poi_ticket_count");
 
-    private PoiTicketCountDebugPayload(FriendlyByteBuf p_299616_) {
-        this(p_299616_.readBlockPos(), p_299616_.readInt());
+    private PoiTicketCountDebugPayload(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readBlockPos(), pBuffer.readInt());
     }
 
-    private void write(FriendlyByteBuf p_299042_) {
-        p_299042_.writeBlockPos(this.pos);
-        p_299042_.writeInt(this.freeTicketCount);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeBlockPos(this.pos);
+        pBuffer.writeInt(this.freeTicketCount);
     }
 
     @Override

@@ -14,14 +14,14 @@ public interface SearchTree<T> {
         return p_344644_ -> List.of();
     }
 
-    static <T> SearchTree<T> plainText(List<T> p_344984_, Function<T, Stream<String>> p_343350_) {
-        if (p_344984_.isEmpty()) {
+    static <T> SearchTree<T> plainText(List<T> pContents, Function<T, Stream<String>> pFilter) {
+        if (pContents.isEmpty()) {
             return empty();
         } else {
             SuffixArray<T> suffixarray = new SuffixArray<>();
 
-            for (T t : p_344984_) {
-                p_343350_.apply(t).forEach(p_342612_ -> suffixarray.add(t, p_342612_.toLowerCase(Locale.ROOT)));
+            for (T t : pContents) {
+                pFilter.apply(t).forEach(p_342612_ -> suffixarray.add(t, p_342612_.toLowerCase(Locale.ROOT)));
             }
 
             suffixarray.generate();
@@ -29,5 +29,5 @@ public interface SearchTree<T> {
         }
     }
 
-    List<T> search(String p_119955_);
+    List<T> search(String pQuery);
 }

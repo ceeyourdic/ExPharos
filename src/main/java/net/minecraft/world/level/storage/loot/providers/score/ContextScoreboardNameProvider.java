@@ -18,8 +18,8 @@ public record ContextScoreboardNameProvider(LootContext.EntityTarget target) imp
     public static final Codec<ContextScoreboardNameProvider> INLINE_CODEC = LootContext.EntityTarget.CODEC
         .xmap(ContextScoreboardNameProvider::new, ContextScoreboardNameProvider::target);
 
-    public static ScoreboardNameProvider forTarget(LootContext.EntityTarget p_165808_) {
-        return new ContextScoreboardNameProvider(p_165808_);
+    public static ScoreboardNameProvider forTarget(LootContext.EntityTarget pTarget) {
+        return new ContextScoreboardNameProvider(pTarget);
     }
 
     @Override

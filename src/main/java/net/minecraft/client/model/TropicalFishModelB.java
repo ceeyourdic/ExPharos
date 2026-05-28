@@ -16,43 +16,43 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class TropicalFishModelB extends EntityModel<TropicalFishRenderState> {
     private final ModelPart tail;
 
-    public TropicalFishModelB(ModelPart p_171036_) {
-        super(p_171036_);
-        this.tail = p_171036_.getChild("tail");
+    public TropicalFishModelB(ModelPart pRoot) {
+        super(pRoot);
+        this.tail = pRoot.getChild("tail");
     }
 
-    public static LayerDefinition createBodyLayer(CubeDeformation p_171038_) {
+    public static LayerDefinition createBodyLayer(CubeDeformation pCubeDeformation) {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
         int i = 19;
         partdefinition.addOrReplaceChild(
             "body",
-            CubeListBuilder.create().texOffs(0, 20).addBox(-1.0F, -3.0F, -3.0F, 2.0F, 6.0F, 6.0F, p_171038_),
+            CubeListBuilder.create().texOffs(0, 20).addBox(-1.0F, -3.0F, -3.0F, 2.0F, 6.0F, 6.0F, pCubeDeformation),
             PartPose.offset(0.0F, 19.0F, 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "tail",
-            CubeListBuilder.create().texOffs(21, 16).addBox(0.0F, -3.0F, 0.0F, 0.0F, 6.0F, 5.0F, p_171038_),
+            CubeListBuilder.create().texOffs(21, 16).addBox(0.0F, -3.0F, 0.0F, 0.0F, 6.0F, 5.0F, pCubeDeformation),
             PartPose.offset(0.0F, 19.0F, 3.0F)
         );
         partdefinition.addOrReplaceChild(
             "right_fin",
-            CubeListBuilder.create().texOffs(2, 16).addBox(-2.0F, 0.0F, 0.0F, 2.0F, 2.0F, 0.0F, p_171038_),
+            CubeListBuilder.create().texOffs(2, 16).addBox(-2.0F, 0.0F, 0.0F, 2.0F, 2.0F, 0.0F, pCubeDeformation),
             PartPose.offsetAndRotation(-1.0F, 20.0F, 0.0F, 0.0F, (float) (Math.PI / 4), 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "left_fin",
-            CubeListBuilder.create().texOffs(2, 12).addBox(0.0F, 0.0F, 0.0F, 2.0F, 2.0F, 0.0F, p_171038_),
+            CubeListBuilder.create().texOffs(2, 12).addBox(0.0F, 0.0F, 0.0F, 2.0F, 2.0F, 0.0F, pCubeDeformation),
             PartPose.offsetAndRotation(1.0F, 20.0F, 0.0F, 0.0F, (float) (-Math.PI / 4), 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "top_fin",
-            CubeListBuilder.create().texOffs(20, 11).addBox(0.0F, -4.0F, 0.0F, 0.0F, 4.0F, 6.0F, p_171038_),
+            CubeListBuilder.create().texOffs(20, 11).addBox(0.0F, -4.0F, 0.0F, 0.0F, 4.0F, 6.0F, pCubeDeformation),
             PartPose.offset(0.0F, 16.0F, -3.0F)
         );
         partdefinition.addOrReplaceChild(
             "bottom_fin",
-            CubeListBuilder.create().texOffs(20, 21).addBox(0.0F, 0.0F, 0.0F, 0.0F, 4.0F, 6.0F, p_171038_),
+            CubeListBuilder.create().texOffs(20, 21).addBox(0.0F, 0.0F, 0.0F, 0.0F, 4.0F, 6.0F, pCubeDeformation),
             PartPose.offset(0.0F, 22.0F, -3.0F)
         );
         return LayerDefinition.create(meshdefinition, 32, 32);

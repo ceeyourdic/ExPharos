@@ -39,53 +39,53 @@ public class SurfaceRules {
     public static final SurfaceRules.ConditionSource ON_CEILING = stoneDepthCheck(0, false, CaveSurface.CEILING);
     public static final SurfaceRules.ConditionSource UNDER_CEILING = stoneDepthCheck(0, true, CaveSurface.CEILING);
 
-    public static SurfaceRules.ConditionSource stoneDepthCheck(int p_202177_, boolean p_202178_, CaveSurface p_202179_) {
-        return new SurfaceRules.StoneDepthCheck(p_202177_, p_202178_, 0, p_202179_);
+    public static SurfaceRules.ConditionSource stoneDepthCheck(int pOffset, boolean pAddSurfaceDepth, CaveSurface pSurfaceType) {
+        return new SurfaceRules.StoneDepthCheck(pOffset, pAddSurfaceDepth, 0, pSurfaceType);
     }
 
-    public static SurfaceRules.ConditionSource stoneDepthCheck(int p_202172_, boolean p_202173_, int p_202174_, CaveSurface p_202175_) {
-        return new SurfaceRules.StoneDepthCheck(p_202172_, p_202173_, p_202174_, p_202175_);
+    public static SurfaceRules.ConditionSource stoneDepthCheck(int pOffset, boolean pAddSurfaceDepth, int pSecondaryDepthRange, CaveSurface pSurfaceType) {
+        return new SurfaceRules.StoneDepthCheck(pOffset, pAddSurfaceDepth, pSecondaryDepthRange, pSurfaceType);
     }
 
-    public static SurfaceRules.ConditionSource not(SurfaceRules.ConditionSource p_189393_) {
-        return new SurfaceRules.NotConditionSource(p_189393_);
+    public static SurfaceRules.ConditionSource not(SurfaceRules.ConditionSource pTarget) {
+        return new SurfaceRules.NotConditionSource(pTarget);
     }
 
-    public static SurfaceRules.ConditionSource yBlockCheck(VerticalAnchor p_189401_, int p_189402_) {
-        return new SurfaceRules.YConditionSource(p_189401_, p_189402_, false);
+    public static SurfaceRules.ConditionSource yBlockCheck(VerticalAnchor pAnchor, int pSurfaceDepthMultiplier) {
+        return new SurfaceRules.YConditionSource(pAnchor, pSurfaceDepthMultiplier, false);
     }
 
-    public static SurfaceRules.ConditionSource yStartCheck(VerticalAnchor p_189423_, int p_189424_) {
-        return new SurfaceRules.YConditionSource(p_189423_, p_189424_, true);
+    public static SurfaceRules.ConditionSource yStartCheck(VerticalAnchor pAnchor, int pSurfaceDepthMultiplier) {
+        return new SurfaceRules.YConditionSource(pAnchor, pSurfaceDepthMultiplier, true);
     }
 
-    public static SurfaceRules.ConditionSource waterBlockCheck(int p_189383_, int p_189384_) {
-        return new SurfaceRules.WaterConditionSource(p_189383_, p_189384_, false);
+    public static SurfaceRules.ConditionSource waterBlockCheck(int pOffset, int pSurfaceDepthMultiplier) {
+        return new SurfaceRules.WaterConditionSource(pOffset, pSurfaceDepthMultiplier, false);
     }
 
-    public static SurfaceRules.ConditionSource waterStartCheck(int p_189420_, int p_189421_) {
-        return new SurfaceRules.WaterConditionSource(p_189420_, p_189421_, true);
+    public static SurfaceRules.ConditionSource waterStartCheck(int pOffset, int pSurfaceDepthMultiplier) {
+        return new SurfaceRules.WaterConditionSource(pOffset, pSurfaceDepthMultiplier, true);
     }
 
     @SafeVarargs
-    public static SurfaceRules.ConditionSource isBiome(ResourceKey<Biome>... p_189417_) {
-        return isBiome(List.of(p_189417_));
+    public static SurfaceRules.ConditionSource isBiome(ResourceKey<Biome>... pBiomes) {
+        return isBiome(List.of(pBiomes));
     }
 
-    private static SurfaceRules.BiomeConditionSource isBiome(List<ResourceKey<Biome>> p_189408_) {
-        return new SurfaceRules.BiomeConditionSource(p_189408_);
+    private static SurfaceRules.BiomeConditionSource isBiome(List<ResourceKey<Biome>> pBiomes) {
+        return new SurfaceRules.BiomeConditionSource(pBiomes);
     }
 
-    public static SurfaceRules.ConditionSource noiseCondition(ResourceKey<NormalNoise.NoiseParameters> p_189410_, double p_189411_) {
-        return noiseCondition(p_189410_, p_189411_, Double.MAX_VALUE);
+    public static SurfaceRules.ConditionSource noiseCondition(ResourceKey<NormalNoise.NoiseParameters> pNoise, double pMinThreshold) {
+        return noiseCondition(pNoise, pMinThreshold, Double.MAX_VALUE);
     }
 
-    public static SurfaceRules.ConditionSource noiseCondition(ResourceKey<NormalNoise.NoiseParameters> p_189413_, double p_189414_, double p_189415_) {
-        return new SurfaceRules.NoiseThresholdConditionSource(p_189413_, p_189414_, p_189415_);
+    public static SurfaceRules.ConditionSource noiseCondition(ResourceKey<NormalNoise.NoiseParameters> pNoise, double pMinThreshold, double pMaxThreshold) {
+        return new SurfaceRules.NoiseThresholdConditionSource(pNoise, pMinThreshold, pMaxThreshold);
     }
 
-    public static SurfaceRules.ConditionSource verticalGradient(String p_189404_, VerticalAnchor p_189405_, VerticalAnchor p_189406_) {
-        return new SurfaceRules.VerticalGradientConditionSource(ResourceLocation.parse(p_189404_), p_189405_, p_189406_);
+    public static SurfaceRules.ConditionSource verticalGradient(String pRandomName, VerticalAnchor pTrueAtAndBelow, VerticalAnchor pFalseAtAndAbove) {
+        return new SurfaceRules.VerticalGradientConditionSource(ResourceLocation.parse(pRandomName), pTrueAtAndBelow, pFalseAtAndAbove);
     }
 
     public static SurfaceRules.ConditionSource steep() {
@@ -104,28 +104,28 @@ public class SurfaceRules {
         return SurfaceRules.Temperature.INSTANCE;
     }
 
-    public static SurfaceRules.RuleSource ifTrue(SurfaceRules.ConditionSource p_189395_, SurfaceRules.RuleSource p_189396_) {
-        return new SurfaceRules.TestRuleSource(p_189395_, p_189396_);
+    public static SurfaceRules.RuleSource ifTrue(SurfaceRules.ConditionSource pIfTrue, SurfaceRules.RuleSource pThenRun) {
+        return new SurfaceRules.TestRuleSource(pIfTrue, pThenRun);
     }
 
-    public static SurfaceRules.RuleSource sequence(SurfaceRules.RuleSource... p_198273_) {
-        if (p_198273_.length == 0) {
+    public static SurfaceRules.RuleSource sequence(SurfaceRules.RuleSource... pRules) {
+        if (pRules.length == 0) {
             throw new IllegalArgumentException("Need at least 1 rule for a sequence");
         } else {
-            return new SurfaceRules.SequenceRuleSource(Arrays.asList(p_198273_));
+            return new SurfaceRules.SequenceRuleSource(Arrays.asList(pRules));
         }
     }
 
-    public static SurfaceRules.RuleSource state(BlockState p_189391_) {
-        return new SurfaceRules.BlockRuleSource(p_189391_);
+    public static SurfaceRules.RuleSource state(BlockState pResultState) {
+        return new SurfaceRules.BlockRuleSource(pResultState);
     }
 
     public static SurfaceRules.RuleSource bandlands() {
         return SurfaceRules.Bandlands.INSTANCE;
     }
 
-    static <A> MapCodec<? extends A> register(Registry<MapCodec<? extends A>> p_224604_, String p_224605_, KeyDispatchDataCodec<? extends A> p_224606_) {
-        return Registry.register(p_224604_, p_224605_, p_224606_.codec());
+    static <A> MapCodec<? extends A> register(Registry<MapCodec<? extends A>> pRegistry, String pName, KeyDispatchDataCodec<? extends A> pCodec) {
+        return Registry.register(pRegistry, pName, pCodec.codec());
     }
 
     static enum AbovePreliminarySurface implements SurfaceRules.ConditionSource {
@@ -138,8 +138,8 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.Condition apply(SurfaceRules.Context p_189437_) {
-            return p_189437_.abovePreliminarySurface;
+        public SurfaceRules.Condition apply(SurfaceRules.Context pContext) {
+            return pContext.abovePreliminarySurface;
         }
     }
 
@@ -153,8 +153,8 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.SurfaceRule apply(SurfaceRules.Context p_189482_) {
-            return p_189482_.system::getBand;
+        public SurfaceRules.SurfaceRule apply(SurfaceRules.Context pContext) {
+            return pContext.system::getBand;
         }
     }
 
@@ -165,9 +165,9 @@ public class SurfaceRules {
         private final List<ResourceKey<Biome>> biomes;
         final Predicate<ResourceKey<Biome>> biomeNameTest;
 
-        BiomeConditionSource(List<ResourceKey<Biome>> p_189493_) {
-            this.biomes = p_189493_;
-            this.biomeNameTest = Set.copyOf(p_189493_)::contains;
+        BiomeConditionSource(List<ResourceKey<Biome>> pBiomes) {
+            this.biomes = pBiomes;
+            this.biomeNameTest = Set.copyOf(pBiomes)::contains;
         }
 
         @Override
@@ -175,10 +175,10 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.Condition apply(final SurfaceRules.Context p_189496_) {
+        public SurfaceRules.Condition apply(final SurfaceRules.Context pContext) {
             class BiomeCondition extends SurfaceRules.LazyYCondition {
                 BiomeCondition() {
-                    super(p_189496_);
+                    super(pContext);
                 }
 
                 @Override
@@ -191,11 +191,11 @@ public class SurfaceRules {
         }
 
         @Override
-        public boolean equals(Object p_209694_) {
-            if (this == p_209694_) {
+        public boolean equals(Object pOther) {
+            if (this == pOther) {
                 return true;
             } else {
-                return p_209694_ instanceof SurfaceRules.BiomeConditionSource surfacerules$biomeconditionsource
+                return pOther instanceof SurfaceRules.BiomeConditionSource surfacerules$biomeconditionsource
                     ? this.biomes.equals(surfacerules$biomeconditionsource.biomes)
                     : false;
             }
@@ -217,8 +217,8 @@ public class SurfaceRules {
             BlockState.CODEC.xmap(SurfaceRules.BlockRuleSource::new, SurfaceRules.BlockRuleSource::resultState).fieldOf("result_state")
         );
 
-        BlockRuleSource(BlockState p_189517_) {
-            this(p_189517_, new SurfaceRules.StateRule(p_189517_));
+        BlockRuleSource(BlockState pResultState) {
+            this(pResultState, new SurfaceRules.StateRule(pResultState));
         }
 
         @Override
@@ -226,7 +226,7 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.SurfaceRule apply(SurfaceRules.Context p_189523_) {
+        public SurfaceRules.SurfaceRule apply(SurfaceRules.Context pContext) {
             return this.rule;
         }
     }
@@ -240,18 +240,18 @@ public class SurfaceRules {
             .byNameCodec()
             .dispatch(p_327454_ -> p_327454_.codec().codec(), Function.identity());
 
-        static MapCodec<? extends SurfaceRules.ConditionSource> bootstrap(Registry<MapCodec<? extends SurfaceRules.ConditionSource>> p_204625_) {
-            SurfaceRules.register(p_204625_, "biome", SurfaceRules.BiomeConditionSource.CODEC);
-            SurfaceRules.register(p_204625_, "noise_threshold", SurfaceRules.NoiseThresholdConditionSource.CODEC);
-            SurfaceRules.register(p_204625_, "vertical_gradient", SurfaceRules.VerticalGradientConditionSource.CODEC);
-            SurfaceRules.register(p_204625_, "y_above", SurfaceRules.YConditionSource.CODEC);
-            SurfaceRules.register(p_204625_, "water", SurfaceRules.WaterConditionSource.CODEC);
-            SurfaceRules.register(p_204625_, "temperature", SurfaceRules.Temperature.CODEC);
-            SurfaceRules.register(p_204625_, "steep", SurfaceRules.Steep.CODEC);
-            SurfaceRules.register(p_204625_, "not", SurfaceRules.NotConditionSource.CODEC);
-            SurfaceRules.register(p_204625_, "hole", SurfaceRules.Hole.CODEC);
-            SurfaceRules.register(p_204625_, "above_preliminary_surface", SurfaceRules.AbovePreliminarySurface.CODEC);
-            return SurfaceRules.register(p_204625_, "stone_depth", SurfaceRules.StoneDepthCheck.CODEC);
+        static MapCodec<? extends SurfaceRules.ConditionSource> bootstrap(Registry<MapCodec<? extends SurfaceRules.ConditionSource>> pRegistry) {
+            SurfaceRules.register(pRegistry, "biome", SurfaceRules.BiomeConditionSource.CODEC);
+            SurfaceRules.register(pRegistry, "noise_threshold", SurfaceRules.NoiseThresholdConditionSource.CODEC);
+            SurfaceRules.register(pRegistry, "vertical_gradient", SurfaceRules.VerticalGradientConditionSource.CODEC);
+            SurfaceRules.register(pRegistry, "y_above", SurfaceRules.YConditionSource.CODEC);
+            SurfaceRules.register(pRegistry, "water", SurfaceRules.WaterConditionSource.CODEC);
+            SurfaceRules.register(pRegistry, "temperature", SurfaceRules.Temperature.CODEC);
+            SurfaceRules.register(pRegistry, "steep", SurfaceRules.Steep.CODEC);
+            SurfaceRules.register(pRegistry, "not", SurfaceRules.NotConditionSource.CODEC);
+            SurfaceRules.register(pRegistry, "hole", SurfaceRules.Hole.CODEC);
+            SurfaceRules.register(pRegistry, "above_preliminary_surface", SurfaceRules.AbovePreliminarySurface.CODEC);
+            return SurfaceRules.register(pRegistry, "stone_depth", SurfaceRules.StoneDepthCheck.CODEC);
         }
 
         KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec();
@@ -291,37 +291,37 @@ public class SurfaceRules {
         int stoneDepthAbove;
 
         protected Context(
-            SurfaceSystem p_224616_,
-            RandomState p_224617_,
-            ChunkAccess p_224618_,
-            NoiseChunk p_224619_,
-            Function<BlockPos, Holder<Biome>> p_224620_,
-            Registry<Biome> p_224621_,
-            WorldGenerationContext p_224622_
+            SurfaceSystem pSystem,
+            RandomState pRandomState,
+            ChunkAccess pChunk,
+            NoiseChunk pNoiseChunk,
+            Function<BlockPos, Holder<Biome>> pBiomeGetter,
+            Registry<Biome> pBiomeRegistry,
+            WorldGenerationContext pContext
         ) {
-            this.system = p_224616_;
-            this.randomState = p_224617_;
-            this.chunk = p_224618_;
-            this.noiseChunk = p_224619_;
-            this.biomeGetter = p_224620_;
-            this.context = p_224622_;
+            this.system = pSystem;
+            this.randomState = pRandomState;
+            this.chunk = pChunk;
+            this.noiseChunk = pNoiseChunk;
+            this.biomeGetter = pBiomeGetter;
+            this.context = pContext;
         }
 
-        protected void updateXZ(int p_189570_, int p_189571_) {
+        protected void updateXZ(int pBlockX, int pBlockZ) {
             this.lastUpdateXZ++;
             this.lastUpdateY++;
-            this.blockX = p_189570_;
-            this.blockZ = p_189571_;
-            this.surfaceDepth = this.system.getSurfaceDepth(p_189570_, p_189571_);
+            this.blockX = pBlockX;
+            this.blockZ = pBlockZ;
+            this.surfaceDepth = this.system.getSurfaceDepth(pBlockX, pBlockZ);
         }
 
-        protected void updateY(int p_189577_, int p_189578_, int p_189579_, int p_189580_, int p_189581_, int p_189582_) {
+        protected void updateY(int pStoneDepthAbove, int pStoneDepthBelow, int pWaterHeight, int pBlockX, int pBlockY, int pBlockZ) {
             this.lastUpdateY++;
-            this.biome = Suppliers.memoize(() -> this.biomeGetter.apply(this.pos.set(p_189580_, p_189581_, p_189582_)));
-            this.blockY = p_189581_;
-            this.waterHeight = p_189579_;
-            this.stoneDepthBelow = p_189578_;
-            this.stoneDepthAbove = p_189577_;
+            this.biome = Suppliers.memoize(() -> this.biomeGetter.apply(this.pos.set(pBlockX, pBlockY, pBlockZ)));
+            this.blockY = pBlockY;
+            this.waterHeight = pWaterHeight;
+            this.stoneDepthBelow = pStoneDepthBelow;
+            this.stoneDepthAbove = pStoneDepthAbove;
         }
 
         protected double getSurfaceSecondary() {
@@ -337,12 +337,12 @@ public class SurfaceRules {
             return this.system.getSeaLevel();
         }
 
-        private static int blockCoordToSurfaceCell(int p_198281_) {
-            return p_198281_ >> 4;
+        private static int blockCoordToSurfaceCell(int pBlockCoord) {
+            return pBlockCoord >> 4;
         }
 
-        private static int surfaceCellToBlockCoord(int p_198283_) {
-            return p_198283_ << 4;
+        private static int surfaceCellToBlockCoord(int pSurfaceCell) {
+            return pSurfaceCell << 4;
         }
 
         protected int getMinSurfaceLevel() {
@@ -448,8 +448,8 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.Condition apply(SurfaceRules.Context p_189608_) {
-            return p_189608_.hole;
+        public SurfaceRules.Condition apply(SurfaceRules.Context pContext) {
+            return pContext.hole;
         }
     }
 
@@ -459,8 +459,8 @@ public class SurfaceRules {
         @Nullable
         Boolean result;
 
-        protected LazyCondition(SurfaceRules.Context p_189619_) {
-            this.context = p_189619_;
+        protected LazyCondition(SurfaceRules.Context pContext) {
+            this.context = pContext;
             this.lastUpdate = this.getContextLastUpdate() - 1L;
         }
 
@@ -525,12 +525,12 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.Condition apply(final SurfaceRules.Context p_189640_) {
-            final NormalNoise normalnoise = p_189640_.randomState.getOrCreateNoise(this.noise);
+        public SurfaceRules.Condition apply(final SurfaceRules.Context pContext) {
+            final NormalNoise normalnoise = pContext.randomState.getOrCreateNoise(this.noise);
 
             class NoiseThresholdCondition extends SurfaceRules.LazyXZCondition {
                 NoiseThresholdCondition() {
-                    super(p_189640_);
+                    super(pContext);
                 }
 
                 @Override
@@ -561,8 +561,8 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.Condition apply(SurfaceRules.Context p_189674_) {
-            return new SurfaceRules.NotCondition(this.target.apply(p_189674_));
+        public SurfaceRules.Condition apply(SurfaceRules.Context pContext) {
+            return new SurfaceRules.NotCondition(this.target.apply(pContext));
         }
     }
 
@@ -571,11 +571,11 @@ public class SurfaceRules {
             .byNameCodec()
             .dispatch(p_327455_ -> p_327455_.codec().codec(), Function.identity());
 
-        static MapCodec<? extends SurfaceRules.RuleSource> bootstrap(Registry<MapCodec<? extends SurfaceRules.RuleSource>> p_204631_) {
-            SurfaceRules.register(p_204631_, "bandlands", SurfaceRules.Bandlands.CODEC);
-            SurfaceRules.register(p_204631_, "block", SurfaceRules.BlockRuleSource.CODEC);
-            SurfaceRules.register(p_204631_, "sequence", SurfaceRules.SequenceRuleSource.CODEC);
-            return SurfaceRules.register(p_204631_, "condition", SurfaceRules.TestRuleSource.CODEC);
+        static MapCodec<? extends SurfaceRules.RuleSource> bootstrap(Registry<MapCodec<? extends SurfaceRules.RuleSource>> pRegistry) {
+            SurfaceRules.register(pRegistry, "bandlands", SurfaceRules.Bandlands.CODEC);
+            SurfaceRules.register(pRegistry, "block", SurfaceRules.BlockRuleSource.CODEC);
+            SurfaceRules.register(pRegistry, "sequence", SurfaceRules.SequenceRuleSource.CODEC);
+            return SurfaceRules.register(pRegistry, "condition", SurfaceRules.TestRuleSource.CODEC);
         }
 
         KeyDispatchDataCodec<? extends SurfaceRules.RuleSource> codec();
@@ -609,14 +609,14 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.SurfaceRule apply(SurfaceRules.Context p_189704_) {
+        public SurfaceRules.SurfaceRule apply(SurfaceRules.Context pContext) {
             if (this.sequence.size() == 1) {
-                return this.sequence.get(0).apply(p_189704_);
+                return this.sequence.get(0).apply(pContext);
             } else {
                 Builder<SurfaceRules.SurfaceRule> builder = ImmutableList.builder();
 
                 for (SurfaceRules.RuleSource surfacerules$rulesource : this.sequence) {
-                    builder.add(surfacerules$rulesource.apply(p_189704_));
+                    builder.add(surfacerules$rulesource.apply(pContext));
                 }
 
                 return new SurfaceRules.SequenceRule(builder.build());
@@ -641,8 +641,8 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.Condition apply(SurfaceRules.Context p_189733_) {
-            return p_189733_.steep;
+        public SurfaceRules.Condition apply(SurfaceRules.Context pContext) {
+            return pContext.steep;
         }
     }
 
@@ -664,12 +664,12 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.Condition apply(final SurfaceRules.Context p_189755_) {
+        public SurfaceRules.Condition apply(final SurfaceRules.Context pContext) {
             final boolean flag = this.surfaceType == CaveSurface.CEILING;
 
             class StoneDepthCondition extends SurfaceRules.LazyYCondition {
                 StoneDepthCondition() {
-                    super(p_189755_);
+                    super(pContext);
                 }
 
                 @Override
@@ -689,7 +689,7 @@ public class SurfaceRules {
 
     protected interface SurfaceRule {
         @Nullable
-        BlockState tryApply(int p_189774_, int p_189775_, int p_189776_);
+        BlockState tryApply(int pX, int pY, int pZ);
     }
 
     static enum Temperature implements SurfaceRules.ConditionSource {
@@ -702,8 +702,8 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.Condition apply(SurfaceRules.Context p_189786_) {
-            return p_189786_.temperature;
+        public SurfaceRules.Condition apply(SurfaceRules.Context pContext) {
+            return pContext.temperature;
         }
     }
 
@@ -731,8 +731,8 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.SurfaceRule apply(SurfaceRules.Context p_189819_) {
-            return new SurfaceRules.TestRule(this.ifTrue.apply(p_189819_), this.thenRun.apply(p_189819_));
+        public SurfaceRules.SurfaceRule apply(SurfaceRules.Context pContext) {
+            return new SurfaceRules.TestRule(this.ifTrue.apply(pContext), this.thenRun.apply(pContext));
         }
     }
 
@@ -754,14 +754,14 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.Condition apply(final SurfaceRules.Context p_189841_) {
-            final int i = this.trueAtAndBelow().resolveY(p_189841_.context);
-            final int j = this.falseAtAndAbove().resolveY(p_189841_.context);
-            final PositionalRandomFactory positionalrandomfactory = p_189841_.randomState.getOrCreateRandomFactory(this.randomName());
+        public SurfaceRules.Condition apply(final SurfaceRules.Context pContext) {
+            final int i = this.trueAtAndBelow().resolveY(pContext.context);
+            final int j = this.falseAtAndAbove().resolveY(pContext.context);
+            final PositionalRandomFactory positionalrandomfactory = pContext.randomState.getOrCreateRandomFactory(this.randomName());
 
             class VerticalGradientCondition extends SurfaceRules.LazyYCondition {
                 VerticalGradientCondition() {
-                    super(p_189841_);
+                    super(pContext);
                 }
 
                 @Override
@@ -800,10 +800,10 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.Condition apply(final SurfaceRules.Context p_189876_) {
+        public SurfaceRules.Condition apply(final SurfaceRules.Context pContext) {
             class WaterCondition extends SurfaceRules.LazyYCondition {
                 WaterCondition() {
-                    super(p_189876_);
+                    super(pContext);
                 }
 
                 @Override
@@ -835,10 +835,10 @@ public class SurfaceRules {
             return CODEC;
         }
 
-        public SurfaceRules.Condition apply(final SurfaceRules.Context p_189457_) {
+        public SurfaceRules.Condition apply(final SurfaceRules.Context pContext) {
             class YCondition extends SurfaceRules.LazyYCondition {
                 YCondition() {
-                    super(p_189457_);
+                    super(pContext);
                 }
 
                 @Override

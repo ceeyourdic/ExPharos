@@ -12,24 +12,27 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.shaders.Shaders;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
-@OnlyIn(Dist.CLIENT)
 public class ChunkCullingDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
     public static final Direction[] DIRECTIONS = Direction.values();
     private final Minecraft minecraft;
 
-    public ChunkCullingDebugRenderer(Minecraft p_365943_) {
-        this.minecraft = p_365943_;
+    public ChunkCullingDebugRenderer(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
     @Override
     public void render(PoseStack p_360717_, MultiBufferSource p_369170_, double p_361626_, double p_369161_, double p_367114_) {
         LevelRenderer levelrenderer = this.minecraft.levelRenderer;
         if (this.minecraft.sectionPath || this.minecraft.sectionVisibility) {
+            if (Config.isShaders()) {
+                Shaders.pushUseProgram(Shaders.ProgramBasic);
+            }
+
             SectionOcclusionGraph sectionocclusiongraph = levelrenderer.getSectionOcclusionGraph();
 
             for (SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection : levelrenderer.getVisibleSections()) {
@@ -42,6 +45,10 @@ public class ChunkCullingDebugRenderer implements DebugRenderer.SimpleDebugRende
                     );
                     Matrix4f matrix4f = p_360717_.last().pose();
                     if (this.minecraft.sectionPath) {
+                        if (Config.isShaders()) {
+                            Shaders.beginLines();
+                        }
+
                         VertexConsumer vertexconsumer = p_369170_.getBuffer(RenderType.lines());
                         int i = sectionocclusiongraph$node.step == 0 ? 0 : Mth.hsvToRgb((float)sectionocclusiongraph$node.step / 50.0F, 0.9F, 0.9F);
                         int j = i >> 16 & 0xFF;
@@ -64,9 +71,17 @@ public class ChunkCullingDebugRenderer implements DebugRenderer.SimpleDebugRende
                                     .setNormal((float)direction.getStepX(), (float)direction.getStepY(), (float)direction.getStepZ());
                             }
                         }
+
+                        if (Config.isShaders()) {
+                            Shaders.endLines();
+                        }
                     }
 
                     if (this.minecraft.sectionVisibility && sectionrenderdispatcher$rendersection.getCompiled().hasRenderableLayers()) {
+                        if (Config.isShaders()) {
+                            Shaders.beginLines();
+                        }
+
                         VertexConsumer vertexconsumer3 = p_369170_.getBuffer(RenderType.lines());
                         int j1 = 0;
 
@@ -93,6 +108,10 @@ public class ChunkCullingDebugRenderer implements DebugRenderer.SimpleDebugRende
                                         .setNormal((float)direction1.getStepX(), (float)direction1.getStepY(), (float)direction1.getStepZ());
                                 }
                             }
+                        }
+
+                        if (Config.isShaders()) {
+                            Shaders.endLines();
                         }
 
                         if (j1 > 0) {
@@ -129,10 +148,18 @@ public class ChunkCullingDebugRenderer implements DebugRenderer.SimpleDebugRende
                     p_360717_.popPose();
                 }
             }
+
+            if (Config.isShaders()) {
+                Shaders.popProgram();
+            }
         }
 
         Frustum frustum = levelrenderer.getCapturedFrustum();
         if (frustum != null) {
+            if (Config.isShaders()) {
+                Shaders.pushUseProgram(Shaders.ProgramBasic);
+            }
+
             p_360717_.pushPose();
             p_360717_.translate((float)(frustum.getCamX() - p_361626_), (float)(frustum.getCamY() - p_369161_), (float)(frustum.getCamZ() - p_367114_));
             Matrix4f matrix4f1 = p_360717_.last().pose();
@@ -144,6 +171,10 @@ public class ChunkCullingDebugRenderer implements DebugRenderer.SimpleDebugRende
             this.addFrustumQuad(vertexconsumer1, matrix4f1, avector4f, 2, 3, 7, 6, 0, 0, 1);
             this.addFrustumQuad(vertexconsumer1, matrix4f1, avector4f, 0, 4, 7, 3, 0, 1, 0);
             this.addFrustumQuad(vertexconsumer1, matrix4f1, avector4f, 1, 5, 6, 2, 1, 0, 1);
+            if (Config.isShaders()) {
+                Shaders.beginLines();
+            }
+
             VertexConsumer vertexconsumer2 = p_369170_.getBuffer(RenderType.lines());
             this.addFrustumVertex(vertexconsumer2, matrix4f1, avector4f[0]);
             this.addFrustumVertex(vertexconsumer2, matrix4f1, avector4f[1]);
@@ -169,34 +200,41 @@ public class ChunkCullingDebugRenderer implements DebugRenderer.SimpleDebugRende
             this.addFrustumVertex(vertexconsumer2, matrix4f1, avector4f[6]);
             this.addFrustumVertex(vertexconsumer2, matrix4f1, avector4f[3]);
             this.addFrustumVertex(vertexconsumer2, matrix4f1, avector4f[7]);
+            if (Config.isShaders()) {
+                Shaders.endLines();
+            }
+
             p_360717_.popPose();
+            if (Config.isShaders()) {
+                Shaders.popProgram();
+            }
         }
     }
 
-    private void addFrustumVertex(VertexConsumer p_361872_, Matrix4f p_369368_, Vector4f p_365578_) {
-        p_361872_.addVertex(p_369368_, p_365578_.x(), p_365578_.y(), p_365578_.z()).setColor(-16777216).setNormal(0.0F, 0.0F, -1.0F);
+    private void addFrustumVertex(VertexConsumer pBuffer, Matrix4f pPose, Vector4f pPosition) {
+        pBuffer.addVertex(pPose, pPosition.x(), pPosition.y(), pPosition.z()).setColor(-16777216).setNormal(0.0F, 0.0F, -1.0F);
     }
 
     private void addFrustumQuad(
-        VertexConsumer p_365841_,
-        Matrix4f p_367573_,
-        Vector4f[] p_369613_,
-        int p_360822_,
-        int p_362980_,
-        int p_367860_,
-        int p_360867_,
-        int p_367084_,
-        int p_367738_,
-        int p_367810_
+        VertexConsumer pBuffer,
+        Matrix4f pPose,
+        Vector4f[] pFrustumPoints,
+        int pPoint1,
+        int pPoint2,
+        int pPoint3,
+        int pPoint4,
+        int pRed,
+        int pGreen,
+        int pBlue
     ) {
         float f = 0.25F;
-        p_365841_.addVertex(p_367573_, p_369613_[p_360822_].x(), p_369613_[p_360822_].y(), p_369613_[p_360822_].z())
-            .setColor((float)p_367084_, (float)p_367738_, (float)p_367810_, 0.25F);
-        p_365841_.addVertex(p_367573_, p_369613_[p_362980_].x(), p_369613_[p_362980_].y(), p_369613_[p_362980_].z())
-            .setColor((float)p_367084_, (float)p_367738_, (float)p_367810_, 0.25F);
-        p_365841_.addVertex(p_367573_, p_369613_[p_367860_].x(), p_369613_[p_367860_].y(), p_369613_[p_367860_].z())
-            .setColor((float)p_367084_, (float)p_367738_, (float)p_367810_, 0.25F);
-        p_365841_.addVertex(p_367573_, p_369613_[p_360867_].x(), p_369613_[p_360867_].y(), p_369613_[p_360867_].z())
-            .setColor((float)p_367084_, (float)p_367738_, (float)p_367810_, 0.25F);
+        pBuffer.addVertex(pPose, pFrustumPoints[pPoint1].x(), pFrustumPoints[pPoint1].y(), pFrustumPoints[pPoint1].z())
+            .setColor((float)pRed, (float)pGreen, (float)pBlue, 0.25F);
+        pBuffer.addVertex(pPose, pFrustumPoints[pPoint2].x(), pFrustumPoints[pPoint2].y(), pFrustumPoints[pPoint2].z())
+            .setColor((float)pRed, (float)pGreen, (float)pBlue, 0.25F);
+        pBuffer.addVertex(pPose, pFrustumPoints[pPoint3].x(), pFrustumPoints[pPoint3].y(), pFrustumPoints[pPoint3].z())
+            .setColor((float)pRed, (float)pGreen, (float)pBlue, 0.25F);
+        pBuffer.addVertex(pPose, pFrustumPoints[pPoint4].x(), pFrustumPoints[pPoint4].y(), pFrustumPoints[pPoint4].z())
+            .setColor((float)pRed, (float)pGreen, (float)pBlue, 0.25F);
     }
 }

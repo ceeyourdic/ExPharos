@@ -42,16 +42,16 @@ public class TraderLlama extends Llama {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_30950_) {
-        super.addAdditionalSaveData(p_30950_);
-        p_30950_.putInt("DespawnDelay", this.despawnDelay);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("DespawnDelay", this.despawnDelay);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_30948_) {
-        super.readAdditionalSaveData(p_30948_);
-        if (p_30948_.contains("DespawnDelay", 99)) {
-            this.despawnDelay = p_30948_.getInt("DespawnDelay");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("DespawnDelay", 99)) {
+            this.despawnDelay = pCompound.getInt("DespawnDelay");
         }
     }
 
@@ -65,15 +65,15 @@ public class TraderLlama extends Llama {
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, AbstractIllager.class, true));
     }
 
-    public void setDespawnDelay(int p_149556_) {
-        this.despawnDelay = p_149556_;
+    public void setDespawnDelay(int pDespawnDelay) {
+        this.despawnDelay = pDespawnDelay;
     }
 
     @Override
-    protected void doPlayerRide(Player p_30958_) {
+    protected void doPlayerRide(Player pPlayer) {
         Entity entity = this.getLeashHolder();
         if (!(entity instanceof WanderingTrader)) {
-            super.doPlayerRide(p_30958_);
+            super.doPlayerRide(pPlayer);
         }
     }
 
@@ -126,9 +126,9 @@ public class TraderLlama extends Llama {
         private LivingEntity ownerLastHurtBy;
         private int timestamp;
 
-        public TraderLlamaDefendWanderingTraderGoal(Llama p_149558_) {
-            super(p_149558_, false);
-            this.llama = p_149558_;
+        public TraderLlamaDefendWanderingTraderGoal(Llama pLlama) {
+            super(pLlama, false);
+            this.llama = pLlama;
             this.setFlags(EnumSet.of(Goal.Flag.TARGET));
         }
 

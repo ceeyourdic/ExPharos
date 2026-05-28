@@ -13,8 +13,8 @@ public record ModelResourceLocation(ResourceLocation id, String variant) {
         this.variant = variant;
     }
 
-    private static String lowercaseVariant(String p_248567_) {
-        return p_248567_.toLowerCase(Locale.ROOT);
+    private static String lowercaseVariant(String pVariant) {
+        return pVariant.toLowerCase(Locale.ROOT);
     }
 
     public String getVariant() {

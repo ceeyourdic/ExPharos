@@ -19,8 +19,8 @@ import net.minecraft.world.entity.Entity;
 public class DamageCommand {
     private static final SimpleCommandExceptionType ERROR_INVULNERABLE = new SimpleCommandExceptionType(Component.translatable("commands.damage.invulnerable"));
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_270226_, CommandBuildContext p_270136_) {
-        p_270226_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher, CommandBuildContext pContext) {
+        pDispatcher.register(
             Commands.literal("damage")
                 .requires(p_270872_ -> p_270872_.hasPermission(2))
                 .then(
@@ -36,7 +36,7 @@ public class DamageCommand {
                                         )
                                 )
                                 .then(
-                                    Commands.argument("damageType", ResourceArgument.resource(p_270136_, Registries.DAMAGE_TYPE))
+                                    Commands.argument("damageType", ResourceArgument.resource(pContext, Registries.DAMAGE_TYPE))
                                         .executes(
                                             p_270840_ -> damage(
                                                     p_270840_.getSource(),
@@ -105,9 +105,9 @@ public class DamageCommand {
         );
     }
 
-    private static int damage(CommandSourceStack p_270409_, Entity p_270496_, float p_270836_, DamageSource p_270727_) throws CommandSyntaxException {
-        if (p_270496_.hurtServer(p_270409_.getLevel(), p_270727_, p_270836_)) {
-            p_270409_.sendSuccess(() -> Component.translatable("commands.damage.success", p_270836_, p_270496_.getDisplayName()), true);
+    private static int damage(CommandSourceStack pSource, Entity pTarget, float pAmount, DamageSource pDamageType) throws CommandSyntaxException {
+        if (pTarget.hurtServer(pSource.getLevel(), pDamageType, pAmount)) {
+            pSource.sendSuccess(() -> Component.translatable("commands.damage.success", pAmount, pTarget.getDisplayName()), true);
             return 1;
         } else {
             throw ERROR_INVULNERABLE.create();

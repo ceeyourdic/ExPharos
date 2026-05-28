@@ -12,20 +12,20 @@ public class DecoratedPotRecipe extends CustomRecipe {
         super(p_273056_);
     }
 
-    private static ItemStack back(CraftingInput p_364856_) {
-        return p_364856_.getItem(1, 0);
+    private static ItemStack back(CraftingInput pInput) {
+        return pInput.getItem(1, 0);
     }
 
-    private static ItemStack left(CraftingInput p_367598_) {
-        return p_367598_.getItem(0, 1);
+    private static ItemStack left(CraftingInput pInput) {
+        return pInput.getItem(0, 1);
     }
 
-    private static ItemStack right(CraftingInput p_365582_) {
-        return p_365582_.getItem(2, 1);
+    private static ItemStack right(CraftingInput pInput) {
+        return pInput.getItem(2, 1);
     }
 
-    private static ItemStack front(CraftingInput p_369403_) {
-        return p_369403_.getItem(1, 2);
+    private static ItemStack front(CraftingInput pInput) {
+        return pInput.getItem(1, 2);
     }
 
     public boolean matches(CraftingInput p_342524_, Level p_272812_) {

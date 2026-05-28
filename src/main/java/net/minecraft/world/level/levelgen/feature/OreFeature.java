@@ -53,33 +53,33 @@ public class OreFeature extends Feature<OreConfiguration> {
     }
 
     protected boolean doPlace(
-        WorldGenLevel p_225172_,
-        RandomSource p_225173_,
-        OreConfiguration p_225174_,
-        double p_225175_,
-        double p_225176_,
-        double p_225177_,
-        double p_225178_,
-        double p_225179_,
-        double p_225180_,
-        int p_225181_,
-        int p_225182_,
-        int p_225183_,
-        int p_225184_,
-        int p_225185_
+        WorldGenLevel pLevel,
+        RandomSource pRandom,
+        OreConfiguration pConfig,
+        double pMinX,
+        double pMaxX,
+        double pMinZ,
+        double pMaxZ,
+        double pMinY,
+        double pMaxY,
+        int pX,
+        int pY,
+        int pZ,
+        int pWidth,
+        int pHeight
     ) {
         int i = 0;
-        BitSet bitset = new BitSet(p_225184_ * p_225185_ * p_225184_);
+        BitSet bitset = new BitSet(pWidth * pHeight * pWidth);
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-        int j = p_225174_.size;
+        int j = pConfig.size;
         double[] adouble = new double[j * 4];
 
         for (int k = 0; k < j; k++) {
             float f = (float)k / (float)j;
-            double d0 = Mth.lerp((double)f, p_225175_, p_225176_);
-            double d1 = Mth.lerp((double)f, p_225179_, p_225180_);
-            double d2 = Mth.lerp((double)f, p_225177_, p_225178_);
-            double d3 = p_225173_.nextDouble() * (double)j / 16.0;
+            double d0 = Mth.lerp((double)f, pMinX, pMaxX);
+            double d1 = Mth.lerp((double)f, pMinY, pMaxY);
+            double d2 = Mth.lerp((double)f, pMinZ, pMaxZ);
+            double d3 = pRandom.nextDouble() * (double)j / 16.0;
             double d4 = ((double)(Mth.sin((float) Math.PI * f) + 1.0F) * d3 + 1.0) / 2.0;
             adouble[k * 4 + 0] = d0;
             adouble[k * 4 + 1] = d1;
@@ -107,16 +107,16 @@ public class OreFeature extends Feature<OreConfiguration> {
             }
         }
 
-        try (BulkSectionAccess bulksectionaccess = new BulkSectionAccess(p_225172_)) {
+        try (BulkSectionAccess bulksectionaccess = new BulkSectionAccess(pLevel)) {
             for (int j4 = 0; j4 < j; j4++) {
                 double d9 = adouble[j4 * 4 + 3];
                 if (!(d9 < 0.0)) {
                     double d11 = adouble[j4 * 4 + 0];
                     double d13 = adouble[j4 * 4 + 1];
                     double d15 = adouble[j4 * 4 + 2];
-                    int k4 = Math.max(Mth.floor(d11 - d9), p_225181_);
-                    int l = Math.max(Mth.floor(d13 - d9), p_225182_);
-                    int i1 = Math.max(Mth.floor(d15 - d9), p_225183_);
+                    int k4 = Math.max(Mth.floor(d11 - d9), pX);
+                    int l = Math.max(Mth.floor(d13 - d9), pY);
+                    int i1 = Math.max(Mth.floor(d15 - d9), pZ);
                     int j1 = Math.max(Mth.floor(d11 + d9), k4);
                     int k1 = Math.max(Mth.floor(d13 + d9), l);
                     int l1 = Math.max(Mth.floor(d15 + d9), i1);
@@ -129,12 +129,12 @@ public class OreFeature extends Feature<OreConfiguration> {
                                 if (d5 * d5 + d6 * d6 < 1.0) {
                                     for (int k2 = i1; k2 <= l1; k2++) {
                                         double d7 = ((double)k2 + 0.5 - d15) / d9;
-                                        if (d5 * d5 + d6 * d6 + d7 * d7 < 1.0 && !p_225172_.isOutsideBuildHeight(j2)) {
-                                            int l2 = i2 - p_225181_ + (j2 - p_225182_) * p_225184_ + (k2 - p_225183_) * p_225184_ * p_225185_;
+                                        if (d5 * d5 + d6 * d6 + d7 * d7 < 1.0 && !pLevel.isOutsideBuildHeight(j2)) {
+                                            int l2 = i2 - pX + (j2 - pY) * pWidth + (k2 - pZ) * pWidth * pHeight;
                                             if (!bitset.get(l2)) {
                                                 bitset.set(l2);
                                                 blockpos$mutableblockpos.set(i2, j2, k2);
-                                                if (p_225172_.ensureCanWrite(blockpos$mutableblockpos)) {
+                                                if (pLevel.ensureCanWrite(blockpos$mutableblockpos)) {
                                                     LevelChunkSection levelchunksection = bulksectionaccess.getSection(blockpos$mutableblockpos);
                                                     if (levelchunksection != null) {
                                                         int i3 = SectionPos.sectionRelative(i2);
@@ -142,12 +142,12 @@ public class OreFeature extends Feature<OreConfiguration> {
                                                         int k3 = SectionPos.sectionRelative(k2);
                                                         BlockState blockstate = levelchunksection.getBlockState(i3, j3, k3);
 
-                                                        for (OreConfiguration.TargetBlockState oreconfiguration$targetblockstate : p_225174_.targetStates) {
+                                                        for (OreConfiguration.TargetBlockState oreconfiguration$targetblockstate : pConfig.targetStates) {
                                                             if (canPlaceOre(
                                                                 blockstate,
                                                                 bulksectionaccess::getBlockState,
-                                                                p_225173_,
-                                                                p_225174_,
+                                                                pRandom,
+                                                                pConfig,
                                                                 oreconfiguration$targetblockstate,
                                                                 blockpos$mutableblockpos
                                                             )) {
@@ -173,25 +173,25 @@ public class OreFeature extends Feature<OreConfiguration> {
     }
 
     public static boolean canPlaceOre(
-        BlockState p_225187_,
-        Function<BlockPos, BlockState> p_225188_,
-        RandomSource p_225189_,
-        OreConfiguration p_225190_,
-        OreConfiguration.TargetBlockState p_225191_,
-        BlockPos.MutableBlockPos p_225192_
+        BlockState pState,
+        Function<BlockPos, BlockState> pAdjacentStateAccessor,
+        RandomSource pRandom,
+        OreConfiguration pConfig,
+        OreConfiguration.TargetBlockState pTargetState,
+        BlockPos.MutableBlockPos pMutablePos
     ) {
-        if (!p_225191_.target.test(p_225187_, p_225189_)) {
+        if (!pTargetState.target.test(pState, pRandom)) {
             return false;
         } else {
-            return shouldSkipAirCheck(p_225189_, p_225190_.discardChanceOnAirExposure) ? true : !isAdjacentToAir(p_225188_, p_225192_);
+            return shouldSkipAirCheck(pRandom, pConfig.discardChanceOnAirExposure) ? true : !isAdjacentToAir(pAdjacentStateAccessor, pMutablePos);
         }
     }
 
-    protected static boolean shouldSkipAirCheck(RandomSource p_225169_, float p_225170_) {
-        if (p_225170_ <= 0.0F) {
+    protected static boolean shouldSkipAirCheck(RandomSource pRandom, float pChance) {
+        if (pChance <= 0.0F) {
             return true;
         } else {
-            return p_225170_ >= 1.0F ? false : p_225169_.nextFloat() >= p_225170_;
+            return pChance >= 1.0F ? false : pRandom.nextFloat() >= pChance;
         }
     }
 }

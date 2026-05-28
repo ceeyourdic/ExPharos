@@ -17,19 +17,18 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.item.DyeColor;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.CustomColors;
 
-@OnlyIn(Dist.CLIENT)
 public class SheepWoolLayer extends RenderLayer<SheepRenderState, SheepModel> {
     private static final ResourceLocation SHEEP_FUR_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/sheep/sheep_fur.png");
-    private final EntityModel<SheepRenderState> adultModel;
-    private final EntityModel<SheepRenderState> babyModel;
+    public EntityModel<SheepRenderState> adultModel;
+    public EntityModel<SheepRenderState> babyModel;
 
-    public SheepWoolLayer(RenderLayerParent<SheepRenderState, SheepModel> p_367510_, EntityModelSet p_367850_) {
-        super(p_367510_);
-        this.adultModel = new SheepFurModel(p_367850_.bakeLayer(ModelLayers.SHEEP_WOOL));
-        this.babyModel = new SheepFurModel(p_367850_.bakeLayer(ModelLayers.SHEEP_BABY_WOOL));
+    public SheepWoolLayer(RenderLayerParent<SheepRenderState, SheepModel> pRenderer, EntityModelSet pModelSet) {
+        super(pRenderer);
+        this.adultModel = new SheepFurModel(pModelSet.bakeLayer(ModelLayers.SHEEP_WOOL));
+        this.babyModel = new SheepFurModel(pModelSet.bakeLayer(ModelLayers.SHEEP_BABY_WOOL));
     }
 
     public void render(PoseStack p_362211_, MultiBufferSource p_366726_, int p_362383_, SheepRenderState p_366463_, float p_364799_, float p_361838_) {
@@ -42,23 +41,31 @@ public class SheepWoolLayer extends RenderLayer<SheepRenderState, SheepModel> {
                     entitymodel.renderToBuffer(p_362211_, vertexconsumer, p_362383_, LivingEntityRenderer.getOverlayCoords(p_366463_, 0.0F), -16777216);
                 }
             } else {
-                int i;
+                int i2;
                 if (p_366463_.customName != null && "jeb_".equals(p_366463_.customName.getString())) {
-                    int j = 25;
-                    int k = Mth.floor(p_366463_.ageInTicks);
-                    int l = k / 25 + p_366463_.id;
-                    int i1 = DyeColor.values().length;
-                    int j1 = l % i1;
-                    int k1 = (l + 1) % i1;
-                    float f = ((float)(k % 25) + Mth.frac(p_366463_.ageInTicks)) / 25.0F;
+                    int i = 25;
+                    int j = Mth.floor(p_366463_.ageInTicks);
+                    int k = j / 25 + p_366463_.id;
+                    int l = DyeColor.values().length;
+                    int i1 = k % l;
+                    int j1 = (k + 1) % l;
+                    float f = ((float)(j % 25) + Mth.frac(p_366463_.ageInTicks)) / 25.0F;
+                    int k1 = Sheep.getColor(DyeColor.byId(i1));
                     int l1 = Sheep.getColor(DyeColor.byId(j1));
-                    int i2 = Sheep.getColor(DyeColor.byId(k1));
-                    i = ARGB.lerp(f, l1, i2);
+                    if (Config.isCustomColors()) {
+                        k1 = CustomColors.getSheepColors(DyeColor.byId(i1), k1);
+                        l1 = CustomColors.getSheepColors(DyeColor.byId(j1), l1);
+                    }
+
+                    i2 = ARGB.lerp(f, k1, l1);
                 } else {
-                    i = Sheep.getColor(p_366463_.woolColor);
+                    i2 = Sheep.getColor(p_366463_.woolColor);
+                    if (Config.isCustomColors()) {
+                        i2 = CustomColors.getSheepColors(p_366463_.woolColor, i2);
+                    }
                 }
 
-                coloredCutoutModelCopyLayerRender(entitymodel, SHEEP_FUR_LOCATION, p_362211_, p_366726_, p_362383_, p_366463_, i);
+                coloredCutoutModelCopyLayerRender(entitymodel, SHEEP_FUR_LOCATION, p_362211_, p_366726_, p_362383_, p_366463_, i2);
             }
         }
     }

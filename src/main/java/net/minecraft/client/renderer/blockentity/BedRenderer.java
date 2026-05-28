@@ -34,13 +34,13 @@ public class BedRenderer implements BlockEntityRenderer<BedBlockEntity> {
     private final Model headModel;
     private final Model footModel;
 
-    public BedRenderer(BlockEntityRendererProvider.Context p_173540_) {
-        this(p_173540_.getModelSet());
+    public BedRenderer(BlockEntityRendererProvider.Context pContext) {
+        this(pContext.getModelSet());
     }
 
-    public BedRenderer(EntityModelSet p_377493_) {
-        this.headModel = new Model.Simple(p_377493_.bakeLayer(ModelLayers.BED_HEAD), RenderType::entitySolid);
-        this.footModel = new Model.Simple(p_377493_.bakeLayer(ModelLayers.BED_FOOT), RenderType::entitySolid);
+    public BedRenderer(EntityModelSet pModelSet) {
+        this.headModel = new Model.Simple(pModelSet.bakeLayer(ModelLayers.BED_HEAD), RenderType::entitySolid);
+        this.footModel = new Model.Simple(pModelSet.bakeLayer(ModelLayers.BED_FOOT), RenderType::entitySolid);
     }
 
     public static LayerDefinition createHeadLayer() {
@@ -106,29 +106,29 @@ public class BedRenderer implements BlockEntityRenderer<BedBlockEntity> {
         }
     }
 
-    public void renderInHand(PoseStack p_377951_, MultiBufferSource p_377093_, int p_377719_, int p_375884_, Material p_376840_) {
-        this.renderPiece(p_377951_, p_377093_, this.headModel, Direction.SOUTH, p_376840_, p_377719_, p_375884_, false);
-        this.renderPiece(p_377951_, p_377093_, this.footModel, Direction.SOUTH, p_376840_, p_377719_, p_375884_, true);
+    public void renderInHand(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay, Material pMaterial) {
+        this.renderPiece(pPoseStack, pBufferSource, this.headModel, Direction.SOUTH, pMaterial, pPackedLight, pPackedOverlay, false);
+        this.renderPiece(pPoseStack, pBufferSource, this.footModel, Direction.SOUTH, pMaterial, pPackedLight, pPackedOverlay, true);
     }
 
     private void renderPiece(
-        PoseStack p_173542_,
-        MultiBufferSource p_173543_,
-        Model p_363903_,
-        Direction p_173545_,
-        Material p_173546_,
-        int p_173547_,
-        int p_173548_,
-        boolean p_173549_
+        PoseStack pPoseStack,
+        MultiBufferSource pBufferSource,
+        Model pModel,
+        Direction pDirection,
+        Material pMaterial,
+        int pPackedLight,
+        int pPackedOverlay,
+        boolean pIsFeet
     ) {
-        p_173542_.pushPose();
-        p_173542_.translate(0.0F, 0.5625F, p_173549_ ? -1.0F : 0.0F);
-        p_173542_.mulPose(Axis.XP.rotationDegrees(90.0F));
-        p_173542_.translate(0.5F, 0.5F, 0.5F);
-        p_173542_.mulPose(Axis.ZP.rotationDegrees(180.0F + p_173545_.toYRot()));
-        p_173542_.translate(-0.5F, -0.5F, -0.5F);
-        VertexConsumer vertexconsumer = p_173546_.buffer(p_173543_, RenderType::entitySolid);
-        p_363903_.renderToBuffer(p_173542_, vertexconsumer, p_173547_, p_173548_);
-        p_173542_.popPose();
+        pPoseStack.pushPose();
+        pPoseStack.translate(0.0F, 0.5625F, pIsFeet ? -1.0F : 0.0F);
+        pPoseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+        pPoseStack.translate(0.5F, 0.5F, 0.5F);
+        pPoseStack.mulPose(Axis.ZP.rotationDegrees(180.0F + pDirection.toYRot()));
+        pPoseStack.translate(-0.5F, -0.5F, -0.5F);
+        VertexConsumer vertexconsumer = pMaterial.buffer(pBufferSource, RenderType::entitySolid);
+        pModel.renderToBuffer(pPoseStack, vertexconsumer, pPackedLight, pPackedOverlay);
+        pPoseStack.popPose();
     }
 }

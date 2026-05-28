@@ -29,11 +29,11 @@ public class TagEntry extends LootPoolSingletonContainer {
     private final boolean expand;
 
     private TagEntry(
-        TagKey<Item> p_205078_, boolean p_205079_, int p_205080_, int p_205081_, List<LootItemCondition> p_298538_, List<LootItemFunction> p_301109_
+        TagKey<Item> pTag, boolean pExpand, int pWeight, int pQuality, List<LootItemCondition> pConditions, List<LootItemFunction> pFunctions
     ) {
-        super(p_205080_, p_205081_, p_298538_, p_301109_);
-        this.tag = p_205078_;
-        this.expand = p_205079_;
+        super(pWeight, pQuality, pConditions, pFunctions);
+        this.tag = pTag;
+        this.expand = pExpand;
     }
 
     @Override
@@ -46,12 +46,12 @@ public class TagEntry extends LootPoolSingletonContainer {
         BuiltInRegistries.ITEM.getTagOrEmpty(this.tag).forEach(p_205094_ -> p_79854_.accept(new ItemStack((Holder<Item>)p_205094_)));
     }
 
-    private boolean expandTag(LootContext p_79846_, Consumer<LootPoolEntry> p_79847_) {
-        if (!this.canRun(p_79846_)) {
+    private boolean expandTag(LootContext pContext, Consumer<LootPoolEntry> pGeneratorConsumer) {
+        if (!this.canRun(pContext)) {
             return false;
         } else {
             for (final Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
-                p_79847_.accept(new LootPoolSingletonContainer.EntryBase() {
+                pGeneratorConsumer.accept(new LootPoolSingletonContainer.EntryBase() {
                     @Override
                     public void createItemStack(Consumer<ItemStack> p_79869_, LootContext p_79870_) {
                         p_79869_.accept(new ItemStack(holder));
@@ -68,11 +68,11 @@ public class TagEntry extends LootPoolSingletonContainer {
         return this.expand ? this.expandTag(p_79861_, p_79862_) : super.expand(p_79861_, p_79862_);
     }
 
-    public static LootPoolSingletonContainer.Builder<?> tagContents(TagKey<Item> p_205085_) {
-        return simpleBuilder((p_297054_, p_297055_, p_297056_, p_297057_) -> new TagEntry(p_205085_, false, p_297054_, p_297055_, p_297056_, p_297057_));
+    public static LootPoolSingletonContainer.Builder<?> tagContents(TagKey<Item> pTag) {
+        return simpleBuilder((p_297054_, p_297055_, p_297056_, p_297057_) -> new TagEntry(pTag, false, p_297054_, p_297055_, p_297056_, p_297057_));
     }
 
-    public static LootPoolSingletonContainer.Builder<?> expandTag(TagKey<Item> p_205096_) {
-        return simpleBuilder((p_297048_, p_297049_, p_297050_, p_297051_) -> new TagEntry(p_205096_, true, p_297048_, p_297049_, p_297050_, p_297051_));
+    public static LootPoolSingletonContainer.Builder<?> expandTag(TagKey<Item> pTag) {
+        return simpleBuilder((p_297048_, p_297049_, p_297050_, p_297051_) -> new TagEntry(pTag, true, p_297048_, p_297049_, p_297050_, p_297051_));
     }
 }

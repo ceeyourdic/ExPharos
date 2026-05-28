@@ -21,24 +21,24 @@ public class StyleArgument implements ArgumentType<Style> {
     );
     private final HolderLookup.Provider registries;
 
-    private StyleArgument(HolderLookup.Provider p_329379_) {
-        this.registries = p_329379_;
+    private StyleArgument(HolderLookup.Provider pRegistries) {
+        this.registries = pRegistries;
     }
 
-    public static Style getStyle(CommandContext<CommandSourceStack> p_311982_, String p_309702_) {
-        return p_311982_.getArgument(p_309702_, Style.class);
+    public static Style getStyle(CommandContext<CommandSourceStack> pContext, String pName) {
+        return pContext.getArgument(pName, Style.class);
     }
 
-    public static StyleArgument style(CommandBuildContext p_331105_) {
-        return new StyleArgument(p_331105_);
+    public static StyleArgument style(CommandBuildContext pContext) {
+        return new StyleArgument(pContext);
     }
 
-    public Style parse(StringReader p_311382_) throws CommandSyntaxException {
+    public Style parse(StringReader pReader) throws CommandSyntaxException {
         try {
-            return ParserUtils.parseJson(this.registries, p_311382_, Style.Serializer.CODEC);
+            return ParserUtils.parseJson(this.registries, pReader, Style.Serializer.CODEC);
         } catch (Exception exception) {
             String s = exception.getCause() != null ? exception.getCause().getMessage() : exception.getMessage();
-            throw ERROR_INVALID_JSON.createWithContext(p_311382_, s);
+            throw ERROR_INVALID_JSON.createWithContext(pReader, s);
         }
     }
 

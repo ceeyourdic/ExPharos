@@ -24,20 +24,20 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 
     Either<TagKey<T>, List<Holder<T>>> unwrap();
 
-    Optional<Holder<T>> getRandomElement(RandomSource p_235712_);
+    Optional<Holder<T>> getRandomElement(RandomSource pRandom);
 
-    Holder<T> get(int p_205798_);
+    Holder<T> get(int pIndex);
 
-    boolean contains(Holder<T> p_205799_);
+    boolean contains(Holder<T> pHolder);
 
-    boolean canSerializeIn(HolderOwner<T> p_255749_);
+    boolean canSerializeIn(HolderOwner<T> pOwner);
 
     Optional<TagKey<T>> unwrapKey();
 
     @Deprecated
     @VisibleForTesting
-    static <T> HolderSet.Named<T> emptyNamed(HolderOwner<T> p_255858_, TagKey<T> p_256459_) {
-        return new HolderSet.Named<T>(p_255858_, p_256459_) {
+    static <T> HolderSet.Named<T> emptyNamed(HolderOwner<T> pOwner, TagKey<T> pKey) {
+        return new HolderSet.Named<T>(pOwner, pKey) {
             @Override
             protected List<Holder<T>> contents() {
                 throw new UnsupportedOperationException("Tag " + this.key() + " can't be dereferenced during construction");
@@ -50,21 +50,21 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
     }
 
     @SafeVarargs
-    static <T> HolderSet.Direct<T> direct(Holder<T>... p_205810_) {
-        return new HolderSet.Direct<>(List.of(p_205810_));
+    static <T> HolderSet.Direct<T> direct(Holder<T>... pContents) {
+        return new HolderSet.Direct<>(List.of(pContents));
     }
 
-    static <T> HolderSet.Direct<T> direct(List<? extends Holder<T>> p_205801_) {
-        return new HolderSet.Direct<>(List.copyOf(p_205801_));
+    static <T> HolderSet.Direct<T> direct(List<? extends Holder<T>> pContents) {
+        return new HolderSet.Direct<>(List.copyOf(pContents));
     }
 
     @SafeVarargs
-    static <E, T> HolderSet.Direct<T> direct(Function<E, Holder<T>> p_205807_, E... p_205808_) {
-        return direct(Stream.of(p_205808_).map(p_205807_).toList());
+    static <E, T> HolderSet.Direct<T> direct(Function<E, Holder<T>> pHolderFactory, E... pValues) {
+        return direct(Stream.of(pValues).map(pHolderFactory).toList());
     }
 
-    static <E, T> HolderSet.Direct<T> direct(Function<E, Holder<T>> p_205804_, Collection<E> p_298882_) {
-        return direct(p_298882_.stream().map(p_205804_).toList());
+    static <E, T> HolderSet.Direct<T> direct(Function<E, Holder<T>> pHolderFactory, Collection<E> pValues) {
+        return direct(pValues.stream().map(pHolderFactory).toList());
     }
 
     public static final class Direct<T> extends HolderSet.ListBacked<T> {
@@ -73,8 +73,8 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
         @Nullable
         private Set<Holder<T>> contentsSet;
 
-        Direct(List<Holder<T>> p_205814_) {
-            this.contents = p_205814_;
+        Direct(List<Holder<T>> pContents) {
+            this.contents = pContents;
         }
 
         @Override
@@ -112,11 +112,11 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
         }
 
         @Override
-        public boolean equals(Object p_335031_) {
-            if (this == p_335031_) {
+        public boolean equals(Object pOther) {
+            if (this == pOther) {
                 return true;
             } else {
-                if (p_335031_ instanceof HolderSet.Direct<?> direct && this.contents.equals(direct.contents)) {
+                if (pOther instanceof HolderSet.Direct<?> direct && this.contents.equals(direct.contents)) {
                     return true;
                 }
 
@@ -175,13 +175,13 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
         @Nullable
         private List<Holder<T>> contents;
 
-        Named(HolderOwner<T> p_256118_, TagKey<T> p_256597_) {
-            this.owner = p_256118_;
-            this.key = p_256597_;
+        Named(HolderOwner<T> pOwner, TagKey<T> pKey) {
+            this.owner = pOwner;
+            this.key = pKey;
         }
 
-        void bind(List<Holder<T>> p_205836_) {
-            this.contents = List.copyOf(p_205836_);
+        void bind(List<Holder<T>> pContents) {
+            this.contents = List.copyOf(pContents);
         }
 
         public TagKey<T> key() {

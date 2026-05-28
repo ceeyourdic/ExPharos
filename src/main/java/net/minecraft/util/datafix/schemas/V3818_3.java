@@ -14,36 +14,36 @@ public class V3818_3 extends NamespacedSchema {
         super(p_333453_, p_330765_);
     }
 
-    public static SequencedMap<String, Supplier<TypeTemplate>> components(Schema p_361272_) {
+    public static SequencedMap<String, Supplier<TypeTemplate>> components(Schema pSchema) {
         SequencedMap<String, Supplier<TypeTemplate>> sequencedmap = new LinkedHashMap<>();
-        sequencedmap.put("minecraft:bees", () -> DSL.list(DSL.optionalFields("entity_data", References.ENTITY_TREE.in(p_361272_))));
-        sequencedmap.put("minecraft:block_entity_data", () -> References.BLOCK_ENTITY.in(p_361272_));
-        sequencedmap.put("minecraft:bundle_contents", () -> DSL.list(References.ITEM_STACK.in(p_361272_)));
+        sequencedmap.put("minecraft:bees", () -> DSL.list(DSL.optionalFields("entity_data", References.ENTITY_TREE.in(pSchema))));
+        sequencedmap.put("minecraft:block_entity_data", () -> References.BLOCK_ENTITY.in(pSchema));
+        sequencedmap.put("minecraft:bundle_contents", () -> DSL.list(References.ITEM_STACK.in(pSchema)));
         sequencedmap.put(
             "minecraft:can_break",
             () -> DSL.optionalFields(
                     "predicates",
-                    DSL.list(DSL.optionalFields("blocks", DSL.or(References.BLOCK_NAME.in(p_361272_), DSL.list(References.BLOCK_NAME.in(p_361272_)))))
+                    DSL.list(DSL.optionalFields("blocks", DSL.or(References.BLOCK_NAME.in(pSchema), DSL.list(References.BLOCK_NAME.in(pSchema)))))
                 )
         );
         sequencedmap.put(
             "minecraft:can_place_on",
             () -> DSL.optionalFields(
                     "predicates",
-                    DSL.list(DSL.optionalFields("blocks", DSL.or(References.BLOCK_NAME.in(p_361272_), DSL.list(References.BLOCK_NAME.in(p_361272_)))))
+                    DSL.list(DSL.optionalFields("blocks", DSL.or(References.BLOCK_NAME.in(pSchema), DSL.list(References.BLOCK_NAME.in(pSchema)))))
                 )
         );
-        sequencedmap.put("minecraft:charged_projectiles", () -> DSL.list(References.ITEM_STACK.in(p_361272_)));
-        sequencedmap.put("minecraft:container", () -> DSL.list(DSL.optionalFields("item", References.ITEM_STACK.in(p_361272_))));
-        sequencedmap.put("minecraft:entity_data", () -> References.ENTITY_TREE.in(p_361272_));
-        sequencedmap.put("minecraft:pot_decorations", () -> DSL.list(References.ITEM_NAME.in(p_361272_)));
-        sequencedmap.put("minecraft:food", () -> DSL.optionalFields("using_converts_to", References.ITEM_STACK.in(p_361272_)));
+        sequencedmap.put("minecraft:charged_projectiles", () -> DSL.list(References.ITEM_STACK.in(pSchema)));
+        sequencedmap.put("minecraft:container", () -> DSL.list(DSL.optionalFields("item", References.ITEM_STACK.in(pSchema))));
+        sequencedmap.put("minecraft:entity_data", () -> References.ENTITY_TREE.in(pSchema));
+        sequencedmap.put("minecraft:pot_decorations", () -> DSL.list(References.ITEM_NAME.in(pSchema)));
+        sequencedmap.put("minecraft:food", () -> DSL.optionalFields("using_converts_to", References.ITEM_STACK.in(pSchema)));
         return sequencedmap;
     }
 
     @Override
-    public void registerTypes(Schema p_332951_, Map<String, Supplier<TypeTemplate>> p_332616_, Map<String, Supplier<TypeTemplate>> p_331121_) {
-        super.registerTypes(p_332951_, p_332616_, p_331121_);
-        p_332951_.registerType(true, References.DATA_COMPONENTS, () -> DSL.optionalFieldsLazy(components(p_332951_)));
+    public void registerTypes(Schema pSchema, Map<String, Supplier<TypeTemplate>> pEntityTypes, Map<String, Supplier<TypeTemplate>> pBlockEntityTypes) {
+        super.registerTypes(pSchema, pEntityTypes, pBlockEntityTypes);
+        pSchema.registerType(true, References.DATA_COMPONENTS, () -> DSL.optionalFieldsLazy(components(pSchema)));
     }
 }

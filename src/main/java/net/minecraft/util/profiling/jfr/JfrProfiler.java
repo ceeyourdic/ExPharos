@@ -139,21 +139,21 @@ public class JfrProfiler implements JvmProfiler {
         return FlightRecorder.isAvailable();
     }
 
-    private boolean start(Reader p_185317_, Environment p_185318_) {
+    private boolean start(Reader pReader, Environment pEnvironment) {
         if (this.isRunning()) {
             LOGGER.warn("Profiling already in progress");
             return false;
         } else {
             try {
-                Configuration configuration = Configuration.create(p_185317_);
+                Configuration configuration = Configuration.create(pReader);
                 String s = DATE_TIME_FORMATTER.format(Instant.now());
                 this.recording = Util.make(new Recording(configuration), p_185311_ -> {
                     CUSTOM_EVENTS.forEach(p_185311_::enable);
                     p_185311_.setDumpOnExit(true);
                     p_185311_.setToDisk(true);
-                    p_185311_.setName(String.format(Locale.ROOT, "%s-%s-%s", p_185318_.getDescription(), SharedConstants.getCurrentVersion().getName(), s));
+                    p_185311_.setName(String.format(Locale.ROOT, "%s-%s-%s", pEnvironment.getDescription(), SharedConstants.getCurrentVersion().getName(), s));
                 });
-                Path path = Paths.get(String.format(Locale.ROOT, "debug/%s-%s.jfr", p_185318_.getDescription(), s));
+                Path path = Paths.get(String.format(Locale.ROOT, "debug/%s-%s.jfr", pEnvironment.getDescription(), s));
                 FileUtil.createDirectoriesSafe(path.getParent());
                 this.recording.setDestination(path);
                 this.recording.start();
@@ -216,8 +216,8 @@ public class JfrProfiler implements JvmProfiler {
         }
     }
 
-    private NetworkSummaryEvent.SumAggregation networkStatFor(SocketAddress p_185320_) {
-        return this.networkTrafficByAddress.computeIfAbsent(p_185320_.toString(), NetworkSummaryEvent.SumAggregation::new);
+    private NetworkSummaryEvent.SumAggregation networkStatFor(SocketAddress pRemoteAddress) {
+        return this.networkTrafficByAddress.computeIfAbsent(pRemoteAddress.toString(), NetworkSummaryEvent.SumAggregation::new);
     }
 
     @Override

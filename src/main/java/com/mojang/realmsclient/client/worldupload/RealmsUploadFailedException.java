@@ -8,12 +8,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class RealmsUploadFailedException extends RealmsUploadException {
     private final Component errorMessage;
 
-    public RealmsUploadFailedException(Component p_364964_) {
-        this.errorMessage = p_364964_;
+    public RealmsUploadFailedException(Component pErrorMessage) {
+        this.errorMessage = pErrorMessage;
     }
 
-    public RealmsUploadFailedException(String p_362207_) {
-        this(Component.literal(p_362207_));
+    public RealmsUploadFailedException(String pErrorMessage) {
+        this(Component.literal(pErrorMessage));
     }
 
     @Override

@@ -6,31 +6,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import javax.annotation.Nullable;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class SectionBufferBuilderPool {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final Queue<SectionBufferBuilderPack> freeBuffers;
     private volatile int freeBufferCount;
 
-    private SectionBufferBuilderPool(List<SectionBufferBuilderPack> p_312374_) {
-        this.freeBuffers = Queues.newArrayDeque(p_312374_);
+    private SectionBufferBuilderPool(List<SectionBufferBuilderPack> pFreeBuffers) {
+        this.freeBuffers = Queues.newConcurrentLinkedQueue(pFreeBuffers);
         this.freeBufferCount = this.freeBuffers.size();
     }
 
-    public static SectionBufferBuilderPool allocate(int p_310783_) {
+    public static SectionBufferBuilderPool allocate(int pBufferCount) {
         int i = Math.max(1, (int)((double)Runtime.getRuntime().maxMemory() * 0.3) / SectionBufferBuilderPack.TOTAL_BUFFERS_SIZE);
-        int j = Math.max(1, Math.min(p_310783_, i));
+        int j = Math.max(1, Math.min(pBufferCount, i));
         List<SectionBufferBuilderPack> list = new ArrayList<>(j);
 
         try {
             for (int k = 0; k < j; k++) {
                 list.add(new SectionBufferBuilderPack());
             }
-        } catch (OutOfMemoryError outofmemoryerror) {
+        } catch (OutOfMemoryError outofmemoryerror1) {
             LOGGER.warn("Allocated only {}/{} buffers", list.size(), j);
             int l = Math.min(list.size() * 2 / 3, list.size() - 1);
 
@@ -53,8 +50,8 @@ public class SectionBufferBuilderPool {
         }
     }
 
-    public void release(SectionBufferBuilderPack p_310220_) {
-        this.freeBuffers.add(p_310220_);
+    public void release(SectionBufferBuilderPack pBuffer) {
+        this.freeBuffers.add(pBuffer);
         this.freeBufferCount = this.freeBuffers.size();
     }
 

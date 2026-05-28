@@ -39,10 +39,10 @@ public record ScoreContents(Either<SelectorPattern, String> name, String objecti
         return TYPE;
     }
 
-    private ScoreHolder findTargetName(CommandSourceStack p_237442_) throws CommandSyntaxException {
+    private ScoreHolder findTargetName(CommandSourceStack pSource) throws CommandSyntaxException {
         Optional<SelectorPattern> optional = this.name.left();
         if (optional.isPresent()) {
-            List<? extends Entity> list = optional.get().resolved().findEntities(p_237442_);
+            List<? extends Entity> list = optional.get().resolved().findEntities(pSource);
             if (!list.isEmpty()) {
                 if (list.size() != 1) {
                     throw EntityArgument.ERROR_NOT_SINGLE_ENTITY.create();
@@ -57,13 +57,13 @@ public record ScoreContents(Either<SelectorPattern, String> name, String objecti
         }
     }
 
-    private MutableComponent getScore(ScoreHolder p_312678_, CommandSourceStack p_237451_) {
-        MinecraftServer minecraftserver = p_237451_.getServer();
+    private MutableComponent getScore(ScoreHolder pScoreHolder, CommandSourceStack pSource) {
+        MinecraftServer minecraftserver = pSource.getServer();
         if (minecraftserver != null) {
             Scoreboard scoreboard = minecraftserver.getScoreboard();
             Objective objective = scoreboard.getObjective(this.objective);
             if (objective != null) {
-                ReadOnlyScoreInfo readonlyscoreinfo = scoreboard.getPlayerScoreInfo(p_312678_, objective);
+                ReadOnlyScoreInfo readonlyscoreinfo = scoreboard.getPlayerScoreInfo(pScoreHolder, objective);
                 if (readonlyscoreinfo != null) {
                     return readonlyscoreinfo.formatValue(objective.numberFormatOrDefault(StyledFormat.NO_STYLE));
                 }

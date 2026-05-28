@@ -22,23 +22,23 @@ public abstract class StuckInBodyLayer<M extends PlayerModel> extends RenderLaye
     private final StuckInBodyLayer.PlacementStyle placementStyle;
 
     public StuckInBodyLayer(
-        LivingEntityRenderer<?, PlayerRenderState, M> p_117564_, Model p_360738_, ResourceLocation p_361896_, StuckInBodyLayer.PlacementStyle p_363745_
+        LivingEntityRenderer<?, PlayerRenderState, M> pRenderer, Model pModel, ResourceLocation pTexture, StuckInBodyLayer.PlacementStyle pPlacementStyle
     ) {
-        super(p_117564_);
-        this.model = p_360738_;
-        this.texture = p_361896_;
-        this.placementStyle = p_363745_;
+        super(pRenderer);
+        this.model = pModel;
+        this.texture = pTexture;
+        this.placementStyle = pPlacementStyle;
     }
 
-    protected abstract int numStuck(PlayerRenderState p_368620_);
+    protected abstract int numStuck(PlayerRenderState pRenderState);
 
-    private void renderStuckItem(PoseStack p_117566_, MultiBufferSource p_117567_, int p_117568_, float p_117570_, float p_117571_, float p_117572_) {
-        float f = Mth.sqrt(p_117570_ * p_117570_ + p_117572_ * p_117572_);
-        float f1 = (float)(Math.atan2((double)p_117570_, (double)p_117572_) * 180.0F / (float)Math.PI);
-        float f2 = (float)(Math.atan2((double)p_117571_, (double)f) * 180.0F / (float)Math.PI);
-        p_117566_.mulPose(Axis.YP.rotationDegrees(f1 - 90.0F));
-        p_117566_.mulPose(Axis.ZP.rotationDegrees(f2));
-        this.model.renderToBuffer(p_117566_, p_117567_.getBuffer(this.model.renderType(this.texture)), p_117568_, OverlayTexture.NO_OVERLAY);
+    private void renderStuckItem(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, float pX, float pY, float pZ) {
+        float f = Mth.sqrt(pX * pX + pZ * pZ);
+        float f1 = (float)(Math.atan2((double)pX, (double)pZ) * 180.0F / (float)Math.PI);
+        float f2 = (float)(Math.atan2((double)pY, (double)f) * 180.0F / (float)Math.PI);
+        pPoseStack.mulPose(Axis.YP.rotationDegrees(f1 - 90.0F));
+        pPoseStack.mulPose(Axis.ZP.rotationDegrees(f2));
+        this.model.renderToBuffer(pPoseStack, pBufferSource.getBuffer(this.model.renderType(this.texture)), pPackedLight, OverlayTexture.NO_OVERLAY);
     }
 
     public void render(PoseStack p_117575_, MultiBufferSource p_117576_, int p_117577_, PlayerRenderState p_367175_, float p_117579_, float p_117580_) {
@@ -79,8 +79,8 @@ public abstract class StuckInBodyLayer<M extends PlayerModel> extends RenderLaye
         }
     }
 
-    private static float snapToFace(float p_362675_) {
-        return p_362675_ > 0.5F ? 1.0F : 0.5F;
+    private static float snapToFace(float pValue) {
+        return pValue > 0.5F ? 1.0F : 0.5F;
     }
 
     @OnlyIn(Dist.CLIENT)

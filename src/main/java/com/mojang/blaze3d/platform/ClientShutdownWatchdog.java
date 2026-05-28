@@ -12,7 +12,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class ClientShutdownWatchdog {
     private static final Duration CRASH_REPORT_PRELOAD_LOAD = Duration.ofSeconds(15L);
 
-    public static void startShutdownWatchdog(File p_361803_, long p_368685_) {
+    public static void startShutdownWatchdog(File pFile, long pThreadId) {
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(CRASH_REPORT_PRELOAD_LOAD);
@@ -20,8 +20,8 @@ public class ClientShutdownWatchdog {
                 return;
             }
 
-            CrashReport crashreport = ServerWatchdog.createWatchdogCrashReport("Client shutdown", p_368685_);
-            Minecraft.saveReport(p_361803_, crashreport);
+            CrashReport crashreport = ServerWatchdog.createWatchdogCrashReport("Client shutdown", pThreadId);
+            Minecraft.saveReport(pFile, crashreport);
         });
         thread.setDaemon(true);
         thread.setName("Client shutdown watchdog");

@@ -36,7 +36,7 @@ public class WitherSkullRenderer extends EntityRenderer<WitherSkull, WitherSkull
         return LayerDefinition.create(meshdefinition, 64, 64);
     }
 
-    protected int getBlockLightLevel(WitherSkull p_116491_, BlockPos p_116492_) {
+    protected int getBlockLightLevel(WitherSkull pEntity, BlockPos pPos) {
         return 15;
     }
 
@@ -50,8 +50,8 @@ public class WitherSkullRenderer extends EntityRenderer<WitherSkull, WitherSkull
         super.render(p_362201_, p_116475_, p_116476_, p_116477_);
     }
 
-    private ResourceLocation getTextureLocation(WitherSkullRenderState p_366519_) {
-        return p_366519_.isDangerous ? WITHER_INVULNERABLE_LOCATION : WITHER_LOCATION;
+    private ResourceLocation getTextureLocation(WitherSkullRenderState pRenderState) {
+        return pRenderState.isDangerous ? WITHER_INVULNERABLE_LOCATION : WITHER_LOCATION;
     }
 
     public WitherSkullRenderState createRenderState() {

@@ -40,16 +40,16 @@ public class TagLoader<T> {
     final TagLoader.ElementLookup<T> elementLookup;
     private final String directory;
 
-    public TagLoader(TagLoader.ElementLookup<T> p_365781_, String p_144494_) {
-        this.elementLookup = p_365781_;
-        this.directory = p_144494_;
+    public TagLoader(TagLoader.ElementLookup<T> pElementLookup, String pDirectory) {
+        this.elementLookup = pElementLookup;
+        this.directory = pDirectory;
     }
 
-    public Map<ResourceLocation, List<TagLoader.EntryWithSource>> load(ResourceManager p_144496_) {
+    public Map<ResourceLocation, List<TagLoader.EntryWithSource>> load(ResourceManager pResourceManager) {
         Map<ResourceLocation, List<TagLoader.EntryWithSource>> map = new HashMap<>();
         FileToIdConverter filetoidconverter = FileToIdConverter.json(this.directory);
 
-        for (Entry<ResourceLocation, List<Resource>> entry : filetoidconverter.listMatchingResourceStacks(p_144496_).entrySet()) {
+        for (Entry<ResourceLocation, List<Resource>> entry : filetoidconverter.listMatchingResourceStacks(pResourceManager).entrySet()) {
             ResourceLocation resourcelocation = entry.getKey();
             ResourceLocation resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
 
@@ -73,12 +73,12 @@ public class TagLoader<T> {
         return map;
     }
 
-    private Either<List<TagLoader.EntryWithSource>, List<T>> tryBuildTag(TagEntry.Lookup<T> p_215979_, List<TagLoader.EntryWithSource> p_215980_) {
+    private Either<List<TagLoader.EntryWithSource>, List<T>> tryBuildTag(TagEntry.Lookup<T> pLookup, List<TagLoader.EntryWithSource> pEntries) {
         SequencedSet<T> sequencedset = new LinkedHashSet<>();
         List<TagLoader.EntryWithSource> list = new ArrayList<>();
 
-        for (TagLoader.EntryWithSource tagloader$entrywithsource : p_215980_) {
-            if (!tagloader$entrywithsource.entry().build(p_215979_, sequencedset::add)) {
+        for (TagLoader.EntryWithSource tagloader$entrywithsource : pEntries) {
+            if (!tagloader$entrywithsource.entry().build(pLookup, sequencedset::add)) {
                 list.add(tagloader$entrywithsource);
             }
         }
@@ -86,7 +86,7 @@ public class TagLoader<T> {
         return list.isEmpty() ? Either.right(List.copyOf(sequencedset)) : Either.left(list);
     }
 
-    public Map<ResourceLocation, List<T>> build(Map<ResourceLocation, List<TagLoader.EntryWithSource>> p_203899_) {
+    public Map<ResourceLocation, List<T>> build(Map<ResourceLocation, List<TagLoader.EntryWithSource>> pBuilders) {
         final Map<ResourceLocation, List<T>> map = new HashMap<>();
         TagEntry.Lookup<T> lookup = new TagEntry.Lookup<T>() {
             @Nullable
@@ -102,7 +102,7 @@ public class TagLoader<T> {
             }
         };
         DependencySorter<ResourceLocation, TagLoader.SortingEntry> dependencysorter = new DependencySorter<>();
-        p_203899_.forEach(
+        pBuilders.forEach(
             (p_284685_, p_284686_) -> dependencysorter.addEntry(p_284685_, new TagLoader.SortingEntry((List<TagLoader.EntryWithSource>)p_284686_))
         );
         dependencysorter.orderByDependencies(
@@ -119,54 +119,54 @@ public class TagLoader<T> {
         return map;
     }
 
-    public static <T> void loadTagsFromNetwork(TagNetworkSerialization.NetworkPayload p_363340_, WritableRegistry<T> p_362274_) {
-        p_363340_.resolve(p_362274_).tags.forEach(p_362274_::bindTag);
+    public static <T> void loadTagsFromNetwork(TagNetworkSerialization.NetworkPayload pPayload, WritableRegistry<T> pRegistry) {
+        pPayload.resolve(pRegistry).tags.forEach(pRegistry::bindTag);
     }
 
-    public static List<Registry.PendingTags<?>> loadTagsForExistingRegistries(ResourceManager p_363516_, RegistryAccess p_365200_) {
-        return p_365200_.registries()
-            .map(p_358777_ -> loadPendingTags(p_363516_, p_358777_.value()))
+    public static List<Registry.PendingTags<?>> loadTagsForExistingRegistries(ResourceManager pResourceManager, RegistryAccess pRegistryAccess) {
+        return pRegistryAccess.registries()
+            .map(p_358777_ -> loadPendingTags(pResourceManager, p_358777_.value()))
             .flatMap(Optional::stream)
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public static <T> void loadTagsForRegistry(ResourceManager p_361002_, WritableRegistry<T> p_369889_) {
-        ResourceKey<? extends Registry<T>> resourcekey = p_369889_.key();
-        TagLoader<Holder<T>> tagloader = new TagLoader<>(TagLoader.ElementLookup.fromWritableRegistry(p_369889_), Registries.tagsDirPath(resourcekey));
-        tagloader.build(tagloader.load(p_361002_))
-            .forEach((p_358786_, p_358787_) -> p_369889_.bindTag(TagKey.create(resourcekey, p_358786_), (List<Holder<T>>)p_358787_));
+    public static <T> void loadTagsForRegistry(ResourceManager pResourceManager, WritableRegistry<T> pRegistry) {
+        ResourceKey<? extends Registry<T>> resourcekey = pRegistry.key();
+        TagLoader<Holder<T>> tagloader = new TagLoader<>(TagLoader.ElementLookup.fromWritableRegistry(pRegistry), Registries.tagsDirPath(resourcekey));
+        tagloader.build(tagloader.load(pResourceManager))
+            .forEach((p_358786_, p_358787_) -> pRegistry.bindTag(TagKey.create(resourcekey, p_358786_), (List<Holder<T>>)p_358787_));
     }
 
-    private static <T> Map<TagKey<T>, List<Holder<T>>> wrapTags(ResourceKey<? extends Registry<T>> p_369888_, Map<ResourceLocation, List<Holder<T>>> p_362414_) {
-        return p_362414_.entrySet()
+    private static <T> Map<TagKey<T>, List<Holder<T>>> wrapTags(ResourceKey<? extends Registry<T>> pRegistryKey, Map<ResourceLocation, List<Holder<T>>> pTags) {
+        return pTags.entrySet()
             .stream()
-            .collect(Collectors.toUnmodifiableMap(p_358783_ -> TagKey.create(p_369888_, p_358783_.getKey()), Entry::getValue));
+            .collect(Collectors.toUnmodifiableMap(p_358783_ -> TagKey.create(pRegistryKey, p_358783_.getKey()), Entry::getValue));
     }
 
-    private static <T> Optional<Registry.PendingTags<T>> loadPendingTags(ResourceManager p_366215_, Registry<T> p_369074_) {
-        ResourceKey<? extends Registry<T>> resourcekey = p_369074_.key();
+    private static <T> Optional<Registry.PendingTags<T>> loadPendingTags(ResourceManager pResourceManager, Registry<T> pRegistry) {
+        ResourceKey<? extends Registry<T>> resourcekey = pRegistry.key();
         TagLoader<Holder<T>> tagloader = new TagLoader<>(
-            (TagLoader.ElementLookup<Holder<T>>)TagLoader.ElementLookup.fromFrozenRegistry(p_369074_), Registries.tagsDirPath(resourcekey)
+            (TagLoader.ElementLookup<Holder<T>>)TagLoader.ElementLookup.fromFrozenRegistry(pRegistry), Registries.tagsDirPath(resourcekey)
         );
         TagLoader.LoadResult<T> loadresult = new TagLoader.LoadResult<>(
-            resourcekey, wrapTags(p_369074_.key(), tagloader.build(tagloader.load(p_366215_)))
+            resourcekey, wrapTags(pRegistry.key(), tagloader.build(tagloader.load(pResourceManager)))
         );
-        return loadresult.tags().isEmpty() ? Optional.empty() : Optional.of(p_369074_.prepareTagReload(loadresult));
+        return loadresult.tags().isEmpty() ? Optional.empty() : Optional.of(pRegistry.prepareTagReload(loadresult));
     }
 
-    public static List<HolderLookup.RegistryLookup<?>> buildUpdatedLookups(RegistryAccess.Frozen p_361092_, List<Registry.PendingTags<?>> p_361987_) {
+    public static List<HolderLookup.RegistryLookup<?>> buildUpdatedLookups(RegistryAccess.Frozen pRegistry, List<Registry.PendingTags<?>> pTags) {
         List<HolderLookup.RegistryLookup<?>> list = new ArrayList<>();
-        p_361092_.registries().forEach(p_358775_ -> {
-            Registry.PendingTags<?> pendingtags = findTagsForRegistry(p_361987_, p_358775_.key());
+        pRegistry.registries().forEach(p_358775_ -> {
+            Registry.PendingTags<?> pendingtags = findTagsForRegistry(pTags, p_358775_.key());
             list.add((HolderLookup.RegistryLookup<?>)(pendingtags != null ? pendingtags.lookup() : p_358775_.value()));
         });
         return list;
     }
 
     @Nullable
-    private static Registry.PendingTags<?> findTagsForRegistry(List<Registry.PendingTags<?>> p_361794_, ResourceKey<? extends Registry<?>> p_361930_) {
-        for (Registry.PendingTags<?> pendingtags : p_361794_) {
-            if (pendingtags.key() == p_361930_) {
+    private static Registry.PendingTags<?> findTagsForRegistry(List<Registry.PendingTags<?>> pTags, ResourceKey<? extends Registry<?>> pRegistryKey) {
+        for (Registry.PendingTags<?> pendingtags : pTags) {
+            if (pendingtags.key() == pRegistryKey) {
                 return pendingtags;
             }
         }
@@ -175,16 +175,16 @@ public class TagLoader<T> {
     }
 
     public interface ElementLookup<T> {
-        Optional<? extends T> get(ResourceLocation p_362946_, boolean p_368007_);
+        Optional<? extends T> get(ResourceLocation pId, boolean pRequired);
 
-        static <T> TagLoader.ElementLookup<? extends Holder<T>> fromFrozenRegistry(Registry<T> p_369869_) {
-            return (p_367027_, p_367996_) -> p_369869_.get(p_367027_);
+        static <T> TagLoader.ElementLookup<? extends Holder<T>> fromFrozenRegistry(Registry<T> pRegistry) {
+            return (p_367027_, p_367996_) -> pRegistry.get(p_367027_);
         }
 
-        static <T> TagLoader.ElementLookup<Holder<T>> fromWritableRegistry(WritableRegistry<T> p_361559_) {
-            HolderGetter<T> holdergetter = p_361559_.createRegistrationLookup();
-            return (p_367634_, p_365243_) -> ((HolderGetter<T>)(p_365243_ ? holdergetter : p_361559_))
-                    .get(ResourceKey.create(p_361559_.key(), p_367634_));
+        static <T> TagLoader.ElementLookup<Holder<T>> fromWritableRegistry(WritableRegistry<T> pRegistry) {
+            HolderGetter<T> holdergetter = pRegistry.createRegistrationLookup();
+            return (p_367634_, p_365243_) -> ((HolderGetter<T>)(p_365243_ ? holdergetter : pRegistry))
+                    .get(ResourceKey.create(pRegistry.key(), p_367634_));
         }
     }
 

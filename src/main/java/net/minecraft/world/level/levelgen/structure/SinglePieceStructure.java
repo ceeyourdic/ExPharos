@@ -11,11 +11,11 @@ public abstract class SinglePieceStructure extends Structure {
     private final int width;
     private final int depth;
 
-    protected SinglePieceStructure(SinglePieceStructure.PieceConstructor p_226537_, int p_226538_, int p_226539_, Structure.StructureSettings p_226540_) {
-        super(p_226540_);
-        this.constructor = p_226537_;
-        this.width = p_226538_;
-        this.depth = p_226539_;
+    protected SinglePieceStructure(SinglePieceStructure.PieceConstructor pConstructor, int pWidth, int pDepth, Structure.StructureSettings pSettings) {
+        super(pSettings);
+        this.constructor = pConstructor;
+        this.width = pWidth;
+        this.depth = pDepth;
     }
 
     @Override
@@ -25,13 +25,13 @@ public abstract class SinglePieceStructure extends Structure {
             : onTopOfChunkCenter(p_226542_, Heightmap.Types.WORLD_SURFACE_WG, p_226545_ -> this.generatePieces(p_226545_, p_226542_));
     }
 
-    private void generatePieces(StructurePiecesBuilder p_226547_, Structure.GenerationContext p_226548_) {
-        ChunkPos chunkpos = p_226548_.chunkPos();
-        p_226547_.addPiece(this.constructor.construct(p_226548_.random(), chunkpos.getMinBlockX(), chunkpos.getMinBlockZ()));
+    private void generatePieces(StructurePiecesBuilder pBuilder, Structure.GenerationContext pContext) {
+        ChunkPos chunkpos = pContext.chunkPos();
+        pBuilder.addPiece(this.constructor.construct(pContext.random(), chunkpos.getMinBlockX(), chunkpos.getMinBlockZ()));
     }
 
     @FunctionalInterface
     protected interface PieceConstructor {
-        StructurePiece construct(WorldgenRandom p_226550_, int p_226551_, int p_226552_);
+        StructurePiece construct(WorldgenRandom pRandom, int pMinBlockX, int pMinBlockZ);
     }
 }

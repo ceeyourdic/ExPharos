@@ -22,22 +22,22 @@ public class PlayerSensor extends Sensor<LivingEntity> {
     }
 
     @Override
-    protected void doTick(ServerLevel p_26740_, LivingEntity p_26741_) {
-        List<Player> list = p_26740_.players()
+    protected void doTick(ServerLevel pLevel, LivingEntity pEntity) {
+        List<Player> list = pLevel.players()
             .stream()
             .filter(EntitySelector.NO_SPECTATORS)
-            .filter(p_359124_ -> p_26741_.closerThan(p_359124_, this.getFollowDistance(p_26741_)))
-            .sorted(Comparator.comparingDouble(p_26741_::distanceToSqr))
+            .filter(p_359124_ -> pEntity.closerThan(p_359124_, this.getFollowDistance(pEntity)))
+            .sorted(Comparator.comparingDouble(pEntity::distanceToSqr))
             .collect(Collectors.toList());
-        Brain<?> brain = p_26741_.getBrain();
+        Brain<?> brain = pEntity.getBrain();
         brain.setMemory(MemoryModuleType.NEAREST_PLAYERS, list);
-        List<Player> list1 = list.stream().filter(p_359122_ -> isEntityTargetable(p_26740_, p_26741_, p_359122_)).collect(Collectors.toList());
+        List<Player> list1 = list.stream().filter(p_359122_ -> isEntityTargetable(pLevel, pEntity, p_359122_)).collect(Collectors.toList());
         brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER, list1.isEmpty() ? null : list1.get(0));
-        Optional<Player> optional = list1.stream().filter(p_359119_ -> isEntityAttackable(p_26740_, p_26741_, p_359119_)).findFirst();
+        Optional<Player> optional = list1.stream().filter(p_359119_ -> isEntityAttackable(pLevel, pEntity, p_359119_)).findFirst();
         brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, optional);
     }
 
-    protected double getFollowDistance(LivingEntity p_369051_) {
-        return p_369051_.getAttributeValue(Attributes.FOLLOW_RANGE);
+    protected double getFollowDistance(LivingEntity pEntity) {
+        return pEntity.getAttributeValue(Attributes.FOLLOW_RANGE);
     }
 }

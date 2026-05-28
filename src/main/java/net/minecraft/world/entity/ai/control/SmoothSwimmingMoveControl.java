@@ -13,13 +13,13 @@ public class SmoothSwimmingMoveControl extends MoveControl {
     private final float outsideWaterSpeedModifier;
     private final boolean applyGravity;
 
-    public SmoothSwimmingMoveControl(Mob p_148070_, int p_148071_, int p_148072_, float p_148073_, float p_148074_, boolean p_148075_) {
-        super(p_148070_);
-        this.maxTurnX = p_148071_;
-        this.maxTurnY = p_148072_;
-        this.inWaterSpeedModifier = p_148073_;
-        this.outsideWaterSpeedModifier = p_148074_;
-        this.applyGravity = p_148075_;
+    public SmoothSwimmingMoveControl(Mob pMob, int pMaxTurnX, int pMaxTurnY, float pInWaterSpeedModifier, float pOutsideWaterSpeedModifier, boolean pApplyGravity) {
+        super(pMob);
+        this.maxTurnX = pMaxTurnX;
+        this.maxTurnY = pMaxTurnY;
+        this.inWaterSpeedModifier = pInWaterSpeedModifier;
+        this.outsideWaterSpeedModifier = pOutsideWaterSpeedModifier;
+        this.applyGravity = pApplyGravity;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class SmoothSwimmingMoveControl extends MoveControl {
         }
     }
 
-    private static float getTurningSpeedFactor(float p_249853_) {
-        return 1.0F - Mth.clamp((p_249853_ - 10.0F) / 50.0F, 0.0F, 1.0F);
+    private static float getTurningSpeedFactor(float pDegreesToTurn) {
+        return 1.0F - Mth.clamp((pDegreesToTurn - 10.0F) / 50.0F, 0.0F, 1.0F);
     }
 }

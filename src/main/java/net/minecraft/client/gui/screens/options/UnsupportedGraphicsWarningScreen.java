@@ -25,12 +25,12 @@ public class UnsupportedGraphicsWarningScreen extends Screen {
     private int buttonWidth;
 
     protected UnsupportedGraphicsWarningScreen(
-        Component p_345197_, List<Component> p_343955_, ImmutableList<UnsupportedGraphicsWarningScreen.ButtonOption> p_343113_
+        Component pTitle, List<Component> pMessage, ImmutableList<UnsupportedGraphicsWarningScreen.ButtonOption> pButtonOptions
     ) {
-        super(p_345197_);
-        this.message = p_343955_;
-        this.narrationMessage = CommonComponents.joinForNarration(p_345197_, ComponentUtils.formatList(p_343955_, CommonComponents.EMPTY));
-        this.buttonOptions = p_343113_;
+        super(pTitle);
+        this.message = pMessage;
+        this.narrationMessage = CommonComponents.joinForNarration(pTitle, ComponentUtils.formatList(pMessage, CommonComponents.EMPTY));
+        this.buttonOptions = pButtonOptions;
     }
 
     @Override
@@ -79,9 +79,9 @@ public class UnsupportedGraphicsWarningScreen extends Screen {
         final Component message;
         final Button.OnPress onPress;
 
-        public ButtonOption(Component p_342726_, Button.OnPress p_343620_) {
-            this.message = p_342726_;
-            this.onPress = p_343620_;
+        public ButtonOption(Component pMessage, Button.OnPress pOnPress) {
+            this.message = pMessage;
+            this.onPress = pOnPress;
         }
     }
 }

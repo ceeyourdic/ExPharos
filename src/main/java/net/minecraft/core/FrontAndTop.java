@@ -27,14 +27,14 @@ public enum FrontAndTop implements StringRepresentable {
     private final Direction top;
     private final Direction front;
 
-    private static int lookupKey(Direction p_122627_, Direction p_122628_) {
-        return p_122627_.ordinal() * NUM_DIRECTIONS + p_122628_.ordinal();
+    private static int lookupKey(Direction pFront, Direction pTop) {
+        return pFront.ordinal() * NUM_DIRECTIONS + pTop.ordinal();
     }
 
-    private FrontAndTop(final String p_122618_, final Direction p_122619_, final Direction p_122620_) {
-        this.name = p_122618_;
-        this.front = p_122619_;
-        this.top = p_122620_;
+    private FrontAndTop(final String pName, final Direction pFront, final Direction pTop) {
+        this.name = pName;
+        this.front = pFront;
+        this.top = pTop;
     }
 
     @Override
@@ -42,8 +42,8 @@ public enum FrontAndTop implements StringRepresentable {
         return this.name;
     }
 
-    public static FrontAndTop fromFrontAndTop(Direction p_122623_, Direction p_122624_) {
-        return BY_TOP_FRONT[lookupKey(p_122623_, p_122624_)];
+    public static FrontAndTop fromFrontAndTop(Direction pFront, Direction pTop) {
+        return BY_TOP_FRONT[lookupKey(pFront, pTop)];
     }
 
     public Direction front() {

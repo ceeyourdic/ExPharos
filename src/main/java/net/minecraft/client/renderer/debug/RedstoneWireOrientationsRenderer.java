@@ -21,12 +21,12 @@ public class RedstoneWireOrientationsRenderer implements DebugRenderer.SimpleDeb
     private final Minecraft minecraft;
     private final List<RedstoneWireOrientationsDebugPayload> updatedWires = Lists.newArrayList();
 
-    RedstoneWireOrientationsRenderer(Minecraft p_366596_) {
-        this.minecraft = p_366596_;
+    RedstoneWireOrientationsRenderer(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
-    public void addWireOrientations(RedstoneWireOrientationsDebugPayload p_363711_) {
-        this.updatedWires.add(p_363711_);
+    public void addWireOrientations(RedstoneWireOrientationsDebugPayload pPayload) {
+        this.updatedWires.add(pPayload);
     }
 
     @Override

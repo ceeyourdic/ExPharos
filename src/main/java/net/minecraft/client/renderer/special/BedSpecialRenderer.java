@@ -20,9 +20,9 @@ public class BedSpecialRenderer implements NoDataSpecialModelRenderer {
     private final BedRenderer bedRenderer;
     private final Material material;
 
-    public BedSpecialRenderer(BedRenderer p_376795_, Material p_375687_) {
-        this.bedRenderer = p_376795_;
-        this.material = p_375687_;
+    public BedSpecialRenderer(BedRenderer pBedRenderer, Material pMaterial) {
+        this.bedRenderer = pBedRenderer;
+        this.material = pMaterial;
     }
 
     @Override
@@ -37,8 +37,8 @@ public class BedSpecialRenderer implements NoDataSpecialModelRenderer {
                     .apply(p_375943_, BedSpecialRenderer.Unbaked::new)
         );
 
-        public Unbaked(DyeColor p_378179_) {
-            this(Sheets.colorToResourceMaterial(p_378179_));
+        public Unbaked(DyeColor pColor) {
+            this(Sheets.colorToResourceMaterial(pColor));
         }
 
         @Override

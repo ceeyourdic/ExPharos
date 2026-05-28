@@ -21,31 +21,31 @@ public interface LevelBasedValue {
                     : Either.right(p_343036_)
         );
 
-    static MapCodec<? extends LevelBasedValue> bootstrap(Registry<MapCodec<? extends LevelBasedValue>> p_342464_) {
-        Registry.register(p_342464_, "clamped", LevelBasedValue.Clamped.CODEC);
-        Registry.register(p_342464_, "fraction", LevelBasedValue.Fraction.CODEC);
-        Registry.register(p_342464_, "levels_squared", LevelBasedValue.LevelsSquared.CODEC);
-        Registry.register(p_342464_, "linear", LevelBasedValue.Linear.CODEC);
-        return Registry.register(p_342464_, "lookup", LevelBasedValue.Lookup.CODEC);
+    static MapCodec<? extends LevelBasedValue> bootstrap(Registry<MapCodec<? extends LevelBasedValue>> pRegistry) {
+        Registry.register(pRegistry, "clamped", LevelBasedValue.Clamped.CODEC);
+        Registry.register(pRegistry, "fraction", LevelBasedValue.Fraction.CODEC);
+        Registry.register(pRegistry, "levels_squared", LevelBasedValue.LevelsSquared.CODEC);
+        Registry.register(pRegistry, "linear", LevelBasedValue.Linear.CODEC);
+        return Registry.register(pRegistry, "lookup", LevelBasedValue.Lookup.CODEC);
     }
 
-    static LevelBasedValue.Constant constant(float p_343866_) {
-        return new LevelBasedValue.Constant(p_343866_);
+    static LevelBasedValue.Constant constant(float pValue) {
+        return new LevelBasedValue.Constant(pValue);
     }
 
-    static LevelBasedValue.Linear perLevel(float p_343120_, float p_345457_) {
-        return new LevelBasedValue.Linear(p_343120_, p_345457_);
+    static LevelBasedValue.Linear perLevel(float pBase, float pPerLevelAfterFirst) {
+        return new LevelBasedValue.Linear(pBase, pPerLevelAfterFirst);
     }
 
-    static LevelBasedValue.Linear perLevel(float p_343073_) {
-        return perLevel(p_343073_, p_343073_);
+    static LevelBasedValue.Linear perLevel(float pPerLevel) {
+        return perLevel(pPerLevel, pPerLevel);
     }
 
-    static LevelBasedValue.Lookup lookup(List<Float> p_342101_, LevelBasedValue p_345072_) {
-        return new LevelBasedValue.Lookup(p_342101_, p_345072_);
+    static LevelBasedValue.Lookup lookup(List<Float> pValues, LevelBasedValue pFallback) {
+        return new LevelBasedValue.Lookup(pValues, pFallback);
     }
 
-    float calculate(int p_342618_);
+    float calculate(int pLevel);
 
     MapCodec<? extends LevelBasedValue> codec();
 

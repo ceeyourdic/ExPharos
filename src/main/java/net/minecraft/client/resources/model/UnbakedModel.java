@@ -13,7 +13,7 @@ public interface UnbakedModel extends ResolvableModel {
     boolean DEFAULT_AMBIENT_OCCLUSION = true;
     UnbakedModel.GuiLight DEFAULT_GUI_LIGHT = UnbakedModel.GuiLight.SIDE;
 
-    BakedModel bake(TextureSlots p_376037_, ModelBaker p_250133_, ModelState p_119536_, boolean p_378145_, boolean p_377763_, ItemTransforms p_375499_);
+    BakedModel bake(TextureSlots pTextureSlots, ModelBaker pBaker, ModelState pModelState, boolean pHasAmbientOcclusion, boolean pUseBlockLight, ItemTransforms pTransforms);
 
     @Nullable
     default Boolean getAmbientOcclusion() {
@@ -39,76 +39,76 @@ public interface UnbakedModel extends ResolvableModel {
         return null;
     }
 
-    static BakedModel bakeWithTopModelValues(UnbakedModel p_377580_, ModelBaker p_375760_, ModelState p_377199_) {
-        TextureSlots textureslots = getTopTextureSlots(p_377580_, p_375760_.rootName());
-        boolean flag = getTopAmbientOcclusion(p_377580_);
-        boolean flag1 = getTopGuiLight(p_377580_).lightLikeBlock();
-        ItemTransforms itemtransforms = getTopTransforms(p_377580_);
-        return p_377580_.bake(textureslots, p_375760_, p_377199_, flag, flag1, itemtransforms);
+    static BakedModel bakeWithTopModelValues(UnbakedModel pModel, ModelBaker pBaker, ModelState pModelState) {
+        TextureSlots textureslots = getTopTextureSlots(pModel, pBaker.rootName());
+        boolean flag = getTopAmbientOcclusion(pModel);
+        boolean flag1 = getTopGuiLight(pModel).lightLikeBlock();
+        ItemTransforms itemtransforms = getTopTransforms(pModel);
+        return pModel.bake(textureslots, pBaker, pModelState, flag, flag1, itemtransforms);
     }
 
-    static TextureSlots getTopTextureSlots(UnbakedModel p_375427_, ModelDebugName p_378400_) {
+    static TextureSlots getTopTextureSlots(UnbakedModel pModel, ModelDebugName pName) {
         TextureSlots.Resolver textureslots$resolver = new TextureSlots.Resolver();
 
-        while (p_375427_ != null) {
-            textureslots$resolver.addLast(p_375427_.getTextureSlots());
-            p_375427_ = p_375427_.getParent();
+        while (pModel != null) {
+            textureslots$resolver.addLast(pModel.getTextureSlots());
+            pModel = pModel.getParent();
         }
 
-        return textureslots$resolver.resolve(p_378400_);
+        return textureslots$resolver.resolve(pName);
     }
 
-    static boolean getTopAmbientOcclusion(UnbakedModel p_377158_) {
-        while (p_377158_ != null) {
-            Boolean obool = p_377158_.getAmbientOcclusion();
+    static boolean getTopAmbientOcclusion(UnbakedModel pModel) {
+        while (pModel != null) {
+            Boolean obool = pModel.getAmbientOcclusion();
             if (obool != null) {
                 return obool;
             }
 
-            p_377158_ = p_377158_.getParent();
+            pModel = pModel.getParent();
         }
 
         return true;
     }
 
-    static UnbakedModel.GuiLight getTopGuiLight(UnbakedModel p_375581_) {
-        while (p_375581_ != null) {
-            UnbakedModel.GuiLight unbakedmodel$guilight = p_375581_.getGuiLight();
+    static UnbakedModel.GuiLight getTopGuiLight(UnbakedModel pModel) {
+        while (pModel != null) {
+            UnbakedModel.GuiLight unbakedmodel$guilight = pModel.getGuiLight();
             if (unbakedmodel$guilight != null) {
                 return unbakedmodel$guilight;
             }
 
-            p_375581_ = p_375581_.getParent();
+            pModel = pModel.getParent();
         }
 
         return DEFAULT_GUI_LIGHT;
     }
 
-    static ItemTransform getTopTransform(UnbakedModel p_377137_, ItemDisplayContext p_376495_) {
-        while (p_377137_ != null) {
-            ItemTransforms itemtransforms = p_377137_.getTransforms();
+    static ItemTransform getTopTransform(UnbakedModel pModel, ItemDisplayContext pDisplayContext) {
+        while (pModel != null) {
+            ItemTransforms itemtransforms = pModel.getTransforms();
             if (itemtransforms != null) {
-                ItemTransform itemtransform = itemtransforms.getTransform(p_376495_);
+                ItemTransform itemtransform = itemtransforms.getTransform(pDisplayContext);
                 if (itemtransform != ItemTransform.NO_TRANSFORM) {
                     return itemtransform;
                 }
             }
 
-            p_377137_ = p_377137_.getParent();
+            pModel = pModel.getParent();
         }
 
         return ItemTransform.NO_TRANSFORM;
     }
 
-    static ItemTransforms getTopTransforms(UnbakedModel p_377896_) {
-        ItemTransform itemtransform = getTopTransform(p_377896_, ItemDisplayContext.THIRD_PERSON_LEFT_HAND);
-        ItemTransform itemtransform1 = getTopTransform(p_377896_, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND);
-        ItemTransform itemtransform2 = getTopTransform(p_377896_, ItemDisplayContext.FIRST_PERSON_LEFT_HAND);
-        ItemTransform itemtransform3 = getTopTransform(p_377896_, ItemDisplayContext.FIRST_PERSON_RIGHT_HAND);
-        ItemTransform itemtransform4 = getTopTransform(p_377896_, ItemDisplayContext.HEAD);
-        ItemTransform itemtransform5 = getTopTransform(p_377896_, ItemDisplayContext.GUI);
-        ItemTransform itemtransform6 = getTopTransform(p_377896_, ItemDisplayContext.GROUND);
-        ItemTransform itemtransform7 = getTopTransform(p_377896_, ItemDisplayContext.FIXED);
+    static ItemTransforms getTopTransforms(UnbakedModel pUnbakedModel) {
+        ItemTransform itemtransform = getTopTransform(pUnbakedModel, ItemDisplayContext.THIRD_PERSON_LEFT_HAND);
+        ItemTransform itemtransform1 = getTopTransform(pUnbakedModel, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND);
+        ItemTransform itemtransform2 = getTopTransform(pUnbakedModel, ItemDisplayContext.FIRST_PERSON_LEFT_HAND);
+        ItemTransform itemtransform3 = getTopTransform(pUnbakedModel, ItemDisplayContext.FIRST_PERSON_RIGHT_HAND);
+        ItemTransform itemtransform4 = getTopTransform(pUnbakedModel, ItemDisplayContext.HEAD);
+        ItemTransform itemtransform5 = getTopTransform(pUnbakedModel, ItemDisplayContext.GUI);
+        ItemTransform itemtransform6 = getTopTransform(pUnbakedModel, ItemDisplayContext.GROUND);
+        ItemTransform itemtransform7 = getTopTransform(pUnbakedModel, ItemDisplayContext.FIXED);
         return new ItemTransforms(itemtransform, itemtransform1, itemtransform2, itemtransform3, itemtransform4, itemtransform5, itemtransform6, itemtransform7);
     }
 
@@ -119,18 +119,18 @@ public interface UnbakedModel extends ResolvableModel {
 
         private final String name;
 
-        private GuiLight(final String p_377886_) {
-            this.name = p_377886_;
+        private GuiLight(final String pName) {
+            this.name = pName;
         }
 
-        public static UnbakedModel.GuiLight getByName(String p_378162_) {
+        public static UnbakedModel.GuiLight getByName(String pName) {
             for (UnbakedModel.GuiLight unbakedmodel$guilight : values()) {
-                if (unbakedmodel$guilight.name.equals(p_378162_)) {
+                if (unbakedmodel$guilight.name.equals(pName)) {
                     return unbakedmodel$guilight;
                 }
             }
 
-            throw new IllegalArgumentException("Invalid gui light: " + p_378162_);
+            throw new IllegalArgumentException("Invalid gui light: " + pName);
         }
 
         public boolean lightLikeBlock() {

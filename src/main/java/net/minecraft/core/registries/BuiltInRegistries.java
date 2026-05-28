@@ -221,34 +221,34 @@ public class BuiltInRegistries {
     public static final Registry<RecipeBookCategory> RECIPE_BOOK_CATEGORY = registerSimple(Registries.RECIPE_BOOK_CATEGORY, RecipeBookCategories::bootstrap);
     public static final Registry<? extends Registry<?>> REGISTRY = WRITABLE_REGISTRY;
 
-    private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> p_260095_, BuiltInRegistries.RegistryBootstrap<T> p_259057_) {
-        return internalRegister(p_260095_, new MappedRegistry<>(p_260095_, Lifecycle.stable(), false), p_259057_);
+    private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> pKey, BuiltInRegistries.RegistryBootstrap<T> pBootstrap) {
+        return internalRegister(pKey, new MappedRegistry<>(pKey, Lifecycle.stable(), false), pBootstrap);
     }
 
-    private static <T> Registry<T> registerSimpleWithIntrusiveHolders(ResourceKey<? extends Registry<T>> p_297531_, BuiltInRegistries.RegistryBootstrap<T> p_298446_) {
-        return internalRegister(p_297531_, new MappedRegistry<>(p_297531_, Lifecycle.stable(), true), p_298446_);
+    private static <T> Registry<T> registerSimpleWithIntrusiveHolders(ResourceKey<? extends Registry<T>> pKey, BuiltInRegistries.RegistryBootstrap<T> pBootstrap) {
+        return internalRegister(pKey, new MappedRegistry<>(pKey, Lifecycle.stable(), true), pBootstrap);
     }
 
     private static <T> DefaultedRegistry<T> registerDefaulted(
-        ResourceKey<? extends Registry<T>> p_259887_, String p_259325_, BuiltInRegistries.RegistryBootstrap<T> p_259759_
+        ResourceKey<? extends Registry<T>> pKey, String pDefaultKey, BuiltInRegistries.RegistryBootstrap<T> pBootstrap
     ) {
-        return internalRegister(p_259887_, new DefaultedMappedRegistry<>(p_259325_, p_259887_, Lifecycle.stable(), false), p_259759_);
+        return internalRegister(pKey, new DefaultedMappedRegistry<>(pDefaultKey, pKey, Lifecycle.stable(), false), pBootstrap);
     }
 
     private static <T> DefaultedRegistry<T> registerDefaultedWithIntrusiveHolders(
-        ResourceKey<? extends Registry<T>> p_259296_, String p_259101_, BuiltInRegistries.RegistryBootstrap<T> p_259485_
+        ResourceKey<? extends Registry<T>> pKey, String pDefaultKey, BuiltInRegistries.RegistryBootstrap<T> pBootstrap
     ) {
-        return internalRegister(p_259296_, new DefaultedMappedRegistry<>(p_259101_, p_259296_, Lifecycle.stable(), true), p_259485_);
+        return internalRegister(pKey, new DefaultedMappedRegistry<>(pDefaultKey, pKey, Lifecycle.stable(), true), pBootstrap);
     }
 
     private static <T, R extends WritableRegistry<T>> R internalRegister(
-        ResourceKey<? extends Registry<T>> p_259230_, R p_260327_, BuiltInRegistries.RegistryBootstrap<T> p_259210_
+        ResourceKey<? extends Registry<T>> pKey, R pRegistry, BuiltInRegistries.RegistryBootstrap<T> pBootstrap
     ) {
-        Bootstrap.checkBootstrapCalled(() -> "registry " + p_259230_.location());
-        ResourceLocation resourcelocation = p_259230_.location();
-        LOADERS.put(resourcelocation, () -> p_259210_.run(p_260327_));
-        WRITABLE_REGISTRY.register((ResourceKey)p_259230_, p_260327_, RegistrationInfo.BUILT_IN);
-        return p_260327_;
+        Bootstrap.checkBootstrapCalled(() -> "registry " + pKey.location());
+        ResourceLocation resourcelocation = pKey.location();
+        LOADERS.put(resourcelocation, () -> pBootstrap.run(pRegistry));
+        WRITABLE_REGISTRY.register((ResourceKey)pKey, pRegistry, RegistrationInfo.BUILT_IN);
+        return pRegistry;
     }
 
     public static void bootStrap() {
@@ -274,10 +274,10 @@ public class BuiltInRegistries {
         }
     }
 
-    private static <T extends Registry<?>> void validate(Registry<T> p_260209_) {
-        p_260209_.forEach(p_358159_ -> {
+    private static <T extends Registry<?>> void validate(Registry<T> pRegistry) {
+        pRegistry.forEach(p_358159_ -> {
             if (p_358159_.keySet().isEmpty()) {
-                Util.logAndPauseIfInIde("Registry '" + p_260209_.getKey((T)p_358159_) + "' was empty after loading");
+                Util.logAndPauseIfInIde("Registry '" + pRegistry.getKey((T)p_358159_) + "' was empty after loading");
             }
 
             if (p_358159_ instanceof DefaultedRegistry) {
@@ -287,16 +287,16 @@ public class BuiltInRegistries {
         });
     }
 
-    public static <T> HolderGetter<T> acquireBootstrapRegistrationLookup(Registry<T> p_363847_) {
-        return ((WritableRegistry)p_363847_).createRegistrationLookup();
+    public static <T> HolderGetter<T> acquireBootstrapRegistrationLookup(Registry<T> pRegistry) {
+        return ((WritableRegistry)pRegistry).createRegistrationLookup();
     }
 
-    private static void bindBootstrappedTagsToEmpty(Registry<?> p_365803_) {
-        ((MappedRegistry)p_365803_).bindAllTagsToEmpty();
+    private static void bindBootstrappedTagsToEmpty(Registry<?> pRegistry) {
+        ((MappedRegistry)pRegistry).bindAllTagsToEmpty();
     }
 
     @FunctionalInterface
     interface RegistryBootstrap<T> {
-        Object run(Registry<T> p_260128_);
+        Object run(Registry<T> pRegistry);
     }
 }

@@ -37,10 +37,10 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
     final Collection<Pack> enabledPacks;
     private final GridLayout layout = new GridLayout().columnSpacing(10).rowSpacing(20);
 
-    public ConfirmExperimentalFeaturesScreen(Collection<Pack> p_252011_, BooleanConsumer p_250152_) {
+    public ConfirmExperimentalFeaturesScreen(Collection<Pack> pEnabledPacks, BooleanConsumer pCallback) {
         super(TITLE);
-        this.enabledPacks = p_252011_;
-        this.callback = p_250152_;
+        this.enabledPacks = pEnabledPacks;
+        this.callback = pCallback;
     }
 
     @Override
@@ -121,10 +121,10 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 
         @OnlyIn(Dist.CLIENT)
         class PackList extends ObjectSelectionList<ConfirmExperimentalFeaturesScreen.DetailsScreen.PackListEntry> {
-            public PackList(final Minecraft p_249776_, final Collection<Pack> p_251183_) {
-                super(p_249776_, DetailsScreen.this.width, DetailsScreen.this.layout.getContentHeight(), DetailsScreen.this.layout.getHeaderHeight(), (9 + 2) * 3);
+            public PackList(final Minecraft pMinecraft, final Collection<Pack> pEnabledPacks) {
+                super(pMinecraft, DetailsScreen.this.width, DetailsScreen.this.layout.getContentHeight(), DetailsScreen.this.layout.getHeaderHeight(), (9 + 2) * 3);
 
-                for (Pack pack : p_251183_) {
+                for (Pack pack : pEnabledPacks) {
                     String s = FeatureFlags.printMissingFlags(FeatureFlags.VANILLA_SET, pack.getRequestedFeatures());
                     if (!s.isEmpty()) {
                         Component component = ComponentUtils.mergeStyles(pack.getTitle().copy(), Style.EMPTY.withBold(true));
@@ -150,10 +150,10 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
             private final Component message;
             private final MultiLineLabel splitMessage;
 
-            PackListEntry(final Component p_250724_, final Component p_248883_, final MultiLineLabel p_250949_) {
-                this.packId = p_250724_;
-                this.message = p_248883_;
-                this.splitMessage = p_250949_;
+            PackListEntry(final Component pPackId, final Component pMessage, final MultiLineLabel pSplitMessage) {
+                this.packId = pPackId;
+                this.message = pMessage;
+                this.splitMessage = pSplitMessage;
             }
 
             @Override

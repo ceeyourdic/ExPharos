@@ -25,8 +25,8 @@ public class InventoryScreen extends AbstractRecipeBookScreen<InventoryMenu> {
     private boolean buttonClicked;
     private final EffectsInInventory effects;
 
-    public InventoryScreen(Player p_98839_) {
-        super(p_98839_.inventoryMenu, new CraftingRecipeBookComponent(p_98839_.inventoryMenu), p_98839_.getInventory(), Component.translatable("container.crafting"));
+    public InventoryScreen(Player pPlayer) {
+        super(pPlayer.inventoryMenu, new CraftingRecipeBookComponent(pPlayer.inventoryMenu), pPlayer.getInventory(), Component.translatable("container.crafting"));
         this.titleLabelX = 97;
         this.effects = new EffectsInInventory(this);
     }
@@ -100,84 +100,84 @@ public class InventoryScreen extends AbstractRecipeBookScreen<InventoryMenu> {
     }
 
     public static void renderEntityInInventoryFollowsMouse(
-        GuiGraphics p_282802_,
-        int p_275688_,
-        int p_275245_,
-        int p_275535_,
-        int p_301381_,
-        int p_299741_,
-        float p_275604_,
-        float p_275546_,
-        float p_300682_,
-        LivingEntity p_275689_
+        GuiGraphics pGuiGraphics,
+        int pX1,
+        int pY1,
+        int pX2,
+        int pY2,
+        int pScale,
+        float pYOffset,
+        float pMouseX,
+        float pMouseY,
+        LivingEntity pEntity
     ) {
-        float f = (float)(p_275688_ + p_275535_) / 2.0F;
-        float f1 = (float)(p_275245_ + p_301381_) / 2.0F;
-        p_282802_.enableScissor(p_275688_, p_275245_, p_275535_, p_301381_);
-        float f2 = (float)Math.atan((double)((f - p_275546_) / 40.0F));
-        float f3 = (float)Math.atan((double)((f1 - p_300682_) / 40.0F));
+        float f = (float)(pX1 + pX2) / 2.0F;
+        float f1 = (float)(pY1 + pY2) / 2.0F;
+        pGuiGraphics.enableScissor(pX1, pY1, pX2, pY2);
+        float f2 = (float)Math.atan((double)((f - pMouseX) / 40.0F));
+        float f3 = (float)Math.atan((double)((f1 - pMouseY) / 40.0F));
         Quaternionf quaternionf = new Quaternionf().rotateZ((float) Math.PI);
         Quaternionf quaternionf1 = new Quaternionf().rotateX(f3 * 20.0F * (float) (Math.PI / 180.0));
         quaternionf.mul(quaternionf1);
-        float f4 = p_275689_.yBodyRot;
-        float f5 = p_275689_.getYRot();
-        float f6 = p_275689_.getXRot();
-        float f7 = p_275689_.yHeadRotO;
-        float f8 = p_275689_.yHeadRot;
-        p_275689_.yBodyRot = 180.0F + f2 * 20.0F;
-        p_275689_.setYRot(180.0F + f2 * 40.0F);
-        p_275689_.setXRot(-f3 * 20.0F);
-        p_275689_.yHeadRot = p_275689_.getYRot();
-        p_275689_.yHeadRotO = p_275689_.getYRot();
-        float f9 = p_275689_.getScale();
-        Vector3f vector3f = new Vector3f(0.0F, p_275689_.getBbHeight() / 2.0F + p_275604_ * f9, 0.0F);
-        float f10 = (float)p_299741_ / f9;
-        renderEntityInInventory(p_282802_, f, f1, f10, vector3f, quaternionf, quaternionf1, p_275689_);
-        p_275689_.yBodyRot = f4;
-        p_275689_.setYRot(f5);
-        p_275689_.setXRot(f6);
-        p_275689_.yHeadRotO = f7;
-        p_275689_.yHeadRot = f8;
-        p_282802_.disableScissor();
+        float f4 = pEntity.yBodyRot;
+        float f5 = pEntity.getYRot();
+        float f6 = pEntity.getXRot();
+        float f7 = pEntity.yHeadRotO;
+        float f8 = pEntity.yHeadRot;
+        pEntity.yBodyRot = 180.0F + f2 * 20.0F;
+        pEntity.setYRot(180.0F + f2 * 40.0F);
+        pEntity.setXRot(-f3 * 20.0F);
+        pEntity.yHeadRot = pEntity.getYRot();
+        pEntity.yHeadRotO = pEntity.getYRot();
+        float f9 = pEntity.getScale();
+        Vector3f vector3f = new Vector3f(0.0F, pEntity.getBbHeight() / 2.0F + pYOffset * f9, 0.0F);
+        float f10 = (float)pScale / f9;
+        renderEntityInInventory(pGuiGraphics, f, f1, f10, vector3f, quaternionf, quaternionf1, pEntity);
+        pEntity.yBodyRot = f4;
+        pEntity.setYRot(f5);
+        pEntity.setXRot(f6);
+        pEntity.yHeadRotO = f7;
+        pEntity.yHeadRot = f8;
+        pGuiGraphics.disableScissor();
     }
 
     public static void renderEntityInInventory(
-        GuiGraphics p_282665_,
-        float p_300023_,
-        float p_301239_,
-        float p_330270_,
-        Vector3f p_298037_,
-        Quaternionf p_281880_,
-        @Nullable Quaternionf p_282882_,
-        LivingEntity p_282466_
+        GuiGraphics pGuiGraphics,
+        float pX,
+        float pY,
+        float pScale,
+        Vector3f pTranslate,
+        Quaternionf pPose,
+        @Nullable Quaternionf pCameraOrientation,
+        LivingEntity pEntity
     ) {
-        p_282665_.pose().pushPose();
-        p_282665_.pose().translate((double)p_300023_, (double)p_301239_, 50.0);
-        p_282665_.pose().scale(p_330270_, p_330270_, -p_330270_);
-        p_282665_.pose().translate(p_298037_.x, p_298037_.y, p_298037_.z);
-        p_282665_.pose().mulPose(p_281880_);
-        p_282665_.flush();
+        pGuiGraphics.pose().pushPose();
+        pGuiGraphics.pose().translate((double)pX, (double)pY, 50.0);
+        pGuiGraphics.pose().scale(pScale, pScale, -pScale);
+        pGuiGraphics.pose().translate(pTranslate.x, pTranslate.y, pTranslate.z);
+        pGuiGraphics.pose().mulPose(pPose);
+        pGuiGraphics.flush();
         Lighting.setupForEntityInInventory();
         EntityRenderDispatcher entityrenderdispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-        if (p_282882_ != null) {
-            entityrenderdispatcher.overrideCameraOrientation(p_282882_.conjugate(new Quaternionf()).rotateY((float) Math.PI));
+        if (pCameraOrientation != null) {
+            entityrenderdispatcher.overrideCameraOrientation(pCameraOrientation.conjugate(new Quaternionf()).rotateY((float) Math.PI));
         }
 
         entityrenderdispatcher.setRenderShadow(false);
-        p_282665_.drawSpecial(p_357680_ -> entityrenderdispatcher.render(p_282466_, 0.0, 0.0, 0.0, 1.0F, p_282665_.pose(), p_357680_, 15728880));
-        p_282665_.flush();
+        pGuiGraphics.drawSpecial(p_357680_ -> entityrenderdispatcher.render(pEntity, 0.0, 0.0, 0.0, 1.0F, pGuiGraphics.pose(), p_357680_, 15728880));
+        pGuiGraphics.flush();
         entityrenderdispatcher.setRenderShadow(true);
-        p_282665_.pose().popPose();
+        pGuiGraphics.pose().popPose();
         Lighting.setupFor3DItems();
     }
 
     @Override
-    public boolean mouseReleased(double p_98893_, double p_98894_, int p_98895_) {
+    public boolean mouseReleased(double pMouseX, double pMouseY, int pButton) {
         if (this.buttonClicked) {
             this.buttonClicked = false;
             return true;
         } else {
-            return super.mouseReleased(p_98893_, p_98894_, p_98895_);
+            return super.mouseReleased(pMouseX, pMouseY, pButton);
         }
     }
 }

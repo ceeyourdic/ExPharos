@@ -21,16 +21,16 @@ public class NameReportScreen extends AbstractReportScreen<NameReport.Builder> {
     @Nullable
     private MultiLineEditBox commentBox;
 
-    private NameReportScreen(Screen p_300534_, ReportingContext p_300915_, NameReport.Builder p_300014_) {
-        super(TITLE, p_300534_, p_300915_, p_300014_);
+    private NameReportScreen(Screen pLastScreen, ReportingContext pReportingContext, NameReport.Builder pReportBuilder) {
+        super(TITLE, pLastScreen, pReportingContext, pReportBuilder);
     }
 
-    public NameReportScreen(Screen p_300152_, ReportingContext p_300083_, UUID p_298096_, String p_300249_) {
-        this(p_300152_, p_300083_, new NameReport.Builder(p_298096_, p_300249_, p_300083_.sender().reportLimits()));
+    public NameReportScreen(Screen pLastScreen, ReportingContext pReportingContext, UUID pReportedProfileId, String pReportedName) {
+        this(pLastScreen, pReportingContext, new NameReport.Builder(pReportedProfileId, pReportedName, pReportingContext.sender().reportLimits()));
     }
 
-    public NameReportScreen(Screen p_300445_, ReportingContext p_299367_, NameReport p_297896_) {
-        this(p_300445_, p_299367_, new NameReport.Builder(p_297896_, p_299367_.sender().reportLimits()));
+    public NameReportScreen(Screen pLastScreen, ReportingContext pReportingContext, NameReport pReport) {
+        this(pLastScreen, pReportingContext, new NameReport.Builder(pReport, pReportingContext.sender().reportLimits()));
     }
 
     @Override

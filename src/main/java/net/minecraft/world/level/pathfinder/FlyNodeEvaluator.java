@@ -256,21 +256,21 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
         return i;
     }
 
-    private boolean hasMalus(@Nullable Node p_77264_) {
-        return p_77264_ != null && p_77264_.costMalus >= 0.0F;
+    private boolean hasMalus(@Nullable Node pNode) {
+        return pNode != null && pNode.costMalus >= 0.0F;
     }
 
-    private boolean isOpen(@Nullable Node p_77270_) {
-        return p_77270_ != null && !p_77270_.closed;
+    private boolean isOpen(@Nullable Node pNode) {
+        return pNode != null && !pNode.closed;
     }
 
     @Nullable
-    protected Node findAcceptedNode(int p_262970_, int p_263018_, int p_262947_) {
+    protected Node findAcceptedNode(int pX, int pY, int pZ) {
         Node node = null;
-        PathType pathtype = this.getCachedPathType(p_262970_, p_263018_, p_262947_);
+        PathType pathtype = this.getCachedPathType(pX, pY, pZ);
         float f = this.mob.getPathfindingMalus(pathtype);
         if (f >= 0.0F) {
-            node = this.getNode(p_262970_, p_263018_, p_262947_);
+            node = this.getNode(pX, pY, pZ);
             node.type = pathtype;
             node.costMalus = Math.max(node.costMalus, f);
             if (pathtype == PathType.WALKABLE) {
@@ -318,15 +318,15 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
         return pathtype;
     }
 
-    private Iterable<BlockPos> iteratePathfindingStartNodeCandidatePositions(Mob p_263108_) {
-        AABB aabb = p_263108_.getBoundingBox();
+    private Iterable<BlockPos> iteratePathfindingStartNodeCandidatePositions(Mob pMob) {
+        AABB aabb = pMob.getBoundingBox();
         boolean flag = aabb.getSize() < 1.0;
         if (!flag) {
             return List.of(
-                BlockPos.containing(aabb.minX, (double)p_263108_.getBlockY(), aabb.minZ),
-                BlockPos.containing(aabb.minX, (double)p_263108_.getBlockY(), aabb.maxZ),
-                BlockPos.containing(aabb.maxX, (double)p_263108_.getBlockY(), aabb.minZ),
-                BlockPos.containing(aabb.maxX, (double)p_263108_.getBlockY(), aabb.maxZ)
+                BlockPos.containing(aabb.minX, (double)pMob.getBlockY(), aabb.minZ),
+                BlockPos.containing(aabb.minX, (double)pMob.getBlockY(), aabb.maxZ),
+                BlockPos.containing(aabb.maxX, (double)pMob.getBlockY(), aabb.minZ),
+                BlockPos.containing(aabb.maxX, (double)pMob.getBlockY(), aabb.maxZ)
             );
         } else {
             double d0 = Math.max(0.0, 1.1F - aabb.getZsize());
@@ -334,7 +334,7 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
             double d2 = Math.max(0.0, 1.1F - aabb.getYsize());
             AABB aabb1 = aabb.inflate(d1, d2, d0);
             return BlockPos.randomBetweenClosed(
-                p_263108_.getRandom(),
+                pMob.getRandom(),
                 10,
                 Mth.floor(aabb1.minX),
                 Mth.floor(aabb1.minY),

@@ -13,8 +13,8 @@ public enum RecipeCategory {
 
     private final String recipeFolderName;
 
-    private RecipeCategory(final String p_251010_) {
-        this.recipeFolderName = p_251010_;
+    private RecipeCategory(final String pRecipeFolderName) {
+        this.recipeFolderName = pRecipeFolderName;
     }
 
     public String getFolderName() {

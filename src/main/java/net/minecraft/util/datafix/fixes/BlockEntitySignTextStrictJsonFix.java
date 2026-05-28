@@ -7,12 +7,12 @@ import com.mojang.serialization.Dynamic;
 import net.minecraft.util.datafix.ComponentDataFixUtils;
 
 public class BlockEntitySignTextStrictJsonFix extends NamedEntityFix {
-    public BlockEntitySignTextStrictJsonFix(Schema p_14864_, boolean p_14865_) {
-        super(p_14864_, p_14865_, "BlockEntitySignTextStrictJsonFix", References.BLOCK_ENTITY, "Sign");
+    public BlockEntitySignTextStrictJsonFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType, "BlockEntitySignTextStrictJsonFix", References.BLOCK_ENTITY, "Sign");
     }
 
-    private Dynamic<?> updateLine(Dynamic<?> p_14871_, String p_14872_) {
-        return p_14871_.update(p_14872_, ComponentDataFixUtils::rewriteFromLenient);
+    private Dynamic<?> updateLine(Dynamic<?> pDynamic, String pKey) {
+        return pDynamic.update(pKey, ComponentDataFixUtils::rewriteFromLenient);
     }
 
     @Override

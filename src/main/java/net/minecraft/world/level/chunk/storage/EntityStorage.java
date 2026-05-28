@@ -33,10 +33,10 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
     private final LongSet emptyChunks = new LongOpenHashSet();
     private final ConsecutiveExecutor entityDeserializerQueue;
 
-    public EntityStorage(SimpleRegionStorage p_329511_, ServerLevel p_196924_, Executor p_196928_) {
-        this.simpleRegionStorage = p_329511_;
-        this.level = p_196924_;
-        this.entityDeserializerQueue = new ConsecutiveExecutor(p_196928_, "entity-deserializer");
+    public EntityStorage(SimpleRegionStorage pSimpleRegionStorage, ServerLevel pLevel, Executor pExecutor) {
+        this.simpleRegionStorage = pSimpleRegionStorage;
+        this.level = pLevel;
+        this.entityDeserializerQueue = new ConsecutiveExecutor(pExecutor, "entity-deserializer");
     }
 
     @Override
@@ -71,17 +71,17 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
         }
     }
 
-    private static ChunkPos readChunkPos(CompoundTag p_156571_) {
-        int[] aint = p_156571_.getIntArray("Position");
+    private static ChunkPos readChunkPos(CompoundTag pTag) {
+        int[] aint = pTag.getIntArray("Position");
         return new ChunkPos(aint[0], aint[1]);
     }
 
-    private static void writeChunkPos(CompoundTag p_156563_, ChunkPos p_156564_) {
-        p_156563_.put("Position", new IntArrayTag(new int[]{p_156564_.x, p_156564_.z}));
+    private static void writeChunkPos(CompoundTag pTag, ChunkPos pPos) {
+        pTag.put("Position", new IntArrayTag(new int[]{pPos.x, pPos.z}));
     }
 
-    private static ChunkEntities<Entity> emptyChunk(ChunkPos p_156569_) {
-        return new ChunkEntities<>(p_156569_, ImmutableList.of());
+    private static ChunkEntities<Entity> emptyChunk(ChunkPos pPos) {
+        return new ChunkEntities<>(pPos, ImmutableList.of());
     }
 
     @Override
@@ -107,18 +107,18 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
         }
     }
 
-    private void reportSaveFailureIfPresent(CompletableFuture<?> p_343321_, ChunkPos p_343781_) {
-        p_343321_.exceptionally(p_341884_ -> {
-            LOGGER.error("Failed to store entity chunk {}", p_343781_, p_341884_);
-            this.level.getServer().reportChunkSaveFailure(p_341884_, this.simpleRegionStorage.storageInfo(), p_343781_);
+    private void reportSaveFailureIfPresent(CompletableFuture<?> pFuture, ChunkPos pPos) {
+        pFuture.exceptionally(p_341884_ -> {
+            LOGGER.error("Failed to store entity chunk {}", pPos, p_341884_);
+            this.level.getServer().reportChunkSaveFailure(p_341884_, this.simpleRegionStorage.storageInfo(), pPos);
             return null;
         });
     }
 
-    private void reportLoadFailureIfPresent(CompletableFuture<?> p_344653_, ChunkPos p_345292_) {
-        p_344653_.exceptionally(p_341888_ -> {
-            LOGGER.error("Failed to load entity chunk {}", p_345292_, p_341888_);
-            this.level.getServer().reportChunkLoadFailure(p_341888_, this.simpleRegionStorage.storageInfo(), p_345292_);
+    private void reportLoadFailureIfPresent(CompletableFuture<?> pFuture, ChunkPos pPos) {
+        pFuture.exceptionally(p_341888_ -> {
+            LOGGER.error("Failed to load entity chunk {}", pPos, p_341888_);
+            this.level.getServer().reportChunkLoadFailure(p_341888_, this.simpleRegionStorage.storageInfo(), pPos);
             return null;
         });
     }

@@ -24,10 +24,10 @@ public class FilteredFunction extends LootItemConditionalFunction {
     private final ItemPredicate filter;
     private final LootItemFunction modifier;
 
-    private FilteredFunction(List<LootItemCondition> p_333409_, ItemPredicate p_333352_, LootItemFunction p_328232_) {
-        super(p_333409_);
-        this.filter = p_333352_;
-        this.modifier = p_328232_;
+    private FilteredFunction(List<LootItemCondition> pConditions, ItemPredicate pFilter, LootItemFunction pModifier) {
+        super(pConditions);
+        this.filter = pFilter;
+        this.modifier = pModifier;
     }
 
     @Override

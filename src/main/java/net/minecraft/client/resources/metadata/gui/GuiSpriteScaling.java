@@ -32,28 +32,28 @@ public interface GuiSpriteScaling {
             )
             .validate(GuiSpriteScaling.NineSlice::validate);
 
-        private static DataResult<GuiSpriteScaling.NineSlice> validate(GuiSpriteScaling.NineSlice p_298579_) {
-            GuiSpriteScaling.NineSlice.Border guispritescaling$nineslice$border = p_298579_.border();
-            if (guispritescaling$nineslice$border.left() + guispritescaling$nineslice$border.right() >= p_298579_.width()) {
+        private static DataResult<GuiSpriteScaling.NineSlice> validate(GuiSpriteScaling.NineSlice pNineSlice) {
+            GuiSpriteScaling.NineSlice.Border guispritescaling$nineslice$border = pNineSlice.border();
+            if (guispritescaling$nineslice$border.left() + guispritescaling$nineslice$border.right() >= pNineSlice.width()) {
                 return DataResult.error(
                     () -> "Nine-sliced texture has no horizontal center slice: "
                             + guispritescaling$nineslice$border.left()
                             + " + "
                             + guispritescaling$nineslice$border.right()
                             + " >= "
-                            + p_298579_.width()
+                            + pNineSlice.width()
                 );
             } else {
-                return guispritescaling$nineslice$border.top() + guispritescaling$nineslice$border.bottom() >= p_298579_.height()
+                return guispritescaling$nineslice$border.top() + guispritescaling$nineslice$border.bottom() >= pNineSlice.height()
                     ? DataResult.error(
                         () -> "Nine-sliced texture has no vertical center slice: "
                                 + guispritescaling$nineslice$border.top()
                                 + " + "
                                 + guispritescaling$nineslice$border.bottom()
                                 + " >= "
-                                + p_298579_.height()
+                                + pNineSlice.height()
                     )
-                    : DataResult.success(p_298579_);
+                    : DataResult.success(pNineSlice);
             }
         }
 
@@ -125,9 +125,9 @@ public interface GuiSpriteScaling {
         private final String key;
         private final MapCodec<? extends GuiSpriteScaling> codec;
 
-        private Type(final String p_299685_, final MapCodec<? extends GuiSpriteScaling> p_329674_) {
-            this.key = p_299685_;
-            this.codec = p_329674_;
+        private Type(final String pKey, final MapCodec<? extends GuiSpriteScaling> pCodec) {
+            this.key = pKey;
+            this.codec = pCodec;
         }
 
         @Override

@@ -20,17 +20,17 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class Main {
     @DontObfuscate
-    @SuppressForbidden(
-        reason = "System.out needed before bootstrap"
-    )
-    public static void main(String[] p_375526_) throws IOException {
+//    @SuppressForbidden(
+//        a = "System.out needed before bootstrap"
+//    )
+    public static void main(String[] pArgs) throws IOException {
         SharedConstants.tryDetectVersion();
         OptionParser optionparser = new OptionParser();
         OptionSpec<Void> optionspec = optionparser.accepts("help", "Show the help menu").forHelp();
         OptionSpec<Void> optionspec1 = optionparser.accepts("client", "Include client generators");
         OptionSpec<Void> optionspec2 = optionparser.accepts("all", "Include all generators");
         OptionSpec<String> optionspec3 = optionparser.accepts("output", "Output folder").withRequiredArg().defaultsTo("generated");
-        OptionSet optionset = optionparser.parse(p_375526_);
+        OptionSet optionset = optionparser.parse(pArgs);
         if (!optionset.has(optionspec) && optionset.hasOptions()) {
             Path path = Paths.get(optionspec3.value(optionset));
             boolean flag = optionset.has(optionspec2);
@@ -45,8 +45,8 @@ public class Main {
         }
     }
 
-    public static void addClientProviders(DataGenerator p_377181_, boolean p_375717_) {
-        DataGenerator.PackGenerator datagenerator$packgenerator = p_377181_.getVanillaPack(p_375717_);
+    public static void addClientProviders(DataGenerator pDataGenerator, boolean pToRun) {
+        DataGenerator.PackGenerator datagenerator$packgenerator = pDataGenerator.getVanillaPack(pToRun);
         datagenerator$packgenerator.addProvider(ModelProvider::new);
         datagenerator$packgenerator.addProvider(EquipmentAssetProvider::new);
     }

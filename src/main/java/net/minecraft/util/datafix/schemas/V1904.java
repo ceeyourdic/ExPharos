@@ -11,9 +11,9 @@ public class V1904 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_17766_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_17766_);
-        p_17766_.register(map, "minecraft:cat", () -> V100.equipment(p_17766_));
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
+        pSchema.register(map, "minecraft:cat", () -> V100.equipment(pSchema));
         return map;
     }
 }

@@ -29,17 +29,17 @@ public class HoglinModel extends EntityModel<HoglinRenderState> {
     private final ModelPart leftHindLeg;
     private final ModelPart mane;
 
-    public HoglinModel(ModelPart p_170640_) {
-        super(p_170640_);
-        this.body = p_170640_.getChild("body");
+    public HoglinModel(ModelPart pRoot) {
+        super(pRoot);
+        this.body = pRoot.getChild("body");
         this.mane = this.body.getChild("mane");
-        this.head = p_170640_.getChild("head");
+        this.head = pRoot.getChild("head");
         this.rightEar = this.head.getChild("right_ear");
         this.leftEar = this.head.getChild("left_ear");
-        this.rightFrontLeg = p_170640_.getChild("right_front_leg");
-        this.leftFrontLeg = p_170640_.getChild("left_front_leg");
-        this.rightHindLeg = p_170640_.getChild("right_hind_leg");
-        this.leftHindLeg = p_170640_.getChild("left_hind_leg");
+        this.rightFrontLeg = pRoot.getChild("right_front_leg");
+        this.leftFrontLeg = pRoot.getChild("left_front_leg");
+        this.rightHindLeg = pRoot.getChild("right_hind_leg");
+        this.leftHindLeg = pRoot.getChild("left_hind_leg");
     }
 
     private static MeshDefinition createMesh() {

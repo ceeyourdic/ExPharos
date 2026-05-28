@@ -24,14 +24,22 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import javax.annotation.Nullable;
@@ -45,14 +53,19 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.PrioritizeChunkUpdates;
+import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.chunk.RenderRegionCache;
 import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemFrameRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -60,6 +73,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.server.level.ParticleStatus;
@@ -73,27 +87,58 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.profiling.Zone;
 import net.minecraft.world.TickRateManager;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.entity.EntitySection;
+import net.minecraft.world.level.entity.EntitySectionStorage;
 import net.minecraft.world.level.material.FogType;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.model.data.ModelData;
+import net.optifine.BlockPosM;
+import net.optifine.Config;
+import net.optifine.CustomColors;
+import net.optifine.CustomSky;
+import net.optifine.DynamicLights;
+import net.optifine.EmissiveTextures;
+import net.optifine.Lagometer;
+import net.optifine.SmartAnimations;
+import net.optifine.entity.model.CustomEntityModels;
+import net.optifine.reflect.Reflector;
+import net.optifine.render.ChunkVisibility;
+import net.optifine.render.RenderEnv;
+import net.optifine.render.RenderStateManager;
+import net.optifine.render.RenderUtils;
+import net.optifine.render.VboRegion;
+import net.optifine.shaders.FrustumDummy;
+import net.optifine.shaders.RenderStage;
+import net.optifine.shaders.Shaders;
+import net.optifine.shaders.ShadersRender;
+import net.optifine.util.BiomeUtils;
+import net.optifine.util.GpuMemory;
+import net.optifine.util.MathUtils;
+import net.optifine.util.PairInt;
+import net.optifine.util.RandomUtils;
+import net.optifine.util.RenderChunkUtils;
+import net.optifine.util.SectionUtils;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.joml.Vector4f;
+import org.lwjgl.opengl.GL11;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseable {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final ResourceLocation TRANSPARENCY_POST_CHAIN_ID = ResourceLocation.withDefaultNamespace("transparency");
@@ -109,11 +154,11 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
     private final SkyRenderer skyRenderer = new SkyRenderer();
     private final CloudRenderer cloudRenderer = new CloudRenderer();
     private final WorldBorderRenderer worldBorderRenderer = new WorldBorderRenderer();
-    private final WeatherEffectRenderer weatherEffectRenderer = new WeatherEffectRenderer();
+    private WeatherEffectRenderer weatherEffectRenderer = new WeatherEffectRenderer();
     @Nullable
-    private ClientLevel level;
+    protected ClientLevel level;
     private final SectionOcclusionGraph sectionOcclusionGraph = new SectionOcclusionGraph();
-    private final ObjectArrayList<SectionRenderDispatcher.RenderSection> visibleSections = new ObjectArrayList<>(10000);
+    private ObjectArrayList<SectionRenderDispatcher.RenderSection> visibleSections = new ObjectArrayList<>(10000);
     private final ObjectArrayList<SectionRenderDispatcher.RenderSection> nearbyVisibleSections = new ObjectArrayList<>(50);
     private final Set<BlockEntity> globalBlockEntities = Sets.newHashSet();
     @Nullable
@@ -144,16 +189,43 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
     @Nullable
     private BlockPos lastTranslucentSortBlockPos;
     private int translucencyResortIterationIndex;
+    private Set<SectionRenderDispatcher.RenderSection> chunksToResortTransparency = new LinkedHashSet<>();
+    private int countChunksToUpdate = 0;
+    private ObjectArrayList<SectionRenderDispatcher.RenderSection> renderInfosTerrain = new ObjectArrayList<>(1024);
+    private LongOpenHashSet renderInfosEntities = new LongOpenHashSet(1024);
+    private List<SectionRenderDispatcher.RenderSection> renderInfosTileEntities = new ArrayList<>(1024);
+    private ObjectArrayList renderInfosTerrainNormal = new ObjectArrayList(1024);
+    private LongOpenHashSet renderInfosEntitiesNormal = new LongOpenHashSet(1024);
+    private List renderInfosTileEntitiesNormal = new ArrayList(1024);
+    private ObjectArrayList renderInfosTerrainShadow = new ObjectArrayList(1024);
+    private LongOpenHashSet renderInfosEntitiesShadow = new LongOpenHashSet(1024);
+    private List renderInfosTileEntitiesShadow = new ArrayList(1024);
+    protected int renderDistance = 0;
+    protected int renderDistanceSq = 0;
+    protected int renderDistanceXZSq = 0;
+    private int countTileEntitiesRendered;
+    private RenderEnv renderEnv = new RenderEnv(Blocks.AIR.defaultBlockState(), new BlockPos(0, 0, 0));
+    public boolean renderOverlayDamaged = false;
+    public boolean renderOverlayEyes = false;
+    private boolean firstWorldLoad = false;
+    private static int renderEntitiesCounter = 0;
+    public int loadVisibleChunksCounter = -1;
+    public static MessageSignature loadVisibleChunksMessageId = new MessageSignature(RandomUtils.getRandomBytes(256));
+    private static boolean ambientOcclusion = false;
+    private Map<String, List<Entity>> mapEntityLists = new HashMap<>();
+    private Map<RenderType, Map> mapRegionLayers = new LinkedHashMap<>();
+    private int frameId;
+    private boolean debugFixTerrainFrustumShadow;
 
-    public LevelRenderer(Minecraft p_234245_, EntityRenderDispatcher p_234246_, BlockEntityRenderDispatcher p_234247_, RenderBuffers p_234248_) {
-        this.minecraft = p_234245_;
-        this.entityRenderDispatcher = p_234246_;
-        this.blockEntityRenderDispatcher = p_234247_;
-        this.renderBuffers = p_234248_;
+    public LevelRenderer(Minecraft pMinecraft, EntityRenderDispatcher pEntityRenderDispatcher, BlockEntityRenderDispatcher pBlockEntityRenderDispatcher, RenderBuffers pRenderBuffers) {
+        this.minecraft = pMinecraft;
+        this.entityRenderDispatcher = pEntityRenderDispatcher;
+        this.blockEntityRenderDispatcher = pBlockEntityRenderDispatcher;
+        this.renderBuffers = pRenderBuffers;
     }
 
-    public void tickParticles(Camera p_369538_) {
-        this.weatherEffectRenderer.tickRainParticles(this.minecraft.level, p_369538_, this.ticks, this.minecraft.options.particles().get());
+    public void tickParticles(Camera pCamera) {
+        this.weatherEffectRenderer.tickRainParticles(this.minecraft.level, pCamera, this.ticks, this.minecraft.options.particles().get());
     }
 
     @Override
@@ -167,7 +239,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
     }
 
     @Override
-    public void onResourceManagerReload(ResourceManager p_109513_) {
+    public void onResourceManagerReload(ResourceManager pResourceManager) {
         this.initOutline();
     }
 
@@ -210,17 +282,27 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
         }
     }
 
-    protected boolean shouldShowEntityOutlines() {
-        return !this.minecraft.gameRenderer.isPanoramicMode() && this.entityOutlineTarget != null && this.minecraft.player != null;
+    public boolean shouldShowEntityOutlines() {
+        return !Config.isShaders() && Config.isMainFramebufferEnabled()
+            ? !this.minecraft.gameRenderer.isPanoramicMode() && this.entityOutlineTarget != null && this.minecraft.player != null
+            : false;
     }
 
-    public void setLevel(@Nullable ClientLevel p_109702_) {
+    public void setLevel(@Nullable ClientLevel pLevel) {
         this.lastCameraSectionX = Integer.MIN_VALUE;
         this.lastCameraSectionY = Integer.MIN_VALUE;
         this.lastCameraSectionZ = Integer.MIN_VALUE;
-        this.entityRenderDispatcher.setLevel(p_109702_);
-        this.level = p_109702_;
-        if (p_109702_ != null) {
+        this.entityRenderDispatcher.setLevel(pLevel);
+        this.level = pLevel;
+        if (Config.isDynamicLights()) {
+            DynamicLights.clear();
+        }
+
+        ChunkVisibility.reset();
+        this.renderEnv.reset(null, null);
+        BiomeUtils.onWorldChanged(this.level);
+        Shaders.checkWorldChanged(this.level);
+        if (pLevel != null) {
             this.allChanged();
         } else {
             if (this.viewArea != null) {
@@ -236,6 +318,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
             this.globalBlockEntities.clear();
             this.sectionOcclusionGraph.waitAndReset(null);
             this.clearVisibleSections();
+            this.clearRenderInfos();
         }
     }
 
@@ -256,12 +339,24 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
             }
 
             this.cloudRenderer.markForRebuild();
-            ItemBlockRenderTypes.setFancy(Minecraft.useFancyGraphics());
+            ItemBlockRenderTypes.setFancy(Config.isTreesFancy());
+            ModelBlockRenderer.updateAoLightValue();
+            if (Config.isDynamicLights()) {
+                DynamicLights.clear();
+            }
+
+            SmartAnimations.update();
+            ambientOcclusion = Minecraft.useAmbientOcclusion();
             this.lastViewDistance = this.minecraft.options.getEffectiveRenderDistance();
+            this.renderDistance = this.lastViewDistance * 16;
+            this.renderDistanceSq = this.renderDistance * this.renderDistance;
+            double d0 = (double)((this.lastViewDistance + 1) * 16);
+            this.renderDistanceXZSq = (int)(d0 * d0);
             if (this.viewArea != null) {
                 this.viewArea.releaseAllBuffers();
             }
 
+            GpuMemory.bufferFreed(GpuMemory.getBufferAllocated());
             this.sectionRenderDispatcher.blockUntilClear();
             synchronized (this.globalBlockEntities) {
                 this.globalBlockEntities.clear();
@@ -270,15 +365,17 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
             this.viewArea = new ViewArea(this.sectionRenderDispatcher, this.level, this.minecraft.options.getEffectiveRenderDistance(), this);
             this.sectionOcclusionGraph.waitAndReset(this.viewArea);
             this.clearVisibleSections();
+            this.clearRenderInfos();
+            this.killFrustum();
             Camera camera = this.minecraft.gameRenderer.getMainCamera();
             this.viewArea.repositionCamera(SectionPos.of(camera.getPosition()));
         }
     }
 
-    public void resize(int p_109488_, int p_109489_) {
+    public void resize(int pWidth, int pHeight) {
         this.needsUpdate();
         if (this.entityOutlineTarget != null) {
-            this.entityOutlineTarget.resize(p_109488_, p_109489_);
+            this.entityOutlineTarget.resize(pWidth, pHeight);
         }
     }
 
@@ -309,23 +406,15 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
     }
 
     public int countRenderedSections() {
-        int i = 0;
-
-        for (SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection : this.visibleSections) {
-            if (sectionrenderdispatcher$rendersection.getCompiled().hasRenderableLayers()) {
-                i++;
-            }
-        }
-
-        return i;
+        return this.renderInfosTerrain.size();
     }
 
     public String getEntityStatistics() {
-        return "E: " + this.visibleEntityCount + "/" + this.level.getEntityCount() + ", SD: " + this.level.getServerSimulationDistance();
+        return "E: " + this.visibleEntityCount + "/" + this.level.getEntityCount() + ", SD: " + this.level.getServerSimulationDistance() + ", " + Config.getVersionDebug();
     }
 
-    private void setupRender(Camera p_194339_, Frustum p_194340_, boolean p_194341_, boolean p_194342_) {
-        Vec3 vec3 = p_194339_.getPosition();
+    private void setupRender(Camera pCamera, Frustum pFrustum, boolean pHasCapturedFrustum, boolean pIsSpectator) {
+        Vec3 vec3 = pCamera.getPosition();
         if (this.minecraft.options.getEffectiveRenderDistance() != this.lastViewDistance) {
             this.allChanged();
         }
@@ -342,6 +431,10 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
             this.viewArea.repositionCamera(SectionPos.of(vec3));
         }
 
+        if (Config.isDynamicLights()) {
+            DynamicLights.update(this);
+        }
+
         this.sectionRenderDispatcher.setCamera(vec3);
         profilerfiller.popPush("cull");
         double d0 = Math.floor(vec3.x / 8.0);
@@ -355,70 +448,91 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
         this.prevCamY = d1;
         this.prevCamZ = d2;
         profilerfiller.popPush("update");
-        if (!p_194341_) {
+        Lagometer.timerVisibility.start();
+        if (!pHasCapturedFrustum) {
             boolean flag = this.minecraft.smartCull;
-            if (p_194342_ && this.level.getBlockState(p_194339_.getBlockPosition()).isSolidRender()) {
+            if (pIsSpectator && this.level.getBlockState(pCamera.getBlockPosition()).isSolidRender()) {
                 flag = false;
             }
 
             profilerfiller.push("section_occlusion_graph");
-            this.sectionOcclusionGraph.update(flag, p_194339_, p_194340_, this.visibleSections, this.level.getChunkSource().getLoadedEmptySections());
+            this.sectionOcclusionGraph.update(flag, pCamera, pFrustum, this.visibleSections, this.level.getChunkSource().getLoadedEmptySections());
             profilerfiller.pop();
-            double d3 = Math.floor((double)(p_194339_.getXRot() / 2.0F));
-            double d4 = Math.floor((double)(p_194339_.getYRot() / 2.0F));
+            double d3 = Math.floor((double)(pCamera.getXRot() / 2.0F));
+            double d4 = Math.floor((double)(pCamera.getYRot() / 2.0F));
+            boolean flag1 = false;
             if (this.sectionOcclusionGraph.consumeFrustumUpdate() || d3 != this.prevCamRotX || d4 != this.prevCamRotY) {
-                this.applyFrustum(offsetFrustum(p_194340_));
+                this.applyFrustum(offsetFrustum(pFrustum));
                 this.prevCamRotX = d3;
                 this.prevCamRotY = d4;
+                flag1 = true;
+                ShadersRender.frustumTerrainShadowChanged = true;
+            }
+
+            if (this.level.getSectionStorage().resetUpdated() || flag1) {
+                this.applyFrustumEntities(pFrustum, -1);
+                ShadersRender.frustumEntitiesShadowChanged = true;
             }
         }
 
+        Lagometer.timerVisibility.end();
         profilerfiller.pop();
     }
 
-    public static Frustum offsetFrustum(Frustum p_298803_) {
-        return new Frustum(p_298803_).offsetToFullyIncludeCameraCube(8);
+    public static Frustum offsetFrustum(Frustum pFrustum) {
+        return new Frustum(pFrustum).offsetToFullyIncludeCameraCube(8);
     }
 
-    private void applyFrustum(Frustum p_194355_) {
+    private void applyFrustum(Frustum pFrustum) {
+        this.applyFrustum(pFrustum, true, -1);
+    }
+
+    public void applyFrustum(Frustum frustumIn, boolean updateRenderInfos, int maxChunkDistance) {
         if (!Minecraft.getInstance().isSameThread()) {
             throw new IllegalStateException("applyFrustum called from wrong thread: " + Thread.currentThread().getName());
         } else {
             Profiler.get().push("apply_frustum");
-            this.clearVisibleSections();
-            this.sectionOcclusionGraph.addSectionsInFrustum(p_194355_, this.visibleSections, this.nearbyVisibleSections);
+            if (updateRenderInfos) {
+                this.clearVisibleSections();
+            }
+
+            this.clearRenderInfosTerrain();
+            this.sectionOcclusionGraph.addSectionsInFrustum(frustumIn, this.visibleSections, this.nearbyVisibleSections, updateRenderInfos, maxChunkDistance);
             Profiler.get().pop();
         }
     }
 
-    public void addRecentlyCompiledSection(SectionRenderDispatcher.RenderSection p_301248_) {
-        this.sectionOcclusionGraph.schedulePropagationFrom(p_301248_);
+    public void addRecentlyCompiledSection(SectionRenderDispatcher.RenderSection pRenderSection) {
+        this.sectionOcclusionGraph.schedulePropagationFrom(pRenderSection);
     }
 
-    public void prepareCullFrustum(Vec3 p_253766_, Matrix4f p_254341_, Matrix4f p_332544_) {
-        this.cullingFrustum = new Frustum(p_254341_, p_332544_);
-        this.cullingFrustum.prepare(p_253766_.x(), p_253766_.y(), p_253766_.z());
+    public void prepareCullFrustum(Vec3 pCameraPosition, Matrix4f pFrustumMatrix, Matrix4f pProjectionMatrix) {
+        this.cullingFrustum = new Frustum(pFrustumMatrix, pProjectionMatrix);
+        this.cullingFrustum.prepare(pCameraPosition.x(), pCameraPosition.y(), pCameraPosition.z());
+        if (Config.isShaders() && !Shaders.isFrustumCulling()) {
+            this.cullingFrustum.disabled = true;
+        }
     }
 
     public void renderLevel(
-        GraphicsResourceAllocator p_367325_,
-        DeltaTracker p_342180_,
-        boolean p_109603_,
-        Camera p_109604_,
-        GameRenderer p_109605_,
-        Matrix4f p_254120_,
-        Matrix4f p_330527_
+        GraphicsResourceAllocator pGraphicsResourceAllocator,
+        DeltaTracker pDeltaTracker,
+        boolean pRenderBlockOutline,
+        Camera pCamera,
+        GameRenderer pGameRenderer,
+        Matrix4f pFrustumMatrix,
+        Matrix4f pProjectionMatrix
     ) {
-        float f = p_342180_.getGameTimeDeltaPartialTick(false);
+        float f = pDeltaTracker.getGameTimeDeltaPartialTick(false);
         RenderSystem.setShaderGameTime(this.level.getGameTime(), f);
-        this.blockEntityRenderDispatcher.prepare(this.level, p_109604_, this.minecraft.hitResult);
-        this.entityRenderDispatcher.prepare(this.level, p_109604_, this.minecraft.crosshairPickEntity);
+        this.blockEntityRenderDispatcher.prepare(this.level, pCamera, this.minecraft.hitResult);
+        this.entityRenderDispatcher.prepare(this.level, pCamera, this.minecraft.crosshairPickEntity);
         final ProfilerFiller profilerfiller = Profiler.get();
         profilerfiller.popPush("light_update_queue");
         this.level.pollLightUpdates();
         profilerfiller.popPush("light_updates");
         this.level.getChunkSource().getLightEngine().runLightUpdates();
-        Vec3 vec3 = p_109604_.getPosition();
+        Vec3 vec3 = pCamera.getPosition();
         double d0 = vec3.x();
         double d1 = vec3.y();
         double d2 = vec3.z();
@@ -427,27 +541,53 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
         Frustum frustum = flag ? this.capturedFrustum : this.cullingFrustum;
         Profiler.get().popPush("captureFrustum");
         if (this.captureFrustum) {
-            this.capturedFrustum = flag ? new Frustum(p_254120_, p_330527_) : frustum;
+            this.capturedFrustum = flag ? new Frustum(pFrustumMatrix, pProjectionMatrix) : frustum;
             this.capturedFrustum.prepare(d0, d1, d2);
             this.captureFrustum = false;
+            frustum = this.capturedFrustum;
+            frustum.disabled = Config.isShaders() && !Shaders.isFrustumCulling();
+            frustum.prepare(vec3.x, vec3.y, vec3.z);
+            this.applyFrustum(frustum, false, -1);
+            this.applyFrustumEntities(frustum, -1);
         }
 
+        if (this.debugFixTerrainFrustumShadow) {
+            this.capturedFrustum = flag ? new Frustum(pFrustumMatrix, pProjectionMatrix) : frustum;
+            this.capturedFrustum.prepare(d0, d1, d2);
+            this.debugFixTerrainFrustumShadow = false;
+            frustum = this.capturedFrustum;
+            frustum.prepare(vec3.x, vec3.y, vec3.z);
+            ShadersRender.frustumTerrainShadowChanged = true;
+            ShadersRender.frustumEntitiesShadowChanged = true;
+            ShadersRender.applyFrustumShadow(this, frustum);
+        }
+
+        if (Config.isShaders()) {
+            Shaders.setViewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
+        } else {
+            RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
+        }
+
+        boolean flag1 = Config.isShaders();
         profilerfiller.popPush("fog");
-        float f1 = p_109605_.getRenderDistance();
-        boolean flag1 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d0), Mth.floor(d1)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
-        Vector4f vector4f = FogRenderer.computeFogColor(p_109604_, f, this.minecraft.level, this.minecraft.options.getEffectiveRenderDistance(), p_109605_.getDarkenWorldAmount(f));
-        FogParameters fogparameters = FogRenderer.setupFog(p_109604_, FogRenderer.FogMode.FOG_TERRAIN, vector4f, f1, flag1, f);
-        FogParameters fogparameters1 = FogRenderer.setupFog(p_109604_, FogRenderer.FogMode.FOG_SKY, vector4f, f1, flag1, f);
+        float f1 = pGameRenderer.getRenderDistance();
+        boolean flag2 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d0), Mth.floor(d1)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
+        boolean flag3 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d0), Mth.floor(d1));
+        Vector4f vector4f = FogRenderer.computeFogColor(pCamera, f, this.minecraft.level, this.minecraft.options.getEffectiveRenderDistance(), pGameRenderer.getDarkenWorldAmount(f));
+        FogParameters fogparameters = FogRenderer.setupFog(pCamera, FogRenderer.FogMode.FOG_TERRAIN, vector4f, f1, flag2, f);
+        FogParameters fogparameters1 = FogRenderer.setupFog(pCamera, FogRenderer.FogMode.FOG_SKY, vector4f, f1, flag2, f);
         profilerfiller.popPush("cullEntities");
-        boolean flag2 = this.collectVisibleEntities(p_109604_, frustum, this.visibleEntities);
+        boolean flag4 = this.collectVisibleEntities(pCamera, frustum, this.visibleEntities);
         this.visibleEntityCount = this.visibleEntities.size();
+        this.checkLoadVisibleChunks(pCamera, frustum, this.minecraft.player.isSpectator());
+        this.frameId++;
         profilerfiller.popPush("terrain_setup");
-        this.setupRender(p_109604_, frustum, flag, this.minecraft.player.isSpectator());
+        this.setupRender(pCamera, frustum, flag, this.minecraft.player.isSpectator());
         profilerfiller.popPush("compile_sections");
-        this.compileSections(p_109604_);
+        this.compileSections(pCamera);
         Matrix4fStack matrix4fstack = RenderSystem.getModelViewStack();
         matrix4fstack.pushMatrix();
-        matrix4fstack.mul(p_254120_);
+        matrix4fstack.mul(pFrustumMatrix);
         FrameGraphBuilder framegraphbuilder = new FrameGraphBuilder();
         this.targets.main = framegraphbuilder.importExternal("main", this.minecraft.getMainRenderTarget());
         int i = this.minecraft.getMainRenderTarget().width;
@@ -471,36 +611,49 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
         framepass.executes(() -> {
             RenderSystem.clearColor(vector4f.x, vector4f.y, vector4f.z, 0.0F);
             RenderSystem.clear(16640);
+            if (flag1) {
+                Shaders.clearRenderBuffer();
+                Shaders.setCamera(pFrustumMatrix, pCamera, f);
+                Shaders.renderPrepare();
+            }
         });
-        if (!flag1) {
-            this.addSkyPass(framegraphbuilder, p_109604_, f, fogparameters1);
-        }
-
-        this.addMainPass(framegraphbuilder, frustum, p_109604_, p_254120_, p_330527_, fogparameters, p_109603_, flag2, p_342180_, profilerfiller);
-        PostChain postchain1 = this.minecraft.getShaderManager().getPostChain(ENTITY_OUTLINE_POST_CHAIN_ID, LevelTargetBundle.OUTLINE_TARGETS);
-        if (flag2 && postchain1 != null) {
-            postchain1.addToFrame(framegraphbuilder, i, j, this.targets);
-        }
-
-        this.addParticlesPass(framegraphbuilder, p_109604_, f, fogparameters);
-        CloudStatus cloudstatus = this.minecraft.options.getCloudsType();
-        if (cloudstatus != CloudStatus.OFF) {
-            float f2 = this.level.effects().getCloudHeight();
-            if (!Float.isNaN(f2)) {
-                float f3 = (float)this.ticks + f;
-                int k = this.level.getCloudColor(f);
-                this.addCloudsPass(framegraphbuilder, p_254120_, p_330527_, cloudstatus, p_109604_.getPosition(), f3, k, f2 + 0.33F);
+        if (!flag3) {
+            if ((Config.isSkyEnabled() || Config.isSunMoonEnabled() || Config.isStarsEnabled()) && !Shaders.isShadowPass) {
+                this.addSkyPass(framegraphbuilder, pCamera, f, fogparameters1);
+            } else {
+                GlStateManager._disableBlend();
             }
         }
 
-        this.addWeatherPass(framegraphbuilder, p_109604_.getPosition(), f, fogparameters);
+        this.addMainPass(framegraphbuilder, frustum, pCamera, pFrustumMatrix, pProjectionMatrix, fogparameters, pRenderBlockOutline, flag4, pDeltaTracker, profilerfiller);
+        PostChain postchain1 = this.minecraft.getShaderManager().getPostChain(ENTITY_OUTLINE_POST_CHAIN_ID, LevelTargetBundle.OUTLINE_TARGETS);
+        if (flag4 && postchain1 != null) {
+            postchain1.addToFrame(framegraphbuilder, i, j, this.targets);
+        }
+
+        if (!Shaders.isParticlesBeforeDeferred()) {
+            this.addParticlesPass(framegraphbuilder, pCamera, f, fogparameters, frustum);
+        }
+
+        CloudStatus cloudstatus = this.minecraft.options.getCloudsType();
+        if (cloudstatus != CloudStatus.OFF && !Config.isCloudsOff()) {
+            float f2 = this.level.effects().getCloudHeight();
+            if (!Float.isNaN(f2)) {
+                f2 = (float)((double)f2 + this.minecraft.options.ofCloudsHeight * 128.0);
+                float f3 = (float)this.ticks + f;
+                int k = this.level.getCloudColor(f);
+                this.addCloudsPass(framegraphbuilder, pFrustumMatrix, pProjectionMatrix, cloudstatus, pCamera.getPosition(), f3, k, f2 + 0.33F, fogparameters1);
+            }
+        }
+
+        this.addWeatherPass(framegraphbuilder, pCamera.getPosition(), f, fogparameters);
         if (postchain != null) {
             postchain.addToFrame(framegraphbuilder, i, j, this.targets);
         }
 
         this.addLateDebugPass(framegraphbuilder, vec3, fogparameters);
         profilerfiller.popPush("framegraph");
-        framegraphbuilder.execute(p_367325_, new FrameGraphBuilder.Inspector() {
+        framegraphbuilder.execute(pGraphicsResourceAllocator, new FrameGraphBuilder.Inspector() {
             @Override
             public void beforeExecutePass(String p_367748_) {
                 profilerfiller.push(p_367748_);
@@ -521,18 +674,18 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
     }
 
     private void addMainPass(
-        FrameGraphBuilder p_365119_,
-        Frustum p_363733_,
-        Camera p_364769_,
-        Matrix4f p_361439_,
-        Matrix4f p_369924_,
-        FogParameters p_365435_,
-        boolean p_362593_,
-        boolean p_368830_,
-        DeltaTracker p_365046_,
-        ProfilerFiller p_369478_
+        FrameGraphBuilder pFrameGraphBuilder,
+        Frustum pFrustum,
+        Camera pCamera,
+        Matrix4f pFrustumMatrix,
+        Matrix4f pProjectionMatrix,
+        FogParameters pFogParameters,
+        boolean pRenderBlockOutline,
+        boolean pRenderEntityOutline,
+        DeltaTracker pDeltaTracker,
+        ProfilerFiller pProfiler
     ) {
-        FramePass framepass = p_365119_.addPass("main");
+        FramePass framepass = pFrameGraphBuilder.addPass("main");
         this.targets.main = framepass.readsAndWrites(this.targets.main);
         if (this.targets.translucent != null) {
             this.targets.translucent = framepass.readsAndWrites(this.targets.translucent);
@@ -546,7 +699,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
             this.targets.weather = framepass.readsAndWrites(this.targets.weather);
         }
 
-        if (p_368830_ && this.targets.entityOutline != null) {
+        if (pRenderEntityOutline && this.targets.entityOutline != null) {
             this.targets.entityOutline = framepass.readsAndWrites(this.targets.entityOutline);
         }
 
@@ -556,16 +709,30 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
         ResourceHandle<RenderTarget> resourcehandle3 = this.targets.weather;
         ResourceHandle<RenderTarget> resourcehandle4 = this.targets.entityOutline;
         framepass.executes(() -> {
-            RenderSystem.setShaderFog(p_365435_);
-            float f = p_365046_.getGameTimeDeltaPartialTick(false);
-            Vec3 vec3 = p_364769_.getPosition();
+            RenderSystem.setShaderFog(pFogParameters);
+            float f = pDeltaTracker.getGameTimeDeltaPartialTick(false);
+            Vec3 vec3 = pCamera.getPosition();
             double d0 = vec3.x();
             double d1 = vec3.y();
             double d2 = vec3.z();
-            p_369478_.push("terrain");
-            this.renderSectionLayer(RenderType.solid(), d0, d1, d2, p_361439_, p_369924_);
-            this.renderSectionLayer(RenderType.cutoutMipped(), d0, d1, d2, p_361439_, p_369924_);
-            this.renderSectionLayer(RenderType.cutout(), d0, d1, d2, p_361439_, p_369924_);
+            pProfiler.push("terrain");
+            Lagometer.timerTerrain.start();
+            if (this.minecraft.options.ofSmoothFps) {
+                pProfiler.popPush("finish");
+                GL11.glFinish();
+                pProfiler.popPush("terrain");
+            }
+
+            boolean flag = Config.isShaders();
+            this.renderSectionLayer(RenderType.solid(), d0, d1, d2, pFrustumMatrix, pProjectionMatrix);
+            this.minecraft.getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS).setBlurMipmap(false, this.minecraft.options.mipmapLevels().get() > 0);
+            this.renderSectionLayer(RenderType.cutoutMipped(), d0, d1, d2, pFrustumMatrix, pProjectionMatrix);
+            this.minecraft.getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS).restoreLastBlurMipmap();
+            this.renderSectionLayer(RenderType.cutout(), d0, d1, d2, pFrustumMatrix, pProjectionMatrix);
+            if (flag) {
+                ShadersRender.endTerrain();
+            }
+
             if (this.level.effects().constantAmbientLight()) {
                 Lighting.setupNetherLevel();
             } else {
@@ -590,15 +757,46 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
                 resourcehandle.get().bindWrite(false);
             }
 
+            if (flag) {
+                Shaders.beginEntities();
+            }
+
+            ItemFrameRenderer.updateItemRenderDistance();
+            renderEntitiesCounter++;
+            this.countTileEntitiesRendered = 0;
             PoseStack posestack = new PoseStack();
             MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
             MultiBufferSource.BufferSource multibuffersource$buffersource1 = this.renderBuffers.crumblingBufferSource();
-            p_369478_.popPush("entities");
-            this.renderEntities(posestack, multibuffersource$buffersource, p_364769_, p_365046_, this.visibleEntities);
+            pProfiler.popPush("entities");
+            if (Config.isFastRender()) {
+                RenderStateManager.enableCache();
+                multibuffersource$buffersource.enableCache();
+            }
+
+            if (Config.isRenderRegions() || Config.isMultiTexture()) {
+                RenderSystem.setShader(CoreShaders.POSITION);
+            }
+
+            this.renderEntities(posestack, multibuffersource$buffersource, pCamera, pDeltaTracker, this.visibleEntities);
             multibuffersource$buffersource.endLastBatch();
             this.checkPoseStack(posestack);
-            p_369478_.popPush("blockentities");
-            this.renderBlockEntities(posestack, multibuffersource$buffersource, multibuffersource$buffersource1, p_364769_, f);
+            if (Config.isFastRender()) {
+                multibuffersource$buffersource.flushCache();
+                RenderStateManager.flushCache();
+            }
+
+            if (flag) {
+                Shaders.endEntities();
+            }
+
+            if (flag) {
+                Shaders.beginBlockEntities();
+            }
+
+            SignRenderer.updateTextRenderDistance();
+            pProfiler.popPush("blockentities");
+            boolean flag1 = this.renderBlockEntities(posestack, multibuffersource$buffersource, multibuffersource$buffersource1, pCamera, f, pFrustum);
+            boolean flag2 = flag1 || pRenderBlockOutline;
             multibuffersource$buffersource.endLastBatch();
             this.checkPoseStack(posestack);
             multibuffersource$buffersource.endBatch(RenderType.solid());
@@ -612,13 +810,28 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
             multibuffersource$buffersource.endBatch(Sheets.hangingSignSheet());
             multibuffersource$buffersource.endBatch(Sheets.chestSheet());
             this.renderBuffers.outlineBufferSource().endOutlineBatch();
-            if (p_362593_) {
-                this.renderBlockOutline(p_364769_, multibuffersource$buffersource, posestack, false);
+            if (Config.isFastRender()) {
+                multibuffersource$buffersource.disableCache();
+                RenderStateManager.disableCache();
             }
 
-            p_369478_.popPush("debug");
-            this.minecraft.debugRenderer.render(posestack, p_363733_, multibuffersource$buffersource, d0, d1, d2);
+            Lagometer.timerTerrain.end();
+            if (flag2) {
+                this.renderBlockOutline(pCamera, multibuffersource$buffersource, posestack, false, f);
+            }
+
+            if (flag) {
+                Shaders.endBlockEntities();
+            }
+
+            pProfiler.popPush("debug");
+            this.minecraft.debugRenderer.render(posestack, pFrustum, multibuffersource$buffersource, d0, d1, d2);
             multibuffersource$buffersource.endLastBatch();
+            if (flag) {
+                RenderUtils.finishRenderBuffers();
+                ShadersRender.beginDebug();
+            }
+
             this.checkPoseStack(posestack);
             multibuffersource$buffersource.endBatch(Sheets.translucentItemSheet());
             multibuffersource$buffersource.endBatch(Sheets.bannerSheet());
@@ -627,33 +840,71 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
             multibuffersource$buffersource.endBatch(RenderType.glint());
             multibuffersource$buffersource.endBatch(RenderType.glintTranslucent());
             multibuffersource$buffersource.endBatch(RenderType.entityGlint());
-            p_369478_.popPush("destroyProgress");
-            this.renderBlockDestroyAnimation(posestack, p_364769_, multibuffersource$buffersource1);
+            this.renderOverlayDamaged = true;
+            pProfiler.popPush("destroyProgress");
+            this.renderBlockDestroyAnimation(posestack, pCamera, multibuffersource$buffersource1);
             multibuffersource$buffersource1.endBatch();
             this.checkPoseStack(posestack);
             multibuffersource$buffersource.endBatch(RenderType.waterMask());
             multibuffersource$buffersource.endBatch();
+            this.renderOverlayDamaged = false;
+            RenderUtils.flushRenderBuffers();
+            renderEntitiesCounter--;
             if (resourcehandle1 != null) {
                 resourcehandle1.get().setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
                 resourcehandle1.get().clear();
                 resourcehandle1.get().copyDepthFrom(resourcehandle.get());
             }
 
-            p_369478_.popPush("translucent");
-            this.renderSectionLayer(RenderType.translucent(), d0, d1, d2, p_361439_, p_369924_);
-            p_369478_.popPush("string");
-            this.renderSectionLayer(RenderType.tripwire(), d0, d1, d2, p_361439_, p_369924_);
-            if (p_362593_) {
-                this.renderBlockOutline(p_364769_, multibuffersource$buffersource, posestack, true);
+            if (flag) {
+                multibuffersource$buffersource.endBatch();
+                ShadersRender.endDebug();
+                Shaders.preRenderHand();
+                Matrix4f matrix4f = MathUtils.copy(RenderSystem.getProjectionMatrix());
+                ShadersRender.renderHand0(this.minecraft.gameRenderer, pFrustumMatrix, pCamera, f);
+                RenderSystem.setProjectionMatrix(matrix4f, RenderSystem.getProjectionType());
+                Shaders.preWater();
+            }
+
+            if (Shaders.isParticlesBeforeDeferred()) {
+                pProfiler.popPush("particles");
+                RenderSystem.setShaderFog(pFogParameters);
+                Shaders.beginParticles();
+                RenderStateShard.PARTICLES_TARGET.setupRenderState();
+                this.minecraft.particleEngine.renderParticles(pCamera, f, this.renderBuffers.bufferSource(), pFrustum);
+                RenderStateShard.PARTICLES_TARGET.clearRenderState();
+                Shaders.endParticles();
+            }
+
+            pProfiler.popPush("translucent");
+            Lagometer.timerTerrain.start();
+            if (flag) {
+                Shaders.beginWater();
+            }
+
+            this.renderSectionLayer(RenderType.translucent(), d0, d1, d2, pFrustumMatrix, pProjectionMatrix);
+            if (flag) {
+                Shaders.endWater();
+            }
+
+            Lagometer.timerTerrain.end();
+            pProfiler.popPush("string");
+            this.renderSectionLayer(RenderType.tripwire(), d0, d1, d2, pFrustumMatrix, pProjectionMatrix);
+            if (flag2) {
+                this.renderBlockOutline(pCamera, multibuffersource$buffersource, posestack, true, f);
             }
 
             multibuffersource$buffersource.endBatch();
-            p_369478_.pop();
+            pProfiler.pop();
         });
     }
 
-    private void addParticlesPass(FrameGraphBuilder p_366471_, Camera p_363128_, float p_365755_, FogParameters p_363695_) {
-        FramePass framepass = p_366471_.addPass("particles");
+    private void addParticlesPass(FrameGraphBuilder pFrameGraphBuilder, Camera pCamera, float pPartialTick, FogParameters pFog) {
+        this.addParticlesPass(pFrameGraphBuilder, pCamera, pPartialTick, pFog, FrustumDummy.INSTANCE);
+    }
+
+    private void addParticlesPass(FrameGraphBuilder graphBuilderIn, Camera cameraIn, float partialTicks, FogParameters fogParamsIn, Frustum frustumIn) {
+        FramePass framepass = graphBuilderIn.addPass("particles");
         if (this.targets.particles != null) {
             this.targets.particles = framepass.readsAndWrites(this.targets.particles);
             framepass.reads(this.targets.main);
@@ -664,28 +915,49 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
         ResourceHandle<RenderTarget> resourcehandle = this.targets.main;
         ResourceHandle<RenderTarget> resourcehandle1 = this.targets.particles;
         framepass.executes(() -> {
-            RenderSystem.setShaderFog(p_363695_);
+            RenderSystem.setShaderFog(fogParamsIn);
             if (resourcehandle1 != null) {
                 resourcehandle1.get().setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
                 resourcehandle1.get().clear();
                 resourcehandle1.get().copyDepthFrom(resourcehandle.get());
             }
 
-            this.minecraft.particleEngine.render(p_363128_, p_365755_, this.renderBuffers.bufferSource());
+            if (Config.isShaders()) {
+                Shaders.beginParticles();
+            }
+
+            this.minecraft.particleEngine.renderParticles(cameraIn, partialTicks, this.renderBuffers.bufferSource(), frustumIn);
+            if (Config.isShaders()) {
+                Shaders.endParticles();
+            }
         });
     }
 
     private void addCloudsPass(
-        FrameGraphBuilder p_364518_,
-        Matrix4f p_361837_,
-        Matrix4f p_366102_,
-        CloudStatus p_368512_,
-        Vec3 p_364075_,
-        float p_369524_,
-        int p_369495_,
-        float p_366207_
+        FrameGraphBuilder pFrameGraphBuilder,
+        Matrix4f pFrustumMatrix,
+        Matrix4f pProjectionMatrix,
+        CloudStatus pCloudStatus,
+        Vec3 pCameraPosition,
+        float pAgeInTicks,
+        int pHeight,
+        float pTicks
     ) {
-        FramePass framepass = p_364518_.addPass("clouds");
+        this.addCloudsPass(pFrameGraphBuilder, pFrustumMatrix, pProjectionMatrix, pCloudStatus, pCameraPosition, pAgeInTicks, pHeight, pTicks, null);
+    }
+
+    private void addCloudsPass(
+        FrameGraphBuilder builderIn,
+        Matrix4f viewIn,
+        Matrix4f projectionIn,
+        CloudStatus statusIn,
+        Vec3 posIn,
+        float ticksIn,
+        int colorIn,
+        float cloudHeightIn,
+        FogParameters fogParamsIn
+    ) {
+        FramePass framepass = builderIn.addPass("clouds");
         if (this.targets.clouds != null) {
             this.targets.clouds = framepass.readsAndWrites(this.targets.clouds);
         } else {
@@ -699,14 +971,25 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
                 resourcehandle.get().clear();
             }
 
-            this.cloudRenderer.render(p_369495_, p_368512_, p_366207_, p_361837_, p_366102_, p_364075_, p_369524_);
+            if (Config.isShaders()) {
+                Shaders.beginClouds();
+            }
+
+            if (fogParamsIn != null) {
+                RenderSystem.setShaderFog(fogParamsIn);
+            }
+
+            this.cloudRenderer.render(colorIn, statusIn, cloudHeightIn, viewIn, projectionIn, posIn, ticksIn);
+            if (Config.isShaders()) {
+                Shaders.endClouds();
+            }
         });
     }
 
-    private void addWeatherPass(FrameGraphBuilder p_362650_, Vec3 p_368413_, float p_367747_, FogParameters p_364026_) {
+    private void addWeatherPass(FrameGraphBuilder pFrameGraphBuilder, Vec3 pCameraPosition, float pPartialTick, FogParameters pFog) {
         int i = this.minecraft.options.getEffectiveRenderDistance() * 16;
         float f = this.minecraft.gameRenderer.getDepthFar();
-        FramePass framepass = p_362650_.addPass("weather");
+        FramePass framepass = pFrameGraphBuilder.addPass("weather");
         if (this.targets.weather != null) {
             this.targets.weather = framepass.readsAndWrites(this.targets.weather);
         } else {
@@ -714,16 +997,24 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
         }
 
         framepass.executes(() -> {
-            RenderSystem.setShaderFog(p_364026_);
+            RenderSystem.setShaderFog(pFog);
             MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
-            this.weatherEffectRenderer.render(this.minecraft.level, multibuffersource$buffersource, this.ticks, p_367747_, p_368413_);
-            this.worldBorderRenderer.render(this.level.getWorldBorder(), p_368413_, (double)i, (double)f);
+            if (Config.isShaders()) {
+                Shaders.beginWeather();
+            }
+
+            this.weatherEffectRenderer.render(this.minecraft.level, multibuffersource$buffersource, this.ticks, pPartialTick, pCameraPosition);
+            if (Config.isShaders()) {
+                Shaders.endWeather();
+            }
+
+            this.worldBorderRenderer.render(this.level.getWorldBorder(), pCameraPosition, (double)i, (double)f);
             multibuffersource$buffersource.endBatch();
         });
     }
 
-    private void addLateDebugPass(FrameGraphBuilder p_369572_, Vec3 p_365929_, FogParameters p_368329_) {
-        FramePass framepass = p_369572_.addPass("late_debug");
+    private void addLateDebugPass(FrameGraphBuilder pFrameGraphBuilder, Vec3 pCameraPosition, FogParameters pFog) {
+        FramePass framepass = pFrameGraphBuilder.addPass("late_debug");
         this.targets.main = framepass.readsAndWrites(this.targets.main);
         if (this.targets.itemEntity != null) {
             this.targets.itemEntity = framepass.readsAndWrites(this.targets.itemEntity);
@@ -731,38 +1022,55 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
         ResourceHandle<RenderTarget> resourcehandle = this.targets.main;
         framepass.executes(() -> {
-            RenderSystem.setShaderFog(p_368329_);
+            RenderSystem.setShaderFog(pFog);
             resourcehandle.get().bindWrite(false);
             PoseStack posestack = new PoseStack();
             MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
-            this.minecraft.debugRenderer.renderAfterTranslucents(posestack, multibuffersource$buffersource, p_365929_.x, p_365929_.y, p_365929_.z);
+            this.minecraft.debugRenderer.renderAfterTranslucents(posestack, multibuffersource$buffersource, pCameraPosition.x, pCameraPosition.y, pCameraPosition.z);
             multibuffersource$buffersource.endLastBatch();
             this.checkPoseStack(posestack);
         });
     }
 
-    private boolean collectVisibleEntities(Camera p_365712_, Frustum p_365717_, List<Entity> p_368622_) {
-        Vec3 vec3 = p_365712_.getPosition();
+    private boolean collectVisibleEntities(Camera pCamera, Frustum pFrustum, List<Entity> pOutput) {
+        Vec3 vec3 = pCamera.getPosition();
         double d0 = vec3.x();
         double d1 = vec3.y();
         double d2 = vec3.z();
         boolean flag = false;
         boolean flag1 = this.shouldShowEntityOutlines();
         Entity.setViewScale(Mth.clamp((double)this.minecraft.options.getEffectiveRenderDistance() / 8.0, 1.0, 2.5) * this.minecraft.options.entityDistanceScaling().get());
+        int i = this.level.getMinY();
+        int j = this.level.getMaxY();
 
         for (Entity entity : this.level.entitiesForRendering()) {
-            if (this.entityRenderDispatcher.shouldRender(entity, p_365717_, d0, d1, d2) || entity.hasIndirectPassenger(this.minecraft.player)) {
-                BlockPos blockpos = entity.blockPosition();
-                if ((this.level.isOutsideBuildHeight(blockpos.getY()) || this.isSectionCompiled(blockpos))
-                    && (
-                        entity != p_365712_.getEntity()
-                            || p_365712_.isDetached()
-                            || p_365712_.getEntity() instanceof LivingEntity && ((LivingEntity)p_365712_.getEntity()).isSleeping()
-                    )
-                    && (!(entity instanceof LocalPlayer) || p_365712_.getEntity() == entity)) {
-                    p_368622_.add(entity);
-                    if (flag1 && this.minecraft.shouldEntityAppearGlowing(entity)) {
-                        flag = true;
+            if (this.shouldRenderEntity(entity, i, j)) {
+                boolean flag2 = entity == this.minecraft.player && !this.minecraft.player.isSpectator();
+                if (this.entityRenderDispatcher.shouldRender(entity, pFrustum, d0, d1, d2) || entity.hasIndirectPassenger(this.minecraft.player)) {
+                    BlockPos blockpos = entity.blockPosition();
+                    if ((this.level.isOutsideBuildHeight(blockpos.getY()) || this.isSectionCompiled(blockpos))
+                        && (
+                            entity != pCamera.getEntity()
+                                || pCamera.isDetached()
+                                || pCamera.getEntity() instanceof LivingEntity && ((LivingEntity)pCamera.getEntity()).isSleeping()
+                        )
+                        && (!(entity instanceof LocalPlayer) || pCamera.getEntity() == entity || flag2)) {
+                        String s = entity.getClass().getName();
+                        List<Entity> list = this.mapEntityLists.get(s);
+                        if (list == null) {
+                            list = new ArrayList<>();
+                            this.mapEntityLists.put(s, list);
+                        }
+
+                        list.add(entity);
+                        boolean flag3 = this.minecraft.shouldEntityAppearGlowing(entity);
+                        if (Reflector.IForgeEntity_hasCustomOutlineRendering.exists()) {
+                            flag3 = flag3 || Reflector.callBoolean(entity, Reflector.IForgeEntity_hasCustomOutlineRendering, this.minecraft.player);
+                        }
+
+                        if (flag1 && flag3) {
+                            flag = true;
+                        }
                     }
                 }
             }
@@ -771,86 +1079,147 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
         return flag;
     }
 
-    private void renderEntities(PoseStack p_369689_, MultiBufferSource.BufferSource p_367493_, Camera p_368044_, DeltaTracker p_369396_, List<Entity> p_364182_) {
-        Vec3 vec3 = p_368044_.getPosition();
+    private void renderEntities(PoseStack pPoseStack, MultiBufferSource.BufferSource pBufferSource, Camera pCamera, DeltaTracker pDeltaTracker, List<Entity> pEntities) {
+        Vec3 vec3 = pCamera.getPosition();
         double d0 = vec3.x();
         double d1 = vec3.y();
         double d2 = vec3.z();
         TickRateManager tickratemanager = this.minecraft.level.tickRateManager();
         boolean flag = this.shouldShowEntityOutlines();
+        boolean flag1 = Config.isShaders();
 
-        for (Entity entity : p_364182_) {
-            if (entity.tickCount == 0) {
-                entity.xOld = entity.getX();
-                entity.yOld = entity.getY();
-                entity.zOld = entity.getZ();
+        for (List<Entity> list : this.mapEntityLists.values()) {
+            for (Entity entity : list) {
+                if (entity.tickCount == 0) {
+                    entity.xOld = entity.getX();
+                    entity.yOld = entity.getY();
+                    entity.zOld = entity.getZ();
+                }
+
+                MultiBufferSource multibuffersource;
+                if (flag && this.minecraft.shouldEntityAppearGlowing(entity)) {
+                    OutlineBufferSource outlinebuffersource = this.renderBuffers.outlineBufferSource();
+                    multibuffersource = outlinebuffersource;
+                    int i = entity.getTeamColor();
+                    outlinebuffersource.setColor(ARGB.red(i), ARGB.green(i), ARGB.blue(i), 255);
+                } else {
+                    multibuffersource = pBufferSource;
+                }
+
+                if (flag1) {
+                    Shaders.nextEntity(entity);
+                }
+
+                float f = pDeltaTracker.getGameTimeDeltaPartialTick(!tickratemanager.isEntityFrozen(entity));
+                this.renderEntity(entity, d0, d1, d2, f, pPoseStack, multibuffersource);
             }
 
-            MultiBufferSource multibuffersource;
-            if (flag && this.minecraft.shouldEntityAppearGlowing(entity)) {
-                OutlineBufferSource outlinebuffersource = this.renderBuffers.outlineBufferSource();
-                multibuffersource = outlinebuffersource;
-                int i = entity.getTeamColor();
-                outlinebuffersource.setColor(ARGB.red(i), ARGB.green(i), ARGB.blue(i), 255);
-            } else {
-                multibuffersource = p_367493_;
-            }
-
-            float f = p_369396_.getGameTimeDeltaPartialTick(!tickratemanager.isEntityFrozen(entity));
-            this.renderEntity(entity, d0, d1, d2, f, p_369689_, multibuffersource);
+            list.clear();
         }
     }
 
     private void renderBlockEntities(
-        PoseStack p_366168_, MultiBufferSource.BufferSource p_362022_, MultiBufferSource.BufferSource p_369016_, Camera p_369847_, float p_367074_
+        PoseStack pPoseStack, MultiBufferSource.BufferSource pBufferSource, MultiBufferSource.BufferSource pCrumblingBufferSource, Camera pCamera, float pPartialTick
     ) {
-        Vec3 vec3 = p_369847_.getPosition();
+        this.renderBlockEntities(pPoseStack, pBufferSource, pCrumblingBufferSource, pCamera, pPartialTick, FrustumDummy.INSTANCE);
+    }
+
+    private boolean renderBlockEntities(
+        PoseStack matrixStackIn,
+        MultiBufferSource.BufferSource bufferSourceIn,
+        MultiBufferSource.BufferSource crumblingSourceIn,
+        Camera cameraIn,
+        float partialTicks,
+        Frustum frustumIn
+    ) {
+        boolean flag = false;
+        Vec3 vec3 = cameraIn.getPosition();
         double d0 = vec3.x();
         double d1 = vec3.y();
         double d2 = vec3.z();
+        boolean flag1 = Config.isShaders();
+        boolean flag2 = Reflector.IForgeBlockEntity_getRenderBoundingBox.exists();
 
-        for (SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection : this.visibleSections) {
+        for (SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection : this.renderInfosTileEntities) {
             List<BlockEntity> list = sectionrenderdispatcher$rendersection.getCompiled().getRenderableBlockEntities();
             if (!list.isEmpty()) {
                 for (BlockEntity blockentity : list) {
-                    BlockPos blockpos = blockentity.getBlockPos();
-                    MultiBufferSource multibuffersource = p_362022_;
-                    p_366168_.pushPose();
-                    p_366168_.translate((double)blockpos.getX() - d0, (double)blockpos.getY() - d1, (double)blockpos.getZ() - d2);
-                    SortedSet<BlockDestructionProgress> sortedset = this.destructionProgress.get(blockpos.asLong());
+                    if (flag2) {
+                        AABB aabb = (AABB)Reflector.call(blockentity, Reflector.IForgeBlockEntity_getRenderBoundingBox);
+                        if (aabb != null && !frustumIn.isVisible(aabb)) {
+                            continue;
+                        }
+                    }
+
+                    if (flag1) {
+                        Shaders.nextBlockEntity(blockentity);
+                    }
+
+                    BlockPos blockpos1 = blockentity.getBlockPos();
+                    MultiBufferSource multibuffersource = bufferSourceIn;
+                    matrixStackIn.pushPose();
+                    matrixStackIn.translate((double)blockpos1.getX() - d0, (double)blockpos1.getY() - d1, (double)blockpos1.getZ() - d2);
+                    SortedSet<BlockDestructionProgress> sortedset = this.destructionProgress.get(blockpos1.asLong());
                     if (sortedset != null && !sortedset.isEmpty()) {
                         int i = sortedset.last().getProgress();
                         if (i >= 0) {
-                            PoseStack.Pose posestack$pose = p_366168_.last();
+                            PoseStack.Pose posestack$pose = matrixStackIn.last();
                             VertexConsumer vertexconsumer = new SheetedDecalTextureGenerator(
-                                p_369016_.getBuffer(ModelBakery.DESTROY_TYPES.get(i)), posestack$pose, 1.0F
+                                crumblingSourceIn.getBuffer(ModelBakery.DESTROY_TYPES.get(i)), posestack$pose, 1.0F
                             );
-                            multibuffersource = p_234298_ -> {
-                                VertexConsumer vertexconsumer1 = p_362022_.getBuffer(p_234298_);
-                                return p_234298_.affectsCrumbling() ? VertexMultiConsumer.create(vertexconsumer, vertexconsumer1) : vertexconsumer1;
+                            multibuffersource = renderTypeIn -> {
+                                VertexConsumer vertexconsumer1 = bufferSourceIn.getBuffer(renderTypeIn);
+                                return renderTypeIn.affectsCrumbling() ? VertexMultiConsumer.create(vertexconsumer, vertexconsumer1) : vertexconsumer1;
                             };
                         }
                     }
 
-                    this.blockEntityRenderDispatcher.render(blockentity, p_367074_, p_366168_, multibuffersource);
-                    p_366168_.popPose();
+                    if (Reflector.IForgeBlockEntity_hasCustomOutlineRendering.exists()
+                        && this.shouldShowEntityOutlines()
+                        && Reflector.callBoolean(blockentity, Reflector.IForgeBlockEntity_hasCustomOutlineRendering, this.minecraft.player)) {
+                        flag = true;
+                    }
+
+                    this.blockEntityRenderDispatcher.render(blockentity, partialTicks, matrixStackIn, multibuffersource);
+                    matrixStackIn.popPose();
+                    this.countTileEntitiesRendered++;
                 }
             }
         }
 
         synchronized (this.globalBlockEntities) {
             for (BlockEntity blockentity1 : this.globalBlockEntities) {
-                BlockPos blockpos1 = blockentity1.getBlockPos();
-                p_366168_.pushPose();
-                p_366168_.translate((double)blockpos1.getX() - d0, (double)blockpos1.getY() - d1, (double)blockpos1.getZ() - d2);
-                this.blockEntityRenderDispatcher.render(blockentity1, p_367074_, p_366168_, p_362022_);
-                p_366168_.popPose();
+                if (flag2) {
+                    AABB aabb1 = (AABB)Reflector.call(blockentity1, Reflector.IForgeBlockEntity_getRenderBoundingBox);
+                    if (aabb1 != null && !frustumIn.isVisible(aabb1)) {
+                        continue;
+                    }
+                }
+
+                if (flag1) {
+                    Shaders.nextBlockEntity(blockentity1);
+                }
+
+                BlockPos blockpos = blockentity1.getBlockPos();
+                matrixStackIn.pushPose();
+                matrixStackIn.translate((double)blockpos.getX() - d0, (double)blockpos.getY() - d1, (double)blockpos.getZ() - d2);
+                if (Reflector.IForgeBlockEntity_hasCustomOutlineRendering.exists()
+                    && this.shouldShowEntityOutlines()
+                    && Reflector.callBoolean(blockentity1, Reflector.IForgeBlockEntity_hasCustomOutlineRendering, this.minecraft.player)) {
+                    flag = true;
+                }
+
+                this.blockEntityRenderDispatcher.render(blockentity1, partialTicks, matrixStackIn, bufferSourceIn);
+                matrixStackIn.popPose();
+                this.countTileEntitiesRendered++;
             }
+
+            return flag;
         }
     }
 
-    private void renderBlockDestroyAnimation(PoseStack p_366956_, Camera p_369324_, MultiBufferSource.BufferSource p_365998_) {
-        Vec3 vec3 = p_369324_.getPosition();
+    private void renderBlockDestroyAnimation(PoseStack pPoseStack, Camera pCamera, MultiBufferSource.BufferSource pBufferSource) {
+        Vec3 vec3 = pCamera.getPosition();
         double d0 = vec3.x();
         double d1 = vec3.y();
         double d2 = vec3.z();
@@ -861,73 +1230,101 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
                 SortedSet<BlockDestructionProgress> sortedset = entry.getValue();
                 if (sortedset != null && !sortedset.isEmpty()) {
                     int i = sortedset.last().getProgress();
-                    p_366956_.pushPose();
-                    p_366956_.translate((double)blockpos.getX() - d0, (double)blockpos.getY() - d1, (double)blockpos.getZ() - d2);
-                    PoseStack.Pose posestack$pose = p_366956_.last();
-                    VertexConsumer vertexconsumer = new SheetedDecalTextureGenerator(p_365998_.getBuffer(ModelBakery.DESTROY_TYPES.get(i)), posestack$pose, 1.0F);
-                    this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockpos), blockpos, this.level, p_366956_, vertexconsumer);
-                    p_366956_.popPose();
+                    pPoseStack.pushPose();
+                    pPoseStack.translate((double)blockpos.getX() - d0, (double)blockpos.getY() - d1, (double)blockpos.getZ() - d2);
+                    PoseStack.Pose posestack$pose = pPoseStack.last();
+                    VertexConsumer vertexconsumer = new SheetedDecalTextureGenerator(pBufferSource.getBuffer(ModelBakery.DESTROY_TYPES.get(i)), posestack$pose, 1.0F);
+                    ModelData modeldata = this.level.getModelDataManager().getAt(blockpos);
+                    if (modeldata == null) {
+                        modeldata = ModelData.EMPTY;
+                    }
+
+                    this.minecraft
+                        .getBlockRenderer()
+                        .renderBreakingTexture(this.level.getBlockState(blockpos), blockpos, this.level, pPoseStack, vertexconsumer, modeldata);
+                    pPoseStack.popPose();
                 }
             }
         }
     }
 
-    private void renderBlockOutline(Camera p_367935_, MultiBufferSource.BufferSource p_367206_, PoseStack p_365062_, boolean p_368189_) {
+    private void renderBlockOutline(Camera pCamera, MultiBufferSource.BufferSource pBufferSource, PoseStack pPoseStack, boolean pSort) {
+        this.renderBlockOutline(pCamera, pBufferSource, pPoseStack, pSort, 0.0F);
+    }
+
+    private void renderBlockOutline(
+        Camera cameraIn, MultiBufferSource.BufferSource bufferSourceIn, PoseStack matrixStackIn, boolean translucentIn, float partialTicks
+    ) {
         if (this.minecraft.hitResult instanceof BlockHitResult blockhitresult) {
             if (blockhitresult.getType() != HitResult.Type.MISS) {
                 BlockPos blockpos = blockhitresult.getBlockPos();
                 BlockState blockstate = this.level.getBlockState(blockpos);
-                if (!blockstate.isAir() && this.level.getWorldBorder().isWithinBounds(blockpos)) {
+                if (Config.isShaders()) {
+                    ShadersRender.beginOutline();
+                }
+
+                if (!Reflector.callBoolean(
+                        Reflector.ForgeHooksClient_onDrawHighlight, this, cameraIn, blockhitresult, partialTicks, matrixStackIn, bufferSourceIn
+                    )
+                    && !blockstate.isAir()
+                    && this.level.getWorldBorder().isWithinBounds(blockpos)) {
                     boolean flag = ItemBlockRenderTypes.getChunkRenderType(blockstate).sortOnUpload();
-                    if (flag != p_368189_) {
+                    if (flag != translucentIn) {
                         return;
                     }
 
-                    Vec3 vec3 = p_367935_.getPosition();
+                    Vec3 vec3 = cameraIn.getPosition();
                     Boolean obool = this.minecraft.options.highContrastBlockOutline().get();
                     if (obool) {
-                        VertexConsumer vertexconsumer = p_367206_.getBuffer(RenderType.secondaryBlockOutline());
+                        VertexConsumer vertexconsumer = bufferSourceIn.getBuffer(RenderType.secondaryBlockOutline());
                         this.renderHitOutline(
-                            p_365062_, vertexconsumer, p_367935_.getEntity(), vec3.x, vec3.y, vec3.z, blockpos, blockstate, -16777216
+                            matrixStackIn, vertexconsumer, cameraIn.getEntity(), vec3.x, vec3.y, vec3.z, blockpos, blockstate, -16777216
                         );
                     }
 
-                    VertexConsumer vertexconsumer1 = p_367206_.getBuffer(RenderType.lines());
+                    VertexConsumer vertexconsumer1 = bufferSourceIn.getBuffer(RenderType.lines());
                     int i = obool ? -11010079 : ARGB.color(102, -16777216);
-                    this.renderHitOutline(p_365062_, vertexconsumer1, p_367935_.getEntity(), vec3.x, vec3.y, vec3.z, blockpos, blockstate, i);
-                    p_367206_.endLastBatch();
+                    this.renderHitOutline(matrixStackIn, vertexconsumer1, cameraIn.getEntity(), vec3.x, vec3.y, vec3.z, blockpos, blockstate, i);
+                    bufferSourceIn.endLastBatch();
                 }
+
+                if (Config.isShaders()) {
+                    bufferSourceIn.endBatch(RenderType.lines());
+                    ShadersRender.endOutline();
+                }
+            } else if (this.minecraft.hitResult instanceof EntityHitResult entityhitresult) {
+                Reflector.ForgeHooksClient_onDrawHighlight.call(this, cameraIn, entityhitresult, partialTicks, matrixStackIn, bufferSourceIn);
             }
         }
     }
 
-    private void checkPoseStack(PoseStack p_109589_) {
-        if (!p_109589_.clear()) {
+    public void checkPoseStack(PoseStack pPoseStack) {
+        if (!pPoseStack.clear()) {
             throw new IllegalStateException("Pose stack not empty");
         }
     }
 
-    private void renderEntity(
-        Entity p_109518_, double p_109519_, double p_109520_, double p_109521_, float p_109522_, PoseStack p_109523_, MultiBufferSource p_109524_
+    public void renderEntity(
+        Entity pEntity, double pCamX, double pCamY, double pCamZ, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBufferSource
     ) {
-        double d0 = Mth.lerp((double)p_109522_, p_109518_.xOld, p_109518_.getX());
-        double d1 = Mth.lerp((double)p_109522_, p_109518_.yOld, p_109518_.getY());
-        double d2 = Mth.lerp((double)p_109522_, p_109518_.zOld, p_109518_.getZ());
+        double d0 = Mth.lerp((double)pPartialTick, pEntity.xOld, pEntity.getX());
+        double d1 = Mth.lerp((double)pPartialTick, pEntity.yOld, pEntity.getY());
+        double d2 = Mth.lerp((double)pPartialTick, pEntity.zOld, pEntity.getZ());
         this.entityRenderDispatcher
             .render(
-                p_109518_, d0 - p_109519_, d1 - p_109520_, d2 - p_109521_, p_109522_, p_109523_, p_109524_, this.entityRenderDispatcher.getPackedLightCoords(p_109518_, p_109522_)
+                pEntity, d0 - pCamX, d1 - pCamY, d2 - pCamZ, pPartialTick, pPoseStack, pBufferSource, this.entityRenderDispatcher.getPackedLightCoords(pEntity, pPartialTick)
             );
     }
 
-    private void scheduleTranslucentSectionResort(Vec3 p_362155_) {
+    private void scheduleTranslucentSectionResort(Vec3 pCameraPosition) {
         if (!this.visibleSections.isEmpty()) {
-            BlockPos blockpos = BlockPos.containing(p_362155_);
+            BlockPos blockpos = BlockPos.containing(pCameraPosition);
             boolean flag = !blockpos.equals(this.lastTranslucentSortBlockPos);
             Profiler.get().push("translucent_sort");
             SectionRenderDispatcher.TranslucencyPointOfView sectionrenderdispatcher$translucencypointofview = new SectionRenderDispatcher.TranslucencyPointOfView();
 
             for (SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection : this.nearbyVisibleSections) {
-                this.scheduleResort(sectionrenderdispatcher$rendersection, sectionrenderdispatcher$translucencypointofview, p_362155_, flag, true);
+                this.scheduleResort(sectionrenderdispatcher$rendersection, sectionrenderdispatcher$translucencypointofview, pCameraPosition, flag, true);
             }
 
             this.translucencyResortIterationIndex = this.translucencyResortIterationIndex % this.visibleSections.size();
@@ -935,7 +1332,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
             while (i-- > 0) {
                 int j = this.translucencyResortIterationIndex++ % this.visibleSections.size();
-                this.scheduleResort(this.visibleSections.get(j), sectionrenderdispatcher$translucencypointofview, p_362155_, flag, false);
+                this.scheduleResort(this.visibleSections.get(j), sectionrenderdispatcher$translucencypointofview, pCameraPosition, flag, false);
             }
 
             this.lastTranslucentSortBlockPos = blockpos;
@@ -944,64 +1341,179 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
     }
 
     private void scheduleResort(
-        SectionRenderDispatcher.RenderSection p_363545_,
-        SectionRenderDispatcher.TranslucencyPointOfView p_365141_,
-        Vec3 p_364217_,
-        boolean p_363419_,
-        boolean p_368916_
+        SectionRenderDispatcher.RenderSection pSection,
+        SectionRenderDispatcher.TranslucencyPointOfView pPointOfView,
+        Vec3 pCameraPosition,
+        boolean pForce,
+        boolean pIgnoreAxisAlignment
     ) {
-        p_365141_.set(p_364217_, p_363545_.getSectionNode());
-        boolean flag = !p_365141_.equals(p_363545_.pointOfView.get());
-        boolean flag1 = p_363419_ && (p_365141_.isAxisAligned() || p_368916_);
-        if ((flag1 || flag) && !p_363545_.transparencyResortingScheduled() && p_363545_.hasTranslucentGeometry()) {
-            p_363545_.resortTransparency(this.sectionRenderDispatcher);
+        pPointOfView.set(pCameraPosition, pSection.getSectionNode());
+        boolean flag = !pPointOfView.equals(pSection.pointOfView.get());
+        boolean flag1 = pForce && (pPointOfView.isAxisAligned() || pIgnoreAxisAlignment);
+        if ((flag1 || flag) && !pSection.transparencyResortingScheduled() && pSection.hasTranslucentGeometry()) {
+            pSection.resortTransparency(this.sectionRenderDispatcher);
         }
     }
 
-    private void renderSectionLayer(RenderType p_298012_, double p_298706_, double p_299730_, double p_298956_, Matrix4f p_297481_, Matrix4f p_333714_) {
+    public void renderSectionLayer(RenderType pRenderType, double pX, double pY, double pZ, Matrix4f pFrustrumMatrix, Matrix4f pProjectionMatrix) {
         RenderSystem.assertOnRenderThread();
-        Zone zone = Profiler.get().zone(() -> "render_" + p_298012_.name);
-        zone.addText(p_298012_::toString);
-        boolean flag = p_298012_ != RenderType.translucent();
-        ObjectListIterator<SectionRenderDispatcher.RenderSection> objectlistiterator = this.visibleSections.listIterator(flag ? 0 : this.visibleSections.size());
-        p_298012_.setupRenderState();
+        Zone zone = Profiler.get().zone(() -> "render_" + pRenderType.name);
+        zone.addText(pRenderType::toString);
+        boolean flag = pRenderType != RenderType.translucent();
+        boolean flag1 = Config.isShaders();
+        ObjectListIterator<SectionRenderDispatcher.RenderSection> objectlistiterator = this.renderInfosTerrain
+            .listIterator(flag ? 0 : this.renderInfosTerrain.size());
+        pRenderType.setupRenderState();
         CompiledShaderProgram compiledshaderprogram = RenderSystem.getShader();
         if (compiledshaderprogram == null) {
-            p_298012_.clearRenderState();
+            pRenderType.clearRenderState();
             zone.close();
         } else {
-            compiledshaderprogram.setDefaultUniforms(VertexFormat.Mode.QUADS, p_297481_, p_333714_, this.minecraft.getWindow());
+            compiledshaderprogram.setDefaultUniforms(VertexFormat.Mode.QUADS, pFrustrumMatrix, pProjectionMatrix, this.minecraft.getWindow());
             compiledshaderprogram.apply();
             Uniform uniform = compiledshaderprogram.MODEL_OFFSET;
+            if (flag1) {
+                ShadersRender.preRenderChunkLayer(pRenderType);
+                Shaders.setModelViewMatrix(pFrustrumMatrix);
+                Shaders.setProjectionMatrix(pProjectionMatrix);
+                Shaders.setTextureMatrix(RenderSystem.getTextureMatrix());
+                Shaders.setColorModulator(RenderSystem.getShaderColor());
+            }
 
-            while (flag ? objectlistiterator.hasNext() : objectlistiterator.hasPrevious()) {
-                SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection = flag ? objectlistiterator.next() : objectlistiterator.previous();
-                if (!sectionrenderdispatcher$rendersection.getCompiled().isEmpty(p_298012_)) {
-                    VertexBuffer vertexbuffer = sectionrenderdispatcher$rendersection.getBuffer(p_298012_);
-                    BlockPos blockpos = sectionrenderdispatcher$rendersection.getOrigin();
-                    if (uniform != null) {
-                        uniform.set(
-                            (float)((double)blockpos.getX() - p_298706_),
-                            (float)((double)blockpos.getY() - p_299730_),
-                            (float)((double)blockpos.getZ() - p_298956_)
-                        );
-                        uniform.upload();
+            boolean flag2 = SmartAnimations.isActive();
+            if (flag1 && Shaders.activeProgramID > 0) {
+                uniform = null;
+            }
+
+            if (Config.isRenderRegions() && !pRenderType.isNeedsSorting()) {
+                int i = Integer.MIN_VALUE;
+                int j = Integer.MIN_VALUE;
+                VboRegion vboregion2 = null;
+                Map<PairInt, Map<VboRegion, List<VertexBuffer>>> map2 = (Map<PairInt, Map<VboRegion, List<VertexBuffer>>>)this.mapRegionLayers
+                    .computeIfAbsent(pRenderType, k -> new LinkedHashMap(16));
+                Map<VboRegion, List<VertexBuffer>> map = null;
+                List<VertexBuffer> list = null;
+
+                while (flag ? objectlistiterator.hasNext() : objectlistiterator.hasPrevious()) {
+                    SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection1 = flag
+                        ? objectlistiterator.next()
+                        : objectlistiterator.previous();
+                    if (!sectionrenderdispatcher$rendersection1.getCompiled().isEmpty(pRenderType)) {
+                        VertexBuffer vertexbuffer1 = sectionrenderdispatcher$rendersection1.getBuffer(pRenderType);
+                        VboRegion vboregion = vertexbuffer1.getVboRegion();
+                        if (sectionrenderdispatcher$rendersection1.regionX != i || sectionrenderdispatcher$rendersection1.regionZ != j) {
+                            PairInt pairint = PairInt.of(sectionrenderdispatcher$rendersection1.regionX, sectionrenderdispatcher$rendersection1.regionZ);
+                            map = map2.computeIfAbsent(pairint, k -> new LinkedHashMap<>(8));
+                            i = sectionrenderdispatcher$rendersection1.regionX;
+                            j = sectionrenderdispatcher$rendersection1.regionZ;
+                            vboregion2 = null;
+                        }
+
+                        if (vboregion != vboregion2) {
+                            list = map.computeIfAbsent(vboregion, k -> new ArrayList<>());
+                            vboregion2 = vboregion;
+                        }
+
+                        list.add(vertexbuffer1);
+                        if (flag2) {
+                            BitSet bitset1 = sectionrenderdispatcher$rendersection1.getCompiled().getAnimatedSprites(pRenderType);
+                            if (bitset1 != null) {
+                                SmartAnimations.spritesRendered(bitset1);
+                            }
+                        }
                     }
-
-                    vertexbuffer.bind();
-                    vertexbuffer.draw();
                 }
+
+                for (java.util.Map.Entry<PairInt, Map<VboRegion, List<VertexBuffer>>> entry1 : map2.entrySet()) {
+                    PairInt pairint1 = entry1.getKey();
+                    Map<VboRegion, List<VertexBuffer>> map1 = entry1.getValue();
+
+                    for (java.util.Map.Entry<VboRegion, List<VertexBuffer>> entry : map1.entrySet()) {
+                        VboRegion vboregion1 = entry.getKey();
+                        List<VertexBuffer> list1 = entry.getValue();
+                        if (!list1.isEmpty()) {
+                            for (VertexBuffer vertexbuffer2 : list1) {
+                                vertexbuffer2.draw();
+                            }
+
+                            this.drawRegion(pairint1.getLeft(), 0, pairint1.getRight(), pX, pY, pZ, vboregion1, uniform, flag1);
+                            list1.clear();
+                        }
+                    }
+                }
+            } else {
+                while (flag ? objectlistiterator.hasNext() : objectlistiterator.hasPrevious()) {
+                    SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection = flag
+                        ? objectlistiterator.next()
+                        : objectlistiterator.previous();
+                    if (!sectionrenderdispatcher$rendersection.getCompiled().isEmpty(pRenderType)) {
+                        VertexBuffer vertexbuffer = sectionrenderdispatcher$rendersection.getBuffer(pRenderType);
+                        BlockPos blockpos = sectionrenderdispatcher$rendersection.getOrigin();
+                        if (uniform != null) {
+                            uniform.set(
+                                (float)((double)blockpos.getX() - pX - (double)sectionrenderdispatcher$rendersection.regionDX),
+                                (float)((double)blockpos.getY() - pY - (double)sectionrenderdispatcher$rendersection.regionDY),
+                                (float)((double)blockpos.getZ() - pZ - (double)sectionrenderdispatcher$rendersection.regionDZ)
+                            );
+                            uniform.upload();
+                        }
+
+                        if (flag1) {
+                            Shaders.uniform_modelOffset
+                                .setValue(
+                                    (float)((double)blockpos.getX() - pX - (double)sectionrenderdispatcher$rendersection.regionDX),
+                                    (float)((double)blockpos.getY() - pY - (double)sectionrenderdispatcher$rendersection.regionDY),
+                                    (float)((double)blockpos.getZ() - pZ - (double)sectionrenderdispatcher$rendersection.regionDZ)
+                                );
+                        }
+
+                        if (flag2) {
+                            BitSet bitset = sectionrenderdispatcher$rendersection.getCompiled().getAnimatedSprites(pRenderType);
+                            if (bitset != null) {
+                                SmartAnimations.spritesRendered(bitset);
+                            }
+                        }
+
+                        vertexbuffer.bind();
+                        vertexbuffer.draw();
+                    }
+                }
+            }
+
+            if (Config.isMultiTexture()) {
+                this.minecraft.getTextureManager().bindTexture(TextureAtlas.LOCATION_BLOCKS);
             }
 
             if (uniform != null) {
                 uniform.set(0.0F, 0.0F, 0.0F);
             }
 
+            if (flag1) {
+                Shaders.uniform_modelOffset.setValue(0.0F, 0.0F, 0.0F);
+            }
+
             compiledshaderprogram.clear();
             VertexBuffer.unbind();
             zone.close();
-            p_298012_.clearRenderState();
+            if (flag1) {
+                ShadersRender.postRenderChunkLayer(pRenderType);
+            }
+
+            pRenderType.clearRenderState();
         }
+    }
+
+    private void drawRegion(int regionX, int regionY, int regionZ, double xIn, double yIn, double zIn, VboRegion vboRegion, Uniform uniform, boolean isShaders) {
+        if (uniform != null) {
+            uniform.set((float)((double)regionX - xIn), (float)((double)regionY - yIn), (float)((double)regionZ - zIn));
+            uniform.upload();
+        }
+
+        if (isShaders) {
+            Shaders.uniform_modelOffset.setValue((float)((double)regionX - xIn), (float)((double)regionY - yIn), (float)((double)regionZ - zIn));
+        }
+
+        vboRegion.finishDraw();
     }
 
     public void captureFrustum() {
@@ -1029,278 +1541,456 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
                 }
             }
         }
+
+        if (Config.isRenderRegions() && this.ticks % 20 == 0) {
+            this.mapRegionLayers.clear();
+        }
     }
 
-    private void removeProgress(BlockDestructionProgress p_109766_) {
-        long i = p_109766_.getPos().asLong();
+    private void removeProgress(BlockDestructionProgress pProgress) {
+        long i = pProgress.getPos().asLong();
         Set<BlockDestructionProgress> set = this.destructionProgress.get(i);
-        set.remove(p_109766_);
+        set.remove(pProgress);
         if (set.isEmpty()) {
             this.destructionProgress.remove(i);
         }
     }
 
-    private void addSkyPass(FrameGraphBuilder p_362462_, Camera p_369183_, float p_368085_, FogParameters p_365377_) {
-        FogType fogtype = p_369183_.getFluidInCamera();
-        if (fogtype != FogType.POWDER_SNOW && fogtype != FogType.LAVA && !this.doesMobEffectBlockSky(p_369183_)) {
+    private void addSkyPass(FrameGraphBuilder pFrameGraphBuilder, Camera pCamera, float pPartialTick, FogParameters pFog) {
+        FogType fogtype = pCamera.getFluidInCamera();
+        if (fogtype != FogType.POWDER_SNOW && fogtype != FogType.LAVA && !this.doesMobEffectBlockSky(pCamera)) {
             DimensionSpecialEffects dimensionspecialeffects = this.level.effects();
             DimensionSpecialEffects.SkyType dimensionspecialeffects$skytype = dimensionspecialeffects.skyType();
             if (dimensionspecialeffects$skytype != DimensionSpecialEffects.SkyType.NONE) {
-                FramePass framepass = p_362462_.addPass("sky");
+                FramePass framepass = pFrameGraphBuilder.addPass("sky");
                 this.targets.main = framepass.readsAndWrites(this.targets.main);
-                framepass.executes(() -> {
-                    RenderSystem.setShaderFog(p_365377_);
-                    if (dimensionspecialeffects$skytype == DimensionSpecialEffects.SkyType.END) {
-                        this.skyRenderer.renderEndSky();
-                    } else {
-                        PoseStack posestack = new PoseStack();
-                        float f = this.level.getSunAngle(p_368085_);
-                        float f1 = this.level.getTimeOfDay(p_368085_);
-                        float f2 = 1.0F - this.level.getRainLevel(p_368085_);
-                        float f3 = this.level.getStarBrightness(p_368085_) * f2;
-                        int i = dimensionspecialeffects.getSunriseOrSunsetColor(f1);
-                        int j = this.level.getMoonPhase();
-                        int k = this.level.getSkyColor(this.minecraft.gameRenderer.getMainCamera().getPosition(), p_368085_);
-                        float f4 = ARGB.redFloat(k);
-                        float f5 = ARGB.greenFloat(k);
-                        float f6 = ARGB.blueFloat(k);
-                        this.skyRenderer.renderSkyDisc(f4, f5, f6);
-                        MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
-                        if (dimensionspecialeffects.isSunriseOrSunset(f1)) {
-                            this.skyRenderer.renderSunriseAndSunset(posestack, multibuffersource$buffersource, f, i);
+                framepass.executes(
+                    () -> {
+                        boolean flag = Config.isShaders();
+                        if (flag) {
+                            Shaders.beginSky();
                         }
 
-                        this.skyRenderer.renderSunMoonAndStars(posestack, multibuffersource$buffersource, f1, j, f2, f3, p_365377_);
-                        multibuffersource$buffersource.endBatch();
-                        if (this.shouldRenderDarkDisc(p_368085_)) {
-                            this.skyRenderer.renderDarkDisc(posestack);
+                        RenderSystem.setShaderFog(pFog);
+                        this.skyRenderer.setRenderParameters(this.level, pPartialTick);
+                        if (dimensionspecialeffects$skytype == DimensionSpecialEffects.SkyType.END) {
+                            this.skyRenderer.renderEndSky();
+                        } else {
+                            if (flag) {
+                                Shaders.disableTexture2D();
+                            }
+
+                            PoseStack posestack = new PoseStack();
+                            float f = this.level.getSunAngle(pPartialTick);
+                            float f1 = this.level.getTimeOfDay(pPartialTick);
+                            float f2 = 1.0F - this.level.getRainLevel(pPartialTick);
+                            float f3 = this.level.getStarBrightness(pPartialTick) * f2;
+                            int i = dimensionspecialeffects.getSunriseOrSunsetColor(f1);
+                            int j = this.level.getMoonPhase();
+                            int k = this.level.getSkyColor(this.minecraft.gameRenderer.getMainCamera().getPosition(), pPartialTick);
+                            k = CustomColors.getSkyColor(
+                                k,
+                                this.minecraft.level,
+                                this.minecraft.getCameraEntity().getX(),
+                                this.minecraft.getCameraEntity().getY() + 1.0,
+                                this.minecraft.getCameraEntity().getZ()
+                            );
+                            float f4 = ARGB.redFloat(k);
+                            float f5 = ARGB.greenFloat(k);
+                            float f6 = ARGB.blueFloat(k);
+                            if (flag) {
+                                Shaders.setSkyColor(f4, f5, f6);
+                                RenderSystem.setColorToAttribute(true);
+                                Shaders.enableFog();
+                                Shaders.preSkyList(posestack);
+                            }
+
+                            if (Config.isSkyEnabled()) {
+                                this.skyRenderer.renderSkyDisc(f4, f5, f6);
+                            }
+
+                            if (flag) {
+                                Shaders.disableFog();
+                            }
+
+                            MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
+                            if (dimensionspecialeffects.isSunriseOrSunset(f1) && Config.isSunMoonEnabled()) {
+                                if (flag) {
+                                    Shaders.disableTexture2D();
+                                }
+
+                                if (flag) {
+                                    Shaders.setRenderStage(RenderStage.SUNSET);
+                                }
+
+                                this.skyRenderer.renderSunriseAndSunset(posestack, multibuffersource$buffersource, f, i);
+                            }
+
+                            if (flag) {
+                                Shaders.enableTexture2D();
+                            }
+
+                            if (CustomSky.isActive()) {
+                                multibuffersource$buffersource.flushRenderBuffers();
+                            }
+
+                            this.skyRenderer.renderSunMoonAndStars(posestack, multibuffersource$buffersource, f1, j, f2, f3, pFog);
+                            multibuffersource$buffersource.endBatch();
+                            if (flag) {
+                                Shaders.disableTexture2D();
+                            }
+
+                            if (this.shouldRenderDarkDisc(pPartialTick)) {
+                                if (flag) {
+                                    Shaders.setRenderStage(RenderStage.VOID);
+                                }
+
+                                this.skyRenderer.renderDarkDisc(posestack);
+                            }
+
+                            if (flag) {
+                                RenderSystem.setColorToAttribute(false);
+                            }
+                        }
+
+                        if (flag) {
+                            Shaders.endSky();
                         }
                     }
-                });
+                );
             }
         }
     }
 
-    private boolean shouldRenderDarkDisc(float p_365771_) {
-        return this.minecraft.player.getEyePosition(p_365771_).y - this.level.getLevelData().getHorizonHeight(this.level) < 0.0;
+    private boolean shouldRenderDarkDisc(float pPartialTick) {
+        return this.minecraft.player.getEyePosition(pPartialTick).y - this.level.getLevelData().getHorizonHeight(this.level) < 0.0;
     }
 
-    private boolean doesMobEffectBlockSky(Camera p_234311_) {
-        return !(p_234311_.getEntity() instanceof LivingEntity livingentity)
-            ? false
-            : livingentity.hasEffect(MobEffects.BLINDNESS) || livingentity.hasEffect(MobEffects.DARKNESS);
+    private boolean doesMobEffectBlockSky(Camera pCamera) {
+        return pCamera.getEntity() instanceof LivingEntity livingentity
+            ? livingentity.hasEffect(MobEffects.BLINDNESS) || livingentity.hasEffect(MobEffects.DARKNESS)
+            : false;
     }
 
-    private void compileSections(Camera p_194371_) {
+    private void compileSections(Camera pCamera) {
         ProfilerFiller profilerfiller = Profiler.get();
         profilerfiller.push("populate_sections_to_compile");
         RenderRegionCache renderregioncache = new RenderRegionCache();
-        BlockPos blockpos = p_194371_.getBlockPosition();
+        renderregioncache.compileStarted();
+        BlockPos blockpos = pCamera.getBlockPosition();
         List<SectionRenderDispatcher.RenderSection> list = Lists.newArrayList();
+        Lagometer.timerChunkUpdate.start();
 
         for (SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection : this.visibleSections) {
             if (sectionrenderdispatcher$rendersection.isDirty() && sectionrenderdispatcher$rendersection.hasAllNeighbors()) {
-                boolean flag = false;
-                if (this.minecraft.options.prioritizeChunkUpdates().get() == PrioritizeChunkUpdates.NEARBY) {
-                    BlockPos blockpos1 = sectionrenderdispatcher$rendersection.getOrigin().offset(8, 8, 8);
-                    flag = blockpos1.distSqr(blockpos) < 768.0 || sectionrenderdispatcher$rendersection.isDirtyFromPlayer();
-                } else if (this.minecraft.options.prioritizeChunkUpdates().get() == PrioritizeChunkUpdates.PLAYER_AFFECTED) {
-                    flag = sectionrenderdispatcher$rendersection.isDirtyFromPlayer();
-                }
-
-                if (flag) {
-                    profilerfiller.push("build_near_sync");
-                    this.sectionRenderDispatcher.rebuildSectionSync(sectionrenderdispatcher$rendersection, renderregioncache);
-                    sectionrenderdispatcher$rendersection.setNotDirty();
-                    profilerfiller.pop();
-                } else {
+                if (sectionrenderdispatcher$rendersection.needsBackgroundPriorityUpdate()) {
                     list.add(sectionrenderdispatcher$rendersection);
+                } else {
+                    boolean flag = false;
+                    if (this.minecraft.options.prioritizeChunkUpdates().get() == PrioritizeChunkUpdates.NEARBY) {
+                        BlockPos blockpos1 = sectionrenderdispatcher$rendersection.getOrigin().offset(8, 8, 8);
+                        flag = blockpos1.distSqr(blockpos) < 768.0 || sectionrenderdispatcher$rendersection.isDirtyFromPlayer();
+                    } else if (this.minecraft.options.prioritizeChunkUpdates().get() == PrioritizeChunkUpdates.PLAYER_AFFECTED) {
+                        flag = sectionrenderdispatcher$rendersection.isDirtyFromPlayer();
+                    }
+
+                    if (flag) {
+                        profilerfiller.push("build_near_sync");
+                        this.sectionRenderDispatcher.rebuildSectionSync(sectionrenderdispatcher$rendersection, renderregioncache);
+                        sectionrenderdispatcher$rendersection.setNotDirty();
+                        profilerfiller.pop();
+                    } else {
+                        list.add(sectionrenderdispatcher$rendersection);
+                    }
                 }
             }
         }
 
+        Lagometer.timerChunkUpdate.end();
+        Lagometer.timerChunkUpload.start();
         profilerfiller.popPush("upload");
         this.sectionRenderDispatcher.uploadAllPendingUploads();
+        this.viewArea.clearUnusedVbos();
         profilerfiller.popPush("schedule_async_compile");
-
-        for (SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection1 : list) {
-            sectionrenderdispatcher$rendersection1.rebuildSectionAsync(this.sectionRenderDispatcher, renderregioncache);
-            sectionrenderdispatcher$rendersection1.setNotDirty();
+        if (this.chunksToResortTransparency.size() > 0) {
+            Iterator<SectionRenderDispatcher.RenderSection> iterator = this.chunksToResortTransparency.iterator();
+            if (iterator.hasNext()) {
+                SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection2 = iterator.next();
+                if (this.sectionRenderDispatcher.updateTransparencyLater(sectionrenderdispatcher$rendersection2)) {
+                    iterator.remove();
+                }
+            }
         }
 
+        double d1 = 0.0;
+        int i = Config.getUpdatesPerFrame();
+        this.countChunksToUpdate = list.size();
+
+        for (SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection1 : SectionUtils.getSortedDist(list, this.minecraft.player)) {
+            boolean flag1 = sectionrenderdispatcher$rendersection1.isChunkRegionEmpty();
+            boolean flag2 = sectionrenderdispatcher$rendersection1.needsBackgroundPriorityUpdate();
+            if (sectionrenderdispatcher$rendersection1.isDirty()) {
+                sectionrenderdispatcher$rendersection1.rebuildSectionAsync(this.sectionRenderDispatcher, renderregioncache);
+                sectionrenderdispatcher$rendersection1.setNotDirty();
+                if (!flag1 && !flag2) {
+                    double d0 = 2.0 * RenderChunkUtils.getRelativeBufferSize(sectionrenderdispatcher$rendersection1);
+                    d1 += d0;
+                    if (d1 > (double)i) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        renderregioncache.compileFinished();
+        Lagometer.timerChunkUpload.end();
         profilerfiller.pop();
-        this.scheduleTranslucentSectionResort(p_194371_.getPosition());
+        this.scheduleTranslucentSectionResort(pCamera.getPosition());
     }
 
     private void renderHitOutline(
-        PoseStack p_109638_,
-        VertexConsumer p_109639_,
-        Entity p_109640_,
-        double p_109641_,
-        double p_109642_,
-        double p_109643_,
-        BlockPos p_109644_,
-        BlockState p_109645_,
-        int p_362600_
+        PoseStack pPoseStack,
+        VertexConsumer pBuffer,
+        Entity pEntity,
+        double pCamX,
+        double pCamY,
+        double pCamZ,
+        BlockPos pPos,
+        BlockState pState,
+        int pColor
     ) {
-        ShapeRenderer.renderShape(
-            p_109638_,
-            p_109639_,
-            p_109645_.getShape(this.level, p_109644_, CollisionContext.of(p_109640_)),
-            (double)p_109644_.getX() - p_109641_,
-            (double)p_109644_.getY() - p_109642_,
-            (double)p_109644_.getZ() - p_109643_,
-            p_362600_
-        );
+        if (!Config.isCustomEntityModels() || !CustomEntityModels.isCustomModel(pState)) {
+            ShapeRenderer.renderShape(
+                pPoseStack,
+                pBuffer,
+                pState.getShape(this.level, pPos, CollisionContext.of(pEntity)),
+                (double)pPos.getX() - pCamX,
+                (double)pPos.getY() - pCamY,
+                (double)pPos.getZ() - pCamZ,
+                pColor
+            );
+        }
     }
 
-    public void blockChanged(BlockGetter p_109545_, BlockPos p_109546_, BlockState p_109547_, BlockState p_109548_, int p_109549_) {
-        this.setBlockDirty(p_109546_, (p_109549_ & 8) != 0);
+    public void blockChanged(BlockGetter pLevel, BlockPos pPos, BlockState pOldState, BlockState pNewState, int pFlags) {
+        this.setBlockDirty(pPos, (pFlags & 8) != 0);
     }
 
-    private void setBlockDirty(BlockPos p_109733_, boolean p_109734_) {
-        for (int i = p_109733_.getZ() - 1; i <= p_109733_.getZ() + 1; i++) {
-            for (int j = p_109733_.getX() - 1; j <= p_109733_.getX() + 1; j++) {
-                for (int k = p_109733_.getY() - 1; k <= p_109733_.getY() + 1; k++) {
-                    this.setSectionDirty(SectionPos.blockToSectionCoord(j), SectionPos.blockToSectionCoord(k), SectionPos.blockToSectionCoord(i), p_109734_);
+    private void setBlockDirty(BlockPos pPos, boolean pReRenderOnMainThread) {
+        for (int i = pPos.getZ() - 1; i <= pPos.getZ() + 1; i++) {
+            for (int j = pPos.getX() - 1; j <= pPos.getX() + 1; j++) {
+                for (int k = pPos.getY() - 1; k <= pPos.getY() + 1; k++) {
+                    this.setSectionDirty(SectionPos.blockToSectionCoord(j), SectionPos.blockToSectionCoord(k), SectionPos.blockToSectionCoord(i), pReRenderOnMainThread);
                 }
             }
         }
     }
 
-    public void setBlocksDirty(int p_109495_, int p_109496_, int p_109497_, int p_109498_, int p_109499_, int p_109500_) {
-        for (int i = p_109497_ - 1; i <= p_109500_ + 1; i++) {
-            for (int j = p_109495_ - 1; j <= p_109498_ + 1; j++) {
-                for (int k = p_109496_ - 1; k <= p_109499_ + 1; k++) {
+    public void setBlocksDirty(int pMinX, int pMinY, int pMinZ, int pMaxX, int pMaxY, int pMaxZ) {
+        for (int i = pMinZ - 1; i <= pMaxZ + 1; i++) {
+            for (int j = pMinX - 1; j <= pMaxX + 1; j++) {
+                for (int k = pMinY - 1; k <= pMaxY + 1; k++) {
                     this.setSectionDirty(SectionPos.blockToSectionCoord(j), SectionPos.blockToSectionCoord(k), SectionPos.blockToSectionCoord(i));
                 }
             }
         }
     }
 
-    public void setBlockDirty(BlockPos p_109722_, BlockState p_109723_, BlockState p_109724_) {
-        if (this.minecraft.getModelManager().requiresRender(p_109723_, p_109724_)) {
+    public void setBlockDirty(BlockPos pPos, BlockState pOldState, BlockState pNewState) {
+        if (this.minecraft.getModelManager().requiresRender(pOldState, pNewState)) {
             this.setBlocksDirty(
-                p_109722_.getX(), p_109722_.getY(), p_109722_.getZ(), p_109722_.getX(), p_109722_.getY(), p_109722_.getZ()
+                pPos.getX(), pPos.getY(), pPos.getZ(), pPos.getX(), pPos.getY(), pPos.getZ()
             );
         }
     }
 
-    public void setSectionDirtyWithNeighbors(int p_109491_, int p_109492_, int p_109493_) {
-        this.setSectionRangeDirty(p_109491_ - 1, p_109492_ - 1, p_109493_ - 1, p_109491_ + 1, p_109492_ + 1, p_109493_ + 1);
+    public void setSectionDirtyWithNeighbors(int pSectionX, int pSectionY, int pSectionZ) {
+        this.setSectionRangeDirty(pSectionX - 1, pSectionY - 1, pSectionZ - 1, pSectionX + 1, pSectionY + 1, pSectionZ + 1);
     }
 
-    public void setSectionRangeDirty(int p_368495_, int p_365381_, int p_365979_, int p_367380_, int p_368841_, int p_363880_) {
-        for (int i = p_365979_; i <= p_363880_; i++) {
-            for (int j = p_368495_; j <= p_367380_; j++) {
-                for (int k = p_365381_; k <= p_368841_; k++) {
+    public void setSectionRangeDirty(int pMinY, int pMinX, int pMinZ, int pMaxY, int pMaxX, int pMaxZ) {
+        for (int i = pMinZ; i <= pMaxZ; i++) {
+            for (int j = pMinY; j <= pMaxY; j++) {
+                for (int k = pMinX; k <= pMaxX; k++) {
                     this.setSectionDirty(j, k, i);
                 }
             }
         }
     }
 
-    public void setSectionDirty(int p_109771_, int p_109772_, int p_109773_) {
-        this.setSectionDirty(p_109771_, p_109772_, p_109773_, false);
+    public void setSectionDirty(int pSectionX, int pSectionY, int pSectionZ) {
+        this.setSectionDirty(pSectionX, pSectionY, pSectionZ, false);
     }
 
-    private void setSectionDirty(int p_109502_, int p_109503_, int p_109504_, boolean p_109505_) {
-        this.viewArea.setDirty(p_109502_, p_109503_, p_109504_, p_109505_);
+    private void setSectionDirty(int pSectionX, int pSectionY, int pSectionZ, boolean pReRenderOnMainThread) {
+        this.viewArea.setDirty(pSectionX, pSectionY, pSectionZ, pReRenderOnMainThread);
     }
 
-    public void onSectionBecomingNonEmpty(long p_366966_) {
-        SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection = this.viewArea.getRenderSection(p_366966_);
+    public void onSectionBecomingNonEmpty(long pSectionPos) {
+        SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection = this.viewArea.getRenderSection(pSectionPos);
         if (sectionrenderdispatcher$rendersection != null) {
             this.sectionOcclusionGraph.schedulePropagationFrom(sectionrenderdispatcher$rendersection);
         }
     }
 
     public void addParticle(
-        ParticleOptions p_109744_,
-        boolean p_109745_,
-        double p_109746_,
-        double p_109747_,
-        double p_109748_,
-        double p_109749_,
-        double p_109750_,
-        double p_109751_
+        ParticleOptions pOptions,
+        boolean pForce,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed
     ) {
-        this.addParticle(p_109744_, p_109745_, false, p_109746_, p_109747_, p_109748_, p_109749_, p_109750_, p_109751_);
+        this.addParticle(pOptions, pForce, false, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
     }
 
     public void addParticle(
-        ParticleOptions p_109753_,
-        boolean p_109754_,
-        boolean p_109755_,
-        double p_109756_,
-        double p_109757_,
-        double p_109758_,
-        double p_109759_,
-        double p_109760_,
-        double p_109761_
+        ParticleOptions pOptions,
+        boolean pForce,
+        boolean pDecreased,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed
     ) {
         try {
-            this.addParticleInternal(p_109753_, p_109754_, p_109755_, p_109756_, p_109757_, p_109758_, p_109759_, p_109760_, p_109761_);
+            this.addParticleInternal(pOptions, pForce, pDecreased, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.forThrowable(throwable, "Exception while adding particle");
             CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being added");
-            crashreportcategory.setDetail("ID", BuiltInRegistries.PARTICLE_TYPE.getKey(p_109753_.getType()));
+            crashreportcategory.setDetail("ID", BuiltInRegistries.PARTICLE_TYPE.getKey(pOptions.getType()));
             crashreportcategory.setDetail(
-                "Parameters", () -> ParticleTypes.CODEC.encodeStart(this.level.registryAccess().createSerializationContext(NbtOps.INSTANCE), p_109753_).toString()
+                "Parameters", () -> ParticleTypes.CODEC.encodeStart(this.level.registryAccess().createSerializationContext(NbtOps.INSTANCE), pOptions).toString()
             );
-            crashreportcategory.setDetail("Position", () -> CrashReportCategory.formatLocation(this.level, p_109756_, p_109757_, p_109758_));
+            crashreportcategory.setDetail("Position", () -> CrashReportCategory.formatLocation(this.level, pX, pY, pZ));
             throw new ReportedException(crashreport);
         }
     }
 
     public <T extends ParticleOptions> void addParticle(
-        T p_109736_, double p_109737_, double p_109738_, double p_109739_, double p_109740_, double p_109741_, double p_109742_
+        T pOptions, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed
     ) {
-        this.addParticle(p_109736_, p_109736_.getType().getOverrideLimiter(), p_109737_, p_109738_, p_109739_, p_109740_, p_109741_, p_109742_);
+        this.addParticle(pOptions, pOptions.getType().getOverrideLimiter(), pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
     }
 
     @Nullable
     Particle addParticleInternal(
-        ParticleOptions p_109796_,
-        boolean p_109797_,
-        double p_109798_,
-        double p_109799_,
-        double p_109800_,
-        double p_109801_,
-        double p_109802_,
-        double p_109803_
+        ParticleOptions pOptions,
+        boolean pForce,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed
     ) {
-        return this.addParticleInternal(p_109796_, p_109797_, false, p_109798_, p_109799_, p_109800_, p_109801_, p_109802_, p_109803_);
+        return this.addParticleInternal(pOptions, pForce, false, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
     }
 
     @Nullable
     private Particle addParticleInternal(
-        ParticleOptions p_109805_,
-        boolean p_109806_,
-        boolean p_109807_,
-        double p_109808_,
-        double p_109809_,
-        double p_109810_,
-        double p_109811_,
-        double p_109812_,
-        double p_109813_
+        ParticleOptions pOptions,
+        boolean pForce,
+        boolean pDecreased,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed
     ) {
         Camera camera = this.minecraft.gameRenderer.getMainCamera();
-        ParticleStatus particlestatus = this.calculateParticleLevel(p_109807_);
-        if (p_109806_) {
-            return this.minecraft.particleEngine.createParticle(p_109805_, p_109808_, p_109809_, p_109810_, p_109811_, p_109812_, p_109813_);
-        } else if (camera.getPosition().distanceToSqr(p_109808_, p_109809_, p_109810_) > 1024.0) {
+        ParticleStatus particlestatus = this.calculateParticleLevel(pDecreased);
+        if (pOptions == ParticleTypes.EXPLOSION_EMITTER && !Config.isAnimatedExplosion()) {
+            return null;
+        } else if (pOptions == ParticleTypes.EXPLOSION && !Config.isAnimatedExplosion()) {
+            return null;
+        } else if (pOptions == ParticleTypes.POOF && !Config.isAnimatedExplosion()) {
+            return null;
+        } else if (pOptions == ParticleTypes.UNDERWATER && !Config.isWaterParticles()) {
+            return null;
+        } else if (pOptions == ParticleTypes.SMOKE && !Config.isAnimatedSmoke()) {
+            return null;
+        } else if (pOptions == ParticleTypes.LARGE_SMOKE && !Config.isAnimatedSmoke()) {
+            return null;
+        } else if (pOptions == ParticleTypes.ENTITY_EFFECT && !Config.isPotionParticles()) {
+            return null;
+        } else if (pOptions == ParticleTypes.EFFECT && !Config.isPotionParticles()) {
+            return null;
+        } else if (pOptions == ParticleTypes.INSTANT_EFFECT && !Config.isPotionParticles()) {
+            return null;
+        } else if (pOptions == ParticleTypes.WITCH && !Config.isPotionParticles()) {
+            return null;
+        } else if (pOptions == ParticleTypes.PORTAL && !Config.isPortalParticles()) {
+            return null;
+        } else if (pOptions == ParticleTypes.FLAME && !Config.isAnimatedFlame()) {
+            return null;
+        } else if (pOptions == ParticleTypes.SOUL_FIRE_FLAME && !Config.isAnimatedFlame()) {
+            return null;
+        } else if (pOptions == ParticleTypes.DUST && !Config.isAnimatedRedstone()) {
+            return null;
+        } else if (pOptions == ParticleTypes.DRIPPING_WATER && !Config.isDrippingWaterLava()) {
+            return null;
+        } else if (pOptions == ParticleTypes.DRIPPING_LAVA && !Config.isDrippingWaterLava()) {
+            return null;
+        } else if (pOptions == ParticleTypes.FIREWORK && !Config.isFireworkParticles()) {
             return null;
         } else {
-            return particlestatus == ParticleStatus.MINIMAL
-                ? null
-                : this.minecraft.particleEngine.createParticle(p_109805_, p_109808_, p_109809_, p_109810_, p_109811_, p_109812_, p_109813_);
+            if (!pForce) {
+                double d0 = 1024.0;
+                if (pOptions == ParticleTypes.CRIT) {
+                    d0 = 38416.0;
+                }
+
+                if (camera.getPosition().distanceToSqr(pX, pY, pZ) > d0) {
+                    return null;
+                }
+
+                if (particlestatus == ParticleStatus.MINIMAL) {
+                    return null;
+                }
+            }
+
+            Particle particle = this.minecraft.particleEngine.createParticle(pOptions, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
+            if (pOptions == ParticleTypes.BUBBLE) {
+                CustomColors.updateWaterFX(particle, this.level, pX, pY, pZ, this.renderEnv);
+            }
+
+            if (pOptions == ParticleTypes.SPLASH) {
+                CustomColors.updateWaterFX(particle, this.level, pX, pY, pZ, this.renderEnv);
+            }
+
+            if (pOptions == ParticleTypes.RAIN) {
+                CustomColors.updateWaterFX(particle, this.level, pX, pY, pZ, this.renderEnv);
+            }
+
+            if (pOptions == ParticleTypes.MYCELIUM) {
+                CustomColors.updateMyceliumFX(particle);
+            }
+
+            if (pOptions == ParticleTypes.PORTAL) {
+                CustomColors.updatePortalFX(particle);
+            }
+
+            if (pOptions == ParticleTypes.DUST) {
+                CustomColors.updateReddustFX(particle, this.level, pX, pY, pZ);
+            }
+
+            if (pOptions == ParticleTypes.LAVA) {
+                CustomColors.updateLavaFX(particle);
+            }
+
+            return particle;
         }
     }
 
-    private ParticleStatus calculateParticleLevel(boolean p_109768_) {
+    private ParticleStatus calculateParticleLevel(boolean pDecreased) {
         ParticleStatus particlestatus = this.minecraft.options.particles().get();
-        if (p_109768_ && particlestatus == ParticleStatus.MINIMAL && this.level.random.nextInt(10) == 0) {
+        if (pDecreased && particlestatus == ParticleStatus.MINIMAL && this.level.random.nextInt(10) == 0) {
             particlestatus = ParticleStatus.DECREASED;
         }
 
@@ -1311,26 +2001,26 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
         return particlestatus;
     }
 
-    public void destroyBlockProgress(int p_109775_, BlockPos p_109776_, int p_109777_) {
-        if (p_109777_ >= 0 && p_109777_ < 10) {
-            BlockDestructionProgress blockdestructionprogress1 = this.destroyingBlocks.get(p_109775_);
+    public void destroyBlockProgress(int pBreakerId, BlockPos pPos, int pProgress) {
+        if (pProgress >= 0 && pProgress < 10) {
+            BlockDestructionProgress blockdestructionprogress1 = this.destroyingBlocks.get(pBreakerId);
             if (blockdestructionprogress1 != null) {
                 this.removeProgress(blockdestructionprogress1);
             }
 
             if (blockdestructionprogress1 == null
-                || blockdestructionprogress1.getPos().getX() != p_109776_.getX()
-                || blockdestructionprogress1.getPos().getY() != p_109776_.getY()
-                || blockdestructionprogress1.getPos().getZ() != p_109776_.getZ()) {
-                blockdestructionprogress1 = new BlockDestructionProgress(p_109775_, p_109776_);
-                this.destroyingBlocks.put(p_109775_, blockdestructionprogress1);
+                || blockdestructionprogress1.getPos().getX() != pPos.getX()
+                || blockdestructionprogress1.getPos().getY() != pPos.getY()
+                || blockdestructionprogress1.getPos().getZ() != pPos.getZ()) {
+                blockdestructionprogress1 = new BlockDestructionProgress(pBreakerId, pPos);
+                this.destroyingBlocks.put(pBreakerId, blockdestructionprogress1);
             }
 
-            blockdestructionprogress1.setProgress(p_109777_);
+            blockdestructionprogress1.setProgress(pProgress);
             blockdestructionprogress1.updateTick(this.ticks);
-            this.destructionProgress.computeIfAbsent(blockdestructionprogress1.getPos().asLong(), p_234254_ -> Sets.newTreeSet()).add(blockdestructionprogress1);
+            this.destructionProgress.computeIfAbsent(blockdestructionprogress1.getPos().asLong(), keyIn -> Sets.newTreeSet()).add(blockdestructionprogress1);
         } else {
-            BlockDestructionProgress blockdestructionprogress = this.destroyingBlocks.remove(p_109775_);
+            BlockDestructionProgress blockdestructionprogress = this.destroyingBlocks.remove(pBreakerId);
             if (blockdestructionprogress != null) {
                 this.removeProgress(blockdestructionprogress);
             }
@@ -1341,8 +2031,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
         return this.sectionRenderDispatcher.isQueueEmpty();
     }
 
-    public void onChunkReadyToRender(ChunkPos p_376082_) {
-        this.sectionOcclusionGraph.onChunkReadyToRender(p_376082_);
+    public void onChunkReadyToRender(ChunkPos pChunkPos) {
+        this.sectionOcclusionGraph.onChunkReadyToRender(pChunkPos);
     }
 
     public void needsUpdate() {
@@ -1350,34 +2040,351 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
         this.cloudRenderer.markForRebuild();
     }
 
-    public void updateGlobalBlockEntities(Collection<BlockEntity> p_109763_, Collection<BlockEntity> p_109764_) {
-        synchronized (this.globalBlockEntities) {
-            this.globalBlockEntities.removeAll(p_109763_);
-            this.globalBlockEntities.addAll(p_109764_);
+    public int getCountRenderers() {
+        return this.viewArea.sections.length;
+    }
+
+    public int getCountEntitiesRendered() {
+        return this.visibleEntityCount;
+    }
+
+    public int getCountTileEntitiesRendered() {
+        return this.countTileEntitiesRendered;
+    }
+
+    public int getCountLoadedChunks() {
+        if (this.level == null) {
+            return 0;
+        } else {
+            ClientChunkCache clientchunkcache = this.level.getChunkSource();
+            return clientchunkcache == null ? 0 : clientchunkcache.getLoadedChunksCount();
         }
     }
 
-    public static int getLightColor(BlockAndTintGetter p_109542_, BlockPos p_109543_) {
-        return getLightColor(p_109542_, p_109542_.getBlockState(p_109543_), p_109543_);
+    public int getCountChunksToUpdate() {
+        return this.countChunksToUpdate;
     }
 
-    public static int getLightColor(BlockAndTintGetter p_109538_, BlockState p_109539_, BlockPos p_109540_) {
-        if (p_109539_.emissiveRendering(p_109538_, p_109540_)) {
-            return 15728880;
+    public SectionRenderDispatcher.RenderSection getRenderChunk(BlockPos pos) {
+        return this.viewArea.getRenderSectionAt(pos);
+    }
+
+    public SectionRenderDispatcher.RenderSection getRenderChunk(long pos) {
+        return this.viewArea.getRenderSection(pos);
+    }
+
+    public ClientLevel getWorld() {
+        return this.level;
+    }
+
+    private void clearRenderInfos() {
+        this.clearRenderInfosTerrain();
+        this.clearRenderInfosEntities();
+    }
+
+    private void clearRenderInfosTerrain() {
+        if (renderEntitiesCounter > 0) {
+            this.renderInfosTerrain = new ObjectArrayList<>(this.renderInfosTerrain.size() + 16);
+            this.renderInfosTileEntities = new ArrayList<>(this.renderInfosTileEntities.size() + 16);
         } else {
-            int i = p_109538_.getBrightness(LightLayer.SKY, p_109540_);
-            int j = p_109538_.getBrightness(LightLayer.BLOCK, p_109540_);
-            int k = p_109539_.getLightEmission();
+            this.renderInfosTerrain.clear();
+            this.renderInfosTileEntities.clear();
+        }
+    }
+
+    private void clearRenderInfosEntities() {
+        if (renderEntitiesCounter > 0) {
+            this.renderInfosEntities = new LongOpenHashSet(this.renderInfosEntities.size() + 16);
+        } else {
+            this.renderInfosEntities.clear();
+        }
+    }
+
+    public void onPlayerPositionSet() {
+        if (this.firstWorldLoad) {
+            this.allChanged();
+            this.firstWorldLoad = false;
+        }
+    }
+
+    public void pauseChunkUpdates() {
+        if (this.sectionRenderDispatcher != null) {
+            this.sectionRenderDispatcher.pauseChunkUpdates();
+        }
+    }
+
+    public void resumeChunkUpdates() {
+        if (this.sectionRenderDispatcher != null) {
+            this.sectionRenderDispatcher.resumeChunkUpdates();
+        }
+    }
+
+    public int getFrameCount() {
+        return this.frameId;
+    }
+
+    public RenderBuffers getRenderTypeTextures() {
+        return this.renderBuffers;
+    }
+
+    public LongOpenHashSet getRenderChunksEntities() {
+        return this.renderInfosEntities;
+    }
+
+    private void addEntitySection(LongOpenHashSet set, EntitySectionStorage storage, BlockPos pos) {
+        long i = SectionPos.asLong(pos);
+        EntitySection entitysection = storage.getSection(i);
+        if (entitysection != null) {
+            set.add(i);
+        }
+    }
+
+    private boolean hasEntitySection(EntitySectionStorage storage, BlockPos pos) {
+        long i = SectionPos.asLong(pos);
+        EntitySection entitysection = storage.getSection(i);
+        return entitysection != null;
+    }
+
+    public List<SectionRenderDispatcher.RenderSection> getRenderInfos() {
+        return this.visibleSections;
+    }
+
+    public List<SectionRenderDispatcher.RenderSection> getRenderInfosTerrain() {
+        return this.renderInfosTerrain;
+    }
+
+    public List<SectionRenderDispatcher.RenderSection> getRenderInfosTileEntities() {
+        return this.renderInfosTileEntities;
+    }
+
+    private void checkLoadVisibleChunks(Camera activeRenderInfo, Frustum icamera, boolean spectator) {
+        if (this.loadVisibleChunksCounter == 0) {
+            this.loadAllVisibleChunks(activeRenderInfo, icamera, spectator);
+            this.minecraft.gui.getChat().deleteMessage(loadVisibleChunksMessageId);
+        }
+
+        if (this.loadVisibleChunksCounter >= 0) {
+            this.loadVisibleChunksCounter--;
+        }
+    }
+
+    private void loadAllVisibleChunks(Camera activeRenderInfo, Frustum icamera, boolean spectator) {
+        int i = this.minecraft.options.ofChunkUpdates;
+        boolean flag = this.minecraft.options.ofLazyChunkLoading;
+
+        try {
+            this.minecraft.options.ofChunkUpdates = 1000;
+            this.minecraft.options.ofLazyChunkLoading = false;
+            LevelRenderer levelrenderer = Config.getRenderGlobal();
+            int j = levelrenderer.getCountLoadedChunks();
+            long k = System.currentTimeMillis();
+            Config.dbg("Loading visible chunks");
+            long l = System.currentTimeMillis() + 5000L;
+            int i1 = 0;
+            boolean flag1 = false;
+
+            do {
+                flag1 = false;
+
+                for (int j1 = 0; j1 < 100; j1++) {
+                    levelrenderer.needsUpdate();
+                    levelrenderer.setupRender(activeRenderInfo, icamera, false, spectator);
+                    Config.sleep(1L);
+                    this.compileSections(activeRenderInfo);
+                    if (levelrenderer.getCountChunksToUpdate() > 0) {
+                        flag1 = true;
+                    }
+
+                    if (!levelrenderer.hasRenderedAllSections()) {
+                        flag1 = true;
+                    }
+
+                    i1 += levelrenderer.getCountChunksToUpdate();
+
+                    while (!levelrenderer.hasRenderedAllSections()) {
+                        int k1 = levelrenderer.getCountChunksToUpdate();
+                        this.compileSections(activeRenderInfo);
+                        if (k1 == levelrenderer.getCountChunksToUpdate()) {
+                            break;
+                        }
+                    }
+
+                    i1 -= levelrenderer.getCountChunksToUpdate();
+                    if (!flag1) {
+                        break;
+                    }
+                }
+
+                if (levelrenderer.getCountLoadedChunks() != j) {
+                    flag1 = true;
+                    j = levelrenderer.getCountLoadedChunks();
+                }
+
+                if (System.currentTimeMillis() > l) {
+                    Config.log("Chunks loaded: " + i1);
+                    l = System.currentTimeMillis() + 5000L;
+                }
+            } while (flag1);
+
+            Config.log("Chunks loaded: " + i1);
+            Config.log("Finished loading visible chunks");
+            SectionRenderDispatcher.renderChunksUpdated = 0;
+        } finally {
+            this.minecraft.options.ofChunkUpdates = i;
+            this.minecraft.options.ofLazyChunkLoading = flag;
+        }
+    }
+
+    public void applyFrustumEntities(Frustum camera, int maxChunkDistance) {
+        this.renderInfosEntities.clear();
+        int i = (int)camera.getCameraX() >> 4 << 4;
+        int j = (int)camera.getCameraY() >> 4 << 4;
+        int k = (int)camera.getCameraZ() >> 4 << 4;
+        int l = maxChunkDistance * maxChunkDistance;
+        EntitySectionStorage<?> entitysectionstorage = this.level.getSectionStorage();
+        BlockPosM blockposm = new BlockPosM();
+        LongSet longset = entitysectionstorage.getSectionKeys();
+        LongIterator longiterator = longset.iterator();
+
+        while (longiterator.hasNext()) {
+            long i1 = longiterator.nextLong();
+            blockposm.setXyz(
+                SectionPos.sectionToBlockCoord(SectionPos.x(i1)), SectionPos.sectionToBlockCoord(SectionPos.y(i1)), SectionPos.sectionToBlockCoord(SectionPos.z(i1))
+            );
+            SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection = this.viewArea.getRenderSectionAt(blockposm);
+            if (sectionrenderdispatcher$rendersection != null && camera.isVisible(sectionrenderdispatcher$rendersection.getBoundingBox())) {
+                if (maxChunkDistance > 0) {
+                    BlockPos blockpos = sectionrenderdispatcher$rendersection.getOrigin();
+                    int j1 = i - blockpos.getX();
+                    int k1 = j - blockpos.getY();
+                    int l1 = k - blockpos.getZ();
+                    int i2 = j1 * j1 + k1 * k1 + l1 * l1;
+                    if (i2 > l) {
+                        continue;
+                    }
+                }
+
+                this.renderInfosEntities.add(i1);
+            }
+        }
+    }
+
+    public void setShadowRenderInfos(boolean shadowInfos) {
+        if (shadowInfos) {
+            this.renderInfosTerrain = this.renderInfosTerrainShadow;
+            this.renderInfosEntities = this.renderInfosEntitiesShadow;
+            this.renderInfosTileEntities = this.renderInfosTileEntitiesShadow;
+        } else {
+            this.renderInfosTerrain = this.renderInfosTerrainNormal;
+            this.renderInfosEntities = this.renderInfosEntitiesNormal;
+            this.renderInfosTileEntities = this.renderInfosTileEntitiesNormal;
+        }
+    }
+
+    public int getRenderedChunksShadow() {
+        return !Config.isShadersShadows() ? -1 : this.renderInfosTerrainShadow.size();
+    }
+
+    public int getCountEntitiesRenderedShadow() {
+        return !Config.isShadersShadows() ? -1 : ShadersRender.countEntitiesRenderedShadow;
+    }
+
+    public int getCountTileEntitiesRenderedShadow() {
+        if (!Config.isShaders()) {
+            return -1;
+        } else {
+            return !Shaders.hasShadowMap ? -1 : ShadersRender.countTileEntitiesRenderedShadow;
+        }
+    }
+
+    public void captureFrustumShadow() {
+        this.debugFixTerrainFrustumShadow = true;
+    }
+
+    public boolean isDebugFrustum() {
+        return this.capturedFrustum != null;
+    }
+
+    public void onChunkRenderNeedsUpdate(SectionRenderDispatcher.RenderSection renderChunk) {
+        if (!renderChunk.getCompiled().hasTerrainBlockEntities()) {
+            ;
+        }
+    }
+
+    public boolean needsFrustumUpdate() {
+        return this.sectionOcclusionGraph.needsFrustumUpdate();
+    }
+
+    public boolean shouldRenderEntity(Entity entity, int minWorldY, int maxWorldY) {
+        if (entity instanceof Display) {
+            return true;
+        } else if (entity == this.minecraft.getCameraEntity()) {
+            return true;
+        } else {
+            if (entity instanceof LivingEntity livingentity && livingentity.getScale() > 1.0F) {
+                return true;
+            }
+
+            BlockPos blockpos = entity.blockPosition();
+            return this.renderInfosEntities.contains(SectionPos.asLong(blockpos)) || blockpos.getY() <= minWorldY || blockpos.getY() >= maxWorldY;
+        }
+    }
+
+    public Frustum getFrustum() {
+        return this.capturedFrustum != null ? this.capturedFrustum : this.cullingFrustum;
+    }
+
+    public int getTicks() {
+        return this.ticks;
+    }
+
+    public WeatherEffectRenderer getWeatherEffects() {
+        return this.weatherEffectRenderer;
+    }
+
+    public void setWeatherEffects(WeatherEffectRenderer value) {
+        this.weatherEffectRenderer = value;
+    }
+
+    public void updateGlobalBlockEntities(Collection<BlockEntity> pBlockEntitiesToRemove, Collection<BlockEntity> pBlockEntitiesToAdd) {
+        synchronized (this.globalBlockEntities) {
+            this.globalBlockEntities.removeAll(pBlockEntitiesToRemove);
+            this.globalBlockEntities.addAll(pBlockEntitiesToAdd);
+        }
+    }
+
+    public static int getLightColor(BlockAndTintGetter pLevel, BlockPos pPos) {
+        return getLightColor(pLevel, pLevel.getBlockState(pPos), pPos);
+    }
+
+    public static int getLightColor(BlockAndTintGetter pLevel, BlockState pState, BlockPos pPos) {
+        return getPackedLightmapCoords(pLevel, pState, pPos, ambientOcclusion);
+    }
+
+    public static int getPackedLightmapCoords(BlockAndTintGetter lightReaderIn, BlockState blockStateIn, BlockPos blockPosIn, boolean ambientOcclusionIn) {
+        if (EmissiveTextures.isRenderEmissive() && Config.isMinecraftThread()) {
+            return LightTexture.MAX_BRIGHTNESS;
+        } else if (blockStateIn.emissiveRendering(lightReaderIn, blockPosIn)) {
+            return 15794417;
+        } else {
+            int i = lightReaderIn.getBrightness(LightLayer.SKY, blockPosIn);
+            int j = lightReaderIn.getBrightness(LightLayer.BLOCK, blockPosIn);
+            int k = blockStateIn.getLightValue(lightReaderIn, blockPosIn);
             if (j < k) {
                 j = k;
             }
 
-            return i << 20 | j << 4;
+            int l = i << 20 | j << 4;
+            if (Config.isDynamicLights() && lightReaderIn instanceof BlockGetter && (!ambientOcclusionIn || !blockStateIn.isSolidRender())) {
+                l = DynamicLights.getCombinedLight(blockPosIn, l);
+            }
+
+            return l;
         }
     }
 
-    public boolean isSectionCompiled(BlockPos p_300380_) {
-        SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection = this.viewArea.getRenderSectionAt(p_300380_);
+    public boolean isSectionCompiled(BlockPos pPos) {
+        SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection = this.viewArea.getRenderSectionAt(pPos);
         return sectionrenderdispatcher$rendersection != null
             && sectionrenderdispatcher$rendersection.compiled.get() != SectionRenderDispatcher.CompiledSection.UNCOMPILED;
     }

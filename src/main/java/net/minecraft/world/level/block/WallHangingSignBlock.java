@@ -75,14 +75,14 @@ public class WallHangingSignBlock extends SignBlock {
         return super.useItemOn(p_331007_, p_336183_, p_331789_, p_329016_, p_329833_, p_330634_, p_333867_);
     }
 
-    private boolean shouldTryToChainAnotherHangingSign(BlockState p_278346_, Player p_278263_, BlockHitResult p_278269_, SignBlockEntity p_278290_, ItemStack p_278238_) {
-        return !p_278290_.canExecuteClickCommands(p_278290_.isFacingFrontText(p_278263_), p_278263_)
-            && p_278238_.getItem() instanceof HangingSignItem
-            && !this.isHittingEditableSide(p_278269_, p_278346_);
+    private boolean shouldTryToChainAnotherHangingSign(BlockState pState, Player pPlayer, BlockHitResult pHitResult, SignBlockEntity pSign, ItemStack pStack) {
+        return !pSign.canExecuteClickCommands(pSign.isFacingFrontText(pPlayer), pPlayer)
+            && pStack.getItem() instanceof HangingSignItem
+            && !this.isHittingEditableSide(pHitResult, pState);
     }
 
-    private boolean isHittingEditableSide(BlockHitResult p_278339_, BlockState p_278302_) {
-        return p_278339_.getDirection().getAxis() == p_278302_.getValue(FACING).getAxis();
+    private boolean isHittingEditableSide(BlockHitResult pHitResult, BlockState pState) {
+        return pHitResult.getDirection().getAxis() == pState.getValue(FACING).getAxis();
     }
 
     @Override
@@ -106,18 +106,18 @@ public class WallHangingSignBlock extends SignBlock {
         }
     }
 
-    public boolean canPlace(BlockState p_249472_, LevelReader p_249453_, BlockPos p_251235_) {
-        Direction direction = p_249472_.getValue(FACING).getClockWise();
-        Direction direction1 = p_249472_.getValue(FACING).getCounterClockWise();
-        return this.canAttachTo(p_249453_, p_249472_, p_251235_.relative(direction), direction1)
-            || this.canAttachTo(p_249453_, p_249472_, p_251235_.relative(direction1), direction);
+    public boolean canPlace(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        Direction direction = pState.getValue(FACING).getClockWise();
+        Direction direction1 = pState.getValue(FACING).getCounterClockWise();
+        return this.canAttachTo(pLevel, pState, pPos.relative(direction), direction1)
+            || this.canAttachTo(pLevel, pState, pPos.relative(direction1), direction);
     }
 
-    public boolean canAttachTo(LevelReader p_249746_, BlockState p_251128_, BlockPos p_250583_, Direction p_250567_) {
-        BlockState blockstate = p_249746_.getBlockState(p_250583_);
+    public boolean canAttachTo(LevelReader pLevel, BlockState pState, BlockPos pPos, Direction pDirection) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
         return blockstate.is(BlockTags.WALL_HANGING_SIGNS)
-            ? blockstate.getValue(FACING).getAxis().test(p_251128_.getValue(FACING))
-            : blockstate.isFaceSturdy(p_249746_, p_250583_, p_250567_, SupportType.FULL);
+            ? blockstate.getValue(FACING).getAxis().test(pState.getValue(FACING))
+            : blockstate.isFaceSturdy(pLevel, pPos, pDirection, SupportType.FULL);
     }
 
     @Nullable

@@ -6,8 +6,8 @@ import java.util.Optional;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class RemoveEmptyItemInBrushableBlockFix extends NamedEntityWriteReadFix {
-    public RemoveEmptyItemInBrushableBlockFix(Schema p_328124_) {
-        super(p_328124_, false, "RemoveEmptyItemInSuspiciousBlockFix", References.BLOCK_ENTITY, "minecraft:brushable_block");
+    public RemoveEmptyItemInBrushableBlockFix(Schema pOutputSchema) {
+        super(pOutputSchema, false, "RemoveEmptyItemInSuspiciousBlockFix", References.BLOCK_ENTITY, "minecraft:brushable_block");
     }
 
     @Override
@@ -16,9 +16,9 @@ public class RemoveEmptyItemInBrushableBlockFix extends NamedEntityWriteReadFix 
         return optional.isPresent() && isEmptyStack(optional.get()) ? p_330310_.remove("item") : p_330310_;
     }
 
-    private static boolean isEmptyStack(Dynamic<?> p_328874_) {
-        String s = NamespacedSchema.ensureNamespaced(p_328874_.get("id").asString("minecraft:air"));
-        int i = p_328874_.get("count").asInt(0);
+    private static boolean isEmptyStack(Dynamic<?> pTag) {
+        String s = NamespacedSchema.ensureNamespaced(pTag.get("id").asString("minecraft:air"));
+        int i = pTag.get("count").asInt(0);
         return s.equals("minecraft:air") || i == 0;
     }
 }

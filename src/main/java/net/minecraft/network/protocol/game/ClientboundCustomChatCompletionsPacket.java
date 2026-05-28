@@ -12,13 +12,13 @@ public record ClientboundCustomChatCompletionsPacket(ClientboundCustomChatComple
         ClientboundCustomChatCompletionsPacket::write, ClientboundCustomChatCompletionsPacket::new
     );
 
-    private ClientboundCustomChatCompletionsPacket(FriendlyByteBuf p_243340_) {
-        this(p_243340_.readEnum(ClientboundCustomChatCompletionsPacket.Action.class), p_243340_.readList(FriendlyByteBuf::readUtf));
+    private ClientboundCustomChatCompletionsPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readEnum(ClientboundCustomChatCompletionsPacket.Action.class), pBuffer.readList(FriendlyByteBuf::readUtf));
     }
 
-    private void write(FriendlyByteBuf p_240782_) {
-        p_240782_.writeEnum(this.action);
-        p_240782_.writeCollection(this.entries, FriendlyByteBuf::writeUtf);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeEnum(this.action);
+        pBuffer.writeCollection(this.entries, FriendlyByteBuf::writeUtf);
     }
 
     @Override

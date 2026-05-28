@@ -29,25 +29,25 @@ public class RangeSelectItemModel implements ItemModel {
     private final ItemModel[] models;
     private final ItemModel fallback;
 
-    RangeSelectItemModel(RangeSelectItemModelProperty p_378527_, float p_378148_, float[] p_377531_, ItemModel[] p_375411_, ItemModel p_378323_) {
-        this.property = p_378527_;
-        this.thresholds = p_377531_;
-        this.models = p_375411_;
-        this.fallback = p_378323_;
-        this.scale = p_378148_;
+    RangeSelectItemModel(RangeSelectItemModelProperty pProperty, float pScale, float[] pThresholds, ItemModel[] pModels, ItemModel pFallback) {
+        this.property = pProperty;
+        this.thresholds = pThresholds;
+        this.models = pModels;
+        this.fallback = pFallback;
+        this.scale = pScale;
     }
 
-    private static int lastIndexLessOrEqual(float[] p_378298_, float p_378394_) {
-        if (p_378298_.length < 16) {
-            for (int k = 0; k < p_378298_.length; k++) {
-                if (p_378298_[k] > p_378394_) {
+    private static int lastIndexLessOrEqual(float[] pThresholds, float pValue) {
+        if (pThresholds.length < 16) {
+            for (int k = 0; k < pThresholds.length; k++) {
+                if (pThresholds[k] > pValue) {
                     return k - 1;
                 }
             }
 
-            return p_378298_.length - 1;
+            return pThresholds.length - 1;
         } else {
-            int i = Arrays.binarySearch(p_378298_, p_378394_);
+            int i = Arrays.binarySearch(pThresholds, pValue);
             if (i < 0) {
                 int j = ~i;
                 return j - 1;

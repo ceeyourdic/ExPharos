@@ -25,16 +25,16 @@ public class IllagerModel<S extends IllagerRenderState> extends EntityModel<S> i
     private final ModelPart rightArm;
     private final ModelPart leftArm;
 
-    public IllagerModel(ModelPart p_170688_) {
-        super(p_170688_);
-        this.head = p_170688_.getChild("head");
+    public IllagerModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
         this.hat = this.head.getChild("hat");
         this.hat.visible = false;
-        this.arms = p_170688_.getChild("arms");
-        this.leftLeg = p_170688_.getChild("left_leg");
-        this.rightLeg = p_170688_.getChild("right_leg");
-        this.leftArm = p_170688_.getChild("left_arm");
-        this.rightArm = p_170688_.getChild("right_arm");
+        this.arms = pRoot.getChild("arms");
+        this.leftLeg = pRoot.getChild("left_leg");
+        this.rightLeg = pRoot.getChild("right_leg");
+        this.leftArm = pRoot.getChild("left_arm");
+        this.rightArm = pRoot.getChild("right_arm");
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -172,8 +172,8 @@ public class IllagerModel<S extends IllagerRenderState> extends EntityModel<S> i
         this.rightArm.visible = !flag;
     }
 
-    private ModelPart getArm(HumanoidArm p_102923_) {
-        return p_102923_ == HumanoidArm.LEFT ? this.leftArm : this.rightArm;
+    private ModelPart getArm(HumanoidArm pArm) {
+        return pArm == HumanoidArm.LEFT ? this.leftArm : this.rightArm;
     }
 
     public ModelPart getHat() {
@@ -186,8 +186,8 @@ public class IllagerModel<S extends IllagerRenderState> extends EntityModel<S> i
     }
 
     @Override
-    public void translateToHand(HumanoidArm p_102925_, PoseStack p_102926_) {
-        this.root.translateAndRotate(p_102926_);
-        this.getArm(p_102925_).translateAndRotate(p_102926_);
+    public void translateToHand(HumanoidArm pSide, PoseStack pPoseStack) {
+        this.root.translateAndRotate(pPoseStack);
+        this.getArm(pSide).translateAndRotate(pPoseStack);
     }
 }

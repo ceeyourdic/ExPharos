@@ -6,14 +6,14 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.serialization.Dynamic;
 
 public class JukeboxTicksSinceSongStartedFix extends NamedEntityFix {
-    public JukeboxTicksSinceSongStartedFix(Schema p_342295_) {
-        super(p_342295_, false, "JukeboxTicksSinceSongStartedFix", References.BLOCK_ENTITY, "minecraft:jukebox");
+    public JukeboxTicksSinceSongStartedFix(Schema pOutputSchema) {
+        super(pOutputSchema, false, "JukeboxTicksSinceSongStartedFix", References.BLOCK_ENTITY, "minecraft:jukebox");
     }
 
-    public Dynamic<?> fixTag(Dynamic<?> p_344094_) {
-        long i = p_344094_.get("TickCount").asLong(0L) - p_344094_.get("RecordStartTick").asLong(0L);
-        Dynamic<?> dynamic = p_344094_.remove("IsPlaying").remove("TickCount").remove("RecordStartTick");
-        return i > 0L ? dynamic.set("ticks_since_song_started", p_344094_.createLong(i)) : dynamic;
+    public Dynamic<?> fixTag(Dynamic<?> pTag) {
+        long i = pTag.get("TickCount").asLong(0L) - pTag.get("RecordStartTick").asLong(0L);
+        Dynamic<?> dynamic = pTag.remove("IsPlaying").remove("TickCount").remove("RecordStartTick");
+        return i > 0L ? dynamic.set("ticks_since_song_started", pTag.createLong(i)) : dynamic;
     }
 
     @Override

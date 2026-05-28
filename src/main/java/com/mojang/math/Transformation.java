@@ -46,20 +46,20 @@ public final class Transformation {
         return transformation;
     });
 
-    public Transformation(@Nullable Matrix4f p_253689_) {
-        if (p_253689_ == null) {
+    public Transformation(@Nullable Matrix4f pMatrix) {
+        if (pMatrix == null) {
             this.matrix = new Matrix4f();
         } else {
-            this.matrix = p_253689_;
+            this.matrix = pMatrix;
         }
     }
 
-    public Transformation(@Nullable Vector3f p_253831_, @Nullable Quaternionf p_253846_, @Nullable Vector3f p_254502_, @Nullable Quaternionf p_253912_) {
-        this.matrix = compose(p_253831_, p_253846_, p_254502_, p_253912_);
-        this.translation = p_253831_ != null ? p_253831_ : new Vector3f();
-        this.leftRotation = p_253846_ != null ? p_253846_ : new Quaternionf();
-        this.scale = p_254502_ != null ? p_254502_ : new Vector3f(1.0F, 1.0F, 1.0F);
-        this.rightRotation = p_253912_ != null ? p_253912_ : new Quaternionf();
+    public Transformation(@Nullable Vector3f pTranslation, @Nullable Quaternionf pLeftRotation, @Nullable Vector3f pScale, @Nullable Quaternionf pRightRotation) {
+        this.matrix = compose(pTranslation, pLeftRotation, pScale, pRightRotation);
+        this.translation = pTranslation != null ? pTranslation : new Vector3f();
+        this.leftRotation = pLeftRotation != null ? pLeftRotation : new Quaternionf();
+        this.scale = pScale != null ? pScale : new Vector3f(1.0F, 1.0F, 1.0F);
+        this.rightRotation = pRightRotation != null ? pRightRotation : new Quaternionf();
         this.decomposed = true;
     }
 
@@ -67,9 +67,9 @@ public final class Transformation {
         return IDENTITY;
     }
 
-    public Transformation compose(Transformation p_121097_) {
+    public Transformation compose(Transformation pOther) {
         Matrix4f matrix4f = this.getMatrix();
-        matrix4f.mul(p_121097_.getMatrix());
+        matrix4f.mul(pOther.getMatrix());
         return new Transformation(matrix4f);
     }
 
@@ -96,23 +96,23 @@ public final class Transformation {
     }
 
     private static Matrix4f compose(
-        @Nullable Vector3f p_254465_, @Nullable Quaternionf p_254416_, @Nullable Vector3f p_254499_, @Nullable Quaternionf p_254334_
+        @Nullable Vector3f pTranslation, @Nullable Quaternionf pLeftRotation, @Nullable Vector3f pScale, @Nullable Quaternionf pRightRotation
     ) {
         Matrix4f matrix4f = new Matrix4f();
-        if (p_254465_ != null) {
-            matrix4f.translation(p_254465_);
+        if (pTranslation != null) {
+            matrix4f.translation(pTranslation);
         }
 
-        if (p_254416_ != null) {
-            matrix4f.rotate(p_254416_);
+        if (pLeftRotation != null) {
+            matrix4f.rotate(pLeftRotation);
         }
 
-        if (p_254499_ != null) {
-            matrix4f.scale(p_254499_);
+        if (pScale != null) {
+            matrix4f.scale(pScale);
         }
 
-        if (p_254334_ != null) {
-            matrix4f.rotate(p_254334_);
+        if (pRightRotation != null) {
+            matrix4f.rotate(pRightRotation);
         }
 
         return matrix4f;
@@ -143,11 +143,11 @@ public final class Transformation {
     }
 
     @Override
-    public boolean equals(Object p_121108_) {
-        if (this == p_121108_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
-        } else if (p_121108_ != null && this.getClass() == p_121108_.getClass()) {
-            Transformation transformation = (Transformation)p_121108_;
+        } else if (pOther != null && this.getClass() == pOther.getClass()) {
+            Transformation transformation = (Transformation)pOther;
             return Objects.equals(this.matrix, transformation.matrix);
         } else {
             return false;
@@ -159,15 +159,15 @@ public final class Transformation {
         return Objects.hash(this.matrix);
     }
 
-    public Transformation slerp(Transformation p_175938_, float p_175939_) {
+    public Transformation slerp(Transformation pTransformation, float pDelta) {
         Vector3f vector3f = this.getTranslation();
         Quaternionf quaternionf = this.getLeftRotation();
         Vector3f vector3f1 = this.getScale();
         Quaternionf quaternionf1 = this.getRightRotation();
-        vector3f.lerp(p_175938_.getTranslation(), p_175939_);
-        quaternionf.slerp(p_175938_.getLeftRotation(), p_175939_);
-        vector3f1.lerp(p_175938_.getScale(), p_175939_);
-        quaternionf1.slerp(p_175938_.getRightRotation(), p_175939_);
+        vector3f.lerp(pTransformation.getTranslation(), pDelta);
+        quaternionf.slerp(pTransformation.getLeftRotation(), pDelta);
+        vector3f1.lerp(pTransformation.getScale(), pDelta);
+        quaternionf1.slerp(pTransformation.getRightRotation(), pDelta);
         return new Transformation(vector3f, quaternionf, vector3f1, quaternionf1);
     }
 }

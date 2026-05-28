@@ -35,11 +35,11 @@ public class WolfArmorLayer extends RenderLayer<WolfRenderState, WolfModel> {
         ResourceLocation.withDefaultNamespace("textures/entity/wolf/wolf_armor_crackiness_high.png")
     );
 
-    public WolfArmorLayer(RenderLayerParent<WolfRenderState, WolfModel> p_329010_, EntityModelSet p_329062_, EquipmentLayerRenderer p_364552_) {
-        super(p_329010_);
-        this.adultModel = new WolfModel(p_329062_.bakeLayer(ModelLayers.WOLF_ARMOR));
-        this.babyModel = new WolfModel(p_329062_.bakeLayer(ModelLayers.WOLF_BABY_ARMOR));
-        this.equipmentRenderer = p_364552_;
+    public WolfArmorLayer(RenderLayerParent<WolfRenderState, WolfModel> pRenderer, EntityModelSet pEntityModels, EquipmentLayerRenderer pEquipmentRenderer) {
+        super(pRenderer);
+        this.adultModel = new WolfModel(pEntityModels.bakeLayer(ModelLayers.WOLF_ARMOR));
+        this.babyModel = new WolfModel(pEntityModels.bakeLayer(ModelLayers.WOLF_BABY_ARMOR));
+        this.equipmentRenderer = pEquipmentRenderer;
     }
 
     public void render(PoseStack p_332681_, MultiBufferSource p_332805_, int p_332676_, WolfRenderState p_361287_, float p_334070_, float p_332543_) {
@@ -54,12 +54,12 @@ public class WolfArmorLayer extends RenderLayer<WolfRenderState, WolfModel> {
         }
     }
 
-    private void maybeRenderCracks(PoseStack p_332031_, MultiBufferSource p_334884_, int p_329468_, ItemStack p_332244_, Model p_365074_) {
-        Crackiness.Level crackiness$level = Crackiness.WOLF_ARMOR.byDamage(p_332244_);
+    private void maybeRenderCracks(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, ItemStack pArmorItem, Model pModel) {
+        Crackiness.Level crackiness$level = Crackiness.WOLF_ARMOR.byDamage(pArmorItem);
         if (crackiness$level != Crackiness.Level.NONE) {
             ResourceLocation resourcelocation = ARMOR_CRACK_LOCATIONS.get(crackiness$level);
-            VertexConsumer vertexconsumer = p_334884_.getBuffer(RenderType.armorTranslucent(resourcelocation));
-            p_365074_.renderToBuffer(p_332031_, vertexconsumer, p_329468_, OverlayTexture.NO_OVERLAY);
+            VertexConsumer vertexconsumer = pBufferSource.getBuffer(RenderType.armorTranslucent(resourcelocation));
+            pModel.renderToBuffer(pPoseStack, vertexconsumer, pPackedLight, OverlayTexture.NO_OVERLAY);
         }
     }
 }

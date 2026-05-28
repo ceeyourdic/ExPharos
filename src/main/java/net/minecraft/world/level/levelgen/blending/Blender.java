@@ -63,12 +63,12 @@ public class Blender {
         return EMPTY;
     }
 
-    public static Blender of(@Nullable WorldGenRegion p_190203_) {
-        if (p_190203_ == null) {
+    public static Blender of(@Nullable WorldGenRegion pRegion) {
+        if (pRegion == null) {
             return EMPTY;
         } else {
-            ChunkPos chunkpos = p_190203_.getCenter();
-            if (!p_190203_.isOldChunkAround(chunkpos, HEIGHT_BLENDING_RANGE_CHUNKS)) {
+            ChunkPos chunkpos = pRegion.getCenter();
+            if (!pRegion.isOldChunkAround(chunkpos, HEIGHT_BLENDING_RANGE_CHUNKS)) {
                 return EMPTY;
             } else {
                 Long2ObjectOpenHashMap<BlendingData> long2objectopenhashmap = new Long2ObjectOpenHashMap<>();
@@ -80,7 +80,7 @@ public class Blender {
                         if (j * j + k * k <= i) {
                             int l = chunkpos.x + j;
                             int i1 = chunkpos.z + k;
-                            BlendingData blendingdata = BlendingData.getOrUpdateBlendingData(p_190203_, l, i1);
+                            BlendingData blendingdata = BlendingData.getOrUpdateBlendingData(pRegion, l, i1);
                             if (blendingdata != null) {
                                 long2objectopenhashmap.put(ChunkPos.asLong(l, i1), blendingdata);
                                 if (j >= -DENSITY_BLENDING_RANGE_CHUNKS && j <= DENSITY_BLENDING_RANGE_CHUNKS && k >= -DENSITY_BLENDING_RANGE_CHUNKS && k <= DENSITY_BLENDING_RANGE_CHUNKS) {
@@ -98,14 +98,14 @@ public class Blender {
         }
     }
 
-    Blender(Long2ObjectOpenHashMap<BlendingData> p_202197_, Long2ObjectOpenHashMap<BlendingData> p_202198_) {
-        this.heightAndBiomeBlendingData = p_202197_;
-        this.densityBlendingData = p_202198_;
+    Blender(Long2ObjectOpenHashMap<BlendingData> pHeightAndBiomeBlendingData, Long2ObjectOpenHashMap<BlendingData> pDensityBlendingData) {
+        this.heightAndBiomeBlendingData = pHeightAndBiomeBlendingData;
+        this.densityBlendingData = pDensityBlendingData;
     }
 
-    public Blender.BlendingOutput blendOffsetAndFactor(int p_209719_, int p_209720_) {
-        int i = QuartPos.fromBlock(p_209719_);
-        int j = QuartPos.fromBlock(p_209720_);
+    public Blender.BlendingOutput blendOffsetAndFactor(int pX, int pZ) {
+        int i = QuartPos.fromBlock(pX);
+        int j = QuartPos.fromBlock(pZ);
         double d0 = this.getBlendingDataValue(i, 0, j, BlendingData::getHeight);
         if (d0 != Double.MAX_VALUE) {
             return new Blender.BlendingOutput(0.0, heightToOffset(d0));
@@ -143,17 +143,17 @@ public class Blender {
         }
     }
 
-    private static double heightToOffset(double p_190155_) {
+    private static double heightToOffset(double pHeight) {
         double d0 = 1.0;
-        double d1 = p_190155_ + 0.5;
+        double d1 = pHeight + 0.5;
         double d2 = Mth.positiveModulo(d1, 8.0);
         return 1.0 * (32.0 * (d1 - 128.0) - 3.0 * (d1 - 120.0) * d2 + 3.0 * d2 * d2) / (128.0 * (32.0 - 3.0 * d2));
     }
 
-    public double blendDensity(DensityFunction.FunctionContext p_209721_, double p_209722_) {
-        int i = QuartPos.fromBlock(p_209721_.blockX());
-        int j = p_209721_.blockY() / 8;
-        int k = QuartPos.fromBlock(p_209721_.blockZ());
+    public double blendDensity(DensityFunction.FunctionContext pContext, double pDensity) {
+        int i = QuartPos.fromBlock(pContext.blockX());
+        int j = pContext.blockY() / 8;
+        int k = QuartPos.fromBlock(pContext.blockZ());
         double d0 = this.getBlendingDataValue(i, j, k, BlendingData::getDensity);
         if (d0 != Double.MAX_VALUE) {
             return d0;
@@ -183,33 +183,33 @@ public class Blender {
                         )
                 );
             if (mutabledouble2.doubleValue() == Double.POSITIVE_INFINITY) {
-                return p_209722_;
+                return pDensity;
             } else {
                 double d1 = mutabledouble1.doubleValue() / mutabledouble.doubleValue();
                 double d2 = Mth.clamp(mutabledouble2.doubleValue() / 3.0, 0.0, 1.0);
-                return Mth.lerp(d2, d1, p_209722_);
+                return Mth.lerp(d2, d1, pDensity);
             }
         }
     }
 
-    private double getBlendingDataValue(int p_190175_, int p_190176_, int p_190177_, Blender.CellValueGetter p_190178_) {
-        int i = QuartPos.toSection(p_190175_);
-        int j = QuartPos.toSection(p_190177_);
-        boolean flag = (p_190175_ & 3) == 0;
-        boolean flag1 = (p_190177_ & 3) == 0;
-        double d0 = this.getBlendingDataValue(p_190178_, i, j, p_190175_, p_190176_, p_190177_);
+    private double getBlendingDataValue(int pX, int pY, int pZ, Blender.CellValueGetter pGetter) {
+        int i = QuartPos.toSection(pX);
+        int j = QuartPos.toSection(pZ);
+        boolean flag = (pX & 3) == 0;
+        boolean flag1 = (pZ & 3) == 0;
+        double d0 = this.getBlendingDataValue(pGetter, i, j, pX, pY, pZ);
         if (d0 == Double.MAX_VALUE) {
             if (flag && flag1) {
-                d0 = this.getBlendingDataValue(p_190178_, i - 1, j - 1, p_190175_, p_190176_, p_190177_);
+                d0 = this.getBlendingDataValue(pGetter, i - 1, j - 1, pX, pY, pZ);
             }
 
             if (d0 == Double.MAX_VALUE) {
                 if (flag) {
-                    d0 = this.getBlendingDataValue(p_190178_, i - 1, j, p_190175_, p_190176_, p_190177_);
+                    d0 = this.getBlendingDataValue(pGetter, i - 1, j, pX, pY, pZ);
                 }
 
                 if (d0 == Double.MAX_VALUE && flag1) {
-                    d0 = this.getBlendingDataValue(p_190178_, i, j - 1, p_190175_, p_190176_, p_190177_);
+                    d0 = this.getBlendingDataValue(pGetter, i, j - 1, pX, pY, pZ);
                 }
             }
         }
@@ -217,32 +217,32 @@ public class Blender {
         return d0;
     }
 
-    private double getBlendingDataValue(Blender.CellValueGetter p_190212_, int p_190213_, int p_190214_, int p_190215_, int p_190216_, int p_190217_) {
-        BlendingData blendingdata = this.heightAndBiomeBlendingData.get(ChunkPos.asLong(p_190213_, p_190214_));
+    private double getBlendingDataValue(Blender.CellValueGetter pGetter, int pSectionX, int pSectionZ, int pX, int pY, int pZ) {
+        BlendingData blendingdata = this.heightAndBiomeBlendingData.get(ChunkPos.asLong(pSectionX, pSectionZ));
         return blendingdata != null
-            ? p_190212_.get(blendingdata, p_190215_ - QuartPos.fromSection(p_190213_), p_190216_, p_190217_ - QuartPos.fromSection(p_190214_))
+            ? pGetter.get(blendingdata, pX - QuartPos.fromSection(pSectionX), pY, pZ - QuartPos.fromSection(pSectionZ))
             : Double.MAX_VALUE;
     }
 
-    public BiomeResolver getBiomeResolver(BiomeResolver p_190204_) {
+    public BiomeResolver getBiomeResolver(BiomeResolver pResolver) {
         return (p_204669_, p_204670_, p_204671_, p_204672_) -> {
             Holder<Biome> holder = this.blendBiome(p_204669_, p_204670_, p_204671_);
-            return holder == null ? p_190204_.getNoiseBiome(p_204669_, p_204670_, p_204671_, p_204672_) : holder;
+            return holder == null ? pResolver.getNoiseBiome(p_204669_, p_204670_, p_204671_, p_204672_) : holder;
         };
     }
 
     @Nullable
-    private Holder<Biome> blendBiome(int p_224707_, int p_224708_, int p_224709_) {
+    private Holder<Biome> blendBiome(int pX, int pY, int pZ) {
         MutableDouble mutabledouble = new MutableDouble(Double.POSITIVE_INFINITY);
         MutableObject<Holder<Biome>> mutableobject = new MutableObject<>();
         this.heightAndBiomeBlendingData
             .forEach(
                 (p_224716_, p_224717_) -> p_224717_.iterateBiomes(
                         QuartPos.fromSection(ChunkPos.getX(p_224716_)),
-                        p_224708_,
+                        pY,
                         QuartPos.fromSection(ChunkPos.getZ(p_224716_)),
                         (p_360591_, p_360592_, p_360593_) -> {
-                            double d2 = (double)Mth.length((float)(p_224707_ - p_360591_), (float)(p_224709_ - p_360592_));
+                            double d2 = (double)Mth.length((float)(pX - p_360591_), (float)(pZ - p_360592_));
                             if (!(d2 > (double)HEIGHT_BLENDING_RANGE_CELLS)) {
                                 if (d2 < mutabledouble.doubleValue()) {
                                     mutableobject.setValue(p_360593_);
@@ -255,34 +255,34 @@ public class Blender {
         if (mutabledouble.doubleValue() == Double.POSITIVE_INFINITY) {
             return null;
         } else {
-            double d0 = SHIFT_NOISE.getValue((double)p_224707_, 0.0, (double)p_224709_) * 12.0;
+            double d0 = SHIFT_NOISE.getValue((double)pX, 0.0, (double)pZ) * 12.0;
             double d1 = Mth.clamp((mutabledouble.doubleValue() + d0) / (double)(HEIGHT_BLENDING_RANGE_CELLS + 1), 0.0, 1.0);
             return d1 > 0.5 ? null : mutableobject.getValue();
         }
     }
 
-    public static void generateBorderTicks(WorldGenRegion p_197032_, ChunkAccess p_197033_) {
-        ChunkPos chunkpos = p_197033_.getPos();
-        boolean flag = p_197033_.isOldNoiseGeneration();
+    public static void generateBorderTicks(WorldGenRegion pRegion, ChunkAccess pChunk) {
+        ChunkPos chunkpos = pChunk.getPos();
+        boolean flag = pChunk.isOldNoiseGeneration();
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
         BlockPos blockpos = new BlockPos(chunkpos.getMinBlockX(), 0, chunkpos.getMinBlockZ());
-        BlendingData blendingdata = p_197033_.getBlendingData();
+        BlendingData blendingdata = pChunk.getBlendingData();
         if (blendingdata != null) {
             int i = blendingdata.getAreaWithOldGeneration().getMinY();
             int j = blendingdata.getAreaWithOldGeneration().getMaxY();
             if (flag) {
                 for (int k = 0; k < 16; k++) {
                     for (int l = 0; l < 16; l++) {
-                        generateBorderTick(p_197033_, blockpos$mutableblockpos.setWithOffset(blockpos, k, i - 1, l));
-                        generateBorderTick(p_197033_, blockpos$mutableblockpos.setWithOffset(blockpos, k, i, l));
-                        generateBorderTick(p_197033_, blockpos$mutableblockpos.setWithOffset(blockpos, k, j, l));
-                        generateBorderTick(p_197033_, blockpos$mutableblockpos.setWithOffset(blockpos, k, j + 1, l));
+                        generateBorderTick(pChunk, blockpos$mutableblockpos.setWithOffset(blockpos, k, i - 1, l));
+                        generateBorderTick(pChunk, blockpos$mutableblockpos.setWithOffset(blockpos, k, i, l));
+                        generateBorderTick(pChunk, blockpos$mutableblockpos.setWithOffset(blockpos, k, j, l));
+                        generateBorderTick(pChunk, blockpos$mutableblockpos.setWithOffset(blockpos, k, j + 1, l));
                     }
                 }
             }
 
             for (Direction direction : Direction.Plane.HORIZONTAL) {
-                if (p_197032_.getChunk(chunkpos.x + direction.getStepX(), chunkpos.z + direction.getStepZ()).isOldNoiseGeneration() != flag) {
+                if (pRegion.getChunk(chunkpos.x + direction.getStepX(), chunkpos.z + direction.getStepZ()).isOldNoiseGeneration() != flag) {
                     int i1 = direction == Direction.EAST ? 15 : 0;
                     int j1 = direction == Direction.WEST ? 0 : 15;
                     int k1 = direction == Direction.SOUTH ? 15 : 0;
@@ -290,10 +290,10 @@ public class Blender {
 
                     for (int i2 = i1; i2 <= j1; i2++) {
                         for (int j2 = k1; j2 <= l1; j2++) {
-                            int k2 = Math.min(j, p_197033_.getHeight(Heightmap.Types.MOTION_BLOCKING, i2, j2)) + 1;
+                            int k2 = Math.min(j, pChunk.getHeight(Heightmap.Types.MOTION_BLOCKING, i2, j2)) + 1;
 
                             for (int l2 = i; l2 < k2; l2++) {
-                                generateBorderTick(p_197033_, blockpos$mutableblockpos.setWithOffset(blockpos, i2, l2, j2));
+                                generateBorderTick(pChunk, blockpos$mutableblockpos.setWithOffset(blockpos, i2, l2, j2));
                             }
                         }
                     }
@@ -302,51 +302,51 @@ public class Blender {
         }
     }
 
-    private static void generateBorderTick(ChunkAccess p_197041_, BlockPos p_197042_) {
-        BlockState blockstate = p_197041_.getBlockState(p_197042_);
+    private static void generateBorderTick(ChunkAccess pChunk, BlockPos pPos) {
+        BlockState blockstate = pChunk.getBlockState(pPos);
         if (blockstate.is(BlockTags.LEAVES)) {
-            p_197041_.markPosForPostprocessing(p_197042_);
+            pChunk.markPosForPostprocessing(pPos);
         }
 
-        FluidState fluidstate = p_197041_.getFluidState(p_197042_);
+        FluidState fluidstate = pChunk.getFluidState(pPos);
         if (!fluidstate.isEmpty()) {
-            p_197041_.markPosForPostprocessing(p_197042_);
+            pChunk.markPosForPostprocessing(pPos);
         }
     }
 
-    public static void addAroundOldChunksCarvingMaskFilter(WorldGenLevel p_197035_, ProtoChunk p_197036_) {
-        ChunkPos chunkpos = p_197036_.getPos();
+    public static void addAroundOldChunksCarvingMaskFilter(WorldGenLevel pLevel, ProtoChunk pChunk) {
+        ChunkPos chunkpos = pChunk.getPos();
         Builder<Direction8, BlendingData> builder = ImmutableMap.builder();
 
         for (Direction8 direction8 : Direction8.values()) {
             int i = chunkpos.x + direction8.getStepX();
             int j = chunkpos.z + direction8.getStepZ();
-            BlendingData blendingdata = p_197035_.getChunk(i, j).getBlendingData();
+            BlendingData blendingdata = pLevel.getChunk(i, j).getBlendingData();
             if (blendingdata != null) {
                 builder.put(direction8, blendingdata);
             }
         }
 
         ImmutableMap<Direction8, BlendingData> immutablemap = builder.build();
-        if (p_197036_.isOldNoiseGeneration() || !immutablemap.isEmpty()) {
-            Blender.DistanceGetter blender$distancegetter = makeOldChunkDistanceGetter(p_197036_.getBlendingData(), immutablemap);
+        if (pChunk.isOldNoiseGeneration() || !immutablemap.isEmpty()) {
+            Blender.DistanceGetter blender$distancegetter = makeOldChunkDistanceGetter(pChunk.getBlendingData(), immutablemap);
             CarvingMask.Mask carvingmask$mask = (p_202262_, p_202263_, p_202264_) -> {
                 double d0 = (double)p_202262_ + 0.5 + SHIFT_NOISE.getValue((double)p_202262_, (double)p_202263_, (double)p_202264_) * 4.0;
                 double d1 = (double)p_202263_ + 0.5 + SHIFT_NOISE.getValue((double)p_202263_, (double)p_202264_, (double)p_202262_) * 4.0;
                 double d2 = (double)p_202264_ + 0.5 + SHIFT_NOISE.getValue((double)p_202264_, (double)p_202262_, (double)p_202263_) * 4.0;
                 return blender$distancegetter.getDistance(d0, d1, d2) < 4.0;
             };
-            p_197036_.getOrCreateCarvingMask().setAdditionalMask(carvingmask$mask);
+            pChunk.getOrCreateCarvingMask().setAdditionalMask(carvingmask$mask);
         }
     }
 
-    public static Blender.DistanceGetter makeOldChunkDistanceGetter(@Nullable BlendingData p_224727_, Map<Direction8, BlendingData> p_224728_) {
+    public static Blender.DistanceGetter makeOldChunkDistanceGetter(@Nullable BlendingData pBlendingData, Map<Direction8, BlendingData> pSurroundingBlendingData) {
         List<Blender.DistanceGetter> list = Lists.newArrayList();
-        if (p_224727_ != null) {
-            list.add(makeOffsetOldChunkDistanceGetter(null, p_224727_));
+        if (pBlendingData != null) {
+            list.add(makeOffsetOldChunkDistanceGetter(null, pBlendingData));
         }
 
-        p_224728_.forEach((p_224734_, p_224735_) -> list.add(makeOffsetOldChunkDistanceGetter(p_224734_, p_224735_)));
+        pSurroundingBlendingData.forEach((p_224734_, p_224735_) -> list.add(makeOffsetOldChunkDistanceGetter(p_224734_, p_224735_)));
         return (p_202267_, p_202268_, p_202269_) -> {
             double d0 = Double.POSITIVE_INFINITY;
 
@@ -361,11 +361,11 @@ public class Blender {
         };
     }
 
-    private static Blender.DistanceGetter makeOffsetOldChunkDistanceGetter(@Nullable Direction8 p_224730_, BlendingData p_224731_) {
+    private static Blender.DistanceGetter makeOffsetOldChunkDistanceGetter(@Nullable Direction8 pDirection, BlendingData pBlendingData) {
         double d0 = 0.0;
         double d1 = 0.0;
-        if (p_224730_ != null) {
-            for (Direction direction : p_224730_.getDirections()) {
+        if (pDirection != null) {
+            for (Direction direction : pDirection.getDirections()) {
                 d0 += (double)(direction.getStepX() * 16);
                 d1 += (double)(direction.getStepZ() * 16);
             }
@@ -373,15 +373,15 @@ public class Blender {
 
         double d5 = d0;
         double d2 = d1;
-        double d3 = (double)p_224731_.getAreaWithOldGeneration().getHeight() / 2.0;
-        double d4 = (double)p_224731_.getAreaWithOldGeneration().getMinY() + d3;
+        double d3 = (double)pBlendingData.getAreaWithOldGeneration().getHeight() / 2.0;
+        double d4 = (double)pBlendingData.getAreaWithOldGeneration().getMinY() + d3;
         return (p_224703_, p_224704_, p_224705_) -> distanceToCube(p_224703_ - 8.0 - d5, p_224704_ - d4, p_224705_ - 8.0 - d2, 8.0, d3, 8.0);
     }
 
-    private static double distanceToCube(double p_197025_, double p_197026_, double p_197027_, double p_197028_, double p_197029_, double p_197030_) {
-        double d0 = Math.abs(p_197025_) - p_197028_;
-        double d1 = Math.abs(p_197026_) - p_197029_;
-        double d2 = Math.abs(p_197027_) - p_197030_;
+    private static double distanceToCube(double pX1, double pY1, double pZ1, double pX2, double pY2, double pZ2) {
+        double d0 = Math.abs(pX1) - pX2;
+        double d1 = Math.abs(pY1) - pY2;
+        double d2 = Math.abs(pZ1) - pZ2;
         return Mth.length(Math.max(0.0, d0), Math.max(0.0, d1), Math.max(0.0, d2));
     }
 
@@ -389,10 +389,10 @@ public class Blender {
     }
 
     interface CellValueGetter {
-        double get(BlendingData p_190234_, int p_190235_, int p_190236_, int p_190237_);
+        double get(BlendingData pBlendingData, int pX, int pY, int pZ);
     }
 
     public interface DistanceGetter {
-        double getDistance(double p_197062_, double p_197063_, double p_197064_);
+        double getDistance(double pX, double pY, double pZ);
     }
 }

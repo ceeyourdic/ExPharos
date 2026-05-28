@@ -21,14 +21,14 @@ import net.minecraft.world.phys.AABB;
 public class ValidateNearbyPoi {
     private static final int MAX_DISTANCE = 16;
 
-    public static BehaviorControl<LivingEntity> create(Predicate<Holder<PoiType>> p_259460_, MemoryModuleType<GlobalPos> p_259635_) {
+    public static BehaviorControl<LivingEntity> create(Predicate<Holder<PoiType>> pPoiValidator, MemoryModuleType<GlobalPos> pPoiPosMemory) {
         return BehaviorBuilder.create(
-            p_259215_ -> p_259215_.group(p_259215_.present(p_259635_)).apply(p_259215_, p_259498_ -> (p_375053_, p_375054_, p_375055_) -> {
+            p_259215_ -> p_259215_.group(p_259215_.present(pPoiPosMemory)).apply(p_259215_, p_259498_ -> (p_375053_, p_375054_, p_375055_) -> {
                         GlobalPos globalpos = p_259215_.get(p_259498_);
                         BlockPos blockpos = globalpos.pos();
                         if (p_375053_.dimension() == globalpos.dimension() && blockpos.closerToCenterThan(p_375054_.position(), 16.0)) {
                             ServerLevel serverlevel = p_375053_.getServer().getLevel(globalpos.dimension());
-                            if (serverlevel == null || !serverlevel.getPoiManager().exists(blockpos, p_259460_)) {
+                            if (serverlevel == null || !serverlevel.getPoiManager().exists(blockpos, pPoiValidator)) {
                                 p_259498_.erase();
                             } else if (bedIsOccupied(serverlevel, blockpos, p_375054_)) {
                                 p_259498_.erase();
@@ -46,13 +46,13 @@ public class ValidateNearbyPoi {
         );
     }
 
-    private static boolean bedIsOccupied(ServerLevel p_24531_, BlockPos p_24532_, LivingEntity p_24533_) {
-        BlockState blockstate = p_24531_.getBlockState(p_24532_);
-        return blockstate.is(BlockTags.BEDS) && blockstate.getValue(BedBlock.OCCUPIED) && !p_24533_.isSleeping();
+    private static boolean bedIsOccupied(ServerLevel pLevel, BlockPos pPos, LivingEntity pEntity) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
+        return blockstate.is(BlockTags.BEDS) && blockstate.getValue(BedBlock.OCCUPIED) && !pEntity.isSleeping();
     }
 
-    private static boolean bedIsOccupiedByVillager(ServerLevel p_377892_, BlockPos p_376377_) {
-        List<Villager> list = p_377892_.getEntitiesOfClass(Villager.class, new AABB(p_376377_), LivingEntity::isSleeping);
+    private static boolean bedIsOccupiedByVillager(ServerLevel pLevel, BlockPos pPos) {
+        List<Villager> list = pLevel.getEntitiesOfClass(Villager.class, new AABB(pPos), LivingEntity::isSleeping);
         return !list.isEmpty();
     }
 }

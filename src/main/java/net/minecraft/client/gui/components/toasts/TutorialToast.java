@@ -34,20 +34,20 @@ public class TutorialToast implements Toast {
     private final boolean progressable;
     private final int timeToDisplayMs;
 
-    public TutorialToast(Font p_375994_, TutorialToast.Icons p_94958_, Component p_94959_, @Nullable Component p_94960_, boolean p_94961_, int p_378192_) {
-        this.icon = p_94958_;
+    public TutorialToast(Font pFont, TutorialToast.Icons pIcon, Component pTitle, @Nullable Component pMessage, boolean pProgressable, int pTimeToDisplayMs) {
+        this.icon = pIcon;
         this.lines = new ArrayList<>(2);
-        this.lines.addAll(p_375994_.split(p_94959_.copy().withColor(-11534256), 126));
-        if (p_94960_ != null) {
-            this.lines.addAll(p_375994_.split(p_94960_, 126));
+        this.lines.addAll(pFont.split(pTitle.copy().withColor(-11534256), 126));
+        if (pMessage != null) {
+            this.lines.addAll(pFont.split(pMessage, 126));
         }
 
-        this.progressable = p_94961_;
-        this.timeToDisplayMs = p_378192_;
+        this.progressable = pProgressable;
+        this.timeToDisplayMs = pTimeToDisplayMs;
     }
 
-    public TutorialToast(Font p_376611_, TutorialToast.Icons p_361346_, Component p_369759_, @Nullable Component p_363508_, boolean p_369872_) {
-        this(p_376611_, p_361346_, p_369759_, p_363508_, p_369872_, 0);
+    public TutorialToast(Font pFont, TutorialToast.Icons pIcon, Component pTitle, @Nullable Component pMessage, boolean pProgressable) {
+        this(pFont, pIcon, pTitle, pMessage, pProgressable, 0);
     }
 
     @Override
@@ -109,8 +109,8 @@ public class TutorialToast implements Toast {
         this.visibility = Toast.Visibility.HIDE;
     }
 
-    public void updateProgress(float p_94963_) {
-        this.progress = p_94963_;
+    public void updateProgress(float pProgress) {
+        this.progress = pProgress;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -125,12 +125,12 @@ public class TutorialToast implements Toast {
 
         private final ResourceLocation sprite;
 
-        private Icons(final ResourceLocation p_297613_) {
-            this.sprite = p_297613_;
+        private Icons(final ResourceLocation pSprite) {
+            this.sprite = pSprite;
         }
 
-        public void render(GuiGraphics p_282818_, int p_283064_, int p_282765_) {
-            p_282818_.blitSprite(RenderType::guiTextured, this.sprite, p_283064_, p_282765_, 20, 20);
+        public void render(GuiGraphics pGuiGraphics, int pX, int pY) {
+            pGuiGraphics.blitSprite(RenderType::guiTextured, this.sprite, pX, pY, 20, 20);
         }
     }
 }

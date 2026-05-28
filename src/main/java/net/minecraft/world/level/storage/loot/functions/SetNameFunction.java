@@ -45,12 +45,12 @@ public class SetNameFunction extends LootItemConditionalFunction {
     private final SetNameFunction.Target target;
 
     private SetNameFunction(
-        List<LootItemCondition> p_298434_, Optional<Component> p_299902_, Optional<LootContext.EntityTarget> p_300668_, SetNameFunction.Target p_327809_
+        List<LootItemCondition> pConditions, Optional<Component> pName, Optional<LootContext.EntityTarget> pResolutionContext, SetNameFunction.Target pTarget
     ) {
-        super(p_298434_);
-        this.name = p_299902_;
-        this.resolutionContext = p_300668_;
-        this.target = p_327809_;
+        super(pConditions);
+        this.name = pName;
+        this.resolutionContext = pResolutionContext;
+        this.target = pTarget;
     }
 
     @Override
@@ -63,11 +63,11 @@ public class SetNameFunction extends LootItemConditionalFunction {
         return this.resolutionContext.<Set<ContextKey<?>>>map(p_360676_ -> Set.of(p_360676_.getParam())).orElse(Set.of());
     }
 
-    public static UnaryOperator<Component> createResolver(LootContext p_81140_, @Nullable LootContext.EntityTarget p_81141_) {
-        if (p_81141_ != null) {
-            Entity entity = p_81140_.getOptionalParameter(p_81141_.getParam());
+    public static UnaryOperator<Component> createResolver(LootContext pLootContext, @Nullable LootContext.EntityTarget pResolutionContext) {
+        if (pResolutionContext != null) {
+            Entity entity = pLootContext.getOptionalParameter(pResolutionContext.getParam());
             if (entity != null) {
-                CommandSourceStack commandsourcestack = entity.createCommandSourceStackForNameResolution(p_81140_.getLevel()).withPermission(2);
+                CommandSourceStack commandsourcestack = entity.createCommandSourceStackForNameResolution(pLootContext.getLevel()).withPermission(2);
                 return p_81147_ -> {
                     try {
                         return ComponentUtils.updateForEntity(commandsourcestack, p_81147_, entity, 0);
@@ -83,17 +83,17 @@ public class SetNameFunction extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_81137_, LootContext p_81138_) {
-        this.name.ifPresent(p_327617_ -> p_81137_.set(this.target.component(), createResolver(p_81138_, this.resolutionContext.orElse(null)).apply(p_327617_)));
-        return p_81137_;
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        this.name.ifPresent(p_327617_ -> pStack.set(this.target.component(), createResolver(pContext, this.resolutionContext.orElse(null)).apply(p_327617_)));
+        return pStack;
     }
 
-    public static LootItemConditionalFunction.Builder<?> setName(Component p_165460_, SetNameFunction.Target p_336143_) {
-        return simpleBuilder(p_327621_ -> new SetNameFunction(p_327621_, Optional.of(p_165460_), Optional.empty(), p_336143_));
+    public static LootItemConditionalFunction.Builder<?> setName(Component pName, SetNameFunction.Target pTarget) {
+        return simpleBuilder(p_327621_ -> new SetNameFunction(p_327621_, Optional.of(pName), Optional.empty(), pTarget));
     }
 
-    public static LootItemConditionalFunction.Builder<?> setName(Component p_165458_, SetNameFunction.Target p_335783_, LootContext.EntityTarget p_332047_) {
-        return simpleBuilder(p_327626_ -> new SetNameFunction(p_327626_, Optional.of(p_165458_), Optional.of(p_332047_), p_335783_));
+    public static LootItemConditionalFunction.Builder<?> setName(Component pName, SetNameFunction.Target pTarget, LootContext.EntityTarget pResolutionContext) {
+        return simpleBuilder(p_327626_ -> new SetNameFunction(p_327626_, Optional.of(pName), Optional.of(pResolutionContext), pTarget));
     }
 
     public static enum Target implements StringRepresentable {
@@ -103,8 +103,8 @@ public class SetNameFunction extends LootItemConditionalFunction {
         public static final Codec<SetNameFunction.Target> CODEC = StringRepresentable.fromEnum(SetNameFunction.Target::values);
         private final String name;
 
-        private Target(final String p_333129_) {
-            this.name = p_333129_;
+        private Target(final String pName) {
+            this.name = pName;
         }
 
         @Override

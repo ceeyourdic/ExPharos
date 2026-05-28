@@ -18,9 +18,9 @@ class MatchingFluidsPredicate extends StateTestingPredicate {
                 .apply(p_259005_, MatchingFluidsPredicate::new)
     );
 
-    public MatchingFluidsPredicate(Vec3i p_204695_, HolderSet<Fluid> p_204696_) {
-        super(p_204695_);
-        this.fluids = p_204696_;
+    public MatchingFluidsPredicate(Vec3i pOffset, HolderSet<Fluid> pFluids) {
+        super(pOffset);
+        this.fluids = pFluids;
     }
 
     @Override

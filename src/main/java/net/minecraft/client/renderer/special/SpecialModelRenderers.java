@@ -173,7 +173,7 @@ public class SpecialModelRenderers {
         ID_MAPPER.put(ResourceLocation.withDefaultNamespace("hanging_sign"), HangingSignSpecialRenderer.Unbaked.MAP_CODEC);
     }
 
-    public static Map<Block, SpecialModelRenderer<?>> createBlockRenderers(EntityModelSet p_378538_) {
+    public static Map<Block, SpecialModelRenderer<?>> createBlockRenderers(EntityModelSet pModelSet) {
         Map<Block, SpecialModelRenderer.Unbaked> map = new HashMap<>(STATIC_BLOCK_MAPPING);
         if (ChestRenderer.xmasTextures()) {
             map.put(Blocks.CHEST, GIFT_CHEST);
@@ -182,7 +182,7 @@ public class SpecialModelRenderers {
 
         Builder<Block, SpecialModelRenderer<?>> builder = ImmutableMap.builder();
         map.forEach((p_377014_, p_376072_) -> {
-            SpecialModelRenderer<?> specialmodelrenderer = p_376072_.bake(p_378538_);
+            SpecialModelRenderer<?> specialmodelrenderer = p_376072_.bake(pModelSet);
             if (specialmodelrenderer != null) {
                 builder.put(p_377014_, specialmodelrenderer);
             }

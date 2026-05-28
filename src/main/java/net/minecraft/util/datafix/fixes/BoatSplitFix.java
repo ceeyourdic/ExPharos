@@ -13,24 +13,24 @@ import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class BoatSplitFix extends DataFix {
-    public BoatSplitFix(Schema p_366558_) {
-        super(p_366558_, true);
+    public BoatSplitFix(Schema pOutputSchema) {
+        super(pOutputSchema, true);
     }
 
-    private static boolean isNormalBoat(String p_363922_) {
-        return p_363922_.equals("minecraft:boat");
+    private static boolean isNormalBoat(String pId) {
+        return pId.equals("minecraft:boat");
     }
 
-    private static boolean isChestBoat(String p_369570_) {
-        return p_369570_.equals("minecraft:chest_boat");
+    private static boolean isChestBoat(String pId) {
+        return pId.equals("minecraft:chest_boat");
     }
 
-    private static boolean isAnyBoat(String p_366835_) {
-        return isNormalBoat(p_366835_) || isChestBoat(p_366835_);
+    private static boolean isAnyBoat(String pId) {
+        return isNormalBoat(pId) || isChestBoat(pId);
     }
 
-    private static String mapVariantToNormalBoat(String p_362351_) {
-        return switch (p_362351_) {
+    private static String mapVariantToNormalBoat(String pVariant) {
+        return switch (pVariant) {
             case "spruce" -> "minecraft:spruce_boat";
             case "birch" -> "minecraft:birch_boat";
             case "jungle" -> "minecraft:jungle_boat";
@@ -43,8 +43,8 @@ public class BoatSplitFix extends DataFix {
         };
     }
 
-    private static String mapVariantToChestBoat(String p_368305_) {
-        return switch (p_368305_) {
+    private static String mapVariantToChestBoat(String pVariant) {
+        return switch (pVariant) {
             case "spruce" -> "minecraft:spruce_chest_boat";
             case "birch" -> "minecraft:birch_chest_boat";
             case "jungle" -> "minecraft:jungle_chest_boat";

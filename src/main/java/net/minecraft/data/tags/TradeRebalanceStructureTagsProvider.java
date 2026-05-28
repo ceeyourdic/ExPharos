@@ -9,8 +9,8 @@ import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
 public class TradeRebalanceStructureTagsProvider extends TagsProvider<Structure> {
-    public TradeRebalanceStructureTagsProvider(PackOutput p_301607_, CompletableFuture<HolderLookup.Provider> p_301609_) {
-        super(p_301607_, Registries.STRUCTURE, p_301609_);
+    public TradeRebalanceStructureTagsProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pLookupProvider) {
+        super(pOutput, Registries.STRUCTURE, pLookupProvider);
     }
 
     @Override

@@ -29,20 +29,20 @@ public interface SlotDisplay {
     StreamCodec<RegistryFriendlyByteBuf, SlotDisplay> STREAM_CODEC = ByteBufCodecs.registry(Registries.SLOT_DISPLAY)
         .dispatch(SlotDisplay::type, SlotDisplay.Type::streamCodec);
 
-    <T> Stream<T> resolve(ContextMap p_366337_, DisplayContentsFactory<T> p_363501_);
+    <T> Stream<T> resolve(ContextMap pContext, DisplayContentsFactory<T> pOutput);
 
     SlotDisplay.Type<? extends SlotDisplay> type();
 
-    default boolean isEnabled(FeatureFlagSet p_363351_) {
+    default boolean isEnabled(FeatureFlagSet pEnabledFeatures) {
         return true;
     }
 
-    default List<ItemStack> resolveForStacks(ContextMap p_365710_) {
-        return this.resolve(p_365710_, SlotDisplay.ItemStackContentsFactory.INSTANCE).toList();
+    default List<ItemStack> resolveForStacks(ContextMap pContext) {
+        return this.resolve(pContext, SlotDisplay.ItemStackContentsFactory.INSTANCE).toList();
     }
 
-    default ItemStack resolveForFirstStack(ContextMap p_367736_) {
-        return this.resolve(p_367736_, SlotDisplay.ItemStackContentsFactory.INSTANCE).findFirst().orElse(ItemStack.EMPTY);
+    default ItemStack resolveForFirstStack(ContextMap pContext) {
+        return this.resolve(pContext, SlotDisplay.ItemStackContentsFactory.INSTANCE).findFirst().orElse(ItemStack.EMPTY);
     }
 
     public static class AnyFuel implements SlotDisplay {
@@ -138,8 +138,8 @@ public interface SlotDisplay {
         );
         public static final SlotDisplay.Type<SlotDisplay.ItemSlotDisplay> TYPE = new SlotDisplay.Type<>(MAP_CODEC, STREAM_CODEC);
 
-        public ItemSlotDisplay(Item p_369458_) {
-            this(p_369458_.builtInRegistryHolder());
+        public ItemSlotDisplay(Item pItem) {
+            this(pItem.builtInRegistryHolder());
         }
 
         @Override
@@ -187,11 +187,11 @@ public interface SlotDisplay {
         }
 
         @Override
-        public boolean equals(Object p_366031_) {
-            if (this == p_366031_) {
+        public boolean equals(Object pOther) {
+            if (this == pOther) {
                 return true;
             } else {
-                if (p_366031_ instanceof SlotDisplay.ItemStackSlotDisplay slotdisplay$itemstackslotdisplay
+                if (pOther instanceof SlotDisplay.ItemStackSlotDisplay slotdisplay$itemstackslotdisplay
                     && ItemStack.matches(this.stack, slotdisplay$itemstackslotdisplay.stack)) {
                     return true;
                 }

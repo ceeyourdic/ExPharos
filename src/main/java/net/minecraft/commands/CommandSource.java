@@ -24,7 +24,7 @@ public interface CommandSource {
         }
     };
 
-    void sendSystemMessage(Component p_230797_);
+    void sendSystemMessage(Component pComponent);
 
     boolean acceptsSuccess();
 

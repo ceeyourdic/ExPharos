@@ -18,8 +18,8 @@ public class ConsumeItemTrigger extends SimpleCriterionTrigger<ConsumeItemTrigge
         return ConsumeItemTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_23683_, ItemStack p_23684_) {
-        this.trigger(p_23683_, p_23687_ -> p_23687_.matches(p_23684_));
+    public void trigger(ServerPlayer pPlayer, ItemStack pItem) {
+        this.trigger(pPlayer, p_23687_ -> p_23687_.matches(pItem));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item)
@@ -36,16 +36,16 @@ public class ConsumeItemTrigger extends SimpleCriterionTrigger<ConsumeItemTrigge
             return CriteriaTriggers.CONSUME_ITEM.createCriterion(new ConsumeItemTrigger.TriggerInstance(Optional.empty(), Optional.empty()));
         }
 
-        public static Criterion<ConsumeItemTrigger.TriggerInstance> usedItem(HolderGetter<Item> p_367236_, ItemLike p_299577_) {
-            return usedItem(ItemPredicate.Builder.item().of(p_367236_, p_299577_.asItem()));
+        public static Criterion<ConsumeItemTrigger.TriggerInstance> usedItem(HolderGetter<Item> pItemRegistry, ItemLike pItem) {
+            return usedItem(ItemPredicate.Builder.item().of(pItemRegistry, pItem.asItem()));
         }
 
-        public static Criterion<ConsumeItemTrigger.TriggerInstance> usedItem(ItemPredicate.Builder p_297282_) {
-            return CriteriaTriggers.CONSUME_ITEM.createCriterion(new ConsumeItemTrigger.TriggerInstance(Optional.empty(), Optional.of(p_297282_.build())));
+        public static Criterion<ConsumeItemTrigger.TriggerInstance> usedItem(ItemPredicate.Builder pItem) {
+            return CriteriaTriggers.CONSUME_ITEM.createCriterion(new ConsumeItemTrigger.TriggerInstance(Optional.empty(), Optional.of(pItem.build())));
         }
 
-        public boolean matches(ItemStack p_23702_) {
-            return this.item.isEmpty() || this.item.get().test(p_23702_);
+        public boolean matches(ItemStack pItem) {
+            return this.item.isEmpty() || this.item.get().test(pItem);
         }
 
         @Override

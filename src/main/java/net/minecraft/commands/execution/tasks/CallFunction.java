@@ -15,10 +15,10 @@ public class CallFunction<T extends ExecutionCommandSource<T>> implements Unboun
     private final CommandResultCallback resultCallback;
     private final boolean returnParentFrame;
 
-    public CallFunction(InstantiatedFunction<T> p_311175_, CommandResultCallback p_310950_, boolean p_309425_) {
-        this.function = p_311175_;
-        this.resultCallback = p_310950_;
-        this.returnParentFrame = p_309425_;
+    public CallFunction(InstantiatedFunction<T> pFunction, CommandResultCallback pResultCallback, boolean pReturnParentFrame) {
+        this.function = pFunction;
+        this.resultCallback = pResultCallback;
+        this.returnParentFrame = pReturnParentFrame;
     }
 
     public void execute(T p_312557_, ExecutionContext<T> p_312618_, Frame p_310825_) {

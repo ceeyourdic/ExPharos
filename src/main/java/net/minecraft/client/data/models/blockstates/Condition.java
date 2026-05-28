@@ -17,18 +17,18 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface Condition extends Supplier<JsonElement> {
-    void validate(StateDefinition<?, ?> p_378274_);
+    void validate(StateDefinition<?, ?> pStateDefinition);
 
     static Condition.TerminalCondition condition() {
         return new Condition.TerminalCondition();
     }
 
-    static Condition and(Condition... p_376370_) {
-        return new Condition.CompositeCondition(Condition.Operation.AND, Arrays.asList(p_376370_));
+    static Condition and(Condition... pConditions) {
+        return new Condition.CompositeCondition(Condition.Operation.AND, Arrays.asList(pConditions));
     }
 
-    static Condition or(Condition... p_376775_) {
-        return new Condition.CompositeCondition(Condition.Operation.OR, Arrays.asList(p_376775_));
+    static Condition or(Condition... pConditions) {
+        return new Condition.CompositeCondition(Condition.Operation.OR, Arrays.asList(pConditions));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -36,9 +36,9 @@ public interface Condition extends Supplier<JsonElement> {
         private final Condition.Operation operation;
         private final List<Condition> subconditions;
 
-        CompositeCondition(Condition.Operation p_376168_, List<Condition> p_375599_) {
-            this.operation = p_376168_;
-            this.subconditions = p_375599_;
+        CompositeCondition(Condition.Operation pOperation, List<Condition> pSubconditions) {
+            this.operation = pOperation;
+            this.subconditions = pSubconditions;
         }
 
         @Override
@@ -62,8 +62,8 @@ public interface Condition extends Supplier<JsonElement> {
 
         final String id;
 
-        private Operation(final String p_375720_) {
-            this.id = p_375720_;
+        private Operation(final String pId) {
+            this.id = pId;
         }
     }
 
@@ -71,40 +71,40 @@ public interface Condition extends Supplier<JsonElement> {
     public static class TerminalCondition implements Condition {
         private final Map<Property<?>, String> terms = Maps.newHashMap();
 
-        private static <T extends Comparable<T>> String joinValues(Property<T> p_376628_, Stream<T> p_376793_) {
-            return p_376793_.map(p_376628_::getName).collect(Collectors.joining("|"));
+        private static <T extends Comparable<T>> String joinValues(Property<T> pProperty, Stream<T> pValues) {
+            return pValues.map(pProperty::getName).collect(Collectors.joining("|"));
         }
 
-        private static <T extends Comparable<T>> String getTerm(Property<T> p_375838_, T p_376932_, T[] p_377385_) {
-            return joinValues(p_375838_, Stream.concat(Stream.of(p_376932_), Stream.of(p_377385_)));
+        private static <T extends Comparable<T>> String getTerm(Property<T> pProperty, T pStartValue, T[] pOtherValues) {
+            return joinValues(pProperty, Stream.concat(Stream.of(pStartValue), Stream.of(pOtherValues)));
         }
 
-        private <T extends Comparable<T>> void putValue(Property<T> p_378347_, String p_375759_) {
-            String s = this.terms.put(p_378347_, p_375759_);
+        private <T extends Comparable<T>> void putValue(Property<T> pProperty, String pValue) {
+            String s = this.terms.put(pProperty, pValue);
             if (s != null) {
-                throw new IllegalStateException("Tried to replace " + p_378347_ + " value from " + s + " to " + p_375759_);
+                throw new IllegalStateException("Tried to replace " + pProperty + " value from " + s + " to " + pValue);
             }
         }
 
-        public final <T extends Comparable<T>> Condition.TerminalCondition term(Property<T> p_377417_, T p_376821_) {
-            this.putValue(p_377417_, p_377417_.getName(p_376821_));
+        public final <T extends Comparable<T>> Condition.TerminalCondition term(Property<T> pProperty, T pValue) {
+            this.putValue(pProperty, pProperty.getName(pValue));
             return this;
         }
 
         @SafeVarargs
-        public final <T extends Comparable<T>> Condition.TerminalCondition term(Property<T> p_376002_, T p_377971_, T... p_376529_) {
-            this.putValue(p_376002_, getTerm(p_376002_, p_377971_, p_376529_));
+        public final <T extends Comparable<T>> Condition.TerminalCondition term(Property<T> pProperty, T pStartValue, T... pOtherValues) {
+            this.putValue(pProperty, getTerm(pProperty, pStartValue, pOtherValues));
             return this;
         }
 
-        public final <T extends Comparable<T>> Condition.TerminalCondition negatedTerm(Property<T> p_377663_, T p_378614_) {
-            this.putValue(p_377663_, "!" + p_377663_.getName(p_378614_));
+        public final <T extends Comparable<T>> Condition.TerminalCondition negatedTerm(Property<T> pProperty, T pValue) {
+            this.putValue(pProperty, "!" + pProperty.getName(pValue));
             return this;
         }
 
         @SafeVarargs
-        public final <T extends Comparable<T>> Condition.TerminalCondition negatedTerm(Property<T> p_377804_, T p_377881_, T... p_375630_) {
-            this.putValue(p_377804_, "!" + getTerm(p_377804_, p_377881_, p_375630_));
+        public final <T extends Comparable<T>> Condition.TerminalCondition negatedTerm(Property<T> pProperty, T pStartValue, T... pOtherValues) {
+            this.putValue(pProperty, "!" + getTerm(pProperty, pStartValue, pOtherValues));
             return this;
         }
 

@@ -71,14 +71,14 @@ public abstract class Raider extends PatrollingMonster {
         p_333182_.define(IS_CELEBRATING, false);
     }
 
-    public abstract void applyRaidBuffs(ServerLevel p_343389_, int p_37844_, boolean p_37845_);
+    public abstract void applyRaidBuffs(ServerLevel pLevel, int pWave, boolean pUnused);
 
     public boolean canJoinRaid() {
         return this.canJoinRaid;
     }
 
-    public void setCanJoinRaid(boolean p_37898_) {
-        this.canJoinRaid = p_37898_;
+    public void setCanJoinRaid(boolean pCanJoinRaid) {
+        this.canJoinRaid = pCanJoinRaid;
     }
 
     @Override
@@ -111,9 +111,9 @@ public abstract class Raider extends PatrollingMonster {
     }
 
     @Override
-    public void die(DamageSource p_37847_) {
+    public void die(DamageSource pCause) {
         if (this.level() instanceof ServerLevel) {
-            Entity entity = p_37847_.getEntity();
+            Entity entity = pCause.getEntity();
             Raid raid = this.getCurrentRaid();
             if (raid != null) {
                 if (this.isPatrolLeader()) {
@@ -128,7 +128,7 @@ public abstract class Raider extends PatrollingMonster {
             }
         }
 
-        super.die(p_37847_);
+        super.die(pCause);
     }
 
     @Override
@@ -136,8 +136,8 @@ public abstract class Raider extends PatrollingMonster {
         return !this.hasActiveRaid();
     }
 
-    public void setCurrentRaid(@Nullable Raid p_37852_) {
-        this.raid = p_37852_;
+    public void setCurrentRaid(@Nullable Raid pRaid) {
+        this.raid = pRaid;
     }
 
     @Nullable
@@ -160,8 +160,8 @@ public abstract class Raider extends PatrollingMonster {
         return this.getCurrentRaid() != null && this.getCurrentRaid().isActive();
     }
 
-    public void setWave(int p_37843_) {
-        this.wave = p_37843_;
+    public void setWave(int pWave) {
+        this.wave = pWave;
     }
 
     public int getWave() {
@@ -172,28 +172,28 @@ public abstract class Raider extends PatrollingMonster {
         return this.entityData.get(IS_CELEBRATING);
     }
 
-    public void setCelebrating(boolean p_37900_) {
-        this.entityData.set(IS_CELEBRATING, p_37900_);
+    public void setCelebrating(boolean pCelebrating) {
+        this.entityData.set(IS_CELEBRATING, pCelebrating);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_37870_) {
-        super.addAdditionalSaveData(p_37870_);
-        p_37870_.putInt("Wave", this.wave);
-        p_37870_.putBoolean("CanJoinRaid", this.canJoinRaid);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("Wave", this.wave);
+        pCompound.putBoolean("CanJoinRaid", this.canJoinRaid);
         if (this.raid != null) {
-            p_37870_.putInt("RaidId", this.raid.getId());
+            pCompound.putInt("RaidId", this.raid.getId());
         }
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_37862_) {
-        super.readAdditionalSaveData(p_37862_);
-        this.wave = p_37862_.getInt("Wave");
-        this.canJoinRaid = p_37862_.getBoolean("CanJoinRaid");
-        if (p_37862_.contains("RaidId", 3)) {
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.wave = pCompound.getInt("Wave");
+        this.canJoinRaid = pCompound.getBoolean("CanJoinRaid");
+        if (pCompound.contains("RaidId", 3)) {
             if (this.level() instanceof ServerLevel) {
-                this.raid = ((ServerLevel)this.level()).getRaids().get(p_37862_.getInt("RaidId"));
+                this.raid = ((ServerLevel)this.level()).getRaids().get(pCompound.getInt("RaidId"));
             }
 
             if (this.raid != null) {
@@ -229,8 +229,8 @@ public abstract class Raider extends PatrollingMonster {
     }
 
     @Override
-    public boolean removeWhenFarAway(double p_37894_) {
-        return this.getCurrentRaid() == null ? super.removeWhenFarAway(p_37894_) : false;
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
+        return this.getCurrentRaid() == null ? super.removeWhenFarAway(pDistanceToClosestPlayer) : false;
     }
 
     @Override
@@ -242,8 +242,8 @@ public abstract class Raider extends PatrollingMonster {
         return this.ticksOutsideRaid;
     }
 
-    public void setTicksOutsideRaid(int p_37864_) {
-        this.ticksOutsideRaid = p_37864_;
+    public void setTicksOutsideRaid(int pTicksOutsideRaid) {
+        this.ticksOutsideRaid = pTicksOutsideRaid;
     }
 
     @Override
@@ -269,9 +269,9 @@ public abstract class Raider extends PatrollingMonster {
         private final float hostileRadiusSqr;
         public final TargetingConditions shoutTargeting = TargetingConditions.forNonCombat().range(8.0).ignoreLineOfSight().ignoreInvisibilityTesting();
 
-        public HoldGroundAttackGoal(AbstractIllager p_37907_, float p_37908_) {
-            this.mob = p_37907_;
-            this.hostileRadiusSqr = p_37908_ * p_37908_;
+        public HoldGroundAttackGoal(AbstractIllager pMob, float pRadius) {
+            this.mob = pMob;
+            this.hostileRadiusSqr = pRadius * pRadius;
             this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
         }
 
@@ -342,8 +342,8 @@ public abstract class Raider extends PatrollingMonster {
         @Nullable
         private ItemEntity pursuedBannerItemEntity;
 
-        public ObtainRaidLeaderBannerGoal(final T p_37917_) {
-            this.mob = p_37917_;
+        public ObtainRaidLeaderBannerGoal(final T pMob) {
+            this.mob = pMob;
             this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         }
 
@@ -426,8 +426,8 @@ public abstract class Raider extends PatrollingMonster {
     public class RaiderCelebration extends Goal {
         private final Raider mob;
 
-        RaiderCelebration(final Raider p_37924_) {
-            this.mob = p_37924_;
+        RaiderCelebration(final Raider pMob) {
+            this.mob = pMob;
             this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         }
 
@@ -471,10 +471,10 @@ public abstract class Raider extends PatrollingMonster {
         private final int distanceToPoi;
         private boolean stuck;
 
-        public RaiderMoveThroughVillageGoal(Raider p_37936_, double p_37937_, int p_37938_) {
-            this.raider = p_37936_;
-            this.speedModifier = p_37937_;
-            this.distanceToPoi = p_37938_;
+        public RaiderMoveThroughVillageGoal(Raider pRaider, double pSpeedModifier, int pDistanceToPoi) {
+            this.raider = pRaider;
+            this.speedModifier = pSpeedModifier;
+            this.distanceToPoi = pDistanceToPoi;
             this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         }
 
@@ -545,9 +545,9 @@ public abstract class Raider extends PatrollingMonster {
             }
         }
 
-        private boolean hasNotVisited(BlockPos p_37943_) {
+        private boolean hasNotVisited(BlockPos pPos) {
             for (BlockPos blockpos : this.visited) {
-                if (Objects.equals(p_37943_, blockpos)) {
+                if (Objects.equals(pPos, blockpos)) {
                     return false;
                 }
             }

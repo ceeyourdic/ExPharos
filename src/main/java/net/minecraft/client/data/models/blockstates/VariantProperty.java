@@ -11,13 +11,13 @@ public class VariantProperty<T> {
     final String key;
     final Function<T, JsonElement> serializer;
 
-    public VariantProperty(String p_376086_, Function<T, JsonElement> p_378721_) {
-        this.key = p_376086_;
-        this.serializer = p_378721_;
+    public VariantProperty(String pKey, Function<T, JsonElement> pSerializer) {
+        this.key = pKey;
+        this.serializer = pSerializer;
     }
 
-    public VariantProperty<T>.Value withValue(T p_377956_) {
-        return new VariantProperty.Value(p_377956_);
+    public VariantProperty<T>.Value withValue(T pValue) {
+        return new VariantProperty.Value(pValue);
     }
 
     @Override
@@ -29,16 +29,16 @@ public class VariantProperty<T> {
     public class Value {
         private final T value;
 
-        public Value(final T p_378727_) {
-            this.value = p_378727_;
+        public Value(final T pValue) {
+            this.value = pValue;
         }
 
         public VariantProperty<T> getKey() {
             return VariantProperty.this;
         }
 
-        public void addToVariant(JsonObject p_375542_) {
-            p_375542_.add(VariantProperty.this.key, VariantProperty.this.serializer.apply(this.value));
+        public void addToVariant(JsonObject pJson) {
+            pJson.add(VariantProperty.this.key, VariantProperty.this.serializer.apply(this.value));
         }
 
         @Override

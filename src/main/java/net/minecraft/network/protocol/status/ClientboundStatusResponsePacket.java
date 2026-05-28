@@ -10,12 +10,12 @@ public record ClientboundStatusResponsePacket(ServerStatus status) implements Pa
         ClientboundStatusResponsePacket::write, ClientboundStatusResponsePacket::new
     );
 
-    private ClientboundStatusResponsePacket(FriendlyByteBuf p_179834_) {
-        this(p_179834_.readJsonWithCodec(ServerStatus.CODEC));
+    private ClientboundStatusResponsePacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readJsonWithCodec(ServerStatus.CODEC));
     }
 
-    private void write(FriendlyByteBuf p_134899_) {
-        p_134899_.writeJsonWithCodec(ServerStatus.CODEC, this.status);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeJsonWithCodec(ServerStatus.CODEC, this.status);
     }
 
     @Override
@@ -23,7 +23,7 @@ public record ClientboundStatusResponsePacket(ServerStatus status) implements Pa
         return StatusPacketTypes.CLIENTBOUND_STATUS_RESPONSE;
     }
 
-    public void handle(ClientStatusPacketListener p_134896_) {
-        p_134896_.handleStatusResponse(this);
+    public void handle(ClientStatusPacketListener pHandler) {
+        pHandler.handleStatusResponse(this);
     }
 }

@@ -11,13 +11,13 @@ public record ServerboundResourcePackPacket(UUID id, ServerboundResourcePackPack
         ServerboundResourcePackPacket::write, ServerboundResourcePackPacket::new
     );
 
-    private ServerboundResourcePackPacket(FriendlyByteBuf p_299426_) {
-        this(p_299426_.readUUID(), p_299426_.readEnum(ServerboundResourcePackPacket.Action.class));
+    private ServerboundResourcePackPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readUUID(), pBuffer.readEnum(ServerboundResourcePackPacket.Action.class));
     }
 
-    private void write(FriendlyByteBuf p_298279_) {
-        p_298279_.writeUUID(this.id);
-        p_298279_.writeEnum(this.action);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeUUID(this.id);
+        pBuffer.writeEnum(this.action);
     }
 
     @Override

@@ -49,35 +49,35 @@ public class AdventureModePredicate {
     private boolean lastResult;
     private boolean checksBlockEntity;
 
-    public AdventureModePredicate(List<BlockPredicate> p_336068_, boolean p_330877_) {
-        this.predicates = p_336068_;
-        this.showInTooltip = p_330877_;
+    public AdventureModePredicate(List<BlockPredicate> pPredicates, boolean pShowInTooltip) {
+        this.predicates = pPredicates;
+        this.showInTooltip = pShowInTooltip;
     }
 
-    private static boolean areSameBlocks(BlockInWorld p_330769_, @Nullable BlockInWorld p_330025_, boolean p_331117_) {
-        if (p_330025_ == null || p_330769_.getState() != p_330025_.getState()) {
+    private static boolean areSameBlocks(BlockInWorld pFirst, @Nullable BlockInWorld pSecond, boolean pCheckNbt) {
+        if (pSecond == null || pFirst.getState() != pSecond.getState()) {
             return false;
-        } else if (!p_331117_) {
+        } else if (!pCheckNbt) {
             return true;
-        } else if (p_330769_.getEntity() == null && p_330025_.getEntity() == null) {
+        } else if (pFirst.getEntity() == null && pSecond.getEntity() == null) {
             return true;
-        } else if (p_330769_.getEntity() != null && p_330025_.getEntity() != null) {
-            RegistryAccess registryaccess = p_330769_.getLevel().registryAccess();
-            return Objects.equals(p_330769_.getEntity().saveWithId(registryaccess), p_330025_.getEntity().saveWithId(registryaccess));
+        } else if (pFirst.getEntity() != null && pSecond.getEntity() != null) {
+            RegistryAccess registryaccess = pFirst.getLevel().registryAccess();
+            return Objects.equals(pFirst.getEntity().saveWithId(registryaccess), pSecond.getEntity().saveWithId(registryaccess));
         } else {
             return false;
         }
     }
 
-    public boolean test(BlockInWorld p_333716_) {
-        if (areSameBlocks(p_333716_, this.lastCheckedBlock, this.checksBlockEntity)) {
+    public boolean test(BlockInWorld pBlock) {
+        if (areSameBlocks(pBlock, this.lastCheckedBlock, this.checksBlockEntity)) {
             return this.lastResult;
         } else {
-            this.lastCheckedBlock = p_333716_;
+            this.lastCheckedBlock = pBlock;
             this.checksBlockEntity = false;
 
             for (BlockPredicate blockpredicate : this.predicates) {
-                if (blockpredicate.matches(p_333716_)) {
+                if (blockpredicate.matches(pBlock)) {
                     this.checksBlockEntity = this.checksBlockEntity | blockpredicate.requiresNbt();
                     this.lastResult = true;
                     return true;
@@ -97,22 +97,22 @@ public class AdventureModePredicate {
         return this.cachedTooltip;
     }
 
-    public void addToTooltip(Consumer<Component> p_334654_) {
-        this.tooltip().forEach(p_334654_);
+    public void addToTooltip(Consumer<Component> pTooltipAdder) {
+        this.tooltip().forEach(pTooltipAdder);
     }
 
-    public AdventureModePredicate withTooltip(boolean p_335029_) {
-        return new AdventureModePredicate(this.predicates, p_335029_);
+    public AdventureModePredicate withTooltip(boolean pShowInTooltip) {
+        return new AdventureModePredicate(this.predicates, pShowInTooltip);
     }
 
-    private static List<Component> computeTooltip(List<BlockPredicate> p_328947_) {
-        for (BlockPredicate blockpredicate : p_328947_) {
+    private static List<Component> computeTooltip(List<BlockPredicate> pPredicates) {
+        for (BlockPredicate blockpredicate : pPredicates) {
             if (blockpredicate.blocks().isEmpty()) {
                 return List.of(UNKNOWN_USE);
             }
         }
 
-        return p_328947_.stream()
+        return pPredicates.stream()
             .flatMap(p_333785_ -> p_333785_.blocks().orElseThrow().stream())
             .distinct()
             .map(p_335858_ -> (Component)p_335858_.value().getName().withStyle(ChatFormatting.DARK_GRAY))
@@ -124,11 +124,11 @@ public class AdventureModePredicate {
     }
 
     @Override
-    public boolean equals(Object p_331232_) {
-        if (this == p_331232_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            return !(p_331232_ instanceof AdventureModePredicate adventuremodepredicate)
+            return !(pOther instanceof AdventureModePredicate adventuremodepredicate)
                 ? false
                 : this.predicates.equals(adventuremodepredicate.predicates) && this.showInTooltip == adventuremodepredicate.showInTooltip;
         }

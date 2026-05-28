@@ -26,17 +26,17 @@ public class EndPlacements {
     public static final ResourceKey<PlacedFeature> CHORUS_PLANT = PlacementUtils.createKey("chorus_plant");
     public static final ResourceKey<PlacedFeature> END_ISLAND_DECORATED = PlacementUtils.createKey("end_island_decorated");
 
-    public static void bootstrap(BootstrapContext<PlacedFeature> p_328049_) {
-        HolderGetter<ConfiguredFeature<?, ?>> holdergetter = p_328049_.lookup(Registries.CONFIGURED_FEATURE);
+    public static void bootstrap(BootstrapContext<PlacedFeature> pContext) {
+        HolderGetter<ConfiguredFeature<?, ?>> holdergetter = pContext.lookup(Registries.CONFIGURED_FEATURE);
         Holder<ConfiguredFeature<?, ?>> holder = holdergetter.getOrThrow(EndFeatures.END_PLATFORM);
         Holder<ConfiguredFeature<?, ?>> holder1 = holdergetter.getOrThrow(EndFeatures.END_SPIKE);
         Holder<ConfiguredFeature<?, ?>> holder2 = holdergetter.getOrThrow(EndFeatures.END_GATEWAY_RETURN);
         Holder<ConfiguredFeature<?, ?>> holder3 = holdergetter.getOrThrow(EndFeatures.CHORUS_PLANT);
         Holder<ConfiguredFeature<?, ?>> holder4 = holdergetter.getOrThrow(EndFeatures.END_ISLAND);
-        PlacementUtils.register(p_328049_, END_PLATFORM, holder, FixedPlacement.of(ServerLevel.END_SPAWN_POINT.below()), BiomeFilter.biome());
-        PlacementUtils.register(p_328049_, END_SPIKE, holder1, BiomeFilter.biome());
+        PlacementUtils.register(pContext, END_PLATFORM, holder, FixedPlacement.of(ServerLevel.END_SPAWN_POINT.below()), BiomeFilter.biome());
+        PlacementUtils.register(pContext, END_SPIKE, holder1, BiomeFilter.biome());
         PlacementUtils.register(
-            p_328049_,
+            pContext,
             END_GATEWAY_RETURN,
             holder2,
             RarityFilter.onAverageOnceEvery(700),
@@ -46,7 +46,7 @@ public class EndPlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328049_,
+            pContext,
             CHORUS_PLANT,
             holder3,
             CountPlacement.of(UniformInt.of(0, 4)),
@@ -55,7 +55,7 @@ public class EndPlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328049_,
+            pContext,
             END_ISLAND_DECORATED,
             holder4,
             RarityFilter.onAverageOnceEvery(14),

@@ -71,12 +71,12 @@ public class CactusBlock extends Block {
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState p_51176_, BlockGetter p_51177_, BlockPos p_51178_, CollisionContext p_51179_) {
+    protected VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return COLLISION_SHAPE;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_51171_, BlockGetter p_51172_, BlockPos p_51173_, CollisionContext p_51174_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return OUTLINE_SHAPE;
     }
 
@@ -99,26 +99,26 @@ public class CactusBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_51153_, LevelReader p_51154_, BlockPos p_51155_) {
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
-            BlockState blockstate = p_51154_.getBlockState(p_51155_.relative(direction));
-            if (blockstate.isSolid() || p_51154_.getFluidState(p_51155_.relative(direction)).is(FluidTags.LAVA)) {
+            BlockState blockstate = pLevel.getBlockState(pPos.relative(direction));
+            if (blockstate.isSolid() || pLevel.getFluidState(pPos.relative(direction)).is(FluidTags.LAVA)) {
                 return false;
             }
         }
 
-        BlockState blockstate1 = p_51154_.getBlockState(p_51155_.below());
-        return (blockstate1.is(Blocks.CACTUS) || blockstate1.is(BlockTags.SAND)) && !p_51154_.getBlockState(p_51155_.above()).liquid();
+        BlockState blockstate1 = pLevel.getBlockState(pPos.below());
+        return (blockstate1.is(Blocks.CACTUS) || blockstate1.is(BlockTags.SAND)) && !pLevel.getBlockState(pPos.above()).liquid();
     }
 
     @Override
-    protected void entityInside(BlockState p_51148_, Level p_51149_, BlockPos p_51150_, Entity p_51151_) {
-        p_51151_.hurt(p_51149_.damageSources().cactus(), 1.0F);
+    protected void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
+        pEntity.hurt(pLevel.damageSources().cactus(), 1.0F);
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_51164_) {
-        p_51164_.add(AGE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(AGE);
     }
 
     @Override

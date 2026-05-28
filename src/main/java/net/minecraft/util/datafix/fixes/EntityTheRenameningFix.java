@@ -44,16 +44,16 @@ public class EntityTheRenameningFix extends SimplestEntityRenameFix {
         .build();
     private static final String MINECRAFT_BRED = "minecraft:bred_";
 
-    public EntityTheRenameningFix(Schema p_15706_, boolean p_15707_) {
-        super("EntityTheRenameningBlock", p_15706_, p_15707_);
+    public EntityTheRenameningFix(Schema pOutputSchema, boolean pChangesType) {
+        super("EntityTheRenameningBlock", pOutputSchema, pChangesType);
     }
 
     @Override
-    protected String rename(String p_15709_) {
-        if (p_15709_.startsWith("minecraft:bred_")) {
-            p_15709_ = "minecraft:" + p_15709_.substring("minecraft:bred_".length());
+    protected String rename(String pName) {
+        if (pName.startsWith("minecraft:bred_")) {
+            pName = "minecraft:" + pName.substring("minecraft:bred_".length());
         }
 
-        return RENAMED_IDS.getOrDefault(p_15709_, p_15709_);
+        return RENAMED_IDS.getOrDefault(pName, pName);
     }
 }

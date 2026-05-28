@@ -36,27 +36,27 @@ public record ItemCost(Holder<Item> item, int count, DataComponentPredicate comp
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, Optional<ItemCost>> OPTIONAL_STREAM_CODEC = STREAM_CODEC.apply(ByteBufCodecs::optional);
 
-    public ItemCost(ItemLike p_333321_) {
-        this(p_333321_, 1);
+    public ItemCost(ItemLike pItem) {
+        this(pItem, 1);
     }
 
-    public ItemCost(ItemLike p_332783_, int p_331715_) {
-        this(p_332783_.asItem().builtInRegistryHolder(), p_331715_, DataComponentPredicate.EMPTY);
+    public ItemCost(ItemLike pItem, int pCount) {
+        this(pItem.asItem().builtInRegistryHolder(), pCount, DataComponentPredicate.EMPTY);
     }
 
-    public ItemCost(Holder<Item> p_331233_, int p_334492_, DataComponentPredicate p_330788_) {
-        this(p_331233_, p_334492_, p_330788_, createStack(p_331233_, p_334492_, p_330788_));
+    public ItemCost(Holder<Item> pItem, int pCount, DataComponentPredicate pComponentPredicate) {
+        this(pItem, pCount, pComponentPredicate, createStack(pItem, pCount, pComponentPredicate));
     }
 
-    public ItemCost withComponents(UnaryOperator<DataComponentPredicate.Builder> p_328625_) {
-        return new ItemCost(this.item, this.count, p_328625_.apply(DataComponentPredicate.builder()).build());
+    public ItemCost withComponents(UnaryOperator<DataComponentPredicate.Builder> pComponents) {
+        return new ItemCost(this.item, this.count, pComponents.apply(DataComponentPredicate.builder()).build());
     }
 
-    private static ItemStack createStack(Holder<Item> p_329043_, int p_329370_, DataComponentPredicate p_330789_) {
-        return new ItemStack(p_329043_, p_329370_, p_330789_.asPatch());
+    private static ItemStack createStack(Holder<Item> pItem, int pCount, DataComponentPredicate pComponentPredicate) {
+        return new ItemStack(pItem, pCount, pComponentPredicate.asPatch());
     }
 
-    public boolean test(ItemStack p_331178_) {
-        return p_331178_.is(this.item) && this.components.test(p_331178_);
+    public boolean test(ItemStack pStack) {
+        return pStack.is(this.item) && this.components.test(pStack);
     }
 }

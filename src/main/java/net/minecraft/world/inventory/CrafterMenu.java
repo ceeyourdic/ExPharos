@@ -21,26 +21,26 @@ public class CrafterMenu extends AbstractContainerMenu implements ContainerListe
     private final Player player;
     private final CraftingContainer container;
 
-    public CrafterMenu(int p_310742_, Inventory p_312080_) {
-        super(MenuType.CRAFTER_3x3, p_310742_);
-        this.player = p_312080_.player;
+    public CrafterMenu(int pContainerId, Inventory pPlayerInventory) {
+        super(MenuType.CRAFTER_3x3, pContainerId);
+        this.player = pPlayerInventory.player;
         this.containerData = new SimpleContainerData(10);
         this.container = new TransientCraftingContainer(this, 3, 3);
-        this.addSlots(p_312080_);
+        this.addSlots(pPlayerInventory);
     }
 
-    public CrafterMenu(int p_312262_, Inventory p_309729_, CraftingContainer p_309543_, ContainerData p_312942_) {
-        super(MenuType.CRAFTER_3x3, p_312262_);
-        this.player = p_309729_.player;
-        this.containerData = p_312942_;
-        this.container = p_309543_;
-        checkContainerSize(p_309543_, 9);
-        p_309543_.startOpen(p_309729_.player);
-        this.addSlots(p_309729_);
+    public CrafterMenu(int pContainerId, Inventory pPlayerInventory, CraftingContainer pContainer, ContainerData pContainerData) {
+        super(MenuType.CRAFTER_3x3, pContainerId);
+        this.player = pPlayerInventory.player;
+        this.containerData = pContainerData;
+        this.container = pContainer;
+        checkContainerSize(pContainer, 9);
+        pContainer.startOpen(pPlayerInventory.player);
+        this.addSlots(pPlayerInventory);
         this.addSlotListener(this);
     }
 
-    private void addSlots(Inventory p_312143_) {
+    private void addSlots(Inventory pPlayerInventory) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 int k = j + i * 3;
@@ -48,20 +48,20 @@ public class CrafterMenu extends AbstractContainerMenu implements ContainerListe
             }
         }
 
-        this.addStandardInventorySlots(p_312143_, 8, 84);
+        this.addStandardInventorySlots(pPlayerInventory, 8, 84);
         this.addSlot(new NonInteractiveResultSlot(this.resultContainer, 0, 134, 35));
         this.addDataSlots(this.containerData);
         this.refreshRecipeResult();
     }
 
-    public void setSlotState(int p_312148_, boolean p_312187_) {
-        CrafterSlot crafterslot = (CrafterSlot)this.getSlot(p_312148_);
-        this.containerData.set(crafterslot.index, p_312187_ ? 0 : 1);
+    public void setSlotState(int pSlot, boolean pEnabled) {
+        CrafterSlot crafterslot = (CrafterSlot)this.getSlot(pSlot);
+        this.containerData.set(crafterslot.index, pEnabled ? 0 : 1);
         this.broadcastChanges();
     }
 
-    public boolean isSlotDisabled(int p_311661_) {
-        return p_311661_ > -1 && p_311661_ < 9 ? this.containerData.get(p_311661_) == 1 : false;
+    public boolean isSlotDisabled(int pSlot) {
+        return pSlot > -1 && pSlot < 9 ? this.containerData.get(pSlot) == 1 : false;
     }
 
     public boolean isPowered() {

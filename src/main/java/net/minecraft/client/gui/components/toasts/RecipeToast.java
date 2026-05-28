@@ -65,21 +65,21 @@ public class RecipeToast implements Toast {
         p_281667_.renderFakeItem(recipetoast$entry.unlockedItem(), 8, 8);
     }
 
-    private void addItem(ItemStack p_365961_, ItemStack p_367451_) {
-        this.recipeItems.add(new RecipeToast.Entry(p_365961_, p_367451_));
+    private void addItem(ItemStack pCategoryItem, ItemStack pUnlockedItem) {
+        this.recipeItems.add(new RecipeToast.Entry(pCategoryItem, pUnlockedItem));
         this.changed = true;
     }
 
-    public static void addOrUpdate(ToastManager p_367086_, RecipeDisplay p_362853_) {
-        RecipeToast recipetoast = p_367086_.getToast(RecipeToast.class, NO_TOKEN);
+    public static void addOrUpdate(ToastManager pToastManager, RecipeDisplay pRecipeDisplay) {
+        RecipeToast recipetoast = pToastManager.getToast(RecipeToast.class, NO_TOKEN);
         if (recipetoast == null) {
             recipetoast = new RecipeToast();
-            p_367086_.addToast(recipetoast);
+            pToastManager.addToast(recipetoast);
         }
 
-        ContextMap contextmap = SlotDisplayContext.fromLevel(p_367086_.getMinecraft().level);
-        ItemStack itemstack = p_362853_.craftingStation().resolveForFirstStack(contextmap);
-        ItemStack itemstack1 = p_362853_.result().resolveForFirstStack(contextmap);
+        ContextMap contextmap = SlotDisplayContext.fromLevel(pToastManager.getMinecraft().level);
+        ItemStack itemstack = pRecipeDisplay.craftingStation().resolveForFirstStack(contextmap);
+        ItemStack itemstack1 = pRecipeDisplay.result().resolveForFirstStack(contextmap);
         recipetoast.addItem(itemstack, itemstack1);
     }
 

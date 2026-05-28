@@ -20,12 +20,12 @@ public class MapIndex extends SavedData {
         this.usedAuxIds.defaultReturnValue(-1);
     }
 
-    public static MapIndex load(CompoundTag p_164763_, HolderLookup.Provider p_334612_) {
+    public static MapIndex load(CompoundTag pTag, HolderLookup.Provider pRegistries) {
         MapIndex mapindex = new MapIndex();
 
-        for (String s : p_164763_.getAllKeys()) {
-            if (p_164763_.contains(s, 99)) {
-                mapindex.usedAuxIds.put(s, p_164763_.getInt(s));
+        for (String s : pTag.getAllKeys()) {
+            if (pTag.contains(s, 99)) {
+                mapindex.usedAuxIds.put(s, pTag.getInt(s));
             }
         }
 

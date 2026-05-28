@@ -9,8 +9,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block> {
-    public VanillaBlockTagsProvider(PackOutput p_256406_, CompletableFuture<HolderLookup.Provider> p_256525_) {
-        super(p_256406_, Registries.BLOCK, p_256525_, p_255627_ -> p_255627_.builtInRegistryHolder().key());
+    public VanillaBlockTagsProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pLookupProvider) {
+        super(pOutput, Registries.BLOCK, pLookupProvider, p_255627_ -> p_255627_.builtInRegistryHolder().key());
     }
 
     @Override

@@ -17,9 +17,9 @@ public enum Difficulty implements StringRepresentable {
     private final int id;
     private final String key;
 
-    private Difficulty(final int p_19026_, final String p_19027_) {
-        this.id = p_19026_;
-        this.key = p_19027_;
+    private Difficulty(final int pId, final String pKey) {
+        this.id = pId;
+        this.key = pKey;
     }
 
     public int getId() {
@@ -34,13 +34,13 @@ public enum Difficulty implements StringRepresentable {
         return Component.translatable("options.difficulty." + this.key + ".info");
     }
 
-    public static Difficulty byId(int p_19030_) {
-        return BY_ID.apply(p_19030_);
+    public static Difficulty byId(int pId) {
+        return BY_ID.apply(pId);
     }
 
     @Nullable
-    public static Difficulty byName(String p_19032_) {
-        return CODEC.byName(p_19032_);
+    public static Difficulty byName(String pName) {
+        return CODEC.byName(pName);
     }
 
     public String getKey() {

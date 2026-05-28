@@ -33,26 +33,26 @@ public class RealmsCreateWorldFlow {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static void createWorld(
-        Minecraft p_367436_, Screen p_363355_, Screen p_369120_, int p_369852_, RealmsServer p_360755_, @Nullable RealmCreationTask p_370180_
+        Minecraft pMinecraft, Screen pLastScreen, Screen pResetWorldScreen, int pSlot, RealmsServer pServer, @Nullable RealmCreationTask pRealmCreationTask
     ) {
         CreateWorldScreen.openFresh(
-            p_367436_,
-            p_363355_,
+            pMinecraft,
+            pLastScreen,
             (p_364975_, p_365999_, p_364203_, p_363779_) -> {
                 Path path;
                 try {
                     path = createTemporaryWorldFolder(p_365999_, p_364203_, p_363779_);
                 } catch (IOException ioexception) {
                     LOGGER.warn("Failed to create temporary world folder.");
-                    p_367436_.setScreen(new RealmsGenericErrorScreen(Component.translatable("mco.create.world.failed"), p_369120_));
+                    pMinecraft.setScreen(new RealmsGenericErrorScreen(Component.translatable("mco.create.world.failed"), pResetWorldScreen));
                     return true;
                 }
 
                 RealmsWorldOptions realmsworldoptions = RealmsWorldOptions.createFromSettings(p_364203_.getLevelSettings(), SharedConstants.getCurrentVersion().getName());
                 RealmsWorldUpload realmsworldupload = new RealmsWorldUpload(
-                    path, realmsworldoptions, p_367436_.getUser(), p_360755_.id, p_369852_, RealmsWorldUploadStatusTracker.noOp()
+                    path, realmsworldoptions, pMinecraft.getUser(), pServer.id, pSlot, RealmsWorldUploadStatusTracker.noOp()
                 );
-                p_367436_.forceSetScreen(
+                pMinecraft.forceSetScreen(
                     new AlertScreen(
                         realmsworldupload::cancel,
                         Component.translatable("mco.create.world.reset.title"),
@@ -61,8 +61,8 @@ public class RealmsCreateWorldFlow {
                         false
                     )
                 );
-                if (p_370180_ != null) {
-                    p_370180_.run();
+                if (pRealmCreationTask != null) {
+                    pRealmCreationTask.run();
                 }
 
                 realmsworldupload.packAndUpload().handleAsync((p_366683_, p_363012_) -> {
@@ -72,7 +72,7 @@ public class RealmsCreateWorldFlow {
                         }
 
                         if (p_363012_ instanceof RealmsUploadCanceledException) {
-                            p_367436_.forceSetScreen(p_369120_);
+                            pMinecraft.forceSetScreen(pResetWorldScreen);
                         } else {
                             if (p_363012_ instanceof RealmsUploadFailedException realmsuploadfailedexception) {
                                 LOGGER.warn("Failed to create realms world {}", realmsuploadfailedexception.getStatusMessage());
@@ -80,36 +80,36 @@ public class RealmsCreateWorldFlow {
                                 LOGGER.warn("Failed to create realms world {}", p_363012_.getMessage());
                             }
 
-                            p_367436_.forceSetScreen(new RealmsGenericErrorScreen(Component.translatable("mco.create.world.failed"), p_369120_));
+                            pMinecraft.forceSetScreen(new RealmsGenericErrorScreen(Component.translatable("mco.create.world.failed"), pResetWorldScreen));
                         }
                     } else {
-                        if (p_363355_ instanceof RealmsConfigureWorldScreen realmsconfigureworldscreen) {
-                            realmsconfigureworldscreen.fetchServerData(p_360755_.id);
+                        if (pLastScreen instanceof RealmsConfigureWorldScreen realmsconfigureworldscreen) {
+                            realmsconfigureworldscreen.fetchServerData(pServer.id);
                         }
 
-                        if (p_370180_ != null) {
-                            RealmsMainScreen.play(p_360755_, p_363355_, true);
+                        if (pRealmCreationTask != null) {
+                            RealmsMainScreen.play(pServer, pLastScreen, true);
                         } else {
-                            p_367436_.forceSetScreen(p_363355_);
+                            pMinecraft.forceSetScreen(pLastScreen);
                         }
 
                         RealmsMainScreen.refreshServerList();
                     }
 
                     return null;
-                }, p_367436_);
+                }, pMinecraft);
                 return true;
             }
         );
     }
 
-    private static Path createTemporaryWorldFolder(LayeredRegistryAccess<RegistryLayer> p_363722_, PrimaryLevelData p_362242_, @Nullable Path p_362088_) throws IOException {
+    private static Path createTemporaryWorldFolder(LayeredRegistryAccess<RegistryLayer> pRegistryAccess, PrimaryLevelData pLevelData, @Nullable Path pTempDatapackDir) throws IOException {
         Path path = Files.createTempDirectory("minecraft_realms_world_upload");
-        if (p_362088_ != null) {
-            Files.move(p_362088_, path.resolve("datapacks"));
+        if (pTempDatapackDir != null) {
+            Files.move(pTempDatapackDir, path.resolve("datapacks"));
         }
 
-        CompoundTag compoundtag = p_362242_.createTag(p_363722_.compositeAccess(), null);
+        CompoundTag compoundtag = pLevelData.createTag(pRegistryAccess.compositeAccess(), null);
         CompoundTag compoundtag1 = new CompoundTag();
         compoundtag1.put("Data", compoundtag);
         Path path1 = Files.createFile(path.resolve("level.dat"));

@@ -135,9 +135,9 @@ public class ListTag extends CollectionTag<Tag> {
     private final List<Tag> list;
     private byte type;
 
-    ListTag(List<Tag> p_128721_, byte p_128722_) {
-        this.list = p_128721_;
-        this.type = p_128722_;
+    ListTag(List<Tag> pList, byte pType) {
+        this.list = pList;
+        this.type = pType;
     }
 
     public ListTag() {
@@ -145,18 +145,18 @@ public class ListTag extends CollectionTag<Tag> {
     }
 
     @Override
-    public void write(DataOutput p_128734_) throws IOException {
+    public void write(DataOutput pOutput) throws IOException {
         if (this.list.isEmpty()) {
             this.type = 0;
         } else {
             this.type = this.list.get(0).getId();
         }
 
-        p_128734_.writeByte(this.type);
-        p_128734_.writeInt(this.list.size());
+        pOutput.writeByte(this.type);
+        pOutput.writeInt(this.list.size());
 
         for (Tag tag : this.list) {
-            tag.write(p_128734_);
+            tag.write(pOutput);
         }
     }
 
@@ -205,9 +205,9 @@ public class ListTag extends CollectionTag<Tag> {
         return this.list.isEmpty();
     }
 
-    public CompoundTag getCompound(int p_128729_) {
-        if (p_128729_ >= 0 && p_128729_ < this.list.size()) {
-            Tag tag = this.list.get(p_128729_);
+    public CompoundTag getCompound(int pIndex) {
+        if (pIndex >= 0 && pIndex < this.list.size()) {
+            Tag tag = this.list.get(pIndex);
             if (tag.getId() == 10) {
                 return (CompoundTag)tag;
             }
@@ -216,9 +216,9 @@ public class ListTag extends CollectionTag<Tag> {
         return new CompoundTag();
     }
 
-    public ListTag getList(int p_128745_) {
-        if (p_128745_ >= 0 && p_128745_ < this.list.size()) {
-            Tag tag = this.list.get(p_128745_);
+    public ListTag getList(int pIndex) {
+        if (pIndex >= 0 && pIndex < this.list.size()) {
+            Tag tag = this.list.get(pIndex);
             if (tag.getId() == 9) {
                 return (ListTag)tag;
             }
@@ -227,9 +227,9 @@ public class ListTag extends CollectionTag<Tag> {
         return new ListTag();
     }
 
-    public short getShort(int p_128758_) {
-        if (p_128758_ >= 0 && p_128758_ < this.list.size()) {
-            Tag tag = this.list.get(p_128758_);
+    public short getShort(int pIndex) {
+        if (pIndex >= 0 && pIndex < this.list.size()) {
+            Tag tag = this.list.get(pIndex);
             if (tag.getId() == 2) {
                 return ((ShortTag)tag).getAsShort();
             }
@@ -238,9 +238,9 @@ public class ListTag extends CollectionTag<Tag> {
         return 0;
     }
 
-    public int getInt(int p_128764_) {
-        if (p_128764_ >= 0 && p_128764_ < this.list.size()) {
-            Tag tag = this.list.get(p_128764_);
+    public int getInt(int pIndex) {
+        if (pIndex >= 0 && pIndex < this.list.size()) {
+            Tag tag = this.list.get(pIndex);
             if (tag.getId() == 3) {
                 return ((IntTag)tag).getAsInt();
             }
@@ -249,9 +249,9 @@ public class ListTag extends CollectionTag<Tag> {
         return 0;
     }
 
-    public int[] getIntArray(int p_128768_) {
-        if (p_128768_ >= 0 && p_128768_ < this.list.size()) {
-            Tag tag = this.list.get(p_128768_);
+    public int[] getIntArray(int pIndex) {
+        if (pIndex >= 0 && pIndex < this.list.size()) {
+            Tag tag = this.list.get(pIndex);
             if (tag.getId() == 11) {
                 return ((IntArrayTag)tag).getAsIntArray();
             }
@@ -260,9 +260,9 @@ public class ListTag extends CollectionTag<Tag> {
         return new int[0];
     }
 
-    public long[] getLongArray(int p_177992_) {
-        if (p_177992_ >= 0 && p_177992_ < this.list.size()) {
-            Tag tag = this.list.get(p_177992_);
+    public long[] getLongArray(int pIndex) {
+        if (pIndex >= 0 && pIndex < this.list.size()) {
+            Tag tag = this.list.get(pIndex);
             if (tag.getId() == 12) {
                 return ((LongArrayTag)tag).getAsLongArray();
             }
@@ -271,9 +271,9 @@ public class ListTag extends CollectionTag<Tag> {
         return new long[0];
     }
 
-    public double getDouble(int p_128773_) {
-        if (p_128773_ >= 0 && p_128773_ < this.list.size()) {
-            Tag tag = this.list.get(p_128773_);
+    public double getDouble(int pIndex) {
+        if (pIndex >= 0 && pIndex < this.list.size()) {
+            Tag tag = this.list.get(pIndex);
             if (tag.getId() == 6) {
                 return ((DoubleTag)tag).getAsDouble();
             }
@@ -282,9 +282,9 @@ public class ListTag extends CollectionTag<Tag> {
         return 0.0;
     }
 
-    public float getFloat(int p_128776_) {
-        if (p_128776_ >= 0 && p_128776_ < this.list.size()) {
-            Tag tag = this.list.get(p_128776_);
+    public float getFloat(int pIndex) {
+        if (pIndex >= 0 && pIndex < this.list.size()) {
+            Tag tag = this.list.get(pIndex);
             if (tag.getId() == 5) {
                 return ((FloatTag)tag).getAsFloat();
             }
@@ -293,9 +293,9 @@ public class ListTag extends CollectionTag<Tag> {
         return 0.0F;
     }
 
-    public String getString(int p_128779_) {
-        if (p_128779_ >= 0 && p_128779_ < this.list.size()) {
-            Tag tag = this.list.get(p_128779_);
+    public String getString(int pIndex) {
+        if (pIndex >= 0 && pIndex < this.list.size()) {
+            Tag tag = this.list.get(pIndex);
             return tag.getId() == 8 ? tag.getAsString() : tag.toString();
         } else {
             return "";
@@ -307,8 +307,8 @@ public class ListTag extends CollectionTag<Tag> {
         return this.list.size();
     }
 
-    public Tag get(int p_128781_) {
-        return this.list.get(p_128781_);
+    public Tag get(int pIndex) {
+        return this.list.get(pIndex);
     }
 
     @Override
@@ -333,9 +333,9 @@ public class ListTag extends CollectionTag<Tag> {
     }
 
     @Override
-    public boolean setTag(int p_128731_, Tag p_128732_) {
-        if (this.updateType(p_128732_)) {
-            this.list.set(p_128731_, p_128732_);
+    public boolean setTag(int pIndex, Tag pNbt) {
+        if (this.updateType(pNbt)) {
+            this.list.set(pIndex, pNbt);
             return true;
         } else {
             return false;
@@ -343,23 +343,23 @@ public class ListTag extends CollectionTag<Tag> {
     }
 
     @Override
-    public boolean addTag(int p_128747_, Tag p_128748_) {
-        if (this.updateType(p_128748_)) {
-            this.list.add(p_128747_, p_128748_);
+    public boolean addTag(int pIndex, Tag pNbt) {
+        if (this.updateType(pNbt)) {
+            this.list.add(pIndex, pNbt);
             return true;
         } else {
             return false;
         }
     }
 
-    private boolean updateType(Tag p_128739_) {
-        if (p_128739_.getId() == 0) {
+    private boolean updateType(Tag pTag) {
+        if (pTag.getId() == 0) {
             return false;
         } else if (this.type == 0) {
-            this.type = p_128739_.getId();
+            this.type = pTag.getId();
             return true;
         } else {
-            return this.type == p_128739_.getId();
+            return this.type == pTag.getId();
         }
     }
 
@@ -372,8 +372,8 @@ public class ListTag extends CollectionTag<Tag> {
     }
 
     @Override
-    public boolean equals(Object p_128766_) {
-        return this == p_128766_ ? true : p_128766_ instanceof ListTag && Objects.equals(this.list, ((ListTag)p_128766_).list);
+    public boolean equals(Object pOther) {
+        return this == pOther ? true : pOther instanceof ListTag && Objects.equals(this.list, ((ListTag)pOther).list);
     }
 
     @Override

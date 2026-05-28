@@ -21,37 +21,37 @@ public class TreeNodePosition {
     private float change;
     private float shift;
 
-    public TreeNodePosition(AdvancementNode p_297517_, @Nullable TreeNodePosition p_16568_, @Nullable TreeNodePosition p_16569_, int p_16570_, int p_16571_) {
-        if (p_297517_.advancement().display().isEmpty()) {
+    public TreeNodePosition(AdvancementNode pNode, @Nullable TreeNodePosition pParent, @Nullable TreeNodePosition pPreviousSibling, int pChildIndex, int pX) {
+        if (pNode.advancement().display().isEmpty()) {
             throw new IllegalArgumentException("Can't position an invisible advancement!");
         } else {
-            this.node = p_297517_;
-            this.parent = p_16568_;
-            this.previousSibling = p_16569_;
-            this.childIndex = p_16570_;
+            this.node = pNode;
+            this.parent = pParent;
+            this.previousSibling = pPreviousSibling;
+            this.childIndex = pChildIndex;
             this.ancestor = this;
-            this.x = p_16571_;
+            this.x = pX;
             this.y = -1.0F;
             TreeNodePosition treenodeposition = null;
 
-            for (AdvancementNode advancementnode : p_297517_.children()) {
+            for (AdvancementNode advancementnode : pNode.children()) {
                 treenodeposition = this.addChild(advancementnode, treenodeposition);
             }
         }
     }
 
     @Nullable
-    private TreeNodePosition addChild(AdvancementNode p_298340_, @Nullable TreeNodePosition p_16591_) {
-        if (p_298340_.advancement().display().isPresent()) {
-            p_16591_ = new TreeNodePosition(p_298340_, this, p_16591_, this.children.size() + 1, this.x + 1);
-            this.children.add(p_16591_);
+    private TreeNodePosition addChild(AdvancementNode pChild, @Nullable TreeNodePosition pPreviousSibling) {
+        if (pChild.advancement().display().isPresent()) {
+            pPreviousSibling = new TreeNodePosition(pChild, this, pPreviousSibling, this.children.size() + 1, this.x + 1);
+            this.children.add(pPreviousSibling);
         } else {
-            for (AdvancementNode advancementnode : p_298340_.children()) {
-                p_16591_ = this.addChild(advancementnode, p_16591_);
+            for (AdvancementNode advancementnode : pChild.children()) {
+                pPreviousSibling = this.addChild(advancementnode, pPreviousSibling);
             }
         }
 
-        return p_16591_;
+        return pPreviousSibling;
     }
 
     private void firstWalk() {
@@ -80,25 +80,25 @@ public class TreeNodePosition {
         }
     }
 
-    private float secondWalk(float p_16576_, int p_16577_, float p_16578_) {
-        this.y += p_16576_;
-        this.x = p_16577_;
-        if (this.y < p_16578_) {
-            p_16578_ = this.y;
+    private float secondWalk(float pOffsetY, int pColumnX, float pSubtreeTopY) {
+        this.y += pOffsetY;
+        this.x = pColumnX;
+        if (this.y < pSubtreeTopY) {
+            pSubtreeTopY = this.y;
         }
 
         for (TreeNodePosition treenodeposition : this.children) {
-            p_16578_ = treenodeposition.secondWalk(p_16576_ + this.mod, p_16577_ + 1, p_16578_);
+            pSubtreeTopY = treenodeposition.secondWalk(pOffsetY + this.mod, pColumnX + 1, pSubtreeTopY);
         }
 
-        return p_16578_;
+        return pSubtreeTopY;
     }
 
-    private void thirdWalk(float p_16574_) {
-        this.y += p_16574_;
+    private void thirdWalk(float pY) {
+        this.y += pY;
 
         for (TreeNodePosition treenodeposition : this.children) {
-            treenodeposition.thirdWalk(p_16574_);
+            treenodeposition.thirdWalk(pY);
         }
     }
 
@@ -133,9 +133,9 @@ public class TreeNodePosition {
         }
     }
 
-    private TreeNodePosition apportion(TreeNodePosition p_16580_) {
+    private TreeNodePosition apportion(TreeNodePosition pNode) {
         if (this.previousSibling == null) {
-            return p_16580_;
+            return pNode;
         } else {
             TreeNodePosition treenodeposition = this;
             TreeNodePosition treenodeposition1 = this;
@@ -154,7 +154,7 @@ public class TreeNodePosition {
                 treenodeposition1.ancestor = this;
                 float f4 = treenodeposition2.y + f2 - (treenodeposition.y + f) + 1.0F;
                 if (f4 > 0.0F) {
-                    treenodeposition2.getAncestor(this, p_16580_).moveSubtree(this, f4);
+                    treenodeposition2.getAncestor(this, pNode).moveSubtree(this, f4);
                     f += f4;
                     f1 += f4;
                 }
@@ -173,27 +173,27 @@ public class TreeNodePosition {
                     treenodeposition3.mod += f - f3;
                 }
 
-                p_16580_ = this;
+                pNode = this;
             }
 
-            return p_16580_;
+            return pNode;
         }
     }
 
-    private void moveSubtree(TreeNodePosition p_16582_, float p_16583_) {
-        float f = (float)(p_16582_.childIndex - this.childIndex);
+    private void moveSubtree(TreeNodePosition pNode, float pShift) {
+        float f = (float)(pNode.childIndex - this.childIndex);
         if (f != 0.0F) {
-            p_16582_.change -= p_16583_ / f;
-            this.change += p_16583_ / f;
+            pNode.change -= pShift / f;
+            this.change += pShift / f;
         }
 
-        p_16582_.shift += p_16583_;
-        p_16582_.y += p_16583_;
-        p_16582_.mod += p_16583_;
+        pNode.shift += pShift;
+        pNode.y += pShift;
+        pNode.mod += pShift;
     }
 
-    private TreeNodePosition getAncestor(TreeNodePosition p_16585_, TreeNodePosition p_16586_) {
-        return this.ancestor != null && p_16585_.parent.children.contains(this.ancestor) ? this.ancestor : p_16586_;
+    private TreeNodePosition getAncestor(TreeNodePosition pSelf, TreeNodePosition pOther) {
+        return this.ancestor != null && pSelf.parent.children.contains(this.ancestor) ? this.ancestor : pOther;
     }
 
     private void finalizePosition() {
@@ -205,11 +205,11 @@ public class TreeNodePosition {
         }
     }
 
-    public static void run(AdvancementNode p_299150_) {
-        if (p_299150_.advancement().display().isEmpty()) {
+    public static void run(AdvancementNode pRootNode) {
+        if (pRootNode.advancement().display().isEmpty()) {
             throw new IllegalArgumentException("Can't position children of an invisible root!");
         } else {
-            TreeNodePosition treenodeposition = new TreeNodePosition(p_299150_, null, null, 1, 0);
+            TreeNodePosition treenodeposition = new TreeNodePosition(pRootNode, null, null, 1, 0);
             treenodeposition.firstWalk();
             float f = treenodeposition.secondWalk(0.0F, 0, treenodeposition.y);
             if (f < 0.0F) {

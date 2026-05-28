@@ -78,22 +78,22 @@ public class BookEditScreen extends Screen {
     private Component pageMsg = CommonComponents.EMPTY;
     private final Component ownerText;
 
-    public BookEditScreen(Player p_98076_, ItemStack p_98077_, InteractionHand p_98078_, WritableBookContent p_363680_) {
+    public BookEditScreen(Player pOwner, ItemStack pBook, InteractionHand pHand, WritableBookContent pContent) {
         super(GameNarrator.NO_TITLE);
-        this.owner = p_98076_;
-        this.book = p_98077_;
-        this.hand = p_98078_;
-        p_363680_.getPages(Minecraft.getInstance().isTextFilteringEnabled()).forEach(this.pages::add);
+        this.owner = pOwner;
+        this.book = pBook;
+        this.hand = pHand;
+        pContent.getPages(Minecraft.getInstance().isTextFilteringEnabled()).forEach(this.pages::add);
         if (this.pages.isEmpty()) {
             this.pages.add("");
         }
 
-        this.ownerText = Component.translatable("book.byAuthor", p_98076_.getName()).withStyle(ChatFormatting.DARK_GRAY);
+        this.ownerText = Component.translatable("book.byAuthor", pOwner.getName()).withStyle(ChatFormatting.DARK_GRAY);
     }
 
-    private void setClipboard(String p_98148_) {
+    private void setClipboard(String pClipboardValue) {
         if (this.minecraft != null) {
-            TextFieldHelper.setClipboardContents(this.minecraft, p_98148_);
+            TextFieldHelper.setClipboardContents(this.minecraft, pClipboardValue);
         }
     }
 
@@ -183,14 +183,14 @@ public class BookEditScreen extends Screen {
         }
     }
 
-    private void saveChanges(boolean p_98161_) {
+    private void saveChanges(boolean pPublish) {
         if (this.isModified) {
             this.eraseEmptyTrailingPages();
             this.updateLocalCopy();
             int i = this.hand == InteractionHand.MAIN_HAND ? this.owner.getInventory().selected : 40;
             this.minecraft
                 .getConnection()
-                .send(new ServerboundEditBookPacket(i, this.pages, p_98161_ ? Optional.of(this.title.trim()) : Optional.empty()));
+                .send(new ServerboundEditBookPacket(i, this.pages, pPublish ? Optional.of(this.title.trim()) : Optional.empty()));
         }
     }
 
@@ -206,13 +206,13 @@ public class BookEditScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int p_98100_, int p_98101_, int p_98102_) {
-        if (super.keyPressed(p_98100_, p_98101_, p_98102_)) {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (super.keyPressed(pKeyCode, pScanCode, pModifiers)) {
             return true;
         } else if (this.isSigning) {
-            return this.titleKeyPressed(p_98100_, p_98101_, p_98102_);
+            return this.titleKeyPressed(pKeyCode, pScanCode, pModifiers);
         } else {
-            boolean flag = this.bookKeyPressed(p_98100_, p_98101_, p_98102_);
+            boolean flag = this.bookKeyPressed(pKeyCode, pScanCode, pModifiers);
             if (flag) {
                 this.clearDisplayCache();
                 return true;
@@ -223,11 +223,11 @@ public class BookEditScreen extends Screen {
     }
 
     @Override
-    public boolean charTyped(char p_98085_, int p_98086_) {
-        if (super.charTyped(p_98085_, p_98086_)) {
+    public boolean charTyped(char pCodePoint, int pModifiers) {
+        if (super.charTyped(pCodePoint, pModifiers)) {
             return true;
         } else if (this.isSigning) {
-            boolean flag = this.titleEdit.charTyped(p_98085_);
+            boolean flag = this.titleEdit.charTyped(pCodePoint);
             if (flag) {
                 this.updateButtonVisibility();
                 this.isModified = true;
@@ -235,8 +235,8 @@ public class BookEditScreen extends Screen {
             } else {
                 return false;
             }
-        } else if (StringUtil.isAllowedChatCharacter(p_98085_)) {
-            this.pageEdit.insertText(Character.toString(p_98085_));
+        } else if (StringUtil.isAllowedChatCharacter(pCodePoint)) {
+            this.pageEdit.insertText(Character.toString(pCodePoint));
             this.clearDisplayCache();
             return true;
         } else {
@@ -244,22 +244,22 @@ public class BookEditScreen extends Screen {
         }
     }
 
-    private boolean bookKeyPressed(int p_98153_, int p_98154_, int p_98155_) {
-        if (Screen.isSelectAll(p_98153_)) {
+    private boolean bookKeyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (Screen.isSelectAll(pKeyCode)) {
             this.pageEdit.selectAll();
             return true;
-        } else if (Screen.isCopy(p_98153_)) {
+        } else if (Screen.isCopy(pKeyCode)) {
             this.pageEdit.copy();
             return true;
-        } else if (Screen.isPaste(p_98153_)) {
+        } else if (Screen.isPaste(pKeyCode)) {
             this.pageEdit.paste();
             return true;
-        } else if (Screen.isCut(p_98153_)) {
+        } else if (Screen.isCut(pKeyCode)) {
             this.pageEdit.cut();
             return true;
         } else {
             TextFieldHelper.CursorStep textfieldhelper$cursorstep = Screen.hasControlDown() ? TextFieldHelper.CursorStep.WORD : TextFieldHelper.CursorStep.CHARACTER;
-            switch (p_98153_) {
+            switch (pKeyCode) {
                 case 257:
                 case 335:
                     this.pageEdit.insertText("\n");
@@ -308,9 +308,9 @@ public class BookEditScreen extends Screen {
         this.changeLine(1);
     }
 
-    private void changeLine(int p_98098_) {
+    private void changeLine(int pYChange) {
         int i = this.pageEdit.getCursorPos();
-        int j = this.getDisplayCache().changeLine(i, p_98098_);
+        int j = this.getDisplayCache().changeLine(i, pYChange);
         this.pageEdit.setCursorPos(j, Screen.hasShiftDown());
     }
 
@@ -335,8 +335,8 @@ public class BookEditScreen extends Screen {
         }
     }
 
-    private boolean titleKeyPressed(int p_98164_, int p_98165_, int p_98166_) {
-        switch (p_98164_) {
+    private boolean titleKeyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        switch (pKeyCode) {
             case 257:
             case 335:
                 if (!this.title.isEmpty()) {
@@ -359,9 +359,9 @@ public class BookEditScreen extends Screen {
         return this.currentPage >= 0 && this.currentPage < this.pages.size() ? this.pages.get(this.currentPage) : "";
     }
 
-    private void setCurrentPageText(String p_98159_) {
+    private void setCurrentPageText(String pText) {
         if (this.currentPage >= 0 && this.currentPage < this.pages.size()) {
-            this.pages.set(this.currentPage, p_98159_);
+            this.pages.set(this.currentPage, pText);
             this.isModified = true;
             this.clearDisplayCache();
         }
@@ -407,44 +407,44 @@ public class BookEditScreen extends Screen {
         p_298379_.blit(RenderType::guiTextured, BookViewScreen.BOOK_LOCATION, (this.width - 192) / 2, 2, 0.0F, 0.0F, 192, 192, 256, 256);
     }
 
-    private void renderCursor(GuiGraphics p_281833_, BookEditScreen.Pos2i p_282190_, boolean p_282412_) {
+    private void renderCursor(GuiGraphics pGuiGraphics, BookEditScreen.Pos2i pCursorPos, boolean pIsEndOfText) {
         if (this.frameTick / 6 % 2 == 0) {
-            p_282190_ = this.convertLocalToScreen(p_282190_);
-            if (!p_282412_) {
-                p_281833_.fill(p_282190_.x, p_282190_.y - 1, p_282190_.x + 1, p_282190_.y + 9, -16777216);
+            pCursorPos = this.convertLocalToScreen(pCursorPos);
+            if (!pIsEndOfText) {
+                pGuiGraphics.fill(pCursorPos.x, pCursorPos.y - 1, pCursorPos.x + 1, pCursorPos.y + 9, -16777216);
             } else {
-                p_281833_.drawString(this.font, "_", p_282190_.x, p_282190_.y, 0, false);
+                pGuiGraphics.drawString(this.font, "_", pCursorPos.x, pCursorPos.y, 0, false);
             }
         }
     }
 
-    private void renderHighlight(GuiGraphics p_282188_, Rect2i[] p_265482_) {
-        for (Rect2i rect2i : p_265482_) {
+    private void renderHighlight(GuiGraphics pGuiGraphics, Rect2i[] pHighlightAreas) {
+        for (Rect2i rect2i : pHighlightAreas) {
             int i = rect2i.getX();
             int j = rect2i.getY();
             int k = i + rect2i.getWidth();
             int l = j + rect2i.getHeight();
-            p_282188_.fill(RenderType.guiTextHighlight(), i, j, k, l, -16776961);
+            pGuiGraphics.fill(RenderType.guiTextHighlight(), i, j, k, l, -16776961);
         }
     }
 
-    private BookEditScreen.Pos2i convertScreenToLocal(BookEditScreen.Pos2i p_98115_) {
-        return new BookEditScreen.Pos2i(p_98115_.x - (this.width - 192) / 2 - 36, p_98115_.y - 32);
+    private BookEditScreen.Pos2i convertScreenToLocal(BookEditScreen.Pos2i pScreenPos) {
+        return new BookEditScreen.Pos2i(pScreenPos.x - (this.width - 192) / 2 - 36, pScreenPos.y - 32);
     }
 
-    private BookEditScreen.Pos2i convertLocalToScreen(BookEditScreen.Pos2i p_98146_) {
-        return new BookEditScreen.Pos2i(p_98146_.x + (this.width - 192) / 2 + 36, p_98146_.y + 32);
+    private BookEditScreen.Pos2i convertLocalToScreen(BookEditScreen.Pos2i pLocalScreenPos) {
+        return new BookEditScreen.Pos2i(pLocalScreenPos.x + (this.width - 192) / 2 + 36, pLocalScreenPos.y + 32);
     }
 
     @Override
-    public boolean mouseClicked(double p_98088_, double p_98089_, int p_98090_) {
-        if (super.mouseClicked(p_98088_, p_98089_, p_98090_)) {
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+        if (super.mouseClicked(pMouseX, pMouseY, pButton)) {
             return true;
         } else {
-            if (p_98090_ == 0) {
+            if (pButton == 0) {
                 long i = Util.getMillis();
                 BookEditScreen.DisplayCache bookeditscreen$displaycache = this.getDisplayCache();
-                int j = bookeditscreen$displaycache.getIndexAtPosition(this.font, this.convertScreenToLocal(new BookEditScreen.Pos2i((int)p_98088_, (int)p_98089_)));
+                int j = bookeditscreen$displaycache.getIndexAtPosition(this.font, this.convertScreenToLocal(new BookEditScreen.Pos2i((int)pMouseX, (int)pMouseY)));
                 if (j >= 0) {
                     if (j != this.lastIndex || i - this.lastClickTime >= 250L) {
                         this.pageEdit.setCursorPos(j, Screen.hasShiftDown());
@@ -465,19 +465,19 @@ public class BookEditScreen extends Screen {
         }
     }
 
-    private void selectWord(int p_98142_) {
+    private void selectWord(int pIndex) {
         String s = this.getCurrentPageText();
-        this.pageEdit.setSelectionRange(StringSplitter.getWordPosition(s, -1, p_98142_, false), StringSplitter.getWordPosition(s, 1, p_98142_, false));
+        this.pageEdit.setSelectionRange(StringSplitter.getWordPosition(s, -1, pIndex, false), StringSplitter.getWordPosition(s, 1, pIndex, false));
     }
 
     @Override
-    public boolean mouseDragged(double p_98092_, double p_98093_, int p_98094_, double p_98095_, double p_98096_) {
-        if (super.mouseDragged(p_98092_, p_98093_, p_98094_, p_98095_, p_98096_)) {
+    public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
+        if (super.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY)) {
             return true;
         } else {
-            if (p_98094_ == 0) {
+            if (pButton == 0) {
                 BookEditScreen.DisplayCache bookeditscreen$displaycache = this.getDisplayCache();
-                int i = bookeditscreen$displaycache.getIndexAtPosition(this.font, this.convertScreenToLocal(new BookEditScreen.Pos2i((int)p_98092_, (int)p_98093_)));
+                int i = bookeditscreen$displaycache.getIndexAtPosition(this.font, this.convertScreenToLocal(new BookEditScreen.Pos2i((int)pMouseX, (int)pMouseY)));
                 this.pageEdit.setCursorPos(i, true);
                 this.clearDisplayCache();
             }
@@ -568,22 +568,22 @@ public class BookEditScreen extends Screen {
         }
     }
 
-    static int findLineFromPos(int[] p_98150_, int p_98151_) {
-        int i = Arrays.binarySearch(p_98150_, p_98151_);
+    static int findLineFromPos(int[] pLineStarts, int pFind) {
+        int i = Arrays.binarySearch(pLineStarts, pFind);
         return i < 0 ? -(i + 2) : i;
     }
 
-    private Rect2i createPartialLineSelection(String p_98120_, StringSplitter p_98121_, int p_98122_, int p_98123_, int p_98124_, int p_98125_) {
-        String s = p_98120_.substring(p_98125_, p_98122_);
-        String s1 = p_98120_.substring(p_98125_, p_98123_);
-        BookEditScreen.Pos2i bookeditscreen$pos2i = new BookEditScreen.Pos2i((int)p_98121_.stringWidth(s), p_98124_);
-        BookEditScreen.Pos2i bookeditscreen$pos2i1 = new BookEditScreen.Pos2i((int)p_98121_.stringWidth(s1), p_98124_ + 9);
+    private Rect2i createPartialLineSelection(String pInput, StringSplitter pSplitter, int pStartPos, int pEndPos, int pY, int pLineStart) {
+        String s = pInput.substring(pLineStart, pStartPos);
+        String s1 = pInput.substring(pLineStart, pEndPos);
+        BookEditScreen.Pos2i bookeditscreen$pos2i = new BookEditScreen.Pos2i((int)pSplitter.stringWidth(s), pY);
+        BookEditScreen.Pos2i bookeditscreen$pos2i1 = new BookEditScreen.Pos2i((int)pSplitter.stringWidth(s1), pY + 9);
         return this.createSelection(bookeditscreen$pos2i, bookeditscreen$pos2i1);
     }
 
-    private Rect2i createSelection(BookEditScreen.Pos2i p_98117_, BookEditScreen.Pos2i p_98118_) {
-        BookEditScreen.Pos2i bookeditscreen$pos2i = this.convertLocalToScreen(p_98117_);
-        BookEditScreen.Pos2i bookeditscreen$pos2i1 = this.convertLocalToScreen(p_98118_);
+    private Rect2i createSelection(BookEditScreen.Pos2i pCorner1, BookEditScreen.Pos2i pCorner2) {
+        BookEditScreen.Pos2i bookeditscreen$pos2i = this.convertLocalToScreen(pCorner1);
+        BookEditScreen.Pos2i bookeditscreen$pos2i1 = this.convertLocalToScreen(pCorner2);
         int i = Math.min(bookeditscreen$pos2i.x, bookeditscreen$pos2i1.x);
         int j = Math.max(bookeditscreen$pos2i.x, bookeditscreen$pos2i1.x);
         int k = Math.min(bookeditscreen$pos2i.y, bookeditscreen$pos2i1.y);
@@ -609,50 +609,50 @@ public class BookEditScreen extends Screen {
         final Rect2i[] selection;
 
         public DisplayCache(
-            String p_98201_, BookEditScreen.Pos2i p_98202_, boolean p_98203_, int[] p_98204_, BookEditScreen.LineInfo[] p_98205_, Rect2i[] p_98206_
+            String pFullText, BookEditScreen.Pos2i pCursor, boolean pCursorAtEnd, int[] pLineStarts, BookEditScreen.LineInfo[] pLines, Rect2i[] pSelection
         ) {
-            this.fullText = p_98201_;
-            this.cursor = p_98202_;
-            this.cursorAtEnd = p_98203_;
-            this.lineStarts = p_98204_;
-            this.lines = p_98205_;
-            this.selection = p_98206_;
+            this.fullText = pFullText;
+            this.cursor = pCursor;
+            this.cursorAtEnd = pCursorAtEnd;
+            this.lineStarts = pLineStarts;
+            this.lines = pLines;
+            this.selection = pSelection;
         }
 
-        public int getIndexAtPosition(Font p_98214_, BookEditScreen.Pos2i p_98215_) {
-            int i = p_98215_.y / 9;
+        public int getIndexAtPosition(Font pFont, BookEditScreen.Pos2i pCursorPosition) {
+            int i = pCursorPosition.y / 9;
             if (i < 0) {
                 return 0;
             } else if (i >= this.lines.length) {
                 return this.fullText.length();
             } else {
                 BookEditScreen.LineInfo bookeditscreen$lineinfo = this.lines[i];
-                return this.lineStarts[i] + p_98214_.getSplitter().plainIndexAtWidth(bookeditscreen$lineinfo.contents, p_98215_.x, bookeditscreen$lineinfo.style);
+                return this.lineStarts[i] + pFont.getSplitter().plainIndexAtWidth(bookeditscreen$lineinfo.contents, pCursorPosition.x, bookeditscreen$lineinfo.style);
             }
         }
 
-        public int changeLine(int p_98211_, int p_98212_) {
-            int i = BookEditScreen.findLineFromPos(this.lineStarts, p_98211_);
-            int j = i + p_98212_;
+        public int changeLine(int pXChange, int pYChange) {
+            int i = BookEditScreen.findLineFromPos(this.lineStarts, pXChange);
+            int j = i + pYChange;
             int k;
             if (0 <= j && j < this.lineStarts.length) {
-                int l = p_98211_ - this.lineStarts[i];
+                int l = pXChange - this.lineStarts[i];
                 int i1 = this.lines[j].contents.length();
                 k = this.lineStarts[j] + Math.min(l, i1);
             } else {
-                k = p_98211_;
+                k = pXChange;
             }
 
             return k;
         }
 
-        public int findLineStart(int p_98209_) {
-            int i = BookEditScreen.findLineFromPos(this.lineStarts, p_98209_);
+        public int findLineStart(int pLine) {
+            int i = BookEditScreen.findLineFromPos(this.lineStarts, pLine);
             return this.lineStarts[i];
         }
 
-        public int findLineEnd(int p_98219_) {
-            int i = BookEditScreen.findLineFromPos(this.lineStarts, p_98219_);
+        public int findLineEnd(int pLine) {
+            int i = BookEditScreen.findLineFromPos(this.lineStarts, pLine);
             return this.lineStarts[i] + this.lines[i].contents.length();
         }
     }
@@ -665,12 +665,12 @@ public class BookEditScreen extends Screen {
         final int x;
         final int y;
 
-        public LineInfo(Style p_98232_, String p_98233_, int p_98234_, int p_98235_) {
-            this.style = p_98232_;
-            this.contents = p_98233_;
-            this.x = p_98234_;
-            this.y = p_98235_;
-            this.asComponent = Component.literal(p_98233_).setStyle(p_98232_);
+        public LineInfo(Style pStyle, String pContents, int pX, int pY) {
+            this.style = pStyle;
+            this.contents = pContents;
+            this.x = pX;
+            this.y = pY;
+            this.asComponent = Component.literal(pContents).setStyle(pStyle);
         }
     }
 
@@ -679,9 +679,9 @@ public class BookEditScreen extends Screen {
         public final int x;
         public final int y;
 
-        Pos2i(int p_98249_, int p_98250_) {
-            this.x = p_98249_;
-            this.y = p_98250_;
+        Pos2i(int pX, int pY) {
+            this.x = pX;
+            this.y = pY;
         }
     }
 }

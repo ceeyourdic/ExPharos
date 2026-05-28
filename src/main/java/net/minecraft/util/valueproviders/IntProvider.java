@@ -17,25 +17,25 @@ public abstract class IntProvider {
     public static final Codec<IntProvider> NON_NEGATIVE_CODEC = codec(0, Integer.MAX_VALUE);
     public static final Codec<IntProvider> POSITIVE_CODEC = codec(1, Integer.MAX_VALUE);
 
-    public static Codec<IntProvider> codec(int p_146546_, int p_146547_) {
-        return validateCodec(p_146546_, p_146547_, CODEC);
+    public static Codec<IntProvider> codec(int pMinInclusive, int pMaxInclusive) {
+        return validateCodec(pMinInclusive, pMaxInclusive, CODEC);
     }
 
-    public static <T extends IntProvider> Codec<T> validateCodec(int p_330202_, int p_327757_, Codec<T> p_336105_) {
-        return p_336105_.validate(p_326740_ -> validate(p_330202_, p_327757_, p_326740_));
+    public static <T extends IntProvider> Codec<T> validateCodec(int pMin, int pMax, Codec<T> pCodec) {
+        return pCodec.validate(p_326740_ -> validate(pMin, pMax, p_326740_));
     }
 
-    private static <T extends IntProvider> DataResult<T> validate(int p_331801_, int p_334933_, T p_329862_) {
-        if (p_329862_.getMinValue() < p_331801_) {
-            return DataResult.error(() -> "Value provider too low: " + p_331801_ + " [" + p_329862_.getMinValue() + "-" + p_329862_.getMaxValue() + "]");
+    private static <T extends IntProvider> DataResult<T> validate(int pMin, int pMax, T pProvider) {
+        if (pProvider.getMinValue() < pMin) {
+            return DataResult.error(() -> "Value provider too low: " + pMin + " [" + pProvider.getMinValue() + "-" + pProvider.getMaxValue() + "]");
         } else {
-            return p_329862_.getMaxValue() > p_334933_
-                ? DataResult.error(() -> "Value provider too high: " + p_334933_ + " [" + p_329862_.getMinValue() + "-" + p_329862_.getMaxValue() + "]")
-                : DataResult.success(p_329862_);
+            return pProvider.getMaxValue() > pMax
+                ? DataResult.error(() -> "Value provider too high: " + pMax + " [" + pProvider.getMinValue() + "-" + pProvider.getMaxValue() + "]")
+                : DataResult.success(pProvider);
         }
     }
 
-    public abstract int sample(RandomSource p_216855_);
+    public abstract int sample(RandomSource pRandom);
 
     public abstract int getMinValue();
 

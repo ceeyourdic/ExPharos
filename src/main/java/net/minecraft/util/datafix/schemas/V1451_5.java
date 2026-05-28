@@ -11,8 +11,8 @@ public class V1451_5 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_17530_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_17530_);
+    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(pSchema);
         map.remove("minecraft:flower_pot");
         map.remove("minecraft:noteblock");
         return map;

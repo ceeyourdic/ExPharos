@@ -13,9 +13,9 @@ public class WaterAvoidingRandomStrollGoal extends RandomStrollGoal {
         this(p_25987_, p_25988_, 0.001F);
     }
 
-    public WaterAvoidingRandomStrollGoal(PathfinderMob p_25990_, double p_25991_, float p_25992_) {
-        super(p_25990_, p_25991_);
-        this.probability = p_25992_;
+    public WaterAvoidingRandomStrollGoal(PathfinderMob pMob, double pSpeedModifier, float pProbability) {
+        super(pMob, pSpeedModifier);
+        this.probability = pProbability;
     }
 
     @Nullable

@@ -18,16 +18,16 @@ public class AlertScreen extends Screen {
     private final Component okButton;
     private final boolean shouldCloseOnEsc;
 
-    public AlertScreen(Runnable p_95519_, Component p_95520_, Component p_95521_) {
-        this(p_95519_, p_95520_, p_95521_, CommonComponents.GUI_BACK, true);
+    public AlertScreen(Runnable pCallback, Component pTitle, Component pText) {
+        this(pCallback, pTitle, pText, CommonComponents.GUI_BACK, true);
     }
 
-    public AlertScreen(Runnable p_239327_, Component p_239328_, Component p_239329_, Component p_239330_, boolean p_239331_) {
-        super(p_239328_);
-        this.callback = p_239327_;
-        this.messageText = p_239329_;
-        this.okButton = p_239330_;
-        this.shouldCloseOnEsc = p_239331_;
+    public AlertScreen(Runnable pCallback, Component pTitle, Component pMessageText, Component pOkButton, boolean pShouldCloseOnEsc) {
+        super(pTitle);
+        this.callback = pCallback;
+        this.messageText = pMessageText;
+        this.okButton = pOkButton;
+        this.shouldCloseOnEsc = pShouldCloseOnEsc;
     }
 
     @Override

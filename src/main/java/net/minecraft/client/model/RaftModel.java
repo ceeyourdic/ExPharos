@@ -11,12 +11,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class RaftModel extends AbstractBoatModel {
-    public RaftModel(ModelPart p_251383_) {
-        super(p_251383_);
+    public RaftModel(ModelPart pRoot) {
+        super(pRoot);
     }
 
-    private static void addCommonParts(PartDefinition p_250262_) {
-        p_250262_.addOrReplaceChild(
+    private static void addCommonParts(PartDefinition pPartDefinition) {
+        pPartDefinition.addOrReplaceChild(
             "bottom",
             CubeListBuilder.create()
                 .texOffs(0, 0)
@@ -29,12 +29,12 @@ public class RaftModel extends AbstractBoatModel {
         int j = 7;
         int k = 6;
         float f = -5.0F;
-        p_250262_.addOrReplaceChild(
+        pPartDefinition.addOrReplaceChild(
             "left_paddle",
             CubeListBuilder.create().texOffs(0, 24).addBox(-1.0F, 0.0F, -5.0F, 2.0F, 2.0F, 18.0F).addBox(-1.001F, -3.0F, 8.0F, 1.0F, 6.0F, 7.0F),
             PartPose.offsetAndRotation(3.0F, -4.0F, 9.0F, 0.0F, 0.0F, (float) (Math.PI / 16))
         );
-        p_250262_.addOrReplaceChild(
+        pPartDefinition.addOrReplaceChild(
             "right_paddle",
             CubeListBuilder.create().texOffs(40, 24).addBox(-1.0F, 0.0F, -5.0F, 2.0F, 2.0F, 18.0F).addBox(0.001F, -3.0F, 8.0F, 1.0F, 6.0F, 7.0F),
             PartPose.offsetAndRotation(3.0F, -4.0F, -9.0F, 0.0F, (float) Math.PI, (float) (Math.PI / 16))

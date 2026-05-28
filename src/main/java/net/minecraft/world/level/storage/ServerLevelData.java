@@ -14,13 +14,13 @@ import net.minecraft.world.level.timers.TimerQueue;
 public interface ServerLevelData extends WritableLevelData {
     String getLevelName();
 
-    void setThundering(boolean p_78623_);
+    void setThundering(boolean pThundering);
 
     int getRainTime();
 
-    void setRainTime(int p_78627_);
+    void setRainTime(int pTime);
 
-    void setThunderTime(int p_78626_);
+    void setThunderTime(int pTime);
 
     int getThunderTime();
 
@@ -49,40 +49,40 @@ public interface ServerLevelData extends WritableLevelData {
 
     int getClearWeatherTime();
 
-    void setClearWeatherTime(int p_78616_);
+    void setClearWeatherTime(int pTime);
 
     int getWanderingTraderSpawnDelay();
 
-    void setWanderingTraderSpawnDelay(int p_78628_);
+    void setWanderingTraderSpawnDelay(int pDelay);
 
     int getWanderingTraderSpawnChance();
 
-    void setWanderingTraderSpawnChance(int p_78629_);
+    void setWanderingTraderSpawnChance(int pChance);
 
     @Nullable
     UUID getWanderingTraderId();
 
-    void setWanderingTraderId(UUID p_78620_);
+    void setWanderingTraderId(UUID pId);
 
     GameType getGameType();
 
-    void setWorldBorder(WorldBorder.Settings p_78619_);
+    void setWorldBorder(WorldBorder.Settings pSerializer);
 
     WorldBorder.Settings getWorldBorder();
 
     boolean isInitialized();
 
-    void setInitialized(boolean p_78625_);
+    void setInitialized(boolean pInitialized);
 
     boolean isAllowCommands();
 
-    void setGameType(GameType p_78618_);
+    void setGameType(GameType pType);
 
     TimerQueue<MinecraftServer> getScheduledEvents();
 
-    void setGameTime(long p_78617_);
+    void setGameTime(long pTime);
 
-    void setDayTime(long p_78624_);
+    void setDayTime(long pTime);
 
     GameRules getGameRules();
 }

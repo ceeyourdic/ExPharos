@@ -10,8 +10,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class DelegatedModel implements ModelInstance {
     private final ResourceLocation parent;
 
-    public DelegatedModel(ResourceLocation p_377640_) {
-        this.parent = p_377640_;
+    public DelegatedModel(ResourceLocation pParent) {
+        this.parent = pParent;
     }
 
     public JsonElement get() {

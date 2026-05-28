@@ -34,7 +34,7 @@ public class ShootTongue extends Behavior<Frog> {
     private Vec3 itemSpawnPos;
     private ShootTongue.State state = ShootTongue.State.DONE;
 
-    public ShootTongue(SoundEvent p_218620_, SoundEvent p_218621_) {
+    public ShootTongue(SoundEvent pTongueSound, SoundEvent pEatSound) {
         super(
             ImmutableMap.of(
                 MemoryModuleType.WALK_TARGET,
@@ -48,8 +48,8 @@ public class ShootTongue extends Behavior<Frog> {
             ),
             100
         );
-        this.tongueSound = p_218620_;
-        this.eatSound = p_218621_;
+        this.tongueSound = pTongueSound;
+        this.eatSound = pEatSound;
     }
 
     protected boolean checkExtraStartConditions(ServerLevel p_218630_, Frog p_218631_) {
@@ -84,13 +84,13 @@ public class ShootTongue extends Behavior<Frog> {
         p_218653_.setPose(Pose.STANDING);
     }
 
-    private void eatEntity(ServerLevel p_218641_, Frog p_218642_) {
-        p_218641_.playSound(null, p_218642_, this.eatSound, SoundSource.NEUTRAL, 2.0F, 1.0F);
-        Optional<Entity> optional = p_218642_.getTongueTarget();
+    private void eatEntity(ServerLevel pLevel, Frog pFrog) {
+        pLevel.playSound(null, pFrog, this.eatSound, SoundSource.NEUTRAL, 2.0F, 1.0F);
+        Optional<Entity> optional = pFrog.getTongueTarget();
         if (optional.isPresent()) {
             Entity entity = optional.get();
             if (entity.isAlive()) {
-                p_218642_.doHurtTarget(p_218641_, entity);
+                pFrog.doHurtTarget(pLevel, entity);
                 if (!entity.isAlive()) {
                     entity.remove(Entity.RemovalReason.KILLED);
                 }
@@ -133,23 +133,23 @@ public class ShootTongue extends Behavior<Frog> {
         }
     }
 
-    private boolean canPathfindToTarget(Frog p_238359_, LivingEntity p_238360_) {
-        Path path = p_238359_.getNavigation().createPath(p_238360_, 0);
+    private boolean canPathfindToTarget(Frog pFrog, LivingEntity pTarget) {
+        Path path = pFrog.getNavigation().createPath(pTarget, 0);
         return path != null && path.getDistToTarget() < 1.75F;
     }
 
-    private void addUnreachableTargetToMemory(Frog p_238444_, LivingEntity p_243335_) {
-        List<UUID> list = p_238444_.getBrain().getMemory(MemoryModuleType.UNREACHABLE_TONGUE_TARGETS).orElseGet(ArrayList::new);
-        boolean flag = !list.contains(p_243335_.getUUID());
+    private void addUnreachableTargetToMemory(Frog pFrog, LivingEntity pTarget) {
+        List<UUID> list = pFrog.getBrain().getMemory(MemoryModuleType.UNREACHABLE_TONGUE_TARGETS).orElseGet(ArrayList::new);
+        boolean flag = !list.contains(pTarget.getUUID());
         if (list.size() == 5 && flag) {
             list.remove(0);
         }
 
         if (flag) {
-            list.add(p_243335_.getUUID());
+            list.add(pTarget.getUUID());
         }
 
-        p_238444_.getBrain().setMemoryWithExpiry(MemoryModuleType.UNREACHABLE_TONGUE_TARGETS, list, 100L);
+        pFrog.getBrain().setMemoryWithExpiry(MemoryModuleType.UNREACHABLE_TONGUE_TARGETS, list, 100L);
     }
 
     static enum State {

@@ -24,17 +24,17 @@ public abstract class Property<T extends Comparable<T>> {
         );
     private final Codec<Property.Value<T>> valueCodec = this.codec.xmap(this::value, Property.Value::value);
 
-    protected Property(String p_61692_, Class<T> p_61693_) {
-        this.clazz = p_61693_;
-        this.name = p_61692_;
+    protected Property(String pName, Class<T> pClazz) {
+        this.clazz = pClazz;
+        this.name = pName;
     }
 
-    public Property.Value<T> value(T p_61700_) {
-        return new Property.Value<>(this, p_61700_);
+    public Property.Value<T> value(T pValue) {
+        return new Property.Value<>(this, pValue);
     }
 
-    public Property.Value<T> value(StateHolder<?, ?> p_61695_) {
-        return new Property.Value<>(this, p_61695_.getValue(this));
+    public Property.Value<T> value(StateHolder<?, ?> pHolder) {
+        return new Property.Value<>(this, pHolder.getValue(this));
     }
 
     public Stream<Property.Value<T>> getAllValues() {
@@ -59,11 +59,11 @@ public abstract class Property<T extends Comparable<T>> {
 
     public abstract List<T> getPossibleValues();
 
-    public abstract String getName(T p_61696_);
+    public abstract String getName(T pValue);
 
-    public abstract Optional<T> getValue(String p_61701_);
+    public abstract Optional<T> getValue(String pValue);
 
-    public abstract int getInternalIndex(T p_366384_);
+    public abstract int getInternalIndex(T pValue);
 
     @Override
     public String toString() {
@@ -71,11 +71,11 @@ public abstract class Property<T extends Comparable<T>> {
     }
 
     @Override
-    public boolean equals(Object p_61707_) {
-        if (this == p_61707_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            return !(p_61707_ instanceof Property<?> property) ? false : this.clazz.equals(property.clazz) && this.name.equals(property.name);
+            return !(pOther instanceof Property<?> property) ? false : this.clazz.equals(property.clazz) && this.name.equals(property.name);
         }
     }
 
@@ -92,9 +92,9 @@ public abstract class Property<T extends Comparable<T>> {
         return 31 * this.clazz.hashCode() + this.name.hashCode();
     }
 
-    public <U, S extends StateHolder<?, S>> DataResult<S> parseValue(DynamicOps<U> p_156032_, S p_156033_, U p_156034_) {
-        DataResult<T> dataresult = this.codec.parse(p_156032_, p_156034_);
-        return dataresult.<S>map(p_156030_ -> p_156033_.setValue(this, p_156030_)).setPartial(p_156033_);
+    public <U, S extends StateHolder<?, S>> DataResult<S> parseValue(DynamicOps<U> pOps, S pStateHolder, U pUnparsedValue) {
+        DataResult<T> dataresult = this.codec.parse(pOps, pUnparsedValue);
+        return dataresult.<S>map(p_156030_ -> pStateHolder.setValue(this, p_156030_)).setPartial(pStateHolder);
     }
 
     public static record Value<T extends Comparable<T>>(Property<T> property, T value) {

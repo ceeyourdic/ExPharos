@@ -27,43 +27,43 @@ public record MovementPredicate(
                 .apply(p_345285_, MovementPredicate::new)
     );
 
-    public static MovementPredicate speed(MinMaxBounds.Doubles p_344237_) {
+    public static MovementPredicate speed(MinMaxBounds.Doubles pSpeed) {
         return new MovementPredicate(
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
-            p_344237_,
+            pSpeed,
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY
         );
     }
 
-    public static MovementPredicate horizontalSpeed(MinMaxBounds.Doubles p_343918_) {
+    public static MovementPredicate horizontalSpeed(MinMaxBounds.Doubles pHorizontalSpeed) {
         return new MovementPredicate(
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
-            p_343918_,
+            pHorizontalSpeed,
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY
         );
     }
 
-    public static MovementPredicate verticalSpeed(MinMaxBounds.Doubles p_342210_) {
+    public static MovementPredicate verticalSpeed(MinMaxBounds.Doubles pVerticalSpeed) {
         return new MovementPredicate(
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
-            p_342210_,
+            pVerticalSpeed,
             MinMaxBounds.Doubles.ANY
         );
     }
 
-    public static MovementPredicate fallDistance(MinMaxBounds.Doubles p_344473_) {
+    public static MovementPredicate fallDistance(MinMaxBounds.Doubles pFallDistance) {
         return new MovementPredicate(
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
@@ -71,22 +71,22 @@ public record MovementPredicate(
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
             MinMaxBounds.Doubles.ANY,
-            p_344473_
+            pFallDistance
         );
     }
 
-    public boolean matches(double p_342615_, double p_343015_, double p_344849_, double p_344583_) {
-        if (this.x.matches(p_342615_) && this.y.matches(p_343015_) && this.z.matches(p_344849_)) {
-            double d0 = Mth.lengthSquared(p_342615_, p_343015_, p_344849_);
+    public boolean matches(double pX, double pY, double pZ, double pFallDistance) {
+        if (this.x.matches(pX) && this.y.matches(pY) && this.z.matches(pZ)) {
+            double d0 = Mth.lengthSquared(pX, pY, pZ);
             if (!this.speed.matchesSqr(d0)) {
                 return false;
             } else {
-                double d1 = Mth.lengthSquared(p_342615_, p_344849_);
+                double d1 = Mth.lengthSquared(pX, pZ);
                 if (!this.horizontalSpeed.matchesSqr(d1)) {
                     return false;
                 } else {
-                    double d2 = Math.abs(p_343015_);
-                    return !this.verticalSpeed.matches(d2) ? false : this.fallDistance.matches(p_344583_);
+                    double d2 = Math.abs(pY);
+                    return !this.verticalSpeed.matches(d2) ? false : this.fallDistance.matches(pFallDistance);
                 }
             }
         } else {

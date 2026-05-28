@@ -2053,74 +2053,74 @@ public class Items {
             .component(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, new OminousBottleAmplifier(0))
     );
 
-    private static Function<Item.Properties, Item> createBlockItemWithCustomItemName(Block p_368898_) {
-        return p_359551_ -> new BlockItem(p_368898_, p_359551_.useItemDescriptionPrefix());
+    private static Function<Item.Properties, Item> createBlockItemWithCustomItemName(Block pBlock) {
+        return p_359551_ -> new BlockItem(pBlock, p_359551_.useItemDescriptionPrefix());
     }
 
-    private static ResourceKey<Item> vanillaItemId(String p_369483_) {
-        return ResourceKey.create(Registries.ITEM, ResourceLocation.withDefaultNamespace(p_369483_));
+    private static ResourceKey<Item> vanillaItemId(String pName) {
+        return ResourceKey.create(Registries.ITEM, ResourceLocation.withDefaultNamespace(pName));
     }
 
-    private static ResourceKey<Item> blockIdToItemId(ResourceKey<Block> p_361268_) {
-        return ResourceKey.create(Registries.ITEM, p_361268_.location());
+    private static ResourceKey<Item> blockIdToItemId(ResourceKey<Block> pBlockId) {
+        return ResourceKey.create(Registries.ITEM, pBlockId.location());
     }
 
-    public static Item registerBlock(Block p_42806_) {
-        return registerBlock(p_42806_, BlockItem::new);
+    public static Item registerBlock(Block pBlock) {
+        return registerBlock(pBlock, BlockItem::new);
     }
 
-    public static Item registerBlock(Block p_363946_, Item.Properties p_363058_) {
-        return registerBlock(p_363946_, BlockItem::new, p_363058_);
+    public static Item registerBlock(Block pBlock, Item.Properties pProperties) {
+        return registerBlock(pBlock, BlockItem::new, pProperties);
     }
 
-    public static Item registerBlock(Block p_335257_, UnaryOperator<Item.Properties> p_333002_) {
-        return registerBlock(p_335257_, (p_359459_, p_359460_) -> new BlockItem(p_359459_, p_333002_.apply(p_359460_)));
+    public static Item registerBlock(Block pBlock, UnaryOperator<Item.Properties> pPropertiesModifier) {
+        return registerBlock(pBlock, (p_359459_, p_359460_) -> new BlockItem(p_359459_, pPropertiesModifier.apply(p_359460_)));
     }
 
-    public static Item registerBlock(Block p_252092_, Block... p_248886_) {
-        Item item = registerBlock(p_252092_);
+    public static Item registerBlock(Block pBlock, Block... pOthers) {
+        Item item = registerBlock(pBlock);
 
-        for (Block block : p_248886_) {
+        for (Block block : pOthers) {
             Item.BY_BLOCK.put(block, item);
         }
 
         return item;
     }
 
-    public static Item registerBlock(Block p_365695_, BiFunction<Block, Item.Properties, Item> p_365018_) {
-        return registerBlock(p_365695_, p_365018_, new Item.Properties());
+    public static Item registerBlock(Block pBlock, BiFunction<Block, Item.Properties, Item> pFactory) {
+        return registerBlock(pBlock, pFactory, new Item.Properties());
     }
 
-    public static Item registerBlock(Block p_42811_, BiFunction<Block, Item.Properties, Item> p_363735_, Item.Properties p_368670_) {
-        return registerItem(blockIdToItemId(p_42811_.builtInRegistryHolder().key()), p_359548_ -> p_363735_.apply(p_42811_, p_359548_), p_368670_.useBlockDescriptionPrefix());
+    public static Item registerBlock(Block pBlock, BiFunction<Block, Item.Properties, Item> pFactory, Item.Properties pProperties) {
+        return registerItem(blockIdToItemId(pBlock.builtInRegistryHolder().key()), p_359548_ -> pFactory.apply(pBlock, p_359548_), pProperties.useBlockDescriptionPrefix());
     }
 
-    public static Item registerItem(String p_361437_, Function<Item.Properties, Item> p_361381_) {
-        return registerItem(vanillaItemId(p_361437_), p_361381_, new Item.Properties());
+    public static Item registerItem(String pName, Function<Item.Properties, Item> pFactory) {
+        return registerItem(vanillaItemId(pName), pFactory, new Item.Properties());
     }
 
-    public static Item registerItem(String p_367564_, Function<Item.Properties, Item> p_366420_, Item.Properties p_369916_) {
-        return registerItem(vanillaItemId(p_367564_), p_366420_, p_369916_);
+    public static Item registerItem(String pName, Function<Item.Properties, Item> pFactory, Item.Properties pProperties) {
+        return registerItem(vanillaItemId(pName), pFactory, pProperties);
     }
 
-    public static Item registerItem(String p_42814_, Item.Properties p_366252_) {
-        return registerItem(vanillaItemId(p_42814_), Item::new, p_366252_);
+    public static Item registerItem(String pName, Item.Properties pProperties) {
+        return registerItem(vanillaItemId(pName), Item::new, pProperties);
     }
 
-    public static Item registerItem(String p_366886_) {
-        return registerItem(vanillaItemId(p_366886_), Item::new, new Item.Properties());
+    public static Item registerItem(String pName) {
+        return registerItem(vanillaItemId(pName), Item::new, new Item.Properties());
     }
 
-    public static Item registerItem(ResourceKey<Item> p_361380_, Function<Item.Properties, Item> p_368667_) {
-        return registerItem(p_361380_, p_368667_, new Item.Properties());
+    public static Item registerItem(ResourceKey<Item> pKey, Function<Item.Properties, Item> pFactory) {
+        return registerItem(pKey, pFactory, new Item.Properties());
     }
 
-    public static Item registerItem(ResourceKey<Item> p_364577_, Function<Item.Properties, Item> p_366144_, Item.Properties p_369845_) {
-        Item item = p_366144_.apply(p_369845_.setId(p_364577_));
+    public static Item registerItem(ResourceKey<Item> pKey, Function<Item.Properties, Item> pFactory, Item.Properties pProperties) {
+        Item item = pFactory.apply(pProperties.setId(pKey));
         if (item instanceof BlockItem blockitem) {
             blockitem.registerBlocks(Item.BY_BLOCK, item);
         }
 
-        return Registry.register(BuiltInRegistries.ITEM, p_364577_, item);
+        return Registry.register(BuiltInRegistries.ITEM, pKey, item);
     }
 }

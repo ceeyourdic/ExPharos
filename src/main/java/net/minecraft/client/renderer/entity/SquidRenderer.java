@@ -14,8 +14,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class SquidRenderer<T extends Squid> extends AgeableMobRenderer<T, SquidRenderState, SquidModel> {
     private static final ResourceLocation SQUID_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/squid/squid.png");
 
-    public SquidRenderer(EntityRendererProvider.Context p_174406_, SquidModel p_174407_, SquidModel p_361703_) {
-        super(p_174406_, p_174407_, p_361703_, 0.7F);
+    public SquidRenderer(EntityRendererProvider.Context pContext, SquidModel pAdultModel, SquidModel pBabyModel) {
+        super(pContext, pAdultModel, pBabyModel, 0.7F);
     }
 
     public ResourceLocation getTextureLocation(SquidRenderState p_365962_) {

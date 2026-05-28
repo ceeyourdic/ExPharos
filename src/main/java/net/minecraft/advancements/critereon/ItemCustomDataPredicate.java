@@ -12,7 +12,7 @@ public record ItemCustomDataPredicate(NbtPredicate value) implements ItemSubPred
         return this.value.matches(p_333399_);
     }
 
-    public static ItemCustomDataPredicate customData(NbtPredicate p_329748_) {
-        return new ItemCustomDataPredicate(p_329748_);
+    public static ItemCustomDataPredicate customData(NbtPredicate pValue) {
+        return new ItemCustomDataPredicate(pValue);
     }
 }

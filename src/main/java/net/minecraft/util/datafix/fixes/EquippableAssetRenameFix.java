@@ -10,8 +10,8 @@ import com.mojang.datafixers.types.Type;
 import com.mojang.serialization.Dynamic;
 
 public class EquippableAssetRenameFix extends DataFix {
-    public EquippableAssetRenameFix(Schema p_377108_) {
-        super(p_377108_, true);
+    public EquippableAssetRenameFix(Schema pOutputSchema) {
+        super(pOutputSchema, true);
     }
 
     @Override

@@ -31,10 +31,10 @@ public class ParticleLeavesBlock extends LeavesBlock {
         return CODEC;
     }
 
-    public ParticleLeavesBlock(int p_377019_, ParticleOptions p_378342_, BlockBehaviour.Properties p_377172_) {
-        super(p_377172_);
-        this.chance = p_377019_;
-        this.particle = p_378342_;
+    public ParticleLeavesBlock(int pChance, ParticleOptions pParticle, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.chance = pChance;
+        this.particle = pParticle;
     }
 
     @Override

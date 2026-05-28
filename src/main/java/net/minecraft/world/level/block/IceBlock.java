@@ -32,17 +32,17 @@ public class IceBlock extends HalfTransparentBlock {
     }
 
     @Override
-    public void playerDestroy(Level p_54157_, Player p_54158_, BlockPos p_54159_, BlockState p_54160_, @Nullable BlockEntity p_54161_, ItemStack p_54162_) {
-        super.playerDestroy(p_54157_, p_54158_, p_54159_, p_54160_, p_54161_, p_54162_);
-        if (!EnchantmentHelper.hasTag(p_54162_, EnchantmentTags.PREVENTS_ICE_MELTING)) {
-            if (p_54157_.dimensionType().ultraWarm()) {
-                p_54157_.removeBlock(p_54159_, false);
+    public void playerDestroy(Level pLevel, Player pPlayer, BlockPos pPos, BlockState pState, @Nullable BlockEntity pTe, ItemStack pStack) {
+        super.playerDestroy(pLevel, pPlayer, pPos, pState, pTe, pStack);
+        if (!EnchantmentHelper.hasTag(pStack, EnchantmentTags.PREVENTS_ICE_MELTING)) {
+            if (pLevel.dimensionType().ultraWarm()) {
+                pLevel.removeBlock(pPos, false);
                 return;
             }
 
-            BlockState blockstate = p_54157_.getBlockState(p_54159_.below());
+            BlockState blockstate = pLevel.getBlockState(pPos.below());
             if (blockstate.blocksMotion() || blockstate.liquid()) {
-                p_54157_.setBlockAndUpdate(p_54159_, meltsInto());
+                pLevel.setBlockAndUpdate(pPos, meltsInto());
             }
         }
     }
@@ -54,12 +54,12 @@ public class IceBlock extends HalfTransparentBlock {
         }
     }
 
-    protected void melt(BlockState p_54169_, Level p_54170_, BlockPos p_54171_) {
-        if (p_54170_.dimensionType().ultraWarm()) {
-            p_54170_.removeBlock(p_54171_, false);
+    protected void melt(BlockState pState, Level pLevel, BlockPos pPos) {
+        if (pLevel.dimensionType().ultraWarm()) {
+            pLevel.removeBlock(pPos, false);
         } else {
-            p_54170_.setBlockAndUpdate(p_54171_, meltsInto());
-            p_54170_.neighborChanged(p_54171_, meltsInto().getBlock(), null);
+            pLevel.setBlockAndUpdate(pPos, meltsInto());
+            pLevel.neighborChanged(pPos, meltsInto().getBlock(), null);
         }
     }
 }

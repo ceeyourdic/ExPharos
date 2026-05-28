@@ -38,8 +38,8 @@ public record Variant(ResourceLocation modelLocation, Transformation rotation, b
         @VisibleForTesting
         static final int DEFAULT_Y_ROTATION = 0;
 
-        public Variant deserialize(JsonElement p_111893_, Type p_111894_, JsonDeserializationContext p_111895_) throws JsonParseException {
-            JsonObject jsonobject = p_111893_.getAsJsonObject();
+        public Variant deserialize(JsonElement pJson, Type pType, JsonDeserializationContext pContext) throws JsonParseException {
+            JsonObject jsonobject = pJson.getAsJsonObject();
             ResourceLocation resourcelocation = this.getModel(jsonobject);
             BlockModelRotation blockmodelrotation = this.getBlockRotation(jsonobject);
             boolean flag = this.getUvLock(jsonobject);
@@ -47,13 +47,13 @@ public record Variant(ResourceLocation modelLocation, Transformation rotation, b
             return new Variant(resourcelocation, blockmodelrotation.getRotation(), flag, i);
         }
 
-        private boolean getUvLock(JsonObject p_111903_) {
-            return GsonHelper.getAsBoolean(p_111903_, "uvlock", false);
+        private boolean getUvLock(JsonObject pJson) {
+            return GsonHelper.getAsBoolean(pJson, "uvlock", false);
         }
 
-        protected BlockModelRotation getBlockRotation(JsonObject p_111897_) {
-            int i = GsonHelper.getAsInt(p_111897_, "x", 0);
-            int j = GsonHelper.getAsInt(p_111897_, "y", 0);
+        protected BlockModelRotation getBlockRotation(JsonObject pJson) {
+            int i = GsonHelper.getAsInt(pJson, "x", 0);
+            int j = GsonHelper.getAsInt(pJson, "y", 0);
             BlockModelRotation blockmodelrotation = BlockModelRotation.by(i, j);
             if (blockmodelrotation == null) {
                 throw new JsonParseException("Invalid BlockModelRotation x: " + i + ", y: " + j);
@@ -62,12 +62,12 @@ public record Variant(ResourceLocation modelLocation, Transformation rotation, b
             }
         }
 
-        protected ResourceLocation getModel(JsonObject p_111899_) {
-            return ResourceLocation.parse(GsonHelper.getAsString(p_111899_, "model"));
+        protected ResourceLocation getModel(JsonObject pJson) {
+            return ResourceLocation.parse(GsonHelper.getAsString(pJson, "model"));
         }
 
-        protected int getWeight(JsonObject p_111901_) {
-            int i = GsonHelper.getAsInt(p_111901_, "weight", 1);
+        protected int getWeight(JsonObject pJson) {
+            int i = GsonHelper.getAsInt(pJson, "weight", 1);
             if (i < 1) {
                 throw new JsonParseException("Invalid weight " + i + " found, expected integer >= 1");
             } else {

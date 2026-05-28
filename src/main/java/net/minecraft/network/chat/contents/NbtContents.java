@@ -43,22 +43,22 @@ public class NbtContents implements ComponentContents {
     @Nullable
     protected final NbtPathArgument.NbtPath compiledNbtPath;
 
-    public NbtContents(String p_237395_, boolean p_237396_, Optional<Component> p_237397_, DataSource p_237398_) {
-        this(p_237395_, compileNbtPath(p_237395_), p_237396_, p_237397_, p_237398_);
+    public NbtContents(String pNbtPathPattern, boolean pInterpreting, Optional<Component> pSeparator, DataSource pDataSource) {
+        this(pNbtPathPattern, compileNbtPath(pNbtPathPattern), pInterpreting, pSeparator, pDataSource);
     }
 
-    private NbtContents(String p_237389_, @Nullable NbtPathArgument.NbtPath p_237390_, boolean p_237391_, Optional<Component> p_237392_, DataSource p_237393_) {
-        this.nbtPathPattern = p_237389_;
-        this.compiledNbtPath = p_237390_;
-        this.interpreting = p_237391_;
-        this.separator = p_237392_;
-        this.dataSource = p_237393_;
+    private NbtContents(String pNbtPathPattern, @Nullable NbtPathArgument.NbtPath pCompiledNbtPath, boolean pInterpreting, Optional<Component> pSeparator, DataSource pDataSource) {
+        this.nbtPathPattern = pNbtPathPattern;
+        this.compiledNbtPath = pCompiledNbtPath;
+        this.interpreting = pInterpreting;
+        this.separator = pSeparator;
+        this.dataSource = pDataSource;
     }
 
     @Nullable
-    private static NbtPathArgument.NbtPath compileNbtPath(String p_237410_) {
+    private static NbtPathArgument.NbtPath compileNbtPath(String pNbtPathPattern) {
         try {
-            return new NbtPathArgument().parse(new StringReader(p_237410_));
+            return new NbtPathArgument().parse(new StringReader(pNbtPathPattern));
         } catch (CommandSyntaxException commandsyntaxexception) {
             return null;
         }
@@ -81,11 +81,11 @@ public class NbtContents implements ComponentContents {
     }
 
     @Override
-    public boolean equals(Object p_237430_) {
-        if (this == p_237430_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            if (p_237430_ instanceof NbtContents nbtcontents
+            if (pOther instanceof NbtContents nbtcontents
                 && this.dataSource.equals(nbtcontents.dataSource)
                 && this.separator.equals(nbtcontents.separator)
                 && this.interpreting == nbtcontents.interpreting

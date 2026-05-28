@@ -18,12 +18,12 @@ public class FoliagePlacerType<P extends FoliagePlacer> {
     public static final FoliagePlacerType<CherryFoliagePlacer> CHERRY_FOLIAGE_PLACER = register("cherry_foliage_placer", CherryFoliagePlacer.CODEC);
     private final MapCodec<P> codec;
 
-    private static <P extends FoliagePlacer> FoliagePlacerType<P> register(String p_68606_, MapCodec<P> p_332653_) {
-        return Registry.register(BuiltInRegistries.FOLIAGE_PLACER_TYPE, p_68606_, new FoliagePlacerType<>(p_332653_));
+    private static <P extends FoliagePlacer> FoliagePlacerType<P> register(String pName, MapCodec<P> pCodec) {
+        return Registry.register(BuiltInRegistries.FOLIAGE_PLACER_TYPE, pName, new FoliagePlacerType<>(pCodec));
     }
 
-    private FoliagePlacerType(MapCodec<P> p_328706_) {
-        this.codec = p_328706_;
+    private FoliagePlacerType(MapCodec<P> pCodec) {
+        this.codec = pCodec;
     }
 
     public MapCodec<P> codec() {

@@ -30,6 +30,19 @@ configurations {
     compile.extendsFrom shade
 }
 
+sourceSets {
+    main {
+        java {
+            exclude 'cn/lazymoon/mixin/**'
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.annotationProcessorPath = configurations.annotationProcessor
+}
+
 group = 'me.yourname'
 version = '1.0.0'
 
@@ -55,6 +68,8 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")
+    implementation("org.lwjgl:lwjgl-nanovg:3.3.3")
+    runtimeOnly("org.lwjgl:lwjgl-nanovg:3.3.3:natives-windows")
 }
 
 project(':mcp') {

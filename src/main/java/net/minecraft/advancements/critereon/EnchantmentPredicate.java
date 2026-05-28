@@ -21,25 +21,25 @@ public record EnchantmentPredicate(Optional<HolderSet<Enchantment>> enchantments
                 .apply(p_340753_, EnchantmentPredicate::new)
     );
 
-    public EnchantmentPredicate(Holder<Enchantment> p_342794_, MinMaxBounds.Ints p_343999_) {
-        this(Optional.of(HolderSet.direct(p_342794_)), p_343999_);
+    public EnchantmentPredicate(Holder<Enchantment> pEnchantment, MinMaxBounds.Ints pLevel) {
+        this(Optional.of(HolderSet.direct(pEnchantment)), pLevel);
     }
 
-    public EnchantmentPredicate(HolderSet<Enchantment> p_343165_, MinMaxBounds.Ints p_30472_) {
-        this(Optional.of(p_343165_), p_30472_);
+    public EnchantmentPredicate(HolderSet<Enchantment> pEnchantments, MinMaxBounds.Ints pLevel) {
+        this(Optional.of(pEnchantments), pLevel);
     }
 
-    public boolean containedIn(ItemEnchantments p_334667_) {
+    public boolean containedIn(ItemEnchantments pEnchantments) {
         if (this.enchantments.isPresent()) {
             for (Holder<Enchantment> holder : this.enchantments.get()) {
-                if (this.matchesEnchantment(p_334667_, holder)) {
+                if (this.matchesEnchantment(pEnchantments, holder)) {
                     return true;
                 }
             }
 
             return false;
         } else if (this.level != MinMaxBounds.Ints.ANY) {
-            for (Entry<Holder<Enchantment>> entry : p_334667_.entrySet()) {
+            for (Entry<Holder<Enchantment>> entry : pEnchantments.entrySet()) {
                 if (this.level.matches(entry.getIntValue())) {
                     return true;
                 }
@@ -47,12 +47,12 @@ public record EnchantmentPredicate(Optional<HolderSet<Enchantment>> enchantments
 
             return false;
         } else {
-            return !p_334667_.isEmpty();
+            return !pEnchantments.isEmpty();
         }
     }
 
-    private boolean matchesEnchantment(ItemEnchantments p_342239_, Holder<Enchantment> p_342249_) {
-        int i = p_342239_.getLevel(p_342249_);
+    private boolean matchesEnchantment(ItemEnchantments pItemEnchantments, Holder<Enchantment> pEnchantment) {
+        int i = pItemEnchantments.getLevel(pEnchantment);
         if (i == 0) {
             return false;
         } else {

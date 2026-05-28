@@ -127,25 +127,25 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_34751_) {
-        super.addAdditionalSaveData(p_34751_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
         if (this.isBaby()) {
-            p_34751_.putBoolean("IsBaby", true);
+            pCompound.putBoolean("IsBaby", true);
         }
 
         if (this.cannotHunt) {
-            p_34751_.putBoolean("CannotHunt", true);
+            pCompound.putBoolean("CannotHunt", true);
         }
 
-        this.writeInventoryToTag(p_34751_, this.registryAccess());
+        this.writeInventoryToTag(pCompound, this.registryAccess());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_34725_) {
-        super.readAdditionalSaveData(p_34725_);
-        this.setBaby(p_34725_.getBoolean("IsBaby"));
-        this.setCannotHunt(p_34725_.getBoolean("CannotHunt"));
-        this.readInventoryFromTag(p_34725_, this.registryAccess());
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setBaby(pCompound.getBoolean("IsBaby"));
+        this.setCannotHunt(pCompound.getBoolean("CannotHunt"));
+        this.readInventoryFromTag(pCompound, this.registryAccess());
     }
 
     @VisibleForDebug
@@ -166,12 +166,12 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
         this.inventory.removeAllItems().forEach(p_369899_ -> this.spawnAtLocation(p_343074_, p_369899_));
     }
 
-    protected ItemStack addToInventory(ItemStack p_34779_) {
-        return this.inventory.addItem(p_34779_);
+    protected ItemStack addToInventory(ItemStack pStack) {
+        return this.inventory.addItem(pStack);
     }
 
-    protected boolean canAddToInventory(ItemStack p_34781_) {
-        return this.inventory.canAddItem(p_34781_);
+    protected boolean canAddToInventory(ItemStack pStack) {
+        return this.inventory.canAddItem(pStack);
     }
 
     @Override
@@ -183,9 +183,9 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_34727_) {
-        super.onSyncedDataUpdated(p_34727_);
-        if (DATA_BABY_ID.equals(p_34727_)) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        super.onSyncedDataUpdated(pKey);
+        if (DATA_BABY_ID.equals(pKey)) {
             this.refreshDimensions();
         }
     }
@@ -195,9 +195,9 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
     }
 
     public static boolean checkPiglinSpawnRules(
-        EntityType<Piglin> p_219198_, LevelAccessor p_219199_, EntitySpawnReason p_361741_, BlockPos p_219201_, RandomSource p_219202_
+        EntityType<Piglin> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return !p_219199_.getBlockState(p_219201_.below()).is(Blocks.NETHER_WART_BLOCK);
+        return !pLevel.getBlockState(pPos.below()).is(Blocks.NETHER_WART_BLOCK);
     }
 
     @Nullable
@@ -224,7 +224,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
     }
 
     @Override
-    public boolean removeWhenFarAway(double p_34775_) {
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
         return !this.isPersistenceRequired();
     }
 
@@ -238,9 +238,9 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
         }
     }
 
-    private void maybeWearArmor(EquipmentSlot p_219192_, ItemStack p_219193_, RandomSource p_219194_) {
-        if (p_219194_.nextFloat() < 0.1F) {
-            this.setItemSlot(p_219192_, p_219193_);
+    private void maybeWearArmor(EquipmentSlot pSlot, ItemStack pStack, RandomSource pRandom) {
+        if (pRandom.nextFloat() < 0.1F) {
+            this.setItemSlot(pSlot, pStack);
         }
     }
 
@@ -250,8 +250,8 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
     }
 
     @Override
-    protected Brain<?> makeBrain(Dynamic<?> p_34723_) {
-        return PiglinAi.makeBrain(this, this.brainProvider().makeBrain(p_34723_));
+    protected Brain<?> makeBrain(Dynamic<?> pDynamic) {
+        return PiglinAi.makeBrain(this, this.brainProvider().makeBrain(pDynamic));
     }
 
     @Override
@@ -260,14 +260,14 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_34745_, InteractionHand p_34746_) {
-        InteractionResult interactionresult = super.mobInteract(p_34745_, p_34746_);
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
         if (interactionresult.consumesAction()) {
             return interactionresult;
         } else if (this.level() instanceof ServerLevel serverlevel) {
-            return PiglinAi.mobInteract(serverlevel, this, p_34745_, p_34746_);
+            return PiglinAi.mobInteract(serverlevel, this, pPlayer, pHand);
         } else {
-            boolean flag = PiglinAi.canAdmire(this, p_34745_.getItemInHand(p_34746_)) && this.getArmPose() != PiglinArmPose.ADMIRING_ITEM;
+            boolean flag = PiglinAi.canAdmire(this, pPlayer.getItemInHand(pHand)) && this.getArmPose() != PiglinArmPose.ADMIRING_ITEM;
             return (InteractionResult)(flag ? InteractionResult.SUCCESS : InteractionResult.PASS);
         }
     }
@@ -278,12 +278,12 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
     }
 
     @Override
-    public void setBaby(boolean p_34729_) {
-        this.getEntityData().set(DATA_BABY_ID, p_34729_);
+    public void setBaby(boolean pChildZombie) {
+        this.getEntityData().set(DATA_BABY_ID, pChildZombie);
         if (!this.level().isClientSide) {
             AttributeInstance attributeinstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
             attributeinstance.removeModifier(SPEED_MODIFIER_BABY.id());
-            if (p_34729_) {
+            if (pChildZombie) {
                 attributeinstance.addTransientModifier(SPEED_MODIFIER_BABY);
             }
         }
@@ -294,8 +294,8 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
         return this.getEntityData().get(DATA_BABY_ID);
     }
 
-    private void setCannotHunt(boolean p_34792_) {
-        this.cannotHunt = p_34792_;
+    private void setCannotHunt(boolean pCannotHunt) {
+        this.cannotHunt = pCannotHunt;
     }
 
     @Override
@@ -339,8 +339,8 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
     }
 
     @Override
-    public void setChargingCrossbow(boolean p_34753_) {
-        this.entityData.set(DATA_IS_CHARGING_CROSSBOW, p_34753_);
+    public void setChargingCrossbow(boolean pIsCharging) {
+        this.entityData.set(DATA_IS_CHARGING_CROSSBOW, pIsCharging);
     }
 
     @Override
@@ -367,8 +367,8 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
         return this.entityData.get(DATA_IS_DANCING);
     }
 
-    public void setDancing(boolean p_34790_) {
-        this.entityData.set(DATA_IS_DANCING, p_34790_);
+    public void setDancing(boolean pDancing) {
+        this.entityData.set(DATA_IS_DANCING, pDancing);
     }
 
     @Override
@@ -382,7 +382,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
     }
 
     @Override
-    public void performRangedAttack(LivingEntity p_34704_, float p_34705_) {
+    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
         this.performCrossbowAttack(this, 1.6F);
     }
 
@@ -391,16 +391,16 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
         return p_34715_ == Items.CROSSBOW;
     }
 
-    protected void holdInMainHand(ItemStack p_34784_) {
-        this.setItemSlotAndDropWhenKilled(EquipmentSlot.MAINHAND, p_34784_);
+    protected void holdInMainHand(ItemStack pStack) {
+        this.setItemSlotAndDropWhenKilled(EquipmentSlot.MAINHAND, pStack);
     }
 
-    protected void holdInOffHand(ItemStack p_34786_) {
-        if (p_34786_.is(PiglinAi.BARTERING_ITEM)) {
-            this.setItemSlot(EquipmentSlot.OFFHAND, p_34786_);
+    protected void holdInOffHand(ItemStack pStack) {
+        if (pStack.is(PiglinAi.BARTERING_ITEM)) {
+            this.setItemSlot(EquipmentSlot.OFFHAND, pStack);
             this.setGuaranteedDrop(EquipmentSlot.OFFHAND);
         } else {
-            this.setItemSlotAndDropWhenKilled(EquipmentSlot.OFFHAND, p_34786_);
+            this.setItemSlotAndDropWhenKilled(EquipmentSlot.OFFHAND, pStack);
         }
     }
 
@@ -409,10 +409,10 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
         return p_369934_.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && this.canPickUpLoot() && PiglinAi.wantsToPickup(this, p_34777_);
     }
 
-    protected boolean canReplaceCurrentItem(ItemStack p_34788_) {
-        EquipmentSlot equipmentslot = this.getEquipmentSlotForItem(p_34788_);
+    protected boolean canReplaceCurrentItem(ItemStack pCandidate) {
+        EquipmentSlot equipmentslot = this.getEquipmentSlotForItem(pCandidate);
         ItemStack itemstack = this.getItemBySlot(equipmentslot);
-        return this.canReplaceCurrentItem(p_34788_, itemstack, equipmentslot);
+        return this.canReplaceCurrentItem(pCandidate, itemstack, equipmentslot);
     }
 
     @Override
@@ -438,17 +438,17 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
     }
 
     @Override
-    public boolean startRiding(Entity p_34701_, boolean p_34702_) {
-        if (this.isBaby() && p_34701_.getType() == EntityType.HOGLIN) {
-            p_34701_ = this.getTopPassenger(p_34701_, 3);
+    public boolean startRiding(Entity pEntity, boolean pForce) {
+        if (this.isBaby() && pEntity.getType() == EntityType.HOGLIN) {
+            pEntity = this.getTopPassenger(pEntity, 3);
         }
 
-        return super.startRiding(p_34701_, p_34702_);
+        return super.startRiding(pEntity, pForce);
     }
 
-    private Entity getTopPassenger(Entity p_34731_, int p_34732_) {
-        List<Entity> list = p_34731_.getPassengers();
-        return p_34732_ != 1 && !list.isEmpty() ? this.getTopPassenger(list.get(0), p_34732_ - 1) : p_34731_;
+    private Entity getTopPassenger(Entity pVehicle, int pMaxPosition) {
+        List<Entity> list = pVehicle.getPassengers();
+        return pMaxPosition != 1 && !list.isEmpty() ? this.getTopPassenger(list.get(0), pMaxPosition - 1) : pVehicle;
     }
 
     @Override
@@ -457,7 +457,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_34767_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.PIGLIN_HURT;
     }
 
@@ -467,7 +467,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
     }
 
     @Override
-    protected void playStepSound(BlockPos p_34748_, BlockState p_34749_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(SoundEvents.PIGLIN_STEP, 0.15F, 1.0F);
     }
 

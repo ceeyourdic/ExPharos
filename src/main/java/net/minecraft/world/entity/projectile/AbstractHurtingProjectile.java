@@ -25,25 +25,25 @@ public abstract class AbstractHurtingProjectile extends Projectile {
     }
 
     protected AbstractHurtingProjectile(
-        EntityType<? extends AbstractHurtingProjectile> p_310629_, double p_311590_, double p_312782_, double p_309484_, Level p_311660_
+        EntityType<? extends AbstractHurtingProjectile> pEntityType, double pX, double pY, double pZ, Level pLevel
     ) {
-        this(p_310629_, p_311660_);
-        this.setPos(p_311590_, p_312782_, p_309484_);
+        this(pEntityType, pLevel);
+        this.setPos(pX, pY, pZ);
     }
 
     public AbstractHurtingProjectile(
-        EntityType<? extends AbstractHurtingProjectile> p_36817_, double p_36818_, double p_36819_, double p_36820_, Vec3 p_343716_, Level p_36824_
+        EntityType<? extends AbstractHurtingProjectile> pEntityType, double pX, double pY, double pZ, Vec3 pMovement, Level pLevel
     ) {
-        this(p_36817_, p_36824_);
-        this.moveTo(p_36818_, p_36819_, p_36820_, this.getYRot(), this.getXRot());
+        this(pEntityType, pLevel);
+        this.moveTo(pX, pY, pZ, this.getYRot(), this.getXRot());
         this.reapplyPosition();
-        this.assignDirectionalMovement(p_343716_, this.accelerationPower);
+        this.assignDirectionalMovement(pMovement, this.accelerationPower);
     }
 
-    public AbstractHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> p_36826_, LivingEntity p_36827_, Vec3 p_343596_, Level p_36831_) {
-        this(p_36826_, p_36827_.getX(), p_36827_.getY(), p_36827_.getZ(), p_343596_, p_36831_);
-        this.setOwner(p_36827_);
-        this.setRot(p_36827_.getYRot(), p_36827_.getXRot());
+    public AbstractHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> pEntityType, LivingEntity pOwner, Vec3 pMovement, Level pLevel) {
+        this(pEntityType, pOwner.getX(), pOwner.getY(), pOwner.getZ(), pMovement, pLevel);
+        this.setOwner(pOwner);
+        this.setRot(pOwner.getYRot(), pOwner.getXRot());
     }
 
     @Override
@@ -51,14 +51,14 @@ public abstract class AbstractHurtingProjectile extends Projectile {
     }
 
     @Override
-    public boolean shouldRenderAtSqrDistance(double p_36837_) {
+    public boolean shouldRenderAtSqrDistance(double pDistance) {
         double d0 = this.getBoundingBox().getSize() * 4.0;
         if (Double.isNaN(d0)) {
             d0 = 4.0;
         }
 
         d0 *= 64.0;
-        return p_36837_ < d0 * d0;
+        return pDistance < d0 * d0;
     }
 
     protected ClipContext.Block getClipType() {
@@ -159,16 +159,16 @@ public abstract class AbstractHurtingProjectile extends Projectile {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_36848_) {
-        super.addAdditionalSaveData(p_36848_);
-        p_36848_.putDouble("acceleration_power", this.accelerationPower);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putDouble("acceleration_power", this.accelerationPower);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_36844_) {
-        super.readAdditionalSaveData(p_36844_);
-        if (p_36844_.contains("acceleration_power", 6)) {
-            this.accelerationPower = p_36844_.getDouble("acceleration_power");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("acceleration_power", 6)) {
+            this.accelerationPower = pCompound.getDouble("acceleration_power");
         }
     }
 
@@ -177,8 +177,8 @@ public abstract class AbstractHurtingProjectile extends Projectile {
         return 1.0F;
     }
 
-    private void assignDirectionalMovement(Vec3 p_342200_, double p_343156_) {
-        this.setDeltaMovement(p_342200_.normalize().scale(p_343156_));
+    private void assignDirectionalMovement(Vec3 pMovement, double pAccelerationPower) {
+        this.setDeltaMovement(pMovement.normalize().scale(pAccelerationPower));
         this.hasImpulse = true;
     }
 

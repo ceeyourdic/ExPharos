@@ -24,33 +24,33 @@ public class CompassItem extends Item {
     }
 
     @Override
-    public boolean isFoil(ItemStack p_40739_) {
-        return p_40739_.has(DataComponents.LODESTONE_TRACKER) || super.isFoil(p_40739_);
+    public boolean isFoil(ItemStack pStack) {
+        return pStack.has(DataComponents.LODESTONE_TRACKER) || super.isFoil(pStack);
     }
 
     @Override
-    public void inventoryTick(ItemStack p_40720_, Level p_40721_, Entity p_40722_, int p_40723_, boolean p_40724_) {
-        if (p_40721_ instanceof ServerLevel serverlevel) {
-            LodestoneTracker lodestonetracker = p_40720_.get(DataComponents.LODESTONE_TRACKER);
+    public void inventoryTick(ItemStack pStack, Level pLevel, Entity pEntity, int pItemSlot, boolean pIsSelected) {
+        if (pLevel instanceof ServerLevel serverlevel) {
+            LodestoneTracker lodestonetracker = pStack.get(DataComponents.LODESTONE_TRACKER);
             if (lodestonetracker != null) {
                 LodestoneTracker lodestonetracker1 = lodestonetracker.tick(serverlevel);
                 if (lodestonetracker1 != lodestonetracker) {
-                    p_40720_.set(DataComponents.LODESTONE_TRACKER, lodestonetracker1);
+                    pStack.set(DataComponents.LODESTONE_TRACKER, lodestonetracker1);
                 }
             }
         }
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext p_40726_) {
-        BlockPos blockpos = p_40726_.getClickedPos();
-        Level level = p_40726_.getLevel();
+    public InteractionResult useOn(UseOnContext pContext) {
+        BlockPos blockpos = pContext.getClickedPos();
+        Level level = pContext.getLevel();
         if (!level.getBlockState(blockpos).is(Blocks.LODESTONE)) {
-            return super.useOn(p_40726_);
+            return super.useOn(pContext);
         } else {
             level.playSound(null, blockpos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundSource.PLAYERS, 1.0F, 1.0F);
-            Player player = p_40726_.getPlayer();
-            ItemStack itemstack = p_40726_.getItemInHand();
+            Player player = pContext.getPlayer();
+            ItemStack itemstack = pContext.getItemInHand();
             boolean flag = !player.hasInfiniteMaterials() && itemstack.getCount() == 1;
             LodestoneTracker lodestonetracker = new LodestoneTracker(Optional.of(GlobalPos.of(level.dimension(), blockpos)), true);
             if (flag) {

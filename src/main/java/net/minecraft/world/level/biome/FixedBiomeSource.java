@@ -19,8 +19,8 @@ public class FixedBiomeSource extends BiomeSource implements BiomeManager.NoiseB
         .stable();
     private final Holder<Biome> biome;
 
-    public FixedBiomeSource(Holder<Biome> p_204257_) {
-        this.biome = p_204257_;
+    public FixedBiomeSource(Holder<Biome> pBiome) {
+        this.biome = pBiome;
     }
 
     @Override

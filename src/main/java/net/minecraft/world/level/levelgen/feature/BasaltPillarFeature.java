@@ -76,15 +76,15 @@ public class BasaltPillarFeature extends Feature<NoneFeatureConfiguration> {
         }
     }
 
-    private void placeBaseHangOff(LevelAccessor p_224937_, RandomSource p_224938_, BlockPos p_224939_) {
-        if (p_224938_.nextBoolean()) {
-            p_224937_.setBlock(p_224939_, Blocks.BASALT.defaultBlockState(), 2);
+    private void placeBaseHangOff(LevelAccessor pLevel, RandomSource pRandom, BlockPos pPos) {
+        if (pRandom.nextBoolean()) {
+            pLevel.setBlock(pPos, Blocks.BASALT.defaultBlockState(), 2);
         }
     }
 
-    private boolean placeHangOff(LevelAccessor p_224941_, RandomSource p_224942_, BlockPos p_224943_) {
-        if (p_224942_.nextInt(10) != 0) {
-            p_224941_.setBlock(p_224943_, Blocks.BASALT.defaultBlockState(), 2);
+    private boolean placeHangOff(LevelAccessor pLevel, RandomSource pRandom, BlockPos pPos) {
+        if (pRandom.nextInt(10) != 0) {
+            pLevel.setBlock(pPos, Blocks.BASALT.defaultBlockState(), 2);
             return true;
         } else {
             return false;

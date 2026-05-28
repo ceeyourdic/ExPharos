@@ -8,13 +8,13 @@ public final class ChunkDependencies {
     private final ImmutableList<ChunkStatus> dependencyByRadius;
     private final int[] radiusByDependency;
 
-    public ChunkDependencies(ImmutableList<ChunkStatus> p_344765_) {
-        this.dependencyByRadius = p_344765_;
-        int i = p_344765_.isEmpty() ? 0 : p_344765_.getFirst().getIndex() + 1;
+    public ChunkDependencies(ImmutableList<ChunkStatus> pDependencyByRadius) {
+        this.dependencyByRadius = pDependencyByRadius;
+        int i = pDependencyByRadius.isEmpty() ? 0 : pDependencyByRadius.getFirst().getIndex() + 1;
         this.radiusByDependency = new int[i];
 
-        for (int j = 0; j < p_344765_.size(); j++) {
-            ChunkStatus chunkstatus = p_344765_.get(j);
+        for (int j = 0; j < pDependencyByRadius.size(); j++) {
+            ChunkStatus chunkstatus = pDependencyByRadius.get(j);
             int k = chunkstatus.getIndex();
 
             for (int l = 0; l <= k; l++) {
@@ -32,11 +32,11 @@ public final class ChunkDependencies {
         return this.dependencyByRadius.size();
     }
 
-    public int getRadiusOf(ChunkStatus p_343147_) {
-        int i = p_343147_.getIndex();
+    public int getRadiusOf(ChunkStatus pStatus) {
+        int i = pStatus.getIndex();
         if (i >= this.radiusByDependency.length) {
             throw new IllegalArgumentException(
-                String.format(Locale.ROOT, "Requesting a ChunkStatus(%s) outside of dependency range(%s)", p_343147_, this.dependencyByRadius)
+                String.format(Locale.ROOT, "Requesting a ChunkStatus(%s) outside of dependency range(%s)", pStatus, this.dependencyByRadius)
             );
         } else {
             return this.radiusByDependency[i];
@@ -47,8 +47,8 @@ public final class ChunkDependencies {
         return Math.max(0, this.dependencyByRadius.size() - 1);
     }
 
-    public ChunkStatus get(int p_343463_) {
-        return this.dependencyByRadius.get(p_343463_);
+    public ChunkStatus get(int pRadius) {
+        return this.dependencyByRadius.get(pRadius);
     }
 
     @Override

@@ -142,8 +142,8 @@ public class Sniffer extends Animal {
         return this.entityData.get(DATA_STATE);
     }
 
-    private Sniffer setState(Sniffer.State p_273359_) {
-        this.entityData.set(DATA_STATE, p_273359_);
+    private Sniffer setState(Sniffer.State pState) {
+        this.entityData.set(DATA_STATE, pState);
         return this;
     }
 
@@ -185,8 +185,8 @@ public class Sniffer extends Animal {
         this.scentingAnimationState.stop();
     }
 
-    public Sniffer transitionTo(Sniffer.State p_273096_) {
-        switch (p_273096_) {
+    public Sniffer transitionTo(Sniffer.State pState) {
+        switch (pState) {
             case IDLING:
                 this.setState(Sniffer.State.IDLING);
                 break;
@@ -226,8 +226,8 @@ public class Sniffer extends Animal {
         return this;
     }
 
-    public Sniffer onDiggingComplete(boolean p_272677_) {
-        if (p_272677_) {
+    public Sniffer onDiggingComplete(boolean pStoreExploredPosition) {
+        if (pStoreExploredPosition) {
             this.storeExploredPosition(this.getOnPos());
         }
 
@@ -255,10 +255,10 @@ public class Sniffer extends Animal {
             && this.canDig(this.getHeadBlock().below());
     }
 
-    private boolean canDig(BlockPos p_272757_) {
-        return this.level().getBlockState(p_272757_).is(BlockTags.SNIFFER_DIGGABLE_BLOCK)
-            && this.getExploredPositions().noneMatch(p_375125_ -> GlobalPos.of(this.level().dimension(), p_272757_).equals(p_375125_))
-            && Optional.ofNullable(this.getNavigation().createPath(p_272757_, 1)).map(Path::canReach).orElse(false);
+    private boolean canDig(BlockPos pPos) {
+        return this.level().getBlockState(pPos).is(BlockTags.SNIFFER_DIGGABLE_BLOCK)
+            && this.getExploredPositions().noneMatch(p_375125_ -> GlobalPos.of(this.level().dimension(), pPos).equals(p_375125_))
+            && Optional.ofNullable(this.getNavigation().createPath(pPos, 1)).map(Path::canReach).orElse(false);
     }
 
     private void dropSeed() {
@@ -280,8 +280,8 @@ public class Sniffer extends Animal {
         }
     }
 
-    private Sniffer emitDiggingParticles(AnimationState p_273528_) {
-        boolean flag = p_273528_.getTimeInMillis((float)this.tickCount) > 1700L && p_273528_.getTimeInMillis((float)this.tickCount) < 6000L;
+    private Sniffer emitDiggingParticles(AnimationState pAnimationState) {
+        boolean flag = pAnimationState.getTimeInMillis((float)this.tickCount) > 1700L && pAnimationState.getTimeInMillis((float)this.tickCount) < 6000L;
         if (flag) {
             BlockPos blockpos = this.getHeadBlock();
             BlockState blockstate = this.level().getBlockState(blockpos.below());
@@ -306,9 +306,9 @@ public class Sniffer extends Animal {
         return this;
     }
 
-    private Sniffer storeExploredPosition(BlockPos p_273015_) {
+    private Sniffer storeExploredPosition(BlockPos pPos) {
         List<GlobalPos> list = this.getExploredPositions().limit(20L).collect(Collectors.toList());
-        list.add(0, GlobalPos.of(this.level().dimension(), p_273015_));
+        list.add(0, GlobalPos.of(this.level().dimension(), pPos));
         this.getBrain().setMemory(MemoryModuleType.SNIFFER_EXPLORED_POSITIONS, list);
         return this;
     }
@@ -476,8 +476,8 @@ public class Sniffer extends Animal {
         public static final StreamCodec<ByteBuf, Sniffer.State> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, Sniffer.State::id);
         private final int id;
 
-        private State(final int p_328116_) {
-            this.id = p_328116_;
+        private State(final int pId) {
+            this.id = pId;
         }
 
         public int id() {

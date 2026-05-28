@@ -16,10 +16,10 @@ public class SwitchSlotTask extends LongRunningTask {
     private final int slot;
     private final Runnable callback;
 
-    public SwitchSlotTask(long p_90459_, int p_90460_, Runnable p_90461_) {
-        this.realmId = p_90459_;
-        this.slot = p_90460_;
-        this.callback = p_90461_;
+    public SwitchSlotTask(long pWorldId, int pSlot, Runnable pCallback) {
+        this.realmId = pWorldId;
+        this.slot = pSlot;
+        this.callback = pCallback;
     }
 
     @Override

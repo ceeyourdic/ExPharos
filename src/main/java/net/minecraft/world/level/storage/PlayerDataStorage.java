@@ -24,62 +24,62 @@ public class PlayerDataStorage {
     protected final DataFixer fixerUpper;
     private static final DateTimeFormatter FORMATTER = FileNameDateFormatter.create();
 
-    public PlayerDataStorage(LevelStorageSource.LevelStorageAccess p_78430_, DataFixer p_78431_) {
-        this.fixerUpper = p_78431_;
-        this.playerDir = p_78430_.getLevelPath(LevelResource.PLAYER_DATA_DIR).toFile();
+    public PlayerDataStorage(LevelStorageSource.LevelStorageAccess pLevelStorageAccess, DataFixer pFixerUpper) {
+        this.fixerUpper = pFixerUpper;
+        this.playerDir = pLevelStorageAccess.getLevelPath(LevelResource.PLAYER_DATA_DIR).toFile();
         this.playerDir.mkdirs();
     }
 
-    public void save(Player p_78434_) {
+    public void save(Player pPlayer) {
         try {
-            CompoundTag compoundtag = p_78434_.saveWithoutId(new CompoundTag());
+            CompoundTag compoundtag = pPlayer.saveWithoutId(new CompoundTag());
             Path path = this.playerDir.toPath();
-            Path path1 = Files.createTempFile(path, p_78434_.getStringUUID() + "-", ".dat");
+            Path path1 = Files.createTempFile(path, pPlayer.getStringUUID() + "-", ".dat");
             NbtIo.writeCompressed(compoundtag, path1);
-            Path path2 = path.resolve(p_78434_.getStringUUID() + ".dat");
-            Path path3 = path.resolve(p_78434_.getStringUUID() + ".dat_old");
+            Path path2 = path.resolve(pPlayer.getStringUUID() + ".dat");
+            Path path3 = path.resolve(pPlayer.getStringUUID() + ".dat_old");
             Util.safeReplaceFile(path2, path1, path3);
         } catch (Exception exception) {
-            LOGGER.warn("Failed to save player data for {}", p_78434_.getName().getString());
+            LOGGER.warn("Failed to save player data for {}", pPlayer.getName().getString());
         }
     }
 
-    private void backup(Player p_331737_, String p_336359_) {
+    private void backup(Player pPlayer, String pSuffix) {
         Path path = this.playerDir.toPath();
-        Path path1 = path.resolve(p_331737_.getStringUUID() + p_336359_);
-        Path path2 = path.resolve(p_331737_.getStringUUID() + "_corrupted_" + LocalDateTime.now().format(FORMATTER) + p_336359_);
+        Path path1 = path.resolve(pPlayer.getStringUUID() + pSuffix);
+        Path path2 = path.resolve(pPlayer.getStringUUID() + "_corrupted_" + LocalDateTime.now().format(FORMATTER) + pSuffix);
         if (Files.isRegularFile(path1)) {
             try {
                 Files.copy(path1, path2, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
             } catch (Exception exception) {
-                LOGGER.warn("Failed to copy the player.dat file for {}", p_331737_.getName().getString(), exception);
+                LOGGER.warn("Failed to copy the player.dat file for {}", pPlayer.getName().getString(), exception);
             }
         }
     }
 
-    private Optional<CompoundTag> load(Player p_329651_, String p_330353_) {
-        File file1 = new File(this.playerDir, p_329651_.getStringUUID() + p_330353_);
+    private Optional<CompoundTag> load(Player pPlayer, String pSuffix) {
+        File file1 = new File(this.playerDir, pPlayer.getStringUUID() + pSuffix);
         if (file1.exists() && file1.isFile()) {
             try {
                 return Optional.of(NbtIo.readCompressed(file1.toPath(), NbtAccounter.unlimitedHeap()));
             } catch (Exception exception) {
-                LOGGER.warn("Failed to load player data for {}", p_329651_.getName().getString());
+                LOGGER.warn("Failed to load player data for {}", pPlayer.getName().getString());
             }
         }
 
         return Optional.empty();
     }
 
-    public Optional<CompoundTag> load(Player p_78436_) {
-        Optional<CompoundTag> optional = this.load(p_78436_, ".dat");
+    public Optional<CompoundTag> load(Player pPlayer) {
+        Optional<CompoundTag> optional = this.load(pPlayer, ".dat");
         if (optional.isEmpty()) {
-            this.backup(p_78436_, ".dat");
+            this.backup(pPlayer, ".dat");
         }
 
-        return optional.or(() -> this.load(p_78436_, ".dat_old")).map(p_328937_ -> {
+        return optional.or(() -> this.load(pPlayer, ".dat_old")).map(p_328937_ -> {
             int i = NbtUtils.getDataVersion(p_328937_, -1);
             p_328937_ = DataFixTypes.PLAYER.updateToCurrentVersion(this.fixerUpper, p_328937_, i);
-            p_78436_.load(p_328937_);
+            pPlayer.load(p_328937_);
             return p_328937_;
         });
     }

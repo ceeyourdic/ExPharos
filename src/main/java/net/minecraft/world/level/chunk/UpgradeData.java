@@ -54,14 +54,14 @@ public class UpgradeData {
     static final Map<Block, UpgradeData.BlockFixer> MAP = new IdentityHashMap<>();
     static final Set<UpgradeData.BlockFixer> CHUNKY_FIXERS = Sets.newHashSet();
 
-    private UpgradeData(LevelHeightAccessor p_156506_) {
-        this.index = new int[p_156506_.getSectionsCount()][];
+    private UpgradeData(LevelHeightAccessor pLevel) {
+        this.index = new int[pLevel.getSectionsCount()][];
     }
 
-    public UpgradeData(CompoundTag p_156508_, LevelHeightAccessor p_156509_) {
-        this(p_156509_);
-        if (p_156508_.contains("Indices", 10)) {
-            CompoundTag compoundtag = p_156508_.getCompound("Indices");
+    public UpgradeData(CompoundTag pTag, LevelHeightAccessor pLevel) {
+        this(pLevel);
+        if (pTag.contains("Indices", 10)) {
+            CompoundTag compoundtag = pTag.getCompound("Indices");
 
             for (int i = 0; i < this.index.length; i++) {
                 String s = String.valueOf(i);
@@ -71,7 +71,7 @@ public class UpgradeData {
             }
         }
 
-        int j = p_156508_.getInt("Sides");
+        int j = pTag.getInt("Sides");
 
         for (Direction8 direction8 : Direction8.values()) {
             if ((j & 1 << direction8.ordinal()) != 0) {
@@ -80,47 +80,47 @@ public class UpgradeData {
         }
 
         loadTicks(
-            p_156508_,
+            pTag,
             "neighbor_block_ticks",
             p_258983_ -> BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(p_258983_)).or(() -> Optional.of(Blocks.AIR)),
             this.neighborBlockTicks
         );
         loadTicks(
-            p_156508_,
+            pTag,
             "neighbor_fluid_ticks",
             p_258986_ -> BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(p_258986_)).or(() -> Optional.of(Fluids.EMPTY)),
             this.neighborFluidTicks
         );
     }
 
-    private UpgradeData(UpgradeData p_360816_) {
-        this.sides.addAll(p_360816_.sides);
-        this.neighborBlockTicks.addAll(p_360816_.neighborBlockTicks);
-        this.neighborFluidTicks.addAll(p_360816_.neighborFluidTicks);
-        this.index = new int[p_360816_.index.length][];
+    private UpgradeData(UpgradeData pOther) {
+        this.sides.addAll(pOther.sides);
+        this.neighborBlockTicks.addAll(pOther.neighborBlockTicks);
+        this.neighborFluidTicks.addAll(pOther.neighborFluidTicks);
+        this.index = new int[pOther.index.length][];
 
-        for (int i = 0; i < p_360816_.index.length; i++) {
-            int[] aint = p_360816_.index[i];
+        for (int i = 0; i < pOther.index.length; i++) {
+            int[] aint = pOther.index[i];
             this.index[i] = aint != null ? IntArrays.copy(aint) : null;
         }
     }
 
-    private static <T> void loadTicks(CompoundTag p_208133_, String p_208134_, Function<String, Optional<T>> p_208135_, List<SavedTick<T>> p_208136_) {
-        if (p_208133_.contains(p_208134_, 9)) {
-            for (Tag tag : p_208133_.getList(p_208134_, 10)) {
-                SavedTick.loadTick((CompoundTag)tag, p_208135_).ifPresent(p_208136_::add);
+    private static <T> void loadTicks(CompoundTag pTag, String pIdentifier, Function<String, Optional<T>> pValueFunction, List<SavedTick<T>> pTicks) {
+        if (pTag.contains(pIdentifier, 9)) {
+            for (Tag tag : pTag.getList(pIdentifier, 10)) {
+                SavedTick.loadTick((CompoundTag)tag, pValueFunction).ifPresent(pTicks::add);
             }
         }
     }
 
-    public void upgrade(LevelChunk p_63342_) {
-        this.upgradeInside(p_63342_);
+    public void upgrade(LevelChunk pChunk) {
+        this.upgradeInside(pChunk);
 
         for (Direction8 direction8 : DIRECTIONS) {
-            upgradeSides(p_63342_, direction8);
+            upgradeSides(pChunk, direction8);
         }
 
-        Level level = p_63342_.getLevel();
+        Level level = pChunk.getLevel();
         this.neighborBlockTicks.forEach(p_208142_ -> {
             Block block = p_208142_.type() == Blocks.AIR ? level.getBlockState(p_208142_.pos()).getBlock() : p_208142_.type();
             level.scheduleTick(p_208142_.pos(), block, p_208142_.delay(), p_208142_.priority());
@@ -132,10 +132,10 @@ public class UpgradeData {
         CHUNKY_FIXERS.forEach(p_208122_ -> p_208122_.processChunk(level));
     }
 
-    private static void upgradeSides(LevelChunk p_63344_, Direction8 p_63345_) {
-        Level level = p_63344_.getLevel();
-        if (p_63344_.getUpgradeData().sides.remove(p_63345_)) {
-            Set<Direction> set = p_63345_.getDirections();
+    private static void upgradeSides(LevelChunk pChunk, Direction8 pSide) {
+        Level level = pChunk.getLevel();
+        if (pChunk.getUpgradeData().sides.remove(pSide)) {
+            Set<Direction> set = pSide.getDirections();
             int i = 0;
             int j = 15;
             boolean flag = set.contains(Direction.EAST);
@@ -143,7 +143,7 @@ public class UpgradeData {
             boolean flag2 = set.contains(Direction.SOUTH);
             boolean flag3 = set.contains(Direction.NORTH);
             boolean flag4 = set.size() == 1;
-            ChunkPos chunkpos = p_63344_.getPos();
+            ChunkPos chunkpos = pChunk.getPos();
             int k = chunkpos.getMinBlockX() + (!flag4 || !flag3 && !flag2 ? (flag1 ? 0 : 15) : 1);
             int l = chunkpos.getMinBlockX() + (!flag4 || !flag3 && !flag2 ? (flag1 ? 0 : 15) : 14);
             int i1 = chunkpos.getMinBlockZ() + (!flag4 || !flag && !flag1 ? (flag3 ? 0 : 15) : 1);
@@ -165,25 +165,25 @@ public class UpgradeData {
         }
     }
 
-    private static BlockState updateState(BlockState p_63336_, Direction p_63337_, LevelAccessor p_63338_, BlockPos p_63339_, BlockPos p_63340_) {
-        return MAP.getOrDefault(p_63336_.getBlock(), UpgradeData.BlockFixers.DEFAULT)
-            .updateShape(p_63336_, p_63337_, p_63338_.getBlockState(p_63340_), p_63338_, p_63339_, p_63340_);
+    private static BlockState updateState(BlockState pState, Direction pDirection, LevelAccessor pLevel, BlockPos pPos, BlockPos pOffsetPos) {
+        return MAP.getOrDefault(pState.getBlock(), UpgradeData.BlockFixers.DEFAULT)
+            .updateShape(pState, pDirection, pLevel.getBlockState(pOffsetPos), pLevel, pPos, pOffsetPos);
     }
 
-    private void upgradeInside(LevelChunk p_63348_) {
+    private void upgradeInside(LevelChunk pChunk) {
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos blockpos$mutableblockpos1 = new BlockPos.MutableBlockPos();
-        ChunkPos chunkpos = p_63348_.getPos();
-        LevelAccessor levelaccessor = p_63348_.getLevel();
+        ChunkPos chunkpos = pChunk.getPos();
+        LevelAccessor levelaccessor = pChunk.getLevel();
 
         for (int i = 0; i < this.index.length; i++) {
-            LevelChunkSection levelchunksection = p_63348_.getSection(i);
+            LevelChunkSection levelchunksection = pChunk.getSection(i);
             int[] aint = this.index[i];
             this.index[i] = null;
             if (aint != null && aint.length > 0) {
                 Direction[] adirection = Direction.values();
                 PalettedContainer<BlockState> palettedcontainer = levelchunksection.getStates();
-                int j = p_63348_.getSectionYFromSectionIndex(i);
+                int j = pChunk.getSectionYFromSectionIndex(i);
                 int k = SectionPos.sectionToBlockCoord(j);
 
                 for (int l : aint) {
@@ -268,9 +268,9 @@ public class UpgradeData {
     }
 
     public interface BlockFixer {
-        BlockState updateShape(BlockState p_63352_, Direction p_63353_, BlockState p_63354_, LevelAccessor p_63355_, BlockPos p_63356_, BlockPos p_63357_);
+        BlockState updateShape(BlockState pState, Direction pDirection, BlockState pOffsetState, LevelAccessor pLevel, BlockPos pPos, BlockPos pOffsetPos);
 
-        default void processChunk(LevelAccessor p_63351_) {
+        default void processChunk(LevelAccessor pLevel) {
         }
     }
 
@@ -447,16 +447,16 @@ public class UpgradeData {
 
         public static final Direction[] DIRECTIONS = Direction.values();
 
-        BlockFixers(final Block... p_63380_) {
-            this(false, p_63380_);
+        BlockFixers(final Block... pBlocks) {
+            this(false, pBlocks);
         }
 
-        BlockFixers(final boolean p_63369_, final Block... p_63370_) {
-            for (Block block : p_63370_) {
+        BlockFixers(final boolean pChunkyFixer, final Block... pBlocks) {
+            for (Block block : pBlocks) {
                 UpgradeData.MAP.put(block, this);
             }
 
-            if (p_63369_) {
+            if (pChunkyFixer) {
                 UpgradeData.CHUNKY_FIXERS.add(this);
             }
         }

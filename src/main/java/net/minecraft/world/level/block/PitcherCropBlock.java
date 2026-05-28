@@ -137,49 +137,49 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
         }
     }
 
-    private void grow(ServerLevel p_277975_, BlockState p_277349_, BlockPos p_277585_, int p_277498_) {
-        int i = Math.min(p_277349_.getValue(AGE) + p_277498_, 4);
-        if (this.canGrow(p_277975_, p_277585_, p_277349_, i)) {
-            BlockState blockstate = p_277349_.setValue(AGE, Integer.valueOf(i));
-            p_277975_.setBlock(p_277585_, blockstate, 2);
+    private void grow(ServerLevel pLevel, BlockState pState, BlockPos pPos, int pAgeIncrement) {
+        int i = Math.min(pState.getValue(AGE) + pAgeIncrement, 4);
+        if (this.canGrow(pLevel, pPos, pState, i)) {
+            BlockState blockstate = pState.setValue(AGE, Integer.valueOf(i));
+            pLevel.setBlock(pPos, blockstate, 2);
             if (isDouble(i)) {
-                p_277975_.setBlock(p_277585_.above(), blockstate.setValue(HALF, DoubleBlockHalf.UPPER), 3);
+                pLevel.setBlock(pPos.above(), blockstate.setValue(HALF, DoubleBlockHalf.UPPER), 3);
             }
         }
     }
 
-    private static boolean canGrowInto(LevelReader p_290010_, BlockPos p_277823_) {
-        BlockState blockstate = p_290010_.getBlockState(p_277823_);
+    private static boolean canGrowInto(LevelReader pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
         return blockstate.isAir() || blockstate.is(Blocks.PITCHER_CROP);
     }
 
-    private static boolean sufficientLight(LevelReader p_290018_, BlockPos p_290011_) {
-        return CropBlock.hasSufficientLight(p_290018_, p_290011_);
+    private static boolean sufficientLight(LevelReader pLevel, BlockPos pPos) {
+        return CropBlock.hasSufficientLight(pLevel, pPos);
     }
 
-    private static boolean isLower(BlockState p_279488_) {
-        return p_279488_.is(Blocks.PITCHER_CROP) && p_279488_.getValue(HALF) == DoubleBlockHalf.LOWER;
+    private static boolean isLower(BlockState pState) {
+        return pState.is(Blocks.PITCHER_CROP) && pState.getValue(HALF) == DoubleBlockHalf.LOWER;
     }
 
-    private static boolean isDouble(int p_298533_) {
-        return p_298533_ >= 3;
+    private static boolean isDouble(int pAge) {
+        return pAge >= 3;
     }
 
-    private boolean canGrow(LevelReader p_290007_, BlockPos p_290014_, BlockState p_290017_, int p_290008_) {
-        return !this.isMaxAge(p_290017_) && sufficientLight(p_290007_, p_290014_) && (!isDouble(p_290008_) || canGrowInto(p_290007_, p_290014_.above()));
+    private boolean canGrow(LevelReader pReader, BlockPos pPos, BlockState pState, int pAge) {
+        return !this.isMaxAge(pState) && sufficientLight(pReader, pPos) && (!isDouble(pAge) || canGrowInto(pReader, pPos.above()));
     }
 
-    private boolean isMaxAge(BlockState p_277387_) {
-        return p_277387_.getValue(AGE) >= 4;
+    private boolean isMaxAge(BlockState pState) {
+        return pState.getValue(AGE) >= 4;
     }
 
     @Nullable
-    private PitcherCropBlock.PosAndState getLowerHalf(LevelReader p_290009_, BlockPos p_290016_, BlockState p_290015_) {
-        if (isLower(p_290015_)) {
-            return new PitcherCropBlock.PosAndState(p_290016_, p_290015_);
+    private PitcherCropBlock.PosAndState getLowerHalf(LevelReader pLevel, BlockPos pPos, BlockState pState) {
+        if (isLower(pState)) {
+            return new PitcherCropBlock.PosAndState(pPos, pState);
         } else {
-            BlockPos blockpos = p_290016_.below();
-            BlockState blockstate = p_290009_.getBlockState(blockpos);
+            BlockPos blockpos = pPos.below();
+            BlockState blockstate = pLevel.getBlockState(blockpos);
             return isLower(blockstate) ? new PitcherCropBlock.PosAndState(blockpos, blockstate) : null;
         }
     }

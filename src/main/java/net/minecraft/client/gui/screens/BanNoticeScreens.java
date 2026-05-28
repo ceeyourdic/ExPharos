@@ -25,22 +25,22 @@ public class BanNoticeScreens {
     private static final Component SKIN_BAN_TITLE = Component.translatable("gui.banned.skin.title").withStyle(ChatFormatting.BOLD);
     private static final Component SKIN_BAN_DESCRIPTION = Component.translatable("gui.banned.skin.description", Component.translationArg(CommonLinks.SUSPENSION_HELP));
 
-    public static ConfirmLinkScreen create(BooleanConsumer p_299994_, BanDetails p_297408_) {
-        return new ConfirmLinkScreen(p_299994_, getBannedTitle(p_297408_), getBannedScreenText(p_297408_), CommonLinks.SUSPENSION_HELP, CommonComponents.GUI_ACKNOWLEDGE, true);
+    public static ConfirmLinkScreen create(BooleanConsumer pCallback, BanDetails pBanDetails) {
+        return new ConfirmLinkScreen(pCallback, getBannedTitle(pBanDetails), getBannedScreenText(pBanDetails), CommonLinks.SUSPENSION_HELP, CommonComponents.GUI_ACKNOWLEDGE, true);
     }
 
-    public static ConfirmLinkScreen createSkinBan(Runnable p_300032_) {
+    public static ConfirmLinkScreen createSkinBan(Runnable pCallback) {
         URI uri = CommonLinks.SUSPENSION_HELP;
         return new ConfirmLinkScreen(p_340785_ -> {
             if (p_340785_) {
                 Util.getPlatform().openUri(uri);
             }
 
-            p_300032_.run();
+            pCallback.run();
         }, SKIN_BAN_TITLE, SKIN_BAN_DESCRIPTION, uri, CommonComponents.GUI_ACKNOWLEDGE, true);
     }
 
-    public static ConfirmLinkScreen createNameBan(String p_300838_, Runnable p_297249_) {
+    public static ConfirmLinkScreen createNameBan(String pUsername, Runnable pCallback) {
         URI uri = CommonLinks.SUSPENSION_HELP;
         return new ConfirmLinkScreen(
             p_340782_ -> {
@@ -48,11 +48,11 @@ public class BanNoticeScreens {
                     Util.getPlatform().openUri(uri);
                 }
 
-                p_297249_.run();
+                pCallback.run();
             },
             NAME_BAN_TITLE,
             Component.translatable(
-                "gui.banned.name.description", Component.literal(p_300838_).withStyle(ChatFormatting.YELLOW), Component.translationArg(CommonLinks.SUSPENSION_HELP)
+                "gui.banned.name.description", Component.literal(pUsername).withStyle(ChatFormatting.YELLOW), Component.translationArg(CommonLinks.SUSPENSION_HELP)
             ),
             uri,
             CommonComponents.GUI_ACKNOWLEDGE,
@@ -60,17 +60,17 @@ public class BanNoticeScreens {
         );
     }
 
-    private static Component getBannedTitle(BanDetails p_299452_) {
-        return isTemporaryBan(p_299452_) ? TEMPORARY_BAN_TITLE : PERMANENT_BAN_TITLE;
+    private static Component getBannedTitle(BanDetails pBanDetails) {
+        return isTemporaryBan(pBanDetails) ? TEMPORARY_BAN_TITLE : PERMANENT_BAN_TITLE;
     }
 
-    private static Component getBannedScreenText(BanDetails p_299903_) {
-        return Component.translatable("gui.banned.description", getBanReasonText(p_299903_), getBanStatusText(p_299903_), Component.translationArg(CommonLinks.SUSPENSION_HELP));
+    private static Component getBannedScreenText(BanDetails pBanDetails) {
+        return Component.translatable("gui.banned.description", getBanReasonText(pBanDetails), getBanStatusText(pBanDetails), Component.translationArg(CommonLinks.SUSPENSION_HELP));
     }
 
-    private static Component getBanReasonText(BanDetails p_298548_) {
-        String s = p_298548_.reason();
-        String s1 = p_298548_.reasonMessage();
+    private static Component getBanReasonText(BanDetails pBanDetails) {
+        String s = pBanDetails.reason();
+        String s1 = pBanDetails.reasonMessage();
         if (StringUtils.isNumeric(s)) {
             int i = Integer.parseInt(s);
             BanReason banreason = BanReason.byId(i);
@@ -89,9 +89,9 @@ public class BanNoticeScreens {
         }
     }
 
-    private static Component getBanStatusText(BanDetails p_298190_) {
-        if (isTemporaryBan(p_298190_)) {
-            Component component = getBanDurationText(p_298190_);
+    private static Component getBanStatusText(BanDetails pBanDetails) {
+        if (isTemporaryBan(pBanDetails)) {
+            Component component = getBanDurationText(pBanDetails);
             return Component.translatable(
                 "gui.banned.description.temporary", Component.translatable("gui.banned.description.temporary.duration", component).withStyle(ChatFormatting.BOLD)
             );
@@ -100,8 +100,8 @@ public class BanNoticeScreens {
         }
     }
 
-    private static Component getBanDurationText(BanDetails p_300603_) {
-        Duration duration = Duration.between(Instant.now(), p_300603_.expires());
+    private static Component getBanDurationText(BanDetails pBanDetails) {
+        Duration duration = Duration.between(Instant.now(), pBanDetails.expires());
         long i = duration.toHours();
         if (i > 72L) {
             return CommonComponents.days(duration.toDays());
@@ -110,7 +110,7 @@ public class BanNoticeScreens {
         }
     }
 
-    private static boolean isTemporaryBan(BanDetails p_300637_) {
-        return p_300637_.expires() != null;
+    private static boolean isTemporaryBan(BanDetails pBanDetails) {
+        return pBanDetails.expires() != null;
     }
 }

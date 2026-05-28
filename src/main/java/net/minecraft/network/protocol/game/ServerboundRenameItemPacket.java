@@ -11,16 +11,16 @@ public class ServerboundRenameItemPacket implements Packet<ServerGamePacketListe
     );
     private final String name;
 
-    public ServerboundRenameItemPacket(String p_134396_) {
-        this.name = p_134396_;
+    public ServerboundRenameItemPacket(String pName) {
+        this.name = pName;
     }
 
-    private ServerboundRenameItemPacket(FriendlyByteBuf p_179738_) {
-        this.name = p_179738_.readUtf();
+    private ServerboundRenameItemPacket(FriendlyByteBuf pBuffer) {
+        this.name = pBuffer.readUtf();
     }
 
-    private void write(FriendlyByteBuf p_134405_) {
-        p_134405_.writeUtf(this.name);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeUtf(this.name);
     }
 
     @Override
@@ -28,8 +28,8 @@ public class ServerboundRenameItemPacket implements Packet<ServerGamePacketListe
         return GamePacketTypes.SERVERBOUND_RENAME_ITEM;
     }
 
-    public void handle(ServerGamePacketListener p_134402_) {
-        p_134402_.handleRenameItem(this);
+    public void handle(ServerGamePacketListener pHandler) {
+        pHandler.handleRenameItem(this);
     }
 
     public String getName() {

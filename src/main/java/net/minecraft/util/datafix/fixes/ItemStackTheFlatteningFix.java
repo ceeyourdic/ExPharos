@@ -402,8 +402,8 @@ public class ItemStackTheFlatteningFix extends DataFix {
         "minecraft:wooden_sword"
     );
 
-    public ItemStackTheFlatteningFix(Schema p_16114_, boolean p_16115_) {
-        super(p_16114_, p_16115_);
+    public ItemStackTheFlatteningFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
     }
 
     @Override
@@ -437,10 +437,10 @@ public class ItemStackTheFlatteningFix extends DataFix {
     }
 
     @Nullable
-    public static String updateItem(@Nullable String p_16123_, int p_16124_) {
-        if (IDS.contains(p_16123_)) {
-            String s = MAP.get(p_16123_ + "." + p_16124_);
-            return s == null ? MAP.get(p_16123_ + ".0") : s;
+    public static String updateItem(@Nullable String pItem, int pDataValue) {
+        if (IDS.contains(pItem)) {
+            String s = MAP.get(pItem + "." + pDataValue);
+            return s == null ? MAP.get(pItem + ".0") : s;
         } else {
             return null;
         }

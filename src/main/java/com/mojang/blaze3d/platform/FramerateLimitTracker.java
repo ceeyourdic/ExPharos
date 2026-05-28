@@ -4,10 +4,7 @@ import net.minecraft.Util;
 import net.minecraft.client.InactivityFpsLimit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class FramerateLimitTracker {
     private static final int OUT_OF_LEVEL_MENU_LIMIT = 60;
     private static final int ICONIFIED_WINDOW_LIMIT = 10;
@@ -20,13 +17,21 @@ public class FramerateLimitTracker {
     private int framerateLimit;
     private long latestInputTime;
 
-    public FramerateLimitTracker(Options p_364723_, Minecraft p_360737_) {
-        this.options = p_364723_;
-        this.minecraft = p_360737_;
-        this.framerateLimit = p_364723_.framerateLimit().get();
+    public FramerateLimitTracker(Options pOptions, Minecraft pMinecraft) {
+        this.options = pOptions;
+        this.minecraft = pMinecraft;
+        this.framerateLimit = pOptions.framerateLimit().get();
     }
 
     public int getFramerateLimit() {
+        if (Minecraft.getInstance().options.enableVsync().get()) {
+            this.framerateLimit = 260;
+        }
+
+        if (this.framerateLimit <= 0) {
+            this.framerateLimit = 260;
+        }
+
         InactivityFpsLimit inactivityfpslimit = this.options.inactivityFpsLimit().get();
         if (this.minecraft.getWindow().isIconified()) {
             return 10;
@@ -42,12 +47,12 @@ public class FramerateLimitTracker {
                 }
             }
 
-            return this.minecraft.level != null || this.minecraft.screen == null && this.minecraft.getOverlay() == null ? this.framerateLimit : 60;
+            return this.minecraft.level == null && (this.minecraft.screen != null || this.minecraft.getOverlay() != null) ? 60 : this.framerateLimit;
         }
     }
 
-    public void setFramerateLimit(int p_364240_) {
-        this.framerateLimit = p_364240_;
+    public void setFramerateLimit(int pFramerateLimit) {
+        this.framerateLimit = pFramerateLimit;
     }
 
     public void onInputReceived() {

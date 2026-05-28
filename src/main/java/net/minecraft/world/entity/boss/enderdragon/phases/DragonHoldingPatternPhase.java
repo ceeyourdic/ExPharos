@@ -51,16 +51,16 @@ public class DragonHoldingPatternPhase extends AbstractDragonPhaseInstance {
         return this.targetLocation;
     }
 
-    private void findNewTarget(ServerLevel p_369217_) {
+    private void findNewTarget(ServerLevel pLevel) {
         if (this.currentPath != null && this.currentPath.isDone()) {
-            BlockPos blockpos = p_369217_.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(this.dragon.getFightOrigin()));
+            BlockPos blockpos = pLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(this.dragon.getFightOrigin()));
             int i = this.dragon.getDragonFight() == null ? 0 : this.dragon.getDragonFight().getCrystalsAlive();
             if (this.dragon.getRandom().nextInt(i + 3) == 0) {
                 this.dragon.getPhaseManager().setPhase(EnderDragonPhase.LANDING_APPROACH);
                 return;
             }
 
-            Player player = p_369217_.getNearestPlayer(
+            Player player = pLevel.getNearestPlayer(
                 NEW_TARGET_TARGETING, this.dragon, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ()
             );
             double d0;
@@ -110,9 +110,9 @@ public class DragonHoldingPatternPhase extends AbstractDragonPhaseInstance {
         this.navigateToNextPathNode();
     }
 
-    private void strafePlayer(Player p_31237_) {
+    private void strafePlayer(Player pPlayer) {
         this.dragon.getPhaseManager().setPhase(EnderDragonPhase.STRAFE_PLAYER);
-        this.dragon.getPhaseManager().getPhase(EnderDragonPhase.STRAFE_PLAYER).setTarget(p_31237_);
+        this.dragon.getPhaseManager().getPhase(EnderDragonPhase.STRAFE_PLAYER).setTarget(pPlayer);
     }
 
     private void navigateToNextPathNode() {
@@ -132,9 +132,9 @@ public class DragonHoldingPatternPhase extends AbstractDragonPhaseInstance {
     }
 
     @Override
-    public void onCrystalDestroyed(EndCrystal p_31232_, BlockPos p_31233_, DamageSource p_31234_, @Nullable Player p_31235_) {
-        if (p_31235_ != null && this.dragon.canAttack(p_31235_)) {
-            this.strafePlayer(p_31235_);
+    public void onCrystalDestroyed(EndCrystal pCrystal, BlockPos pPos, DamageSource pDmgSrc, @Nullable Player pPlyr) {
+        if (pPlyr != null && this.dragon.canAttack(pPlyr)) {
+            this.strafePlayer(pPlyr);
         }
     }
 }

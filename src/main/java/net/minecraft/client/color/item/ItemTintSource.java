@@ -10,7 +10,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface ItemTintSource {
-    int calculate(ItemStack p_376017_, @Nullable ClientLevel p_378129_, @Nullable LivingEntity p_376885_);
+    int calculate(ItemStack pStack, @Nullable ClientLevel pLevel, @Nullable LivingEntity pEntity);
 
     MapCodec<? extends ItemTintSource> type();
 }

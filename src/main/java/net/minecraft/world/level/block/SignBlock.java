@@ -46,9 +46,9 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
     protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 16.0, 12.0);
     private final WoodType type;
 
-    protected SignBlock(WoodType p_56274_, BlockBehaviour.Properties p_56273_) {
-        super(p_56273_);
-        this.type = p_56274_;
+    protected SignBlock(WoodType pType, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.type = pType;
     }
 
     @Override
@@ -73,7 +73,7 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_56293_, BlockGetter p_56294_, BlockPos p_56295_, CollisionContext p_56296_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
@@ -143,31 +143,31 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
         }
     }
 
-    private boolean hasEditableText(Player p_279394_, SignBlockEntity p_279187_, boolean p_279225_) {
-        SignText signtext = p_279187_.getText(p_279225_);
-        return Arrays.stream(signtext.getMessages(p_279394_.isTextFilteringEnabled()))
+    private boolean hasEditableText(Player pPlayer, SignBlockEntity pSignEntity, boolean pIsFrontText) {
+        SignText signtext = pSignEntity.getText(pIsFrontText);
+        return Arrays.stream(signtext.getMessages(pPlayer.isTextFilteringEnabled()))
             .allMatch(p_327267_ -> p_327267_.equals(CommonComponents.EMPTY) || p_327267_.getContents() instanceof PlainTextContents);
     }
 
-    public abstract float getYRotationDegrees(BlockState p_277705_);
+    public abstract float getYRotationDegrees(BlockState pState);
 
-    public Vec3 getSignHitboxCenterPosition(BlockState p_278294_) {
+    public Vec3 getSignHitboxCenterPosition(BlockState pState) {
         return new Vec3(0.5, 0.5, 0.5);
     }
 
     @Override
-    protected FluidState getFluidState(BlockState p_56299_) {
-        return p_56299_.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(p_56299_);
+    protected FluidState getFluidState(BlockState pState) {
+        return pState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(pState);
     }
 
     public WoodType type() {
         return this.type;
     }
 
-    public static WoodType getWoodType(Block p_251096_) {
+    public static WoodType getWoodType(Block pBlock) {
         WoodType woodtype;
-        if (p_251096_ instanceof SignBlock) {
-            woodtype = ((SignBlock)p_251096_).type();
+        if (pBlock instanceof SignBlock) {
+            woodtype = ((SignBlock)pBlock).type();
         } else {
             woodtype = WoodType.OAK;
         }
@@ -175,14 +175,14 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
         return woodtype;
     }
 
-    public void openTextEdit(Player p_277738_, SignBlockEntity p_277467_, boolean p_277771_) {
-        p_277467_.setAllowedPlayerEditor(p_277738_.getUUID());
-        p_277738_.openTextEdit(p_277467_, p_277771_);
+    public void openTextEdit(Player pPlayer, SignBlockEntity pSignEntity, boolean pIsFrontText) {
+        pSignEntity.setAllowedPlayerEditor(pPlayer.getUUID());
+        pPlayer.openTextEdit(pSignEntity, pIsFrontText);
     }
 
-    private boolean otherPlayerIsEditingSign(Player p_277952_, SignBlockEntity p_277599_) {
-        UUID uuid = p_277599_.getPlayerWhoMayEdit();
-        return uuid != null && !uuid.equals(p_277952_.getUUID());
+    private boolean otherPlayerIsEditingSign(Player pPlayer, SignBlockEntity pSignEntity) {
+        UUID uuid = pSignEntity.getPlayerWhoMayEdit();
+        return uuid != null && !uuid.equals(pPlayer.getUUID());
     }
 
     @Nullable

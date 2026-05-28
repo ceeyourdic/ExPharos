@@ -19,17 +19,17 @@ public class EntityPaintingMotiveFix extends NamedEntityFix {
         p_15532_.put("skullandroses", "skull_and_roses");
     });
 
-    public EntityPaintingMotiveFix(Schema p_15525_, boolean p_15526_) {
-        super(p_15525_, p_15526_, "EntityPaintingMotiveFix", References.ENTITY, "minecraft:painting");
+    public EntityPaintingMotiveFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType, "EntityPaintingMotiveFix", References.ENTITY, "minecraft:painting");
     }
 
-    public Dynamic<?> fixTag(Dynamic<?> p_15530_) {
-        Optional<String> optional = p_15530_.get("Motive").asString().result();
+    public Dynamic<?> fixTag(Dynamic<?> pTag) {
+        Optional<String> optional = pTag.get("Motive").asString().result();
         if (optional.isPresent()) {
             String s = optional.get().toLowerCase(Locale.ROOT);
-            return p_15530_.set("Motive", p_15530_.createString(NamespacedSchema.ensureNamespaced(MAP.getOrDefault(s, s))));
+            return pTag.set("Motive", pTag.createString(NamespacedSchema.ensureNamespaced(MAP.getOrDefault(s, s))));
         } else {
-            return p_15530_;
+            return pTag;
         }
     }
 

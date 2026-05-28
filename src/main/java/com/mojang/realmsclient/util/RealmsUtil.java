@@ -19,11 +19,11 @@ public class RealmsUtil {
     private static final int HOURS = 3600;
     private static final int DAYS = 86400;
 
-    public static Component convertToAgePresentation(long p_287679_) {
-        if (p_287679_ < 0L) {
+    public static Component convertToAgePresentation(long pMillis) {
+        if (pMillis < 0L) {
             return RIGHT_NOW;
         } else {
-            long i = p_287679_ / 1000L;
+            long i = pMillis / 1000L;
             if (i < 60L) {
                 return Component.translatable("mco.time.secondsAgo", i);
             } else if (i < 3600L) {
@@ -39,14 +39,14 @@ public class RealmsUtil {
         }
     }
 
-    public static Component convertToAgePresentationFromInstant(Date p_287698_) {
-        return convertToAgePresentation(System.currentTimeMillis() - p_287698_.getTime());
+    public static Component convertToAgePresentationFromInstant(Date pDate) {
+        return convertToAgePresentation(System.currentTimeMillis() - pDate.getTime());
     }
 
-    public static void renderPlayerFace(GuiGraphics p_281255_, int p_281818_, int p_281791_, int p_282088_, UUID p_298294_) {
+    public static void renderPlayerFace(GuiGraphics pGuiGraphics, int pX, int pY, int pSize, UUID pPlayerUuid) {
         Minecraft minecraft = Minecraft.getInstance();
-        ProfileResult profileresult = minecraft.getMinecraftSessionService().fetchProfile(p_298294_, false);
-        PlayerSkin playerskin = profileresult != null ? minecraft.getSkinManager().getInsecureSkin(profileresult.profile()) : DefaultPlayerSkin.get(p_298294_);
-        PlayerFaceRenderer.draw(p_281255_, playerskin, p_281818_, p_281791_, p_282088_);
+        ProfileResult profileresult = minecraft.getMinecraftSessionService().fetchProfile(pPlayerUuid, false);
+        PlayerSkin playerskin = profileresult != null ? minecraft.getSkinManager().getInsecureSkin(profileresult.profile()) : DefaultPlayerSkin.get(pPlayerUuid);
+        PlayerFaceRenderer.draw(pGuiGraphics, playerskin, pX, pY, pSize);
     }
 }

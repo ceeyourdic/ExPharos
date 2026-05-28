@@ -52,14 +52,14 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
     private AdvancementTab selectedTab;
     private boolean isScrolling;
 
-    public AdvancementsScreen(ClientAdvancements p_97340_) {
-        this(p_97340_, null);
+    public AdvancementsScreen(ClientAdvancements pAdvancements) {
+        this(pAdvancements, null);
     }
 
-    public AdvancementsScreen(ClientAdvancements p_333280_, @Nullable Screen p_335811_) {
+    public AdvancementsScreen(ClientAdvancements pAdvancements, @Nullable Screen pLastScreen) {
         super(TITLE);
-        this.advancements = p_333280_;
-        this.lastScreen = p_335811_;
+        this.advancements = pAdvancements;
+        this.lastScreen = pLastScreen;
     }
 
     @Override
@@ -102,30 +102,30 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
     }
 
     @Override
-    public boolean mouseClicked(double p_97343_, double p_97344_, int p_97345_) {
-        if (p_97345_ == 0) {
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+        if (pButton == 0) {
             int i = (this.width - 252) / 2;
             int j = (this.height - 140) / 2;
 
             for (AdvancementTab advancementtab : this.tabs.values()) {
-                if (advancementtab.isMouseOver(i, j, p_97343_, p_97344_)) {
+                if (advancementtab.isMouseOver(i, j, pMouseX, pMouseY)) {
                     this.advancements.setSelectedTab(advancementtab.getRootNode().holder(), true);
                     break;
                 }
             }
         }
 
-        return super.mouseClicked(p_97343_, p_97344_, p_97345_);
+        return super.mouseClicked(pMouseX, pMouseY, pButton);
     }
 
     @Override
-    public boolean keyPressed(int p_97353_, int p_97354_, int p_97355_) {
-        if (this.minecraft.options.keyAdvancements.matches(p_97353_, p_97354_)) {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (this.minecraft.options.keyAdvancements.matches(pKeyCode, pScanCode)) {
             this.minecraft.setScreen(null);
             this.minecraft.mouseHandler.grabMouse();
             return true;
         } else {
-            return super.keyPressed(p_97353_, p_97354_, p_97355_);
+            return super.keyPressed(pKeyCode, pScanCode, pModifiers);
         }
     }
 
@@ -140,15 +140,15 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
     }
 
     @Override
-    public boolean mouseDragged(double p_97347_, double p_97348_, int p_97349_, double p_97350_, double p_97351_) {
-        if (p_97349_ != 0) {
+    public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
+        if (pButton != 0) {
             this.isScrolling = false;
             return false;
         } else {
             if (!this.isScrolling) {
                 this.isScrolling = true;
             } else if (this.selectedTab != null) {
-                this.selectedTab.scroll(p_97350_, p_97351_);
+                this.selectedTab.scroll(pDragX, pDragY);
             }
 
             return true;
@@ -165,45 +165,45 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
         }
     }
 
-    private void renderInside(GuiGraphics p_282012_, int p_97375_, int p_97376_, int p_97377_, int p_97378_) {
+    private void renderInside(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, int pOffsetX, int pOffsetY) {
         AdvancementTab advancementtab = this.selectedTab;
         if (advancementtab == null) {
-            p_282012_.fill(p_97377_ + 9, p_97378_ + 18, p_97377_ + 9 + 234, p_97378_ + 18 + 113, -16777216);
-            int i = p_97377_ + 9 + 117;
-            p_282012_.drawCenteredString(this.font, NO_ADVANCEMENTS_LABEL, i, p_97378_ + 18 + 56 - 9 / 2, -1);
-            p_282012_.drawCenteredString(this.font, VERY_SAD_LABEL, i, p_97378_ + 18 + 113 - 9, -1);
+            pGuiGraphics.fill(pOffsetX + 9, pOffsetY + 18, pOffsetX + 9 + 234, pOffsetY + 18 + 113, -16777216);
+            int i = pOffsetX + 9 + 117;
+            pGuiGraphics.drawCenteredString(this.font, NO_ADVANCEMENTS_LABEL, i, pOffsetY + 18 + 56 - 9 / 2, -1);
+            pGuiGraphics.drawCenteredString(this.font, VERY_SAD_LABEL, i, pOffsetY + 18 + 113 - 9, -1);
         } else {
-            advancementtab.drawContents(p_282012_, p_97377_ + 9, p_97378_ + 18);
+            advancementtab.drawContents(pGuiGraphics, pOffsetX + 9, pOffsetY + 18);
         }
     }
 
-    public void renderWindow(GuiGraphics p_283395_, int p_281890_, int p_282532_) {
-        p_283395_.blit(RenderType::guiTextured, WINDOW_LOCATION, p_281890_, p_282532_, 0.0F, 0.0F, 252, 140, 256, 256);
+    public void renderWindow(GuiGraphics pGuiGraphics, int pOffsetX, int pOffsetY) {
+        pGuiGraphics.blit(RenderType::guiTextured, WINDOW_LOCATION, pOffsetX, pOffsetY, 0.0F, 0.0F, 252, 140, 256, 256);
         if (this.tabs.size() > 1) {
             for (AdvancementTab advancementtab : this.tabs.values()) {
-                advancementtab.drawTab(p_283395_, p_281890_, p_282532_, advancementtab == this.selectedTab);
+                advancementtab.drawTab(pGuiGraphics, pOffsetX, pOffsetY, advancementtab == this.selectedTab);
             }
 
             for (AdvancementTab advancementtab1 : this.tabs.values()) {
-                advancementtab1.drawIcon(p_283395_, p_281890_, p_282532_);
+                advancementtab1.drawIcon(pGuiGraphics, pOffsetX, pOffsetY);
             }
         }
 
-        p_283395_.drawString(this.font, this.selectedTab != null ? this.selectedTab.getTitle() : TITLE, p_281890_ + 8, p_282532_ + 6, 4210752, false);
+        pGuiGraphics.drawString(this.font, this.selectedTab != null ? this.selectedTab.getTitle() : TITLE, pOffsetX + 8, pOffsetY + 6, 4210752, false);
     }
 
-    private void renderTooltips(GuiGraphics p_282784_, int p_283556_, int p_282458_, int p_281519_, int p_283371_) {
+    private void renderTooltips(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, int pOffsetX, int pOffsetY) {
         if (this.selectedTab != null) {
-            p_282784_.pose().pushPose();
-            p_282784_.pose().translate((float)(p_281519_ + 9), (float)(p_283371_ + 18), 400.0F);
-            this.selectedTab.drawTooltips(p_282784_, p_283556_ - p_281519_ - 9, p_282458_ - p_283371_ - 18, p_281519_, p_283371_);
-            p_282784_.pose().popPose();
+            pGuiGraphics.pose().pushPose();
+            pGuiGraphics.pose().translate((float)(pOffsetX + 9), (float)(pOffsetY + 18), 400.0F);
+            this.selectedTab.drawTooltips(pGuiGraphics, pMouseX - pOffsetX - 9, pMouseY - pOffsetY - 18, pOffsetX, pOffsetY);
+            pGuiGraphics.pose().popPose();
         }
 
         if (this.tabs.size() > 1) {
             for (AdvancementTab advancementtab : this.tabs.values()) {
-                if (advancementtab.isMouseOver(p_281519_, p_283371_, (double)p_283556_, (double)p_282458_)) {
-                    p_282784_.renderTooltip(this.font, advancementtab.getTitle(), p_283556_, p_282458_);
+                if (advancementtab.isMouseOver(pOffsetX, pOffsetY, (double)pMouseX, (double)pMouseY)) {
+                    pGuiGraphics.renderTooltip(this.font, advancementtab.getTitle(), pMouseX, pMouseY);
                 }
             }
         }
@@ -253,14 +253,14 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
     }
 
     @Nullable
-    public AdvancementWidget getAdvancementWidget(AdvancementNode p_298026_) {
-        AdvancementTab advancementtab = this.getTab(p_298026_);
-        return advancementtab == null ? null : advancementtab.getWidget(p_298026_.holder());
+    public AdvancementWidget getAdvancementWidget(AdvancementNode pAdvancement) {
+        AdvancementTab advancementtab = this.getTab(pAdvancement);
+        return advancementtab == null ? null : advancementtab.getWidget(pAdvancement.holder());
     }
 
     @Nullable
-    private AdvancementTab getTab(AdvancementNode p_300894_) {
-        AdvancementNode advancementnode = p_300894_.root();
+    private AdvancementTab getTab(AdvancementNode pAdvancement) {
+        AdvancementNode advancementnode = pAdvancement.root();
         return this.tabs.get(advancementnode.holder());
     }
 }

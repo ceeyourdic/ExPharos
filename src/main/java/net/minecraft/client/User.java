@@ -21,13 +21,13 @@ public class User {
     private final Optional<String> clientId;
     private final User.Type type;
 
-    public User(String p_193799_, UUID p_297254_, String p_193800_, Optional<String> p_193802_, Optional<String> p_193803_, User.Type p_193804_) {
-        this.name = p_193799_;
-        this.uuid = p_297254_;
-        this.accessToken = p_193800_;
-        this.xuid = p_193802_;
-        this.clientId = p_193803_;
-        this.type = p_193804_;
+    public User(String pName, UUID pUuid, String pAccessToken, Optional<String> pXuid, Optional<String> pClientId, User.Type pType) {
+        this.name = pName;
+        this.uuid = pUuid;
+        this.accessToken = pAccessToken;
+        this.xuid = pXuid;
+        this.clientId = pClientId;
+        this.type = pType;
     }
 
     public String getSessionId() {
@@ -68,13 +68,13 @@ public class User {
             .collect(Collectors.toMap(p_92560_ -> p_92560_.name, Function.identity()));
         private final String name;
 
-        private Type(final String p_92558_) {
-            this.name = p_92558_;
+        private Type(final String pName) {
+            this.name = pName;
         }
 
         @Nullable
-        public static User.Type byName(String p_92562_) {
-            return BY_NAME.get(p_92562_.toLowerCase(Locale.ROOT));
+        public static User.Type byName(String pTypeName) {
+            return BY_NAME.get(pTypeName.toLowerCase(Locale.ROOT));
         }
 
         public String getName() {

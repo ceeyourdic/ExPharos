@@ -19,11 +19,11 @@ public class RealmsServerAddress extends ValueObject {
     @Nullable
     public String resourcePackHash;
 
-    public static RealmsServerAddress parse(String p_87572_) {
+    public static RealmsServerAddress parse(String pJson) {
         RealmsServerAddress realmsserveraddress = new RealmsServerAddress();
 
         try {
-            JsonObject jsonobject = JsonParser.parseString(p_87572_).getAsJsonObject();
+            JsonObject jsonobject = JsonParser.parseString(pJson).getAsJsonObject();
             realmsserveraddress.address = JsonUtils.getStringOr("address", jsonobject, null);
             realmsserveraddress.resourcePackUrl = JsonUtils.getStringOr("resourcePackUrl", jsonobject, null);
             realmsserveraddress.resourcePackHash = JsonUtils.getStringOr("resourcePackHash", jsonobject, null);

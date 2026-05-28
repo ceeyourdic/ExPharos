@@ -44,47 +44,47 @@ public interface Registry<T> extends Keyable, HolderLookup.RegistryLookup<T>, Id
         return ExtraCodecs.overrideLifecycle(codec, p_325682_ -> this.registrationInfo(p_325682_.key()).map(RegistrationInfo::lifecycle).orElse(Lifecycle.experimental()));
     }
 
-    private DataResult<Holder.Reference<T>> safeCastToReference(Holder<T> p_329506_) {
-        return p_329506_ instanceof Holder.Reference<T> reference
+    private DataResult<Holder.Reference<T>> safeCastToReference(Holder<T> pValue) {
+        return pValue instanceof Holder.Reference<T> reference
             ? DataResult.success(reference)
-            : DataResult.error(() -> "Unregistered holder in " + this.key() + ": " + p_329506_);
+            : DataResult.error(() -> "Unregistered holder in " + this.key() + ": " + pValue);
     }
 
     @Override
-    default <U> Stream<U> keys(DynamicOps<U> p_123030_) {
-        return this.keySet().stream().map(p_235784_ -> p_123030_.createString(p_235784_.toString()));
+    default <U> Stream<U> keys(DynamicOps<U> pOps) {
+        return this.keySet().stream().map(p_235784_ -> pOps.createString(p_235784_.toString()));
     }
 
     @Nullable
-    ResourceLocation getKey(T p_123006_);
+    ResourceLocation getKey(T pValue);
 
-    Optional<ResourceKey<T>> getResourceKey(T p_123008_);
+    Optional<ResourceKey<T>> getResourceKey(T pValue);
 
     @Override
     int getId(@Nullable T p_122977_);
 
     @Nullable
-    T getValue(@Nullable ResourceKey<T> p_362147_);
+    T getValue(@Nullable ResourceKey<T> pKey);
 
     @Nullable
-    T getValue(@Nullable ResourceLocation p_364352_);
+    T getValue(@Nullable ResourceLocation pKey);
 
-    Optional<RegistrationInfo> registrationInfo(ResourceKey<T> p_333179_);
+    Optional<RegistrationInfo> registrationInfo(ResourceKey<T> pKey);
 
-    default Optional<T> getOptional(@Nullable ResourceLocation p_123007_) {
-        return Optional.ofNullable(this.getValue(p_123007_));
+    default Optional<T> getOptional(@Nullable ResourceLocation pName) {
+        return Optional.ofNullable(this.getValue(pName));
     }
 
-    default Optional<T> getOptional(@Nullable ResourceKey<T> p_123010_) {
-        return Optional.ofNullable(this.getValue(p_123010_));
+    default Optional<T> getOptional(@Nullable ResourceKey<T> pRegistryKey) {
+        return Optional.ofNullable(this.getValue(pRegistryKey));
     }
 
     Optional<Holder.Reference<T>> getAny();
 
-    default T getValueOrThrow(ResourceKey<T> p_367641_) {
-        T t = this.getValue(p_367641_);
+    default T getValueOrThrow(ResourceKey<T> pKey) {
+        T t = this.getValue(pKey);
         if (t == null) {
-            throw new IllegalStateException("Missing key in " + this.key() + ": " + p_367641_);
+            throw new IllegalStateException("Missing key in " + this.key() + ": " + pKey);
         } else {
             return t;
         }
@@ -96,53 +96,53 @@ public interface Registry<T> extends Keyable, HolderLookup.RegistryLookup<T>, Id
 
     Set<ResourceKey<T>> registryKeySet();
 
-    Optional<Holder.Reference<T>> getRandom(RandomSource p_235781_);
+    Optional<Holder.Reference<T>> getRandom(RandomSource pRandom);
 
     default Stream<T> stream() {
         return StreamSupport.stream(this.spliterator(), false);
     }
 
-    boolean containsKey(ResourceLocation p_123011_);
+    boolean containsKey(ResourceLocation pName);
 
-    boolean containsKey(ResourceKey<T> p_175475_);
+    boolean containsKey(ResourceKey<T> pKey);
 
-    static <T> T register(Registry<? super T> p_122962_, String p_122963_, T p_122964_) {
-        return register(p_122962_, ResourceLocation.parse(p_122963_), p_122964_);
+    static <T> T register(Registry<? super T> pRegistry, String pName, T pValue) {
+        return register(pRegistry, ResourceLocation.parse(pName), pValue);
     }
 
-    static <V, T extends V> T register(Registry<V> p_122966_, ResourceLocation p_122967_, T p_122968_) {
-        return register(p_122966_, ResourceKey.create(p_122966_.key(), p_122967_), p_122968_);
+    static <V, T extends V> T register(Registry<V> pRegistry, ResourceLocation pName, T pValue) {
+        return register(pRegistry, ResourceKey.create(pRegistry.key(), pName), pValue);
     }
 
-    static <V, T extends V> T register(Registry<V> p_194580_, ResourceKey<V> p_194581_, T p_194582_) {
-        ((WritableRegistry)p_194580_).register(p_194581_, (V)p_194582_, RegistrationInfo.BUILT_IN);
-        return p_194582_;
+    static <V, T extends V> T register(Registry<V> pRegistry, ResourceKey<V> pKey, T pValue) {
+        ((WritableRegistry)pRegistry).register(pKey, (V)pValue, RegistrationInfo.BUILT_IN);
+        return pValue;
     }
 
-    static <T> Holder.Reference<T> registerForHolder(Registry<T> p_263347_, ResourceKey<T> p_263355_, T p_263428_) {
-        return ((WritableRegistry)p_263347_).register(p_263355_, p_263428_, RegistrationInfo.BUILT_IN);
+    static <T> Holder.Reference<T> registerForHolder(Registry<T> pRegistry, ResourceKey<T> pKey, T pValue) {
+        return ((WritableRegistry)pRegistry).register(pKey, pValue, RegistrationInfo.BUILT_IN);
     }
 
-    static <T> Holder.Reference<T> registerForHolder(Registry<T> p_263351_, ResourceLocation p_263363_, T p_263423_) {
-        return registerForHolder(p_263351_, ResourceKey.create(p_263351_.key(), p_263363_), p_263423_);
+    static <T> Holder.Reference<T> registerForHolder(Registry<T> pRegistry, ResourceLocation pName, T pValue) {
+        return registerForHolder(pRegistry, ResourceKey.create(pRegistry.key(), pName), pValue);
     }
 
     Registry<T> freeze();
 
-    Holder.Reference<T> createIntrusiveHolder(T p_206068_);
+    Holder.Reference<T> createIntrusiveHolder(T pValue);
 
-    Optional<Holder.Reference<T>> get(int p_367150_);
+    Optional<Holder.Reference<T>> get(int pIndex);
 
-    Optional<Holder.Reference<T>> get(ResourceLocation p_370108_);
+    Optional<Holder.Reference<T>> get(ResourceLocation pKey);
 
-    Holder<T> wrapAsHolder(T p_263382_);
+    Holder<T> wrapAsHolder(T pValue);
 
-    default Iterable<Holder<T>> getTagOrEmpty(TagKey<T> p_206059_) {
-        return DataFixUtils.orElse((Optional<Iterable>)(Optional)this.get(p_206059_), List.<T>of());
+    default Iterable<Holder<T>> getTagOrEmpty(TagKey<T> pKey) {
+        return DataFixUtils.orElse((Optional<Iterable>)(Optional)this.get(pKey), List.<T>of());
     }
 
-    default Optional<Holder<T>> getRandomElementOf(TagKey<T> p_332242_, RandomSource p_335036_) {
-        return this.get(p_332242_).flatMap(p_325677_ -> p_325677_.getRandomElement(p_335036_));
+    default Optional<Holder<T>> getRandomElementOf(TagKey<T> pKey, RandomSource pRandom) {
+        return this.get(pKey).flatMap(p_325677_ -> p_325677_.getRandomElement(pRandom));
     }
 
     Stream<HolderSet.Named<T>> getTags();
@@ -170,7 +170,7 @@ public interface Registry<T> extends Keyable, HolderLookup.RegistryLookup<T>, Id
         };
     }
 
-    Registry.PendingTags<T> prepareTagReload(TagLoader.LoadResult<T> p_364537_);
+    Registry.PendingTags<T> prepareTagReload(TagLoader.LoadResult<T> pLoadResult);
 
     public interface PendingTags<T> {
         ResourceKey<? extends Registry<? extends T>> key();

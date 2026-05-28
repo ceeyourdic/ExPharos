@@ -77,69 +77,69 @@ public enum ConversionType {
 
     private final boolean discardAfterConversion;
 
-    ConversionType(final boolean p_361780_) {
-        this.discardAfterConversion = p_361780_;
+    ConversionType(final boolean pDiscardAfterConversion) {
+        this.discardAfterConversion = pDiscardAfterConversion;
     }
 
     public boolean shouldDiscardAfterConversion() {
         return this.discardAfterConversion;
     }
 
-    abstract void convert(Mob p_364369_, Mob p_364345_, ConversionParams p_366192_);
+    abstract void convert(Mob pOldMob, Mob pNewMob, ConversionParams pConversionParams);
 
-    void convertCommon(Mob p_368736_, Mob p_363577_, ConversionParams p_361619_) {
-        p_363577_.setAbsorptionAmount(p_368736_.getAbsorptionAmount());
+    void convertCommon(Mob pOldMob, Mob pNewMob, ConversionParams pConversionParams) {
+        pNewMob.setAbsorptionAmount(pOldMob.getAbsorptionAmount());
 
-        for (MobEffectInstance mobeffectinstance : p_368736_.getActiveEffects()) {
-            p_363577_.addEffect(new MobEffectInstance(mobeffectinstance));
+        for (MobEffectInstance mobeffectinstance : pOldMob.getActiveEffects()) {
+            pNewMob.addEffect(new MobEffectInstance(mobeffectinstance));
         }
 
-        if (p_368736_.isBaby()) {
-            p_363577_.setBaby(true);
+        if (pOldMob.isBaby()) {
+            pNewMob.setBaby(true);
         }
 
-        if (p_368736_ instanceof AgeableMob ageablemob && p_363577_ instanceof AgeableMob ageablemob1) {
+        if (pOldMob instanceof AgeableMob ageablemob && pNewMob instanceof AgeableMob ageablemob1) {
             ageablemob1.setAge(ageablemob.getAge());
             ageablemob1.forcedAge = ageablemob.forcedAge;
             ageablemob1.forcedAgeTimer = ageablemob.forcedAgeTimer;
         }
 
-        Brain<?> brain = p_368736_.getBrain();
-        Brain<?> brain1 = p_363577_.getBrain();
+        Brain<?> brain = pOldMob.getBrain();
+        Brain<?> brain1 = pNewMob.getBrain();
         if (brain.checkMemory(MemoryModuleType.ANGRY_AT, MemoryStatus.REGISTERED) && brain.hasMemoryValue(MemoryModuleType.ANGRY_AT)) {
             brain1.setMemory(MemoryModuleType.ANGRY_AT, brain.getMemory(MemoryModuleType.ANGRY_AT));
         }
 
-        if (p_361619_.preserveCanPickUpLoot()) {
-            p_363577_.setCanPickUpLoot(p_368736_.canPickUpLoot());
+        if (pConversionParams.preserveCanPickUpLoot()) {
+            pNewMob.setCanPickUpLoot(pOldMob.canPickUpLoot());
         }
 
-        p_363577_.setLeftHanded(p_368736_.isLeftHanded());
-        p_363577_.setNoAi(p_368736_.isNoAi());
-        if (p_368736_.isPersistenceRequired()) {
-            p_363577_.setPersistenceRequired();
+        pNewMob.setLeftHanded(pOldMob.isLeftHanded());
+        pNewMob.setNoAi(pOldMob.isNoAi());
+        if (pOldMob.isPersistenceRequired()) {
+            pNewMob.setPersistenceRequired();
         }
 
-        if (p_368736_.hasCustomName()) {
-            p_363577_.setCustomName(p_368736_.getCustomName());
-            p_363577_.setCustomNameVisible(p_368736_.isCustomNameVisible());
+        if (pOldMob.hasCustomName()) {
+            pNewMob.setCustomName(pOldMob.getCustomName());
+            pNewMob.setCustomNameVisible(pOldMob.isCustomNameVisible());
         }
 
-        p_363577_.setSharedFlagOnFire(p_368736_.isOnFire());
-        p_363577_.setInvulnerable(p_368736_.isInvulnerable());
-        p_363577_.setNoGravity(p_368736_.isNoGravity());
-        p_363577_.setPortalCooldown(p_368736_.getPortalCooldown());
-        p_363577_.setSilent(p_368736_.isSilent());
-        p_368736_.getTags().forEach(p_363577_::addTag);
-        if (p_361619_.team() != null) {
-            Scoreboard scoreboard = p_363577_.level().getScoreboard();
-            scoreboard.addPlayerToTeam(p_363577_.getStringUUID(), p_361619_.team());
-            if (p_368736_.getTeam() != null && p_368736_.getTeam() == p_361619_.team()) {
-                scoreboard.removePlayerFromTeam(p_368736_.getStringUUID(), p_368736_.getTeam());
+        pNewMob.setSharedFlagOnFire(pOldMob.isOnFire());
+        pNewMob.setInvulnerable(pOldMob.isInvulnerable());
+        pNewMob.setNoGravity(pOldMob.isNoGravity());
+        pNewMob.setPortalCooldown(pOldMob.getPortalCooldown());
+        pNewMob.setSilent(pOldMob.isSilent());
+        pOldMob.getTags().forEach(pNewMob::addTag);
+        if (pConversionParams.team() != null) {
+            Scoreboard scoreboard = pNewMob.level().getScoreboard();
+            scoreboard.addPlayerToTeam(pNewMob.getStringUUID(), pConversionParams.team());
+            if (pOldMob.getTeam() != null && pOldMob.getTeam() == pConversionParams.team()) {
+                scoreboard.removePlayerFromTeam(pOldMob.getStringUUID(), pOldMob.getTeam());
             }
         }
 
-        if (p_368736_ instanceof Zombie zombie1 && zombie1.canBreakDoors() && p_363577_ instanceof Zombie zombie) {
+        if (pOldMob instanceof Zombie zombie1 && zombie1.canBreakDoors() && pNewMob instanceof Zombie zombie) {
             zombie.setCanBreakDoors(true);
         }
     }

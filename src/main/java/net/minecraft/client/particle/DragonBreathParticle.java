@@ -20,13 +20,13 @@ public class DragonBreathParticle extends TextureSheetParticle {
     private final SpriteSet sprites;
 
     DragonBreathParticle(
-        ClientLevel p_106005_, double p_106006_, double p_106007_, double p_106008_, double p_106009_, double p_106010_, double p_106011_, SpriteSet p_106012_
+        ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites
     ) {
-        super(p_106005_, p_106006_, p_106007_, p_106008_);
+        super(pLevel, pX, pY, pZ);
         this.friction = 0.96F;
-        this.xd = p_106009_;
-        this.yd = p_106010_;
-        this.zd = p_106011_;
+        this.xd = pXSpeed;
+        this.yd = pYSpeed;
+        this.zd = pZSpeed;
         this.rCol = Mth.nextFloat(this.random, 0.7176471F, 0.8745098F);
         this.gCol = Mth.nextFloat(this.random, 0.0F, 0.0F);
         this.bCol = Mth.nextFloat(this.random, 0.8235294F, 0.9764706F);
@@ -34,8 +34,8 @@ public class DragonBreathParticle extends TextureSheetParticle {
         this.lifetime = (int)(20.0 / ((double)this.random.nextFloat() * 0.8 + 0.2));
         this.hasHitGround = false;
         this.hasPhysics = false;
-        this.sprites = p_106012_;
-        this.setSpriteFromAge(p_106012_);
+        this.sprites = pSprites;
+        this.setSpriteFromAge(pSprites);
     }
 
     @Override
@@ -76,29 +76,29 @@ public class DragonBreathParticle extends TextureSheetParticle {
     }
 
     @Override
-    public float getQuadSize(float p_106026_) {
-        return this.quadSize * Mth.clamp(((float)this.age + p_106026_) / (float)this.lifetime * 32.0F, 0.0F, 1.0F);
+    public float getQuadSize(float pScaleFactor) {
+        return this.quadSize * Mth.clamp(((float)this.age + pScaleFactor) / (float)this.lifetime * 32.0F, 0.0F, 1.0F);
     }
 
     @OnlyIn(Dist.CLIENT)
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public Provider(SpriteSet p_106029_) {
-            this.sprites = p_106029_;
+        public Provider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_106040_,
-            ClientLevel p_106041_,
-            double p_106042_,
-            double p_106043_,
-            double p_106044_,
-            double p_106045_,
-            double p_106046_,
-            double p_106047_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            return new DragonBreathParticle(p_106041_, p_106042_, p_106043_, p_106044_, p_106045_, p_106046_, p_106047_, this.sprites);
+            return new DragonBreathParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites);
         }
     }
 }

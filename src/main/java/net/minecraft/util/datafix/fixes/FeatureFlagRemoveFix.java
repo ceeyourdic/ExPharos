@@ -18,10 +18,10 @@ public class FeatureFlagRemoveFix extends DataFix {
     private final String name;
     private final Set<String> flagsToRemove;
 
-    public FeatureFlagRemoveFix(Schema p_277930_, String p_277628_, Set<String> p_277886_) {
-        super(p_277930_, false);
-        this.name = p_277628_;
-        this.flagsToRemove = p_277886_;
+    public FeatureFlagRemoveFix(Schema pOutputSchema, String pName, Set<String> pFlagsToRemove) {
+        super(pOutputSchema, false);
+        this.name = pName;
+        this.flagsToRemove = pFlagsToRemove;
     }
 
     @Override
@@ -31,9 +31,9 @@ public class FeatureFlagRemoveFix extends DataFix {
         );
     }
 
-    private <T> Dynamic<T> fixTag(Dynamic<T> p_277583_) {
-        List<Dynamic<T>> list = p_277583_.get("removed_features").asStream().collect(Collectors.toCollection(ArrayList::new));
-        Dynamic<T> dynamic = p_277583_.update(
+    private <T> Dynamic<T> fixTag(Dynamic<T> pTag) {
+        List<Dynamic<T>> list = pTag.get("removed_features").asStream().collect(Collectors.toCollection(ArrayList::new));
+        Dynamic<T> dynamic = pTag.update(
             "enabled_features", p_326589_ -> DataFixUtils.orElse(p_326589_.asStreamOpt().result().map(p_277400_ -> p_277400_.filter(p_326586_ -> {
                         Optional<String> optional = p_326586_.asString().result();
                         if (optional.isEmpty()) {
@@ -41,15 +41,15 @@ public class FeatureFlagRemoveFix extends DataFix {
                         } else {
                             boolean flag = this.flagsToRemove.contains(optional.get());
                             if (flag) {
-                                list.add(p_277583_.createString(optional.get()));
+                                list.add(pTag.createString(optional.get()));
                             }
 
                             return !flag;
                         }
-                    })).map(p_277583_::createList), p_326589_)
+                    })).map(pTag::createList), p_326589_)
         );
         if (!list.isEmpty()) {
-            dynamic = dynamic.set("removed_features", p_277583_.createList(list.stream()));
+            dynamic = dynamic.set("removed_features", pTag.createList(list.stream()));
         }
 
         return dynamic;

@@ -23,14 +23,14 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 public class SetBlockCommand {
     private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.setblock.failed"));
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_214731_, CommandBuildContext p_214732_) {
-        p_214731_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher, CommandBuildContext pContext) {
+        pDispatcher.register(
             Commands.literal("setblock")
                 .requires(p_138606_ -> p_138606_.hasPermission(2))
                 .then(
                     Commands.argument("pos", BlockPosArgument.blockPos())
                         .then(
-                            Commands.argument("block", BlockStateArgument.block(p_214732_))
+                            Commands.argument("block", BlockStateArgument.block(pContext))
                                 .executes(
                                     p_138618_ -> setBlock(
                                             p_138618_.getSource(),
@@ -82,28 +82,28 @@ public class SetBlockCommand {
     }
 
     private static int setBlock(
-        CommandSourceStack p_138608_, BlockPos p_138609_, BlockInput p_138610_, SetBlockCommand.Mode p_138611_, @Nullable Predicate<BlockInWorld> p_138612_
+        CommandSourceStack pSource, BlockPos pPos, BlockInput pState, SetBlockCommand.Mode pMode, @Nullable Predicate<BlockInWorld> pPredicate
     ) throws CommandSyntaxException {
-        ServerLevel serverlevel = p_138608_.getLevel();
-        if (p_138612_ != null && !p_138612_.test(new BlockInWorld(serverlevel, p_138609_, true))) {
+        ServerLevel serverlevel = pSource.getLevel();
+        if (pPredicate != null && !pPredicate.test(new BlockInWorld(serverlevel, pPos, true))) {
             throw ERROR_FAILED.create();
         } else {
             boolean flag;
-            if (p_138611_ == SetBlockCommand.Mode.DESTROY) {
-                serverlevel.destroyBlock(p_138609_, true);
-                flag = !p_138610_.getState().isAir() || !serverlevel.getBlockState(p_138609_).isAir();
+            if (pMode == SetBlockCommand.Mode.DESTROY) {
+                serverlevel.destroyBlock(pPos, true);
+                flag = !pState.getState().isAir() || !serverlevel.getBlockState(pPos).isAir();
             } else {
-                BlockEntity blockentity = serverlevel.getBlockEntity(p_138609_);
+                BlockEntity blockentity = serverlevel.getBlockEntity(pPos);
                 Clearable.tryClear(blockentity);
                 flag = true;
             }
 
-            if (flag && !p_138610_.place(serverlevel, p_138609_, 2)) {
+            if (flag && !pState.place(serverlevel, pPos, 2)) {
                 throw ERROR_FAILED.create();
             } else {
-                serverlevel.blockUpdated(p_138609_, p_138610_.getState().getBlock());
-                p_138608_.sendSuccess(
-                    () -> Component.translatable("commands.setblock.success", p_138609_.getX(), p_138609_.getY(), p_138609_.getZ()), true
+                serverlevel.blockUpdated(pPos, pState.getState().getBlock());
+                pSource.sendSuccess(
+                    () -> Component.translatable("commands.setblock.success", pPos.getX(), pPos.getY(), pPos.getZ()), true
                 );
                 return 1;
             }
@@ -112,7 +112,7 @@ public class SetBlockCommand {
 
     public interface Filter {
         @Nullable
-        BlockInput filter(BoundingBox p_138620_, BlockPos p_138621_, BlockInput p_138622_, ServerLevel p_138623_);
+        BlockInput filter(BoundingBox pBoundingBox, BlockPos pPos, BlockInput pBlockInput, ServerLevel pLevel);
     }
 
     public static enum Mode {

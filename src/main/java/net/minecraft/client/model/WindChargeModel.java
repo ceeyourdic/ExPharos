@@ -19,9 +19,9 @@ public class WindChargeModel extends EntityModel<EntityRenderState> {
     private final ModelPart windCharge;
     private final ModelPart wind;
 
-    public WindChargeModel(ModelPart p_309708_) {
-        super(p_309708_, RenderType::entityTranslucent);
-        this.bone = p_309708_.getChild("bone");
+    public WindChargeModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entityTranslucent);
+        this.bone = pRoot.getChild("bone");
         this.wind = this.bone.getChild("wind");
         this.windCharge = this.bone.getChild("wind_charge");
     }

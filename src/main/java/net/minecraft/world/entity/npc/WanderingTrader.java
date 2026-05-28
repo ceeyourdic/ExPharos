@@ -103,11 +103,11 @@ public class WanderingTrader extends AbstractVillager implements Consumable.Over
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_35856_, InteractionHand p_35857_) {
-        ItemStack itemstack = p_35856_.getItemInHand(p_35857_);
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
         if (!itemstack.is(Items.VILLAGER_SPAWN_EGG) && this.isAlive() && !this.isTrading() && !this.isBaby()) {
-            if (p_35857_ == InteractionHand.MAIN_HAND) {
-                p_35856_.awardStat(Stats.TALKED_TO_VILLAGER);
+            if (pHand == InteractionHand.MAIN_HAND) {
+                pPlayer.awardStat(Stats.TALKED_TO_VILLAGER);
             }
 
             if (!this.level().isClientSide) {
@@ -115,13 +115,13 @@ public class WanderingTrader extends AbstractVillager implements Consumable.Over
                     return InteractionResult.CONSUME;
                 }
 
-                this.setTradingPlayer(p_35856_);
-                this.openTradingScreen(p_35856_, this.getDisplayName(), 1);
+                this.setTradingPlayer(pPlayer);
+                this.openTradingScreen(pPlayer, this.getDisplayName(), 1);
             }
 
             return InteractionResult.SUCCESS;
         } else {
-            return super.mobInteract(p_35856_, p_35857_);
+            return super.mobInteract(pPlayer, pHand);
         }
     }
 
@@ -155,33 +155,33 @@ public class WanderingTrader extends AbstractVillager implements Consumable.Over
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_35861_) {
-        super.addAdditionalSaveData(p_35861_);
-        p_35861_.putInt("DespawnDelay", this.despawnDelay);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("DespawnDelay", this.despawnDelay);
         if (this.wanderTarget != null) {
-            p_35861_.put("wander_target", NbtUtils.writeBlockPos(this.wanderTarget));
+            pCompound.put("wander_target", NbtUtils.writeBlockPos(this.wanderTarget));
         }
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_35852_) {
-        super.readAdditionalSaveData(p_35852_);
-        if (p_35852_.contains("DespawnDelay", 99)) {
-            this.despawnDelay = p_35852_.getInt("DespawnDelay");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("DespawnDelay", 99)) {
+            this.despawnDelay = pCompound.getInt("DespawnDelay");
         }
 
-        NbtUtils.readBlockPos(p_35852_, "wander_target").ifPresent(p_327049_ -> this.wanderTarget = p_327049_);
+        NbtUtils.readBlockPos(pCompound, "wander_target").ifPresent(p_327049_ -> this.wanderTarget = p_327049_);
         this.setAge(Math.max(0, this.getAge()));
     }
 
     @Override
-    public boolean removeWhenFarAway(double p_35886_) {
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
         return false;
     }
 
     @Override
-    protected void rewardTradeXp(MerchantOffer p_35859_) {
-        if (p_35859_.shouldRewardExp()) {
+    protected void rewardTradeXp(MerchantOffer pOffer) {
+        if (pOffer.shouldRewardExp()) {
             int i = 3 + this.random.nextInt(4);
             this.level().addFreshEntity(new ExperienceOrb(this.level(), this.getX(), this.getY() + 0.5, this.getZ(), i));
         }
@@ -193,7 +193,7 @@ public class WanderingTrader extends AbstractVillager implements Consumable.Over
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_35870_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.WANDERING_TRADER_HURT;
     }
 
@@ -208,8 +208,8 @@ public class WanderingTrader extends AbstractVillager implements Consumable.Over
     }
 
     @Override
-    protected SoundEvent getTradeUpdatedSound(boolean p_35890_) {
-        return p_35890_ ? SoundEvents.WANDERING_TRADER_YES : SoundEvents.WANDERING_TRADER_NO;
+    protected SoundEvent getTradeUpdatedSound(boolean pGetYesSound) {
+        return pGetYesSound ? SoundEvents.WANDERING_TRADER_YES : SoundEvents.WANDERING_TRADER_NO;
     }
 
     @Override
@@ -217,8 +217,8 @@ public class WanderingTrader extends AbstractVillager implements Consumable.Over
         return SoundEvents.WANDERING_TRADER_YES;
     }
 
-    public void setDespawnDelay(int p_35892_) {
-        this.despawnDelay = p_35892_;
+    public void setDespawnDelay(int pDespawnDelay) {
+        this.despawnDelay = pDespawnDelay;
     }
 
     public int getDespawnDelay() {
@@ -239,8 +239,8 @@ public class WanderingTrader extends AbstractVillager implements Consumable.Over
         }
     }
 
-    public void setWanderTarget(@Nullable BlockPos p_35884_) {
-        this.wanderTarget = p_35884_;
+    public void setWanderTarget(@Nullable BlockPos pWanderTarget) {
+        this.wanderTarget = pWanderTarget;
     }
 
     @Nullable
@@ -253,10 +253,10 @@ public class WanderingTrader extends AbstractVillager implements Consumable.Over
         final double stopDistance;
         final double speedModifier;
 
-        WanderToPositionGoal(final WanderingTrader p_35899_, final double p_35900_, final double p_35901_) {
-            this.trader = p_35899_;
-            this.stopDistance = p_35900_;
-            this.speedModifier = p_35901_;
+        WanderToPositionGoal(final WanderingTrader pTrader, final double pStopDistance, final double pSpeedModifier) {
+            this.trader = pTrader;
+            this.stopDistance = pStopDistance;
+            this.speedModifier = pSpeedModifier;
             this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         }
 
@@ -292,8 +292,8 @@ public class WanderingTrader extends AbstractVillager implements Consumable.Over
             }
         }
 
-        private boolean isTooFarAway(BlockPos p_35904_, double p_35905_) {
-            return !p_35904_.closerToCenterThan(this.trader.position(), p_35905_);
+        private boolean isTooFarAway(BlockPos pPos, double pDistance) {
+            return !pPos.closerToCenterThan(this.trader.position(), pDistance);
         }
     }
 }

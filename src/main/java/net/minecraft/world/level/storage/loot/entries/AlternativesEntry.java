@@ -51,19 +51,19 @@ public class AlternativesEntry extends CompositeEntryBase {
         }
     }
 
-    public static AlternativesEntry.Builder alternatives(LootPoolEntryContainer.Builder<?>... p_79396_) {
-        return new AlternativesEntry.Builder(p_79396_);
+    public static AlternativesEntry.Builder alternatives(LootPoolEntryContainer.Builder<?>... pChildren) {
+        return new AlternativesEntry.Builder(pChildren);
     }
 
-    public static <E> AlternativesEntry.Builder alternatives(Collection<E> p_230934_, Function<E, LootPoolEntryContainer.Builder<?>> p_230935_) {
-        return new AlternativesEntry.Builder(p_230934_.stream().map(p_230935_::apply).toArray(LootPoolEntryContainer.Builder[]::new));
+    public static <E> AlternativesEntry.Builder alternatives(Collection<E> pChildrenSources, Function<E, LootPoolEntryContainer.Builder<?>> pToChildrenFunction) {
+        return new AlternativesEntry.Builder(pChildrenSources.stream().map(pToChildrenFunction::apply).toArray(LootPoolEntryContainer.Builder[]::new));
     }
 
     public static class Builder extends LootPoolEntryContainer.Builder<AlternativesEntry.Builder> {
         private final ImmutableList.Builder<LootPoolEntryContainer> entries = ImmutableList.builder();
 
-        public Builder(LootPoolEntryContainer.Builder<?>... p_79399_) {
-            for (LootPoolEntryContainer.Builder<?> builder : p_79399_) {
+        public Builder(LootPoolEntryContainer.Builder<?>... pChildren) {
+            for (LootPoolEntryContainer.Builder<?> builder : pChildren) {
                 this.entries.add(builder.build());
             }
         }

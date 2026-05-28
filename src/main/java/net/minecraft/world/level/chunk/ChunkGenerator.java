@@ -84,15 +84,15 @@ public abstract class ChunkGenerator {
     private final Supplier<List<FeatureSorter.StepFeatureData>> featuresPerStep;
     private final Function<Holder<Biome>, BiomeGenerationSettings> generationSettingsGetter;
 
-    public ChunkGenerator(BiomeSource p_256133_) {
-        this(p_256133_, p_223234_ -> p_223234_.value().getGenerationSettings());
+    public ChunkGenerator(BiomeSource pBiomeSource) {
+        this(pBiomeSource, p_223234_ -> p_223234_.value().getGenerationSettings());
     }
 
-    public ChunkGenerator(BiomeSource p_255838_, Function<Holder<Biome>, BiomeGenerationSettings> p_256216_) {
-        this.biomeSource = p_255838_;
-        this.generationSettingsGetter = p_256216_;
+    public ChunkGenerator(BiomeSource pBiomeSource, Function<Holder<Biome>, BiomeGenerationSettings> pGenerationSettingsGetter) {
+        this.biomeSource = pBiomeSource;
+        this.generationSettingsGetter = pGenerationSettingsGetter;
         this.featuresPerStep = Suppliers.memoize(
-            () -> FeatureSorter.buildFeaturesPerStep(List.copyOf(p_255838_.possibleBiomes()), p_223216_ -> p_256216_.apply(p_223216_).features(), true)
+            () -> FeatureSorter.buildFeaturesPerStep(List.copyOf(pBiomeSource.possibleBiomes()), p_223216_ -> pGenerationSettingsGetter.apply(p_223216_).features(), true)
         );
     }
 
@@ -102,33 +102,33 @@ public abstract class ChunkGenerator {
 
     protected abstract MapCodec<? extends ChunkGenerator> codec();
 
-    public ChunkGeneratorStructureState createState(HolderLookup<StructureSet> p_256405_, RandomState p_256101_, long p_256018_) {
-        return ChunkGeneratorStructureState.createForNormal(p_256101_, p_256018_, this.biomeSource, p_256405_);
+    public ChunkGeneratorStructureState createState(HolderLookup<StructureSet> pStructureSetLookup, RandomState pRandomState, long pSeed) {
+        return ChunkGeneratorStructureState.createForNormal(pRandomState, pSeed, this.biomeSource, pStructureSetLookup);
     }
 
     public Optional<ResourceKey<MapCodec<? extends ChunkGenerator>>> getTypeNameForDataFixer() {
         return BuiltInRegistries.CHUNK_GENERATOR.getResourceKey(this.codec());
     }
 
-    public CompletableFuture<ChunkAccess> createBiomes(RandomState p_223160_, Blender p_223161_, StructureManager p_223162_, ChunkAccess p_223163_) {
+    public CompletableFuture<ChunkAccess> createBiomes(RandomState pRandomState, Blender pBlender, StructureManager pStructureManager, ChunkAccess pChunk) {
         return CompletableFuture.supplyAsync(() -> {
-            p_223163_.fillBiomesFromNoise(this.biomeSource, p_223160_.sampler());
-            return p_223163_;
+            pChunk.fillBiomesFromNoise(this.biomeSource, pRandomState.sampler());
+            return pChunk;
         }, Util.backgroundExecutor().forName("init_biomes"));
     }
 
     public abstract void applyCarvers(
-        WorldGenRegion p_223043_, long p_223044_, RandomState p_223045_, BiomeManager p_223046_, StructureManager p_223047_, ChunkAccess p_223048_
+        WorldGenRegion pLevel, long pSeed, RandomState pRandom, BiomeManager pBiomeManager, StructureManager pStructureManager, ChunkAccess pChunk
     );
 
     @Nullable
     public Pair<BlockPos, Holder<Structure>> findNearestMapStructure(
-        ServerLevel p_223038_, HolderSet<Structure> p_223039_, BlockPos p_223040_, int p_223041_, boolean p_223042_
+        ServerLevel pLevel, HolderSet<Structure> pStructure, BlockPos pPos, int pSearchRadius, boolean pSkipKnownStructures
     ) {
-        ChunkGeneratorStructureState chunkgeneratorstructurestate = p_223038_.getChunkSource().getGeneratorState();
+        ChunkGeneratorStructureState chunkgeneratorstructurestate = pLevel.getChunkSource().getGeneratorState();
         Map<StructurePlacement, Set<Holder<Structure>>> map = new Object2ObjectArrayMap<>();
 
-        for (Holder<Structure> holder : p_223039_) {
+        for (Holder<Structure> holder : pStructure) {
             for (StructurePlacement structureplacement : chunkgeneratorstructurestate.getPlacementsForStructure(holder)) {
                 map.computeIfAbsent(structureplacement, p_223127_ -> new ObjectArraySet<>()).add(holder);
             }
@@ -139,7 +139,7 @@ public abstract class ChunkGenerator {
         } else {
             Pair<BlockPos, Holder<Structure>> pair2 = null;
             double d2 = Double.MAX_VALUE;
-            StructureManager structuremanager = p_223038_.structureManager();
+            StructureManager structuremanager = pLevel.structureManager();
             List<Entry<StructurePlacement, Set<Holder<Structure>>>> list = new ArrayList<>(map.size());
 
             for (Entry<StructurePlacement, Set<Holder<Structure>>> entry : map.entrySet()) {
@@ -147,11 +147,11 @@ public abstract class ChunkGenerator {
                 if (structureplacement1 instanceof ConcentricRingsStructurePlacement) {
                     ConcentricRingsStructurePlacement concentricringsstructureplacement = (ConcentricRingsStructurePlacement)structureplacement1;
                     Pair<BlockPos, Holder<Structure>> pair = this.getNearestGeneratedStructure(
-                        entry.getValue(), p_223038_, structuremanager, p_223040_, p_223042_, concentricringsstructureplacement
+                        entry.getValue(), pLevel, structuremanager, pPos, pSkipKnownStructures, concentricringsstructureplacement
                     );
                     if (pair != null) {
                         BlockPos blockpos = pair.getFirst();
-                        double d0 = p_223040_.distSqr(blockpos);
+                        double d0 = pPos.distSqr(blockpos);
                         if (d0 < d2) {
                             d2 = d0;
                             pair2 = pair;
@@ -163,28 +163,28 @@ public abstract class ChunkGenerator {
             }
 
             if (!list.isEmpty()) {
-                int i = SectionPos.blockToSectionCoord(p_223040_.getX());
-                int j = SectionPos.blockToSectionCoord(p_223040_.getZ());
+                int i = SectionPos.blockToSectionCoord(pPos.getX());
+                int j = SectionPos.blockToSectionCoord(pPos.getZ());
 
-                for (int k = 0; k <= p_223041_; k++) {
+                for (int k = 0; k <= pSearchRadius; k++) {
                     boolean flag = false;
 
                     for (Entry<StructurePlacement, Set<Holder<Structure>>> entry1 : list) {
                         RandomSpreadStructurePlacement randomspreadstructureplacement = (RandomSpreadStructurePlacement)entry1.getKey();
                         Pair<BlockPos, Holder<Structure>> pair1 = getNearestGeneratedStructure(
                             entry1.getValue(),
-                            p_223038_,
+                            pLevel,
                             structuremanager,
                             i,
                             j,
                             k,
-                            p_223042_,
+                            pSkipKnownStructures,
                             chunkgeneratorstructurestate.getLevelSeed(),
                             randomspreadstructureplacement
                         );
                         if (pair1 != null) {
                             flag = true;
-                            double d1 = p_223040_.distSqr(pair1.getFirst());
+                            double d1 = pPos.distSqr(pair1.getFirst());
                             if (d1 < d2) {
                                 d2 = d1;
                                 pair2 = pair1;
@@ -204,14 +204,14 @@ public abstract class ChunkGenerator {
 
     @Nullable
     private Pair<BlockPos, Holder<Structure>> getNearestGeneratedStructure(
-        Set<Holder<Structure>> p_223182_,
-        ServerLevel p_223183_,
-        StructureManager p_223184_,
-        BlockPos p_223185_,
-        boolean p_223186_,
-        ConcentricRingsStructurePlacement p_223187_
+        Set<Holder<Structure>> pStructureHoldersSet,
+        ServerLevel pLevel,
+        StructureManager pStructureManager,
+        BlockPos pPos,
+        boolean pSkipKnownStructures,
+        ConcentricRingsStructurePlacement pPlacement
     ) {
-        List<ChunkPos> list = p_223183_.getChunkSource().getGeneratorState().getRingPositionsFor(p_223187_);
+        List<ChunkPos> list = pLevel.getChunkSource().getGeneratorState().getRingPositionsFor(pPlacement);
         if (list == null) {
             throw new IllegalStateException("Somehow tried to find structures for a placement that doesn't exist");
         } else {
@@ -221,10 +221,10 @@ public abstract class ChunkGenerator {
 
             for (ChunkPos chunkpos : list) {
                 blockpos$mutableblockpos.set(SectionPos.sectionToBlockCoord(chunkpos.x, 8), 32, SectionPos.sectionToBlockCoord(chunkpos.z, 8));
-                double d1 = blockpos$mutableblockpos.distSqr(p_223185_);
+                double d1 = blockpos$mutableblockpos.distSqr(pPos);
                 boolean flag = pair == null || d1 < d0;
                 if (flag) {
-                    Pair<BlockPos, Holder<Structure>> pair1 = getStructureGeneratingAt(p_223182_, p_223183_, p_223184_, p_223186_, p_223187_, chunkpos);
+                    Pair<BlockPos, Holder<Structure>> pair1 = getStructureGeneratingAt(pStructureHoldersSet, pLevel, pStructureManager, pSkipKnownStructures, pPlacement, chunkpos);
                     if (pair1 != null) {
                         pair = pair1;
                         d0 = d1;
@@ -238,28 +238,28 @@ public abstract class ChunkGenerator {
 
     @Nullable
     private static Pair<BlockPos, Holder<Structure>> getNearestGeneratedStructure(
-        Set<Holder<Structure>> p_223189_,
-        LevelReader p_223190_,
-        StructureManager p_223191_,
-        int p_223192_,
-        int p_223193_,
-        int p_223194_,
-        boolean p_223195_,
-        long p_223196_,
-        RandomSpreadStructurePlacement p_223197_
+        Set<Holder<Structure>> pStructureHoldersSet,
+        LevelReader pLevel,
+        StructureManager pStructureManager,
+        int pX,
+        int pY,
+        int pZ,
+        boolean pSkipKnownStructures,
+        long pSeed,
+        RandomSpreadStructurePlacement pSpreadPlacement
     ) {
-        int i = p_223197_.spacing();
+        int i = pSpreadPlacement.spacing();
 
-        for (int j = -p_223194_; j <= p_223194_; j++) {
-            boolean flag = j == -p_223194_ || j == p_223194_;
+        for (int j = -pZ; j <= pZ; j++) {
+            boolean flag = j == -pZ || j == pZ;
 
-            for (int k = -p_223194_; k <= p_223194_; k++) {
-                boolean flag1 = k == -p_223194_ || k == p_223194_;
+            for (int k = -pZ; k <= pZ; k++) {
+                boolean flag1 = k == -pZ || k == pZ;
                 if (flag || flag1) {
-                    int l = p_223192_ + i * j;
-                    int i1 = p_223193_ + i * k;
-                    ChunkPos chunkpos = p_223197_.getPotentialStructureChunk(p_223196_, l, i1);
-                    Pair<BlockPos, Holder<Structure>> pair = getStructureGeneratingAt(p_223189_, p_223190_, p_223191_, p_223195_, p_223197_, chunkpos);
+                    int l = pX + i * j;
+                    int i1 = pY + i * k;
+                    ChunkPos chunkpos = pSpreadPlacement.getPotentialStructureChunk(pSeed, l, i1);
+                    Pair<BlockPos, Holder<Structure>> pair = getStructureGeneratingAt(pStructureHoldersSet, pLevel, pStructureManager, pSkipKnownStructures, pSpreadPlacement, chunkpos);
                     if (pair != null) {
                         return pair;
                     }
@@ -272,24 +272,24 @@ public abstract class ChunkGenerator {
 
     @Nullable
     private static Pair<BlockPos, Holder<Structure>> getStructureGeneratingAt(
-        Set<Holder<Structure>> p_223199_,
-        LevelReader p_223200_,
-        StructureManager p_223201_,
-        boolean p_223202_,
-        StructurePlacement p_223203_,
-        ChunkPos p_223204_
+        Set<Holder<Structure>> pStructureHoldersSet,
+        LevelReader pLevel,
+        StructureManager pStructureManager,
+        boolean pSkipKnownStructures,
+        StructurePlacement pPlacement,
+        ChunkPos pChunkPos
     ) {
-        for (Holder<Structure> holder : p_223199_) {
-            StructureCheckResult structurecheckresult = p_223201_.checkStructurePresence(p_223204_, holder.value(), p_223203_, p_223202_);
+        for (Holder<Structure> holder : pStructureHoldersSet) {
+            StructureCheckResult structurecheckresult = pStructureManager.checkStructurePresence(pChunkPos, holder.value(), pPlacement, pSkipKnownStructures);
             if (structurecheckresult != StructureCheckResult.START_NOT_PRESENT) {
-                if (!p_223202_ && structurecheckresult == StructureCheckResult.START_PRESENT) {
-                    return Pair.of(p_223203_.getLocatePos(p_223204_), holder);
+                if (!pSkipKnownStructures && structurecheckresult == StructureCheckResult.START_PRESENT) {
+                    return Pair.of(pPlacement.getLocatePos(pChunkPos), holder);
                 }
 
-                ChunkAccess chunkaccess = p_223200_.getChunk(p_223204_.x, p_223204_.z, ChunkStatus.STRUCTURE_STARTS);
-                StructureStart structurestart = p_223201_.getStartForStructure(SectionPos.bottomOf(chunkaccess), holder.value(), chunkaccess);
-                if (structurestart != null && structurestart.isValid() && (!p_223202_ || tryAddReference(p_223201_, structurestart))) {
-                    return Pair.of(p_223203_.getLocatePos(structurestart.getChunkPos()), holder);
+                ChunkAccess chunkaccess = pLevel.getChunk(pChunkPos.x, pChunkPos.z, ChunkStatus.STRUCTURE_STARTS);
+                StructureStart structurestart = pStructureManager.getStartForStructure(SectionPos.bottomOf(chunkaccess), holder.value(), chunkaccess);
+                if (structurestart != null && structurestart.isValid() && (!pSkipKnownStructures || tryAddReference(pStructureManager, structurestart))) {
+                    return Pair.of(pPlacement.getLocatePos(structurestart.getChunkPos()), holder);
                 }
             }
         }
@@ -297,28 +297,28 @@ public abstract class ChunkGenerator {
         return null;
     }
 
-    private static boolean tryAddReference(StructureManager p_223060_, StructureStart p_223061_) {
-        if (p_223061_.canBeReferenced()) {
-            p_223060_.addReference(p_223061_);
+    private static boolean tryAddReference(StructureManager pStructureManager, StructureStart pStructureStart) {
+        if (pStructureStart.canBeReferenced()) {
+            pStructureManager.addReference(pStructureStart);
             return true;
         } else {
             return false;
         }
     }
 
-    public void applyBiomeDecoration(WorldGenLevel p_223087_, ChunkAccess p_223088_, StructureManager p_223089_) {
-        ChunkPos chunkpos = p_223088_.getPos();
+    public void applyBiomeDecoration(WorldGenLevel pLevel, ChunkAccess pChunk, StructureManager pStructureManager) {
+        ChunkPos chunkpos = pChunk.getPos();
         if (!SharedConstants.debugVoidTerrain(chunkpos)) {
-            SectionPos sectionpos = SectionPos.of(chunkpos, p_223087_.getMinSectionY());
+            SectionPos sectionpos = SectionPos.of(chunkpos, pLevel.getMinSectionY());
             BlockPos blockpos = sectionpos.origin();
-            Registry<Structure> registry = p_223087_.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+            Registry<Structure> registry = pLevel.registryAccess().lookupOrThrow(Registries.STRUCTURE);
             Map<Integer, List<Structure>> map = registry.stream().collect(Collectors.groupingBy(p_223103_ -> p_223103_.step().ordinal()));
             List<FeatureSorter.StepFeatureData> list = this.featuresPerStep.get();
             WorldgenRandom worldgenrandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.generateUniqueSeed()));
-            long i = worldgenrandom.setDecorationSeed(p_223087_.getSeed(), blockpos.getX(), blockpos.getZ());
+            long i = worldgenrandom.setDecorationSeed(pLevel.getSeed(), blockpos.getX(), blockpos.getZ());
             Set<Holder<Biome>> set = new ObjectArraySet<>();
             ChunkPos.rangeClosed(sectionpos.chunk(), 1).forEach(p_223093_ -> {
-                ChunkAccess chunkaccess = p_223087_.getChunk(p_223093_.x, p_223093_.z);
+                ChunkAccess chunkaccess = pLevel.getChunk(p_223093_.x, p_223093_.z);
 
                 for (LevelChunkSection levelchunksection : chunkaccess.getSections()) {
                     levelchunksection.getBiomes().getAll(set::add);
@@ -328,20 +328,20 @@ public abstract class ChunkGenerator {
             int j = list.size();
 
             try {
-                Registry<PlacedFeature> registry1 = p_223087_.registryAccess().lookupOrThrow(Registries.PLACED_FEATURE);
+                Registry<PlacedFeature> registry1 = pLevel.registryAccess().lookupOrThrow(Registries.PLACED_FEATURE);
                 int i1 = Math.max(GenerationStep.Decoration.values().length, j);
 
                 for (int k = 0; k < i1; k++) {
                     int l = 0;
-                    if (p_223089_.shouldGenerateStructures()) {
+                    if (pStructureManager.shouldGenerateStructures()) {
                         for (Structure structure : map.getOrDefault(k, Collections.emptyList())) {
                             worldgenrandom.setFeatureSeed(i, l, k);
                             Supplier<String> supplier = () -> registry.getResourceKey(structure).map(Object::toString).orElseGet(structure::toString);
 
                             try {
-                                p_223087_.setCurrentlyGenerating(supplier);
-                                p_223089_.startsForStructure(sectionpos, structure)
-                                    .forEach(p_223086_ -> p_223086_.placeInChunk(p_223087_, p_223089_, this, worldgenrandom, getWritableArea(p_223088_), chunkpos));
+                                pLevel.setCurrentlyGenerating(supplier);
+                                pStructureManager.startsForStructure(sectionpos, structure)
+                                    .forEach(p_223086_ -> p_223086_.placeInChunk(pLevel, pStructureManager, this, worldgenrandom, getWritableArea(pChunk), chunkpos));
                             } catch (Exception exception) {
                                 CrashReport crashreport1 = CrashReport.forThrowable(exception, "Feature placement");
                                 crashreport1.addCategory("Feature").setDetail("Description", supplier::get);
@@ -378,8 +378,8 @@ public abstract class ChunkGenerator {
                             worldgenrandom.setFeatureSeed(i, l1, k);
 
                             try {
-                                p_223087_.setCurrentlyGenerating(supplier1);
-                                placedfeature.placeWithBiomeCheck(p_223087_, this, worldgenrandom, blockpos);
+                                pLevel.setCurrentlyGenerating(supplier1);
+                                placedfeature.placeWithBiomeCheck(pLevel, this, worldgenrandom, blockpos);
                             } catch (Exception exception1) {
                                 CrashReport crashreport2 = CrashReport.forThrowable(exception1, "Feature placement");
                                 crashreport2.addCategory("Feature").setDetail("Description", supplier1::get);
@@ -389,7 +389,7 @@ public abstract class ChunkGenerator {
                     }
                 }
 
-                p_223087_.setCurrentlyGenerating(null);
+                pLevel.setCurrentlyGenerating(null);
             } catch (Exception exception2) {
                 CrashReport crashreport = CrashReport.forThrowable(exception2, "Biome decoration");
                 crashreport.addCategory("Generation")
@@ -401,21 +401,21 @@ public abstract class ChunkGenerator {
         }
     }
 
-    private static BoundingBox getWritableArea(ChunkAccess p_187718_) {
-        ChunkPos chunkpos = p_187718_.getPos();
+    private static BoundingBox getWritableArea(ChunkAccess pChunk) {
+        ChunkPos chunkpos = pChunk.getPos();
         int i = chunkpos.getMinBlockX();
         int j = chunkpos.getMinBlockZ();
-        LevelHeightAccessor levelheightaccessor = p_187718_.getHeightAccessorForGeneration();
+        LevelHeightAccessor levelheightaccessor = pChunk.getHeightAccessorForGeneration();
         int k = levelheightaccessor.getMinY() + 1;
         int l = levelheightaccessor.getMaxY();
         return new BoundingBox(i, k, j, i + 15, l, j + 15);
     }
 
-    public abstract void buildSurface(WorldGenRegion p_223050_, StructureManager p_223051_, RandomState p_223052_, ChunkAccess p_223053_);
+    public abstract void buildSurface(WorldGenRegion pLevel, StructureManager pStructureManager, RandomState pRandom, ChunkAccess pChunk);
 
-    public abstract void spawnOriginalMobs(WorldGenRegion p_62167_);
+    public abstract void spawnOriginalMobs(WorldGenRegion pLevel);
 
-    public int getSpawnHeight(LevelHeightAccessor p_156157_) {
+    public int getSpawnHeight(LevelHeightAccessor pLevel) {
         return 64;
     }
 
@@ -426,19 +426,19 @@ public abstract class ChunkGenerator {
     public abstract int getGenDepth();
 
     public WeightedRandomList<MobSpawnSettings.SpawnerData> getMobsAt(
-        Holder<Biome> p_223134_, StructureManager p_223135_, MobCategory p_223136_, BlockPos p_223137_
+        Holder<Biome> pBiome, StructureManager pStructureManager, MobCategory pCategory, BlockPos pPos
     ) {
-        Map<Structure, LongSet> map = p_223135_.getAllStructuresAt(p_223137_);
+        Map<Structure, LongSet> map = pStructureManager.getAllStructuresAt(pPos);
 
         for (Entry<Structure, LongSet> entry : map.entrySet()) {
             Structure structure = entry.getKey();
-            StructureSpawnOverride structurespawnoverride = structure.spawnOverrides().get(p_223136_);
+            StructureSpawnOverride structurespawnoverride = structure.spawnOverrides().get(pCategory);
             if (structurespawnoverride != null) {
                 MutableBoolean mutableboolean = new MutableBoolean(false);
                 Predicate<StructureStart> predicate = structurespawnoverride.boundingBox() == StructureSpawnOverride.BoundingBoxType.PIECE
-                    ? p_223065_ -> p_223135_.structureHasPieceAt(p_223137_, p_223065_)
-                    : p_223130_ -> p_223130_.getBoundingBox().isInside(p_223137_);
-                p_223135_.fillStartsForStructure(structure, entry.getValue(), p_223220_ -> {
+                    ? p_223065_ -> pStructureManager.structureHasPieceAt(pPos, p_223065_)
+                    : p_223130_ -> p_223130_.getBoundingBox().isInside(pPos);
+                pStructureManager.fillStartsForStructure(structure, entry.getValue(), p_223220_ -> {
                     if (mutableboolean.isFalse() && predicate.test(p_223220_)) {
                         mutableboolean.setTrue();
                     }
@@ -449,43 +449,43 @@ public abstract class ChunkGenerator {
             }
         }
 
-        return p_223134_.value().getMobSettings().getMobs(p_223136_);
+        return pBiome.value().getMobSettings().getMobs(pCategory);
     }
 
     public void createStructures(
-        RegistryAccess p_255835_,
-        ChunkGeneratorStructureState p_256505_,
-        StructureManager p_255934_,
-        ChunkAccess p_255767_,
-        StructureTemplateManager p_255832_,
-        ResourceKey<Level> p_377248_
+        RegistryAccess pRegistryAccess,
+        ChunkGeneratorStructureState pStructureState,
+        StructureManager pStructureManager,
+        ChunkAccess pChunk,
+        StructureTemplateManager pStructureTemplateManager,
+        ResourceKey<Level> pLevel
     ) {
-        ChunkPos chunkpos = p_255767_.getPos();
-        SectionPos sectionpos = SectionPos.bottomOf(p_255767_);
-        RandomState randomstate = p_256505_.randomState();
-        p_256505_.possibleStructureSets()
+        ChunkPos chunkpos = pChunk.getPos();
+        SectionPos sectionpos = SectionPos.bottomOf(pChunk);
+        RandomState randomstate = pStructureState.randomState();
+        pStructureState.possibleStructureSets()
             .forEach(
                 p_255564_ -> {
                     StructurePlacement structureplacement = p_255564_.value().placement();
                     List<StructureSet.StructureSelectionEntry> list = p_255564_.value().structures();
 
                     for (StructureSet.StructureSelectionEntry structureset$structureselectionentry : list) {
-                        StructureStart structurestart = p_255934_.getStartForStructure(sectionpos, structureset$structureselectionentry.structure().value(), p_255767_);
+                        StructureStart structurestart = pStructureManager.getStartForStructure(sectionpos, structureset$structureselectionentry.structure().value(), pChunk);
                         if (structurestart != null && structurestart.isValid()) {
                             return;
                         }
                     }
 
-                    if (structureplacement.isStructureChunk(p_256505_, chunkpos.x, chunkpos.z)) {
+                    if (structureplacement.isStructureChunk(pStructureState, chunkpos.x, chunkpos.z)) {
                         if (list.size() == 1) {
                             this.tryGenerateStructure(
-                                list.get(0), p_255934_, p_255835_, randomstate, p_255832_, p_256505_.getLevelSeed(), p_255767_, chunkpos, sectionpos, p_377248_
+                                list.get(0), pStructureManager, pRegistryAccess, randomstate, pStructureTemplateManager, pStructureState.getLevelSeed(), pChunk, chunkpos, sectionpos, pLevel
                             );
                         } else {
                             ArrayList<StructureSet.StructureSelectionEntry> arraylist = new ArrayList<>(list.size());
                             arraylist.addAll(list);
                             WorldgenRandom worldgenrandom = new WorldgenRandom(new LegacyRandomSource(0L));
-                            worldgenrandom.setLargeFeatureSeed(p_256505_.getLevelSeed(), chunkpos.x, chunkpos.z);
+                            worldgenrandom.setLargeFeatureSeed(pStructureState.getLevelSeed(), chunkpos.x, chunkpos.z);
                             int i = 0;
 
                             for (StructureSet.StructureSelectionEntry structureset$structureselectionentry1 : arraylist) {
@@ -508,15 +508,15 @@ public abstract class ChunkGenerator {
                                 StructureSet.StructureSelectionEntry structureset$structureselectionentry3 = arraylist.get(k);
                                 if (this.tryGenerateStructure(
                                     structureset$structureselectionentry3,
-                                    p_255934_,
-                                    p_255835_,
+                                    pStructureManager,
+                                    pRegistryAccess,
                                     randomstate,
-                                    p_255832_,
-                                    p_256505_.getLevelSeed(),
-                                    p_255767_,
+                                    pStructureTemplateManager,
+                                    pStructureState.getLevelSeed(),
+                                    pChunk,
                                     chunkpos,
                                     sectionpos,
-                                    p_377248_
+                                    pLevel
                                 )) {
                                     return;
                                 }
@@ -531,60 +531,60 @@ public abstract class ChunkGenerator {
     }
 
     private boolean tryGenerateStructure(
-        StructureSet.StructureSelectionEntry p_223105_,
-        StructureManager p_223106_,
-        RegistryAccess p_223107_,
-        RandomState p_223108_,
-        StructureTemplateManager p_223109_,
-        long p_223110_,
-        ChunkAccess p_223111_,
-        ChunkPos p_223112_,
-        SectionPos p_223113_,
-        ResourceKey<Level> p_376331_
+        StructureSet.StructureSelectionEntry pStructureSelectionEntry,
+        StructureManager pStructureManager,
+        RegistryAccess pRegistryAccess,
+        RandomState pRandom,
+        StructureTemplateManager pStructureTemplateManager,
+        long pSeed,
+        ChunkAccess pChunk,
+        ChunkPos pChunkPos,
+        SectionPos pSectionPos,
+        ResourceKey<Level> pLevel
     ) {
-        Structure structure = p_223105_.structure().value();
-        int i = fetchReferences(p_223106_, p_223111_, p_223113_, structure);
+        Structure structure = pStructureSelectionEntry.structure().value();
+        int i = fetchReferences(pStructureManager, pChunk, pSectionPos, structure);
         HolderSet<Biome> holderset = structure.biomes();
         Predicate<Holder<Biome>> predicate = holderset::contains;
         StructureStart structurestart = structure.generate(
-            p_223105_.structure(), p_376331_, p_223107_, this, this.biomeSource, p_223108_, p_223109_, p_223110_, p_223112_, i, p_223111_, predicate
+            pStructureSelectionEntry.structure(), pLevel, pRegistryAccess, this, this.biomeSource, pRandom, pStructureTemplateManager, pSeed, pChunkPos, i, pChunk, predicate
         );
         if (structurestart.isValid()) {
-            p_223106_.setStartForStructure(p_223113_, structure, structurestart, p_223111_);
+            pStructureManager.setStartForStructure(pSectionPos, structure, structurestart, pChunk);
             return true;
         } else {
             return false;
         }
     }
 
-    private static int fetchReferences(StructureManager p_223055_, ChunkAccess p_223056_, SectionPos p_223057_, Structure p_223058_) {
-        StructureStart structurestart = p_223055_.getStartForStructure(p_223057_, p_223058_, p_223056_);
+    private static int fetchReferences(StructureManager pStructureManager, ChunkAccess pChunk, SectionPos pSectionPos, Structure pStructure) {
+        StructureStart structurestart = pStructureManager.getStartForStructure(pSectionPos, pStructure, pChunk);
         return structurestart != null ? structurestart.getReferences() : 0;
     }
 
-    public void createReferences(WorldGenLevel p_223077_, StructureManager p_223078_, ChunkAccess p_223079_) {
+    public void createReferences(WorldGenLevel pLevel, StructureManager pStructureManager, ChunkAccess pChunk) {
         int i = 8;
-        ChunkPos chunkpos = p_223079_.getPos();
+        ChunkPos chunkpos = pChunk.getPos();
         int j = chunkpos.x;
         int k = chunkpos.z;
         int l = chunkpos.getMinBlockX();
         int i1 = chunkpos.getMinBlockZ();
-        SectionPos sectionpos = SectionPos.bottomOf(p_223079_);
+        SectionPos sectionpos = SectionPos.bottomOf(pChunk);
 
         for (int j1 = j - 8; j1 <= j + 8; j1++) {
             for (int k1 = k - 8; k1 <= k + 8; k1++) {
                 long l1 = ChunkPos.asLong(j1, k1);
 
-                for (StructureStart structurestart : p_223077_.getChunk(j1, k1).getAllStarts().values()) {
+                for (StructureStart structurestart : pLevel.getChunk(j1, k1).getAllStarts().values()) {
                     try {
                         if (structurestart.isValid() && structurestart.getBoundingBox().intersects(l, i1, l + 15, i1 + 15)) {
-                            p_223078_.addReferenceForStructure(sectionpos, structurestart.getStructure(), l1, p_223079_);
-                            DebugPackets.sendStructurePacket(p_223077_, structurestart);
+                            pStructureManager.addReferenceForStructure(sectionpos, structurestart.getStructure(), l1, pChunk);
+                            DebugPackets.sendStructurePacket(pLevel, structurestart);
                         }
                     } catch (Exception exception) {
                         CrashReport crashreport = CrashReport.forThrowable(exception, "Generating structure reference");
                         CrashReportCategory crashreportcategory = crashreport.addCategory("Structure");
-                        Optional<? extends Registry<Structure>> optional = p_223077_.registryAccess().lookup(Registries.STRUCTURE);
+                        Optional<? extends Registry<Structure>> optional = pLevel.registryAccess().lookup(Registries.STRUCTURE);
                         crashreportcategory.setDetail(
                             "Id", () -> optional.<String>map(p_258977_ -> p_258977_.getKey(structurestart.getStructure()).toString()).orElse("UNKNOWN")
                         );
@@ -597,28 +597,28 @@ public abstract class ChunkGenerator {
         }
     }
 
-    public abstract CompletableFuture<ChunkAccess> fillFromNoise(Blender p_223210_, RandomState p_223211_, StructureManager p_223212_, ChunkAccess p_223213_);
+    public abstract CompletableFuture<ChunkAccess> fillFromNoise(Blender pBlender, RandomState pRandomState, StructureManager pStructureManager, ChunkAccess pChunk);
 
     public abstract int getSeaLevel();
 
     public abstract int getMinY();
 
-    public abstract int getBaseHeight(int p_223032_, int p_223033_, Heightmap.Types p_223034_, LevelHeightAccessor p_223035_, RandomState p_223036_);
+    public abstract int getBaseHeight(int pX, int pZ, Heightmap.Types pType, LevelHeightAccessor pLevel, RandomState pRandom);
 
-    public abstract NoiseColumn getBaseColumn(int p_223028_, int p_223029_, LevelHeightAccessor p_223030_, RandomState p_223031_);
+    public abstract NoiseColumn getBaseColumn(int pX, int pZ, LevelHeightAccessor pHeight, RandomState pRandom);
 
-    public int getFirstFreeHeight(int p_223222_, int p_223223_, Heightmap.Types p_223224_, LevelHeightAccessor p_223225_, RandomState p_223226_) {
-        return this.getBaseHeight(p_223222_, p_223223_, p_223224_, p_223225_, p_223226_);
+    public int getFirstFreeHeight(int pX, int pZ, Heightmap.Types pType, LevelHeightAccessor pLevel, RandomState pRandom) {
+        return this.getBaseHeight(pX, pZ, pType, pLevel, pRandom);
     }
 
-    public int getFirstOccupiedHeight(int p_223236_, int p_223237_, Heightmap.Types p_223238_, LevelHeightAccessor p_223239_, RandomState p_223240_) {
-        return this.getBaseHeight(p_223236_, p_223237_, p_223238_, p_223239_, p_223240_) - 1;
+    public int getFirstOccupiedHeight(int pX, int pZ, Heightmap.Types pTypes, LevelHeightAccessor pLevel, RandomState pRandom) {
+        return this.getBaseHeight(pX, pZ, pTypes, pLevel, pRandom) - 1;
     }
 
-    public abstract void addDebugScreenInfo(List<String> p_223175_, RandomState p_223176_, BlockPos p_223177_);
+    public abstract void addDebugScreenInfo(List<String> pInfo, RandomState pRandom, BlockPos pPos);
 
     @Deprecated
-    public BiomeGenerationSettings getBiomeGenerationSettings(Holder<Biome> p_223132_) {
-        return this.generationSettingsGetter.apply(p_223132_);
+    public BiomeGenerationSettings getBiomeGenerationSettings(Holder<Biome> pBiome) {
+        return this.generationSettingsGetter.apply(pBiome);
     }
 }

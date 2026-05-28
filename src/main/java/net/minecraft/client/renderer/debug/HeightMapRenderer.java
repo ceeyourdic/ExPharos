@@ -23,8 +23,8 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
     private static final int CHUNK_DIST = 2;
     private static final float BOX_HEIGHT = 0.09375F;
 
-    public HeightMapRenderer(Minecraft p_113572_) {
-        this.minecraft = p_113572_;
+    public HeightMapRenderer(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
     @Override
@@ -70,8 +70,8 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
         }
     }
 
-    private Vector3f getColor(Heightmap.Types p_113574_) {
-        return switch (p_113574_) {
+    private Vector3f getColor(Heightmap.Types pTypes) {
+        return switch (pTypes) {
             case WORLD_SURFACE_WG -> new Vector3f(1.0F, 1.0F, 0.0F);
             case OCEAN_FLOOR_WG -> new Vector3f(1.0F, 0.0F, 1.0F);
             case WORLD_SURFACE -> new Vector3f(0.0F, 0.7F, 0.0F);

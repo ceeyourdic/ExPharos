@@ -232,23 +232,23 @@ public class Registries {
     public static final ResourceKey<Registry<Advancement>> ADVANCEMENT = createRegistryKey("advancement");
     public static final ResourceKey<Registry<Recipe<?>>> RECIPE = createRegistryKey("recipe");
 
-    public static ResourceKey<Level> levelStemToLevel(ResourceKey<LevelStem> p_259475_) {
-        return ResourceKey.create(DIMENSION, p_259475_.location());
+    public static ResourceKey<Level> levelStemToLevel(ResourceKey<LevelStem> pLevelStem) {
+        return ResourceKey.create(DIMENSION, pLevelStem.location());
     }
 
-    public static ResourceKey<LevelStem> levelToLevelStem(ResourceKey<Level> p_260225_) {
-        return ResourceKey.create(LEVEL_STEM, p_260225_.location());
+    public static ResourceKey<LevelStem> levelToLevelStem(ResourceKey<Level> pLevel) {
+        return ResourceKey.create(LEVEL_STEM, pLevel.location());
     }
 
-    private static <T> ResourceKey<Registry<T>> createRegistryKey(String p_259572_) {
-        return ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace(p_259572_));
+    private static <T> ResourceKey<Registry<T>> createRegistryKey(String pName) {
+        return ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace(pName));
     }
 
-    public static String elementsDirPath(ResourceKey<? extends Registry<?>> p_343743_) {
-        return p_343743_.location().getPath();
+    public static String elementsDirPath(ResourceKey<? extends Registry<?>> pRegistryKey) {
+        return pRegistryKey.location().getPath();
     }
 
-    public static String tagsDirPath(ResourceKey<? extends Registry<?>> p_343025_) {
-        return "tags/" + p_343025_.location().getPath();
+    public static String tagsDirPath(ResourceKey<? extends Registry<?>> pRegistryKey) {
+        return "tags/" + pRegistryKey.location().getPath();
     }
 }

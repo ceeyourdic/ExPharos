@@ -44,10 +44,10 @@ public abstract class AbstractSchoolingFish extends AbstractFish {
         return this.leader != null && this.leader.isAlive();
     }
 
-    public AbstractSchoolingFish startFollowing(AbstractSchoolingFish p_27526_) {
-        this.leader = p_27526_;
-        p_27526_.addFollower();
-        return p_27526_;
+    public AbstractSchoolingFish startFollowing(AbstractSchoolingFish pLeader) {
+        this.leader = pLeader;
+        pLeader.addFollower();
+        return pLeader;
     }
 
     public void stopFollowing() {
@@ -93,8 +93,8 @@ public abstract class AbstractSchoolingFish extends AbstractFish {
         }
     }
 
-    public void addFollowers(Stream<? extends AbstractSchoolingFish> p_27534_) {
-        p_27534_.limit((long)(this.getMaxSchoolSize() - this.schoolSize)).filter(p_27538_ -> p_27538_ != this).forEach(p_27536_ -> p_27536_.startFollowing(this));
+    public void addFollowers(Stream<? extends AbstractSchoolingFish> pFollowers) {
+        pFollowers.limit((long)(this.getMaxSchoolSize() - this.schoolSize)).filter(p_27538_ -> p_27538_ != this).forEach(p_27536_ -> p_27536_.startFollowing(this));
     }
 
     @Nullable
@@ -113,8 +113,8 @@ public abstract class AbstractSchoolingFish extends AbstractFish {
     public static class SchoolSpawnGroupData implements SpawnGroupData {
         public final AbstractSchoolingFish leader;
 
-        public SchoolSpawnGroupData(AbstractSchoolingFish p_27553_) {
-            this.leader = p_27553_;
+        public SchoolSpawnGroupData(AbstractSchoolingFish pLeader) {
+            this.leader = pLeader;
         }
     }
 }

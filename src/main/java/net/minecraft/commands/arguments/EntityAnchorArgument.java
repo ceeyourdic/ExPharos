@@ -28,29 +28,29 @@ public class EntityAnchorArgument implements ArgumentType<EntityAnchorArgument.A
         p_308348_ -> Component.translatableEscape("argument.anchor.invalid", p_308348_)
     );
 
-    public static EntityAnchorArgument.Anchor getAnchor(CommandContext<CommandSourceStack> p_90354_, String p_90355_) {
-        return p_90354_.getArgument(p_90355_, EntityAnchorArgument.Anchor.class);
+    public static EntityAnchorArgument.Anchor getAnchor(CommandContext<CommandSourceStack> pContext, String pName) {
+        return pContext.getArgument(pName, EntityAnchorArgument.Anchor.class);
     }
 
     public static EntityAnchorArgument anchor() {
         return new EntityAnchorArgument();
     }
 
-    public EntityAnchorArgument.Anchor parse(StringReader p_90352_) throws CommandSyntaxException {
-        int i = p_90352_.getCursor();
-        String s = p_90352_.readUnquotedString();
+    public EntityAnchorArgument.Anchor parse(StringReader pReader) throws CommandSyntaxException {
+        int i = pReader.getCursor();
+        String s = pReader.readUnquotedString();
         EntityAnchorArgument.Anchor entityanchorargument$anchor = EntityAnchorArgument.Anchor.getByName(s);
         if (entityanchorargument$anchor == null) {
-            p_90352_.setCursor(i);
-            throw ERROR_INVALID.createWithContext(p_90352_, s);
+            pReader.setCursor(i);
+            throw ERROR_INVALID.createWithContext(pReader, s);
         } else {
             return entityanchorargument$anchor;
         }
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_90360_, SuggestionsBuilder p_90361_) {
-        return SharedSuggestionProvider.suggest(EntityAnchorArgument.Anchor.BY_NAME.keySet(), p_90361_);
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> pContext, SuggestionsBuilder pBuilder) {
+        return SharedSuggestionProvider.suggest(EntityAnchorArgument.Anchor.BY_NAME.keySet(), pBuilder);
     }
 
     @Override
@@ -70,23 +70,23 @@ public class EntityAnchorArgument implements ArgumentType<EntityAnchorArgument.A
         private final String name;
         private final BiFunction<Vec3, Entity, Vec3> transform;
 
-        private Anchor(final String p_90374_, final BiFunction<Vec3, Entity, Vec3> p_90375_) {
-            this.name = p_90374_;
-            this.transform = p_90375_;
+        private Anchor(final String pName, final BiFunction<Vec3, Entity, Vec3> pTransform) {
+            this.name = pName;
+            this.transform = pTransform;
         }
 
         @Nullable
-        public static EntityAnchorArgument.Anchor getByName(String p_90385_) {
-            return BY_NAME.get(p_90385_);
+        public static EntityAnchorArgument.Anchor getByName(String pName) {
+            return BY_NAME.get(pName);
         }
 
-        public Vec3 apply(Entity p_90378_) {
-            return this.transform.apply(p_90378_.position(), p_90378_);
+        public Vec3 apply(Entity pEntity) {
+            return this.transform.apply(pEntity.position(), pEntity);
         }
 
-        public Vec3 apply(CommandSourceStack p_90380_) {
-            Entity entity = p_90380_.getEntity();
-            return entity == null ? p_90380_.getPosition() : this.transform.apply(p_90380_.getPosition(), entity);
+        public Vec3 apply(CommandSourceStack pSource) {
+            Entity entity = pSource.getEntity();
+            return entity == null ? pSource.getPosition() : this.transform.apply(pSource.getPosition(), entity);
         }
     }
 }

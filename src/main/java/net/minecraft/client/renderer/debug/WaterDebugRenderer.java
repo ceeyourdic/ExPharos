@@ -15,8 +15,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class WaterDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
     private final Minecraft minecraft;
 
-    public WaterDebugRenderer(Minecraft p_113717_) {
-        this.minecraft = p_113717_;
+    public WaterDebugRenderer(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
     @Override

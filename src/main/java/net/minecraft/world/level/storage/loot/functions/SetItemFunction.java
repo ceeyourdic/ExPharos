@@ -18,9 +18,9 @@ public class SetItemFunction extends LootItemConditionalFunction {
     );
     private final Holder<Item> item;
 
-    private SetItemFunction(List<LootItemCondition> p_334628_, Holder<Item> p_334791_) {
-        super(p_334628_);
-        this.item = p_334791_;
+    private SetItemFunction(List<LootItemCondition> pConditions, Holder<Item> pItem) {
+        super(pConditions);
+        this.item = pItem;
     }
 
     @Override

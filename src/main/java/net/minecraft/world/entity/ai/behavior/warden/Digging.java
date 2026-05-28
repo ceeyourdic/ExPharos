@@ -11,8 +11,8 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.monster.warden.Warden;
 
 public class Digging<E extends Warden> extends Behavior<E> {
-    public Digging(int p_217515_) {
-        super(ImmutableMap.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT), p_217515_);
+    public Digging(int pDuration) {
+        super(ImmutableMap.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT), pDuration);
     }
 
     protected boolean canStillUse(ServerLevel p_217527_, E p_217528_, long p_217529_) {

@@ -33,9 +33,9 @@ public class TrialSpawnerConfigs {
     private static final TrialSpawnerConfigs.Keys TRIAL_CHAMBER_SMALL_MELEE_SILVERFISH = TrialSpawnerConfigs.Keys.of("trial_chamber/small_melee/silverfish");
     private static final TrialSpawnerConfigs.Keys TRIAL_CHAMBER_SMALL_MELEE_SLIME = TrialSpawnerConfigs.Keys.of("trial_chamber/small_melee/slime");
 
-    public static void bootstrap(BootstrapContext<TrialSpawnerConfig> p_366114_) {
+    public static void bootstrap(BootstrapContext<TrialSpawnerConfig> pContext) {
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_BREEZE,
             TrialSpawnerConfig.builder()
                 .simultaneousMobs(1.0F)
@@ -60,7 +60,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_MELEE_HUSK,
             trialChamberBase().spawnPotentialsDefinition(SimpleWeightedRandomList.single(spawnData(EntityType.HUSK))).build(),
             trialChamberBase()
@@ -74,7 +74,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_MELEE_SPIDER,
             trialChamberBase().spawnPotentialsDefinition(SimpleWeightedRandomList.single(spawnData(EntityType.SPIDER))).build(),
             trialChamberMeleeOminous()
@@ -88,7 +88,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_MELEE_ZOMBIE,
             trialChamberBase().spawnPotentialsDefinition(SimpleWeightedRandomList.single(spawnData(EntityType.ZOMBIE))).build(),
             trialChamberBase()
@@ -102,7 +102,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_RANGED_POISON_SKELETON,
             trialChamberBase().spawnPotentialsDefinition(SimpleWeightedRandomList.single(spawnData(EntityType.BOGGED))).build(),
             trialChamberBase()
@@ -116,7 +116,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_RANGED_SKELETON,
             trialChamberBase().spawnPotentialsDefinition(SimpleWeightedRandomList.single(spawnData(EntityType.SKELETON))).build(),
             trialChamberBase()
@@ -130,7 +130,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_RANGED_STRAY,
             trialChamberBase().spawnPotentialsDefinition(SimpleWeightedRandomList.single(spawnData(EntityType.STRAY))).build(),
             trialChamberBase()
@@ -144,7 +144,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_SLOW_RANGED_POISON_SKELETON,
             trialChamberSlowRanged().spawnPotentialsDefinition(SimpleWeightedRandomList.single(spawnData(EntityType.BOGGED))).build(),
             trialChamberSlowRanged()
@@ -158,7 +158,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_SLOW_RANGED_SKELETON,
             trialChamberSlowRanged().spawnPotentialsDefinition(SimpleWeightedRandomList.single(spawnData(EntityType.SKELETON))).build(),
             trialChamberSlowRanged()
@@ -172,7 +172,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_SLOW_RANGED_STRAY,
             trialChamberSlowRanged().spawnPotentialsDefinition(SimpleWeightedRandomList.single(spawnData(EntityType.STRAY))).build(),
             trialChamberSlowRanged()
@@ -186,7 +186,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_SMALL_MELEE_BABY_ZOMBIE,
             TrialSpawnerConfig.builder()
                 .simultaneousMobsAddedPerPlayer(0.5F)
@@ -210,7 +210,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_SMALL_MELEE_CAVE_SPIDER,
             trialChamberBase().spawnPotentialsDefinition(SimpleWeightedRandomList.single(spawnData(EntityType.CAVE_SPIDER))).build(),
             trialChamberMeleeOminous()
@@ -224,7 +224,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_SMALL_MELEE_SILVERFISH,
             trialChamberBase().spawnPotentialsDefinition(SimpleWeightedRandomList.single(spawnData(EntityType.SILVERFISH))).build(),
             trialChamberMeleeOminous()
@@ -238,7 +238,7 @@ public class TrialSpawnerConfigs {
                 .build()
         );
         register(
-            p_366114_,
+            pContext,
             TRIAL_CHAMBER_SMALL_MELEE_SLIME,
             trialChamberBase()
                 .spawnPotentialsDefinition(
@@ -265,37 +265,37 @@ public class TrialSpawnerConfigs {
         );
     }
 
-    private static <T extends Entity> SpawnData spawnData(EntityType<T> p_365287_) {
-        return customSpawnDataWithEquipment(p_365287_, p_368946_ -> {
+    private static <T extends Entity> SpawnData spawnData(EntityType<T> pEntityType) {
+        return customSpawnDataWithEquipment(pEntityType, p_368946_ -> {
         }, null);
     }
 
-    private static <T extends Entity> SpawnData customSpawnData(EntityType<T> p_367885_, Consumer<CompoundTag> p_369148_) {
-        return customSpawnDataWithEquipment(p_367885_, p_369148_, null);
+    private static <T extends Entity> SpawnData customSpawnData(EntityType<T> pEntityType, Consumer<CompoundTag> pTagConsumer) {
+        return customSpawnDataWithEquipment(pEntityType, pTagConsumer, null);
     }
 
-    private static <T extends Entity> SpawnData spawnDataWithEquipment(EntityType<T> p_363974_, ResourceKey<LootTable> p_362763_) {
-        return customSpawnDataWithEquipment(p_363974_, p_364921_ -> {
-        }, p_362763_);
+    private static <T extends Entity> SpawnData spawnDataWithEquipment(EntityType<T> pEntityType, ResourceKey<LootTable> pLootTableKey) {
+        return customSpawnDataWithEquipment(pEntityType, p_364921_ -> {
+        }, pLootTableKey);
     }
 
-    private static <T extends Entity> SpawnData customSpawnDataWithEquipment(EntityType<T> p_361236_, Consumer<CompoundTag> p_368514_, @Nullable ResourceKey<LootTable> p_369178_) {
+    private static <T extends Entity> SpawnData customSpawnDataWithEquipment(EntityType<T> pEntityType, Consumer<CompoundTag> pTagConsumer, @Nullable ResourceKey<LootTable> pLootTableKey) {
         CompoundTag compoundtag = new CompoundTag();
-        compoundtag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(p_361236_).toString());
-        p_368514_.accept(compoundtag);
-        Optional<EquipmentTable> optional = Optional.ofNullable(p_369178_).map(p_367063_ -> new EquipmentTable((ResourceKey<LootTable>)p_367063_, 0.0F));
+        compoundtag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(pEntityType).toString());
+        pTagConsumer.accept(compoundtag);
+        Optional<EquipmentTable> optional = Optional.ofNullable(pLootTableKey).map(p_367063_ -> new EquipmentTable((ResourceKey<LootTable>)p_367063_, 0.0F));
         return new SpawnData(compoundtag, Optional.empty(), optional);
     }
 
     private static void register(
-        BootstrapContext<TrialSpawnerConfig> p_364842_, TrialSpawnerConfigs.Keys p_368673_, TrialSpawnerConfig p_365379_, TrialSpawnerConfig p_368716_
+        BootstrapContext<TrialSpawnerConfig> pContext, TrialSpawnerConfigs.Keys pKeys, TrialSpawnerConfig pNormal, TrialSpawnerConfig pOminous
     ) {
-        p_364842_.register(p_368673_.normal, p_365379_);
-        p_364842_.register(p_368673_.ominous, p_368716_);
+        pContext.register(pKeys.normal, pNormal);
+        pContext.register(pKeys.ominous, pOminous);
     }
 
-    static ResourceKey<TrialSpawnerConfig> registryKey(String p_362769_) {
-        return ResourceKey.create(Registries.TRIAL_SPAWNER_CONFIG, ResourceLocation.withDefaultNamespace(p_362769_));
+    static ResourceKey<TrialSpawnerConfig> registryKey(String pName) {
+        return ResourceKey.create(Registries.TRIAL_SPAWNER_CONFIG, ResourceLocation.withDefaultNamespace(pName));
     }
 
     private static TrialSpawnerConfig.Builder trialChamberMeleeOminous() {
@@ -311,8 +311,8 @@ public class TrialSpawnerConfigs {
     }
 
     static record Keys(ResourceKey<TrialSpawnerConfig> normal, ResourceKey<TrialSpawnerConfig> ominous) {
-        public static TrialSpawnerConfigs.Keys of(String p_363839_) {
-            return new TrialSpawnerConfigs.Keys(TrialSpawnerConfigs.registryKey(p_363839_ + "/normal"), TrialSpawnerConfigs.registryKey(p_363839_ + "/ominous"));
+        public static TrialSpawnerConfigs.Keys of(String pKey) {
+            return new TrialSpawnerConfigs.Keys(TrialSpawnerConfigs.registryKey(pKey + "/normal"), TrialSpawnerConfigs.registryKey(pKey + "/ominous"));
         }
     }
 }

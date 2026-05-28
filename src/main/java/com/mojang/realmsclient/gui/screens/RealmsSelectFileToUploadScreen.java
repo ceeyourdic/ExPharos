@@ -42,12 +42,12 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
     int selectedWorld = -1;
     RealmsSelectFileToUploadScreen.WorldSelectionList worldSelectionList;
 
-    public RealmsSelectFileToUploadScreen(@Nullable RealmCreationTask p_334261_, long p_89498_, int p_89499_, RealmsResetWorldScreen p_89500_) {
+    public RealmsSelectFileToUploadScreen(@Nullable RealmCreationTask pRealmCreationTask, long pRealmId, int pSlotId, RealmsResetWorldScreen pLastScreen) {
         super(TITLE);
-        this.realmCreationTask = p_334261_;
-        this.lastScreen = p_89500_;
-        this.realmId = p_89498_;
-        this.slotId = p_89499_;
+        this.realmCreationTask = pRealmCreationTask;
+        this.lastScreen = pLastScreen;
+        this.realmId = pRealmId;
+        this.slotId = pSlotId;
     }
 
     private void loadLevelList() {
@@ -122,12 +122,12 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
         }
     }
 
-    static Component gameModeName(LevelSummary p_89535_) {
-        return p_89535_.getGameMode().getLongDisplayName();
+    static Component gameModeName(LevelSummary pLevelSummary) {
+        return pLevelSummary.getGameMode().getLongDisplayName();
     }
 
-    static String formatLastPlayed(LevelSummary p_89539_) {
-        return DATE_FORMAT.format(new Date(p_89539_.getLastPlayed()));
+    static String formatLastPlayed(LevelSummary pLevelSummary) {
+        return DATE_FORMAT.format(new Date(pLevelSummary.getLastPlayed()));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -137,11 +137,11 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
         private final Component id;
         private final Component info;
 
-        public Entry(final LevelSummary p_89560_) {
-            this.levelSummary = p_89560_;
-            this.name = p_89560_.getLevelName();
-            this.id = Component.translatable("mco.upload.entry.id", p_89560_.getLevelId(), RealmsSelectFileToUploadScreen.formatLastPlayed(p_89560_));
-            this.info = p_89560_.getInfo();
+        public Entry(final LevelSummary pLevelSummary) {
+            this.levelSummary = pLevelSummary;
+            this.name = pLevelSummary.getLevelName();
+            this.id = Component.translatable("mco.upload.entry.id", pLevelSummary.getLevelId(), RealmsSelectFileToUploadScreen.formatLastPlayed(pLevelSummary));
+            this.info = pLevelSummary.getInfo();
         }
 
         @Override
@@ -166,17 +166,17 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
             return super.mouseClicked(p_89562_, p_89563_, p_89564_);
         }
 
-        protected void renderItem(GuiGraphics p_282872_, int p_283187_, int p_283611_, int p_282173_) {
+        protected void renderItem(GuiGraphics pGuiGraphics, int pIndex, int pX, int pY) {
             String s;
             if (this.name.isEmpty()) {
-                s = RealmsSelectFileToUploadScreen.WORLD_TEXT + " " + (p_283187_ + 1);
+                s = RealmsSelectFileToUploadScreen.WORLD_TEXT + " " + (pIndex + 1);
             } else {
                 s = this.name;
             }
 
-            p_282872_.drawString(RealmsSelectFileToUploadScreen.this.font, s, p_283611_ + 2, p_282173_ + 1, -1);
-            p_282872_.drawString(RealmsSelectFileToUploadScreen.this.font, this.id, p_283611_ + 2, p_282173_ + 12, -8355712);
-            p_282872_.drawString(RealmsSelectFileToUploadScreen.this.font, this.info, p_283611_ + 2, p_282173_ + 12 + 10, -8355712);
+            pGuiGraphics.drawString(RealmsSelectFileToUploadScreen.this.font, s, pX + 2, pY + 1, -1);
+            pGuiGraphics.drawString(RealmsSelectFileToUploadScreen.this.font, this.id, pX + 2, pY + 12, -8355712);
+            pGuiGraphics.drawString(RealmsSelectFileToUploadScreen.this.font, this.info, pX + 2, pY + 12 + 10, -8355712);
         }
 
         @Override
@@ -202,8 +202,8 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
             );
         }
 
-        public void addEntry(LevelSummary p_89588_) {
-            this.addEntry(RealmsSelectFileToUploadScreen.this.new Entry(p_89588_));
+        public void addEntry(LevelSummary pLevelSummary) {
+            this.addEntry(RealmsSelectFileToUploadScreen.this.new Entry(pLevelSummary));
         }
 
         public void setSelected(@Nullable RealmsSelectFileToUploadScreen.Entry p_89592_) {

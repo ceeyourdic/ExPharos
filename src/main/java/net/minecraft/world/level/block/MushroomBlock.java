@@ -34,13 +34,13 @@ public class MushroomBlock extends BushBlock implements BonemealableBlock {
         return CODEC;
     }
 
-    public MushroomBlock(ResourceKey<ConfiguredFeature<?, ?>> p_256049_, BlockBehaviour.Properties p_256027_) {
-        super(p_256027_);
-        this.feature = p_256049_;
+    public MushroomBlock(ResourceKey<ConfiguredFeature<?, ?>> pFeature, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.feature = pFeature;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_54889_, BlockGetter p_54890_, BlockPos p_54891_, CollisionContext p_54892_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
@@ -75,27 +75,27 @@ public class MushroomBlock extends BushBlock implements BonemealableBlock {
     }
 
     @Override
-    protected boolean mayPlaceOn(BlockState p_54894_, BlockGetter p_54895_, BlockPos p_54896_) {
-        return p_54894_.isSolidRender();
+    protected boolean mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return pState.isSolidRender();
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_54880_, LevelReader p_54881_, BlockPos p_54882_) {
-        BlockPos blockpos = p_54882_.below();
-        BlockState blockstate = p_54881_.getBlockState(blockpos);
-        return blockstate.is(BlockTags.MUSHROOM_GROW_BLOCK) ? true : p_54881_.getRawBrightness(p_54882_, 0) < 13 && this.mayPlaceOn(blockstate, p_54881_, blockpos);
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.below();
+        BlockState blockstate = pLevel.getBlockState(blockpos);
+        return blockstate.is(BlockTags.MUSHROOM_GROW_BLOCK) ? true : pLevel.getRawBrightness(pPos, 0) < 13 && this.mayPlaceOn(blockstate, pLevel, blockpos);
     }
 
-    public boolean growMushroom(ServerLevel p_221774_, BlockPos p_221775_, BlockState p_221776_, RandomSource p_221777_) {
-        Optional<? extends Holder<ConfiguredFeature<?, ?>>> optional = p_221774_.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).get(this.feature);
+    public boolean growMushroom(ServerLevel pLevel, BlockPos pPos, BlockState pState, RandomSource pRandom) {
+        Optional<? extends Holder<ConfiguredFeature<?, ?>>> optional = pLevel.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).get(this.feature);
         if (optional.isEmpty()) {
             return false;
         } else {
-            p_221774_.removeBlock(p_221775_, false);
-            if (optional.get().value().place(p_221774_, p_221774_.getChunkSource().getGenerator(), p_221777_, p_221775_)) {
+            pLevel.removeBlock(pPos, false);
+            if (optional.get().value().place(pLevel, pLevel.getChunkSource().getGenerator(), pRandom, pPos)) {
                 return true;
             } else {
-                p_221774_.setBlock(p_221775_, p_221776_, 3);
+                pLevel.setBlock(pPos, pState, 3);
                 return false;
             }
         }

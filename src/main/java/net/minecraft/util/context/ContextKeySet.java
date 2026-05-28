@@ -8,9 +8,9 @@ public class ContextKeySet {
     private final Set<ContextKey<?>> required;
     private final Set<ContextKey<?>> allowed;
 
-    ContextKeySet(Set<ContextKey<?>> p_366050_, Set<ContextKey<?>> p_362785_) {
-        this.required = Set.copyOf(p_366050_);
-        this.allowed = Set.copyOf(Sets.union(p_366050_, p_362785_));
+    ContextKeySet(Set<ContextKey<?>> pRequired, Set<ContextKey<?>> pAllowed) {
+        this.required = Set.copyOf(pRequired);
+        this.allowed = Set.copyOf(Sets.union(pRequired, pAllowed));
     }
 
     public Set<ContextKey<?>> required() {
@@ -33,20 +33,20 @@ public class ContextKeySet {
         private final Set<ContextKey<?>> required = Sets.newIdentityHashSet();
         private final Set<ContextKey<?>> optional = Sets.newIdentityHashSet();
 
-        public ContextKeySet.Builder required(ContextKey<?> p_365799_) {
-            if (this.optional.contains(p_365799_)) {
-                throw new IllegalArgumentException("Parameter " + p_365799_.name() + " is already optional");
+        public ContextKeySet.Builder required(ContextKey<?> pKey) {
+            if (this.optional.contains(pKey)) {
+                throw new IllegalArgumentException("Parameter " + pKey.name() + " is already optional");
             } else {
-                this.required.add(p_365799_);
+                this.required.add(pKey);
                 return this;
             }
         }
 
-        public ContextKeySet.Builder optional(ContextKey<?> p_361328_) {
-            if (this.required.contains(p_361328_)) {
-                throw new IllegalArgumentException("Parameter " + p_361328_.name() + " is already required");
+        public ContextKeySet.Builder optional(ContextKey<?> pKey) {
+            if (this.required.contains(pKey)) {
+                throw new IllegalArgumentException("Parameter " + pKey.name() + " is already required");
             } else {
-                this.optional.add(p_361328_);
+                this.optional.add(pKey);
                 return this;
             }
         }

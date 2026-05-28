@@ -30,40 +30,40 @@ public class AbstractPiglinModel<S extends HumanoidRenderState> extends Humanoid
         super(p_369736_, RenderType::entityTranslucent);
     }
 
-    public static MeshDefinition createMesh(CubeDeformation p_365542_) {
-        MeshDefinition meshdefinition = PlayerModel.createMesh(p_365542_, false);
+    public static MeshDefinition createMesh(CubeDeformation pCubeDeformation) {
+        MeshDefinition meshdefinition = PlayerModel.createMesh(pCubeDeformation, false);
         PartDefinition partdefinition = meshdefinition.getRoot();
         partdefinition.addOrReplaceChild(
-            "body", CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, p_365542_), PartPose.ZERO
+            "body", CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, pCubeDeformation), PartPose.ZERO
         );
-        PartDefinition partdefinition1 = addHead(p_365542_, meshdefinition);
+        PartDefinition partdefinition1 = addHead(pCubeDeformation, meshdefinition);
         partdefinition1.clearChild("hat");
         return meshdefinition;
     }
 
-    public static PartDefinition addHead(CubeDeformation p_368080_, MeshDefinition p_363060_) {
-        PartDefinition partdefinition = p_363060_.getRoot();
+    public static PartDefinition addHead(CubeDeformation pCubeDeformation, MeshDefinition pMesh) {
+        PartDefinition partdefinition = pMesh.getRoot();
         PartDefinition partdefinition1 = partdefinition.addOrReplaceChild(
             "head",
             CubeListBuilder.create()
                 .texOffs(0, 0)
-                .addBox(-5.0F, -8.0F, -4.0F, 10.0F, 8.0F, 8.0F, p_368080_)
+                .addBox(-5.0F, -8.0F, -4.0F, 10.0F, 8.0F, 8.0F, pCubeDeformation)
                 .texOffs(31, 1)
-                .addBox(-2.0F, -4.0F, -5.0F, 4.0F, 4.0F, 1.0F, p_368080_)
+                .addBox(-2.0F, -4.0F, -5.0F, 4.0F, 4.0F, 1.0F, pCubeDeformation)
                 .texOffs(2, 4)
-                .addBox(2.0F, -2.0F, -5.0F, 1.0F, 2.0F, 1.0F, p_368080_)
+                .addBox(2.0F, -2.0F, -5.0F, 1.0F, 2.0F, 1.0F, pCubeDeformation)
                 .texOffs(2, 0)
-                .addBox(-3.0F, -2.0F, -5.0F, 1.0F, 2.0F, 1.0F, p_368080_),
+                .addBox(-3.0F, -2.0F, -5.0F, 1.0F, 2.0F, 1.0F, pCubeDeformation),
             PartPose.ZERO
         );
         partdefinition1.addOrReplaceChild(
             "left_ear",
-            CubeListBuilder.create().texOffs(51, 6).addBox(0.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, p_368080_),
+            CubeListBuilder.create().texOffs(51, 6).addBox(0.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, pCubeDeformation),
             PartPose.offsetAndRotation(4.5F, -6.0F, 0.0F, 0.0F, 0.0F, (float) (-Math.PI / 6))
         );
         partdefinition1.addOrReplaceChild(
             "right_ear",
-            CubeListBuilder.create().texOffs(39, 6).addBox(-1.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, p_368080_),
+            CubeListBuilder.create().texOffs(39, 6).addBox(-1.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, pCubeDeformation),
             PartPose.offsetAndRotation(-4.5F, -6.0F, 0.0F, 0.0F, 0.0F, (float) (Math.PI / 6))
         );
         return partdefinition1;

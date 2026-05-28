@@ -10,10 +10,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.shaders.Program;
+import net.optifine.shaders.Shaders;
 
-@OnlyIn(Dist.CLIENT)
 public class ItemPickupParticle extends Particle {
     private static final int LIFE_TIME = 3;
     private final Entity itemEntity;
@@ -27,21 +27,21 @@ public class ItemPickupParticle extends Particle {
     private double targetYOld;
     private double targetZOld;
 
-    public ItemPickupParticle(EntityRenderDispatcher p_107023_, ClientLevel p_107025_, Entity p_107026_, Entity p_107027_) {
-        this(p_107023_, p_107025_, p_107026_, p_107027_, p_107026_.getDeltaMovement());
+    public ItemPickupParticle(EntityRenderDispatcher pEntityRenderDispatcher, ClientLevel pLevel, Entity pItemEntity, Entity pTarget) {
+        this(pEntityRenderDispatcher, pLevel, pItemEntity, pTarget, pItemEntity.getDeltaMovement());
     }
 
-    private ItemPickupParticle(EntityRenderDispatcher p_107029_, ClientLevel p_107031_, Entity p_107032_, Entity p_107033_, Vec3 p_107034_) {
-        super(p_107031_, p_107032_.getX(), p_107032_.getY(), p_107032_.getZ(), p_107034_.x, p_107034_.y, p_107034_.z);
-        this.itemEntity = this.getSafeCopy(p_107032_);
-        this.target = p_107033_;
-        this.entityRenderDispatcher = p_107029_;
+    private ItemPickupParticle(EntityRenderDispatcher pEntityRenderDispatcher, ClientLevel pLevel, Entity pItemEntity, Entity pTarget, Vec3 pSpeed) {
+        super(pLevel, pItemEntity.getX(), pItemEntity.getY(), pItemEntity.getZ(), pSpeed.x, pSpeed.y, pSpeed.z);
+        this.itemEntity = this.getSafeCopy(pItemEntity);
+        this.target = pTarget;
+        this.entityRenderDispatcher = pEntityRenderDispatcher;
         this.updatePosition();
         this.saveOldPosition();
     }
 
-    private Entity getSafeCopy(Entity p_107037_) {
-        return (Entity)(!(p_107037_ instanceof ItemEntity) ? p_107037_ : ((ItemEntity)p_107037_).copy());
+    private Entity getSafeCopy(Entity pEntity) {
+        return (Entity)(!(pEntity instanceof ItemEntity) ? pEntity : ((ItemEntity)pEntity).copy());
     }
 
     @Override
@@ -51,6 +51,12 @@ public class ItemPickupParticle extends Particle {
 
     @Override
     public void renderCustom(PoseStack p_375620_, MultiBufferSource p_377939_, Camera p_376327_, float p_377781_) {
+        Program program = null;
+        if (Config.isShaders()) {
+            program = Shaders.activeProgram;
+            Shaders.nextEntity(this.itemEntity);
+        }
+
         float f = ((float)this.life + p_377781_) / 3.0F;
         f *= f;
         double d0 = Mth.lerp((double)p_377781_, this.targetXOld, this.targetX);
@@ -71,10 +77,14 @@ public class ItemPickupParticle extends Particle {
                 p_377939_,
                 this.entityRenderDispatcher.getPackedLightCoords(this.itemEntity, p_377781_)
             );
+        if (Config.isShaders()) {
+            Shaders.setEntityId(null);
+            Shaders.useProgram(program);
+        }
     }
 
     @Override
-    public void render(VertexConsumer p_107039_, Camera p_107040_, float p_107041_) {
+    public void render(VertexConsumer pBuffer, Camera pRenderInfo, float pPartialTicks) {
     }
 
     @Override

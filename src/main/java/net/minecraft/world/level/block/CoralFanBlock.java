@@ -25,14 +25,14 @@ public class CoralFanBlock extends BaseCoralFanBlock {
         return CODEC;
     }
 
-    protected CoralFanBlock(Block p_52151_, BlockBehaviour.Properties p_52152_) {
-        super(p_52152_);
-        this.deadBlock = p_52151_;
+    protected CoralFanBlock(Block pDeadBlock, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.deadBlock = pDeadBlock;
     }
 
     @Override
-    protected void onPlace(BlockState p_52166_, Level p_52167_, BlockPos p_52168_, BlockState p_52169_, boolean p_52170_) {
-        this.tryScheduleDieTick(p_52166_, p_52167_, p_52167_, p_52167_.random, p_52168_);
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        this.tryScheduleDieTick(pState, pLevel, pLevel, pLevel.random, pPos);
     }
 
     @Override

@@ -15,7 +15,7 @@ public abstract class SimplePreparableReloadListener<T> implements PreparableRel
             .thenAcceptAsync(p_358748_ -> this.apply((T)p_358748_, p_10781_, Profiler.get()), p_10785_);
     }
 
-    protected abstract T prepare(ResourceManager p_10796_, ProfilerFiller p_10797_);
+    protected abstract T prepare(ResourceManager pResourceManager, ProfilerFiller pProfiler);
 
-    protected abstract void apply(T p_10793_, ResourceManager p_10794_, ProfilerFiller p_10795_);
+    protected abstract void apply(T pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler);
 }

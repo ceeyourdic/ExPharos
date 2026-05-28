@@ -24,8 +24,8 @@ public class GlowLichenBlock extends MultifaceSpreadeableBlock implements Boneme
         super(p_153282_);
     }
 
-    public static ToIntFunction<BlockState> emission(int p_181223_) {
-        return p_181221_ -> MultifaceBlock.hasAnyFace(p_181221_) ? p_181223_ : 0;
+    public static ToIntFunction<BlockState> emission(int pLight) {
+        return p_181221_ -> MultifaceBlock.hasAnyFace(p_181221_) ? pLight : 0;
     }
 
     @Override

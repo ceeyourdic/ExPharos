@@ -35,13 +35,13 @@ public class EntityPositionSource implements PositionSource {
     private Either<Entity, Either<UUID, Integer>> entityOrUuidOrId;
     private final float yOffset;
 
-    public EntityPositionSource(Entity p_223648_, float p_223649_) {
-        this(Either.left(p_223648_), p_223649_);
+    public EntityPositionSource(Entity pEntity, float pYOffset) {
+        this(Either.left(pEntity), pYOffset);
     }
 
-    private EntityPositionSource(Either<Entity, Either<UUID, Integer>> p_223651_, float p_223652_) {
-        this.entityOrUuidOrId = p_223651_;
-        this.yOffset = p_223652_;
+    private EntityPositionSource(Either<Entity, Either<UUID, Integer>> pEntityOrUuidOrId, float pYOffset) {
+        this.entityOrUuidOrId = pEntityOrUuidOrId;
+        this.yOffset = pYOffset;
     }
 
     @Override
@@ -53,12 +53,12 @@ public class EntityPositionSource implements PositionSource {
         return this.entityOrUuidOrId.left().map(p_223676_ -> p_223676_.position().add(0.0, (double)this.yOffset, 0.0));
     }
 
-    private void resolveEntity(Level p_223678_) {
+    private void resolveEntity(Level pLevel) {
         this.entityOrUuidOrId
             .map(
                 Optional::of,
                 p_223657_ -> Optional.ofNullable(
-                        p_223657_.map(p_223660_ -> p_223678_ instanceof ServerLevel serverlevel ? serverlevel.getEntity(p_223660_) : null, p_223678_::getEntity)
+                        p_223657_.map(p_223660_ -> pLevel instanceof ServerLevel serverlevel ? serverlevel.getEntity(p_223660_) : null, pLevel::getEntity)
                     )
             )
             .ifPresent(p_223654_ -> this.entityOrUuidOrId = Either.left(p_223654_));

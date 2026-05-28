@@ -24,11 +24,11 @@ public record AnimationFrame(int index, Optional<Integer> time) {
             p_378215_ -> p_378215_.time.isPresent() ? Either.right(p_378215_) : Either.left(p_378215_.index)
         );
 
-    public AnimationFrame(int p_119004_) {
-        this(p_119004_, Optional.empty());
+    public AnimationFrame(int pIndex) {
+        this(pIndex, Optional.empty());
     }
 
-    public int timeOr(int p_378767_) {
-        return this.time.orElse(p_378767_);
+    public int timeOr(int pDefaultValue) {
+        return this.time.orElse(pDefaultValue);
     }
 }

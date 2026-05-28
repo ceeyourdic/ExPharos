@@ -58,8 +58,8 @@ public record ItemWrittenBookPredicate(
         public static final Codec<ItemWrittenBookPredicate.PagePredicate> CODEC = ComponentSerialization.CODEC
             .xmap(ItemWrittenBookPredicate.PagePredicate::new, ItemWrittenBookPredicate.PagePredicate::contents);
 
-        public boolean test(Filterable<Component> p_327692_) {
-            return p_327692_.raw().equals(this.contents);
+        public boolean test(Filterable<Component> pContents) {
+            return pContents.raw().equals(this.contents);
         }
     }
 }

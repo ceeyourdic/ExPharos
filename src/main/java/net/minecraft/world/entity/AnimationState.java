@@ -6,19 +6,19 @@ public class AnimationState {
     private static final int STOPPED = Integer.MIN_VALUE;
     private int startTick = Integer.MIN_VALUE;
 
-    public void start(int p_216978_) {
-        this.startTick = p_216978_;
+    public void start(int pTickCount) {
+        this.startTick = pTickCount;
     }
 
-    public void startIfStopped(int p_216983_) {
+    public void startIfStopped(int pTickCount) {
         if (!this.isStarted()) {
-            this.start(p_216983_);
+            this.start(pTickCount);
         }
     }
 
-    public void animateWhen(boolean p_252220_, int p_249486_) {
-        if (p_252220_) {
-            this.startIfStopped(p_249486_);
+    public void animateWhen(boolean pCondition, int pTickCount) {
+        if (pCondition) {
+            this.startIfStopped(pTickCount);
         } else {
             this.stop();
         }
@@ -28,20 +28,20 @@ public class AnimationState {
         this.startTick = Integer.MIN_VALUE;
     }
 
-    public void ifStarted(Consumer<AnimationState> p_216980_) {
+    public void ifStarted(Consumer<AnimationState> pAction) {
         if (this.isStarted()) {
-            p_216980_.accept(this);
+            pAction.accept(this);
         }
     }
 
-    public void fastForward(int p_332215_, float p_335055_) {
+    public void fastForward(int pDuration, float pSpeed) {
         if (this.isStarted()) {
-            this.startTick -= (int)((float)p_332215_ * p_335055_);
+            this.startTick -= (int)((float)pDuration * pSpeed);
         }
     }
 
-    public long getTimeInMillis(float p_368031_) {
-        float f = p_368031_ - (float)this.startTick;
+    public long getTimeInMillis(float pGameTime) {
+        float f = pGameTime - (float)this.startTick;
         return (long)(f * 50.0F);
     }
 
@@ -49,7 +49,7 @@ public class AnimationState {
         return this.startTick != Integer.MIN_VALUE;
     }
 
-    public void copyFrom(AnimationState p_369750_) {
-        this.startTick = p_369750_.startTick;
+    public void copyFrom(AnimationState pOther) {
+        this.startTick = pOther.startTick;
     }
 }

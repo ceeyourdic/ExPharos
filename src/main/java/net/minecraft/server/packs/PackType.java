@@ -6,8 +6,8 @@ public enum PackType {
 
     private final String directory;
 
-    private PackType(final String p_265479_) {
-        this.directory = p_265479_;
+    private PackType(final String pDirectory) {
+        this.directory = pDirectory;
     }
 
     public String getDirectory() {

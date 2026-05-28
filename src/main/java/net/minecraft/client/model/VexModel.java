@@ -24,8 +24,8 @@ public class VexModel extends EntityModel<VexRenderState> implements ArmedModel 
     private final ModelPart leftWing = this.body.getChild("left_wing");
     private final ModelPart head = this.root.getChild("head");
 
-    public VexModel(ModelPart p_171045_) {
-        super(p_171045_.getChild("root"), RenderType::entityTranslucent);
+    public VexModel(ModelPart pRoot) {
+        super(pRoot.getChild("root"), RenderType::entityTranslucent);
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -91,25 +91,25 @@ public class VexModel extends EntityModel<VexRenderState> implements ArmedModel 
         this.rightWing.zRot = 0.47123888F;
     }
 
-    private void setArmsCharging(boolean p_365310_, boolean p_367220_, float p_265125_) {
-        if (!p_365310_ && !p_367220_) {
+    private void setArmsCharging(boolean pRightArm, boolean pLeftArm, float pChargeAmount) {
+        if (!pRightArm && !pLeftArm) {
             this.rightArm.xRot = -1.2217305F;
             this.rightArm.yRot = (float) (Math.PI / 12);
-            this.rightArm.zRot = -0.47123888F - p_265125_;
+            this.rightArm.zRot = -0.47123888F - pChargeAmount;
             this.leftArm.xRot = -1.2217305F;
             this.leftArm.yRot = (float) (-Math.PI / 12);
-            this.leftArm.zRot = 0.47123888F + p_265125_;
+            this.leftArm.zRot = 0.47123888F + pChargeAmount;
         } else {
-            if (p_365310_) {
+            if (pRightArm) {
                 this.rightArm.xRot = (float) (Math.PI * 7.0 / 6.0);
                 this.rightArm.yRot = (float) (Math.PI / 12);
-                this.rightArm.zRot = -0.47123888F - p_265125_;
+                this.rightArm.zRot = -0.47123888F - pChargeAmount;
             }
 
-            if (p_367220_) {
+            if (pLeftArm) {
                 this.leftArm.xRot = (float) (Math.PI * 7.0 / 6.0);
                 this.leftArm.yRot = (float) (-Math.PI / 12);
-                this.leftArm.zRot = 0.47123888F + p_265125_;
+                this.leftArm.zRot = 0.47123888F + pChargeAmount;
             }
         }
     }
@@ -125,11 +125,11 @@ public class VexModel extends EntityModel<VexRenderState> implements ArmedModel 
         this.offsetStackPosition(p_260351_, flag);
     }
 
-    private void offsetStackPosition(PoseStack p_263343_, boolean p_263414_) {
-        if (p_263414_) {
-            p_263343_.translate(0.046875, -0.15625, 0.078125);
+    private void offsetStackPosition(PoseStack pPoseStack, boolean pRightSide) {
+        if (pRightSide) {
+            pPoseStack.translate(0.046875, -0.15625, 0.078125);
         } else {
-            p_263343_.translate(-0.046875, -0.15625, 0.078125);
+            pPoseStack.translate(-0.046875, -0.15625, 0.078125);
         }
     }
 }

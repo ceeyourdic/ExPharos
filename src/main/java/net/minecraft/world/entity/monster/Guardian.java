@@ -89,8 +89,8 @@ public class Guardian extends Monster {
     }
 
     @Override
-    protected PathNavigation createNavigation(Level p_32846_) {
-        return new WaterBoundPathNavigation(this, p_32846_);
+    protected PathNavigation createNavigation(Level pLevel) {
+        return new WaterBoundPathNavigation(this, pLevel);
     }
 
     @Override
@@ -104,16 +104,16 @@ public class Guardian extends Monster {
         return this.entityData.get(DATA_ID_MOVING);
     }
 
-    void setMoving(boolean p_32862_) {
-        this.entityData.set(DATA_ID_MOVING, p_32862_);
+    void setMoving(boolean pMoving) {
+        this.entityData.set(DATA_ID_MOVING, pMoving);
     }
 
     public int getAttackDuration() {
         return 80;
     }
 
-    void setActiveAttackTarget(int p_32818_) {
-        this.entityData.set(DATA_ID_ATTACK_TARGET, p_32818_);
+    void setActiveAttackTarget(int pActiveAttackTargetId) {
+        this.entityData.set(DATA_ID_ATTACK_TARGET, pActiveAttackTargetId);
     }
 
     public boolean hasActiveAttackTarget() {
@@ -142,9 +142,9 @@ public class Guardian extends Monster {
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_32834_) {
-        super.onSyncedDataUpdated(p_32834_);
-        if (DATA_ID_ATTACK_TARGET.equals(p_32834_)) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        super.onSyncedDataUpdated(pKey);
+        if (DATA_ID_ATTACK_TARGET.equals(pKey)) {
             this.clientSideAttackTime = 0;
             this.clientSideCachedAttackTarget = null;
         }
@@ -161,7 +161,7 @@ public class Guardian extends Monster {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_32852_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return this.isInWaterOrBubble() ? SoundEvents.GUARDIAN_HURT : SoundEvents.GUARDIAN_HURT_LAND;
     }
 
@@ -176,8 +176,8 @@ public class Guardian extends Monster {
     }
 
     @Override
-    public float getWalkTargetValue(BlockPos p_32831_, LevelReader p_32832_) {
-        return p_32832_.getFluidState(p_32831_).is(FluidTags.WATER) ? 10.0F + p_32832_.getPathfindingCostFromLightLevels(p_32831_) : super.getWalkTargetValue(p_32831_, p_32832_);
+    public float getWalkTargetValue(BlockPos pPos, LevelReader pLevel) {
+        return pLevel.getFluidState(pPos).is(FluidTags.WATER) ? 10.0F + pLevel.getPathfindingCostFromLightLevels(pPos) : super.getWalkTargetValue(pPos, pLevel);
     }
 
     @Override
@@ -284,16 +284,16 @@ public class Guardian extends Monster {
         return SoundEvents.GUARDIAN_FLOP;
     }
 
-    public float getTailAnimation(float p_32864_) {
-        return Mth.lerp(p_32864_, this.clientSideTailAnimationO, this.clientSideTailAnimation);
+    public float getTailAnimation(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.clientSideTailAnimationO, this.clientSideTailAnimation);
     }
 
-    public float getSpikesAnimation(float p_32866_) {
-        return Mth.lerp(p_32866_, this.clientSideSpikesAnimationO, this.clientSideSpikesAnimation);
+    public float getSpikesAnimation(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.clientSideSpikesAnimationO, this.clientSideSpikesAnimation);
     }
 
-    public float getAttackAnimationScale(float p_32813_) {
-        return ((float)this.clientSideAttackTime + p_32813_) / (float)this.getAttackDuration();
+    public float getAttackAnimationScale(float pPartialTick) {
+        return ((float)this.clientSideAttackTime + pPartialTick) / (float)this.getAttackDuration();
     }
 
     public float getClientSideAttackTime() {
@@ -301,17 +301,17 @@ public class Guardian extends Monster {
     }
 
     @Override
-    public boolean checkSpawnObstruction(LevelReader p_32829_) {
-        return p_32829_.isUnobstructed(this);
+    public boolean checkSpawnObstruction(LevelReader pLevel) {
+        return pLevel.isUnobstructed(this);
     }
 
     public static boolean checkGuardianSpawnRules(
-        EntityType<? extends Guardian> p_218991_, LevelAccessor p_218992_, EntitySpawnReason p_362802_, BlockPos p_218994_, RandomSource p_218995_
+        EntityType<? extends Guardian> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return (p_218995_.nextInt(20) == 0 || !p_218992_.canSeeSkyFromBelowWater(p_218994_))
-            && p_218992_.getDifficulty() != Difficulty.PEACEFUL
-            && (EntitySpawnReason.isSpawner(p_362802_) || p_218992_.getFluidState(p_218994_).is(FluidTags.WATER))
-            && p_218992_.getFluidState(p_218994_.below()).is(FluidTags.WATER);
+        return (pRandom.nextInt(20) == 0 || !pLevel.canSeeSkyFromBelowWater(pPos))
+            && pLevel.getDifficulty() != Difficulty.PEACEFUL
+            && (EntitySpawnReason.isSpawner(pSpawnReason) || pLevel.getFluidState(pPos).is(FluidTags.WATER))
+            && pLevel.getFluidState(pPos.below()).is(FluidTags.WATER);
     }
 
     @Override
@@ -336,16 +336,16 @@ public class Guardian extends Monster {
     }
 
     @Override
-    public void travel(Vec3 p_32858_) {
+    public void travel(Vec3 pTravelVector) {
         if (this.isControlledByLocalInstance() && this.isInWater()) {
-            this.moveRelative(0.1F, p_32858_);
+            this.moveRelative(0.1F, pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9));
             if (!this.isMoving() && this.getTarget() == null) {
                 this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.005, 0.0));
             }
         } else {
-            super.travel(p_32858_);
+            super.travel(pTravelVector);
         }
     }
 
@@ -354,9 +354,9 @@ public class Guardian extends Monster {
         private int attackTime;
         private final boolean elder;
 
-        public GuardianAttackGoal(Guardian p_32871_) {
-            this.guardian = p_32871_;
-            this.elder = p_32871_ instanceof ElderGuardian;
+        public GuardianAttackGoal(Guardian pGuardian) {
+            this.guardian = pGuardian;
+            this.elder = pGuardian instanceof ElderGuardian;
             this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
         }
 
@@ -435,8 +435,8 @@ public class Guardian extends Monster {
     static class GuardianAttackSelector implements TargetingConditions.Selector {
         private final Guardian guardian;
 
-        public GuardianAttackSelector(Guardian p_32879_) {
-            this.guardian = p_32879_;
+        public GuardianAttackSelector(Guardian pGuardian) {
+            this.guardian = pGuardian;
         }
 
         @Override
@@ -448,9 +448,9 @@ public class Guardian extends Monster {
     static class GuardianMoveControl extends MoveControl {
         private final Guardian guardian;
 
-        public GuardianMoveControl(Guardian p_32886_) {
-            super(p_32886_);
-            this.guardian = p_32886_;
+        public GuardianMoveControl(Guardian pGuardian) {
+            super(pGuardian);
+            this.guardian = pGuardian;
         }
 
         @Override

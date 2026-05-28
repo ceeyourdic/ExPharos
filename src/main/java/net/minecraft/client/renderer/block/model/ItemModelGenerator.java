@@ -50,45 +50,45 @@ public class ItemModelGenerator implements UnbakedModel {
     }
 
     private BakedModel bake(
-        TextureSlots p_377946_, SpriteGetter p_378401_, ModelState p_375548_, boolean p_377983_, boolean p_377097_, ItemTransforms p_377316_
+        TextureSlots pTextureSlots, SpriteGetter pSpriteGetter, ModelState pModelState, boolean pHasAmbientOcclusion, boolean pUseBlockLight, ItemTransforms pTransforms
     ) {
         TextureSlots.Data.Builder textureslots$data$builder = new TextureSlots.Data.Builder();
         List<BlockElement> list = new ArrayList<>();
 
         for (int i = 0; i < LAYERS.size(); i++) {
             String s = LAYERS.get(i);
-            Material material = p_377946_.getMaterial(s);
+            Material material = pTextureSlots.getMaterial(s);
             if (material == null) {
                 break;
             }
 
             textureslots$data$builder.addTexture(s, material);
-            SpriteContents spritecontents = p_378401_.get(material).contents();
+            SpriteContents spritecontents = pSpriteGetter.get(material).contents();
             list.addAll(this.processFrames(i, s, spritecontents));
         }
 
-        return SimpleBakedModel.bakeElements(list, p_377946_, p_378401_, p_375548_, p_377983_, p_377097_, false, p_377316_);
+        return SimpleBakedModel.bakeElements(list, pTextureSlots, pSpriteGetter, pModelState, pHasAmbientOcclusion, pUseBlockLight, false, pTransforms);
     }
 
-    private List<BlockElement> processFrames(int p_111639_, String p_111640_, SpriteContents p_251768_) {
+    private List<BlockElement> processFrames(int pTintIndex, String pTexture, SpriteContents pSprite) {
         Map<Direction, BlockElementFace> map = Map.of(
             Direction.SOUTH,
-            new BlockElementFace(null, p_111639_, p_111640_, new BlockFaceUV(new float[]{0.0F, 0.0F, 16.0F, 16.0F}, 0)),
+            new BlockElementFace(null, pTintIndex, pTexture, new BlockFaceUV(new float[]{0.0F, 0.0F, 16.0F, 16.0F}, 0)),
             Direction.NORTH,
-            new BlockElementFace(null, p_111639_, p_111640_, new BlockFaceUV(new float[]{16.0F, 0.0F, 0.0F, 16.0F}, 0))
+            new BlockElementFace(null, pTintIndex, pTexture, new BlockFaceUV(new float[]{16.0F, 0.0F, 0.0F, 16.0F}, 0))
         );
         List<BlockElement> list = new ArrayList<>();
         list.add(new BlockElement(new Vector3f(0.0F, 0.0F, 7.5F), new Vector3f(16.0F, 16.0F, 8.5F), map));
-        list.addAll(this.createSideElements(p_251768_, p_111640_, p_111639_));
+        list.addAll(this.createSideElements(pSprite, pTexture, pTintIndex));
         return list;
     }
 
-    private List<BlockElement> createSideElements(SpriteContents p_248810_, String p_111663_, int p_111664_) {
-        float f = (float)p_248810_.width();
-        float f1 = (float)p_248810_.height();
+    private List<BlockElement> createSideElements(SpriteContents pSprite, String pTexture, int pTintIndex) {
+        float f = (float)pSprite.width();
+        float f1 = (float)pSprite.height();
         List<BlockElement> list = new ArrayList<>();
 
-        for (ItemModelGenerator.Span itemmodelgenerator$span : this.getSpans(p_248810_)) {
+        for (ItemModelGenerator.Span itemmodelgenerator$span : this.getSpans(pSprite)) {
             float f2 = 0.0F;
             float f3 = 0.0F;
             float f4 = 0.0F;
@@ -152,7 +152,7 @@ public class ItemModelGenerator implements UnbakedModel {
             f8 *= f11;
             f9 *= f11;
             Map<Direction, BlockElementFace> map = Map.of(
-                itemmodelgenerator$spanfacing.getDirection(), new BlockElementFace(null, p_111664_, p_111663_, new BlockFaceUV(new float[]{f6, f8, f7, f9}, 0))
+                itemmodelgenerator$spanfacing.getDirection(), new BlockElementFace(null, pTintIndex, pTexture, new BlockFaceUV(new float[]{f6, f8, f7, f9}, 0))
             );
             switch (itemmodelgenerator$spanfacing) {
                 case UP:
@@ -172,18 +172,18 @@ public class ItemModelGenerator implements UnbakedModel {
         return list;
     }
 
-    private List<ItemModelGenerator.Span> getSpans(SpriteContents p_250338_) {
-        int i = p_250338_.width();
-        int j = p_250338_.height();
+    private List<ItemModelGenerator.Span> getSpans(SpriteContents pSprite) {
+        int i = pSprite.width();
+        int j = pSprite.height();
         List<ItemModelGenerator.Span> list = new ArrayList<>();
-        p_250338_.getUniqueFrames().forEach(p_173444_ -> {
+        pSprite.getUniqueFrames().forEach(p_173444_ -> {
             for (int k = 0; k < j; k++) {
                 for (int l = 0; l < i; l++) {
-                    boolean flag = !this.isTransparent(p_250338_, p_173444_, l, k, i, j);
-                    this.checkTransition(ItemModelGenerator.SpanFacing.UP, list, p_250338_, p_173444_, l, k, i, j, flag);
-                    this.checkTransition(ItemModelGenerator.SpanFacing.DOWN, list, p_250338_, p_173444_, l, k, i, j, flag);
-                    this.checkTransition(ItemModelGenerator.SpanFacing.LEFT, list, p_250338_, p_173444_, l, k, i, j, flag);
-                    this.checkTransition(ItemModelGenerator.SpanFacing.RIGHT, list, p_250338_, p_173444_, l, k, i, j, flag);
+                    boolean flag = !this.isTransparent(pSprite, p_173444_, l, k, i, j);
+                    this.checkTransition(ItemModelGenerator.SpanFacing.UP, list, pSprite, p_173444_, l, k, i, j, flag);
+                    this.checkTransition(ItemModelGenerator.SpanFacing.DOWN, list, pSprite, p_173444_, l, k, i, j, flag);
+                    this.checkTransition(ItemModelGenerator.SpanFacing.LEFT, list, pSprite, p_173444_, l, k, i, j, flag);
+                    this.checkTransition(ItemModelGenerator.SpanFacing.RIGHT, list, pSprite, p_173444_, l, k, i, j, flag);
                 }
             }
         });
@@ -191,29 +191,29 @@ public class ItemModelGenerator implements UnbakedModel {
     }
 
     private void checkTransition(
-        ItemModelGenerator.SpanFacing p_251572_,
-        List<ItemModelGenerator.Span> p_248882_,
-        SpriteContents p_249847_,
-        int p_250616_,
-        int p_251416_,
-        int p_249664_,
-        int p_250174_,
-        int p_250897_,
-        boolean p_248773_
+        ItemModelGenerator.SpanFacing pSpanFacing,
+        List<ItemModelGenerator.Span> pListSpans,
+        SpriteContents pContents,
+        int pFrameIndex,
+        int pPixelX,
+        int pPixelY,
+        int pSpriteWidth,
+        int pSpriteHeight,
+        boolean pTransparent
     ) {
-        boolean flag = this.isTransparent(p_249847_, p_250616_, p_251416_ + p_251572_.getXOffset(), p_249664_ + p_251572_.getYOffset(), p_250174_, p_250897_)
-            && p_248773_;
+        boolean flag = this.isTransparent(pContents, pFrameIndex, pPixelX + pSpanFacing.getXOffset(), pPixelY + pSpanFacing.getYOffset(), pSpriteWidth, pSpriteHeight)
+            && pTransparent;
         if (flag) {
-            this.createOrExpandSpan(p_248882_, p_251572_, p_251416_, p_249664_);
+            this.createOrExpandSpan(pListSpans, pSpanFacing, pPixelX, pPixelY);
         }
     }
 
-    private void createOrExpandSpan(List<ItemModelGenerator.Span> p_111666_, ItemModelGenerator.SpanFacing p_111667_, int p_111668_, int p_111669_) {
+    private void createOrExpandSpan(List<ItemModelGenerator.Span> pListSpans, ItemModelGenerator.SpanFacing pSpanFacing, int pPixelX, int pPixelY) {
         ItemModelGenerator.Span itemmodelgenerator$span = null;
 
-        for (ItemModelGenerator.Span itemmodelgenerator$span1 : p_111666_) {
-            if (itemmodelgenerator$span1.getFacing() == p_111667_) {
-                int i = p_111667_.isHorizontal() ? p_111669_ : p_111668_;
+        for (ItemModelGenerator.Span itemmodelgenerator$span1 : pListSpans) {
+            if (itemmodelgenerator$span1.getFacing() == pSpanFacing) {
+                int i = pSpanFacing.isHorizontal() ? pPixelY : pPixelX;
                 if (itemmodelgenerator$span1.getAnchor() == i) {
                     itemmodelgenerator$span = itemmodelgenerator$span1;
                     break;
@@ -221,17 +221,17 @@ public class ItemModelGenerator implements UnbakedModel {
             }
         }
 
-        int j = p_111667_.isHorizontal() ? p_111669_ : p_111668_;
-        int k = p_111667_.isHorizontal() ? p_111668_ : p_111669_;
+        int j = pSpanFacing.isHorizontal() ? pPixelY : pPixelX;
+        int k = pSpanFacing.isHorizontal() ? pPixelX : pPixelY;
         if (itemmodelgenerator$span == null) {
-            p_111666_.add(new ItemModelGenerator.Span(p_111667_, k, j));
+            pListSpans.add(new ItemModelGenerator.Span(pSpanFacing, k, j));
         } else {
             itemmodelgenerator$span.expand(k);
         }
     }
 
-    private boolean isTransparent(SpriteContents p_249650_, int p_250692_, int p_251914_, int p_252343_, int p_250258_, int p_248997_) {
-        return p_251914_ >= 0 && p_252343_ >= 0 && p_251914_ < p_250258_ && p_252343_ < p_248997_ ? p_249650_.isTransparent(p_250692_, p_251914_, p_252343_) : true;
+    private boolean isTransparent(SpriteContents pSprite, int pFrameIndex, int pPixelX, int pPixelY, int pSpriteWidth, int pSpriteHeight) {
+        return pPixelX >= 0 && pPixelY >= 0 && pPixelX < pSpriteWidth && pPixelY < pSpriteHeight ? pSprite.isTransparent(pFrameIndex, pPixelX, pPixelY) : true;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -241,18 +241,18 @@ public class ItemModelGenerator implements UnbakedModel {
         private int max;
         private final int anchor;
 
-        public Span(ItemModelGenerator.SpanFacing p_111680_, int p_111681_, int p_111682_) {
-            this.facing = p_111680_;
-            this.min = p_111681_;
-            this.max = p_111681_;
-            this.anchor = p_111682_;
+        public Span(ItemModelGenerator.SpanFacing pFacing, int pMinMax, int pAnchor) {
+            this.facing = pFacing;
+            this.min = pMinMax;
+            this.max = pMinMax;
+            this.anchor = pAnchor;
         }
 
-        public void expand(int p_111685_) {
-            if (p_111685_ < this.min) {
-                this.min = p_111685_;
-            } else if (p_111685_ > this.max) {
-                this.max = p_111685_;
+        public void expand(int pPos) {
+            if (pPos < this.min) {
+                this.min = pPos;
+            } else if (pPos > this.max) {
+                this.max = pPos;
             }
         }
 
@@ -284,10 +284,10 @@ public class ItemModelGenerator implements UnbakedModel {
         private final int xOffset;
         private final int yOffset;
 
-        private SpanFacing(final Direction p_111701_, final int p_111702_, final int p_111703_) {
-            this.direction = p_111701_;
-            this.xOffset = p_111702_;
-            this.yOffset = p_111703_;
+        private SpanFacing(final Direction pDirection, final int pXOffset, final int pYOffset) {
+            this.direction = pDirection;
+            this.xOffset = pXOffset;
+            this.yOffset = pYOffset;
         }
 
         public Direction getDirection() {

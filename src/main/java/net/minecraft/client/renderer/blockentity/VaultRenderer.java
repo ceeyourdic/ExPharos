@@ -22,8 +22,8 @@ public class VaultRenderer implements BlockEntityRenderer<VaultBlockEntity> {
     private final RandomSource random = RandomSource.create();
     private final ItemClusterRenderState renderState = new ItemClusterRenderState();
 
-    public VaultRenderer(BlockEntityRendererProvider.Context p_335617_) {
-        this.itemModelResolver = p_335617_.getItemModelResolver();
+    public VaultRenderer(BlockEntityRendererProvider.Context pContext) {
+        this.itemModelResolver = pContext.getItemModelResolver();
     }
 
     public void render(VaultBlockEntity p_335871_, float p_335940_, PoseStack p_331267_, MultiBufferSource p_329108_, int p_330387_, int p_332341_) {

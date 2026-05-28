@@ -50,14 +50,14 @@ public class JfrStatsParser {
     @Nullable
     private Duration worldCreationDuration = null;
 
-    private JfrStatsParser(Stream<RecordedEvent> p_185443_) {
-        this.capture(p_185443_);
+    private JfrStatsParser(Stream<RecordedEvent> pEvents) {
+        this.capture(pEvents);
     }
 
-    public static JfrStatsResult parse(Path p_185448_) {
+    public static JfrStatsResult parse(Path pFile) {
         try {
             JfrStatsResult jfrstatsresult;
-            try (final RecordingFile recordingfile = new RecordingFile(p_185448_)) {
+            try (final RecordingFile recordingfile = new RecordingFile(pFile)) {
                 Iterator<RecordedEvent> iterator = new Iterator<RecordedEvent>() {
                     @Override
                     public boolean hasNext() {
@@ -108,8 +108,8 @@ public class JfrStatsParser {
         );
     }
 
-    private void capture(Stream<RecordedEvent> p_185455_) {
-        p_185455_.forEach(p_374914_ -> {
+    private void capture(Stream<RecordedEvent> pEvents) {
+        pEvents.forEach(p_374914_ -> {
             if (p_374914_.getEndTime().isAfter(this.recordingEnded) || this.recordingEnded.equals(Instant.EPOCH)) {
                 this.recordingEnded = p_374914_.getEndTime();
             }
@@ -166,32 +166,32 @@ public class JfrStatsParser {
         });
     }
 
-    private void incrementPacket(RecordedEvent p_185459_, int p_185460_, Map<PacketIdentification, JfrStatsParser.MutableCountAndSize> p_185461_) {
-        p_185461_.computeIfAbsent(PacketIdentification.from(p_185459_), p_326728_ -> new JfrStatsParser.MutableCountAndSize()).increment(p_185460_);
+    private void incrementPacket(RecordedEvent pEvent, int pIncrement, Map<PacketIdentification, JfrStatsParser.MutableCountAndSize> pPackets) {
+        pPackets.computeIfAbsent(PacketIdentification.from(pEvent), p_326728_ -> new JfrStatsParser.MutableCountAndSize()).increment(pIncrement);
     }
 
-    private void incrementChunk(RecordedEvent p_329550_, int p_328110_, Map<ChunkIdentification, JfrStatsParser.MutableCountAndSize> p_329507_) {
-        p_329507_.computeIfAbsent(ChunkIdentification.from(p_329550_), p_332913_ -> new JfrStatsParser.MutableCountAndSize()).increment(p_328110_);
+    private void incrementChunk(RecordedEvent pEvent, int pIncrement, Map<ChunkIdentification, JfrStatsParser.MutableCountAndSize> pChunks) {
+        pChunks.computeIfAbsent(ChunkIdentification.from(pEvent), p_332913_ -> new JfrStatsParser.MutableCountAndSize()).increment(pIncrement);
     }
 
-    private void appendFileIO(RecordedEvent p_185463_, List<FileIOStat> p_185464_, String p_185465_) {
-        p_185464_.add(new FileIOStat(p_185463_.getDuration(), p_185463_.getString("path"), p_185463_.getLong(p_185465_)));
+    private void appendFileIO(RecordedEvent pEvent, List<FileIOStat> pStats, String pId) {
+        pStats.add(new FileIOStat(pEvent.getDuration(), pEvent.getString("path"), pEvent.getLong(pId)));
     }
 
-    private static <T> IoSummary<T> collectIoStats(Duration p_333492_, Map<T, JfrStatsParser.MutableCountAndSize> p_336276_) {
-        List<Pair<T, IoSummary.CountAndSize>> list = p_336276_.entrySet()
+    private static <T> IoSummary<T> collectIoStats(Duration pRecordingDuration, Map<T, JfrStatsParser.MutableCountAndSize> pEntries) {
+        List<Pair<T, IoSummary.CountAndSize>> list = pEntries.entrySet()
             .stream()
             .map(p_326729_ -> Pair.of(p_326729_.getKey(), p_326729_.getValue().toCountAndSize()))
             .toList();
-        return new IoSummary<>(p_333492_, list);
+        return new IoSummary<>(pRecordingDuration, list);
     }
 
     public static final class MutableCountAndSize {
         private long count;
         private long totalSize;
 
-        public void increment(int p_185477_) {
-            this.totalSize += (long)p_185477_;
+        public void increment(int pIncrement) {
+            this.totalSize += (long)pIncrement;
             this.count++;
         }
 

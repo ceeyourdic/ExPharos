@@ -18,8 +18,8 @@ public class CampfireRenderer implements BlockEntityRenderer<CampfireBlockEntity
     private static final float SIZE = 0.375F;
     private final ItemRenderer itemRenderer;
 
-    public CampfireRenderer(BlockEntityRendererProvider.Context p_173602_) {
-        this.itemRenderer = p_173602_.getItemRenderer();
+    public CampfireRenderer(BlockEntityRendererProvider.Context pContext) {
+        this.itemRenderer = pContext.getItemRenderer();
     }
 
     public void render(CampfireBlockEntity p_112344_, float p_112345_, PoseStack p_112346_, MultiBufferSource p_112347_, int p_112348_, int p_112349_) {

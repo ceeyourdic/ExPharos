@@ -53,9 +53,9 @@ public enum VaultState implements StringRepresentable {
     private final String stateName;
     private final VaultState.LightLevel lightLevel;
 
-    VaultState(final String p_333421_, final VaultState.LightLevel p_333767_) {
-        this.stateName = p_333421_;
-        this.lightLevel = p_333767_;
+    VaultState(final String pStateName, final VaultState.LightLevel pLightLevel) {
+        this.stateName = pStateName;
+        this.lightLevel = pLightLevel;
     }
 
     @Override
@@ -67,25 +67,25 @@ public enum VaultState implements StringRepresentable {
         return this.lightLevel.value;
     }
 
-    public VaultState tickAndGetNext(ServerLevel p_334990_, BlockPos p_330620_, VaultConfig p_334025_, VaultServerData p_332760_, VaultSharedData p_333510_) {
+    public VaultState tickAndGetNext(ServerLevel pLevel, BlockPos pPos, VaultConfig pConfig, VaultServerData pServerData, VaultSharedData pSharedData) {
         return switch (this) {
-            case INACTIVE -> updateStateForConnectedPlayers(p_334990_, p_330620_, p_334025_, p_332760_, p_333510_, p_334025_.activationRange());
-            case ACTIVE -> updateStateForConnectedPlayers(p_334990_, p_330620_, p_334025_, p_332760_, p_333510_, p_334025_.deactivationRange());
+            case INACTIVE -> updateStateForConnectedPlayers(pLevel, pPos, pConfig, pServerData, pSharedData, pConfig.activationRange());
+            case ACTIVE -> updateStateForConnectedPlayers(pLevel, pPos, pConfig, pServerData, pSharedData, pConfig.deactivationRange());
             case UNLOCKING -> {
-                p_332760_.pauseStateUpdatingUntil(p_334990_.getGameTime() + 20L);
+                pServerData.pauseStateUpdatingUntil(pLevel.getGameTime() + 20L);
                 yield EJECTING;
             }
             case EJECTING -> {
-                if (p_332760_.getItemsToEject().isEmpty()) {
-                    p_332760_.markEjectionFinished();
-                    yield updateStateForConnectedPlayers(p_334990_, p_330620_, p_334025_, p_332760_, p_333510_, p_334025_.deactivationRange());
+                if (pServerData.getItemsToEject().isEmpty()) {
+                    pServerData.markEjectionFinished();
+                    yield updateStateForConnectedPlayers(pLevel, pPos, pConfig, pServerData, pSharedData, pConfig.deactivationRange());
                 } else {
-                    float f = p_332760_.ejectionProgress();
-                    this.ejectResultItem(p_334990_, p_330620_, p_332760_.popNextItemToEject(), f);
-                    p_333510_.setDisplayItem(p_332760_.getNextItemToEject());
-                    boolean flag = p_332760_.getItemsToEject().isEmpty();
+                    float f = pServerData.ejectionProgress();
+                    this.ejectResultItem(pLevel, pPos, pServerData.popNextItemToEject(), f);
+                    pSharedData.setDisplayItem(pServerData.getNextItemToEject());
+                    boolean flag = pServerData.getItemsToEject().isEmpty();
                     int i = flag ? 20 : 20;
-                    p_332760_.pauseStateUpdatingUntil(p_334990_.getGameTime() + (long)i);
+                    pServerData.pauseStateUpdatingUntil(pLevel.getGameTime() + (long)i);
                     yield EJECTING;
                 }
             }
@@ -93,28 +93,28 @@ public enum VaultState implements StringRepresentable {
     }
 
     private static VaultState updateStateForConnectedPlayers(
-        ServerLevel p_330419_, BlockPos p_334068_, VaultConfig p_335667_, VaultServerData p_330976_, VaultSharedData p_330718_, double p_334799_
+        ServerLevel pLevel, BlockPos pPos, VaultConfig pConfig, VaultServerData pSeverData, VaultSharedData pSharedData, double pDeactivationRange
     ) {
-        p_330718_.updateConnectedPlayersWithinRange(p_330419_, p_334068_, p_330976_, p_335667_, p_334799_);
-        p_330976_.pauseStateUpdatingUntil(p_330419_.getGameTime() + 20L);
-        return p_330718_.hasConnectedPlayers() ? ACTIVE : INACTIVE;
+        pSharedData.updateConnectedPlayersWithinRange(pLevel, pPos, pSeverData, pConfig, pDeactivationRange);
+        pSeverData.pauseStateUpdatingUntil(pLevel.getGameTime() + 20L);
+        return pSharedData.hasConnectedPlayers() ? ACTIVE : INACTIVE;
     }
 
-    public void onTransition(ServerLevel p_332806_, BlockPos p_329339_, VaultState p_335389_, VaultConfig p_330996_, VaultSharedData p_333239_, boolean p_330399_) {
-        this.onExit(p_332806_, p_329339_, p_330996_, p_333239_);
-        p_335389_.onEnter(p_332806_, p_329339_, p_330996_, p_333239_, p_330399_);
+    public void onTransition(ServerLevel pLevel, BlockPos pPos, VaultState pState, VaultConfig pConfig, VaultSharedData pSharedData, boolean pIsOminous) {
+        this.onExit(pLevel, pPos, pConfig, pSharedData);
+        pState.onEnter(pLevel, pPos, pConfig, pSharedData, pIsOminous);
     }
 
-    protected void onEnter(ServerLevel p_335827_, BlockPos p_330931_, VaultConfig p_331678_, VaultSharedData p_333706_, boolean p_330849_) {
+    protected void onEnter(ServerLevel pLevel, BlockPos pPos, VaultConfig pConfig, VaultSharedData pSharedData, boolean pIsOminous) {
     }
 
-    protected void onExit(ServerLevel p_331983_, BlockPos p_331510_, VaultConfig p_327841_, VaultSharedData p_334150_) {
+    protected void onExit(ServerLevel pLevel, BlockPos pPos, VaultConfig pConfig, VaultSharedData pSharedData) {
     }
 
-    private void ejectResultItem(ServerLevel p_329632_, BlockPos p_331411_, ItemStack p_329283_, float p_332145_) {
-        DefaultDispenseItemBehavior.spawnItem(p_329632_, p_329283_, 2, Direction.UP, Vec3.atBottomCenterOf(p_331411_).relative(Direction.UP, 1.2));
-        p_329632_.levelEvent(3017, p_331411_, 0);
-        p_329632_.playSound(null, p_331411_, SoundEvents.VAULT_EJECT_ITEM, SoundSource.BLOCKS, 1.0F, 0.8F + 0.4F * p_332145_);
+    private void ejectResultItem(ServerLevel pLevel, BlockPos pPos, ItemStack pStack, float pEjectionProgress) {
+        DefaultDispenseItemBehavior.spawnItem(pLevel, pStack, 2, Direction.UP, Vec3.atBottomCenterOf(pPos).relative(Direction.UP, 1.2));
+        pLevel.levelEvent(3017, pPos, 0);
+        pLevel.playSound(null, pPos, SoundEvents.VAULT_EJECT_ITEM, SoundSource.BLOCKS, 1.0F, 0.8F + 0.4F * pEjectionProgress);
     }
 
     static enum LightLevel {
@@ -123,8 +123,8 @@ public enum VaultState implements StringRepresentable {
 
         final int value;
 
-        private LightLevel(final int p_327951_) {
-            this.value = p_327951_;
+        private LightLevel(final int pValue) {
+            this.value = pValue;
         }
     }
 }

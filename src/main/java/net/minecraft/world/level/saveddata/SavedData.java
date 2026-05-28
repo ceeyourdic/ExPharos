@@ -10,23 +10,23 @@ import net.minecraft.util.datafix.DataFixTypes;
 public abstract class SavedData {
     private boolean dirty;
 
-    public abstract CompoundTag save(CompoundTag p_77763_, HolderLookup.Provider p_334349_);
+    public abstract CompoundTag save(CompoundTag pTag, HolderLookup.Provider pRegistries);
 
     public void setDirty() {
         this.setDirty(true);
     }
 
-    public void setDirty(boolean p_77761_) {
-        this.dirty = p_77761_;
+    public void setDirty(boolean pDirty) {
+        this.dirty = pDirty;
     }
 
     public boolean isDirty() {
         return this.dirty;
     }
 
-    public CompoundTag save(HolderLookup.Provider p_336018_) {
+    public CompoundTag save(HolderLookup.Provider pRegistries) {
         CompoundTag compoundtag = new CompoundTag();
-        compoundtag.put("data", this.save(new CompoundTag(), p_336018_));
+        compoundtag.put("data", this.save(new CompoundTag(), pRegistries));
         NbtUtils.addCurrentDataVersion(compoundtag);
         this.setDirty(false);
         return compoundtag;

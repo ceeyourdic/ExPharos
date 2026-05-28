@@ -43,16 +43,16 @@ public class CopperBulbBlock extends Block {
         }
     }
 
-    public void checkAndFlip(BlockState p_309989_, ServerLevel p_310260_, BlockPos p_310537_) {
-        boolean flag = p_310260_.hasNeighborSignal(p_310537_);
-        if (flag != p_309989_.getValue(POWERED)) {
-            BlockState blockstate = p_309989_;
-            if (!p_309989_.getValue(POWERED)) {
-                blockstate = p_309989_.cycle(LIT);
-                p_310260_.playSound(null, p_310537_, blockstate.getValue(LIT) ? SoundEvents.COPPER_BULB_TURN_ON : SoundEvents.COPPER_BULB_TURN_OFF, SoundSource.BLOCKS);
+    public void checkAndFlip(BlockState pState, ServerLevel pLevel, BlockPos pPos) {
+        boolean flag = pLevel.hasNeighborSignal(pPos);
+        if (flag != pState.getValue(POWERED)) {
+            BlockState blockstate = pState;
+            if (!pState.getValue(POWERED)) {
+                blockstate = pState.cycle(LIT);
+                pLevel.playSound(null, pPos, blockstate.getValue(LIT) ? SoundEvents.COPPER_BULB_TURN_ON : SoundEvents.COPPER_BULB_TURN_OFF, SoundSource.BLOCKS);
             }
 
-            p_310260_.setBlock(p_310537_, blockstate.setValue(POWERED, Boolean.valueOf(flag)), 3);
+            pLevel.setBlock(pPos, blockstate.setValue(POWERED, Boolean.valueOf(flag)), 3);
         }
     }
 

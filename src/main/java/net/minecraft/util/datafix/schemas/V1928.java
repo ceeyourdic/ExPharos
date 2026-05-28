@@ -10,15 +10,15 @@ public class V1928 extends NamespacedSchema {
         super(p_17798_, p_17799_);
     }
 
-    protected static void registerMob(Schema p_17803_, Map<String, Supplier<TypeTemplate>> p_17804_, String p_17805_) {
-        p_17803_.register(p_17804_, p_17805_, () -> V100.equipment(p_17803_));
+    protected static void registerMob(Schema pSchema, Map<String, Supplier<TypeTemplate>> pMap, String pName) {
+        pSchema.register(pMap, pName, () -> V100.equipment(pSchema));
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_17809_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_17809_);
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
         map.remove("minecraft:illager_beast");
-        registerMob(p_17809_, map, "minecraft:ravager");
+        registerMob(pSchema, map, "minecraft:ravager");
         return map;
     }
 }

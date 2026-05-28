@@ -282,12 +282,12 @@ public class ModelLayers {
     public static final ModelLayerLocation ZOMBIFIED_PIGLIN_INNER_ARMOR = registerInnerArmor("zombified_piglin");
     public static final ModelLayerLocation ZOMBIFIED_PIGLIN_OUTER_ARMOR = registerOuterArmor("zombified_piglin");
 
-    private static ModelLayerLocation register(String p_171294_) {
-        return register(p_171294_, "main");
+    private static ModelLayerLocation register(String pPath) {
+        return register(pPath, "main");
     }
 
-    private static ModelLayerLocation register(String p_171296_, String p_171297_) {
-        ModelLayerLocation modellayerlocation = createLocation(p_171296_, p_171297_);
+    private static ModelLayerLocation register(String pPath, String pModel) {
+        ModelLayerLocation modellayerlocation = createLocation(pPath, pModel);
         if (!ALL_MODELS.add(modellayerlocation)) {
             throw new IllegalStateException("Duplicate registration for " + modellayerlocation);
         } else {
@@ -295,28 +295,28 @@ public class ModelLayers {
         }
     }
 
-    private static ModelLayerLocation createLocation(String p_171301_, String p_171302_) {
-        return new ModelLayerLocation(ResourceLocation.withDefaultNamespace(p_171301_), p_171302_);
+    private static ModelLayerLocation createLocation(String pPath, String pModel) {
+        return new ModelLayerLocation(ResourceLocation.withDefaultNamespace(pPath), pModel);
     }
 
-    private static ModelLayerLocation registerInnerArmor(String p_171299_) {
-        return register(p_171299_, "inner_armor");
+    private static ModelLayerLocation registerInnerArmor(String pPath) {
+        return register(pPath, "inner_armor");
     }
 
-    private static ModelLayerLocation registerOuterArmor(String p_171304_) {
-        return register(p_171304_, "outer_armor");
+    private static ModelLayerLocation registerOuterArmor(String pPath) {
+        return register(pPath, "outer_armor");
     }
 
-    public static ModelLayerLocation createStandingSignModelName(WoodType p_171292_) {
-        return createLocation("sign/standing/" + p_171292_.name(), "main");
+    public static ModelLayerLocation createStandingSignModelName(WoodType pWoodType) {
+        return createLocation("sign/standing/" + pWoodType.name(), "main");
     }
 
-    public static ModelLayerLocation createWallSignModelName(WoodType p_363532_) {
-        return createLocation("sign/wall/" + p_363532_.name(), "main");
+    public static ModelLayerLocation createWallSignModelName(WoodType pWoodType) {
+        return createLocation("sign/wall/" + pWoodType.name(), "main");
     }
 
-    public static ModelLayerLocation createHangingSignModelName(WoodType p_252225_, HangingSignRenderer.AttachmentType p_378070_) {
-        return createLocation("hanging_sign/" + p_252225_.name() + "/" + p_378070_.getSerializedName(), "main");
+    public static ModelLayerLocation createHangingSignModelName(WoodType pWoodType, HangingSignRenderer.AttachmentType pAttachmentType) {
+        return createLocation("hanging_sign/" + pWoodType.name() + "/" + pAttachmentType.getSerializedName(), "main");
     }
 
     public static Stream<ModelLayerLocation> getKnownLocations() {

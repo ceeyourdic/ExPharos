@@ -74,23 +74,23 @@ public class ProcessorLists {
     public static final ResourceKey<StructureProcessorList> TRAIL_RUINS_TOWER_TOP_ARCHAEOLOGY = createKey("trail_ruins_tower_top_archaeology");
     public static final ResourceKey<StructureProcessorList> TRIAL_CHAMBERS_COPPER_BULB_DEGRADATION = createKey("trial_chambers_copper_bulb_degradation");
 
-    private static ResourceKey<StructureProcessorList> createKey(String p_256151_) {
-        return ResourceKey.create(Registries.PROCESSOR_LIST, ResourceLocation.withDefaultNamespace(p_256151_));
+    private static ResourceKey<StructureProcessorList> createKey(String pName) {
+        return ResourceKey.create(Registries.PROCESSOR_LIST, ResourceLocation.withDefaultNamespace(pName));
     }
 
     private static void register(
-        BootstrapContext<StructureProcessorList> p_332799_, ResourceKey<StructureProcessorList> p_256192_, List<StructureProcessor> p_255805_
+        BootstrapContext<StructureProcessorList> pContext, ResourceKey<StructureProcessorList> pKey, List<StructureProcessor> pProcessors
     ) {
-        p_332799_.register(p_256192_, new StructureProcessorList(p_255805_));
+        pContext.register(pKey, new StructureProcessorList(pProcessors));
     }
 
-    public static void bootstrap(BootstrapContext<StructureProcessorList> p_333601_) {
-        HolderGetter<Block> holdergetter = p_333601_.lookup(Registries.BLOCK);
+    public static void bootstrap(BootstrapContext<StructureProcessorList> pContext) {
+        HolderGetter<Block> holdergetter = pContext.lookup(Registries.BLOCK);
         ProcessorRule processorrule = new ProcessorRule(new RandomBlockMatchTest(Blocks.BLACKSTONE, 0.01F), AlwaysTrueTest.INSTANCE, Blocks.GILDED_BLACKSTONE.defaultBlockState());
         ProcessorRule processorrule1 = new ProcessorRule(new RandomBlockMatchTest(Blocks.GILDED_BLACKSTONE, 0.5F), AlwaysTrueTest.INSTANCE, Blocks.BLACKSTONE.defaultBlockState());
-        register(p_333601_, EMPTY, ImmutableList.of());
+        register(pContext, EMPTY, ImmutableList.of());
         register(
-            p_333601_,
+            pContext,
             ZOMBIE_PLAINS,
             ImmutableList.of(
                 new RuleProcessor(
@@ -141,7 +141,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             ZOMBIE_SAVANNA,
             ImmutableList.of(
                 new RuleProcessor(
@@ -189,7 +189,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             ZOMBIE_SNOWY,
             ImmutableList.of(
                 new RuleProcessor(
@@ -236,7 +236,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             ZOMBIE_TAIGA,
             ImmutableList.of(
                 new RuleProcessor(
@@ -286,7 +286,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             ZOMBIE_DESERT,
             ImmutableList.of(
                 new RuleProcessor(
@@ -306,7 +306,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             MOSSIFY_10_PERCENT,
             ImmutableList.of(
                 new RuleProcessor(
@@ -315,7 +315,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             MOSSIFY_20_PERCENT,
             ImmutableList.of(
                 new RuleProcessor(
@@ -324,7 +324,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             MOSSIFY_70_PERCENT,
             ImmutableList.of(
                 new RuleProcessor(
@@ -333,7 +333,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             STREET_PLAINS,
             ImmutableList.of(
                 new RuleProcessor(
@@ -347,7 +347,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             STREET_SAVANNA,
             ImmutableList.of(
                 new RuleProcessor(
@@ -361,7 +361,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             STREET_SNOWY_OR_TAIGA,
             ImmutableList.of(
                 new RuleProcessor(
@@ -376,7 +376,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             FARM_PLAINS,
             ImmutableList.of(
                 new RuleProcessor(
@@ -389,7 +389,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             FARM_SAVANNA,
             ImmutableList.of(
                 new RuleProcessor(
@@ -398,7 +398,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             FARM_SNOWY,
             ImmutableList.of(
                 new RuleProcessor(
@@ -410,7 +410,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             FARM_TAIGA,
             ImmutableList.of(
                 new RuleProcessor(
@@ -422,7 +422,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             FARM_DESERT,
             ImmutableList.of(
                 new RuleProcessor(
@@ -433,9 +433,9 @@ public class ProcessorLists {
                 )
             )
         );
-        register(p_333601_, OUTPOST_ROT, ImmutableList.of(new BlockRotProcessor(0.05F)));
+        register(pContext, OUTPOST_ROT, ImmutableList.of(new BlockRotProcessor(0.05F)));
         register(
-            p_333601_,
+            pContext,
             BOTTOM_RAMPART,
             ImmutableList.of(
                 new RuleProcessor(
@@ -449,7 +449,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             TREASURE_ROOMS,
             ImmutableList.of(
                 new RuleProcessor(
@@ -463,7 +463,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             HOUSING,
             ImmutableList.of(
                 new RuleProcessor(
@@ -477,7 +477,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             SIDE_WALL_DEGRADATION,
             ImmutableList.of(
                 new RuleProcessor(
@@ -491,7 +491,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             STABLE_DEGRADATION,
             ImmutableList.of(
                 new RuleProcessor(
@@ -505,7 +505,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             BASTION_GENERIC_DEGRADATION,
             ImmutableList.of(
                 new RuleProcessor(
@@ -520,7 +520,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             RAMPART_DEGRADATION,
             ImmutableList.of(
                 new RuleProcessor(
@@ -537,7 +537,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             ENTRANCE_REPLACEMENT,
             ImmutableList.of(
                 new RuleProcessor(
@@ -551,7 +551,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             BRIDGE,
             ImmutableList.of(
                 new RuleProcessor(
@@ -563,7 +563,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             ROOF,
             ImmutableList.of(
                 new RuleProcessor(
@@ -576,7 +576,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             HIGH_WALL,
             ImmutableList.of(
                 new RuleProcessor(
@@ -590,7 +590,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             HIGH_RAMPART,
             ImmutableList.of(
                 new RuleProcessor(
@@ -607,10 +607,10 @@ public class ProcessorLists {
                 )
             )
         );
-        register(p_333601_, FOSSIL_ROT, ImmutableList.of(new BlockRotProcessor(0.9F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE)));
-        register(p_333601_, FOSSIL_COAL, ImmutableList.of(new BlockRotProcessor(0.1F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE)));
+        register(pContext, FOSSIL_ROT, ImmutableList.of(new BlockRotProcessor(0.9F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE)));
+        register(pContext, FOSSIL_COAL, ImmutableList.of(new BlockRotProcessor(0.1F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE)));
         register(
-            p_333601_,
+            pContext,
             FOSSIL_DIAMONDS,
             ImmutableList.of(
                 new BlockRotProcessor(0.1F),
@@ -621,7 +621,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             ANCIENT_CITY_START_DEGRADATION,
             ImmutableList.of(
                 new RuleProcessor(
@@ -635,7 +635,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             ANCIENT_CITY_GENERIC_DEGRADATION,
             ImmutableList.of(
                 new BlockRotProcessor(holdergetter.getOrThrow(BlockTags.ANCIENT_CITY_REPLACEABLE), 0.95F),
@@ -650,7 +650,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             ANCIENT_CITY_WALLS_DEGRADATION,
             ImmutableList.of(
                 new BlockRotProcessor(holdergetter.getOrThrow(BlockTags.ANCIENT_CITY_REPLACEABLE), 0.95F),
@@ -666,7 +666,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             TRAIL_RUINS_HOUSES_ARCHAEOLOGY,
             List.of(
                 new RuleProcessor(
@@ -681,7 +681,7 @@ public class ProcessorLists {
             )
         );
         register(
-            p_333601_,
+            pContext,
             TRAIL_RUINS_ROADS_ARCHAEOLOGY,
             List.of(
                 new RuleProcessor(
@@ -694,9 +694,9 @@ public class ProcessorLists {
                 trailsArchyLootProcessor(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_COMMON, 2)
             )
         );
-        register(p_333601_, TRAIL_RUINS_TOWER_TOP_ARCHAEOLOGY, List.of(trailsArchyLootProcessor(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_COMMON, 2)));
+        register(pContext, TRAIL_RUINS_TOWER_TOP_ARCHAEOLOGY, List.of(trailsArchyLootProcessor(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_COMMON, 2)));
         register(
-            p_333601_,
+            pContext,
             TRIAL_CHAMBERS_COPPER_BULB_DEGRADATION,
             List.of(
                 new RuleProcessor(
@@ -723,7 +723,7 @@ public class ProcessorLists {
         );
     }
 
-    private static CappedProcessor trailsArchyLootProcessor(ResourceKey<LootTable> p_332708_, int p_281868_) {
+    private static CappedProcessor trailsArchyLootProcessor(ResourceKey<LootTable> pLootTable, int pLimit) {
         return new CappedProcessor(
             new RuleProcessor(
                 List.of(
@@ -732,11 +732,11 @@ public class ProcessorLists {
                         AlwaysTrueTest.INSTANCE,
                         PosAlwaysTrueTest.INSTANCE,
                         Blocks.SUSPICIOUS_GRAVEL.defaultBlockState(),
-                        new AppendLoot(p_332708_)
+                        new AppendLoot(pLootTable)
                     )
                 )
             ),
-            ConstantInt.of(p_281868_)
+            ConstantInt.of(pLimit)
         );
     }
 }

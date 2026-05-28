@@ -27,8 +27,8 @@ public class ClientItemInfoLoader {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final FileToIdConverter LISTER = FileToIdConverter.json("items");
 
-    public static CompletableFuture<ClientItemInfoLoader.LoadedClientInfos> scheduleLoad(ResourceManager p_377664_, Executor p_378750_) {
-        return CompletableFuture.<Map<ResourceLocation, Resource>>supplyAsync(() -> LISTER.listMatchingResources(p_377664_), p_378750_)
+    public static CompletableFuture<ClientItemInfoLoader.LoadedClientInfos> scheduleLoad(ResourceManager pResourceManager, Executor pExecutor) {
+        return CompletableFuture.<Map<ResourceLocation, Resource>>supplyAsync(() -> LISTER.listMatchingResources(pResourceManager), pExecutor)
             .thenCompose(
                 p_377544_ -> {
                     List<CompletableFuture<ClientItemInfoLoader.PendingLoad>> list = new ArrayList<>(p_377544_.size());
@@ -62,7 +62,7 @@ public class ClientItemInfoLoader {
                                             return new ClientItemInfoLoader.PendingLoad(resourcelocation, null);
                                         }
                                     },
-                                    p_378750_
+                                    pExecutor
                                 )
                             )
                     );

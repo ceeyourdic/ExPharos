@@ -19,40 +19,40 @@ public record ClientboundDamageEventPacket(int entityId, Holder<DamageType> sour
         ClientboundDamageEventPacket::write, ClientboundDamageEventPacket::new
     );
 
-    public ClientboundDamageEventPacket(Entity p_270474_, DamageSource p_270781_) {
+    public ClientboundDamageEventPacket(Entity pEntity, DamageSource pDamageSource) {
         this(
-            p_270474_.getId(),
-            p_270781_.typeHolder(),
-            p_270781_.getEntity() != null ? p_270781_.getEntity().getId() : -1,
-            p_270781_.getDirectEntity() != null ? p_270781_.getDirectEntity().getId() : -1,
-            Optional.ofNullable(p_270781_.sourcePositionRaw())
+            pEntity.getId(),
+            pDamageSource.typeHolder(),
+            pDamageSource.getEntity() != null ? pDamageSource.getEntity().getId() : -1,
+            pDamageSource.getDirectEntity() != null ? pDamageSource.getDirectEntity().getId() : -1,
+            Optional.ofNullable(pDamageSource.sourcePositionRaw())
         );
     }
 
-    private ClientboundDamageEventPacket(RegistryFriendlyByteBuf p_328419_) {
+    private ClientboundDamageEventPacket(RegistryFriendlyByteBuf pBuffer) {
         this(
-            p_328419_.readVarInt(),
-            DamageType.STREAM_CODEC.decode(p_328419_),
-            readOptionalEntityId(p_328419_),
-            readOptionalEntityId(p_328419_),
-            p_328419_.readOptional(p_270813_ -> new Vec3(p_270813_.readDouble(), p_270813_.readDouble(), p_270813_.readDouble()))
+            pBuffer.readVarInt(),
+            DamageType.STREAM_CODEC.decode(pBuffer),
+            readOptionalEntityId(pBuffer),
+            readOptionalEntityId(pBuffer),
+            pBuffer.readOptional(p_270813_ -> new Vec3(p_270813_.readDouble(), p_270813_.readDouble(), p_270813_.readDouble()))
         );
     }
 
-    private static void writeOptionalEntityId(FriendlyByteBuf p_270812_, int p_270852_) {
-        p_270812_.writeVarInt(p_270852_ + 1);
+    private static void writeOptionalEntityId(FriendlyByteBuf pBuffer, int pOptionalEntityId) {
+        pBuffer.writeVarInt(pOptionalEntityId + 1);
     }
 
-    private static int readOptionalEntityId(FriendlyByteBuf p_270462_) {
-        return p_270462_.readVarInt() - 1;
+    private static int readOptionalEntityId(FriendlyByteBuf pBuffer) {
+        return pBuffer.readVarInt() - 1;
     }
 
-    private void write(RegistryFriendlyByteBuf p_330396_) {
-        p_330396_.writeVarInt(this.entityId);
-        DamageType.STREAM_CODEC.encode(p_330396_, this.sourceType);
-        writeOptionalEntityId(p_330396_, this.sourceCauseId);
-        writeOptionalEntityId(p_330396_, this.sourceDirectId);
-        p_330396_.writeOptional(this.sourcePosition, (p_296394_, p_296395_) -> {
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.entityId);
+        DamageType.STREAM_CODEC.encode(pBuffer, this.sourceType);
+        writeOptionalEntityId(pBuffer, this.sourceCauseId);
+        writeOptionalEntityId(pBuffer, this.sourceDirectId);
+        pBuffer.writeOptional(this.sourcePosition, (p_296394_, p_296395_) -> {
             p_296394_.writeDouble(p_296395_.x());
             p_296394_.writeDouble(p_296395_.y());
             p_296394_.writeDouble(p_296395_.z());
@@ -68,12 +68,12 @@ public record ClientboundDamageEventPacket(int entityId, Holder<DamageType> sour
         p_270510_.handleDamageEvent(this);
     }
 
-    public DamageSource getSource(Level p_270943_) {
+    public DamageSource getSource(Level pLevel) {
         if (this.sourcePosition.isPresent()) {
             return new DamageSource(this.sourceType, this.sourcePosition.get());
         } else {
-            Entity entity = p_270943_.getEntity(this.sourceCauseId);
-            Entity entity1 = p_270943_.getEntity(this.sourceDirectId);
+            Entity entity = pLevel.getEntity(this.sourceCauseId);
+            Entity entity1 = pLevel.getEntity(this.sourceDirectId);
             return new DamageSource(this.sourceType, entity1, entity);
         }
     }

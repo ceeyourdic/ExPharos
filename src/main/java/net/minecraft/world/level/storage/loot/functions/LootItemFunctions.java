@@ -69,12 +69,12 @@ public class LootItemFunctions {
     );
     public static final LootItemFunctionType<SetCustomModelDataFunction> SET_CUSTOM_MODEL_DATA = register("set_custom_model_data", SetCustomModelDataFunction.CODEC);
 
-    private static <T extends LootItemFunction> LootItemFunctionType<T> register(String p_80763_, MapCodec<T> p_329222_) {
-        return Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, ResourceLocation.withDefaultNamespace(p_80763_), new LootItemFunctionType<>(p_329222_));
+    private static <T extends LootItemFunction> LootItemFunctionType<T> register(String pName, MapCodec<T> pCodec) {
+        return Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, ResourceLocation.withDefaultNamespace(pName), new LootItemFunctionType<>(pCodec));
     }
 
-    public static BiFunction<ItemStack, LootContext, ItemStack> compose(List<? extends BiFunction<ItemStack, LootContext, ItemStack>> p_298840_) {
-        List<BiFunction<ItemStack, LootContext, ItemStack>> list = List.copyOf(p_298840_);
+    public static BiFunction<ItemStack, LootContext, ItemStack> compose(List<? extends BiFunction<ItemStack, LootContext, ItemStack>> pFunctions) {
+        List<BiFunction<ItemStack, LootContext, ItemStack>> list = List.copyOf(pFunctions);
 
         return switch (list.size()) {
             case 0 -> IDENTITY;

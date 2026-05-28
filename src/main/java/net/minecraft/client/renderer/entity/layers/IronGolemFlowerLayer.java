@@ -17,9 +17,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class IronGolemFlowerLayer extends RenderLayer<IronGolemRenderState, IronGolemModel> {
     private final BlockRenderDispatcher blockRenderer;
 
-    public IronGolemFlowerLayer(RenderLayerParent<IronGolemRenderState, IronGolemModel> p_234842_, BlockRenderDispatcher p_234843_) {
-        super(p_234842_);
-        this.blockRenderer = p_234843_;
+    public IronGolemFlowerLayer(RenderLayerParent<IronGolemRenderState, IronGolemModel> pRenderer, BlockRenderDispatcher pBlockRenderer) {
+        super(pRenderer);
+        this.blockRenderer = pBlockRenderer;
     }
 
     public void render(PoseStack p_117172_, MultiBufferSource p_117173_, int p_117174_, IronGolemRenderState p_367303_, float p_117176_, float p_117177_) {

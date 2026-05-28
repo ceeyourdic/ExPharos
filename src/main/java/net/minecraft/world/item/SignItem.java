@@ -11,23 +11,23 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SignItem extends StandingAndWallBlockItem {
-    public SignItem(Block p_43127_, Block p_43128_, Item.Properties p_43126_) {
-        super(p_43127_, p_43128_, Direction.DOWN, p_43126_);
+    public SignItem(Block pStandingBlock, Block pWallBlock, Item.Properties pProperties) {
+        super(pStandingBlock, pWallBlock, Direction.DOWN, pProperties);
     }
 
-    public SignItem(Item.Properties p_278081_, Block p_277743_, Block p_277375_, Direction p_278052_) {
-        super(p_277743_, p_277375_, p_278052_, p_278081_);
+    public SignItem(Item.Properties pProperties, Block pStandingBlock, Block pWallBlock, Direction pAttachmentDirection) {
+        super(pStandingBlock, pWallBlock, pAttachmentDirection, pProperties);
     }
 
     @Override
-    protected boolean updateCustomBlockEntityTag(BlockPos p_43130_, Level p_43131_, @Nullable Player p_43132_, ItemStack p_43133_, BlockState p_43134_) {
-        boolean flag = super.updateCustomBlockEntityTag(p_43130_, p_43131_, p_43132_, p_43133_, p_43134_);
-        if (!p_43131_.isClientSide
+    protected boolean updateCustomBlockEntityTag(BlockPos pPos, Level pLevel, @Nullable Player pPlayer, ItemStack pStack, BlockState pState) {
+        boolean flag = super.updateCustomBlockEntityTag(pPos, pLevel, pPlayer, pStack, pState);
+        if (!pLevel.isClientSide
             && !flag
-            && p_43132_ != null
-            && p_43131_.getBlockEntity(p_43130_) instanceof SignBlockEntity signblockentity
-            && p_43131_.getBlockState(p_43130_).getBlock() instanceof SignBlock signblock) {
-            signblock.openTextEdit(p_43132_, signblockentity, true);
+            && pPlayer != null
+            && pLevel.getBlockEntity(pPos) instanceof SignBlockEntity signblockentity
+            && pLevel.getBlockState(pPos).getBlock() instanceof SignBlock signblock) {
+            signblock.openTextEdit(pPlayer, signblockentity, true);
         }
 
         return flag;

@@ -20,21 +20,21 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
     private static final int SLOT_BODY_ARMOR = 1;
     private static final int SLOT_HORSE_INVENTORY_START = 2;
 
-    public HorseInventoryMenu(int p_39656_, Inventory p_39657_, Container p_39658_, final AbstractHorse p_39659_, int p_342974_) {
-        super(null, p_39656_);
-        this.horseContainer = p_39658_;
-        this.armorContainer = p_39659_.getBodyArmorAccess();
-        this.horse = p_39659_;
-        p_39658_.startOpen(p_39657_.player);
-        this.addSlot(new Slot(p_39658_, 0, 8, 18) {
+    public HorseInventoryMenu(int pContainerId, Inventory pInventory, Container pHorseContainer, final AbstractHorse pHorse, int pColumns) {
+        super(null, pContainerId);
+        this.horseContainer = pHorseContainer;
+        this.armorContainer = pHorse.getBodyArmorAccess();
+        this.horse = pHorse;
+        pHorseContainer.startOpen(pInventory.player);
+        this.addSlot(new Slot(pHorseContainer, 0, 8, 18) {
             @Override
             public boolean mayPlace(ItemStack p_39677_) {
-                return p_39677_.is(Items.SADDLE) && !this.hasItem() && p_39659_.isSaddleable();
+                return p_39677_.is(Items.SADDLE) && !this.hasItem() && pHorse.isSaddleable();
             }
 
             @Override
             public boolean isActive() {
-                return p_39659_.isSaddleable();
+                return pHorse.isSaddleable();
             }
 
             @Override
@@ -42,47 +42,47 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
                 return HorseInventoryMenu.SADDLE_SLOT_SPRITE;
             }
         });
-        ResourceLocation resourcelocation = p_39659_ instanceof Llama ? LLAMA_ARMOR_SLOT_SPRITE : ARMOR_SLOT_SPRITE;
-        this.addSlot(new ArmorSlot(this.armorContainer, p_39659_, EquipmentSlot.BODY, 0, 8, 36, resourcelocation) {
+        ResourceLocation resourcelocation = pHorse instanceof Llama ? LLAMA_ARMOR_SLOT_SPRITE : ARMOR_SLOT_SPRITE;
+        this.addSlot(new ArmorSlot(this.armorContainer, pHorse, EquipmentSlot.BODY, 0, 8, 36, resourcelocation) {
             @Override
             public boolean mayPlace(ItemStack p_39690_) {
-                return p_39659_.isEquippableInSlot(p_39690_, EquipmentSlot.BODY);
+                return pHorse.isEquippableInSlot(p_39690_, EquipmentSlot.BODY);
             }
 
             @Override
             public boolean isActive() {
-                return p_39659_.canUseSlot(EquipmentSlot.BODY);
+                return pHorse.canUseSlot(EquipmentSlot.BODY);
             }
         });
-        if (p_342974_ > 0) {
+        if (pColumns > 0) {
             for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < p_342974_; j++) {
-                    this.addSlot(new Slot(p_39658_, 1 + j + i * p_342974_, 80 + j * 18, 18 + i * 18));
+                for (int j = 0; j < pColumns; j++) {
+                    this.addSlot(new Slot(pHorseContainer, 1 + j + i * pColumns, 80 + j * 18, 18 + i * 18));
                 }
             }
         }
 
-        this.addStandardInventorySlots(p_39657_, 8, 84);
+        this.addStandardInventorySlots(pInventory, 8, 84);
     }
 
     @Override
-    public boolean stillValid(Player p_39661_) {
+    public boolean stillValid(Player pPlayer) {
         return !this.horse.hasInventoryChanged(this.horseContainer)
-            && this.horseContainer.stillValid(p_39661_)
-            && this.armorContainer.stillValid(p_39661_)
+            && this.horseContainer.stillValid(pPlayer)
+            && this.armorContainer.stillValid(pPlayer)
             && this.horse.isAlive()
-            && p_39661_.canInteractWithEntity(this.horse, 4.0);
+            && pPlayer.canInteractWithEntity(this.horse, 4.0);
     }
 
     @Override
-    public ItemStack quickMoveStack(Player p_39665_, int p_39666_) {
+    public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(p_39666_);
+        Slot slot = this.slots.get(pIndex);
         if (slot != null && slot.hasItem()) {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
             int i = this.horseContainer.getContainerSize() + 1;
-            if (p_39666_ < i) {
+            if (pIndex < i) {
                 if (!this.moveItemStackTo(itemstack1, i, this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
@@ -97,11 +97,11 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
             } else if (i <= 1 || !this.moveItemStackTo(itemstack1, 2, i, false)) {
                 int j = i + 27;
                 int k = j + 9;
-                if (p_39666_ >= j && p_39666_ < k) {
+                if (pIndex >= j && pIndex < k) {
                     if (!this.moveItemStackTo(itemstack1, i, j, false)) {
                         return ItemStack.EMPTY;
                     }
-                } else if (p_39666_ >= i && p_39666_ < j) {
+                } else if (pIndex >= i && pIndex < j) {
                     if (!this.moveItemStackTo(itemstack1, j, k, false)) {
                         return ItemStack.EMPTY;
                     }
@@ -123,8 +123,8 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public void removed(Player p_39663_) {
-        super.removed(p_39663_);
-        this.horseContainer.stopOpen(p_39663_);
+    public void removed(Player pPlayer) {
+        super.removed(pPlayer);
+        this.horseContainer.stopOpen(pPlayer);
     }
 }

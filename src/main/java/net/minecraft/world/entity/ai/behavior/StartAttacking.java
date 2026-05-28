@@ -9,18 +9,18 @@ import net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 public class StartAttacking {
-    public static <E extends Mob> BehaviorControl<E> create(StartAttacking.TargetFinder<E> p_368894_) {
-        return create((p_362883_, p_24212_) -> true, p_368894_);
+    public static <E extends Mob> BehaviorControl<E> create(StartAttacking.TargetFinder<E> pTargetFinder) {
+        return create((p_362883_, p_24212_) -> true, pTargetFinder);
     }
 
-    public static <E extends Mob> BehaviorControl<E> create(StartAttacking.StartAttackingCondition<E> p_363679_, StartAttacking.TargetFinder<E> p_360766_) {
+    public static <E extends Mob> BehaviorControl<E> create(StartAttacking.StartAttackingCondition<E> pCondition, StartAttacking.TargetFinder<E> pTargetFinder) {
         return BehaviorBuilder.create(
             p_258782_ -> p_258782_.group(p_258782_.absent(MemoryModuleType.ATTACK_TARGET), p_258782_.registered(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE))
                     .apply(p_258782_, (p_258778_, p_258779_) -> (p_359048_, p_359049_, p_359050_) -> {
-                            if (!p_363679_.test(p_359048_, p_359049_)) {
+                            if (!pCondition.test(p_359048_, p_359049_)) {
                                 return false;
                             } else {
-                                Optional<? extends LivingEntity> optional = p_360766_.get(p_359048_, p_359049_);
+                                Optional<? extends LivingEntity> optional = pTargetFinder.get(p_359048_, p_359049_);
                                 if (optional.isEmpty()) {
                                     return false;
                                 } else {
@@ -40,11 +40,11 @@ public class StartAttacking {
 
     @FunctionalInterface
     public interface StartAttackingCondition<E> {
-        boolean test(ServerLevel p_365334_, E p_367852_);
+        boolean test(ServerLevel pLevel, E pMob);
     }
 
     @FunctionalInterface
     public interface TargetFinder<E> {
-        Optional<? extends LivingEntity> get(ServerLevel p_363589_, E p_364995_);
+        Optional<? extends LivingEntity> get(ServerLevel pLevel, E pMob);
     }
 }

@@ -13,23 +13,23 @@ import net.minecraft.resources.ResourceLocation;
 public interface CustomPacketPayload {
     CustomPacketPayload.Type<? extends CustomPacketPayload> type();
 
-    static <B extends ByteBuf, T extends CustomPacketPayload> StreamCodec<B, T> codec(StreamMemberEncoder<B, T> p_336135_, StreamDecoder<B, T> p_335771_) {
-        return StreamCodec.ofMember(p_336135_, p_335771_);
+    static <B extends ByteBuf, T extends CustomPacketPayload> StreamCodec<B, T> codec(StreamMemberEncoder<B, T> pEncoder, StreamDecoder<B, T> pDecoder) {
+        return StreamCodec.ofMember(pEncoder, pDecoder);
     }
 
-    static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> createType(String p_331650_) {
-        return new CustomPacketPayload.Type<>(ResourceLocation.withDefaultNamespace(p_331650_));
+    static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> createType(String pId) {
+        return new CustomPacketPayload.Type<>(ResourceLocation.withDefaultNamespace(pId));
     }
 
     static <B extends FriendlyByteBuf> StreamCodec<B, CustomPacketPayload> codec(
-        final CustomPacketPayload.FallbackProvider<B> p_329573_, List<CustomPacketPayload.TypeAndCodec<? super B, ?>> p_333081_
+        final CustomPacketPayload.FallbackProvider<B> pFallbackProvider, List<CustomPacketPayload.TypeAndCodec<? super B, ?>> pTypeAndCodecs
     ) {
-        final Map<ResourceLocation, StreamCodec<? super B, ? extends CustomPacketPayload>> map = p_333081_.stream()
+        final Map<ResourceLocation, StreamCodec<? super B, ? extends CustomPacketPayload>> map = pTypeAndCodecs.stream()
             .collect(Collectors.toUnmodifiableMap(p_332174_ -> p_332174_.type().id(), CustomPacketPayload.TypeAndCodec::codec));
         return new StreamCodec<B, CustomPacketPayload>() {
             private StreamCodec<? super B, ? extends CustomPacketPayload> findCodec(ResourceLocation p_335824_) {
                 StreamCodec<? super B, ? extends CustomPacketPayload> streamcodec = map.get(p_335824_);
-                return streamcodec != null ? streamcodec : p_329573_.create(p_335824_);
+                return streamcodec != null ? streamcodec : pFallbackProvider.create(p_335824_);
             }
 
             private <T extends CustomPacketPayload> void writeCap(B p_332252_, CustomPacketPayload.Type<T> p_334465_, CustomPacketPayload p_334290_) {
@@ -50,7 +50,7 @@ public interface CustomPacketPayload {
     }
 
     public interface FallbackProvider<B extends FriendlyByteBuf> {
-        StreamCodec<B, ? extends CustomPacketPayload> create(ResourceLocation p_336163_);
+        StreamCodec<B, ? extends CustomPacketPayload> create(ResourceLocation pId);
     }
 
     public static record Type<T extends CustomPacketPayload>(ResourceLocation id) {

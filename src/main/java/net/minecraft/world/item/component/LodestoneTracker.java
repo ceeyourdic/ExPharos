@@ -28,13 +28,13 @@ public record LodestoneTracker(Optional<GlobalPos> target, boolean tracked) {
         LodestoneTracker::new
     );
 
-    public LodestoneTracker tick(ServerLevel p_333312_) {
+    public LodestoneTracker tick(ServerLevel pLevel) {
         if (this.tracked && !this.target.isEmpty()) {
-            if (this.target.get().dimension() != p_333312_.dimension()) {
+            if (this.target.get().dimension() != pLevel.dimension()) {
                 return this;
             } else {
                 BlockPos blockpos = this.target.get().pos();
-                return p_333312_.isInWorldBounds(blockpos) && p_333312_.getPoiManager().existsAtPosition(PoiTypes.LODESTONE, blockpos)
+                return pLevel.isInWorldBounds(blockpos) && pLevel.getPoiManager().existsAtPosition(PoiTypes.LODESTONE, blockpos)
                     ? this
                     : new LodestoneTracker(Optional.empty(), true);
             }

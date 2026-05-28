@@ -49,10 +49,10 @@ public class PalettedPermutations implements SpriteSource {
     private final Map<String, ResourceLocation> permutations;
     private final ResourceLocation paletteKey;
 
-    private PalettedPermutations(List<ResourceLocation> p_267282_, ResourceLocation p_266681_, Map<String, ResourceLocation> p_266741_) {
-        this.textures = p_267282_;
-        this.permutations = p_266741_;
-        this.paletteKey = p_266681_;
+    private PalettedPermutations(List<ResourceLocation> pTextures, ResourceLocation pPaletteKey, Map<String, ResourceLocation> pPermutations) {
+        this.textures = pTextures;
+        this.permutations = pPermutations;
+        this.paletteKey = pPaletteKey;
     }
 
     @Override
@@ -80,17 +80,17 @@ public class PalettedPermutations implements SpriteSource {
         }
     }
 
-    private static IntUnaryOperator createPaletteMapping(int[] p_266839_, int[] p_266776_) {
-        if (p_266776_.length != p_266839_.length) {
-            LOGGER.warn("Palette mapping has different sizes: {} and {}", p_266839_.length, p_266776_.length);
+    private static IntUnaryOperator createPaletteMapping(int[] pKeys, int[] pValues) {
+        if (pValues.length != pKeys.length) {
+            LOGGER.warn("Palette mapping has different sizes: {} and {}", pKeys.length, pValues.length);
             throw new IllegalArgumentException();
         } else {
-            Int2IntMap int2intmap = new Int2IntOpenHashMap(p_266776_.length);
+            Int2IntMap int2intmap = new Int2IntOpenHashMap(pValues.length);
 
-            for (int i = 0; i < p_266839_.length; i++) {
-                int j = p_266839_[i];
+            for (int i = 0; i < pKeys.length; i++) {
+                int j = pKeys[i];
                 if (ARGB.alpha(j) != 0) {
-                    int2intmap.put(ARGB.transparent(j), p_266776_[i]);
+                    int2intmap.put(ARGB.transparent(j), pValues[i]);
                 }
             }
 
@@ -108,10 +108,10 @@ public class PalettedPermutations implements SpriteSource {
         }
     }
 
-    private static int[] loadPaletteEntryFromImage(ResourceManager p_267184_, ResourceLocation p_267059_) {
-        Optional<Resource> optional = p_267184_.getResource(TEXTURE_ID_CONVERTER.idToFile(p_267059_));
+    private static int[] loadPaletteEntryFromImage(ResourceManager pResourceMananger, ResourceLocation pPalette) {
+        Optional<Resource> optional = pResourceMananger.getResource(TEXTURE_ID_CONVERTER.idToFile(pPalette));
         if (optional.isEmpty()) {
-            LOGGER.error("Failed to load palette image {}", p_267059_);
+            LOGGER.error("Failed to load palette image {}", pPalette);
             throw new IllegalArgumentException();
         } else {
             try {
@@ -125,7 +125,7 @@ public class PalettedPermutations implements SpriteSource {
 
                 return aint;
             } catch (Exception exception) {
-                LOGGER.error("Couldn't load texture {}", p_267059_, exception);
+                LOGGER.error("Couldn't load texture {}", pPalette, exception);
                 throw new IllegalArgumentException();
             }
         }

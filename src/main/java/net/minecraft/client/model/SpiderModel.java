@@ -29,17 +29,17 @@ public class SpiderModel extends EntityModel<LivingEntityRenderState> {
     private final ModelPart rightFrontLeg;
     private final ModelPart leftFrontLeg;
 
-    public SpiderModel(ModelPart p_170984_) {
-        super(p_170984_);
-        this.head = p_170984_.getChild("head");
-        this.rightHindLeg = p_170984_.getChild("right_hind_leg");
-        this.leftHindLeg = p_170984_.getChild("left_hind_leg");
-        this.rightMiddleHindLeg = p_170984_.getChild("right_middle_hind_leg");
-        this.leftMiddleHindLeg = p_170984_.getChild("left_middle_hind_leg");
-        this.rightMiddleFrontLeg = p_170984_.getChild("right_middle_front_leg");
-        this.leftMiddleFrontLeg = p_170984_.getChild("left_middle_front_leg");
-        this.rightFrontLeg = p_170984_.getChild("right_front_leg");
-        this.leftFrontLeg = p_170984_.getChild("left_front_leg");
+    public SpiderModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
+        this.rightHindLeg = pRoot.getChild("right_hind_leg");
+        this.leftHindLeg = pRoot.getChild("left_hind_leg");
+        this.rightMiddleHindLeg = pRoot.getChild("right_middle_hind_leg");
+        this.leftMiddleHindLeg = pRoot.getChild("left_middle_hind_leg");
+        this.rightMiddleFrontLeg = pRoot.getChild("right_middle_front_leg");
+        this.leftMiddleFrontLeg = pRoot.getChild("left_middle_front_leg");
+        this.rightFrontLeg = pRoot.getChild("right_front_leg");
+        this.leftFrontLeg = pRoot.getChild("left_front_leg");
     }
 
     public static LayerDefinition createSpiderBodyLayer() {

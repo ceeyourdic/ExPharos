@@ -17,9 +17,9 @@ import net.minecraft.world.level.block.Blocks;
 class WeavingMobEffect extends MobEffect {
     private final ToIntFunction<RandomSource> maxCobwebs;
 
-    protected WeavingMobEffect(MobEffectCategory p_331231_, int p_336179_, ToIntFunction<RandomSource> p_328620_) {
-        super(p_331231_, p_336179_, ParticleTypes.ITEM_COBWEB);
-        this.maxCobwebs = p_328620_;
+    protected WeavingMobEffect(MobEffectCategory pCategory, int pColor, ToIntFunction<RandomSource> pMaxCobwebs) {
+        super(pCategory, pColor, ParticleTypes.ITEM_COBWEB);
+        this.maxCobwebs = pMaxCobwebs;
     }
 
     @Override
@@ -29,13 +29,13 @@ class WeavingMobEffect extends MobEffect {
         }
     }
 
-    private void spawnCobwebsRandomlyAround(ServerLevel p_368804_, RandomSource p_332035_, BlockPos p_329542_) {
+    private void spawnCobwebsRandomlyAround(ServerLevel pLevel, RandomSource pRandom, BlockPos pPos) {
         Set<BlockPos> set = Sets.newHashSet();
-        int i = this.maxCobwebs.applyAsInt(p_332035_);
+        int i = this.maxCobwebs.applyAsInt(pRandom);
 
-        for (BlockPos blockpos : BlockPos.randomInCube(p_332035_, 15, p_329542_, 1)) {
+        for (BlockPos blockpos : BlockPos.randomInCube(pRandom, 15, pPos, 1)) {
             BlockPos blockpos1 = blockpos.below();
-            if (!set.contains(blockpos) && p_368804_.getBlockState(blockpos).canBeReplaced() && p_368804_.getBlockState(blockpos1).isFaceSturdy(p_368804_, blockpos1, Direction.UP)
+            if (!set.contains(blockpos) && pLevel.getBlockState(blockpos).canBeReplaced() && pLevel.getBlockState(blockpos1).isFaceSturdy(pLevel, blockpos1, Direction.UP)
                 )
              {
                 set.add(blockpos.immutable());
@@ -46,8 +46,8 @@ class WeavingMobEffect extends MobEffect {
         }
 
         for (BlockPos blockpos2 : set) {
-            p_368804_.setBlock(blockpos2, Blocks.COBWEB.defaultBlockState(), 3);
-            p_368804_.levelEvent(3018, blockpos2, 0);
+            pLevel.setBlock(blockpos2, Blocks.COBWEB.defaultBlockState(), 3);
+            pLevel.levelEvent(3018, blockpos2, 0);
         }
     }
 }

@@ -40,10 +40,10 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
     private final List<SetAttributesFunction.Modifier> modifiers;
     private final boolean replace;
 
-    SetAttributesFunction(List<LootItemCondition> p_80834_, List<SetAttributesFunction.Modifier> p_298826_, boolean p_336168_) {
-        super(p_80834_);
-        this.modifiers = List.copyOf(p_298826_);
-        this.replace = p_336168_;
+    SetAttributesFunction(List<LootItemCondition> pConditions, List<SetAttributesFunction.Modifier> pModifiers, boolean pReplace) {
+        super(pConditions);
+        this.modifiers = List.copyOf(pModifiers);
+        this.replace = pReplace;
     }
 
     @Override
@@ -57,39 +57,39 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_80840_, LootContext p_80841_) {
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
         if (this.replace) {
-            p_80840_.set(DataComponents.ATTRIBUTE_MODIFIERS, this.updateModifiers(p_80841_, ItemAttributeModifiers.EMPTY));
+            pStack.set(DataComponents.ATTRIBUTE_MODIFIERS, this.updateModifiers(pContext, ItemAttributeModifiers.EMPTY));
         } else {
-            p_80840_.update(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY, p_360673_ -> this.updateModifiers(p_80841_, p_360673_));
+            pStack.update(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY, p_360673_ -> this.updateModifiers(pContext, p_360673_));
         }
 
-        return p_80840_;
+        return pStack;
     }
 
-    private ItemAttributeModifiers updateModifiers(LootContext p_331587_, ItemAttributeModifiers p_333868_) {
-        RandomSource randomsource = p_331587_.getRandom();
+    private ItemAttributeModifiers updateModifiers(LootContext pContext, ItemAttributeModifiers pModifiers) {
+        RandomSource randomsource = pContext.getRandom();
 
         for (SetAttributesFunction.Modifier setattributesfunction$modifier : this.modifiers) {
             EquipmentSlotGroup equipmentslotgroup = Util.getRandom(setattributesfunction$modifier.slots, randomsource);
-            p_333868_ = p_333868_.withModifierAdded(
+            pModifiers = pModifiers.withModifierAdded(
                 setattributesfunction$modifier.attribute,
                 new AttributeModifier(
                     setattributesfunction$modifier.id,
-                    (double)setattributesfunction$modifier.amount.getFloat(p_331587_),
+                    (double)setattributesfunction$modifier.amount.getFloat(pContext),
                     setattributesfunction$modifier.operation
                 ),
                 equipmentslotgroup
             );
         }
 
-        return p_333868_;
+        return pModifiers;
     }
 
     public static SetAttributesFunction.ModifierBuilder modifier(
-        ResourceLocation p_344770_, Holder<Attribute> p_300622_, AttributeModifier.Operation p_165238_, NumberProvider p_165239_
+        ResourceLocation pId, Holder<Attribute> pAttribute, AttributeModifier.Operation pOperation, NumberProvider pAmount
     ) {
-        return new SetAttributesFunction.ModifierBuilder(p_344770_, p_300622_, p_165238_, p_165239_);
+        return new SetAttributesFunction.ModifierBuilder(pId, pAttribute, pOperation, pAmount);
     }
 
     public static SetAttributesFunction.Builder setAttributes() {
@@ -100,8 +100,8 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
         private final boolean replace;
         private final List<SetAttributesFunction.Modifier> modifiers = Lists.newArrayList();
 
-        public Builder(boolean p_330119_) {
-            this.replace = p_330119_;
+        public Builder(boolean pReplace) {
+            this.replace = pReplace;
         }
 
         public Builder() {
@@ -112,8 +112,8 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
             return this;
         }
 
-        public SetAttributesFunction.Builder withModifier(SetAttributesFunction.ModifierBuilder p_165246_) {
-            this.modifiers.add(p_165246_.build());
+        public SetAttributesFunction.Builder withModifier(SetAttributesFunction.ModifierBuilder pModifierBuilder) {
+            this.modifiers.add(pModifierBuilder.build());
             return this;
         }
 
@@ -146,15 +146,15 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
         private final NumberProvider amount;
         private final Set<EquipmentSlotGroup> slots = EnumSet.noneOf(EquipmentSlotGroup.class);
 
-        public ModifierBuilder(ResourceLocation p_344994_, Holder<Attribute> p_299576_, AttributeModifier.Operation p_165265_, NumberProvider p_165266_) {
-            this.id = p_344994_;
-            this.attribute = p_299576_;
-            this.operation = p_165265_;
-            this.amount = p_165266_;
+        public ModifierBuilder(ResourceLocation pId, Holder<Attribute> pAttribute, AttributeModifier.Operation pOperation, NumberProvider pAmount) {
+            this.id = pId;
+            this.attribute = pAttribute;
+            this.operation = pOperation;
+            this.amount = pAmount;
         }
 
-        public SetAttributesFunction.ModifierBuilder forSlot(EquipmentSlotGroup p_333921_) {
-            this.slots.add(p_333921_);
+        public SetAttributesFunction.ModifierBuilder forSlot(EquipmentSlotGroup pSlot) {
+            this.slots.add(pSlot);
             return this;
         }
 

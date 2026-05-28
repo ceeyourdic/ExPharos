@@ -30,47 +30,47 @@ public class ShapelessRecipeBuilder implements RecipeBuilder {
     @Nullable
     private String group;
 
-    private ShapelessRecipeBuilder(HolderGetter<Item> p_362903_, RecipeCategory p_250837_, ItemStack p_362773_) {
-        this.items = p_362903_;
-        this.category = p_250837_;
-        this.result = p_362773_;
+    private ShapelessRecipeBuilder(HolderGetter<Item> pItems, RecipeCategory pCategory, ItemStack pResult) {
+        this.items = pItems;
+        this.category = pCategory;
+        this.result = pResult;
     }
 
-    public static ShapelessRecipeBuilder shapeless(HolderGetter<Item> p_365884_, RecipeCategory p_250714_, ItemStack p_369160_) {
-        return new ShapelessRecipeBuilder(p_365884_, p_250714_, p_369160_);
+    public static ShapelessRecipeBuilder shapeless(HolderGetter<Item> pItems, RecipeCategory pCategory, ItemStack pResult) {
+        return new ShapelessRecipeBuilder(pItems, pCategory, pResult);
     }
 
-    public static ShapelessRecipeBuilder shapeless(HolderGetter<Item> p_362305_, RecipeCategory p_368322_, ItemLike p_366832_) {
-        return shapeless(p_362305_, p_368322_, p_366832_, 1);
+    public static ShapelessRecipeBuilder shapeless(HolderGetter<Item> pItems, RecipeCategory pCategory, ItemLike pResult) {
+        return shapeless(pItems, pCategory, pResult, 1);
     }
 
-    public static ShapelessRecipeBuilder shapeless(HolderGetter<Item> p_361011_, RecipeCategory p_252339_, ItemLike p_250836_, int p_249928_) {
-        return new ShapelessRecipeBuilder(p_361011_, p_252339_, p_250836_.asItem().getDefaultInstance().copyWithCount(p_249928_));
+    public static ShapelessRecipeBuilder shapeless(HolderGetter<Item> pItems, RecipeCategory pCategory, ItemLike pResult, int pCount) {
+        return new ShapelessRecipeBuilder(pItems, pCategory, pResult.asItem().getDefaultInstance().copyWithCount(pCount));
     }
 
-    public ShapelessRecipeBuilder requires(TagKey<Item> p_206420_) {
-        return this.requires(Ingredient.of(this.items.getOrThrow(p_206420_)));
+    public ShapelessRecipeBuilder requires(TagKey<Item> pTag) {
+        return this.requires(Ingredient.of(this.items.getOrThrow(pTag)));
     }
 
-    public ShapelessRecipeBuilder requires(ItemLike p_126210_) {
-        return this.requires(p_126210_, 1);
+    public ShapelessRecipeBuilder requires(ItemLike pItem) {
+        return this.requires(pItem, 1);
     }
 
-    public ShapelessRecipeBuilder requires(ItemLike p_126212_, int p_126213_) {
-        for (int i = 0; i < p_126213_; i++) {
-            this.requires(Ingredient.of(p_126212_));
+    public ShapelessRecipeBuilder requires(ItemLike pItem, int pQuantity) {
+        for (int i = 0; i < pQuantity; i++) {
+            this.requires(Ingredient.of(pItem));
         }
 
         return this;
     }
 
-    public ShapelessRecipeBuilder requires(Ingredient p_126185_) {
-        return this.requires(p_126185_, 1);
+    public ShapelessRecipeBuilder requires(Ingredient pIngredient) {
+        return this.requires(pIngredient, 1);
     }
 
-    public ShapelessRecipeBuilder requires(Ingredient p_126187_, int p_126188_) {
-        for (int i = 0; i < p_126188_; i++) {
-            this.ingredients.add(p_126187_);
+    public ShapelessRecipeBuilder requires(Ingredient pIngredient, int pQuantity) {
+        for (int i = 0; i < pQuantity; i++) {
+            this.ingredients.add(pIngredient);
         }
 
         return this;
@@ -107,9 +107,9 @@ public class ShapelessRecipeBuilder implements RecipeBuilder {
         );
     }
 
-    private void ensureValid(ResourceKey<Recipe<?>> p_368339_) {
+    private void ensureValid(ResourceKey<Recipe<?>> pRecipe) {
         if (this.criteria.isEmpty()) {
-            throw new IllegalStateException("No way of obtaining recipe " + p_368339_.location());
+            throw new IllegalStateException("No way of obtaining recipe " + pRecipe.location());
         }
     }
 }

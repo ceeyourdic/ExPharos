@@ -18,10 +18,10 @@ public class ElytraModel extends EntityModel<HumanoidRenderState> {
     private final ModelPart rightWing;
     private final ModelPart leftWing;
 
-    public ElytraModel(ModelPart p_170538_) {
-        super(p_170538_);
-        this.leftWing = p_170538_.getChild("left_wing");
-        this.rightWing = p_170538_.getChild("right_wing");
+    public ElytraModel(ModelPart pRoot) {
+        super(pRoot);
+        this.leftWing = pRoot.getChild("left_wing");
+        this.rightWing = pRoot.getChild("right_wing");
     }
 
     public static LayerDefinition createLayer() {

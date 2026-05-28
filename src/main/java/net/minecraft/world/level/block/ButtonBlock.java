@@ -73,20 +73,20 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
         return CODEC;
     }
 
-    protected ButtonBlock(BlockSetType p_273462_, int p_273212_, BlockBehaviour.Properties p_273290_) {
-        super(p_273290_.sound(p_273462_.soundType()));
-        this.type = p_273462_;
+    protected ButtonBlock(BlockSetType pType, int pTicksToStayPressed, BlockBehaviour.Properties pProperties) {
+        super(pProperties.sound(pType.soundType()));
+        this.type = pType;
         this.registerDefaultState(
             this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(POWERED, Boolean.valueOf(false)).setValue(FACE, AttachFace.WALL)
         );
-        this.ticksToStayPressed = p_273212_;
+        this.ticksToStayPressed = pTicksToStayPressed;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_51104_, BlockGetter p_51105_, BlockPos p_51106_, CollisionContext p_51107_) {
-        Direction direction = p_51104_.getValue(FACING);
-        boolean flag = p_51104_.getValue(POWERED);
-        switch ((AttachFace)p_51104_.getValue(FACE)) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        Direction direction = pState.getValue(FACING);
+        boolean flag = pState.getValue(POWERED);
+        switch ((AttachFace)pState.getValue(FACE)) {
             case FLOOR:
                 if (direction.getAxis() == Direction.Axis.X) {
                     return flag ? PRESSED_FLOOR_AABB_X : FLOOR_AABB_X;
@@ -129,45 +129,45 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
         super.onExplosionHit(p_310762_, p_363623_, p_312982_, p_311820_, p_312672_);
     }
 
-    public void press(BlockState p_51117_, Level p_51118_, BlockPos p_51119_, @Nullable Player p_343045_) {
-        p_51118_.setBlock(p_51119_, p_51117_.setValue(POWERED, Boolean.valueOf(true)), 3);
-        this.updateNeighbours(p_51117_, p_51118_, p_51119_);
-        p_51118_.scheduleTick(p_51119_, this, this.ticksToStayPressed);
-        this.playSound(p_343045_, p_51118_, p_51119_, true);
-        p_51118_.gameEvent(p_343045_, GameEvent.BLOCK_ACTIVATE, p_51119_);
+    public void press(BlockState pState, Level pLevel, BlockPos pPos, @Nullable Player pPlayer) {
+        pLevel.setBlock(pPos, pState.setValue(POWERED, Boolean.valueOf(true)), 3);
+        this.updateNeighbours(pState, pLevel, pPos);
+        pLevel.scheduleTick(pPos, this, this.ticksToStayPressed);
+        this.playSound(pPlayer, pLevel, pPos, true);
+        pLevel.gameEvent(pPlayer, GameEvent.BLOCK_ACTIVATE, pPos);
     }
 
-    protected void playSound(@Nullable Player p_51068_, LevelAccessor p_51069_, BlockPos p_51070_, boolean p_51071_) {
-        p_51069_.playSound(p_51071_ ? p_51068_ : null, p_51070_, this.getSound(p_51071_), SoundSource.BLOCKS);
+    protected void playSound(@Nullable Player pPlayer, LevelAccessor pLevel, BlockPos pPos, boolean pHitByArrow) {
+        pLevel.playSound(pHitByArrow ? pPlayer : null, pPos, this.getSound(pHitByArrow), SoundSource.BLOCKS);
     }
 
-    protected SoundEvent getSound(boolean p_51102_) {
-        return p_51102_ ? this.type.buttonClickOn() : this.type.buttonClickOff();
+    protected SoundEvent getSound(boolean pIsOn) {
+        return pIsOn ? this.type.buttonClickOn() : this.type.buttonClickOff();
     }
 
     @Override
-    protected void onRemove(BlockState p_51095_, Level p_51096_, BlockPos p_51097_, BlockState p_51098_, boolean p_51099_) {
-        if (!p_51099_ && !p_51095_.is(p_51098_.getBlock())) {
-            if (p_51095_.getValue(POWERED)) {
-                this.updateNeighbours(p_51095_, p_51096_, p_51097_);
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        if (!pIsMoving && !pState.is(pNewState.getBlock())) {
+            if (pState.getValue(POWERED)) {
+                this.updateNeighbours(pState, pLevel, pPos);
             }
 
-            super.onRemove(p_51095_, p_51096_, p_51097_, p_51098_, p_51099_);
+            super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
         }
     }
 
     @Override
-    protected int getSignal(BlockState p_51078_, BlockGetter p_51079_, BlockPos p_51080_, Direction p_51081_) {
-        return p_51078_.getValue(POWERED) ? 15 : 0;
+    protected int getSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
+        return pBlockState.getValue(POWERED) ? 15 : 0;
     }
 
     @Override
-    protected int getDirectSignal(BlockState p_51109_, BlockGetter p_51110_, BlockPos p_51111_, Direction p_51112_) {
-        return p_51109_.getValue(POWERED) && getConnectedDirection(p_51109_) == p_51112_ ? 15 : 0;
+    protected int getDirectSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
+        return pBlockState.getValue(POWERED) && getConnectedDirection(pBlockState) == pSide ? 15 : 0;
     }
 
     @Override
-    protected boolean isSignalSource(BlockState p_51114_) {
+    protected boolean isSignalSource(BlockState pState) {
         return true;
     }
 
@@ -179,41 +179,41 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
     }
 
     @Override
-    protected void entityInside(BlockState p_51083_, Level p_51084_, BlockPos p_51085_, Entity p_51086_) {
-        if (!p_51084_.isClientSide && this.type.canButtonBeActivatedByArrows() && !p_51083_.getValue(POWERED)) {
-            this.checkPressed(p_51083_, p_51084_, p_51085_);
+    protected void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
+        if (!pLevel.isClientSide && this.type.canButtonBeActivatedByArrows() && !pState.getValue(POWERED)) {
+            this.checkPressed(pState, pLevel, pPos);
         }
     }
 
-    protected void checkPressed(BlockState p_51121_, Level p_51122_, BlockPos p_51123_) {
+    protected void checkPressed(BlockState pState, Level pLevel, BlockPos pPos) {
         AbstractArrow abstractarrow = this.type.canButtonBeActivatedByArrows()
-            ? p_51122_.getEntitiesOfClass(AbstractArrow.class, p_51121_.getShape(p_51122_, p_51123_).bounds().move(p_51123_)).stream().findFirst().orElse(null)
+            ? pLevel.getEntitiesOfClass(AbstractArrow.class, pState.getShape(pLevel, pPos).bounds().move(pPos)).stream().findFirst().orElse(null)
             : null;
         boolean flag = abstractarrow != null;
-        boolean flag1 = p_51121_.getValue(POWERED);
+        boolean flag1 = pState.getValue(POWERED);
         if (flag != flag1) {
-            p_51122_.setBlock(p_51123_, p_51121_.setValue(POWERED, Boolean.valueOf(flag)), 3);
-            this.updateNeighbours(p_51121_, p_51122_, p_51123_);
-            this.playSound(null, p_51122_, p_51123_, flag);
-            p_51122_.gameEvent(abstractarrow, flag ? GameEvent.BLOCK_ACTIVATE : GameEvent.BLOCK_DEACTIVATE, p_51123_);
+            pLevel.setBlock(pPos, pState.setValue(POWERED, Boolean.valueOf(flag)), 3);
+            this.updateNeighbours(pState, pLevel, pPos);
+            this.playSound(null, pLevel, pPos, flag);
+            pLevel.gameEvent(abstractarrow, flag ? GameEvent.BLOCK_ACTIVATE : GameEvent.BLOCK_DEACTIVATE, pPos);
         }
 
         if (flag) {
-            p_51122_.scheduleTick(new BlockPos(p_51123_), this, this.ticksToStayPressed);
+            pLevel.scheduleTick(new BlockPos(pPos), this, this.ticksToStayPressed);
         }
     }
 
-    private void updateNeighbours(BlockState p_51125_, Level p_51126_, BlockPos p_51127_) {
-        Direction direction = getConnectedDirection(p_51125_).getOpposite();
+    private void updateNeighbours(BlockState pState, Level pLevel, BlockPos pPos) {
+        Direction direction = getConnectedDirection(pState).getOpposite();
         Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(
-            p_51126_, direction, direction.getAxis().isHorizontal() ? Direction.UP : p_51125_.getValue(FACING)
+            pLevel, direction, direction.getAxis().isHorizontal() ? Direction.UP : pState.getValue(FACING)
         );
-        p_51126_.updateNeighborsAt(p_51127_, this, orientation);
-        p_51126_.updateNeighborsAt(p_51127_.relative(direction), this, orientation);
+        pLevel.updateNeighborsAt(pPos, this, orientation);
+        pLevel.updateNeighborsAt(pPos.relative(direction), this, orientation);
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_51101_) {
-        p_51101_.add(FACING, POWERED, FACE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, POWERED, FACE);
     }
 }

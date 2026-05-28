@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 public class SavedDataUUIDFix extends AbstractUUIDFix {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public SavedDataUUIDFix(Schema p_16863_) {
-        super(p_16863_, References.SAVED_DATA_RAIDS);
+    public SavedDataUUIDFix(Schema pOutputSchema) {
+        super(pOutputSchema, References.SAVED_DATA_RAIDS);
     }
 
     @Override

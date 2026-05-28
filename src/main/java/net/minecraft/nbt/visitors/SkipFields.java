@@ -9,10 +9,10 @@ import net.minecraft.nbt.TagType;
 public class SkipFields extends CollectToTag {
     private final Deque<FieldTree> stack = new ArrayDeque<>();
 
-    public SkipFields(FieldSelector... p_202549_) {
+    public SkipFields(FieldSelector... pSelectors) {
         FieldTree fieldtree = FieldTree.createRoot();
 
-        for (FieldSelector fieldselector : p_202549_) {
+        for (FieldSelector fieldselector : pSelectors) {
             fieldtree.addEntry(fieldselector);
         }
 

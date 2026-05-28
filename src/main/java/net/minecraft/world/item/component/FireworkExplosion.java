@@ -59,17 +59,17 @@ public record FireworkExplosion(FireworkExplosion.Shape shape, IntList colors, I
         this.addAdditionalTooltip(p_333224_);
     }
 
-    public void addShapeNameTooltip(Consumer<Component> p_331419_) {
-        p_331419_.accept(this.shape.getName().withStyle(ChatFormatting.GRAY));
+    public void addShapeNameTooltip(Consumer<Component> pTooltipAdder) {
+        pTooltipAdder.accept(this.shape.getName().withStyle(ChatFormatting.GRAY));
     }
 
-    public void addAdditionalTooltip(Consumer<Component> p_331797_) {
+    public void addAdditionalTooltip(Consumer<Component> pTooltipAdder) {
         if (!this.colors.isEmpty()) {
-            p_331797_.accept(appendColors(Component.empty().withStyle(ChatFormatting.GRAY), this.colors));
+            pTooltipAdder.accept(appendColors(Component.empty().withStyle(ChatFormatting.GRAY), this.colors));
         }
 
         if (!this.fadeColors.isEmpty()) {
-            p_331797_.accept(
+            pTooltipAdder.accept(
                 appendColors(
                     Component.translatable("item.minecraft.firework_star.fade_to").append(CommonComponents.SPACE).withStyle(ChatFormatting.GRAY),
                     this.fadeColors
@@ -78,33 +78,33 @@ public record FireworkExplosion(FireworkExplosion.Shape shape, IntList colors, I
         }
 
         if (this.hasTrail) {
-            p_331797_.accept(Component.translatable("item.minecraft.firework_star.trail").withStyle(ChatFormatting.GRAY));
+            pTooltipAdder.accept(Component.translatable("item.minecraft.firework_star.trail").withStyle(ChatFormatting.GRAY));
         }
 
         if (this.hasTwinkle) {
-            p_331797_.accept(Component.translatable("item.minecraft.firework_star.flicker").withStyle(ChatFormatting.GRAY));
+            pTooltipAdder.accept(Component.translatable("item.minecraft.firework_star.flicker").withStyle(ChatFormatting.GRAY));
         }
     }
 
-    private static Component appendColors(MutableComponent p_333538_, IntList p_333652_) {
-        for (int i = 0; i < p_333652_.size(); i++) {
+    private static Component appendColors(MutableComponent pComponent, IntList pColors) {
+        for (int i = 0; i < pColors.size(); i++) {
             if (i > 0) {
-                p_333538_.append(", ");
+                pComponent.append(", ");
             }
 
-            p_333538_.append(getColorName(p_333652_.getInt(i)));
+            pComponent.append(getColorName(pColors.getInt(i)));
         }
 
-        return p_333538_;
+        return pComponent;
     }
 
-    private static Component getColorName(int p_333961_) {
-        DyeColor dyecolor = DyeColor.byFireworkColor(p_333961_);
+    private static Component getColorName(int pId) {
+        DyeColor dyecolor = DyeColor.byFireworkColor(pId);
         return (Component)(dyecolor == null ? CUSTOM_COLOR_NAME : Component.translatable("item.minecraft.firework_star." + dyecolor.getName()));
     }
 
-    public FireworkExplosion withFadeColors(IntList p_330299_) {
-        return new FireworkExplosion(this.shape, this.colors, new IntArrayList(p_330299_), this.hasTrail, this.hasTwinkle);
+    public FireworkExplosion withFadeColors(IntList pFadeColors) {
+        return new FireworkExplosion(this.shape, this.colors, new IntArrayList(pFadeColors), this.hasTrail, this.hasTwinkle);
     }
 
     public static enum Shape implements StringRepresentable {
@@ -122,9 +122,9 @@ public record FireworkExplosion(FireworkExplosion.Shape shape, IntList colors, I
         private final int id;
         private final String name;
 
-        private Shape(final int p_330815_, final String p_329574_) {
-            this.id = p_330815_;
-            this.name = p_329574_;
+        private Shape(final int pId, final String pName) {
+            this.id = pId;
+            this.name = pName;
         }
 
         public MutableComponent getName() {
@@ -135,8 +135,8 @@ public record FireworkExplosion(FireworkExplosion.Shape shape, IntList colors, I
             return this.id;
         }
 
-        public static FireworkExplosion.Shape byId(int p_330413_) {
-            return BY_ID.apply(p_330413_);
+        public static FireworkExplosion.Shape byId(int pId) {
+            return BY_ID.apply(pId);
         }
 
         @Override

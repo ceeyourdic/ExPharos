@@ -27,13 +27,13 @@ public class NamespacedSchema extends Schema {
     };
     private static final Type<String> NAMESPACED_STRING = new PrimitiveType<>(NAMESPACED_STRING_CODEC);
 
-    public NamespacedSchema(int p_17308_, Schema p_17309_) {
-        super(p_17308_, p_17309_);
+    public NamespacedSchema(int pVersionKey, Schema pParent) {
+        super(pVersionKey, pParent);
     }
 
-    public static String ensureNamespaced(String p_17312_) {
-        ResourceLocation resourcelocation = ResourceLocation.tryParse(p_17312_);
-        return resourcelocation != null ? resourcelocation.toString() : p_17312_;
+    public static String ensureNamespaced(String pString) {
+        ResourceLocation resourcelocation = ResourceLocation.tryParse(pString);
+        return resourcelocation != null ? resourcelocation.toString() : pString;
     }
 
     public static Type<String> namespacedString() {
@@ -41,7 +41,7 @@ public class NamespacedSchema extends Schema {
     }
 
     @Override
-    public Type<?> getChoiceType(TypeReference p_17314_, String p_17315_) {
-        return super.getChoiceType(p_17314_, ensureNamespaced(p_17315_));
+    public Type<?> getChoiceType(TypeReference pType, String pChoiceName) {
+        return super.getChoiceType(pType, ensureNamespaced(pChoiceName));
     }
 }

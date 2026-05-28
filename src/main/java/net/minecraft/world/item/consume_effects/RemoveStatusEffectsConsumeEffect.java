@@ -24,8 +24,8 @@ public record RemoveStatusEffectsConsumeEffect(HolderSet<MobEffect> effects) imp
         ByteBufCodecs.holderSet(Registries.MOB_EFFECT), RemoveStatusEffectsConsumeEffect::effects, RemoveStatusEffectsConsumeEffect::new
     );
 
-    public RemoveStatusEffectsConsumeEffect(Holder<MobEffect> p_368449_) {
-        this(HolderSet.direct(p_368449_));
+    public RemoveStatusEffectsConsumeEffect(Holder<MobEffect> pEffects) {
+        this(HolderSet.direct(pEffects));
     }
 
     @Override

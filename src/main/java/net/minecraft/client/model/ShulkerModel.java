@@ -19,10 +19,10 @@ public class ShulkerModel extends EntityModel<ShulkerRenderState> {
     private final ModelPart lid;
     private final ModelPart head;
 
-    public ShulkerModel(ModelPart p_170922_) {
-        super(p_170922_, RenderType::entityCutoutNoCullZOffset);
-        this.lid = p_170922_.getChild("lid");
-        this.head = p_170922_.getChild("head");
+    public ShulkerModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entityCutoutNoCullZOffset);
+        this.lid = pRoot.getChild("lid");
+        this.head = pRoot.getChild("head");
     }
 
     private static MeshDefinition createShellMesh() {

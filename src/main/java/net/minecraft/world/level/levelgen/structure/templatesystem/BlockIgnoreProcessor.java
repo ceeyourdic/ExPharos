@@ -22,8 +22,8 @@ public class BlockIgnoreProcessor extends StructureProcessor {
     public static final BlockIgnoreProcessor STRUCTURE_AND_AIR = new BlockIgnoreProcessor(ImmutableList.of(Blocks.AIR, Blocks.STRUCTURE_BLOCK));
     private final ImmutableList<Block> toIgnore;
 
-    public BlockIgnoreProcessor(List<Block> p_74052_) {
-        this.toIgnore = ImmutableList.copyOf(p_74052_);
+    public BlockIgnoreProcessor(List<Block> pIgnoredBlocks) {
+        this.toIgnore = ImmutableList.copyOf(pIgnoredBlocks);
     }
 
     @Nullable

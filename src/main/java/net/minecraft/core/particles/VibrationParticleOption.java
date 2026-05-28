@@ -31,9 +31,9 @@ public class VibrationParticleOption implements ParticleOptions {
     private final PositionSource destination;
     private final int arrivalInTicks;
 
-    public VibrationParticleOption(PositionSource p_235975_, int p_235976_) {
-        this.destination = p_235975_;
-        this.arrivalInTicks = p_235976_;
+    public VibrationParticleOption(PositionSource pDestination, int pArrivalInTicks) {
+        this.destination = pDestination;
+        this.arrivalInTicks = pArrivalInTicks;
     }
 
     @Override

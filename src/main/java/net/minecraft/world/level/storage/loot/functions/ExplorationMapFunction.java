@@ -51,14 +51,14 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
     private final boolean skipKnownStructures;
 
     ExplorationMapFunction(
-        List<LootItemCondition> p_300426_, TagKey<Structure> p_210653_, Holder<MapDecorationType> p_335648_, byte p_210655_, int p_210656_, boolean p_210657_
+        List<LootItemCondition> pConditons, TagKey<Structure> pDestination, Holder<MapDecorationType> pMapDecoration, byte pZoom, int pSearchRadius, boolean pSkipKnownStructures
     ) {
-        super(p_300426_);
-        this.destination = p_210653_;
-        this.mapDecoration = p_335648_;
-        this.zoom = p_210655_;
-        this.searchRadius = p_210656_;
-        this.skipKnownStructures = p_210657_;
+        super(pConditons);
+        this.destination = pDestination;
+        this.mapDecoration = pMapDecoration;
+        this.zoom = pZoom;
+        this.searchRadius = pSearchRadius;
+        this.skipKnownStructures = pSkipKnownStructures;
     }
 
     @Override
@@ -72,13 +72,13 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_80547_, LootContext p_80548_) {
-        if (!p_80547_.is(Items.MAP)) {
-            return p_80547_;
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        if (!pStack.is(Items.MAP)) {
+            return pStack;
         } else {
-            Vec3 vec3 = p_80548_.getOptionalParameter(LootContextParams.ORIGIN);
+            Vec3 vec3 = pContext.getOptionalParameter(LootContextParams.ORIGIN);
             if (vec3 != null) {
-                ServerLevel serverlevel = p_80548_.getLevel();
+                ServerLevel serverlevel = pContext.getLevel();
                 BlockPos blockpos = serverlevel.findNearestMapStructure(this.destination, BlockPos.containing(vec3), this.searchRadius, this.skipKnownStructures);
                 if (blockpos != null) {
                     ItemStack itemstack = MapItem.create(serverlevel, blockpos.getX(), blockpos.getZ(), this.zoom, true, true);
@@ -88,7 +88,7 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
                 }
             }
 
-            return p_80547_;
+            return pStack;
         }
     }
 
@@ -107,28 +107,28 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
             return this;
         }
 
-        public ExplorationMapFunction.Builder setDestination(TagKey<Structure> p_210659_) {
-            this.destination = p_210659_;
+        public ExplorationMapFunction.Builder setDestination(TagKey<Structure> pDestination) {
+            this.destination = pDestination;
             return this;
         }
 
-        public ExplorationMapFunction.Builder setMapDecoration(Holder<MapDecorationType> p_335674_) {
-            this.mapDecoration = p_335674_;
+        public ExplorationMapFunction.Builder setMapDecoration(Holder<MapDecorationType> pMapDecoration) {
+            this.mapDecoration = pMapDecoration;
             return this;
         }
 
-        public ExplorationMapFunction.Builder setZoom(byte p_80570_) {
-            this.zoom = p_80570_;
+        public ExplorationMapFunction.Builder setZoom(byte pZoom) {
+            this.zoom = pZoom;
             return this;
         }
 
-        public ExplorationMapFunction.Builder setSearchRadius(int p_165206_) {
-            this.searchRadius = p_165206_;
+        public ExplorationMapFunction.Builder setSearchRadius(int pSearchRadius) {
+            this.searchRadius = pSearchRadius;
             return this;
         }
 
-        public ExplorationMapFunction.Builder setSkipKnownStructures(boolean p_80576_) {
-            this.skipKnownStructures = p_80576_;
+        public ExplorationMapFunction.Builder setSkipKnownStructures(boolean pSkipKnownStructures) {
+            this.skipKnownStructures = pSkipKnownStructures;
             return this;
         }
 

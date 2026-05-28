@@ -1,5 +1,6 @@
 package net.minecraft.world;
 
+import java.util.List;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -12,8 +13,8 @@ public class TickRateManager {
     protected boolean runGameElements = true;
     protected boolean isFrozen = false;
 
-    public void setTickRate(float p_312754_) {
-        this.tickrate = Math.max(p_312754_, 1.0F);
+    public void setTickRate(float pTickRate) {
+        this.tickrate = Math.max(pTickRate, 1.0F);
         this.nanosecondsPerTick = (long)((double)TimeUtil.NANOSECONDS_PER_SECOND / (double)this.tickrate);
     }
 
@@ -37,16 +38,16 @@ public class TickRateManager {
         return this.frozenTicksToRun > 0;
     }
 
-    public void setFrozenTicksToRun(int p_312047_) {
-        this.frozenTicksToRun = p_312047_;
+    public void setFrozenTicksToRun(int pFrozenTicksToRun) {
+        this.frozenTicksToRun = pFrozenTicksToRun;
     }
 
     public int frozenTicksToRun() {
         return this.frozenTicksToRun;
     }
 
-    public void setFrozen(boolean p_312988_) {
-        this.isFrozen = p_312988_;
+    public void setFrozen(boolean pFrozen) {
+        this.isFrozen = pFrozen;
     }
 
     public boolean isFrozen() {
@@ -60,7 +61,24 @@ public class TickRateManager {
         }
     }
 
-    public boolean isEntityFrozen(Entity p_311574_) {
-        return !this.runsNormally() && !(p_311574_ instanceof Player) && p_311574_.countPlayerPassengers() <= 0;
+    public boolean isEntityFrozen(Entity pEntity) {
+        return !this.runsNormally() && !(pEntity instanceof Player) && !this.hasPlayerPassengers(pEntity);
+    }
+
+    private boolean hasPlayerPassengers(Entity entity) {
+        List<Entity> list = entity.getPassengers();
+
+        for (int i = 0; i < list.size(); i++) {
+            Entity entityx = list.get(i);
+            if (entityx instanceof Player) {
+                return true;
+            }
+
+            if (this.hasPlayerPassengers(entityx)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

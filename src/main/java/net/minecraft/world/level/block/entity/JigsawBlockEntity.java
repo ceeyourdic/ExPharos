@@ -34,8 +34,8 @@ public class JigsawBlockEntity extends BlockEntity {
     private int placementPriority;
     private int selectionPriority;
 
-    public JigsawBlockEntity(BlockPos p_155605_, BlockState p_155606_) {
-        super(BlockEntityType.JIGSAW, p_155605_, p_155606_);
+    public JigsawBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        super(BlockEntityType.JIGSAW, pPos, pBlockState);
     }
 
     public ResourceLocation getName() {
@@ -66,32 +66,32 @@ public class JigsawBlockEntity extends BlockEntity {
         return this.selectionPriority;
     }
 
-    public void setName(ResourceLocation p_59436_) {
-        this.name = p_59436_;
+    public void setName(ResourceLocation pName) {
+        this.name = pName;
     }
 
-    public void setTarget(ResourceLocation p_59439_) {
-        this.target = p_59439_;
+    public void setTarget(ResourceLocation pTarget) {
+        this.target = pTarget;
     }
 
-    public void setPool(ResourceKey<StructureTemplatePool> p_222764_) {
-        this.pool = p_222764_;
+    public void setPool(ResourceKey<StructureTemplatePool> pPool) {
+        this.pool = pPool;
     }
 
-    public void setFinalState(String p_59432_) {
-        this.finalState = p_59432_;
+    public void setFinalState(String pFinalState) {
+        this.finalState = pFinalState;
     }
 
-    public void setJoint(JigsawBlockEntity.JointType p_59425_) {
-        this.joint = p_59425_;
+    public void setJoint(JigsawBlockEntity.JointType pJoint) {
+        this.joint = pJoint;
     }
 
-    public void setPlacementPriority(int p_312425_) {
-        this.placementPriority = p_312425_;
+    public void setPlacementPriority(int pPlacementPriority) {
+        this.placementPriority = pPlacementPriority;
     }
 
-    public void setSelectionPriority(int p_309491_) {
-        this.selectionPriority = p_309491_;
+    public void setSelectionPriority(int pSelectionPriority) {
+        this.selectionPriority = pSelectionPriority;
     }
 
     @Override
@@ -127,11 +127,11 @@ public class JigsawBlockEntity extends BlockEntity {
         return this.saveCustomOnly(p_333585_);
     }
 
-    public void generate(ServerLevel p_59421_, int p_59422_, boolean p_59423_) {
+    public void generate(ServerLevel pLevel, int pMaxDepth, boolean pKeepJigsaws) {
         BlockPos blockpos = this.getBlockPos().relative(this.getBlockState().getValue(JigsawBlock.ORIENTATION).front());
-        Registry<StructureTemplatePool> registry = p_59421_.registryAccess().lookupOrThrow(Registries.TEMPLATE_POOL);
+        Registry<StructureTemplatePool> registry = pLevel.registryAccess().lookupOrThrow(Registries.TEMPLATE_POOL);
         Holder<StructureTemplatePool> holder = registry.getOrThrow(this.pool);
-        JigsawPlacement.generateJigsaw(p_59421_, holder, this.target, p_59422_, blockpos, p_59423_);
+        JigsawPlacement.generateJigsaw(pLevel, holder, this.target, pMaxDepth, blockpos, pKeepJigsaws);
     }
 
     public static enum JointType implements StringRepresentable {
@@ -143,8 +143,8 @@ public class JigsawBlockEntity extends BlockEntity {
         );
         private final String name;
 
-        private JointType(final String p_59455_) {
-            this.name = p_59455_;
+        private JointType(final String pName) {
+            this.name = pName;
         }
 
         @Override

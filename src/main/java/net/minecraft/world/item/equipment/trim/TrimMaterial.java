@@ -46,7 +46,7 @@ public record TrimMaterial(String assetName, Holder<Item> ingredient, Map<Resour
     public static final Codec<Holder<TrimMaterial>> CODEC = RegistryFileCodec.create(Registries.TRIM_MATERIAL, DIRECT_CODEC);
     public static final StreamCodec<RegistryFriendlyByteBuf, Holder<TrimMaterial>> STREAM_CODEC = ByteBufCodecs.holder(Registries.TRIM_MATERIAL, DIRECT_STREAM_CODEC);
 
-    public static TrimMaterial create(String p_366767_, Item p_365530_, Component p_365548_, Map<ResourceKey<EquipmentAsset>, String> p_366307_) {
-        return new TrimMaterial(p_366767_, BuiltInRegistries.ITEM.wrapAsHolder(p_365530_), p_366307_, p_365548_);
+    public static TrimMaterial create(String pAssetName, Item pIngredient, Component pDescription, Map<ResourceKey<EquipmentAsset>, String> pOverrideArmorAssets) {
+        return new TrimMaterial(pAssetName, BuiltInRegistries.ITEM.wrapAsHolder(pIngredient), pOverrideArmorAssets, pDescription);
     }
 }

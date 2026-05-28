@@ -27,28 +27,38 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
     public static final int AMOUNT_MAX = 9;
     public static final int AMOUNT_FULL = 8;
 
-    public FluidState(Fluid p_76149_, Reference2ObjectArrayMap<Property<?>, Comparable<?>> p_332108_, MapCodec<FluidState> p_76151_) {
-        super(p_76149_, p_332108_, p_76151_);
+    public FluidState(Fluid pOwner, Reference2ObjectArrayMap<Property<?>, Comparable<?>> pValues, MapCodec<FluidState> pPropertiesCodec) {
+        super(pOwner, pValues, pPropertiesCodec);
     }
 
     public Fluid getType() {
         return this.owner;
     }
 
+    // Arcane mixin port: Yarn accessor name for official getType().
+    public Fluid getFluid() {
+        return this.getType();
+    }
+
     public boolean isSource() {
         return this.getType().isSource(this);
     }
 
-    public boolean isSourceOfType(Fluid p_164513_) {
-        return this.owner == p_164513_ && this.owner.isSource(this);
+    // Arcane mixin port: Yarn name for source fluid-state checks.
+    public boolean isStill() {
+        return this.isSource();
+    }
+
+    public boolean isSourceOfType(Fluid pFluid) {
+        return this.owner == pFluid && this.owner.isSource(this);
     }
 
     public boolean isEmpty() {
         return this.getType().isEmpty();
     }
 
-    public float getHeight(BlockGetter p_76156_, BlockPos p_76157_) {
-        return this.getType().getHeight(this, p_76156_, p_76157_);
+    public float getHeight(BlockGetter pLevel, BlockPos pPos) {
+        return this.getType().getHeight(this, pLevel, pPos);
     }
 
     public float getOwnHeight() {
@@ -59,12 +69,12 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
         return this.getType().getAmount(this);
     }
 
-    public boolean shouldRenderBackwardUpFace(BlockGetter p_76172_, BlockPos p_76173_) {
+    public boolean shouldRenderBackwardUpFace(BlockGetter pLevel, BlockPos pPos) {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
-                BlockPos blockpos = p_76173_.offset(i, 0, j);
-                FluidState fluidstate = p_76172_.getFluidState(blockpos);
-                if (!fluidstate.getType().isSame(this.getType()) && !p_76172_.getBlockState(blockpos).isSolidRender()) {
+                BlockPos blockpos = pPos.offset(i, 0, j);
+                FluidState fluidstate = pLevel.getFluidState(blockpos);
+                if (!fluidstate.getType().isSame(this.getType()) && !pLevel.getBlockState(blockpos).isSolidRender()) {
                     return true;
                 }
             }
@@ -73,24 +83,24 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
         return false;
     }
 
-    public void tick(ServerLevel p_366366_, BlockPos p_76165_, BlockState p_361746_) {
-        this.getType().tick(p_366366_, p_76165_, p_361746_, this);
+    public void tick(ServerLevel pLevel, BlockPos pPos, BlockState pState) {
+        this.getType().tick(pLevel, pPos, pState, this);
     }
 
-    public void animateTick(Level p_230559_, BlockPos p_230560_, RandomSource p_230561_) {
-        this.getType().animateTick(p_230559_, p_230560_, this, p_230561_);
+    public void animateTick(Level pLevel, BlockPos pPos, RandomSource pRandom) {
+        this.getType().animateTick(pLevel, pPos, this, pRandom);
     }
 
     public boolean isRandomlyTicking() {
         return this.getType().isRandomlyTicking();
     }
 
-    public void randomTick(ServerLevel p_366389_, BlockPos p_230564_, RandomSource p_230565_) {
-        this.getType().randomTick(p_366389_, p_230564_, this, p_230565_);
+    public void randomTick(ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
+        this.getType().randomTick(pLevel, pPos, this, pRandom);
     }
 
-    public Vec3 getFlow(BlockGetter p_76180_, BlockPos p_76181_) {
-        return this.getType().getFlow(p_76180_, p_76181_, this);
+    public Vec3 getFlow(BlockGetter pLevel, BlockPos pPos) {
+        return this.getType().getFlow(pLevel, pPos, this);
     }
 
     public BlockState createLegacyBlock() {
@@ -102,28 +112,33 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
         return this.getType().getDripParticle();
     }
 
-    public boolean is(TagKey<Fluid> p_205071_) {
-        return this.getType().builtInRegistryHolder().is(p_205071_);
+    public boolean is(TagKey<Fluid> pTag) {
+        return this.getType().builtInRegistryHolder().is(pTag);
     }
 
-    public boolean is(HolderSet<Fluid> p_205073_) {
-        return p_205073_.contains(this.getType().builtInRegistryHolder());
+    // Arcane mixin port: Yarn name for tag membership.
+    public boolean isIn(TagKey<Fluid> pTag) {
+        return this.is(pTag);
     }
 
-    public boolean is(Fluid p_192918_) {
-        return this.getType() == p_192918_;
+    public boolean is(HolderSet<Fluid> pFluids) {
+        return pFluids.contains(this.getType().builtInRegistryHolder());
+    }
+
+    public boolean is(Fluid pFluid) {
+        return this.getType() == pFluid;
     }
 
     public float getExplosionResistance() {
         return this.getType().getExplosionResistance();
     }
 
-    public boolean canBeReplacedWith(BlockGetter p_76159_, BlockPos p_76160_, Fluid p_76161_, Direction p_76162_) {
-        return this.getType().canBeReplacedWith(this, p_76159_, p_76160_, p_76161_, p_76162_);
+    public boolean canBeReplacedWith(BlockGetter pLevel, BlockPos pPos, Fluid pFluid, Direction pDirection) {
+        return this.getType().canBeReplacedWith(this, pLevel, pPos, pFluid, pDirection);
     }
 
-    public VoxelShape getShape(BlockGetter p_76184_, BlockPos p_76185_) {
-        return this.getType().getShape(this, p_76184_, p_76185_);
+    public VoxelShape getShape(BlockGetter pLevel, BlockPos pPos) {
+        return this.getType().getShape(this, pLevel, pPos);
     }
 
     public Holder<Fluid> holder() {

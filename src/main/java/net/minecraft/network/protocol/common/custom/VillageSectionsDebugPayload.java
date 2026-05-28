@@ -12,13 +12,13 @@ public record VillageSectionsDebugPayload(Set<SectionPos> villageChunks, Set<Sec
     );
     public static final CustomPacketPayload.Type<VillageSectionsDebugPayload> TYPE = CustomPacketPayload.createType("debug/village_sections");
 
-    private VillageSectionsDebugPayload(FriendlyByteBuf p_298910_) {
-        this(p_298910_.readCollection(HashSet::new, FriendlyByteBuf::readSectionPos), p_298910_.readCollection(HashSet::new, FriendlyByteBuf::readSectionPos));
+    private VillageSectionsDebugPayload(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readCollection(HashSet::new, FriendlyByteBuf::readSectionPos), pBuffer.readCollection(HashSet::new, FriendlyByteBuf::readSectionPos));
     }
 
-    private void write(FriendlyByteBuf p_299408_) {
-        p_299408_.writeCollection(this.villageChunks, FriendlyByteBuf::writeSectionPos);
-        p_299408_.writeCollection(this.notVillageChunks, FriendlyByteBuf::writeSectionPos);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeCollection(this.villageChunks, FriendlyByteBuf::writeSectionPos);
+        pBuffer.writeCollection(this.notVillageChunks, FriendlyByteBuf::writeSectionPos);
     }
 
     @Override

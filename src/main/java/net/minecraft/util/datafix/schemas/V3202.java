@@ -11,9 +11,9 @@ public class V3202 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_252169_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_252169_);
-        p_252169_.registerSimple(map, "minecraft:hanging_sign");
+    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(pSchema);
+        pSchema.registerSimple(map, "minecraft:hanging_sign");
         return map;
     }
 }

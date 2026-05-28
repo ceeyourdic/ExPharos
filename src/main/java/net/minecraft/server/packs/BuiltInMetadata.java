@@ -7,23 +7,23 @@ public class BuiltInMetadata {
     private static final BuiltInMetadata EMPTY = new BuiltInMetadata(Map.of());
     private final Map<MetadataSectionType<?>, ?> values;
 
-    private BuiltInMetadata(Map<MetadataSectionType<?>, ?> p_251588_) {
-        this.values = p_251588_;
+    private BuiltInMetadata(Map<MetadataSectionType<?>, ?> pValues) {
+        this.values = pValues;
     }
 
-    public <T> T get(MetadataSectionType<T> p_377219_) {
-        return (T)this.values.get(p_377219_);
+    public <T> T get(MetadataSectionType<T> pType) {
+        return (T)this.values.get(pType);
     }
 
     public static BuiltInMetadata of() {
         return EMPTY;
     }
 
-    public static <T> BuiltInMetadata of(MetadataSectionType<T> p_376773_, T p_249997_) {
-        return new BuiltInMetadata(Map.of(p_376773_, p_249997_));
+    public static <T> BuiltInMetadata of(MetadataSectionType<T> pType, T pValue) {
+        return new BuiltInMetadata(Map.of(pType, pValue));
     }
 
-    public static <T1, T2> BuiltInMetadata of(MetadataSectionType<T1> p_377897_, T1 p_252174_, MetadataSectionType<T2> p_377603_, T2 p_250020_) {
-        return new BuiltInMetadata(Map.of(p_377897_, p_252174_, p_377603_, (T1)p_250020_));
+    public static <T1, T2> BuiltInMetadata of(MetadataSectionType<T1> pType1, T1 pValue1, MetadataSectionType<T2> pType2, T2 pValue2) {
+        return new BuiltInMetadata(Map.of(pType1, pValue1, pType2, (T1)pValue2));
     }
 }

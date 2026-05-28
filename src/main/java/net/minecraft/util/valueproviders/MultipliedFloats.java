@@ -6,8 +6,8 @@ import net.minecraft.util.RandomSource;
 public class MultipliedFloats implements SampledFloat {
     private final SampledFloat[] values;
 
-    public MultipliedFloats(SampledFloat... p_216858_) {
-        this.values = p_216858_;
+    public MultipliedFloats(SampledFloat... pValues) {
+        this.values = pValues;
     }
 
     @Override

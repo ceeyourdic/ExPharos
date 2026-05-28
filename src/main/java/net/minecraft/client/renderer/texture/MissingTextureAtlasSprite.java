@@ -4,10 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceMetadata;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public final class MissingTextureAtlasSprite {
     private static final int MISSING_IMAGE_WIDTH = 16;
     private static final int MISSING_IMAGE_HEIGHT = 16;
@@ -18,13 +15,13 @@ public final class MissingTextureAtlasSprite {
         return generateMissingImage(16, 16);
     }
 
-    public static NativeImage generateMissingImage(int p_249811_, int p_249362_) {
-        NativeImage nativeimage = new NativeImage(p_249811_, p_249362_, false);
+    public static NativeImage generateMissingImage(int pWidth, int pHeight) {
+        NativeImage nativeimage = new NativeImage(pWidth, pHeight, false);
         int i = -524040;
 
-        for (int j = 0; j < p_249362_; j++) {
-            for (int k = 0; k < p_249811_; k++) {
-                if (j < p_249362_ / 2 ^ k < p_249811_ / 2) {
+        for (int j = 0; j < pHeight; j++) {
+            for (int k = 0; k < pWidth; k++) {
+                if (j < pHeight / 2 ^ k < pWidth / 2) {
                     nativeimage.setPixel(k, j, -524040);
                 } else {
                     nativeimage.setPixel(k, j, -16777216);
@@ -42,5 +39,9 @@ public final class MissingTextureAtlasSprite {
 
     public static ResourceLocation getLocation() {
         return MISSING_TEXTURE_LOCATION;
+    }
+
+    public static boolean isMisingSprite(TextureAtlasSprite sprite) {
+        return sprite.getName() == MISSING_TEXTURE_LOCATION;
     }
 }

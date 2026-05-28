@@ -15,8 +15,8 @@ public class MenuTooltipPositioner implements ClientTooltipPositioner {
     public static final int MAX_DISTANCE_TO_WIDGET = 5;
     private final ScreenRectangle screenRectangle;
 
-    public MenuTooltipPositioner(ScreenRectangle p_310340_) {
-        this.screenRectangle = p_310340_;
+    public MenuTooltipPositioner(ScreenRectangle pScreenRectangle) {
+        this.screenRectangle = pScreenRectangle;
     }
 
     @Override
@@ -39,8 +39,8 @@ public class MenuTooltipPositioner implements ClientTooltipPositioner {
         return vector2i;
     }
 
-    private static int getOffset(int p_268188_, int p_268026_, int p_268015_) {
-        int i = Math.min(Math.abs(p_268188_ - p_268026_), p_268015_);
-        return Math.round(Mth.lerp((float)i / (float)p_268015_, (float)(p_268015_ - 3), 5.0F));
+    private static int getOffset(int pMouseY, int pWidgetY, int pWidgetHeight) {
+        int i = Math.min(Math.abs(pMouseY - pWidgetY), pWidgetHeight);
+        return Math.round(Mth.lerp((float)i / (float)pWidgetHeight, (float)(pWidgetHeight - 3), 5.0F));
     }
 }

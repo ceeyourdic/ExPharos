@@ -32,24 +32,24 @@ public class LargeDripstoneConfiguration implements FeatureConfiguration {
     public final float minBluntnessForWind;
 
     public LargeDripstoneConfiguration(
-        int p_160956_,
-        IntProvider p_160957_,
-        FloatProvider p_160958_,
-        float p_160959_,
-        FloatProvider p_160960_,
-        FloatProvider p_160961_,
-        FloatProvider p_160962_,
-        int p_160963_,
-        float p_160964_
+        int pFloorToCeilingSearchRange,
+        IntProvider pColumnRadius,
+        FloatProvider pHeightScale,
+        float pMaxColumnRadiusToCaveHeightRatio,
+        FloatProvider pStalactiteBluntness,
+        FloatProvider pStalagmiteBluntness,
+        FloatProvider pWindSpeed,
+        int pMinRadiusForWind,
+        float pMinBluntnessForWind
     ) {
-        this.floorToCeilingSearchRange = p_160956_;
-        this.columnRadius = p_160957_;
-        this.heightScale = p_160958_;
-        this.maxColumnRadiusToCaveHeightRatio = p_160959_;
-        this.stalactiteBluntness = p_160960_;
-        this.stalagmiteBluntness = p_160961_;
-        this.windSpeed = p_160962_;
-        this.minRadiusForWind = p_160963_;
-        this.minBluntnessForWind = p_160964_;
+        this.floorToCeilingSearchRange = pFloorToCeilingSearchRange;
+        this.columnRadius = pColumnRadius;
+        this.heightScale = pHeightScale;
+        this.maxColumnRadiusToCaveHeightRatio = pMaxColumnRadiusToCaveHeightRatio;
+        this.stalactiteBluntness = pStalactiteBluntness;
+        this.stalagmiteBluntness = pStalagmiteBluntness;
+        this.windSpeed = pWindSpeed;
+        this.minRadiusForWind = pMinRadiusForWind;
+        this.minBluntnessForWind = pMinBluntnessForWind;
     }
 }

@@ -10,11 +10,11 @@ public class Listener {
     private float gain = 1.0F;
     private ListenerTransform transform = ListenerTransform.INITIAL;
 
-    public void setTransform(ListenerTransform p_312167_) {
-        this.transform = p_312167_;
-        Vec3 vec3 = p_312167_.position();
-        Vec3 vec31 = p_312167_.forward();
-        Vec3 vec32 = p_312167_.up();
+    public void setTransform(ListenerTransform pTransform) {
+        this.transform = pTransform;
+        Vec3 vec3 = pTransform.position();
+        Vec3 vec31 = pTransform.forward();
+        Vec3 vec32 = pTransform.up();
         AL10.alListener3f(4100, (float)vec3.x, (float)vec3.y, (float)vec3.z);
         AL10.alListenerfv(
             4111,
@@ -24,9 +24,9 @@ public class Listener {
         );
     }
 
-    public void setGain(float p_83738_) {
-        AL10.alListenerf(4106, p_83738_);
-        this.gain = p_83738_;
+    public void setGain(float pGain) {
+        AL10.alListenerf(4106, pGain);
+        this.gain = pGain;
     }
 
     public float getGain() {

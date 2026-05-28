@@ -21,25 +21,25 @@ import org.slf4j.Logger;
 public class TrialSpawnerConfigInRegistryFix extends NamedEntityFix {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public TrialSpawnerConfigInRegistryFix(Schema p_369765_) {
-        super(p_369765_, false, "TrialSpawnerConfigInRegistryFix", References.BLOCK_ENTITY, "minecraft:trial_spawner");
+    public TrialSpawnerConfigInRegistryFix(Schema pOutputSchema) {
+        super(pOutputSchema, false, "TrialSpawnerConfigInRegistryFix", References.BLOCK_ENTITY, "minecraft:trial_spawner");
     }
 
-    public Dynamic<?> fixTag(Dynamic<Tag> p_362102_) {
-        Optional<Dynamic<Tag>> optional = p_362102_.get("normal_config").result();
+    public Dynamic<?> fixTag(Dynamic<Tag> pTag) {
+        Optional<Dynamic<Tag>> optional = pTag.get("normal_config").result();
         if (optional.isEmpty()) {
-            return p_362102_;
+            return pTag;
         } else {
-            Optional<Dynamic<Tag>> optional1 = p_362102_.get("ominous_config").result();
+            Optional<Dynamic<Tag>> optional1 = pTag.get("ominous_config").result();
             if (optional1.isEmpty()) {
-                return p_362102_;
+                return pTag;
             } else {
                 ResourceLocation resourcelocation = TrialSpawnerConfigInRegistryFix.VanillaTrialChambers.CONFIGS_TO_KEY
                     .get(Pair.of(optional.get(), optional1.get()));
                 return resourcelocation == null
-                    ? p_362102_
-                    : p_362102_.set("normal_config", p_362102_.createString(resourcelocation.withSuffix("/normal").toString()))
-                        .set("ominous_config", p_362102_.createString(resourcelocation.withSuffix("/ominous").toString()));
+                    ? pTag
+                    : pTag.set("normal_config", pTag.createString(resourcelocation.withSuffix("/normal").toString()))
+                        .set("ominous_config", pTag.createString(resourcelocation.withSuffix("/ominous").toString()));
             }
         }
     }
@@ -59,59 +59,59 @@ public class TrialSpawnerConfigInRegistryFix extends NamedEntityFix {
         private VanillaTrialChambers() {
         }
 
-        private static void register(ResourceLocation p_362455_, String p_367097_, String p_370028_) {
+        private static void register(ResourceLocation pName, String pNormal, String pOminous) {
             try {
-                CompoundTag compoundtag = parse(p_367097_);
-                CompoundTag compoundtag1 = parse(p_370028_);
+                CompoundTag compoundtag = parse(pNormal);
+                CompoundTag compoundtag1 = parse(pOminous);
                 CompoundTag compoundtag2 = compoundtag.copy().merge(compoundtag1);
                 CompoundTag compoundtag3 = removeDefaults(compoundtag2.copy());
                 Dynamic<Tag> dynamic = asDynamic(compoundtag);
-                CONFIGS_TO_KEY.put(Pair.of(dynamic, asDynamic(compoundtag1)), p_362455_);
-                CONFIGS_TO_KEY.put(Pair.of(dynamic, asDynamic(compoundtag2)), p_362455_);
-                CONFIGS_TO_KEY.put(Pair.of(dynamic, asDynamic(compoundtag3)), p_362455_);
+                CONFIGS_TO_KEY.put(Pair.of(dynamic, asDynamic(compoundtag1)), pName);
+                CONFIGS_TO_KEY.put(Pair.of(dynamic, asDynamic(compoundtag2)), pName);
+                CONFIGS_TO_KEY.put(Pair.of(dynamic, asDynamic(compoundtag3)), pName);
             } catch (RuntimeException runtimeexception) {
-                throw new IllegalStateException("Failed to parse NBT for " + p_362455_, runtimeexception);
+                throw new IllegalStateException("Failed to parse NBT for " + pName, runtimeexception);
             }
         }
 
-        private static Dynamic<Tag> asDynamic(CompoundTag p_364176_) {
-            return new Dynamic<>(NbtOps.INSTANCE, p_364176_);
+        private static Dynamic<Tag> asDynamic(CompoundTag pTag) {
+            return new Dynamic<>(NbtOps.INSTANCE, pTag);
         }
 
-        private static CompoundTag parse(String p_367124_) {
+        private static CompoundTag parse(String pConfig) {
             try {
-                return TagParser.parseTag(p_367124_);
+                return TagParser.parseTag(pConfig);
             } catch (CommandSyntaxException commandsyntaxexception) {
-                throw new IllegalArgumentException("Failed to parse Trial Spawner NBT config: " + p_367124_, commandsyntaxexception);
+                throw new IllegalArgumentException("Failed to parse Trial Spawner NBT config: " + pConfig, commandsyntaxexception);
             }
         }
 
-        private static CompoundTag removeDefaults(CompoundTag p_368568_) {
-            if (p_368568_.getInt("spawn_range") == 4) {
-                p_368568_.remove("spawn_range");
+        private static CompoundTag removeDefaults(CompoundTag pTag) {
+            if (pTag.getInt("spawn_range") == 4) {
+                pTag.remove("spawn_range");
             }
 
-            if (p_368568_.getFloat("total_mobs") == 6.0F) {
-                p_368568_.remove("total_mobs");
+            if (pTag.getFloat("total_mobs") == 6.0F) {
+                pTag.remove("total_mobs");
             }
 
-            if (p_368568_.getFloat("simultaneous_mobs") == 2.0F) {
-                p_368568_.remove("simultaneous_mobs");
+            if (pTag.getFloat("simultaneous_mobs") == 2.0F) {
+                pTag.remove("simultaneous_mobs");
             }
 
-            if (p_368568_.getFloat("total_mobs_added_per_player") == 2.0F) {
-                p_368568_.remove("total_mobs_added_per_player");
+            if (pTag.getFloat("total_mobs_added_per_player") == 2.0F) {
+                pTag.remove("total_mobs_added_per_player");
             }
 
-            if (p_368568_.getFloat("simultaneous_mobs_added_per_player") == 1.0F) {
-                p_368568_.remove("simultaneous_mobs_added_per_player");
+            if (pTag.getFloat("simultaneous_mobs_added_per_player") == 1.0F) {
+                pTag.remove("simultaneous_mobs_added_per_player");
             }
 
-            if (p_368568_.getInt("ticks_between_spawn") == 40) {
-                p_368568_.remove("ticks_between_spawn");
+            if (pTag.getInt("ticks_between_spawn") == 40) {
+                pTag.remove("ticks_between_spawn");
             }
 
-            return p_368568_;
+            return pTag;
         }
 
         static {

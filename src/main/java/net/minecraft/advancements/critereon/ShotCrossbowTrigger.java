@@ -18,8 +18,8 @@ public class ShotCrossbowTrigger extends SimpleCriterionTrigger<ShotCrossbowTrig
         return ShotCrossbowTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_65463_, ItemStack p_65464_) {
-        this.trigger(p_65463_, p_65467_ -> p_65467_.matches(p_65464_));
+    public void trigger(ServerPlayer pShooter, ItemStack pStack) {
+        this.trigger(pShooter, p_65467_ -> p_65467_.matches(pStack));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item)
@@ -32,21 +32,21 @@ public class ShotCrossbowTrigger extends SimpleCriterionTrigger<ShotCrossbowTrig
                     .apply(p_325245_, ShotCrossbowTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<ShotCrossbowTrigger.TriggerInstance> shotCrossbow(Optional<ItemPredicate> p_299474_) {
-            return CriteriaTriggers.SHOT_CROSSBOW.createCriterion(new ShotCrossbowTrigger.TriggerInstance(Optional.empty(), p_299474_));
+        public static Criterion<ShotCrossbowTrigger.TriggerInstance> shotCrossbow(Optional<ItemPredicate> pItem) {
+            return CriteriaTriggers.SHOT_CROSSBOW.createCriterion(new ShotCrossbowTrigger.TriggerInstance(Optional.empty(), pItem));
         }
 
-        public static Criterion<ShotCrossbowTrigger.TriggerInstance> shotCrossbow(HolderGetter<Item> p_365112_, ItemLike p_65484_) {
+        public static Criterion<ShotCrossbowTrigger.TriggerInstance> shotCrossbow(HolderGetter<Item> pItemRegistry, ItemLike pItem) {
             return CriteriaTriggers.SHOT_CROSSBOW
                 .createCriterion(
                     new ShotCrossbowTrigger.TriggerInstance(
-                        Optional.empty(), Optional.of(ItemPredicate.Builder.item().of(p_365112_, p_65484_).build())
+                        Optional.empty(), Optional.of(ItemPredicate.Builder.item().of(pItemRegistry, pItem).build())
                     )
                 );
         }
 
-        public boolean matches(ItemStack p_65482_) {
-            return this.item.isEmpty() || this.item.get().test(p_65482_);
+        public boolean matches(ItemStack pItem) {
+            return this.item.isEmpty() || this.item.get().test(pItem);
         }
 
         @Override

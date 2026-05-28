@@ -24,7 +24,7 @@ public record EnchantmentLevelProvider(LevelBasedValue amount) implements Number
         return NumberProviders.ENCHANTMENT_LEVEL;
     }
 
-    public static EnchantmentLevelProvider forEnchantmentLevel(LevelBasedValue p_343548_) {
-        return new EnchantmentLevelProvider(p_343548_);
+    public static EnchantmentLevelProvider forEnchantmentLevel(LevelBasedValue pAmount) {
+        return new EnchantmentLevelProvider(pAmount);
     }
 }

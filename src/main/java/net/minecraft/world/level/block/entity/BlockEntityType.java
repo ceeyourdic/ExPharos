@@ -224,33 +224,33 @@ public class BlockEntityType<T extends BlockEntity> {
     private final Holder.Reference<BlockEntityType<?>> builtInRegistryHolder = BuiltInRegistries.BLOCK_ENTITY_TYPE.createIntrusiveHolder(this);
 
     @Nullable
-    public static ResourceLocation getKey(BlockEntityType<?> p_58955_) {
-        return BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(p_58955_);
+    public static ResourceLocation getKey(BlockEntityType<?> pBlockEntityType) {
+        return BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(pBlockEntityType);
     }
 
     private static <T extends BlockEntity> BlockEntityType<T> register(
-        String p_58957_, BlockEntityType.BlockEntitySupplier<? extends T> p_368550_, Block... p_369035_
+        String pName, BlockEntityType.BlockEntitySupplier<? extends T> pFactory, Block... pValidBlocks
     ) {
-        if (p_369035_.length == 0) {
-            LOGGER.warn("Block entity type {} requires at least one valid block to be defined!", p_58957_);
+        if (pValidBlocks.length == 0) {
+            LOGGER.warn("Block entity type {} requires at least one valid block to be defined!", pName);
         }
 
-        Util.fetchChoiceType(References.BLOCK_ENTITY, p_58957_);
-        return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, p_58957_, new BlockEntityType<>(p_368550_, Set.of(p_369035_)));
+        Util.fetchChoiceType(References.BLOCK_ENTITY, pName);
+        return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, pName, new BlockEntityType<>(pFactory, Set.of(pValidBlocks)));
     }
 
-    private BlockEntityType(BlockEntityType.BlockEntitySupplier<? extends T> p_155259_, Set<Block> p_155260_) {
-        this.factory = p_155259_;
-        this.validBlocks = p_155260_;
+    private BlockEntityType(BlockEntityType.BlockEntitySupplier<? extends T> pFactory, Set<Block> pValidBlocks) {
+        this.factory = pFactory;
+        this.validBlocks = pValidBlocks;
     }
 
     @Nullable
-    public T create(BlockPos p_155265_, BlockState p_155266_) {
-        return (T)this.factory.create(p_155265_, p_155266_);
+    public T create(BlockPos pPos, BlockState pState) {
+        return (T)this.factory.create(pPos, pState);
     }
 
-    public boolean isValid(BlockState p_155263_) {
-        return this.validBlocks.contains(p_155263_.getBlock());
+    public boolean isValid(BlockState pState) {
+        return this.validBlocks.contains(pState.getBlock());
     }
 
     @Deprecated
@@ -259,8 +259,8 @@ public class BlockEntityType<T extends BlockEntity> {
     }
 
     @Nullable
-    public T getBlockEntity(BlockGetter p_58950_, BlockPos p_58951_) {
-        BlockEntity blockentity = p_58950_.getBlockEntity(p_58951_);
+    public T getBlockEntity(BlockGetter pLevel, BlockPos pPos) {
+        BlockEntity blockentity = pLevel.getBlockEntity(pPos);
         return (T)(blockentity != null && blockentity.getType() == this ? blockentity : null);
     }
 
@@ -270,6 +270,6 @@ public class BlockEntityType<T extends BlockEntity> {
 
     @FunctionalInterface
     interface BlockEntitySupplier<T extends BlockEntity> {
-        T create(BlockPos p_155268_, BlockState p_155269_);
+        T create(BlockPos pPos, BlockState pState);
     }
 }

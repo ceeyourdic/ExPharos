@@ -12,8 +12,8 @@ public class ThreadSafeLegacyRandomSource implements BitRandomSource {
     private final AtomicLong seed = new AtomicLong();
     private final MarsagliaPolarGaussian gaussianSource = new MarsagliaPolarGaussian(this);
 
-    public ThreadSafeLegacyRandomSource(long p_224664_) {
-        this.setSeed(p_224664_);
+    public ThreadSafeLegacyRandomSource(long pSeed) {
+        this.setSeed(pSeed);
     }
 
     @Override

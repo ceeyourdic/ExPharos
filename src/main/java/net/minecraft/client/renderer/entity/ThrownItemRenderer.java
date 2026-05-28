@@ -18,11 +18,11 @@ public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityR
     private final float scale;
     private final boolean fullBright;
 
-    public ThrownItemRenderer(EntityRendererProvider.Context p_174416_, float p_174417_, boolean p_174418_) {
-        super(p_174416_);
-        this.itemModelResolver = p_174416_.getItemModelResolver();
-        this.scale = p_174417_;
-        this.fullBright = p_174418_;
+    public ThrownItemRenderer(EntityRendererProvider.Context pContext, float pScale, boolean pFullBright) {
+        super(pContext);
+        this.itemModelResolver = pContext.getItemModelResolver();
+        this.scale = pScale;
+        this.fullBright = pFullBright;
     }
 
     public ThrownItemRenderer(EntityRendererProvider.Context p_174414_) {
@@ -30,8 +30,8 @@ public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityR
     }
 
     @Override
-    protected int getBlockLightLevel(T p_116092_, BlockPos p_116093_) {
-        return this.fullBright ? 15 : super.getBlockLightLevel(p_116092_, p_116093_);
+    protected int getBlockLightLevel(T pEntity, BlockPos pPos) {
+        return this.fullBright ? 15 : super.getBlockLightLevel(pEntity, pPos);
     }
 
     public void render(ThrownItemRenderState p_362153_, PoseStack p_367133_, MultiBufferSource p_369201_, int p_366531_) {

@@ -22,47 +22,47 @@ public class BoatModel extends AbstractBoatModel {
     private static final String RIGHT = "right";
     private static final String LEFT = "left";
 
-    public BoatModel(ModelPart p_250599_) {
-        super(p_250599_);
+    public BoatModel(ModelPart pRoot) {
+        super(pRoot);
     }
 
-    private static void addCommonParts(PartDefinition p_360900_) {
+    private static void addCommonParts(PartDefinition pPartDefinition) {
         int i = 16;
         int j = 14;
         int k = 10;
-        p_360900_.addOrReplaceChild(
+        pPartDefinition.addOrReplaceChild(
             "bottom",
             CubeListBuilder.create().texOffs(0, 0).addBox(-14.0F, -9.0F, -3.0F, 28.0F, 16.0F, 3.0F),
             PartPose.offsetAndRotation(0.0F, 3.0F, 1.0F, (float) (Math.PI / 2), 0.0F, 0.0F)
         );
-        p_360900_.addOrReplaceChild(
+        pPartDefinition.addOrReplaceChild(
             "back",
             CubeListBuilder.create().texOffs(0, 19).addBox(-13.0F, -7.0F, -1.0F, 18.0F, 6.0F, 2.0F),
             PartPose.offsetAndRotation(-15.0F, 4.0F, 4.0F, 0.0F, (float) (Math.PI * 3.0 / 2.0), 0.0F)
         );
-        p_360900_.addOrReplaceChild(
+        pPartDefinition.addOrReplaceChild(
             "front",
             CubeListBuilder.create().texOffs(0, 27).addBox(-8.0F, -7.0F, -1.0F, 16.0F, 6.0F, 2.0F),
             PartPose.offsetAndRotation(15.0F, 4.0F, 0.0F, 0.0F, (float) (Math.PI / 2), 0.0F)
         );
-        p_360900_.addOrReplaceChild(
+        pPartDefinition.addOrReplaceChild(
             "right",
             CubeListBuilder.create().texOffs(0, 35).addBox(-14.0F, -7.0F, -1.0F, 28.0F, 6.0F, 2.0F),
             PartPose.offsetAndRotation(0.0F, 4.0F, -9.0F, 0.0F, (float) Math.PI, 0.0F)
         );
-        p_360900_.addOrReplaceChild(
+        pPartDefinition.addOrReplaceChild(
             "left", CubeListBuilder.create().texOffs(0, 43).addBox(-14.0F, -7.0F, -1.0F, 28.0F, 6.0F, 2.0F), PartPose.offset(0.0F, 4.0F, 9.0F)
         );
         int l = 20;
         int i1 = 7;
         int j1 = 6;
         float f = -5.0F;
-        p_360900_.addOrReplaceChild(
+        pPartDefinition.addOrReplaceChild(
             "left_paddle",
             CubeListBuilder.create().texOffs(62, 0).addBox(-1.0F, 0.0F, -5.0F, 2.0F, 2.0F, 18.0F).addBox(-1.001F, -3.0F, 8.0F, 1.0F, 6.0F, 7.0F),
             PartPose.offsetAndRotation(3.0F, -5.0F, 9.0F, 0.0F, 0.0F, (float) (Math.PI / 16))
         );
-        p_360900_.addOrReplaceChild(
+        pPartDefinition.addOrReplaceChild(
             "right_paddle",
             CubeListBuilder.create().texOffs(62, 20).addBox(-1.0F, 0.0F, -5.0F, 2.0F, 2.0F, 18.0F).addBox(0.001F, -3.0F, 8.0F, 1.0F, 6.0F, 7.0F),
             PartPose.offsetAndRotation(3.0F, -5.0F, -9.0F, 0.0F, (float) Math.PI, (float) (Math.PI / 16))

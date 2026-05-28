@@ -16,14 +16,14 @@ public interface ChunkTrackingView {
         }
     };
 
-    static ChunkTrackingView of(ChunkPos p_299839_, int p_298969_) {
-        return new ChunkTrackingView.Positioned(p_299839_, p_298969_);
+    static ChunkTrackingView of(ChunkPos pCenter, int pViewDistance) {
+        return new ChunkTrackingView.Positioned(pCenter, pViewDistance);
     }
 
-    static void difference(ChunkTrackingView p_297320_, ChunkTrackingView p_298920_, Consumer<ChunkPos> p_300281_, Consumer<ChunkPos> p_298429_) {
-        if (!p_297320_.equals(p_298920_)) {
-            if (p_297320_ instanceof ChunkTrackingView.Positioned chunktrackingview$positioned
-                && p_298920_ instanceof ChunkTrackingView.Positioned chunktrackingview$positioned1
+    static void difference(ChunkTrackingView pOldChunkTrackingView, ChunkTrackingView pNewChunkTrackingView, Consumer<ChunkPos> pChunkMarker, Consumer<ChunkPos> pChunkDropper) {
+        if (!pOldChunkTrackingView.equals(pNewChunkTrackingView)) {
+            if (pOldChunkTrackingView instanceof ChunkTrackingView.Positioned chunktrackingview$positioned
+                && pNewChunkTrackingView instanceof ChunkTrackingView.Positioned chunktrackingview$positioned1
                 && chunktrackingview$positioned.squareIntersects(chunktrackingview$positioned1)) {
                 int i = Math.min(chunktrackingview$positioned.minX(), chunktrackingview$positioned1.minX());
                 int j = Math.min(chunktrackingview$positioned.minZ(), chunktrackingview$positioned1.minZ());
@@ -36,9 +36,9 @@ public interface ChunkTrackingView {
                         boolean flag1 = chunktrackingview$positioned1.contains(i1, j1);
                         if (flag != flag1) {
                             if (flag1) {
-                                p_300281_.accept(new ChunkPos(i1, j1));
+                                pChunkMarker.accept(new ChunkPos(i1, j1));
                             } else {
-                                p_298429_.accept(new ChunkPos(i1, j1));
+                                pChunkDropper.accept(new ChunkPos(i1, j1));
                             }
                         }
                     }
@@ -47,37 +47,37 @@ public interface ChunkTrackingView {
                 return;
             }
 
-            p_297320_.forEach(p_298429_);
-            p_298920_.forEach(p_300281_);
+            pOldChunkTrackingView.forEach(pChunkDropper);
+            pNewChunkTrackingView.forEach(pChunkMarker);
         }
     }
 
-    default boolean contains(ChunkPos p_298506_) {
-        return this.contains(p_298506_.x, p_298506_.z);
+    default boolean contains(ChunkPos pChunkPos) {
+        return this.contains(pChunkPos.x, pChunkPos.z);
     }
 
-    default boolean contains(int p_298205_, int p_299033_) {
-        return this.contains(p_298205_, p_299033_, true);
+    default boolean contains(int pX, int pZ) {
+        return this.contains(pX, pZ, true);
     }
 
-    boolean contains(int p_297637_, int p_299915_, boolean p_300628_);
+    boolean contains(int pX, int pZ, boolean pIncludeOuterChunksAdjacentToViewBorder);
 
-    void forEach(Consumer<ChunkPos> p_301208_);
+    void forEach(Consumer<ChunkPos> pAction);
 
-    default boolean isInViewDistance(int p_299368_, int p_297466_) {
-        return this.contains(p_299368_, p_297466_, false);
+    default boolean isInViewDistance(int pX, int pZ) {
+        return this.contains(pX, pZ, false);
     }
 
-    static boolean isInViewDistance(int p_300363_, int p_300565_, int p_297699_, int p_299801_, int p_300142_) {
-        return isWithinDistance(p_300363_, p_300565_, p_297699_, p_299801_, p_300142_, false);
+    static boolean isInViewDistance(int pCenterX, int pCenterZ, int pViewDistance, int pX, int pZ) {
+        return isWithinDistance(pCenterX, pCenterZ, pViewDistance, pX, pZ, false);
     }
 
-    static boolean isWithinDistance(int p_299483_, int p_297415_, int p_300799_, int p_299157_, int p_301327_, boolean p_301271_) {
-        int i = p_301271_ ? 2 : 1;
-        long j = (long)Math.max(0, Math.abs(p_299157_ - p_299483_) - i);
-        long k = (long)Math.max(0, Math.abs(p_301327_ - p_297415_) - i);
+    static boolean isWithinDistance(int pCenterX, int pCenterZ, int pViewDistance, int pX, int pZ, boolean pIncludeOuterChunksAdjacentToViewBorder) {
+        int i = pIncludeOuterChunksAdjacentToViewBorder ? 2 : 1;
+        long j = (long)Math.max(0, Math.abs(pX - pCenterX) - i);
+        long k = (long)Math.max(0, Math.abs(pZ - pCenterZ) - i);
         long l = j * j + k * k;
-        int i1 = p_300799_ * p_300799_;
+        int i1 = pViewDistance * pViewDistance;
         return l < (long)i1;
     }
 
@@ -99,11 +99,11 @@ public interface ChunkTrackingView {
         }
 
         @VisibleForTesting
-        protected boolean squareIntersects(ChunkTrackingView.Positioned p_300776_) {
-            return this.minX() <= p_300776_.maxX()
-                && this.maxX() >= p_300776_.minX()
-                && this.minZ() <= p_300776_.maxZ()
-                && this.maxZ() >= p_300776_.minZ();
+        protected boolean squareIntersects(ChunkTrackingView.Positioned pOther) {
+            return this.minX() <= pOther.maxX()
+                && this.maxX() >= pOther.minX()
+                && this.minZ() <= pOther.maxZ()
+                && this.maxZ() >= pOther.minZ();
         }
 
         @Override

@@ -14,28 +14,28 @@ public record ServerboundCustomQueryAnswerPacket(int transactionId, @Nullable Cu
     );
     private static final int MAX_PAYLOAD_SIZE = 1048576;
 
-    private static ServerboundCustomQueryAnswerPacket read(FriendlyByteBuf p_300962_) {
-        int i = p_300962_.readVarInt();
-        return new ServerboundCustomQueryAnswerPacket(i, readPayload(i, p_300962_));
+    private static ServerboundCustomQueryAnswerPacket read(FriendlyByteBuf pBuffer) {
+        int i = pBuffer.readVarInt();
+        return new ServerboundCustomQueryAnswerPacket(i, readPayload(i, pBuffer));
     }
 
-    private static CustomQueryAnswerPayload readPayload(int p_298211_, FriendlyByteBuf p_300600_) {
-        return readUnknownPayload(p_300600_);
+    private static CustomQueryAnswerPayload readPayload(int pTransactionId, FriendlyByteBuf pBuffer) {
+        return readUnknownPayload(pBuffer);
     }
 
-    private static CustomQueryAnswerPayload readUnknownPayload(FriendlyByteBuf p_299934_) {
-        int i = p_299934_.readableBytes();
+    private static CustomQueryAnswerPayload readUnknownPayload(FriendlyByteBuf pBuffer) {
+        int i = pBuffer.readableBytes();
         if (i >= 0 && i <= 1048576) {
-            p_299934_.skipBytes(i);
+            pBuffer.skipBytes(i);
             return DiscardedQueryAnswerPayload.INSTANCE;
         } else {
             throw new IllegalArgumentException("Payload may not be larger than 1048576 bytes");
         }
     }
 
-    private void write(FriendlyByteBuf p_299339_) {
-        p_299339_.writeVarInt(this.transactionId);
-        p_299339_.writeNullable(this.payload, (p_300758_, p_298999_) -> p_298999_.write(p_300758_));
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.transactionId);
+        pBuffer.writeNullable(this.payload, (p_300758_, p_298999_) -> p_298999_.write(p_300758_));
     }
 
     @Override

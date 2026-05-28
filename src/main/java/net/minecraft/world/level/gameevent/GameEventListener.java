@@ -9,7 +9,7 @@ public interface GameEventListener {
 
     int getListenerRadius();
 
-    boolean handleGameEvent(ServerLevel p_223757_, Holder<GameEvent> p_332132_, GameEvent.Context p_249681_, Vec3 p_251048_);
+    boolean handleGameEvent(ServerLevel pLevel, Holder<GameEvent> pGameEvent, GameEvent.Context pContext, Vec3 pPos);
 
     default GameEventListener.DeliveryMode getDeliveryMode() {
         return GameEventListener.DeliveryMode.UNSPECIFIED;

@@ -37,7 +37,7 @@ public class Mule extends AbstractChestedHorse {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_30886_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.MULE_HURT;
     }
 

@@ -60,12 +60,12 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
     private boolean checked;
     private final BooleanConsumer callback;
 
-    public RealmsDownloadLatestWorldScreen(Screen p_88625_, WorldDownload p_88626_, String p_88627_, BooleanConsumer p_88628_) {
+    public RealmsDownloadLatestWorldScreen(Screen pLastScreen, WorldDownload pWorldDownload, String pWorldName, BooleanConsumer pCallback) {
         super(GameNarrator.NO_TITLE);
-        this.callback = p_88628_;
-        this.lastScreen = p_88625_;
-        this.worldName = p_88627_;
-        this.worldDownload = p_88626_;
+        this.callback = pCallback;
+        this.lastScreen = pLastScreen;
+        this.worldName = pWorldName;
+        this.worldDownload = pWorldDownload;
         this.downloadStatus = new RealmsDownloadLatestWorldScreen.DownloadStatus();
         this.downloadTitle = Component.translatable("mco.download.title");
         this.narrationRateLimiter = RateLimiter.create(0.1F);
@@ -96,9 +96,9 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
         }
     }
 
-    private long getContentLength(String p_88647_) {
+    private long getContentLength(String pUri) {
         FileDownload filedownload = new FileDownload();
-        return filedownload.contentLength(p_88647_);
+        return filedownload.contentLength(pUri);
     }
 
     @Override
@@ -156,26 +156,26 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
         }
     }
 
-    private void drawDots(GuiGraphics p_281948_) {
+    private void drawDots(GuiGraphics pGuiGraphics) {
         int i = this.font.width(this.status);
         if (this.animTick != 0 && this.animTick % 10 == 0) {
             this.dotIndex++;
         }
 
-        p_281948_.drawString(this.font, DOTS[this.dotIndex % DOTS.length], this.width / 2 + i / 2 + 5, 50, -1);
+        pGuiGraphics.drawString(this.font, DOTS[this.dotIndex % DOTS.length], this.width / 2 + i / 2 + 5, 50, -1);
     }
 
-    private void drawProgressBar(GuiGraphics p_281556_) {
+    private void drawProgressBar(GuiGraphics pGuiGraphics) {
         double d0 = Math.min((double)this.downloadStatus.bytesWritten / (double)this.downloadStatus.totalBytes, 1.0);
         this.progress = String.format(Locale.ROOT, "%.1f", d0 * 100.0);
         int i = (this.width - 200) / 2;
         int j = i + (int)Math.round(200.0 * d0);
-        p_281556_.fill(i - 1, 79, j + 1, 96, -1);
-        p_281556_.fill(i, 80, j, 95, -8355712);
-        p_281556_.drawCenteredString(this.font, Component.translatable("mco.download.percent", this.progress), this.width / 2, 84, -1);
+        pGuiGraphics.fill(i - 1, 79, j + 1, 96, -1);
+        pGuiGraphics.fill(i, 80, j, 95, -8355712);
+        pGuiGraphics.drawCenteredString(this.font, Component.translatable("mco.download.percent", this.progress), this.width / 2, 84, -1);
     }
 
-    private void drawDownloadSpeed(GuiGraphics p_282236_) {
+    private void drawDownloadSpeed(GuiGraphics pGuiGraphics) {
         if (this.animTick % 20 == 0) {
             if (this.previousWrittenBytes != null) {
                 long i = Util.getMillis() - this.previousTimeSnapshot;
@@ -184,20 +184,20 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
                 }
 
                 this.bytesPersSecond = 1000L * (this.downloadStatus.bytesWritten - this.previousWrittenBytes) / i;
-                this.drawDownloadSpeed0(p_282236_, this.bytesPersSecond);
+                this.drawDownloadSpeed0(pGuiGraphics, this.bytesPersSecond);
             }
 
             this.previousWrittenBytes = this.downloadStatus.bytesWritten;
             this.previousTimeSnapshot = Util.getMillis();
         } else {
-            this.drawDownloadSpeed0(p_282236_, this.bytesPersSecond);
+            this.drawDownloadSpeed0(pGuiGraphics, this.bytesPersSecond);
         }
     }
 
-    private void drawDownloadSpeed0(GuiGraphics p_283338_, long p_281931_) {
-        if (p_281931_ > 0L) {
+    private void drawDownloadSpeed0(GuiGraphics pGuiGraphics, long pBytesPerSecond) {
+        if (pBytesPerSecond > 0L) {
             int i = this.font.width(this.progress);
-            p_283338_.drawString(this.font, Component.translatable("mco.download.speed", Unit.humanReadable(p_281931_)), this.width / 2 + i / 2 + 15, 84, -1);
+            pGuiGraphics.drawString(this.font, Component.translatable("mco.download.speed", Unit.humanReadable(pBytesPerSecond)), this.width / 2 + i / 2 + 15, 84, -1);
         }
     }
 

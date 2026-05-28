@@ -12,8 +12,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class MinecartModel extends EntityModel<MinecartRenderState> {
-    public MinecartModel(ModelPart p_170737_) {
-        super(p_170737_);
+    public MinecartModel(ModelPart pRoot) {
+        super(pRoot);
     }
 
     public static LayerDefinition createBodyLayer() {

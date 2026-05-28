@@ -45,7 +45,7 @@ public class SpyglassItem extends Item {
         return true;
     }
 
-    private void stopUsing(LivingEntity p_151207_) {
-        p_151207_.playSound(SoundEvents.SPYGLASS_STOP_USING, 1.0F, 1.0F);
+    private void stopUsing(LivingEntity pUser) {
+        pUser.playSound(SoundEvents.SPYGLASS_STOP_USING, 1.0F, 1.0F);
     }
 }

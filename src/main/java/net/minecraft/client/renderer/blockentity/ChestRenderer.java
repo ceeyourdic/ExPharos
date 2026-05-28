@@ -31,10 +31,10 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> implements Bl
     private final ChestModel doubleRightModel;
     private final boolean xmasTextures = xmasTextures();
 
-    public ChestRenderer(BlockEntityRendererProvider.Context p_173607_) {
-        this.singleModel = new ChestModel(p_173607_.bakeLayer(ModelLayers.CHEST));
-        this.doubleLeftModel = new ChestModel(p_173607_.bakeLayer(ModelLayers.DOUBLE_CHEST_LEFT));
-        this.doubleRightModel = new ChestModel(p_173607_.bakeLayer(ModelLayers.DOUBLE_CHEST_RIGHT));
+    public ChestRenderer(BlockEntityRendererProvider.Context pContext) {
+        this.singleModel = new ChestModel(pContext.bakeLayer(ModelLayers.CHEST));
+        this.doubleLeftModel = new ChestModel(pContext.bakeLayer(ModelLayers.DOUBLE_CHEST_LEFT));
+        this.doubleRightModel = new ChestModel(pContext.bakeLayer(ModelLayers.DOUBLE_CHEST_RIGHT));
     }
 
     public static boolean xmasTextures() {
@@ -82,8 +82,8 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> implements Bl
         }
     }
 
-    private void render(PoseStack p_112370_, VertexConsumer p_112371_, ChestModel p_363333_, float p_112375_, int p_112376_, int p_112377_) {
-        p_363333_.setupAnim(p_112375_);
-        p_363333_.renderToBuffer(p_112370_, p_112371_, p_112376_, p_112377_);
+    private void render(PoseStack pPoseStack, VertexConsumer pBuffer, ChestModel pModel, float pOpenness, int pPackedLight, int pPackedOverlay) {
+        pModel.setupAnim(pOpenness);
+        pModel.renderToBuffer(pPoseStack, pBuffer, pPackedLight, pPackedOverlay);
     }
 }

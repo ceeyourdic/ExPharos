@@ -16,12 +16,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.render.RenderUtils;
+import net.optifine.shaders.Shaders;
+import net.optifine.shaders.ShadersTex;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.joml.Matrix4f;
 
-@OnlyIn(Dist.CLIENT)
 public class CompiledShaderProgram implements AutoCloseable {
     private static final AbstractUniform DUMMY_UNIFORM = new AbstractUniform();
     private static final int NO_SAMPLER_TEXTURE = -1;
@@ -62,26 +63,27 @@ public class CompiledShaderProgram implements AutoCloseable {
     public Uniform GAME_TIME;
     @Nullable
     public Uniform MODEL_OFFSET;
+    private static int lastProgramId = -1;
 
-    private CompiledShaderProgram(int p_364313_) {
-        this.programId = p_364313_;
+    private CompiledShaderProgram(int pProgramId) {
+        this.programId = pProgramId;
         this.samplerTextures.defaultReturnValue(-1);
     }
 
-    public static CompiledShaderProgram link(CompiledShader p_365694_, CompiledShader p_364868_, VertexFormat p_368531_) throws ShaderManager.CompilationException {
+    public static CompiledShaderProgram link(CompiledShader pVertexShader, CompiledShader pFragmentShader, VertexFormat pVertexFormat) throws ShaderManager.CompilationException {
         int i = GlStateManager.glCreateProgram();
         if (i <= 0) {
             throw new ShaderManager.CompilationException("Could not create shader program (returned program ID " + i + ")");
         } else {
-            p_368531_.bindAttributes(i);
-            GlStateManager.glAttachShader(i, p_365694_.getShaderId());
-            GlStateManager.glAttachShader(i, p_364868_.getShaderId());
+            pVertexFormat.bindAttributes(i);
+            GlStateManager.glAttachShader(i, pVertexShader.getShaderId());
+            GlStateManager.glAttachShader(i, pFragmentShader.getShaderId());
             GlStateManager.glLinkProgram(i);
             int j = GlStateManager.glGetProgrami(i, 35714);
             if (j == 0) {
                 String s = GlStateManager.glGetProgramInfoLog(i, 32768);
                 throw new ShaderManager.CompilationException(
-                    "Error encountered when linking program containing VS " + p_365694_.getId() + " and FS " + p_364868_.getId() + ". Log output: " + s
+                    "Error encountered when linking program containing VS " + pVertexShader.getId() + " and FS " + pFragmentShader.getId() + ". Log output: " + s
                 );
             } else {
                 return new CompiledShaderProgram(i);
@@ -89,10 +91,10 @@ public class CompiledShaderProgram implements AutoCloseable {
         }
     }
 
-    public void setupUniforms(List<ShaderProgramConfig.Uniform> p_364222_, List<ShaderProgramConfig.Sampler> p_363420_) {
+    public void setupUniforms(List<ShaderProgramConfig.Uniform> pUniforms, List<ShaderProgramConfig.Sampler> pSamplers) {
         RenderSystem.assertOnRenderThread();
 
-        for (ShaderProgramConfig.Uniform shaderprogramconfig$uniform : p_364222_) {
+        for (ShaderProgramConfig.Uniform shaderprogramconfig$uniform : pUniforms) {
             String s = shaderprogramconfig$uniform.name();
             int i = Uniform.glGetUniformLocation(this.programId, s);
             if (i != -1) {
@@ -104,7 +106,7 @@ public class CompiledShaderProgram implements AutoCloseable {
             }
         }
 
-        for (ShaderProgramConfig.Sampler shaderprogramconfig$sampler : p_363420_) {
+        for (ShaderProgramConfig.Sampler shaderprogramconfig$sampler : pSamplers) {
             int j = Uniform.glGetUniformLocation(this.programId, shaderprogramconfig$sampler.name());
             if (j != -1) {
                 this.samplers.add(shaderprogramconfig$sampler);
@@ -137,14 +139,16 @@ public class CompiledShaderProgram implements AutoCloseable {
 
     public void clear() {
         RenderSystem.assertOnRenderThread();
-        GlStateManager._glUseProgram(0);
+        lastProgramId = -1;
         int i = GlStateManager._getActiveTexture();
-
-        for (int j = 0; j < this.samplerLocations.size(); j++) {
-            ShaderProgramConfig.Sampler shaderprogramconfig$sampler = this.samplers.get(j);
-            if (!this.samplerTextures.containsKey(shaderprogramconfig$sampler.name())) {
-                GlStateManager._activeTexture(33984 + j);
-                GlStateManager._bindTexture(0);
+        if (Boolean.FALSE) {
+            for (int j = 0; j < this.samplerLocations.size(); j++) {
+                ShaderProgramConfig.Sampler shaderprogramconfig$sampler = this.samplers.get(j);
+                if (!this.samplerTextures.containsKey(shaderprogramconfig$sampler.name())) {
+                    int k = this.getTextureUnit(shaderprogramconfig$sampler.name(), j);
+                    GlStateManager._activeTexture(33984 + k);
+                    GlStateManager._bindTexture(0);
+                }
             }
         }
 
@@ -153,7 +157,12 @@ public class CompiledShaderProgram implements AutoCloseable {
 
     public void apply() {
         RenderSystem.assertOnRenderThread();
+        if (Config.getMinecraft().getOverlay() != null) {
+            GlStateManager._glUseProgram(0);
+        }
+
         GlStateManager._glUseProgram(this.programId);
+        lastProgramId = this.programId;
         int i = GlStateManager._getActiveTexture();
 
         for (int j = 0; j < this.samplerLocations.size(); j++) {
@@ -161,9 +170,16 @@ public class CompiledShaderProgram implements AutoCloseable {
             int k = this.samplerTextures.getInt(s);
             if (k != -1) {
                 int l = this.samplerLocations.getInt(j);
-                Uniform.uploadInteger(l, j);
-                RenderSystem.activeTexture(33984 + j);
-                RenderSystem.bindTexture(k);
+                int i1 = this.getTextureUnit(s, j);
+                Uniform.uploadInteger(l, i1);
+                RenderSystem.activeTexture(33984 + i1);
+                if (i1 != 1 || Shaders.activeProgramID <= 0 || !Shaders.isOverlayDisabled()) {
+                    if (Config.isShaders()) {
+                        ShadersTex.bindTexture(k);
+                    } else {
+                        RenderSystem.bindTexture(k);
+                    }
+                }
             }
         }
 
@@ -172,49 +188,56 @@ public class CompiledShaderProgram implements AutoCloseable {
         for (Uniform uniform : this.uniforms) {
             uniform.upload();
         }
+
+        if (Config.isShaders() && Shaders.activeProgramID > 0) {
+            GlStateManager._glUseProgram(Shaders.activeProgramID);
+            boolean flag = RenderUtils.setFlushRenderBuffers(false);
+            Shaders.uniform_atlasSize.setValue(Shaders.atlasSizeX, Shaders.atlasSizeY);
+            RenderUtils.setFlushRenderBuffers(flag);
+        }
     }
 
     @Nullable
-    public Uniform getUniform(String p_365840_) {
+    public Uniform getUniform(String pName) {
         RenderSystem.assertOnRenderThread();
-        return this.uniformsByName.get(p_365840_);
+        return this.uniformsByName.get(pName);
     }
 
     @Nullable
-    public ShaderProgramConfig.Uniform getUniformConfig(String p_368330_) {
-        return this.uniformConfigs.get(p_368330_);
+    public ShaderProgramConfig.Uniform getUniformConfig(String pName) {
+        return this.uniformConfigs.get(pName);
     }
 
-    public AbstractUniform safeGetUniform(String p_369250_) {
-        Uniform uniform = this.getUniform(p_369250_);
+    public AbstractUniform safeGetUniform(String pName) {
+        Uniform uniform = this.getUniform(pName);
         return (AbstractUniform)(uniform == null ? DUMMY_UNIFORM : uniform);
     }
 
-    public void bindSampler(String p_368222_, int p_368552_) {
-        this.samplerTextures.put(p_368222_, p_368552_);
+    public void bindSampler(String pSamplerName, int pTextureId) {
+        this.samplerTextures.put(pSamplerName, pTextureId);
     }
 
-    private Uniform parseUniformNode(ShaderProgramConfig.Uniform p_369359_) {
-        int i = Uniform.getTypeFromString(p_369359_.type());
-        int j = p_369359_.count();
+    private Uniform parseUniformNode(ShaderProgramConfig.Uniform pUniform) {
+        int i = Uniform.getTypeFromString(pUniform.type());
+        int j = pUniform.count();
         int k = j > 1 && j <= 4 && i < 8 ? j - 1 : 0;
-        Uniform uniform = new Uniform(p_369359_.name(), i + k, j);
-        uniform.setFromConfig(p_369359_);
+        Uniform uniform = new Uniform(pUniform.name(), i + k, j);
+        uniform.setFromConfig(pUniform);
         return uniform;
     }
 
-    public void setDefaultUniforms(VertexFormat.Mode p_368046_, Matrix4f p_363712_, Matrix4f p_367865_, Window p_366180_) {
+    public void setDefaultUniforms(VertexFormat.Mode pMode, Matrix4f pFrustumMatrix, Matrix4f pProjectionMatrix, Window pWindow) {
         for (int i = 0; i < 12; i++) {
             int j = RenderSystem.getShaderTexture(i);
-            this.bindSampler("Sampler" + i, j);
+            this.bindSampler(getSamplerName(i), j);
         }
 
         if (this.MODEL_VIEW_MATRIX != null) {
-            this.MODEL_VIEW_MATRIX.set(p_363712_);
+            this.MODEL_VIEW_MATRIX.set(pFrustumMatrix);
         }
 
         if (this.PROJECTION_MATRIX != null) {
-            this.PROJECTION_MATRIX.set(p_367865_);
+            this.PROJECTION_MATRIX.set(pProjectionMatrix);
         }
 
         if (this.COLOR_MODULATOR != null) {
@@ -251,10 +274,10 @@ public class CompiledShaderProgram implements AutoCloseable {
         }
 
         if (this.SCREEN_SIZE != null) {
-            this.SCREEN_SIZE.set((float)p_366180_.getWidth(), (float)p_366180_.getHeight());
+            this.SCREEN_SIZE.set((float)pWindow.getWidth(), (float)pWindow.getHeight());
         }
 
-        if (this.LINE_WIDTH != null && (p_368046_ == VertexFormat.Mode.LINES || p_368046_ == VertexFormat.Mode.LINE_STRIP)) {
+        if (this.LINE_WIDTH != null && (pMode == VertexFormat.Mode.LINES || pMode == VertexFormat.Mode.LINE_STRIP)) {
             this.LINE_WIDTH.set(RenderSystem.getShaderLineWidth());
         }
 
@@ -262,13 +285,60 @@ public class CompiledShaderProgram implements AutoCloseable {
     }
 
     @VisibleForTesting
-    public void registerUniform(Uniform p_365922_) {
-        this.uniforms.add(p_365922_);
-        this.uniformsByName.put(p_365922_.getName(), p_365922_);
+    public void registerUniform(Uniform pUniform) {
+        this.uniforms.add(pUniform);
+        this.uniformsByName.put(pUniform.getName(), pUniform);
     }
 
     @VisibleForTesting
     public int getProgramId() {
         return this.programId;
+    }
+
+    public static void useVanillaProgram() {
+        if (lastProgramId > 0) {
+            GlStateManager._glUseProgram(lastProgramId);
+        }
+    }
+
+    private int getTextureUnit(String sampler, int index) {
+        if (sampler.equals("Sampler0")) {
+            return 0;
+        } else if (sampler.equals("Sampler1")) {
+            return 1;
+        } else {
+            return sampler.equals("Sampler2") ? 2 : index;
+        }
+    }
+
+    public static String getSamplerName(int indexIn) {
+        switch (indexIn) {
+            case 0:
+                return "Sampler0";
+            case 1:
+                return "Sampler1";
+            case 2:
+                return "Sampler2";
+            case 3:
+                return "Sampler3";
+            case 4:
+                return "Sampler4";
+            case 5:
+                return "Sampler5";
+            case 6:
+                return "Sampler6";
+            case 7:
+                return "Sampler7";
+            case 8:
+                return "Sampler8";
+            case 9:
+                return "Sampler9";
+            case 10:
+                return "Sampler10";
+            case 11:
+                return "Sampler11";
+            default:
+                return "Sampler" + indexIn;
+        }
     }
 }

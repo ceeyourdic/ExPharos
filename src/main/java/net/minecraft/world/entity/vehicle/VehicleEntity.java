@@ -66,7 +66,7 @@ public abstract class VehicleEntity extends Entity {
         }
     }
 
-    boolean shouldSourceDestroy(DamageSource p_309621_) {
+    boolean shouldSourceDestroy(DamageSource pSource) {
         return false;
     }
 
@@ -75,12 +75,12 @@ public abstract class VehicleEntity extends Entity {
         return p_366232_.getIndirectSourceEntity() instanceof Mob && !p_366232_.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
     }
 
-    public void destroy(ServerLevel p_367176_, Item p_313028_) {
-        this.kill(p_367176_);
-        if (p_367176_.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-            ItemStack itemstack = new ItemStack(p_313028_);
+    public void destroy(ServerLevel pLevel, Item pDropItem) {
+        this.kill(pLevel);
+        if (pLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+            ItemStack itemstack = new ItemStack(pDropItem);
             itemstack.set(DataComponents.CUSTOM_NAME, this.getCustomName());
-            this.spawnAtLocation(p_367176_, itemstack);
+            this.spawnAtLocation(pLevel, itemstack);
         }
     }
 
@@ -91,16 +91,16 @@ public abstract class VehicleEntity extends Entity {
         p_332479_.define(DATA_ID_DAMAGE, 0.0F);
     }
 
-    public void setHurtTime(int p_312621_) {
-        this.entityData.set(DATA_ID_HURT, p_312621_);
+    public void setHurtTime(int pHurtTime) {
+        this.entityData.set(DATA_ID_HURT, pHurtTime);
     }
 
-    public void setHurtDir(int p_312074_) {
-        this.entityData.set(DATA_ID_HURTDIR, p_312074_);
+    public void setHurtDir(int pHurtDir) {
+        this.entityData.set(DATA_ID_HURTDIR, pHurtDir);
     }
 
-    public void setDamage(float p_313007_) {
-        this.entityData.set(DATA_ID_DAMAGE, p_313007_);
+    public void setDamage(float pDamage) {
+        this.entityData.set(DATA_ID_DAMAGE, pDamage);
     }
 
     public float getDamage() {
@@ -115,8 +115,8 @@ public abstract class VehicleEntity extends Entity {
         return this.entityData.get(DATA_ID_HURTDIR);
     }
 
-    protected void destroy(ServerLevel p_365692_, DamageSource p_312900_) {
-        this.destroy(p_365692_, this.getDropItem());
+    protected void destroy(ServerLevel pLevel, DamageSource pDamageSource) {
+        this.destroy(pLevel, this.getDropItem());
     }
 
     @Override

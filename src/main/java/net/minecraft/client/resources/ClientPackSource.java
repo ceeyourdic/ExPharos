@@ -46,19 +46,19 @@ public class ClientPackSource extends BuiltInPackSource {
     @Nullable
     private final Path externalAssetDir;
 
-    public ClientPackSource(Path p_249324_, DirectoryValidator p_299963_) {
-        super(PackType.CLIENT_RESOURCES, createVanillaPackSource(p_249324_), PACKS_DIR, p_299963_);
-        this.externalAssetDir = this.findExplodedAssetPacks(p_249324_);
+    public ClientPackSource(Path pAssetIndex, DirectoryValidator pValidator) {
+        super(PackType.CLIENT_RESOURCES, createVanillaPackSource(pAssetIndex), PACKS_DIR, pValidator);
+        this.externalAssetDir = this.findExplodedAssetPacks(pAssetIndex);
     }
 
-    private static PackLocationInfo createBuiltInPackLocation(String p_331520_, Component p_335955_) {
-        return new PackLocationInfo(p_331520_, p_335955_, PackSource.BUILT_IN, Optional.of(KnownPack.vanilla(p_331520_)));
+    private static PackLocationInfo createBuiltInPackLocation(String pId, Component pTitle) {
+        return new PackLocationInfo(pId, pTitle, PackSource.BUILT_IN, Optional.of(KnownPack.vanilla(pId)));
     }
 
     @Nullable
-    private Path findExplodedAssetPacks(Path p_251339_) {
-        if (SharedConstants.IS_RUNNING_IN_IDE && p_251339_.getFileSystem() == FileSystems.getDefault()) {
-            Path path = p_251339_.getParent().resolve("resourcepacks");
+    private Path findExplodedAssetPacks(Path pAssetIndex) {
+        if (SharedConstants.IS_RUNNING_IN_IDE && pAssetIndex.getFileSystem() == FileSystems.getDefault()) {
+            Path path = pAssetIndex.getParent().resolve("resourcepacks");
             if (Files.isDirectory(path)) {
                 return path;
             }
@@ -67,9 +67,9 @@ public class ClientPackSource extends BuiltInPackSource {
         return null;
     }
 
-    private static VanillaPackResources createVanillaPackSource(Path p_250749_) {
+    private static VanillaPackResources createVanillaPackSource(Path pAssetIndex) {
         VanillaPackResourcesBuilder vanillapackresourcesbuilder = new VanillaPackResourcesBuilder().setMetadata(BUILT_IN_METADATA).exposeNamespace("minecraft", "realms");
-        return vanillapackresourcesbuilder.applyDevelopmentConfig().pushJarResources().pushAssetPath(PackType.CLIENT_RESOURCES, p_250749_).build(VANILLA_PACK_INFO);
+        return vanillapackresourcesbuilder.applyDevelopmentConfig().pushJarResources().pushAssetPath(PackType.CLIENT_RESOURCES, pAssetIndex).build(VANILLA_PACK_INFO);
     }
 
     @Override

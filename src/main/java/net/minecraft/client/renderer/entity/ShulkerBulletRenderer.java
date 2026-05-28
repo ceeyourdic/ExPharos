@@ -27,7 +27,7 @@ public class ShulkerBulletRenderer extends EntityRenderer<ShulkerBullet, Shulker
         this.model = new ShulkerBulletModel(p_174368_.bakeLayer(ModelLayers.SHULKER_BULLET));
     }
 
-    protected int getBlockLightLevel(ShulkerBullet p_115869_, BlockPos p_115870_) {
+    protected int getBlockLightLevel(ShulkerBullet pEntity, BlockPos pPos) {
         return 15;
     }
 

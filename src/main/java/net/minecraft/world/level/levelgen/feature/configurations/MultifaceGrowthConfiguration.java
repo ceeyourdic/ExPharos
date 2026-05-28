@@ -44,47 +44,47 @@ public class MultifaceGrowthConfiguration implements FeatureConfiguration {
     public final HolderSet<Block> canBePlacedOn;
     private final ObjectArrayList<Direction> validDirections;
 
-    private static DataResult<MultifaceSpreadeableBlock> apply(Block p_225405_) {
-        return p_225405_ instanceof MultifaceSpreadeableBlock multifacespreadeableblock
+    private static DataResult<MultifaceSpreadeableBlock> apply(Block pBlock) {
+        return pBlock instanceof MultifaceSpreadeableBlock multifacespreadeableblock
             ? DataResult.success(multifacespreadeableblock)
             : DataResult.error(() -> "Growth block should be a multiface spreadeable block");
     }
 
     public MultifaceGrowthConfiguration(
-        MultifaceSpreadeableBlock p_376525_,
-        int p_225393_,
-        boolean p_225394_,
-        boolean p_225395_,
-        boolean p_225396_,
-        float p_225397_,
-        HolderSet<Block> p_225398_
+        MultifaceSpreadeableBlock pPlaceBlock,
+        int pSearchRange,
+        boolean pCanPlaceOnFloor,
+        boolean pCanPlaceOnCeiling,
+        boolean pCanPlaceOnWall,
+        float pChanceOfSpreading,
+        HolderSet<Block> pCanBePlacedOn
     ) {
-        this.placeBlock = p_376525_;
-        this.searchRange = p_225393_;
-        this.canPlaceOnFloor = p_225394_;
-        this.canPlaceOnCeiling = p_225395_;
-        this.canPlaceOnWall = p_225396_;
-        this.chanceOfSpreading = p_225397_;
-        this.canBePlacedOn = p_225398_;
+        this.placeBlock = pPlaceBlock;
+        this.searchRange = pSearchRange;
+        this.canPlaceOnFloor = pCanPlaceOnFloor;
+        this.canPlaceOnCeiling = pCanPlaceOnCeiling;
+        this.canPlaceOnWall = pCanPlaceOnWall;
+        this.chanceOfSpreading = pChanceOfSpreading;
+        this.canBePlacedOn = pCanBePlacedOn;
         this.validDirections = new ObjectArrayList<>(6);
-        if (p_225395_) {
+        if (pCanPlaceOnCeiling) {
             this.validDirections.add(Direction.UP);
         }
 
-        if (p_225394_) {
+        if (pCanPlaceOnFloor) {
             this.validDirections.add(Direction.DOWN);
         }
 
-        if (p_225396_) {
+        if (pCanPlaceOnWall) {
             Direction.Plane.HORIZONTAL.forEach(this.validDirections::add);
         }
     }
 
-    public List<Direction> getShuffledDirectionsExcept(RandomSource p_225402_, Direction p_225403_) {
-        return Util.toShuffledList(this.validDirections.stream().filter(p_225412_ -> p_225412_ != p_225403_), p_225402_);
+    public List<Direction> getShuffledDirectionsExcept(RandomSource pRandom, Direction pDirection) {
+        return Util.toShuffledList(this.validDirections.stream().filter(p_225412_ -> p_225412_ != pDirection), pRandom);
     }
 
-    public List<Direction> getShuffledDirections(RandomSource p_225400_) {
-        return Util.shuffledCopy(this.validDirections, p_225400_);
+    public List<Direction> getShuffledDirections(RandomSource pRandom) {
+        return Util.shuffledCopy(this.validDirections, pRandom);
     }
 }

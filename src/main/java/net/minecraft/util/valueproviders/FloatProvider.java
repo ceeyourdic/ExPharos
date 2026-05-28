@@ -14,14 +14,14 @@ public abstract class FloatProvider implements SampledFloat {
         p_146513_ -> p_146513_.getType() == FloatProviderType.CONSTANT ? Either.left(((ConstantFloat)p_146513_).getValue()) : Either.right(p_146513_)
     );
 
-    public static Codec<FloatProvider> codec(float p_146506_, float p_146507_) {
+    public static Codec<FloatProvider> codec(float pMinInclusive, float pMaxInclusive) {
         return CODEC.validate(
             p_274942_ -> {
-                if (p_274942_.getMinValue() < p_146506_) {
-                    return DataResult.error(() -> "Value provider too low: " + p_146506_ + " [" + p_274942_.getMinValue() + "-" + p_274942_.getMaxValue() + "]");
+                if (p_274942_.getMinValue() < pMinInclusive) {
+                    return DataResult.error(() -> "Value provider too low: " + pMinInclusive + " [" + p_274942_.getMinValue() + "-" + p_274942_.getMaxValue() + "]");
                 } else {
-                    return p_274942_.getMaxValue() > p_146507_
-                        ? DataResult.error(() -> "Value provider too high: " + p_146507_ + " [" + p_274942_.getMinValue() + "-" + p_274942_.getMaxValue() + "]")
+                    return p_274942_.getMaxValue() > pMaxInclusive
+                        ? DataResult.error(() -> "Value provider too high: " + pMaxInclusive + " [" + p_274942_.getMinValue() + "-" + p_274942_.getMaxValue() + "]")
                         : DataResult.success(p_274942_);
                 }
             }

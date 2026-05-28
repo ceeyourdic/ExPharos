@@ -28,27 +28,27 @@ public abstract class BaseFireBlock extends Block {
     protected static final float AABB_OFFSET = 1.0F;
     protected static final VoxelShape DOWN_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 1.0, 16.0);
 
-    public BaseFireBlock(BlockBehaviour.Properties p_49241_, float p_49242_) {
-        super(p_49241_);
-        this.fireDamage = p_49242_;
+    public BaseFireBlock(BlockBehaviour.Properties pProperties, float pFireDamage) {
+        super(pProperties);
+        this.fireDamage = pFireDamage;
     }
 
     @Override
     protected abstract MapCodec<? extends BaseFireBlock> codec();
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_49244_) {
-        return getState(p_49244_.getLevel(), p_49244_.getClickedPos());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return getState(pContext.getLevel(), pContext.getClickedPos());
     }
 
-    public static BlockState getState(BlockGetter p_49246_, BlockPos p_49247_) {
-        BlockPos blockpos = p_49247_.below();
-        BlockState blockstate = p_49246_.getBlockState(blockpos);
-        return SoulFireBlock.canSurviveOnBlock(blockstate) ? Blocks.SOUL_FIRE.defaultBlockState() : ((FireBlock)Blocks.FIRE).getStateForPlacement(p_49246_, p_49247_);
+    public static BlockState getState(BlockGetter pReader, BlockPos pPos) {
+        BlockPos blockpos = pPos.below();
+        BlockState blockstate = pReader.getBlockState(blockpos);
+        return SoulFireBlock.canSurviveOnBlock(blockstate) ? Blocks.SOUL_FIRE.defaultBlockState() : ((FireBlock)Blocks.FIRE).getStateForPlacement(pReader, pPos);
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_49274_, BlockGetter p_49275_, BlockPos p_49276_, CollisionContext p_49277_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return DOWN_AABB;
     }
 
@@ -124,46 +124,46 @@ public abstract class BaseFireBlock extends Block {
         }
     }
 
-    protected abstract boolean canBurn(BlockState p_49284_);
+    protected abstract boolean canBurn(BlockState pState);
 
     @Override
-    protected void entityInside(BlockState p_49260_, Level p_49261_, BlockPos p_49262_, Entity p_49263_) {
-        if (!p_49263_.fireImmune()) {
-            if (p_49263_.getRemainingFireTicks() < 0) {
-                p_49263_.setRemainingFireTicks(p_49263_.getRemainingFireTicks() + 1);
-            } else if (p_49263_ instanceof ServerPlayer) {
-                int i = p_49261_.getRandom().nextInt(1, 3);
-                p_49263_.setRemainingFireTicks(p_49263_.getRemainingFireTicks() + i);
+    protected void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
+        if (!pEntity.fireImmune()) {
+            if (pEntity.getRemainingFireTicks() < 0) {
+                pEntity.setRemainingFireTicks(pEntity.getRemainingFireTicks() + 1);
+            } else if (pEntity instanceof ServerPlayer) {
+                int i = pLevel.getRandom().nextInt(1, 3);
+                pEntity.setRemainingFireTicks(pEntity.getRemainingFireTicks() + i);
             }
 
-            if (p_49263_.getRemainingFireTicks() >= 0) {
-                p_49263_.igniteForSeconds(8.0F);
+            if (pEntity.getRemainingFireTicks() >= 0) {
+                pEntity.igniteForSeconds(8.0F);
             }
         }
 
-        p_49263_.hurt(p_49261_.damageSources().inFire(), this.fireDamage);
-        super.entityInside(p_49260_, p_49261_, p_49262_, p_49263_);
+        pEntity.hurt(pLevel.damageSources().inFire(), this.fireDamage);
+        super.entityInside(pState, pLevel, pPos, pEntity);
     }
 
     @Override
-    protected void onPlace(BlockState p_49279_, Level p_49280_, BlockPos p_49281_, BlockState p_49282_, boolean p_49283_) {
-        if (!p_49282_.is(p_49279_.getBlock())) {
-            if (inPortalDimension(p_49280_)) {
-                Optional<PortalShape> optional = PortalShape.findEmptyPortalShape(p_49280_, p_49281_, Direction.Axis.X);
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        if (!pOldState.is(pState.getBlock())) {
+            if (inPortalDimension(pLevel)) {
+                Optional<PortalShape> optional = PortalShape.findEmptyPortalShape(pLevel, pPos, Direction.Axis.X);
                 if (optional.isPresent()) {
-                    optional.get().createPortalBlocks(p_49280_);
+                    optional.get().createPortalBlocks(pLevel);
                     return;
                 }
             }
 
-            if (!p_49279_.canSurvive(p_49280_, p_49281_)) {
-                p_49280_.removeBlock(p_49281_, false);
+            if (!pState.canSurvive(pLevel, pPos)) {
+                pLevel.removeBlock(pPos, false);
             }
         }
     }
 
-    private static boolean inPortalDimension(Level p_49249_) {
-        return p_49249_.dimension() == Level.OVERWORLD || p_49249_.dimension() == Level.NETHER;
+    private static boolean inPortalDimension(Level pLevel) {
+        return pLevel.dimension() == Level.OVERWORLD || pLevel.dimension() == Level.NETHER;
     }
 
     @Override
@@ -179,20 +179,20 @@ public abstract class BaseFireBlock extends Block {
         return super.playerWillDestroy(p_49251_, p_49252_, p_49253_, p_49254_);
     }
 
-    public static boolean canBePlacedAt(Level p_49256_, BlockPos p_49257_, Direction p_49258_) {
-        BlockState blockstate = p_49256_.getBlockState(p_49257_);
-        return !blockstate.isAir() ? false : getState(p_49256_, p_49257_).canSurvive(p_49256_, p_49257_) || isPortal(p_49256_, p_49257_, p_49258_);
+    public static boolean canBePlacedAt(Level pLevel, BlockPos pPos, Direction pDirection) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
+        return !blockstate.isAir() ? false : getState(pLevel, pPos).canSurvive(pLevel, pPos) || isPortal(pLevel, pPos, pDirection);
     }
 
-    private static boolean isPortal(Level p_49270_, BlockPos p_49271_, Direction p_49272_) {
-        if (!inPortalDimension(p_49270_)) {
+    private static boolean isPortal(Level pLevel, BlockPos pPos, Direction pDirection) {
+        if (!inPortalDimension(pLevel)) {
             return false;
         } else {
-            BlockPos.MutableBlockPos blockpos$mutableblockpos = p_49271_.mutable();
+            BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.mutable();
             boolean flag = false;
 
             for (Direction direction : Direction.values()) {
-                if (p_49270_.getBlockState(blockpos$mutableblockpos.set(p_49271_).move(direction)).is(Blocks.OBSIDIAN)) {
+                if (pLevel.getBlockState(blockpos$mutableblockpos.set(pPos).move(direction)).is(Blocks.OBSIDIAN)) {
                     flag = true;
                     break;
                 }
@@ -201,10 +201,10 @@ public abstract class BaseFireBlock extends Block {
             if (!flag) {
                 return false;
             } else {
-                Direction.Axis direction$axis = p_49272_.getAxis().isHorizontal()
-                    ? p_49272_.getCounterClockWise().getAxis()
-                    : Direction.Plane.HORIZONTAL.getRandomAxis(p_49270_.random);
-                return PortalShape.findEmptyPortalShape(p_49270_, p_49271_, direction$axis).isPresent();
+                Direction.Axis direction$axis = pDirection.getAxis().isHorizontal()
+                    ? pDirection.getCounterClockWise().getAxis()
+                    : Direction.Plane.HORIZONTAL.getRandomAxis(pLevel.random);
+                return PortalShape.findEmptyPortalShape(pLevel, pPos, direction$axis).isPresent();
             }
         }
     }

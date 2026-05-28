@@ -14,9 +14,9 @@ public class DonkeyRenderer<T extends AbstractChestedHorse> extends AbstractHors
     public static final ResourceLocation MULE_TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/horse/mule.png");
     private final ResourceLocation texture;
 
-    public DonkeyRenderer(EntityRendererProvider.Context p_362293_, ModelLayerLocation p_368663_, ModelLayerLocation p_368478_, boolean p_362367_) {
-        super(p_362293_, new DonkeyModel(p_362293_.bakeLayer(p_368663_)), new DonkeyModel(p_362293_.bakeLayer(p_368478_)));
-        this.texture = p_362367_ ? MULE_TEXTURE : DONKEY_TEXTURE;
+    public DonkeyRenderer(EntityRendererProvider.Context pContext, ModelLayerLocation pAdultModel, ModelLayerLocation pBabyModel, boolean pIsMule) {
+        super(pContext, new DonkeyModel(pContext.bakeLayer(pAdultModel)), new DonkeyModel(pContext.bakeLayer(pBabyModel)));
+        this.texture = pIsMule ? MULE_TEXTURE : DONKEY_TEXTURE;
     }
 
     public ResourceLocation getTextureLocation(DonkeyRenderState p_367902_) {

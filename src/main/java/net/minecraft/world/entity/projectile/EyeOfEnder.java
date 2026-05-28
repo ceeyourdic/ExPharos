@@ -31,16 +31,16 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
         super(p_36957_, p_36958_);
     }
 
-    public EyeOfEnder(Level p_36960_, double p_36961_, double p_36962_, double p_36963_) {
-        this(EntityType.EYE_OF_ENDER, p_36960_);
-        this.setPos(p_36961_, p_36962_, p_36963_);
+    public EyeOfEnder(Level pLevel, double pX, double pY, double pZ) {
+        this(EntityType.EYE_OF_ENDER, pLevel);
+        this.setPos(pX, pY, pZ);
     }
 
-    public void setItem(ItemStack p_36973_) {
-        if (p_36973_.isEmpty()) {
+    public void setItem(ItemStack pStack) {
+        if (pStack.isEmpty()) {
             this.getEntityData().set(DATA_ITEM_STACK, this.getDefaultItem());
         } else {
-            this.getEntityData().set(DATA_ITEM_STACK, p_36973_.copyWithCount(1));
+            this.getEntityData().set(DATA_ITEM_STACK, pStack.copyWithCount(1));
         }
     }
 
@@ -55,8 +55,8 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
     }
 
     @Override
-    public boolean shouldRenderAtSqrDistance(double p_36966_) {
-        if (this.tickCount < 2 && p_36966_ < 12.25) {
+    public boolean shouldRenderAtSqrDistance(double pDistance) {
+        if (this.tickCount < 2 && pDistance < 12.25) {
             return false;
         } else {
             double d0 = this.getBoundingBox().getSize() * 4.0;
@@ -65,14 +65,14 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
             }
 
             d0 *= 64.0;
-            return p_36966_ < d0 * d0;
+            return pDistance < d0 * d0;
         }
     }
 
-    public void signalTo(BlockPos p_36968_) {
-        double d0 = (double)p_36968_.getX();
-        int i = p_36968_.getY();
-        double d1 = (double)p_36968_.getZ();
+    public void signalTo(BlockPos pPos) {
+        double d0 = (double)pPos.getX();
+        int i = pPos.getY();
+        double d1 = (double)pPos.getZ();
         double d2 = d0 - this.getX();
         double d3 = d1 - this.getZ();
         double d4 = Math.sqrt(d2 * d2 + d3 * d3);
@@ -91,12 +91,12 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
     }
 
     @Override
-    public void lerpMotion(double p_36984_, double p_36985_, double p_36986_) {
-        this.setDeltaMovement(p_36984_, p_36985_, p_36986_);
+    public void lerpMotion(double pX, double pY, double pZ) {
+        this.setDeltaMovement(pX, pY, pZ);
         if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
-            double d0 = Math.sqrt(p_36984_ * p_36984_ + p_36986_ * p_36986_);
-            this.setYRot((float)(Mth.atan2(p_36984_, p_36986_) * 180.0F / (float)Math.PI));
-            this.setXRot((float)(Mth.atan2(p_36985_, d0) * 180.0F / (float)Math.PI));
+            double d0 = Math.sqrt(pX * pX + pZ * pZ);
+            this.setYRot((float)(Mth.atan2(pX, pZ) * 180.0F / (float)Math.PI));
+            this.setXRot((float)(Mth.atan2(pY, d0) * 180.0F / (float)Math.PI));
             this.yRotO = this.getYRot();
             this.xRotO = this.getXRot();
         }
@@ -174,14 +174,14 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_36975_) {
-        p_36975_.put("Item", this.getItem().save(this.registryAccess()));
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        pCompound.put("Item", this.getItem().save(this.registryAccess()));
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_36970_) {
-        if (p_36970_.contains("Item", 10)) {
-            this.setItem(ItemStack.parse(this.registryAccess(), p_36970_.getCompound("Item")).orElse(this.getDefaultItem()));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        if (pCompound.contains("Item", 10)) {
+            this.setItem(ItemStack.parse(this.registryAccess(), pCompound.getCompound("Item")).orElse(this.getDefaultItem()));
         } else {
             this.setItem(this.getDefaultItem());
         }

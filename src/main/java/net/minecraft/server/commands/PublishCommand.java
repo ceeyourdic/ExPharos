@@ -23,8 +23,8 @@ public class PublishCommand {
         p_308792_ -> Component.translatableEscape("commands.publish.alreadyPublished", p_308792_)
     );
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_138185_) {
-        p_138185_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("publish")
                 .requires(p_138189_ -> p_138189_.hasPermission(4))
                 .executes(p_258235_ -> publish(p_258235_.getSource(), HttpUtil.getAvailablePort(), false, null))
@@ -59,19 +59,19 @@ public class PublishCommand {
         );
     }
 
-    private static int publish(CommandSourceStack p_260117_, int p_259411_, boolean p_260137_, @Nullable GameType p_259145_) throws CommandSyntaxException {
-        if (p_260117_.getServer().isPublished()) {
-            throw ERROR_ALREADY_PUBLISHED.create(p_260117_.getServer().getPort());
-        } else if (!p_260117_.getServer().publishServer(p_259145_, p_260137_, p_259411_)) {
+    private static int publish(CommandSourceStack pSource, int pPort, boolean pCheats, @Nullable GameType pGameMode) throws CommandSyntaxException {
+        if (pSource.getServer().isPublished()) {
+            throw ERROR_ALREADY_PUBLISHED.create(pSource.getServer().getPort());
+        } else if (!pSource.getServer().publishServer(pGameMode, pCheats, pPort)) {
             throw ERROR_FAILED.create();
         } else {
-            p_260117_.sendSuccess(() -> getSuccessMessage(p_259411_), true);
-            return p_259411_;
+            pSource.sendSuccess(() -> getSuccessMessage(pPort), true);
+            return pPort;
         }
     }
 
-    public static MutableComponent getSuccessMessage(int p_259532_) {
-        Component component = ComponentUtils.copyOnClickText(String.valueOf(p_259532_));
+    public static MutableComponent getSuccessMessage(int pPort) {
+        Component component = ComponentUtils.copyOnClickText(String.valueOf(pPort));
         return Component.translatable("commands.publish.started", component);
     }
 }

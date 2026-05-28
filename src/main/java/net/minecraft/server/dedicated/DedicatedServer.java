@@ -81,20 +81,20 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
     private final ServerLinks serverLinks;
 
     public DedicatedServer(
-        Thread p_214789_,
-        LevelStorageSource.LevelStorageAccess p_214790_,
-        PackRepository p_214791_,
-        WorldStem p_214792_,
-        DedicatedServerSettings p_214793_,
-        DataFixer p_214794_,
-        Services p_214795_,
-        ChunkProgressListenerFactory p_214796_
+        Thread pServerThread,
+        LevelStorageSource.LevelStorageAccess pStorageSource,
+        PackRepository pPackRepository,
+        WorldStem pWorldStem,
+        DedicatedServerSettings pSettings,
+        DataFixer pFixerUpper,
+        Services pServices,
+        ChunkProgressListenerFactory pProgressListenerFactory
     ) {
-        super(p_214789_, p_214790_, p_214791_, p_214792_, Proxy.NO_PROXY, p_214794_, p_214795_, p_214796_);
-        this.settings = p_214793_;
+        super(pServerThread, pStorageSource, pPackRepository, pWorldStem, Proxy.NO_PROXY, pFixerUpper, pServices, pProgressListenerFactory);
+        this.settings = pSettings;
         this.rconConsoleSource = new RconConsoleSource(this);
-        this.serverTextFilter = ServerTextFilter.createFromConfig(p_214793_.getProperties());
-        this.serverLinks = createServerLinks(p_214793_);
+        this.serverTextFilter = ServerTextFilter.createFromConfig(pSettings.getProperties());
+        this.serverLinks = createServerLinks(pSettings);
     }
 
     @Override
@@ -288,8 +288,8 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
         return p_344961_.dimension() == Level.NETHER ? this.getProperties().allowNether : true;
     }
 
-    public void handleConsoleInput(String p_139646_, CommandSourceStack p_139647_) {
-        this.consoleInput.add(new ConsoleInput(p_139646_, p_139647_));
+    public void handleConsoleInput(String pMsg, CommandSourceStack pSource) {
+        this.consoleInput.add(new ConsoleInput(pMsg, pSource));
     }
 
     public void handleConsoleInputs() {
@@ -360,19 +360,19 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
     }
 
     @Override
-    public boolean isUnderSpawnProtection(ServerLevel p_139630_, BlockPos p_139631_, Player p_139632_) {
-        if (p_139630_.dimension() != Level.OVERWORLD) {
+    public boolean isUnderSpawnProtection(ServerLevel pLevel, BlockPos pPos, Player pPlayer) {
+        if (pLevel.dimension() != Level.OVERWORLD) {
             return false;
         } else if (this.getPlayerList().getOps().isEmpty()) {
             return false;
-        } else if (this.getPlayerList().isOp(p_139632_.getGameProfile())) {
+        } else if (this.getPlayerList().isOp(pPlayer.getGameProfile())) {
             return false;
         } else if (this.getSpawnProtectionRadius() <= 0) {
             return false;
         } else {
-            BlockPos blockpos = p_139630_.getSharedSpawnPos();
-            int i = Mth.abs(p_139631_.getX() - blockpos.getX());
-            int j = Mth.abs(p_139631_.getZ() - blockpos.getZ());
+            BlockPos blockpos = pLevel.getSharedSpawnPos();
+            int i = Mth.abs(pPos.getX() - blockpos.getX());
+            int j = Mth.abs(pPos.getZ() - blockpos.getZ());
             int k = Math.max(i, j);
             return k <= this.getSpawnProtectionRadius();
         }
@@ -399,9 +399,9 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
     }
 
     @Override
-    public void setPlayerIdleTimeout(int p_139676_) {
-        super.setPlayerIdleTimeout(p_139676_);
-        this.settings.update(p_358657_ -> p_358657_.playerIdleTimeout.update(this.registryAccess(), p_139676_));
+    public void setPlayerIdleTimeout(int pIdleTimeout) {
+        super.setPlayerIdleTimeout(pIdleTimeout);
+        this.settings.update(p_358657_ -> p_358657_.playerIdleTimeout.update(this.registryAccess(), pIdleTimeout));
     }
 
     @Override
@@ -516,14 +516,14 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
     }
 
     @Override
-    public String runCommand(String p_139644_) {
+    public String runCommand(String pCommand) {
         this.rconConsoleSource.prepareForCommand();
-        this.executeBlocking(() -> this.getCommands().performPrefixedCommand(this.rconConsoleSource.createCommandSourceStack(), p_139644_));
+        this.executeBlocking(() -> this.getCommands().performPrefixedCommand(this.rconConsoleSource.createCommandSourceStack(), pCommand));
         return this.rconConsoleSource.getCommandResponse();
     }
 
-    public void storeUsingWhiteList(boolean p_139689_) {
-        this.settings.update(p_358659_ -> p_358659_.whiteList.update(this.registryAccess(), p_139689_));
+    public void storeUsingWhiteList(boolean pIsStoreUsingWhiteList) {
+        this.settings.update(p_358659_ -> p_358659_.whiteList.update(this.registryAccess(), pIsStoreUsingWhiteList));
     }
 
     @Override
@@ -534,7 +534,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
     }
 
     @Override
-    public boolean isSingleplayerOwner(GameProfile p_139642_) {
+    public boolean isSingleplayerOwner(GameProfile pProfile) {
         return false;
     }
 
@@ -605,14 +605,14 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
         return this.settings.getProperties().pauseWhenEmptySeconds;
     }
 
-    private static ServerLinks createServerLinks(DedicatedServerSettings p_343848_) {
-        Optional<URI> optional = parseBugReportLink(p_343848_.getProperties());
+    private static ServerLinks createServerLinks(DedicatedServerSettings pSettings) {
+        Optional<URI> optional = parseBugReportLink(pSettings.getProperties());
         return optional.<ServerLinks>map(p_341204_ -> new ServerLinks(List.of(ServerLinks.KnownLinkType.BUG_REPORT.create(p_341204_))))
             .orElse(ServerLinks.EMPTY);
     }
 
-    private static Optional<URI> parseBugReportLink(DedicatedServerProperties p_342981_) {
-        String s = p_342981_.bugReportLink;
+    private static Optional<URI> parseBugReportLink(DedicatedServerProperties pProperties) {
+        String s = pProperties.bugReportLink;
         if (s.isEmpty()) {
             return Optional.empty();
         } else {

@@ -39,18 +39,18 @@ public class CopyComponentsFunction extends LootItemConditionalFunction {
     private final Predicate<DataComponentType<?>> bakedPredicate;
 
     CopyComponentsFunction(
-        List<LootItemCondition> p_332739_,
-        CopyComponentsFunction.Source p_333486_,
-        Optional<List<DataComponentType<?>>> p_332029_,
-        Optional<List<DataComponentType<?>>> p_329656_
+        List<LootItemCondition> pConditions,
+        CopyComponentsFunction.Source pSource,
+        Optional<List<DataComponentType<?>>> pInclude,
+        Optional<List<DataComponentType<?>>> pExclude
     ) {
-        super(p_332739_);
-        this.source = p_333486_;
-        this.include = p_332029_.map(List::copyOf);
-        this.exclude = p_329656_.map(List::copyOf);
+        super(pConditions);
+        this.source = pSource;
+        this.include = pInclude.map(List::copyOf);
+        this.exclude = pExclude.map(List::copyOf);
         List<Predicate<DataComponentType<?>>> list = new ArrayList<>(2);
-        p_329656_.ifPresent(p_329848_ -> list.add(p_331276_ -> !p_329848_.contains(p_331276_)));
-        p_332029_.ifPresent(p_331486_ -> list.add(p_331486_::contains));
+        pExclude.ifPresent(p_329848_ -> list.add(p_331276_ -> !p_329848_.contains(p_331276_)));
+        pInclude.ifPresent(p_331486_ -> list.add(p_331486_::contains));
         this.bakedPredicate = Util.allOf(list);
     }
 
@@ -71,8 +71,8 @@ public class CopyComponentsFunction extends LootItemConditionalFunction {
         return p_329465_;
     }
 
-    public static CopyComponentsFunction.Builder copyComponents(CopyComponentsFunction.Source p_331082_) {
-        return new CopyComponentsFunction.Builder(p_331082_);
+    public static CopyComponentsFunction.Builder copyComponents(CopyComponentsFunction.Source pSource) {
+        return new CopyComponentsFunction.Builder(pSource);
     }
 
     public static class Builder extends LootItemConditionalFunction.Builder<CopyComponentsFunction.Builder> {
@@ -80,25 +80,25 @@ public class CopyComponentsFunction extends LootItemConditionalFunction {
         private Optional<ImmutableList.Builder<DataComponentType<?>>> include = Optional.empty();
         private Optional<ImmutableList.Builder<DataComponentType<?>>> exclude = Optional.empty();
 
-        Builder(CopyComponentsFunction.Source p_336396_) {
-            this.source = p_336396_;
+        Builder(CopyComponentsFunction.Source pSource) {
+            this.source = pSource;
         }
 
-        public CopyComponentsFunction.Builder include(DataComponentType<?> p_329871_) {
+        public CopyComponentsFunction.Builder include(DataComponentType<?> pInclude) {
             if (this.include.isEmpty()) {
                 this.include = Optional.of(ImmutableList.builder());
             }
 
-            this.include.get().add(p_329871_);
+            this.include.get().add(pInclude);
             return this;
         }
 
-        public CopyComponentsFunction.Builder exclude(DataComponentType<?> p_332922_) {
+        public CopyComponentsFunction.Builder exclude(DataComponentType<?> pExclude) {
             if (this.exclude.isEmpty()) {
                 this.exclude = Optional.of(ImmutableList.builder());
             }
 
-            this.exclude.get().add(p_332922_);
+            this.exclude.get().add(pExclude);
             return this;
         }
 
@@ -120,14 +120,14 @@ public class CopyComponentsFunction extends LootItemConditionalFunction {
         public static final Codec<CopyComponentsFunction.Source> CODEC = StringRepresentable.fromValues(CopyComponentsFunction.Source::values);
         private final String name;
 
-        private Source(final String p_331847_) {
-            this.name = p_331847_;
+        private Source(final String pName) {
+            this.name = pName;
         }
 
-        public DataComponentMap get(LootContext p_331544_) {
+        public DataComponentMap get(LootContext pContext) {
             switch (this) {
                 case BLOCK_ENTITY:
-                    BlockEntity blockentity = p_331544_.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+                    BlockEntity blockentity = pContext.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
                     return blockentity != null ? blockentity.collectComponents() : DataComponentMap.EMPTY;
                 default:
                     throw new MatchException(null, null);

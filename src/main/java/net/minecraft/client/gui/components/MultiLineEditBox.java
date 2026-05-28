@@ -26,24 +26,24 @@ public class MultiLineEditBox extends AbstractTextAreaWidget {
     private final MultilineTextField textField;
     private long focusedTime = Util.getMillis();
 
-    public MultiLineEditBox(Font p_239008_, int p_239009_, int p_239010_, int p_239011_, int p_239012_, Component p_239013_, Component p_239014_) {
-        super(p_239009_, p_239010_, p_239011_, p_239012_, p_239014_);
-        this.font = p_239008_;
-        this.placeholder = p_239013_;
-        this.textField = new MultilineTextField(p_239008_, p_239011_ - this.totalInnerPadding());
+    public MultiLineEditBox(Font pFont, int pX, int pY, int pWidth, int pHeight, Component pPlaceholder, Component pMessage) {
+        super(pX, pY, pWidth, pHeight, pMessage);
+        this.font = pFont;
+        this.placeholder = pPlaceholder;
+        this.textField = new MultilineTextField(pFont, pWidth - this.totalInnerPadding());
         this.textField.setCursorListener(this::scrollToCursor);
     }
 
-    public void setCharacterLimit(int p_239314_) {
-        this.textField.setCharacterLimit(p_239314_);
+    public void setCharacterLimit(int pCharacterLimit) {
+        this.textField.setCharacterLimit(pCharacterLimit);
     }
 
-    public void setValueListener(Consumer<String> p_239274_) {
-        this.textField.setValueListener(p_239274_);
+    public void setValueListener(Consumer<String> pValueListener) {
+        this.textField.setValueListener(pValueListener);
     }
 
-    public void setValue(String p_240160_) {
-        this.textField.setValue(p_240160_);
+    public void setValue(String pFullText) {
+        this.textField.setValue(pFullText);
     }
 
     public String getValue() {
@@ -191,8 +191,8 @@ public class MultiLineEditBox extends AbstractTextAreaWidget {
         return 9.0 / 2.0;
     }
 
-    private void renderHighlight(GuiGraphics p_282092_, int p_282814_, int p_282908_, int p_281451_, int p_281765_) {
-        p_282092_.fill(RenderType.guiTextHighlight(), p_282814_, p_282908_, p_281451_, p_281765_, -16776961);
+    private void renderHighlight(GuiGraphics pGuiGraphics, int pMinX, int pMinY, int pMaxX, int pMaxY) {
+        pGuiGraphics.fill(RenderType.guiTextHighlight(), pMinX, pMinY, pMaxX, pMaxY, -16776961);
     }
 
     private void scrollToCursor() {
@@ -210,9 +210,9 @@ public class MultiLineEditBox extends AbstractTextAreaWidget {
         this.setScrollAmount(d0);
     }
 
-    private void seekCursorScreen(double p_239276_, double p_239277_) {
-        double d0 = p_239276_ - (double)this.getX() - (double)this.innerPadding();
-        double d1 = p_239277_ - (double)this.getY() - (double)this.innerPadding() + this.scrollAmount();
+    private void seekCursorScreen(double pMouseX, double pMouseY) {
+        double d0 = pMouseX - (double)this.getX() - (double)this.innerPadding();
+        double d1 = pMouseY - (double)this.getY() - (double)this.innerPadding() + this.scrollAmount();
         this.textField.seekCursorToPoint(d0, d1);
     }
 

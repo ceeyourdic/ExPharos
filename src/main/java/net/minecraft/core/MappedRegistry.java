@@ -50,14 +50,14 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
         return this.getTags();
     }
 
-    public MappedRegistry(ResourceKey<? extends Registry<T>> p_249899_, Lifecycle p_252249_) {
-        this(p_249899_, p_252249_, false);
+    public MappedRegistry(ResourceKey<? extends Registry<T>> pKey, Lifecycle pRegistryLifecycle) {
+        this(pKey, pRegistryLifecycle, false);
     }
 
-    public MappedRegistry(ResourceKey<? extends Registry<T>> p_252132_, Lifecycle p_249215_, boolean p_251014_) {
-        this.key = p_252132_;
-        this.registryLifecycle = p_249215_;
-        if (p_251014_) {
+    public MappedRegistry(ResourceKey<? extends Registry<T>> pKey, Lifecycle pRegistryLifecycle, boolean pHasIntrusiveHolders) {
+        this.key = pKey;
+        this.registryLifecycle = pRegistryLifecycle;
+        if (pHasIntrusiveHolders) {
             this.unregisteredIntrusiveHolders = new IdentityHashMap<>();
         }
     }
@@ -78,9 +78,9 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
         }
     }
 
-    private void validateWrite(ResourceKey<T> p_205922_) {
+    private void validateWrite(ResourceKey<T> pKey) {
         if (this.frozen) {
-            throw new IllegalStateException("Registry is already frozen (trying to add key " + p_205922_ + ")");
+            throw new IllegalStateException("Registry is already frozen (trying to add key " + pKey + ")");
         }
     }
 
@@ -173,8 +173,8 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
         return (Holder<T>)(reference != null ? reference : Holder.direct(p_263356_));
     }
 
-    Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> p_248831_) {
-        return this.byKey.computeIfAbsent(p_248831_, p_358081_ -> {
+    Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> pKey) {
+        return this.byKey.computeIfAbsent(pKey, p_358081_ -> {
             if (this.unregisteredIntrusiveHolders != null) {
                 throw new IllegalStateException("This registry can't create new holders without value");
             } else {
@@ -212,8 +212,8 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
     }
 
     @Nullable
-    private static <T> T getValueFromNullable(@Nullable Holder.Reference<T> p_205866_) {
-        return p_205866_ != null ? p_205866_.value() : null;
+    private static <T> T getValueFromNullable(@Nullable Holder.Reference<T> pHolder) {
+        return pHolder != null ? pHolder.value() : null;
     }
 
     @Override
@@ -241,12 +241,12 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
         return this.allTags.getTags();
     }
 
-    HolderSet.Named<T> getOrCreateTagForRegistration(TagKey<T> p_363833_) {
-        return this.frozenTags.computeIfAbsent(p_363833_, this::createTag);
+    HolderSet.Named<T> getOrCreateTagForRegistration(TagKey<T> pKey) {
+        return this.frozenTags.computeIfAbsent(pKey, this::createTag);
     }
 
-    private HolderSet.Named<T> createTag(TagKey<T> p_211068_) {
-        return new HolderSet.Named<>(this, p_211068_);
+    private HolderSet.Named<T> createTag(TagKey<T> pKey) {
+        return new HolderSet.Named<>(this, pKey);
     }
 
     @Override
@@ -331,13 +331,13 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
         return this.allTags.get(p_365729_);
     }
 
-    private Holder.Reference<T> validateAndUnwrapTagElement(TagKey<T> p_363318_, Holder<T> p_362647_) {
-        if (!p_362647_.canSerializeIn(this)) {
-            throw new IllegalStateException("Can't create named set " + p_363318_ + " containing value " + p_362647_ + " from outside registry " + this);
-        } else if (p_362647_ instanceof Holder.Reference) {
-            return (Holder.Reference<T>)p_362647_;
+    private Holder.Reference<T> validateAndUnwrapTagElement(TagKey<T> pKey, Holder<T> pValue) {
+        if (!pValue.canSerializeIn(this)) {
+            throw new IllegalStateException("Can't create named set " + pKey + " containing value " + pValue + " from outside registry " + this);
+        } else if (pValue instanceof Holder.Reference) {
+            return (Holder.Reference<T>)pValue;
         } else {
-            throw new IllegalStateException("Found direct holder " + p_362647_ + " value in tag " + p_363318_);
+            throw new IllegalStateException("Found direct holder " + pValue + " value in tag " + pKey);
         }
     }
 
@@ -477,7 +477,7 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
             };
         }
 
-        static <T> MappedRegistry.TagSet<T> fromMap(final Map<TagKey<T>, HolderSet.Named<T>> p_364506_) {
+        static <T> MappedRegistry.TagSet<T> fromMap(final Map<TagKey<T>, HolderSet.Named<T>> pMap) {
             return new MappedRegistry.TagSet<T>() {
                 @Override
                 public boolean isBound() {
@@ -486,26 +486,26 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 
                 @Override
                 public Optional<HolderSet.Named<T>> get(TagKey<T> p_364348_) {
-                    return Optional.ofNullable(p_364506_.get(p_364348_));
+                    return Optional.ofNullable(pMap.get(p_364348_));
                 }
 
                 @Override
                 public void forEach(BiConsumer<? super TagKey<T>, ? super HolderSet.Named<T>> p_366521_) {
-                    p_364506_.forEach(p_366521_);
+                    pMap.forEach(p_366521_);
                 }
 
                 @Override
                 public Stream<HolderSet.Named<T>> getTags() {
-                    return p_364506_.values().stream();
+                    return pMap.values().stream();
                 }
             };
         }
 
         boolean isBound();
 
-        Optional<HolderSet.Named<T>> get(TagKey<T> p_368240_);
+        Optional<HolderSet.Named<T>> get(TagKey<T> pKey);
 
-        void forEach(BiConsumer<? super TagKey<T>, ? super HolderSet.Named<T>> p_366969_);
+        void forEach(BiConsumer<? super TagKey<T>, ? super HolderSet.Named<T>> pAction);
 
         Stream<HolderSet.Named<T>> getTags();
     }

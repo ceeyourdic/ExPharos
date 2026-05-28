@@ -38,11 +38,11 @@ public class ZombieHorse extends AbstractHorse {
     }
 
     public static boolean checkZombieHorseSpawnRules(
-        EntityType<? extends Animal> p_313002_, LevelAccessor p_310822_, EntitySpawnReason p_366902_, BlockPos p_311078_, RandomSource p_312131_
+        EntityType<? extends Animal> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return !EntitySpawnReason.isSpawner(p_366902_)
-            ? Animal.checkAnimalSpawnRules(p_313002_, p_310822_, p_366902_, p_311078_, p_312131_)
-            : EntitySpawnReason.ignoresLightRequirements(p_366902_) || isBrightEnoughToSpawn(p_310822_, p_311078_);
+        return !EntitySpawnReason.isSpawner(pSpawnReason)
+            ? Animal.checkAnimalSpawnRules(pEntityType, pLevel, pSpawnReason, pPos, pRandom)
+            : EntitySpawnReason.ignoresLightRequirements(pSpawnReason) || isBrightEnoughToSpawn(pLevel, pPos);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class ZombieHorse extends AbstractHorse {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_31006_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.ZOMBIE_HORSE_HURT;
     }
 
@@ -72,8 +72,8 @@ public class ZombieHorse extends AbstractHorse {
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_31001_, InteractionHand p_31002_) {
-        return (InteractionResult)(!this.isTamed() ? InteractionResult.PASS : super.mobInteract(p_31001_, p_31002_));
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        return (InteractionResult)(!this.isTamed() ? InteractionResult.PASS : super.mobInteract(pPlayer, pHand));
     }
 
     @Override

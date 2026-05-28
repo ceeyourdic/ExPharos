@@ -210,69 +210,69 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
     private final RandomSequences randomSequences;
 
     public ServerLevel(
-        MinecraftServer p_214999_,
-        Executor p_215000_,
-        LevelStorageSource.LevelStorageAccess p_215001_,
-        ServerLevelData p_215002_,
-        ResourceKey<Level> p_215003_,
-        LevelStem p_215004_,
-        ChunkProgressListener p_215005_,
-        boolean p_215006_,
-        long p_215007_,
-        List<CustomSpawner> p_215008_,
-        boolean p_215009_,
-        @Nullable RandomSequences p_288977_
+        MinecraftServer pServer,
+        Executor pDispatcher,
+        LevelStorageSource.LevelStorageAccess pLevelStorageAccess,
+        ServerLevelData pServerLevelData,
+        ResourceKey<Level> pDimension,
+        LevelStem pLevelStem,
+        ChunkProgressListener pProgressListener,
+        boolean pIsDebug,
+        long pBiomeZoomSeed,
+        List<CustomSpawner> pCustomSpawners,
+        boolean pTickTime,
+        @Nullable RandomSequences pRandomSequences
     ) {
-        super(p_215002_, p_215003_, p_214999_.registryAccess(), p_215004_.type(), false, p_215006_, p_215007_, p_214999_.getMaxChainedNeighborUpdates());
-        this.tickTime = p_215009_;
-        this.server = p_214999_;
-        this.customSpawners = p_215008_;
-        this.serverLevelData = p_215002_;
-        ChunkGenerator chunkgenerator = p_215004_.generator();
-        boolean flag = p_214999_.forceSynchronousWrites();
-        DataFixer datafixer = p_214999_.getFixerUpper();
+        super(pServerLevelData, pDimension, pServer.registryAccess(), pLevelStem.type(), false, pIsDebug, pBiomeZoomSeed, pServer.getMaxChainedNeighborUpdates());
+        this.tickTime = pTickTime;
+        this.server = pServer;
+        this.customSpawners = pCustomSpawners;
+        this.serverLevelData = pServerLevelData;
+        ChunkGenerator chunkgenerator = pLevelStem.generator();
+        boolean flag = pServer.forceSynchronousWrites();
+        DataFixer datafixer = pServer.getFixerUpper();
         EntityPersistentStorage<Entity> entitypersistentstorage = new EntityStorage(
             new SimpleRegionStorage(
-                new RegionStorageInfo(p_215001_.getLevelId(), p_215003_, "entities"),
-                p_215001_.getDimensionPath(p_215003_).resolve("entities"),
+                new RegionStorageInfo(pLevelStorageAccess.getLevelId(), pDimension, "entities"),
+                pLevelStorageAccess.getDimensionPath(pDimension).resolve("entities"),
                 datafixer,
                 flag,
                 DataFixTypes.ENTITY_CHUNK
             ),
             this,
-            p_214999_
+            pServer
         );
         this.entityManager = new PersistentEntitySectionManager<>(Entity.class, new ServerLevel.EntityCallbacks(), entitypersistentstorage);
         this.chunkSource = new ServerChunkCache(
             this,
-            p_215001_,
+            pLevelStorageAccess,
             datafixer,
-            p_214999_.getStructureManager(),
-            p_215000_,
+            pServer.getStructureManager(),
+            pDispatcher,
             chunkgenerator,
-            p_214999_.getPlayerList().getViewDistance(),
-            p_214999_.getPlayerList().getSimulationDistance(),
+            pServer.getPlayerList().getViewDistance(),
+            pServer.getPlayerList().getSimulationDistance(),
             flag,
-            p_215005_,
+            pProgressListener,
             this.entityManager::updateChunkStatus,
-            () -> p_214999_.overworld().getDataStorage()
+            () -> pServer.overworld().getDataStorage()
         );
         this.chunkSource.getGeneratorState().ensureStructuresGenerated();
         this.portalForcer = new PortalForcer(this);
         this.updateSkyBrightness();
         this.prepareWeather();
-        this.getWorldBorder().setAbsoluteMaxSize(p_214999_.getAbsoluteMaxWorldSize());
+        this.getWorldBorder().setAbsoluteMaxSize(pServer.getAbsoluteMaxWorldSize());
         this.raids = this.getDataStorage().computeIfAbsent(Raids.factory(this), Raids.getFileId(this.dimensionTypeRegistration()));
-        if (!p_214999_.isSingleplayer()) {
-            p_215002_.setGameType(p_214999_.getDefaultGameType());
+        if (!pServer.isSingleplayer()) {
+            pServerLevelData.setGameType(pServer.getDefaultGameType());
         }
 
-        long i = p_214999_.getWorldData().worldGenOptions().seed();
+        long i = pServer.getWorldData().worldGenOptions().seed();
         this.structureCheck = new StructureCheck(
             this.chunkSource.chunkScanner(),
             this.registryAccess(),
-            p_214999_.getStructureManager(),
-            p_215003_,
+            pServer.getStructureManager(),
+            pDimension,
             chunkgenerator,
             this.chunkSource.randomState(),
             this,
@@ -280,30 +280,30 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
             i,
             datafixer
         );
-        this.structureManager = new StructureManager(this, p_214999_.getWorldData().worldGenOptions(), this.structureCheck);
+        this.structureManager = new StructureManager(this, pServer.getWorldData().worldGenOptions(), this.structureCheck);
         if (this.dimension() == Level.END && this.dimensionTypeRegistration().is(BuiltinDimensionTypes.END)) {
-            this.dragonFight = new EndDragonFight(this, i, p_214999_.getWorldData().endDragonFightData());
+            this.dragonFight = new EndDragonFight(this, i, pServer.getWorldData().endDragonFightData());
         } else {
             this.dragonFight = null;
         }
 
         this.sleepStatus = new SleepStatus();
         this.gameEventDispatcher = new GameEventDispatcher(this);
-        this.randomSequences = Objects.requireNonNullElseGet(p_288977_, () -> this.getDataStorage().computeIfAbsent(RandomSequences.factory(i), "random_sequences"));
+        this.randomSequences = Objects.requireNonNullElseGet(pRandomSequences, () -> this.getDataStorage().computeIfAbsent(RandomSequences.factory(i), "random_sequences"));
     }
 
     @Deprecated
     @VisibleForTesting
-    public void setDragonFight(@Nullable EndDragonFight p_287779_) {
-        this.dragonFight = p_287779_;
+    public void setDragonFight(@Nullable EndDragonFight pDragonFight) {
+        this.dragonFight = pDragonFight;
     }
 
-    public void setWeatherParameters(int p_8607_, int p_8608_, boolean p_8609_, boolean p_8610_) {
-        this.serverLevelData.setClearWeatherTime(p_8607_);
-        this.serverLevelData.setRainTime(p_8608_);
-        this.serverLevelData.setThunderTime(p_8608_);
-        this.serverLevelData.setRaining(p_8609_);
-        this.serverLevelData.setThundering(p_8610_);
+    public void setWeatherParameters(int pClearTime, int pWeatherTime, boolean pIsRaining, boolean pIsThundering) {
+        this.serverLevelData.setClearWeatherTime(pClearTime);
+        this.serverLevelData.setRainTime(pWeatherTime);
+        this.serverLevelData.setThunderTime(pWeatherTime);
+        this.serverLevelData.setRaining(pIsRaining);
+        this.serverLevelData.setThundering(pIsThundering);
     }
 
     @Override
@@ -315,7 +315,7 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         return this.structureManager;
     }
 
-    public void tick(BooleanSupplier p_8794_) {
+    public void tick(BooleanSupplier pHasTimeLeft) {
         ProfilerFiller profilerfiller = Profiler.get();
         this.handlingTick = true;
         TickRateManager tickratemanager = this.tickRateManager();
@@ -362,7 +362,7 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         }
 
         profilerfiller.popPush("chunkSource");
-        this.getChunkSource().tick(p_8794_, true);
+        this.getChunkSource().tick(pHasTimeLeft, true);
         profilerfiller.popPush("blockEvents");
         if (flag) {
             this.runBlockEvents();
@@ -433,13 +433,13 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         }
     }
 
-    public void setDayTime(long p_8616_) {
-        this.serverLevelData.setDayTime(p_8616_);
+    public void setDayTime(long pTime) {
+        this.serverLevelData.setDayTime(pTime);
     }
 
-    public void tickCustomSpawners(boolean p_8800_, boolean p_8801_) {
+    public void tickCustomSpawners(boolean pSpawnEnemies, boolean pSpawnFriendlies) {
         for (CustomSpawner customspawner : this.customSpawners) {
-            customspawner.tick(this, p_8800_, p_8801_);
+            customspawner.tick(this, pSpawnEnemies, pSpawnFriendlies);
         }
     }
 
@@ -448,8 +448,8 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         this.players.stream().filter(LivingEntity::isSleeping).collect(Collectors.toList()).forEach(p_184116_ -> p_184116_.stopSleepInBed(false, false));
     }
 
-    public void tickChunk(LevelChunk p_8715_, int p_8716_) {
-        ChunkPos chunkpos = p_8715_.getPos();
+    public void tickChunk(LevelChunk pChunk, int pRandomTickSpeed) {
+        ChunkPos chunkpos = pChunk.getPos();
         boolean flag = this.isRaining();
         int i = chunkpos.getMinBlockX();
         int j = chunkpos.getMinBlockZ();
@@ -483,23 +483,23 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
 
         profilerfiller.popPush("iceandsnow");
 
-        for (int i1 = 0; i1 < p_8716_; i1++) {
+        for (int i1 = 0; i1 < pRandomTickSpeed; i1++) {
             if (this.random.nextInt(48) == 0) {
                 this.tickPrecipitation(this.getBlockRandomPos(i, 0, j, 15));
             }
         }
 
         profilerfiller.popPush("tickBlocks");
-        if (p_8716_ > 0) {
-            LevelChunkSection[] alevelchunksection = p_8715_.getSections();
+        if (pRandomTickSpeed > 0) {
+            LevelChunkSection[] alevelchunksection = pChunk.getSections();
 
             for (int j1 = 0; j1 < alevelchunksection.length; j1++) {
                 LevelChunkSection levelchunksection = alevelchunksection[j1];
                 if (levelchunksection.isRandomlyTicking()) {
-                    int k1 = p_8715_.getSectionYFromSectionIndex(j1);
+                    int k1 = pChunk.getSectionYFromSectionIndex(j1);
                     int k = SectionPos.sectionToBlockCoord(k1);
 
-                    for (int l = 0; l < p_8716_; l++) {
+                    for (int l = 0; l < pRandomTickSpeed; l++) {
                         BlockPos blockpos1 = this.getBlockRandomPos(i, k, j, 15);
                         profilerfiller.push("randomTick");
                         BlockState blockstate = levelchunksection.getBlockState(blockpos1.getX() - i, blockpos1.getY() - k, blockpos1.getZ() - j);
@@ -522,8 +522,8 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
     }
 
     @VisibleForTesting
-    public void tickPrecipitation(BlockPos p_300602_) {
-        BlockPos blockpos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, p_300602_);
+    public void tickPrecipitation(BlockPos pBlockPos) {
+        BlockPos blockpos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, pBlockPos);
         BlockPos blockpos1 = blockpos.below();
         Biome biome = this.getBiome(blockpos).value();
         if (biome.shouldFreeze(this, blockpos1)) {
@@ -554,20 +554,20 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         }
     }
 
-    private Optional<BlockPos> findLightningRod(BlockPos p_143249_) {
+    private Optional<BlockPos> findLightningRod(BlockPos pPos) {
         Optional<BlockPos> optional = this.getPoiManager()
             .findClosest(
                 p_215059_ -> p_215059_.is(PoiTypes.LIGHTNING_ROD),
                 p_184055_ -> p_184055_.getY() == this.getHeight(Heightmap.Types.WORLD_SURFACE, p_184055_.getX(), p_184055_.getZ()) - 1,
-                p_143249_,
+                pPos,
                 128,
                 PoiManager.Occupancy.ANY
             );
         return optional.map(p_184053_ -> p_184053_.above(1));
     }
 
-    protected BlockPos findLightningTargetAround(BlockPos p_143289_) {
-        BlockPos blockpos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, p_143289_);
+    protected BlockPos findLightningTargetAround(BlockPos pPos) {
+        BlockPos blockpos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, pPos);
         Optional<BlockPos> optional = this.findLightningRod(blockpos);
         if (optional.isPresent()) {
             return optional.get();
@@ -718,72 +718,72 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         this.emptyTime = 0;
     }
 
-    private void tickFluid(BlockPos p_184077_, Fluid p_184078_) {
-        BlockState blockstate = this.getBlockState(p_184077_);
+    private void tickFluid(BlockPos pPos, Fluid pFluid) {
+        BlockState blockstate = this.getBlockState(pPos);
         FluidState fluidstate = blockstate.getFluidState();
-        if (fluidstate.is(p_184078_)) {
-            fluidstate.tick(this, p_184077_, blockstate);
+        if (fluidstate.is(pFluid)) {
+            fluidstate.tick(this, pPos, blockstate);
         }
     }
 
-    private void tickBlock(BlockPos p_184113_, Block p_184114_) {
-        BlockState blockstate = this.getBlockState(p_184113_);
-        if (blockstate.is(p_184114_)) {
-            blockstate.tick(this, p_184113_, this.random);
+    private void tickBlock(BlockPos pPos, Block pBlock) {
+        BlockState blockstate = this.getBlockState(pPos);
+        if (blockstate.is(pBlock)) {
+            blockstate.tick(this, pPos, this.random);
         }
     }
 
-    public void tickNonPassenger(Entity p_8648_) {
-        p_8648_.setOldPosAndRot();
+    public void tickNonPassenger(Entity pEntity) {
+        pEntity.setOldPosAndRot();
         ProfilerFiller profilerfiller = Profiler.get();
-        p_8648_.tickCount++;
-        profilerfiller.push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(p_8648_.getType()).toString());
+        pEntity.tickCount++;
+        profilerfiller.push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(pEntity.getType()).toString());
         profilerfiller.incrementCounter("tickNonPassenger");
-        p_8648_.tick();
+        pEntity.tick();
         profilerfiller.pop();
 
-        for (Entity entity : p_8648_.getPassengers()) {
-            this.tickPassenger(p_8648_, entity);
+        for (Entity entity : pEntity.getPassengers()) {
+            this.tickPassenger(pEntity, entity);
         }
     }
 
-    private void tickPassenger(Entity p_8663_, Entity p_8664_) {
-        if (p_8664_.isRemoved() || p_8664_.getVehicle() != p_8663_) {
-            p_8664_.stopRiding();
-        } else if (p_8664_ instanceof Player || this.entityTickList.contains(p_8664_)) {
-            p_8664_.setOldPosAndRot();
-            p_8664_.tickCount++;
+    private void tickPassenger(Entity pRidingEntity, Entity pPassengerEntity) {
+        if (pPassengerEntity.isRemoved() || pPassengerEntity.getVehicle() != pRidingEntity) {
+            pPassengerEntity.stopRiding();
+        } else if (pPassengerEntity instanceof Player || this.entityTickList.contains(pPassengerEntity)) {
+            pPassengerEntity.setOldPosAndRot();
+            pPassengerEntity.tickCount++;
             ProfilerFiller profilerfiller = Profiler.get();
-            profilerfiller.push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(p_8664_.getType()).toString());
+            profilerfiller.push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(pPassengerEntity.getType()).toString());
             profilerfiller.incrementCounter("tickPassenger");
-            p_8664_.rideTick();
+            pPassengerEntity.rideTick();
             profilerfiller.pop();
 
-            for (Entity entity : p_8664_.getPassengers()) {
-                this.tickPassenger(p_8664_, entity);
+            for (Entity entity : pPassengerEntity.getPassengers()) {
+                this.tickPassenger(pPassengerEntity, entity);
             }
         }
     }
 
     @Override
-    public boolean mayInteract(Player p_8696_, BlockPos p_8697_) {
-        return !this.server.isUnderSpawnProtection(this, p_8697_, p_8696_) && this.getWorldBorder().isWithinBounds(p_8697_);
+    public boolean mayInteract(Player pPlayer, BlockPos pPos) {
+        return !this.server.isUnderSpawnProtection(this, pPos, pPlayer) && this.getWorldBorder().isWithinBounds(pPos);
     }
 
-    public void save(@Nullable ProgressListener p_8644_, boolean p_8645_, boolean p_8646_) {
+    public void save(@Nullable ProgressListener pProgress, boolean pFlush, boolean pSkipSave) {
         ServerChunkCache serverchunkcache = this.getChunkSource();
-        if (!p_8646_) {
-            if (p_8644_ != null) {
-                p_8644_.progressStartNoAbort(Component.translatable("menu.savingLevel"));
+        if (!pSkipSave) {
+            if (pProgress != null) {
+                pProgress.progressStartNoAbort(Component.translatable("menu.savingLevel"));
             }
 
-            this.saveLevelData(p_8645_);
-            if (p_8644_ != null) {
-                p_8644_.progressStage(Component.translatable("menu.savingChunks"));
+            this.saveLevelData(pFlush);
+            if (pProgress != null) {
+                pProgress.progressStage(Component.translatable("menu.savingChunks"));
             }
 
-            serverchunkcache.save(p_8645_);
-            if (p_8645_) {
+            serverchunkcache.save(pFlush);
+            if (pFlush) {
                 this.entityManager.saveAll();
             } else {
                 this.entityManager.autoSave();
@@ -791,34 +791,34 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         }
     }
 
-    private void saveLevelData(boolean p_365704_) {
+    private void saveLevelData(boolean pJoin) {
         if (this.dragonFight != null) {
             this.server.getWorldData().setEndDragonFightData(this.dragonFight.saveData());
         }
 
         DimensionDataStorage dimensiondatastorage = this.getChunkSource().getDataStorage();
-        if (p_365704_) {
+        if (pJoin) {
             dimensiondatastorage.saveAndJoin();
         } else {
             dimensiondatastorage.scheduleSave();
         }
     }
 
-    public <T extends Entity> List<? extends T> getEntities(EntityTypeTest<Entity, T> p_143281_, Predicate<? super T> p_143282_) {
+    public <T extends Entity> List<? extends T> getEntities(EntityTypeTest<Entity, T> pTypeTest, Predicate<? super T> pPredicate) {
         List<T> list = Lists.newArrayList();
-        this.getEntities(p_143281_, p_143282_, list);
+        this.getEntities(pTypeTest, pPredicate, list);
         return list;
     }
 
-    public <T extends Entity> void getEntities(EntityTypeTest<Entity, T> p_262152_, Predicate<? super T> p_261808_, List<? super T> p_261583_) {
-        this.getEntities(p_262152_, p_261808_, p_261583_, Integer.MAX_VALUE);
+    public <T extends Entity> void getEntities(EntityTypeTest<Entity, T> pTypeTest, Predicate<? super T> pPredicate, List<? super T> pOutput) {
+        this.getEntities(pTypeTest, pPredicate, pOutput, Integer.MAX_VALUE);
     }
 
-    public <T extends Entity> void getEntities(EntityTypeTest<Entity, T> p_261842_, Predicate<? super T> p_262091_, List<? super T> p_261703_, int p_261907_) {
-        this.getEntities().get(p_261842_, p_261428_ -> {
-            if (p_262091_.test(p_261428_)) {
-                p_261703_.add(p_261428_);
-                if (p_261703_.size() >= p_261907_) {
+    public <T extends Entity> void getEntities(EntityTypeTest<Entity, T> pTypeTest, Predicate<? super T> pPredicate, List<? super T> pOutput, int pMaxResults) {
+        this.getEntities().get(pTypeTest, p_261428_ -> {
+            if (pPredicate.test(p_261428_)) {
+                pOutput.add(p_261428_);
+                if (pOutput.size() >= pMaxResults) {
                     return AbortableIterationConsumer.Continuation.ABORT;
                 }
             }
@@ -831,17 +831,17 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         return this.getEntities(EntityType.ENDER_DRAGON, LivingEntity::isAlive);
     }
 
-    public List<ServerPlayer> getPlayers(Predicate<? super ServerPlayer> p_8796_) {
-        return this.getPlayers(p_8796_, Integer.MAX_VALUE);
+    public List<ServerPlayer> getPlayers(Predicate<? super ServerPlayer> pPredicate) {
+        return this.getPlayers(pPredicate, Integer.MAX_VALUE);
     }
 
-    public List<ServerPlayer> getPlayers(Predicate<? super ServerPlayer> p_261698_, int p_262035_) {
+    public List<ServerPlayer> getPlayers(Predicate<? super ServerPlayer> pPredicate, int pMaxResults) {
         List<ServerPlayer> list = Lists.newArrayList();
 
         for (ServerPlayer serverplayer : this.players) {
-            if (p_261698_.test(serverplayer)) {
+            if (pPredicate.test(serverplayer)) {
                 list.add(serverplayer);
-                if (list.size() >= p_262035_) {
+                if (list.size() >= pMaxResults) {
                     return list;
                 }
             }
@@ -857,77 +857,77 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
     }
 
     @Override
-    public boolean addFreshEntity(Entity p_8837_) {
-        return this.addEntity(p_8837_);
+    public boolean addFreshEntity(Entity pEntity) {
+        return this.addEntity(pEntity);
     }
 
-    public boolean addWithUUID(Entity p_8848_) {
-        return this.addEntity(p_8848_);
+    public boolean addWithUUID(Entity pEntity) {
+        return this.addEntity(pEntity);
     }
 
-    public void addDuringTeleport(Entity p_143335_) {
-        if (p_143335_ instanceof ServerPlayer serverplayer) {
+    public void addDuringTeleport(Entity pEntity) {
+        if (pEntity instanceof ServerPlayer serverplayer) {
             this.addPlayer(serverplayer);
         } else {
-            this.addEntity(p_143335_);
+            this.addEntity(pEntity);
         }
     }
 
-    public void addNewPlayer(ServerPlayer p_8835_) {
-        this.addPlayer(p_8835_);
+    public void addNewPlayer(ServerPlayer pPlayer) {
+        this.addPlayer(pPlayer);
     }
 
-    public void addRespawnedPlayer(ServerPlayer p_8846_) {
-        this.addPlayer(p_8846_);
+    public void addRespawnedPlayer(ServerPlayer pPlayer) {
+        this.addPlayer(pPlayer);
     }
 
-    private void addPlayer(ServerPlayer p_8854_) {
-        Entity entity = this.getEntities().get(p_8854_.getUUID());
+    private void addPlayer(ServerPlayer pPlayer) {
+        Entity entity = this.getEntities().get(pPlayer.getUUID());
         if (entity != null) {
-            LOGGER.warn("Force-added player with duplicate UUID {}", p_8854_.getUUID());
+            LOGGER.warn("Force-added player with duplicate UUID {}", pPlayer.getUUID());
             entity.unRide();
             this.removePlayerImmediately((ServerPlayer)entity, Entity.RemovalReason.DISCARDED);
         }
 
-        this.entityManager.addNewEntity(p_8854_);
+        this.entityManager.addNewEntity(pPlayer);
     }
 
-    private boolean addEntity(Entity p_8873_) {
-        if (p_8873_.isRemoved()) {
-            LOGGER.warn("Tried to add entity {} but it was marked as removed already", EntityType.getKey(p_8873_.getType()));
+    private boolean addEntity(Entity pEntity) {
+        if (pEntity.isRemoved()) {
+            LOGGER.warn("Tried to add entity {} but it was marked as removed already", EntityType.getKey(pEntity.getType()));
             return false;
         } else {
-            return this.entityManager.addNewEntity(p_8873_);
+            return this.entityManager.addNewEntity(pEntity);
         }
     }
 
-    public boolean tryAddFreshEntityWithPassengers(Entity p_8861_) {
-        if (p_8861_.getSelfAndPassengers().map(Entity::getUUID).anyMatch(this.entityManager::isLoaded)) {
+    public boolean tryAddFreshEntityWithPassengers(Entity pEntity) {
+        if (pEntity.getSelfAndPassengers().map(Entity::getUUID).anyMatch(this.entityManager::isLoaded)) {
             return false;
         } else {
-            this.addFreshEntityWithPassengers(p_8861_);
+            this.addFreshEntityWithPassengers(pEntity);
             return true;
         }
     }
 
-    public void unload(LevelChunk p_8713_) {
-        p_8713_.clearAllBlockEntities();
-        p_8713_.unregisterTickContainerFromLevel(this);
+    public void unload(LevelChunk pChunk) {
+        pChunk.clearAllBlockEntities();
+        pChunk.unregisterTickContainerFromLevel(this);
     }
 
-    public void removePlayerImmediately(ServerPlayer p_143262_, Entity.RemovalReason p_143263_) {
-        p_143262_.remove(p_143263_);
+    public void removePlayerImmediately(ServerPlayer pPlayer, Entity.RemovalReason pReason) {
+        pPlayer.remove(pReason);
     }
 
     @Override
-    public void destroyBlockProgress(int p_8612_, BlockPos p_8613_, int p_8614_) {
+    public void destroyBlockProgress(int pBreakerId, BlockPos pPos, int pProgress) {
         for (ServerPlayer serverplayer : this.server.getPlayerList().getPlayers()) {
-            if (serverplayer != null && serverplayer.level() == this && serverplayer.getId() != p_8612_) {
-                double d0 = (double)p_8613_.getX() - serverplayer.getX();
-                double d1 = (double)p_8613_.getY() - serverplayer.getY();
-                double d2 = (double)p_8613_.getZ() - serverplayer.getZ();
+            if (serverplayer != null && serverplayer.level() == this && serverplayer.getId() != pBreakerId) {
+                double d0 = (double)pPos.getX() - serverplayer.getX();
+                double d1 = (double)pPos.getY() - serverplayer.getY();
+                double d2 = (double)pPos.getZ() - serverplayer.getZ();
                 if (d0 * d0 + d1 * d1 + d2 * d2 < 1024.0) {
-                    serverplayer.connection.send(new ClientboundBlockDestructionPacket(p_8612_, p_8613_, p_8614_));
+                    serverplayer.connection.send(new ClientboundBlockDestructionPacket(pBreakerId, pPos, pProgress));
                 }
             }
         }
@@ -976,12 +976,12 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
     }
 
     @Override
-    public void globalLevelEvent(int p_8811_, BlockPos p_8812_, int p_8813_) {
+    public void globalLevelEvent(int pId, BlockPos pPos, int pData) {
         if (this.getGameRules().getBoolean(GameRules.RULE_GLOBAL_SOUND_EVENTS)) {
             this.server.getPlayerList().getPlayers().forEach(p_358704_ -> {
                 Vec3 vec3;
                 if (p_358704_.level() == this) {
-                    Vec3 vec31 = Vec3.atCenterOf(p_8812_);
+                    Vec3 vec31 = Vec3.atCenterOf(pPos);
                     if (p_358704_.distanceToSqr(vec31) < (double)Mth.square(32)) {
                         vec3 = vec31;
                     } else {
@@ -992,25 +992,25 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
                     vec3 = p_358704_.position();
                 }
 
-                p_358704_.connection.send(new ClientboundLevelEventPacket(p_8811_, BlockPos.containing(vec3), p_8813_, true));
+                p_358704_.connection.send(new ClientboundLevelEventPacket(pId, BlockPos.containing(vec3), pData, true));
             });
         } else {
-            this.levelEvent(null, p_8811_, p_8812_, p_8813_);
+            this.levelEvent(null, pId, pPos, pData);
         }
     }
 
     @Override
-    public void levelEvent(@Nullable Player p_8684_, int p_8685_, BlockPos p_8686_, int p_8687_) {
+    public void levelEvent(@Nullable Player pPlayer, int pType, BlockPos pPos, int pData) {
         this.server
             .getPlayerList()
             .broadcast(
-                p_8684_,
-                (double)p_8686_.getX(),
-                (double)p_8686_.getY(),
-                (double)p_8686_.getZ(),
+                pPlayer,
+                (double)pPos.getX(),
+                (double)pPos.getY(),
+                (double)pPos.getZ(),
                 64.0,
                 this.dimension(),
-                new ClientboundLevelEventPacket(p_8685_, p_8686_, p_8687_, false)
+                new ClientboundLevelEventPacket(pType, pPos, pData, false)
             );
     }
 
@@ -1024,22 +1024,22 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
     }
 
     @Override
-    public void sendBlockUpdated(BlockPos p_8755_, BlockState p_8756_, BlockState p_8757_, int p_8758_) {
+    public void sendBlockUpdated(BlockPos pPos, BlockState pOldState, BlockState pNewState, int pFlags) {
         if (this.isUpdatingNavigations) {
             String s = "recursive call to sendBlockUpdated";
             Util.logAndPauseIfInIde("recursive call to sendBlockUpdated", new IllegalStateException("recursive call to sendBlockUpdated"));
         }
 
-        this.getChunkSource().blockChanged(p_8755_);
-        this.pathTypesByPosCache.invalidate(p_8755_);
-        VoxelShape voxelshape1 = p_8756_.getCollisionShape(this, p_8755_);
-        VoxelShape voxelshape = p_8757_.getCollisionShape(this, p_8755_);
+        this.getChunkSource().blockChanged(pPos);
+        this.pathTypesByPosCache.invalidate(pPos);
+        VoxelShape voxelshape1 = pOldState.getCollisionShape(this, pPos);
+        VoxelShape voxelshape = pNewState.getCollisionShape(this, pPos);
         if (Shapes.joinIsNotEmpty(voxelshape1, voxelshape, BooleanOp.NOT_SAME)) {
             List<PathNavigation> list = new ObjectArrayList<>();
 
             for (Mob mob : this.navigatingMobs) {
                 PathNavigation pathnavigation = mob.getNavigation();
-                if (pathnavigation.shouldRecomputePath(p_8755_)) {
+                if (pathnavigation.shouldRecomputePath(pPos)) {
                     list.add(pathnavigation);
                 }
             }
@@ -1082,8 +1082,8 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
     }
 
     @Override
-    public void broadcastEntityEvent(Entity p_8650_, byte p_8651_) {
-        this.getChunkSource().broadcastAndSend(p_8650_, new ClientboundEntityEventPacket(p_8650_, p_8651_));
+    public void broadcastEntityEvent(Entity pEntity, byte pState) {
+        this.getChunkSource().broadcastAndSend(pEntity, new ClientboundEntityEventPacket(pEntity, pState));
     }
 
     @Override
@@ -1130,13 +1130,13 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         }
     }
 
-    private Explosion.BlockInteraction getDestroyType(GameRules.Key<GameRules.BooleanValue> p_368408_) {
-        return this.getGameRules().getBoolean(p_368408_) ? Explosion.BlockInteraction.DESTROY_WITH_DECAY : Explosion.BlockInteraction.DESTROY;
+    private Explosion.BlockInteraction getDestroyType(GameRules.Key<GameRules.BooleanValue> pDecayGameRule) {
+        return this.getGameRules().getBoolean(pDecayGameRule) ? Explosion.BlockInteraction.DESTROY_WITH_DECAY : Explosion.BlockInteraction.DESTROY;
     }
 
     @Override
-    public void blockEvent(BlockPos p_8746_, Block p_8747_, int p_8748_, int p_8749_) {
-        this.blockEvents.add(new BlockEventData(p_8746_, p_8747_, p_8748_, p_8749_));
+    public void blockEvent(BlockPos pPos, Block pBlock, int pEventID, int pEventParam) {
+        this.blockEvents.add(new BlockEventData(pPos, pBlock, pEventID, pEventParam));
     }
 
     private void runBlockEvents() {
@@ -1168,9 +1168,9 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         this.blockEvents.addAll(this.blockEventsToReschedule);
     }
 
-    private boolean doBlockEvent(BlockEventData p_8699_) {
-        BlockState blockstate = this.getBlockState(p_8699_.pos());
-        return blockstate.is(p_8699_.block()) ? blockstate.triggerEvent(this, p_8699_.pos(), p_8699_.paramA(), p_8699_.paramB()) : false;
+    private boolean doBlockEvent(BlockEventData pEvent) {
+        BlockState blockstate = this.getBlockState(pEvent.pos());
+        return blockstate.is(pEvent.block()) ? blockstate.triggerEvent(this, pEvent.pos(), pEvent.paramA(), pEvent.paramB()) : false;
     }
 
     public LevelTicks<Block> getBlockTicks() {
@@ -1196,32 +1196,32 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
     }
 
     public <T extends ParticleOptions> int sendParticles(
-        T p_8768_, double p_8769_, double p_8770_, double p_8771_, int p_8772_, double p_8773_, double p_8774_, double p_8775_, double p_8776_
+        T pType, double pPosX, double pPosY, double pPosZ, int pParticleCount, double pXOffset, double pYOffset, double pZOffset, double pSpeed
     ) {
-        return this.sendParticles(p_8768_, false, false, p_8769_, p_8770_, p_8771_, p_8772_, p_8773_, p_8774_, p_8775_, p_8776_);
+        return this.sendParticles(pType, false, false, pPosX, pPosY, pPosZ, pParticleCount, pXOffset, pYOffset, pZOffset, pSpeed);
     }
 
     public <T extends ParticleOptions> int sendParticles(
-        T p_8626_,
-        boolean p_8627_,
-        boolean p_378427_,
-        double p_8628_,
-        double p_8629_,
-        double p_8630_,
-        int p_8631_,
-        double p_8632_,
-        double p_8633_,
-        double p_8634_,
-        double p_8635_
+        T pType,
+        boolean pOverrideLimiter,
+        boolean pAlwaysShow,
+        double pPosX,
+        double pPosY,
+        double pPosZ,
+        int pParticleCount,
+        double pXOffset,
+        double pYOffset,
+        double pZOffset,
+        double pSpeed
     ) {
         ClientboundLevelParticlesPacket clientboundlevelparticlespacket = new ClientboundLevelParticlesPacket(
-            p_8626_, p_8627_, p_378427_, p_8628_, p_8629_, p_8630_, (float)p_8632_, (float)p_8633_, (float)p_8634_, (float)p_8635_, p_8631_
+            pType, pOverrideLimiter, pAlwaysShow, pPosX, pPosY, pPosZ, (float)pXOffset, (float)pYOffset, (float)pZOffset, (float)pSpeed, pParticleCount
         );
         int i = 0;
 
         for (int j = 0; j < this.players.size(); j++) {
             ServerPlayer serverplayer = this.players.get(j);
-            if (this.sendParticles(serverplayer, p_8627_, p_8628_, p_8629_, p_8630_, clientboundlevelparticlespacket)) {
+            if (this.sendParticles(serverplayer, pOverrideLimiter, pPosX, pPosY, pPosZ, clientboundlevelparticlespacket)) {
                 i++;
             }
         }
@@ -1230,32 +1230,32 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
     }
 
     public <T extends ParticleOptions> boolean sendParticles(
-        ServerPlayer p_376717_,
-        T p_375887_,
-        boolean p_376188_,
-        boolean p_378707_,
-        double p_378284_,
-        double p_377685_,
-        double p_375756_,
-        int p_377117_,
-        double p_378090_,
-        double p_376820_,
-        double p_376920_,
-        double p_377557_
+        ServerPlayer pPlayer,
+        T pParticle,
+        boolean pOverrideLimiter,
+        boolean pAlwaysShow,
+        double pPosX,
+        double pPosY,
+        double pPosZ,
+        int pCount,
+        double pXDist,
+        double pYDist,
+        double pZDist,
+        double pMaxSpeed
     ) {
         Packet<?> packet = new ClientboundLevelParticlesPacket(
-            p_375887_, p_376188_, p_378707_, p_378284_, p_377685_, p_375756_, (float)p_378090_, (float)p_376820_, (float)p_376920_, (float)p_377557_, p_377117_
+            pParticle, pOverrideLimiter, pAlwaysShow, pPosX, pPosY, pPosZ, (float)pXDist, (float)pYDist, (float)pZDist, (float)pMaxSpeed, pCount
         );
-        return this.sendParticles(p_376717_, p_376188_, p_378284_, p_377685_, p_375756_, packet);
+        return this.sendParticles(pPlayer, pOverrideLimiter, pPosX, pPosY, pPosZ, packet);
     }
 
-    private boolean sendParticles(ServerPlayer p_8637_, boolean p_8638_, double p_8639_, double p_8640_, double p_8641_, Packet<?> p_8642_) {
-        if (p_8637_.level() != this) {
+    private boolean sendParticles(ServerPlayer pPlayer, boolean pLongDistance, double pPosX, double pPosY, double pPosZ, Packet<?> pPacket) {
+        if (pPlayer.level() != this) {
             return false;
         } else {
-            BlockPos blockpos = p_8637_.blockPosition();
-            if (blockpos.closerToCenterThan(new Vec3(p_8639_, p_8640_, p_8641_), p_8638_ ? 512.0 : 32.0)) {
-                p_8637_.connection.send(p_8642_);
+            BlockPos blockpos = pPlayer.blockPosition();
+            if (blockpos.closerToCenterThan(new Vec3(pPosX, pPosY, pPosZ), pLongDistance ? 512.0 : 32.0)) {
+                pPlayer.connection.send(pPacket);
                 return true;
             } else {
                 return false;
@@ -1265,20 +1265,20 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
 
     @Nullable
     @Override
-    public Entity getEntity(int p_8597_) {
-        return this.getEntities().get(p_8597_);
+    public Entity getEntity(int pId) {
+        return this.getEntities().get(pId);
     }
 
     @Nullable
-    public Entity getEntity(UUID p_8792_) {
-        return this.getEntities().get(p_8792_);
+    public Entity getEntity(UUID pUniqueId) {
+        return this.getEntities().get(pUniqueId);
     }
 
     @Deprecated
     @Nullable
-    public Entity getEntityOrPart(int p_143318_) {
-        Entity entity = this.getEntities().get(p_143318_);
-        return entity != null ? entity : this.dragonParts.get(p_143318_);
+    public Entity getEntityOrPart(int pId) {
+        Entity entity = this.getEntities().get(pId);
+        return entity != null ? entity : this.dragonParts.get(pId);
     }
 
     @Override
@@ -1287,26 +1287,26 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
     }
 
     @Nullable
-    public BlockPos findNearestMapStructure(TagKey<Structure> p_215012_, BlockPos p_215013_, int p_215014_, boolean p_215015_) {
+    public BlockPos findNearestMapStructure(TagKey<Structure> pStructureTag, BlockPos pPos, int pRadius, boolean pSkipExistingChunks) {
         if (!this.server.getWorldData().worldGenOptions().generateStructures()) {
             return null;
         } else {
-            Optional<HolderSet.Named<Structure>> optional = this.registryAccess().lookupOrThrow(Registries.STRUCTURE).get(p_215012_);
+            Optional<HolderSet.Named<Structure>> optional = this.registryAccess().lookupOrThrow(Registries.STRUCTURE).get(pStructureTag);
             if (optional.isEmpty()) {
                 return null;
             } else {
-                Pair<BlockPos, Holder<Structure>> pair = this.getChunkSource().getGenerator().findNearestMapStructure(this, optional.get(), p_215013_, p_215014_, p_215015_);
+                Pair<BlockPos, Holder<Structure>> pair = this.getChunkSource().getGenerator().findNearestMapStructure(this, optional.get(), pPos, pRadius, pSkipExistingChunks);
                 return pair != null ? pair.getFirst() : null;
             }
         }
     }
 
     @Nullable
-    public Pair<BlockPos, Holder<Biome>> findClosestBiome3d(Predicate<Holder<Biome>> p_215070_, BlockPos p_215071_, int p_215072_, int p_215073_, int p_215074_) {
+    public Pair<BlockPos, Holder<Biome>> findClosestBiome3d(Predicate<Holder<Biome>> pBiomePredicate, BlockPos pPos, int pRadius, int pHorizontalStep, int pVerticalStep) {
         return this.getChunkSource()
             .getGenerator()
             .getBiomeSource()
-            .findClosestBiome3d(p_215071_, p_215072_, p_215073_, p_215074_, p_215070_, this.getChunkSource().randomState().sampler(), this);
+            .findClosestBiome3d(pPos, pRadius, pHorizontalStep, pVerticalStep, pBiomePredicate, this.getChunkSource().randomState().sampler(), this);
     }
 
     public RecipeManager recipeAccess() {
@@ -1343,12 +1343,12 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         return this.getServer().overworld().getDataStorage().computeIfAbsent(MapIndex.factory(), "idcounts").getFreeAuxValueForMap();
     }
 
-    public void setDefaultSpawnPos(BlockPos p_8734_, float p_8735_) {
+    public void setDefaultSpawnPos(BlockPos pPos, float pAngle) {
         BlockPos blockpos = this.levelData.getSpawnPos();
         float f = this.levelData.getSpawnAngle();
-        if (!blockpos.equals(p_8734_) || f != p_8735_) {
-            this.levelData.setSpawn(p_8734_, p_8735_);
-            this.getServer().getPlayerList().broadcastAll(new ClientboundSetDefaultSpawnPositionPacket(p_8734_, p_8735_));
+        if (!blockpos.equals(pPos) || f != pAngle) {
+            this.levelData.setSpawn(pPos, pAngle);
+            this.getServer().getPlayerList().broadcastAll(new ClientboundSetDefaultSpawnPositionPacket(pPos, pAngle));
         }
 
         if (this.lastSpawnChunkRadius > 1) {
@@ -1357,7 +1357,7 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
 
         int i = this.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS) + 1;
         if (i > 1) {
-            this.getChunkSource().addRegionTicket(TicketType.START, new ChunkPos(p_8734_), i, Unit.INSTANCE);
+            this.getChunkSource().addRegionTicket(TicketType.START, new ChunkPos(pPos), i, Unit.INSTANCE);
         }
 
         this.lastSpawnChunkRadius = i;
@@ -1368,15 +1368,15 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         return (LongSet)(forcedchunkssaveddata != null ? LongSets.unmodifiable(forcedchunkssaveddata.getChunks()) : LongSets.EMPTY_SET);
     }
 
-    public boolean setChunkForced(int p_8603_, int p_8604_, boolean p_8605_) {
+    public boolean setChunkForced(int pChunkX, int pChunkZ, boolean pAdd) {
         ForcedChunksSavedData forcedchunkssaveddata = this.getDataStorage().computeIfAbsent(ForcedChunksSavedData.factory(), "chunks");
-        ChunkPos chunkpos = new ChunkPos(p_8603_, p_8604_);
+        ChunkPos chunkpos = new ChunkPos(pChunkX, pChunkZ);
         long i = chunkpos.toLong();
         boolean flag;
-        if (p_8605_) {
+        if (pAdd) {
             flag = forcedchunkssaveddata.getChunks().add(i);
             if (flag) {
-                this.getChunk(p_8603_, p_8604_);
+                this.getChunk(pChunkX, pChunkZ);
             }
         } else {
             flag = forcedchunkssaveddata.getChunks().remove(i);
@@ -1384,7 +1384,7 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
 
         forcedchunkssaveddata.setDirty(flag);
         if (flag) {
-            this.getChunkSource().updateChunkForced(chunkpos, p_8605_);
+            this.getChunkSource().updateChunkForced(chunkpos, pAdd);
         }
 
         return flag;
@@ -1396,11 +1396,11 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
     }
 
     @Override
-    public void onBlockStateChange(BlockPos p_8751_, BlockState p_8752_, BlockState p_8753_) {
-        Optional<Holder<PoiType>> optional = PoiTypes.forState(p_8752_);
-        Optional<Holder<PoiType>> optional1 = PoiTypes.forState(p_8753_);
+    public void onBlockStateChange(BlockPos pPos, BlockState pBlockState, BlockState pNewState) {
+        Optional<Holder<PoiType>> optional = PoiTypes.forState(pBlockState);
+        Optional<Holder<PoiType>> optional1 = PoiTypes.forState(pNewState);
         if (!Objects.equals(optional, optional1)) {
-            BlockPos blockpos = p_8751_.immutable();
+            BlockPos blockpos = pPos.immutable();
             optional.ifPresent(p_215081_ -> this.getServer().execute(() -> {
                     this.getPoiManager().remove(blockpos);
                     DebugPackets.sendPoiRemovedPacket(this, blockpos);
@@ -1416,20 +1416,20 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         return this.getChunkSource().getPoiManager();
     }
 
-    public boolean isVillage(BlockPos p_8803_) {
-        return this.isCloseToVillage(p_8803_, 1);
+    public boolean isVillage(BlockPos pPos) {
+        return this.isCloseToVillage(pPos, 1);
     }
 
-    public boolean isVillage(SectionPos p_8763_) {
-        return this.isVillage(p_8763_.center());
+    public boolean isVillage(SectionPos pPos) {
+        return this.isVillage(pPos.center());
     }
 
-    public boolean isCloseToVillage(BlockPos p_8737_, int p_8738_) {
-        return p_8738_ > 6 ? false : this.sectionsToVillage(SectionPos.of(p_8737_)) <= p_8738_;
+    public boolean isCloseToVillage(BlockPos pPos, int pSections) {
+        return pSections > 6 ? false : this.sectionsToVillage(SectionPos.of(pPos)) <= pSections;
     }
 
-    public int sectionsToVillage(SectionPos p_8829_) {
-        return this.getPoiManager().sectionsToVillage(p_8829_);
+    public int sectionsToVillage(SectionPos pPos) {
+        return this.getPoiManager().sectionsToVillage(pPos);
     }
 
     public Raids getRaids() {
@@ -1437,22 +1437,22 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
     }
 
     @Nullable
-    public Raid getRaidAt(BlockPos p_8833_) {
-        return this.raids.getNearbyRaid(p_8833_, 9216);
+    public Raid getRaidAt(BlockPos pPos) {
+        return this.raids.getNearbyRaid(pPos, 9216);
     }
 
-    public boolean isRaided(BlockPos p_8844_) {
-        return this.getRaidAt(p_8844_) != null;
+    public boolean isRaided(BlockPos pPos) {
+        return this.getRaidAt(pPos) != null;
     }
 
-    public void onReputationEvent(ReputationEventType p_8671_, Entity p_8672_, ReputationEventHandler p_8673_) {
-        p_8673_.onReputationEventFrom(p_8671_, p_8672_);
+    public void onReputationEvent(ReputationEventType pType, Entity pTarget, ReputationEventHandler pHost) {
+        pHost.onReputationEventFrom(pType, pTarget);
     }
 
-    public void saveDebugReport(Path p_8787_) throws IOException {
+    public void saveDebugReport(Path pPath) throws IOException {
         ChunkMap chunkmap = this.getChunkSource().chunkMap;
 
-        try (Writer writer = Files.newBufferedWriter(p_8787_.resolve("stats.txt"))) {
+        try (Writer writer = Files.newBufferedWriter(pPath.resolve("stats.txt"))) {
             writer.write(String.format(Locale.ROOT, "spawning_chunks: %d\n", chunkmap.getDistanceManager().getNaturalSpawnChunkCount()));
             NaturalSpawner.SpawnState naturalspawner$spawnstate = this.getChunkSource().getLastSpawnState();
             if (naturalspawner$spawnstate != null) {
@@ -1472,36 +1472,36 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         CrashReport crashreport = new CrashReport("Level dump", new Exception("dummy"));
         this.fillReportDetails(crashreport);
 
-        try (Writer writer3 = Files.newBufferedWriter(p_8787_.resolve("example_crash.txt"))) {
+        try (Writer writer3 = Files.newBufferedWriter(pPath.resolve("example_crash.txt"))) {
             writer3.write(crashreport.getFriendlyReport(ReportType.TEST));
         }
 
-        Path path = p_8787_.resolve("chunks.csv");
+        Path path = pPath.resolve("chunks.csv");
 
         try (Writer writer4 = Files.newBufferedWriter(path)) {
             chunkmap.dumpChunks(writer4);
         }
 
-        Path path1 = p_8787_.resolve("entity_chunks.csv");
+        Path path1 = pPath.resolve("entity_chunks.csv");
 
         try (Writer writer5 = Files.newBufferedWriter(path1)) {
             this.entityManager.dumpSections(writer5);
         }
 
-        Path path2 = p_8787_.resolve("entities.csv");
+        Path path2 = pPath.resolve("entities.csv");
 
         try (Writer writer1 = Files.newBufferedWriter(path2)) {
             dumpEntities(writer1, this.getEntities().getAll());
         }
 
-        Path path3 = p_8787_.resolve("block_entities.csv");
+        Path path3 = pPath.resolve("block_entities.csv");
 
         try (Writer writer2 = Files.newBufferedWriter(path3)) {
             this.dumpBlockEntityTickers(writer2);
         }
     }
 
-    private static void dumpEntities(Writer p_8782_, Iterable<Entity> p_8783_) throws IOException {
+    private static void dumpEntities(Writer pWriter, Iterable<Entity> pEntities) throws IOException {
         CsvOutput csvoutput = CsvOutput.builder()
             .addColumn("x")
             .addColumn("y")
@@ -1511,9 +1511,9 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
             .addColumn("alive")
             .addColumn("display_name")
             .addColumn("custom_name")
-            .build(p_8782_);
+            .build(pWriter);
 
-        for (Entity entity : p_8783_) {
+        for (Entity entity : pEntities) {
             Component component = entity.getCustomName();
             Component component1 = entity.getDisplayName();
             csvoutput.writeRow(
@@ -1529,8 +1529,8 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         }
     }
 
-    private void dumpBlockEntityTickers(Writer p_143300_) throws IOException {
-        CsvOutput csvoutput = CsvOutput.builder().addColumn("x").addColumn("y").addColumn("z").addColumn("type").build(p_143300_);
+    private void dumpBlockEntityTickers(Writer pOutput) throws IOException {
+        CsvOutput csvoutput = CsvOutput.builder().addColumn("x").addColumn("y").addColumn("z").addColumn("type").build(pOutput);
 
         for (TickingBlockEntity tickingblockentity : this.blockEntityTickers) {
             BlockPos blockpos = tickingblockentity.getPos();
@@ -1539,14 +1539,14 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
     }
 
     @VisibleForTesting
-    public void clearBlockEvents(BoundingBox p_8723_) {
-        this.blockEvents.removeIf(p_207568_ -> p_8723_.isInside(p_207568_.pos()));
+    public void clearBlockEvents(BoundingBox pBoundingBox) {
+        this.blockEvents.removeIf(p_207568_ -> pBoundingBox.isInside(p_207568_.pos()));
     }
 
     @Override
-    public void blockUpdated(BlockPos p_8743_, Block p_8744_) {
+    public void blockUpdated(BlockPos pPos, Block pBlock) {
         if (!this.isDebug()) {
-            this.updateNeighborsAt(p_8743_, p_8744_);
+            this.updateNeighborsAt(pPos, pBlock);
         }
     }
 
@@ -1599,12 +1599,12 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         );
     }
 
-    private static <T> String getTypeCount(Iterable<T> p_143302_, Function<T, String> p_143303_) {
+    private static <T> String getTypeCount(Iterable<T> pObjects, Function<T, String> pTypeGetter) {
         try {
             Object2IntOpenHashMap<String> object2intopenhashmap = new Object2IntOpenHashMap<>();
 
-            for (T t : p_143302_) {
-                String s = p_143303_.apply(t);
+            for (T t : pObjects) {
+                String s = pTypeGetter.apply(t);
                 object2intopenhashmap.addTo(s, 1);
             }
 
@@ -1624,20 +1624,20 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         return this.entityManager.getEntityGetter();
     }
 
-    public void addLegacyChunkEntities(Stream<Entity> p_143312_) {
-        this.entityManager.addLegacyChunkEntities(p_143312_);
+    public void addLegacyChunkEntities(Stream<Entity> pEntities) {
+        this.entityManager.addLegacyChunkEntities(pEntities);
     }
 
-    public void addWorldGenChunkEntities(Stream<Entity> p_143328_) {
-        this.entityManager.addWorldGenChunkEntities(p_143328_);
+    public void addWorldGenChunkEntities(Stream<Entity> pEntities) {
+        this.entityManager.addWorldGenChunkEntities(pEntities);
     }
 
-    public void startTickingChunk(LevelChunk p_184103_) {
-        p_184103_.unpackTicks(this.getLevelData().getGameTime());
+    public void startTickingChunk(LevelChunk pChunk) {
+        pChunk.unpackTicks(this.getLevelData().getGameTime());
     }
 
-    public void onStructureStartsAvailable(ChunkAccess p_196558_) {
-        this.server.execute(() -> this.structureCheck.onStructureLoad(p_196558_.getPos(), p_196558_.getAllStarts()));
+    public void onStructureStartsAvailable(ChunkAccess pChunk) {
+        this.server.execute(() -> this.structureCheck.onStructureLoad(pChunk.getPos(), pChunk.getAllStarts()));
     }
 
     public PathTypeCache getPathTypeCache() {
@@ -1655,24 +1655,24 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         return "Chunks[S] W: " + this.chunkSource.gatherStats() + " E: " + this.entityManager.gatherStats();
     }
 
-    public boolean areEntitiesLoaded(long p_143320_) {
-        return this.entityManager.areEntitiesLoaded(p_143320_);
+    public boolean areEntitiesLoaded(long pChunkPos) {
+        return this.entityManager.areEntitiesLoaded(pChunkPos);
     }
 
-    private boolean isPositionTickingWithEntitiesLoaded(long p_184111_) {
-        return this.areEntitiesLoaded(p_184111_) && this.chunkSource.isPositionTicking(p_184111_);
+    private boolean isPositionTickingWithEntitiesLoaded(long pChunkPos) {
+        return this.areEntitiesLoaded(pChunkPos) && this.chunkSource.isPositionTicking(pChunkPos);
     }
 
-    public boolean isPositionEntityTicking(BlockPos p_143341_) {
-        return this.entityManager.canPositionTick(p_143341_) && this.chunkSource.chunkMap.getDistanceManager().inEntityTickingRange(ChunkPos.asLong(p_143341_));
+    public boolean isPositionEntityTicking(BlockPos pPos) {
+        return this.entityManager.canPositionTick(pPos) && this.chunkSource.chunkMap.getDistanceManager().inEntityTickingRange(ChunkPos.asLong(pPos));
     }
 
-    public boolean isNaturalSpawningAllowed(BlockPos p_201919_) {
-        return this.entityManager.canPositionTick(p_201919_);
+    public boolean isNaturalSpawningAllowed(BlockPos pPos) {
+        return this.entityManager.canPositionTick(pPos);
     }
 
-    public boolean isNaturalSpawningAllowed(ChunkPos p_201917_) {
-        return this.entityManager.canPositionTick(p_201917_);
+    public boolean isNaturalSpawningAllowed(ChunkPos pChunkPos) {
+        return this.entityManager.canPositionTick(pChunkPos);
     }
 
     @Override
@@ -1690,8 +1690,8 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
         return this.server.fuelValues();
     }
 
-    public RandomSource getRandomSequence(ResourceLocation p_287689_) {
-        return this.randomSequences.get(p_287689_);
+    public RandomSource getRandomSequence(ResourceLocation pLocation) {
+        return this.randomSequences.get(pLocation);
     }
 
     public RandomSequences getRandomSequences() {

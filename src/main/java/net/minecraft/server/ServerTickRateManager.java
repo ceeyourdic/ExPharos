@@ -15,8 +15,8 @@ public class ServerTickRateManager extends TickRateManager {
     private boolean previousIsFrozen = false;
     private final MinecraftServer server;
 
-    public ServerTickRateManager(MinecraftServer p_311395_) {
-        this.server = p_311395_;
+    public ServerTickRateManager(MinecraftServer pServer) {
+        this.server = pServer;
     }
 
     public boolean isSprinting() {
@@ -37,11 +37,11 @@ public class ServerTickRateManager extends TickRateManager {
         this.server.getPlayerList().broadcastAll(ClientboundTickingStepPacket.from(this));
     }
 
-    public boolean stepGameIfPaused(int p_312205_) {
+    public boolean stepGameIfPaused(int pTicks) {
         if (!this.isFrozen()) {
             return false;
         } else {
-            this.frozenTicksToRun = p_312205_;
+            this.frozenTicksToRun = pTicks;
             this.updateStepTicks();
             return true;
         }
@@ -66,11 +66,11 @@ public class ServerTickRateManager extends TickRateManager {
         }
     }
 
-    public boolean requestGameToSprint(int p_311983_) {
+    public boolean requestGameToSprint(int pSprintTime) {
         boolean flag = this.remainingSprintTicks > 0L;
         this.sprintTimeSpend = 0L;
-        this.scheduledCurrentSprintTicks = (long)p_311983_;
-        this.remainingSprintTicks = (long)p_311983_;
+        this.scheduledCurrentSprintTicks = (long)pSprintTime;
+        this.remainingSprintTicks = (long)pSprintTime;
         this.previousIsFrozen = this.isFrozen();
         this.setFrozen(false);
         return flag;
@@ -113,8 +113,8 @@ public class ServerTickRateManager extends TickRateManager {
         this.updateStateToClients();
     }
 
-    public void updateJoiningPlayer(ServerPlayer p_310808_) {
-        p_310808_.connection.send(ClientboundTickingStatePacket.from(this));
-        p_310808_.connection.send(ClientboundTickingStepPacket.from(this));
+    public void updateJoiningPlayer(ServerPlayer pPlayer) {
+        pPlayer.connection.send(ClientboundTickingStatePacket.from(this));
+        pPlayer.connection.send(ClientboundTickingStepPacket.from(this));
     }
 }

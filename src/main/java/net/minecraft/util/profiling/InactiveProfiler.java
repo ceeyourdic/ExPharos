@@ -22,11 +22,11 @@ public class InactiveProfiler implements ProfileCollector {
     }
 
     @Override
-    public void push(String p_18559_) {
+    public void push(String pName) {
     }
 
     @Override
-    public void push(Supplier<String> p_18561_) {
+    public void push(Supplier<String> pNameSupplier) {
     }
 
     @Override
@@ -38,11 +38,11 @@ public class InactiveProfiler implements ProfileCollector {
     }
 
     @Override
-    public void popPush(String p_18564_) {
+    public void popPush(String pName) {
     }
 
     @Override
-    public void popPush(Supplier<String> p_18566_) {
+    public void popPush(Supplier<String> pNameSupplier) {
     }
 
     @Override

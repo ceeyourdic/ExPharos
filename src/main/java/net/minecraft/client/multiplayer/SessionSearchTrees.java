@@ -39,9 +39,9 @@ public class SessionSearchTrees {
     private CompletableFuture<SearchTree<RecipeCollection>> recipeSearch = CompletableFuture.completedFuture(SearchTree.empty());
     private final Map<SessionSearchTrees.Key, Runnable> reloaders = new IdentityHashMap<>();
 
-    private void register(SessionSearchTrees.Key p_342736_, Runnable p_343077_) {
-        p_343077_.run();
-        this.reloaders.put(p_342736_, p_343077_);
+    private void register(SessionSearchTrees.Key pKey, Runnable pReloader) {
+        pReloader.run();
+        this.reloaders.put(pKey, pReloader);
     }
 
     public void rebuildAfterLanguageChange() {
@@ -50,21 +50,21 @@ public class SessionSearchTrees {
         }
     }
 
-    private static Stream<String> getTooltipLines(Stream<ItemStack> p_344293_, Item.TooltipContext p_343228_, TooltipFlag p_342315_) {
-        return p_344293_.<Component>flatMap(p_343071_ -> p_343071_.getTooltipLines(p_343228_, null, p_342315_).stream())
+    private static Stream<String> getTooltipLines(Stream<ItemStack> pItems, Item.TooltipContext pContext, TooltipFlag pTooltipFlag) {
+        return pItems.<Component>flatMap(p_343071_ -> p_343071_.getTooltipLines(pContext, null, pTooltipFlag).stream())
             .map(p_344266_ -> ChatFormatting.stripFormatting(p_344266_.getString()).trim())
             .filter(p_345189_ -> !p_345189_.isEmpty());
     }
 
-    public void updateRecipes(ClientRecipeBook p_343609_, Level p_362281_) {
+    public void updateRecipes(ClientRecipeBook pRecipeBook, Level pLevel) {
         this.register(
             RECIPE_COLLECTIONS,
             () -> {
-                List<RecipeCollection> list = p_343609_.getCollections();
-                RegistryAccess registryaccess = p_362281_.registryAccess();
+                List<RecipeCollection> list = pRecipeBook.getCollections();
+                RegistryAccess registryaccess = pLevel.registryAccess();
                 Registry<Item> registry = registryaccess.lookupOrThrow(Registries.ITEM);
                 Item.TooltipContext item$tooltipcontext = Item.TooltipContext.of(registryaccess);
-                ContextMap contextmap = SlotDisplayContext.fromLevel(p_362281_);
+                ContextMap contextmap = SlotDisplayContext.fromLevel(pLevel);
                 TooltipFlag tooltipflag = TooltipFlag.Default.NORMAL;
                 CompletableFuture<?> completablefuture = this.recipeSearch;
                 this.recipeSearch = CompletableFuture.supplyAsync(
@@ -91,13 +91,13 @@ public class SessionSearchTrees {
         return this.recipeSearch.join();
     }
 
-    public void updateCreativeTags(List<ItemStack> p_344581_) {
+    public void updateCreativeTags(List<ItemStack> pItems) {
         this.register(
             CREATIVE_TAGS,
             () -> {
                 CompletableFuture<?> completablefuture = this.creativeByTagSearch;
                 this.creativeByTagSearch = CompletableFuture.supplyAsync(
-                    () -> new IdSearchTree<>(p_342206_ -> p_342206_.getTags().map(TagKey::location), p_344581_), Util.backgroundExecutor()
+                    () -> new IdSearchTree<>(p_342206_ -> p_342206_.getTags().map(TagKey::location), pItems), Util.backgroundExecutor()
                 );
                 completablefuture.cancel(true);
             }
@@ -108,18 +108,18 @@ public class SessionSearchTrees {
         return this.creativeByTagSearch.join();
     }
 
-    public void updateCreativeTooltips(HolderLookup.Provider p_343364_, List<ItemStack> p_342500_) {
+    public void updateCreativeTooltips(HolderLookup.Provider pRegistries, List<ItemStack> pItems) {
         this.register(
             CREATIVE_NAMES,
             () -> {
-                Item.TooltipContext item$tooltipcontext = Item.TooltipContext.of(p_343364_);
+                Item.TooltipContext item$tooltipcontext = Item.TooltipContext.of(pRegistries);
                 TooltipFlag tooltipflag = TooltipFlag.Default.NORMAL.asCreative();
                 CompletableFuture<?> completablefuture = this.creativeByNameSearch;
                 this.creativeByNameSearch = CompletableFuture.supplyAsync(
                     () -> new FullTextSearchTree<>(
                             p_345254_ -> getTooltipLines(Stream.of(p_345254_), item$tooltipcontext, tooltipflag),
                             p_344415_ -> p_344415_.getItemHolder().unwrapKey().map(ResourceKey::location).stream(),
-                            p_342500_
+                            pItems
                         ),
                     Util.backgroundExecutor()
                 );

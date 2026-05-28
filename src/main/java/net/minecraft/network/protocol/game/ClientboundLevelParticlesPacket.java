@@ -24,57 +24,57 @@ public class ClientboundLevelParticlesPacket implements Packet<ClientGamePacketL
     private final ParticleOptions particle;
 
     public <T extends ParticleOptions> ClientboundLevelParticlesPacket(
-        T p_132292_,
-        boolean p_132293_,
-        boolean p_378159_,
-        double p_132294_,
-        double p_132295_,
-        double p_132296_,
-        float p_132297_,
-        float p_132298_,
-        float p_132299_,
-        float p_132300_,
-        int p_132301_
+        T pParticle,
+        boolean pOverrideLimiter,
+        boolean pAlwaysShow,
+        double pX,
+        double pY,
+        double pZ,
+        float pXDist,
+        float pYDist,
+        float pZDist,
+        float pMaxSpeed,
+        int pCount
     ) {
-        this.particle = p_132292_;
-        this.overrideLimiter = p_132293_;
-        this.alwaysShow = p_378159_;
-        this.x = p_132294_;
-        this.y = p_132295_;
-        this.z = p_132296_;
-        this.xDist = p_132297_;
-        this.yDist = p_132298_;
-        this.zDist = p_132299_;
-        this.maxSpeed = p_132300_;
-        this.count = p_132301_;
+        this.particle = pParticle;
+        this.overrideLimiter = pOverrideLimiter;
+        this.alwaysShow = pAlwaysShow;
+        this.x = pX;
+        this.y = pY;
+        this.z = pZ;
+        this.xDist = pXDist;
+        this.yDist = pYDist;
+        this.zDist = pZDist;
+        this.maxSpeed = pMaxSpeed;
+        this.count = pCount;
     }
 
-    private ClientboundLevelParticlesPacket(RegistryFriendlyByteBuf p_334002_) {
-        this.overrideLimiter = p_334002_.readBoolean();
-        this.alwaysShow = p_334002_.readBoolean();
-        this.x = p_334002_.readDouble();
-        this.y = p_334002_.readDouble();
-        this.z = p_334002_.readDouble();
-        this.xDist = p_334002_.readFloat();
-        this.yDist = p_334002_.readFloat();
-        this.zDist = p_334002_.readFloat();
-        this.maxSpeed = p_334002_.readFloat();
-        this.count = p_334002_.readInt();
-        this.particle = ParticleTypes.STREAM_CODEC.decode(p_334002_);
+    private ClientboundLevelParticlesPacket(RegistryFriendlyByteBuf pBuffer) {
+        this.overrideLimiter = pBuffer.readBoolean();
+        this.alwaysShow = pBuffer.readBoolean();
+        this.x = pBuffer.readDouble();
+        this.y = pBuffer.readDouble();
+        this.z = pBuffer.readDouble();
+        this.xDist = pBuffer.readFloat();
+        this.yDist = pBuffer.readFloat();
+        this.zDist = pBuffer.readFloat();
+        this.maxSpeed = pBuffer.readFloat();
+        this.count = pBuffer.readInt();
+        this.particle = ParticleTypes.STREAM_CODEC.decode(pBuffer);
     }
 
-    private void write(RegistryFriendlyByteBuf p_335688_) {
-        p_335688_.writeBoolean(this.overrideLimiter);
-        p_335688_.writeBoolean(this.alwaysShow);
-        p_335688_.writeDouble(this.x);
-        p_335688_.writeDouble(this.y);
-        p_335688_.writeDouble(this.z);
-        p_335688_.writeFloat(this.xDist);
-        p_335688_.writeFloat(this.yDist);
-        p_335688_.writeFloat(this.zDist);
-        p_335688_.writeFloat(this.maxSpeed);
-        p_335688_.writeInt(this.count);
-        ParticleTypes.STREAM_CODEC.encode(p_335688_, this.particle);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeBoolean(this.overrideLimiter);
+        pBuffer.writeBoolean(this.alwaysShow);
+        pBuffer.writeDouble(this.x);
+        pBuffer.writeDouble(this.y);
+        pBuffer.writeDouble(this.z);
+        pBuffer.writeFloat(this.xDist);
+        pBuffer.writeFloat(this.yDist);
+        pBuffer.writeFloat(this.zDist);
+        pBuffer.writeFloat(this.maxSpeed);
+        pBuffer.writeInt(this.count);
+        ParticleTypes.STREAM_CODEC.encode(pBuffer, this.particle);
     }
 
     @Override
@@ -82,8 +82,8 @@ public class ClientboundLevelParticlesPacket implements Packet<ClientGamePacketL
         return GamePacketTypes.CLIENTBOUND_LEVEL_PARTICLES;
     }
 
-    public void handle(ClientGamePacketListener p_132310_) {
-        p_132310_.handleParticleEvent(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleParticleEvent(this);
     }
 
     public boolean isOverrideLimiter() {

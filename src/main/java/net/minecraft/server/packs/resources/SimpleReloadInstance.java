@@ -25,39 +25,39 @@ public class SimpleReloadInstance<S> implements ReloadInstance {
     private final AtomicInteger doneTaskCounter = new AtomicInteger();
 
     public static SimpleReloadInstance<Void> of(
-        ResourceManager p_10816_, List<PreparableReloadListener> p_10817_, Executor p_10818_, Executor p_10819_, CompletableFuture<Unit> p_10820_
+        ResourceManager pResourceManager, List<PreparableReloadListener> pListeners, Executor pBackgroundExecutor, Executor pGameExecutor, CompletableFuture<Unit> pAlsoWaitedFor
     ) {
         return new SimpleReloadInstance<>(
-            p_10818_,
-            p_10819_,
-            p_10816_,
-            p_10817_,
-            (p_358750_, p_358751_, p_358752_, p_358753_, p_358754_) -> p_358752_.reload(p_358750_, p_358751_, p_10818_, p_358754_),
-            p_10820_
+            pBackgroundExecutor,
+            pGameExecutor,
+            pResourceManager,
+            pListeners,
+            (p_358750_, p_358751_, p_358752_, p_358753_, p_358754_) -> p_358752_.reload(p_358750_, p_358751_, pBackgroundExecutor, p_358754_),
+            pAlsoWaitedFor
         );
     }
 
     protected SimpleReloadInstance(
-        Executor p_10808_,
-        final Executor p_10809_,
-        ResourceManager p_10810_,
-        List<PreparableReloadListener> p_10811_,
-        SimpleReloadInstance.StateFactory<S> p_10812_,
-        CompletableFuture<Unit> p_10813_
+        Executor pBackgroundExecutor,
+        final Executor pGameExecutor,
+        ResourceManager pResourceManager,
+        List<PreparableReloadListener> pListeners,
+        SimpleReloadInstance.StateFactory<S> pStateFactory,
+        CompletableFuture<Unit> pAlsoWaitedFor
     ) {
-        this.listenerCount = p_10811_.size();
+        this.listenerCount = pListeners.size();
         this.startedTaskCounter.incrementAndGet();
-        p_10813_.thenRun(this.doneTaskCounter::incrementAndGet);
+        pAlsoWaitedFor.thenRun(this.doneTaskCounter::incrementAndGet);
         List<CompletableFuture<S>> list = Lists.newArrayList();
-        CompletableFuture<?> completablefuture = p_10813_;
-        this.preparingListeners = Sets.newHashSet(p_10811_);
+        CompletableFuture<?> completablefuture = pAlsoWaitedFor;
+        this.preparingListeners = Sets.newHashSet(pListeners);
 
-        for (final PreparableReloadListener preparablereloadlistener : p_10811_) {
+        for (final PreparableReloadListener preparablereloadlistener : pListeners) {
             final CompletableFuture<?> completablefuture1 = completablefuture;
-            CompletableFuture<S> completablefuture2 = p_10812_.create(new PreparableReloadListener.PreparationBarrier() {
+            CompletableFuture<S> completablefuture2 = pStateFactory.create(new PreparableReloadListener.PreparationBarrier() {
                 @Override
                 public <T> CompletableFuture<T> wait(T p_10858_) {
-                    p_10809_.execute(() -> {
+                    pGameExecutor.execute(() -> {
                         SimpleReloadInstance.this.preparingListeners.remove(preparablereloadlistener);
                         if (SimpleReloadInstance.this.preparingListeners.isEmpty()) {
                             SimpleReloadInstance.this.allPreparations.complete(Unit.INSTANCE);
@@ -65,15 +65,15 @@ public class SimpleReloadInstance<S> implements ReloadInstance {
                     });
                     return SimpleReloadInstance.this.allPreparations.thenCombine((CompletionStage<? extends T>)completablefuture1, (p_10861_, p_10862_) -> p_10858_);
                 }
-            }, p_10810_, preparablereloadlistener, p_10842_ -> {
+            }, pResourceManager, preparablereloadlistener, p_10842_ -> {
                 this.startedTaskCounter.incrementAndGet();
-                p_10808_.execute(() -> {
+                pBackgroundExecutor.execute(() -> {
                     p_10842_.run();
                     this.doneTaskCounter.incrementAndGet();
                 });
             }, p_10836_ -> {
                 this.startedReloads++;
-                p_10809_.execute(() -> {
+                pGameExecutor.execute(() -> {
                     p_10836_.run();
                     this.finishedReloads++;
                 });
@@ -99,25 +99,25 @@ public class SimpleReloadInstance<S> implements ReloadInstance {
     }
 
     public static ReloadInstance create(
-        ResourceManager p_203835_,
-        List<PreparableReloadListener> p_203836_,
-        Executor p_203837_,
-        Executor p_203838_,
-        CompletableFuture<Unit> p_203839_,
-        boolean p_203840_
+        ResourceManager pResourceManager,
+        List<PreparableReloadListener> pListeners,
+        Executor pBackgroundExecutor,
+        Executor pGameExecutor,
+        CompletableFuture<Unit> pAlsoWaitedFor,
+        boolean pProfiled
     ) {
-        return (ReloadInstance)(p_203840_
-            ? new ProfiledReloadInstance(p_203835_, p_203836_, p_203837_, p_203838_, p_203839_)
-            : of(p_203835_, p_203836_, p_203837_, p_203838_, p_203839_));
+        return (ReloadInstance)(pProfiled
+            ? new ProfiledReloadInstance(pResourceManager, pListeners, pBackgroundExecutor, pGameExecutor, pAlsoWaitedFor)
+            : of(pResourceManager, pListeners, pBackgroundExecutor, pGameExecutor, pAlsoWaitedFor));
     }
 
     protected interface StateFactory<S> {
         CompletableFuture<S> create(
-            PreparableReloadListener.PreparationBarrier p_10864_,
-            ResourceManager p_10865_,
-            PreparableReloadListener p_10866_,
-            Executor p_10867_,
-            Executor p_10868_
+            PreparableReloadListener.PreparationBarrier pPreperationBarrier,
+            ResourceManager pResourceManager,
+            PreparableReloadListener pListener,
+            Executor pBackgroundExecutor,
+            Executor pGameExecutor
         );
     }
 }

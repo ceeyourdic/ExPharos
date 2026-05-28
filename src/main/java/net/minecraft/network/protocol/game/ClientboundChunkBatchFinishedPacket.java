@@ -10,12 +10,12 @@ public record ClientboundChunkBatchFinishedPacket(int batchSize) implements Pack
         ClientboundChunkBatchFinishedPacket::write, ClientboundChunkBatchFinishedPacket::new
     );
 
-    private ClientboundChunkBatchFinishedPacket(FriendlyByteBuf p_298630_) {
-        this(p_298630_.readVarInt());
+    private ClientboundChunkBatchFinishedPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readVarInt());
     }
 
-    private void write(FriendlyByteBuf p_299639_) {
-        p_299639_.writeVarInt(this.batchSize);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.batchSize);
     }
 
     @Override

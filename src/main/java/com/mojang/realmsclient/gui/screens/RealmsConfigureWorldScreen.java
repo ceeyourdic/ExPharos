@@ -64,10 +64,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
     private boolean stateChanged;
     private final List<RealmsWorldSlotButton> slotButtonList = Lists.newArrayList();
 
-    public RealmsConfigureWorldScreen(RealmsMainScreen p_88411_, long p_88412_) {
+    public RealmsConfigureWorldScreen(RealmsMainScreen pLastScreen, long pServerId) {
         super(TITLE);
-        this.lastScreen = p_88411_;
-        this.serverId = p_88412_;
+        this.lastScreen = pLastScreen;
+        this.serverId = pServerId;
     }
 
     @Override
@@ -175,10 +175,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
         }
     }
 
-    private RealmsWorldSlotButton addSlotButton(int p_167386_) {
-        int i = this.frame(p_167386_);
+    private RealmsWorldSlotButton addSlotButton(int pIndex) {
+        int i = this.frame(pIndex);
         int j = row(5) + 5;
-        RealmsWorldSlotButton realmsworldslotbutton = new RealmsWorldSlotButton(i, j, 80, 80, p_167386_, p_325121_ -> {
+        RealmsWorldSlotButton realmsworldslotbutton = new RealmsWorldSlotButton(i, j, 80, 80, pIndex, p_325121_ -> {
             RealmsWorldSlotButton.State realmsworldslotbutton$state = ((RealmsWorldSlotButton)p_325121_).getState();
             if (realmsworldslotbutton$state != null) {
                 switch (realmsworldslotbutton$state.action) {
@@ -191,9 +191,9 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
                         if (realmsworldslotbutton$state.minigame) {
                             this.switchToMinigame();
                         } else if (realmsworldslotbutton$state.empty) {
-                            this.switchToEmptySlot(p_167386_, this.serverData);
+                            this.switchToEmptySlot(pIndex, this.serverData);
                         } else {
-                            this.switchToFullSlot(p_167386_, this.serverData);
+                            this.switchToFullSlot(pIndex, this.serverData);
                         }
                         break;
                     default:
@@ -208,12 +208,12 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
         return this.addRenderableWidget(realmsworldslotbutton);
     }
 
-    private int leftButton(int p_88464_) {
-        return this.leftX + p_88464_ * 95;
+    private int leftButton(int pIndex) {
+        return this.leftX + pIndex * 95;
     }
 
-    private int centerButton(int p_88466_, int p_88467_) {
-        return this.width / 2 - (p_88467_ * 105 - 5) / 2 + p_88466_ * 105;
+    private int centerButton(int pRow, int pColumn) {
+        return this.width / 2 - (pColumn * 105 - 5) / 2 + pRow * 105;
     }
 
     @Override
@@ -241,8 +241,8 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
         }
     }
 
-    private int frame(int p_88488_) {
-        return this.leftX + (p_88488_ - 1) * 98;
+    private int frame(int pIndex) {
+        return this.leftX + (pIndex - 1) * 98;
     }
 
     @Override
@@ -253,12 +253,12 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
         }
     }
 
-    public void fetchServerData(long p_88427_) {
+    public void fetchServerData(long pServerId) {
         new Thread(() -> {
             RealmsClient realmsclient = RealmsClient.create();
 
             try {
-                RealmsServer realmsserver = realmsclient.getOwnRealm(p_88427_);
+                RealmsServer realmsserver = realmsclient.getOwnRealm(pServerId);
                 this.minecraft.execute(() -> {
                     this.serverData = realmsserver;
                     this.disableButtons();
@@ -290,9 +290,9 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
         this.resetWorldButton.active = !this.serverData.expired;
     }
 
-    private void joinRealm(RealmsServer p_88439_) {
+    private void joinRealm(RealmsServer pServer) {
         if (this.serverData.state == RealmsServer.State.OPEN) {
-            RealmsMainScreen.play(p_88439_, this);
+            RealmsMainScreen.play(pServer, this);
         } else {
             this.openTheWorld(true);
         }
@@ -306,7 +306,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
         this.minecraft.setScreen(realmsselectworldtemplatescreen);
     }
 
-    private void switchToFullSlot(int p_88421_, RealmsServer p_88422_) {
+    private void switchToFullSlot(int pSlot, RealmsServer pServer) {
         this.minecraft
             .setScreen(
                 RealmsPopups.infoPopupScreen(
@@ -318,7 +318,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
                             .setScreen(
                                 new RealmsLongRunningMcoTaskScreen(
                                     this.lastScreen,
-                                    new SwitchSlotTask(p_88422_.id, p_88421_, () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen())))
+                                    new SwitchSlotTask(pServer.id, pSlot, () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen())))
                                 )
                             );
                     }
@@ -326,7 +326,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
             );
     }
 
-    private void switchToEmptySlot(int p_88469_, RealmsServer p_88470_) {
+    private void switchToEmptySlot(int pSlot, RealmsServer pServer) {
         this.minecraft
             .setScreen(
                 RealmsPopups.infoPopupScreen(
@@ -335,7 +335,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
                     p_340715_ -> {
                         this.stateChanged();
                         RealmsResetWorldScreen realmsresetworldscreen = RealmsResetWorldScreen.forEmptySlot(
-                            this, p_88469_, p_88470_, () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen()))
+                            this, pSlot, pServer, () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen()))
                         );
                         this.minecraft.setScreen(realmsresetworldscreen);
                     }
@@ -343,19 +343,19 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
             );
     }
 
-    private void drawServerStatus(GuiGraphics p_281709_, int p_88491_, int p_88492_, int p_88493_, int p_88494_) {
+    private void drawServerStatus(GuiGraphics pGuiGraphics, int pX, int pY, int pMouseX, int pMouseY) {
         if (this.serverData.expired) {
-            this.drawRealmStatus(p_281709_, p_88491_, p_88492_, p_88493_, p_88494_, EXPIRED_SPRITE, () -> SERVER_EXPIRED_TOOLTIP);
+            this.drawRealmStatus(pGuiGraphics, pX, pY, pMouseX, pMouseY, EXPIRED_SPRITE, () -> SERVER_EXPIRED_TOOLTIP);
         } else if (this.serverData.state == RealmsServer.State.CLOSED) {
-            this.drawRealmStatus(p_281709_, p_88491_, p_88492_, p_88493_, p_88494_, CLOSED_SPRITE, () -> SERVER_CLOSED_TOOLTIP);
+            this.drawRealmStatus(pGuiGraphics, pX, pY, pMouseX, pMouseY, CLOSED_SPRITE, () -> SERVER_CLOSED_TOOLTIP);
         } else if (this.serverData.state == RealmsServer.State.OPEN) {
             if (this.serverData.daysLeft < 7) {
                 this.drawRealmStatus(
-                    p_281709_,
-                    p_88491_,
-                    p_88492_,
-                    p_88493_,
-                    p_88494_,
+                    pGuiGraphics,
+                    pX,
+                    pY,
+                    pMouseX,
+                    pMouseY,
                     EXPIRES_SOON_SPRITE,
                     () -> {
                         if (this.serverData.daysLeft <= 0) {
@@ -368,17 +368,17 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
                     }
                 );
             } else {
-                this.drawRealmStatus(p_281709_, p_88491_, p_88492_, p_88493_, p_88494_, OPEN_SPRITE, () -> SERVER_OPEN_TOOLTIP);
+                this.drawRealmStatus(pGuiGraphics, pX, pY, pMouseX, pMouseY, OPEN_SPRITE, () -> SERVER_OPEN_TOOLTIP);
             }
         }
     }
 
     private void drawRealmStatus(
-        GuiGraphics p_298677_, int p_297798_, int p_301226_, int p_298804_, int p_297961_, ResourceLocation p_299441_, Supplier<Component> p_300912_
+        GuiGraphics pGuiGraphics, int pX, int pY, int pMouseX, int pMouseY, ResourceLocation pSprite, Supplier<Component> pTooltipSupplier
     ) {
-        p_298677_.blitSprite(RenderType::guiTextured, p_299441_, p_297798_, p_301226_, 10, 28);
-        if (p_298804_ >= p_297798_ && p_298804_ <= p_297798_ + 9 && p_297961_ >= p_301226_ && p_297961_ <= p_301226_ + 27) {
-            this.setTooltipForNextRenderPass(p_300912_.get());
+        pGuiGraphics.blitSprite(RenderType::guiTextured, pSprite, pX, pY, 10, 28);
+        if (pMouseX >= pX && pMouseX <= pX + 9 && pMouseY >= pY && pMouseY <= pY + 27) {
+            this.setTooltipForNextRenderPass(pTooltipSupplier.get());
         }
     }
 
@@ -392,28 +392,28 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
         this.hide(this.resetWorldButton);
     }
 
-    private void hide(Button p_88451_) {
-        p_88451_.visible = false;
+    private void hide(Button pButton) {
+        pButton.visible = false;
     }
 
-    private void show(Button p_88485_) {
-        p_88485_.visible = true;
+    private void show(Button pButton) {
+        pButton.visible = true;
     }
 
     private void hideMinigameButtons() {
         this.hide(this.switchMinigameButton);
     }
 
-    public void saveSlotSettings(RealmsWorldOptions p_88445_) {
+    public void saveSlotSettings(RealmsWorldOptions pWorldOptions) {
         RealmsWorldOptions realmsworldoptions = this.serverData.slots.get(this.serverData.activeSlot);
-        p_88445_.templateId = realmsworldoptions.templateId;
-        p_88445_.templateImage = realmsworldoptions.templateImage;
+        pWorldOptions.templateId = realmsworldoptions.templateId;
+        pWorldOptions.templateImage = realmsworldoptions.templateImage;
         RealmsClient realmsclient = RealmsClient.create();
 
         try {
-            realmsclient.updateSlot(this.serverData.id, this.serverData.activeSlot, p_88445_);
-            this.serverData.slots.put(this.serverData.activeSlot, p_88445_);
-            if (realmsworldoptions.gameMode != p_88445_.gameMode || realmsworldoptions.hardcore != p_88445_.hardcore) {
+            realmsclient.updateSlot(this.serverData.id, this.serverData.activeSlot, pWorldOptions);
+            this.serverData.slots.put(this.serverData.activeSlot, pWorldOptions);
+            if (realmsworldoptions.gameMode != pWorldOptions.gameMode || realmsworldoptions.hardcore != pWorldOptions.hardcore) {
                 RealmsMainScreen.refreshServerList();
             }
         } catch (RealmsServiceException realmsserviceexception) {
@@ -425,13 +425,13 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
         this.minecraft.setScreen(this);
     }
 
-    public void saveSettings(String p_88455_, String p_88456_) {
-        String s = StringUtil.isBlank(p_88456_) ? "" : p_88456_;
+    public void saveSettings(String pKey, String pValue) {
+        String s = StringUtil.isBlank(pValue) ? "" : pValue;
         RealmsClient realmsclient = RealmsClient.create();
 
         try {
-            realmsclient.update(this.serverData.id, p_88455_, s);
-            this.serverData.setName(p_88455_);
+            realmsclient.update(this.serverData.id, pKey, s);
+            this.serverData.setName(pKey);
             this.serverData.setDescription(s);
             this.stateChanged();
         } catch (RealmsServiceException realmsserviceexception) {
@@ -443,12 +443,12 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
         this.minecraft.setScreen(this);
     }
 
-    public void openTheWorld(boolean p_88460_) {
+    public void openTheWorld(boolean pJoin) {
         RealmsConfigureWorldScreen realmsconfigureworldscreen = this.getNewScreen();
         this.minecraft
             .setScreen(
                 new RealmsLongRunningMcoTaskScreen(
-                    realmsconfigureworldscreen, new OpenServerTask(this.serverData, realmsconfigureworldscreen, p_88460_, this.minecraft)
+                    realmsconfigureworldscreen, new OpenServerTask(this.serverData, realmsconfigureworldscreen, pJoin, this.minecraft)
                 )
             );
     }
@@ -462,11 +462,11 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
         this.stateChanged = true;
     }
 
-    private void templateSelectionCallback(@Nullable WorldTemplate p_167395_) {
-        if (p_167395_ != null && WorldTemplate.WorldTemplateType.MINIGAME == p_167395_.type) {
+    private void templateSelectionCallback(@Nullable WorldTemplate pWorldTemplate) {
+        if (pWorldTemplate != null && WorldTemplate.WorldTemplateType.MINIGAME == pWorldTemplate.type) {
             this.stateChanged();
             this.minecraft
-                .setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new SwitchMinigameTask(this.serverData.id, p_167395_, this.getNewScreen())));
+                .setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new SwitchMinigameTask(this.serverData.id, pWorldTemplate, this.getNewScreen())));
         } else {
             this.minecraft.setScreen(this);
         }

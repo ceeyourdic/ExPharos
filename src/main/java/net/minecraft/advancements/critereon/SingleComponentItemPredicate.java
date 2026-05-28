@@ -12,5 +12,5 @@ public interface SingleComponentItemPredicate<T> extends ItemSubPredicate {
 
     DataComponentType<T> componentType();
 
-    boolean matches(ItemStack p_329983_, T p_333057_);
+    boolean matches(ItemStack pStack, T pValue);
 }

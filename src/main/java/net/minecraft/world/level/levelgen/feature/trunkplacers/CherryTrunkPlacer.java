@@ -47,14 +47,14 @@ public class CherryTrunkPlacer extends TrunkPlacer {
     private final IntProvider branchEndOffsetFromTop;
 
     public CherryTrunkPlacer(
-        int p_273281_, int p_273327_, int p_272619_, IntProvider p_272873_, IntProvider p_272789_, UniformInt p_272917_, IntProvider p_272948_
+        int pBaseHeight, int pHeightRandA, int pHeightRandB, IntProvider pBranchCount, IntProvider pBranchHorizontalLength, UniformInt pBranchStartOffsetFromTop, IntProvider pBranchEndOffsetFromTop
     ) {
-        super(p_273281_, p_273327_, p_272619_);
-        this.branchCount = p_272873_;
-        this.branchHorizontalLength = p_272789_;
-        this.branchStartOffsetFromTop = p_272917_;
-        this.secondBranchStartOffsetFromTop = UniformInt.of(p_272917_.getMinValue(), p_272917_.getMaxValue() - 1);
-        this.branchEndOffsetFromTop = p_272948_;
+        super(pBaseHeight, pHeightRandA, pHeightRandB);
+        this.branchCount = pBranchCount;
+        this.branchHorizontalLength = pBranchHorizontalLength;
+        this.branchStartOffsetFromTop = pBranchStartOffsetFromTop;
+        this.secondBranchStartOffsetFromTop = UniformInt.of(pBranchStartOffsetFromTop.getMinValue(), pBranchStartOffsetFromTop.getMaxValue() - 1);
+        this.branchEndOffsetFromTop = pBranchEndOffsetFromTop;
     }
 
     @Override
@@ -115,41 +115,41 @@ public class CherryTrunkPlacer extends TrunkPlacer {
     }
 
     private FoliagePlacer.FoliageAttachment generateBranch(
-        LevelSimulatedReader p_272736_,
-        BiConsumer<BlockPos, BlockState> p_273092_,
-        RandomSource p_273449_,
-        int p_272659_,
-        BlockPos p_273743_,
-        TreeConfiguration p_273027_,
-        Function<BlockState, BlockState> p_273558_,
-        Direction p_273712_,
-        int p_272980_,
-        boolean p_272719_,
-        BlockPos.MutableBlockPos p_273496_
+        LevelSimulatedReader pLevel,
+        BiConsumer<BlockPos, BlockState> pBlockSetter,
+        RandomSource pRandom,
+        int pFreeTreeHeight,
+        BlockPos pPos,
+        TreeConfiguration pConfig,
+        Function<BlockState, BlockState> pPropertySetter,
+        Direction pDirection,
+        int pSecondBranchStartOffsetFromTop,
+        boolean pDoubleBranch,
+        BlockPos.MutableBlockPos pCurrentPos
     ) {
-        p_273496_.set(p_273743_).move(Direction.UP, p_272980_);
-        int i = p_272659_ - 1 + this.branchEndOffsetFromTop.sample(p_273449_);
-        boolean flag = p_272719_ || i < p_272980_;
-        int j = this.branchHorizontalLength.sample(p_273449_) + (flag ? 1 : 0);
-        BlockPos blockpos = p_273743_.relative(p_273712_, j).above(i);
+        pCurrentPos.set(pPos).move(Direction.UP, pSecondBranchStartOffsetFromTop);
+        int i = pFreeTreeHeight - 1 + this.branchEndOffsetFromTop.sample(pRandom);
+        boolean flag = pDoubleBranch || i < pSecondBranchStartOffsetFromTop;
+        int j = this.branchHorizontalLength.sample(pRandom) + (flag ? 1 : 0);
+        BlockPos blockpos = pPos.relative(pDirection, j).above(i);
         int k = flag ? 2 : 1;
 
         for (int l = 0; l < k; l++) {
-            this.placeLog(p_272736_, p_273092_, p_273449_, p_273496_.move(p_273712_), p_273027_, p_273558_);
+            this.placeLog(pLevel, pBlockSetter, pRandom, pCurrentPos.move(pDirection), pConfig, pPropertySetter);
         }
 
-        Direction direction = blockpos.getY() > p_273496_.getY() ? Direction.UP : Direction.DOWN;
+        Direction direction = blockpos.getY() > pCurrentPos.getY() ? Direction.UP : Direction.DOWN;
 
         while (true) {
-            int i1 = p_273496_.distManhattan(blockpos);
+            int i1 = pCurrentPos.distManhattan(blockpos);
             if (i1 == 0) {
                 return new FoliagePlacer.FoliageAttachment(blockpos.above(), 0, false);
             }
 
-            float f = (float)Math.abs(blockpos.getY() - p_273496_.getY()) / (float)i1;
-            boolean flag1 = p_273449_.nextFloat() < f;
-            p_273496_.move(flag1 ? direction : p_273712_);
-            this.placeLog(p_272736_, p_273092_, p_273449_, p_273496_, p_273027_, flag1 ? Function.identity() : p_273558_);
+            float f = (float)Math.abs(blockpos.getY() - pCurrentPos.getY()) / (float)i1;
+            boolean flag1 = pRandom.nextFloat() < f;
+            pCurrentPos.move(flag1 ? direction : pDirection);
+            this.placeLog(pLevel, pBlockSetter, pRandom, pCurrentPos, pConfig, flag1 ? Function.identity() : pPropertySetter);
         }
     }
 }

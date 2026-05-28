@@ -10,12 +10,12 @@ public record HiveDebugPayload(HiveDebugPayload.HiveInfo hiveInfo) implements Cu
     );
     public static final CustomPacketPayload.Type<HiveDebugPayload> TYPE = CustomPacketPayload.createType("debug/hive");
 
-    private HiveDebugPayload(FriendlyByteBuf p_299613_) {
-        this(new HiveDebugPayload.HiveInfo(p_299613_));
+    private HiveDebugPayload(FriendlyByteBuf pBuffer) {
+        this(new HiveDebugPayload.HiveInfo(pBuffer));
     }
 
-    private void write(FriendlyByteBuf p_297901_) {
-        this.hiveInfo.write(p_297901_);
+    private void write(FriendlyByteBuf pBuffer) {
+        this.hiveInfo.write(pBuffer);
     }
 
     @Override
@@ -24,16 +24,16 @@ public record HiveDebugPayload(HiveDebugPayload.HiveInfo hiveInfo) implements Cu
     }
 
     public static record HiveInfo(BlockPos pos, String hiveType, int occupantCount, int honeyLevel, boolean sedated) {
-        public HiveInfo(FriendlyByteBuf p_299719_) {
-            this(p_299719_.readBlockPos(), p_299719_.readUtf(), p_299719_.readInt(), p_299719_.readInt(), p_299719_.readBoolean());
+        public HiveInfo(FriendlyByteBuf pBuffer) {
+            this(pBuffer.readBlockPos(), pBuffer.readUtf(), pBuffer.readInt(), pBuffer.readInt(), pBuffer.readBoolean());
         }
 
-        public void write(FriendlyByteBuf p_301145_) {
-            p_301145_.writeBlockPos(this.pos);
-            p_301145_.writeUtf(this.hiveType);
-            p_301145_.writeInt(this.occupantCount);
-            p_301145_.writeInt(this.honeyLevel);
-            p_301145_.writeBoolean(this.sedated);
+        public void write(FriendlyByteBuf pBuffer) {
+            pBuffer.writeBlockPos(this.pos);
+            pBuffer.writeUtf(this.hiveType);
+            pBuffer.writeInt(this.occupantCount);
+            pBuffer.writeInt(this.honeyLevel);
+            pBuffer.writeBoolean(this.sedated);
         }
     }
 }

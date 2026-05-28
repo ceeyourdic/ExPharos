@@ -5,7 +5,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class CommonInputs {
-    public static boolean selected(int p_279282_) {
-        return p_279282_ == 257 || p_279282_ == 32 || p_279282_ == 335;
+    public static boolean selected(int pKey) {
+        return pKey == 257 || pKey == 32 || pKey == 335;
     }
 }

@@ -20,37 +20,37 @@ public final class SkyLightEngine extends LightEngine<SkyLightSectionStorage.Sky
     private final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
     private final ChunkSkyLightSources emptyChunkSources;
 
-    public SkyLightEngine(LightChunkGetter p_75843_) {
-        this(p_75843_, new SkyLightSectionStorage(p_75843_));
+    public SkyLightEngine(LightChunkGetter pChunkSource) {
+        this(pChunkSource, new SkyLightSectionStorage(pChunkSource));
     }
 
     @VisibleForTesting
-    protected SkyLightEngine(LightChunkGetter p_282215_, SkyLightSectionStorage p_282341_) {
-        super(p_282215_, p_282341_);
-        this.emptyChunkSources = new ChunkSkyLightSources(p_282215_.getLevel());
+    protected SkyLightEngine(LightChunkGetter pChunkSource, SkyLightSectionStorage pSectionStorage) {
+        super(pChunkSource, pSectionStorage);
+        this.emptyChunkSources = new ChunkSkyLightSources(pChunkSource.getLevel());
     }
 
-    private static boolean isSourceLevel(int p_285004_) {
-        return p_285004_ == 15;
+    private static boolean isSourceLevel(int pLevel) {
+        return pLevel == 15;
     }
 
-    private int getLowestSourceY(int p_285058_, int p_285191_, int p_285111_) {
-        ChunkSkyLightSources chunkskylightsources = this.getChunkSources(SectionPos.blockToSectionCoord(p_285058_), SectionPos.blockToSectionCoord(p_285191_));
-        return chunkskylightsources == null ? p_285111_ : chunkskylightsources.getLowestSourceY(SectionPos.sectionRelative(p_285058_), SectionPos.sectionRelative(p_285191_));
+    private int getLowestSourceY(int pX, int pZ, int pDefaultReturnValue) {
+        ChunkSkyLightSources chunkskylightsources = this.getChunkSources(SectionPos.blockToSectionCoord(pX), SectionPos.blockToSectionCoord(pZ));
+        return chunkskylightsources == null ? pDefaultReturnValue : chunkskylightsources.getLowestSourceY(SectionPos.sectionRelative(pX), SectionPos.sectionRelative(pZ));
     }
 
     @Nullable
-    private ChunkSkyLightSources getChunkSources(int p_285270_, int p_285307_) {
-        LightChunk lightchunk = this.chunkSource.getChunkForLighting(p_285270_, p_285307_);
+    private ChunkSkyLightSources getChunkSources(int pChunkX, int pChunkZ) {
+        LightChunk lightchunk = this.chunkSource.getChunkForLighting(pChunkX, pChunkZ);
         return lightchunk != null ? lightchunk.getSkyLightSources() : null;
     }
 
     @Override
-    protected void checkNode(long p_75859_) {
-        int i = BlockPos.getX(p_75859_);
-        int j = BlockPos.getY(p_75859_);
-        int k = BlockPos.getZ(p_75859_);
-        long l = SectionPos.blockToSection(p_75859_);
+    protected void checkNode(long pLevelPos) {
+        int i = BlockPos.getX(pLevelPos);
+        int j = BlockPos.getY(pLevelPos);
+        int k = BlockPos.getZ(pLevelPos);
+        long l = SectionPos.blockToSection(pLevelPos);
         int i1 = this.storage.lightOnInSection(l) ? this.getLowestSourceY(i, k, Integer.MAX_VALUE) : Integer.MAX_VALUE;
         if (i1 != Integer.MAX_VALUE) {
             this.updateSourcesInColumn(i, k, i1);
@@ -59,31 +59,31 @@ public final class SkyLightEngine extends LightEngine<SkyLightSectionStorage.Sky
         if (this.storage.storingLightForSection(l)) {
             boolean flag = j >= i1;
             if (flag) {
-                this.enqueueDecrease(p_75859_, REMOVE_SKY_SOURCE_ENTRY);
-                this.enqueueIncrease(p_75859_, ADD_SKY_SOURCE_ENTRY);
+                this.enqueueDecrease(pLevelPos, REMOVE_SKY_SOURCE_ENTRY);
+                this.enqueueIncrease(pLevelPos, ADD_SKY_SOURCE_ENTRY);
             } else {
-                int j1 = this.storage.getStoredLevel(p_75859_);
+                int j1 = this.storage.getStoredLevel(pLevelPos);
                 if (j1 > 0) {
-                    this.storage.setStoredLevel(p_75859_, 0);
-                    this.enqueueDecrease(p_75859_, LightEngine.QueueEntry.decreaseAllDirections(j1));
+                    this.storage.setStoredLevel(pLevelPos, 0);
+                    this.enqueueDecrease(pLevelPos, LightEngine.QueueEntry.decreaseAllDirections(j1));
                 } else {
-                    this.enqueueDecrease(p_75859_, PULL_LIGHT_IN_ENTRY);
+                    this.enqueueDecrease(pLevelPos, PULL_LIGHT_IN_ENTRY);
                 }
             }
         }
     }
 
-    private void updateSourcesInColumn(int p_285053_, int p_285140_, int p_285337_) {
+    private void updateSourcesInColumn(int pX, int pZ, int pLowestY) {
         int i = SectionPos.sectionToBlockCoord(this.storage.getBottomSectionY());
-        this.removeSourcesBelow(p_285053_, p_285140_, p_285337_, i);
-        this.addSourcesAbove(p_285053_, p_285140_, p_285337_, i);
+        this.removeSourcesBelow(pX, pZ, pLowestY, i);
+        this.addSourcesAbove(pX, pZ, pLowestY, i);
     }
 
-    private void removeSourcesBelow(int p_285475_, int p_285138_, int p_285130_, int p_285112_) {
-        if (p_285130_ > p_285112_) {
-            int i = SectionPos.blockToSectionCoord(p_285475_);
-            int j = SectionPos.blockToSectionCoord(p_285138_);
-            int k = p_285130_ - 1;
+    private void removeSourcesBelow(int pX, int pZ, int pMinY, int pBottomSectionY) {
+        if (pMinY > pBottomSectionY) {
+            int i = SectionPos.blockToSectionCoord(pX);
+            int j = SectionPos.blockToSectionCoord(pZ);
+            int k = pMinY - 1;
 
             for (int l = SectionPos.blockToSectionCoord(k); this.storage.hasLightDataAtOrBelow(l); l--) {
                 if (this.storage.storingLightForSection(SectionPos.asLong(i, l, j))) {
@@ -91,27 +91,27 @@ public final class SkyLightEngine extends LightEngine<SkyLightSectionStorage.Sky
                     int j1 = i1 + 15;
 
                     for (int k1 = Math.min(j1, k); k1 >= i1; k1--) {
-                        long l1 = BlockPos.asLong(p_285475_, k1, p_285138_);
+                        long l1 = BlockPos.asLong(pX, k1, pZ);
                         if (!isSourceLevel(this.storage.getStoredLevel(l1))) {
                             return;
                         }
 
                         this.storage.setStoredLevel(l1, 0);
-                        this.enqueueDecrease(l1, k1 == p_285130_ - 1 ? REMOVE_TOP_SKY_SOURCE_ENTRY : REMOVE_SKY_SOURCE_ENTRY);
+                        this.enqueueDecrease(l1, k1 == pMinY - 1 ? REMOVE_TOP_SKY_SOURCE_ENTRY : REMOVE_SKY_SOURCE_ENTRY);
                     }
                 }
             }
         }
     }
 
-    private void addSourcesAbove(int p_285241_, int p_285212_, int p_284972_, int p_285134_) {
-        int i = SectionPos.blockToSectionCoord(p_285241_);
-        int j = SectionPos.blockToSectionCoord(p_285212_);
+    private void addSourcesAbove(int pX, int pZ, int pMaxY, int pBottomSectionY) {
+        int i = SectionPos.blockToSectionCoord(pX);
+        int j = SectionPos.blockToSectionCoord(pZ);
         int k = Math.max(
-            Math.max(this.getLowestSourceY(p_285241_ - 1, p_285212_, Integer.MIN_VALUE), this.getLowestSourceY(p_285241_ + 1, p_285212_, Integer.MIN_VALUE)),
-            Math.max(this.getLowestSourceY(p_285241_, p_285212_ - 1, Integer.MIN_VALUE), this.getLowestSourceY(p_285241_, p_285212_ + 1, Integer.MIN_VALUE))
+            Math.max(this.getLowestSourceY(pX - 1, pZ, Integer.MIN_VALUE), this.getLowestSourceY(pX + 1, pZ, Integer.MIN_VALUE)),
+            Math.max(this.getLowestSourceY(pX, pZ - 1, Integer.MIN_VALUE), this.getLowestSourceY(pX, pZ + 1, Integer.MIN_VALUE))
         );
-        int l = Math.max(p_284972_, p_285134_);
+        int l = Math.max(pMaxY, pBottomSectionY);
 
         for (long i1 = SectionPos.asLong(i, SectionPos.blockToSectionCoord(l), j); !this.storage.isAboveData(i1); i1 = SectionPos.offset(i1, Direction.UP)) {
             if (this.storage.storingLightForSection(i1)) {
@@ -119,13 +119,13 @@ public final class SkyLightEngine extends LightEngine<SkyLightSectionStorage.Sky
                 int k1 = j1 + 15;
 
                 for (int l1 = Math.max(j1, l); l1 <= k1; l1++) {
-                    long i2 = BlockPos.asLong(p_285241_, l1, p_285212_);
+                    long i2 = BlockPos.asLong(pX, l1, pZ);
                     if (isSourceLevel(this.storage.getStoredLevel(i2))) {
                         return;
                     }
 
                     this.storage.setStoredLevel(i2, 15);
-                    if (l1 < k || l1 == p_284972_) {
+                    if (l1 < k || l1 == pMaxY) {
                         this.enqueueIncrease(i2, ADD_SKY_SOURCE_ENTRY);
                     }
                 }
@@ -194,14 +194,14 @@ public final class SkyLightEngine extends LightEngine<SkyLightSectionStorage.Sky
         }
     }
 
-    private int countEmptySectionsBelowIfAtBorder(long p_285356_) {
-        int i = BlockPos.getY(p_285356_);
+    private int countEmptySectionsBelowIfAtBorder(long pPackedPos) {
+        int i = BlockPos.getY(pPackedPos);
         int j = SectionPos.sectionRelative(i);
         if (j != 0) {
             return 0;
         } else {
-            int k = BlockPos.getX(p_285356_);
-            int l = BlockPos.getZ(p_285356_);
+            int k = BlockPos.getX(pPackedPos);
+            int l = BlockPos.getZ(pPackedPos);
             int i1 = SectionPos.sectionRelative(k);
             int j1 = SectionPos.sectionRelative(l);
             if (i1 != 0 && i1 != 15 && j1 != 0 && j1 != 15) {
@@ -221,16 +221,16 @@ public final class SkyLightEngine extends LightEngine<SkyLightSectionStorage.Sky
         }
     }
 
-    private void propagateFromEmptySections(long p_284965_, Direction p_285308_, int p_284977_, boolean p_285001_, int p_285052_) {
-        if (p_285052_ != 0) {
-            int i = BlockPos.getX(p_284965_);
-            int j = BlockPos.getZ(p_284965_);
-            if (crossedSectionEdge(p_285308_, SectionPos.sectionRelative(i), SectionPos.sectionRelative(j))) {
-                int k = BlockPos.getY(p_284965_);
+    private void propagateFromEmptySections(long pPackedPos, Direction pDirection, int pLevel, boolean pShouldIncrease, int pEmptySections) {
+        if (pEmptySections != 0) {
+            int i = BlockPos.getX(pPackedPos);
+            int j = BlockPos.getZ(pPackedPos);
+            if (crossedSectionEdge(pDirection, SectionPos.sectionRelative(i), SectionPos.sectionRelative(j))) {
+                int k = BlockPos.getY(pPackedPos);
                 int l = SectionPos.blockToSectionCoord(i);
                 int i1 = SectionPos.blockToSectionCoord(j);
                 int j1 = SectionPos.blockToSectionCoord(k) - 1;
-                int k1 = j1 - p_285052_ + 1;
+                int k1 = j1 - pEmptySections + 1;
 
                 while (j1 >= k1) {
                     if (!this.storage.storingLightForSection(SectionPos.asLong(l, j1, i1))) {
@@ -240,14 +240,14 @@ public final class SkyLightEngine extends LightEngine<SkyLightSectionStorage.Sky
 
                         for (int i2 = 15; i2 >= 0; i2--) {
                             long j2 = BlockPos.asLong(i, l1 + i2, j);
-                            if (p_285001_) {
-                                this.storage.setStoredLevel(j2, p_284977_);
-                                if (p_284977_ > 1) {
-                                    this.enqueueIncrease(j2, LightEngine.QueueEntry.increaseSkipOneDirection(p_284977_, true, p_285308_.getOpposite()));
+                            if (pShouldIncrease) {
+                                this.storage.setStoredLevel(j2, pLevel);
+                                if (pLevel > 1) {
+                                    this.enqueueIncrease(j2, LightEngine.QueueEntry.increaseSkipOneDirection(pLevel, true, pDirection.getOpposite()));
                                 }
                             } else {
                                 this.storage.setStoredLevel(j2, 0);
-                                this.enqueueDecrease(j2, LightEngine.QueueEntry.decreaseSkipOneDirection(p_284977_, p_285308_.getOpposite()));
+                                this.enqueueDecrease(j2, LightEngine.QueueEntry.decreaseSkipOneDirection(pLevel, pDirection.getOpposite()));
                             }
                         }
 
@@ -258,12 +258,12 @@ public final class SkyLightEngine extends LightEngine<SkyLightSectionStorage.Sky
         }
     }
 
-    private static boolean crossedSectionEdge(Direction p_285014_, int p_284991_, int p_285468_) {
-        return switch (p_285014_) {
-            case NORTH -> p_285468_ == 15;
-            case SOUTH -> p_285468_ == 0;
-            case WEST -> p_284991_ == 15;
-            case EAST -> p_284991_ == 0;
+    private static boolean crossedSectionEdge(Direction pDirection, int pX, int pZ) {
+        return switch (pDirection) {
+            case NORTH -> pZ == 15;
+            case SOUTH -> pZ == 0;
+            case WEST -> pX == 15;
+            case EAST -> pX == 0;
             default -> false;
         };
     }

@@ -19,14 +19,14 @@ public class DefaultTooltipPositioner implements ClientTooltipPositioner {
         return vector2i;
     }
 
-    private void positionTooltip(int p_282431_, int p_282309_, Vector2i p_282004_, int p_283148_, int p_281715_) {
-        if (p_282004_.x + p_283148_ > p_282431_) {
-            p_282004_.x = Math.max(p_282004_.x - 24 - p_283148_, 4);
+    private void positionTooltip(int pScreenWidth, int pScreenHeight, Vector2i pTooltipPos, int pTooltipWidth, int pTooltipHeight) {
+        if (pTooltipPos.x + pTooltipWidth > pScreenWidth) {
+            pTooltipPos.x = Math.max(pTooltipPos.x - 24 - pTooltipWidth, 4);
         }
 
-        int i = p_281715_ + 3;
-        if (p_282004_.y + i > p_282309_) {
-            p_282004_.y = p_282309_ - i;
+        int i = pTooltipHeight + 3;
+        if (pTooltipPos.y + i > pScreenHeight) {
+            pTooltipPos.y = pScreenHeight - i;
         }
     }
 }

@@ -20,13 +20,13 @@ public class IronGolemModel extends EntityModel<IronGolemRenderState> {
     private final ModelPart rightLeg;
     private final ModelPart leftLeg;
 
-    public IronGolemModel(ModelPart p_170697_) {
-        super(p_170697_);
-        this.head = p_170697_.getChild("head");
-        this.rightArm = p_170697_.getChild("right_arm");
-        this.leftArm = p_170697_.getChild("left_arm");
-        this.rightLeg = p_170697_.getChild("right_leg");
-        this.leftLeg = p_170697_.getChild("left_leg");
+    public IronGolemModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
+        this.rightArm = pRoot.getChild("right_arm");
+        this.leftArm = pRoot.getChild("left_arm");
+        this.rightLeg = pRoot.getChild("right_leg");
+        this.leftLeg = pRoot.getChild("left_leg");
     }
 
     public static LayerDefinition createBodyLayer() {

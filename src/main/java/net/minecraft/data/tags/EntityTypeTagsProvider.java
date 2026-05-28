@@ -8,8 +8,8 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.EntityType;
 
 public class EntityTypeTagsProvider extends IntrinsicHolderTagsProvider<EntityType<?>> {
-    public EntityTypeTagsProvider(PackOutput p_256095_, CompletableFuture<HolderLookup.Provider> p_256572_) {
-        super(p_256095_, Registries.ENTITY_TYPE, p_256572_, p_256665_ -> p_256665_.builtInRegistryHolder().key());
+    public EntityTypeTagsProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pProvider) {
+        super(pOutput, Registries.ENTITY_TYPE, pProvider, p_256665_ -> p_256665_.builtInRegistryHolder().key());
     }
 
     @Override

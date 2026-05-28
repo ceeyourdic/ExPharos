@@ -18,9 +18,9 @@ public class StainedGlassBlock extends TransparentBlock implements BeaconBeamBlo
         return CODEC;
     }
 
-    public StainedGlassBlock(DyeColor p_56833_, BlockBehaviour.Properties p_56834_) {
-        super(p_56834_);
-        this.color = p_56833_;
+    public StainedGlassBlock(DyeColor pColor, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.color = pColor;
     }
 
     @Override

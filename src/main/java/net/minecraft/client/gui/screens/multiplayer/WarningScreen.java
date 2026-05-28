@@ -28,15 +28,15 @@ public abstract class WarningScreen extends Screen {
     private FocusableTextWidget messageWidget;
     private final FrameLayout layout;
 
-    protected WarningScreen(Component p_239894_, Component p_239895_, Component p_239896_) {
-        this(p_239894_, p_239895_, null, p_239896_);
+    protected WarningScreen(Component pTitle, Component pContent, Component pNarration) {
+        this(pTitle, pContent, null, pNarration);
     }
 
-    protected WarningScreen(Component p_232852_, Component p_232853_, @Nullable Component p_232854_, Component p_232855_) {
-        super(p_232852_);
-        this.message = p_232853_;
-        this.check = p_232854_;
-        this.narration = p_232855_;
+    protected WarningScreen(Component pTitle, Component pContent, @Nullable Component pCheck, Component pNarration) {
+        super(pTitle);
+        this.message = pContent;
+        this.check = pCheck;
+        this.narration = pNarration;
         this.layout = new FrameLayout(0, 0, this.width, this.height);
     }
 

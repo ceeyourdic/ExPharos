@@ -82,53 +82,53 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_34397_) {
-        super.addAdditionalSaveData(p_34397_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
         VillagerData.CODEC
             .encodeStart(NbtOps.INSTANCE, this.getVillagerData())
             .resultOrPartial(LOGGER::error)
-            .ifPresent(p_204072_ -> p_34397_.put("VillagerData", p_204072_));
+            .ifPresent(p_204072_ -> pCompound.put("VillagerData", p_204072_));
         if (this.tradeOffers != null) {
-            p_34397_.put("Offers", MerchantOffers.CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), this.tradeOffers).getOrThrow());
+            pCompound.put("Offers", MerchantOffers.CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), this.tradeOffers).getOrThrow());
         }
 
         if (this.gossips != null) {
-            p_34397_.put("Gossips", this.gossips);
+            pCompound.put("Gossips", this.gossips);
         }
 
-        p_34397_.putInt("ConversionTime", this.isConverting() ? this.villagerConversionTime : -1);
+        pCompound.putInt("ConversionTime", this.isConverting() ? this.villagerConversionTime : -1);
         if (this.conversionStarter != null) {
-            p_34397_.putUUID("ConversionPlayer", this.conversionStarter);
+            pCompound.putUUID("ConversionPlayer", this.conversionStarter);
         }
 
-        p_34397_.putInt("Xp", this.villagerXp);
+        pCompound.putInt("Xp", this.villagerXp);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_34387_) {
-        super.readAdditionalSaveData(p_34387_);
-        if (p_34387_.contains("VillagerData", 10)) {
-            DataResult<VillagerData> dataresult = VillagerData.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, p_34387_.get("VillagerData")));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("VillagerData", 10)) {
+            DataResult<VillagerData> dataresult = VillagerData.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, pCompound.get("VillagerData")));
             dataresult.resultOrPartial(LOGGER::error).ifPresent(this::setVillagerData);
         }
 
-        if (p_34387_.contains("Offers")) {
+        if (pCompound.contains("Offers")) {
             MerchantOffers.CODEC
-                .parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), p_34387_.get("Offers"))
+                .parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), pCompound.get("Offers"))
                 .resultOrPartial(Util.prefix("Failed to load offers: ", LOGGER::warn))
                 .ifPresent(p_327013_ -> this.tradeOffers = p_327013_);
         }
 
-        if (p_34387_.contains("Gossips", 9)) {
-            this.gossips = p_34387_.getList("Gossips", 10);
+        if (pCompound.contains("Gossips", 9)) {
+            this.gossips = pCompound.getList("Gossips", 10);
         }
 
-        if (p_34387_.contains("ConversionTime", 99) && p_34387_.getInt("ConversionTime") > -1) {
-            this.startConverting(p_34387_.hasUUID("ConversionPlayer") ? p_34387_.getUUID("ConversionPlayer") : null, p_34387_.getInt("ConversionTime"));
+        if (pCompound.contains("ConversionTime", 99) && pCompound.getInt("ConversionTime") > -1) {
+            this.startConverting(pCompound.hasUUID("ConversionPlayer") ? pCompound.getUUID("ConversionPlayer") : null, pCompound.getInt("ConversionTime"));
         }
 
-        if (p_34387_.contains("Xp", 3)) {
-            this.villagerXp = p_34387_.getInt("Xp");
+        if (pCompound.contains("Xp", 3)) {
+            this.villagerXp = pCompound.getInt("Xp");
         }
     }
 
@@ -146,13 +146,13 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_34394_, InteractionHand p_34395_) {
-        ItemStack itemstack = p_34394_.getItemInHand(p_34395_);
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
         if (itemstack.is(Items.GOLDEN_APPLE)) {
             if (this.hasEffect(MobEffects.WEAKNESS)) {
-                itemstack.consume(1, p_34394_);
+                itemstack.consume(1, pPlayer);
                 if (!this.level().isClientSide) {
-                    this.startConverting(p_34394_.getUUID(), this.random.nextInt(2401) + 3600);
+                    this.startConverting(pPlayer.getUUID(), this.random.nextInt(2401) + 3600);
                 }
 
                 return InteractionResult.SUCCESS_SERVER;
@@ -160,7 +160,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
                 return InteractionResult.CONSUME;
             }
         } else {
-            return super.mobInteract(p_34394_, p_34395_);
+            return super.mobInteract(pPlayer, pHand);
         }
     }
 
@@ -170,7 +170,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
     }
 
     @Override
-    public boolean removeWhenFarAway(double p_34414_) {
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
         return !this.isConverting() && this.villagerXp == 0;
     }
 
@@ -178,12 +178,12 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
         return this.getEntityData().get(DATA_CONVERTING_ID);
     }
 
-    private void startConverting(@Nullable UUID p_34384_, int p_34385_) {
-        this.conversionStarter = p_34384_;
-        this.villagerConversionTime = p_34385_;
+    private void startConverting(@Nullable UUID pConversionStarter, int pVillagerConversionTime) {
+        this.conversionStarter = pConversionStarter;
+        this.villagerConversionTime = pVillagerConversionTime;
         this.getEntityData().set(DATA_CONVERTING_ID, true);
         this.removeEffect(MobEffects.WEAKNESS);
-        this.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, p_34385_, Math.min(this.level().getDifficulty().getId() - 1, 0)));
+        this.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, pVillagerConversionTime, Math.min(this.level().getDifficulty().getId() - 1, 0)));
         this.level().broadcastEntityEvent(this, (byte)16);
     }
 
@@ -208,13 +208,13 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
         }
     }
 
-    private void finishConversion(ServerLevel p_34399_) {
+    private void finishConversion(ServerLevel pServerLevel) {
         this.convertTo(
             EntityType.VILLAGER,
             ConversionParams.single(this, false, false),
             p_359261_ -> {
                 for (EquipmentSlot equipmentslot : this.dropPreservedEquipment(
-                    p_34399_, p_341444_ -> !EnchantmentHelper.has(p_341444_, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)
+                    pServerLevel, p_341444_ -> !EnchantmentHelper.has(p_341444_, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)
                 )) {
                     SlotAccess slotaccess = p_359261_.getSlot(equipmentslot.getIndex() + 300);
                     slotaccess.set(this.getItemBySlot(equipmentslot));
@@ -230,27 +230,27 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
                 }
 
                 p_359261_.setVillagerXp(this.villagerXp);
-                p_359261_.finalizeSpawn(p_34399_, p_34399_.getCurrentDifficultyAt(p_359261_.blockPosition()), EntitySpawnReason.CONVERSION, null);
-                p_359261_.refreshBrain(p_34399_);
+                p_359261_.finalizeSpawn(pServerLevel, pServerLevel.getCurrentDifficultyAt(p_359261_.blockPosition()), EntitySpawnReason.CONVERSION, null);
+                p_359261_.refreshBrain(pServerLevel);
                 if (this.conversionStarter != null) {
-                    Player player = p_34399_.getPlayerByUUID(this.conversionStarter);
+                    Player player = pServerLevel.getPlayerByUUID(this.conversionStarter);
                     if (player instanceof ServerPlayer) {
                         CriteriaTriggers.CURED_ZOMBIE_VILLAGER.trigger((ServerPlayer)player, this, p_359261_);
-                        p_34399_.onReputationEvent(ReputationEventType.ZOMBIE_VILLAGER_CURED, player, p_359261_);
+                        pServerLevel.onReputationEvent(ReputationEventType.ZOMBIE_VILLAGER_CURED, player, p_359261_);
                     }
                 }
 
                 p_359261_.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
                 if (!this.isSilent()) {
-                    p_34399_.levelEvent(null, 1027, this.blockPosition(), 0);
+                    pServerLevel.levelEvent(null, 1027, this.blockPosition(), 0);
                 }
             }
         );
     }
 
     @VisibleForTesting
-    public void setVillagerConversionTime(int p_368211_) {
-        this.villagerConversionTime = p_368211_;
+    public void setVillagerConversionTime(int pVillagerConversionTime) {
+        this.villagerConversionTime = pVillagerConversionTime;
     }
 
     private int getConversionProgress() {
@@ -291,7 +291,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
     }
 
     @Override
-    public SoundEvent getHurtSound(DamageSource p_34404_) {
+    public SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.ZOMBIE_VILLAGER_HURT;
     }
 
@@ -310,12 +310,12 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
         return ItemStack.EMPTY;
     }
 
-    public void setTradeOffers(MerchantOffers p_330397_) {
-        this.tradeOffers = p_330397_;
+    public void setTradeOffers(MerchantOffers pTradeOffers) {
+        this.tradeOffers = pTradeOffers;
     }
 
-    public void setGossips(Tag p_34392_) {
-        this.gossips = p_34392_;
+    public void setGossips(Tag pGossips) {
+        this.gossips = pGossips;
     }
 
     @Nullable
@@ -344,7 +344,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
         return this.villagerXp;
     }
 
-    public void setVillagerXp(int p_34374_) {
-        this.villagerXp = p_34374_;
+    public void setVillagerXp(int pVillagerXp) {
+        this.villagerXp = pVillagerXp;
     }
 }

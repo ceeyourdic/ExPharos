@@ -13,13 +13,13 @@ public class CraftingInput implements RecipeInput {
     private final StackedItemContents stackedContents = new StackedItemContents();
     private final int ingredientCount;
 
-    private CraftingInput(int p_344026_, int p_345334_, List<ItemStack> p_343256_) {
-        this.width = p_344026_;
-        this.height = p_345334_;
-        this.items = p_343256_;
+    private CraftingInput(int pWidth, int pHeight, List<ItemStack> pItem) {
+        this.width = pWidth;
+        this.height = pHeight;
+        this.items = pItem;
         int i = 0;
 
-        for (ItemStack itemstack : p_343256_) {
+        for (ItemStack itemstack : pItem) {
             if (!itemstack.isEmpty()) {
                 i++;
                 this.stackedContents.accountStack(itemstack, 1);
@@ -29,22 +29,22 @@ public class CraftingInput implements RecipeInput {
         this.ingredientCount = i;
     }
 
-    public static CraftingInput of(int p_345026_, int p_344893_, List<ItemStack> p_343663_) {
-        return ofPositioned(p_345026_, p_344893_, p_343663_).input();
+    public static CraftingInput of(int pWidth, int pHeight, List<ItemStack> pItems) {
+        return ofPositioned(pWidth, pHeight, pItems).input();
     }
 
-    public static CraftingInput.Positioned ofPositioned(int p_345256_, int p_344157_, List<ItemStack> p_342879_) {
-        if (p_345256_ != 0 && p_344157_ != 0) {
-            int i = p_345256_ - 1;
+    public static CraftingInput.Positioned ofPositioned(int pWidth, int pHeight, List<ItemStack> pItems) {
+        if (pWidth != 0 && pHeight != 0) {
+            int i = pWidth - 1;
             int j = 0;
-            int k = p_344157_ - 1;
+            int k = pHeight - 1;
             int l = 0;
 
-            for (int i1 = 0; i1 < p_344157_; i1++) {
+            for (int i1 = 0; i1 < pHeight; i1++) {
                 boolean flag = true;
 
-                for (int j1 = 0; j1 < p_345256_; j1++) {
-                    ItemStack itemstack = p_342879_.get(j1 + i1 * p_345256_);
+                for (int j1 = 0; j1 < pWidth; j1++) {
+                    ItemStack itemstack = pItems.get(j1 + i1 * pWidth);
                     if (!itemstack.isEmpty()) {
                         i = Math.min(i, j1);
                         j = Math.max(j, j1);
@@ -62,15 +62,15 @@ public class CraftingInput implements RecipeInput {
             int j2 = l - k + 1;
             if (i2 <= 0 || j2 <= 0) {
                 return CraftingInput.Positioned.EMPTY;
-            } else if (i2 == p_345256_ && j2 == p_344157_) {
-                return new CraftingInput.Positioned(new CraftingInput(p_345256_, p_344157_, p_342879_), i, k);
+            } else if (i2 == pWidth && j2 == pHeight) {
+                return new CraftingInput.Positioned(new CraftingInput(pWidth, pHeight, pItems), i, k);
             } else {
                 List<ItemStack> list = new ArrayList<>(i2 * j2);
 
                 for (int k2 = 0; k2 < j2; k2++) {
                     for (int k1 = 0; k1 < i2; k1++) {
-                        int l1 = k1 + i + (k2 + k) * p_345256_;
-                        list.add(p_342879_.get(l1));
+                        int l1 = k1 + i + (k2 + k) * pWidth;
+                        list.add(pItems.get(l1));
                     }
                 }
 
@@ -86,8 +86,8 @@ public class CraftingInput implements RecipeInput {
         return this.items.get(p_342671_);
     }
 
-    public ItemStack getItem(int p_343752_, int p_345443_) {
-        return this.items.get(p_343752_ + p_345443_ * this.width);
+    public ItemStack getItem(int pRow, int pColumn) {
+        return this.items.get(pRow + pColumn * this.width);
     }
 
     @Override
@@ -121,11 +121,11 @@ public class CraftingInput implements RecipeInput {
     }
 
     @Override
-    public boolean equals(Object p_343121_) {
-        if (p_343121_ == this) {
+    public boolean equals(Object pOther) {
+        if (pOther == this) {
             return true;
         } else {
-            return !(p_343121_ instanceof CraftingInput craftinginput)
+            return !(pOther instanceof CraftingInput craftinginput)
                 ? false
                 : this.width == craftinginput.width
                     && this.height == craftinginput.height

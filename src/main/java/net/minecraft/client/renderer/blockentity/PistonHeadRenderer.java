@@ -23,8 +23,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class PistonHeadRenderer implements BlockEntityRenderer<PistonMovingBlockEntity> {
     private final BlockRenderDispatcher blockRenderer;
 
-    public PistonHeadRenderer(BlockEntityRendererProvider.Context p_173623_) {
-        this.blockRenderer = p_173623_.getBlockRenderDispatcher();
+    public PistonHeadRenderer(BlockEntityRendererProvider.Context pContext) {
+        this.blockRenderer = pContext.getBlockRenderDispatcher();
     }
 
     public void render(PistonMovingBlockEntity p_112452_, float p_112453_, PoseStack p_112454_, MultiBufferSource p_112455_, int p_112456_, int p_112457_) {
@@ -63,23 +63,23 @@ public class PistonHeadRenderer implements BlockEntityRenderer<PistonMovingBlock
     }
 
     private void renderBlock(
-        BlockPos p_112459_, BlockState p_112460_, PoseStack p_112461_, MultiBufferSource p_112462_, Level p_112463_, boolean p_112464_, int p_112465_
+        BlockPos pPos, BlockState pState, PoseStack pPoseStack, MultiBufferSource pBufferSource, Level pLevel, boolean pExtended, int pPackedOverlay
     ) {
-        RenderType rendertype = ItemBlockRenderTypes.getMovingBlockRenderType(p_112460_);
-        VertexConsumer vertexconsumer = p_112462_.getBuffer(rendertype);
+        RenderType rendertype = ItemBlockRenderTypes.getMovingBlockRenderType(pState);
+        VertexConsumer vertexconsumer = pBufferSource.getBuffer(rendertype);
         this.blockRenderer
             .getModelRenderer()
             .tesselateBlock(
-                p_112463_,
-                this.blockRenderer.getBlockModel(p_112460_),
-                p_112460_,
-                p_112459_,
-                p_112461_,
+                pLevel,
+                this.blockRenderer.getBlockModel(pState),
+                pState,
+                pPos,
+                pPoseStack,
                 vertexconsumer,
-                p_112464_,
+                pExtended,
                 RandomSource.create(),
-                p_112460_.getSeed(p_112459_),
-                p_112465_
+                pState.getSeed(pPos),
+                pPackedOverlay
             );
     }
 

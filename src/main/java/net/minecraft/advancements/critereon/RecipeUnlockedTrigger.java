@@ -18,12 +18,12 @@ public class RecipeUnlockedTrigger extends SimpleCriterionTrigger<RecipeUnlocked
         return RecipeUnlockedTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_63719_, RecipeHolder<?> p_300165_) {
-        this.trigger(p_63719_, p_296143_ -> p_296143_.matches(p_300165_));
+    public void trigger(ServerPlayer pPlayer, RecipeHolder<?> pRecipe) {
+        this.trigger(pPlayer, p_296143_ -> p_296143_.matches(pRecipe));
     }
 
-    public static Criterion<RecipeUnlockedTrigger.TriggerInstance> unlocked(ResourceKey<Recipe<?>> p_362362_) {
-        return CriteriaTriggers.RECIPE_UNLOCKED.createCriterion(new RecipeUnlockedTrigger.TriggerInstance(Optional.empty(), p_362362_));
+    public static Criterion<RecipeUnlockedTrigger.TriggerInstance> unlocked(ResourceKey<Recipe<?>> pRecipe) {
+        return CriteriaTriggers.RECIPE_UNLOCKED.createCriterion(new RecipeUnlockedTrigger.TriggerInstance(Optional.empty(), pRecipe));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, ResourceKey<Recipe<?>> recipe)
@@ -36,8 +36,8 @@ public class RecipeUnlockedTrigger extends SimpleCriterionTrigger<RecipeUnlocked
                     .apply(p_357631_, RecipeUnlockedTrigger.TriggerInstance::new)
         );
 
-        public boolean matches(RecipeHolder<?> p_299959_) {
-            return this.recipe == p_299959_.id();
+        public boolean matches(RecipeHolder<?> pRecipe) {
+            return this.recipe == pRecipe.id();
         }
 
         @Override

@@ -45,11 +45,11 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
     @Nullable
     private Subscription.SubscriptionType type;
 
-    public RealmsSubscriptionInfoScreen(Screen p_89979_, RealmsServer p_89980_, Screen p_89981_) {
+    public RealmsSubscriptionInfoScreen(Screen pLastScreen, RealmsServer pServerData, Screen pMainScreen) {
         super(GameNarrator.NO_TITLE);
-        this.lastScreen = p_89979_;
-        this.serverData = p_89980_;
-        this.mainScreen = p_89981_;
+        this.lastScreen = pLastScreen;
+        this.serverData = pServerData;
+        this.mainScreen = pMainScreen;
     }
 
     @Override
@@ -119,11 +119,11 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
         this.minecraft.setScreen(this);
     }
 
-    private void getSubscription(long p_89990_) {
+    private void getSubscription(long pServerId) {
         RealmsClient realmsclient = RealmsClient.create();
 
         try {
-            Subscription subscription = realmsclient.subscriptionFor(p_89990_);
+            Subscription subscription = realmsclient.subscriptionFor(pServerId);
             this.daysLeft = this.daysLeftPresentation(subscription.daysLeft);
             this.startDate = localPresentation(subscription.startDate);
             this.type = subscription.type;
@@ -133,9 +133,9 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
         }
     }
 
-    private static Component localPresentation(long p_182539_) {
+    private static Component localPresentation(long pTime) {
         Calendar calendar = new GregorianCalendar(TimeZone.getDefault());
-        calendar.setTimeInMillis(p_182539_);
+        calendar.setTimeInMillis(pTime);
         return Component.literal(DateFormat.getDateTimeInstance().format(calendar.getTime()));
     }
 
@@ -160,14 +160,14 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
         p_282831_.drawString(this.font, this.daysLeft, i, row(4), -1);
     }
 
-    private Component daysLeftPresentation(int p_89984_) {
-        if (p_89984_ < 0 && this.serverData.expired) {
+    private Component daysLeftPresentation(int pDaysLeft) {
+        if (pDaysLeft < 0 && this.serverData.expired) {
             return SUBSCRIPTION_EXPIRED_TEXT;
-        } else if (p_89984_ <= 1) {
+        } else if (pDaysLeft <= 1) {
             return SUBSCRIPTION_LESS_THAN_A_DAY_TEXT;
         } else {
-            int i = p_89984_ / 30;
-            int j = p_89984_ % 30;
+            int i = pDaysLeft / 30;
+            int j = pDaysLeft % 30;
             boolean flag = i > 0;
             boolean flag1 = j > 0;
             if (flag && flag1) {

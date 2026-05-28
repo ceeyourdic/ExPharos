@@ -25,17 +25,17 @@ public record DeprecatedTranslationsInfo(List<String> removed, Map<String, Strin
                 .apply(p_368182_, DeprecatedTranslationsInfo::new)
     );
 
-    public static DeprecatedTranslationsInfo loadFromJson(InputStream p_366953_) {
-        JsonElement jsonelement = JsonParser.parseReader(new InputStreamReader(p_366953_, StandardCharsets.UTF_8));
+    public static DeprecatedTranslationsInfo loadFromJson(InputStream pInputStream) {
+        JsonElement jsonelement = JsonParser.parseReader(new InputStreamReader(pInputStream, StandardCharsets.UTF_8));
         return CODEC.parse(JsonOps.INSTANCE, jsonelement)
             .getOrThrow(p_370184_ -> new IllegalStateException("Failed to parse deprecated language data: " + p_370184_));
     }
 
-    public static DeprecatedTranslationsInfo loadFromResource(String p_369676_) {
-        try (InputStream inputstream = Language.class.getResourceAsStream(p_369676_)) {
+    public static DeprecatedTranslationsInfo loadFromResource(String pName) {
+        try (InputStream inputstream = Language.class.getResourceAsStream(pName)) {
             return inputstream != null ? loadFromJson(inputstream) : EMPTY;
         } catch (Exception exception) {
-            LOGGER.error("Failed to read {}", p_369676_, exception);
+            LOGGER.error("Failed to read {}", pName, exception);
             return EMPTY;
         }
     }
@@ -44,18 +44,18 @@ public record DeprecatedTranslationsInfo(List<String> removed, Map<String, Strin
         return loadFromResource("/assets/minecraft/lang/deprecated.json");
     }
 
-    public void applyToMap(Map<String, String> p_370162_) {
+    public void applyToMap(Map<String, String> pTranslations) {
         for (String s : this.removed) {
-            p_370162_.remove(s);
+            pTranslations.remove(s);
         }
 
         this.renamed.forEach((p_363113_, p_364770_) -> {
-            String s1 = p_370162_.remove(p_363113_);
+            String s1 = pTranslations.remove(p_363113_);
             if (s1 == null) {
                 LOGGER.warn("Missing translation key for rename: {}", p_363113_);
-                p_370162_.remove(p_364770_);
+                pTranslations.remove(p_364770_);
             } else {
-                p_370162_.put(p_364770_, s1);
+                pTranslations.put(p_364770_, s1);
             }
         });
     }

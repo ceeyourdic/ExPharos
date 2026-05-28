@@ -10,7 +10,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface RangeSelectItemModelProperty {
-    float get(ItemStack p_376822_, @Nullable ClientLevel p_376153_, @Nullable LivingEntity p_377311_, int p_376174_);
+    float get(ItemStack pStack, @Nullable ClientLevel pLevel, @Nullable LivingEntity pEntity, int pSeed);
 
     MapCodec<? extends RangeSelectItemModelProperty> type();
 }

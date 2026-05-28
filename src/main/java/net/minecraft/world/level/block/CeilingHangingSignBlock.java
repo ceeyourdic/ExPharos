@@ -90,10 +90,10 @@ public class CeilingHangingSignBlock extends SignBlock {
         return super.useItemOn(p_328363_, p_332889_, p_333165_, p_331699_, p_335683_, p_332677_, p_330587_);
     }
 
-    private boolean shouldTryToChainAnotherHangingSign(Player p_278279_, BlockHitResult p_278273_, SignBlockEntity p_278236_, ItemStack p_278343_) {
-        return !p_278236_.canExecuteClickCommands(p_278236_.isFacingFrontText(p_278279_), p_278279_)
-            && p_278343_.getItem() instanceof HangingSignItem
-            && p_278273_.getDirection().equals(Direction.DOWN);
+    private boolean shouldTryToChainAnotherHangingSign(Player pPlayer, BlockHitResult pHitResult, SignBlockEntity pSign, ItemStack pStack) {
+        return !pSign.canExecuteClickCommands(pSign.isFacingFrontText(pPlayer), pPlayer)
+            && pStack.getItem() instanceof HangingSignItem
+            && pHitResult.getDirection().equals(Direction.DOWN);
     }
 
     @Override

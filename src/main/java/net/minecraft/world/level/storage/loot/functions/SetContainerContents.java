@@ -31,10 +31,10 @@ public class SetContainerContents extends LootItemConditionalFunction {
     private final ContainerComponentManipulator<?> component;
     private final List<LootPoolEntryContainer> entries;
 
-    SetContainerContents(List<LootItemCondition> p_193035_, ContainerComponentManipulator<?> p_329803_, List<LootPoolEntryContainer> p_298786_) {
-        super(p_193035_);
-        this.component = p_329803_;
-        this.entries = List.copyOf(p_298786_);
+    SetContainerContents(List<LootItemCondition> pConditions, ContainerComponentManipulator<?> pComponent, List<LootPoolEntryContainer> pEntries) {
+        super(pConditions);
+        this.component = pComponent;
+        this.entries = List.copyOf(pEntries);
     }
 
     @Override
@@ -43,17 +43,17 @@ public class SetContainerContents extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_80911_, LootContext p_80912_) {
-        if (p_80911_.isEmpty()) {
-            return p_80911_;
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        if (pStack.isEmpty()) {
+            return pStack;
         } else {
             Stream.Builder<ItemStack> builder = Stream.builder();
             this.entries
                 .forEach(
-                    p_80916_ -> p_80916_.expand(p_80912_, p_287573_ -> p_287573_.createItemStack(LootTable.createStackSplitter(p_80912_.getLevel(), builder::add), p_80912_))
+                    p_80916_ -> p_80916_.expand(pContext, p_287573_ -> p_287573_.createItemStack(LootTable.createStackSplitter(pContext.getLevel(), builder::add), pContext))
                 );
-            this.component.setContents(p_80911_, builder.build());
-            return p_80911_;
+            this.component.setContents(pStack, builder.build());
+            return pStack;
         }
     }
 
@@ -66,24 +66,24 @@ public class SetContainerContents extends LootItemConditionalFunction {
         }
     }
 
-    public static SetContainerContents.Builder setContents(ContainerComponentManipulator<?> p_328808_) {
-        return new SetContainerContents.Builder(p_328808_);
+    public static SetContainerContents.Builder setContents(ContainerComponentManipulator<?> pComponent) {
+        return new SetContainerContents.Builder(pComponent);
     }
 
     public static class Builder extends LootItemConditionalFunction.Builder<SetContainerContents.Builder> {
         private final ImmutableList.Builder<LootPoolEntryContainer> entries = ImmutableList.builder();
         private final ContainerComponentManipulator<?> component;
 
-        public Builder(ContainerComponentManipulator<?> p_332521_) {
-            this.component = p_332521_;
+        public Builder(ContainerComponentManipulator<?> pComponent) {
+            this.component = pComponent;
         }
 
         protected SetContainerContents.Builder getThis() {
             return this;
         }
 
-        public SetContainerContents.Builder withEntry(LootPoolEntryContainer.Builder<?> p_80931_) {
-            this.entries.add(p_80931_.build());
+        public SetContainerContents.Builder withEntry(LootPoolEntryContainer.Builder<?> pLootEntryBuilder) {
+            this.entries.add(pLootEntryBuilder.build());
             return this;
         }
 

@@ -11,8 +11,8 @@ public class ServerResourcePackConfigurationTask implements ConfigurationTask {
     public static final ConfigurationTask.Type TYPE = new ConfigurationTask.Type("server_resource_pack");
     private final MinecraftServer.ServerResourcePackInfo info;
 
-    public ServerResourcePackConfigurationTask(MinecraftServer.ServerResourcePackInfo p_299050_) {
-        this.info = p_299050_;
+    public ServerResourcePackConfigurationTask(MinecraftServer.ServerResourcePackInfo pInfo) {
+        this.info = pInfo;
     }
 
     @Override

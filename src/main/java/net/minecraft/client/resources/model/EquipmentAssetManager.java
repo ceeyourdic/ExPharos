@@ -30,7 +30,7 @@ public class EquipmentAssetManager extends SimpleJsonResourceReloadListener<Equi
             .collect(Collectors.toUnmodifiableMap(p_375636_ -> ResourceKey.create(EquipmentAssets.ROOT_ID, p_375636_.getKey()), Entry::getValue));
     }
 
-    public EquipmentClientInfo get(ResourceKey<EquipmentAsset> p_376890_) {
-        return this.equipmentAssets.getOrDefault(p_376890_, MISSING);
+    public EquipmentClientInfo get(ResourceKey<EquipmentAsset> pKey) {
+        return this.equipmentAssets.getOrDefault(pKey, MISSING);
     }
 }

@@ -32,20 +32,20 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
     private final String commandInput;
     private final ContextChain<T> command;
 
-    public BuildContexts(String p_310420_, ContextChain<T> p_313082_) {
-        this.commandInput = p_310420_;
-        this.command = p_313082_;
+    public BuildContexts(String pCommandInput, ContextChain<T> pCommand) {
+        this.commandInput = pCommandInput;
+        this.command = pCommand;
     }
 
-    protected void execute(T p_309755_, List<T> p_310231_, ExecutionContext<T> p_311779_, Frame p_313162_, ChainModifiers p_310618_) {
+    protected void execute(T pOriginalSource, List<T> pSources, ExecutionContext<T> pContext, Frame pFrame, ChainModifiers pChainModifiers) {
         ContextChain<T> contextchain = this.command;
-        ChainModifiers chainmodifiers = p_310618_;
-        List<T> list = p_310231_;
+        ChainModifiers chainmodifiers = pChainModifiers;
+        List<T> list = pSources;
         if (contextchain.getStage() != Stage.EXECUTE) {
-            p_311779_.profiler().push(() -> "prepare " + this.commandInput);
+            pContext.profiler().push(() -> "prepare " + this.commandInput);
 
             try {
-                for (int i = p_311779_.forkLimit(); contextchain.getStage() != Stage.EXECUTE; contextchain = contextchain.nextStage()) {
+                for (int i = pContext.forkLimit(); contextchain.getStage() != Stage.EXECUTE; contextchain = contextchain.nextStage()) {
                     CommandContext<T> commandcontext = contextchain.getTopContext();
                     if (commandcontext.isForked()) {
                         chainmodifiers = chainmodifiers.setForked();
@@ -53,12 +53,12 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
 
                     RedirectModifier<T> redirectmodifier = commandcontext.getRedirectModifier();
                     if (redirectmodifier instanceof CustomModifierExecutor custommodifierexecutor) {
-                        custommodifierexecutor.apply(p_309755_, list, contextchain, chainmodifiers, ExecutionControl.create(p_311779_, p_313162_));
+                        custommodifierexecutor.apply(pOriginalSource, list, contextchain, chainmodifiers, ExecutionControl.create(pContext, pFrame));
                         return;
                     }
 
                     if (redirectmodifier != null) {
-                        p_311779_.incrementCost();
+                        pContext.incrementCost();
                         boolean flag = chainmodifiers.isForked();
                         List<T> list1 = new ObjectArrayList<>();
 
@@ -67,13 +67,13 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
                                 Collection<T> collection = ContextChain.runModifier(commandcontext, t, (p_311026_, p_312291_, p_310245_) -> {
                                 }, flag);
                                 if (list1.size() + collection.size() >= i) {
-                                    p_309755_.handleError(ERROR_FORK_LIMIT_REACHED.create(i), flag, p_311779_.tracer());
+                                    pOriginalSource.handleError(ERROR_FORK_LIMIT_REACHED.create(i), flag, pContext.tracer());
                                     return;
                                 }
 
                                 list1.addAll(collection);
                             } catch (CommandSyntaxException commandsyntaxexception) {
-                                t.handleError(commandsyntaxexception, flag, p_311779_.tracer());
+                                t.handleError(commandsyntaxexception, flag, pContext.tracer());
                                 if (!flag) {
                                     return;
                                 }
@@ -84,18 +84,18 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
                     }
                 }
             } finally {
-                p_311779_.profiler().pop();
+                pContext.profiler().pop();
             }
         }
 
         if (list.isEmpty()) {
             if (chainmodifiers.isReturn()) {
-                p_311779_.queueNext(new CommandQueueEntry<T>(p_313162_, FallthroughTask.instance()));
+                pContext.queueNext(new CommandQueueEntry<T>(pFrame, FallthroughTask.instance()));
             }
         } else {
             CommandContext<T> commandcontext1 = contextchain.getTopContext();
             if (commandcontext1.getCommand() instanceof CustomCommandExecutor customcommandexecutor) {
-                ExecutionControl<T> executioncontrol = ExecutionControl.create(p_311779_, p_313162_);
+                ExecutionControl<T> executioncontrol = ExecutionControl.create(pContext, pFrame);
 
                 for (T t2 : list) {
                     customcommandexecutor.run(t2, contextchain, chainmodifiers, executioncontrol);
@@ -103,22 +103,22 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
             } else {
                 if (chainmodifiers.isReturn()) {
                     T t1 = list.get(0);
-                    t1 = t1.withCallback(CommandResultCallback.chain(t1.callback(), p_313162_.returnValueConsumer()));
+                    t1 = t1.withCallback(CommandResultCallback.chain(t1.callback(), pFrame.returnValueConsumer()));
                     list = List.of(t1);
                 }
 
                 ExecuteCommand<T> executecommand = new ExecuteCommand<>(this.commandInput, chainmodifiers, commandcontext1);
                 ContinuationTask.schedule(
-                    p_311779_, p_313162_, list, (p_311832_, p_309437_) -> new CommandQueueEntry<>(p_311832_, executecommand.bind(p_309437_))
+                    pContext, pFrame, list, (p_311832_, p_309437_) -> new CommandQueueEntry<>(p_311832_, executecommand.bind(p_309437_))
                 );
             }
         }
     }
 
-    protected void traceCommandStart(ExecutionContext<T> p_311913_, Frame p_312311_) {
-        TraceCallbacks tracecallbacks = p_311913_.tracer();
+    protected void traceCommandStart(ExecutionContext<T> pExecutionContext, Frame pFrame) {
+        TraceCallbacks tracecallbacks = pExecutionContext.tracer();
         if (tracecallbacks != null) {
-            tracecallbacks.onCommand(p_312311_.depth(), this.commandInput);
+            tracecallbacks.onCommand(pFrame.depth(), this.commandInput);
         }
     }
 
@@ -132,11 +132,11 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
         private final T originalSource;
         private final List<T> sources;
 
-        public Continuation(String p_312336_, ContextChain<T> p_312118_, ChainModifiers p_311446_, T p_312390_, List<T> p_311252_) {
-            super(p_312336_, p_312118_);
-            this.originalSource = p_312390_;
-            this.sources = p_311252_;
-            this.modifiers = p_311446_;
+        public Continuation(String pCommandInput, ContextChain<T> pCommand, ChainModifiers pModifiers, T pOriginalSource, List<T> pSources) {
+            super(pCommandInput, pCommand);
+            this.originalSource = pOriginalSource;
+            this.sources = pSources;
+            this.modifiers = pModifiers;
         }
 
         @Override
@@ -148,9 +148,9 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
     public static class TopLevel<T extends ExecutionCommandSource<T>> extends BuildContexts<T> implements EntryAction<T> {
         private final T source;
 
-        public TopLevel(String p_312552_, ContextChain<T> p_309758_, T p_313175_) {
-            super(p_312552_, p_309758_);
-            this.source = p_313175_;
+        public TopLevel(String pCommandInput, ContextChain<T> pCommand, T pSource) {
+            super(pCommandInput, pCommand);
+            this.source = pSource;
         }
 
         @Override

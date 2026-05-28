@@ -22,20 +22,20 @@ public class WorldTemplate extends ValueObject {
     public String recommendedPlayers = "";
     public WorldTemplate.WorldTemplateType type = WorldTemplate.WorldTemplateType.WORLD_TEMPLATE;
 
-    public static WorldTemplate parse(JsonObject p_87739_) {
+    public static WorldTemplate parse(JsonObject pJson) {
         WorldTemplate worldtemplate = new WorldTemplate();
 
         try {
-            worldtemplate.id = JsonUtils.getStringOr("id", p_87739_, "");
-            worldtemplate.name = JsonUtils.getStringOr("name", p_87739_, "");
-            worldtemplate.version = JsonUtils.getStringOr("version", p_87739_, "");
-            worldtemplate.author = JsonUtils.getStringOr("author", p_87739_, "");
-            worldtemplate.link = JsonUtils.getStringOr("link", p_87739_, "");
-            worldtemplate.image = JsonUtils.getStringOr("image", p_87739_, null);
-            worldtemplate.trailer = JsonUtils.getStringOr("trailer", p_87739_, "");
-            worldtemplate.recommendedPlayers = JsonUtils.getStringOr("recommendedPlayers", p_87739_, "");
+            worldtemplate.id = JsonUtils.getStringOr("id", pJson, "");
+            worldtemplate.name = JsonUtils.getStringOr("name", pJson, "");
+            worldtemplate.version = JsonUtils.getStringOr("version", pJson, "");
+            worldtemplate.author = JsonUtils.getStringOr("author", pJson, "");
+            worldtemplate.link = JsonUtils.getStringOr("link", pJson, "");
+            worldtemplate.image = JsonUtils.getStringOr("image", pJson, null);
+            worldtemplate.trailer = JsonUtils.getStringOr("trailer", pJson, "");
+            worldtemplate.recommendedPlayers = JsonUtils.getStringOr("recommendedPlayers", pJson, "");
             worldtemplate.type = WorldTemplate.WorldTemplateType.valueOf(
-                JsonUtils.getStringOr("type", p_87739_, WorldTemplate.WorldTemplateType.WORLD_TEMPLATE.name())
+                JsonUtils.getStringOr("type", pJson, WorldTemplate.WorldTemplateType.WORLD_TEMPLATE.name())
             );
         } catch (Exception exception) {
             LOGGER.error("Could not parse WorldTemplate: {}", exception.getMessage());

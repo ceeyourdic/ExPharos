@@ -10,43 +10,43 @@ import net.minecraft.resources.ResourceLocation;
 public class AttributeSupplier {
     private final Map<Holder<Attribute>, AttributeInstance> instances;
 
-    AttributeSupplier(Map<Holder<Attribute>, AttributeInstance> p_22243_) {
-        this.instances = p_22243_;
+    AttributeSupplier(Map<Holder<Attribute>, AttributeInstance> pInstances) {
+        this.instances = pInstances;
     }
 
-    private AttributeInstance getAttributeInstance(Holder<Attribute> p_335900_) {
-        AttributeInstance attributeinstance = this.instances.get(p_335900_);
+    private AttributeInstance getAttributeInstance(Holder<Attribute> pAttribute) {
+        AttributeInstance attributeinstance = this.instances.get(pAttribute);
         if (attributeinstance == null) {
-            throw new IllegalArgumentException("Can't find attribute " + p_335900_.getRegisteredName());
+            throw new IllegalArgumentException("Can't find attribute " + pAttribute.getRegisteredName());
         } else {
             return attributeinstance;
         }
     }
 
-    public double getValue(Holder<Attribute> p_333974_) {
-        return this.getAttributeInstance(p_333974_).getValue();
+    public double getValue(Holder<Attribute> pAttribute) {
+        return this.getAttributeInstance(pAttribute).getValue();
     }
 
-    public double getBaseValue(Holder<Attribute> p_333849_) {
-        return this.getAttributeInstance(p_333849_).getBaseValue();
+    public double getBaseValue(Holder<Attribute> pAttribute) {
+        return this.getAttributeInstance(pAttribute).getBaseValue();
     }
 
-    public double getModifierValue(Holder<Attribute> p_333807_, ResourceLocation p_344356_) {
-        AttributeModifier attributemodifier = this.getAttributeInstance(p_333807_).getModifier(p_344356_);
+    public double getModifierValue(Holder<Attribute> pAttribute, ResourceLocation pId) {
+        AttributeModifier attributemodifier = this.getAttributeInstance(pAttribute).getModifier(pId);
         if (attributemodifier == null) {
-            throw new IllegalArgumentException("Can't find modifier " + p_344356_ + " on attribute " + p_333807_.getRegisteredName());
+            throw new IllegalArgumentException("Can't find modifier " + pId + " on attribute " + pAttribute.getRegisteredName());
         } else {
             return attributemodifier.amount();
         }
     }
 
     @Nullable
-    public AttributeInstance createInstance(Consumer<AttributeInstance> p_22251_, Holder<Attribute> p_333997_) {
-        AttributeInstance attributeinstance = this.instances.get(p_333997_);
+    public AttributeInstance createInstance(Consumer<AttributeInstance> pOnDirty, Holder<Attribute> pAttribute) {
+        AttributeInstance attributeinstance = this.instances.get(pAttribute);
         if (attributeinstance == null) {
             return null;
         } else {
-            AttributeInstance attributeinstance1 = new AttributeInstance(p_333997_, p_22251_);
+            AttributeInstance attributeinstance1 = new AttributeInstance(pAttribute, pOnDirty);
             attributeinstance1.replaceFrom(attributeinstance);
             return attributeinstance1;
         }
@@ -56,37 +56,37 @@ public class AttributeSupplier {
         return new AttributeSupplier.Builder();
     }
 
-    public boolean hasAttribute(Holder<Attribute> p_331710_) {
-        return this.instances.containsKey(p_331710_);
+    public boolean hasAttribute(Holder<Attribute> pAttribute) {
+        return this.instances.containsKey(pAttribute);
     }
 
-    public boolean hasModifier(Holder<Attribute> p_335566_, ResourceLocation p_343659_) {
-        AttributeInstance attributeinstance = this.instances.get(p_335566_);
-        return attributeinstance != null && attributeinstance.getModifier(p_343659_) != null;
+    public boolean hasModifier(Holder<Attribute> pAttribute, ResourceLocation pId) {
+        AttributeInstance attributeinstance = this.instances.get(pAttribute);
+        return attributeinstance != null && attributeinstance.getModifier(pId) != null;
     }
 
     public static class Builder {
         private final ImmutableMap.Builder<Holder<Attribute>, AttributeInstance> builder = ImmutableMap.builder();
         private boolean instanceFrozen;
 
-        private AttributeInstance create(Holder<Attribute> p_334904_) {
-            AttributeInstance attributeinstance = new AttributeInstance(p_334904_, p_326800_ -> {
+        private AttributeInstance create(Holder<Attribute> pAttribute) {
+            AttributeInstance attributeinstance = new AttributeInstance(pAttribute, p_326800_ -> {
                 if (this.instanceFrozen) {
-                    throw new UnsupportedOperationException("Tried to change value for default attribute instance: " + p_334904_.getRegisteredName());
+                    throw new UnsupportedOperationException("Tried to change value for default attribute instance: " + pAttribute.getRegisteredName());
                 }
             });
-            this.builder.put(p_334904_, attributeinstance);
+            this.builder.put(pAttribute, attributeinstance);
             return attributeinstance;
         }
 
-        public AttributeSupplier.Builder add(Holder<Attribute> p_334664_) {
-            this.create(p_334664_);
+        public AttributeSupplier.Builder add(Holder<Attribute> pAttribute) {
+            this.create(pAttribute);
             return this;
         }
 
-        public AttributeSupplier.Builder add(Holder<Attribute> p_329131_, double p_22270_) {
-            AttributeInstance attributeinstance = this.create(p_329131_);
-            attributeinstance.setBaseValue(p_22270_);
+        public AttributeSupplier.Builder add(Holder<Attribute> pAttribute, double pBaseValue) {
+            AttributeInstance attributeinstance = this.create(pAttribute);
+            attributeinstance.setBaseValue(pBaseValue);
             return this;
         }
 

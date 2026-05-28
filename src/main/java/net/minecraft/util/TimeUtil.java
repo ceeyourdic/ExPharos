@@ -10,7 +10,7 @@ public class TimeUtil {
     public static final long SECONDS_PER_HOUR = TimeUnit.HOURS.toSeconds(1L);
     public static final int SECONDS_PER_MINUTE = (int)TimeUnit.MINUTES.toSeconds(1L);
 
-    public static UniformInt rangeOfSeconds(int p_145021_, int p_145022_) {
-        return UniformInt.of(p_145021_ * 20, p_145022_ * 20);
+    public static UniformInt rangeOfSeconds(int pMinInclusive, int pMaxInclusive) {
+        return UniformInt.of(pMinInclusive * 20, pMaxInclusive * 20);
     }
 }

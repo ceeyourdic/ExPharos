@@ -37,18 +37,18 @@ public class DiskFeature extends Feature<DiskConfiguration> {
     }
 
     protected boolean placeColumn(
-        DiskConfiguration p_224996_, WorldGenLevel p_224997_, RandomSource p_224998_, int p_224999_, int p_225000_, BlockPos.MutableBlockPos p_225001_
+        DiskConfiguration pConfig, WorldGenLevel pLevel, RandomSource pRandom, int pMaxY, int pMinY, BlockPos.MutableBlockPos pPos
     ) {
         boolean flag = false;
         boolean flag1 = false;
 
-        for (int i = p_224999_; i > p_225000_; i--) {
-            p_225001_.setY(i);
-            if (p_224996_.target().test(p_224997_, p_225001_)) {
-                BlockState blockstate = p_224996_.stateProvider().getState(p_224997_, p_224998_, p_225001_);
-                p_224997_.setBlock(p_225001_, blockstate, 2);
+        for (int i = pMaxY; i > pMinY; i--) {
+            pPos.setY(i);
+            if (pConfig.target().test(pLevel, pPos)) {
+                BlockState blockstate = pConfig.stateProvider().getState(pLevel, pRandom, pPos);
+                pLevel.setBlock(pPos, blockstate, 2);
                 if (!flag1) {
-                    this.markAboveForPostProcessing(p_224997_, p_225001_);
+                    this.markAboveForPostProcessing(pLevel, pPos);
                 }
 
                 flag = true;

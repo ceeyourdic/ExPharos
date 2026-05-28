@@ -23,13 +23,13 @@ public abstract class NodeEvaluator {
     protected boolean canFloat;
     protected boolean canWalkOverFences;
 
-    public void prepare(PathNavigationRegion p_77347_, Mob p_77348_) {
-        this.currentContext = new PathfindingContext(p_77347_, p_77348_);
-        this.mob = p_77348_;
+    public void prepare(PathNavigationRegion pLevel, Mob pMob) {
+        this.currentContext = new PathfindingContext(pLevel, pMob);
+        this.mob = pMob;
         this.nodes.clear();
-        this.entityWidth = Mth.floor(p_77348_.getBbWidth() + 1.0F);
-        this.entityHeight = Mth.floor(p_77348_.getBbHeight() + 1.0F);
-        this.entityDepth = Mth.floor(p_77348_.getBbWidth() + 1.0F);
+        this.entityWidth = Mth.floor(pMob.getBbWidth() + 1.0F);
+        this.entityHeight = Mth.floor(pMob.getBbHeight() + 1.0F);
+        this.entityDepth = Mth.floor(pMob.getBbWidth() + 1.0F);
     }
 
     public void done() {
@@ -37,46 +37,46 @@ public abstract class NodeEvaluator {
         this.mob = null;
     }
 
-    protected Node getNode(BlockPos p_77350_) {
-        return this.getNode(p_77350_.getX(), p_77350_.getY(), p_77350_.getZ());
+    protected Node getNode(BlockPos pPos) {
+        return this.getNode(pPos.getX(), pPos.getY(), pPos.getZ());
     }
 
-    protected Node getNode(int p_77325_, int p_77326_, int p_77327_) {
-        return this.nodes.computeIfAbsent(Node.createHash(p_77325_, p_77326_, p_77327_), p_77332_ -> new Node(p_77325_, p_77326_, p_77327_));
+    protected Node getNode(int pX, int pY, int pZ) {
+        return this.nodes.computeIfAbsent(Node.createHash(pX, pY, pZ), p_77332_ -> new Node(pX, pY, pZ));
     }
 
     public abstract Node getStart();
 
-    public abstract Target getTarget(double p_336317_, double p_334044_, double p_334139_);
+    public abstract Target getTarget(double pX, double pY, double pZ);
 
-    protected Target getTargetNodeAt(double p_328825_, double p_331532_, double p_333874_) {
-        return new Target(this.getNode(Mth.floor(p_328825_), Mth.floor(p_331532_), Mth.floor(p_333874_)));
+    protected Target getTargetNodeAt(double pX, double pY, double pZ) {
+        return new Target(this.getNode(Mth.floor(pX), Mth.floor(pY), Mth.floor(pZ)));
     }
 
-    public abstract int getNeighbors(Node[] p_77353_, Node p_77354_);
+    public abstract int getNeighbors(Node[] pOutputArray, Node pNode);
 
-    public abstract PathType getPathTypeOfMob(PathfindingContext p_335888_, int p_331986_, int p_331764_, int p_335132_, Mob p_329853_);
+    public abstract PathType getPathTypeOfMob(PathfindingContext pContext, int pX, int pY, int pZ, Mob pMob);
 
-    public abstract PathType getPathType(PathfindingContext p_334172_, int p_335319_, int p_333029_, int p_332756_);
+    public abstract PathType getPathType(PathfindingContext pContext, int pX, int pY, int pZ);
 
-    public PathType getPathType(Mob p_330121_, BlockPos p_332460_) {
-        return this.getPathType(new PathfindingContext(p_330121_.level(), p_330121_), p_332460_.getX(), p_332460_.getY(), p_332460_.getZ());
+    public PathType getPathType(Mob pMob, BlockPos pPos) {
+        return this.getPathType(new PathfindingContext(pMob.level(), pMob), pPos.getX(), pPos.getY(), pPos.getZ());
     }
 
-    public void setCanPassDoors(boolean p_77352_) {
-        this.canPassDoors = p_77352_;
+    public void setCanPassDoors(boolean pCanEnterDoors) {
+        this.canPassDoors = pCanEnterDoors;
     }
 
-    public void setCanOpenDoors(boolean p_77356_) {
-        this.canOpenDoors = p_77356_;
+    public void setCanOpenDoors(boolean pCanOpenDoors) {
+        this.canOpenDoors = pCanOpenDoors;
     }
 
-    public void setCanFloat(boolean p_77359_) {
-        this.canFloat = p_77359_;
+    public void setCanFloat(boolean pCanFloat) {
+        this.canFloat = pCanFloat;
     }
 
-    public void setCanWalkOverFences(boolean p_255862_) {
-        this.canWalkOverFences = p_255862_;
+    public void setCanWalkOverFences(boolean pCanWalkOverFences) {
+        this.canWalkOverFences = pCanWalkOverFences;
     }
 
     public boolean canPassDoors() {
@@ -95,11 +95,11 @@ public abstract class NodeEvaluator {
         return this.canWalkOverFences;
     }
 
-    public static boolean isBurningBlock(BlockState p_329628_) {
-        return p_329628_.is(BlockTags.FIRE)
-            || p_329628_.is(Blocks.LAVA)
-            || p_329628_.is(Blocks.MAGMA_BLOCK)
-            || CampfireBlock.isLitCampfire(p_329628_)
-            || p_329628_.is(Blocks.LAVA_CAULDRON);
+    public static boolean isBurningBlock(BlockState pState) {
+        return pState.is(BlockTags.FIRE)
+            || pState.is(Blocks.LAVA)
+            || pState.is(Blocks.MAGMA_BLOCK)
+            || CampfireBlock.isLitCampfire(pState)
+            || pState.is(Blocks.LAVA_CAULDRON);
     }
 }

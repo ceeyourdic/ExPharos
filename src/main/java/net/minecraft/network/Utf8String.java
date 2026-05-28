@@ -7,22 +7,22 @@ import io.netty.handler.codec.EncoderException;
 import java.nio.charset.StandardCharsets;
 
 public class Utf8String {
-    public static String read(ByteBuf p_300143_, int p_298419_) {
-        int i = ByteBufUtil.utf8MaxBytes(p_298419_);
-        int j = VarInt.read(p_300143_);
+    public static String read(ByteBuf pBuffer, int pMaxLength) {
+        int i = ByteBufUtil.utf8MaxBytes(pMaxLength);
+        int j = VarInt.read(pBuffer);
         if (j > i) {
             throw new DecoderException("The received encoded string buffer length is longer than maximum allowed (" + j + " > " + i + ")");
         } else if (j < 0) {
             throw new DecoderException("The received encoded string buffer length is less than zero! Weird string!");
         } else {
-            int k = p_300143_.readableBytes();
+            int k = pBuffer.readableBytes();
             if (j > k) {
                 throw new DecoderException("Not enough bytes in buffer, expected " + j + ", but got " + k);
             } else {
-                String s = p_300143_.toString(p_300143_.readerIndex(), j, StandardCharsets.UTF_8);
-                p_300143_.readerIndex(p_300143_.readerIndex() + j);
-                if (s.length() > p_298419_) {
-                    throw new DecoderException("The received string length is longer than maximum allowed (" + s.length() + " > " + p_298419_ + ")");
+                String s = pBuffer.toString(pBuffer.readerIndex(), j, StandardCharsets.UTF_8);
+                pBuffer.readerIndex(pBuffer.readerIndex() + j);
+                if (s.length() > pMaxLength) {
+                    throw new DecoderException("The received string length is longer than maximum allowed (" + s.length() + " > " + pMaxLength + ")");
                 } else {
                     return s;
                 }
@@ -30,22 +30,22 @@ public class Utf8String {
         }
     }
 
-    public static void write(ByteBuf p_299969_, CharSequence p_299580_, int p_298286_) {
-        if (p_299580_.length() > p_298286_) {
-            throw new EncoderException("String too big (was " + p_299580_.length() + " characters, max " + p_298286_ + ")");
+    public static void write(ByteBuf pBuffer, CharSequence pString, int pMaxLength) {
+        if (pString.length() > pMaxLength) {
+            throw new EncoderException("String too big (was " + pString.length() + " characters, max " + pMaxLength + ")");
         } else {
-            int i = ByteBufUtil.utf8MaxBytes(p_299580_);
-            ByteBuf bytebuf = p_299969_.alloc().buffer(i);
+            int i = ByteBufUtil.utf8MaxBytes(pString);
+            ByteBuf bytebuf = pBuffer.alloc().buffer(i);
 
             try {
-                int j = ByteBufUtil.writeUtf8(bytebuf, p_299580_);
-                int k = ByteBufUtil.utf8MaxBytes(p_298286_);
+                int j = ByteBufUtil.writeUtf8(bytebuf, pString);
+                int k = ByteBufUtil.utf8MaxBytes(pMaxLength);
                 if (j > k) {
                     throw new EncoderException("String too big (was " + j + " bytes encoded, max " + k + ")");
                 }
 
-                VarInt.write(p_299969_, j);
-                p_299969_.writeBytes(bytebuf);
+                VarInt.write(pBuffer, j);
+                pBuffer.writeBytes(bytebuf);
             } finally {
                 bytebuf.release();
             }

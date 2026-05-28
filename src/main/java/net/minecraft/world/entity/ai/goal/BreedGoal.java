@@ -17,15 +17,15 @@ public class BreedGoal extends Goal {
     private int loveTime;
     private final double speedModifier;
 
-    public BreedGoal(Animal p_25122_, double p_25123_) {
-        this(p_25122_, p_25123_, (Class<? extends Animal>)p_25122_.getClass());
+    public BreedGoal(Animal pAnimal, double pSpeedModifier) {
+        this(pAnimal, pSpeedModifier, (Class<? extends Animal>)pAnimal.getClass());
     }
 
-    public BreedGoal(Animal p_25125_, double p_25126_, Class<? extends Animal> p_25127_) {
-        this.animal = p_25125_;
-        this.level = getServerLevel(p_25125_);
-        this.partnerClass = p_25127_;
-        this.speedModifier = p_25126_;
+    public BreedGoal(Animal pAnimal, double pSpeedModifier, Class<? extends Animal> pPartnerClass) {
+        this.animal = pAnimal;
+        this.level = getServerLevel(pAnimal);
+        this.partnerClass = pPartnerClass;
+        this.speedModifier = pSpeedModifier;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 

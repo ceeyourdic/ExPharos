@@ -9,8 +9,8 @@ import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 
 public class PoiTypeTagsProvider extends TagsProvider<PoiType> {
-    public PoiTypeTagsProvider(PackOutput p_256012_, CompletableFuture<HolderLookup.Provider> p_256617_) {
-        super(p_256012_, Registries.POINT_OF_INTEREST_TYPE, p_256617_);
+    public PoiTypeTagsProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pProvider) {
+        super(pOutput, Registries.POINT_OF_INTEREST_TYPE, pProvider);
     }
 
     @Override

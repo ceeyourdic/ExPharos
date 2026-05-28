@@ -21,8 +21,8 @@ public class TemptingSensor extends Sensor<PathfinderMob> {
     private static final TargetingConditions TEMPT_TARGETING = TargetingConditions.forNonCombat().ignoreLineOfSight();
     private final Predicate<ItemStack> temptations;
 
-    public TemptingSensor(Predicate<ItemStack> p_328517_) {
-        this.temptations = p_328517_;
+    public TemptingSensor(Predicate<ItemStack> pTemptations) {
+        this.temptations = pTemptations;
     }
 
     protected void doTick(ServerLevel p_148331_, PathfinderMob p_148332_) {
@@ -44,12 +44,12 @@ public class TemptingSensor extends Sensor<PathfinderMob> {
         }
     }
 
-    private boolean playerHoldingTemptation(Player p_148337_) {
-        return this.isTemptation(p_148337_.getMainHandItem()) || this.isTemptation(p_148337_.getOffhandItem());
+    private boolean playerHoldingTemptation(Player pPlayer) {
+        return this.isTemptation(pPlayer.getMainHandItem()) || this.isTemptation(pPlayer.getOffhandItem());
     }
 
-    private boolean isTemptation(ItemStack p_148339_) {
-        return this.temptations.test(p_148339_);
+    private boolean isTemptation(ItemStack pStack) {
+        return this.temptations.test(pStack);
     }
 
     @Override

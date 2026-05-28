@@ -50,8 +50,8 @@ public class BarrelBlockEntity extends RandomizableContainerBlockEntity {
         }
     };
 
-    public BarrelBlockEntity(BlockPos p_155052_, BlockState p_155053_) {
-        super(BlockEntityType.BARREL, p_155052_, p_155053_);
+    public BarrelBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        super(BlockEntityType.BARREL, pPos, pBlockState);
     }
 
     @Override
@@ -82,8 +82,8 @@ public class BarrelBlockEntity extends RandomizableContainerBlockEntity {
     }
 
     @Override
-    protected void setItems(NonNullList<ItemStack> p_58610_) {
-        this.items = p_58610_;
+    protected void setItems(NonNullList<ItemStack> pItems) {
+        this.items = pItems;
     }
 
     @Override
@@ -92,21 +92,21 @@ public class BarrelBlockEntity extends RandomizableContainerBlockEntity {
     }
 
     @Override
-    protected AbstractContainerMenu createMenu(int p_58598_, Inventory p_58599_) {
-        return ChestMenu.threeRows(p_58598_, p_58599_, this);
+    protected AbstractContainerMenu createMenu(int pId, Inventory pPlayer) {
+        return ChestMenu.threeRows(pId, pPlayer, this);
     }
 
     @Override
-    public void startOpen(Player p_58616_) {
-        if (!this.remove && !p_58616_.isSpectator()) {
-            this.openersCounter.incrementOpeners(p_58616_, this.getLevel(), this.getBlockPos(), this.getBlockState());
+    public void startOpen(Player pPlayer) {
+        if (!this.remove && !pPlayer.isSpectator()) {
+            this.openersCounter.incrementOpeners(pPlayer, this.getLevel(), this.getBlockPos(), this.getBlockState());
         }
     }
 
     @Override
-    public void stopOpen(Player p_58614_) {
-        if (!this.remove && !p_58614_.isSpectator()) {
-            this.openersCounter.decrementOpeners(p_58614_, this.getLevel(), this.getBlockPos(), this.getBlockState());
+    public void stopOpen(Player pPlayer) {
+        if (!this.remove && !pPlayer.isSpectator()) {
+            this.openersCounter.decrementOpeners(pPlayer, this.getLevel(), this.getBlockPos(), this.getBlockState());
         }
     }
 
@@ -116,15 +116,15 @@ public class BarrelBlockEntity extends RandomizableContainerBlockEntity {
         }
     }
 
-    void updateBlockState(BlockState p_58607_, boolean p_58608_) {
-        this.level.setBlock(this.getBlockPos(), p_58607_.setValue(BarrelBlock.OPEN, Boolean.valueOf(p_58608_)), 3);
+    void updateBlockState(BlockState pState, boolean pOpen) {
+        this.level.setBlock(this.getBlockPos(), pState.setValue(BarrelBlock.OPEN, Boolean.valueOf(pOpen)), 3);
     }
 
-    void playSound(BlockState p_58601_, SoundEvent p_58602_) {
-        Vec3i vec3i = p_58601_.getValue(BarrelBlock.FACING).getUnitVec3i();
+    void playSound(BlockState pState, SoundEvent pSound) {
+        Vec3i vec3i = pState.getValue(BarrelBlock.FACING).getUnitVec3i();
         double d0 = (double)this.worldPosition.getX() + 0.5 + (double)vec3i.getX() / 2.0;
         double d1 = (double)this.worldPosition.getY() + 0.5 + (double)vec3i.getY() / 2.0;
         double d2 = (double)this.worldPosition.getZ() + 0.5 + (double)vec3i.getZ() / 2.0;
-        this.level.playSound(null, d0, d1, d2, p_58602_, SoundSource.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
+        this.level.playSound(null, d0, d1, d2, pSound, SoundSource.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
     }
 }

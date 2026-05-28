@@ -12,17 +12,17 @@ public final class FeatureFlagSet {
     private final FeatureFlagUniverse universe;
     private final long mask;
 
-    private FeatureFlagSet(@Nullable FeatureFlagUniverse p_250433_, long p_251523_) {
-        this.universe = p_250433_;
-        this.mask = p_251523_;
+    private FeatureFlagSet(@Nullable FeatureFlagUniverse pUniverse, long pMask) {
+        this.universe = pUniverse;
+        this.mask = pMask;
     }
 
-    static FeatureFlagSet create(FeatureFlagUniverse p_251573_, Collection<FeatureFlag> p_251037_) {
-        if (p_251037_.isEmpty()) {
+    static FeatureFlagSet create(FeatureFlagUniverse pUniverse, Collection<FeatureFlag> pFlags) {
+        if (pFlags.isEmpty()) {
             return EMPTY;
         } else {
-            long i = computeMask(p_251573_, 0L, p_251037_);
-            return new FeatureFlagSet(p_251573_, i);
+            long i = computeMask(pUniverse, 0L, pFlags);
+            return new FeatureFlagSet(pUniverse, i);
         }
     }
 
@@ -30,78 +30,78 @@ public final class FeatureFlagSet {
         return EMPTY;
     }
 
-    public static FeatureFlagSet of(FeatureFlag p_252331_) {
-        return new FeatureFlagSet(p_252331_.universe, p_252331_.mask);
+    public static FeatureFlagSet of(FeatureFlag pFlag) {
+        return new FeatureFlagSet(pFlag.universe, pFlag.mask);
     }
 
-    public static FeatureFlagSet of(FeatureFlag p_251008_, FeatureFlag... p_249805_) {
-        long i = p_249805_.length == 0 ? p_251008_.mask : computeMask(p_251008_.universe, p_251008_.mask, Arrays.asList(p_249805_));
-        return new FeatureFlagSet(p_251008_.universe, i);
+    public static FeatureFlagSet of(FeatureFlag pFlag, FeatureFlag... pOthers) {
+        long i = pOthers.length == 0 ? pFlag.mask : computeMask(pFlag.universe, pFlag.mask, Arrays.asList(pOthers));
+        return new FeatureFlagSet(pFlag.universe, i);
     }
 
-    private static long computeMask(FeatureFlagUniverse p_249684_, long p_250982_, Iterable<FeatureFlag> p_251734_) {
-        for (FeatureFlag featureflag : p_251734_) {
-            if (p_249684_ != featureflag.universe) {
-                throw new IllegalStateException("Mismatched feature universe, expected '" + p_249684_ + "', but got '" + featureflag.universe + "'");
+    private static long computeMask(FeatureFlagUniverse pUniverse, long pMask, Iterable<FeatureFlag> pFlags) {
+        for (FeatureFlag featureflag : pFlags) {
+            if (pUniverse != featureflag.universe) {
+                throw new IllegalStateException("Mismatched feature universe, expected '" + pUniverse + "', but got '" + featureflag.universe + "'");
             }
 
-            p_250982_ |= featureflag.mask;
+            pMask |= featureflag.mask;
         }
 
-        return p_250982_;
+        return pMask;
     }
 
-    public boolean contains(FeatureFlag p_249521_) {
-        return this.universe != p_249521_.universe ? false : (this.mask & p_249521_.mask) != 0L;
+    public boolean contains(FeatureFlag pFlag) {
+        return this.universe != pFlag.universe ? false : (this.mask & pFlag.mask) != 0L;
     }
 
     public boolean isEmpty() {
         return this.equals(EMPTY);
     }
 
-    public boolean isSubsetOf(FeatureFlagSet p_249164_) {
+    public boolean isSubsetOf(FeatureFlagSet pSet) {
         if (this.universe == null) {
             return true;
         } else {
-            return this.universe != p_249164_.universe ? false : (this.mask & ~p_249164_.mask) == 0L;
+            return this.universe != pSet.universe ? false : (this.mask & ~pSet.mask) == 0L;
         }
     }
 
-    public boolean intersects(FeatureFlagSet p_332490_) {
-        return this.universe != null && p_332490_.universe != null && this.universe == p_332490_.universe
-            ? (this.mask & p_332490_.mask) != 0L
+    public boolean intersects(FeatureFlagSet pSet) {
+        return this.universe != null && pSet.universe != null && this.universe == pSet.universe
+            ? (this.mask & pSet.mask) != 0L
             : false;
     }
 
-    public FeatureFlagSet join(FeatureFlagSet p_251527_) {
+    public FeatureFlagSet join(FeatureFlagSet pOther) {
         if (this.universe == null) {
-            return p_251527_;
-        } else if (p_251527_.universe == null) {
+            return pOther;
+        } else if (pOther.universe == null) {
             return this;
-        } else if (this.universe != p_251527_.universe) {
-            throw new IllegalArgumentException("Mismatched set elements: '" + this.universe + "' != '" + p_251527_.universe + "'");
+        } else if (this.universe != pOther.universe) {
+            throw new IllegalArgumentException("Mismatched set elements: '" + this.universe + "' != '" + pOther.universe + "'");
         } else {
-            return new FeatureFlagSet(this.universe, this.mask | p_251527_.mask);
+            return new FeatureFlagSet(this.universe, this.mask | pOther.mask);
         }
     }
 
-    public FeatureFlagSet subtract(FeatureFlagSet p_328325_) {
-        if (this.universe == null || p_328325_.universe == null) {
+    public FeatureFlagSet subtract(FeatureFlagSet pOther) {
+        if (this.universe == null || pOther.universe == null) {
             return this;
-        } else if (this.universe != p_328325_.universe) {
-            throw new IllegalArgumentException("Mismatched set elements: '" + this.universe + "' != '" + p_328325_.universe + "'");
+        } else if (this.universe != pOther.universe) {
+            throw new IllegalArgumentException("Mismatched set elements: '" + this.universe + "' != '" + pOther.universe + "'");
         } else {
-            long i = this.mask & ~p_328325_.mask;
+            long i = this.mask & ~pOther.mask;
             return i == 0L ? EMPTY : new FeatureFlagSet(this.universe, i);
         }
     }
 
     @Override
-    public boolean equals(Object p_248691_) {
-        if (this == p_248691_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            if (p_248691_ instanceof FeatureFlagSet featureflagset && this.universe == featureflagset.universe && this.mask == featureflagset.mask) {
+            if (pOther instanceof FeatureFlagSet featureflagset && this.universe == featureflagset.universe && this.mask == featureflagset.mask) {
                 return true;
             }
 

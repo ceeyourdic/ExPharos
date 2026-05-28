@@ -5,10 +5,9 @@ import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ProgressListener;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.CustomLoadingScreen;
+import net.optifine.CustomLoadingScreens;
 
-@OnlyIn(Dist.CLIENT)
 public class ProgressScreen extends Screen implements ProgressListener {
     @Nullable
     private Component header;
@@ -17,10 +16,12 @@ public class ProgressScreen extends Screen implements ProgressListener {
     private int progress;
     private boolean stop;
     private final boolean clearScreenAfterStop;
+    private CustomLoadingScreen customLoadingScreen;
 
-    public ProgressScreen(boolean p_169364_) {
+    public ProgressScreen(boolean pClearScreenAfterStop) {
         super(GameNarrator.NO_TITLE);
-        this.clearScreenAfterStop = p_169364_;
+        this.clearScreenAfterStop = pClearScreenAfterStop;
+        this.customLoadingScreen = CustomLoadingScreens.getCustomLoadingScreen();
     }
 
     @Override
@@ -34,25 +35,25 @@ public class ProgressScreen extends Screen implements ProgressListener {
     }
 
     @Override
-    public void progressStartNoAbort(Component p_96520_) {
-        this.progressStart(p_96520_);
+    public void progressStartNoAbort(Component pComponent) {
+        this.progressStart(pComponent);
     }
 
     @Override
-    public void progressStart(Component p_96523_) {
-        this.header = p_96523_;
+    public void progressStart(Component pComponent) {
+        this.header = pComponent;
         this.progressStage(Component.translatable("menu.working"));
     }
 
     @Override
-    public void progressStage(Component p_96525_) {
-        this.stage = p_96525_;
+    public void progressStage(Component pComponent) {
+        this.stage = pComponent;
         this.progressStagePercentage(0);
     }
 
     @Override
-    public void progressStagePercentage(int p_96513_) {
-        this.progress = p_96513_;
+    public void progressStagePercentage(int pProgress) {
+        this.progress = pProgress;
     }
 
     @Override
@@ -68,15 +69,26 @@ public class ProgressScreen extends Screen implements ProgressListener {
             }
         } else {
             super.render(p_283582_, p_96516_, p_96517_, p_96518_);
-            if (this.header != null) {
-                p_283582_.drawCenteredString(this.font, this.header, this.width / 2, 70, 16777215);
-            }
+            if (this.progress > 0) {
+                if (this.header != null) {
+                    p_283582_.drawCenteredString(this.font, this.header, this.width / 2, 70, 16777215);
+                }
 
-            if (this.stage != null && this.progress != 0) {
-                p_283582_.drawCenteredString(
-                    this.font, Component.empty().append(this.stage).append(" " + this.progress + "%"), this.width / 2, 90, 16777215
-                );
+                if (this.stage != null && this.progress != 0) {
+                    p_283582_.drawCenteredString(
+                        this.font, Component.empty().append(this.stage).append(" " + this.progress + "%"), this.width / 2, 90, 16777215
+                    );
+                }
             }
+        }
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics graphicsIn, int mouseX, int mouseY, float partialTicks) {
+        if (this.customLoadingScreen != null && this.minecraft.level == null) {
+            this.customLoadingScreen.drawBackground(this.width, this.height);
+        } else {
+            super.renderBackground(graphicsIn, mouseX, mouseY, partialTicks);
         }
     }
 }

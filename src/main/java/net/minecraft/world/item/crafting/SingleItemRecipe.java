@@ -19,10 +19,10 @@ public abstract class SingleItemRecipe implements Recipe<SingleRecipeInput> {
     @Nullable
     private PlacementInfo placementInfo;
 
-    public SingleItemRecipe(String p_44419_, Ingredient p_44420_, ItemStack p_44421_) {
-        this.group = p_44419_;
-        this.input = p_44420_;
-        this.result = p_44421_;
+    public SingleItemRecipe(String pGroup, Ingredient pInput, ItemStack pResult) {
+        this.group = pGroup;
+        this.input = pInput;
+        this.result = pResult;
     }
 
     @Override
@@ -63,21 +63,21 @@ public abstract class SingleItemRecipe implements Recipe<SingleRecipeInput> {
 
     @FunctionalInterface
     public interface Factory<T extends SingleItemRecipe> {
-        T create(String p_310227_, Ingredient p_313029_, ItemStack p_312409_);
+        T create(String pGroup, Ingredient pIngredient, ItemStack pResult);
     }
 
     public static class Serializer<T extends SingleItemRecipe> implements RecipeSerializer<T> {
         private final MapCodec<T> codec;
         private final StreamCodec<RegistryFriendlyByteBuf, T> streamCodec;
 
-        protected Serializer(SingleItemRecipe.Factory<T> p_311205_) {
+        protected Serializer(SingleItemRecipe.Factory<T> pFactory) {
             this.codec = RecordCodecBuilder.mapCodec(
                 p_359863_ -> p_359863_.group(
                             Codec.STRING.optionalFieldOf("group", "").forGetter(SingleItemRecipe::group),
                             Ingredient.CODEC.fieldOf("ingredient").forGetter(SingleItemRecipe::input),
                             ItemStack.STRICT_CODEC.fieldOf("result").forGetter(SingleItemRecipe::result)
                         )
-                        .apply(p_359863_, p_311205_::create)
+                        .apply(p_359863_, pFactory::create)
             );
             this.streamCodec = StreamCodec.composite(
                 ByteBufCodecs.STRING_UTF8,
@@ -86,7 +86,7 @@ public abstract class SingleItemRecipe implements Recipe<SingleRecipeInput> {
                 SingleItemRecipe::input,
                 ItemStack.STREAM_CODEC,
                 SingleItemRecipe::result,
-                p_311205_::create
+                pFactory::create
             );
         }
 

@@ -28,9 +28,9 @@ public class AxolotlModel extends EntityModel<AxolotlRenderState> {
     private final ModelPart leftGills;
     private final ModelPart rightGills;
 
-    public AxolotlModel(ModelPart p_170370_) {
-        super(p_170370_);
-        this.body = p_170370_.getChild("body");
+    public AxolotlModel(ModelPart pRoot) {
+        super(pRoot);
+        this.body = pRoot.getChild("body");
         this.head = this.body.getChild("head");
         this.rightHindLeg = this.body.getChild("right_hind_leg");
         this.leftHindLeg = this.body.getChild("left_hind_leg");
@@ -95,124 +95,124 @@ public class AxolotlModel extends EntityModel<AxolotlRenderState> {
         this.applyMirrorLegRotations(f5);
     }
 
-    private void setupLayStillOnGroundAnimation(float p_170415_, float p_170416_) {
-        if (!(p_170416_ <= 1.0E-5F)) {
-            float f = p_170415_ * 0.09F;
+    private void setupLayStillOnGroundAnimation(float pAgeInTicks, float pNetHeadYaw) {
+        if (!(pNetHeadYaw <= 1.0E-5F)) {
+            float f = pAgeInTicks * 0.09F;
             float f1 = Mth.sin(f);
             float f2 = Mth.cos(f);
             float f3 = f1 * f1 - 2.0F * f1;
             float f4 = f2 * f2 - 3.0F * f1;
-            this.head.xRot += -0.09F * f3 * p_170416_;
-            this.head.zRot += -0.2F * p_170416_;
-            this.tail.yRot += (-0.1F + 0.1F * f3) * p_170416_;
-            float f5 = (0.6F + 0.05F * f4) * p_170416_;
+            this.head.xRot += -0.09F * f3 * pNetHeadYaw;
+            this.head.zRot += -0.2F * pNetHeadYaw;
+            this.tail.yRot += (-0.1F + 0.1F * f3) * pNetHeadYaw;
+            float f5 = (0.6F + 0.05F * f4) * pNetHeadYaw;
             this.topGills.xRot += f5;
             this.leftGills.yRot -= f5;
             this.rightGills.yRot += f5;
-            this.leftHindLeg.xRot += 1.1F * p_170416_;
-            this.leftHindLeg.yRot += 1.0F * p_170416_;
-            this.leftFrontLeg.xRot += 0.8F * p_170416_;
-            this.leftFrontLeg.yRot += 2.3F * p_170416_;
-            this.leftFrontLeg.zRot -= 0.5F * p_170416_;
+            this.leftHindLeg.xRot += 1.1F * pNetHeadYaw;
+            this.leftHindLeg.yRot += 1.0F * pNetHeadYaw;
+            this.leftFrontLeg.xRot += 0.8F * pNetHeadYaw;
+            this.leftFrontLeg.yRot += 2.3F * pNetHeadYaw;
+            this.leftFrontLeg.zRot -= 0.5F * pNetHeadYaw;
         }
     }
 
-    private void setupGroundCrawlingAnimation(float p_170419_, float p_170420_) {
-        if (!(p_170420_ <= 1.0E-5F)) {
-            float f = p_170419_ * 0.11F;
+    private void setupGroundCrawlingAnimation(float pAgeInTicks, float pNetHeadYaw) {
+        if (!(pNetHeadYaw <= 1.0E-5F)) {
+            float f = pAgeInTicks * 0.11F;
             float f1 = Mth.cos(f);
             float f2 = (f1 * f1 - 2.0F * f1) / 5.0F;
             float f3 = 0.7F * f1;
-            float f4 = 0.09F * f1 * p_170420_;
+            float f4 = 0.09F * f1 * pNetHeadYaw;
             this.head.yRot += f4;
             this.tail.yRot += f4;
-            float f5 = (0.6F - 0.08F * (f1 * f1 + 2.0F * Mth.sin(f))) * p_170420_;
+            float f5 = (0.6F - 0.08F * (f1 * f1 + 2.0F * Mth.sin(f))) * pNetHeadYaw;
             this.topGills.xRot += f5;
             this.leftGills.yRot -= f5;
             this.rightGills.yRot += f5;
-            float f6 = 0.9424779F * p_170420_;
-            float f7 = 1.0995574F * p_170420_;
+            float f6 = 0.9424779F * pNetHeadYaw;
+            float f7 = 1.0995574F * pNetHeadYaw;
             this.leftHindLeg.xRot += f6;
-            this.leftHindLeg.yRot += (1.5F - f2) * p_170420_;
-            this.leftHindLeg.zRot += -0.1F * p_170420_;
+            this.leftHindLeg.yRot += (1.5F - f2) * pNetHeadYaw;
+            this.leftHindLeg.zRot += -0.1F * pNetHeadYaw;
             this.leftFrontLeg.xRot += f7;
-            this.leftFrontLeg.yRot += ((float) (Math.PI / 2) - f3) * p_170420_;
+            this.leftFrontLeg.yRot += ((float) (Math.PI / 2) - f3) * pNetHeadYaw;
             this.rightHindLeg.xRot += f6;
-            this.rightHindLeg.yRot += (-1.0F - f2) * p_170420_;
+            this.rightHindLeg.yRot += (-1.0F - f2) * pNetHeadYaw;
             this.rightFrontLeg.xRot += f7;
-            this.rightFrontLeg.yRot += ((float) (-Math.PI / 2) - f3) * p_170420_;
+            this.rightFrontLeg.yRot += ((float) (-Math.PI / 2) - f3) * pNetHeadYaw;
         }
     }
 
-    private void setupWaterHoveringAnimation(float p_170373_, float p_366999_) {
-        if (!(p_366999_ <= 1.0E-5F)) {
-            float f = p_170373_ * 0.075F;
+    private void setupWaterHoveringAnimation(float pAgeInTicks, float pSwimmingFactor) {
+        if (!(pSwimmingFactor <= 1.0E-5F)) {
+            float f = pAgeInTicks * 0.075F;
             float f1 = Mth.cos(f);
             float f2 = Mth.sin(f) * 0.15F;
-            float f3 = (-0.15F + 0.075F * f1) * p_366999_;
+            float f3 = (-0.15F + 0.075F * f1) * pSwimmingFactor;
             this.body.xRot += f3;
-            this.body.y -= f2 * p_366999_;
+            this.body.y -= f2 * pSwimmingFactor;
             this.head.xRot -= f3;
-            this.topGills.xRot += 0.2F * f1 * p_366999_;
-            float f4 = (-0.3F * f1 - 0.19F) * p_366999_;
+            this.topGills.xRot += 0.2F * f1 * pSwimmingFactor;
+            float f4 = (-0.3F * f1 - 0.19F) * pSwimmingFactor;
             this.leftGills.yRot += f4;
             this.rightGills.yRot -= f4;
-            this.leftHindLeg.xRot += ((float) (Math.PI * 3.0 / 4.0) - f1 * 0.11F) * p_366999_;
-            this.leftHindLeg.yRot += 0.47123894F * p_366999_;
-            this.leftHindLeg.zRot += 1.7278761F * p_366999_;
-            this.leftFrontLeg.xRot += ((float) (Math.PI / 4) - f1 * 0.2F) * p_366999_;
-            this.leftFrontLeg.yRot += 2.042035F * p_366999_;
-            this.tail.yRot += 0.5F * f1 * p_366999_;
+            this.leftHindLeg.xRot += ((float) (Math.PI * 3.0 / 4.0) - f1 * 0.11F) * pSwimmingFactor;
+            this.leftHindLeg.yRot += 0.47123894F * pSwimmingFactor;
+            this.leftHindLeg.zRot += 1.7278761F * pSwimmingFactor;
+            this.leftFrontLeg.xRot += ((float) (Math.PI / 4) - f1 * 0.2F) * pSwimmingFactor;
+            this.leftFrontLeg.yRot += 2.042035F * pSwimmingFactor;
+            this.tail.yRot += 0.5F * f1 * pSwimmingFactor;
         }
     }
 
-    private void setupSwimmingAnimation(float p_170423_, float p_170424_, float p_361788_) {
-        if (!(p_361788_ <= 1.0E-5F)) {
-            float f = p_170423_ * 0.33F;
+    private void setupSwimmingAnimation(float pAgeInTicks, float pXRot, float pMovingFactor) {
+        if (!(pMovingFactor <= 1.0E-5F)) {
+            float f = pAgeInTicks * 0.33F;
             float f1 = Mth.sin(f);
             float f2 = Mth.cos(f);
             float f3 = 0.13F * f1;
-            this.body.xRot += (p_170424_ * (float) (Math.PI / 180.0) + f3) * p_361788_;
-            this.head.xRot -= f3 * 1.8F * p_361788_;
-            this.body.y -= 0.45F * f2 * p_361788_;
-            this.topGills.xRot += (-0.5F * f1 - 0.8F) * p_361788_;
-            float f4 = (0.3F * f1 + 0.9F) * p_361788_;
+            this.body.xRot += (pXRot * (float) (Math.PI / 180.0) + f3) * pMovingFactor;
+            this.head.xRot -= f3 * 1.8F * pMovingFactor;
+            this.body.y -= 0.45F * f2 * pMovingFactor;
+            this.topGills.xRot += (-0.5F * f1 - 0.8F) * pMovingFactor;
+            float f4 = (0.3F * f1 + 0.9F) * pMovingFactor;
             this.leftGills.yRot += f4;
             this.rightGills.yRot -= f4;
-            this.tail.yRot = this.tail.yRot + 0.3F * Mth.cos(f * 0.9F) * p_361788_;
-            this.leftHindLeg.xRot += 1.8849558F * p_361788_;
-            this.leftHindLeg.yRot += -0.4F * f1 * p_361788_;
-            this.leftHindLeg.zRot += (float) (Math.PI / 2) * p_361788_;
-            this.leftFrontLeg.xRot += 1.8849558F * p_361788_;
-            this.leftFrontLeg.yRot += (-0.2F * f2 - 0.1F) * p_361788_;
-            this.leftFrontLeg.zRot += (float) (Math.PI / 2) * p_361788_;
+            this.tail.yRot = this.tail.yRot + 0.3F * Mth.cos(f * 0.9F) * pMovingFactor;
+            this.leftHindLeg.xRot += 1.8849558F * pMovingFactor;
+            this.leftHindLeg.yRot += -0.4F * f1 * pMovingFactor;
+            this.leftHindLeg.zRot += (float) (Math.PI / 2) * pMovingFactor;
+            this.leftFrontLeg.xRot += 1.8849558F * pMovingFactor;
+            this.leftFrontLeg.yRot += (-0.2F * f2 - 0.1F) * pMovingFactor;
+            this.leftFrontLeg.zRot += (float) (Math.PI / 2) * pMovingFactor;
         }
     }
 
-    private void setupPlayDeadAnimation(float p_170413_) {
-        if (!(p_170413_ <= 1.0E-5F)) {
-            this.leftHindLeg.xRot += 1.4137167F * p_170413_;
-            this.leftHindLeg.yRot += 1.0995574F * p_170413_;
-            this.leftHindLeg.zRot += (float) (Math.PI / 4) * p_170413_;
-            this.leftFrontLeg.xRot += (float) (Math.PI / 4) * p_170413_;
-            this.leftFrontLeg.yRot += 2.042035F * p_170413_;
-            this.body.xRot += -0.15F * p_170413_;
-            this.body.zRot += 0.35F * p_170413_;
+    private void setupPlayDeadAnimation(float pPlayingDeadFactor) {
+        if (!(pPlayingDeadFactor <= 1.0E-5F)) {
+            this.leftHindLeg.xRot += 1.4137167F * pPlayingDeadFactor;
+            this.leftHindLeg.yRot += 1.0995574F * pPlayingDeadFactor;
+            this.leftHindLeg.zRot += (float) (Math.PI / 4) * pPlayingDeadFactor;
+            this.leftFrontLeg.xRot += (float) (Math.PI / 4) * pPlayingDeadFactor;
+            this.leftFrontLeg.yRot += 2.042035F * pPlayingDeadFactor;
+            this.body.xRot += -0.15F * pPlayingDeadFactor;
+            this.body.zRot += 0.35F * pPlayingDeadFactor;
         }
     }
 
-    private void applyMirrorLegRotations(float p_368255_) {
-        if (!(p_368255_ <= 1.0E-5F)) {
-            this.rightHindLeg.xRot = this.rightHindLeg.xRot + this.leftHindLeg.xRot * p_368255_;
+    private void applyMirrorLegRotations(float pFactor) {
+        if (!(pFactor <= 1.0E-5F)) {
+            this.rightHindLeg.xRot = this.rightHindLeg.xRot + this.leftHindLeg.xRot * pFactor;
             ModelPart modelpart = this.rightHindLeg;
-            modelpart.yRot = modelpart.yRot + -this.leftHindLeg.yRot * p_368255_;
+            modelpart.yRot = modelpart.yRot + -this.leftHindLeg.yRot * pFactor;
             modelpart = this.rightHindLeg;
-            modelpart.zRot = modelpart.zRot + -this.leftHindLeg.zRot * p_368255_;
-            this.rightFrontLeg.xRot = this.rightFrontLeg.xRot + this.leftFrontLeg.xRot * p_368255_;
+            modelpart.zRot = modelpart.zRot + -this.leftHindLeg.zRot * pFactor;
+            this.rightFrontLeg.xRot = this.rightFrontLeg.xRot + this.leftFrontLeg.xRot * pFactor;
             modelpart = this.rightFrontLeg;
-            modelpart.yRot = modelpart.yRot + -this.leftFrontLeg.yRot * p_368255_;
+            modelpart.yRot = modelpart.yRot + -this.leftFrontLeg.yRot * pFactor;
             modelpart = this.rightFrontLeg;
-            modelpart.zRot = modelpart.zRot + -this.leftFrontLeg.zRot * p_368255_;
+            modelpart.zRot = modelpart.zRot + -this.leftFrontLeg.zRot * pFactor;
         }
     }
 }

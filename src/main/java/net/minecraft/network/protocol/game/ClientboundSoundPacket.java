@@ -23,45 +23,45 @@ public class ClientboundSoundPacket implements Packet<ClientGamePacketListener> 
     private final long seed;
 
     public ClientboundSoundPacket(
-        Holder<SoundEvent> p_263366_,
-        SoundSource p_263375_,
-        double p_263378_,
-        double p_263367_,
-        double p_263394_,
-        float p_263415_,
-        float p_263399_,
-        long p_263409_
+        Holder<SoundEvent> pSound,
+        SoundSource pSource,
+        double pX,
+        double pY,
+        double pZ,
+        float pVolume,
+        float pPitch,
+        long pSeed
     ) {
-        this.sound = p_263366_;
-        this.source = p_263375_;
-        this.x = (int)(p_263378_ * 8.0);
-        this.y = (int)(p_263367_ * 8.0);
-        this.z = (int)(p_263394_ * 8.0);
-        this.volume = p_263415_;
-        this.pitch = p_263399_;
-        this.seed = p_263409_;
+        this.sound = pSound;
+        this.source = pSource;
+        this.x = (int)(pX * 8.0);
+        this.y = (int)(pY * 8.0);
+        this.z = (int)(pZ * 8.0);
+        this.volume = pVolume;
+        this.pitch = pPitch;
+        this.seed = pSeed;
     }
 
-    private ClientboundSoundPacket(RegistryFriendlyByteBuf p_334023_) {
-        this.sound = SoundEvent.STREAM_CODEC.decode(p_334023_);
-        this.source = p_334023_.readEnum(SoundSource.class);
-        this.x = p_334023_.readInt();
-        this.y = p_334023_.readInt();
-        this.z = p_334023_.readInt();
-        this.volume = p_334023_.readFloat();
-        this.pitch = p_334023_.readFloat();
-        this.seed = p_334023_.readLong();
+    private ClientboundSoundPacket(RegistryFriendlyByteBuf pBuffer) {
+        this.sound = SoundEvent.STREAM_CODEC.decode(pBuffer);
+        this.source = pBuffer.readEnum(SoundSource.class);
+        this.x = pBuffer.readInt();
+        this.y = pBuffer.readInt();
+        this.z = pBuffer.readInt();
+        this.volume = pBuffer.readFloat();
+        this.pitch = pBuffer.readFloat();
+        this.seed = pBuffer.readLong();
     }
 
-    private void write(RegistryFriendlyByteBuf p_330374_) {
-        SoundEvent.STREAM_CODEC.encode(p_330374_, this.sound);
-        p_330374_.writeEnum(this.source);
-        p_330374_.writeInt(this.x);
-        p_330374_.writeInt(this.y);
-        p_330374_.writeInt(this.z);
-        p_330374_.writeFloat(this.volume);
-        p_330374_.writeFloat(this.pitch);
-        p_330374_.writeLong(this.seed);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        SoundEvent.STREAM_CODEC.encode(pBuffer, this.sound);
+        pBuffer.writeEnum(this.source);
+        pBuffer.writeInt(this.x);
+        pBuffer.writeInt(this.y);
+        pBuffer.writeInt(this.z);
+        pBuffer.writeFloat(this.volume);
+        pBuffer.writeFloat(this.pitch);
+        pBuffer.writeLong(this.seed);
     }
 
     @Override
@@ -69,8 +69,8 @@ public class ClientboundSoundPacket implements Packet<ClientGamePacketListener> 
         return GamePacketTypes.CLIENTBOUND_SOUND;
     }
 
-    public void handle(ClientGamePacketListener p_133454_) {
-        p_133454_.handleSoundEvent(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleSoundEvent(this);
     }
 
     public Holder<SoundEvent> getSound() {

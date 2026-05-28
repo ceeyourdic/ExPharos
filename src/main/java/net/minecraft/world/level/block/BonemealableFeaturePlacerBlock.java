@@ -28,9 +28,9 @@ public class BonemealableFeaturePlacerBlock extends Block implements Bonemealabl
         return CODEC;
     }
 
-    public BonemealableFeaturePlacerBlock(ResourceKey<ConfiguredFeature<?, ?>> p_364303_, BlockBehaviour.Properties p_364734_) {
-        super(p_364734_);
-        this.feature = p_364303_;
+    public BonemealableFeaturePlacerBlock(ResourceKey<ConfiguredFeature<?, ?>> pFeature, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.feature = pFeature;
     }
 
     @Override

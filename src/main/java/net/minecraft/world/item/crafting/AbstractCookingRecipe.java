@@ -19,11 +19,11 @@ public abstract class AbstractCookingRecipe extends SingleItemRecipe {
     private final float experience;
     private final int cookingTime;
 
-    public AbstractCookingRecipe(String p_249518_, CookingBookCategory p_250891_, Ingredient p_251354_, ItemStack p_252185_, float p_252165_, int p_250256_) {
-        super(p_249518_, p_251354_, p_252185_);
-        this.category = p_250891_;
-        this.experience = p_252165_;
-        this.cookingTime = p_250256_;
+    public AbstractCookingRecipe(String pGroup, CookingBookCategory pCategory, Ingredient pInput, ItemStack pResult, float pExperience, int pCookingTime) {
+        super(pGroup, pInput, pResult);
+        this.category = pCategory;
+        this.experience = pExperience;
+        this.cookingTime = pCookingTime;
     }
 
     @Override
@@ -62,14 +62,14 @@ public abstract class AbstractCookingRecipe extends SingleItemRecipe {
 
     @FunctionalInterface
     public interface Factory<T extends AbstractCookingRecipe> {
-        T create(String p_310191_, CookingBookCategory p_311031_, Ingredient p_313122_, ItemStack p_312156_, float p_312177_, int p_311374_);
+        T create(String pGroup, CookingBookCategory pCategory, Ingredient pIngredient, ItemStack pResult, float pExperience, int pCookingTime);
     }
 
     public static class Serializer<T extends AbstractCookingRecipe> implements RecipeSerializer<T> {
         private final MapCodec<T> codec;
         private final StreamCodec<RegistryFriendlyByteBuf, T> streamCodec;
 
-        public Serializer(AbstractCookingRecipe.Factory<T> p_368971_, int p_370210_) {
+        public Serializer(AbstractCookingRecipe.Factory<T> pFactory, int pDefaultCookingTime) {
             this.codec = RecordCodecBuilder.mapCodec(
                 p_361399_ -> p_361399_.group(
                             Codec.STRING.optionalFieldOf("group", "").forGetter(SingleItemRecipe::group),
@@ -77,9 +77,9 @@ public abstract class AbstractCookingRecipe extends SingleItemRecipe {
                             Ingredient.CODEC.fieldOf("ingredient").forGetter(SingleItemRecipe::input),
                             ItemStack.STRICT_SINGLE_ITEM_CODEC.fieldOf("result").forGetter(SingleItemRecipe::result),
                             Codec.FLOAT.fieldOf("experience").orElse(0.0F).forGetter(AbstractCookingRecipe::experience),
-                            Codec.INT.fieldOf("cookingtime").orElse(p_370210_).forGetter(AbstractCookingRecipe::cookingTime)
+                            Codec.INT.fieldOf("cookingtime").orElse(pDefaultCookingTime).forGetter(AbstractCookingRecipe::cookingTime)
                         )
-                        .apply(p_361399_, p_368971_::create)
+                        .apply(p_361399_, pFactory::create)
             );
             this.streamCodec = StreamCodec.composite(
                 ByteBufCodecs.STRING_UTF8,
@@ -94,7 +94,7 @@ public abstract class AbstractCookingRecipe extends SingleItemRecipe {
                 AbstractCookingRecipe::experience,
                 ByteBufCodecs.INT,
                 AbstractCookingRecipe::cookingTime,
-                p_368971_::create
+                pFactory::create
             );
         }
 

@@ -77,12 +77,12 @@ public class DemoMode extends ServerPlayerGameMode {
     }
 
     @Override
-    public InteractionResult useItem(ServerPlayer p_140742_, Level p_140743_, ItemStack p_140744_, InteractionHand p_140745_) {
+    public InteractionResult useItem(ServerPlayer pPlayer, Level pLevel, ItemStack pStack, InteractionHand pHand) {
         if (this.demoHasEnded) {
             this.outputDemoReminder();
             return InteractionResult.PASS;
         } else {
-            return super.useItem(p_140742_, p_140743_, p_140744_, p_140745_);
+            return super.useItem(pPlayer, pLevel, pStack, pHand);
         }
     }
 

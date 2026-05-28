@@ -14,18 +14,18 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public abstract class AbstractSkeletonRenderer<T extends AbstractSkeleton, S extends SkeletonRenderState> extends HumanoidMobRenderer<T, S, SkeletonModel<S>> {
     public AbstractSkeletonRenderer(
-        EntityRendererProvider.Context p_362142_, ModelLayerLocation p_369786_, ModelLayerLocation p_368806_, ModelLayerLocation p_364022_
+        EntityRendererProvider.Context pContext, ModelLayerLocation pModelLayer, ModelLayerLocation pSkeletonLayer, ModelLayerLocation pInnerModelLayer
     ) {
-        this(p_362142_, p_368806_, p_364022_, new SkeletonModel<>(p_362142_.bakeLayer(p_369786_)));
+        this(pContext, pSkeletonLayer, pInnerModelLayer, new SkeletonModel<>(pContext.bakeLayer(pModelLayer)));
     }
 
     public AbstractSkeletonRenderer(
-        EntityRendererProvider.Context p_363000_, ModelLayerLocation p_363059_, ModelLayerLocation p_360859_, SkeletonModel<S> p_360744_
+        EntityRendererProvider.Context pContext, ModelLayerLocation pSkeletonLayer, ModelLayerLocation pInnerModelLayer, SkeletonModel<S> pModel
     ) {
-        super(p_363000_, p_360744_, 0.5F);
+        super(pContext, pModel, 0.5F);
         this.addLayer(
             new HumanoidArmorLayer<>(
-                this, new SkeletonModel(p_363000_.bakeLayer(p_363059_)), new SkeletonModel(p_363000_.bakeLayer(p_360859_)), p_363000_.getEquipmentRenderer()
+                this, new SkeletonModel(pContext.bakeLayer(pSkeletonLayer)), new SkeletonModel(pContext.bakeLayer(pInnerModelLayer)), pContext.getEquipmentRenderer()
             )
         );
     }

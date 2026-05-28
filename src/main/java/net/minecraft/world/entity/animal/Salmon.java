@@ -56,7 +56,7 @@ public class Salmon extends AbstractSchoolingFish implements VariantHolder<Salmo
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_29795_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.SALMON_HURT;
     }
 
@@ -142,10 +142,10 @@ public class Salmon extends AbstractSchoolingFish implements VariantHolder<Salmo
         final int id;
         final float boundingBoxScale;
 
-        private Variant(final String p_364669_, final int p_375656_, final float p_368051_) {
-            this.name = p_364669_;
-            this.id = p_375656_;
-            this.boundingBoxScale = p_368051_;
+        private Variant(final String pName, final int pId, final float pBoundingBoxScale) {
+            this.name = pName;
+            this.id = pId;
+            this.boundingBoxScale = pBoundingBoxScale;
         }
 
         @Override
@@ -157,8 +157,8 @@ public class Salmon extends AbstractSchoolingFish implements VariantHolder<Salmo
             return this.id;
         }
 
-        static Salmon.Variant byName(String p_368928_) {
-            return CODEC.byName(p_368928_, MEDIUM);
+        static Salmon.Variant byName(String pName) {
+            return CODEC.byName(pName, MEDIUM);
         }
     }
 }

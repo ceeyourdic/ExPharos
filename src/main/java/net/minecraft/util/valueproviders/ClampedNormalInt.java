@@ -28,15 +28,15 @@ public class ClampedNormalInt extends IntProvider {
     private final int minInclusive;
     private final int maxInclusive;
 
-    public static ClampedNormalInt of(float p_185880_, float p_185881_, int p_185882_, int p_185883_) {
-        return new ClampedNormalInt(p_185880_, p_185881_, p_185882_, p_185883_);
+    public static ClampedNormalInt of(float pMean, float pDeviation, int pMinInclusive, int pMaxInclusive) {
+        return new ClampedNormalInt(pMean, pDeviation, pMinInclusive, pMaxInclusive);
     }
 
-    private ClampedNormalInt(float p_185874_, float p_185875_, int p_185876_, int p_185877_) {
-        this.mean = p_185874_;
-        this.deviation = p_185875_;
-        this.minInclusive = p_185876_;
-        this.maxInclusive = p_185877_;
+    private ClampedNormalInt(float pMean, float pDeviation, int pMinInclusive, int pMaxInclusive) {
+        this.mean = pMean;
+        this.deviation = pDeviation;
+        this.minInclusive = pMinInclusive;
+        this.maxInclusive = pMaxInclusive;
     }
 
     @Override
@@ -44,8 +44,8 @@ public class ClampedNormalInt extends IntProvider {
         return sample(p_216844_, this.mean, this.deviation, (float)this.minInclusive, (float)this.maxInclusive);
     }
 
-    public static int sample(RandomSource p_216846_, float p_216847_, float p_216848_, float p_216849_, float p_216850_) {
-        return (int)Mth.clamp(Mth.normal(p_216846_, p_216847_, p_216848_), p_216849_, p_216850_);
+    public static int sample(RandomSource pRandom, float pMean, float pDeviation, float pMinInclusive, float pMaxInclusive) {
+        return (int)Mth.clamp(Mth.normal(pRandom, pMean, pDeviation), pMinInclusive, pMaxInclusive);
     }
 
     @Override

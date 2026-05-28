@@ -20,8 +20,8 @@ public class GenerationStep {
         public static final Codec<GenerationStep.Decoration> CODEC = StringRepresentable.fromEnum(GenerationStep.Decoration::values);
         private final String name;
 
-        private Decoration(final String p_224193_) {
-            this.name = p_224193_;
+        private Decoration(final String pName) {
+            this.name = pName;
         }
 
         public String getName() {

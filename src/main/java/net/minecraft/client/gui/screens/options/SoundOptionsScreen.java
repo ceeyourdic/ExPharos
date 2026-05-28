@@ -13,12 +13,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class SoundOptionsScreen extends OptionsSubScreen {
     private static final Component TITLE = Component.translatable("options.sounds.title");
 
-    private static OptionInstance<?>[] buttonOptions(Options p_343195_) {
-        return new OptionInstance[]{p_343195_.showSubtitles(), p_343195_.directionalAudio()};
+    private static OptionInstance<?>[] buttonOptions(Options pOptions) {
+        return new OptionInstance[]{pOptions.showSubtitles(), pOptions.directionalAudio()};
     }
 
-    public SoundOptionsScreen(Screen p_343471_, Options p_344842_) {
-        super(p_343471_, p_344842_, TITLE);
+    public SoundOptionsScreen(Screen pLastScreen, Options pOptions) {
+        super(pLastScreen, pOptions, TITLE);
     }
 
     @Override

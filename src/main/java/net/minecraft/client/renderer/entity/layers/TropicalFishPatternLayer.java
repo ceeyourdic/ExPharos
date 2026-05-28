@@ -31,10 +31,10 @@ public class TropicalFishPatternLayer extends RenderLayer<TropicalFishRenderStat
     private final TropicalFishModelA modelA;
     private final TropicalFishModelB modelB;
 
-    public TropicalFishPatternLayer(RenderLayerParent<TropicalFishRenderState, EntityModel<TropicalFishRenderState>> p_174547_, EntityModelSet p_174548_) {
-        super(p_174547_);
-        this.modelA = new TropicalFishModelA(p_174548_.bakeLayer(ModelLayers.TROPICAL_FISH_SMALL_PATTERN));
-        this.modelB = new TropicalFishModelB(p_174548_.bakeLayer(ModelLayers.TROPICAL_FISH_LARGE_PATTERN));
+    public TropicalFishPatternLayer(RenderLayerParent<TropicalFishRenderState, EntityModel<TropicalFishRenderState>> pRenderer, EntityModelSet pModelSet) {
+        super(pRenderer);
+        this.modelA = new TropicalFishModelA(pModelSet.bakeLayer(ModelLayers.TROPICAL_FISH_SMALL_PATTERN));
+        this.modelB = new TropicalFishModelB(pModelSet.bakeLayer(ModelLayers.TROPICAL_FISH_LARGE_PATTERN));
     }
 
     public void render(PoseStack p_117612_, MultiBufferSource p_117613_, int p_117614_, TropicalFishRenderState p_366498_, float p_117616_, float p_117617_) {

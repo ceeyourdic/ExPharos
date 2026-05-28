@@ -35,20 +35,20 @@ public record BonusLevelTableCondition(Holder<Enchantment> enchantment, List<Flo
         return Set.of(LootContextParams.TOOL);
     }
 
-    public boolean test(LootContext p_81521_) {
-        ItemStack itemstack = p_81521_.getOptionalParameter(LootContextParams.TOOL);
+    public boolean test(LootContext pContext) {
+        ItemStack itemstack = pContext.getOptionalParameter(LootContextParams.TOOL);
         int i = itemstack != null ? EnchantmentHelper.getItemEnchantmentLevel(this.enchantment, itemstack) : 0;
         float f = this.values.get(Math.min(i, this.values.size() - 1));
-        return p_81521_.getRandom().nextFloat() < f;
+        return pContext.getRandom().nextFloat() < f;
     }
 
-    public static LootItemCondition.Builder bonusLevelFlatChance(Holder<Enchantment> p_342391_, float... p_81519_) {
-        List<Float> list = new ArrayList<>(p_81519_.length);
+    public static LootItemCondition.Builder bonusLevelFlatChance(Holder<Enchantment> pEnchantment, float... pValues) {
+        List<Float> list = new ArrayList<>(pValues.length);
 
-        for (float f : p_81519_) {
+        for (float f : pValues) {
             list.add(f);
         }
 
-        return () -> new BonusLevelTableCondition(p_342391_, list);
+        return () -> new BonusLevelTableCondition(pEnchantment, list);
     }
 }

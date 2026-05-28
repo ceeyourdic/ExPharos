@@ -21,7 +21,7 @@ public interface JvmProfiler {
         ? JfrProfiler.getInstance()
         : new JvmProfiler.NoOpProfiler());
 
-    boolean start(Environment p_185347_);
+    boolean start(Environment pEnvironment);
 
     Path stop();
 
@@ -29,24 +29,24 @@ public interface JvmProfiler {
 
     boolean isAvailable();
 
-    void onServerTick(float p_185342_);
+    void onServerTick(float pCurrentAverageTickTime);
 
-    void onPacketReceived(ConnectionProtocol p_298929_, PacketType<?> p_334193_, SocketAddress p_185345_, int p_185343_);
+    void onPacketReceived(ConnectionProtocol pProtocol, PacketType<?> pPacketType, SocketAddress pAddress, int pSize);
 
-    void onPacketSent(ConnectionProtocol p_298320_, PacketType<?> p_328486_, SocketAddress p_185353_, int p_185351_);
+    void onPacketSent(ConnectionProtocol pProtocol, PacketType<?> pPacketType, SocketAddress pAddress, int pSize);
 
-    void onRegionFileRead(RegionStorageInfo p_330485_, ChunkPos p_331201_, RegionFileVersion p_333173_, int p_330872_);
+    void onRegionFileRead(RegionStorageInfo pRegionStorageInfo, ChunkPos pChunkPos, RegionFileVersion pVersion, int pBytes);
 
-    void onRegionFileWrite(RegionStorageInfo p_330562_, ChunkPos p_334903_, RegionFileVersion p_331257_, int p_327730_);
+    void onRegionFileWrite(RegionStorageInfo pRegionStorageInfo, ChunkPos pChunkPos, RegionFileVersion pVersion, int pBytes);
 
     @Nullable
     ProfiledDuration onWorldLoadedStarted();
 
     @Nullable
-    ProfiledDuration onChunkGenerate(ChunkPos p_185348_, ResourceKey<Level> p_185349_, String p_185350_);
+    ProfiledDuration onChunkGenerate(ChunkPos pChunkPos, ResourceKey<Level> pLevel, String pName);
 
     @Nullable
-    ProfiledDuration onStructureGenerate(ChunkPos p_377018_, ResourceKey<Level> p_376171_, Holder<Structure> p_376314_);
+    ProfiledDuration onStructureGenerate(ChunkPos pChunkPos, ResourceKey<Level> pLevel, Holder<Structure> pStructure);
 
     public static class NoOpProfiler implements JvmProfiler {
         private static final Logger LOGGER = LogUtils.getLogger();

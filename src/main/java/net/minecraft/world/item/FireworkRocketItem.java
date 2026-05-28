@@ -27,16 +27,16 @@ public class FireworkRocketItem extends Item implements ProjectileItem {
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext p_41216_) {
-        Level level = p_41216_.getLevel();
+    public InteractionResult useOn(UseOnContext pContext) {
+        Level level = pContext.getLevel();
         if (level instanceof ServerLevel serverlevel) {
-            ItemStack itemstack = p_41216_.getItemInHand();
-            Vec3 vec3 = p_41216_.getClickLocation();
-            Direction direction = p_41216_.getClickedFace();
+            ItemStack itemstack = pContext.getItemInHand();
+            Vec3 vec3 = pContext.getClickLocation();
+            Direction direction = pContext.getClickedFace();
             Projectile.spawnProjectile(
                 new FireworkRocketEntity(
                     level,
-                    p_41216_.getPlayer(),
+                    pContext.getPlayer(),
                     vec3.x + (double)direction.getStepX() * 0.15,
                     vec3.y + (double)direction.getStepY() * 0.15,
                     vec3.z + (double)direction.getStepZ() * 0.15,
@@ -85,12 +85,12 @@ public class FireworkRocketItem extends Item implements ProjectileItem {
         return ProjectileItem.DispenseConfig.builder().positionFunction(FireworkRocketItem::getEntityJustOutsideOfBlockPos).uncertainty(1.0F).power(0.5F).overrideDispenseEvent(1004).build();
     }
 
-    private static Vec3 getEntityJustOutsideOfBlockPos(BlockSource p_367723_, Direction p_361737_) {
-        return p_367723_.center()
+    private static Vec3 getEntityJustOutsideOfBlockPos(BlockSource pBlockSource, Direction pDirection) {
+        return pBlockSource.center()
             .add(
-                (double)p_361737_.getStepX() * 0.5000099999997474,
-                (double)p_361737_.getStepY() * 0.5000099999997474,
-                (double)p_361737_.getStepZ() * 0.5000099999997474
+                (double)pDirection.getStepX() * 0.5000099999997474,
+                (double)pDirection.getStepY() * 0.5000099999997474,
+                (double)pDirection.getStepZ() * 0.5000099999997474
             );
     }
 }

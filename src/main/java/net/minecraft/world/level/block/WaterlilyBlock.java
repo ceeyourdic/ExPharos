@@ -28,22 +28,22 @@ public class WaterlilyBlock extends BushBlock {
     }
 
     @Override
-    protected void entityInside(BlockState p_58164_, Level p_58165_, BlockPos p_58166_, Entity p_58167_) {
-        super.entityInside(p_58164_, p_58165_, p_58166_, p_58167_);
-        if (p_58165_ instanceof ServerLevel && p_58167_ instanceof AbstractBoat) {
-            p_58165_.destroyBlock(new BlockPos(p_58166_), true, p_58167_);
+    protected void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
+        super.entityInside(pState, pLevel, pPos, pEntity);
+        if (pLevel instanceof ServerLevel && pEntity instanceof AbstractBoat) {
+            pLevel.destroyBlock(new BlockPos(pPos), true, pEntity);
         }
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_58169_, BlockGetter p_58170_, BlockPos p_58171_, CollisionContext p_58172_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return AABB;
     }
 
     @Override
-    protected boolean mayPlaceOn(BlockState p_58174_, BlockGetter p_58175_, BlockPos p_58176_) {
-        FluidState fluidstate = p_58175_.getFluidState(p_58176_);
-        FluidState fluidstate1 = p_58175_.getFluidState(p_58176_.above());
-        return (fluidstate.getType() == Fluids.WATER || p_58174_.getBlock() instanceof IceBlock) && fluidstate1.getType() == Fluids.EMPTY;
+    protected boolean mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        FluidState fluidstate = pLevel.getFluidState(pPos);
+        FluidState fluidstate1 = pLevel.getFluidState(pPos.above());
+        return (fluidstate.getType() == Fluids.WATER || pState.getBlock() instanceof IceBlock) && fluidstate1.getType() == Fluids.EMPTY;
     }
 }

@@ -17,24 +17,24 @@ public abstract class ItemTagsProvider extends IntrinsicHolderTagsProvider<Item>
     private final Map<TagKey<Block>, TagKey<Item>> tagsToCopy = new HashMap<>();
 
     public ItemTagsProvider(
-        PackOutput p_275343_, CompletableFuture<HolderLookup.Provider> p_275729_, CompletableFuture<TagsProvider.TagLookup<Block>> p_275322_
+        PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pLookupProvider, CompletableFuture<TagsProvider.TagLookup<Block>> pBlockTags
     ) {
-        super(p_275343_, Registries.ITEM, p_275729_, p_255790_ -> p_255790_.builtInRegistryHolder().key());
-        this.blockTags = p_275322_;
+        super(pOutput, Registries.ITEM, pLookupProvider, p_255790_ -> p_255790_.builtInRegistryHolder().key());
+        this.blockTags = pBlockTags;
     }
 
     public ItemTagsProvider(
-        PackOutput p_275204_,
-        CompletableFuture<HolderLookup.Provider> p_275194_,
-        CompletableFuture<TagsProvider.TagLookup<Item>> p_275207_,
-        CompletableFuture<TagsProvider.TagLookup<Block>> p_275634_
+        PackOutput pOutput,
+        CompletableFuture<HolderLookup.Provider> pLookupProvider,
+        CompletableFuture<TagsProvider.TagLookup<Item>> pParentProvider,
+        CompletableFuture<TagsProvider.TagLookup<Block>> pBlockTags
     ) {
-        super(p_275204_, Registries.ITEM, p_275194_, p_275207_, p_274765_ -> p_274765_.builtInRegistryHolder().key());
-        this.blockTags = p_275634_;
+        super(pOutput, Registries.ITEM, pLookupProvider, pParentProvider, p_274765_ -> p_274765_.builtInRegistryHolder().key());
+        this.blockTags = pBlockTags;
     }
 
-    protected void copy(TagKey<Block> p_206422_, TagKey<Item> p_206423_) {
-        this.tagsToCopy.put(p_206422_, p_206423_);
+    protected void copy(TagKey<Block> pBlockTag, TagKey<Item> pItemTag) {
+        this.tagsToCopy.put(pBlockTag, pItemTag);
     }
 
     @Override

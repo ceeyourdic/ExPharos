@@ -21,55 +21,55 @@ public class GhostSlots {
     private final Reference2ObjectMap<Slot, GhostSlots.GhostSlot> ingredients = new Reference2ObjectArrayMap<>();
     private final SlotSelectTime slotSelectTime;
 
-    public GhostSlots(SlotSelectTime p_365573_) {
-        this.slotSelectTime = p_365573_;
+    public GhostSlots(SlotSelectTime pSlotSelectTime) {
+        this.slotSelectTime = pSlotSelectTime;
     }
 
     public void clear() {
         this.ingredients.clear();
     }
 
-    private void setSlot(Slot p_361864_, ContextMap p_369307_, SlotDisplay p_367189_, boolean p_365725_) {
-        List<ItemStack> list = p_367189_.resolveForStacks(p_369307_);
+    private void setSlot(Slot pSlot, ContextMap pContextMap, SlotDisplay pSlotDisplay, boolean pIsResultSlot) {
+        List<ItemStack> list = pSlotDisplay.resolveForStacks(pContextMap);
         if (!list.isEmpty()) {
-            this.ingredients.put(p_361864_, new GhostSlots.GhostSlot(list, p_365725_));
+            this.ingredients.put(pSlot, new GhostSlots.GhostSlot(list, pIsResultSlot));
         }
     }
 
-    protected void setInput(Slot p_367759_, ContextMap p_367544_, SlotDisplay p_368203_) {
-        this.setSlot(p_367759_, p_367544_, p_368203_, false);
+    protected void setInput(Slot pSlot, ContextMap pContextMap, SlotDisplay pSlotDisplay) {
+        this.setSlot(pSlot, pContextMap, pSlotDisplay, false);
     }
 
-    protected void setResult(Slot p_364854_, ContextMap p_369632_, SlotDisplay p_369669_) {
-        this.setSlot(p_364854_, p_369632_, p_369669_, true);
+    protected void setResult(Slot pSlot, ContextMap pContextMap, SlotDisplay pSlotDisplay) {
+        this.setSlot(pSlot, pContextMap, pSlotDisplay, true);
     }
 
-    public void render(GuiGraphics p_367836_, Minecraft p_369819_, boolean p_361725_) {
+    public void render(GuiGraphics pGuiGraphics, Minecraft pMinecraft, boolean pIsBiggerResultSlot) {
         this.ingredients.forEach((p_365858_, p_367422_) -> {
             int i = p_365858_.x;
             int j = p_365858_.y;
-            if (p_367422_.isResultSlot && p_361725_) {
-                p_367836_.fill(i - 4, j - 4, i + 20, j + 20, 822018048);
+            if (p_367422_.isResultSlot && pIsBiggerResultSlot) {
+                pGuiGraphics.fill(i - 4, j - 4, i + 20, j + 20, 822018048);
             } else {
-                p_367836_.fill(i, j, i + 16, j + 16, 822018048);
+                pGuiGraphics.fill(i, j, i + 16, j + 16, 822018048);
             }
 
             ItemStack itemstack = p_367422_.getItem(this.slotSelectTime.currentIndex());
-            p_367836_.renderFakeItem(itemstack, i, j);
-            p_367836_.fill(RenderType.guiGhostRecipeOverlay(), i, j, i + 16, j + 16, 822083583);
+            pGuiGraphics.renderFakeItem(itemstack, i, j);
+            pGuiGraphics.fill(RenderType.guiGhostRecipeOverlay(), i, j, i + 16, j + 16, 822083583);
             if (p_367422_.isResultSlot) {
-                p_367836_.renderItemDecorations(p_369819_.font, itemstack, i, j);
+                pGuiGraphics.renderItemDecorations(pMinecraft.font, itemstack, i, j);
             }
         });
     }
 
-    public void renderTooltip(GuiGraphics p_362742_, Minecraft p_367763_, int p_363042_, int p_368767_, @Nullable Slot p_366140_) {
-        if (p_366140_ != null) {
-            GhostSlots.GhostSlot ghostslots$ghostslot = this.ingredients.get(p_366140_);
+    public void renderTooltip(GuiGraphics pGuiGraphics, Minecraft pMinecraft, int pMouseX, int pMouseY, @Nullable Slot pSlot) {
+        if (pSlot != null) {
+            GhostSlots.GhostSlot ghostslots$ghostslot = this.ingredients.get(pSlot);
             if (ghostslots$ghostslot != null) {
                 ItemStack itemstack = ghostslots$ghostslot.getItem(this.slotSelectTime.currentIndex());
-                p_362742_.renderComponentTooltip(
-                    p_367763_.font, Screen.getTooltipFromItem(p_367763_, itemstack), p_363042_, p_368767_, itemstack.get(DataComponents.TOOLTIP_STYLE)
+                pGuiGraphics.renderComponentTooltip(
+                    pMinecraft.font, Screen.getTooltipFromItem(pMinecraft, itemstack), pMouseX, pMouseY, itemstack.get(DataComponents.TOOLTIP_STYLE)
                 );
             }
         }
@@ -77,9 +77,9 @@ public class GhostSlots {
 
     @OnlyIn(Dist.CLIENT)
     static record GhostSlot(List<ItemStack> items, boolean isResultSlot) {
-        public ItemStack getItem(int p_367346_) {
+        public ItemStack getItem(int pIndex) {
             int i = this.items.size();
-            return i == 0 ? ItemStack.EMPTY : this.items.get(p_367346_ % i);
+            return i == 0 ? ItemStack.EMPTY : this.items.get(pIndex % i);
         }
     }
 }

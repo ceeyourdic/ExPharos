@@ -18,14 +18,14 @@ public class BannerModel extends Model {
     private static final String POLE = "pole";
     private static final String BAR = "bar";
 
-    public BannerModel(ModelPart p_376011_) {
-        super(p_376011_, RenderType::entitySolid);
+    public BannerModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entitySolid);
     }
 
-    public static LayerDefinition createBodyLayer(boolean p_375508_) {
+    public static LayerDefinition createBodyLayer(boolean pIsStanding) {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
-        if (p_375508_) {
+        if (pIsStanding) {
             partdefinition.addOrReplaceChild(
                 "pole", CubeListBuilder.create().texOffs(44, 0).addBox(-1.0F, -42.0F, -1.0F, 2.0F, 42.0F, 2.0F), PartPose.ZERO
             );
@@ -33,7 +33,7 @@ public class BannerModel extends Model {
 
         partdefinition.addOrReplaceChild(
             "bar",
-            CubeListBuilder.create().texOffs(0, 42).addBox(-10.0F, p_375508_ ? -44.0F : -20.5F, p_375508_ ? -1.0F : 9.5F, 20.0F, 2.0F, 2.0F),
+            CubeListBuilder.create().texOffs(0, 42).addBox(-10.0F, pIsStanding ? -44.0F : -20.5F, pIsStanding ? -1.0F : 9.5F, 20.0F, 2.0F, 2.0F),
             PartPose.ZERO
         );
         return LayerDefinition.create(meshdefinition, 64, 64);

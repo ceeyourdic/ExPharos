@@ -37,13 +37,13 @@ public class ScoreboardDisplaySlotFix extends DataFix {
         .put("slot_18", "sidebar.team.white")
         .build();
 
-    public ScoreboardDisplaySlotFix(Schema p_300624_) {
-        super(p_300624_, false);
+    public ScoreboardDisplaySlotFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Nullable
-    private static String rename(String p_297960_) {
-        return SLOT_RENAMES.get(p_297960_);
+    private static String rename(String pOldName) {
+        return SLOT_RENAMES.get(pOldName);
     }
 
     @Override

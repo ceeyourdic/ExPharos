@@ -37,18 +37,18 @@ public record PlayerChatMessage(
     public static final Duration MESSAGE_EXPIRES_AFTER_SERVER = Duration.ofMinutes(5L);
     public static final Duration MESSAGE_EXPIRES_AFTER_CLIENT = MESSAGE_EXPIRES_AFTER_SERVER.plus(Duration.ofMinutes(2L));
 
-    public static PlayerChatMessage system(String p_249209_) {
-        return unsigned(SYSTEM_SENDER, p_249209_);
+    public static PlayerChatMessage system(String pContent) {
+        return unsigned(SYSTEM_SENDER, pContent);
     }
 
-    public static PlayerChatMessage unsigned(UUID p_251783_, String p_251615_) {
-        SignedMessageBody signedmessagebody = SignedMessageBody.unsigned(p_251615_);
-        SignedMessageLink signedmessagelink = SignedMessageLink.unsigned(p_251783_);
+    public static PlayerChatMessage unsigned(UUID pSender, String pContent) {
+        SignedMessageBody signedmessagebody = SignedMessageBody.unsigned(pContent);
+        SignedMessageLink signedmessagelink = SignedMessageLink.unsigned(pSender);
         return new PlayerChatMessage(signedmessagelink, null, signedmessagebody, null, FilterMask.PASS_THROUGH);
     }
 
-    public PlayerChatMessage withUnsignedContent(Component p_242164_) {
-        Component component = !p_242164_.equals(Component.literal(this.signedContent())) ? p_242164_ : null;
+    public PlayerChatMessage withUnsignedContent(Component pMessage) {
+        Component component = !pMessage.equals(Component.literal(this.signedContent())) ? pMessage : null;
         return new PlayerChatMessage(this.link, this.signature, this.signedBody, component, this.filterMask);
     }
 
@@ -56,12 +56,12 @@ public record PlayerChatMessage(
         return this.unsignedContent != null ? new PlayerChatMessage(this.link, this.signature, this.signedBody, null, this.filterMask) : this;
     }
 
-    public PlayerChatMessage filter(FilterMask p_243320_) {
-        return this.filterMask.equals(p_243320_) ? this : new PlayerChatMessage(this.link, this.signature, this.signedBody, this.unsignedContent, p_243320_);
+    public PlayerChatMessage filter(FilterMask pMask) {
+        return this.filterMask.equals(pMask) ? this : new PlayerChatMessage(this.link, this.signature, this.signedBody, this.unsignedContent, pMask);
     }
 
-    public PlayerChatMessage filter(boolean p_243223_) {
-        return this.filter(p_243223_ ? this.filterMask : FilterMask.PASS_THROUGH);
+    public PlayerChatMessage filter(boolean pShouldFilter) {
+        return this.filter(pShouldFilter ? this.filterMask : FilterMask.PASS_THROUGH);
     }
 
     public PlayerChatMessage removeSignature() {
@@ -70,14 +70,14 @@ public record PlayerChatMessage(
         return new PlayerChatMessage(signedmessagelink, null, signedmessagebody, this.unsignedContent, this.filterMask);
     }
 
-    public static void updateSignature(SignatureUpdater.Output p_250661_, SignedMessageLink p_248621_, SignedMessageBody p_248823_) throws SignatureException {
-        p_250661_.update(Ints.toByteArray(1));
-        p_248621_.updateSignature(p_250661_);
-        p_248823_.updateSignature(p_250661_);
+    public static void updateSignature(SignatureUpdater.Output pOutput, SignedMessageLink pLink, SignedMessageBody pBody) throws SignatureException {
+        pOutput.update(Ints.toByteArray(1));
+        pLink.updateSignature(pOutput);
+        pBody.updateSignature(pOutput);
     }
 
-    public boolean verify(SignatureValidator p_241442_) {
-        return this.signature != null && this.signature.verify(p_241442_, p_249861_ -> updateSignature(p_249861_, this.link, this.signedBody));
+    public boolean verify(SignatureValidator pValidator) {
+        return this.signature != null && this.signature.verify(pValidator, p_249861_ -> updateSignature(p_249861_, this.link, this.signedBody));
     }
 
     public String signedContent() {
@@ -96,12 +96,12 @@ public record PlayerChatMessage(
         return this.signedBody.salt();
     }
 
-    public boolean hasExpiredServer(Instant p_240573_) {
-        return p_240573_.isAfter(this.timeStamp().plus(MESSAGE_EXPIRES_AFTER_SERVER));
+    public boolean hasExpiredServer(Instant pTimestamp) {
+        return pTimestamp.isAfter(this.timeStamp().plus(MESSAGE_EXPIRES_AFTER_SERVER));
     }
 
-    public boolean hasExpiredClient(Instant p_240629_) {
-        return p_240629_.isAfter(this.timeStamp().plus(MESSAGE_EXPIRES_AFTER_CLIENT));
+    public boolean hasExpiredClient(Instant pTimestamp) {
+        return pTimestamp.isAfter(this.timeStamp().plus(MESSAGE_EXPIRES_AFTER_CLIENT));
     }
 
     public UUID sender() {
@@ -116,8 +116,8 @@ public record PlayerChatMessage(
         return this.signature != null;
     }
 
-    public boolean hasSignatureFrom(UUID p_243236_) {
-        return this.hasSignature() && this.link.sender().equals(p_243236_);
+    public boolean hasSignatureFrom(UUID pUuid) {
+        return this.hasSignature() && this.link.sender().equals(pUuid);
     }
 
     public boolean isFullyFiltered() {

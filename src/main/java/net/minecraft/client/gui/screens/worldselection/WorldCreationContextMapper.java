@@ -9,5 +9,5 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @FunctionalInterface
 @OnlyIn(Dist.CLIENT)
 public interface WorldCreationContextMapper {
-    WorldCreationContext apply(ReloadableServerResources p_365416_, LayeredRegistryAccess<RegistryLayer> p_365038_, DataPackReloadCookie p_366983_);
+    WorldCreationContext apply(ReloadableServerResources pDataPackResources, LayeredRegistryAccess<RegistryLayer> pWorldGenRegistries, DataPackReloadCookie pDataPackReloadCookie);
 }

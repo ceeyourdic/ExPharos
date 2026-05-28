@@ -29,8 +29,8 @@ public class RedstoneLampBlock extends Block {
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_55659_) {
-        return this.defaultBlockState().setValue(LIT, Boolean.valueOf(p_55659_.getLevel().hasNeighborSignal(p_55659_.getClickedPos())));
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.defaultBlockState().setValue(LIT, Boolean.valueOf(pContext.getLevel().hasNeighborSignal(pContext.getClickedPos())));
     }
 
     @Override
@@ -55,7 +55,7 @@ public class RedstoneLampBlock extends Block {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_55673_) {
-        p_55673_.add(LIT);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(LIT);
     }
 }

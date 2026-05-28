@@ -40,15 +40,15 @@ public interface CauldronInteraction {
     CauldronInteraction.InteractionMap LAVA = newInteractionMap("lava");
     CauldronInteraction.InteractionMap POWDER_SNOW = newInteractionMap("powder_snow");
 
-    static CauldronInteraction.InteractionMap newInteractionMap(String p_311265_) {
+    static CauldronInteraction.InteractionMap newInteractionMap(String pName) {
         Object2ObjectOpenHashMap<Item, CauldronInteraction> object2objectopenhashmap = new Object2ObjectOpenHashMap<>();
         object2objectopenhashmap.defaultReturnValue((p_358117_, p_358118_, p_358119_, p_358120_, p_358121_, p_358122_) -> InteractionResult.TRY_WITH_EMPTY_HAND);
-        CauldronInteraction.InteractionMap cauldroninteraction$interactionmap = new CauldronInteraction.InteractionMap(p_311265_, object2objectopenhashmap);
-        INTERACTIONS.put(p_311265_, cauldroninteraction$interactionmap);
+        CauldronInteraction.InteractionMap cauldroninteraction$interactionmap = new CauldronInteraction.InteractionMap(pName, object2objectopenhashmap);
+        INTERACTIONS.put(pName, cauldroninteraction$interactionmap);
         return cauldroninteraction$interactionmap;
     }
 
-    InteractionResult interact(BlockState p_175711_, Level p_175712_, BlockPos p_175713_, Player p_175714_, InteractionHand p_175715_, ItemStack p_175716_);
+    InteractionResult interact(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, ItemStack pStack);
 
     static void bootStrap() {
         Map<Item, CauldronInteraction> map = EMPTY.map();
@@ -185,34 +185,34 @@ public interface CauldronInteraction {
         addDefaultInteractions(map3);
     }
 
-    static void addDefaultInteractions(Map<Item, CauldronInteraction> p_175648_) {
-        p_175648_.put(Items.LAVA_BUCKET, CauldronInteraction::fillLavaInteraction);
-        p_175648_.put(Items.WATER_BUCKET, CauldronInteraction::fillWaterInteraction);
-        p_175648_.put(Items.POWDER_SNOW_BUCKET, CauldronInteraction::fillPowderSnowInteraction);
+    static void addDefaultInteractions(Map<Item, CauldronInteraction> pInteractionsMap) {
+        pInteractionsMap.put(Items.LAVA_BUCKET, CauldronInteraction::fillLavaInteraction);
+        pInteractionsMap.put(Items.WATER_BUCKET, CauldronInteraction::fillWaterInteraction);
+        pInteractionsMap.put(Items.POWDER_SNOW_BUCKET, CauldronInteraction::fillPowderSnowInteraction);
     }
 
     static InteractionResult fillBucket(
-        BlockState p_175636_,
-        Level p_175637_,
-        BlockPos p_175638_,
-        Player p_175639_,
-        InteractionHand p_175640_,
-        ItemStack p_175641_,
-        ItemStack p_175642_,
-        Predicate<BlockState> p_175643_,
-        SoundEvent p_175644_
+        BlockState pState,
+        Level pLevel,
+        BlockPos pPos,
+        Player pPlayer,
+        InteractionHand pHand,
+        ItemStack pEmptyStack,
+        ItemStack pFilledStack,
+        Predicate<BlockState> pStatePredicate,
+        SoundEvent pFillSound
     ) {
-        if (!p_175643_.test(p_175636_)) {
+        if (!pStatePredicate.test(pState)) {
             return InteractionResult.TRY_WITH_EMPTY_HAND;
         } else {
-            if (!p_175637_.isClientSide) {
-                Item item = p_175641_.getItem();
-                p_175639_.setItemInHand(p_175640_, ItemUtils.createFilledResult(p_175641_, p_175639_, p_175642_));
-                p_175639_.awardStat(Stats.USE_CAULDRON);
-                p_175639_.awardStat(Stats.ITEM_USED.get(item));
-                p_175637_.setBlockAndUpdate(p_175638_, Blocks.CAULDRON.defaultBlockState());
-                p_175637_.playSound(null, p_175638_, p_175644_, SoundSource.BLOCKS, 1.0F, 1.0F);
-                p_175637_.gameEvent(null, GameEvent.FLUID_PICKUP, p_175638_);
+            if (!pLevel.isClientSide) {
+                Item item = pEmptyStack.getItem();
+                pPlayer.setItemInHand(pHand, ItemUtils.createFilledResult(pEmptyStack, pPlayer, pFilledStack));
+                pPlayer.awardStat(Stats.USE_CAULDRON);
+                pPlayer.awardStat(Stats.ITEM_USED.get(item));
+                pLevel.setBlockAndUpdate(pPos, Blocks.CAULDRON.defaultBlockState());
+                pLevel.playSound(null, pPos, pFillSound, SoundSource.BLOCKS, 1.0F, 1.0F);
+                pLevel.gameEvent(null, GameEvent.FLUID_PICKUP, pPos);
             }
 
             return InteractionResult.SUCCESS;
@@ -220,71 +220,71 @@ public interface CauldronInteraction {
     }
 
     static InteractionResult emptyBucket(
-        Level p_175619_, BlockPos p_175620_, Player p_175621_, InteractionHand p_175622_, ItemStack p_175623_, BlockState p_175624_, SoundEvent p_175625_
+        Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, ItemStack pFilledStack, BlockState pState, SoundEvent pEmptySound
     ) {
-        if (!p_175619_.isClientSide) {
-            Item item = p_175623_.getItem();
-            p_175621_.setItemInHand(p_175622_, ItemUtils.createFilledResult(p_175623_, p_175621_, new ItemStack(Items.BUCKET)));
-            p_175621_.awardStat(Stats.FILL_CAULDRON);
-            p_175621_.awardStat(Stats.ITEM_USED.get(item));
-            p_175619_.setBlockAndUpdate(p_175620_, p_175624_);
-            p_175619_.playSound(null, p_175620_, p_175625_, SoundSource.BLOCKS, 1.0F, 1.0F);
-            p_175619_.gameEvent(null, GameEvent.FLUID_PLACE, p_175620_);
+        if (!pLevel.isClientSide) {
+            Item item = pFilledStack.getItem();
+            pPlayer.setItemInHand(pHand, ItemUtils.createFilledResult(pFilledStack, pPlayer, new ItemStack(Items.BUCKET)));
+            pPlayer.awardStat(Stats.FILL_CAULDRON);
+            pPlayer.awardStat(Stats.ITEM_USED.get(item));
+            pLevel.setBlockAndUpdate(pPos, pState);
+            pLevel.playSound(null, pPos, pEmptySound, SoundSource.BLOCKS, 1.0F, 1.0F);
+            pLevel.gameEvent(null, GameEvent.FLUID_PLACE, pPos);
         }
 
         return InteractionResult.SUCCESS;
     }
 
     private static InteractionResult fillWaterInteraction(
-        BlockState p_363465_, Level p_369690_, BlockPos p_365994_, Player p_361538_, InteractionHand p_363296_, ItemStack p_369551_
+        BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, ItemStack pFilledStack
     ) {
         return emptyBucket(
-            p_369690_,
-            p_365994_,
-            p_361538_,
-            p_363296_,
-            p_369551_,
+            pLevel,
+            pPos,
+            pPlayer,
+            pHand,
+            pFilledStack,
             Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, Integer.valueOf(3)),
             SoundEvents.BUCKET_EMPTY
         );
     }
 
     private static InteractionResult fillLavaInteraction(
-        BlockState p_365957_, Level p_368892_, BlockPos p_365280_, Player p_368758_, InteractionHand p_369203_, ItemStack p_369309_
+        BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, ItemStack pFilledStack
     ) {
-        return (InteractionResult)(isUnderWater(p_368892_, p_365280_)
+        return (InteractionResult)(isUnderWater(pLevel, pPos)
             ? InteractionResult.CONSUME
-            : emptyBucket(p_368892_, p_365280_, p_368758_, p_369203_, p_369309_, Blocks.LAVA_CAULDRON.defaultBlockState(), SoundEvents.BUCKET_EMPTY_LAVA));
+            : emptyBucket(pLevel, pPos, pPlayer, pHand, pFilledStack, Blocks.LAVA_CAULDRON.defaultBlockState(), SoundEvents.BUCKET_EMPTY_LAVA));
     }
 
     private static InteractionResult fillPowderSnowInteraction(
-        BlockState p_367322_, Level p_368177_, BlockPos p_369168_, Player p_362349_, InteractionHand p_363299_, ItemStack p_365742_
+        BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, ItemStack pFilledStack
     ) {
-        return (InteractionResult)(isUnderWater(p_368177_, p_369168_)
+        return (InteractionResult)(isUnderWater(pLevel, pPos)
             ? InteractionResult.CONSUME
             : emptyBucket(
-                p_368177_,
-                p_369168_,
-                p_362349_,
-                p_363299_,
-                p_365742_,
+                pLevel,
+                pPos,
+                pPlayer,
+                pHand,
+                pFilledStack,
                 Blocks.POWDER_SNOW_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, Integer.valueOf(3)),
                 SoundEvents.BUCKET_EMPTY_POWDER_SNOW
             ));
     }
 
     private static InteractionResult shulkerBoxInteraction(
-        BlockState p_361616_, Level p_361740_, BlockPos p_363368_, Player p_365016_, InteractionHand p_367201_, ItemStack p_364495_
+        BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, ItemStack pStack
     ) {
-        Block block = Block.byItem(p_364495_.getItem());
+        Block block = Block.byItem(pStack.getItem());
         if (!(block instanceof ShulkerBoxBlock)) {
             return InteractionResult.TRY_WITH_EMPTY_HAND;
         } else {
-            if (!p_361740_.isClientSide) {
-                ItemStack itemstack = p_364495_.transmuteCopy(Blocks.SHULKER_BOX, 1);
-                p_365016_.setItemInHand(p_367201_, ItemUtils.createFilledResult(p_364495_, p_365016_, itemstack, false));
-                p_365016_.awardStat(Stats.CLEAN_SHULKER_BOX);
-                LayeredCauldronBlock.lowerFillLevel(p_361616_, p_361740_, p_363368_);
+            if (!pLevel.isClientSide) {
+                ItemStack itemstack = pStack.transmuteCopy(Blocks.SHULKER_BOX, 1);
+                pPlayer.setItemInHand(pHand, ItemUtils.createFilledResult(pStack, pPlayer, itemstack, false));
+                pPlayer.awardStat(Stats.CLEAN_SHULKER_BOX);
+                LayeredCauldronBlock.lowerFillLevel(pState, pLevel, pPos);
             }
 
             return InteractionResult.SUCCESS;
@@ -292,18 +292,18 @@ public interface CauldronInteraction {
     }
 
     private static InteractionResult bannerInteraction(
-        BlockState p_367762_, Level p_366713_, BlockPos p_368348_, Player p_365632_, InteractionHand p_369503_, ItemStack p_363311_
+        BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, ItemStack pStack
     ) {
-        BannerPatternLayers bannerpatternlayers = p_363311_.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+        BannerPatternLayers bannerpatternlayers = pStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
         if (bannerpatternlayers.layers().isEmpty()) {
             return InteractionResult.TRY_WITH_EMPTY_HAND;
         } else {
-            if (!p_366713_.isClientSide) {
-                ItemStack itemstack = p_363311_.copyWithCount(1);
+            if (!pLevel.isClientSide) {
+                ItemStack itemstack = pStack.copyWithCount(1);
                 itemstack.set(DataComponents.BANNER_PATTERNS, bannerpatternlayers.removeLast());
-                p_365632_.setItemInHand(p_369503_, ItemUtils.createFilledResult(p_363311_, p_365632_, itemstack, false));
-                p_365632_.awardStat(Stats.CLEAN_BANNER);
-                LayeredCauldronBlock.lowerFillLevel(p_367762_, p_366713_, p_368348_);
+                pPlayer.setItemInHand(pHand, ItemUtils.createFilledResult(pStack, pPlayer, itemstack, false));
+                pPlayer.awardStat(Stats.CLEAN_BANNER);
+                LayeredCauldronBlock.lowerFillLevel(pState, pLevel, pPos);
             }
 
             return InteractionResult.SUCCESS;
@@ -311,25 +311,25 @@ public interface CauldronInteraction {
     }
 
     private static InteractionResult dyedItemIteration(
-        BlockState p_367064_, Level p_365282_, BlockPos p_365414_, Player p_364718_, InteractionHand p_362544_, ItemStack p_368695_
+        BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, ItemStack pStack
     ) {
-        if (!p_368695_.is(ItemTags.DYEABLE)) {
+        if (!pStack.is(ItemTags.DYEABLE)) {
             return InteractionResult.TRY_WITH_EMPTY_HAND;
-        } else if (!p_368695_.has(DataComponents.DYED_COLOR)) {
+        } else if (!pStack.has(DataComponents.DYED_COLOR)) {
             return InteractionResult.TRY_WITH_EMPTY_HAND;
         } else {
-            if (!p_365282_.isClientSide) {
-                p_368695_.remove(DataComponents.DYED_COLOR);
-                p_364718_.awardStat(Stats.CLEAN_ARMOR);
-                LayeredCauldronBlock.lowerFillLevel(p_367064_, p_365282_, p_365414_);
+            if (!pLevel.isClientSide) {
+                pStack.remove(DataComponents.DYED_COLOR);
+                pPlayer.awardStat(Stats.CLEAN_ARMOR);
+                LayeredCauldronBlock.lowerFillLevel(pState, pLevel, pPos);
             }
 
             return InteractionResult.SUCCESS;
         }
     }
 
-    private static boolean isUnderWater(Level p_362699_, BlockPos p_366592_) {
-        FluidState fluidstate = p_362699_.getFluidState(p_366592_.above());
+    private static boolean isUnderWater(Level pLevel, BlockPos pPos) {
+        FluidState fluidstate = pLevel.getFluidState(pPos.above());
         return fluidstate.is(FluidTags.WATER);
     }
 

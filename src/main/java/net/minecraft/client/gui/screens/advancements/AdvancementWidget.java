@@ -55,22 +55,22 @@ public class AdvancementWidget {
     private final int x;
     private final int y;
 
-    public AdvancementWidget(AdvancementTab p_97255_, Minecraft p_97256_, AdvancementNode p_298278_, DisplayInfo p_97258_) {
-        this.tab = p_97255_;
-        this.advancementNode = p_298278_;
-        this.display = p_97258_;
-        this.minecraft = p_97256_;
-        this.titleLines = p_97256_.font.split(p_97258_.getTitle(), 163);
-        this.x = Mth.floor(p_97258_.getX() * 28.0F);
-        this.y = Mth.floor(p_97258_.getY() * 27.0F);
-        int i = Math.max(this.titleLines.stream().mapToInt(p_97256_.font::width).max().orElse(0), 80);
+    public AdvancementWidget(AdvancementTab pTab, Minecraft pMinecraft, AdvancementNode pAdvancementNode, DisplayInfo pDisplay) {
+        this.tab = pTab;
+        this.advancementNode = pAdvancementNode;
+        this.display = pDisplay;
+        this.minecraft = pMinecraft;
+        this.titleLines = pMinecraft.font.split(pDisplay.getTitle(), 163);
+        this.x = Mth.floor(pDisplay.getX() * 28.0F);
+        this.y = Mth.floor(pDisplay.getY() * 27.0F);
+        int i = Math.max(this.titleLines.stream().mapToInt(pMinecraft.font::width).max().orElse(0), 80);
         int j = this.getMaxProgressWidth();
         int k = 29 + i + j;
         this.description = Language.getInstance()
-            .getVisualOrder(this.findOptimalLines(ComponentUtils.mergeStyles(p_97258_.getDescription().copy(), Style.EMPTY.withColor(p_97258_.getType().getChatColor())), k));
+            .getVisualOrder(this.findOptimalLines(ComponentUtils.mergeStyles(pDisplay.getDescription().copy(), Style.EMPTY.withColor(pDisplay.getType().getChatColor())), k));
 
         for (FormattedCharSequence formattedcharsequence : this.description) {
-            k = Math.max(k, p_97256_.font.width(formattedcharsequence));
+            k = Math.max(k, pMinecraft.font.width(formattedcharsequence));
         }
 
         this.width = k + 3 + 5;
@@ -87,18 +87,18 @@ public class AdvancementWidget {
         }
     }
 
-    private static float getMaxWidth(StringSplitter p_97304_, List<FormattedText> p_97305_) {
-        return (float)p_97305_.stream().mapToDouble(p_97304_::stringWidth).max().orElse(0.0);
+    private static float getMaxWidth(StringSplitter pManager, List<FormattedText> pText) {
+        return (float)pText.stream().mapToDouble(pManager::stringWidth).max().orElse(0.0);
     }
 
-    private List<FormattedText> findOptimalLines(Component p_97309_, int p_97310_) {
+    private List<FormattedText> findOptimalLines(Component pComponent, int pMaxWidth) {
         StringSplitter stringsplitter = this.minecraft.font.getSplitter();
         List<FormattedText> list = null;
         float f = Float.MAX_VALUE;
 
         for (int i : TEST_SPLIT_OFFSETS) {
-            List<FormattedText> list1 = stringsplitter.splitLines(p_97309_, p_97310_ - i, Style.EMPTY);
-            float f1 = Math.abs(getMaxWidth(stringsplitter, list1) - (float)p_97310_);
+            List<FormattedText> list1 = stringsplitter.splitLines(pComponent, pMaxWidth - i, Style.EMPTY);
+            float f1 = Math.abs(getMaxWidth(stringsplitter, list1) - (float)pMaxWidth);
             if (f1 <= 10.0F) {
                 return list1;
             }
@@ -113,44 +113,44 @@ public class AdvancementWidget {
     }
 
     @Nullable
-    private AdvancementWidget getFirstVisibleParent(AdvancementNode p_297515_) {
+    private AdvancementWidget getFirstVisibleParent(AdvancementNode pAdvancement) {
         do {
-            p_297515_ = p_297515_.parent();
-        } while (p_297515_ != null && p_297515_.advancement().display().isEmpty());
+            pAdvancement = pAdvancement.parent();
+        } while (pAdvancement != null && pAdvancement.advancement().display().isEmpty());
 
-        return p_297515_ != null && !p_297515_.advancement().display().isEmpty() ? this.tab.getWidget(p_297515_.holder()) : null;
+        return pAdvancement != null && !pAdvancement.advancement().display().isEmpty() ? this.tab.getWidget(pAdvancement.holder()) : null;
     }
 
-    public void drawConnectivity(GuiGraphics p_281947_, int p_97300_, int p_97301_, boolean p_97302_) {
+    public void drawConnectivity(GuiGraphics pGuiGraphics, int pX, int pY, boolean pDropShadow) {
         if (this.parent != null) {
-            int i = p_97300_ + this.parent.x + 13;
-            int j = p_97300_ + this.parent.x + 26 + 4;
-            int k = p_97301_ + this.parent.y + 13;
-            int l = p_97300_ + this.x + 13;
-            int i1 = p_97301_ + this.y + 13;
-            int j1 = p_97302_ ? -16777216 : -1;
-            if (p_97302_) {
-                p_281947_.hLine(j, i, k - 1, j1);
-                p_281947_.hLine(j + 1, i, k, j1);
-                p_281947_.hLine(j, i, k + 1, j1);
-                p_281947_.hLine(l, j - 1, i1 - 1, j1);
-                p_281947_.hLine(l, j - 1, i1, j1);
-                p_281947_.hLine(l, j - 1, i1 + 1, j1);
-                p_281947_.vLine(j - 1, i1, k, j1);
-                p_281947_.vLine(j + 1, i1, k, j1);
+            int i = pX + this.parent.x + 13;
+            int j = pX + this.parent.x + 26 + 4;
+            int k = pY + this.parent.y + 13;
+            int l = pX + this.x + 13;
+            int i1 = pY + this.y + 13;
+            int j1 = pDropShadow ? -16777216 : -1;
+            if (pDropShadow) {
+                pGuiGraphics.hLine(j, i, k - 1, j1);
+                pGuiGraphics.hLine(j + 1, i, k, j1);
+                pGuiGraphics.hLine(j, i, k + 1, j1);
+                pGuiGraphics.hLine(l, j - 1, i1 - 1, j1);
+                pGuiGraphics.hLine(l, j - 1, i1, j1);
+                pGuiGraphics.hLine(l, j - 1, i1 + 1, j1);
+                pGuiGraphics.vLine(j - 1, i1, k, j1);
+                pGuiGraphics.vLine(j + 1, i1, k, j1);
             } else {
-                p_281947_.hLine(j, i, k, j1);
-                p_281947_.hLine(l, j, i1, j1);
-                p_281947_.vLine(j, i1, k, j1);
+                pGuiGraphics.hLine(j, i, k, j1);
+                pGuiGraphics.hLine(l, j, i1, j1);
+                pGuiGraphics.vLine(j, i1, k, j1);
             }
         }
 
         for (AdvancementWidget advancementwidget : this.children) {
-            advancementwidget.drawConnectivity(p_281947_, p_97300_, p_97301_, p_97302_);
+            advancementwidget.drawConnectivity(pGuiGraphics, pX, pY, pDropShadow);
         }
     }
 
-    public void draw(GuiGraphics p_281958_, int p_281323_, int p_283679_) {
+    public void draw(GuiGraphics pGuiGraphics, int pX, int pY) {
         if (!this.display.isHidden() || this.progress != null && this.progress.isDone()) {
             float f = this.progress == null ? 0.0F : this.progress.getPercent();
             AdvancementWidgetType advancementwidgettype;
@@ -160,19 +160,19 @@ public class AdvancementWidget {
                 advancementwidgettype = AdvancementWidgetType.UNOBTAINED;
             }
 
-            p_281958_.blitSprite(
+            pGuiGraphics.blitSprite(
                 RenderType::guiTextured,
                 advancementwidgettype.frameSprite(this.display.getType()),
-                p_281323_ + this.x + 3,
-                p_283679_ + this.y,
+                pX + this.x + 3,
+                pY + this.y,
                 26,
                 26
             );
-            p_281958_.renderFakeItem(this.display.getIcon(), p_281323_ + this.x + 8, p_283679_ + this.y + 5);
+            pGuiGraphics.renderFakeItem(this.display.getIcon(), pX + this.x + 8, pY + this.y + 5);
         }
 
         for (AdvancementWidget advancementwidget : this.children) {
-            advancementwidget.draw(p_281958_, p_281323_, p_283679_);
+            advancementwidget.draw(pGuiGraphics, pX, pY);
         }
     }
 
@@ -180,22 +180,22 @@ public class AdvancementWidget {
         return this.width;
     }
 
-    public void setProgress(AdvancementProgress p_97265_) {
-        this.progress = p_97265_;
+    public void setProgress(AdvancementProgress pProgress) {
+        this.progress = pProgress;
     }
 
-    public void addChild(AdvancementWidget p_97307_) {
-        this.children.add(p_97307_);
+    public void addChild(AdvancementWidget pAdvancementWidget) {
+        this.children.add(pAdvancementWidget);
     }
 
-    public void drawHover(GuiGraphics p_283068_, int p_281304_, int p_281253_, float p_281848_, int p_282097_, int p_281537_) {
+    public void drawHover(GuiGraphics pGuiGraphics, int pX, int pY, float pFade, int pWidth, int pHeight) {
         Font font = this.minecraft.font;
         int i = 9 * this.titleLines.size() + 9 + 8;
-        int j = p_281253_ + this.y + (26 - i) / 2;
+        int j = pY + this.y + (26 - i) / 2;
         int k = j + i;
         int l = this.description.size() * 9;
         int i1 = 6 + l;
-        boolean flag = p_282097_ + p_281304_ + this.x + this.width + 26 >= this.tab.getScreen().width;
+        boolean flag = pWidth + pX + this.x + this.width + 26 >= this.tab.getScreen().width;
         Component component = this.progress == null ? null : this.progress.getProgressText();
         int j1 = component == null ? 0 : font.width(component);
         boolean flag1 = k + i1 >= 113;
@@ -228,72 +228,72 @@ public class AdvancementWidget {
         int l1 = this.width - k1;
         int i2;
         if (flag) {
-            i2 = p_281304_ + this.x - this.width + 26 + 6;
+            i2 = pX + this.x - this.width + 26 + 6;
         } else {
-            i2 = p_281304_ + this.x;
+            i2 = pX + this.x;
         }
 
         int j2 = i + i1;
         if (!this.description.isEmpty()) {
             if (flag1) {
-                p_283068_.blitSprite(RenderType::guiTextured, TITLE_BOX_SPRITE, i2, k - j2, this.width, j2);
+                pGuiGraphics.blitSprite(RenderType::guiTextured, TITLE_BOX_SPRITE, i2, k - j2, this.width, j2);
             } else {
-                p_283068_.blitSprite(RenderType::guiTextured, TITLE_BOX_SPRITE, i2, j, this.width, j2);
+                pGuiGraphics.blitSprite(RenderType::guiTextured, TITLE_BOX_SPRITE, i2, j, this.width, j2);
             }
         }
 
         if (advancementwidgettype != advancementwidgettype1) {
-            p_283068_.blitSprite(RenderType::guiTextured, advancementwidgettype.boxSprite(), 200, i, 0, 0, i2, j, k1, i);
-            p_283068_.blitSprite(RenderType::guiTextured, advancementwidgettype1.boxSprite(), 200, i, 200 - l1, 0, i2 + k1, j, l1, i);
+            pGuiGraphics.blitSprite(RenderType::guiTextured, advancementwidgettype.boxSprite(), 200, i, 0, 0, i2, j, k1, i);
+            pGuiGraphics.blitSprite(RenderType::guiTextured, advancementwidgettype1.boxSprite(), 200, i, 200 - l1, 0, i2 + k1, j, l1, i);
         } else {
-            p_283068_.blitSprite(RenderType::guiTextured, advancementwidgettype.boxSprite(), i2, j, this.width, i);
+            pGuiGraphics.blitSprite(RenderType::guiTextured, advancementwidgettype.boxSprite(), i2, j, this.width, i);
         }
 
-        p_283068_.blitSprite(
+        pGuiGraphics.blitSprite(
             RenderType::guiTextured,
             advancementwidgettype2.frameSprite(this.display.getType()),
-            p_281304_ + this.x + 3,
-            p_281253_ + this.y,
+            pX + this.x + 3,
+            pY + this.y,
             26,
             26
         );
         int k2 = i2 + 5;
         if (flag) {
-            this.drawMultilineText(p_283068_, this.titleLines, k2, j + 9, -1);
+            this.drawMultilineText(pGuiGraphics, this.titleLines, k2, j + 9, -1);
             if (component != null) {
-                p_283068_.drawString(font, component, p_281304_ + this.x - j1, j + 9, -1);
+                pGuiGraphics.drawString(font, component, pX + this.x - j1, j + 9, -1);
             }
         } else {
-            this.drawMultilineText(p_283068_, this.titleLines, p_281304_ + this.x + 32, j + 9, -1);
+            this.drawMultilineText(pGuiGraphics, this.titleLines, pX + this.x + 32, j + 9, -1);
             if (component != null) {
-                p_283068_.drawString(font, component, p_281304_ + this.x + this.width - j1 - 5, j + 9, -1);
+                pGuiGraphics.drawString(font, component, pX + this.x + this.width - j1 - 5, j + 9, -1);
             }
         }
 
         if (flag1) {
-            this.drawMultilineText(p_283068_, this.description, k2, j - l + 1, -16711936);
+            this.drawMultilineText(pGuiGraphics, this.description, k2, j - l + 1, -16711936);
         } else {
-            this.drawMultilineText(p_283068_, this.description, k2, k, -16711936);
+            this.drawMultilineText(pGuiGraphics, this.description, k2, k, -16711936);
         }
 
-        p_283068_.renderFakeItem(this.display.getIcon(), p_281304_ + this.x + 8, p_281253_ + this.y + 5);
+        pGuiGraphics.renderFakeItem(this.display.getIcon(), pX + this.x + 8, pY + this.y + 5);
     }
 
-    private void drawMultilineText(GuiGraphics p_377348_, List<FormattedCharSequence> p_376770_, int p_375430_, int p_378762_, int p_377335_) {
+    private void drawMultilineText(GuiGraphics pGuiGraphics, List<FormattedCharSequence> pText, int pX, int pY, int pColor) {
         Font font = this.minecraft.font;
 
-        for (int i = 0; i < p_376770_.size(); i++) {
-            p_377348_.drawString(font, p_376770_.get(i), p_375430_, p_378762_ + i * 9, p_377335_);
+        for (int i = 0; i < pText.size(); i++) {
+            pGuiGraphics.drawString(font, pText.get(i), pX, pY + i * 9, pColor);
         }
     }
 
-    public boolean isMouseOver(int p_97260_, int p_97261_, int p_97262_, int p_97263_) {
+    public boolean isMouseOver(int pX, int pY, int pMouseX, int pMouseY) {
         if (!this.display.isHidden() || this.progress != null && this.progress.isDone()) {
-            int i = p_97260_ + this.x;
+            int i = pX + this.x;
             int j = i + 26;
-            int k = p_97261_ + this.y;
+            int k = pY + this.y;
             int l = k + 26;
-            return p_97262_ >= i && p_97262_ <= j && p_97263_ >= k && p_97263_ <= l;
+            return pMouseX >= i && pMouseX <= j && pMouseY >= k && pMouseY <= l;
         } else {
             return false;
         }

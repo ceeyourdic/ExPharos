@@ -26,14 +26,14 @@ public class WorldLoader {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static <D, R> CompletableFuture<R> load(
-        WorldLoader.InitConfig p_214363_,
-        WorldLoader.WorldDataSupplier<D> p_214364_,
-        WorldLoader.ResultFactory<D, R> p_214365_,
-        Executor p_214366_,
-        Executor p_214367_
+        WorldLoader.InitConfig pInitConfig,
+        WorldLoader.WorldDataSupplier<D> pWorldDataSupplier,
+        WorldLoader.ResultFactory<D, R> pResultFactory,
+        Executor pBackgroundExecutor,
+        Executor pGameExecutor
     ) {
         try {
-            Pair<WorldDataConfiguration, CloseableResourceManager> pair = p_214363_.packConfig.createResourceManager();
+            Pair<WorldDataConfiguration, CloseableResourceManager> pair = pInitConfig.packConfig.createResourceManager();
             CloseableResourceManager closeableresourcemanager = pair.getSecond();
             LayeredRegistryAccess<RegistryLayer> layeredregistryaccess = RegistryLayer.createRegistryAccess();
             List<Registry.PendingTags<?>> list = TagLoader.loadTagsForExistingRegistries(closeableresourcemanager, layeredregistryaccess.getLayer(RegistryLayer.STATIC));
@@ -44,7 +44,7 @@ public class WorldLoader {
             RegistryAccess.Frozen registryaccess$frozen2 = RegistryDataLoader.load(closeableresourcemanager, list2, RegistryDataLoader.DIMENSION_REGISTRIES);
             WorldDataConfiguration worlddataconfiguration = pair.getFirst();
             HolderLookup.Provider holderlookup$provider = HolderLookup.Provider.create(list2.stream());
-            WorldLoader.DataLoadOutput<D> dataloadoutput = p_214364_.get(
+            WorldLoader.DataLoadOutput<D> dataloadoutput = pWorldDataSupplier.get(
                 new WorldLoader.DataLoadContext(closeableresourcemanager, worlddataconfiguration, holderlookup$provider, registryaccess$frozen2)
             );
             LayeredRegistryAccess<RegistryLayer> layeredregistryaccess1 = layeredregistryaccess.replaceFrom(
@@ -55,10 +55,10 @@ public class WorldLoader {
                     layeredregistryaccess1,
                     list,
                     worlddataconfiguration.enabledFeatures(),
-                    p_214363_.commandSelection(),
-                    p_214363_.functionCompilationLevel(),
-                    p_214366_,
-                    p_214367_
+                    pInitConfig.commandSelection(),
+                    pInitConfig.functionCompilationLevel(),
+                    pBackgroundExecutor,
+                    pGameExecutor
                 )
                 .whenComplete((p_214370_, p_214371_) -> {
                     if (p_214371_ != null) {
@@ -67,8 +67,8 @@ public class WorldLoader {
                 })
                 .thenApplyAsync(p_358549_ -> {
                     p_358549_.updateStaticRegistryTags();
-                    return p_214365_.create(closeableresourcemanager, p_358549_, layeredregistryaccess1, dataloadoutput.cookie);
-                }, p_214367_);
+                    return pResultFactory.create(closeableresourcemanager, p_358549_, layeredregistryaccess1, dataloadoutput.cookie);
+                }, pGameExecutor);
         } catch (Exception exception) {
             return CompletableFuture.failedFuture(exception);
         }
@@ -96,11 +96,11 @@ public class WorldLoader {
 
     @FunctionalInterface
     public interface ResultFactory<D, R> {
-        R create(CloseableResourceManager p_214408_, ReloadableServerResources p_214409_, LayeredRegistryAccess<RegistryLayer> p_248844_, D p_214411_);
+        R create(CloseableResourceManager pManager, ReloadableServerResources pResources, LayeredRegistryAccess<RegistryLayer> pRegistryAccess, D pCookie);
     }
 
     @FunctionalInterface
     public interface WorldDataSupplier<D> {
-        WorldLoader.DataLoadOutput<D> get(WorldLoader.DataLoadContext p_251042_);
+        WorldLoader.DataLoadOutput<D> get(WorldLoader.DataLoadContext pContext);
     }
 }

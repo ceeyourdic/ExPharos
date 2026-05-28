@@ -26,32 +26,32 @@ public class PressurePlateBlock extends BasePressurePlateBlock {
         return CODEC;
     }
 
-    protected PressurePlateBlock(BlockSetType p_273284_, BlockBehaviour.Properties p_273571_) {
-        super(p_273571_, p_273284_);
+    protected PressurePlateBlock(BlockSetType pType, BlockBehaviour.Properties pProperties) {
+        super(pProperties, pType);
         this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, Boolean.valueOf(false)));
     }
 
     @Override
-    protected int getSignalForState(BlockState p_55270_) {
-        return p_55270_.getValue(POWERED) ? 15 : 0;
+    protected int getSignalForState(BlockState pState) {
+        return pState.getValue(POWERED) ? 15 : 0;
     }
 
     @Override
-    protected BlockState setSignalForState(BlockState p_55259_, int p_55260_) {
-        return p_55259_.setValue(POWERED, Boolean.valueOf(p_55260_ > 0));
+    protected BlockState setSignalForState(BlockState pState, int pStrength) {
+        return pState.setValue(POWERED, Boolean.valueOf(pStrength > 0));
     }
 
     @Override
-    protected int getSignalStrength(Level p_55264_, BlockPos p_55265_) {
+    protected int getSignalStrength(Level pLevel, BlockPos pPos) {
         Class<? extends Entity> oclass = switch (this.type.pressurePlateSensitivity()) {
             case EVERYTHING -> Entity.class;
             case MOBS -> LivingEntity.class;
         };
-        return getEntityCount(p_55264_, TOUCH_AABB.move(p_55265_), oclass) > 0 ? 15 : 0;
+        return getEntityCount(pLevel, TOUCH_AABB.move(pPos), oclass) > 0 ? 15 : 0;
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_55262_) {
-        p_55262_.add(POWERED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(POWERED);
     }
 }

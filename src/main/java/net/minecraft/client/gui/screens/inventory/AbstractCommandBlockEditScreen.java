@@ -96,15 +96,15 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
     }
 
     @Override
-    public void resize(Minecraft p_97677_, int p_97678_, int p_97679_) {
+    public void resize(Minecraft pMinecraft, int pWidth, int pHeight) {
         String s = this.commandEdit.getValue();
-        this.init(p_97677_, p_97678_, p_97679_);
+        this.init(pMinecraft, pWidth, pHeight);
         this.commandEdit.setValue(s);
         this.commandSuggestions.updateCommandInfo();
     }
 
-    protected void updatePreviousOutput(boolean p_169599_) {
-        this.previousEdit.setValue(p_169599_ ? this.getCommandBlock().getLastOutput().getString() : "-");
+    protected void updatePreviousOutput(boolean pTrackOutput) {
+        this.previousEdit.setValue(pTrackOutput ? this.getCommandBlock().getLastOutput().getString() : "-");
     }
 
     protected void onDone() {
@@ -117,19 +117,19 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
         this.minecraft.setScreen(null);
     }
 
-    protected abstract void populateAndSendPacket(BaseCommandBlock p_97670_);
+    protected abstract void populateAndSendPacket(BaseCommandBlock pCommandBlock);
 
-    private void onEdited(String p_97689_) {
+    private void onEdited(String pCommand) {
         this.commandSuggestions.updateCommandInfo();
     }
 
     @Override
-    public boolean keyPressed(int p_97667_, int p_97668_, int p_97669_) {
-        if (this.commandSuggestions.keyPressed(p_97667_, p_97668_, p_97669_)) {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (this.commandSuggestions.keyPressed(pKeyCode, pScanCode, pModifiers)) {
             return true;
-        } else if (super.keyPressed(p_97667_, p_97668_, p_97669_)) {
+        } else if (super.keyPressed(pKeyCode, pScanCode, pModifiers)) {
             return true;
-        } else if (p_97667_ != 257 && p_97667_ != 335) {
+        } else if (pKeyCode != 257 && pKeyCode != 335) {
             return false;
         } else {
             this.onDone();
@@ -143,8 +143,8 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double p_97663_, double p_97664_, int p_97665_) {
-        return this.commandSuggestions.mouseClicked(p_97663_, p_97664_, p_97665_) ? true : super.mouseClicked(p_97663_, p_97664_, p_97665_);
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+        return this.commandSuggestions.mouseClicked(pMouseX, pMouseY, pButton) ? true : super.mouseClicked(pMouseX, pMouseY, pButton);
     }
 
     @Override

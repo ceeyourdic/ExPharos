@@ -14,8 +14,8 @@ public class StartRidingTrigger extends SimpleCriterionTrigger<StartRidingTrigge
         return StartRidingTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_160388_) {
-        this.trigger(p_160388_, p_160394_ -> true);
+    public void trigger(ServerPlayer pPlayer) {
+        this.trigger(pPlayer, p_160394_ -> true);
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player) implements SimpleCriterionTrigger.SimpleInstance {
@@ -24,8 +24,8 @@ public class StartRidingTrigger extends SimpleCriterionTrigger<StartRidingTrigge
                     .apply(p_325250_, StartRidingTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<StartRidingTrigger.TriggerInstance> playerStartsRiding(EntityPredicate.Builder p_160402_) {
-            return CriteriaTriggers.START_RIDING_TRIGGER.createCriterion(new StartRidingTrigger.TriggerInstance(Optional.of(EntityPredicate.wrap(p_160402_))));
+        public static Criterion<StartRidingTrigger.TriggerInstance> playerStartsRiding(EntityPredicate.Builder pPlayer) {
+            return CriteriaTriggers.START_RIDING_TRIGGER.createCriterion(new StartRidingTrigger.TriggerInstance(Optional.of(EntityPredicate.wrap(pPlayer))));
         }
 
         @Override

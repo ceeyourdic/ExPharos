@@ -22,7 +22,7 @@ public interface WorldData {
 
     WorldDataConfiguration getDataConfiguration();
 
-    void setDataConfiguration(WorldDataConfiguration p_250014_);
+    void setDataConfiguration(WorldDataConfiguration pDataConfiguration);
 
     boolean wasModded();
 
@@ -30,20 +30,20 @@ public interface WorldData {
 
     Set<String> getRemovedFeatureFlags();
 
-    void setModdedInfo(String p_78638_, boolean p_78639_);
+    void setModdedInfo(String pName, boolean pIsModded);
 
-    default void fillCrashReportCategory(CrashReportCategory p_78640_) {
-        p_78640_.setDetail("Known server brands", () -> String.join(", ", this.getKnownServerBrands()));
-        p_78640_.setDetail("Removed feature flags", () -> String.join(", ", this.getRemovedFeatureFlags()));
-        p_78640_.setDetail("Level was modded", () -> Boolean.toString(this.wasModded()));
-        p_78640_.setDetail("Level storage version", () -> {
+    default void fillCrashReportCategory(CrashReportCategory pCategory) {
+        pCategory.setDetail("Known server brands", () -> String.join(", ", this.getKnownServerBrands()));
+        pCategory.setDetail("Removed feature flags", () -> String.join(", ", this.getRemovedFeatureFlags()));
+        pCategory.setDetail("Level was modded", () -> Boolean.toString(this.wasModded()));
+        pCategory.setDetail("Level storage version", () -> {
             int i = this.getVersion();
             return String.format(Locale.ROOT, "0x%05X - %s", i, this.getStorageVersionName(i));
         });
     }
 
-    default String getStorageVersionName(int p_78647_) {
-        switch (p_78647_) {
+    default String getStorageVersionName(int pStorageVersionId) {
+        switch (pStorageVersionId) {
             case 19132:
                 return "McRegion";
             case 19133:
@@ -56,13 +56,13 @@ public interface WorldData {
     @Nullable
     CompoundTag getCustomBossEvents();
 
-    void setCustomBossEvents(@Nullable CompoundTag p_78643_);
+    void setCustomBossEvents(@Nullable CompoundTag pNbt);
 
     ServerLevelData overworldData();
 
     LevelSettings getLevelSettings();
 
-    CompoundTag createTag(RegistryAccess p_78636_, @Nullable CompoundTag p_78637_);
+    CompoundTag createTag(RegistryAccess pRegistries, @Nullable CompoundTag pHostPlayerNBT);
 
     boolean isHardcore();
 
@@ -72,17 +72,17 @@ public interface WorldData {
 
     GameType getGameType();
 
-    void setGameType(GameType p_78635_);
+    void setGameType(GameType pType);
 
     boolean isAllowCommands();
 
     Difficulty getDifficulty();
 
-    void setDifficulty(Difficulty p_78633_);
+    void setDifficulty(Difficulty pDifficulty);
 
     boolean isDifficultyLocked();
 
-    void setDifficultyLocked(boolean p_78645_);
+    void setDifficultyLocked(boolean pLocked);
 
     GameRules getGameRules();
 
@@ -91,7 +91,7 @@ public interface WorldData {
 
     EndDragonFight.Data endDragonFightData();
 
-    void setEndDragonFightData(EndDragonFight.Data p_289783_);
+    void setEndDragonFightData(EndDragonFight.Data pEndDragonFightData);
 
     WorldOptions worldGenOptions();
 

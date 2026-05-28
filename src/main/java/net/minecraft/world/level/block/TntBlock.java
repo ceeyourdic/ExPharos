@@ -43,11 +43,11 @@ public class TntBlock extends Block {
     }
 
     @Override
-    protected void onPlace(BlockState p_57466_, Level p_57467_, BlockPos p_57468_, BlockState p_57469_, boolean p_57470_) {
-        if (!p_57469_.is(p_57466_.getBlock())) {
-            if (p_57467_.hasNeighborSignal(p_57468_)) {
-                explode(p_57467_, p_57468_);
-                p_57467_.removeBlock(p_57468_, false);
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        if (!pOldState.is(pState.getBlock())) {
+            if (pLevel.hasNeighborSignal(pPos)) {
+                explode(pLevel, pPos);
+                pLevel.removeBlock(pPos, false);
             }
         }
     }
@@ -79,18 +79,18 @@ public class TntBlock extends Block {
         p_368198_.addFreshEntity(primedtnt);
     }
 
-    public static void explode(Level p_57434_, BlockPos p_57435_) {
-        explode(p_57434_, p_57435_, null);
+    public static void explode(Level pLevel, BlockPos pPos) {
+        explode(pLevel, pPos, null);
     }
 
-    private static void explode(Level p_57437_, BlockPos p_57438_, @Nullable LivingEntity p_57439_) {
-        if (!p_57437_.isClientSide) {
+    private static void explode(Level pLevel, BlockPos pPos, @Nullable LivingEntity pEntity) {
+        if (!pLevel.isClientSide) {
             PrimedTnt primedtnt = new PrimedTnt(
-                p_57437_, (double)p_57438_.getX() + 0.5, (double)p_57438_.getY(), (double)p_57438_.getZ() + 0.5, p_57439_
+                pLevel, (double)pPos.getX() + 0.5, (double)pPos.getY(), (double)pPos.getZ() + 0.5, pEntity
             );
-            p_57437_.addFreshEntity(primedtnt);
-            p_57437_.playSound(null, primedtnt.getX(), primedtnt.getY(), primedtnt.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
-            p_57437_.gameEvent(p_57439_, GameEvent.PRIME_FUSE, p_57438_);
+            pLevel.addFreshEntity(primedtnt);
+            pLevel.playSound(null, primedtnt.getX(), primedtnt.getY(), primedtnt.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
+            pLevel.gameEvent(pEntity, GameEvent.PRIME_FUSE, pPos);
         }
     }
 
@@ -116,24 +116,24 @@ public class TntBlock extends Block {
     }
 
     @Override
-    protected void onProjectileHit(Level p_57429_, BlockState p_57430_, BlockHitResult p_57431_, Projectile p_57432_) {
-        if (p_57429_ instanceof ServerLevel serverlevel) {
-            BlockPos blockpos = p_57431_.getBlockPos();
-            Entity entity = p_57432_.getOwner();
-            if (p_57432_.isOnFire() && p_57432_.mayInteract(serverlevel, blockpos)) {
-                explode(p_57429_, blockpos, entity instanceof LivingEntity ? (LivingEntity)entity : null);
-                p_57429_.removeBlock(blockpos, false);
+    protected void onProjectileHit(Level pLevel, BlockState pState, BlockHitResult pHit, Projectile pProjectile) {
+        if (pLevel instanceof ServerLevel serverlevel) {
+            BlockPos blockpos = pHit.getBlockPos();
+            Entity entity = pProjectile.getOwner();
+            if (pProjectile.isOnFire() && pProjectile.mayInteract(serverlevel, blockpos)) {
+                explode(pLevel, blockpos, entity instanceof LivingEntity ? (LivingEntity)entity : null);
+                pLevel.removeBlock(blockpos, false);
             }
         }
     }
 
     @Override
-    public boolean dropFromExplosion(Explosion p_57427_) {
+    public boolean dropFromExplosion(Explosion pExplosion) {
         return false;
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_57464_) {
-        p_57464_.add(UNSTABLE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(UNSTABLE);
     }
 }

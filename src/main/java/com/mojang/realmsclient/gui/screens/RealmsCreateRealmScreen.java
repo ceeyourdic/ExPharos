@@ -36,10 +36,10 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
     private EditBox descriptionBox;
     private final Runnable createWorldRunnable;
 
-    public RealmsCreateRealmScreen(RealmsMainScreen p_88575_, RealmsServer p_366584_, boolean p_369519_) {
+    public RealmsCreateRealmScreen(RealmsMainScreen pLastScreen, RealmsServer pServer, boolean pIsSnapshot) {
         super(CREATE_REALM_TEXT);
-        this.lastScreen = p_88575_;
-        this.createWorldRunnable = () -> this.createWorld(p_366584_, p_369519_);
+        this.lastScreen = pLastScreen;
+        this.createWorldRunnable = () -> this.createWorld(pServer, pIsSnapshot);
     }
 
     @Override
@@ -72,15 +72,15 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
         this.layout.arrangeElements();
     }
 
-    private void createWorld(RealmsServer p_367400_, boolean p_365842_) {
-        if (!p_367400_.isSnapshotRealm() && p_365842_) {
+    private void createWorld(RealmsServer pServer, boolean pIsSnapshot) {
+        if (!pServer.isSnapshotRealm() && pIsSnapshot) {
             AtomicBoolean atomicboolean = new AtomicBoolean();
             this.minecraft.setScreen(new AlertScreen(() -> {
                 atomicboolean.set(true);
                 this.lastScreen.resetScreen();
                 this.minecraft.setScreen(this.lastScreen);
             }, Component.translatable("mco.upload.preparing"), Component.empty()));
-            CompletableFuture.<RealmsServer>supplyAsync(() -> createSnapshotRealm(p_367400_), Util.backgroundExecutor()).thenAcceptAsync(p_357557_ -> {
+            CompletableFuture.<RealmsServer>supplyAsync(() -> createSnapshotRealm(pServer), Util.backgroundExecutor()).thenAcceptAsync(p_357557_ -> {
                 if (!atomicboolean.get()) {
                     this.showResetWorldScreen(p_357557_);
                 }
@@ -97,24 +97,24 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
                 return null;
             }, this.minecraft);
         } else {
-            this.showResetWorldScreen(p_367400_);
+            this.showResetWorldScreen(pServer);
         }
     }
 
-    private static RealmsServer createSnapshotRealm(RealmsServer p_362204_) {
+    private static RealmsServer createSnapshotRealm(RealmsServer pServer) {
         RealmsClient realmsclient = RealmsClient.create();
 
         try {
-            return realmsclient.createSnapshotRealm(p_362204_.id);
+            return realmsclient.createSnapshotRealm(pServer.id);
         } catch (RealmsServiceException realmsserviceexception) {
             throw new RuntimeException(realmsserviceexception);
         }
     }
 
-    private void showResetWorldScreen(RealmsServer p_310274_) {
-        RealmCreationTask realmcreationtask = new RealmCreationTask(p_310274_.id, this.nameBox.getValue(), this.descriptionBox.getValue());
+    private void showResetWorldScreen(RealmsServer pServer) {
+        RealmCreationTask realmcreationtask = new RealmCreationTask(pServer.id, this.nameBox.getValue(), this.descriptionBox.getValue());
         RealmsResetWorldScreen realmsresetworldscreen = RealmsResetWorldScreen.forNewRealm(
-            this, p_310274_, realmcreationtask, () -> this.minecraft.execute(() -> {
+            this, pServer, realmcreationtask, () -> this.minecraft.execute(() -> {
                     RealmsMainScreen.refreshServerList();
                     this.minecraft.setScreen(this.lastScreen);
                 })

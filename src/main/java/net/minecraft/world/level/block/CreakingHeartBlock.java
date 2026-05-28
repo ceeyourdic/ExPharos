@@ -63,8 +63,8 @@ public class CreakingHeartBlock extends BaseEntityBlock {
         }
     }
 
-    public static boolean isNaturalNight(Level p_368323_) {
-        return p_368323_.dimensionType().natural() && p_368323_.isNight();
+    public static boolean isNaturalNight(Level pLevel) {
+        return pLevel.dimensionType().natural() && pLevel.isNight();
     }
 
     @Override
@@ -102,17 +102,17 @@ public class CreakingHeartBlock extends BaseEntityBlock {
         return updateState(blockstate, p_369079_, p_363646_);
     }
 
-    private static BlockState updateState(BlockState p_366979_, LevelReader p_367908_, BlockPos p_368789_) {
-        boolean flag = hasRequiredLogs(p_366979_, p_367908_, p_368789_);
-        boolean flag1 = !p_366979_.getValue(ACTIVE);
-        return flag && flag1 ? p_366979_.setValue(ACTIVE, Boolean.valueOf(true)) : p_366979_;
+    private static BlockState updateState(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        boolean flag = hasRequiredLogs(pState, pLevel, pPos);
+        boolean flag1 = !pState.getValue(ACTIVE);
+        return flag && flag1 ? pState.setValue(ACTIVE, Boolean.valueOf(true)) : pState;
     }
 
-    public static boolean hasRequiredLogs(BlockState p_363238_, LevelReader p_369227_, BlockPos p_362506_) {
-        Direction.Axis direction$axis = p_363238_.getValue(AXIS);
+    public static boolean hasRequiredLogs(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        Direction.Axis direction$axis = pState.getValue(AXIS);
 
         for (Direction direction : direction$axis.getDirections()) {
-            BlockState blockstate = p_369227_.getBlockState(p_362506_.relative(direction));
+            BlockState blockstate = pLevel.getBlockState(pPos.relative(direction));
             if (!blockstate.is(BlockTags.PALE_OAK_LOGS) || blockstate.getValue(AXIS) != direction$axis) {
                 return false;
             }
@@ -121,10 +121,10 @@ public class CreakingHeartBlock extends BaseEntityBlock {
         return true;
     }
 
-    private static boolean isSurroundedByLogs(LevelAccessor p_369449_, BlockPos p_360949_) {
+    private static boolean isSurroundedByLogs(LevelAccessor pLevel, BlockPos pPos) {
         for (Direction direction : Direction.values()) {
-            BlockPos blockpos = p_360949_.relative(direction);
-            BlockState blockstate = p_369449_.getBlockState(blockpos);
+            BlockPos blockpos = pPos.relative(direction);
+            BlockState blockstate = pLevel.getBlockState(blockpos);
             if (!blockstate.is(BlockTags.PALE_OAK_LOGS)) {
                 return false;
             }
@@ -182,9 +182,9 @@ public class CreakingHeartBlock extends BaseEntityBlock {
         return super.playerWillDestroy(p_361112_, p_368479_, p_363792_, p_362626_);
     }
 
-    private void tryAwardExperience(Player p_378356_, BlockState p_377297_, Level p_376854_, BlockPos p_378426_) {
-        if (!p_378356_.isCreative() && !p_378356_.isSpectator() && p_377297_.getValue(NATURAL) && p_376854_ instanceof ServerLevel serverlevel) {
-            this.popExperience(serverlevel, p_378426_, p_376854_.random.nextIntBetweenInclusive(20, 24));
+    private void tryAwardExperience(Player pPlayer, BlockState pState, Level pLevel, BlockPos pPos) {
+        if (!pPlayer.isCreative() && !pPlayer.isSpectator() && pState.getValue(NATURAL) && pLevel instanceof ServerLevel serverlevel) {
+            this.popExperience(serverlevel, pPos, pLevel.random.nextIntBetweenInclusive(20, 24));
         }
     }
 

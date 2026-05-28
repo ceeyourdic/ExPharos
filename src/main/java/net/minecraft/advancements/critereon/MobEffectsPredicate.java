@@ -18,21 +18,21 @@ public record MobEffectsPredicate(Map<Holder<MobEffect>, MobEffectsPredicate.Mob
     public static final Codec<MobEffectsPredicate> CODEC = Codec.unboundedMap(MobEffect.CODEC, MobEffectsPredicate.MobEffectInstancePredicate.CODEC)
         .xmap(MobEffectsPredicate::new, MobEffectsPredicate::effectMap);
 
-    public boolean matches(Entity p_56556_) {
-        if (p_56556_ instanceof LivingEntity livingentity && this.matches(livingentity.getActiveEffectsMap())) {
+    public boolean matches(Entity pEntity) {
+        if (pEntity instanceof LivingEntity livingentity && this.matches(livingentity.getActiveEffectsMap())) {
             return true;
         }
 
         return false;
     }
 
-    public boolean matches(LivingEntity p_56558_) {
-        return this.matches(p_56558_.getActiveEffectsMap());
+    public boolean matches(LivingEntity pEntity) {
+        return this.matches(pEntity.getActiveEffectsMap());
     }
 
-    public boolean matches(Map<Holder<MobEffect>, MobEffectInstance> p_56562_) {
+    public boolean matches(Map<Holder<MobEffect>, MobEffectInstance> pEffects) {
         for (Entry<Holder<MobEffect>, MobEffectsPredicate.MobEffectInstancePredicate> entry : this.effectMap.entrySet()) {
-            MobEffectInstance mobeffectinstance = p_56562_.get(entry.getKey());
+            MobEffectInstance mobeffectinstance = pEffects.get(entry.getKey());
             if (!entry.getValue().matches(mobeffectinstance)) {
                 return false;
             }
@@ -48,13 +48,13 @@ public record MobEffectsPredicate(Map<Holder<MobEffect>, MobEffectsPredicate.Mob
             return new MobEffectsPredicate.Builder();
         }
 
-        public MobEffectsPredicate.Builder and(Holder<MobEffect> p_331731_) {
-            this.effectMap.put(p_331731_, new MobEffectsPredicate.MobEffectInstancePredicate());
+        public MobEffectsPredicate.Builder and(Holder<MobEffect> pEffect) {
+            this.effectMap.put(pEffect, new MobEffectsPredicate.MobEffectInstancePredicate());
             return this;
         }
 
-        public MobEffectsPredicate.Builder and(Holder<MobEffect> p_335348_, MobEffectsPredicate.MobEffectInstancePredicate p_331793_) {
-            this.effectMap.put(p_335348_, p_331793_);
+        public MobEffectsPredicate.Builder and(Holder<MobEffect> pEffect, MobEffectsPredicate.MobEffectInstancePredicate pPredicate) {
+            this.effectMap.put(pEffect, pPredicate);
             return this;
         }
 
@@ -84,17 +84,17 @@ public record MobEffectsPredicate(Map<Holder<MobEffect>, MobEffectsPredicate.Mob
             this(MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, Optional.empty(), Optional.empty());
         }
 
-        public boolean matches(@Nullable MobEffectInstance p_56578_) {
-            if (p_56578_ == null) {
+        public boolean matches(@Nullable MobEffectInstance pEffect) {
+            if (pEffect == null) {
                 return false;
-            } else if (!this.amplifier.matches(p_56578_.getAmplifier())) {
+            } else if (!this.amplifier.matches(pEffect.getAmplifier())) {
                 return false;
-            } else if (!this.duration.matches(p_56578_.getDuration())) {
+            } else if (!this.duration.matches(pEffect.getDuration())) {
                 return false;
             } else {
-                return this.ambient.isPresent() && this.ambient.get() != p_56578_.isAmbient()
+                return this.ambient.isPresent() && this.ambient.get() != pEffect.isAmbient()
                     ? false
-                    : !this.visible.isPresent() || this.visible.get() == p_56578_.isVisible();
+                    : !this.visible.isPresent() || this.visible.get() == pEffect.isVisible();
             }
         }
     }

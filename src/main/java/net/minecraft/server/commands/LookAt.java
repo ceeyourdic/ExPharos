@@ -8,7 +8,7 @@ import net.minecraft.world.phys.Vec3;
 
 @FunctionalInterface
 public interface LookAt {
-    void perform(CommandSourceStack p_364146_, Entity p_365585_);
+    void perform(CommandSourceStack pSource, Entity pEntity);
 
     public static record LookAtEntity(Entity entity, EntityAnchorArgument.Anchor anchor) implements LookAt {
         @Override

@@ -14,15 +14,15 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class BlockEntityRenderers {
     private static final Map<BlockEntityType<?>, BlockEntityRendererProvider<?>> PROVIDERS = Maps.newHashMap();
 
-    private static <T extends BlockEntity> void register(BlockEntityType<? extends T> p_173591_, BlockEntityRendererProvider<T> p_173592_) {
-        PROVIDERS.put(p_173591_, p_173592_);
+    private static <T extends BlockEntity> void register(BlockEntityType<? extends T> pType, BlockEntityRendererProvider<T> pRenderProvider) {
+        PROVIDERS.put(pType, pRenderProvider);
     }
 
-    public static Map<BlockEntityType<?>, BlockEntityRenderer<?>> createEntityRenderers(BlockEntityRendererProvider.Context p_173599_) {
+    public static Map<BlockEntityType<?>, BlockEntityRenderer<?>> createEntityRenderers(BlockEntityRendererProvider.Context pContext) {
         Builder<BlockEntityType<?>, BlockEntityRenderer<?>> builder = ImmutableMap.builder();
         PROVIDERS.forEach((p_325522_, p_325523_) -> {
             try {
-                builder.put((BlockEntityType<?>)p_325522_, p_325523_.create(p_173599_));
+                builder.put((BlockEntityType<?>)p_325522_, p_325523_.create(pContext));
             } catch (Exception exception) {
                 throw new IllegalStateException("Failed to create model for " + BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey((BlockEntityType<?>)p_325522_), exception);
             }

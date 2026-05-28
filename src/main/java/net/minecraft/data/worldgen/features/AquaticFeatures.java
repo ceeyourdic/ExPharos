@@ -20,15 +20,15 @@ public class AquaticFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> KELP = FeatureUtils.createKey("kelp");
     public static final ResourceKey<ConfiguredFeature<?, ?>> WARM_OCEAN_VEGETATION = FeatureUtils.createKey("warm_ocean_vegetation");
 
-    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> p_333517_) {
-        FeatureUtils.register(p_333517_, SEAGRASS_SHORT, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.3F));
-        FeatureUtils.register(p_333517_, SEAGRASS_SLIGHTLY_LESS_SHORT, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.4F));
-        FeatureUtils.register(p_333517_, SEAGRASS_MID, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.6F));
-        FeatureUtils.register(p_333517_, SEAGRASS_TALL, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.8F));
-        FeatureUtils.register(p_333517_, SEA_PICKLE, Feature.SEA_PICKLE, new CountConfiguration(20));
-        FeatureUtils.register(p_333517_, KELP, Feature.KELP);
+    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> pContext) {
+        FeatureUtils.register(pContext, SEAGRASS_SHORT, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.3F));
+        FeatureUtils.register(pContext, SEAGRASS_SLIGHTLY_LESS_SHORT, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.4F));
+        FeatureUtils.register(pContext, SEAGRASS_MID, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.6F));
+        FeatureUtils.register(pContext, SEAGRASS_TALL, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.8F));
+        FeatureUtils.register(pContext, SEA_PICKLE, Feature.SEA_PICKLE, new CountConfiguration(20));
+        FeatureUtils.register(pContext, KELP, Feature.KELP);
         FeatureUtils.register(
-            p_333517_,
+            pContext,
             WARM_OCEAN_VEGETATION,
             Feature.SIMPLE_RANDOM_SELECTOR,
             new SimpleRandomFeatureConfiguration(

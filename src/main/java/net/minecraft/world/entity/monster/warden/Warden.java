@@ -318,16 +318,16 @@ public class Warden extends Monster implements VibrationSystem {
         return 40 - Mth.floor(Mth.clamp(f, 0.0F, 1.0F) * 30.0F);
     }
 
-    public float getTendrilAnimation(float p_219468_) {
-        return Mth.lerp(p_219468_, (float)this.tendrilAnimationO, (float)this.tendrilAnimation) / 10.0F;
+    public float getTendrilAnimation(float pPartialTick) {
+        return Mth.lerp(pPartialTick, (float)this.tendrilAnimationO, (float)this.tendrilAnimation) / 10.0F;
     }
 
-    public float getHeartAnimation(float p_219470_) {
-        return Mth.lerp(p_219470_, (float)this.heartAnimationO, (float)this.heartAnimation) / 10.0F;
+    public float getHeartAnimation(float pPartialTick) {
+        return Mth.lerp(pPartialTick, (float)this.heartAnimationO, (float)this.heartAnimation) / 10.0F;
     }
 
-    private void clientDiggingParticles(AnimationState p_219384_) {
-        if ((float)p_219384_.getTimeInMillis((float)this.tickCount) < 4500.0F) {
+    private void clientDiggingParticles(AnimationState pAnimationState) {
+        if ((float)pAnimationState.getTimeInMillis((float)this.tickCount) < 4500.0F) {
             RandomSource randomsource = this.getRandom();
             BlockState blockstate = this.getBlockStateOn();
             if (blockstate.getRenderShape() != RenderShape.INVISIBLE) {
@@ -391,11 +391,11 @@ public class Warden extends Monster implements VibrationSystem {
     }
 
     @Contract("null->false")
-    public boolean canTargetEntity(@Nullable Entity p_219386_) {
-        if (p_219386_ instanceof LivingEntity livingentity
-            && this.level() == p_219386_.level()
-            && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(p_219386_)
-            && !this.isAlliedTo(p_219386_)
+    public boolean canTargetEntity(@Nullable Entity pEntity) {
+        if (pEntity instanceof LivingEntity livingentity
+            && this.level() == pEntity.level()
+            && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(pEntity)
+            && !this.isAlliedTo(pEntity)
             && livingentity.getType() != EntityType.ARMOR_STAND
             && livingentity.getType() != EntityType.WARDEN
             && !livingentity.isInvulnerable()
@@ -407,9 +407,9 @@ public class Warden extends Monster implements VibrationSystem {
         return false;
     }
 
-    public static void applyDarknessAround(ServerLevel p_219376_, Vec3 p_219377_, @Nullable Entity p_219378_, int p_219379_) {
+    public static void applyDarknessAround(ServerLevel pLevel, Vec3 pPos, @Nullable Entity pSource, int pRadius) {
         MobEffectInstance mobeffectinstance = new MobEffectInstance(MobEffects.DARKNESS, 260, 0, false, false);
-        MobEffectUtil.addEffectToPlayersAround(p_219376_, p_219378_, p_219377_, (double)p_219379_, mobeffectinstance, 200);
+        MobEffectUtil.addEffectToPlayersAround(pLevel, pSource, pPos, (double)pRadius, mobeffectinstance, 200);
     }
 
     @Override
@@ -460,25 +460,25 @@ public class Warden extends Monster implements VibrationSystem {
         return this.angerManagement.getActiveAnger(this.getTarget());
     }
 
-    public void clearAnger(Entity p_219429_) {
-        this.angerManagement.clearAnger(p_219429_);
+    public void clearAnger(Entity pEntity) {
+        this.angerManagement.clearAnger(pEntity);
     }
 
-    public void increaseAngerAt(@Nullable Entity p_219442_) {
-        this.increaseAngerAt(p_219442_, 35, true);
+    public void increaseAngerAt(@Nullable Entity pEntity) {
+        this.increaseAngerAt(pEntity, 35, true);
     }
 
     @VisibleForTesting
-    public void increaseAngerAt(@Nullable Entity p_219388_, int p_219389_, boolean p_219390_) {
-        if (!this.isNoAi() && this.canTargetEntity(p_219388_)) {
+    public void increaseAngerAt(@Nullable Entity pEntity, int pOffset, boolean pPlayListeningSound) {
+        if (!this.isNoAi() && this.canTargetEntity(pEntity)) {
             WardenAi.setDigCooldown(this);
             boolean flag = !(this.getTarget() instanceof Player);
-            int i = this.angerManagement.increaseAnger(p_219388_, p_219389_);
-            if (p_219388_ instanceof Player && flag && AngerLevel.byAnger(i).isAngry()) {
+            int i = this.angerManagement.increaseAnger(pEntity, pOffset);
+            if (pEntity instanceof Player && flag && AngerLevel.byAnger(i).isAngry()) {
                 this.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
             }
 
-            if (p_219390_) {
+            if (pPlayListeningSound) {
                 this.playListeningSound();
             }
         }
@@ -528,9 +528,9 @@ public class Warden extends Monster implements VibrationSystem {
         return flag;
     }
 
-    public void setAttackTarget(LivingEntity p_219460_) {
+    public void setAttackTarget(LivingEntity pAttackTarget) {
         this.getBrain().eraseMemory(MemoryModuleType.ROAR_TARGET);
-        this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, p_219460_);
+        this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, pAttackTarget);
         this.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
         SonicBoom.setCooldown(this, 200);
     }

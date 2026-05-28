@@ -104,8 +104,8 @@ public class Shoot extends Behavior<Breeze> {
         }
     }
 
-    private static boolean isTargetWithinRange(Breeze p_311470_, LivingEntity p_309385_) {
-        double d0 = p_311470_.position().distanceToSqr(p_309385_.position());
+    private static boolean isTargetWithinRange(Breeze pBreeze, LivingEntity pTarget) {
+        double d0 = pBreeze.position().distanceToSqr(pTarget.position());
         return d0 < 256.0;
     }
 }

@@ -11,9 +11,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class ErrorScreen extends Screen {
     private final Component message;
 
-    public ErrorScreen(Component p_96049_, Component p_96050_) {
-        super(p_96049_);
-        this.message = p_96050_;
+    public ErrorScreen(Component pTitle, Component pMessage) {
+        super(pTitle);
+        this.message = pMessage;
     }
 
     @Override

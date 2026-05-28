@@ -14,24 +14,24 @@ public abstract class IntrinsicHolderTagsProvider<T> extends TagsProvider<T> {
     private final Function<T, ResourceKey<T>> keyExtractor;
 
     public IntrinsicHolderTagsProvider(
-        PackOutput p_256164_,
-        ResourceKey<? extends Registry<T>> p_256155_,
-        CompletableFuture<HolderLookup.Provider> p_256488_,
-        Function<T, ResourceKey<T>> p_256168_
+        PackOutput pOutput,
+        ResourceKey<? extends Registry<T>> pRegistryKey,
+        CompletableFuture<HolderLookup.Provider> pLookupProvider,
+        Function<T, ResourceKey<T>> pKeyExtractor
     ) {
-        super(p_256164_, p_256155_, p_256488_);
-        this.keyExtractor = p_256168_;
+        super(pOutput, pRegistryKey, pLookupProvider);
+        this.keyExtractor = pKeyExtractor;
     }
 
     public IntrinsicHolderTagsProvider(
-        PackOutput p_275304_,
-        ResourceKey<? extends Registry<T>> p_275709_,
-        CompletableFuture<HolderLookup.Provider> p_275227_,
-        CompletableFuture<TagsProvider.TagLookup<T>> p_275311_,
-        Function<T, ResourceKey<T>> p_275566_
+        PackOutput pOutput,
+        ResourceKey<? extends Registry<T>> pRegistryKey,
+        CompletableFuture<HolderLookup.Provider> pLookupProvider,
+        CompletableFuture<TagsProvider.TagLookup<T>> pParentProvider,
+        Function<T, ResourceKey<T>> pKeyExtractor
     ) {
-        super(p_275304_, p_275709_, p_275227_, p_275311_);
-        this.keyExtractor = p_275566_;
+        super(pOutput, pRegistryKey, pLookupProvider, pParentProvider);
+        this.keyExtractor = pKeyExtractor;
     }
 
     protected IntrinsicHolderTagsProvider.IntrinsicTagAppender<T> tag(TagKey<T> p_255730_) {
@@ -42,9 +42,9 @@ public abstract class IntrinsicHolderTagsProvider<T> extends TagsProvider<T> {
     protected static class IntrinsicTagAppender<T> extends TagsProvider.TagAppender<T> {
         private final Function<T, ResourceKey<T>> keyExtractor;
 
-        IntrinsicTagAppender(TagBuilder p_256108_, Function<T, ResourceKey<T>> p_256433_) {
-            super(p_256108_);
-            this.keyExtractor = p_256433_;
+        IntrinsicTagAppender(TagBuilder pBuilder, Function<T, ResourceKey<T>> pKeyExtractor) {
+            super(pBuilder);
+            this.keyExtractor = pKeyExtractor;
         }
 
         public IntrinsicHolderTagsProvider.IntrinsicTagAppender<T> addTag(TagKey<T> p_256311_) {
@@ -52,14 +52,14 @@ public abstract class IntrinsicHolderTagsProvider<T> extends TagsProvider<T> {
             return this;
         }
 
-        public final IntrinsicHolderTagsProvider.IntrinsicTagAppender<T> add(T p_256557_) {
-            this.add(this.keyExtractor.apply(p_256557_));
+        public final IntrinsicHolderTagsProvider.IntrinsicTagAppender<T> add(T pValue) {
+            this.add(this.keyExtractor.apply(pValue));
             return this;
         }
 
         @SafeVarargs
-        public final IntrinsicHolderTagsProvider.IntrinsicTagAppender<T> add(T... p_255868_) {
-            Stream.<T>of(p_255868_).map(this.keyExtractor).forEach(this::add);
+        public final IntrinsicHolderTagsProvider.IntrinsicTagAppender<T> add(T... pValues) {
+            Stream.<T>of(pValues).map(this.keyExtractor).forEach(this::add);
             return this;
         }
     }

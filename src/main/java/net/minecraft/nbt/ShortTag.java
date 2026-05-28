@@ -43,17 +43,17 @@ public class ShortTag extends NumericTag {
     };
     private final short data;
 
-    ShortTag(short p_129248_) {
-        this.data = p_129248_;
+    ShortTag(short pData) {
+        this.data = pData;
     }
 
-    public static ShortTag valueOf(short p_129259_) {
-        return p_129259_ >= -128 && p_129259_ <= 1024 ? ShortTag.Cache.cache[p_129259_ - -128] : new ShortTag(p_129259_);
+    public static ShortTag valueOf(short pData) {
+        return pData >= -128 && pData <= 1024 ? ShortTag.Cache.cache[pData - -128] : new ShortTag(pData);
     }
 
     @Override
-    public void write(DataOutput p_129254_) throws IOException {
-        p_129254_.writeShort(this.data);
+    public void write(DataOutput pOutput) throws IOException {
+        pOutput.writeShort(this.data);
     }
 
     @Override
@@ -76,8 +76,8 @@ public class ShortTag extends NumericTag {
     }
 
     @Override
-    public boolean equals(Object p_129265_) {
-        return this == p_129265_ ? true : p_129265_ instanceof ShortTag && this.data == ((ShortTag)p_129265_).data;
+    public boolean equals(Object pOther) {
+        return this == pOther ? true : pOther instanceof ShortTag && this.data == ((ShortTag)pOther).data;
     }
 
     @Override

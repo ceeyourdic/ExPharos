@@ -36,7 +36,7 @@ public class SugarCaneBlock extends Block {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_57193_, BlockGetter p_57194_, BlockPos p_57195_, CollisionContext p_57196_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
@@ -87,17 +87,17 @@ public class SugarCaneBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_57175_, LevelReader p_57176_, BlockPos p_57177_) {
-        BlockState blockstate = p_57176_.getBlockState(p_57177_.below());
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos.below());
         if (blockstate.is(this)) {
             return true;
         } else {
             if (blockstate.is(BlockTags.DIRT) || blockstate.is(BlockTags.SAND)) {
-                BlockPos blockpos = p_57177_.below();
+                BlockPos blockpos = pPos.below();
 
                 for (Direction direction : Direction.Plane.HORIZONTAL) {
-                    BlockState blockstate1 = p_57176_.getBlockState(blockpos.relative(direction));
-                    FluidState fluidstate = p_57176_.getFluidState(blockpos.relative(direction));
+                    BlockState blockstate1 = pLevel.getBlockState(blockpos.relative(direction));
+                    FluidState fluidstate = pLevel.getFluidState(blockpos.relative(direction));
                     if (fluidstate.is(FluidTags.WATER) || blockstate1.is(Blocks.FROSTED_ICE)) {
                         return true;
                     }
@@ -109,7 +109,7 @@ public class SugarCaneBlock extends Block {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_57186_) {
-        p_57186_.add(AGE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(AGE);
     }
 }

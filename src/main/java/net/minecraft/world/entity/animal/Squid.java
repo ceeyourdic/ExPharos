@@ -66,7 +66,7 @@ public class Squid extends AgeableWaterCreature {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_29980_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.SQUID_HURT;
     }
 
@@ -181,8 +181,8 @@ public class Squid extends AgeableWaterCreature {
         }
     }
 
-    private Vec3 rotateVector(Vec3 p_29986_) {
-        Vec3 vec3 = p_29986_.xRot(this.xBodyRotO * (float) (Math.PI / 180.0));
+    private Vec3 rotateVector(Vec3 pVector) {
+        Vec3 vec3 = pVector.xRot(this.xBodyRotO * (float) (Math.PI / 180.0));
         return vec3.yRot(-this.yBodyRotO * (float) (Math.PI / 180.0));
     }
 
@@ -204,7 +204,7 @@ public class Squid extends AgeableWaterCreature {
     }
 
     @Override
-    public void travel(Vec3 p_29984_) {
+    public void travel(Vec3 pTravelVector) {
         if (this.isControlledByLocalInstance()) {
             this.move(MoverType.SELF, this.getDeltaMovement());
         }

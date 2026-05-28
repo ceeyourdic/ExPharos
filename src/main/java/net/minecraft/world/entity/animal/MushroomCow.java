@@ -57,19 +57,19 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
     }
 
     @Override
-    public float getWalkTargetValue(BlockPos p_28933_, LevelReader p_28934_) {
-        return p_28934_.getBlockState(p_28933_.below()).is(Blocks.MYCELIUM) ? 10.0F : p_28934_.getPathfindingCostFromLightLevels(p_28933_);
+    public float getWalkTargetValue(BlockPos pPos, LevelReader pLevel) {
+        return pLevel.getBlockState(pPos.below()).is(Blocks.MYCELIUM) ? 10.0F : pLevel.getPathfindingCostFromLightLevels(pPos);
     }
 
     public static boolean checkMushroomSpawnRules(
-        EntityType<MushroomCow> p_218201_, LevelAccessor p_218202_, EntitySpawnReason p_370099_, BlockPos p_218204_, RandomSource p_218205_
+        EntityType<MushroomCow> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return p_218202_.getBlockState(p_218204_.below()).is(BlockTags.MOOSHROOMS_SPAWNABLE_ON) && isBrightEnoughToSpawn(p_218202_, p_218204_);
+        return pLevel.getBlockState(pPos.below()).is(BlockTags.MOOSHROOMS_SPAWNABLE_ON) && isBrightEnoughToSpawn(pLevel, pPos);
     }
 
     @Override
-    public void thunderHit(ServerLevel p_28921_, LightningBolt p_28922_) {
-        UUID uuid = p_28922_.getUUID();
+    public void thunderHit(ServerLevel pLevel, LightningBolt pLightning) {
+        UUID uuid = pLightning.getUUID();
         if (!uuid.equals(this.lastLightningBoltUUID)) {
             this.setVariant(this.getVariant() == MushroomCow.Variant.RED ? MushroomCow.Variant.BROWN : MushroomCow.Variant.RED);
             this.lastLightningBoltUUID = uuid;
@@ -84,8 +84,8 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_28941_, InteractionHand p_28942_) {
-        ItemStack itemstack = p_28941_.getItemInHand(p_28942_);
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
         if (itemstack.is(Items.BOWL) && !this.isBaby()) {
             boolean flag = false;
             ItemStack itemstack2;
@@ -98,8 +98,8 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
                 itemstack2 = new ItemStack(Items.MUSHROOM_STEW);
             }
 
-            ItemStack itemstack1 = ItemUtils.createFilledResult(itemstack, p_28941_, itemstack2, false);
-            p_28941_.setItemInHand(p_28942_, itemstack1);
+            ItemStack itemstack1 = ItemUtils.createFilledResult(itemstack, pPlayer, itemstack2, false);
+            pPlayer.setItemInHand(pHand, itemstack1);
             SoundEvent soundevent;
             if (flag) {
                 soundevent = SoundEvents.MOOSHROOM_MILK_SUSPICIOUSLY;
@@ -112,15 +112,15 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
         } else if (itemstack.is(Items.SHEARS) && this.readyForShearing()) {
             if (this.level() instanceof ServerLevel serverlevel) {
                 this.shear(serverlevel, SoundSource.PLAYERS, itemstack);
-                this.gameEvent(GameEvent.SHEAR, p_28941_);
-                itemstack.hurtAndBreak(1, p_28941_, getSlotForHand(p_28942_));
+                this.gameEvent(GameEvent.SHEAR, pPlayer);
+                itemstack.hurtAndBreak(1, pPlayer, getSlotForHand(pHand));
             }
 
             return InteractionResult.SUCCESS;
         } else if (this.getVariant() == MushroomCow.Variant.BROWN) {
             Optional<SuspiciousStewEffects> optional = this.getEffectsFromItemStack(itemstack);
             if (optional.isEmpty()) {
-                return super.mobInteract(p_28941_, p_28942_);
+                return super.mobInteract(pPlayer, pHand);
             } else {
                 if (this.stewEffects != null) {
                     for (int i = 0; i < 2; i++) {
@@ -136,7 +136,7 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
                             );
                     }
                 } else {
-                    itemstack.consume(1, p_28941_);
+                    itemstack.consume(1, pPlayer);
 
                     for (int j = 0; j < 4; j++) {
                         this.level()
@@ -158,7 +158,7 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
                 return InteractionResult.SUCCESS;
             }
         } else {
-            return super.mobInteract(p_28941_, p_28942_);
+            return super.mobInteract(pPlayer, pHand);
         }
     }
 
@@ -181,25 +181,25 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_28944_) {
-        super.addAdditionalSaveData(p_28944_);
-        p_28944_.putString("Type", this.getVariant().getSerializedName());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putString("Type", this.getVariant().getSerializedName());
         if (this.stewEffects != null) {
-            SuspiciousStewEffects.CODEC.encodeStart(NbtOps.INSTANCE, this.stewEffects).ifSuccess(p_296800_ -> p_28944_.put("stew_effects", p_296800_));
+            SuspiciousStewEffects.CODEC.encodeStart(NbtOps.INSTANCE, this.stewEffects).ifSuccess(p_296800_ -> pCompound.put("stew_effects", p_296800_));
         }
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_28936_) {
-        super.readAdditionalSaveData(p_28936_);
-        this.setVariant(MushroomCow.Variant.byName(p_28936_.getString("Type")));
-        if (p_28936_.contains("stew_effects", 9)) {
-            SuspiciousStewEffects.CODEC.parse(NbtOps.INSTANCE, p_28936_.get("stew_effects")).ifSuccess(p_326976_ -> this.stewEffects = p_326976_);
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setVariant(MushroomCow.Variant.byName(pCompound.getString("Type")));
+        if (pCompound.contains("stew_effects", 9)) {
+            SuspiciousStewEffects.CODEC.parse(NbtOps.INSTANCE, pCompound.get("stew_effects")).ifSuccess(p_326976_ -> this.stewEffects = p_326976_);
         }
     }
 
-    private Optional<SuspiciousStewEffects> getEffectsFromItemStack(ItemStack p_298141_) {
-        SuspiciousEffectHolder suspiciouseffectholder = SuspiciousEffectHolder.tryGet(p_298141_.getItem());
+    private Optional<SuspiciousStewEffects> getEffectsFromItemStack(ItemStack pStack) {
+        SuspiciousEffectHolder suspiciouseffectholder = SuspiciousEffectHolder.tryGet(pStack.getItem());
         return suspiciouseffectholder != null ? Optional.of(suspiciouseffectholder.getSuspiciousEffects()) : Optional.empty();
     }
 
@@ -221,9 +221,9 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
         return mushroomcow;
     }
 
-    private MushroomCow.Variant getOffspringVariant(MushroomCow p_28931_) {
+    private MushroomCow.Variant getOffspringVariant(MushroomCow pPartner) {
         MushroomCow.Variant mushroomcow$variant = this.getVariant();
-        MushroomCow.Variant mushroomcow$variant1 = p_28931_.getVariant();
+        MushroomCow.Variant mushroomcow$variant1 = pPartner.getVariant();
         MushroomCow.Variant mushroomcow$variant2;
         if (mushroomcow$variant == mushroomcow$variant1 && this.random.nextInt(1024) == 0) {
             mushroomcow$variant2 = mushroomcow$variant == MushroomCow.Variant.BROWN ? MushroomCow.Variant.RED : MushroomCow.Variant.BROWN;
@@ -242,9 +242,9 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
         final String type;
         private final BlockState blockState;
 
-        private Variant(final String p_367031_, final BlockState p_366288_) {
-            this.type = p_367031_;
-            this.blockState = p_366288_;
+        private Variant(final String pType, final BlockState pBlockState) {
+            this.type = pType;
+            this.blockState = pBlockState;
         }
 
         public BlockState getBlockState() {
@@ -256,8 +256,8 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
             return this.type;
         }
 
-        static MushroomCow.Variant byName(String p_366431_) {
-            return CODEC.byName(p_366431_, RED);
+        static MushroomCow.Variant byName(String pName) {
+            return CODEC.byName(pName, RED);
         }
     }
 }

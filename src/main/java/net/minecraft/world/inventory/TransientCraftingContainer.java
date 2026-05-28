@@ -13,15 +13,15 @@ public class TransientCraftingContainer implements CraftingContainer {
     private final int height;
     private final AbstractContainerMenu menu;
 
-    public TransientCraftingContainer(AbstractContainerMenu p_287684_, int p_287629_, int p_287593_) {
-        this(p_287684_, p_287629_, p_287593_, NonNullList.withSize(p_287629_ * p_287593_, ItemStack.EMPTY));
+    public TransientCraftingContainer(AbstractContainerMenu pMenu, int pWidth, int pHeight) {
+        this(pMenu, pWidth, pHeight, NonNullList.withSize(pWidth * pHeight, ItemStack.EMPTY));
     }
 
-    private TransientCraftingContainer(AbstractContainerMenu p_287708_, int p_287591_, int p_287609_, NonNullList<ItemStack> p_287695_) {
-        this.items = p_287695_;
-        this.menu = p_287708_;
-        this.width = p_287591_;
-        this.height = p_287609_;
+    private TransientCraftingContainer(AbstractContainerMenu pMenu, int pWidth, int pHeight, NonNullList<ItemStack> pItems) {
+        this.items = pItems;
+        this.menu = pMenu;
+        this.width = pWidth;
+        this.height = pHeight;
     }
 
     @Override

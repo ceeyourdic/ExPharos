@@ -11,12 +11,12 @@ public class UserBanList extends StoredUserList<GameProfile, UserBanListEntry> {
     }
 
     @Override
-    protected StoredUserEntry<GameProfile> createEntry(JsonObject p_11405_) {
-        return new UserBanListEntry(p_11405_);
+    protected StoredUserEntry<GameProfile> createEntry(JsonObject pEntryData) {
+        return new UserBanListEntry(pEntryData);
     }
 
-    public boolean isBanned(GameProfile p_11407_) {
-        return this.contains(p_11407_);
+    public boolean isBanned(GameProfile pProfile) {
+        return this.contains(pProfile);
     }
 
     @Override
@@ -24,7 +24,7 @@ public class UserBanList extends StoredUserList<GameProfile, UserBanListEntry> {
         return this.getEntries().stream().map(StoredUserEntry::getUser).filter(Objects::nonNull).map(GameProfile::getName).toArray(String[]::new);
     }
 
-    protected String getKeyForUser(GameProfile p_11411_) {
-        return p_11411_.getId().toString();
+    protected String getKeyForUser(GameProfile pObj) {
+        return pObj.getId().toString();
     }
 }

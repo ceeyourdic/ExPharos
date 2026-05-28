@@ -57,29 +57,29 @@ public class Pufferfish extends AbstractFish {
         return this.entityData.get(PUFF_STATE);
     }
 
-    public void setPuffState(int p_29619_) {
-        this.entityData.set(PUFF_STATE, p_29619_);
+    public void setPuffState(int pPuffState) {
+        this.entityData.set(PUFF_STATE, pPuffState);
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_29615_) {
-        if (PUFF_STATE.equals(p_29615_)) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        if (PUFF_STATE.equals(pKey)) {
             this.refreshDimensions();
         }
 
-        super.onSyncedDataUpdated(p_29615_);
+        super.onSyncedDataUpdated(pKey);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_29624_) {
-        super.addAdditionalSaveData(p_29624_);
-        p_29624_.putInt("PuffState", this.getPuffState());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("PuffState", this.getPuffState());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_29613_) {
-        super.readAdditionalSaveData(p_29613_);
-        this.setPuffState(Math.min(p_29613_.getInt("PuffState"), 2));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setPuffState(Math.min(pCompound.getInt("PuffState"), 2));
     }
 
     @Override
@@ -134,25 +134,25 @@ public class Pufferfish extends AbstractFish {
         }
     }
 
-    private void touch(ServerLevel p_364109_, Mob p_29606_) {
+    private void touch(ServerLevel pLevel, Mob pMob) {
         int i = this.getPuffState();
-        if (p_29606_.hurtServer(p_364109_, this.damageSources().mobAttack(this), (float)(1 + i))) {
-            p_29606_.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * i, 0), this);
+        if (pMob.hurtServer(pLevel, this.damageSources().mobAttack(this), (float)(1 + i))) {
+            pMob.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * i, 0), this);
             this.playSound(SoundEvents.PUFFER_FISH_STING, 1.0F, 1.0F);
         }
     }
 
     @Override
-    public void playerTouch(Player p_29617_) {
+    public void playerTouch(Player pEntity) {
         int i = this.getPuffState();
-        if (p_29617_ instanceof ServerPlayer serverplayer
+        if (pEntity instanceof ServerPlayer serverplayer
             && i > 0
-            && p_29617_.hurtServer(serverplayer.serverLevel(), this.damageSources().mobAttack(this), (float)(1 + i))) {
+            && pEntity.hurtServer(serverplayer.serverLevel(), this.damageSources().mobAttack(this), (float)(1 + i))) {
             if (!this.isSilent()) {
                 serverplayer.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.PUFFER_FISH_STING, 0.0F));
             }
 
-            p_29617_.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * i, 0), this);
+            pEntity.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * i, 0), this);
         }
     }
 
@@ -167,7 +167,7 @@ public class Pufferfish extends AbstractFish {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_29628_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.PUFFER_FISH_HURT;
     }
 
@@ -181,8 +181,8 @@ public class Pufferfish extends AbstractFish {
         return super.getDefaultDimensions(p_335494_).scale(getScale(this.getPuffState()));
     }
 
-    private static float getScale(int p_29639_) {
-        switch (p_29639_) {
+    private static float getScale(int pPuffState) {
+        switch (pPuffState) {
             case 0:
                 return 0.5F;
             case 1:
@@ -195,8 +195,8 @@ public class Pufferfish extends AbstractFish {
     static class PufferfishPuffGoal extends Goal {
         private final Pufferfish fish;
 
-        public PufferfishPuffGoal(Pufferfish p_29642_) {
-            this.fish = p_29642_;
+        public PufferfishPuffGoal(Pufferfish pFish) {
+            this.fish = pFish;
         }
 
         @Override

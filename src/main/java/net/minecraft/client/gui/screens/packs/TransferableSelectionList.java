@@ -32,10 +32,10 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
     private final Component title;
     final PackSelectionScreen screen;
 
-    public TransferableSelectionList(Minecraft p_265029_, PackSelectionScreen p_265777_, int p_265774_, int p_265153_, Component p_265124_) {
-        super(p_265029_, p_265774_, p_265153_, 33, 36, (int)(9.0F * 1.5F));
-        this.screen = p_265777_;
-        this.title = p_265124_;
+    public TransferableSelectionList(Minecraft pMinecraft, PackSelectionScreen pScreen, int pWidth, int pHeight, Component pTitle) {
+        super(pMinecraft, pWidth, pHeight, 33, 36, (int)(9.0F * 1.5F));
+        this.screen = pScreen;
+        this.title = pTitle;
         this.centerListVertically = false;
     }
 
@@ -114,30 +114,30 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
         private final FormattedCharSequence incompatibleNameDisplayCache;
         private final MultiLineLabel incompatibleDescriptionDisplayCache;
 
-        public PackEntry(Minecraft p_265717_, TransferableSelectionList p_265075_, PackSelectionModel.Entry p_265360_) {
-            this.minecraft = p_265717_;
-            this.pack = p_265360_;
-            this.parent = p_265075_;
-            this.nameDisplayCache = cacheName(p_265717_, p_265360_.getTitle());
-            this.descriptionDisplayCache = cacheDescription(p_265717_, p_265360_.getExtendedDescription());
-            this.incompatibleNameDisplayCache = cacheName(p_265717_, TransferableSelectionList.INCOMPATIBLE_TITLE);
-            this.incompatibleDescriptionDisplayCache = cacheDescription(p_265717_, p_265360_.getCompatibility().getDescription());
+        public PackEntry(Minecraft pMinecraft, TransferableSelectionList pParent, PackSelectionModel.Entry pPack) {
+            this.minecraft = pMinecraft;
+            this.pack = pPack;
+            this.parent = pParent;
+            this.nameDisplayCache = cacheName(pMinecraft, pPack.getTitle());
+            this.descriptionDisplayCache = cacheDescription(pMinecraft, pPack.getExtendedDescription());
+            this.incompatibleNameDisplayCache = cacheName(pMinecraft, TransferableSelectionList.INCOMPATIBLE_TITLE);
+            this.incompatibleDescriptionDisplayCache = cacheDescription(pMinecraft, pPack.getCompatibility().getDescription());
         }
 
-        private static FormattedCharSequence cacheName(Minecraft p_100105_, Component p_100106_) {
-            int i = p_100105_.font.width(p_100106_);
+        private static FormattedCharSequence cacheName(Minecraft pMinecraft, Component pName) {
+            int i = pMinecraft.font.width(pName);
             if (i > 157) {
                 FormattedText formattedtext = FormattedText.composite(
-                    p_100105_.font.substrByWidth(p_100106_, 157 - p_100105_.font.width("...")), FormattedText.of("...")
+                    pMinecraft.font.substrByWidth(pName, 157 - pMinecraft.font.width("...")), FormattedText.of("...")
                 );
                 return Language.getInstance().getVisualOrder(formattedtext);
             } else {
-                return p_100106_.getVisualOrderText();
+                return pName.getVisualOrderText();
             }
         }
 
-        private static MultiLineLabel cacheDescription(Minecraft p_100110_, Component p_100111_) {
-            return MultiLineLabel.create(p_100110_.font, 157, 2, p_100111_);
+        private static MultiLineLabel cacheDescription(Minecraft pMinecraft, Component pText) {
+            return MultiLineLabel.create(pMinecraft.font, 157, 2, pText);
         }
 
         @Override
@@ -260,9 +260,9 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
         }
 
         @Override
-        public boolean mouseClicked(double p_100090_, double p_100091_, int p_100092_) {
-            double d0 = p_100090_ - (double)this.parent.getRowLeft();
-            double d1 = p_100091_ - (double)this.parent.getRowTop(this.parent.children().indexOf(this));
+        public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+            double d0 = pMouseX - (double)this.parent.getRowLeft();
+            double d1 = pMouseY - (double)this.parent.getRowTop(this.parent.children().indexOf(this));
             if (this.showHoverOverlay() && d0 <= 32.0) {
                 this.parent.screen.clearSelected();
                 if (this.pack.canSelect()) {
@@ -286,7 +286,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
                 }
             }
 
-            return super.mouseClicked(p_100090_, p_100091_, p_100092_);
+            return super.mouseClicked(pMouseX, pMouseY, pButton);
         }
     }
 }

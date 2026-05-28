@@ -23,9 +23,9 @@ public interface ResourceMetadata {
     };
     IoSupplier<ResourceMetadata> EMPTY_SUPPLIER = () -> EMPTY;
 
-    static ResourceMetadata fromJsonStream(InputStream p_215581_) throws IOException {
+    static ResourceMetadata fromJsonStream(InputStream pStream) throws IOException {
         ResourceMetadata resourcemetadata;
-        try (BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(p_215581_, StandardCharsets.UTF_8))) {
+        try (BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(pStream, StandardCharsets.UTF_8))) {
             final JsonObject jsonobject = GsonHelper.parse(bufferedreader);
             resourcemetadata = new ResourceMetadata() {
                 @Override
@@ -44,27 +44,27 @@ public interface ResourceMetadata {
         return resourcemetadata;
     }
 
-    <T> Optional<T> getSection(MetadataSectionType<T> p_376138_);
+    <T> Optional<T> getSection(MetadataSectionType<T> pType);
 
-    default ResourceMetadata copySections(Collection<MetadataSectionType<?>> p_299820_) {
+    default ResourceMetadata copySections(Collection<MetadataSectionType<?>> pSerializers) {
         ResourceMetadata.Builder resourcemetadata$builder = new ResourceMetadata.Builder();
 
-        for (MetadataSectionType<?> metadatasectiontype : p_299820_) {
+        for (MetadataSectionType<?> metadatasectiontype : pSerializers) {
             this.copySection(resourcemetadata$builder, metadatasectiontype);
         }
 
         return resourcemetadata$builder.build();
     }
 
-    private <T> void copySection(ResourceMetadata.Builder p_299159_, MetadataSectionType<T> p_375583_) {
-        this.getSection(p_375583_).ifPresent(p_374889_ -> p_299159_.put(p_375583_, (T)p_374889_));
+    private <T> void copySection(ResourceMetadata.Builder pBuilder, MetadataSectionType<T> pType) {
+        this.getSection(pType).ifPresent(p_374889_ -> pBuilder.put(pType, (T)p_374889_));
     }
 
     public static class Builder {
         private final ImmutableMap.Builder<MetadataSectionType<?>, Object> map = ImmutableMap.builder();
 
-        public <T> ResourceMetadata.Builder put(MetadataSectionType<T> p_377511_, T p_298435_) {
-            this.map.put(p_377511_, p_298435_);
+        public <T> ResourceMetadata.Builder put(MetadataSectionType<T> pType, T pValue) {
+            this.map.put(pType, pValue);
             return this;
         }
 

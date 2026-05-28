@@ -39,9 +39,9 @@ public class TexturedModel {
     private final TextureMapping mapping;
     private final ModelTemplate template;
 
-    private TexturedModel(TextureMapping p_378768_, ModelTemplate p_377015_) {
-        this.mapping = p_378768_;
-        this.template = p_377015_;
+    private TexturedModel(TextureMapping pMapping, ModelTemplate pTemplate) {
+        this.mapping = pMapping;
+        this.template = pTemplate;
     }
 
     public ModelTemplate getTemplate() {
@@ -52,42 +52,42 @@ public class TexturedModel {
         return this.mapping;
     }
 
-    public TexturedModel updateTextures(Consumer<TextureMapping> p_378734_) {
-        p_378734_.accept(this.mapping);
+    public TexturedModel updateTextures(Consumer<TextureMapping> pUpdater) {
+        pUpdater.accept(this.mapping);
         return this;
     }
 
-    public ResourceLocation create(Block p_377060_, BiConsumer<ResourceLocation, ModelInstance> p_377616_) {
-        return this.template.create(p_377060_, this.mapping, p_377616_);
+    public ResourceLocation create(Block pBlock, BiConsumer<ResourceLocation, ModelInstance> pOutput) {
+        return this.template.create(pBlock, this.mapping, pOutput);
     }
 
-    public ResourceLocation createWithSuffix(Block p_377474_, String p_378409_, BiConsumer<ResourceLocation, ModelInstance> p_378475_) {
-        return this.template.createWithSuffix(p_377474_, p_378409_, this.mapping, p_378475_);
+    public ResourceLocation createWithSuffix(Block pBlock, String pSuffix, BiConsumer<ResourceLocation, ModelInstance> pOutput) {
+        return this.template.createWithSuffix(pBlock, pSuffix, this.mapping, pOutput);
     }
 
-    private static TexturedModel.Provider createDefault(Function<Block, TextureMapping> p_378290_, ModelTemplate p_378044_) {
-        return p_376579_ -> new TexturedModel(p_378290_.apply(p_376579_), p_378044_);
+    private static TexturedModel.Provider createDefault(Function<Block, TextureMapping> pTextureMappingGetter, ModelTemplate pTemplate) {
+        return p_376579_ -> new TexturedModel(pTextureMappingGetter.apply(p_376579_), pTemplate);
     }
 
-    public static TexturedModel createAllSame(ResourceLocation p_377631_) {
-        return new TexturedModel(TextureMapping.cube(p_377631_), ModelTemplates.CUBE_ALL);
+    public static TexturedModel createAllSame(ResourceLocation pLocation) {
+        return new TexturedModel(TextureMapping.cube(pLocation), ModelTemplates.CUBE_ALL);
     }
 
     @FunctionalInterface
     @OnlyIn(Dist.CLIENT)
     public interface Provider {
-        TexturedModel get(Block p_378795_);
+        TexturedModel get(Block pBlock);
 
-        default ResourceLocation create(Block p_377562_, BiConsumer<ResourceLocation, ModelInstance> p_377737_) {
-            return this.get(p_377562_).create(p_377562_, p_377737_);
+        default ResourceLocation create(Block pBlock, BiConsumer<ResourceLocation, ModelInstance> pOutput) {
+            return this.get(pBlock).create(pBlock, pOutput);
         }
 
-        default ResourceLocation createWithSuffix(Block p_378618_, String p_377692_, BiConsumer<ResourceLocation, ModelInstance> p_378446_) {
-            return this.get(p_378618_).createWithSuffix(p_378618_, p_377692_, p_378446_);
+        default ResourceLocation createWithSuffix(Block pBlock, String pSuffix, BiConsumer<ResourceLocation, ModelInstance> pOutput) {
+            return this.get(pBlock).createWithSuffix(pBlock, pSuffix, pOutput);
         }
 
-        default TexturedModel.Provider updateTexture(Consumer<TextureMapping> p_377721_) {
-            return p_378681_ -> this.get(p_378681_).updateTextures(p_377721_);
+        default TexturedModel.Provider updateTexture(Consumer<TextureMapping> pUpdater) {
+            return p_378681_ -> this.get(p_378681_).updateTextures(pUpdater);
         }
     }
 }

@@ -29,28 +29,28 @@ public class TimeArgument implements ArgumentType<Integer> {
     private static final Object2IntMap<String> UNITS = new Object2IntOpenHashMap<>();
     final int minimum;
 
-    private TimeArgument(int p_265107_) {
-        this.minimum = p_265107_;
+    private TimeArgument(int pMinimum) {
+        this.minimum = pMinimum;
     }
 
     public static TimeArgument time() {
         return new TimeArgument(0);
     }
 
-    public static TimeArgument time(int p_265722_) {
-        return new TimeArgument(p_265722_);
+    public static TimeArgument time(int pMinimum) {
+        return new TimeArgument(pMinimum);
     }
 
-    public Integer parse(StringReader p_113039_) throws CommandSyntaxException {
-        float f = p_113039_.readFloat();
-        String s = p_113039_.readUnquotedString();
+    public Integer parse(StringReader pReader) throws CommandSyntaxException {
+        float f = pReader.readFloat();
+        String s = pReader.readUnquotedString();
         int i = UNITS.getOrDefault(s, 0);
         if (i == 0) {
-            throw ERROR_INVALID_UNIT.createWithContext(p_113039_);
+            throw ERROR_INVALID_UNIT.createWithContext(pReader);
         } else {
             int j = Math.round(f * (float)i);
             if (j < this.minimum) {
-                throw ERROR_TICK_COUNT_TOO_LOW.createWithContext(p_113039_, j, this.minimum);
+                throw ERROR_TICK_COUNT_TOO_LOW.createWithContext(pReader, j, this.minimum);
             } else {
                 return j;
             }
@@ -58,16 +58,16 @@ public class TimeArgument implements ArgumentType<Integer> {
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_113044_, SuggestionsBuilder p_113045_) {
-        StringReader stringreader = new StringReader(p_113045_.getRemaining());
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> pContext, SuggestionsBuilder pBuilder) {
+        StringReader stringreader = new StringReader(pBuilder.getRemaining());
 
         try {
             stringreader.readFloat();
         } catch (CommandSyntaxException commandsyntaxexception) {
-            return p_113045_.buildFuture();
+            return pBuilder.buildFuture();
         }
 
-        return SharedSuggestionProvider.suggest(UNITS.keySet(), p_113045_.createOffset(p_113045_.getStart() + stringreader.getCursor()));
+        return SharedSuggestionProvider.suggest(UNITS.keySet(), pBuilder.createOffset(pBuilder.getStart() + stringreader.getCursor()));
     }
 
     @Override
@@ -103,8 +103,8 @@ public class TimeArgument implements ArgumentType<Integer> {
         public final class Template implements ArgumentTypeInfo.Template<TimeArgument> {
             final int min;
 
-            Template(final int p_265096_) {
-                this.min = p_265096_;
+            Template(final int pMin) {
+                this.min = pMin;
             }
 
             public TimeArgument instantiate(CommandBuildContext p_265466_) {

@@ -23,9 +23,9 @@ public class SetOminousBottleAmplifierFunction extends LootItemConditionalFuncti
     );
     private final NumberProvider amplifierGenerator;
 
-    private SetOminousBottleAmplifierFunction(List<LootItemCondition> p_328459_, NumberProvider p_330589_) {
-        super(p_328459_);
-        this.amplifierGenerator = p_330589_;
+    private SetOminousBottleAmplifierFunction(List<LootItemCondition> pConditions, NumberProvider pAmplifierGenerator) {
+        super(pConditions);
+        this.amplifierGenerator = pAmplifierGenerator;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class SetOminousBottleAmplifierFunction extends LootItemConditionalFuncti
         return this.amplifierGenerator;
     }
 
-    public static LootItemConditionalFunction.Builder<?> setAmplifier(NumberProvider p_329950_) {
-        return simpleBuilder(p_334301_ -> new SetOminousBottleAmplifierFunction(p_334301_, p_329950_));
+    public static LootItemConditionalFunction.Builder<?> setAmplifier(NumberProvider pAmplifier) {
+        return simpleBuilder(p_334301_ -> new SetOminousBottleAmplifierFunction(p_334301_, pAmplifier));
     }
 }

@@ -22,11 +22,11 @@ public class ResourceLocationPattern {
     private final Predicate<String> pathPredicate;
     private final Predicate<ResourceLocation> locationPredicate;
 
-    private ResourceLocationPattern(Optional<Pattern> p_261800_, Optional<Pattern> p_262131_) {
-        this.namespacePattern = p_261800_;
-        this.namespacePredicate = p_261800_.map(Pattern::asPredicate).orElse(p_261999_ -> true);
-        this.pathPattern = p_262131_;
-        this.pathPredicate = p_262131_.map(Pattern::asPredicate).orElse(p_261815_ -> true);
+    private ResourceLocationPattern(Optional<Pattern> pNamespacePattern, Optional<Pattern> pPathPattern) {
+        this.namespacePattern = pNamespacePattern;
+        this.namespacePredicate = pNamespacePattern.map(Pattern::asPredicate).orElse(p_261999_ -> true);
+        this.pathPattern = pPathPattern;
+        this.pathPredicate = pPathPattern.map(Pattern::asPredicate).orElse(p_261815_ -> true);
         this.locationPredicate = p_261854_ -> this.namespacePredicate.test(p_261854_.getNamespace()) && this.pathPredicate.test(p_261854_.getPath());
     }
 

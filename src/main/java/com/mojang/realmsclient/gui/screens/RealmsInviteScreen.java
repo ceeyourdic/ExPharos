@@ -39,11 +39,11 @@ public class RealmsInviteScreen extends RealmsScreen {
     @Nullable
     private Component message;
 
-    public RealmsInviteScreen(RealmsConfigureWorldScreen p_88703_, Screen p_88704_, RealmsServer p_88705_) {
+    public RealmsInviteScreen(RealmsConfigureWorldScreen pConfigureScreen, Screen pLastScreen, RealmsServer pServerData) {
         super(TITLE);
-        this.configureScreen = p_88703_;
-        this.lastScreen = p_88704_;
-        this.serverData = p_88705_;
+        this.configureScreen = pConfigureScreen;
+        this.lastScreen = pLastScreen;
+        this.serverData = pServerData;
     }
 
     @Override
@@ -100,9 +100,9 @@ public class RealmsInviteScreen extends RealmsScreen {
         }
     }
 
-    private void showMessage(Component p_289685_) {
-        this.message = p_289685_;
-        this.minecraft.getNarrator().sayNow(p_289685_);
+    private void showMessage(Component pMessage) {
+        this.message = pMessage;
+        this.minecraft.getNarrator().sayNow(pMessage);
     }
 
     @Override

@@ -76,29 +76,29 @@ public record GameEvent(int notificationRadius) {
     public static final int DEFAULT_NOTIFICATION_RADIUS = 16;
     public static final Codec<Holder<GameEvent>> CODEC = RegistryFixedCodec.create(Registries.GAME_EVENT);
 
-    public static Holder<GameEvent> bootstrap(Registry<GameEvent> p_336256_) {
+    public static Holder<GameEvent> bootstrap(Registry<GameEvent> pRegistry) {
         return BLOCK_ACTIVATE;
     }
 
-    private static Holder.Reference<GameEvent> register(String p_157823_) {
-        return register(p_157823_, 16);
+    private static Holder.Reference<GameEvent> register(String pName) {
+        return register(pName, 16);
     }
 
-    private static Holder.Reference<GameEvent> register(String p_157825_, int p_157826_) {
-        return Registry.registerForHolder(BuiltInRegistries.GAME_EVENT, ResourceLocation.withDefaultNamespace(p_157825_), new GameEvent(p_157826_));
+    private static Holder.Reference<GameEvent> register(String pName, int pNotificationRadius) {
+        return Registry.registerForHolder(BuiltInRegistries.GAME_EVENT, ResourceLocation.withDefaultNamespace(pName), new GameEvent(pNotificationRadius));
     }
 
     public static record Context(@Nullable Entity sourceEntity, @Nullable BlockState affectedState) {
-        public static GameEvent.Context of(@Nullable Entity p_223718_) {
-            return new GameEvent.Context(p_223718_, null);
+        public static GameEvent.Context of(@Nullable Entity pSourceEntity) {
+            return new GameEvent.Context(pSourceEntity, null);
         }
 
-        public static GameEvent.Context of(@Nullable BlockState p_223723_) {
-            return new GameEvent.Context(null, p_223723_);
+        public static GameEvent.Context of(@Nullable BlockState pAffectedState) {
+            return new GameEvent.Context(null, pAffectedState);
         }
 
-        public static GameEvent.Context of(@Nullable Entity p_223720_, @Nullable BlockState p_223721_) {
-            return new GameEvent.Context(p_223720_, p_223721_);
+        public static GameEvent.Context of(@Nullable Entity pSourceEntity, @Nullable BlockState pAffectedState) {
+            return new GameEvent.Context(pSourceEntity, pAffectedState);
         }
     }
 
@@ -109,16 +109,16 @@ public record GameEvent(int notificationRadius) {
         private final GameEventListener recipient;
         private final double distanceToRecipient;
 
-        public ListenerInfo(Holder<GameEvent> p_334906_, Vec3 p_249118_, GameEvent.Context p_251196_, GameEventListener p_251701_, Vec3 p_248854_) {
-            this.gameEvent = p_334906_;
-            this.source = p_249118_;
-            this.context = p_251196_;
-            this.recipient = p_251701_;
-            this.distanceToRecipient = p_249118_.distanceToSqr(p_248854_);
+        public ListenerInfo(Holder<GameEvent> pGameEvent, Vec3 pSource, GameEvent.Context pContext, GameEventListener pRecipient, Vec3 pPos) {
+            this.gameEvent = pGameEvent;
+            this.source = pSource;
+            this.context = pContext;
+            this.recipient = pRecipient;
+            this.distanceToRecipient = pSource.distanceToSqr(pPos);
         }
 
-        public int compareTo(GameEvent.ListenerInfo p_249631_) {
-            return Double.compare(this.distanceToRecipient, p_249631_.distanceToRecipient);
+        public int compareTo(GameEvent.ListenerInfo pOther) {
+            return Double.compare(this.distanceToRecipient, pOther.distanceToRecipient);
         }
 
         public Holder<GameEvent> gameEvent() {

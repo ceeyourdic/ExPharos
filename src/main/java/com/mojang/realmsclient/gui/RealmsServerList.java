@@ -16,12 +16,12 @@ public class RealmsServerList implements Iterable<RealmsServer> {
     private final Set<RealmsServer> removedServers = new HashSet<>();
     private List<RealmsServer> servers = List.of();
 
-    public RealmsServerList(Minecraft p_239233_) {
-        this.minecraft = p_239233_;
+    public RealmsServerList(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
-    public void updateServersList(List<RealmsServer> p_239869_) {
-        List<RealmsServer> list = new ArrayList<>(p_239869_);
+    public void updateServersList(List<RealmsServer> pServers) {
+        List<RealmsServer> list = new ArrayList<>(pServers);
         list.sort(new RealmsServer.McoServerComparator(this.minecraft.getUser().getName()));
         boolean flag = list.removeAll(this.removedServers);
         if (!flag) {
@@ -31,9 +31,9 @@ public class RealmsServerList implements Iterable<RealmsServer> {
         this.servers = list;
     }
 
-    public void removeItem(RealmsServer p_240077_) {
-        this.servers.remove(p_240077_);
-        this.removedServers.add(p_240077_);
+    public void removeItem(RealmsServer pServer) {
+        this.servers.remove(pServer);
+        this.removedServers.add(pServer);
     }
 
     @Override

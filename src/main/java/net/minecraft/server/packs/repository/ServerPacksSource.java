@@ -36,12 +36,12 @@ public class ServerPacksSource extends BuiltInPackSource {
     private static final PackSelectionConfig FEATURE_SELECTION_CONFIG = new PackSelectionConfig(false, Pack.Position.TOP, false);
     private static final ResourceLocation PACKS_DIR = ResourceLocation.withDefaultNamespace("datapacks");
 
-    public ServerPacksSource(DirectoryValidator p_300750_) {
-        super(PackType.SERVER_DATA, createVanillaPackSource(), PACKS_DIR, p_300750_);
+    public ServerPacksSource(DirectoryValidator pValidator) {
+        super(PackType.SERVER_DATA, createVanillaPackSource(), PACKS_DIR, pValidator);
     }
 
-    private static PackLocationInfo createBuiltInPackLocation(String p_330867_, Component p_330785_) {
-        return new PackLocationInfo(p_330867_, p_330785_, PackSource.FEATURE, Optional.of(KnownPack.vanilla(p_330867_)));
+    private static PackLocationInfo createBuiltInPackLocation(String pId, Component pTitle) {
+        return new PackLocationInfo(pId, pTitle, PackSource.FEATURE, Optional.of(KnownPack.vanilla(pId)));
     }
 
     @VisibleForTesting
@@ -66,15 +66,15 @@ public class ServerPacksSource extends BuiltInPackSource {
         return Pack.readMetaAndCreate(createBuiltInPackLocation(p_250596_, p_249043_), p_249625_, PackType.SERVER_DATA, FEATURE_SELECTION_CONFIG);
     }
 
-    public static PackRepository createPackRepository(Path p_251569_, DirectoryValidator p_300268_) {
-        return new PackRepository(new ServerPacksSource(p_300268_), new FolderRepositorySource(p_251569_, PackType.SERVER_DATA, PackSource.WORLD, p_300268_));
+    public static PackRepository createPackRepository(Path pFolder, DirectoryValidator pValidator) {
+        return new PackRepository(new ServerPacksSource(pValidator), new FolderRepositorySource(pFolder, PackType.SERVER_DATA, PackSource.WORLD, pValidator));
     }
 
     public static PackRepository createVanillaTrustedRepository() {
         return new PackRepository(new ServerPacksSource(new DirectoryValidator(p_296600_ -> true)));
     }
 
-    public static PackRepository createPackRepository(LevelStorageSource.LevelStorageAccess p_250213_) {
-        return createPackRepository(p_250213_.getLevelPath(LevelResource.DATAPACK_DIR), p_250213_.parent().getWorldDirValidator());
+    public static PackRepository createPackRepository(LevelStorageSource.LevelStorageAccess pLevel) {
+        return createPackRepository(pLevel.getLevelPath(LevelResource.DATAPACK_DIR), pLevel.parent().getWorldDirValidator());
     }
 }

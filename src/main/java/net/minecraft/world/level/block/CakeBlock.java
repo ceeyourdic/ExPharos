@@ -57,8 +57,8 @@ public class CakeBlock extends Block {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_51222_, BlockGetter p_51223_, BlockPos p_51224_, CollisionContext p_51225_) {
-        return SHAPE_BY_BITE[p_51222_.getValue(BITES)];
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return SHAPE_BY_BITE[pState.getValue(BITES)];
     }
 
     @Override
@@ -93,19 +93,19 @@ public class CakeBlock extends Block {
         return eat(p_334119_, p_330552_, p_331745_, p_332095_);
     }
 
-    protected static InteractionResult eat(LevelAccessor p_51186_, BlockPos p_51187_, BlockState p_51188_, Player p_51189_) {
-        if (!p_51189_.canEat(false)) {
+    protected static InteractionResult eat(LevelAccessor pLevel, BlockPos pPos, BlockState pState, Player pPlayer) {
+        if (!pPlayer.canEat(false)) {
             return InteractionResult.PASS;
         } else {
-            p_51189_.awardStat(Stats.EAT_CAKE_SLICE);
-            p_51189_.getFoodData().eat(2, 0.1F);
-            int i = p_51188_.getValue(BITES);
-            p_51186_.gameEvent(p_51189_, GameEvent.EAT, p_51187_);
+            pPlayer.awardStat(Stats.EAT_CAKE_SLICE);
+            pPlayer.getFoodData().eat(2, 0.1F);
+            int i = pState.getValue(BITES);
+            pLevel.gameEvent(pPlayer, GameEvent.EAT, pPos);
             if (i < 6) {
-                p_51186_.setBlock(p_51187_, p_51188_.setValue(BITES, Integer.valueOf(i + 1)), 3);
+                pLevel.setBlock(pPos, pState.setValue(BITES, Integer.valueOf(i + 1)), 3);
             } else {
-                p_51186_.removeBlock(p_51187_, false);
-                p_51186_.gameEvent(p_51189_, GameEvent.BLOCK_DESTROY, p_51187_);
+                pLevel.removeBlock(pPos, false);
+                pLevel.gameEvent(pPlayer, GameEvent.BLOCK_DESTROY, pPos);
             }
 
             return InteractionResult.SUCCESS;
@@ -129,26 +129,26 @@ public class CakeBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_51209_, LevelReader p_51210_, BlockPos p_51211_) {
-        return p_51210_.getBlockState(p_51211_.below()).isSolid();
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        return pLevel.getBlockState(pPos.below()).isSolid();
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_51220_) {
-        p_51220_.add(BITES);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(BITES);
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState p_51198_, Level p_51199_, BlockPos p_51200_) {
-        return getOutputSignal(p_51198_.getValue(BITES));
+    protected int getAnalogOutputSignal(BlockState pBlockState, Level pLevel, BlockPos pPos) {
+        return getOutputSignal(pBlockState.getValue(BITES));
     }
 
-    public static int getOutputSignal(int p_152747_) {
-        return (7 - p_152747_) * 2;
+    public static int getOutputSignal(int pEaten) {
+        return (7 - pEaten) * 2;
     }
 
     @Override
-    protected boolean hasAnalogOutputSignal(BlockState p_51191_) {
+    protected boolean hasAnalogOutputSignal(BlockState pState) {
         return true;
     }
 

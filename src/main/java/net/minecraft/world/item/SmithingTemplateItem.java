@@ -68,29 +68,29 @@ public class SmithingTemplateItem extends Item {
     private final List<ResourceLocation> additionalSlotEmptyIcons;
 
     public SmithingTemplateItem(
-        Component p_266834_,
-        Component p_267043_,
-        Component p_267048_,
-        Component p_267278_,
-        List<ResourceLocation> p_266755_,
-        List<ResourceLocation> p_267060_,
-        Item.Properties p_362295_
+        Component pAppliesTo,
+        Component pIngredients,
+        Component pBaseSlotDescription,
+        Component pAdditionsSlotDescription,
+        List<ResourceLocation> pBaseSlotEmptyIcons,
+        List<ResourceLocation> pAdditionalSlotEmptyIcons,
+        Item.Properties pProperties
     ) {
-        super(p_362295_);
-        this.appliesTo = p_266834_;
-        this.ingredients = p_267043_;
-        this.baseSlotDescription = p_267048_;
-        this.additionsSlotDescription = p_267278_;
-        this.baseSlotEmptyIcons = p_266755_;
-        this.additionalSlotEmptyIcons = p_267060_;
+        super(pProperties);
+        this.appliesTo = pAppliesTo;
+        this.ingredients = pIngredients;
+        this.baseSlotDescription = pBaseSlotDescription;
+        this.additionsSlotDescription = pAdditionsSlotDescription;
+        this.baseSlotEmptyIcons = pBaseSlotEmptyIcons;
+        this.additionalSlotEmptyIcons = pAdditionalSlotEmptyIcons;
     }
 
-    public static SmithingTemplateItem createArmorTrimTemplate(Item.Properties p_366947_) {
-        return new SmithingTemplateItem(ARMOR_TRIM_APPLIES_TO, ARMOR_TRIM_INGREDIENTS, ARMOR_TRIM_BASE_SLOT_DESCRIPTION, ARMOR_TRIM_ADDITIONS_SLOT_DESCRIPTION, createTrimmableArmorIconList(), createTrimmableMaterialIconList(), p_366947_);
+    public static SmithingTemplateItem createArmorTrimTemplate(Item.Properties pProperties) {
+        return new SmithingTemplateItem(ARMOR_TRIM_APPLIES_TO, ARMOR_TRIM_INGREDIENTS, ARMOR_TRIM_BASE_SLOT_DESCRIPTION, ARMOR_TRIM_ADDITIONS_SLOT_DESCRIPTION, createTrimmableArmorIconList(), createTrimmableMaterialIconList(), pProperties);
     }
 
-    public static SmithingTemplateItem createNetheriteUpgradeTemplate(Item.Properties p_368215_) {
-        return new SmithingTemplateItem(NETHERITE_UPGRADE_APPLIES_TO, NETHERITE_UPGRADE_INGREDIENTS, NETHERITE_UPGRADE_BASE_SLOT_DESCRIPTION, NETHERITE_UPGRADE_ADDITIONS_SLOT_DESCRIPTION, createNetheriteUpgradeIconList(), createNetheriteUpgradeMaterialList(), p_368215_);
+    public static SmithingTemplateItem createNetheriteUpgradeTemplate(Item.Properties pProperties) {
+        return new SmithingTemplateItem(NETHERITE_UPGRADE_APPLIES_TO, NETHERITE_UPGRADE_INGREDIENTS, NETHERITE_UPGRADE_BASE_SLOT_DESCRIPTION, NETHERITE_UPGRADE_ADDITIONS_SLOT_DESCRIPTION, createNetheriteUpgradeIconList(), createNetheriteUpgradeMaterialList(), pProperties);
     }
 
     private static List<ResourceLocation> createTrimmableArmorIconList() {

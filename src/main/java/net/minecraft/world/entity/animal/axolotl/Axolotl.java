@@ -205,9 +205,9 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
         this.movingAnimator.tick(flag);
     }
 
-    protected void handleAirSupply(int p_149194_) {
+    protected void handleAirSupply(int pAirSupply) {
         if (this.isAlive() && !this.isInWaterRainOrBubble()) {
-            this.setAirSupply(p_149194_ - 1);
+            this.setAirSupply(pAirSupply - 1);
             if (this.getAirSupply() == -20) {
                 this.setAirSupply(0);
                 this.hurt(this.damageSources().dryOut(), 2.0F);
@@ -231,12 +231,12 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
         return Axolotl.Variant.byId(this.entityData.get(DATA_VARIANT));
     }
 
-    public void setVariant(Axolotl.Variant p_149118_) {
-        this.entityData.set(DATA_VARIANT, p_149118_.getId());
+    public void setVariant(Axolotl.Variant pVariant) {
+        this.entityData.set(DATA_VARIANT, pVariant.getId());
     }
 
-    private static boolean useRareVariant(RandomSource p_218436_) {
-        return p_218436_.nextInt(1200) == 0;
+    private static boolean useRareVariant(RandomSource pRandom) {
+        return pRandom.nextInt(1200) == 0;
     }
 
     @Override
@@ -249,8 +249,8 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
         return false;
     }
 
-    public void setPlayingDead(boolean p_149199_) {
-        this.entityData.set(DATA_PLAYING_DEAD, p_149199_);
+    public void setPlayingDead(boolean pPlayingDead) {
+        this.entityData.set(DATA_PLAYING_DEAD, pPlayingDead);
     }
 
     public boolean isPlayingDead() {
@@ -401,31 +401,31 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
         return !this.isPlayingDead() && super.canBeSeenAsEnemy();
     }
 
-    public static void onStopAttacking(ServerLevel p_365297_, Axolotl p_218444_, LivingEntity p_218445_) {
-        if (p_218445_.isDeadOrDying()) {
-            DamageSource damagesource = p_218445_.getLastDamageSource();
+    public static void onStopAttacking(ServerLevel pLevel, Axolotl pAxolotl, LivingEntity pTarget) {
+        if (pTarget.isDeadOrDying()) {
+            DamageSource damagesource = pTarget.getLastDamageSource();
             if (damagesource != null) {
                 Entity entity = damagesource.getEntity();
                 if (entity != null && entity.getType() == EntityType.PLAYER) {
                     Player player = (Player)entity;
-                    List<Player> list = p_365297_.getEntitiesOfClass(Player.class, p_218444_.getBoundingBox().inflate(20.0));
+                    List<Player> list = pLevel.getEntitiesOfClass(Player.class, pAxolotl.getBoundingBox().inflate(20.0));
                     if (list.contains(player)) {
-                        p_218444_.applySupportingEffects(player);
+                        pAxolotl.applySupportingEffects(player);
                     }
                 }
             }
         }
     }
 
-    public void applySupportingEffects(Player p_149174_) {
-        MobEffectInstance mobeffectinstance = p_149174_.getEffect(MobEffects.REGENERATION);
+    public void applySupportingEffects(Player pPlayer) {
+        MobEffectInstance mobeffectinstance = pPlayer.getEffect(MobEffects.REGENERATION);
         if (mobeffectinstance == null || mobeffectinstance.endsWithin(2399)) {
             int i = mobeffectinstance != null ? mobeffectinstance.getDuration() : 0;
             int j = Math.min(2400, 100 + i);
-            p_149174_.addEffect(new MobEffectInstance(MobEffects.REGENERATION, j, 0), this);
+            pPlayer.addEffect(new MobEffectInstance(MobEffects.REGENERATION, j, 0), this);
         }
 
-        p_149174_.removeEffect(MobEffects.DIG_SLOWDOWN);
+        pPlayer.removeEffect(MobEffects.DIG_SLOWDOWN);
     }
 
     @Override
@@ -513,9 +513,9 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
     }
 
     public static boolean checkAxolotlSpawnRules(
-        EntityType<? extends LivingEntity> p_218438_, ServerLevelAccessor p_218439_, EntitySpawnReason p_367518_, BlockPos p_218441_, RandomSource p_218442_
+        EntityType<? extends LivingEntity> pEntityType, ServerLevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return p_218439_.getBlockState(p_218441_.below()).is(BlockTags.AXOLOTLS_SPAWNABLE_ON);
+        return pLevel.getBlockState(pPos.below()).is(BlockTags.AXOLOTLS_SPAWNABLE_ON);
     }
 
     public static enum AnimationState {
@@ -528,19 +528,19 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
     public static class AxolotlGroupData extends AgeableMob.AgeableMobGroupData {
         public final Axolotl.Variant[] types;
 
-        public AxolotlGroupData(Axolotl.Variant... p_149204_) {
+        public AxolotlGroupData(Axolotl.Variant... pTypes) {
             super(false);
-            this.types = p_149204_;
+            this.types = pTypes;
         }
 
-        public Axolotl.Variant getVariant(RandomSource p_218447_) {
-            return this.types[p_218447_.nextInt(this.types.length)];
+        public Axolotl.Variant getVariant(RandomSource pRandom) {
+            return this.types[pRandom.nextInt(this.types.length)];
         }
     }
 
     class AxolotlLookControl extends SmoothSwimmingLookControl {
-        public AxolotlLookControl(final Axolotl p_149210_, final int p_149211_) {
-            super(p_149210_, p_149211_);
+        public AxolotlLookControl(final Axolotl pAxolotl, final int pMaxYRotFromCenter) {
+            super(pAxolotl, pMaxYRotFromCenter);
         }
 
         @Override
@@ -554,9 +554,9 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
     static class AxolotlMoveControl extends SmoothSwimmingMoveControl {
         private final Axolotl axolotl;
 
-        public AxolotlMoveControl(Axolotl p_149215_) {
-            super(p_149215_, 85, 10, 0.1F, 0.5F, false);
-            this.axolotl = p_149215_;
+        public AxolotlMoveControl(Axolotl pAxolotl) {
+            super(pAxolotl, 85, 10, 0.1F, 0.5F, false);
+            this.axolotl = pAxolotl;
         }
 
         @Override
@@ -580,10 +580,10 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
         private final String name;
         private final boolean common;
 
-        private Variant(final int p_149239_, final String p_149240_, final boolean p_149241_) {
-            this.id = p_149239_;
-            this.name = p_149240_;
-            this.common = p_149241_;
+        private Variant(final int pId, final String pName, final boolean pCommon) {
+            this.id = pId;
+            this.name = pName;
+            this.common = pCommon;
         }
 
         public int getId() {
@@ -599,21 +599,21 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
             return this.name;
         }
 
-        public static Axolotl.Variant byId(int p_262930_) {
-            return BY_ID.apply(p_262930_);
+        public static Axolotl.Variant byId(int pId) {
+            return BY_ID.apply(pId);
         }
 
-        public static Axolotl.Variant getCommonSpawnVariant(RandomSource p_218449_) {
-            return getSpawnVariant(p_218449_, true);
+        public static Axolotl.Variant getCommonSpawnVariant(RandomSource pRandom) {
+            return getSpawnVariant(pRandom, true);
         }
 
-        public static Axolotl.Variant getRareSpawnVariant(RandomSource p_218454_) {
-            return getSpawnVariant(p_218454_, false);
+        public static Axolotl.Variant getRareSpawnVariant(RandomSource pRandom) {
+            return getSpawnVariant(pRandom, false);
         }
 
-        private static Axolotl.Variant getSpawnVariant(RandomSource p_218451_, boolean p_218452_) {
-            Axolotl.Variant[] aaxolotl$variant = Arrays.stream(values()).filter(p_149252_ -> p_149252_.common == p_218452_).toArray(Axolotl.Variant[]::new);
-            return Util.getRandom(aaxolotl$variant, p_218451_);
+        private static Axolotl.Variant getSpawnVariant(RandomSource pRandom, boolean pCommon) {
+            Axolotl.Variant[] aaxolotl$variant = Arrays.stream(values()).filter(p_149252_ -> p_149252_.common == pCommon).toArray(Axolotl.Variant[]::new);
+            return Util.getRandom(aaxolotl$variant, pRandom);
         }
     }
 }

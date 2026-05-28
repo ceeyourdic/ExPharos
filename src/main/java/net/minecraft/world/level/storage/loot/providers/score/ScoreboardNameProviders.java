@@ -23,7 +23,7 @@ public class ScoreboardNameProviders {
     public static final LootScoreProviderType FIXED = register("fixed", FixedScoreboardNameProvider.CODEC);
     public static final LootScoreProviderType CONTEXT = register("context", ContextScoreboardNameProvider.CODEC);
 
-    private static LootScoreProviderType register(String p_165874_, MapCodec<? extends ScoreboardNameProvider> p_327870_) {
-        return Registry.register(BuiltInRegistries.LOOT_SCORE_PROVIDER_TYPE, ResourceLocation.withDefaultNamespace(p_165874_), new LootScoreProviderType(p_327870_));
+    private static LootScoreProviderType register(String pName, MapCodec<? extends ScoreboardNameProvider> pCodec) {
+        return Registry.register(BuiltInRegistries.LOOT_SCORE_PROVIDER_TYPE, ResourceLocation.withDefaultNamespace(pName), new LootScoreProviderType(pCodec));
     }
 }

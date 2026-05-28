@@ -10,14 +10,14 @@ public class SculkChargeParticle extends TextureSheetParticle {
     private final SpriteSet sprites;
 
     SculkChargeParticle(
-        ClientLevel p_233892_, double p_233893_, double p_233894_, double p_233895_, double p_233896_, double p_233897_, double p_233898_, SpriteSet p_233899_
+        ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprite
     ) {
-        super(p_233892_, p_233893_, p_233894_, p_233895_, p_233896_, p_233897_, p_233898_);
+        super(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
         this.friction = 0.96F;
-        this.sprites = p_233899_;
+        this.sprites = pSprite;
         this.scale(1.5F);
         this.hasPhysics = false;
-        this.setSpriteFromAge(p_233899_);
+        this.setSpriteFromAge(pSprite);
     }
 
     @Override

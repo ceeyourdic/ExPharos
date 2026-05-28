@@ -11,7 +11,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.NaturalSpawner;
 
 public class DebugMobSpawningCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> p_180111_) {
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> literalargumentbuilder = Commands.literal("debugmobspawning").requires(p_180113_ -> p_180113_.hasPermission(2));
 
         for (MobCategory mobcategory : MobCategory.values()) {
@@ -24,11 +24,11 @@ public class DebugMobSpawningCommand {
             );
         }
 
-        p_180111_.register(literalargumentbuilder);
+        pDispatcher.register(literalargumentbuilder);
     }
 
-    private static int spawnMobs(CommandSourceStack p_180115_, MobCategory p_180116_, BlockPos p_180117_) {
-        NaturalSpawner.spawnCategoryForPosition(p_180116_, p_180115_.getLevel(), p_180117_);
+    private static int spawnMobs(CommandSourceStack pSource, MobCategory pMobCategory, BlockPos pPos) {
+        NaturalSpawner.spawnCategoryForPosition(pMobCategory, pSource.getLevel(), pPos);
         return 1;
     }
 }

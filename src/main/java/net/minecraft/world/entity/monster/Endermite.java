@@ -61,7 +61,7 @@ public class Endermite extends Monster {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_32615_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.ENDERMITE_HURT;
     }
 
@@ -71,20 +71,20 @@ public class Endermite extends Monster {
     }
 
     @Override
-    protected void playStepSound(BlockPos p_32607_, BlockState p_32608_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(SoundEvents.ENDERMITE_STEP, 0.15F, 1.0F);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_32595_) {
-        super.readAdditionalSaveData(p_32595_);
-        this.life = p_32595_.getInt("Lifetime");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.life = pCompound.getInt("Lifetime");
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_32610_) {
-        super.addAdditionalSaveData(p_32610_);
-        p_32610_.putInt("Lifetime", this.life);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("Lifetime", this.life);
     }
 
     @Override
@@ -94,9 +94,9 @@ public class Endermite extends Monster {
     }
 
     @Override
-    public void setYBodyRot(float p_32621_) {
-        this.setYRot(p_32621_);
-        super.setYBodyRot(p_32621_);
+    public void setYBodyRot(float pOffset) {
+        this.setYRot(pOffset);
+        super.setYBodyRot(pOffset);
     }
 
     @Override
@@ -127,15 +127,15 @@ public class Endermite extends Monster {
     }
 
     public static boolean checkEndermiteSpawnRules(
-        EntityType<Endermite> p_218969_, LevelAccessor p_218970_, EntitySpawnReason p_364641_, BlockPos p_218972_, RandomSource p_218973_
+        EntityType<Endermite> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        if (!checkAnyLightMonsterSpawnRules(p_218969_, p_218970_, p_364641_, p_218972_, p_218973_)) {
+        if (!checkAnyLightMonsterSpawnRules(pEntityType, pLevel, pSpawnReason, pPos, pRandom)) {
             return false;
-        } else if (EntitySpawnReason.isSpawner(p_364641_)) {
+        } else if (EntitySpawnReason.isSpawner(pSpawnReason)) {
             return true;
         } else {
-            Player player = p_218970_.getNearestPlayer(
-                (double)p_218972_.getX() + 0.5, (double)p_218972_.getY() + 0.5, (double)p_218972_.getZ() + 0.5, 5.0, true
+            Player player = pLevel.getNearestPlayer(
+                (double)pPos.getX() + 0.5, (double)pPos.getY() + 0.5, (double)pPos.getZ() + 0.5, 5.0, true
             );
             return player == null;
         }

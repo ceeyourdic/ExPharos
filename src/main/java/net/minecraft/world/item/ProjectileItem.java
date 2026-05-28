@@ -10,14 +10,14 @@ import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.phys.Vec3;
 
 public interface ProjectileItem {
-    Projectile asProjectile(Level p_329689_, Position p_329462_, ItemStack p_328976_, Direction p_329211_);
+    Projectile asProjectile(Level pLevel, Position pPos, ItemStack pStack, Direction pDirection);
 
     default ProjectileItem.DispenseConfig createDispenseConfig() {
         return ProjectileItem.DispenseConfig.DEFAULT;
     }
 
-    default void shoot(Projectile p_328685_, double p_328692_, double p_328907_, double p_334180_, float p_333007_, float p_331671_) {
-        p_328685_.shoot(p_328692_, p_328907_, p_334180_, p_333007_, p_331671_);
+    default void shoot(Projectile pProjectile, double pX, double pY, double pZ, float pVelocity, float pInaccuracy) {
+        pProjectile.shoot(pX, pY, pZ, pVelocity, pInaccuracy);
     }
 
     public static record DispenseConfig(ProjectileItem.PositionFunction positionFunction, float uncertainty, float power, OptionalInt overrideDispenseEvent) {
@@ -33,23 +33,23 @@ public interface ProjectileItem {
             private float power = 1.1F;
             private OptionalInt overrideDispenseEvent = OptionalInt.empty();
 
-            public ProjectileItem.DispenseConfig.Builder positionFunction(ProjectileItem.PositionFunction p_328427_) {
-                this.positionFunction = p_328427_;
+            public ProjectileItem.DispenseConfig.Builder positionFunction(ProjectileItem.PositionFunction pPositionFunction) {
+                this.positionFunction = pPositionFunction;
                 return this;
             }
 
-            public ProjectileItem.DispenseConfig.Builder uncertainty(float p_328001_) {
-                this.uncertainty = p_328001_;
+            public ProjectileItem.DispenseConfig.Builder uncertainty(float pUncertainty) {
+                this.uncertainty = pUncertainty;
                 return this;
             }
 
-            public ProjectileItem.DispenseConfig.Builder power(float p_334376_) {
-                this.power = p_334376_;
+            public ProjectileItem.DispenseConfig.Builder power(float pPower) {
+                this.power = pPower;
                 return this;
             }
 
-            public ProjectileItem.DispenseConfig.Builder overrideDispenseEvent(int p_331932_) {
-                this.overrideDispenseEvent = OptionalInt.of(p_331932_);
+            public ProjectileItem.DispenseConfig.Builder overrideDispenseEvent(int pOverrideDispenseEvent) {
+                this.overrideDispenseEvent = OptionalInt.of(pOverrideDispenseEvent);
                 return this;
             }
 
@@ -61,6 +61,6 @@ public interface ProjectileItem {
 
     @FunctionalInterface
     public interface PositionFunction {
-        Position getDispensePosition(BlockSource p_332931_, Direction p_333506_);
+        Position getDispensePosition(BlockSource pSource, Direction pDirection);
     }
 }

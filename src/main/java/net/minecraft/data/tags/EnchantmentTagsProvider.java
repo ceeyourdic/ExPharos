@@ -13,14 +13,14 @@ import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 public abstract class EnchantmentTagsProvider extends TagsProvider<Enchantment> {
-    public EnchantmentTagsProvider(PackOutput p_332794_, CompletableFuture<HolderLookup.Provider> p_331070_) {
-        super(p_332794_, Registries.ENCHANTMENT, p_331070_);
+    public EnchantmentTagsProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pLookupProvider) {
+        super(pOutput, Registries.ENCHANTMENT, pLookupProvider);
     }
 
-    protected void tooltipOrder(HolderLookup.Provider p_335292_, ResourceKey<Enchantment>... p_343612_) {
-        this.tag(EnchantmentTags.TOOLTIP_ORDER).add(p_343612_);
-        Set<ResourceKey<Enchantment>> set = Set.of(p_343612_);
-        List<String> list = p_335292_.lookupOrThrow(Registries.ENCHANTMENT)
+    protected void tooltipOrder(HolderLookup.Provider pProvider, ResourceKey<Enchantment>... pValues) {
+        this.tag(EnchantmentTags.TOOLTIP_ORDER).add(pValues);
+        Set<ResourceKey<Enchantment>> set = Set.of(pValues);
+        List<String> list = pProvider.lookupOrThrow(Registries.ENCHANTMENT)
             .listElements()
             .filter(p_341081_ -> !set.contains(p_341081_.unwrapKey().get()))
             .map(Holder::getRegisteredName)

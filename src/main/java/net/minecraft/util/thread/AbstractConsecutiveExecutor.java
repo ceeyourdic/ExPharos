@@ -20,10 +20,10 @@ public abstract class AbstractConsecutiveExecutor<T extends Runnable> implements
     private final Executor executor;
     private final String name;
 
-    public AbstractConsecutiveExecutor(StrictQueue<T> p_363900_, Executor p_367154_, String p_369151_) {
-        this.executor = p_367154_;
-        this.queue = p_363900_;
-        this.name = p_369151_;
+    public AbstractConsecutiveExecutor(StrictQueue<T> pQueue, Executor pExecutor, String pName) {
+        this.executor = pExecutor;
+        this.queue = pQueue;
+        this.name = pName;
         MetricsRegistry.INSTANCE.add(this);
     }
 

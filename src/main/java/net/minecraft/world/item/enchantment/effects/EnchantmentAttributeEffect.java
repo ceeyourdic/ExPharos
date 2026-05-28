@@ -30,12 +30,12 @@ public record EnchantmentAttributeEffect(
                 .apply(p_344407_, EnchantmentAttributeEffect::new)
     );
 
-    private ResourceLocation idForSlot(StringRepresentable p_345417_) {
-        return this.id.withSuffix("/" + p_345417_.getSerializedName());
+    private ResourceLocation idForSlot(StringRepresentable pSlot) {
+        return this.id.withSuffix("/" + pSlot.getSerializedName());
     }
 
-    public AttributeModifier getModifier(int p_342709_, StringRepresentable p_342150_) {
-        return new AttributeModifier(this.idForSlot(p_342150_), (double)this.amount().calculate(p_342709_), this.operation());
+    public AttributeModifier getModifier(int pEnchantmentLevel, StringRepresentable pSlot) {
+        return new AttributeModifier(this.idForSlot(pSlot), (double)this.amount().calculate(pEnchantmentLevel), this.operation());
     }
 
     @Override
@@ -52,9 +52,9 @@ public record EnchantmentAttributeEffect(
         }
     }
 
-    private HashMultimap<Holder<Attribute>, AttributeModifier> makeAttributeMap(int p_342373_, EquipmentSlot p_343561_) {
+    private HashMultimap<Holder<Attribute>, AttributeModifier> makeAttributeMap(int pEnchantmentLevel, EquipmentSlot pSlot) {
         HashMultimap<Holder<Attribute>, AttributeModifier> hashmultimap = HashMultimap.create();
-        hashmultimap.put(this.attribute, this.getModifier(p_342373_, p_343561_));
+        hashmultimap.put(this.attribute, this.getModifier(pEnchantmentLevel, pSlot));
         return hashmultimap;
     }
 

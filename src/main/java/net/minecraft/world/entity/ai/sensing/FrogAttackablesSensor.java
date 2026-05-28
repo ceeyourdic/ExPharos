@@ -21,9 +21,9 @@ public class FrogAttackablesSensor extends NearestVisibleLivingEntitySensor {
             : false;
     }
 
-    private boolean isUnreachableAttackTarget(LivingEntity p_238336_, LivingEntity p_238337_) {
-        List<UUID> list = p_238336_.getBrain().getMemory(MemoryModuleType.UNREACHABLE_TONGUE_TARGETS).orElseGet(ArrayList::new);
-        return list.contains(p_238337_.getUUID());
+    private boolean isUnreachableAttackTarget(LivingEntity pAttacker, LivingEntity pTarget) {
+        List<UUID> list = pAttacker.getBrain().getMemory(MemoryModuleType.UNREACHABLE_TONGUE_TARGETS).orElseGet(ArrayList::new);
+        return list.contains(pTarget.getUUID());
     }
 
     @Override

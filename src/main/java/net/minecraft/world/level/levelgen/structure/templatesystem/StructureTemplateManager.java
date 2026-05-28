@@ -64,12 +64,12 @@ public class StructureTemplateManager {
     private static final FileToIdConverter RESOURCE_LISTER = new FileToIdConverter("structure", ".nbt");
 
     public StructureTemplateManager(
-        ResourceManager p_249872_, LevelStorageSource.LevelStorageAccess p_249864_, DataFixer p_249868_, HolderGetter<Block> p_256126_
+        ResourceManager pResourceManager, LevelStorageSource.LevelStorageAccess pLevelStorageAccess, DataFixer pFixerUpper, HolderGetter<Block> pBlockLookup
     ) {
-        this.resourceManager = p_249872_;
-        this.fixerUpper = p_249868_;
-        this.generatedDir = p_249864_.getLevelPath(LevelResource.GENERATED_DIR).normalize();
-        this.blockLookup = p_256126_;
+        this.resourceManager = pResourceManager;
+        this.fixerUpper = pFixerUpper;
+        this.generatedDir = pLevelStorageAccess.getLevelPath(LevelResource.GENERATED_DIR).normalize();
+        this.blockLookup = pBlockLookup;
         Builder<StructureTemplateManager.Source> builder = ImmutableList.builder();
         builder.add(new StructureTemplateManager.Source(this::loadFromGenerated, this::listGenerated));
         if (SharedConstants.IS_RUNNING_IN_IDE) {
@@ -80,29 +80,29 @@ public class StructureTemplateManager {
         this.sources = builder.build();
     }
 
-    public StructureTemplate getOrCreate(ResourceLocation p_230360_) {
-        Optional<StructureTemplate> optional = this.get(p_230360_);
+    public StructureTemplate getOrCreate(ResourceLocation pId) {
+        Optional<StructureTemplate> optional = this.get(pId);
         if (optional.isPresent()) {
             return optional.get();
         } else {
             StructureTemplate structuretemplate = new StructureTemplate();
-            this.structureRepository.put(p_230360_, Optional.of(structuretemplate));
+            this.structureRepository.put(pId, Optional.of(structuretemplate));
             return structuretemplate;
         }
     }
 
-    public Optional<StructureTemplate> get(ResourceLocation p_230408_) {
-        return this.structureRepository.computeIfAbsent(p_230408_, this::tryLoad);
+    public Optional<StructureTemplate> get(ResourceLocation pId) {
+        return this.structureRepository.computeIfAbsent(pId, this::tryLoad);
     }
 
     public Stream<ResourceLocation> listTemplates() {
         return this.sources.stream().flatMap(p_230376_ -> p_230376_.lister().get()).distinct();
     }
 
-    private Optional<StructureTemplate> tryLoad(ResourceLocation p_230426_) {
+    private Optional<StructureTemplate> tryLoad(ResourceLocation pId) {
         for (StructureTemplateManager.Source structuretemplatemanager$source : this.sources) {
             try {
-                Optional<StructureTemplate> optional = structuretemplatemanager$source.loader().apply(p_230426_);
+                Optional<StructureTemplate> optional = structuretemplatemanager$source.loader().apply(pId);
                 if (optional.isPresent()) {
                     return optional;
                 }
@@ -113,15 +113,15 @@ public class StructureTemplateManager {
         return Optional.empty();
     }
 
-    public void onResourceManagerReload(ResourceManager p_230371_) {
-        this.resourceManager = p_230371_;
+    public void onResourceManagerReload(ResourceManager pResourceManager) {
+        this.resourceManager = pResourceManager;
         this.structureRepository.clear();
     }
 
-    private Optional<StructureTemplate> loadFromResource(ResourceLocation p_230428_) {
-        ResourceLocation resourcelocation = RESOURCE_LISTER.idToFile(p_230428_);
+    private Optional<StructureTemplate> loadFromResource(ResourceLocation pId) {
+        ResourceLocation resourcelocation = RESOURCE_LISTER.idToFile(pId);
         return this.load(
-            () -> this.resourceManager.open(resourcelocation), p_230366_ -> LOGGER.error("Couldn't load structure {}", p_230428_, p_230366_)
+            () -> this.resourceManager.open(resourcelocation), p_230366_ -> LOGGER.error("Couldn't load structure {}", pId, p_230366_)
         );
     }
 
@@ -129,8 +129,8 @@ public class StructureTemplateManager {
         return RESOURCE_LISTER.listMatchingResources(this.resourceManager).keySet().stream().map(RESOURCE_LISTER::fileToId);
     }
 
-    private Optional<StructureTemplate> loadFromTestStructures(ResourceLocation p_230430_) {
-        return this.loadFromSnbt(p_230430_, Paths.get(StructureUtils.testStructuresDir));
+    private Optional<StructureTemplate> loadFromTestStructures(ResourceLocation pId) {
+        return this.loadFromSnbt(pId, Paths.get(StructureUtils.testStructuresDir));
     }
 
     private Stream<ResourceLocation> listTestStructures() {
@@ -144,11 +144,11 @@ public class StructureTemplateManager {
         }
     }
 
-    private Optional<StructureTemplate> loadFromGenerated(ResourceLocation p_230432_) {
+    private Optional<StructureTemplate> loadFromGenerated(ResourceLocation pId) {
         if (!Files.isDirectory(this.generatedDir)) {
             return Optional.empty();
         } else {
-            Path path = this.createAndValidatePathToGeneratedStructure(p_230432_, ".nbt");
+            Path path = this.createAndValidatePathToGeneratedStructure(pId, ".nbt");
             return this.load(() -> new FileInputStream(path.toFile()), p_230400_ -> LOGGER.error("Couldn't load structure from {}", path, p_230400_));
         }
     }
@@ -175,34 +175,34 @@ public class StructureTemplateManager {
         }
     }
 
-    private void listFolderContents(Path p_230395_, String p_230396_, String p_230397_, Consumer<ResourceLocation> p_342318_) {
-        int i = p_230397_.length();
+    private void listFolderContents(Path pFolder, String pNamespace, String pExtension, Consumer<ResourceLocation> pOutput) {
+        int i = pExtension.length();
         Function<String, String> function = p_230358_ -> p_230358_.substring(0, p_230358_.length() - i);
 
         try (Stream<Path> stream = Files.find(
-                p_230395_, Integer.MAX_VALUE, (p_341961_, p_341962_) -> p_341962_.isRegularFile() && p_341961_.toString().endsWith(p_230397_)
+                pFolder, Integer.MAX_VALUE, (p_341961_, p_341962_) -> p_341962_.isRegularFile() && p_341961_.toString().endsWith(pExtension)
             )) {
             stream.forEach(p_341959_ -> {
                 try {
-                    p_342318_.accept(ResourceLocation.fromNamespaceAndPath(p_230396_, function.apply(this.relativize(p_230395_, p_341959_))));
+                    pOutput.accept(ResourceLocation.fromNamespaceAndPath(pNamespace, function.apply(this.relativize(pFolder, p_341959_))));
                 } catch (ResourceLocationException resourcelocationexception) {
-                    LOGGER.error("Invalid location while listing folder {} contents", p_230395_, resourcelocationexception);
+                    LOGGER.error("Invalid location while listing folder {} contents", pFolder, resourcelocationexception);
                 }
             });
         } catch (IOException ioexception) {
-            LOGGER.error("Failed to list folder {} contents", p_230395_, ioexception);
+            LOGGER.error("Failed to list folder {} contents", pFolder, ioexception);
         }
     }
 
-    private String relativize(Path p_230402_, Path p_230403_) {
-        return p_230402_.relativize(p_230403_).toString().replace(File.separator, "/");
+    private String relativize(Path pRoot, Path pPath) {
+        return pRoot.relativize(pPath).toString().replace(File.separator, "/");
     }
 
-    private Optional<StructureTemplate> loadFromSnbt(ResourceLocation p_230368_, Path p_230369_) {
-        if (!Files.isDirectory(p_230369_)) {
+    private Optional<StructureTemplate> loadFromSnbt(ResourceLocation pId, Path pPath) {
+        if (!Files.isDirectory(pPath)) {
             return Optional.empty();
         } else {
-            Path path = FileUtil.createPathToResource(p_230369_, p_230368_.getPath(), ".snbt");
+            Path path = FileUtil.createPathToResource(pPath, pId.getPath(), ".snbt");
 
             try {
                 Optional optional;
@@ -221,11 +221,11 @@ public class StructureTemplateManager {
         }
     }
 
-    private Optional<StructureTemplate> load(StructureTemplateManager.InputStreamOpener p_230373_, Consumer<Throwable> p_230374_) {
+    private Optional<StructureTemplate> load(StructureTemplateManager.InputStreamOpener pInputStream, Consumer<Throwable> pOnError) {
         try {
             Optional optional;
             try (
-                InputStream inputstream = p_230373_.open();
+                InputStream inputstream = pInputStream.open();
                 InputStream inputstream1 = new FastBufferedInputStream(inputstream);
             ) {
                 optional = Optional.of(this.readStructure(inputstream1));
@@ -235,30 +235,30 @@ public class StructureTemplateManager {
         } catch (FileNotFoundException filenotfoundexception) {
             return Optional.empty();
         } catch (Throwable throwable1) {
-            p_230374_.accept(throwable1);
+            pOnError.accept(throwable1);
             return Optional.empty();
         }
     }
 
-    private StructureTemplate readStructure(InputStream p_230378_) throws IOException {
-        CompoundTag compoundtag = NbtIo.readCompressed(p_230378_, NbtAccounter.unlimitedHeap());
+    private StructureTemplate readStructure(InputStream pStream) throws IOException {
+        CompoundTag compoundtag = NbtIo.readCompressed(pStream, NbtAccounter.unlimitedHeap());
         return this.readStructure(compoundtag);
     }
 
-    public StructureTemplate readStructure(CompoundTag p_230405_) {
+    public StructureTemplate readStructure(CompoundTag pNbt) {
         StructureTemplate structuretemplate = new StructureTemplate();
-        int i = NbtUtils.getDataVersion(p_230405_, 500);
-        structuretemplate.load(this.blockLookup, DataFixTypes.STRUCTURE.updateToCurrentVersion(this.fixerUpper, p_230405_, i));
+        int i = NbtUtils.getDataVersion(pNbt, 500);
+        structuretemplate.load(this.blockLookup, DataFixTypes.STRUCTURE.updateToCurrentVersion(this.fixerUpper, pNbt, i));
         return structuretemplate;
     }
 
-    public boolean save(ResourceLocation p_230417_) {
-        Optional<StructureTemplate> optional = this.structureRepository.get(p_230417_);
+    public boolean save(ResourceLocation pId) {
+        Optional<StructureTemplate> optional = this.structureRepository.get(pId);
         if (optional.isEmpty()) {
             return false;
         } else {
             StructureTemplate structuretemplate = optional.get();
-            Path path = this.createAndValidatePathToGeneratedStructure(p_230417_, ".nbt");
+            Path path = this.createAndValidatePathToGeneratedStructure(pId, ".nbt");
             Path path1 = path.getParent();
             if (path1 == null) {
                 return false;
@@ -285,27 +285,27 @@ public class StructureTemplateManager {
         }
     }
 
-    public Path createAndValidatePathToGeneratedStructure(ResourceLocation p_345333_, String p_345223_) {
-        if (p_345333_.getPath().contains("//")) {
-            throw new ResourceLocationException("Invalid resource path: " + p_345333_);
+    public Path createAndValidatePathToGeneratedStructure(ResourceLocation pLocation, String pExtension) {
+        if (pLocation.getPath().contains("//")) {
+            throw new ResourceLocationException("Invalid resource path: " + pLocation);
         } else {
             try {
-                Path path = this.generatedDir.resolve(p_345333_.getNamespace());
+                Path path = this.generatedDir.resolve(pLocation.getNamespace());
                 Path path1 = path.resolve("structures");
-                Path path2 = FileUtil.createPathToResource(path1, p_345333_.getPath(), p_345223_);
+                Path path2 = FileUtil.createPathToResource(path1, pLocation.getPath(), pExtension);
                 if (path2.startsWith(this.generatedDir) && FileUtil.isPathNormalized(path2) && FileUtil.isPathPortable(path2)) {
                     return path2;
                 } else {
                     throw new ResourceLocationException("Invalid resource path: " + path2);
                 }
             } catch (InvalidPathException invalidpathexception) {
-                throw new ResourceLocationException("Invalid resource path: " + p_345333_, invalidpathexception);
+                throw new ResourceLocationException("Invalid resource path: " + pLocation, invalidpathexception);
             }
         }
     }
 
-    public void remove(ResourceLocation p_230422_) {
-        this.structureRepository.remove(p_230422_);
+    public void remove(ResourceLocation pId) {
+        this.structureRepository.remove(pId);
     }
 
     @FunctionalInterface

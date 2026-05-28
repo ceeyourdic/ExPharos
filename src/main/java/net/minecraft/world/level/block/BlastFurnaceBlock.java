@@ -43,11 +43,11 @@ public class BlastFurnaceBlock extends AbstractFurnaceBlock {
     }
 
     @Override
-    protected void openContainer(Level p_49777_, BlockPos p_49778_, Player p_49779_) {
-        BlockEntity blockentity = p_49777_.getBlockEntity(p_49778_);
+    protected void openContainer(Level pLevel, BlockPos pPos, Player pPlayer) {
+        BlockEntity blockentity = pLevel.getBlockEntity(pPos);
         if (blockentity instanceof BlastFurnaceBlockEntity) {
-            p_49779_.openMenu((MenuProvider)blockentity);
-            p_49779_.awardStat(Stats.INTERACT_WITH_BLAST_FURNACE);
+            pPlayer.openMenu((MenuProvider)blockentity);
+            pPlayer.awardStat(Stats.INTERACT_WITH_BLAST_FURNACE);
         }
     }
 

@@ -15,8 +15,8 @@ public class ApplyExplosionDecay extends LootItemConditionalFunction {
         p_297802_ -> commonFields(p_297802_).apply(p_297802_, ApplyExplosionDecay::new)
     );
 
-    private ApplyExplosionDecay(List<LootItemCondition> p_301217_) {
-        super(p_301217_);
+    private ApplyExplosionDecay(List<LootItemCondition> pConditions) {
+        super(pConditions);
     }
 
     @Override
@@ -25,12 +25,12 @@ public class ApplyExplosionDecay extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_80034_, LootContext p_80035_) {
-        Float f = p_80035_.getOptionalParameter(LootContextParams.EXPLOSION_RADIUS);
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        Float f = pContext.getOptionalParameter(LootContextParams.EXPLOSION_RADIUS);
         if (f != null) {
-            RandomSource randomsource = p_80035_.getRandom();
+            RandomSource randomsource = pContext.getRandom();
             float f1 = 1.0F / f;
-            int i = p_80034_.getCount();
+            int i = pStack.getCount();
             int j = 0;
 
             for (int k = 0; k < i; k++) {
@@ -39,10 +39,10 @@ public class ApplyExplosionDecay extends LootItemConditionalFunction {
                 }
             }
 
-            p_80034_.setCount(j);
+            pStack.setCount(j);
         }
 
-        return p_80034_;
+        return pStack;
     }
 
     public static LootItemConditionalFunction.Builder<?> explosionDecay() {

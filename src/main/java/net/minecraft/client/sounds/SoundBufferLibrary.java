@@ -21,12 +21,12 @@ public class SoundBufferLibrary {
     private final ResourceProvider resourceManager;
     private final Map<ResourceLocation, CompletableFuture<SoundBuffer>> cache = Maps.newHashMap();
 
-    public SoundBufferLibrary(ResourceProvider p_248900_) {
-        this.resourceManager = p_248900_;
+    public SoundBufferLibrary(ResourceProvider pResourceManager) {
+        this.resourceManager = pResourceManager;
     }
 
-    public CompletableFuture<SoundBuffer> getCompleteBuffer(ResourceLocation p_120203_) {
-        return this.cache.computeIfAbsent(p_120203_, p_358059_ -> CompletableFuture.supplyAsync(() -> {
+    public CompletableFuture<SoundBuffer> getCompleteBuffer(ResourceLocation pSoundID) {
+        return this.cache.computeIfAbsent(pSoundID, p_358059_ -> CompletableFuture.supplyAsync(() -> {
                 try {
                     SoundBuffer soundbuffer;
                     try (
@@ -44,11 +44,11 @@ public class SoundBufferLibrary {
             }, Util.nonCriticalIoPool()));
     }
 
-    public CompletableFuture<AudioStream> getStream(ResourceLocation p_120205_, boolean p_120206_) {
+    public CompletableFuture<AudioStream> getStream(ResourceLocation pResourceLocation, boolean pIsWrapper) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                InputStream inputstream = this.resourceManager.open(p_120205_);
-                return (AudioStream)(p_120206_ ? new LoopingAudioStream(JOrbisAudioStream::new, inputstream) : new JOrbisAudioStream(inputstream));
+                InputStream inputstream = this.resourceManager.open(pResourceLocation);
+                return (AudioStream)(pIsWrapper ? new LoopingAudioStream(JOrbisAudioStream::new, inputstream) : new JOrbisAudioStream(inputstream));
             } catch (IOException ioexception) {
                 throw new CompletionException(ioexception);
             }
@@ -60,7 +60,7 @@ public class SoundBufferLibrary {
         this.cache.clear();
     }
 
-    public CompletableFuture<?> preload(Collection<Sound> p_120199_) {
-        return CompletableFuture.allOf(p_120199_.stream().map(p_120197_ -> this.getCompleteBuffer(p_120197_.getPath())).toArray(CompletableFuture[]::new));
+    public CompletableFuture<?> preload(Collection<Sound> pSounds) {
+        return CompletableFuture.allOf(pSounds.stream().map(p_120197_ -> this.getCompleteBuffer(p_120197_.getPath())).toArray(CompletableFuture[]::new));
     }
 }

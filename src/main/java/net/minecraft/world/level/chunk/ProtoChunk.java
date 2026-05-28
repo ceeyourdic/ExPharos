@@ -49,23 +49,23 @@ public class ProtoChunk extends ChunkAccess {
     private final ProtoChunkTicks<Block> blockTicks;
     private final ProtoChunkTicks<Fluid> fluidTicks;
 
-    public ProtoChunk(ChunkPos p_188167_, UpgradeData p_188168_, LevelHeightAccessor p_188169_, Registry<Biome> p_188170_, @Nullable BlendingData p_188171_) {
-        this(p_188167_, p_188168_, null, new ProtoChunkTicks<>(), new ProtoChunkTicks<>(), p_188169_, p_188170_, p_188171_);
+    public ProtoChunk(ChunkPos pChunkPos, UpgradeData pUpgradeData, LevelHeightAccessor pLevelHeightAccessor, Registry<Biome> pBiomeRegistry, @Nullable BlendingData pBlendingData) {
+        this(pChunkPos, pUpgradeData, null, new ProtoChunkTicks<>(), new ProtoChunkTicks<>(), pLevelHeightAccessor, pBiomeRegistry, pBlendingData);
     }
 
     public ProtoChunk(
-        ChunkPos p_188173_,
-        UpgradeData p_188174_,
-        @Nullable LevelChunkSection[] p_188175_,
-        ProtoChunkTicks<Block> p_188176_,
-        ProtoChunkTicks<Fluid> p_188177_,
-        LevelHeightAccessor p_188178_,
-        Registry<Biome> p_188179_,
-        @Nullable BlendingData p_188180_
+        ChunkPos pChunkPos,
+        UpgradeData pUpgradeData,
+        @Nullable LevelChunkSection[] pSections,
+        ProtoChunkTicks<Block> pBlockTicks,
+        ProtoChunkTicks<Fluid> pLiquidTicks,
+        LevelHeightAccessor pLevelHeightAccessor,
+        Registry<Biome> pBiomeRegistry,
+        @Nullable BlendingData pBlendingData
     ) {
-        super(p_188173_, p_188174_, p_188178_, p_188179_, 0L, p_188175_, p_188180_);
-        this.blockTicks = p_188176_;
-        this.fluidTicks = p_188177_;
+        super(pChunkPos, pUpgradeData, pLevelHeightAccessor, pBiomeRegistry, 0L, pSections, pBlendingData);
+        this.blockTicks = pBlockTicks;
+        this.fluidTicks = pLiquidTicks;
     }
 
     @Override
@@ -183,8 +183,8 @@ public class ProtoChunk extends ChunkAccess {
         return this.blockEntities;
     }
 
-    public void addEntity(CompoundTag p_63243_) {
-        this.entities.add(p_63243_);
+    public void addEntity(CompoundTag pTag) {
+        this.entities.add(pTag);
     }
 
     @Override
@@ -219,9 +219,9 @@ public class ProtoChunk extends ChunkAccess {
         return this.status;
     }
 
-    public void setPersistedStatus(ChunkStatus p_334912_) {
-        this.status = p_334912_;
-        if (this.belowZeroRetrogen != null && p_334912_.isOrAfter(this.belowZeroRetrogen.targetStatus())) {
+    public void setPersistedStatus(ChunkStatus pStatus) {
+        this.status = pStatus;
+        if (this.belowZeroRetrogen != null && pStatus.isOrAfter(this.belowZeroRetrogen.targetStatus())) {
             this.setBelowZeroRetrogen(null);
         }
 
@@ -237,20 +237,20 @@ public class ProtoChunk extends ChunkAccess {
         }
     }
 
-    public static short packOffsetCoordinates(BlockPos p_63281_) {
-        int i = p_63281_.getX();
-        int j = p_63281_.getY();
-        int k = p_63281_.getZ();
+    public static short packOffsetCoordinates(BlockPos pPos) {
+        int i = pPos.getX();
+        int j = pPos.getY();
+        int k = pPos.getZ();
         int l = i & 15;
         int i1 = j & 15;
         int j1 = k & 15;
         return (short)(l | i1 << 4 | j1 << 8);
     }
 
-    public static BlockPos unpackOffsetCoordinates(short p_63228_, int p_63229_, ChunkPos p_63230_) {
-        int i = SectionPos.sectionToBlockCoord(p_63230_.x, p_63228_ & 15);
-        int j = SectionPos.sectionToBlockCoord(p_63229_, p_63228_ >>> 4 & 15);
-        int k = SectionPos.sectionToBlockCoord(p_63230_.z, p_63228_ >>> 8 & 15);
+    public static BlockPos unpackOffsetCoordinates(short pPackedPos, int pYOffset, ChunkPos pChunkPos) {
+        int i = SectionPos.sectionToBlockCoord(pChunkPos.x, pPackedPos & 15);
+        int j = SectionPos.sectionToBlockCoord(pYOffset, pPackedPos >>> 4 & 15);
+        int k = SectionPos.sectionToBlockCoord(pChunkPos.z, pPackedPos >>> 8 & 15);
         return new BlockPos(i, j, k);
     }
 
@@ -296,16 +296,16 @@ public class ProtoChunk extends ChunkAccess {
         return this.carvingMask;
     }
 
-    public void setCarvingMask(CarvingMask p_188188_) {
-        this.carvingMask = p_188188_;
+    public void setCarvingMask(CarvingMask pCarvingMask) {
+        this.carvingMask = pCarvingMask;
     }
 
-    public void setLightEngine(LevelLightEngine p_63210_) {
-        this.lightEngine = p_63210_;
+    public void setLightEngine(LevelLightEngine pLightEngine) {
+        this.lightEngine = pLightEngine;
     }
 
-    public void setBelowZeroRetrogen(@Nullable BelowZeroRetrogen p_188184_) {
-        this.belowZeroRetrogen = p_188184_;
+    public void setBelowZeroRetrogen(@Nullable BelowZeroRetrogen pBelowZeroRetrogen) {
+        this.belowZeroRetrogen = pBelowZeroRetrogen;
     }
 
     @Nullable
@@ -314,8 +314,8 @@ public class ProtoChunk extends ChunkAccess {
         return this.belowZeroRetrogen;
     }
 
-    private static <T> LevelChunkTicks<T> unpackTicks(ProtoChunkTicks<T> p_188190_) {
-        return new LevelChunkTicks<>(p_188190_.scheduledTicks());
+    private static <T> LevelChunkTicks<T> unpackTicks(ProtoChunkTicks<T> pTicks) {
+        return new LevelChunkTicks<>(pTicks.scheduledTicks());
     }
 
     public LevelChunkTicks<Block> unpackBlockTicks() {

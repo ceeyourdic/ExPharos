@@ -7,9 +7,9 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 
 public interface AdvancementSubProvider {
-    void generate(HolderLookup.Provider p_255901_, Consumer<AdvancementHolder> p_250888_);
+    void generate(HolderLookup.Provider pRegistries, Consumer<AdvancementHolder> pWriter);
 
-    static AdvancementHolder createPlaceholder(String p_312736_) {
-        return Advancement.Builder.advancement().build(ResourceLocation.parse(p_312736_));
+    static AdvancementHolder createPlaceholder(String pLocation) {
+        return Advancement.Builder.advancement().build(ResourceLocation.parse(pLocation));
     }
 }

@@ -6,12 +6,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Block;
 
 public class DiggerItem extends Item {
-    protected DiggerItem(ToolMaterial p_367988_, TagKey<Block> p_204111_, float p_363669_, float p_364017_, Item.Properties p_204112_) {
-        super(p_367988_.applyToolProperties(p_204112_, p_204111_, p_363669_, p_364017_));
+    protected DiggerItem(ToolMaterial pMaterial, TagKey<Block> pMineableBlocks, float pAttackDamage, float pAttackSpeed, Item.Properties pProperties) {
+        super(pMaterial.applyToolProperties(pProperties, pMineableBlocks, pAttackDamage, pAttackSpeed));
     }
 
     @Override
-    public boolean hurtEnemy(ItemStack p_40994_, LivingEntity p_40995_, LivingEntity p_40996_) {
+    public boolean hurtEnemy(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
         return true;
     }
 

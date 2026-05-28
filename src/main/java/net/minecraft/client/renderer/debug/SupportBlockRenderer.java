@@ -23,8 +23,8 @@ public class SupportBlockRenderer implements DebugRenderer.SimpleDebugRenderer {
     private double lastUpdateTime = Double.MIN_VALUE;
     private List<Entity> surroundEntities = Collections.emptyList();
 
-    public SupportBlockRenderer(Minecraft p_286424_) {
-        this.minecraft = p_286424_;
+    public SupportBlockRenderer(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
     @Override
@@ -49,65 +49,65 @@ public class SupportBlockRenderer implements DebugRenderer.SimpleDebugRenderer {
     }
 
     private void drawHighlights(
-        PoseStack p_286525_,
-        MultiBufferSource p_286495_,
-        double p_286696_,
-        double p_286417_,
-        double p_286386_,
-        Entity p_286273_,
-        DoubleSupplier p_286458_,
-        float p_286487_,
-        float p_286710_,
-        float p_286793_
+        PoseStack pPoseStack,
+        MultiBufferSource pBuffer,
+        double pCamX,
+        double pCamY,
+        double pCamZ,
+        Entity pEntity,
+        DoubleSupplier pBiasGetter,
+        float pRed,
+        float pGreen,
+        float pBlue
     ) {
-        p_286273_.mainSupportingBlockPos.ifPresent(p_286428_ -> {
-            double d0 = p_286458_.getAsDouble();
-            BlockPos blockpos = p_286273_.getOnPos();
-            this.highlightPosition(blockpos, p_286525_, p_286696_, p_286417_, p_286386_, p_286495_, 0.02 + d0, p_286487_, p_286710_, p_286793_);
-            BlockPos blockpos1 = p_286273_.getOnPosLegacy();
+        pEntity.mainSupportingBlockPos.ifPresent(p_286428_ -> {
+            double d0 = pBiasGetter.getAsDouble();
+            BlockPos blockpos = pEntity.getOnPos();
+            this.highlightPosition(blockpos, pPoseStack, pCamX, pCamY, pCamZ, pBuffer, 0.02 + d0, pRed, pGreen, pBlue);
+            BlockPos blockpos1 = pEntity.getOnPosLegacy();
             if (!blockpos1.equals(blockpos)) {
-                this.highlightPosition(blockpos1, p_286525_, p_286696_, p_286417_, p_286386_, p_286495_, 0.04 + d0, 0.0F, 1.0F, 1.0F);
+                this.highlightPosition(blockpos1, pPoseStack, pCamX, pCamY, pCamZ, pBuffer, 0.04 + d0, 0.0F, 1.0F, 1.0F);
             }
         });
     }
 
-    private double getBias(Entity p_286713_) {
-        return 0.02 * (double)(String.valueOf((double)p_286713_.getId() + 0.132453657).hashCode() % 1000) / 1000.0;
+    private double getBias(Entity pEntity) {
+        return 0.02 * (double)(String.valueOf((double)pEntity.getId() + 0.132453657).hashCode() % 1000) / 1000.0;
     }
 
     private void highlightPosition(
-        BlockPos p_286268_,
-        PoseStack p_286592_,
-        double p_286463_,
-        double p_286552_,
-        double p_286660_,
-        MultiBufferSource p_286314_,
-        double p_286880_,
-        float p_286918_,
-        float p_286304_,
-        float p_286672_
+        BlockPos pPos,
+        PoseStack pPoseStack,
+        double pCamX,
+        double pCamY,
+        double pCamZ,
+        MultiBufferSource pBuffer,
+        double pBias,
+        float pRed,
+        float pGreen,
+        float pBlue
     ) {
-        double d0 = (double)p_286268_.getX() - p_286463_ - 2.0 * p_286880_;
-        double d1 = (double)p_286268_.getY() - p_286552_ - 2.0 * p_286880_;
-        double d2 = (double)p_286268_.getZ() - p_286660_ - 2.0 * p_286880_;
-        double d3 = d0 + 1.0 + 4.0 * p_286880_;
-        double d4 = d1 + 1.0 + 4.0 * p_286880_;
-        double d5 = d2 + 1.0 + 4.0 * p_286880_;
-        ShapeRenderer.renderLineBox(p_286592_, p_286314_.getBuffer(RenderType.lines()), d0, d1, d2, d3, d4, d5, p_286918_, p_286304_, p_286672_, 0.4F);
+        double d0 = (double)pPos.getX() - pCamX - 2.0 * pBias;
+        double d1 = (double)pPos.getY() - pCamY - 2.0 * pBias;
+        double d2 = (double)pPos.getZ() - pCamZ - 2.0 * pBias;
+        double d3 = d0 + 1.0 + 4.0 * pBias;
+        double d4 = d1 + 1.0 + 4.0 * pBias;
+        double d5 = d2 + 1.0 + 4.0 * pBias;
+        ShapeRenderer.renderLineBox(pPoseStack, pBuffer.getBuffer(RenderType.lines()), d0, d1, d2, d3, d4, d5, pRed, pGreen, pBlue, 0.4F);
         DebugRenderer.renderVoxelShape(
-            p_286592_,
-            p_286314_.getBuffer(RenderType.lines()),
+            pPoseStack,
+            pBuffer.getBuffer(RenderType.lines()),
             this.minecraft
                 .level
-                .getBlockState(p_286268_)
-                .getCollisionShape(this.minecraft.level, p_286268_, CollisionContext.empty())
-                .move((double)p_286268_.getX(), (double)p_286268_.getY(), (double)p_286268_.getZ()),
-            -p_286463_,
-            -p_286552_,
-            -p_286660_,
-            p_286918_,
-            p_286304_,
-            p_286672_,
+                .getBlockState(pPos)
+                .getCollisionShape(this.minecraft.level, pPos, CollisionContext.empty())
+                .move((double)pPos.getX(), (double)pPos.getY(), (double)pPos.getZ()),
+            -pCamX,
+            -pCamY,
+            -pCamZ,
+            pRed,
+            pGreen,
+            pBlue,
             1.0F,
             false
         );

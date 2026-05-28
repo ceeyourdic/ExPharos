@@ -45,17 +45,17 @@ public class SetCustomModelDataFunction extends LootItemConditionalFunction {
     private final Optional<ListOperation.StandAlone<NumberProvider>> colors;
 
     public SetCustomModelDataFunction(
-        List<LootItemCondition> p_335890_,
-        Optional<ListOperation.StandAlone<NumberProvider>> p_378574_,
-        Optional<ListOperation.StandAlone<Boolean>> p_377400_,
-        Optional<ListOperation.StandAlone<String>> p_376217_,
-        Optional<ListOperation.StandAlone<NumberProvider>> p_378413_
+        List<LootItemCondition> pConditions,
+        Optional<ListOperation.StandAlone<NumberProvider>> pFloats,
+        Optional<ListOperation.StandAlone<Boolean>> pFlags,
+        Optional<ListOperation.StandAlone<String>> pStrings,
+        Optional<ListOperation.StandAlone<NumberProvider>> pColors
     ) {
-        super(p_335890_);
-        this.floats = p_378574_;
-        this.flags = p_377400_;
-        this.strings = p_376217_;
-        this.colors = p_378413_;
+        super(pConditions);
+        this.floats = pFloats;
+        this.flags = pFlags;
+        this.strings = pStrings;
+        this.colors = pColors;
     }
 
     @Override
@@ -71,15 +71,15 @@ public class SetCustomModelDataFunction extends LootItemConditionalFunction {
         return LootItemFunctions.SET_CUSTOM_MODEL_DATA;
     }
 
-    private static <T> List<T> apply(Optional<ListOperation.StandAlone<T>> p_375697_, List<T> p_377009_) {
-        return p_375697_.<List<T>>map(p_375376_ -> p_375376_.apply(p_377009_)).orElse(p_377009_);
+    private static <T> List<T> apply(Optional<ListOperation.StandAlone<T>> pValue, List<T> pList) {
+        return pValue.<List<T>>map(p_375376_ -> p_375376_.apply(pList)).orElse(pList);
     }
 
-    private static <T, E> List<E> apply(Optional<ListOperation.StandAlone<T>> p_377686_, List<E> p_377143_, Function<T, E> p_376371_) {
-        return p_377686_.<List<E>>map(p_375385_ -> {
-            List<E> list = p_375385_.value().stream().map(p_376371_).toList();
-            return p_375385_.operation().apply(p_377143_, list);
-        }).orElse(p_377143_);
+    private static <T, E> List<E> apply(Optional<ListOperation.StandAlone<T>> pValue, List<E> pList, Function<T, E> pConverter) {
+        return pValue.<List<E>>map(p_375385_ -> {
+            List<E> list = p_375385_.value().stream().map(pConverter).toList();
+            return p_375385_.operation().apply(pList, list);
+        }).orElse(pList);
     }
 
     @Override

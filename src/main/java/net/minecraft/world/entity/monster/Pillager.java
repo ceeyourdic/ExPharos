@@ -103,8 +103,8 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
     }
 
     @Override
-    public void setChargingCrossbow(boolean p_33302_) {
-        this.entityData.set(IS_CHARGING_CROSSBOW, p_33302_);
+    public void setChargingCrossbow(boolean pIsCharging) {
+        this.entityData.set(IS_CHARGING_CROSSBOW, pIsCharging);
     }
 
     @Override
@@ -118,9 +118,9 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_33300_) {
-        super.addAdditionalSaveData(p_33300_);
-        this.writeInventoryToTag(p_33300_, this.registryAccess());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.writeInventoryToTag(pCompound, this.registryAccess());
     }
 
     @Override
@@ -135,14 +135,14 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_33291_) {
-        super.readAdditionalSaveData(p_33291_);
-        this.readInventoryFromTag(p_33291_, this.registryAccess());
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readInventoryFromTag(pCompound, this.registryAccess());
         this.setCanPickUpLoot(true);
     }
 
     @Override
-    public float getWalkTargetValue(BlockPos p_33288_, LevelReader p_33289_) {
+    public float getWalkTargetValue(BlockPos pPos, LevelReader pLevel) {
         return 0.0F;
     }
 
@@ -187,12 +187,12 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_33306_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.PILLAGER_HURT;
     }
 
     @Override
-    public void performRangedAttack(LivingEntity p_33272_, float p_33273_) {
+    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
         this.performCrossbowAttack(this, 1.6F);
     }
 
@@ -217,8 +217,8 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
         }
     }
 
-    private boolean wantsItem(ItemStack p_149745_) {
-        return this.hasActiveRaid() && p_149745_.is(Items.WHITE_BANNER);
+    private boolean wantsItem(ItemStack pItem) {
+        return this.hasActiveRaid() && pItem.is(Items.WHITE_BANNER);
     }
 
     @Override

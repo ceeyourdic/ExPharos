@@ -34,9 +34,9 @@ public abstract class AgeableWaterCreature extends AgeableMob {
         return 1 + this.random.nextInt(3);
     }
 
-    protected void handleAirSupply(int p_366101_) {
+    protected void handleAirSupply(int pAirSupply) {
         if (this.isAlive() && !this.isInWaterOrBubble()) {
-            this.setAirSupply(p_366101_ - 1);
+            this.setAirSupply(pAirSupply - 1);
             if (this.getAirSupply() == -20) {
                 this.setAirSupply(0);
                 this.hurt(this.damageSources().drown(), 2.0F);
@@ -64,13 +64,13 @@ public abstract class AgeableWaterCreature extends AgeableMob {
     }
 
     public static boolean checkSurfaceAgeableWaterCreatureSpawnRules(
-        EntityType<? extends AgeableWaterCreature> p_369363_, LevelAccessor p_370080_, EntitySpawnReason p_367384_, BlockPos p_370200_, RandomSource p_362509_
+        EntityType<? extends AgeableWaterCreature> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        int i = p_370080_.getSeaLevel();
+        int i = pLevel.getSeaLevel();
         int j = i - 13;
-        return p_370200_.getY() >= j
-            && p_370200_.getY() <= i
-            && p_370080_.getFluidState(p_370200_.below()).is(FluidTags.WATER)
-            && p_370080_.getBlockState(p_370200_.above()).is(Blocks.WATER);
+        return pPos.getY() >= j
+            && pPos.getY() <= i
+            && pLevel.getFluidState(pPos.below()).is(FluidTags.WATER)
+            && pLevel.getBlockState(pPos.above()).is(Blocks.WATER);
     }
 }

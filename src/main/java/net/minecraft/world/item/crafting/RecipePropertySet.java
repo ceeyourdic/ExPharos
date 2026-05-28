@@ -30,20 +30,20 @@ public class RecipePropertySet {
     public static final RecipePropertySet EMPTY = new RecipePropertySet(Set.of());
     private final Set<Holder<Item>> items;
 
-    private RecipePropertySet(Set<Holder<Item>> p_369942_) {
-        this.items = p_369942_;
+    private RecipePropertySet(Set<Holder<Item>> pItems) {
+        this.items = pItems;
     }
 
-    private static ResourceKey<RecipePropertySet> registerVanilla(String p_366068_) {
-        return ResourceKey.create(TYPE_KEY, ResourceLocation.withDefaultNamespace(p_366068_));
+    private static ResourceKey<RecipePropertySet> registerVanilla(String pName) {
+        return ResourceKey.create(TYPE_KEY, ResourceLocation.withDefaultNamespace(pName));
     }
 
-    public boolean test(ItemStack p_363498_) {
-        return this.items.contains(p_363498_.getItemHolder());
+    public boolean test(ItemStack pStack) {
+        return this.items.contains(pStack.getItemHolder());
     }
 
-    static RecipePropertySet create(Collection<Ingredient> p_366318_) {
-        Set<Holder<Item>> set = p_366318_.stream().flatMap(Ingredient::items).collect(Collectors.toUnmodifiableSet());
+    static RecipePropertySet create(Collection<Ingredient> pIngredients) {
+        Set<Holder<Item>> set = pIngredients.stream().flatMap(Ingredient::items).collect(Collectors.toUnmodifiableSet());
         return new RecipePropertySet(set);
     }
 }

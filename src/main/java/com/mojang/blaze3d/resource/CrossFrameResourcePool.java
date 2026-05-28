@@ -13,8 +13,8 @@ public class CrossFrameResourcePool implements GraphicsResourceAllocator, AutoCl
     private final int framesToKeepResource;
     private final Deque<CrossFrameResourcePool.ResourceEntry<?>> pool = new ArrayDeque<>();
 
-    public CrossFrameResourcePool(int p_363418_) {
-        this.framesToKeepResource = p_363418_;
+    public CrossFrameResourcePool(int pFramesToKeepResource) {
+        this.framesToKeepResource = pFramesToKeepResource;
     }
 
     public void endFrame() {
@@ -71,10 +71,10 @@ public class CrossFrameResourcePool implements GraphicsResourceAllocator, AutoCl
         final T value;
         int framesToLive;
 
-        ResourceEntry(ResourceDescriptor<T> p_361734_, T p_367770_, int p_363856_) {
-            this.descriptor = p_361734_;
-            this.value = p_367770_;
-            this.framesToLive = p_363856_;
+        ResourceEntry(ResourceDescriptor<T> pDescriptor, T pValue, int pFramesToLive) {
+            this.descriptor = pDescriptor;
+            this.value = pValue;
+            this.framesToLive = pFramesToLive;
         }
 
         @Override

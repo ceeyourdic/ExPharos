@@ -31,14 +31,14 @@ public class CherryFoliagePlacer extends FoliagePlacer {
     private final float hangingLeavesExtensionChance;
 
     public CherryFoliagePlacer(
-        IntProvider p_272646_, IntProvider p_272802_, IntProvider p_273604_, float p_272737_, float p_273720_, float p_273152_, float p_273529_
+        IntProvider pRadius, IntProvider pOffset, IntProvider pHeight, float pWideBottomLayerHoleChance, float pCornerHoleChance, float pHangingLeavesChance, float pHangingLeavesExtensionChance
     ) {
-        super(p_272646_, p_272802_);
-        this.height = p_273604_;
-        this.wideBottomLayerHoleChance = p_272737_;
-        this.cornerHoleChance = p_273720_;
-        this.hangingLeavesChance = p_273152_;
-        this.hangingLeavesExtensionChance = p_273529_;
+        super(pRadius, pOffset);
+        this.height = pHeight;
+        this.wideBottomLayerHoleChance = pWideBottomLayerHoleChance;
+        this.cornerHoleChance = pCornerHoleChance;
+        this.hangingLeavesChance = pHangingLeavesChance;
+        this.hangingLeavesExtensionChance = pHangingLeavesExtensionChance;
     }
 
     @Override

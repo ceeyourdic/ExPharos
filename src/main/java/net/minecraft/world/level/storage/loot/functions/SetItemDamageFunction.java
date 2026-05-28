@@ -31,10 +31,10 @@ public class SetItemDamageFunction extends LootItemConditionalFunction {
     private final NumberProvider damage;
     private final boolean add;
 
-    private SetItemDamageFunction(List<LootItemCondition> p_300823_, NumberProvider p_165428_, boolean p_165429_) {
-        super(p_300823_);
-        this.damage = p_165428_;
-        this.add = p_165429_;
+    private SetItemDamageFunction(List<LootItemCondition> pConditions, NumberProvider pDamage, boolean pAdd) {
+        super(pConditions);
+        this.damage = pDamage;
+        this.add = pAdd;
     }
 
     @Override
@@ -48,24 +48,24 @@ public class SetItemDamageFunction extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_81048_, LootContext p_81049_) {
-        if (p_81048_.isDamageableItem()) {
-            int i = p_81048_.getMaxDamage();
-            float f = this.add ? 1.0F - (float)p_81048_.getDamageValue() / (float)i : 0.0F;
-            float f1 = 1.0F - Mth.clamp(this.damage.getFloat(p_81049_) + f, 0.0F, 1.0F);
-            p_81048_.setDamageValue(Mth.floor(f1 * (float)i));
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        if (pStack.isDamageableItem()) {
+            int i = pStack.getMaxDamage();
+            float f = this.add ? 1.0F - (float)pStack.getDamageValue() / (float)i : 0.0F;
+            float f1 = 1.0F - Mth.clamp(this.damage.getFloat(pContext) + f, 0.0F, 1.0F);
+            pStack.setDamageValue(Mth.floor(f1 * (float)i));
         } else {
-            LOGGER.warn("Couldn't set damage of loot item {}", p_81048_);
+            LOGGER.warn("Couldn't set damage of loot item {}", pStack);
         }
 
-        return p_81048_;
+        return pStack;
     }
 
-    public static LootItemConditionalFunction.Builder<?> setDamage(NumberProvider p_165431_) {
-        return simpleBuilder(p_297153_ -> new SetItemDamageFunction(p_297153_, p_165431_, false));
+    public static LootItemConditionalFunction.Builder<?> setDamage(NumberProvider pDamageValue) {
+        return simpleBuilder(p_297153_ -> new SetItemDamageFunction(p_297153_, pDamageValue, false));
     }
 
-    public static LootItemConditionalFunction.Builder<?> setDamage(NumberProvider p_165433_, boolean p_165434_) {
-        return simpleBuilder(p_297148_ -> new SetItemDamageFunction(p_297148_, p_165433_, p_165434_));
+    public static LootItemConditionalFunction.Builder<?> setDamage(NumberProvider pDamageValue, boolean pAdd) {
+        return simpleBuilder(p_297148_ -> new SetItemDamageFunction(p_297148_, pDamageValue, pAdd));
     }
 }

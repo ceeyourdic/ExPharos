@@ -1,10 +1,15 @@
 package net.minecraft.world.level.biome;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.optifine.reflect.ReflectorClass;
+import net.optifine.reflect.ReflectorField;
 
 public abstract class Biomes {
+    private static Set<ResourceKey<Biome>> biomeKeys = new LinkedHashSet<>();
     public static final ResourceKey<Biome> THE_VOID = register("the_void");
     public static final ResourceKey<Biome> PLAINS = register("plains");
     public static final ResourceKey<Biome> SUNFLOWER_PLAINS = register("sunflower_plains");
@@ -70,8 +75,21 @@ public abstract class Biomes {
     public static final ResourceKey<Biome> END_MIDLANDS = register("end_midlands");
     public static final ResourceKey<Biome> SMALL_END_ISLANDS = register("small_end_islands");
     public static final ResourceKey<Biome> END_BARRENS = register("end_barrens");
+    public static ReflectorClass Biome = new ReflectorClass(Biome.class);
+    public static ReflectorField Biome_climateSettings = Biome.makeField(Biome.ClimateSettings.class);
 
-    private static ResourceKey<Biome> register(String p_48229_) {
-        return ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace(p_48229_));
+    private static ResourceKey<Biome> register(String pKey) {
+        ResourceKey<Biome> resourcekey = ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace(pKey));
+        biomeKeys.add(resourcekey);
+        return resourcekey;
+    }
+
+    public static Set<ResourceKey<Biome>> getBiomeKeys() {
+        return new LinkedHashSet<>(biomeKeys);
+    }
+
+    public static float getDownfall(Biome biome) {
+        Biome.ClimateSettings biome$climatesettings = (Biome.ClimateSettings)Biome_climateSettings.getValue(biome);
+        return biome$climatesettings == null ? 0.0F : biome$climatesettings.downfall();
     }
 }

@@ -16,11 +16,11 @@ public record WorldGenSettings(WorldOptions options, WorldDimensions dimensions)
                 .apply(p_248477_, p_248477_.stable(WorldGenSettings::new))
     );
 
-    public static <T> DataResult<T> encode(DynamicOps<T> p_250104_, WorldOptions p_250578_, WorldDimensions p_249244_) {
-        return CODEC.encodeStart(p_250104_, new WorldGenSettings(p_250578_, p_249244_));
+    public static <T> DataResult<T> encode(DynamicOps<T> pOps, WorldOptions pOptions, WorldDimensions pDimensions) {
+        return CODEC.encodeStart(pOps, new WorldGenSettings(pOptions, pDimensions));
     }
 
-    public static <T> DataResult<T> encode(DynamicOps<T> p_250917_, WorldOptions p_250366_, RegistryAccess p_251515_) {
-        return encode(p_250917_, p_250366_, new WorldDimensions(p_251515_.lookupOrThrow(Registries.LEVEL_STEM)));
+    public static <T> DataResult<T> encode(DynamicOps<T> pOps, WorldOptions pOptions, RegistryAccess pAccess) {
+        return encode(pOps, pOptions, new WorldDimensions(pAccess.lookupOrThrow(Registries.LEVEL_STEM)));
     }
 }

@@ -9,12 +9,12 @@ import com.mojang.serialization.Dynamic;
 import net.minecraft.util.datafix.ExtraDataFixUtils;
 
 public class MapBannerBlockPosFormatFix extends DataFix {
-    public MapBannerBlockPosFormatFix(Schema p_333145_) {
-        super(p_333145_, false);
+    public MapBannerBlockPosFormatFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
-    private static <T> Dynamic<T> fixMapSavedData(Dynamic<T> p_328953_) {
-        return p_328953_.update(
+    private static <T> Dynamic<T> fixMapSavedData(Dynamic<T> pData) {
+        return pData.update(
             "banners", p_331256_ -> p_331256_.createList(p_331256_.asStream().map(p_328913_ -> p_328913_.update("Pos", ExtraDataFixUtils::fixBlockPos)))
         );
     }

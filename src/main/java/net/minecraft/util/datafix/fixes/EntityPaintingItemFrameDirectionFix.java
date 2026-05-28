@@ -12,32 +12,32 @@ import com.mojang.serialization.Dynamic;
 public class EntityPaintingItemFrameDirectionFix extends DataFix {
     private static final int[][] DIRECTIONS = new int[][]{{0, 0, 1}, {-1, 0, 0}, {0, 0, -1}, {1, 0, 0}};
 
-    public EntityPaintingItemFrameDirectionFix(Schema p_15499_, boolean p_15500_) {
-        super(p_15499_, p_15500_);
+    public EntityPaintingItemFrameDirectionFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
     }
 
-    private Dynamic<?> doFix(Dynamic<?> p_15510_, boolean p_15511_, boolean p_15512_) {
-        if ((p_15511_ || p_15512_) && p_15510_.get("Facing").asNumber().result().isEmpty()) {
+    private Dynamic<?> doFix(Dynamic<?> pDynamic, boolean pFixDirection, boolean pFixItemRotation) {
+        if ((pFixDirection || pFixItemRotation) && pDynamic.get("Facing").asNumber().result().isEmpty()) {
             int i;
-            if (p_15510_.get("Direction").asNumber().result().isPresent()) {
-                i = p_15510_.get("Direction").asByte((byte)0) % DIRECTIONS.length;
+            if (pDynamic.get("Direction").asNumber().result().isPresent()) {
+                i = pDynamic.get("Direction").asByte((byte)0) % DIRECTIONS.length;
                 int[] aint = DIRECTIONS[i];
-                p_15510_ = p_15510_.set("TileX", p_15510_.createInt(p_15510_.get("TileX").asInt(0) + aint[0]));
-                p_15510_ = p_15510_.set("TileY", p_15510_.createInt(p_15510_.get("TileY").asInt(0) + aint[1]));
-                p_15510_ = p_15510_.set("TileZ", p_15510_.createInt(p_15510_.get("TileZ").asInt(0) + aint[2]));
-                p_15510_ = p_15510_.remove("Direction");
-                if (p_15512_ && p_15510_.get("ItemRotation").asNumber().result().isPresent()) {
-                    p_15510_ = p_15510_.set("ItemRotation", p_15510_.createByte((byte)(p_15510_.get("ItemRotation").asByte((byte)0) * 2)));
+                pDynamic = pDynamic.set("TileX", pDynamic.createInt(pDynamic.get("TileX").asInt(0) + aint[0]));
+                pDynamic = pDynamic.set("TileY", pDynamic.createInt(pDynamic.get("TileY").asInt(0) + aint[1]));
+                pDynamic = pDynamic.set("TileZ", pDynamic.createInt(pDynamic.get("TileZ").asInt(0) + aint[2]));
+                pDynamic = pDynamic.remove("Direction");
+                if (pFixItemRotation && pDynamic.get("ItemRotation").asNumber().result().isPresent()) {
+                    pDynamic = pDynamic.set("ItemRotation", pDynamic.createByte((byte)(pDynamic.get("ItemRotation").asByte((byte)0) * 2)));
                 }
             } else {
-                i = p_15510_.get("Dir").asByte((byte)0) % DIRECTIONS.length;
-                p_15510_ = p_15510_.remove("Dir");
+                i = pDynamic.get("Dir").asByte((byte)0) % DIRECTIONS.length;
+                pDynamic = pDynamic.remove("Dir");
             }
 
-            p_15510_ = p_15510_.set("Facing", p_15510_.createByte((byte)i));
+            pDynamic = pDynamic.set("Facing", pDynamic.createByte((byte)i));
         }
 
-        return p_15510_;
+        return pDynamic;
     }
 
     @Override

@@ -14,19 +14,19 @@ public class EntityVariantFix extends NamedEntityFix {
     private final String fieldName;
     private final IntFunction<String> idConversions;
 
-    public EntityVariantFix(Schema p_216623_, String p_216624_, TypeReference p_216625_, String p_216626_, String p_216627_, IntFunction<String> p_216628_) {
-        super(p_216623_, false, p_216624_, p_216625_, p_216626_);
-        this.fieldName = p_216627_;
-        this.idConversions = p_216628_;
+    public EntityVariantFix(Schema pOutputSchema, String pName, TypeReference pType, String pEntityName, String pFieldName, IntFunction<String> pIdConversions) {
+        super(pOutputSchema, false, pName, pType, pEntityName);
+        this.fieldName = pFieldName;
+        this.idConversions = pIdConversions;
     }
 
-    private static <T> Dynamic<T> updateAndRename(Dynamic<T> p_216637_, String p_216638_, String p_216639_, Function<Dynamic<T>, Dynamic<T>> p_216640_) {
-        return p_216637_.map(
+    private static <T> Dynamic<T> updateAndRename(Dynamic<T> pDynamic, String pFieldName, String pNewFieldName, Function<Dynamic<T>, Dynamic<T>> pFixer) {
+        return pDynamic.map(
             p_326583_ -> {
-                DynamicOps<T> dynamicops = p_216637_.getOps();
-                Function<T, T> function = p_216656_ -> p_216640_.apply(new Dynamic<>(dynamicops, p_216656_)).getValue();
-                return dynamicops.get((T)p_326583_, p_216638_)
-                    .map(p_216652_ -> dynamicops.set((T)p_326583_, p_216639_, function.apply((T)p_216652_)))
+                DynamicOps<T> dynamicops = pDynamic.getOps();
+                Function<T, T> function = p_216656_ -> pFixer.apply(new Dynamic<>(dynamicops, p_216656_)).getValue();
+                return dynamicops.get((T)p_326583_, pFieldName)
+                    .map(p_216652_ -> dynamicops.set((T)p_326583_, pNewFieldName, function.apply((T)p_216652_)))
                     .result()
                     .orElse((T)p_326583_);
             }

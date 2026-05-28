@@ -64,25 +64,25 @@ public class VineBlock extends Block {
         this.shapesCache = ImmutableMap.copyOf(this.stateDefinition.getPossibleStates().stream().collect(Collectors.toMap(Function.identity(), VineBlock::calculateShape)));
     }
 
-    private static VoxelShape calculateShape(BlockState p_57906_) {
+    private static VoxelShape calculateShape(BlockState pState) {
         VoxelShape voxelshape = Shapes.empty();
-        if (p_57906_.getValue(UP)) {
+        if (pState.getValue(UP)) {
             voxelshape = UP_AABB;
         }
 
-        if (p_57906_.getValue(NORTH)) {
+        if (pState.getValue(NORTH)) {
             voxelshape = Shapes.or(voxelshape, NORTH_AABB);
         }
 
-        if (p_57906_.getValue(SOUTH)) {
+        if (pState.getValue(SOUTH)) {
             voxelshape = Shapes.or(voxelshape, SOUTH_AABB);
         }
 
-        if (p_57906_.getValue(EAST)) {
+        if (pState.getValue(EAST)) {
             voxelshape = Shapes.or(voxelshape, EAST_AABB);
         }
 
-        if (p_57906_.getValue(WEST)) {
+        if (pState.getValue(WEST)) {
             voxelshape = Shapes.or(voxelshape, WEST_AABB);
         }
 
@@ -90,8 +90,8 @@ public class VineBlock extends Block {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_57897_, BlockGetter p_57898_, BlockPos p_57899_, CollisionContext p_57900_) {
-        return this.shapesCache.get(p_57897_);
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return this.shapesCache.get(pState);
     }
 
     @Override
@@ -100,19 +100,19 @@ public class VineBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_57861_, LevelReader p_57862_, BlockPos p_57863_) {
-        return this.hasFaces(this.getUpdatedState(p_57861_, p_57862_, p_57863_));
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        return this.hasFaces(this.getUpdatedState(pState, pLevel, pPos));
     }
 
-    private boolean hasFaces(BlockState p_57908_) {
-        return this.countFaces(p_57908_) > 0;
+    private boolean hasFaces(BlockState pState) {
+        return this.countFaces(pState) > 0;
     }
 
-    private int countFaces(BlockState p_57910_) {
+    private int countFaces(BlockState pState) {
         int i = 0;
 
         for (BooleanProperty booleanproperty : PROPERTY_BY_DIRECTION.values()) {
-            if (p_57910_.getValue(booleanproperty)) {
+            if (pState.getValue(booleanproperty)) {
                 i++;
             }
         }
@@ -120,52 +120,52 @@ public class VineBlock extends Block {
         return i;
     }
 
-    private boolean canSupportAtFace(BlockGetter p_57888_, BlockPos p_57889_, Direction p_57890_) {
-        if (p_57890_ == Direction.DOWN) {
+    private boolean canSupportAtFace(BlockGetter pLevel, BlockPos pPos, Direction pDirection) {
+        if (pDirection == Direction.DOWN) {
             return false;
         } else {
-            BlockPos blockpos = p_57889_.relative(p_57890_);
-            if (isAcceptableNeighbour(p_57888_, blockpos, p_57890_)) {
+            BlockPos blockpos = pPos.relative(pDirection);
+            if (isAcceptableNeighbour(pLevel, blockpos, pDirection)) {
                 return true;
-            } else if (p_57890_.getAxis() == Direction.Axis.Y) {
+            } else if (pDirection.getAxis() == Direction.Axis.Y) {
                 return false;
             } else {
-                BooleanProperty booleanproperty = PROPERTY_BY_DIRECTION.get(p_57890_);
-                BlockState blockstate = p_57888_.getBlockState(p_57889_.above());
+                BooleanProperty booleanproperty = PROPERTY_BY_DIRECTION.get(pDirection);
+                BlockState blockstate = pLevel.getBlockState(pPos.above());
                 return blockstate.is(this) && blockstate.getValue(booleanproperty);
             }
         }
     }
 
-    public static boolean isAcceptableNeighbour(BlockGetter p_57854_, BlockPos p_57855_, Direction p_57856_) {
-        return MultifaceBlock.canAttachTo(p_57854_, p_57856_, p_57855_, p_57854_.getBlockState(p_57855_));
+    public static boolean isAcceptableNeighbour(BlockGetter pBlockReader, BlockPos pNeighborPos, Direction pAttachedFace) {
+        return MultifaceBlock.canAttachTo(pBlockReader, pAttachedFace, pNeighborPos, pBlockReader.getBlockState(pNeighborPos));
     }
 
-    private BlockState getUpdatedState(BlockState p_57902_, BlockGetter p_57903_, BlockPos p_57904_) {
-        BlockPos blockpos = p_57904_.above();
-        if (p_57902_.getValue(UP)) {
-            p_57902_ = p_57902_.setValue(UP, Boolean.valueOf(isAcceptableNeighbour(p_57903_, blockpos, Direction.DOWN)));
+    private BlockState getUpdatedState(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.above();
+        if (pState.getValue(UP)) {
+            pState = pState.setValue(UP, Boolean.valueOf(isAcceptableNeighbour(pLevel, blockpos, Direction.DOWN)));
         }
 
         BlockState blockstate = null;
 
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BooleanProperty booleanproperty = getPropertyForFace(direction);
-            if (p_57902_.getValue(booleanproperty)) {
-                boolean flag = this.canSupportAtFace(p_57903_, p_57904_, direction);
+            if (pState.getValue(booleanproperty)) {
+                boolean flag = this.canSupportAtFace(pLevel, pPos, direction);
                 if (!flag) {
                     if (blockstate == null) {
-                        blockstate = p_57903_.getBlockState(blockpos);
+                        blockstate = pLevel.getBlockState(blockpos);
                     }
 
                     flag = blockstate.is(this) && blockstate.getValue(booleanproperty);
                 }
 
-                p_57902_ = p_57902_.setValue(booleanproperty, Boolean.valueOf(flag));
+                pState = pState.setValue(booleanproperty, Boolean.valueOf(flag));
             }
         }
 
-        return p_57902_;
+        return pState;
     }
 
     @Override
@@ -266,37 +266,37 @@ public class VineBlock extends Block {
         }
     }
 
-    private BlockState copyRandomFaces(BlockState p_222651_, BlockState p_222652_, RandomSource p_222653_) {
+    private BlockState copyRandomFaces(BlockState pSourceState, BlockState pSpreadState, RandomSource pRandom) {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
-            if (p_222653_.nextBoolean()) {
+            if (pRandom.nextBoolean()) {
                 BooleanProperty booleanproperty = getPropertyForFace(direction);
-                if (p_222651_.getValue(booleanproperty)) {
-                    p_222652_ = p_222652_.setValue(booleanproperty, Boolean.valueOf(true));
+                if (pSourceState.getValue(booleanproperty)) {
+                    pSpreadState = pSpreadState.setValue(booleanproperty, Boolean.valueOf(true));
                 }
             }
         }
 
-        return p_222652_;
+        return pSpreadState;
     }
 
-    private boolean hasHorizontalConnection(BlockState p_57912_) {
-        return p_57912_.getValue(NORTH) || p_57912_.getValue(EAST) || p_57912_.getValue(SOUTH) || p_57912_.getValue(WEST);
+    private boolean hasHorizontalConnection(BlockState pState) {
+        return pState.getValue(NORTH) || pState.getValue(EAST) || pState.getValue(SOUTH) || pState.getValue(WEST);
     }
 
-    private boolean canSpread(BlockGetter p_57851_, BlockPos p_57852_) {
+    private boolean canSpread(BlockGetter pBlockReader, BlockPos pPos) {
         int i = 4;
         Iterable<BlockPos> iterable = BlockPos.betweenClosed(
-            p_57852_.getX() - 4,
-            p_57852_.getY() - 1,
-            p_57852_.getZ() - 4,
-            p_57852_.getX() + 4,
-            p_57852_.getY() + 1,
-            p_57852_.getZ() + 4
+            pPos.getX() - 4,
+            pPos.getY() - 1,
+            pPos.getZ() - 4,
+            pPos.getX() + 4,
+            pPos.getY() + 1,
+            pPos.getZ() + 4
         );
         int j = 5;
 
         for (BlockPos blockpos : iterable) {
-            if (p_57851_.getBlockState(blockpos).is(this)) {
+            if (pBlockReader.getBlockState(blockpos).is(this)) {
                 if (--j <= 0) {
                     return false;
                 }
@@ -307,23 +307,23 @@ public class VineBlock extends Block {
     }
 
     @Override
-    protected boolean canBeReplaced(BlockState p_57858_, BlockPlaceContext p_57859_) {
-        BlockState blockstate = p_57859_.getLevel().getBlockState(p_57859_.getClickedPos());
-        return blockstate.is(this) ? this.countFaces(blockstate) < PROPERTY_BY_DIRECTION.size() : super.canBeReplaced(p_57858_, p_57859_);
+    protected boolean canBeReplaced(BlockState pState, BlockPlaceContext pUseContext) {
+        BlockState blockstate = pUseContext.getLevel().getBlockState(pUseContext.getClickedPos());
+        return blockstate.is(this) ? this.countFaces(blockstate) < PROPERTY_BY_DIRECTION.size() : super.canBeReplaced(pState, pUseContext);
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_57849_) {
-        BlockState blockstate = p_57849_.getLevel().getBlockState(p_57849_.getClickedPos());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockState blockstate = pContext.getLevel().getBlockState(pContext.getClickedPos());
         boolean flag = blockstate.is(this);
         BlockState blockstate1 = flag ? blockstate : this.defaultBlockState();
 
-        for (Direction direction : p_57849_.getNearestLookingDirections()) {
+        for (Direction direction : pContext.getNearestLookingDirections()) {
             if (direction != Direction.DOWN) {
                 BooleanProperty booleanproperty = getPropertyForFace(direction);
                 boolean flag1 = flag && blockstate.getValue(booleanproperty);
-                if (!flag1 && this.canSupportAtFace(p_57849_.getLevel(), p_57849_.getClickedPos(), direction)) {
+                if (!flag1 && this.canSupportAtFace(pContext.getLevel(), pContext.getClickedPos(), direction)) {
                     return blockstate1.setValue(booleanproperty, Boolean.valueOf(true));
                 }
             }
@@ -333,46 +333,46 @@ public class VineBlock extends Block {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_57882_) {
-        p_57882_.add(UP, NORTH, EAST, SOUTH, WEST);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(UP, NORTH, EAST, SOUTH, WEST);
     }
 
     @Override
-    protected BlockState rotate(BlockState p_57868_, Rotation p_57869_) {
-        switch (p_57869_) {
+    protected BlockState rotate(BlockState pState, Rotation pRotate) {
+        switch (pRotate) {
             case CLOCKWISE_180:
-                return p_57868_.setValue(NORTH, p_57868_.getValue(SOUTH))
-                    .setValue(EAST, p_57868_.getValue(WEST))
-                    .setValue(SOUTH, p_57868_.getValue(NORTH))
-                    .setValue(WEST, p_57868_.getValue(EAST));
+                return pState.setValue(NORTH, pState.getValue(SOUTH))
+                    .setValue(EAST, pState.getValue(WEST))
+                    .setValue(SOUTH, pState.getValue(NORTH))
+                    .setValue(WEST, pState.getValue(EAST));
             case COUNTERCLOCKWISE_90:
-                return p_57868_.setValue(NORTH, p_57868_.getValue(EAST))
-                    .setValue(EAST, p_57868_.getValue(SOUTH))
-                    .setValue(SOUTH, p_57868_.getValue(WEST))
-                    .setValue(WEST, p_57868_.getValue(NORTH));
+                return pState.setValue(NORTH, pState.getValue(EAST))
+                    .setValue(EAST, pState.getValue(SOUTH))
+                    .setValue(SOUTH, pState.getValue(WEST))
+                    .setValue(WEST, pState.getValue(NORTH));
             case CLOCKWISE_90:
-                return p_57868_.setValue(NORTH, p_57868_.getValue(WEST))
-                    .setValue(EAST, p_57868_.getValue(NORTH))
-                    .setValue(SOUTH, p_57868_.getValue(EAST))
-                    .setValue(WEST, p_57868_.getValue(SOUTH));
+                return pState.setValue(NORTH, pState.getValue(WEST))
+                    .setValue(EAST, pState.getValue(NORTH))
+                    .setValue(SOUTH, pState.getValue(EAST))
+                    .setValue(WEST, pState.getValue(SOUTH));
             default:
-                return p_57868_;
+                return pState;
         }
     }
 
     @Override
-    protected BlockState mirror(BlockState p_57865_, Mirror p_57866_) {
-        switch (p_57866_) {
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        switch (pMirror) {
             case LEFT_RIGHT:
-                return p_57865_.setValue(NORTH, p_57865_.getValue(SOUTH)).setValue(SOUTH, p_57865_.getValue(NORTH));
+                return pState.setValue(NORTH, pState.getValue(SOUTH)).setValue(SOUTH, pState.getValue(NORTH));
             case FRONT_BACK:
-                return p_57865_.setValue(EAST, p_57865_.getValue(WEST)).setValue(WEST, p_57865_.getValue(EAST));
+                return pState.setValue(EAST, pState.getValue(WEST)).setValue(WEST, pState.getValue(EAST));
             default:
-                return super.mirror(p_57865_, p_57866_);
+                return super.mirror(pState, pMirror);
         }
     }
 
-    public static BooleanProperty getPropertyForFace(Direction p_57884_) {
-        return PROPERTY_BY_DIRECTION.get(p_57884_);
+    public static BooleanProperty getPropertyForFace(Direction pFace) {
+        return PROPERTY_BY_DIRECTION.get(pFace);
     }
 }

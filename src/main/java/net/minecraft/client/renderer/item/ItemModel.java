@@ -18,19 +18,19 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public interface ItemModel {
     void update(
-        ItemStackRenderState p_377489_,
-        ItemStack p_376390_,
-        ItemModelResolver p_378232_,
-        ItemDisplayContext p_376927_,
-        @Nullable ClientLevel p_377374_,
-        @Nullable LivingEntity p_376127_,
-        int p_377873_
+        ItemStackRenderState pRenderState,
+        ItemStack pStack,
+        ItemModelResolver pItemModelResolver,
+        ItemDisplayContext pDisplayContext,
+        @Nullable ClientLevel pLevel,
+        @Nullable LivingEntity pEntity,
+        int pSeed
     );
 
     @OnlyIn(Dist.CLIENT)
     public static record BakingContext(ModelBaker blockModelBaker, EntityModelSet entityModelSet, ItemModel missingItemModel) {
-        public BakedModel bake(ResourceLocation p_376055_) {
-            return this.blockModelBaker().bake(p_376055_, BlockModelRotation.X0_Y0);
+        public BakedModel bake(ResourceLocation pLocation) {
+            return this.blockModelBaker().bake(pLocation, BlockModelRotation.X0_Y0);
         }
     }
 
@@ -38,6 +38,6 @@ public interface ItemModel {
     public interface Unbaked extends ResolvableModel {
         MapCodec<? extends ItemModel.Unbaked> type();
 
-        ItemModel bake(ItemModel.BakingContext p_376062_);
+        ItemModel bake(ItemModel.BakingContext pContext);
     }
 }

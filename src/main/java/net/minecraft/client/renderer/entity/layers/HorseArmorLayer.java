@@ -20,11 +20,11 @@ public class HorseArmorLayer extends RenderLayer<HorseRenderState, HorseModel> {
     private final HorseModel babyModel;
     private final EquipmentLayerRenderer equipmentRenderer;
 
-    public HorseArmorLayer(RenderLayerParent<HorseRenderState, HorseModel> p_174496_, EntityModelSet p_174497_, EquipmentLayerRenderer p_367517_) {
-        super(p_174496_);
-        this.equipmentRenderer = p_367517_;
-        this.adultModel = new HorseModel(p_174497_.bakeLayer(ModelLayers.HORSE_ARMOR));
-        this.babyModel = new HorseModel(p_174497_.bakeLayer(ModelLayers.HORSE_BABY_ARMOR));
+    public HorseArmorLayer(RenderLayerParent<HorseRenderState, HorseModel> pRenderer, EntityModelSet pEntityModels, EquipmentLayerRenderer pEquipmentRenderer) {
+        super(pRenderer);
+        this.equipmentRenderer = pEquipmentRenderer;
+        this.adultModel = new HorseModel(pEntityModels.bakeLayer(ModelLayers.HORSE_ARMOR));
+        this.babyModel = new HorseModel(pEntityModels.bakeLayer(ModelLayers.HORSE_BABY_ARMOR));
     }
 
     public void render(PoseStack p_117021_, MultiBufferSource p_117022_, int p_117023_, HorseRenderState p_363397_, float p_117025_, float p_117026_) {

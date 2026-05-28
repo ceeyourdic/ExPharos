@@ -28,16 +28,16 @@ public class RealmsConnect {
     @Nullable
     Connection connection;
 
-    public RealmsConnect(Screen p_120693_) {
-        this.onlineScreen = p_120693_;
+    public RealmsConnect(Screen pOnlineScreen) {
+        this.onlineScreen = pOnlineScreen;
     }
 
-    public void connect(final RealmsServer p_175032_, ServerAddress p_175033_) {
+    public void connect(final RealmsServer pServer, ServerAddress pAddress) {
         final Minecraft minecraft = Minecraft.getInstance();
         minecraft.prepareForMultiplayer();
         minecraft.getNarrator().sayNow(Component.translatable("mco.connect.success"));
-        final String s = p_175033_.getHost();
-        final int i = p_175033_.getPort();
+        final String s = pAddress.getHost();
+        final int i = pAddress.getPort();
         (new Thread("Realms-connect-task") {
                 @Override
                 public void run() {
@@ -55,11 +55,11 @@ public class RealmsConnect {
                         }
 
                         ClientHandshakePacketListenerImpl clienthandshakepacketlistenerimpl = new ClientHandshakePacketListenerImpl(
-                            RealmsConnect.this.connection, minecraft, p_175032_.toServerData(s), RealmsConnect.this.onlineScreen, false, null, p_120726_ -> {
+                            RealmsConnect.this.connection, minecraft, pServer.toServerData(s), RealmsConnect.this.onlineScreen, false, null, p_120726_ -> {
                             }, null
                         );
-                        if (p_175032_.isMinigameActive()) {
-                            clienthandshakepacketlistenerimpl.setMinigameName(p_175032_.minigameName);
+                        if (pServer.isMinigameActive()) {
+                            clienthandshakepacketlistenerimpl.setMinigameName(pServer.minigameName);
                         }
 
                         if (RealmsConnect.this.aborted) {
@@ -72,9 +72,9 @@ public class RealmsConnect {
                         }
 
                         RealmsConnect.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), minecraft.getUser().getProfileId()));
-                        minecraft.updateReportEnvironment(ReportEnvironment.realm(p_175032_));
+                        minecraft.updateReportEnvironment(ReportEnvironment.realm(pServer));
                         minecraft.quickPlayLog()
-                            .setWorldData(QuickPlayLog.Type.REALMS, String.valueOf(p_175032_.id), Objects.requireNonNullElse(p_175032_.name, "unknown"));
+                            .setWorldData(QuickPlayLog.Type.REALMS, String.valueOf(pServer.id), Objects.requireNonNullElse(pServer.name, "unknown"));
                         minecraft.getDownloadedPackSource().configureForServerControl(RealmsConnect.this.connection, ServerPackManager.PackPromptStatus.ALLOWED);
                     } catch (Exception exception) {
                         minecraft.getDownloadedPackSource().cleanupAfterDisconnect();

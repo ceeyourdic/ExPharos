@@ -7,9 +7,9 @@ public class WorldgenRandom extends LegacyRandomSource {
     private final RandomSource randomSource;
     private int count;
 
-    public WorldgenRandom(RandomSource p_224680_) {
+    public WorldgenRandom(RandomSource pRandomSource) {
         super(0L);
-        this.randomSource = p_224680_;
+        this.randomSource = pRandomSource;
     }
 
     public int getCount() {
@@ -27,11 +27,11 @@ public class WorldgenRandom extends LegacyRandomSource {
     }
 
     @Override
-    public int next(int p_64708_) {
+    public int next(int pBits) {
         this.count++;
         return this.randomSource instanceof LegacyRandomSource legacyrandomsource
-            ? legacyrandomsource.next(p_64708_)
-            : (int)(this.randomSource.nextLong() >>> 64 - p_64708_);
+            ? legacyrandomsource.next(pBits)
+            : (int)(this.randomSource.nextLong() >>> 64 - pBits);
     }
 
     @Override
@@ -41,41 +41,41 @@ public class WorldgenRandom extends LegacyRandomSource {
         }
     }
 
-    public long setDecorationSeed(long p_64691_, int p_64692_, int p_64693_) {
-        this.setSeed(p_64691_);
+    public long setDecorationSeed(long pLevelSeed, int pMinChunkBlockX, int pMinChunkBlockZ) {
+        this.setSeed(pLevelSeed);
         long i = this.nextLong() | 1L;
         long j = this.nextLong() | 1L;
-        long k = (long)p_64692_ * i + (long)p_64693_ * j ^ p_64691_;
+        long k = (long)pMinChunkBlockX * i + (long)pMinChunkBlockZ * j ^ pLevelSeed;
         this.setSeed(k);
         return k;
     }
 
-    public void setFeatureSeed(long p_190065_, int p_190066_, int p_190067_) {
-        long i = p_190065_ + (long)p_190066_ + (long)(10000 * p_190067_);
+    public void setFeatureSeed(long pDecorationSeed, int pIndex, int pDecorationStep) {
+        long i = pDecorationSeed + (long)pIndex + (long)(10000 * pDecorationStep);
         this.setSeed(i);
     }
 
-    public void setLargeFeatureSeed(long p_190069_, int p_190070_, int p_190071_) {
-        this.setSeed(p_190069_);
+    public void setLargeFeatureSeed(long pBaseSeed, int pChunkX, int pChunkZ) {
+        this.setSeed(pBaseSeed);
         long i = this.nextLong();
         long j = this.nextLong();
-        long k = (long)p_190070_ * i ^ (long)p_190071_ * j ^ p_190069_;
+        long k = (long)pChunkX * i ^ (long)pChunkZ * j ^ pBaseSeed;
         this.setSeed(k);
     }
 
-    public void setLargeFeatureWithSalt(long p_190059_, int p_190060_, int p_190061_, int p_190062_) {
-        long i = (long)p_190060_ * 341873128712L + (long)p_190061_ * 132897987541L + p_190059_ + (long)p_190062_;
+    public void setLargeFeatureWithSalt(long pLevelSeed, int pRegionX, int pRegionZ, int pSalt) {
+        long i = (long)pRegionX * 341873128712L + (long)pRegionZ * 132897987541L + pLevelSeed + (long)pSalt;
         this.setSeed(i);
     }
 
-    public static RandomSource seedSlimeChunk(int p_224682_, int p_224683_, long p_224684_, long p_224685_) {
+    public static RandomSource seedSlimeChunk(int pChunkX, int pChunkZ, long pLevelSeed, long pSalt) {
         return RandomSource.create(
-            p_224684_
-                    + (long)(p_224682_ * p_224682_ * 4987142)
-                    + (long)(p_224682_ * 5947611)
-                    + (long)(p_224683_ * p_224683_) * 4392871L
-                    + (long)(p_224683_ * 389711)
-                ^ p_224685_
+            pLevelSeed
+                    + (long)(pChunkX * pChunkX * 4987142)
+                    + (long)(pChunkX * 5947611)
+                    + (long)(pChunkZ * pChunkZ) * 4392871L
+                    + (long)(pChunkZ * 389711)
+                ^ pSalt
         );
     }
 
@@ -85,12 +85,12 @@ public class WorldgenRandom extends LegacyRandomSource {
 
         private final LongFunction<RandomSource> constructor;
 
-        private Algorithm(final LongFunction<RandomSource> p_190082_) {
-            this.constructor = p_190082_;
+        private Algorithm(final LongFunction<RandomSource> pConstructor) {
+            this.constructor = pConstructor;
         }
 
-        public RandomSource newInstance(long p_224688_) {
-            return this.constructor.apply(p_224688_);
+        public RandomSource newInstance(long pSeed) {
+            return this.constructor.apply(pSeed);
         }
     }
 }

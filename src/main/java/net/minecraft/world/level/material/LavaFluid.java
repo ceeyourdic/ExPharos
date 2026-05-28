@@ -110,9 +110,9 @@ public abstract class LavaFluid extends FlowingFluid {
         }
     }
 
-    private boolean hasFlammableNeighbours(LevelReader p_76228_, BlockPos p_76229_) {
+    private boolean hasFlammableNeighbours(LevelReader pLevel, BlockPos pPos) {
         for (Direction direction : Direction.values()) {
-            if (this.isFlammable(p_76228_, p_76229_.relative(direction))) {
+            if (this.isFlammable(pLevel, pPos.relative(direction))) {
                 return true;
             }
         }
@@ -120,8 +120,8 @@ public abstract class LavaFluid extends FlowingFluid {
         return false;
     }
 
-    private boolean isFlammable(LevelReader p_76246_, BlockPos p_76247_) {
-        return p_76246_.isInsideBuildHeight(p_76247_.getY()) && !p_76246_.hasChunkAt(p_76247_) ? false : p_76246_.getBlockState(p_76247_).ignitedByLava();
+    private boolean isFlammable(LevelReader pLevel, BlockPos pPos) {
+        return pLevel.isInsideBuildHeight(pPos.getY()) && !pLevel.hasChunkAt(pPos) ? false : pLevel.getBlockState(pPos).ignitedByLava();
     }
 
     @Nullable
@@ -131,33 +131,33 @@ public abstract class LavaFluid extends FlowingFluid {
     }
 
     @Override
-    protected void beforeDestroyingBlock(LevelAccessor p_76216_, BlockPos p_76217_, BlockState p_76218_) {
-        this.fizz(p_76216_, p_76217_);
+    protected void beforeDestroyingBlock(LevelAccessor pLevel, BlockPos pPos, BlockState pState) {
+        this.fizz(pLevel, pPos);
     }
 
     @Override
-    public int getSlopeFindDistance(LevelReader p_76244_) {
-        return p_76244_.dimensionType().ultraWarm() ? 4 : 2;
+    public int getSlopeFindDistance(LevelReader pLevel) {
+        return pLevel.dimensionType().ultraWarm() ? 4 : 2;
     }
 
     @Override
-    public BlockState createLegacyBlock(FluidState p_76249_) {
-        return Blocks.LAVA.defaultBlockState().setValue(LiquidBlock.LEVEL, Integer.valueOf(getLegacyLevel(p_76249_)));
+    public BlockState createLegacyBlock(FluidState pState) {
+        return Blocks.LAVA.defaultBlockState().setValue(LiquidBlock.LEVEL, Integer.valueOf(getLegacyLevel(pState)));
     }
 
     @Override
-    public boolean isSame(Fluid p_76231_) {
-        return p_76231_ == Fluids.LAVA || p_76231_ == Fluids.FLOWING_LAVA;
+    public boolean isSame(Fluid pFluid) {
+        return pFluid == Fluids.LAVA || pFluid == Fluids.FLOWING_LAVA;
     }
 
     @Override
-    public int getDropOff(LevelReader p_76252_) {
-        return p_76252_.dimensionType().ultraWarm() ? 1 : 2;
+    public int getDropOff(LevelReader pLevel) {
+        return pLevel.dimensionType().ultraWarm() ? 1 : 2;
     }
 
     @Override
-    public boolean canBeReplacedWith(FluidState p_76233_, BlockGetter p_76234_, BlockPos p_76235_, Fluid p_76236_, Direction p_76237_) {
-        return p_76233_.getHeight(p_76234_, p_76235_) >= 0.44444445F && p_76236_.is(FluidTags.WATER);
+    public boolean canBeReplacedWith(FluidState pFluidState, BlockGetter pBlockReader, BlockPos pPos, Fluid pFluid, Direction pDirection) {
+        return pFluidState.getHeight(pBlockReader, pPos) >= 0.44444445F && pFluid.is(FluidTags.WATER);
     }
 
     @Override
@@ -180,8 +180,8 @@ public abstract class LavaFluid extends FlowingFluid {
         return i;
     }
 
-    private void fizz(LevelAccessor p_76213_, BlockPos p_76214_) {
-        p_76213_.levelEvent(1501, p_76214_, 0);
+    private void fizz(LevelAccessor pLevel, BlockPos pPos) {
+        pLevel.levelEvent(1501, pPos, 0);
     }
 
     @Override
@@ -190,20 +190,20 @@ public abstract class LavaFluid extends FlowingFluid {
     }
 
     @Override
-    protected void spreadTo(LevelAccessor p_76220_, BlockPos p_76221_, BlockState p_76222_, Direction p_76223_, FluidState p_76224_) {
-        if (p_76223_ == Direction.DOWN) {
-            FluidState fluidstate = p_76220_.getFluidState(p_76221_);
+    protected void spreadTo(LevelAccessor pLevel, BlockPos pPos, BlockState pBlockState, Direction pDirection, FluidState pFluidState) {
+        if (pDirection == Direction.DOWN) {
+            FluidState fluidstate = pLevel.getFluidState(pPos);
             if (this.is(FluidTags.LAVA) && fluidstate.is(FluidTags.WATER)) {
-                if (p_76222_.getBlock() instanceof LiquidBlock) {
-                    p_76220_.setBlock(p_76221_, Blocks.STONE.defaultBlockState(), 3);
+                if (pBlockState.getBlock() instanceof LiquidBlock) {
+                    pLevel.setBlock(pPos, Blocks.STONE.defaultBlockState(), 3);
                 }
 
-                this.fizz(p_76220_, p_76221_);
+                this.fizz(pLevel, pPos);
                 return;
             }
         }
 
-        super.spreadTo(p_76220_, p_76221_, p_76222_, p_76223_, p_76224_);
+        super.spreadTo(pLevel, pPos, pBlockState, pDirection, pFluidState);
     }
 
     @Override
@@ -223,30 +223,30 @@ public abstract class LavaFluid extends FlowingFluid {
 
     public static class Flowing extends LavaFluid {
         @Override
-        protected void createFluidStateDefinition(StateDefinition.Builder<Fluid, FluidState> p_76260_) {
-            super.createFluidStateDefinition(p_76260_);
-            p_76260_.add(LEVEL);
+        protected void createFluidStateDefinition(StateDefinition.Builder<Fluid, FluidState> pBuilder) {
+            super.createFluidStateDefinition(pBuilder);
+            pBuilder.add(LEVEL);
         }
 
         @Override
-        public int getAmount(FluidState p_76264_) {
-            return p_76264_.getValue(LEVEL);
+        public int getAmount(FluidState pState) {
+            return pState.getValue(LEVEL);
         }
 
         @Override
-        public boolean isSource(FluidState p_76262_) {
+        public boolean isSource(FluidState pState) {
             return false;
         }
     }
 
     public static class Source extends LavaFluid {
         @Override
-        public int getAmount(FluidState p_76269_) {
+        public int getAmount(FluidState pState) {
             return 8;
         }
 
         @Override
-        public boolean isSource(FluidState p_76267_) {
+        public boolean isSource(FluidState pState) {
             return true;
         }
     }

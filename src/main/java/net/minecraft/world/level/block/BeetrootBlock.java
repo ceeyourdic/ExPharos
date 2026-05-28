@@ -59,17 +59,17 @@ public class BeetrootBlock extends CropBlock {
     }
 
     @Override
-    protected int getBonemealAgeIncrease(Level p_49663_) {
-        return super.getBonemealAgeIncrease(p_49663_) / 3;
+    protected int getBonemealAgeIncrease(Level pLevel) {
+        return super.getBonemealAgeIncrease(pLevel) / 3;
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_49665_) {
-        p_49665_.add(AGE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(AGE);
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_49672_, BlockGetter p_49673_, BlockPos p_49674_, CollisionContext p_49675_) {
-        return SHAPE_BY_AGE[this.getAge(p_49672_)];
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return SHAPE_BY_AGE[this.getAge(pState)];
     }
 }

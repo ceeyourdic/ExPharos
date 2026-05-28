@@ -6,17 +6,17 @@ import java.util.Map;
 import java.util.Optional;
 
 public class PrimedTntBlockStateFixer extends NamedEntityWriteReadFix {
-    public PrimedTntBlockStateFixer(Schema p_310798_) {
-        super(p_310798_, true, "PrimedTnt BlockState fixer", References.ENTITY, "minecraft:tnt");
+    public PrimedTntBlockStateFixer(Schema pOutputSchema) {
+        super(pOutputSchema, true, "PrimedTnt BlockState fixer", References.ENTITY, "minecraft:tnt");
     }
 
-    private static <T> Dynamic<T> renameFuse(Dynamic<T> p_313041_) {
-        Optional<Dynamic<T>> optional = p_313041_.get("Fuse").get().result();
-        return optional.isPresent() ? p_313041_.set("fuse", optional.get()) : p_313041_;
+    private static <T> Dynamic<T> renameFuse(Dynamic<T> pTag) {
+        Optional<Dynamic<T>> optional = pTag.get("Fuse").get().result();
+        return optional.isPresent() ? pTag.set("fuse", optional.get()) : pTag;
     }
 
-    private static <T> Dynamic<T> insertBlockState(Dynamic<T> p_309485_) {
-        return p_309485_.set("block_state", p_309485_.createMap(Map.of(p_309485_.createString("Name"), p_309485_.createString("minecraft:tnt"))));
+    private static <T> Dynamic<T> insertBlockState(Dynamic<T> pTag) {
+        return pTag.set("block_state", pTag.createMap(Map.of(pTag.createString("Name"), pTag.createString("minecraft:tnt"))));
     }
 
     @Override

@@ -16,15 +16,15 @@ public class PoiRecord {
     private int freeTickets;
     private final Runnable setDirty;
 
-    PoiRecord(BlockPos p_218008_, Holder<PoiType> p_218009_, int p_218010_, Runnable p_218011_) {
-        this.pos = p_218008_.immutable();
-        this.poiType = p_218009_;
-        this.freeTickets = p_218010_;
-        this.setDirty = p_218011_;
+    PoiRecord(BlockPos pPos, Holder<PoiType> pPoiType, int pFreeTickets, Runnable pSetDirty) {
+        this.pos = pPos.immutable();
+        this.poiType = pPoiType;
+        this.freeTickets = pFreeTickets;
+        this.setDirty = pSetDirty;
     }
 
-    public PoiRecord(BlockPos p_218013_, Holder<PoiType> p_218014_, Runnable p_218015_) {
-        this(p_218013_, p_218014_, p_218014_.value().maxTickets(), p_218015_);
+    public PoiRecord(BlockPos pPod, Holder<PoiType> pPoiType, Runnable pSetDirty) {
+        this(pPod, pPoiType, pPoiType.value().maxTickets(), pSetDirty);
     }
 
     public PoiRecord.Packed pack() {
@@ -74,11 +74,11 @@ public class PoiRecord {
     }
 
     @Override
-    public boolean equals(Object p_27256_) {
-        if (this == p_27256_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            return p_27256_ != null && this.getClass() == p_27256_.getClass() ? Objects.equals(this.pos, ((PoiRecord)p_27256_).pos) : false;
+            return pOther != null && this.getClass() == pOther.getClass() ? Objects.equals(this.pos, ((PoiRecord)pOther).pos) : false;
         }
     }
 
@@ -97,8 +97,8 @@ public class PoiRecord {
                     .apply(p_362341_, PoiRecord.Packed::new)
         );
 
-        public PoiRecord unpack(Runnable p_362041_) {
-            return new PoiRecord(this.pos, this.poiType, this.freeTickets, p_362041_);
+        public PoiRecord unpack(Runnable pSetDirty) {
+            return new PoiRecord(this.pos, this.poiType, this.freeTickets, pSetDirty);
         }
     }
 }

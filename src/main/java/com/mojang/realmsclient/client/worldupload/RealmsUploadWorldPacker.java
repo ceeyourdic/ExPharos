@@ -20,13 +20,13 @@ public class RealmsUploadWorldPacker {
     private final BooleanSupplier isCanceled;
     private final Path directoryToPack;
 
-    public static File pack(Path p_363835_, BooleanSupplier p_361418_) throws IOException {
-        return new RealmsUploadWorldPacker(p_363835_, p_361418_).tarGzipArchive();
+    public static File pack(Path pDirectoryToPack, BooleanSupplier pIsCanceled) throws IOException {
+        return new RealmsUploadWorldPacker(pDirectoryToPack, pIsCanceled).tarGzipArchive();
     }
 
-    private RealmsUploadWorldPacker(Path p_366435_, BooleanSupplier p_361265_) {
-        this.isCanceled = p_361265_;
-        this.directoryToPack = p_366435_;
+    private RealmsUploadWorldPacker(Path pDirectoryToPack, BooleanSupplier pIsCanceled) {
+        this.isCanceled = pIsCanceled;
+        this.directoryToPack = pDirectoryToPack;
     }
 
     private File tarGzipArchive() throws IOException {
@@ -54,35 +54,35 @@ public class RealmsUploadWorldPacker {
         return file2;
     }
 
-    private void addFileToTarGz(TarArchiveOutputStream p_369594_, Path p_362919_, String p_363494_, boolean p_368866_) throws IOException {
+    private void addFileToTarGz(TarArchiveOutputStream pStream, Path pDirectory, String pPrefix, boolean pIsRootDirectory) throws IOException {
         if (this.isCanceled.getAsBoolean()) {
             throw new RealmsUploadCanceledException();
         } else {
-            this.verifyBelowSizeLimit(p_369594_.getBytesWritten());
-            File file1 = p_362919_.toFile();
-            String s = p_368866_ ? p_363494_ : p_363494_ + file1.getName();
+            this.verifyBelowSizeLimit(pStream.getBytesWritten());
+            File file1 = pDirectory.toFile();
+            String s = pIsRootDirectory ? pPrefix : pPrefix + file1.getName();
             TarArchiveEntry tararchiveentry = new TarArchiveEntry(file1, s);
-            p_369594_.putArchiveEntry(tararchiveentry);
+            pStream.putArchiveEntry(tararchiveentry);
             if (file1.isFile()) {
                 try (InputStream inputstream = new FileInputStream(file1)) {
-                    inputstream.transferTo(p_369594_);
+                    inputstream.transferTo(pStream);
                 }
 
-                p_369594_.closeArchiveEntry();
+                pStream.closeArchiveEntry();
             } else {
-                p_369594_.closeArchiveEntry();
+                pStream.closeArchiveEntry();
                 File[] afile = file1.listFiles();
                 if (afile != null) {
                     for (File file2 : afile) {
-                        this.addFileToTarGz(p_369594_, file2.toPath(), s + "/", false);
+                        this.addFileToTarGz(pStream, file2.toPath(), s + "/", false);
                     }
                 }
             }
         }
     }
 
-    private void verifyBelowSizeLimit(long p_365035_) {
-        if (p_365035_ > 5368709120L) {
+    private void verifyBelowSizeLimit(long pSize) {
+        if (pSize > 5368709120L) {
             throw new RealmsUploadTooLargeException(5368709120L);
         }
     }

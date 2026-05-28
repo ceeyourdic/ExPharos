@@ -9,13 +9,13 @@ import net.minecraft.world.level.block.state.BlockState;
 public class BedBlockEntity extends BlockEntity {
     private final DyeColor color;
 
-    public BedBlockEntity(BlockPos p_155115_, BlockState p_155116_) {
-        this(p_155115_, p_155116_, ((BedBlock)p_155116_.getBlock()).getColor());
+    public BedBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        this(pPos, pBlockState, ((BedBlock)pBlockState.getBlock()).getColor());
     }
 
-    public BedBlockEntity(BlockPos p_155118_, BlockState p_155119_, DyeColor p_155120_) {
-        super(BlockEntityType.BED, p_155118_, p_155119_);
-        this.color = p_155120_;
+    public BedBlockEntity(BlockPos pPos, BlockState pBlockState, DyeColor pColor) {
+        super(BlockEntityType.BED, pPos, pBlockState);
+        this.color = pColor;
     }
 
     public ClientboundBlockEntityDataPacket getUpdatePacket() {

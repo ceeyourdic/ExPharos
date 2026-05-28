@@ -65,8 +65,8 @@ public class Spider extends Monster {
     }
 
     @Override
-    protected PathNavigation createNavigation(Level p_33802_) {
-        return new WallClimberNavigation(this, p_33802_);
+    protected PathNavigation createNavigation(Level pLevel) {
+        return new WallClimberNavigation(this, pLevel);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class Spider extends Monster {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_33814_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.SPIDER_HURT;
     }
 
@@ -103,7 +103,7 @@ public class Spider extends Monster {
     }
 
     @Override
-    protected void playStepSound(BlockPos p_33804_, BlockState p_33805_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(SoundEvents.SPIDER_STEP, 0.15F, 1.0F);
     }
 
@@ -113,24 +113,24 @@ public class Spider extends Monster {
     }
 
     @Override
-    public void makeStuckInBlock(BlockState p_33796_, Vec3 p_33797_) {
-        if (!p_33796_.is(Blocks.COBWEB)) {
-            super.makeStuckInBlock(p_33796_, p_33797_);
+    public void makeStuckInBlock(BlockState pState, Vec3 pMotionMultiplier) {
+        if (!pState.is(Blocks.COBWEB)) {
+            super.makeStuckInBlock(pState, pMotionMultiplier);
         }
     }
 
     @Override
-    public boolean canBeAffected(MobEffectInstance p_33809_) {
-        return p_33809_.is(MobEffects.POISON) ? false : super.canBeAffected(p_33809_);
+    public boolean canBeAffected(MobEffectInstance pPotioneffect) {
+        return pPotioneffect.is(MobEffects.POISON) ? false : super.canBeAffected(pPotioneffect);
     }
 
     public boolean isClimbing() {
         return (this.entityData.get(DATA_FLAGS_ID) & 1) != 0;
     }
 
-    public void setClimbing(boolean p_33820_) {
+    public void setClimbing(boolean pClimbing) {
         byte b0 = this.entityData.get(DATA_FLAGS_ID);
-        if (p_33820_) {
+        if (pClimbing) {
             b0 = (byte)(b0 | 1);
         } else {
             b0 = (byte)(b0 & -2);
@@ -176,8 +176,8 @@ public class Spider extends Monster {
     }
 
     static class SpiderAttackGoal extends MeleeAttackGoal {
-        public SpiderAttackGoal(Spider p_33822_) {
-            super(p_33822_, 1.0, true);
+        public SpiderAttackGoal(Spider pSpider) {
+            super(pSpider, 1.0, true);
         }
 
         @Override
@@ -201,8 +201,8 @@ public class Spider extends Monster {
         @Nullable
         public Holder<MobEffect> effect;
 
-        public void setRandomEffect(RandomSource p_219119_) {
-            int i = p_219119_.nextInt(5);
+        public void setRandomEffect(RandomSource pRandom) {
+            int i = pRandom.nextInt(5);
             if (i <= 1) {
                 this.effect = MobEffects.MOVEMENT_SPEED;
             } else if (i <= 2) {
@@ -216,8 +216,8 @@ public class Spider extends Monster {
     }
 
     static class SpiderTargetGoal<T extends LivingEntity> extends NearestAttackableTargetGoal<T> {
-        public SpiderTargetGoal(Spider p_33832_, Class<T> p_33833_) {
-            super(p_33832_, p_33833_, true);
+        public SpiderTargetGoal(Spider pSpider, Class<T> pEntityTypeToTarget) {
+            super(pSpider, pEntityTypeToTarget, true);
         }
 
         @Override

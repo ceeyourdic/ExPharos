@@ -24,11 +24,11 @@ public class EditServerScreen extends Screen {
     private EditBox nameEdit;
     private final Screen lastScreen;
 
-    public EditServerScreen(Screen p_96017_, BooleanConsumer p_96018_, ServerData p_96019_) {
+    public EditServerScreen(Screen pLastScreen, BooleanConsumer pCallback, ServerData pServerData) {
         super(Component.translatable("addServer.title"));
-        this.lastScreen = p_96017_;
-        this.callback = p_96018_;
-        this.serverData = p_96019_;
+        this.lastScreen = pLastScreen;
+        this.callback = pCallback;
+        this.serverData = pServerData;
     }
 
     @Override
@@ -74,10 +74,10 @@ public class EditServerScreen extends Screen {
     }
 
     @Override
-    public void resize(Minecraft p_96026_, int p_96027_, int p_96028_) {
+    public void resize(Minecraft pMinecraft, int pWidth, int pHeight) {
         String s = this.ipEdit.getValue();
         String s1 = this.nameEdit.getValue();
-        this.init(p_96026_, p_96027_, p_96028_);
+        this.init(pMinecraft, pWidth, pHeight);
         this.ipEdit.setValue(s);
         this.nameEdit.setValue(s1);
     }

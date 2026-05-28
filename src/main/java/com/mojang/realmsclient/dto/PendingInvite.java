@@ -19,15 +19,15 @@ public class PendingInvite extends ValueObject {
     public UUID realmOwnerUuid;
     public Date date;
 
-    public static PendingInvite parse(JsonObject p_87431_) {
+    public static PendingInvite parse(JsonObject pJson) {
         PendingInvite pendinginvite = new PendingInvite();
 
         try {
-            pendinginvite.invitationId = JsonUtils.getStringOr("invitationId", p_87431_, "");
-            pendinginvite.realmName = JsonUtils.getStringOr("worldName", p_87431_, "");
-            pendinginvite.realmOwnerName = JsonUtils.getStringOr("worldOwnerName", p_87431_, "");
-            pendinginvite.realmOwnerUuid = JsonUtils.getUuidOr("worldOwnerUuid", p_87431_, Util.NIL_UUID);
-            pendinginvite.date = JsonUtils.getDateOr("date", p_87431_);
+            pendinginvite.invitationId = JsonUtils.getStringOr("invitationId", pJson, "");
+            pendinginvite.realmName = JsonUtils.getStringOr("worldName", pJson, "");
+            pendinginvite.realmOwnerName = JsonUtils.getStringOr("worldOwnerName", pJson, "");
+            pendinginvite.realmOwnerUuid = JsonUtils.getUuidOr("worldOwnerUuid", pJson, Util.NIL_UUID);
+            pendinginvite.date = JsonUtils.getDateOr("date", pJson);
         } catch (Exception exception) {
             LOGGER.error("Could not parse PendingInvite: {}", exception.getMessage());
         }

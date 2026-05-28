@@ -11,31 +11,31 @@ import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 public class Pools {
     public static final ResourceKey<StructureTemplatePool> EMPTY = createKey("empty");
 
-    public static ResourceKey<StructureTemplatePool> createKey(ResourceLocation p_368621_) {
-        return ResourceKey.create(Registries.TEMPLATE_POOL, p_368621_);
+    public static ResourceKey<StructureTemplatePool> createKey(ResourceLocation pLocation) {
+        return ResourceKey.create(Registries.TEMPLATE_POOL, pLocation);
     }
 
-    public static ResourceKey<StructureTemplatePool> createKey(String p_256439_) {
-        return createKey(ResourceLocation.withDefaultNamespace(p_256439_));
+    public static ResourceKey<StructureTemplatePool> createKey(String pName) {
+        return createKey(ResourceLocation.withDefaultNamespace(pName));
     }
 
-    public static ResourceKey<StructureTemplatePool> parseKey(String p_344725_) {
-        return createKey(ResourceLocation.parse(p_344725_));
+    public static ResourceKey<StructureTemplatePool> parseKey(String pKey) {
+        return createKey(ResourceLocation.parse(pKey));
     }
 
-    public static void register(BootstrapContext<StructureTemplatePool> p_335139_, String p_255837_, StructureTemplatePool p_256161_) {
-        p_335139_.register(createKey(p_255837_), p_256161_);
+    public static void register(BootstrapContext<StructureTemplatePool> pContext, String pName, StructureTemplatePool pPool) {
+        pContext.register(createKey(pName), pPool);
     }
 
-    public static void bootstrap(BootstrapContext<StructureTemplatePool> p_332528_) {
-        HolderGetter<StructureTemplatePool> holdergetter = p_332528_.lookup(Registries.TEMPLATE_POOL);
+    public static void bootstrap(BootstrapContext<StructureTemplatePool> pContext) {
+        HolderGetter<StructureTemplatePool> holdergetter = pContext.lookup(Registries.TEMPLATE_POOL);
         Holder<StructureTemplatePool> holder = holdergetter.getOrThrow(EMPTY);
-        p_332528_.register(EMPTY, new StructureTemplatePool(holder, ImmutableList.of(), StructureTemplatePool.Projection.RIGID));
-        BastionPieces.bootstrap(p_332528_);
-        PillagerOutpostPools.bootstrap(p_332528_);
-        VillagePools.bootstrap(p_332528_);
-        AncientCityStructurePieces.bootstrap(p_332528_);
-        TrailRuinsStructurePools.bootstrap(p_332528_);
-        TrialChambersStructurePools.bootstrap(p_332528_);
+        pContext.register(EMPTY, new StructureTemplatePool(holder, ImmutableList.of(), StructureTemplatePool.Projection.RIGID));
+        BastionPieces.bootstrap(pContext);
+        PillagerOutpostPools.bootstrap(pContext);
+        VillagePools.bootstrap(pContext);
+        AncientCityStructurePieces.bootstrap(pContext);
+        TrailRuinsStructurePools.bootstrap(pContext);
+        TrialChambersStructurePools.bootstrap(pContext);
     }
 }

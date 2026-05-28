@@ -14,9 +14,9 @@ import net.minecraft.util.datafix.schemas.NamespacedSchema;
 public abstract class ItemRenameFix extends DataFix {
     private final String name;
 
-    public ItemRenameFix(Schema p_16001_, String p_16002_) {
-        super(p_16001_, false);
-        this.name = p_16002_;
+    public ItemRenameFix(Schema pOutputSchema, String pName) {
+        super(pOutputSchema, false);
+        this.name = pName;
     }
 
     @Override
@@ -29,13 +29,13 @@ public abstract class ItemRenameFix extends DataFix {
         }
     }
 
-    protected abstract String fixItem(String p_16011_);
+    protected abstract String fixItem(String pItem);
 
-    public static DataFix create(Schema p_16004_, String p_16005_, final Function<String, String> p_16006_) {
-        return new ItemRenameFix(p_16004_, p_16005_) {
+    public static DataFix create(Schema pOutputSchema, String pName, final Function<String, String> pFixer) {
+        return new ItemRenameFix(pOutputSchema, pName) {
             @Override
             protected String fixItem(String p_16019_) {
-                return p_16006_.apply(p_16019_);
+                return pFixer.apply(p_16019_);
             }
         };
     }

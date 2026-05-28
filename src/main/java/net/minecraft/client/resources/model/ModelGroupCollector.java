@@ -22,13 +22,13 @@ public class ModelGroupCollector {
     static final int SINGLETON_MODEL_GROUP = -1;
     private static final int INVISIBLE_MODEL_GROUP = 0;
 
-    public static Object2IntMap<BlockState> build(BlockColors p_367669_, BlockStateModelLoader.LoadedModels p_368285_) {
+    public static Object2IntMap<BlockState> build(BlockColors pBlockColors, BlockStateModelLoader.LoadedModels pLoadedModels) {
         Map<Block, List<Property<?>>> map = new HashMap<>();
         Map<ModelGroupCollector.GroupKey, Set<BlockState>> map1 = new HashMap<>();
-        p_368285_.models()
+        pLoadedModels.models()
             .forEach(
                 (p_374716_, p_374717_) -> {
-                    List<Property<?>> list = map.computeIfAbsent(p_374717_.state().getBlock(), p_361060_ -> List.copyOf(p_367669_.getColoringProperties(p_361060_)));
+                    List<Property<?>> list = map.computeIfAbsent(p_374717_.state().getBlock(), p_361060_ -> List.copyOf(pBlockColors.getColoringProperties(p_361060_)));
                     ModelGroupCollector.GroupKey modelgroupcollector$groupkey = ModelGroupCollector.GroupKey.create(
                         p_374717_.state(), p_374717_.model(), list
                     );
@@ -61,17 +61,17 @@ public class ModelGroupCollector {
 
     @OnlyIn(Dist.CLIENT)
     static record GroupKey(Object equalityGroup, List<Object> coloringValues) {
-        public static ModelGroupCollector.GroupKey create(BlockState p_367993_, UnbakedBlockStateModel p_377788_, List<Property<?>> p_363265_) {
-            List<Object> list = getColoringValues(p_367993_, p_363265_);
-            Object object = p_377788_.visualEqualityGroup(p_367993_);
+        public static ModelGroupCollector.GroupKey create(BlockState pState, UnbakedBlockStateModel pModel, List<Property<?>> pProperties) {
+            List<Object> list = getColoringValues(pState, pProperties);
+            Object object = pModel.visualEqualityGroup(pState);
             return new ModelGroupCollector.GroupKey(object, list);
         }
 
-        private static List<Object> getColoringValues(BlockState p_367197_, List<Property<?>> p_360879_) {
-            Object[] aobject = new Object[p_360879_.size()];
+        private static List<Object> getColoringValues(BlockState pState, List<Property<?>> pProperties) {
+            Object[] aobject = new Object[pProperties.size()];
 
-            for (int i = 0; i < p_360879_.size(); i++) {
-                aobject[i] = p_367197_.getValue(p_360879_.get(i));
+            for (int i = 0; i < pProperties.size(); i++) {
+                aobject[i] = pState.getValue(pProperties.get(i));
             }
 
             return List.of(aobject);

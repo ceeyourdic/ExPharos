@@ -15,18 +15,18 @@ public class SpecialBlockModelRenderer {
     public static final SpecialBlockModelRenderer EMPTY = new SpecialBlockModelRenderer(Map.of());
     private final Map<Block, SpecialModelRenderer<?>> renderers;
 
-    public SpecialBlockModelRenderer(Map<Block, SpecialModelRenderer<?>> p_376544_) {
-        this.renderers = p_376544_;
+    public SpecialBlockModelRenderer(Map<Block, SpecialModelRenderer<?>> pRenderers) {
+        this.renderers = pRenderers;
     }
 
-    public static SpecialBlockModelRenderer vanilla(EntityModelSet p_378718_) {
-        return new SpecialBlockModelRenderer(SpecialModelRenderers.createBlockRenderers(p_378718_));
+    public static SpecialBlockModelRenderer vanilla(EntityModelSet pModelSet) {
+        return new SpecialBlockModelRenderer(SpecialModelRenderers.createBlockRenderers(pModelSet));
     }
 
-    public void renderByBlock(Block p_378389_, ItemDisplayContext p_376582_, PoseStack p_377636_, MultiBufferSource p_378317_, int p_378039_, int p_375518_) {
-        SpecialModelRenderer<?> specialmodelrenderer = this.renderers.get(p_378389_);
+    public void renderByBlock(Block pBlock, ItemDisplayContext pDisplayContext, PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay) {
+        SpecialModelRenderer<?> specialmodelrenderer = this.renderers.get(pBlock);
         if (specialmodelrenderer != null) {
-            specialmodelrenderer.render(null, p_376582_, p_377636_, p_378317_, p_378039_, p_375518_, false);
+            specialmodelrenderer.render(null, pDisplayContext, pPoseStack, pBufferSource, pPackedLight, pPackedOverlay, false);
         }
     }
 }

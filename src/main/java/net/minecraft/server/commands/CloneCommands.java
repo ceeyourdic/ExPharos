@@ -38,56 +38,56 @@ public class CloneCommands {
     private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.clone.failed"));
     public static final Predicate<BlockInWorld> FILTER_AIR = p_358579_ -> !p_358579_.getState().isAir();
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_214424_, CommandBuildContext p_214425_) {
-        p_214424_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher, CommandBuildContext pContext) {
+        pDispatcher.register(
             Commands.literal("clone")
                 .requires(p_136734_ -> p_136734_.hasPermission(2))
-                .then(beginEndDestinationAndModeSuffix(p_214425_, p_264757_ -> p_264757_.getSource().getLevel()))
+                .then(beginEndDestinationAndModeSuffix(pContext, p_264757_ -> p_264757_.getSource().getLevel()))
                 .then(
                     Commands.literal("from")
                         .then(
                             Commands.argument("sourceDimension", DimensionArgument.dimension())
-                                .then(beginEndDestinationAndModeSuffix(p_214425_, p_264743_ -> DimensionArgument.getDimension(p_264743_, "sourceDimension")))
+                                .then(beginEndDestinationAndModeSuffix(pContext, p_264743_ -> DimensionArgument.getDimension(p_264743_, "sourceDimension")))
                         )
                 )
         );
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> beginEndDestinationAndModeSuffix(
-        CommandBuildContext p_265681_, CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, ServerLevel> p_265514_
+        CommandBuildContext pBuildContext, CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, ServerLevel> pLevelGetter
     ) {
         return Commands.argument("begin", BlockPosArgument.blockPos())
             .then(
                 Commands.argument("end", BlockPosArgument.blockPos())
-                    .then(destinationAndModeSuffix(p_265681_, p_265514_, p_264751_ -> p_264751_.getSource().getLevel()))
+                    .then(destinationAndModeSuffix(pBuildContext, pLevelGetter, p_264751_ -> p_264751_.getSource().getLevel()))
                     .then(
                         Commands.literal("to")
                             .then(
                                 Commands.argument("targetDimension", DimensionArgument.dimension())
-                                    .then(destinationAndModeSuffix(p_265681_, p_265514_, p_264756_ -> DimensionArgument.getDimension(p_264756_, "targetDimension")))
+                                    .then(destinationAndModeSuffix(pBuildContext, pLevelGetter, p_264756_ -> DimensionArgument.getDimension(p_264756_, "targetDimension")))
                             )
                     )
             );
     }
 
-    private static CloneCommands.DimensionAndPosition getLoadedDimensionAndPosition(CommandContext<CommandSourceStack> p_265513_, ServerLevel p_265183_, String p_265511_) throws CommandSyntaxException {
-        BlockPos blockpos = BlockPosArgument.getLoadedBlockPos(p_265513_, p_265183_, p_265511_);
-        return new CloneCommands.DimensionAndPosition(p_265183_, blockpos);
+    private static CloneCommands.DimensionAndPosition getLoadedDimensionAndPosition(CommandContext<CommandSourceStack> pContext, ServerLevel pLevel, String pName) throws CommandSyntaxException {
+        BlockPos blockpos = BlockPosArgument.getLoadedBlockPos(pContext, pLevel, pName);
+        return new CloneCommands.DimensionAndPosition(pLevel, blockpos);
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> destinationAndModeSuffix(
-        CommandBuildContext p_265238_,
-        CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, ServerLevel> p_265621_,
-        CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, ServerLevel> p_265296_
+        CommandBuildContext pBuildContext,
+        CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, ServerLevel> pSourceLevelGetter,
+        CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, ServerLevel> pDestinationLevelGetter
     ) {
         CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, CloneCommands.DimensionAndPosition> commandfunction = p_264737_ -> getLoadedDimensionAndPosition(
-                p_264737_, p_265621_.apply(p_264737_), "begin"
+                p_264737_, pSourceLevelGetter.apply(p_264737_), "begin"
             );
         CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, CloneCommands.DimensionAndPosition> commandfunction1 = p_264735_ -> getLoadedDimensionAndPosition(
-                p_264735_, p_265621_.apply(p_264735_), "end"
+                p_264735_, pSourceLevelGetter.apply(p_264735_), "end"
             );
         CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, CloneCommands.DimensionAndPosition> commandfunction2 = p_264768_ -> getLoadedDimensionAndPosition(
-                p_264768_, p_265296_.apply(p_264768_), "destination"
+                p_264768_, pDestinationLevelGetter.apply(p_264768_), "destination"
             );
         return Commands.argument("destination", BlockPosArgument.blockPos())
             .executes(
@@ -146,7 +146,7 @@ public class CloneCommands {
                             commandfunction1,
                             commandfunction2,
                             p_264745_ -> BlockPredicateArgument.getBlockPredicate(p_264745_, "filter"),
-                            Commands.argument("filter", BlockPredicateArgument.blockPredicate(p_265238_))
+                            Commands.argument("filter", BlockPredicateArgument.blockPredicate(pBuildContext))
                                 .executes(
                                     p_264733_ -> clone(
                                             p_264733_.getSource(),
@@ -163,21 +163,21 @@ public class CloneCommands {
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> wrapWithCloneMode(
-        CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, CloneCommands.DimensionAndPosition> p_265374_,
-        CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, CloneCommands.DimensionAndPosition> p_265134_,
-        CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, CloneCommands.DimensionAndPosition> p_265546_,
-        CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, Predicate<BlockInWorld>> p_265798_,
-        ArgumentBuilder<CommandSourceStack, ?> p_265069_
+        CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, CloneCommands.DimensionAndPosition> pBeginGetter,
+        CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, CloneCommands.DimensionAndPosition> pEndGetter,
+        CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, CloneCommands.DimensionAndPosition> pTargetGetter,
+        CloneCommands.CommandFunction<CommandContext<CommandSourceStack>, Predicate<BlockInWorld>> pFilterGetter,
+        ArgumentBuilder<CommandSourceStack, ?> pArgumentBuilder
     ) {
-        return p_265069_.then(
+        return pArgumentBuilder.then(
                 Commands.literal("force")
                     .executes(
                         p_264773_ -> clone(
                                 p_264773_.getSource(),
-                                p_265374_.apply(p_264773_),
-                                p_265134_.apply(p_264773_),
-                                p_265546_.apply(p_264773_),
-                                p_265798_.apply(p_264773_),
+                                pBeginGetter.apply(p_264773_),
+                                pEndGetter.apply(p_264773_),
+                                pTargetGetter.apply(p_264773_),
+                                pFilterGetter.apply(p_264773_),
                                 CloneCommands.Mode.FORCE
                             )
                     )
@@ -187,10 +187,10 @@ public class CloneCommands {
                     .executes(
                         p_264766_ -> clone(
                                 p_264766_.getSource(),
-                                p_265374_.apply(p_264766_),
-                                p_265134_.apply(p_264766_),
-                                p_265546_.apply(p_264766_),
-                                p_265798_.apply(p_264766_),
+                                pBeginGetter.apply(p_264766_),
+                                pEndGetter.apply(p_264766_),
+                                pTargetGetter.apply(p_264766_),
+                                pFilterGetter.apply(p_264766_),
                                 CloneCommands.Mode.MOVE
                             )
                     )
@@ -200,10 +200,10 @@ public class CloneCommands {
                     .executes(
                         p_264750_ -> clone(
                                 p_264750_.getSource(),
-                                p_265374_.apply(p_264750_),
-                                p_265134_.apply(p_264750_),
-                                p_265546_.apply(p_264750_),
-                                p_265798_.apply(p_264750_),
+                                pBeginGetter.apply(p_264750_),
+                                pEndGetter.apply(p_264750_),
+                                pTargetGetter.apply(p_264750_),
+                                pFilterGetter.apply(p_264750_),
                                 CloneCommands.Mode.NORMAL
                             )
                     )
@@ -211,26 +211,26 @@ public class CloneCommands {
     }
 
     private static int clone(
-        CommandSourceStack p_265047_,
-        CloneCommands.DimensionAndPosition p_265232_,
-        CloneCommands.DimensionAndPosition p_265188_,
-        CloneCommands.DimensionAndPosition p_265594_,
-        Predicate<BlockInWorld> p_265585_,
-        CloneCommands.Mode p_265530_
+        CommandSourceStack pSource,
+        CloneCommands.DimensionAndPosition pBegin,
+        CloneCommands.DimensionAndPosition pEnd,
+        CloneCommands.DimensionAndPosition pTarget,
+        Predicate<BlockInWorld> pFilter,
+        CloneCommands.Mode pMode
     ) throws CommandSyntaxException {
-        BlockPos blockpos = p_265232_.position();
-        BlockPos blockpos1 = p_265188_.position();
+        BlockPos blockpos = pBegin.position();
+        BlockPos blockpos1 = pEnd.position();
         BoundingBox boundingbox = BoundingBox.fromCorners(blockpos, blockpos1);
-        BlockPos blockpos2 = p_265594_.position();
+        BlockPos blockpos2 = pTarget.position();
         BlockPos blockpos3 = blockpos2.offset(boundingbox.getLength());
         BoundingBox boundingbox1 = BoundingBox.fromCorners(blockpos2, blockpos3);
-        ServerLevel serverlevel = p_265232_.dimension();
-        ServerLevel serverlevel1 = p_265594_.dimension();
-        if (!p_265530_.canOverlap() && serverlevel == serverlevel1 && boundingbox1.intersects(boundingbox)) {
+        ServerLevel serverlevel = pBegin.dimension();
+        ServerLevel serverlevel1 = pTarget.dimension();
+        if (!pMode.canOverlap() && serverlevel == serverlevel1 && boundingbox1.intersects(boundingbox)) {
             throw ERROR_OVERLAP.create();
         } else {
             int i = boundingbox.getXSpan() * boundingbox.getYSpan() * boundingbox.getZSpan();
-            int j = p_265047_.getLevel().getGameRules().getInt(GameRules.RULE_COMMAND_MODIFICATION_BLOCK_LIMIT);
+            int j = pSource.getLevel().getGameRules().getInt(GameRules.RULE_COMMAND_MODIFICATION_BLOCK_LIMIT);
             if (i > j) {
                 throw ERROR_AREA_TOO_LARGE.create(j, i);
             } else if (serverlevel.hasChunksAt(blockpos, blockpos1) && serverlevel1.hasChunksAt(blockpos2, blockpos3)) {
@@ -251,11 +251,11 @@ public class CloneCommands {
                             BlockPos blockpos6 = blockpos5.offset(blockpos4);
                             BlockInWorld blockinworld = new BlockInWorld(serverlevel, blockpos5, false);
                             BlockState blockstate = blockinworld.getState();
-                            if (p_265585_.test(blockinworld)) {
+                            if (pFilter.test(blockinworld)) {
                                 BlockEntity blockentity = serverlevel.getBlockEntity(blockpos5);
                                 if (blockentity != null) {
                                     CloneCommands.CloneBlockEntityInfo clonecommands$cloneblockentityinfo = new CloneCommands.CloneBlockEntityInfo(
-                                        blockentity.saveCustomOnly(p_265047_.registryAccess()), blockentity.components()
+                                        blockentity.saveCustomOnly(pSource.registryAccess()), blockentity.components()
                                     );
                                     list1.add(new CloneCommands.CloneBlockInfo(blockpos6, blockstate, clonecommands$cloneblockentityinfo));
                                     deque.addLast(blockpos5);
@@ -271,7 +271,7 @@ public class CloneCommands {
                     }
                 }
 
-                if (p_265530_ == CloneCommands.Mode.MOVE) {
+                if (pMode == CloneCommands.Mode.MOVE) {
                     for (BlockPos blockpos7 : deque) {
                         BlockEntity blockentity1 = serverlevel.getBlockEntity(blockpos7);
                         Clearable.tryClear(blockentity1);
@@ -323,7 +323,7 @@ public class CloneCommands {
                     throw ERROR_FAILED.create();
                 } else {
                     int k1 = j1;
-                    p_265047_.sendSuccess(() -> Component.translatable("commands.clone.success", k1), true);
+                    pSource.sendSuccess(() -> Component.translatable("commands.clone.success", k1), true);
                     return j1;
                 }
             } else {
@@ -340,7 +340,7 @@ public class CloneCommands {
 
     @FunctionalInterface
     interface CommandFunction<T, R> {
-        R apply(T p_265571_) throws CommandSyntaxException;
+        R apply(T pInput) throws CommandSyntaxException;
     }
 
     static record DimensionAndPosition(ServerLevel dimension, BlockPos position) {
@@ -353,8 +353,8 @@ public class CloneCommands {
 
         private final boolean canOverlap;
 
-        private Mode(final boolean p_136795_) {
-            this.canOverlap = p_136795_;
+        private Mode(final boolean pCanOverlap) {
+            this.canOverlap = pCanOverlap;
         }
 
         public boolean canOverlap() {

@@ -25,8 +25,8 @@ public class HeightmapTypeArgument extends StringRepresentableArgument<Heightmap
         return new HeightmapTypeArgument();
     }
 
-    public static Heightmap.Types getHeightmap(CommandContext<CommandSourceStack> p_275445_, String p_275449_) {
-        return p_275445_.getArgument(p_275449_, Heightmap.Types.class);
+    public static Heightmap.Types getHeightmap(CommandContext<CommandSourceStack> pContext, String pArgument) {
+        return pContext.getArgument(pArgument, Heightmap.Types.class);
     }
 
     @Override

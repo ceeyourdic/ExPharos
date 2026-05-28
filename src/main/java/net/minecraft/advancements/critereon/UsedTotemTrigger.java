@@ -18,8 +18,8 @@ public class UsedTotemTrigger extends SimpleCriterionTrigger<UsedTotemTrigger.Tr
         return UsedTotemTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_74432_, ItemStack p_74433_) {
-        this.trigger(p_74432_, p_74436_ -> p_74436_.matches(p_74433_));
+    public void trigger(ServerPlayer pPlayer, ItemStack pItem) {
+        this.trigger(pPlayer, p_74436_ -> p_74436_.matches(pItem));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item)
@@ -32,21 +32,21 @@ public class UsedTotemTrigger extends SimpleCriterionTrigger<UsedTotemTrigger.Tr
                     .apply(p_325258_, UsedTotemTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<UsedTotemTrigger.TriggerInstance> usedTotem(ItemPredicate p_298404_) {
-            return CriteriaTriggers.USED_TOTEM.createCriterion(new UsedTotemTrigger.TriggerInstance(Optional.empty(), Optional.of(p_298404_)));
+        public static Criterion<UsedTotemTrigger.TriggerInstance> usedTotem(ItemPredicate pItem) {
+            return CriteriaTriggers.USED_TOTEM.createCriterion(new UsedTotemTrigger.TriggerInstance(Optional.empty(), Optional.of(pItem)));
         }
 
-        public static Criterion<UsedTotemTrigger.TriggerInstance> usedTotem(HolderGetter<Item> p_367990_, ItemLike p_300178_) {
+        public static Criterion<UsedTotemTrigger.TriggerInstance> usedTotem(HolderGetter<Item> pItemRegistry, ItemLike pItem) {
             return CriteriaTriggers.USED_TOTEM
                 .createCriterion(
                     new UsedTotemTrigger.TriggerInstance(
-                        Optional.empty(), Optional.of(ItemPredicate.Builder.item().of(p_367990_, p_300178_).build())
+                        Optional.empty(), Optional.of(ItemPredicate.Builder.item().of(pItemRegistry, pItem).build())
                     )
                 );
         }
 
-        public boolean matches(ItemStack p_74451_) {
-            return this.item.isEmpty() || this.item.get().test(p_74451_);
+        public boolean matches(ItemStack pItem) {
+            return this.item.isEmpty() || this.item.get().test(pItem);
         }
 
         @Override

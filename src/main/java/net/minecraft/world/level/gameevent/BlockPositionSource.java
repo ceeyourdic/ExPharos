@@ -19,8 +19,8 @@ public class BlockPositionSource implements PositionSource {
     );
     private final BlockPos pos;
 
-    public BlockPositionSource(BlockPos p_157703_) {
-        this.pos = p_157703_;
+    public BlockPositionSource(BlockPos pPos) {
+        this.pos = pPos;
     }
 
     @Override

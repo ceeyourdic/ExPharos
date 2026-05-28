@@ -5,8 +5,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.mojang.logging.LogUtils;
+import cn.lazymoon.features.module.impl.render.InterFace;
+import cn.lazymoon.utils.client.ClientUtil;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +47,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.ARGB;
@@ -67,6 +73,7 @@ import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.RecipeAccess;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.GameType;
@@ -80,6 +87,8 @@ import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.entity.EntitySection;
+import net.minecraft.world.level.entity.EntitySectionStorage;
 import net.minecraft.world.level.entity.EntityTickList;
 import net.minecraft.world.level.entity.LevelCallback;
 import net.minecraft.world.level.entity.LevelEntityGetter;
@@ -91,15 +100,27 @@ import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.BlackholeTickAccess;
 import net.minecraft.world.ticks.LevelTickAccess;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.model.data.ModelDataManager;
+import net.minecraftforge.client.model.lighting.QuadLighter;
+import net.minecraftforge.entity.PartEntity;
+import net.minecraftforge.eventbus.api.Event;
+import net.optifine.Config;
+import net.optifine.CustomColors;
+import net.optifine.CustomGuis;
+import net.optifine.DynamicLights;
+import net.optifine.RandomEntities;
+import net.optifine.Vec3M;
+import net.optifine.override.PlayerControllerOF;
+import net.optifine.reflect.Reflector;
+import net.optifine.reflect.ReflectorForge;
+import net.optifine.shaders.Shaders;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class ClientLevel extends Level {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final double FLUID_PARTICLE_SPAWN_OFFSET = 0.05;
@@ -119,10 +140,11 @@ public class ClientLevel extends Level {
     private final Map<MapId, MapItemSavedData> mapData = Maps.newHashMap();
     private static final int CLOUD_COLOR = -1;
     private int skyFlashTime;
-    private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(new Object2ObjectArrayMap<>(3), p_194170_ -> {
-        p_194170_.put(BiomeColors.GRASS_COLOR_RESOLVER, new BlockTintCache(p_194181_ -> this.calculateBlockTint(p_194181_, BiomeColors.GRASS_COLOR_RESOLVER)));
-        p_194170_.put(BiomeColors.FOLIAGE_COLOR_RESOLVER, new BlockTintCache(p_194177_ -> this.calculateBlockTint(p_194177_, BiomeColors.FOLIAGE_COLOR_RESOLVER)));
-        p_194170_.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache(p_194168_ -> this.calculateBlockTint(p_194168_, BiomeColors.WATER_COLOR_RESOLVER)));
+    private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(new Object2ObjectArrayMap<>(3), mapIn -> {
+        mapIn.put(BiomeColors.GRASS_COLOR_RESOLVER, new BlockTintCache(posIn -> this.calculateBlockTint(posIn, BiomeColors.GRASS_COLOR_RESOLVER)));
+        mapIn.put(BiomeColors.FOLIAGE_COLOR_RESOLVER, new BlockTintCache(posIn -> this.calculateBlockTint(posIn, BiomeColors.FOLIAGE_COLOR_RESOLVER)));
+        mapIn.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache(posIn -> this.calculateBlockTint(posIn, BiomeColors.WATER_COLOR_RESOLVER)));
+        Reflector.ColorResolverManager_registerBlockTintCaches.call(this, mapIn);
     });
     private final ClientChunkCache chunkSource;
     private final Deque<Runnable> lightUpdateQueue = Queues.newArrayDeque();
@@ -131,24 +153,27 @@ public class ClientLevel extends Level {
     private final int seaLevel;
     private boolean tickDayTime;
     private static final Set<Item> MARKER_PARTICLE_ITEMS = Set.of(Items.BARRIER, Items.LIGHT);
+    private final Int2ObjectMap<PartEntity<?>> partEntities = new Int2ObjectOpenHashMap<>();
+    private final ModelDataManager modelDataManager = new ModelDataManager(this);
+    private boolean playerUpdate = false;
 
-    public void handleBlockChangedAck(int p_233652_) {
-        this.blockStatePredictionHandler.endPredictionsUpTo(p_233652_, this);
+    public void handleBlockChangedAck(int pSequence) {
+        this.blockStatePredictionHandler.endPredictionsUpTo(pSequence, this);
     }
 
-    public void setServerVerifiedBlockState(BlockPos p_233654_, BlockState p_233655_, int p_233656_) {
-        if (!this.blockStatePredictionHandler.updateKnownServerState(p_233654_, p_233655_)) {
-            super.setBlock(p_233654_, p_233655_, p_233656_, 512);
+    public void setServerVerifiedBlockState(BlockPos pPos, BlockState pState, int pFlags) {
+        if (!this.blockStatePredictionHandler.updateKnownServerState(pPos, pState)) {
+            super.setBlock(pPos, pState, pFlags, 512);
         }
     }
 
-    public void syncBlockState(BlockPos p_233648_, BlockState p_233649_, Vec3 p_233650_) {
-        BlockState blockstate = this.getBlockState(p_233648_);
-        if (blockstate != p_233649_) {
-            this.setBlock(p_233648_, p_233649_, 19);
+    public void syncBlockState(BlockPos pPos, BlockState pState, Vec3 pPlayerPos) {
+        BlockState blockstate = this.getBlockState(pPos);
+        if (blockstate != pState) {
+            this.setBlock(pPos, pState, 19);
             Player player = this.minecraft.player;
-            if (this == player.level() && player.isColliding(p_233648_, p_233649_)) {
-                player.absMoveTo(p_233650_.x, p_233650_.y, p_233650_.z);
+            if (this == player.level() && player.isColliding(pPos, pState)) {
+                player.absMoveTo(pPlayerPos.x, pPlayerPos.y, pPlayerPos.z);
             }
         }
     }
@@ -173,34 +198,43 @@ public class ClientLevel extends Level {
     }
 
     public ClientLevel(
-        ClientPacketListener p_360996_,
-        ClientLevel.ClientLevelData p_367904_,
-        ResourceKey<Level> p_361945_,
-        Holder<DimensionType> p_364481_,
-        int p_369930_,
-        int p_364305_,
-        LevelRenderer p_369269_,
-        boolean p_363871_,
-        long p_366080_,
-        int p_367884_
+        ClientPacketListener pConnection,
+        ClientLevel.ClientLevelData pLevelData,
+        ResourceKey<Level> pDimension,
+        Holder<DimensionType> pDimensionTypeRegistration,
+        int pViewDistance,
+        int pServerSimulationDistance,
+        LevelRenderer pLevelRenderer,
+        boolean pIsDebug,
+        long pBiomeZoomSeed,
+        int pSeaLevel
     ) {
-        super(p_367904_, p_361945_, p_360996_.registryAccess(), p_364481_, true, p_363871_, p_366080_, 1000000);
-        this.connection = p_360996_;
-        this.chunkSource = new ClientChunkCache(this, p_369930_);
+        super(pLevelData, pDimension, pConnection.registryAccess(), pDimensionTypeRegistration, true, pIsDebug, pBiomeZoomSeed, 1000000);
+        this.connection = pConnection;
+        this.chunkSource = new ClientChunkCache(this, pViewDistance);
         this.tickRateManager = new TickRateManager();
-        this.clientLevelData = p_367904_;
-        this.levelRenderer = p_369269_;
-        this.seaLevel = p_367884_;
-        this.levelEventHandler = new LevelEventHandler(this.minecraft, this, p_369269_);
-        this.effects = DimensionSpecialEffects.forType(p_364481_.value());
+        this.clientLevelData = pLevelData;
+        this.levelRenderer = pLevelRenderer;
+        this.seaLevel = pSeaLevel;
+        this.levelEventHandler = new LevelEventHandler(this.minecraft, this, pLevelRenderer);
+        this.effects = DimensionSpecialEffects.forType(pDimensionTypeRegistration.value());
         this.setDefaultSpawnPos(new BlockPos(8, 64, 8), 0.0F);
-        this.serverSimulationDistance = p_364305_;
+        this.serverSimulationDistance = pServerSimulationDistance;
         this.updateSkyBrightness();
         this.prepareWeather();
+        if (Reflector.CapabilityProvider_gatherCapabilities.exists() && Reflector.CapabilityProvider.getTargetClass().isAssignableFrom(this.getClass())) {
+            Reflector.call(this, Reflector.CapabilityProvider_gatherCapabilities);
+        }
+
+        Reflector.ForgeEventFactory_onLevelLoad.call(this);
+        if (this.minecraft.gameMode != null && this.minecraft.gameMode.getClass() == MultiPlayerGameMode.class) {
+            this.minecraft.gameMode = new PlayerControllerOF(this.minecraft, this.connection);
+            CustomGuis.setPlayerControllerOF((PlayerControllerOF)this.minecraft.gameMode);
+        }
     }
 
-    public void queueLightUpdate(Runnable p_194172_) {
-        this.lightUpdateQueue.add(p_194172_);
+    public void queueLightUpdate(Runnable pTask) {
+        this.lightUpdateQueue.add(pTask);
     }
 
     public void pollLightUpdates() {
@@ -221,7 +255,7 @@ public class ClientLevel extends Level {
         return this.effects;
     }
 
-    public void tick(BooleanSupplier p_104727_) {
+    public void tick(BooleanSupplier pHasTimeLeft) {
         this.getWorldBorder().tick();
         this.updateSkyBrightness();
         if (this.tickRateManager().runsNormally()) {
@@ -233,7 +267,7 @@ public class ClientLevel extends Level {
         }
 
         try (Zone zone = Profiler.get().zone("blocks")) {
-            this.chunkSource.tick(p_104727_, true);
+            this.chunkSource.tick(pHasTimeLeft, true);
         }
     }
 
@@ -244,10 +278,10 @@ public class ClientLevel extends Level {
         }
     }
 
-    public void setTimeFromServer(long p_361997_, long p_369573_, boolean p_363777_) {
-        this.clientLevelData.setGameTime(p_361997_);
-        this.clientLevelData.setDayTime(p_369573_);
-        this.tickDayTime = p_363777_;
+    public void setTimeFromServer(long pGameTime, long pDayTime, boolean pTickDayTime) {
+        this.clientLevelData.setGameTime(pGameTime);
+        this.clientLevelData.setDayTime(pDayTime);
+        this.tickDayTime = pTickDayTime;
     }
 
     public Iterable<Entity> entitiesForRendering() {
@@ -257,17 +291,17 @@ public class ClientLevel extends Level {
     public void tickEntities() {
         ProfilerFiller profilerfiller = Profiler.get();
         profilerfiller.push("entities");
-        this.tickingEntities.forEach(p_308278_ -> {
-            if (!p_308278_.isRemoved() && !p_308278_.isPassenger() && !this.tickRateManager.isEntityFrozen(p_308278_)) {
-                this.guardEntityTick(this::tickNonPassenger, p_308278_);
+        this.tickingEntities.forEach(entityIn -> {
+            if (!entityIn.isRemoved() && !entityIn.isPassenger() && !this.tickRateManager.isEntityFrozen(entityIn)) {
+                this.guardEntityTick(this::tickNonPassenger, entityIn);
             }
         });
         profilerfiller.pop();
         this.tickBlockEntities();
     }
 
-    public boolean isTickingEntity(Entity p_368004_) {
-        return this.tickingEntities.contains(p_368004_);
+    public boolean isTickingEntity(Entity pEntity) {
+        return this.tickingEntities.contains(pEntity);
     }
 
     @Override
@@ -275,77 +309,125 @@ public class ClientLevel extends Level {
         return p_194185_.chunkPosition().getChessboardDistance(this.minecraft.player.chunkPosition()) <= this.serverSimulationDistance;
     }
 
-    public void tickNonPassenger(Entity p_104640_) {
-        p_104640_.setOldPosAndRot();
-        p_104640_.tickCount++;
-        Profiler.get().push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(p_104640_.getType()).toString());
-        p_104640_.tick();
+    public void tickNonPassenger(Entity pEntity) {
+        pEntity.setOldPosAndRot();
+        pEntity.tickCount++;
+        Profiler.get().push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(pEntity.getType()).toString());
+        // Arcane mixin port: skip a requested number of local-player ticks after the vanilla old-position update.
+        if (ClientUtil.skipTicks > 0 && pEntity == this.minecraft.player) {
+            ClientUtil.skipTicks--;
+            Profiler.get().pop();
+            return;
+        }
+
+        if (ReflectorForge.canUpdate(pEntity)) {
+            pEntity.tick();
+        }
+
+        if (pEntity.isRemoved()) {
+            this.onEntityRemoved(pEntity);
+        }
+
         Profiler.get().pop();
 
-        for (Entity entity : p_104640_.getPassengers()) {
-            this.tickPassenger(p_104640_, entity);
+        for (Entity entity : pEntity.getPassengers()) {
+            this.tickPassenger(pEntity, entity);
         }
     }
 
-    private void tickPassenger(Entity p_104642_, Entity p_104643_) {
-        if (p_104643_.isRemoved() || p_104643_.getVehicle() != p_104642_) {
-            p_104643_.stopRiding();
-        } else if (p_104643_ instanceof Player || this.tickingEntities.contains(p_104643_)) {
-            p_104643_.setOldPosAndRot();
-            p_104643_.tickCount++;
-            p_104643_.rideTick();
+    private void tickPassenger(Entity pMount, Entity pRider) {
+        if (!pRider.isRemoved() && pRider.getVehicle() == pMount) {
+            if (pRider instanceof Player || this.tickingEntities.contains(pRider)) {
+                pRider.setOldPosAndRot();
+                pRider.tickCount++;
+                pRider.rideTick();
 
-            for (Entity entity : p_104643_.getPassengers()) {
-                this.tickPassenger(p_104643_, entity);
+                for (Entity entity : pRider.getPassengers()) {
+                    this.tickPassenger(pRider, entity);
+                }
             }
+        } else {
+            pRider.stopRiding();
         }
     }
 
-    public void unload(LevelChunk p_104666_) {
-        p_104666_.clearAllBlockEntities();
-        this.chunkSource.getLightEngine().setLightEnabled(p_104666_.getPos(), false);
-        this.entityStorage.stopTicking(p_104666_.getPos());
+    public void unload(LevelChunk pChunk) {
+        pChunk.clearAllBlockEntities();
+        this.chunkSource.getLightEngine().setLightEnabled(pChunk.getPos(), false);
+        this.entityStorage.stopTicking(pChunk.getPos());
     }
 
-    public void onChunkLoaded(ChunkPos p_171650_) {
-        this.tintCaches.forEach((p_194154_, p_194155_) -> p_194155_.invalidateForChunk(p_171650_.x, p_171650_.z));
-        this.entityStorage.startTicking(p_171650_);
+    public void onChunkLoaded(ChunkPos pChunkPos) {
+        this.tintCaches.forEach((resolverIn, cacheIn) -> cacheIn.invalidateForChunk(pChunkPos.x, pChunkPos.z));
+        this.entityStorage.startTicking(pChunkPos);
     }
 
-    public void onSectionBecomingNonEmpty(long p_365041_) {
-        this.levelRenderer.onSectionBecomingNonEmpty(p_365041_);
+    public void onSectionBecomingNonEmpty(long pSectionPos) {
+        this.levelRenderer.onSectionBecomingNonEmpty(pSectionPos);
     }
 
     public void clearTintCaches() {
-        this.tintCaches.forEach((p_194157_, p_194158_) -> p_194158_.invalidateAll());
+        this.tintCaches.forEach((resolverIn, cacheIn) -> cacheIn.invalidateAll());
     }
 
     @Override
-    public boolean hasChunk(int p_104737_, int p_104738_) {
+    public boolean hasChunk(int pChunkX, int pChunkZ) {
         return true;
+    }
+
+    // Arcane mixin port: Yarn name for checking whether a client chunk is present.
+    public boolean isChunkLoaded(int pChunkX, int pChunkZ) {
+        return this.hasChunk(pChunkX, pChunkZ);
+    }
+
+    // Arcane mixin port: Yarn name for BlockGetter#clip.
+    public BlockHitResult raycast(ClipContext pContext) {
+        return this.clip(pContext);
+    }
+
+    // Arcane mixin port: Yarn name for destroy-block-progress updates.
+    public void setBlockBreakingInfo(int pBreakerId, BlockPos pPos, int pProgress) {
+        this.destroyBlockProgress(pBreakerId, pPos, pProgress);
+    }
+
+    // Arcane mixin port: Yarn name for Level#destroyBlock(pos, drop).
+    public boolean breakBlock(BlockPos pPos, boolean pDropBlock) {
+        return this.destroyBlock(pPos, pDropBlock);
     }
 
     public int getEntityCount() {
         return this.entityStorage.count();
     }
 
-    public void addEntity(Entity p_104741_) {
-        this.removeEntity(p_104741_.getId(), Entity.RemovalReason.DISCARDED);
-        this.entityStorage.addEntity(p_104741_);
+    public void addEntity(Entity pEntity) {
+        if (!Reflector.ForgeEventFactory_onEntityJoinLevel.exists() || !Reflector.ForgeEventFactory_onEntityJoinLevel.callBoolean(pEntity, this)) {
+            this.removeEntity(pEntity.getId(), Entity.RemovalReason.DISCARDED);
+            this.entityStorage.addEntity(pEntity);
+            if (Reflector.IForgeEntity_onAddedToWorld.exists()) {
+                Reflector.call(pEntity, Reflector.IForgeEntity_onAddedToWorld);
+            }
+
+            this.onEntityAdded(pEntity);
+        }
     }
 
-    public void removeEntity(int p_171643_, Entity.RemovalReason p_171644_) {
-        Entity entity = this.getEntities().get(p_171643_);
+    public void removeEntity(int pEntityId, Entity.RemovalReason pReason) {
+        Entity entity = this.getEntities().get(pEntityId);
         if (entity != null) {
-            entity.setRemoved(p_171644_);
+            entity.setRemoved(pReason);
             entity.onClientRemoval();
         }
     }
 
     @Nullable
     @Override
-    public Entity getEntity(int p_104609_) {
-        return this.getEntities().get(p_104609_);
+    public Entity getEntity(int pId) {
+        return this.getEntities().get(pId);
+    }
+
+    // Arcane mixin port: Yarn accessor name for official getEntity(id).
+    public Entity getEntityById(int pId) {
+        return this.getEntity(pId);
     }
 
     @Override
@@ -353,15 +435,15 @@ public class ClientLevel extends Level {
         this.connection.getConnection().disconnect(Component.translatable("multiplayer.status.quitting"));
     }
 
-    public void animateTick(int p_104785_, int p_104786_, int p_104787_) {
+    public void animateTick(int pPosX, int pPosY, int pPosZ) {
         int i = 32;
         RandomSource randomsource = RandomSource.create();
         Block block = this.getMarkerParticleTarget();
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
         for (int j = 0; j < 667; j++) {
-            this.doAnimateTick(p_104785_, p_104786_, p_104787_, 16, randomsource, block, blockpos$mutableblockpos);
-            this.doAnimateTick(p_104785_, p_104786_, p_104787_, 32, randomsource, block, blockpos$mutableblockpos);
+            this.doAnimateTick(pPosX, pPosY, pPosZ, 16, randomsource, block, blockpos$mutableblockpos);
+            this.doAnimateTick(pPosX, pPosY, pPosZ, 32, randomsource, block, blockpos$mutableblockpos);
         }
     }
 
@@ -379,41 +461,41 @@ public class ClientLevel extends Level {
     }
 
     public void doAnimateTick(
-        int p_233613_, int p_233614_, int p_233615_, int p_233616_, RandomSource p_233617_, @Nullable Block p_233618_, BlockPos.MutableBlockPos p_233619_
+        int pPosX, int pPosY, int pPosZ, int pRange, RandomSource pRandom, @Nullable Block pBlock, BlockPos.MutableBlockPos pBlockPos
     ) {
-        int i = p_233613_ + this.random.nextInt(p_233616_) - this.random.nextInt(p_233616_);
-        int j = p_233614_ + this.random.nextInt(p_233616_) - this.random.nextInt(p_233616_);
-        int k = p_233615_ + this.random.nextInt(p_233616_) - this.random.nextInt(p_233616_);
-        p_233619_.set(i, j, k);
-        BlockState blockstate = this.getBlockState(p_233619_);
-        blockstate.getBlock().animateTick(blockstate, this, p_233619_, p_233617_);
-        FluidState fluidstate = this.getFluidState(p_233619_);
+        int i = pPosX + this.random.nextInt(pRange) - this.random.nextInt(pRange);
+        int j = pPosY + this.random.nextInt(pRange) - this.random.nextInt(pRange);
+        int k = pPosZ + this.random.nextInt(pRange) - this.random.nextInt(pRange);
+        pBlockPos.set(i, j, k);
+        BlockState blockstate = this.getBlockState(pBlockPos);
+        blockstate.getBlock().animateTick(blockstate, this, pBlockPos, pRandom);
+        FluidState fluidstate = this.getFluidState(pBlockPos);
         if (!fluidstate.isEmpty()) {
-            fluidstate.animateTick(this, p_233619_, p_233617_);
+            fluidstate.animateTick(this, pBlockPos, pRandom);
             ParticleOptions particleoptions = fluidstate.getDripParticle();
             if (particleoptions != null && this.random.nextInt(10) == 0) {
-                boolean flag = blockstate.isFaceSturdy(this, p_233619_, Direction.DOWN);
-                BlockPos blockpos = p_233619_.below();
+                boolean flag = blockstate.isFaceSturdy(this, pBlockPos, Direction.DOWN);
+                BlockPos blockpos = pBlockPos.below();
                 this.trySpawnDripParticles(blockpos, this.getBlockState(blockpos), particleoptions, flag);
             }
         }
 
-        if (p_233618_ == blockstate.getBlock()) {
+        if (pBlock == blockstate.getBlock()) {
             this.addParticle(new BlockParticleOption(ParticleTypes.BLOCK_MARKER, blockstate), (double)i + 0.5, (double)j + 0.5, (double)k + 0.5, 0.0, 0.0, 0.0);
         }
 
-        if (!blockstate.isCollisionShapeFullBlock(this, p_233619_)) {
-            this.getBiome(p_233619_)
+        if (!blockstate.isCollisionShapeFullBlock(this, pBlockPos)) {
+            this.getBiome(pBlockPos)
                 .value()
                 .getAmbientParticle()
                 .ifPresent(
-                    p_264703_ -> {
-                        if (p_264703_.canSpawn(this.random)) {
+                    settingsIn -> {
+                        if (settingsIn.canSpawn(this.random)) {
                             this.addParticle(
-                                p_264703_.getOptions(),
-                                (double)p_233619_.getX() + this.random.nextDouble(),
-                                (double)p_233619_.getY() + this.random.nextDouble(),
-                                (double)p_233619_.getZ() + this.random.nextDouble(),
+                                settingsIn.getOptions(),
+                                (double)pBlockPos.getX() + this.random.nextDouble(),
+                                (double)pBlockPos.getY() + this.random.nextDouble(),
+                                (double)pBlockPos.getZ() + this.random.nextDouble(),
                                 0.0,
                                 0.0,
                                 0.0
@@ -424,55 +506,55 @@ public class ClientLevel extends Level {
         }
     }
 
-    private void trySpawnDripParticles(BlockPos p_104690_, BlockState p_104691_, ParticleOptions p_104692_, boolean p_104693_) {
-        if (p_104691_.getFluidState().isEmpty()) {
-            VoxelShape voxelshape = p_104691_.getCollisionShape(this, p_104690_);
+    private void trySpawnDripParticles(BlockPos pBlockPos, BlockState pBlockState, ParticleOptions pParticleData, boolean pShapeDownSolid) {
+        if (pBlockState.getFluidState().isEmpty()) {
+            VoxelShape voxelshape = pBlockState.getCollisionShape(this, pBlockPos);
             double d0 = voxelshape.max(Direction.Axis.Y);
             if (d0 < 1.0) {
-                if (p_104693_) {
+                if (pShapeDownSolid) {
                     this.spawnFluidParticle(
-                        (double)p_104690_.getX(),
-                        (double)(p_104690_.getX() + 1),
-                        (double)p_104690_.getZ(),
-                        (double)(p_104690_.getZ() + 1),
-                        (double)(p_104690_.getY() + 1) - 0.05,
-                        p_104692_
+                        (double)pBlockPos.getX(),
+                        (double)(pBlockPos.getX() + 1),
+                        (double)pBlockPos.getZ(),
+                        (double)(pBlockPos.getZ() + 1),
+                        (double)(pBlockPos.getY() + 1) - 0.05,
+                        pParticleData
                     );
                 }
-            } else if (!p_104691_.is(BlockTags.IMPERMEABLE)) {
+            } else if (!pBlockState.is(BlockTags.IMPERMEABLE)) {
                 double d1 = voxelshape.min(Direction.Axis.Y);
                 if (d1 > 0.0) {
-                    this.spawnParticle(p_104690_, p_104692_, voxelshape, (double)p_104690_.getY() + d1 - 0.05);
+                    this.spawnParticle(pBlockPos, pParticleData, voxelshape, (double)pBlockPos.getY() + d1 - 0.05);
                 } else {
-                    BlockPos blockpos = p_104690_.below();
+                    BlockPos blockpos = pBlockPos.below();
                     BlockState blockstate = this.getBlockState(blockpos);
                     VoxelShape voxelshape1 = blockstate.getCollisionShape(this, blockpos);
                     double d2 = voxelshape1.max(Direction.Axis.Y);
                     if (d2 < 1.0 && blockstate.getFluidState().isEmpty()) {
-                        this.spawnParticle(p_104690_, p_104692_, voxelshape, (double)p_104690_.getY() - 0.05);
+                        this.spawnParticle(pBlockPos, pParticleData, voxelshape, (double)pBlockPos.getY() - 0.05);
                     }
                 }
             }
         }
     }
 
-    private void spawnParticle(BlockPos p_104695_, ParticleOptions p_104696_, VoxelShape p_104697_, double p_104698_) {
+    private void spawnParticle(BlockPos pPos, ParticleOptions pParticleData, VoxelShape pVoxelShape, double pY) {
         this.spawnFluidParticle(
-            (double)p_104695_.getX() + p_104697_.min(Direction.Axis.X),
-            (double)p_104695_.getX() + p_104697_.max(Direction.Axis.X),
-            (double)p_104695_.getZ() + p_104697_.min(Direction.Axis.Z),
-            (double)p_104695_.getZ() + p_104697_.max(Direction.Axis.Z),
-            p_104698_,
-            p_104696_
+            (double)pPos.getX() + pVoxelShape.min(Direction.Axis.X),
+            (double)pPos.getX() + pVoxelShape.max(Direction.Axis.X),
+            (double)pPos.getZ() + pVoxelShape.min(Direction.Axis.Z),
+            (double)pPos.getZ() + pVoxelShape.max(Direction.Axis.Z),
+            pY,
+            pParticleData
         );
     }
 
-    private void spawnFluidParticle(double p_104593_, double p_104594_, double p_104595_, double p_104596_, double p_104597_, ParticleOptions p_104598_) {
+    private void spawnFluidParticle(double pXStart, double pXEnd, double pZStart, double pZEnd, double pY, ParticleOptions pParticleData) {
         this.addParticle(
-            p_104598_,
-            Mth.lerp(this.random.nextDouble(), p_104593_, p_104594_),
-            p_104597_,
-            Mth.lerp(this.random.nextDouble(), p_104595_, p_104596_),
+            pParticleData,
+            Mth.lerp(this.random.nextDouble(), pXStart, pXEnd),
+            pY,
+            Mth.lerp(this.random.nextDouble(), pZStart, pZEnd),
             0.0,
             0.0,
             0.0
@@ -480,8 +562,8 @@ public class ClientLevel extends Level {
     }
 
     @Override
-    public CrashReportCategory fillReportDetails(CrashReport p_104729_) {
-        CrashReportCategory crashreportcategory = super.fillReportDetails(p_104729_);
+    public CrashReportCategory fillReportDetails(CrashReport pReport) {
+        CrashReportCategory crashreportcategory = super.fillReportDetails(pReport);
         crashreportcategory.setDetail("Server brand", () -> this.minecraft.player.connection.serverBrand());
         crashreportcategory.setDetail(
             "Server type", () -> this.minecraft.getSingleplayerServer() == null ? "Non-integrated multiplayer server" : "Integrated singleplayer server"
@@ -502,6 +584,24 @@ public class ClientLevel extends Level {
         float p_263349_,
         long p_263408_
     ) {
+        // Arcane mixin port: InterFace.noHitSound cancels vanilla attack impact sounds on the client.
+        if (InterFace.noHitSound.getValue() && arcane$isHitSound(p_263335_.value())) {
+            return;
+        }
+
+        if (Reflector.ForgeEventFactory_onPlaySoundAtPosition.exists()) {
+            Event event = (Event)Reflector.ForgeEventFactory_onPlaySoundAtPosition
+                .call(this, p_263372_, p_263404_, p_263365_, p_263335_, p_263417_, p_263416_, p_263349_);
+            if (event.isCanceled() || Reflector.call(event, Reflector.PlayLevelSoundEvent_getSound) == null) {
+                return;
+            }
+
+            p_263335_ = (Holder<SoundEvent>)Reflector.call(event, Reflector.PlayLevelSoundEvent_getSound);
+            p_263417_ = (SoundSource)Reflector.call(event, Reflector.PlayLevelSoundEvent_getSource);
+            p_263416_ = Reflector.callFloat(event, Reflector.PlayLevelSoundEvent_getNewVolume);
+            p_263349_ = Reflector.callFloat(event, Reflector.PlayLevelSoundEvent_getNewPitch);
+        }
+
         if (p_263381_ == this.minecraft.player) {
             this.playSound(p_263372_, p_263404_, p_263365_, p_263335_.value(), p_263417_, p_263416_, p_263349_, false, p_263408_);
         }
@@ -511,9 +611,30 @@ public class ClientLevel extends Level {
     public void playSeededSound(
         @Nullable Player p_263514_, Entity p_263536_, Holder<SoundEvent> p_263518_, SoundSource p_263487_, float p_263538_, float p_263524_, long p_263509_
     ) {
+        if (Reflector.ForgeEventFactory_onPlaySoundAtEntity.exists()) {
+            Event event = (Event)Reflector.ForgeEventFactory_onPlaySoundAtEntity.call(p_263536_, p_263518_, p_263487_, p_263538_, p_263524_);
+            if (event.isCanceled() || Reflector.call(event, Reflector.PlayLevelSoundEvent_getSound) == null) {
+                return;
+            }
+
+            p_263518_ = (Holder<SoundEvent>)Reflector.call(event, Reflector.PlayLevelSoundEvent_getSound);
+            p_263487_ = (SoundSource)Reflector.call(event, Reflector.PlayLevelSoundEvent_getSource);
+            p_263538_ = Reflector.callFloat(event, Reflector.PlayLevelSoundEvent_getNewVolume);
+            p_263524_ = Reflector.callFloat(event, Reflector.PlayLevelSoundEvent_getNewPitch);
+        }
+
         if (p_263514_ == this.minecraft.player) {
             this.minecraft.getSoundManager().play(new EntityBoundSoundInstance(p_263518_.value(), p_263487_, p_263538_, p_263524_, p_263536_, p_263509_));
         }
+    }
+
+    private static boolean arcane$isHitSound(SoundEvent pSoundEvent) {
+        return pSoundEvent == SoundEvents.PLAYER_ATTACK_STRONG
+            || pSoundEvent == SoundEvents.PLAYER_ATTACK_WEAK
+            || pSoundEvent == SoundEvents.PLAYER_ATTACK_CRIT
+            || pSoundEvent == SoundEvents.PLAYER_ATTACK_KNOCKBACK
+            || pSoundEvent == SoundEvents.PLAYER_ATTACK_SWEEP
+            || pSoundEvent == SoundEvents.PLAYER_ATTACK_NODAMAGE;
     }
 
     @Override
@@ -523,27 +644,27 @@ public class ClientLevel extends Level {
 
     @Override
     public void playLocalSound(
-        double p_104600_, double p_104601_, double p_104602_, SoundEvent p_104603_, SoundSource p_104604_, float p_104605_, float p_104606_, boolean p_104607_
+        double pX, double pY, double pZ, SoundEvent pSound, SoundSource pCategory, float pVolume, float pPitch, boolean pDistanceDelay
     ) {
-        this.playSound(p_104600_, p_104601_, p_104602_, p_104603_, p_104604_, p_104605_, p_104606_, p_104607_, this.random.nextLong());
+        this.playSound(pX, pY, pZ, pSound, pCategory, pVolume, pPitch, pDistanceDelay, this.random.nextLong());
     }
 
     private void playSound(
-        double p_233603_,
-        double p_233604_,
-        double p_233605_,
-        SoundEvent p_233606_,
-        SoundSource p_233607_,
-        float p_233608_,
-        float p_233609_,
-        boolean p_233610_,
-        long p_233611_
+        double pX,
+        double pY,
+        double pZ,
+        SoundEvent pSoundEvent,
+        SoundSource pSource,
+        float pVolume,
+        float pPitch,
+        boolean pDistanceDelay,
+        long pSeed
     ) {
-        double d0 = this.minecraft.gameRenderer.getMainCamera().getPosition().distanceToSqr(p_233603_, p_233604_, p_233605_);
+        double d0 = this.minecraft.gameRenderer.getMainCamera().getPosition().distanceToSqr(pX, pY, pZ);
         SimpleSoundInstance simplesoundinstance = new SimpleSoundInstance(
-            p_233606_, p_233607_, p_233608_, p_233609_, RandomSource.create(p_233611_), p_233603_, p_233604_, p_233605_
+            pSoundEvent, pSource, pVolume, pPitch, RandomSource.create(pSeed), pX, pY, pZ
         );
-        if (p_233610_ && d0 > 100.0) {
+        if (pDistanceDelay && d0 > 100.0) {
             double d1 = Math.sqrt(d0) / 40.0;
             this.minecraft.getSoundManager().playDelayed(simplesoundinstance, (int)(d1 * 20.0));
         } else {
@@ -571,8 +692,8 @@ public class ClientLevel extends Level {
     }
 
     @Override
-    public void sendPacketToServer(Packet<?> p_104734_) {
-        this.connection.send(p_104734_);
+    public void sendPacketToServer(Packet<?> pPacket) {
+        this.connection.send(pPacket);
     }
 
     @Override
@@ -599,14 +720,44 @@ public class ClientLevel extends Level {
         return this.chunkSource;
     }
 
+    @Override
+    public boolean setBlock(BlockPos pos, BlockState newState, int flags) {
+        this.playerUpdate = this.isPlayerActing();
+        boolean flag = super.setBlock(pos, newState, flags);
+        this.playerUpdate = false;
+        return flag;
+    }
+
+    private boolean isPlayerActing() {
+        return this.minecraft.gameMode instanceof PlayerControllerOF playercontrollerof ? playercontrollerof.isActing() : false;
+    }
+
+    public boolean isPlayerUpdate() {
+        return this.playerUpdate;
+    }
+
+    public void onEntityAdded(Entity entityIn) {
+        RandomEntities.entityLoaded(entityIn, this);
+        if (Config.isDynamicLights()) {
+            DynamicLights.entityAdded(entityIn, Config.getRenderGlobal());
+        }
+    }
+
+    public void onEntityRemoved(Entity entityIn) {
+        RandomEntities.entityUnloaded(entityIn, this);
+        if (Config.isDynamicLights()) {
+            DynamicLights.entityRemoved(entityIn, Config.getRenderGlobal());
+        }
+    }
+
     @Nullable
     @Override
     public MapItemSavedData getMapData(MapId p_334091_) {
         return this.mapData.get(p_334091_);
     }
 
-    public void overrideMapData(MapId p_328178_, MapItemSavedData p_259308_) {
-        this.mapData.put(p_328178_, p_259308_);
+    public void overrideMapData(MapId pMapId, MapItemSavedData pMapData) {
+        this.mapData.put(pMapId, pMapData);
     }
 
     @Override
@@ -624,51 +775,51 @@ public class ClientLevel extends Level {
     }
 
     @Override
-    public void sendBlockUpdated(BlockPos p_104685_, BlockState p_104686_, BlockState p_104687_, int p_104688_) {
-        this.levelRenderer.blockChanged(this, p_104685_, p_104686_, p_104687_, p_104688_);
+    public void sendBlockUpdated(BlockPos pPos, BlockState pOldState, BlockState pNewState, int pFlags) {
+        this.levelRenderer.blockChanged(this, pPos, pOldState, pNewState, pFlags);
     }
 
     @Override
-    public void setBlocksDirty(BlockPos p_104759_, BlockState p_104760_, BlockState p_104761_) {
-        this.levelRenderer.setBlockDirty(p_104759_, p_104760_, p_104761_);
+    public void setBlocksDirty(BlockPos pBlockPos, BlockState pOldState, BlockState pNewState) {
+        this.levelRenderer.setBlockDirty(pBlockPos, pOldState, pNewState);
     }
 
-    public void setSectionDirtyWithNeighbors(int p_104794_, int p_104795_, int p_104796_) {
-        this.levelRenderer.setSectionDirtyWithNeighbors(p_104794_, p_104795_, p_104796_);
+    public void setSectionDirtyWithNeighbors(int pSectionX, int pSectionY, int pSectionZ) {
+        this.levelRenderer.setSectionDirtyWithNeighbors(pSectionX, pSectionY, pSectionZ);
     }
 
-    public void setSectionRangeDirty(int p_363748_, int p_364773_, int p_365333_, int p_363409_, int p_361533_, int p_360936_) {
-        this.levelRenderer.setSectionRangeDirty(p_363748_, p_364773_, p_365333_, p_363409_, p_361533_, p_360936_);
-    }
-
-    @Override
-    public void destroyBlockProgress(int p_104634_, BlockPos p_104635_, int p_104636_) {
-        this.levelRenderer.destroyBlockProgress(p_104634_, p_104635_, p_104636_);
+    public void setSectionRangeDirty(int pMinY, int pMinX, int pMinZ, int pMaxY, int pMaxX, int pMaxZ) {
+        this.levelRenderer.setSectionRangeDirty(pMinY, pMinX, pMinZ, pMaxY, pMaxX, pMaxZ);
     }
 
     @Override
-    public void globalLevelEvent(int p_104743_, BlockPos p_104744_, int p_104745_) {
-        this.levelEventHandler.globalLevelEvent(p_104743_, p_104744_, p_104745_);
+    public void destroyBlockProgress(int pBreakerId, BlockPos pPos, int pProgress) {
+        this.levelRenderer.destroyBlockProgress(pBreakerId, pPos, pProgress);
     }
 
     @Override
-    public void levelEvent(@Nullable Player p_104654_, int p_104655_, BlockPos p_104656_, int p_104657_) {
+    public void globalLevelEvent(int pId, BlockPos pPos, int pData) {
+        this.levelEventHandler.globalLevelEvent(pId, pPos, pData);
+    }
+
+    @Override
+    public void levelEvent(@Nullable Player pPlayer, int pType, BlockPos pPos, int pData) {
         try {
-            this.levelEventHandler.levelEvent(p_104655_, p_104656_, p_104657_);
+            this.levelEventHandler.levelEvent(pType, pPos, pData);
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.forThrowable(throwable, "Playing level event");
             CrashReportCategory crashreportcategory = crashreport.addCategory("Level event being played");
-            crashreportcategory.setDetail("Block coordinates", CrashReportCategory.formatLocation(this, p_104656_));
-            crashreportcategory.setDetail("Event source", p_104654_);
-            crashreportcategory.setDetail("Event type", p_104655_);
-            crashreportcategory.setDetail("Event data", p_104657_);
+            crashreportcategory.setDetail("Block coordinates", CrashReportCategory.formatLocation(this, pPos));
+            crashreportcategory.setDetail("Event source", pPlayer);
+            crashreportcategory.setDetail("Event type", pType);
+            crashreportcategory.setDetail("Event data", pData);
             throw new ReportedException(crashreport);
         }
     }
 
     @Override
-    public void addParticle(ParticleOptions p_104706_, double p_104707_, double p_104708_, double p_104709_, double p_104710_, double p_104711_, double p_104712_) {
-        this.levelRenderer.addParticle(p_104706_, p_104706_.getType().getOverrideLimiter(), p_104707_, p_104708_, p_104709_, p_104710_, p_104711_, p_104712_);
+    public void addParticle(ParticleOptions pParticleData, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+        this.levelRenderer.addParticle(pParticleData, pParticleData.getType().getOverrideLimiter(), pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
     }
 
     @Override
@@ -688,23 +839,23 @@ public class ClientLevel extends Level {
     }
 
     @Override
-    public void addAlwaysVisibleParticle(ParticleOptions p_104766_, double p_104767_, double p_104768_, double p_104769_, double p_104770_, double p_104771_, double p_104772_) {
-        this.levelRenderer.addParticle(p_104766_, false, true, p_104767_, p_104768_, p_104769_, p_104770_, p_104771_, p_104772_);
+    public void addAlwaysVisibleParticle(ParticleOptions pParticleData, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+        this.levelRenderer.addParticle(pParticleData, false, true, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
     }
 
     @Override
     public void addAlwaysVisibleParticle(
-        ParticleOptions p_104774_,
-        boolean p_104775_,
-        double p_104776_,
-        double p_104777_,
-        double p_104778_,
-        double p_104779_,
-        double p_104780_,
-        double p_104781_
+        ParticleOptions pParticleData,
+        boolean pIgnoreRange,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed
     ) {
         this.levelRenderer
-            .addParticle(p_104774_, p_104774_.getType().getOverrideLimiter() || p_104775_, true, p_104776_, p_104777_, p_104778_, p_104779_, p_104780_, p_104781_);
+            .addParticle(pParticleData, pParticleData.getType().getOverrideLimiter() || pIgnoreRange, true, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
     }
 
     @Override
@@ -721,27 +872,26 @@ public class ClientLevel extends Level {
         return this.registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.PLAINS);
     }
 
-    public float getSkyDarken(float p_104806_) {
-        float f = this.getTimeOfDay(p_104806_);
+    public float getSkyDarken(float pPartialTick) {
+        float f = this.getTimeOfDay(pPartialTick);
         float f1 = 1.0F - (Mth.cos(f * (float) (Math.PI * 2)) * 2.0F + 0.2F);
         f1 = Mth.clamp(f1, 0.0F, 1.0F);
         f1 = 1.0F - f1;
-        f1 *= 1.0F - this.getRainLevel(p_104806_) * 5.0F / 16.0F;
-        f1 *= 1.0F - this.getThunderLevel(p_104806_) * 5.0F / 16.0F;
+        f1 *= 1.0F - this.getRainLevel(pPartialTick) * 5.0F / 16.0F;
+        f1 *= 1.0F - this.getThunderLevel(pPartialTick) * 5.0F / 16.0F;
         return f1 * 0.8F + 0.2F;
     }
 
-    public int getSkyColor(Vec3 p_171661_, float p_171662_) {
-        float f = this.getTimeOfDay(p_171662_);
-        Vec3 vec3 = p_171661_.subtract(2.0, 2.0, 2.0).scale(0.25);
-        Vec3 vec31 = CubicSampler.gaussianSampleVec3(
-            vec3, (p_357776_, p_357777_, p_357778_) -> Vec3.fromRGB24(this.getBiomeManager().getNoiseBiomeAtQuart(p_357776_, p_357777_, p_357778_).value().getSkyColor())
-        );
+    public int getSkyColor(Vec3 pCameraPosition, float pPartialTick) {
+        float f = this.getTimeOfDay(pPartialTick);
+        Vec3 vec3 = pCameraPosition.subtract(2.0, 2.0, 2.0).scale(0.25);
+        Vec3M vec3m = new Vec3M(0.0, 0.0, 0.0);
+        Vec3 vec31 = CubicSampler.sampleM(vec3, (xIn, yIn, zIn) -> vec3m.fromRgbM(this.getBiomeManager().getNoiseBiomeAtQuart(xIn, yIn, zIn).value().getSkyColor()));
         float f1 = Mth.cos(f * (float) (Math.PI * 2)) * 2.0F + 0.5F;
         f1 = Mth.clamp(f1, 0.0F, 1.0F);
         vec31 = vec31.scale((double)f1);
         int i = ARGB.color(vec31);
-        float f2 = this.getRainLevel(p_171662_);
+        float f2 = this.getRainLevel(pPartialTick);
         if (f2 > 0.0F) {
             float f3 = 0.6F;
             float f4 = f2 * 0.75F;
@@ -749,7 +899,7 @@ public class ClientLevel extends Level {
             i = ARGB.lerp(f4, i, j);
         }
 
-        float f5 = this.getThunderLevel(p_171662_);
+        float f5 = this.getThunderLevel(pPartialTick);
         if (f5 > 0.0F) {
             float f6 = 0.2F;
             float f7 = f5 * 0.75F;
@@ -759,7 +909,7 @@ public class ClientLevel extends Level {
 
         int l = this.getSkyFlashTime();
         if (l > 0) {
-            float f8 = Math.min((float)l - p_171662_, 1.0F);
+            float f8 = Math.min((float)l - pPartialTick, 1.0F);
             f8 *= 0.45F;
             i = ARGB.lerp(f8, i, ARGB.color(204, 204, 255));
         }
@@ -767,19 +917,19 @@ public class ClientLevel extends Level {
         return i;
     }
 
-    public int getCloudColor(float p_365032_) {
+    public int getCloudColor(float pPartialTick) {
         int i = -1;
-        float f = this.getRainLevel(p_365032_);
+        float f = this.getRainLevel(pPartialTick);
         if (f > 0.0F) {
             int j = ARGB.scaleRGB(ARGB.greyscale(i), 0.6F);
             i = ARGB.lerp(f * 0.95F, i, j);
         }
 
-        float f3 = this.getTimeOfDay(p_365032_);
+        float f3 = this.getTimeOfDay(pPartialTick);
         float f1 = Mth.cos(f3 * (float) (Math.PI * 2)) * 2.0F + 0.5F;
         f1 = Mth.clamp(f1, 0.0F, 1.0F);
         i = ARGB.multiply(i, ARGB.colorFromFloat(1.0F, f1 * 0.9F + 0.1F, f1 * 0.9F + 0.1F, f1 * 0.85F + 0.15F));
-        float f2 = this.getThunderLevel(p_365032_);
+        float f2 = this.getThunderLevel(pPartialTick);
         if (f2 > 0.0F) {
             int k = ARGB.scaleRGB(ARGB.greyscale(i), 0.2F);
             i = ARGB.lerp(f2 * 0.95F, i, k);
@@ -788,8 +938,8 @@ public class ClientLevel extends Level {
         return i;
     }
 
-    public float getStarBrightness(float p_104812_) {
-        float f = this.getTimeOfDay(p_104812_);
+    public float getStarBrightness(float pPartialTick) {
+        float f = this.getTimeOfDay(pPartialTick);
         float f1 = 1.0F - (Mth.cos(f * (float) (Math.PI * 2)) * 2.0F + 0.25F);
         f1 = Mth.clamp(f1, 0.0F, 1.0F);
         return f1 * f1 * 0.5F;
@@ -800,26 +950,35 @@ public class ClientLevel extends Level {
     }
 
     @Override
-    public void setSkyFlashTime(int p_104783_) {
-        this.skyFlashTime = p_104783_;
+    public void setSkyFlashTime(int pTimeFlash) {
+        this.skyFlashTime = pTimeFlash;
     }
 
     @Override
     public float getShade(Direction p_104703_, boolean p_104704_) {
         boolean flag = this.effects().constantAmbientLight();
+        boolean flag1 = Config.isShaders();
         if (!p_104704_) {
             return flag ? 0.9F : 1.0F;
         } else {
             switch (p_104703_) {
                 case DOWN:
-                    return flag ? 0.9F : 0.5F;
+                    return flag ? 0.9F : (flag1 ? Shaders.blockLightLevel05 : 0.5F);
                 case UP:
                     return flag ? 0.9F : 1.0F;
                 case NORTH:
                 case SOUTH:
+                    if (Config.isShaders()) {
+                        return Shaders.blockLightLevel08;
+                    }
+
                     return 0.8F;
                 case WEST:
                 case EAST:
+                    if (Config.isShaders()) {
+                        return Shaders.blockLightLevel06;
+                    }
+
                     return 0.6F;
                 default:
                     return 1.0F;
@@ -828,34 +987,36 @@ public class ClientLevel extends Level {
     }
 
     @Override
-    public int getBlockTint(BlockPos p_104700_, ColorResolver p_104701_) {
-        BlockTintCache blocktintcache = this.tintCaches.get(p_104701_);
-        return blocktintcache.getColor(p_104700_);
+    public int getBlockTint(BlockPos pBlockPos, ColorResolver pColorResolver) {
+        BlockTintCache blocktintcache = this.tintCaches.get(pColorResolver);
+        return blocktintcache.getColor(pBlockPos);
     }
 
-    public int calculateBlockTint(BlockPos p_104763_, ColorResolver p_104764_) {
+    public int calculateBlockTint(BlockPos pBlockPos, ColorResolver pColorResolver) {
         int i = Minecraft.getInstance().options.biomeBlendRadius().get();
         if (i == 0) {
-            return p_104764_.getColor(this.getBiome(p_104763_).value(), (double)p_104763_.getX(), (double)p_104763_.getZ());
+            return pColorResolver.getColor(
+                CustomColors.fixBiome(this.getBiome(pBlockPos).value()), (double)pBlockPos.getX(), (double)pBlockPos.getZ()
+            );
         } else {
             int j = (i * 2 + 1) * (i * 2 + 1);
             int k = 0;
             int l = 0;
             int i1 = 0;
             Cursor3D cursor3d = new Cursor3D(
-                p_104763_.getX() - i,
-                p_104763_.getY(),
-                p_104763_.getZ() - i,
-                p_104763_.getX() + i,
-                p_104763_.getY(),
-                p_104763_.getZ() + i
+                pBlockPos.getX() - i,
+                pBlockPos.getY(),
+                pBlockPos.getZ() - i,
+                pBlockPos.getX() + i,
+                pBlockPos.getY(),
+                pBlockPos.getZ() + i
             );
             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
             while (cursor3d.advance()) {
                 blockpos$mutableblockpos.set(cursor3d.nextX(), cursor3d.nextY(), cursor3d.nextZ());
-                int j1 = p_104764_.getColor(
-                    this.getBiome(blockpos$mutableblockpos).value(),
+                int j1 = pColorResolver.getColor(
+                    CustomColors.fixBiome(this.getBiome(blockpos$mutableblockpos).value()),
                     (double)blockpos$mutableblockpos.getX(),
                     (double)blockpos$mutableblockpos.getZ()
                 );
@@ -868,8 +1029,8 @@ public class ClientLevel extends Level {
         }
     }
 
-    public void setDefaultSpawnPos(BlockPos p_104753_, float p_104754_) {
-        this.levelData.setSpawn(p_104753_, p_104754_);
+    public void setDefaultSpawnPos(BlockPos pSpawnPos, float pSpawnAngle) {
+        this.levelData.setSpawn(pSpawnPos, pSpawnAngle);
     }
 
     @Override
@@ -889,8 +1050,8 @@ public class ClientLevel extends Level {
         return ImmutableMap.copyOf(this.mapData);
     }
 
-    protected void addMapData(Map<MapId, MapItemSavedData> p_171673_) {
-        this.mapData.putAll(p_171673_);
+    protected void addMapData(Map<MapId, MapItemSavedData> pMap) {
+        this.mapData.putAll(pMap);
     }
 
     @Override
@@ -908,8 +1069,8 @@ public class ClientLevel extends Level {
         this.minecraft.particleEngine.destroy(p_171667_, p_171668_);
     }
 
-    public void setServerSimulationDistance(int p_194175_) {
-        this.serverSimulationDistance = p_194175_;
+    public void setServerSimulationDistance(int pServerSimulationDistance) {
+        this.serverSimulationDistance = pServerSimulationDistance;
     }
 
     public int getServerSimulationDistance() {
@@ -953,7 +1114,31 @@ public class ClientLevel extends Level {
         return this.seaLevel;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    public TransientEntitySectionManager getEntityStorage() {
+        return this.entityStorage;
+    }
+
+    public EntitySectionStorage getSectionStorage() {
+        return EntitySection.getSectionStorage(this.entityStorage);
+    }
+
+    public Collection<PartEntity<?>> getPartEntities() {
+        return this.partEntities.values();
+    }
+
+    public ModelDataManager getModelDataManager() {
+        return this.modelDataManager;
+    }
+
+    public float getShade(float normalX, float normalY, float normalZ, boolean shade) {
+        boolean flag = this.effects().constantAmbientLight();
+        if (!shade) {
+            return flag ? 0.9F : 1.0F;
+        } else {
+            return QuadLighter.calculateShade(normalX, normalY, normalZ, flag);
+        }
+    }
+
     public static class ClientLevelData implements WritableLevelData {
         private final boolean hardcore;
         private final boolean isFlat;
@@ -965,10 +1150,10 @@ public class ClientLevel extends Level {
         private Difficulty difficulty;
         private boolean difficultyLocked;
 
-        public ClientLevelData(Difficulty p_104843_, boolean p_104844_, boolean p_104845_) {
-            this.difficulty = p_104843_;
-            this.hardcore = p_104844_;
-            this.isFlat = p_104845_;
+        public ClientLevelData(Difficulty pDifficulty, boolean pHardcore, boolean pIsFlat) {
+            this.difficulty = pDifficulty;
+            this.hardcore = pHardcore;
+            this.isFlat = pIsFlat;
         }
 
         @Override
@@ -991,18 +1176,18 @@ public class ClientLevel extends Level {
             return this.dayTime;
         }
 
-        public void setGameTime(long p_104850_) {
-            this.gameTime = p_104850_;
+        public void setGameTime(long pGameTime) {
+            this.gameTime = pGameTime;
         }
 
-        public void setDayTime(long p_104864_) {
-            this.dayTime = p_104864_;
+        public void setDayTime(long pDayTime) {
+            this.dayTime = pDayTime;
         }
 
         @Override
-        public void setSpawn(BlockPos p_104854_, float p_104855_) {
-            this.spawnPos = p_104854_.immutable();
-            this.spawnAngle = p_104855_;
+        public void setSpawn(BlockPos pSpawnPoint, float pAngle) {
+            this.spawnPos = pSpawnPoint.immutable();
+            this.spawnAngle = pAngle;
         }
 
         @Override
@@ -1016,8 +1201,8 @@ public class ClientLevel extends Level {
         }
 
         @Override
-        public void setRaining(boolean p_104866_) {
-            this.raining = p_104866_;
+        public void setRaining(boolean pIsRaining) {
+            this.raining = pIsRaining;
         }
 
         @Override
@@ -1040,16 +1225,17 @@ public class ClientLevel extends Level {
             WritableLevelData.super.fillCrashReportCategory(p_171690_, p_171691_);
         }
 
-        public void setDifficulty(Difficulty p_104852_) {
-            this.difficulty = p_104852_;
+        public void setDifficulty(Difficulty pDifficulty) {
+            Reflector.ForgeEventFactory_onDifficultyChange.callVoid(pDifficulty, this.difficulty);
+            this.difficulty = pDifficulty;
         }
 
-        public void setDifficultyLocked(boolean p_104859_) {
-            this.difficultyLocked = p_104859_;
+        public void setDifficultyLocked(boolean pDifficultyLocked) {
+            this.difficultyLocked = pDifficultyLocked;
         }
 
-        public double getHorizonHeight(LevelHeightAccessor p_171688_) {
-            return this.isFlat ? (double)p_171688_.getMinY() : 63.0;
+        public double getHorizonHeight(LevelHeightAccessor pLevel) {
+            return this.isFlat ? (double)pLevel.getMinY() : 63.0;
         }
 
         public float getClearColorScale() {
@@ -1057,7 +1243,6 @@ public class ClientLevel extends Level {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     final class EntityCallbacks implements LevelCallback<Entity> {
         public void onCreated(Entity p_171696_) {
         }
@@ -1075,6 +1260,7 @@ public class ClientLevel extends Level {
 
         public void onTrackingStart(Entity p_171712_) {
             Objects.requireNonNull(p_171712_);
+            Objects.requireNonNull(p_171712_);
             switch (p_171712_) {
                 case AbstractClientPlayer abstractclientplayer:
                     ClientLevel.this.players.add(abstractclientplayer);
@@ -1084,10 +1270,22 @@ public class ClientLevel extends Level {
                     break;
                 default:
             }
+
+            if (Reflector.IForgeEntity_isMultipartEntity.exists() && Reflector.IForgeEntity_getParts.exists()) {
+                boolean flag = Reflector.callBoolean(p_171712_, Reflector.IForgeEntity_isMultipartEntity);
+                if (flag) {
+                    PartEntity[] apartentity = (PartEntity[])Reflector.call(p_171712_, Reflector.IForgeEntity_getParts);
+
+                    for (PartEntity partentity : apartentity) {
+                        ClientLevel.this.partEntities.put(partentity.getId(), partentity);
+                    }
+                }
+            }
         }
 
         public void onTrackingEnd(Entity p_171716_) {
             p_171716_.unRide();
+            Objects.requireNonNull(p_171716_);
             Objects.requireNonNull(p_171716_);
             switch (p_171716_) {
                 case AbstractClientPlayer abstractclientplayer:
@@ -1098,6 +1296,27 @@ public class ClientLevel extends Level {
                     break;
                 default:
             }
+
+            if (Reflector.IForgeEntity_onRemovedFromWorld.exists()) {
+                Reflector.call(p_171716_, Reflector.IForgeEntity_onRemovedFromWorld);
+            }
+
+            if (Reflector.ForgeEventFactory_onEntityLeaveLevel.exists()) {
+                Reflector.ForgeEventFactory_onEntityLeaveLevel.callVoid(p_171716_, ClientLevel.this);
+            }
+
+            if (Reflector.IForgeEntity_isMultipartEntity.exists() && Reflector.IForgeEntity_getParts.exists()) {
+                boolean flag = Reflector.callBoolean(p_171716_, Reflector.IForgeEntity_isMultipartEntity);
+                if (flag) {
+                    PartEntity[] apartentity = (PartEntity[])Reflector.call(p_171716_, Reflector.IForgeEntity_getParts);
+
+                    for (PartEntity partentity : apartentity) {
+                        ClientLevel.this.partEntities.remove(partentity.getId(), partentity);
+                    }
+                }
+            }
+
+            ClientLevel.this.onEntityRemoved(p_171716_);
         }
 
         public void onSectionChange(Entity p_233660_) {

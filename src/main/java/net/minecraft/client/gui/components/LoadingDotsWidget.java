@@ -17,9 +17,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class LoadingDotsWidget extends AbstractWidget {
     private final Font font;
 
-    public LoadingDotsWidget(Font p_299146_, Component p_300579_) {
-        super(0, 0, p_299146_.width(p_300579_), 9 * 3, p_300579_);
-        this.font = p_299146_;
+    public LoadingDotsWidget(Font pFont, Component pMessage) {
+        super(0, 0, pFont.width(pMessage), 9 * 3, pMessage);
+        this.font = pFont;
     }
 
     @Override

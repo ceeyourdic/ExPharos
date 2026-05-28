@@ -14,10 +14,10 @@ public class DatapackLoadFailureScreen extends Screen {
     private final Runnable cancelCallback;
     private final Runnable safeModeCallback;
 
-    public DatapackLoadFailureScreen(Runnable p_95894_, Runnable p_309481_) {
+    public DatapackLoadFailureScreen(Runnable pCancelCallback, Runnable pSafeModeCallback) {
         super(Component.translatable("datapackFailure.title"));
-        this.cancelCallback = p_95894_;
-        this.safeModeCallback = p_309481_;
+        this.cancelCallback = pCancelCallback;
+        this.safeModeCallback = pSafeModeCallback;
     }
 
     @Override

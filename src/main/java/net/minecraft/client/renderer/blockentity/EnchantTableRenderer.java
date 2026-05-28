@@ -20,8 +20,8 @@ public class EnchantTableRenderer implements BlockEntityRenderer<EnchantingTable
     public static final Material BOOK_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.withDefaultNamespace("entity/enchanting_table_book"));
     private final BookModel bookModel;
 
-    public EnchantTableRenderer(BlockEntityRendererProvider.Context p_173619_) {
-        this.bookModel = new BookModel(p_173619_.bakeLayer(ModelLayers.BOOK));
+    public EnchantTableRenderer(BlockEntityRendererProvider.Context pContext) {
+        this.bookModel = new BookModel(pContext.bakeLayer(ModelLayers.BOOK));
     }
 
     public void render(EnchantingTableBlockEntity p_330087_, float p_112419_, PoseStack p_112420_, MultiBufferSource p_112421_, int p_112422_, int p_112423_) {

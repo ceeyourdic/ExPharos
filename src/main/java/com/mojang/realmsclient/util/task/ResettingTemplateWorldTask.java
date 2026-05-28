@@ -11,9 +11,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class ResettingTemplateWorldTask extends ResettingWorldTask {
     private final WorldTemplate template;
 
-    public ResettingTemplateWorldTask(WorldTemplate p_167668_, long p_167669_, Component p_167670_, Runnable p_167671_) {
-        super(p_167669_, p_167670_, p_167671_);
-        this.template = p_167668_;
+    public ResettingTemplateWorldTask(WorldTemplate pTemplate, long pServerId, Component pTitle, Runnable pCallback) {
+        super(pServerId, pTitle, pCallback);
+        this.template = pTemplate;
     }
 
     @Override

@@ -10,9 +10,9 @@ public enum Visibility {
     private final boolean accessible;
     private final boolean ticking;
 
-    private Visibility(final boolean p_157689_, final boolean p_157690_) {
-        this.accessible = p_157689_;
-        this.ticking = p_157690_;
+    private Visibility(final boolean pAccessible, final boolean pTicking) {
+        this.accessible = pAccessible;
+        this.ticking = pTicking;
     }
 
     public boolean isTicking() {
@@ -23,11 +23,11 @@ public enum Visibility {
         return this.accessible;
     }
 
-    public static Visibility fromFullChunkStatus(FullChunkStatus p_287651_) {
-        if (p_287651_.isOrAfter(FullChunkStatus.ENTITY_TICKING)) {
+    public static Visibility fromFullChunkStatus(FullChunkStatus pFullChunkStatus) {
+        if (pFullChunkStatus.isOrAfter(FullChunkStatus.ENTITY_TICKING)) {
             return TICKING;
         } else {
-            return p_287651_.isOrAfter(FullChunkStatus.FULL) ? TRACKED : HIDDEN;
+            return pFullChunkStatus.isOrAfter(FullChunkStatus.FULL) ? TRACKED : HIDDEN;
         }
     }
 }

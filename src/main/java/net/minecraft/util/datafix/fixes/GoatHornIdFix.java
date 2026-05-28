@@ -15,8 +15,8 @@ public class GoatHornIdFix extends ItemStackTagFix {
         "minecraft:dream_goat_horn"
     };
 
-    public GoatHornIdFix(Schema p_216674_) {
-        super(p_216674_, "GoatHornIdFix", p_216678_ -> p_216678_.equals("minecraft:goat_horn"));
+    public GoatHornIdFix(Schema pOutputSchema) {
+        super(pOutputSchema, "GoatHornIdFix", p_216678_ -> p_216678_.equals("minecraft:goat_horn"));
     }
 
     @Override

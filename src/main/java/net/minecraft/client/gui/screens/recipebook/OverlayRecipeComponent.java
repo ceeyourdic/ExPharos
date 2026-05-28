@@ -45,39 +45,39 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
     final SlotSelectTime slotSelectTime;
     private final boolean isFurnaceMenu;
 
-    public OverlayRecipeComponent(SlotSelectTime p_366271_, boolean p_366919_) {
-        this.slotSelectTime = p_366271_;
-        this.isFurnaceMenu = p_366919_;
+    public OverlayRecipeComponent(SlotSelectTime pSlotSelectTime, boolean pIsFurnaceMenu) {
+        this.slotSelectTime = pSlotSelectTime;
+        this.isFurnaceMenu = pIsFurnaceMenu;
     }
 
     public void init(
-        RecipeCollection p_100196_, ContextMap p_360776_, boolean p_365399_, int p_100197_, int p_100198_, int p_100199_, int p_100200_, float p_100201_
+        RecipeCollection pCollection, ContextMap pContextMap, boolean pIsFiltering, int pX, int pY, int pOverlayX, int pOverlayY, float pWidth
     ) {
-        this.collection = p_100196_;
-        List<RecipeDisplayEntry> list = p_100196_.getSelectedRecipes(RecipeCollection.CraftableStatus.CRAFTABLE);
-        List<RecipeDisplayEntry> list1 = p_365399_ ? Collections.emptyList() : p_100196_.getSelectedRecipes(RecipeCollection.CraftableStatus.NOT_CRAFTABLE);
+        this.collection = pCollection;
+        List<RecipeDisplayEntry> list = pCollection.getSelectedRecipes(RecipeCollection.CraftableStatus.CRAFTABLE);
+        List<RecipeDisplayEntry> list1 = pIsFiltering ? Collections.emptyList() : pCollection.getSelectedRecipes(RecipeCollection.CraftableStatus.NOT_CRAFTABLE);
         int i = list.size();
         int j = i + list1.size();
         int k = j <= 16 ? 4 : 5;
         int l = (int)Math.ceil((double)((float)j / (float)k));
-        this.x = p_100197_;
-        this.y = p_100198_;
+        this.x = pX;
+        this.y = pY;
         float f = (float)(this.x + Math.min(j, k) * 25);
-        float f1 = (float)(p_100199_ + 50);
+        float f1 = (float)(pOverlayX + 50);
         if (f > f1) {
-            this.x = (int)((float)this.x - p_100201_ * (float)((int)((f - f1) / p_100201_)));
+            this.x = (int)((float)this.x - pWidth * (float)((int)((f - f1) / pWidth)));
         }
 
         float f2 = (float)(this.y + l * 25);
-        float f3 = (float)(p_100200_ + 50);
+        float f3 = (float)(pOverlayY + 50);
         if (f2 > f3) {
-            this.y = (int)((float)this.y - p_100201_ * (float)Mth.ceil((f2 - f3) / p_100201_));
+            this.y = (int)((float)this.y - pWidth * (float)Mth.ceil((f2 - f3) / pWidth));
         }
 
         float f4 = (float)this.y;
-        float f5 = (float)(p_100200_ - 100);
+        float f5 = (float)(pOverlayY - 100);
         if (f4 < f5) {
-            this.y = (int)((float)this.y - p_100201_ * (float)Mth.ceil((f4 - f5) / p_100201_));
+            this.y = (int)((float)this.y - pWidth * (float)Mth.ceil((f4 - f5) / pWidth));
         }
 
         this.isVisible = true;
@@ -92,14 +92,14 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
                 this.recipeButtons
                     .add(
                         new OverlayRecipeComponent.OverlaySmeltingRecipeButton(
-                            j1, k1, recipedisplayentry.id(), recipedisplayentry.display(), p_360776_, flag
+                            j1, k1, recipedisplayentry.id(), recipedisplayentry.display(), pContextMap, flag
                         )
                     );
             } else {
                 this.recipeButtons
                     .add(
                         new OverlayRecipeComponent.OverlayCraftingRecipeButton(
-                            j1, k1, recipedisplayentry.id(), recipedisplayentry.display(), p_360776_, flag
+                            j1, k1, recipedisplayentry.id(), recipedisplayentry.display(), pContextMap, flag
                         )
                     );
             }
@@ -118,12 +118,12 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
     }
 
     @Override
-    public boolean mouseClicked(double p_100186_, double p_100187_, int p_100188_) {
-        if (p_100188_ != 0) {
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+        if (pButton != 0) {
             return false;
         } else {
             for (OverlayRecipeComponent.OverlayRecipeButton overlayrecipecomponent$overlayrecipebutton : this.recipeButtons) {
-                if (overlayrecipecomponent$overlayrecipebutton.mouseClicked(p_100186_, p_100187_, p_100188_)) {
+                if (overlayrecipecomponent$overlayrecipebutton.mouseClicked(pMouseX, pMouseY, pButton)) {
                     this.lastRecipeClicked = overlayrecipecomponent$overlayrecipebutton.recipe;
                     return true;
                 }
@@ -134,7 +134,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
     }
 
     @Override
-    public boolean isMouseOver(double p_100208_, double p_100209_) {
+    public boolean isMouseOver(double pMouseX, double pMouseY) {
         return false;
     }
 
@@ -157,8 +157,8 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
         }
     }
 
-    public void setVisible(boolean p_100205_) {
-        this.isVisible = p_100205_;
+    public void setVisible(boolean pIsVisible) {
+        this.isVisible = pIsVisible;
     }
 
     public boolean isVisible() {
@@ -184,20 +184,20 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
         private static final int GRID_HEIGHT = 3;
 
         public OverlayCraftingRecipeButton(
-            final int p_368527_,
-            final int p_364908_,
-            final RecipeDisplayId p_360976_,
-            final RecipeDisplay p_366557_,
-            final ContextMap p_361735_,
-            final boolean p_365316_
+            final int pX,
+            final int pY,
+            final RecipeDisplayId pRecipe,
+            final RecipeDisplay pRecipeDisplay,
+            final ContextMap pContextMap,
+            final boolean pIsCraftable
         ) {
-            super(p_368527_, p_364908_, p_360976_, p_365316_, calculateIngredientsPositions(p_366557_, p_361735_));
+            super(pX, pY, pRecipe, pIsCraftable, calculateIngredientsPositions(pRecipeDisplay, pContextMap));
         }
 
-        private static List<OverlayRecipeComponent.OverlayRecipeButton.Pos> calculateIngredientsPositions(RecipeDisplay p_361654_, ContextMap p_365654_) {
+        private static List<OverlayRecipeComponent.OverlayRecipeButton.Pos> calculateIngredientsPositions(RecipeDisplay pRecipeDisplay, ContextMap pContextMap) {
             List<OverlayRecipeComponent.OverlayRecipeButton.Pos> list = new ArrayList<>();
-            Objects.requireNonNull(p_361654_);
-            switch (p_361654_) {
+            Objects.requireNonNull(pRecipeDisplay);
+            switch (pRecipeDisplay) {
                 case ShapedCraftingRecipeDisplay shapedcraftingrecipedisplay:
                     PlaceRecipeHelper.placeRecipe(
                         3,
@@ -206,7 +206,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
                         shapedcraftingrecipedisplay.height(),
                         shapedcraftingrecipedisplay.ingredients(),
                         (p_369553_, p_363692_, p_370132_, p_368389_) -> {
-                            List<ItemStack> list3 = p_369553_.resolveForStacks(p_365654_);
+                            List<ItemStack> list3 = p_369553_.resolveForStacks(pContextMap);
                             if (!list3.isEmpty()) {
                                 list.add(createGridPos(p_370132_, p_368389_, list3));
                             }
@@ -218,7 +218,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
                         List<SlotDisplay> list1 = shapelesscraftingrecipedisplay.ingredients();
 
                         for (int i = 0; i < list1.size(); i++) {
-                            List<ItemStack> list2 = list1.get(i).resolveForStacks(p_365654_);
+                            List<ItemStack> list2 = list1.get(i).resolveForStacks(pContextMap);
                             if (!list2.isEmpty()) {
                                 list.add(createGridPos(i % 3, i / 3, list2));
                             }
@@ -248,23 +248,23 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
         private final List<OverlayRecipeComponent.OverlayRecipeButton.Pos> slots;
 
         public OverlayRecipeButton(
-            final int p_100232_,
-            final int p_100233_,
-            final RecipeDisplayId p_369216_,
-            final boolean p_100235_,
-            final List<OverlayRecipeComponent.OverlayRecipeButton.Pos> p_365806_
+            final int pX,
+            final int pY,
+            final RecipeDisplayId pRecipe,
+            final boolean pIsCraftable,
+            final List<OverlayRecipeComponent.OverlayRecipeButton.Pos> pSlots
         ) {
-            super(p_100232_, p_100233_, 24, 24, CommonComponents.EMPTY);
-            this.slots = p_365806_;
-            this.recipe = p_369216_;
-            this.isCraftable = p_100235_;
+            super(pX, pY, 24, 24, CommonComponents.EMPTY);
+            this.slots = pSlots;
+            this.recipe = pRecipe;
+            this.isCraftable = pIsCraftable;
         }
 
-        protected static OverlayRecipeComponent.OverlayRecipeButton.Pos createGridPos(int p_365030_, int p_369393_, List<ItemStack> p_365257_) {
-            return new OverlayRecipeComponent.OverlayRecipeButton.Pos(3 + p_365030_ * 7, 3 + p_369393_ * 7, p_365257_);
+        protected static OverlayRecipeComponent.OverlayRecipeButton.Pos createGridPos(int pX, int pY, List<ItemStack> pPossibleItems) {
+            return new OverlayRecipeComponent.OverlayRecipeButton.Pos(3 + pX * 7, 3 + pY * 7, pPossibleItems);
         }
 
-        protected abstract ResourceLocation getSprite(boolean p_365330_);
+        protected abstract ResourceLocation getSprite(boolean pEnabled);
 
         @Override
         public void updateWidgetNarration(NarrationElementOutput p_259646_) {
@@ -305,8 +305,8 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
                 }
             }
 
-            public ItemStack selectIngredient(int p_369709_) {
-                return this.ingredients.get(p_369709_ % this.ingredients.size());
+            public ItemStack selectIngredient(int pIndex) {
+                return this.ingredients.get(pIndex % this.ingredients.size());
             }
         }
     }
@@ -319,19 +319,19 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
         private static final ResourceLocation HIGHLIGHTED_DISABLED_SPRITE = ResourceLocation.withDefaultNamespace("recipe_book/furnace_overlay_disabled_highlighted");
 
         public OverlaySmeltingRecipeButton(
-            final int p_100262_,
-            final int p_100263_,
-            final RecipeDisplayId p_369286_,
-            final RecipeDisplay p_361405_,
-            final ContextMap p_361368_,
-            final boolean p_100265_
+            final int pX,
+            final int pY,
+            final RecipeDisplayId pRecipe,
+            final RecipeDisplay pRecipeDisplay,
+            final ContextMap pContextMap,
+            final boolean pIsCraftable
         ) {
-            super(p_100262_, p_100263_, p_369286_, p_100265_, calculateIngredientsPositions(p_361405_, p_361368_));
+            super(pX, pY, pRecipe, pIsCraftable, calculateIngredientsPositions(pRecipeDisplay, pContextMap));
         }
 
-        private static List<OverlayRecipeComponent.OverlayRecipeButton.Pos> calculateIngredientsPositions(RecipeDisplay p_370119_, ContextMap p_361389_) {
-            if (p_370119_ instanceof FurnaceRecipeDisplay furnacerecipedisplay) {
-                List<ItemStack> list = furnacerecipedisplay.ingredient().resolveForStacks(p_361389_);
+        private static List<OverlayRecipeComponent.OverlayRecipeButton.Pos> calculateIngredientsPositions(RecipeDisplay pRecipeDisplay, ContextMap pContextMap) {
+            if (pRecipeDisplay instanceof FurnaceRecipeDisplay furnacerecipedisplay) {
+                List<ItemStack> list = furnacerecipedisplay.ingredient().resolveForStacks(pContextMap);
                 if (!list.isEmpty()) {
                     return List.of(createGridPos(1, 1, list));
                 }

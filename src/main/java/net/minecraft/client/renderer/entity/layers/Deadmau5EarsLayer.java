@@ -19,9 +19,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class Deadmau5EarsLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
     private final HumanoidModel<PlayerRenderState> model;
 
-    public Deadmau5EarsLayer(RenderLayerParent<PlayerRenderState, PlayerModel> p_116860_, EntityModelSet p_367465_) {
-        super(p_116860_);
-        this.model = new PlayerEarsModel(p_367465_.bakeLayer(ModelLayers.PLAYER_EARS));
+    public Deadmau5EarsLayer(RenderLayerParent<PlayerRenderState, PlayerModel> pRenderer, EntityModelSet pModelSet) {
+        super(pRenderer);
+        this.model = new PlayerEarsModel(pModelSet.bakeLayer(ModelLayers.PLAYER_EARS));
     }
 
     public void render(PoseStack p_116873_, MultiBufferSource p_116874_, int p_116875_, PlayerRenderState p_361078_, float p_116877_, float p_116878_) {

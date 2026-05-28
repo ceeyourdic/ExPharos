@@ -17,25 +17,25 @@ public class ClientboundHelloPacket implements Packet<ClientLoginPacketListener>
     private final byte[] challenge;
     private final boolean shouldAuthenticate;
 
-    public ClientboundHelloPacket(String p_134782_, byte[] p_134783_, byte[] p_134784_, boolean p_331026_) {
-        this.serverId = p_134782_;
-        this.publicKey = p_134783_;
-        this.challenge = p_134784_;
-        this.shouldAuthenticate = p_331026_;
+    public ClientboundHelloPacket(String pServerId, byte[] pPublicKey, byte[] pChallenge, boolean pShouldAuthenticate) {
+        this.serverId = pServerId;
+        this.publicKey = pPublicKey;
+        this.challenge = pChallenge;
+        this.shouldAuthenticate = pShouldAuthenticate;
     }
 
-    private ClientboundHelloPacket(FriendlyByteBuf p_179816_) {
-        this.serverId = p_179816_.readUtf(20);
-        this.publicKey = p_179816_.readByteArray();
-        this.challenge = p_179816_.readByteArray();
-        this.shouldAuthenticate = p_179816_.readBoolean();
+    private ClientboundHelloPacket(FriendlyByteBuf pBuffer) {
+        this.serverId = pBuffer.readUtf(20);
+        this.publicKey = pBuffer.readByteArray();
+        this.challenge = pBuffer.readByteArray();
+        this.shouldAuthenticate = pBuffer.readBoolean();
     }
 
-    private void write(FriendlyByteBuf p_134793_) {
-        p_134793_.writeUtf(this.serverId);
-        p_134793_.writeByteArray(this.publicKey);
-        p_134793_.writeByteArray(this.challenge);
-        p_134793_.writeBoolean(this.shouldAuthenticate);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeUtf(this.serverId);
+        pBuffer.writeByteArray(this.publicKey);
+        pBuffer.writeByteArray(this.challenge);
+        pBuffer.writeBoolean(this.shouldAuthenticate);
     }
 
     @Override
@@ -43,8 +43,8 @@ public class ClientboundHelloPacket implements Packet<ClientLoginPacketListener>
         return LoginPacketTypes.CLIENTBOUND_HELLO;
     }
 
-    public void handle(ClientLoginPacketListener p_134790_) {
-        p_134790_.handleHello(this);
+    public void handle(ClientLoginPacketListener pHandler) {
+        pHandler.handleHello(this);
     }
 
     public String getServerId() {

@@ -15,9 +15,9 @@ public class DragonHeadModel extends SkullModelBase {
     private final ModelPart head;
     private final ModelPart jaw;
 
-    public DragonHeadModel(ModelPart p_171097_) {
-        super(p_171097_);
-        this.head = p_171097_.getChild("head");
+    public DragonHeadModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
         this.jaw = this.head.getChild("jaw");
     }
 

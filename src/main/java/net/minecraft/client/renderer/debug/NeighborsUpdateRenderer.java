@@ -23,14 +23,14 @@ public class NeighborsUpdateRenderer implements DebugRenderer.SimpleDebugRendere
     private final Minecraft minecraft;
     private final Map<Long, Map<BlockPos, Integer>> lastUpdate = Maps.newTreeMap(Ordering.natural().reverse());
 
-    NeighborsUpdateRenderer(Minecraft p_113595_) {
-        this.minecraft = p_113595_;
+    NeighborsUpdateRenderer(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
-    public void addUpdate(long p_113597_, BlockPos p_113598_) {
-        Map<BlockPos, Integer> map = this.lastUpdate.computeIfAbsent(p_113597_, p_113606_ -> Maps.newHashMap());
-        int i = map.getOrDefault(p_113598_, 0);
-        map.put(p_113598_, i + 1);
+    public void addUpdate(long pGameTime, BlockPos pPos) {
+        Map<BlockPos, Integer> map = this.lastUpdate.computeIfAbsent(pGameTime, p_113606_ -> Maps.newHashMap());
+        int i = map.getOrDefault(pPos, 0);
+        map.put(pPos, i + 1);
     }
 
     @Override

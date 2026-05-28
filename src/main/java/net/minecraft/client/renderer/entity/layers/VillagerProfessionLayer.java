@@ -42,10 +42,10 @@ public class VillagerProfessionLayer<S extends LivingEntityRenderState & Village
     private final ResourceManager resourceManager;
     private final String path;
 
-    public VillagerProfessionLayer(RenderLayerParent<S, M> p_174550_, ResourceManager p_174551_, String p_174552_) {
-        super(p_174550_);
-        this.resourceManager = p_174551_;
-        this.path = p_174552_;
+    public VillagerProfessionLayer(RenderLayerParent<S, M> pRenderer, ResourceManager pResourceManager, String pPath) {
+        super(pRenderer);
+        this.resourceManager = pResourceManager;
+        this.path = pPath;
     }
 
     public void render(PoseStack p_117646_, MultiBufferSource p_117647_, int p_117648_, S p_369199_, float p_117650_, float p_117651_) {
@@ -78,15 +78,15 @@ public class VillagerProfessionLayer<S extends LivingEntityRenderState & Village
         }
     }
 
-    private ResourceLocation getResourceLocation(String p_117669_, ResourceLocation p_117670_) {
-        return p_117670_.withPath(p_247944_ -> "textures/entity/" + this.path + "/" + p_117669_ + "/" + p_247944_ + ".png");
+    private ResourceLocation getResourceLocation(String pFolder, ResourceLocation pLocation) {
+        return pLocation.withPath(p_247944_ -> "textures/entity/" + this.path + "/" + pFolder + "/" + p_247944_ + ".png");
     }
 
     public <K> VillagerMetadataSection.Hat getHatData(
-        Object2ObjectMap<K, VillagerMetadataSection.Hat> p_117659_, String p_117660_, DefaultedRegistry<K> p_117661_, K p_117662_
+        Object2ObjectMap<K, VillagerMetadataSection.Hat> pCache, String pFolder, DefaultedRegistry<K> pRegistry, K pKey
     ) {
-        return p_117659_.computeIfAbsent(
-            p_117662_, p_374663_ -> this.resourceManager.getResource(this.getResourceLocation(p_117660_, p_117661_.getKey(p_117662_))).flatMap(p_374659_ -> {
+        return pCache.computeIfAbsent(
+            pKey, p_374663_ -> this.resourceManager.getResource(this.getResourceLocation(pFolder, pRegistry.getKey(pKey))).flatMap(p_374659_ -> {
                     try {
                         return p_374659_.metadata().getSection(VillagerMetadataSection.TYPE).map(VillagerMetadataSection::hat);
                     } catch (IOException ioexception) {

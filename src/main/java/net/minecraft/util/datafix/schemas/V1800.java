@@ -13,11 +13,11 @@ public class V1800 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_17744_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_17744_);
-        p_17744_.register(map, "minecraft:panda", () -> V100.equipment(p_17744_));
-        p_17744_.register(
-            map, "minecraft:pillager", p_17738_ -> DSL.optionalFields("Inventory", DSL.list(References.ITEM_STACK.in(p_17744_)), V100.equipment(p_17744_))
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
+        pSchema.register(map, "minecraft:panda", () -> V100.equipment(pSchema));
+        pSchema.register(
+            map, "minecraft:pillager", p_17738_ -> DSL.optionalFields("Inventory", DSL.list(References.ITEM_STACK.in(pSchema)), V100.equipment(pSchema))
         );
         return map;
     }

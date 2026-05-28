@@ -20,31 +20,31 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
     private final float pitch;
     private final long seed;
 
-    public ClientboundSoundEntityPacket(Holder<SoundEvent> p_263513_, SoundSource p_263511_, Entity p_263496_, float p_263519_, float p_263523_, long p_263532_) {
-        this.sound = p_263513_;
-        this.source = p_263511_;
-        this.id = p_263496_.getId();
-        this.volume = p_263519_;
-        this.pitch = p_263523_;
-        this.seed = p_263532_;
+    public ClientboundSoundEntityPacket(Holder<SoundEvent> pSound, SoundSource pSource, Entity pEntity, float pVolume, float pPitch, long pSeed) {
+        this.sound = pSound;
+        this.source = pSource;
+        this.id = pEntity.getId();
+        this.volume = pVolume;
+        this.pitch = pPitch;
+        this.seed = pSeed;
     }
 
-    private ClientboundSoundEntityPacket(RegistryFriendlyByteBuf p_329519_) {
-        this.sound = SoundEvent.STREAM_CODEC.decode(p_329519_);
-        this.source = p_329519_.readEnum(SoundSource.class);
-        this.id = p_329519_.readVarInt();
-        this.volume = p_329519_.readFloat();
-        this.pitch = p_329519_.readFloat();
-        this.seed = p_329519_.readLong();
+    private ClientboundSoundEntityPacket(RegistryFriendlyByteBuf pBuffer) {
+        this.sound = SoundEvent.STREAM_CODEC.decode(pBuffer);
+        this.source = pBuffer.readEnum(SoundSource.class);
+        this.id = pBuffer.readVarInt();
+        this.volume = pBuffer.readFloat();
+        this.pitch = pBuffer.readFloat();
+        this.seed = pBuffer.readLong();
     }
 
-    private void write(RegistryFriendlyByteBuf p_332294_) {
-        SoundEvent.STREAM_CODEC.encode(p_332294_, this.sound);
-        p_332294_.writeEnum(this.source);
-        p_332294_.writeVarInt(this.id);
-        p_332294_.writeFloat(this.volume);
-        p_332294_.writeFloat(this.pitch);
-        p_332294_.writeLong(this.seed);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        SoundEvent.STREAM_CODEC.encode(pBuffer, this.sound);
+        pBuffer.writeEnum(this.source);
+        pBuffer.writeVarInt(this.id);
+        pBuffer.writeFloat(this.volume);
+        pBuffer.writeFloat(this.pitch);
+        pBuffer.writeLong(this.seed);
     }
 
     @Override
@@ -52,8 +52,8 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
         return GamePacketTypes.CLIENTBOUND_SOUND_ENTITY;
     }
 
-    public void handle(ClientGamePacketListener p_133425_) {
-        p_133425_.handleSoundEntityEvent(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleSoundEntityEvent(this);
     }
 
     public Holder<SoundEvent> getSound() {

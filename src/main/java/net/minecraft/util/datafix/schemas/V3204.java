@@ -13,9 +13,9 @@ public class V3204 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_250991_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_250991_);
-        p_250991_.register(map, "minecraft:chiseled_bookshelf", () -> DSL.optionalFields("Items", DSL.list(References.ITEM_STACK.in(p_250991_))));
+    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(pSchema);
+        pSchema.register(map, "minecraft:chiseled_bookshelf", () -> DSL.optionalFields("Items", DSL.list(References.ITEM_STACK.in(pSchema))));
         return map;
     }
 }

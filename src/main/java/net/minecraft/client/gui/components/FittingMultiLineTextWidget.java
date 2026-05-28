@@ -13,14 +13,14 @@ public class FittingMultiLineTextWidget extends AbstractTextAreaWidget {
     private final Font font;
     private final MultiLineTextWidget multilineWidget;
 
-    public FittingMultiLineTextWidget(int p_289785_, int p_289777_, int p_289760_, int p_289801_, Component p_289788_, Font p_289781_) {
-        super(p_289785_, p_289777_, p_289760_, p_289801_, p_289788_);
-        this.font = p_289781_;
-        this.multilineWidget = new MultiLineTextWidget(p_289788_, p_289781_).setMaxWidth(this.getWidth() - this.totalInnerPadding());
+    public FittingMultiLineTextWidget(int pX, int pY, int pWidth, int pHeight, Component pMessage, Font pFont) {
+        super(pX, pY, pWidth, pHeight, pMessage);
+        this.font = pFont;
+        this.multilineWidget = new MultiLineTextWidget(pMessage, pFont).setMaxWidth(this.getWidth() - this.totalInnerPadding());
     }
 
-    public FittingMultiLineTextWidget setColor(int p_289780_) {
-        this.multilineWidget.setColor(p_289780_);
+    public FittingMultiLineTextWidget setColor(int pColor) {
+        this.multilineWidget.setColor(pColor);
         return this;
     }
 

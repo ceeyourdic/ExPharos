@@ -167,8 +167,8 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
     }
 
     @Override
-    protected PathNavigation createNavigation(Level p_29417_) {
-        FlyingPathNavigation flyingpathnavigation = new FlyingPathNavigation(this, p_29417_);
+    protected PathNavigation createNavigation(Level pLevel) {
+        FlyingPathNavigation flyingpathnavigation = new FlyingPathNavigation(this, pLevel);
         flyingpathnavigation.setCanOpenDoors(false);
         flyingpathnavigation.setCanFloat(true);
         return flyingpathnavigation;
@@ -190,9 +190,9 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
     }
 
     @Override
-    public void setRecordPlayingNearby(BlockPos p_29395_, boolean p_29396_) {
-        this.jukebox = p_29395_;
-        this.partyParrot = p_29396_;
+    public void setRecordPlayingNearby(BlockPos pPos, boolean pIsPartying) {
+        this.jukebox = pPos;
+        this.partyParrot = pIsPartying;
     }
 
     public boolean isPartyParrot() {
@@ -217,15 +217,15 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
         this.flap = this.flap + this.flapping * 2.0F;
     }
 
-    public static boolean imitateNearbyMobs(Level p_29383_, Entity p_29384_) {
-        if (p_29384_.isAlive() && !p_29384_.isSilent() && p_29383_.random.nextInt(2) == 0) {
-            List<Mob> list = p_29383_.getEntitiesOfClass(Mob.class, p_29384_.getBoundingBox().inflate(20.0), NOT_PARROT_PREDICATE);
+    public static boolean imitateNearbyMobs(Level pLevel, Entity pParrot) {
+        if (pParrot.isAlive() && !pParrot.isSilent() && pLevel.random.nextInt(2) == 0) {
+            List<Mob> list = pLevel.getEntitiesOfClass(Mob.class, pParrot.getBoundingBox().inflate(20.0), NOT_PARROT_PREDICATE);
             if (!list.isEmpty()) {
-                Mob mob = list.get(p_29383_.random.nextInt(list.size()));
+                Mob mob = list.get(pLevel.random.nextInt(list.size()));
                 if (!mob.isSilent()) {
                     SoundEvent soundevent = getImitatedSound(mob.getType());
-                    p_29383_.playSound(
-                        null, p_29384_.getX(), p_29384_.getY(), p_29384_.getZ(), soundevent, p_29384_.getSoundSource(), 0.7F, getPitch(p_29383_.random)
+                    pLevel.playSound(
+                        null, pParrot.getX(), pParrot.getY(), pParrot.getZ(), soundevent, pParrot.getSoundSource(), 0.7F, getPitch(pLevel.random)
                     );
                     return true;
                 }
@@ -238,10 +238,10 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_29414_, InteractionHand p_29415_) {
-        ItemStack itemstack = p_29414_.getItemInHand(p_29415_);
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
         if (!this.isTame() && itemstack.is(ItemTags.PARROT_FOOD)) {
-            this.usePlayerItem(p_29414_, p_29415_, itemstack);
+            this.usePlayerItem(pPlayer, pHand, itemstack);
             if (!this.isSilent()) {
                 this.level()
                     .playSound(
@@ -258,7 +258,7 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 
             if (!this.level().isClientSide) {
                 if (this.random.nextInt(10) == 0) {
-                    this.tame(p_29414_);
+                    this.tame(pPlayer);
                     this.level().broadcastEntityEvent(this, (byte)7);
                 } else {
                     this.level().broadcastEntityEvent(this, (byte)6);
@@ -267,20 +267,20 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 
             return InteractionResult.SUCCESS;
         } else if (!itemstack.is(ItemTags.PARROT_POISONOUS_FOOD)) {
-            if (!this.isFlying() && this.isTame() && this.isOwnedBy(p_29414_)) {
+            if (!this.isFlying() && this.isTame() && this.isOwnedBy(pPlayer)) {
                 if (!this.level().isClientSide) {
                     this.setOrderedToSit(!this.isOrderedToSit());
                 }
 
                 return InteractionResult.SUCCESS;
             } else {
-                return super.mobInteract(p_29414_, p_29415_);
+                return super.mobInteract(pPlayer, pHand);
             }
         } else {
-            this.usePlayerItem(p_29414_, p_29415_, itemstack);
+            this.usePlayerItem(pPlayer, pHand, itemstack);
             this.addEffect(new MobEffectInstance(MobEffects.POISON, 900));
-            if (p_29414_.isCreative() || !this.isInvulnerable()) {
-                this.hurt(this.damageSources().playerAttack(p_29414_), Float.MAX_VALUE);
+            if (pPlayer.isCreative() || !this.isInvulnerable()) {
+                this.hurt(this.damageSources().playerAttack(pPlayer), Float.MAX_VALUE);
             }
 
             return InteractionResult.SUCCESS;
@@ -288,22 +288,22 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
     }
 
     @Override
-    public boolean isFood(ItemStack p_29446_) {
+    public boolean isFood(ItemStack pStack) {
         return false;
     }
 
     public static boolean checkParrotSpawnRules(
-        EntityType<Parrot> p_218242_, LevelAccessor p_218243_, EntitySpawnReason p_367372_, BlockPos p_218245_, RandomSource p_218246_
+        EntityType<Parrot> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return p_218243_.getBlockState(p_218245_.below()).is(BlockTags.PARROTS_SPAWNABLE_ON) && isBrightEnoughToSpawn(p_218243_, p_218245_);
+        return pLevel.getBlockState(pPos.below()).is(BlockTags.PARROTS_SPAWNABLE_ON) && isBrightEnoughToSpawn(pLevel, pPos);
     }
 
     @Override
-    protected void checkFallDamage(double p_29370_, boolean p_29371_, BlockState p_29372_, BlockPos p_29373_) {
+    protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {
     }
 
     @Override
-    public boolean canMate(Animal p_29381_) {
+    public boolean canMate(Animal pOtherAnimal) {
         return false;
     }
 
@@ -319,21 +319,21 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
         return getAmbient(this.level(), this.level().random);
     }
 
-    public static SoundEvent getAmbient(Level p_218239_, RandomSource p_218240_) {
-        if (p_218239_.getDifficulty() != Difficulty.PEACEFUL && p_218240_.nextInt(1000) == 0) {
+    public static SoundEvent getAmbient(Level pLevel, RandomSource pRandom) {
+        if (pLevel.getDifficulty() != Difficulty.PEACEFUL && pRandom.nextInt(1000) == 0) {
             List<EntityType<?>> list = Lists.newArrayList(MOB_SOUND_MAP.keySet());
-            return getImitatedSound(list.get(p_218240_.nextInt(list.size())));
+            return getImitatedSound(list.get(pRandom.nextInt(list.size())));
         } else {
             return SoundEvents.PARROT_AMBIENT;
         }
     }
 
-    private static SoundEvent getImitatedSound(EntityType<?> p_29409_) {
-        return MOB_SOUND_MAP.getOrDefault(p_29409_, SoundEvents.PARROT_AMBIENT);
+    private static SoundEvent getImitatedSound(EntityType<?> pType) {
+        return MOB_SOUND_MAP.getOrDefault(pType, SoundEvents.PARROT_AMBIENT);
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_29437_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.PARROT_HURT;
     }
 
@@ -343,7 +343,7 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
     }
 
     @Override
-    protected void playStepSound(BlockPos p_29419_, BlockState p_29420_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(SoundEvents.PARROT_STEP, 0.15F, 1.0F);
     }
 
@@ -363,8 +363,8 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
         return getPitch(this.random);
     }
 
-    public static float getPitch(RandomSource p_218237_) {
-        return (p_218237_.nextFloat() - p_218237_.nextFloat()) * 0.2F + 1.0F;
+    public static float getPitch(RandomSource pRandom) {
+        return (pRandom.nextFloat() - pRandom.nextFloat()) * 0.2F + 1.0F;
     }
 
     @Override
@@ -378,9 +378,9 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
     }
 
     @Override
-    protected void doPush(Entity p_29367_) {
-        if (!(p_29367_ instanceof Player)) {
-            super.doPush(p_29367_);
+    protected void doPush(Entity pEntity) {
+        if (!(pEntity instanceof Player)) {
+            super.doPush(pEntity);
         }
     }
 
@@ -409,15 +409,15 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_29422_) {
-        super.addAdditionalSaveData(p_29422_);
-        p_29422_.putInt("Variant", this.getVariant().id);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("Variant", this.getVariant().id);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_29402_) {
-        super.readAdditionalSaveData(p_29402_);
-        this.setVariant(Parrot.Variant.byId(p_29402_.getInt("Variant")));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setVariant(Parrot.Variant.byId(pCompound.getInt("Variant")));
     }
 
     @Override
@@ -496,17 +496,17 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
         final int id;
         private final String name;
 
-        private Variant(final int p_262571_, final String p_262693_) {
-            this.id = p_262571_;
-            this.name = p_262693_;
+        private Variant(final int pId, final String pName) {
+            this.id = pId;
+            this.name = pName;
         }
 
         public int getId() {
             return this.id;
         }
 
-        public static Parrot.Variant byId(int p_262643_) {
-            return BY_ID.apply(p_262643_);
+        public static Parrot.Variant byId(int pId) {
+            return BY_ID.apply(pId);
         }
 
         @Override

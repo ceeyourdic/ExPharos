@@ -16,11 +16,11 @@ public class GpuFence implements AutoCloseable {
         }
     }
 
-    public boolean awaitCompletion(long p_368162_) {
+    public boolean awaitCompletion(long pTimeout) {
         if (this.handle == 0L) {
             return true;
         } else {
-            int i = GlStateManager._glClientWaitSync(this.handle, 0, p_368162_);
+            int i = GlStateManager._glClientWaitSync(this.handle, 0, pTimeout);
             if (i == 37147) {
                 return false;
             } else if (i == 37149) {

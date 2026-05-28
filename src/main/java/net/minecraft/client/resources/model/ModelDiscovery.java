@@ -11,11 +11,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import net.minecraft.client.renderer.block.model.ItemModelGenerator;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.server.packs.resources.Resource;
+import net.optifine.CustomItems;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class ModelDiscovery {
     static final Logger LOGGER = LogUtils.getLogger();
     private final Map<ResourceLocation, UnbakedModel> inputModels;
@@ -23,22 +22,22 @@ public class ModelDiscovery {
     private final List<ResolvableModel> topModels = new ArrayList<>();
     private final Map<ResourceLocation, UnbakedModel> referencedModels = new HashMap<>();
 
-    public ModelDiscovery(Map<ResourceLocation, UnbakedModel> p_362964_, UnbakedModel p_367385_) {
-        this.inputModels = p_362964_;
-        this.missingModel = p_367385_;
-        this.referencedModels.put(MissingBlockModel.LOCATION, p_367385_);
+    public ModelDiscovery(Map<ResourceLocation, UnbakedModel> pInputModels, UnbakedModel pMissingModel) {
+        this.inputModels = pInputModels;
+        this.missingModel = pMissingModel;
+        this.referencedModels.put(MissingBlockModel.LOCATION, pMissingModel);
     }
 
     public void registerSpecialModels() {
         this.referencedModels.put(ItemModelGenerator.GENERATED_ITEM_MODEL_ID, new ItemModelGenerator());
     }
 
-    public void addRoot(ResolvableModel p_376215_) {
-        this.topModels.add(p_376215_);
+    public void addRoot(ResolvableModel pModel) {
+        this.topModels.add(pModel);
     }
 
     public void discoverDependencies() {
-        this.topModels.forEach(p_374712_ -> p_374712_.resolveDependencies(new ModelDiscovery.ResolverImpl()));
+        this.topModels.forEach(modelIn -> modelIn.resolveDependencies(new ModelDiscovery.ResolverImpl()));
     }
 
     public Map<ResourceLocation, UnbakedModel> getReferencedModels() {
@@ -49,21 +48,30 @@ public class ModelDiscovery {
         return Sets.difference(this.inputModels.keySet(), this.referencedModels.keySet());
     }
 
-    UnbakedModel getBlockModel(ResourceLocation p_363667_) {
-        return this.referencedModels.computeIfAbsent(p_363667_, this::loadBlockModel);
+    UnbakedModel getBlockModel(ResourceLocation pModelLocation) {
+        return this.referencedModels.computeIfAbsent(pModelLocation, this::loadBlockModel);
     }
 
-    private UnbakedModel loadBlockModel(ResourceLocation p_368910_) {
-        UnbakedModel unbakedmodel = this.inputModels.get(p_368910_);
+    private UnbakedModel loadBlockModel(ResourceLocation pModelLocation) {
+        UnbakedModel unbakedmodel = this.inputModels.get(pModelLocation);
         if (unbakedmodel == null) {
-            LOGGER.warn("Missing block model: '{}'", p_368910_);
+            LOGGER.warn("Missing block model: '{}'", pModelLocation);
             return this.missingModel;
         } else {
             return unbakedmodel;
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    public void resolveCustomModels() {
+        Map<ResourceLocation, Resource> map = CustomItems.getModelResources(false);
+
+        for (ResourceLocation resourcelocation : map.keySet()) {
+            ResourceLocation resourcelocation1 = resourcelocation.removePrefixSuffix("models/", ".json");
+            ResolvableModel.Resolver resolvablemodel$resolver = new ModelDiscovery.ResolverImpl();
+            UnbakedModel unbakedmodel = resolvablemodel$resolver.resolve(resourcelocation1);
+        }
+    }
+
     class ResolverImpl implements ResolvableModel.Resolver {
         private final List<ResourceLocation> stack = new ArrayList<>();
         private final Set<ResourceLocation> resolvedModels = new HashSet<>();

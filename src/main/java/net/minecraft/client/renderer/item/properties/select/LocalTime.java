@@ -46,22 +46,22 @@ public class LocalTime implements SelectItemModelProperty<String> {
     private long nextUpdateTimeMs;
     private String lastResult = "";
 
-    private LocalTime(LocalTime.Data p_375944_, DateFormat p_378503_) {
-        this.data = p_375944_;
-        this.parsedFormat = p_378503_;
+    private LocalTime(LocalTime.Data pData, DateFormat pParsedFormat) {
+        this.data = pData;
+        this.parsedFormat = pParsedFormat;
     }
 
-    public static LocalTime create(String p_377930_, String p_378328_, Optional<TimeZone> p_375461_) {
-        return create(new LocalTime.Data(p_377930_, p_378328_, p_375461_))
+    public static LocalTime create(String pFormat, String pLocaleId, Optional<TimeZone> pTimeZone) {
+        return create(new LocalTime.Data(pFormat, pLocaleId, pTimeZone))
             .getOrThrow(p_376916_ -> new IllegalStateException("Failed to validate format: " + p_376916_));
     }
 
-    private static DataResult<LocalTime> create(LocalTime.Data p_378543_) {
-        ULocale ulocale = new ULocale(p_378543_.localeId);
-        Calendar calendar = p_378543_.timeZone
+    private static DataResult<LocalTime> create(LocalTime.Data pData) {
+        ULocale ulocale = new ULocale(pData.localeId);
+        Calendar calendar = pData.timeZone
             .<Calendar>map(p_377754_ -> Calendar.getInstance(p_377754_, ulocale))
             .orElseGet(() -> Calendar.getInstance(ulocale));
-        SimpleDateFormat simpledateformat = new SimpleDateFormat(p_378543_.format, ulocale);
+        SimpleDateFormat simpledateformat = new SimpleDateFormat(pData.format, ulocale);
         simpledateformat.setCalendar(calendar);
 
         try {
@@ -70,7 +70,7 @@ public class LocalTime implements SelectItemModelProperty<String> {
             return DataResult.error(() -> "Invalid time format '" + simpledateformat + "': " + exception.getMessage());
         }
 
-        return DataResult.success(new LocalTime(p_378543_, simpledateformat));
+        return DataResult.success(new LocalTime(pData, simpledateformat));
     }
 
     @Nullable

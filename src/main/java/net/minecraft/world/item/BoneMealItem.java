@@ -33,23 +33,23 @@ public class BoneMealItem extends Item {
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext p_40637_) {
-        Level level = p_40637_.getLevel();
-        BlockPos blockpos = p_40637_.getClickedPos();
-        BlockPos blockpos1 = blockpos.relative(p_40637_.getClickedFace());
-        if (growCrop(p_40637_.getItemInHand(), level, blockpos)) {
+    public InteractionResult useOn(UseOnContext pContext) {
+        Level level = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
+        BlockPos blockpos1 = blockpos.relative(pContext.getClickedFace());
+        if (growCrop(pContext.getItemInHand(), level, blockpos)) {
             if (!level.isClientSide) {
-                p_40637_.getPlayer().gameEvent(GameEvent.ITEM_INTERACT_FINISH);
+                pContext.getPlayer().gameEvent(GameEvent.ITEM_INTERACT_FINISH);
                 level.levelEvent(1505, blockpos, 15);
             }
 
             return InteractionResult.SUCCESS;
         } else {
             BlockState blockstate = level.getBlockState(blockpos);
-            boolean flag = blockstate.isFaceSturdy(level, blockpos, p_40637_.getClickedFace());
-            if (flag && growWaterPlant(p_40637_.getItemInHand(), level, blockpos1, p_40637_.getClickedFace())) {
+            boolean flag = blockstate.isFaceSturdy(level, blockpos, pContext.getClickedFace());
+            if (flag && growWaterPlant(pContext.getItemInHand(), level, blockpos1, pContext.getClickedFace())) {
                 if (!level.isClientSide) {
-                    p_40637_.getPlayer().gameEvent(GameEvent.ITEM_INTERACT_FINISH);
+                    pContext.getPlayer().gameEvent(GameEvent.ITEM_INTERACT_FINISH);
                     level.levelEvent(1505, blockpos1, 15);
                 }
 
@@ -60,15 +60,15 @@ public class BoneMealItem extends Item {
         }
     }
 
-    public static boolean growCrop(ItemStack p_40628_, Level p_40629_, BlockPos p_40630_) {
-        BlockState blockstate = p_40629_.getBlockState(p_40630_);
-        if (blockstate.getBlock() instanceof BonemealableBlock bonemealableblock && bonemealableblock.isValidBonemealTarget(p_40629_, p_40630_, blockstate)) {
-            if (p_40629_ instanceof ServerLevel) {
-                if (bonemealableblock.isBonemealSuccess(p_40629_, p_40629_.random, p_40630_, blockstate)) {
-                    bonemealableblock.performBonemeal((ServerLevel)p_40629_, p_40629_.random, p_40630_, blockstate);
+    public static boolean growCrop(ItemStack pStack, Level pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
+        if (blockstate.getBlock() instanceof BonemealableBlock bonemealableblock && bonemealableblock.isValidBonemealTarget(pLevel, pPos, blockstate)) {
+            if (pLevel instanceof ServerLevel) {
+                if (bonemealableblock.isBonemealSuccess(pLevel, pLevel.random, pPos, blockstate)) {
+                    bonemealableblock.performBonemeal((ServerLevel)pLevel, pLevel.random, pPos, blockstate);
                 }
 
-                p_40628_.shrink(1);
+                pStack.shrink(1);
             }
 
             return true;
@@ -77,64 +77,64 @@ public class BoneMealItem extends Item {
         return false;
     }
 
-    public static boolean growWaterPlant(ItemStack p_40632_, Level p_40633_, BlockPos p_40634_, @Nullable Direction p_40635_) {
-        if (p_40633_.getBlockState(p_40634_).is(Blocks.WATER) && p_40633_.getFluidState(p_40634_).getAmount() == 8) {
-            if (!(p_40633_ instanceof ServerLevel)) {
+    public static boolean growWaterPlant(ItemStack pStack, Level pLevel, BlockPos pPos, @Nullable Direction pClickedSide) {
+        if (pLevel.getBlockState(pPos).is(Blocks.WATER) && pLevel.getFluidState(pPos).getAmount() == 8) {
+            if (!(pLevel instanceof ServerLevel)) {
                 return true;
             } else {
-                RandomSource randomsource = p_40633_.getRandom();
+                RandomSource randomsource = pLevel.getRandom();
 
                 label80:
                 for (int i = 0; i < 128; i++) {
-                    BlockPos blockpos = p_40634_;
+                    BlockPos blockpos = pPos;
                     BlockState blockstate = Blocks.SEAGRASS.defaultBlockState();
 
                     for (int j = 0; j < i / 16; j++) {
                         blockpos = blockpos.offset(
                             randomsource.nextInt(3) - 1, (randomsource.nextInt(3) - 1) * randomsource.nextInt(3) / 2, randomsource.nextInt(3) - 1
                         );
-                        if (p_40633_.getBlockState(blockpos).isCollisionShapeFullBlock(p_40633_, blockpos)) {
+                        if (pLevel.getBlockState(blockpos).isCollisionShapeFullBlock(pLevel, blockpos)) {
                             continue label80;
                         }
                     }
 
-                    Holder<Biome> holder = p_40633_.getBiome(blockpos);
+                    Holder<Biome> holder = pLevel.getBiome(blockpos);
                     if (holder.is(BiomeTags.PRODUCES_CORALS_FROM_BONEMEAL)) {
-                        if (i == 0 && p_40635_ != null && p_40635_.getAxis().isHorizontal()) {
+                        if (i == 0 && pClickedSide != null && pClickedSide.getAxis().isHorizontal()) {
                             blockstate = BuiltInRegistries.BLOCK
-                                .getRandomElementOf(BlockTags.WALL_CORALS, p_40633_.random)
+                                .getRandomElementOf(BlockTags.WALL_CORALS, pLevel.random)
                                 .map(p_204100_ -> p_204100_.value().defaultBlockState())
                                 .orElse(blockstate);
                             if (blockstate.hasProperty(BaseCoralWallFanBlock.FACING)) {
-                                blockstate = blockstate.setValue(BaseCoralWallFanBlock.FACING, p_40635_);
+                                blockstate = blockstate.setValue(BaseCoralWallFanBlock.FACING, pClickedSide);
                             }
                         } else if (randomsource.nextInt(4) == 0) {
                             blockstate = BuiltInRegistries.BLOCK
-                                .getRandomElementOf(BlockTags.UNDERWATER_BONEMEALS, p_40633_.random)
+                                .getRandomElementOf(BlockTags.UNDERWATER_BONEMEALS, pLevel.random)
                                 .map(p_204095_ -> p_204095_.value().defaultBlockState())
                                 .orElse(blockstate);
                         }
                     }
 
                     if (blockstate.is(BlockTags.WALL_CORALS, p_359379_ -> p_359379_.hasProperty(BaseCoralWallFanBlock.FACING))) {
-                        for (int k = 0; !blockstate.canSurvive(p_40633_, blockpos) && k < 4; k++) {
+                        for (int k = 0; !blockstate.canSurvive(pLevel, blockpos) && k < 4; k++) {
                             blockstate = blockstate.setValue(BaseCoralWallFanBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(randomsource));
                         }
                     }
 
-                    if (blockstate.canSurvive(p_40633_, blockpos)) {
-                        BlockState blockstate1 = p_40633_.getBlockState(blockpos);
-                        if (blockstate1.is(Blocks.WATER) && p_40633_.getFluidState(blockpos).getAmount() == 8) {
-                            p_40633_.setBlock(blockpos, blockstate, 3);
+                    if (blockstate.canSurvive(pLevel, blockpos)) {
+                        BlockState blockstate1 = pLevel.getBlockState(blockpos);
+                        if (blockstate1.is(Blocks.WATER) && pLevel.getFluidState(blockpos).getAmount() == 8) {
+                            pLevel.setBlock(blockpos, blockstate, 3);
                         } else if (blockstate1.is(Blocks.SEAGRASS)
-                            && ((BonemealableBlock)Blocks.SEAGRASS).isValidBonemealTarget(p_40633_, blockpos, blockstate1)
+                            && ((BonemealableBlock)Blocks.SEAGRASS).isValidBonemealTarget(pLevel, blockpos, blockstate1)
                             && randomsource.nextInt(10) == 0) {
-                            ((BonemealableBlock)Blocks.SEAGRASS).performBonemeal((ServerLevel)p_40633_, randomsource, blockpos, blockstate1);
+                            ((BonemealableBlock)Blocks.SEAGRASS).performBonemeal((ServerLevel)pLevel, randomsource, blockpos, blockstate1);
                         }
                     }
                 }
 
-                p_40632_.shrink(1);
+                pStack.shrink(1);
                 return true;
             }
         } else {
@@ -142,19 +142,19 @@ public class BoneMealItem extends Item {
         }
     }
 
-    public static void addGrowthParticles(LevelAccessor p_40639_, BlockPos p_40640_, int p_40641_) {
-        BlockState blockstate = p_40639_.getBlockState(p_40640_);
+    public static void addGrowthParticles(LevelAccessor pLevel, BlockPos pPos, int pData) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
         if (blockstate.getBlock() instanceof BonemealableBlock bonemealableblock) {
-            BlockPos blockpos = bonemealableblock.getParticlePos(p_40640_);
+            BlockPos blockpos = bonemealableblock.getParticlePos(pPos);
             switch (bonemealableblock.getType()) {
                 case NEIGHBOR_SPREADER:
-                    ParticleUtils.spawnParticles(p_40639_, blockpos, p_40641_ * 3, 3.0, 1.0, false, ParticleTypes.HAPPY_VILLAGER);
+                    ParticleUtils.spawnParticles(pLevel, blockpos, pData * 3, 3.0, 1.0, false, ParticleTypes.HAPPY_VILLAGER);
                     break;
                 case GROWER:
-                    ParticleUtils.spawnParticleInBlock(p_40639_, blockpos, p_40641_, ParticleTypes.HAPPY_VILLAGER);
+                    ParticleUtils.spawnParticleInBlock(pLevel, blockpos, pData, ParticleTypes.HAPPY_VILLAGER);
             }
         } else if (blockstate.is(Blocks.WATER)) {
-            ParticleUtils.spawnParticles(p_40639_, p_40640_, p_40641_ * 3, 3.0, 1.0, false, ParticleTypes.HAPPY_VILLAGER);
+            ParticleUtils.spawnParticles(pLevel, pPos, pData * 3, 3.0, 1.0, false, ParticleTypes.HAPPY_VILLAGER);
         }
     }
 }

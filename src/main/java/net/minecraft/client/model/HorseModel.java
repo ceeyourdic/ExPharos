@@ -7,7 +7,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class HorseModel extends AbstractEquineModel<EquineRenderState> {
-    public HorseModel(ModelPart p_170668_) {
-        super(p_170668_);
+    public HorseModel(ModelPart pRoot) {
+        super(pRoot);
     }
 }

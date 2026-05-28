@@ -16,9 +16,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class TadpoleModel extends EntityModel<LivingEntityRenderState> {
     private final ModelPart tail;
 
-    public TadpoleModel(ModelPart p_233443_) {
-        super(p_233443_, RenderType::entityCutoutNoCull);
-        this.tail = p_233443_.getChild("tail");
+    public TadpoleModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entityCutoutNoCull);
+        this.tail = pRoot.getChild("tail");
     }
 
     public static LayerDefinition createBodyLayer() {

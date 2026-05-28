@@ -39,17 +39,17 @@ public record LootItemRandomChanceWithEnchantedBonusCondition(float unenchantedC
         return Set.of(LootContextParams.ATTACKING_ENTITY);
     }
 
-    public boolean test(LootContext p_343845_) {
-        Entity entity = p_343845_.getOptionalParameter(LootContextParams.ATTACKING_ENTITY);
+    public boolean test(LootContext pContext) {
+        Entity entity = pContext.getOptionalParameter(LootContextParams.ATTACKING_ENTITY);
         int i = entity instanceof LivingEntity livingentity ? EnchantmentHelper.getEnchantmentLevel(this.enchantment, livingentity) : 0;
         float f = i > 0 ? this.enchantedChance.calculate(i) : this.unenchantedChance;
-        return p_343845_.getRandom().nextFloat() < f;
+        return pContext.getRandom().nextFloat() < f;
     }
 
-    public static LootItemCondition.Builder randomChanceAndLootingBoost(HolderLookup.Provider p_343257_, float p_343637_, float p_342446_) {
-        HolderLookup.RegistryLookup<Enchantment> registrylookup = p_343257_.lookupOrThrow(Registries.ENCHANTMENT);
+    public static LootItemCondition.Builder randomChanceAndLootingBoost(HolderLookup.Provider pRegistries, float pBase, float pPerLevelAfterFirst) {
+        HolderLookup.RegistryLookup<Enchantment> registrylookup = pRegistries.lookupOrThrow(Registries.ENCHANTMENT);
         return () -> new LootItemRandomChanceWithEnchantedBonusCondition(
-                p_343637_, new LevelBasedValue.Linear(p_343637_ + p_342446_, p_342446_), registrylookup.getOrThrow(Enchantments.LOOTING)
+                pBase, new LevelBasedValue.Linear(pBase + pPerLevelAfterFirst, pPerLevelAfterFirst), registrylookup.getOrThrow(Enchantments.LOOTING)
             );
     }
 }

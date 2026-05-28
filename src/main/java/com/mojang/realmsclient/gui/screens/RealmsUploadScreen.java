@@ -67,13 +67,13 @@ public class RealmsUploadScreen extends RealmsScreen implements RealmsWorldUploa
     private int tickCount;
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 
-    public RealmsUploadScreen(@Nullable RealmCreationTask p_332847_, long p_90083_, int p_90084_, RealmsResetWorldScreen p_90085_, LevelSummary p_90086_) {
+    public RealmsUploadScreen(@Nullable RealmCreationTask pRealmCreationTask, long pRealmId, int pSlotId, RealmsResetWorldScreen pLastScreen, LevelSummary pSelectedLevel) {
         super(GameNarrator.NO_TITLE);
-        this.realmCreationTask = p_332847_;
-        this.realmId = p_90083_;
-        this.slotId = p_90084_;
-        this.lastScreen = p_90085_;
-        this.selectedLevel = p_90086_;
+        this.realmCreationTask = pRealmCreationTask;
+        this.realmId = pRealmId;
+        this.slotId = pSlotId;
+        this.lastScreen = pLastScreen;
+        this.selectedLevel = pSelectedLevel;
         this.uploadStatus = new UploadStatus();
         this.narrationRateLimiter = RateLimiter.create(0.1F);
     }
@@ -174,26 +174,26 @@ public class RealmsUploadScreen extends RealmsScreen implements RealmsWorldUploa
         }
     }
 
-    private void drawProgressBar(GuiGraphics p_282575_) {
+    private void drawProgressBar(GuiGraphics pGuiGraphics) {
         double d0 = this.uploadStatus.getPercentage();
         this.progress = String.format(Locale.ROOT, "%.1f", d0 * 100.0);
         int i = (this.width - 200) / 2;
         int j = i + (int)Math.round(200.0 * d0);
-        p_282575_.fill(i - 1, 79, j + 1, 96, -1);
-        p_282575_.fill(i, 80, j, 95, -8355712);
-        p_282575_.drawCenteredString(this.font, Component.translatable("mco.upload.percent", this.progress), this.width / 2, 84, -1);
+        pGuiGraphics.fill(i - 1, 79, j + 1, 96, -1);
+        pGuiGraphics.fill(i, 80, j, 95, -8355712);
+        pGuiGraphics.drawCenteredString(this.font, Component.translatable("mco.upload.percent", this.progress), this.width / 2, 84, -1);
     }
 
-    private void drawUploadSpeed(GuiGraphics p_281884_) {
-        this.drawUploadSpeed0(p_281884_, this.uploadStatus.getBytesPerSecond());
+    private void drawUploadSpeed(GuiGraphics pGuiGraphics) {
+        this.drawUploadSpeed0(pGuiGraphics, this.uploadStatus.getBytesPerSecond());
     }
 
-    private void drawUploadSpeed0(GuiGraphics p_282279_, long p_282827_) {
+    private void drawUploadSpeed0(GuiGraphics pGuiGraphics, long pBytesPerSecond) {
         String s = this.progress;
-        if (p_282827_ > 0L && s != null) {
+        if (pBytesPerSecond > 0L && s != null) {
             int i = this.font.width(s);
-            String s1 = "(" + Unit.humanReadable(p_282827_) + "/s)";
-            p_282279_.drawString(this.font, s1, this.width / 2 + i / 2 + 15, 84, -1);
+            String s1 = "(" + Unit.humanReadable(pBytesPerSecond) + "/s)";
+            pGuiGraphics.drawString(this.font, s1, this.width / 2 + i / 2 + 15, 84, -1);
         }
     }
 
@@ -268,8 +268,8 @@ public class RealmsUploadScreen extends RealmsScreen implements RealmsWorldUploa
         }
     }
 
-    private void setErrorMessage(@Nullable Component... p_90113_) {
-        this.errorMessage = p_90113_;
+    private void setErrorMessage(@Nullable Component... pErrorMessage) {
+        this.errorMessage = pErrorMessage;
     }
 
     @Override

@@ -19,8 +19,8 @@ public class SourceFilter implements SpriteSource {
     );
     private final ResourceLocationPattern filter;
 
-    public SourceFilter(ResourceLocationPattern p_261654_) {
-        this.filter = p_261654_;
+    public SourceFilter(ResourceLocationPattern pFilter) {
+        this.filter = pFilter;
     }
 
     @Override

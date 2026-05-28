@@ -19,26 +19,26 @@ public class NearestAttackableTargetGoal<T extends LivingEntity> extends TargetG
     protected LivingEntity target;
     protected TargetingConditions targetConditions;
 
-    public NearestAttackableTargetGoal(Mob p_26060_, Class<T> p_26061_, boolean p_26062_) {
-        this(p_26060_, p_26061_, 10, p_26062_, false, null);
+    public NearestAttackableTargetGoal(Mob pMob, Class<T> pTargetType, boolean pMustSee) {
+        this(pMob, pTargetType, 10, pMustSee, false, null);
     }
 
-    public NearestAttackableTargetGoal(Mob p_199891_, Class<T> p_199892_, boolean p_199893_, TargetingConditions.Selector p_365854_) {
-        this(p_199891_, p_199892_, 10, p_199893_, false, p_365854_);
+    public NearestAttackableTargetGoal(Mob pMob, Class<T> pTargetType, boolean pMustSee, TargetingConditions.Selector pSelector) {
+        this(pMob, pTargetType, 10, pMustSee, false, pSelector);
     }
 
-    public NearestAttackableTargetGoal(Mob p_26064_, Class<T> p_26065_, boolean p_26066_, boolean p_26067_) {
-        this(p_26064_, p_26065_, 10, p_26066_, p_26067_, null);
+    public NearestAttackableTargetGoal(Mob pMob, Class<T> pTargetType, boolean pMustSee, boolean pMustReach) {
+        this(pMob, pTargetType, 10, pMustSee, pMustReach, null);
     }
 
     public NearestAttackableTargetGoal(
-        Mob p_26053_, Class<T> p_26054_, int p_26055_, boolean p_26056_, boolean p_26057_, @Nullable TargetingConditions.Selector p_365081_
+        Mob pMob, Class<T> pTargetType, int pInterval, boolean pMustSee, boolean pMustReach, @Nullable TargetingConditions.Selector pSelector
     ) {
-        super(p_26053_, p_26056_, p_26057_);
-        this.targetType = p_26054_;
-        this.randomInterval = reducedTickDelay(p_26055_);
+        super(pMob, pMustSee, pMustReach);
+        this.targetType = pTargetType;
+        this.randomInterval = reducedTickDelay(pInterval);
         this.setFlags(EnumSet.of(Goal.Flag.TARGET));
-        this.targetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(p_365081_);
+        this.targetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(pSelector);
     }
 
     @Override
@@ -51,8 +51,8 @@ public class NearestAttackableTargetGoal<T extends LivingEntity> extends TargetG
         }
     }
 
-    protected AABB getTargetSearchArea(double p_26069_) {
-        return this.mob.getBoundingBox().inflate(p_26069_, p_26069_, p_26069_);
+    protected AABB getTargetSearchArea(double pTargetDistance) {
+        return this.mob.getBoundingBox().inflate(pTargetDistance, pTargetDistance, pTargetDistance);
     }
 
     protected void findTarget() {
@@ -77,8 +77,8 @@ public class NearestAttackableTargetGoal<T extends LivingEntity> extends TargetG
         super.start();
     }
 
-    public void setTarget(@Nullable LivingEntity p_26071_) {
-        this.target = p_26071_;
+    public void setTarget(@Nullable LivingEntity pTarget) {
+        this.target = pTarget;
     }
 
     private TargetingConditions getTargetConditions() {

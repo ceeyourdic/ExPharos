@@ -98,22 +98,22 @@ public enum OctahedralGroup implements StringRepresentable {
         .map(p_56536_ -> Arrays.stream(values()).filter(p_174947_ -> p_56536_.compose(p_174947_) == IDENTITY).findAny().get())
         .toArray(OctahedralGroup[]::new);
 
-    private OctahedralGroup(final String p_56513_, final SymmetricGroup3 p_56514_, final boolean p_56515_, final boolean p_56516_, final boolean p_56517_) {
-        this.name = p_56513_;
-        this.invertX = p_56515_;
-        this.invertY = p_56516_;
-        this.invertZ = p_56517_;
-        this.permutation = p_56514_;
-        this.transformation = new Matrix3f().scaling(p_56515_ ? -1.0F : 1.0F, p_56516_ ? -1.0F : 1.0F, p_56517_ ? -1.0F : 1.0F);
-        this.transformation.mul(p_56514_.transformation());
+    private OctahedralGroup(final String pName, final SymmetricGroup3 pPermutation, final boolean pInvertX, final boolean pInvertY, final boolean pInvertZ) {
+        this.name = pName;
+        this.invertX = pInvertX;
+        this.invertY = pInvertY;
+        this.invertZ = pInvertZ;
+        this.permutation = pPermutation;
+        this.transformation = new Matrix3f().scaling(pInvertX ? -1.0F : 1.0F, pInvertY ? -1.0F : 1.0F, pInvertZ ? -1.0F : 1.0F);
+        this.transformation.mul(pPermutation.transformation());
     }
 
     private BooleanList packInversions() {
         return new BooleanArrayList(new boolean[]{this.invertX, this.invertY, this.invertZ});
     }
 
-    public OctahedralGroup compose(OctahedralGroup p_56522_) {
-        return cayleyTable[this.ordinal()][p_56522_.ordinal()];
+    public OctahedralGroup compose(OctahedralGroup pOther) {
+        return cayleyTable[this.ordinal()][pOther.ordinal()];
     }
 
     public OctahedralGroup inverse() {
@@ -134,7 +134,7 @@ public enum OctahedralGroup implements StringRepresentable {
         return this.name;
     }
 
-    public Direction rotate(Direction p_56529_) {
+    public Direction rotate(Direction pDirection) {
         if (this.rotatedDirections == null) {
             this.rotatedDirections = Maps.newEnumMap(Direction.class);
             Direction.Axis[] adirection$axis = Direction.Axis.values();
@@ -151,11 +151,11 @@ public enum OctahedralGroup implements StringRepresentable {
             }
         }
 
-        return this.rotatedDirections.get(p_56529_);
+        return this.rotatedDirections.get(pDirection);
     }
 
-    public boolean inverts(Direction.Axis p_56527_) {
-        switch (p_56527_) {
+    public boolean inverts(Direction.Axis pAxis) {
+        switch (pAxis) {
             case X:
                 return this.invertX;
             case Y:
@@ -166,7 +166,7 @@ public enum OctahedralGroup implements StringRepresentable {
         }
     }
 
-    public FrontAndTop rotate(FrontAndTop p_56531_) {
-        return FrontAndTop.fromFrontAndTop(this.rotate(p_56531_.front()), this.rotate(p_56531_.top()));
+    public FrontAndTop rotate(FrontAndTop pFrontAndTop) {
+        return FrontAndTop.fromFrontAndTop(this.rotate(pFrontAndTop.front()), this.rotate(pFrontAndTop.top()));
     }
 }

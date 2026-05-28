@@ -9,7 +9,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface UnbakedBlockStateModel extends ResolvableModel {
-    BakedModel bake(ModelBaker p_378434_);
+    BakedModel bake(ModelBaker pBaker);
 
-    Object visualEqualityGroup(BlockState p_362808_);
+    Object visualEqualityGroup(BlockState pState);
 }

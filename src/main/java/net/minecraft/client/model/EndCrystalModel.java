@@ -24,10 +24,10 @@ public class EndCrystalModel extends EntityModel<EndCrystalRenderState> {
     public final ModelPart innerGlass;
     public final ModelPart cube;
 
-    public EndCrystalModel(ModelPart p_361518_) {
-        super(p_361518_);
-        this.base = p_361518_.getChild("base");
-        this.outerGlass = p_361518_.getChild("outer_glass");
+    public EndCrystalModel(ModelPart pRoot) {
+        super(pRoot);
+        this.base = pRoot.getChild("base");
+        this.outerGlass = pRoot.getChild("outer_glass");
         this.innerGlass = this.outerGlass.getChild("inner_glass");
         this.cube = this.innerGlass.getChild("cube");
     }

@@ -6,8 +6,8 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.serialization.Dynamic;
 
 public class EntitySalmonSizeFix extends NamedEntityFix {
-    public EntitySalmonSizeFix(Schema p_370267_) {
-        super(p_370267_, false, "EntitySalmonSizeFix", References.ENTITY, "minecraft:salmon");
+    public EntitySalmonSizeFix(Schema pOutputSchema) {
+        super(pOutputSchema, false, "EntitySalmonSizeFix", References.ENTITY, "minecraft:salmon");
     }
 
     @Override

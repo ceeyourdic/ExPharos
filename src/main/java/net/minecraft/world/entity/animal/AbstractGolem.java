@@ -20,7 +20,7 @@ public abstract class AbstractGolem extends PathfinderMob {
 
     @Nullable
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_27517_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return null;
     }
 
@@ -36,7 +36,7 @@ public abstract class AbstractGolem extends PathfinderMob {
     }
 
     @Override
-    public boolean removeWhenFarAway(double p_27519_) {
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
         return false;
     }
 }

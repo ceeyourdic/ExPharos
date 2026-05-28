@@ -16,8 +16,8 @@ public class ClientActivePlayersTooltip implements ClientTooltipComponent {
     private static final int PADDING = 2;
     private final List<ProfileResult> activePlayers;
 
-    public ClientActivePlayersTooltip(ClientActivePlayersTooltip.ActivePlayersTooltip p_344514_) {
-        this.activePlayers = p_344514_.profiles();
+    public ClientActivePlayersTooltip(ClientActivePlayersTooltip.ActivePlayersTooltip pTooltip) {
+        this.activePlayers = pTooltip.profiles();
     }
 
     @Override

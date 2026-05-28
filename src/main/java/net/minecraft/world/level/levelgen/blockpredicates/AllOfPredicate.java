@@ -12,9 +12,9 @@ class AllOfPredicate extends CombiningPredicate {
         super(p_190373_);
     }
 
-    public boolean test(WorldGenLevel p_190376_, BlockPos p_190377_) {
+    public boolean test(WorldGenLevel pLevel, BlockPos pPos) {
         for (BlockPredicate blockpredicate : this.predicates) {
-            if (!blockpredicate.test(p_190376_, p_190377_)) {
+            if (!blockpredicate.test(pLevel, pPos)) {
                 return false;
             }
         }

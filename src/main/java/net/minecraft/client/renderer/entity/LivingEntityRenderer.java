@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
@@ -12,6 +14,7 @@ import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
@@ -34,27 +37,35 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.Team;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.entity.model.CustomEntityModels;
+import net.optifine.reflect.Reflector;
+import net.optifine.shaders.Shaders;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class LivingEntityRenderer<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>>
     extends EntityRenderer<T, S>
     implements RenderLayerParent<S, M> {
     private static final float EYE_BED_OFFSET = 0.1F;
-    protected M model;
+    public M model;
     protected final ItemModelResolver itemModelResolver;
     protected final List<RenderLayer<S, M>> layers = Lists.newArrayList();
+    public float renderLimbSwing;
+    public float renderLimbSwingAmount;
+    public float renderAgeInTicks;
+    public float renderHeadYaw;
+    public float renderHeadPitch;
+    public static final boolean animateModelLiving = Boolean.getBoolean("animate.model.living");
+    private static boolean renderItemHead = false;
 
-    public LivingEntityRenderer(EntityRendererProvider.Context p_174289_, M p_174290_, float p_174291_) {
-        super(p_174289_);
-        this.itemModelResolver = p_174289_.getItemModelResolver();
-        this.model = p_174290_;
-        this.shadowRadius = p_174291_;
+    public LivingEntityRenderer(EntityRendererProvider.Context pContext, M pModel, float pShadowRadius) {
+        super(pContext);
+        this.itemModelResolver = pContext.getItemModelResolver();
+        this.model = pModel;
+        this.shadowRadius = pShadowRadius;
     }
 
-    protected final boolean addLayer(RenderLayer<S, M> p_115327_) {
-        return this.layers.add(p_115327_);
+    public final boolean addLayer(RenderLayer<S, M> pLayer) {
+        return this.layers.add(pLayer);
     }
 
     @Override
@@ -73,75 +84,122 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, S extends Liv
     }
 
     public void render(S p_364280_, PoseStack p_115311_, MultiBufferSource p_115312_, int p_115313_) {
-        p_115311_.pushPose();
-        if (p_364280_.hasPose(Pose.SLEEPING)) {
-            Direction direction = p_364280_.bedOrientation;
-            if (direction != null) {
-                float f = p_364280_.eyeHeight - 0.1F;
-                p_115311_.translate((float)(-direction.getStepX()) * f, 0.0F, (float)(-direction.getStepZ()) * f);
+        if (!Reflector.ForgeEventFactoryClient_onRenderLivingPre.exists()
+            || !Reflector.ForgeEventFactoryClient_onRenderLivingPre.callBoolean(p_364280_, this, p_115311_, p_115312_, p_115313_)) {
+            if (animateModelLiving) {
+                p_364280_.walkAnimationSpeed = 1.5F;
+            }
+
+            p_115311_.pushPose();
+            if (p_364280_.hasPose(Pose.SLEEPING)) {
+                Direction direction = p_364280_.bedOrientation;
+                if (direction != null) {
+                    float f = p_364280_.eyeHeight - 0.1F;
+                    p_115311_.translate((float)(-direction.getStepX()) * f, 0.0F, (float)(-direction.getStepZ()) * f);
+                }
+            }
+
+            float f2 = p_364280_.scale;
+            p_115311_.scale(f2, f2, f2);
+            this.setupRotations(p_364280_, p_115311_, p_364280_.bodyRot, f2);
+            p_115311_.scale(-1.0F, -1.0F, 1.0F);
+            this.scale(p_364280_, p_115311_);
+            p_115311_.translate(0.0F, -1.501F, 0.0F);
+            this.model.setupAnim(p_364280_);
+            if (CustomEntityModels.isActive()) {
+                this.renderLimbSwing = p_364280_.walkAnimationPos;
+                this.renderLimbSwingAmount = p_364280_.walkAnimationSpeed;
+                this.renderAgeInTicks = p_364280_.ageInTicks;
+                this.renderHeadYaw = p_364280_.yRot;
+                this.renderHeadPitch = p_364280_.xRot;
+            }
+
+            boolean flag2 = Config.isShaders();
+            boolean flag = this.isBodyVisible(p_364280_);
+            boolean flag1 = !flag && !p_364280_.isInvisibleToPlayer;
+            RenderType rendertype = this.getRenderType(p_364280_, flag, flag1, p_364280_.appearsGlowing);
+            if (rendertype != null) {
+                VertexConsumer vertexconsumer = p_115312_.getBuffer(rendertype);
+                float f1 = this.getWhiteOverlayProgress(p_364280_);
+                if (flag2) {
+                    if (p_364280_.hasRedOverlay) {
+                        Shaders.setEntityColor(1.0F, 0.0F, 0.0F, 0.3F);
+                    }
+
+                    if (f1 > 0.0F) {
+                        Shaders.setEntityColor(f1, f1, f1, 0.5F);
+                    }
+                }
+
+                int i = getOverlayCoords(p_364280_, f1);
+                int j = flag1 ? 654311423 : -1;
+                int k = ARGB.multiply(j, this.getModelTint(p_364280_));
+                this.model.renderToBuffer(p_115311_, vertexconsumer, p_115313_, i, k);
+            }
+
+            if (this.shouldRenderLayers(p_364280_)) {
+                for (RenderLayer<S, M> renderlayer : this.layers) {
+                    if (renderlayer instanceof CustomHeadLayer) {
+                        renderItemHead = true;
+                    }
+
+                    renderlayer.render(p_115311_, p_115312_, p_115313_, p_364280_, p_364280_.yRot, p_364280_.xRot);
+                    renderItemHead = false;
+                }
+            }
+
+            if (Config.isShaders()) {
+                Shaders.setEntityColor(0.0F, 0.0F, 0.0F, 0.0F);
+            }
+
+            p_115311_.popPose();
+            super.render(p_364280_, p_115311_, p_115312_, p_115313_);
+            if (Reflector.ForgeEventFactoryClient_onRenderLivingPost.exists()) {
+                Reflector.ForgeEventFactoryClient_onRenderLivingPost.callVoid(p_364280_, this, p_115311_, p_115312_, p_115313_);
             }
         }
-
-        float f1 = p_364280_.scale;
-        p_115311_.scale(f1, f1, f1);
-        this.setupRotations(p_364280_, p_115311_, p_364280_.bodyRot, f1);
-        p_115311_.scale(-1.0F, -1.0F, 1.0F);
-        this.scale(p_364280_, p_115311_);
-        p_115311_.translate(0.0F, -1.501F, 0.0F);
-        this.model.setupAnim(p_364280_);
-        boolean flag1 = this.isBodyVisible(p_364280_);
-        boolean flag = !flag1 && !p_364280_.isInvisibleToPlayer;
-        RenderType rendertype = this.getRenderType(p_364280_, flag1, flag, p_364280_.appearsGlowing);
-        if (rendertype != null) {
-            VertexConsumer vertexconsumer = p_115312_.getBuffer(rendertype);
-            int i = getOverlayCoords(p_364280_, this.getWhiteOverlayProgress(p_364280_));
-            int j = flag ? 654311423 : -1;
-            int k = ARGB.multiply(j, this.getModelTint(p_364280_));
-            this.model.renderToBuffer(p_115311_, vertexconsumer, p_115313_, i, k);
-        }
-
-        if (this.shouldRenderLayers(p_364280_)) {
-            for (RenderLayer<S, M> renderlayer : this.layers) {
-                renderlayer.render(p_115311_, p_115312_, p_115313_, p_364280_, p_364280_.yRot, p_364280_.xRot);
-            }
-        }
-
-        p_115311_.popPose();
-        super.render(p_364280_, p_115311_, p_115312_, p_115313_);
     }
 
-    protected boolean shouldRenderLayers(S p_360804_) {
+    protected boolean shouldRenderLayers(S pRenderState) {
         return true;
     }
 
-    protected int getModelTint(S p_361319_) {
+    protected int getModelTint(S pRenderState) {
         return -1;
     }
 
-    public abstract ResourceLocation getTextureLocation(S p_362468_);
+    public abstract ResourceLocation getTextureLocation(S pRenderState);
 
     @Nullable
-    protected RenderType getRenderType(S p_369777_, boolean p_115323_, boolean p_115324_, boolean p_115325_) {
-        ResourceLocation resourcelocation = this.getTextureLocation(p_369777_);
-        if (p_115324_) {
+    protected RenderType getRenderType(S pRenderState, boolean pIsVisible, boolean pRenderTranslucent, boolean pAppearsGlowing) {
+        ResourceLocation resourcelocation = this.getTextureLocation(pRenderState);
+        if (this.model.locationTextureCustom != null) {
+            resourcelocation = this.model.locationTextureCustom;
+        } else if (this.getLocationTextureCustom() != null) {
+            resourcelocation = this.getLocationTextureCustom();
+        }
+
+        if (pRenderTranslucent) {
             return RenderType.itemEntityTranslucentCull(resourcelocation);
-        } else if (p_115323_) {
+        } else if (pIsVisible) {
+            return this.model.renderType(resourcelocation);
+        } else if (pAppearsGlowing && !Config.getMinecraft().levelRenderer.shouldShowEntityOutlines()) {
             return this.model.renderType(resourcelocation);
         } else {
-            return p_115325_ ? RenderType.outline(resourcelocation) : null;
+            return pAppearsGlowing ? RenderType.outline(resourcelocation) : null;
         }
     }
 
-    public static int getOverlayCoords(LivingEntityRenderState p_365259_, float p_115340_) {
-        return OverlayTexture.pack(OverlayTexture.u(p_115340_), OverlayTexture.v(p_365259_.hasRedOverlay));
+    public static int getOverlayCoords(LivingEntityRenderState pRenderState, float pOverlay) {
+        return OverlayTexture.pack(OverlayTexture.u(pOverlay), OverlayTexture.v(pRenderState.hasRedOverlay));
     }
 
-    protected boolean isBodyVisible(S p_363166_) {
-        return !p_363166_.isInvisible;
+    protected boolean isBodyVisible(S pRenderState) {
+        return !pRenderState.isInvisible;
     }
 
-    private static float sleepDirectionToRotation(Direction p_115329_) {
-        switch (p_115329_) {
+    private static float sleepDirectionToRotation(Direction pFacing) {
+        switch (pFacing) {
             case SOUTH:
                 return 90.0F;
             case WEST:
@@ -155,39 +213,39 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, S extends Liv
         }
     }
 
-    protected boolean isShaking(S p_361206_) {
-        return p_361206_.isFullyFrozen;
+    protected boolean isShaking(S pRenderState) {
+        return pRenderState.isFullyFrozen;
     }
 
-    protected void setupRotations(S p_370120_, PoseStack p_115318_, float p_115319_, float p_115320_) {
-        if (this.isShaking(p_370120_)) {
-            p_115319_ += (float)(Math.cos((double)((float)Mth.floor(p_370120_.ageInTicks) * 3.25F)) * Math.PI * 0.4F);
+    protected void setupRotations(S pRenderState, PoseStack pPoseStack, float pBodyRot, float pScale) {
+        if (this.isShaking(pRenderState)) {
+            pBodyRot += (float)(Math.cos((double)((float)Mth.floor(pRenderState.ageInTicks) * 3.25F)) * Math.PI * 0.4F);
         }
 
-        if (!p_370120_.hasPose(Pose.SLEEPING)) {
-            p_115318_.mulPose(Axis.YP.rotationDegrees(180.0F - p_115319_));
+        if (!pRenderState.hasPose(Pose.SLEEPING)) {
+            pPoseStack.mulPose(Axis.YP.rotationDegrees(180.0F - pBodyRot));
         }
 
-        if (p_370120_.deathTime > 0.0F) {
-            float f = (p_370120_.deathTime - 1.0F) / 20.0F * 1.6F;
+        if (pRenderState.deathTime > 0.0F) {
+            float f = (pRenderState.deathTime - 1.0F) / 20.0F * 1.6F;
             f = Mth.sqrt(f);
             if (f > 1.0F) {
                 f = 1.0F;
             }
 
-            p_115318_.mulPose(Axis.ZP.rotationDegrees(f * this.getFlipDegrees()));
-        } else if (p_370120_.isAutoSpinAttack) {
-            p_115318_.mulPose(Axis.XP.rotationDegrees(-90.0F - p_370120_.xRot));
-            p_115318_.mulPose(Axis.YP.rotationDegrees(p_370120_.ageInTicks * -75.0F));
-        } else if (p_370120_.hasPose(Pose.SLEEPING)) {
-            Direction direction = p_370120_.bedOrientation;
-            float f1 = direction != null ? sleepDirectionToRotation(direction) : p_115319_;
-            p_115318_.mulPose(Axis.YP.rotationDegrees(f1));
-            p_115318_.mulPose(Axis.ZP.rotationDegrees(this.getFlipDegrees()));
-            p_115318_.mulPose(Axis.YP.rotationDegrees(270.0F));
-        } else if (p_370120_.isUpsideDown) {
-            p_115318_.translate(0.0F, (p_370120_.boundingBoxHeight + 0.1F) / p_115320_, 0.0F);
-            p_115318_.mulPose(Axis.ZP.rotationDegrees(180.0F));
+            pPoseStack.mulPose(Axis.ZP.rotationDegrees(f * this.getFlipDegrees()));
+        } else if (pRenderState.isAutoSpinAttack) {
+            pPoseStack.mulPose(Axis.XP.rotationDegrees(-90.0F - pRenderState.xRot));
+            pPoseStack.mulPose(Axis.YP.rotationDegrees(pRenderState.ageInTicks * -75.0F));
+        } else if (pRenderState.hasPose(Pose.SLEEPING)) {
+            Direction direction = pRenderState.bedOrientation;
+            float f1 = direction != null ? sleepDirectionToRotation(direction) : pBodyRot;
+            pPoseStack.mulPose(Axis.YP.rotationDegrees(f1));
+            pPoseStack.mulPose(Axis.ZP.rotationDegrees(this.getFlipDegrees()));
+            pPoseStack.mulPose(Axis.YP.rotationDegrees(270.0F));
+        } else if (pRenderState.isUpsideDown) {
+            pPoseStack.translate(0.0F, (pRenderState.boundingBoxHeight + 0.1F) / pScale, 0.0F);
+            pPoseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
         }
     }
 
@@ -195,11 +253,11 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, S extends Liv
         return 90.0F;
     }
 
-    protected float getWhiteOverlayProgress(S p_367139_) {
+    protected float getWhiteOverlayProgress(S pRenderState) {
         return 0.0F;
     }
 
-    protected void scale(S p_363445_, PoseStack p_115315_) {
+    protected void scale(S pRenderState, PoseStack pPoseStack) {
     }
 
     protected boolean shouldShowName(T p_115333_, double p_365822_) {
@@ -236,11 +294,11 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, S extends Liv
         return Minecraft.renderNames() && p_115333_ != minecraft.getCameraEntity() && flag && !p_115333_.isVehicle();
     }
 
-    public static boolean isEntityUpsideDown(LivingEntity p_194454_) {
-        if (p_194454_ instanceof Player || p_194454_.hasCustomName()) {
-            String s = ChatFormatting.stripFormatting(p_194454_.getName().getString());
+    public static boolean isEntityUpsideDown(LivingEntity pEntity) {
+        if (pEntity instanceof Player || pEntity.hasCustomName()) {
+            String s = ChatFormatting.stripFormatting(pEntity.getName().getString());
             if ("Dinnerbone".equals(s) || "Grumm".equals(s)) {
-                return !(p_194454_ instanceof Player) || ((Player)p_194454_).isModelPartShown(PlayerModelPart.CAPE);
+                return !(pEntity instanceof Player) || ((Player)pEntity).isModelPartShown(PlayerModelPart.CAPE);
             }
         }
 
@@ -286,10 +344,14 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, S extends Liv
             p_363057_.eyeHeight = p_368665_.getEyeHeight(Pose.STANDING);
         }
 
-        label48: {
-            p_363057_.isFullyFrozen = p_368665_.isFullyFrozen();
-            p_363057_.isBaby = p_368665_.isBaby();
-            p_363057_.isInWater = p_368665_.isInWater();
+        p_363057_.isFullyFrozen = p_368665_.isFullyFrozen();
+        p_363057_.isBaby = p_368665_.isBaby();
+        p_363057_.isInWater = p_368665_.isInWater();
+        if (Reflector.ForgeEntity_isInWaterOrSwimmable.exists()) {
+            p_363057_.isInWater = Reflector.callBoolean(p_368665_, Reflector.ForgeEntity_isInWaterOrSwimmable);
+        }
+
+        label49: {
             p_363057_.isAutoSpinAttack = p_368665_.isAutoSpinAttack();
             p_363057_.hasRedOverlay = p_368665_.hurtTime > 0 || p_368665_.deathTime > 0;
             ItemStack itemstack = p_368665_.getItemBySlot(EquipmentSlot.HEAD);
@@ -297,7 +359,7 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, S extends Liv
                 p_363057_.wornHeadType = abstractskullblock.getType();
                 p_363057_.wornHeadProfile = itemstack.get(DataComponents.PROFILE);
                 p_363057_.headItem.clear();
-                break label48;
+                break label49;
             }
 
             p_363057_.wornHeadType = null;
@@ -315,19 +377,72 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, S extends Liv
         p_363057_.appearsGlowing = minecraft.shouldEntityAppearGlowing(p_368665_);
     }
 
-    private static float solveBodyRot(LivingEntity p_367822_, float p_362662_, float p_362007_) {
-        if (p_367822_.getVehicle() instanceof LivingEntity livingentity) {
-            float f2 = Mth.rotLerp(p_362007_, livingentity.yBodyRotO, livingentity.yBodyRot);
+    private static float solveBodyRot(LivingEntity pEntity, float pYHeadRot, float pPartialTick) {
+        if (pEntity.getVehicle() instanceof LivingEntity livingentity) {
+            float f2 = Mth.rotLerp(pPartialTick, livingentity.yBodyRotO, livingentity.yBodyRot);
             float f = 85.0F;
-            float f1 = Mth.clamp(Mth.wrapDegrees(p_362662_ - f2), -85.0F, 85.0F);
-            f2 = p_362662_ - f1;
+            float f1 = Mth.clamp(Mth.wrapDegrees(pYHeadRot - f2), -85.0F, 85.0F);
+            f2 = pYHeadRot - f1;
             if (Math.abs(f1) > 50.0F) {
                 f2 += f1 * 0.2F;
             }
 
             return f2;
         } else {
-            return Mth.rotLerp(p_362007_, p_367822_.yBodyRotO, p_367822_.yBodyRot);
+            return Mth.rotLerp(pPartialTick, pEntity.yBodyRotO, pEntity.yBodyRot);
         }
+    }
+
+    public <T extends RenderLayer> T getLayer(Class<T> cls) {
+        List<T> list = this.getLayers(cls);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    public <T extends RenderLayer> List<T> getLayers(Class<T> cls) {
+        List<RenderLayer> list = new ArrayList<>();
+
+        for (RenderLayer renderlayer : this.layers) {
+            if (cls.isInstance(renderlayer)) {
+                list.add(renderlayer);
+            }
+        }
+
+        return (List<T>)list;
+    }
+
+    public void removeLayers(Class cls) {
+        Iterator iterator = this.layers.iterator();
+
+        while (iterator.hasNext()) {
+            RenderLayer renderlayer = (RenderLayer)iterator.next();
+            if (cls.isInstance(renderlayer)) {
+                iterator.remove();
+            }
+        }
+    }
+
+    public void replaceLayer(Class cls, RenderLayer layer) {
+        int i = this.getLayerIndex(cls);
+        this.removeLayers(cls);
+        if (i >= 0) {
+            this.layers.add(i, layer);
+        } else {
+            this.layers.add(layer);
+        }
+    }
+
+    public int getLayerIndex(Class cls) {
+        for (int i = 0; i < this.layers.size(); i++) {
+            RenderLayer renderlayer = this.layers.get(i);
+            if (cls.isInstance(renderlayer)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public static boolean isRenderItemHead() {
+        return renderItemHead;
     }
 }

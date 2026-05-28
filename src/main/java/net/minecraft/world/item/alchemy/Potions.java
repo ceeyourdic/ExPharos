@@ -69,11 +69,11 @@ public class Potions {
     public static final Holder<Potion> OOZING = register("oozing", new Potion("oozing", new MobEffectInstance(MobEffects.OOZING, 3600)));
     public static final Holder<Potion> INFESTED = register("infested", new Potion("infested", new MobEffectInstance(MobEffects.INFESTED, 3600)));
 
-    private static Holder<Potion> register(String p_43626_, Potion p_43627_) {
-        return Registry.registerForHolder(BuiltInRegistries.POTION, ResourceLocation.withDefaultNamespace(p_43626_), p_43627_);
+    private static Holder<Potion> register(String pName, Potion pPotion) {
+        return Registry.registerForHolder(BuiltInRegistries.POTION, ResourceLocation.withDefaultNamespace(pName), pPotion);
     }
 
-    public static Holder<Potion> bootstrap(Registry<Potion> p_334005_) {
+    public static Holder<Potion> bootstrap(Registry<Potion> pRegistry) {
         return WATER;
     }
 }

@@ -14,8 +14,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public record TextureContents(NativeImage image, @Nullable TextureMetadataSection metadata) implements Closeable {
-    public static TextureContents load(ResourceManager p_377087_, ResourceLocation p_377519_) throws IOException {
-        Resource resource = p_377087_.getResourceOrThrow(p_377519_);
+    public static TextureContents load(ResourceManager pResourceManager, ResourceLocation pTextureId) throws IOException {
+        Resource resource = pResourceManager.getResourceOrThrow(pTextureId);
 
         NativeImage nativeimage;
         try (InputStream inputstream = resource.open()) {

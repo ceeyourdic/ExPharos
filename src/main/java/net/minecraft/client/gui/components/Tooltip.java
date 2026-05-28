@@ -23,17 +23,17 @@ public class Tooltip implements NarrationSupplier {
     @Nullable
     private final Component narration;
 
-    private Tooltip(Component p_260262_, @Nullable Component p_260005_) {
-        this.message = p_260262_;
-        this.narration = p_260005_;
+    private Tooltip(Component pMessage, @Nullable Component pNarration) {
+        this.message = pMessage;
+        this.narration = pNarration;
     }
 
-    public static Tooltip create(Component p_259571_, @Nullable Component p_259174_) {
-        return new Tooltip(p_259571_, p_259174_);
+    public static Tooltip create(Component pMessage, @Nullable Component pNarration) {
+        return new Tooltip(pMessage, pNarration);
     }
 
-    public static Tooltip create(Component p_259142_) {
-        return new Tooltip(p_259142_, p_259142_);
+    public static Tooltip create(Component pMessage) {
+        return new Tooltip(pMessage, pMessage);
     }
 
     @Override
@@ -43,17 +43,17 @@ public class Tooltip implements NarrationSupplier {
         }
     }
 
-    public List<FormattedCharSequence> toCharSequence(Minecraft p_260243_) {
+    public List<FormattedCharSequence> toCharSequence(Minecraft pMinecraft) {
         Language language = Language.getInstance();
         if (this.cachedTooltip == null || language != this.splitWithLanguage) {
-            this.cachedTooltip = splitTooltip(p_260243_, this.message);
+            this.cachedTooltip = splitTooltip(pMinecraft, this.message);
             this.splitWithLanguage = language;
         }
 
         return this.cachedTooltip;
     }
 
-    public static List<FormattedCharSequence> splitTooltip(Minecraft p_259133_, Component p_260172_) {
-        return p_259133_.font.split(p_260172_, 170);
+    public static List<FormattedCharSequence> splitTooltip(Minecraft pMinecraft, Component pMessage) {
+        return pMinecraft.font.split(pMessage, 170);
     }
 }

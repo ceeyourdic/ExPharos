@@ -21,12 +21,12 @@ public enum MobCategory implements StringRepresentable {
     private final int noDespawnDistance = 32;
     private final int despawnDistance;
 
-    private MobCategory(final String p_21597_, final int p_21598_, final boolean p_21599_, final boolean p_21600_, final int p_21601_) {
-        this.name = p_21597_;
-        this.max = p_21598_;
-        this.isFriendly = p_21599_;
-        this.isPersistent = p_21600_;
-        this.despawnDistance = p_21601_;
+    private MobCategory(final String pName, final int pMax, final boolean pIsFriendly, final boolean pIsPersistent, final int pDespawnDistance) {
+        this.name = pName;
+        this.max = pMax;
+        this.isFriendly = pIsFriendly;
+        this.isPersistent = pIsPersistent;
+        this.despawnDistance = pDespawnDistance;
     }
 
     public String getName() {

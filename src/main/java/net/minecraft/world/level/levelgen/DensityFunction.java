@@ -19,11 +19,11 @@ public interface DensityFunction {
                 : new Holder.Direct<>(p_208226_))
     );
 
-    double compute(DensityFunction.FunctionContext p_208223_);
+    double compute(DensityFunction.FunctionContext pContext);
 
-    void fillArray(double[] p_208227_, DensityFunction.ContextProvider p_208228_);
+    void fillArray(double[] pArray, DensityFunction.ContextProvider pContextProvider);
 
-    DensityFunction mapAll(DensityFunction.Visitor p_208224_);
+    DensityFunction mapAll(DensityFunction.Visitor pVisitor);
 
     double minValue();
 
@@ -31,8 +31,8 @@ public interface DensityFunction {
 
     KeyDispatchDataCodec<? extends DensityFunction> codec();
 
-    default DensityFunction clamp(double p_208221_, double p_208222_) {
-        return new DensityFunctions.Clamp(this, p_208221_, p_208222_);
+    default DensityFunction clamp(double pMinValue, double pMaxValue) {
+        return new DensityFunctions.Clamp(this, pMinValue, pMaxValue);
     }
 
     default DensityFunction abs() {
@@ -60,9 +60,9 @@ public interface DensityFunction {
     }
 
     public interface ContextProvider {
-        DensityFunction.FunctionContext forIndex(int p_208235_);
+        DensityFunction.FunctionContext forIndex(int pArrayIndex);
 
-        void fillAllDirectly(double[] p_208236_, DensityFunction p_208237_);
+        void fillAllDirectly(double[] pValues, DensityFunction pFunction);
     }
 
     public interface FunctionContext {
@@ -81,12 +81,12 @@ public interface DensityFunction {
         public static final Codec<DensityFunction.NoiseHolder> CODEC = NormalNoise.NoiseParameters.CODEC
             .xmap(p_224011_ -> new DensityFunction.NoiseHolder((Holder<NormalNoise.NoiseParameters>)p_224011_, null), DensityFunction.NoiseHolder::noiseData);
 
-        public NoiseHolder(Holder<NormalNoise.NoiseParameters> p_224001_) {
-            this(p_224001_, null);
+        public NoiseHolder(Holder<NormalNoise.NoiseParameters> pNoiseData) {
+            this(pNoiseData, null);
         }
 
-        public double getValue(double p_224007_, double p_224008_, double p_224009_) {
-            return this.noise == null ? 0.0 : this.noise.getValue(p_224007_, p_224008_, p_224009_);
+        public double getValue(double pX, double pY, double pZ) {
+            return this.noise == null ? 0.0 : this.noise.getValue(pX, pY, pZ);
         }
 
         public double maxValue() {
@@ -124,10 +124,10 @@ public interface DensityFunction {
     }
 
     public interface Visitor {
-        DensityFunction apply(DensityFunction p_224019_);
+        DensityFunction apply(DensityFunction pDensityFunction);
 
-        default DensityFunction.NoiseHolder visitNoise(DensityFunction.NoiseHolder p_224018_) {
-            return p_224018_;
+        default DensityFunction.NoiseHolder visitNoise(DensityFunction.NoiseHolder pNoiseHolder) {
+            return pNoiseHolder;
         }
     }
 }

@@ -20,17 +20,17 @@ public class VibrationSignalParticle extends TextureSheetParticle {
     private float pitch;
     private float pitchO;
 
-    VibrationSignalParticle(ClientLevel p_234105_, double p_234106_, double p_234107_, double p_234108_, PositionSource p_234109_, int p_234110_) {
-        super(p_234105_, p_234106_, p_234107_, p_234108_, 0.0, 0.0, 0.0);
+    VibrationSignalParticle(ClientLevel pLevel, double pX, double pY, double pZ, PositionSource pTarget, int pLifetime) {
+        super(pLevel, pX, pY, pZ, 0.0, 0.0, 0.0);
         this.quadSize = 0.3F;
-        this.target = p_234109_;
-        this.lifetime = p_234110_;
-        Optional<Vec3> optional = p_234109_.getPosition(p_234105_);
+        this.target = pTarget;
+        this.lifetime = pLifetime;
+        Optional<Vec3> optional = pTarget.getPosition(pLevel);
         if (optional.isPresent()) {
             Vec3 vec3 = optional.get();
-            double d0 = p_234106_ - vec3.x();
-            double d1 = p_234107_ - vec3.y();
-            double d2 = p_234108_ - vec3.z();
+            double d0 = pX - vec3.x();
+            double d1 = pY - vec3.y();
+            double d2 = pZ - vec3.z();
             this.rotO = this.rot = (float)Mth.atan2(d0, d2);
             this.pitchO = this.pitch = (float)Mth.atan2(d1, Math.sqrt(d0 * d0 + d2 * d2));
         }
@@ -91,8 +91,8 @@ public class VibrationSignalParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<VibrationParticleOption> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_172490_) {
-            this.sprite = p_172490_;
+        public Provider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(

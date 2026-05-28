@@ -46,9 +46,9 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
     }
 
     @Override
-    protected void doTick(ServerLevel p_26726_, LivingEntity p_26727_) {
-        Brain<?> brain = p_26727_.getBrain();
-        brain.setMemory(MemoryModuleType.NEAREST_REPELLENT, findNearestRepellent(p_26726_, p_26727_));
+    protected void doTick(ServerLevel pLevel, LivingEntity pEntity) {
+        Brain<?> brain = pEntity.getBrain();
+        brain.setMemory(MemoryModuleType.NEAREST_REPELLENT, findNearestRepellent(pLevel, pEntity));
         Optional<Mob> optional = Optional.empty();
         Optional<Hoglin> optional1 = Optional.empty();
         Optional<Hoglin> optional2 = Optional.empty();
@@ -83,7 +83,7 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
                 }
             } else if (livingentity instanceof Player) {
                 Player player = (Player)livingentity;
-                if (optional5.isEmpty() && !PiglinAi.isWearingSafeArmor(player) && p_26727_.canAttack(livingentity)) {
+                if (optional5.isEmpty() && !PiglinAi.isWearingSafeArmor(player) && pEntity.canAttack(livingentity)) {
                     optional5 = Optional.of(player);
                 }
 
@@ -120,12 +120,12 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
         brain.setMemory(MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, i);
     }
 
-    private static Optional<BlockPos> findNearestRepellent(ServerLevel p_26735_, LivingEntity p_26736_) {
-        return BlockPos.findClosestMatch(p_26736_.blockPosition(), 8, 4, p_186160_ -> isValidRepellent(p_26735_, p_186160_));
+    private static Optional<BlockPos> findNearestRepellent(ServerLevel pLevel, LivingEntity pLivingEntity) {
+        return BlockPos.findClosestMatch(pLivingEntity.blockPosition(), 8, 4, p_186160_ -> isValidRepellent(pLevel, p_186160_));
     }
 
-    private static boolean isValidRepellent(ServerLevel p_26729_, BlockPos p_26730_) {
-        BlockState blockstate = p_26729_.getBlockState(p_26730_);
+    private static boolean isValidRepellent(ServerLevel pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
         boolean flag = blockstate.is(BlockTags.PIGLIN_REPELLENTS);
         return flag && blockstate.is(Blocks.SOUL_CAMPFIRE) ? CampfireBlock.isLitCampfire(blockstate) : flag;
     }

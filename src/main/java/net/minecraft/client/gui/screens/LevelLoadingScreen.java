@@ -37,9 +37,9 @@ public class LevelLoadingScreen extends Screen {
         p_280803_.put(ChunkStatus.FULL, 16777215);
     });
 
-    public LevelLoadingScreen(StoringChunkProgressListener p_96143_) {
+    public LevelLoadingScreen(StoringChunkProgressListener pProgressListener) {
         super(GameNarrator.NO_TITLE);
-        this.progressListener = p_96143_;
+        this.progressListener = pProgressListener;
     }
 
     @Override
@@ -87,29 +87,29 @@ public class LevelLoadingScreen extends Screen {
         p_283534_.drawCenteredString(this.font, this.getFormattedProgress(), j, k - l, 16777215);
     }
 
-    public static void renderChunks(GuiGraphics p_283467_, StoringChunkProgressListener p_96151_, int p_96152_, int p_96153_, int p_96154_, int p_96155_) {
-        int i = p_96154_ + p_96155_;
-        int j = p_96151_.getFullDiameter();
-        int k = j * i - p_96155_;
-        int l = p_96151_.getDiameter();
-        int i1 = l * i - p_96155_;
-        int j1 = p_96152_ - i1 / 2;
-        int k1 = p_96153_ - i1 / 2;
+    public static void renderChunks(GuiGraphics pGuiGraphics, StoringChunkProgressListener pProgressListener, int pX, int pY, int pSize, int pSpacing) {
+        int i = pSize + pSpacing;
+        int j = pProgressListener.getFullDiameter();
+        int k = j * i - pSpacing;
+        int l = pProgressListener.getDiameter();
+        int i1 = l * i - pSpacing;
+        int j1 = pX - i1 / 2;
+        int k1 = pY - i1 / 2;
         int l1 = k / 2 + 1;
         int i2 = -16772609;
-        if (p_96155_ != 0) {
-            p_283467_.fill(p_96152_ - l1, p_96153_ - l1, p_96152_ - l1 + 1, p_96153_ + l1, -16772609);
-            p_283467_.fill(p_96152_ + l1 - 1, p_96153_ - l1, p_96152_ + l1, p_96153_ + l1, -16772609);
-            p_283467_.fill(p_96152_ - l1, p_96153_ - l1, p_96152_ + l1, p_96153_ - l1 + 1, -16772609);
-            p_283467_.fill(p_96152_ - l1, p_96153_ + l1 - 1, p_96152_ + l1, p_96153_ + l1, -16772609);
+        if (pSpacing != 0) {
+            pGuiGraphics.fill(pX - l1, pY - l1, pX - l1 + 1, pY + l1, -16772609);
+            pGuiGraphics.fill(pX + l1 - 1, pY - l1, pX + l1, pY + l1, -16772609);
+            pGuiGraphics.fill(pX - l1, pY - l1, pX + l1, pY - l1 + 1, -16772609);
+            pGuiGraphics.fill(pX - l1, pY + l1 - 1, pX + l1, pY + l1, -16772609);
         }
 
         for (int j2 = 0; j2 < l; j2++) {
             for (int k2 = 0; k2 < l; k2++) {
-                ChunkStatus chunkstatus = p_96151_.getStatus(j2, k2);
+                ChunkStatus chunkstatus = pProgressListener.getStatus(j2, k2);
                 int l2 = j1 + j2 * i;
                 int i3 = k1 + k2 * i;
-                p_283467_.fill(l2, i3, l2 + p_96154_, i3 + p_96154_, ARGB.opaque(COLORS.getInt(chunkstatus)));
+                pGuiGraphics.fill(l2, i3, l2 + pSize, i3 + pSize, ARGB.opaque(COLORS.getInt(chunkstatus)));
             }
         }
     }

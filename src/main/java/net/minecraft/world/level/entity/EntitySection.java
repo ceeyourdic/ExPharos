@@ -2,6 +2,7 @@ package net.minecraft.world.level.entity;
 
 import com.mojang.logging.LogUtils;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.ClassInstanceMultiMap;
@@ -14,22 +15,22 @@ public class EntitySection<T extends EntityAccess> {
     private final ClassInstanceMultiMap<T> storage;
     private Visibility chunkStatus;
 
-    public EntitySection(Class<T> p_156831_, Visibility p_156832_) {
-        this.chunkStatus = p_156832_;
-        this.storage = new ClassInstanceMultiMap<>(p_156831_);
+    public EntitySection(Class<T> pEntityClazz, Visibility pChunkStatus) {
+        this.chunkStatus = pChunkStatus;
+        this.storage = new ClassInstanceMultiMap<>(pEntityClazz);
     }
 
-    public void add(T p_188347_) {
-        this.storage.add(p_188347_);
+    public void add(T pEntity) {
+        this.storage.add(pEntity);
     }
 
-    public boolean remove(T p_188356_) {
-        return this.storage.remove(p_188356_);
+    public boolean remove(T pEntity) {
+        return this.storage.remove(pEntity);
     }
 
-    public AbortableIterationConsumer.Continuation getEntities(AABB p_262016_, AbortableIterationConsumer<T> p_261863_) {
+    public AbortableIterationConsumer.Continuation getEntities(AABB pBounds, AbortableIterationConsumer<T> pConsumer) {
         for (T t : this.storage) {
-            if (t.getBoundingBox().intersects(p_262016_) && p_261863_.accept(t).shouldAbort()) {
+            if (t.getBoundingBox().intersects(pBounds) && pConsumer.accept(t).shouldAbort()) {
                 return AbortableIterationConsumer.Continuation.ABORT;
             }
         }
@@ -38,15 +39,15 @@ public class EntitySection<T extends EntityAccess> {
     }
 
     public <U extends T> AbortableIterationConsumer.Continuation getEntities(
-        EntityTypeTest<T, U> p_188349_, AABB p_188350_, AbortableIterationConsumer<? super U> p_261535_
+        EntityTypeTest<T, U> pTest, AABB pBounds, AbortableIterationConsumer<? super U> pConsumer
     ) {
-        Collection<? extends T> collection = this.storage.find(p_188349_.getBaseClass());
+        Collection<? extends T> collection = this.storage.find(pTest.getBaseClass());
         if (collection.isEmpty()) {
             return AbortableIterationConsumer.Continuation.CONTINUE;
         } else {
             for (T t : collection) {
-                U u = (U)p_188349_.tryCast(t);
-                if (u != null && t.getBoundingBox().intersects(p_188350_) && p_261535_.accept(u).shouldAbort()) {
+                U u = (U)pTest.tryCast(t);
+                if (u != null && t.getBoundingBox().intersects(pBounds) && pConsumer.accept(u).shouldAbort()) {
                     return AbortableIterationConsumer.Continuation.ABORT;
                 }
             }
@@ -67,14 +68,22 @@ public class EntitySection<T extends EntityAccess> {
         return this.chunkStatus;
     }
 
-    public Visibility updateChunkStatus(Visibility p_156839_) {
+    public Visibility updateChunkStatus(Visibility pChunkStatus) {
         Visibility visibility = this.chunkStatus;
-        this.chunkStatus = p_156839_;
+        this.chunkStatus = pChunkStatus;
         return visibility;
     }
 
     @VisibleForDebug
     public int size() {
         return this.storage.size();
+    }
+
+    public List<T> getEntityList() {
+        return this.storage.getValues();
+    }
+
+    public static EntitySectionStorage getSectionStorage(TransientEntitySectionManager tesm) {
+        return tesm.sectionStorage;
     }
 }

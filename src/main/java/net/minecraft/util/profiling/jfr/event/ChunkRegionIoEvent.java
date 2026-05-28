@@ -48,18 +48,18 @@ public abstract class ChunkRegionIoEvent extends Event {
     @Label("Bytes")
     public final int bytes;
 
-    public ChunkRegionIoEvent(RegionStorageInfo p_335007_, ChunkPos p_328585_, RegionFileVersion p_333736_, int p_333935_) {
-        this.regionPosX = p_328585_.getRegionX();
-        this.regionPosZ = p_328585_.getRegionZ();
-        this.localChunkPosX = p_328585_.getRegionLocalX();
-        this.localChunkPosZ = p_328585_.getRegionLocalZ();
-        this.chunkPosX = p_328585_.x;
-        this.chunkPosZ = p_328585_.z;
-        this.levelId = p_335007_.level();
-        this.dimension = p_335007_.dimension().location().toString();
-        this.type = p_335007_.type();
-        this.compression = "standard:" + p_333736_.getId();
-        this.bytes = p_333935_;
+    public ChunkRegionIoEvent(RegionStorageInfo pRegionStorageInfo, ChunkPos pChunkPos, RegionFileVersion pVersion, int pBytes) {
+        this.regionPosX = pChunkPos.getRegionX();
+        this.regionPosZ = pChunkPos.getRegionZ();
+        this.localChunkPosX = pChunkPos.getRegionLocalX();
+        this.localChunkPosZ = pChunkPos.getRegionLocalZ();
+        this.chunkPosX = pChunkPos.x;
+        this.chunkPosZ = pChunkPos.z;
+        this.levelId = pRegionStorageInfo.level();
+        this.dimension = pRegionStorageInfo.dimension().location().toString();
+        this.type = pRegionStorageInfo.type();
+        this.compression = "standard:" + pVersion.getId();
+        this.bytes = pBytes;
     }
 
     public static class Fields {

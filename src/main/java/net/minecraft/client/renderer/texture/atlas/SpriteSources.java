@@ -33,9 +33,9 @@ public class SpriteSources {
     public static Codec<SpriteSource> CODEC = TYPE_CODEC.dispatch(SpriteSource::type, SpriteSourceType::codec);
     public static Codec<List<SpriteSource>> FILE_CODEC = CODEC.listOf().fieldOf("sources").codec();
 
-    private static SpriteSourceType register(String p_262175_, MapCodec<? extends SpriteSource> p_329640_) {
-        SpriteSourceType spritesourcetype = new SpriteSourceType(p_329640_);
-        ResourceLocation resourcelocation = ResourceLocation.withDefaultNamespace(p_262175_);
+    private static SpriteSourceType register(String pName, MapCodec<? extends SpriteSource> pCodec) {
+        SpriteSourceType spritesourcetype = new SpriteSourceType(pCodec);
+        ResourceLocation resourcelocation = ResourceLocation.withDefaultNamespace(pName);
         SpriteSourceType spritesourcetype1 = TYPES.putIfAbsent(resourcelocation, spritesourcetype);
         if (spritesourcetype1 != null) {
             throw new IllegalStateException("Duplicate registration " + resourcelocation);

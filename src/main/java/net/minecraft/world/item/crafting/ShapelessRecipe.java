@@ -25,11 +25,11 @@ public class ShapelessRecipe implements CraftingRecipe {
     @Nullable
     private PlacementInfo placementInfo;
 
-    public ShapelessRecipe(String p_249640_, CraftingBookCategory p_249390_, ItemStack p_252071_, List<Ingredient> p_365863_) {
-        this.group = p_249640_;
-        this.category = p_249390_;
-        this.result = p_252071_;
-        this.ingredients = p_365863_;
+    public ShapelessRecipe(String pGroup, CraftingBookCategory pCategory, ItemStack pResult, List<Ingredient> pIngredients) {
+        this.group = pGroup;
+        this.category = pCategory;
+        this.result = pResult;
+        this.ingredients = pIngredients;
     }
 
     @Override

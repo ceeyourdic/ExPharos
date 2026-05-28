@@ -19,16 +19,16 @@ public record LootItemRandomChanceCondition(NumberProvider chance) implements Lo
         return LootItemConditions.RANDOM_CHANCE;
     }
 
-    public boolean test(LootContext p_81930_) {
-        float f = this.chance.getFloat(p_81930_);
-        return p_81930_.getRandom().nextFloat() < f;
+    public boolean test(LootContext pContext) {
+        float f = this.chance.getFloat(pContext);
+        return pContext.getRandom().nextFloat() < f;
     }
 
-    public static LootItemCondition.Builder randomChance(float p_81928_) {
-        return () -> new LootItemRandomChanceCondition(ConstantValue.exactly(p_81928_));
+    public static LootItemCondition.Builder randomChance(float pChance) {
+        return () -> new LootItemRandomChanceCondition(ConstantValue.exactly(pChance));
     }
 
-    public static LootItemCondition.Builder randomChance(NumberProvider p_344007_) {
-        return () -> new LootItemRandomChanceCondition(p_344007_);
+    public static LootItemCondition.Builder randomChance(NumberProvider pChance) {
+        return () -> new LootItemRandomChanceCondition(pChance);
     }
 }

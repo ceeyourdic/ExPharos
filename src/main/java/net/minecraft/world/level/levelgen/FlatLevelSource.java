@@ -33,9 +33,9 @@ public class FlatLevelSource extends ChunkGenerator {
     );
     private final FlatLevelGeneratorSettings settings;
 
-    public FlatLevelSource(FlatLevelGeneratorSettings p_256337_) {
-        super(new FixedBiomeSource(p_256337_.getBiome()), Util.memoize(p_256337_::adjustGenerationSettings));
-        this.settings = p_256337_;
+    public FlatLevelSource(FlatLevelGeneratorSettings pSettings) {
+        super(new FixedBiomeSource(pSettings.getBiome()), Util.memoize(pSettings::adjustGenerationSettings));
+        this.settings = pSettings;
     }
 
     @Override

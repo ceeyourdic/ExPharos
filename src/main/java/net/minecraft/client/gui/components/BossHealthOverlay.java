@@ -7,16 +7,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.BossEvent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.eventbus.api.Event;
+import net.optifine.Config;
+import net.optifine.CustomColors;
+import net.optifine.reflect.Reflector;
 
-@OnlyIn(Dist.CLIENT)
 public class BossHealthOverlay {
     private static final int BAR_WIDTH = 182;
     private static final int BAR_HEIGHT = 5;
@@ -53,27 +55,44 @@ public class BossHealthOverlay {
     private final Minecraft minecraft;
     final Map<UUID, LerpingBossEvent> events = Maps.newLinkedHashMap();
 
-    public BossHealthOverlay(Minecraft p_93702_) {
-        this.minecraft = p_93702_;
+    public BossHealthOverlay(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
-    public void render(GuiGraphics p_283175_) {
+    public void render(GuiGraphics pGuiGraphics) {
         if (!this.events.isEmpty()) {
             ProfilerFiller profilerfiller = Profiler.get();
             profilerfiller.push("bossHealth");
-            int i = p_283175_.guiWidth();
+            int i = pGuiGraphics.guiWidth();
             int j = 12;
 
             for (LerpingBossEvent lerpingbossevent : this.events.values()) {
                 int k = i / 2 - 91;
-                this.drawBar(p_283175_, k, j, lerpingbossevent);
-                Component component = lerpingbossevent.getName();
-                int l = this.minecraft.font.width(component);
-                int i1 = i / 2 - l / 2;
-                int j1 = j - 9;
-                p_283175_.drawString(this.minecraft.font, component, i1, j1, 16777215);
-                j += 10 + 9;
-                if (j >= p_283175_.guiHeight() / 3) {
+                boolean flag = true;
+                int l = 19;
+                if (Reflector.ForgeHooksClient_onCustomizeBossEventProgress.exists()) {
+                    Event event = (Event)Reflector.ForgeHooksClient_onCustomizeBossEventProgress
+                        .call(pGuiGraphics, this.minecraft.getWindow(), lerpingbossevent, k, j, 10 + 9);
+                    flag = !event.isCanceled();
+                    l = Reflector.callInt(event, Reflector.CustomizeGuiOverlayEvent_BossEventProgress_getIncrement);
+                }
+
+                if (flag) {
+                    this.drawBar(pGuiGraphics, k, j, lerpingbossevent);
+                    Component component = lerpingbossevent.getName();
+                    int i1 = this.minecraft.font.width(component);
+                    int j1 = i / 2 - i1 / 2;
+                    int k1 = j - 9;
+                    int l1 = 16777215;
+                    if (Config.isCustomColors()) {
+                        l1 = CustomColors.getBossTextColor(l1);
+                    }
+
+                    pGuiGraphics.drawString(this.minecraft.font, component, j1, k1, l1);
+                }
+
+                j += l;
+                if (j >= pGuiGraphics.guiHeight() / 3) {
                     break;
                 }
             }
@@ -82,25 +101,25 @@ public class BossHealthOverlay {
         }
     }
 
-    private void drawBar(GuiGraphics p_283672_, int p_283570_, int p_283306_, BossEvent p_283156_) {
-        this.drawBar(p_283672_, p_283570_, p_283306_, p_283156_, 182, BAR_BACKGROUND_SPRITES, OVERLAY_BACKGROUND_SPRITES);
-        int i = Mth.lerpDiscrete(p_283156_.getProgress(), 0, 182);
+    private void drawBar(GuiGraphics pGuiGraphics, int pX, int pY, BossEvent pBossEvent) {
+        this.drawBar(pGuiGraphics, pX, pY, pBossEvent, 182, BAR_BACKGROUND_SPRITES, OVERLAY_BACKGROUND_SPRITES);
+        int i = Mth.lerpDiscrete(pBossEvent.getProgress(), 0, 182);
         if (i > 0) {
-            this.drawBar(p_283672_, p_283570_, p_283306_, p_283156_, i, BAR_PROGRESS_SPRITES, OVERLAY_PROGRESS_SPRITES);
+            this.drawBar(pGuiGraphics, pX, pY, pBossEvent, i, BAR_PROGRESS_SPRITES, OVERLAY_PROGRESS_SPRITES);
         }
     }
 
     private void drawBar(
-        GuiGraphics p_281657_, int p_283675_, int p_282498_, BossEvent p_281288_, int p_283619_, ResourceLocation[] p_298746_, ResourceLocation[] p_298698_
+        GuiGraphics pGuiGraphics, int pX, int pY, BossEvent pBossEvent, int pProgress, ResourceLocation[] pBarProgressSprites, ResourceLocation[] pOverlayProgressSprites
     ) {
-        p_281657_.blitSprite(RenderType::guiTextured, p_298746_[p_281288_.getColor().ordinal()], 182, 5, 0, 0, p_283675_, p_282498_, p_283619_, 5);
-        if (p_281288_.getOverlay() != BossEvent.BossBarOverlay.PROGRESS) {
-            p_281657_.blitSprite(RenderType::guiTextured, p_298698_[p_281288_.getOverlay().ordinal() - 1], 182, 5, 0, 0, p_283675_, p_282498_, p_283619_, 5);
+        pGuiGraphics.blitSprite(RenderType::guiTextured, pBarProgressSprites[pBossEvent.getColor().ordinal()], 182, 5, 0, 0, pX, pY, pProgress, 5);
+        if (pBossEvent.getOverlay() != BossEvent.BossBarOverlay.PROGRESS) {
+            pGuiGraphics.blitSprite(RenderType::guiTextured, pOverlayProgressSprites[pBossEvent.getOverlay().ordinal() - 1], 182, 5, 0, 0, pX, pY, pProgress, 5);
         }
     }
 
-    public void update(ClientboundBossEventPacket p_93712_) {
-        p_93712_.dispatch(
+    public void update(ClientboundBossEventPacket pPacket) {
+        pPacket.dispatch(
             new ClientboundBossEventPacket.Handler() {
                 @Override
                 public void add(
@@ -188,5 +207,18 @@ public class BossHealthOverlay {
         }
 
         return false;
+    }
+
+    public String getBossName() {
+        if (!this.events.isEmpty()) {
+            for (BossEvent bossevent : this.events.values()) {
+                Component component = bossevent.getName();
+                if (component != null && component.getContents() instanceof TranslatableContents translatablecontents) {
+                    return translatablecontents.getKey();
+                }
+            }
+        }
+
+        return null;
     }
 }

@@ -78,11 +78,11 @@ public class PackSelectionScreen extends Screen {
     private Button doneButton;
     private final Map<String, ResourceLocation> packIcons = Maps.newHashMap();
 
-    public PackSelectionScreen(PackRepository p_275398_, Consumer<PackRepository> p_275659_, Path p_275522_, Component p_275337_) {
-        super(p_275337_);
-        this.model = new PackSelectionModel(this::populateLists, this::getPackIcon, p_275398_, p_275659_);
-        this.packDir = p_275522_;
-        this.watcher = PackSelectionScreen.Watcher.create(p_275522_);
+    public PackSelectionScreen(PackRepository pRepository, Consumer<PackRepository> pOutput, Path pPackDir, Component pTitle) {
+        super(pTitle);
+        this.model = new PackSelectionModel(this::populateLists, this::getPackIcon, pRepository, pOutput);
+        this.packDir = pPackDir;
+        this.watcher = PackSelectionScreen.Watcher.create(pPackDir);
     }
 
     @Override
@@ -154,26 +154,26 @@ public class PackSelectionScreen extends Screen {
         this.doneButton.active = !this.selectedPackList.children().isEmpty();
     }
 
-    private void updateList(TransferableSelectionList p_100014_, Stream<PackSelectionModel.Entry> p_100015_) {
-        p_100014_.children().clear();
-        TransferableSelectionList.PackEntry transferableselectionlist$packentry = p_100014_.getSelected();
+    private void updateList(TransferableSelectionList pSelection, Stream<PackSelectionModel.Entry> pModels) {
+        pSelection.children().clear();
+        TransferableSelectionList.PackEntry transferableselectionlist$packentry = pSelection.getSelected();
         String s = transferableselectionlist$packentry == null ? "" : transferableselectionlist$packentry.getPackId();
-        p_100014_.setSelected(null);
-        p_100015_.forEach(
+        pSelection.setSelected(null);
+        pModels.forEach(
             p_374582_ -> {
                 TransferableSelectionList.PackEntry transferableselectionlist$packentry1 = new TransferableSelectionList.PackEntry(
-                    this.minecraft, p_100014_, p_374582_
+                    this.minecraft, pSelection, p_374582_
                 );
-                p_100014_.children().add(transferableselectionlist$packentry1);
+                pSelection.children().add(transferableselectionlist$packentry1);
                 if (p_374582_.getId().equals(s)) {
-                    p_100014_.setSelected(transferableselectionlist$packentry1);
+                    pSelection.setSelected(transferableselectionlist$packentry1);
                 }
             }
         );
     }
 
-    public void updateFocus(TransferableSelectionList p_265419_) {
-        TransferableSelectionList transferableselectionlist = this.selectedPackList == p_265419_ ? this.availablePackList : this.selectedPackList;
+    public void updateFocus(TransferableSelectionList pSelection) {
+        TransferableSelectionList transferableselectionlist = this.selectedPackList == pSelection ? this.availablePackList : this.selectedPackList;
         this.changeFocus(ComponentPath.path(transferableselectionlist.getFirstElement(), transferableselectionlist, this));
     }
 
@@ -189,38 +189,38 @@ public class PackSelectionScreen extends Screen {
         this.packIcons.clear();
     }
 
-    protected static void copyPacks(Minecraft p_100000_, List<Path> p_100001_, Path p_100002_) {
+    protected static void copyPacks(Minecraft pMinecraft, List<Path> pPacks, Path pOutDir) {
         MutableBoolean mutableboolean = new MutableBoolean();
-        p_100001_.forEach(p_170009_ -> {
+        pPacks.forEach(p_170009_ -> {
             try (Stream<Path> stream = Files.walk(p_170009_)) {
                 stream.forEach(p_170005_ -> {
                     try {
-                        Util.copyBetweenDirs(p_170009_.getParent(), p_100002_, p_170005_);
+                        Util.copyBetweenDirs(p_170009_.getParent(), pOutDir, p_170005_);
                     } catch (IOException ioexception1) {
-                        LOGGER.warn("Failed to copy datapack file  from {} to {}", p_170005_, p_100002_, ioexception1);
+                        LOGGER.warn("Failed to copy datapack file  from {} to {}", p_170005_, pOutDir, ioexception1);
                         mutableboolean.setTrue();
                     }
                 });
             } catch (IOException ioexception) {
-                LOGGER.warn("Failed to copy datapack file from {} to {}", p_170009_, p_100002_);
+                LOGGER.warn("Failed to copy datapack file from {} to {}", p_170009_, pOutDir);
                 mutableboolean.setTrue();
             }
         });
         if (mutableboolean.isTrue()) {
-            SystemToast.onPackCopyFailure(p_100000_, p_100002_.toString());
+            SystemToast.onPackCopyFailure(pMinecraft, pOutDir.toString());
         }
     }
 
     @Override
-    public void onFilesDrop(List<Path> p_100029_) {
-        String s = extractPackNames(p_100029_).collect(Collectors.joining(", "));
+    public void onFilesDrop(List<Path> pPacks) {
+        String s = extractPackNames(pPacks).collect(Collectors.joining(", "));
         this.minecraft
             .setScreen(
                 new ConfirmScreen(
                     p_296193_ -> {
                         if (p_296193_) {
-                            List<Path> list = new ArrayList<>(p_100029_.size());
-                            Set<Path> set = new HashSet<>(p_100029_);
+                            List<Path> list = new ArrayList<>(pPacks.size());
+                            Set<Path> set = new HashSet<>(pPacks);
                             PackDetector<Path> packdetector = new PackDetector<Path>(this.minecraft.directoryValidator()) {
                                 protected Path createZipPack(Path p_298689_) {
                                     return p_298689_;
@@ -232,7 +232,7 @@ public class PackSelectionScreen extends Screen {
                             };
                             List<ForbiddenSymlinkInfo> list1 = new ArrayList<>();
 
-                            for (Path path : p_100029_) {
+                            for (Path path : pPacks) {
                                 try {
                                     Path path1 = packdetector.detectPackResources(path, list1);
                                     if (path1 == null) {
@@ -278,40 +278,40 @@ public class PackSelectionScreen extends Screen {
             );
     }
 
-    private static Stream<String> extractPackNames(Collection<Path> p_300507_) {
-        return p_300507_.stream().map(Path::getFileName).map(Path::toString);
+    private static Stream<String> extractPackNames(Collection<Path> pPaths) {
+        return pPaths.stream().map(Path::getFileName).map(Path::toString);
     }
 
-    private ResourceLocation loadPackIcon(TextureManager p_100017_, Pack p_100018_) {
+    private ResourceLocation loadPackIcon(TextureManager pTextureManager, Pack pPack) {
         try {
             ResourceLocation resourcelocation1;
-            try (PackResources packresources = p_100018_.open()) {
+            try (PackResources packresources = pPack.open()) {
                 IoSupplier<InputStream> iosupplier = packresources.getRootResource("pack.png");
                 if (iosupplier == null) {
                     return DEFAULT_ICON;
                 }
 
-                String s = p_100018_.getId();
+                String s = pPack.getId();
                 ResourceLocation resourcelocation = ResourceLocation.withDefaultNamespace(
                     "pack/" + Util.sanitizeName(s, ResourceLocation::validPathChar) + "/" + Hashing.sha1().hashUnencodedChars(s) + "/icon"
                 );
 
                 try (InputStream inputstream = iosupplier.get()) {
                     NativeImage nativeimage = NativeImage.read(inputstream);
-                    p_100017_.register(resourcelocation, new DynamicTexture(nativeimage));
+                    pTextureManager.register(resourcelocation, new DynamicTexture(nativeimage));
                     resourcelocation1 = resourcelocation;
                 }
             }
 
             return resourcelocation1;
         } catch (Exception exception) {
-            LOGGER.warn("Failed to load icon from pack {}", p_100018_.getId(), exception);
+            LOGGER.warn("Failed to load icon from pack {}", pPack.getId(), exception);
             return DEFAULT_ICON;
         }
     }
 
-    private ResourceLocation getPackIcon(Pack p_99990_) {
-        return this.packIcons.computeIfAbsent(p_99990_.getId(), p_280879_ -> this.loadPackIcon(this.minecraft.getTextureManager(), p_99990_));
+    private ResourceLocation getPackIcon(Pack pPack) {
+        return this.packIcons.computeIfAbsent(pPack.getId(), p_280879_ -> this.loadPackIcon(this.minecraft.getTextureManager(), pPack));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -319,14 +319,14 @@ public class PackSelectionScreen extends Screen {
         private final WatchService watcher;
         private final Path packPath;
 
-        public Watcher(Path p_250327_) throws IOException {
-            this.packPath = p_250327_;
-            this.watcher = p_250327_.getFileSystem().newWatchService();
+        public Watcher(Path pPackPath) throws IOException {
+            this.packPath = pPackPath;
+            this.watcher = pPackPath.getFileSystem().newWatchService();
 
             try {
-                this.watchDir(p_250327_);
+                this.watchDir(pPackPath);
 
-                try (DirectoryStream<Path> directorystream = Files.newDirectoryStream(p_250327_)) {
+                try (DirectoryStream<Path> directorystream = Files.newDirectoryStream(pPackPath)) {
                     for (Path path : directorystream) {
                         if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
                             this.watchDir(path);
@@ -340,17 +340,17 @@ public class PackSelectionScreen extends Screen {
         }
 
         @Nullable
-        public static PackSelectionScreen.Watcher create(Path p_252119_) {
+        public static PackSelectionScreen.Watcher create(Path pPackPath) {
             try {
-                return new PackSelectionScreen.Watcher(p_252119_);
+                return new PackSelectionScreen.Watcher(pPackPath);
             } catch (IOException ioexception) {
-                PackSelectionScreen.LOGGER.warn("Failed to initialize pack directory {} monitoring", p_252119_, ioexception);
+                PackSelectionScreen.LOGGER.warn("Failed to initialize pack directory {} monitoring", pPackPath, ioexception);
                 return null;
             }
         }
 
-        private void watchDir(Path p_100050_) throws IOException {
-            p_100050_.register(this.watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
+        private void watchDir(Path pPath) throws IOException {
+            pPath.register(this.watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
         }
 
         public boolean pollForChanges() throws IOException {

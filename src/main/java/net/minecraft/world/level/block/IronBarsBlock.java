@@ -40,10 +40,10 @@ public class IronBarsBlock extends CrossCollisionBlock {
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_54200_) {
-        BlockGetter blockgetter = p_54200_.getLevel();
-        BlockPos blockpos = p_54200_.getClickedPos();
-        FluidState fluidstate = p_54200_.getLevel().getFluidState(p_54200_.getClickedPos());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockGetter blockgetter = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
+        FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
         BlockPos blockpos1 = blockpos.north();
         BlockPos blockpos2 = blockpos.south();
         BlockPos blockpos3 = blockpos.west();
@@ -81,31 +81,31 @@ public class IronBarsBlock extends CrossCollisionBlock {
     }
 
     @Override
-    protected VoxelShape getVisualShape(BlockState p_54202_, BlockGetter p_54203_, BlockPos p_54204_, CollisionContext p_54205_) {
+    protected VoxelShape getVisualShape(BlockState pState, BlockGetter pReader, BlockPos pPos, CollisionContext pContext) {
         return Shapes.empty();
     }
 
     @Override
-    protected boolean skipRendering(BlockState p_54207_, BlockState p_54208_, Direction p_54209_) {
-        if (p_54208_.is(this)) {
-            if (!p_54209_.getAxis().isHorizontal()) {
+    protected boolean skipRendering(BlockState pState, BlockState pAdjacentBlockState, Direction pSide) {
+        if (pAdjacentBlockState.is(this)) {
+            if (!pSide.getAxis().isHorizontal()) {
                 return true;
             }
 
-            if (p_54207_.getValue(PROPERTY_BY_DIRECTION.get(p_54209_)) && p_54208_.getValue(PROPERTY_BY_DIRECTION.get(p_54209_.getOpposite()))) {
+            if (pState.getValue(PROPERTY_BY_DIRECTION.get(pSide)) && pAdjacentBlockState.getValue(PROPERTY_BY_DIRECTION.get(pSide.getOpposite()))) {
                 return true;
             }
         }
 
-        return super.skipRendering(p_54207_, p_54208_, p_54209_);
+        return super.skipRendering(pState, pAdjacentBlockState, pSide);
     }
 
-    public final boolean attachsTo(BlockState p_54218_, boolean p_54219_) {
-        return !isExceptionForConnection(p_54218_) && p_54219_ || p_54218_.getBlock() instanceof IronBarsBlock || p_54218_.is(BlockTags.WALLS);
+    public final boolean attachsTo(BlockState pState, boolean pSolidSide) {
+        return !isExceptionForConnection(pState) && pSolidSide || pState.getBlock() instanceof IronBarsBlock || pState.is(BlockTags.WALLS);
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_54221_) {
-        p_54221_.add(NORTH, EAST, WEST, SOUTH, WATERLOGGED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(NORTH, EAST, WEST, SOUTH, WATERLOGGED);
     }
 }

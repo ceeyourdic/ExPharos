@@ -15,13 +15,13 @@ public abstract class ScatteredFeaturePiece extends StructurePiece {
     protected int heightPosition = -1;
 
     protected ScatteredFeaturePiece(
-        StructurePieceType p_209920_, int p_209921_, int p_209922_, int p_209923_, int p_209924_, int p_209925_, int p_209926_, Direction p_209927_
+        StructurePieceType pType, int pX, int pY, int pZ, int pWidth, int pHeight, int pDepth, Direction pOrientation
     ) {
-        super(p_209920_, 0, StructurePiece.makeBoundingBox(p_209921_, p_209922_, p_209923_, p_209927_, p_209924_, p_209925_, p_209926_));
-        this.width = p_209924_;
-        this.height = p_209925_;
-        this.depth = p_209926_;
-        this.setOrientation(p_209927_);
+        super(pType, 0, StructurePiece.makeBoundingBox(pX, pY, pZ, pOrientation, pWidth, pHeight, pDepth));
+        this.width = pWidth;
+        this.height = pHeight;
+        this.depth = pDepth;
+        this.setOrientation(pOrientation);
     }
 
     protected ScatteredFeaturePiece(StructurePieceType p_209929_, CompoundTag p_209930_) {
@@ -40,7 +40,7 @@ public abstract class ScatteredFeaturePiece extends StructurePiece {
         p_192472_.putInt("HPos", this.heightPosition);
     }
 
-    protected boolean updateAverageGroundHeight(LevelAccessor p_72804_, BoundingBox p_72805_, int p_72806_) {
+    protected boolean updateAverageGroundHeight(LevelAccessor pLevel, BoundingBox pBounds, int pHeight) {
         if (this.heightPosition >= 0) {
             return true;
         } else {
@@ -51,8 +51,8 @@ public abstract class ScatteredFeaturePiece extends StructurePiece {
             for (int k = this.boundingBox.minZ(); k <= this.boundingBox.maxZ(); k++) {
                 for (int l = this.boundingBox.minX(); l <= this.boundingBox.maxX(); l++) {
                     blockpos$mutableblockpos.set(l, 64, k);
-                    if (p_72805_.isInside(blockpos$mutableblockpos)) {
-                        i += p_72804_.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockpos$mutableblockpos).getY();
+                    if (pBounds.isInside(blockpos$mutableblockpos)) {
+                        i += pLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockpos$mutableblockpos).getY();
                         j++;
                     }
                 }
@@ -62,24 +62,24 @@ public abstract class ScatteredFeaturePiece extends StructurePiece {
                 return false;
             } else {
                 this.heightPosition = i / j;
-                this.boundingBox.move(0, this.heightPosition - this.boundingBox.minY() + p_72806_, 0);
+                this.boundingBox.move(0, this.heightPosition - this.boundingBox.minY() + pHeight, 0);
                 return true;
             }
         }
     }
 
-    protected boolean updateHeightPositionToLowestGroundHeight(LevelAccessor p_192468_, int p_192469_) {
+    protected boolean updateHeightPositionToLowestGroundHeight(LevelAccessor pLevel, int pHeight) {
         if (this.heightPosition >= 0) {
             return true;
         } else {
-            int i = p_192468_.getMaxY() + 1;
+            int i = pLevel.getMaxY() + 1;
             boolean flag = false;
             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
             for (int j = this.boundingBox.minZ(); j <= this.boundingBox.maxZ(); j++) {
                 for (int k = this.boundingBox.minX(); k <= this.boundingBox.maxX(); k++) {
                     blockpos$mutableblockpos.set(k, 0, j);
-                    i = Math.min(i, p_192468_.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockpos$mutableblockpos).getY());
+                    i = Math.min(i, pLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockpos$mutableblockpos).getY());
                     flag = true;
                 }
             }
@@ -88,7 +88,7 @@ public abstract class ScatteredFeaturePiece extends StructurePiece {
                 return false;
             } else {
                 this.heightPosition = i;
-                this.boundingBox.move(0, this.heightPosition - this.boundingBox.minY() + p_192469_, 0);
+                this.boundingBox.move(0, this.heightPosition - this.boundingBox.minY() + pHeight, 0);
                 return true;
             }
         }

@@ -43,7 +43,7 @@ public abstract class AgeableMob extends PathfinderMob {
     }
 
     @Nullable
-    public abstract AgeableMob getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_);
+    public abstract AgeableMob getBreedOffspring(ServerLevel pLevel, AgeableMob pOtherParent);
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder p_333447_) {
@@ -63,16 +63,16 @@ public abstract class AgeableMob extends PathfinderMob {
         }
     }
 
-    public void ageUp(int p_146741_, boolean p_146742_) {
+    public void ageUp(int pAmount, boolean pForced) {
         int i = this.getAge();
-        i += p_146741_ * 20;
+        i += pAmount * 20;
         if (i > 0) {
             i = 0;
         }
 
         int j = i - i;
         this.setAge(i);
-        if (p_146742_) {
+        if (pForced) {
             this.forcedAge += j;
             if (this.forcedAgeTimer == 0) {
                 this.forcedAgeTimer = 40;
@@ -84,15 +84,15 @@ public abstract class AgeableMob extends PathfinderMob {
         }
     }
 
-    public void ageUp(int p_146759_) {
-        this.ageUp(p_146759_, false);
+    public void ageUp(int pAmount) {
+        this.ageUp(pAmount, false);
     }
 
-    public void setAge(int p_146763_) {
+    public void setAge(int pAge) {
         int i = this.getAge();
-        this.age = p_146763_;
-        if (i < 0 && p_146763_ >= 0 || i >= 0 && p_146763_ < 0) {
-            this.entityData.set(DATA_BABY_ID, p_146763_ < 0);
+        this.age = pAge;
+        if (i < 0 && pAge >= 0 || i >= 0 && pAge < 0) {
+            this.entityData.set(DATA_BABY_ID, pAge < 0);
             this.ageBoundaryReached();
         }
     }
@@ -157,8 +157,8 @@ public abstract class AgeableMob extends PathfinderMob {
         this.setAge(p_146756_ ? -24000 : 0);
     }
 
-    public static int getSpeedUpSecondsWhenFeeding(int p_216968_) {
-        return (int)((float)(p_216968_ / 20) * 0.1F);
+    public static int getSpeedUpSecondsWhenFeeding(int pTicksUntilAdult) {
+        return (int)((float)(pTicksUntilAdult / 20) * 0.1F);
     }
 
     @VisibleForTesting
@@ -176,17 +176,17 @@ public abstract class AgeableMob extends PathfinderMob {
         private final boolean shouldSpawnBaby;
         private final float babySpawnChance;
 
-        public AgeableMobGroupData(boolean p_146775_, float p_146776_) {
-            this.shouldSpawnBaby = p_146775_;
-            this.babySpawnChance = p_146776_;
+        public AgeableMobGroupData(boolean pShouldSpawnBaby, float pBabySpawnChance) {
+            this.shouldSpawnBaby = pShouldSpawnBaby;
+            this.babySpawnChance = pBabySpawnChance;
         }
 
-        public AgeableMobGroupData(boolean p_146773_) {
-            this(p_146773_, 0.05F);
+        public AgeableMobGroupData(boolean pShouldSpawnBaby) {
+            this(pShouldSpawnBaby, 0.05F);
         }
 
-        public AgeableMobGroupData(float p_146771_) {
-            this(true, p_146771_);
+        public AgeableMobGroupData(float pBabySpawnChance) {
+            this(true, pBabySpawnChance);
         }
 
         public int getGroupSize() {

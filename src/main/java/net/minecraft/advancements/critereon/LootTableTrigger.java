@@ -17,8 +17,8 @@ public class LootTableTrigger extends SimpleCriterionTrigger<LootTableTrigger.Tr
         return LootTableTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_54598_, ResourceKey<LootTable> p_332064_) {
-        this.trigger(p_54598_, p_325231_ -> p_325231_.matches(p_332064_));
+    public void trigger(ServerPlayer pPlayer, ResourceKey<LootTable> pLootTable) {
+        this.trigger(pPlayer, p_325231_ -> p_325231_.matches(pLootTable));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, ResourceKey<LootTable> lootTable)
@@ -31,12 +31,12 @@ public class LootTableTrigger extends SimpleCriterionTrigger<LootTableTrigger.Tr
                     .apply(p_325232_, LootTableTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<LootTableTrigger.TriggerInstance> lootTableUsed(ResourceKey<LootTable> p_330710_) {
-            return CriteriaTriggers.GENERATE_LOOT.createCriterion(new LootTableTrigger.TriggerInstance(Optional.empty(), p_330710_));
+        public static Criterion<LootTableTrigger.TriggerInstance> lootTableUsed(ResourceKey<LootTable> pLootTable) {
+            return CriteriaTriggers.GENERATE_LOOT.createCriterion(new LootTableTrigger.TriggerInstance(Optional.empty(), pLootTable));
         }
 
-        public boolean matches(ResourceKey<LootTable> p_333185_) {
-            return this.lootTable == p_333185_;
+        public boolean matches(ResourceKey<LootTable> pLootTable) {
+            return this.lootTable == pLootTable;
         }
 
         @Override

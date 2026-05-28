@@ -23,8 +23,8 @@ public class OnlineOptionsScreen extends OptionsSubScreen {
     @Nullable
     private OptionInstance<Unit> difficultyDisplay;
 
-    public OnlineOptionsScreen(Screen p_344962_, Options p_344910_) {
-        super(p_344962_, p_344910_, TITLE);
+    public OnlineOptionsScreen(Screen pLastScreen, Options pOptions) {
+        super(pLastScreen, pOptions, TITLE);
     }
 
     @Override
@@ -38,12 +38,12 @@ public class OnlineOptionsScreen extends OptionsSubScreen {
         }
     }
 
-    private OptionInstance<?>[] options(Options p_345521_, Minecraft p_342158_) {
+    private OptionInstance<?>[] options(Options pOptions, Minecraft pMinecraft) {
         List<OptionInstance<?>> list = new ArrayList<>();
-        list.add(p_345521_.realmsNotifications());
-        list.add(p_345521_.allowServerListing());
+        list.add(pOptions.realmsNotifications());
+        list.add(pOptions.allowServerListing());
         OptionInstance<Unit> optioninstance = Optionull.map(
-            p_342158_.level,
+            pMinecraft.level,
             p_374578_ -> {
                 Difficulty difficulty = p_374578_.getDifficulty();
                 return new OptionInstance<>(

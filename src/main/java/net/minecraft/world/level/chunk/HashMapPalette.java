@@ -14,24 +14,24 @@ public class HashMapPalette<T> implements Palette<T> {
     private final PaletteResize<T> resizeHandler;
     private final int bits;
 
-    public HashMapPalette(IdMap<T> p_187908_, int p_187909_, PaletteResize<T> p_187910_, List<T> p_187911_) {
-        this(p_187908_, p_187909_, p_187910_);
-        p_187911_.forEach(this.values::add);
+    public HashMapPalette(IdMap<T> pRegistry, int pBits, PaletteResize<T> pResizeHandler, List<T> pValues) {
+        this(pRegistry, pBits, pResizeHandler);
+        pValues.forEach(this.values::add);
     }
 
-    public HashMapPalette(IdMap<T> p_187904_, int p_187905_, PaletteResize<T> p_187906_) {
-        this(p_187904_, p_187905_, p_187906_, CrudeIncrementalIntIdentityHashBiMap.create(1 << p_187905_));
+    public HashMapPalette(IdMap<T> pRegistry, int pBits, PaletteResize<T> pResizeHandler) {
+        this(pRegistry, pBits, pResizeHandler, CrudeIncrementalIntIdentityHashBiMap.create(1 << pBits));
     }
 
-    private HashMapPalette(IdMap<T> p_199915_, int p_199916_, PaletteResize<T> p_199917_, CrudeIncrementalIntIdentityHashBiMap<T> p_199918_) {
-        this.registry = p_199915_;
-        this.bits = p_199916_;
-        this.resizeHandler = p_199917_;
-        this.values = p_199918_;
+    private HashMapPalette(IdMap<T> pRegistry, int pBits, PaletteResize<T> pResizeHandler, CrudeIncrementalIntIdentityHashBiMap<T> pValues) {
+        this.registry = pRegistry;
+        this.bits = pBits;
+        this.resizeHandler = pResizeHandler;
+        this.values = pValues;
     }
 
-    public static <A> Palette<A> create(int p_187913_, IdMap<A> p_187914_, PaletteResize<A> p_187915_, List<A> p_187916_) {
-        return new HashMapPalette<>(p_187914_, p_187913_, p_187915_, p_187916_);
+    public static <A> Palette<A> create(int pBits, IdMap<A> pRegistry, PaletteResize<A> pResizeHandler, List<A> pValues) {
+        return new HashMapPalette<>(pRegistry, pBits, pResizeHandler, pValues);
     }
 
     @Override

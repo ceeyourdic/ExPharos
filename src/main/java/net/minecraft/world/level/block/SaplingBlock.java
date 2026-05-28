@@ -33,14 +33,14 @@ public class SaplingBlock extends BushBlock implements BonemealableBlock {
         return CODEC;
     }
 
-    protected SaplingBlock(TreeGrower p_311256_, BlockBehaviour.Properties p_55979_) {
-        super(p_55979_);
-        this.treeGrower = p_311256_;
+    protected SaplingBlock(TreeGrower pTreeGrower, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.treeGrower = pTreeGrower;
         this.registerDefaultState(this.stateDefinition.any().setValue(STAGE, Integer.valueOf(0)));
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_56008_, BlockGetter p_56009_, BlockPos p_56010_, CollisionContext p_56011_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
@@ -51,11 +51,11 @@ public class SaplingBlock extends BushBlock implements BonemealableBlock {
         }
     }
 
-    public void advanceTree(ServerLevel p_222001_, BlockPos p_222002_, BlockState p_222003_, RandomSource p_222004_) {
-        if (p_222003_.getValue(STAGE) == 0) {
-            p_222001_.setBlock(p_222002_, p_222003_.cycle(STAGE), 4);
+    public void advanceTree(ServerLevel pLevel, BlockPos pPos, BlockState pState, RandomSource pRandom) {
+        if (pState.getValue(STAGE) == 0) {
+            pLevel.setBlock(pPos, pState.cycle(STAGE), 4);
         } else {
-            this.treeGrower.growTree(p_222001_, p_222001_.getChunkSource().getGenerator(), p_222002_, p_222003_, p_222004_);
+            this.treeGrower.growTree(pLevel, pLevel.getChunkSource().getGenerator(), pPos, pState, pRandom);
         }
     }
 
@@ -75,7 +75,7 @@ public class SaplingBlock extends BushBlock implements BonemealableBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_56001_) {
-        p_56001_.add(STAGE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(STAGE);
     }
 }

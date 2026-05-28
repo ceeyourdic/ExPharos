@@ -82,28 +82,28 @@ public abstract class WaterFluid extends FlowingFluid {
     }
 
     @Override
-    protected void beforeDestroyingBlock(LevelAccessor p_76450_, BlockPos p_76451_, BlockState p_76452_) {
-        BlockEntity blockentity = p_76452_.hasBlockEntity() ? p_76450_.getBlockEntity(p_76451_) : null;
-        Block.dropResources(p_76452_, p_76450_, p_76451_, blockentity);
+    protected void beforeDestroyingBlock(LevelAccessor pLevel, BlockPos pPos, BlockState pState) {
+        BlockEntity blockentity = pState.hasBlockEntity() ? pLevel.getBlockEntity(pPos) : null;
+        Block.dropResources(pState, pLevel, pPos, blockentity);
     }
 
     @Override
-    public int getSlopeFindDistance(LevelReader p_76464_) {
+    public int getSlopeFindDistance(LevelReader pLevel) {
         return 4;
     }
 
     @Override
-    public BlockState createLegacyBlock(FluidState p_76466_) {
-        return Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, Integer.valueOf(getLegacyLevel(p_76466_)));
+    public BlockState createLegacyBlock(FluidState pState) {
+        return Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, Integer.valueOf(getLegacyLevel(pState)));
     }
 
     @Override
-    public boolean isSame(Fluid p_76456_) {
-        return p_76456_ == Fluids.WATER || p_76456_ == Fluids.FLOWING_WATER;
+    public boolean isSame(Fluid pFluid) {
+        return pFluid == Fluids.WATER || pFluid == Fluids.FLOWING_WATER;
     }
 
     @Override
-    public int getDropOff(LevelReader p_76469_) {
+    public int getDropOff(LevelReader pLevel) {
         return 1;
     }
 
@@ -113,8 +113,8 @@ public abstract class WaterFluid extends FlowingFluid {
     }
 
     @Override
-    public boolean canBeReplacedWith(FluidState p_76458_, BlockGetter p_76459_, BlockPos p_76460_, Fluid p_76461_, Direction p_76462_) {
-        return p_76462_ == Direction.DOWN && !p_76461_.is(FluidTags.WATER);
+    public boolean canBeReplacedWith(FluidState pFluidState, BlockGetter pBlockReader, BlockPos pPos, Fluid pFluid, Direction pDirection) {
+        return pDirection == Direction.DOWN && !pFluid.is(FluidTags.WATER);
     }
 
     @Override
@@ -129,30 +129,30 @@ public abstract class WaterFluid extends FlowingFluid {
 
     public static class Flowing extends WaterFluid {
         @Override
-        protected void createFluidStateDefinition(StateDefinition.Builder<Fluid, FluidState> p_76476_) {
-            super.createFluidStateDefinition(p_76476_);
-            p_76476_.add(LEVEL);
+        protected void createFluidStateDefinition(StateDefinition.Builder<Fluid, FluidState> pBuilder) {
+            super.createFluidStateDefinition(pBuilder);
+            pBuilder.add(LEVEL);
         }
 
         @Override
-        public int getAmount(FluidState p_76480_) {
-            return p_76480_.getValue(LEVEL);
+        public int getAmount(FluidState pState) {
+            return pState.getValue(LEVEL);
         }
 
         @Override
-        public boolean isSource(FluidState p_76478_) {
+        public boolean isSource(FluidState pState) {
             return false;
         }
     }
 
     public static class Source extends WaterFluid {
         @Override
-        public int getAmount(FluidState p_76485_) {
+        public int getAmount(FluidState pState) {
             return 8;
         }
 
         @Override
-        public boolean isSource(FluidState p_76483_) {
+        public boolean isSource(FluidState pState) {
             return true;
         }
     }

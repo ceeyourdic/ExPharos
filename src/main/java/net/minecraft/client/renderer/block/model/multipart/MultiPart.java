@@ -30,8 +30,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class MultiPart implements UnbakedBlockStateModel {
     private final List<MultiPart.InstantiatedSelector> selectors;
 
-    MultiPart(List<MultiPart.InstantiatedSelector> p_111966_) {
-        this.selectors = p_111966_;
+    MultiPart(List<MultiPart.InstantiatedSelector> pSelectors) {
+        this.selectors = pSelectors;
     }
 
     @Override
@@ -70,10 +70,10 @@ public class MultiPart implements UnbakedBlockStateModel {
 
     @OnlyIn(Dist.CLIENT)
     public static record Definition(List<Selector> selectors) {
-        public MultiPart instantiate(StateDefinition<Block, BlockState> p_365641_) {
+        public MultiPart instantiate(StateDefinition<Block, BlockState> pStateDefinition) {
             List<MultiPart.InstantiatedSelector> list = this.selectors
                 .stream()
-                .map(p_369060_ -> new MultiPart.InstantiatedSelector(p_369060_.getPredicate(p_365641_), p_369060_.getVariant()))
+                .map(p_369060_ -> new MultiPart.InstantiatedSelector(p_369060_.getPredicate(pStateDefinition), p_369060_.getVariant()))
                 .toList();
             return new MultiPart(list);
         }
@@ -89,13 +89,13 @@ public class MultiPart implements UnbakedBlockStateModel {
             return new MultiPart.Definition(this.getSelectors(p_111996_, p_111994_.getAsJsonArray()));
         }
 
-        private List<Selector> getSelectors(JsonDeserializationContext p_111991_, JsonArray p_111992_) {
+        private List<Selector> getSelectors(JsonDeserializationContext pJsonContext, JsonArray pElements) {
             List<Selector> list = new ArrayList<>();
-            if (p_111992_.isEmpty()) {
+            if (pElements.isEmpty()) {
                 throw new JsonSyntaxException("Empty selector array");
             } else {
-                for (JsonElement jsonelement : p_111992_) {
-                    list.add(p_111991_.deserialize(jsonelement, Selector.class));
+                for (JsonElement jsonelement : pElements) {
+                    list.add(pJsonContext.deserialize(jsonelement, Selector.class));
                 }
 
                 return list;

@@ -17,8 +17,8 @@ public class ChangeDimensionTrigger extends SimpleCriterionTrigger<ChangeDimensi
         return ChangeDimensionTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_19758_, ResourceKey<Level> p_19759_, ResourceKey<Level> p_19760_) {
-        this.trigger(p_19758_, p_19768_ -> p_19768_.matches(p_19759_, p_19760_));
+    public void trigger(ServerPlayer pPlayer, ResourceKey<Level> pFromLevel, ResourceKey<Level> pToLevel) {
+        this.trigger(pPlayer, p_19768_ -> p_19768_.matches(pFromLevel, pToLevel));
     }
 
     public static record TriggerInstance(
@@ -37,21 +37,21 @@ public class ChangeDimensionTrigger extends SimpleCriterionTrigger<ChangeDimensi
             return CriteriaTriggers.CHANGED_DIMENSION.createCriterion(new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty()));
         }
 
-        public static Criterion<ChangeDimensionTrigger.TriggerInstance> changedDimension(ResourceKey<Level> p_301176_, ResourceKey<Level> p_298639_) {
+        public static Criterion<ChangeDimensionTrigger.TriggerInstance> changedDimension(ResourceKey<Level> pFrom, ResourceKey<Level> pTo) {
             return CriteriaTriggers.CHANGED_DIMENSION
-                .createCriterion(new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), Optional.of(p_301176_), Optional.of(p_298639_)));
+                .createCriterion(new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), Optional.of(pFrom), Optional.of(pTo)));
         }
 
-        public static Criterion<ChangeDimensionTrigger.TriggerInstance> changedDimensionTo(ResourceKey<Level> p_19783_) {
-            return CriteriaTriggers.CHANGED_DIMENSION.createCriterion(new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.of(p_19783_)));
+        public static Criterion<ChangeDimensionTrigger.TriggerInstance> changedDimensionTo(ResourceKey<Level> pTo) {
+            return CriteriaTriggers.CHANGED_DIMENSION.createCriterion(new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.of(pTo)));
         }
 
-        public static Criterion<ChangeDimensionTrigger.TriggerInstance> changedDimensionFrom(ResourceKey<Level> p_147564_) {
-            return CriteriaTriggers.CHANGED_DIMENSION.createCriterion(new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), Optional.of(p_147564_), Optional.empty()));
+        public static Criterion<ChangeDimensionTrigger.TriggerInstance> changedDimensionFrom(ResourceKey<Level> pFrom) {
+            return CriteriaTriggers.CHANGED_DIMENSION.createCriterion(new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), Optional.of(pFrom), Optional.empty()));
         }
 
-        public boolean matches(ResourceKey<Level> p_19785_, ResourceKey<Level> p_19786_) {
-            return this.from.isPresent() && this.from.get() != p_19785_ ? false : !this.to.isPresent() || this.to.get() == p_19786_;
+        public boolean matches(ResourceKey<Level> pFromLevel, ResourceKey<Level> pToLevel) {
+            return this.from.isPresent() && this.from.get() != pFromLevel ? false : !this.to.isPresent() || this.to.get() == pToLevel;
         }
 
         @Override

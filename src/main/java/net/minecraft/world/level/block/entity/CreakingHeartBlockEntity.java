@@ -63,56 +63,56 @@ public class CreakingHeartBlockEntity extends BlockEntity {
     private Vec3 emitterTarget;
     private int outputSignal;
 
-    public CreakingHeartBlockEntity(BlockPos p_369235_, BlockState p_367834_) {
-        super(BlockEntityType.CREAKING_HEART, p_369235_, p_367834_);
+    public CreakingHeartBlockEntity(BlockPos pPos, BlockState pState) {
+        super(BlockEntityType.CREAKING_HEART, pPos, pState);
     }
 
-    public static void serverTick(Level p_360952_, BlockPos p_367184_, BlockState p_365574_, CreakingHeartBlockEntity p_366884_) {
-        p_366884_.ticksExisted++;
-        if (p_360952_ instanceof ServerLevel serverlevel) {
-            int $$6 = p_366884_.computeAnalogOutputSignal();
-            if (p_366884_.outputSignal != $$6) {
-                p_366884_.outputSignal = $$6;
-                p_360952_.updateNeighbourForOutputSignal(p_367184_, Blocks.CREAKING_HEART);
+    public static void serverTick(Level pLevel, BlockPos pPos, BlockState pState, CreakingHeartBlockEntity pCreakingHeart) {
+        pCreakingHeart.ticksExisted++;
+        if (pLevel instanceof ServerLevel serverlevel) {
+            int $$6 = pCreakingHeart.computeAnalogOutputSignal();
+            if (pCreakingHeart.outputSignal != $$6) {
+                pCreakingHeart.outputSignal = $$6;
+                pLevel.updateNeighbourForOutputSignal(pPos, Blocks.CREAKING_HEART);
             }
 
-            if (p_366884_.emitter > 0) {
-                if (p_366884_.emitter > 50) {
-                    p_366884_.emitParticles(serverlevel, 1, true);
-                    p_366884_.emitParticles(serverlevel, 1, false);
+            if (pCreakingHeart.emitter > 0) {
+                if (pCreakingHeart.emitter > 50) {
+                    pCreakingHeart.emitParticles(serverlevel, 1, true);
+                    pCreakingHeart.emitParticles(serverlevel, 1, false);
                 }
 
-                if (p_366884_.emitter % 10 == 0 && p_366884_.emitterTarget != null) {
-                    p_366884_.getCreakingProtector().ifPresent(p_376513_ -> p_366884_.emitterTarget = p_376513_.getBoundingBox().getCenter());
-                    Vec3 vec3 = Vec3.atCenterOf(p_367184_);
-                    float f = 0.2F + 0.8F * (float)(100 - p_366884_.emitter) / 100.0F;
-                    Vec3 vec31 = vec3.subtract(p_366884_.emitterTarget).scale((double)f).add(p_366884_.emitterTarget);
+                if (pCreakingHeart.emitter % 10 == 0 && pCreakingHeart.emitterTarget != null) {
+                    pCreakingHeart.getCreakingProtector().ifPresent(p_376513_ -> pCreakingHeart.emitterTarget = p_376513_.getBoundingBox().getCenter());
+                    Vec3 vec3 = Vec3.atCenterOf(pPos);
+                    float f = 0.2F + 0.8F * (float)(100 - pCreakingHeart.emitter) / 100.0F;
+                    Vec3 vec31 = vec3.subtract(pCreakingHeart.emitterTarget).scale((double)f).add(pCreakingHeart.emitterTarget);
                     BlockPos blockpos = BlockPos.containing(vec31);
-                    float f1 = (float)p_366884_.emitter / 2.0F / 100.0F + 0.5F;
+                    float f1 = (float)pCreakingHeart.emitter / 2.0F / 100.0F + 0.5F;
                     serverlevel.playSound(null, blockpos, SoundEvents.CREAKING_HEART_HURT, SoundSource.BLOCKS, f1, 1.0F);
                 }
 
-                p_366884_.emitter--;
+                pCreakingHeart.emitter--;
             }
 
-            if (p_366884_.ticker-- < 0) {
-                p_366884_.ticker = p_366884_.level == null ? 20 : p_366884_.level.random.nextInt(5) + 20;
-                if (p_366884_.creakingInfo == null) {
-                    if (!CreakingHeartBlock.hasRequiredLogs(p_365574_, p_360952_, p_367184_)) {
-                        p_360952_.setBlock(p_367184_, p_365574_.setValue(CreakingHeartBlock.ACTIVE, Boolean.valueOf(false)), 3);
-                    } else if (p_365574_.getValue(CreakingHeartBlock.ACTIVE)) {
-                        if (CreakingHeartBlock.isNaturalNight(p_360952_)) {
-                            if (p_360952_.getDifficulty() != Difficulty.PEACEFUL) {
+            if (pCreakingHeart.ticker-- < 0) {
+                pCreakingHeart.ticker = pCreakingHeart.level == null ? 20 : pCreakingHeart.level.random.nextInt(5) + 20;
+                if (pCreakingHeart.creakingInfo == null) {
+                    if (!CreakingHeartBlock.hasRequiredLogs(pState, pLevel, pPos)) {
+                        pLevel.setBlock(pPos, pState.setValue(CreakingHeartBlock.ACTIVE, Boolean.valueOf(false)), 3);
+                    } else if (pState.getValue(CreakingHeartBlock.ACTIVE)) {
+                        if (CreakingHeartBlock.isNaturalNight(pLevel)) {
+                            if (pLevel.getDifficulty() != Difficulty.PEACEFUL) {
                                 if (serverlevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
-                                    Player player = p_360952_.getNearestPlayer(
-                                        (double)p_367184_.getX(), (double)p_367184_.getY(), (double)p_367184_.getZ(), 32.0, false
+                                    Player player = pLevel.getNearestPlayer(
+                                        (double)pPos.getX(), (double)pPos.getY(), (double)pPos.getZ(), 32.0, false
                                     );
                                     if (player != null) {
-                                        Creaking creaking1 = spawnProtector(serverlevel, p_366884_);
+                                        Creaking creaking1 = spawnProtector(serverlevel, pCreakingHeart);
                                         if (creaking1 != null) {
-                                            p_366884_.setCreakingInfo(creaking1);
+                                            pCreakingHeart.setCreakingInfo(creaking1);
                                             creaking1.makeSound(SoundEvents.CREAKING_SPAWN);
-                                            p_360952_.playSound(null, p_366884_.getBlockPos(), SoundEvents.CREAKING_HEART_SPAWN, SoundSource.BLOCKS, 1.0F, 1.0F);
+                                            pLevel.playSound(null, pCreakingHeart.getBlockPos(), SoundEvents.CREAKING_HEART_SPAWN, SoundSource.BLOCKS, 1.0F, 1.0F);
                                         }
                                     }
                                 }
@@ -120,16 +120,16 @@ public class CreakingHeartBlockEntity extends BlockEntity {
                         }
                     }
                 } else {
-                    Optional<Creaking> optional = p_366884_.getCreakingProtector();
+                    Optional<Creaking> optional = pCreakingHeart.getCreakingProtector();
                     if (optional.isPresent()) {
                         Creaking creaking = optional.get();
-                        if (!CreakingHeartBlock.isNaturalNight(p_360952_) || p_366884_.distanceToCreaking() > 34.0 || creaking.playerIsStuckInYou()) {
-                            p_366884_.removeProtector(null);
+                        if (!CreakingHeartBlock.isNaturalNight(pLevel) || pCreakingHeart.distanceToCreaking() > 34.0 || creaking.playerIsStuckInYou()) {
+                            pCreakingHeart.removeProtector(null);
                             return;
                         }
 
-                        if (!CreakingHeartBlock.hasRequiredLogs(p_365574_, p_360952_, p_367184_) && p_366884_.creakingInfo == null) {
-                            p_360952_.setBlock(p_367184_, p_365574_.setValue(CreakingHeartBlock.ACTIVE, Boolean.valueOf(false)), 3);
+                        if (!CreakingHeartBlock.hasRequiredLogs(pState, pLevel, pPos) && pCreakingHeart.creakingInfo == null) {
+                            pLevel.setBlock(pPos, pState.setValue(CreakingHeartBlock.ACTIVE, Boolean.valueOf(false)), 3);
                         }
                     }
                 }
@@ -146,13 +146,13 @@ public class CreakingHeartBlockEntity extends BlockEntity {
         this.setChanged();
     }
 
-    public void setCreakingInfo(Creaking p_376531_) {
-        this.creakingInfo = Either.left(p_376531_);
+    public void setCreakingInfo(Creaking pCreaking) {
+        this.creakingInfo = Either.left(pCreaking);
         this.setChanged();
     }
 
-    public void setCreakingInfo(UUID p_376550_) {
-        this.creakingInfo = Either.right(p_376550_);
+    public void setCreakingInfo(UUID pCreakingUuid) {
+        this.creakingInfo = Either.right(pCreakingUuid);
         this.ticksExisted = 0L;
         this.setChanged();
     }
@@ -189,17 +189,17 @@ public class CreakingHeartBlockEntity extends BlockEntity {
     }
 
     @Nullable
-    private static Creaking spawnProtector(ServerLevel p_362442_, CreakingHeartBlockEntity p_369130_) {
-        BlockPos blockpos = p_369130_.getBlockPos();
+    private static Creaking spawnProtector(ServerLevel pLevel, CreakingHeartBlockEntity pCreakingHeart) {
+        BlockPos blockpos = pCreakingHeart.getBlockPos();
         Optional<Creaking> optional = SpawnUtil.trySpawnMob(
-            EntityType.CREAKING, EntitySpawnReason.SPAWNER, p_362442_, blockpos, 5, 16, 8, SpawnUtil.Strategy.ON_TOP_OF_COLLIDER_NO_LEAVES, true
+            EntityType.CREAKING, EntitySpawnReason.SPAWNER, pLevel, blockpos, 5, 16, 8, SpawnUtil.Strategy.ON_TOP_OF_COLLIDER_NO_LEAVES, true
         );
         if (optional.isEmpty()) {
             return null;
         } else {
             Creaking creaking = optional.get();
-            p_362442_.gameEvent(creaking, GameEvent.ENTITY_PLACE, creaking.position());
-            p_362442_.broadcastEntityEvent(creaking, (byte)60);
+            pLevel.gameEvent(creaking, GameEvent.ENTITY_PLACE, creaking.position());
+            pLevel.broadcastEntityEvent(creaking, (byte)60);
             creaking.setTransient(blockpos);
             return creaking;
         }
@@ -271,36 +271,36 @@ public class CreakingHeartBlockEntity extends BlockEntity {
         return Optional.ofNullable(mutable.getValue());
     }
 
-    private void emitParticles(ServerLevel p_366930_, int p_366541_, boolean p_366282_) {
+    private void emitParticles(ServerLevel pLevel, int pCount, boolean pReverseDirection) {
         if (this.getCreakingProtector().orElse(null) instanceof Creaking creaking) {
-            int i = p_366282_ ? 16545810 : 6250335;
-            RandomSource randomsource = p_366930_.random;
+            int i = pReverseDirection ? 16545810 : 6250335;
+            RandomSource randomsource = pLevel.random;
 
-            for (double d0 = 0.0; d0 < (double)p_366541_; d0++) {
+            for (double d0 = 0.0; d0 < (double)pCount; d0++) {
                 AABB aabb = creaking.getBoundingBox();
                 Vec3 vec3 = aabb.getMinPosition()
                     .add(
                         randomsource.nextDouble() * aabb.getXsize(), randomsource.nextDouble() * aabb.getYsize(), randomsource.nextDouble() * aabb.getZsize()
                     );
                 Vec3 vec31 = Vec3.atLowerCornerOf(this.getBlockPos()).add(randomsource.nextDouble(), randomsource.nextDouble(), randomsource.nextDouble());
-                if (p_366282_) {
+                if (pReverseDirection) {
                     Vec3 vec32 = vec3;
                     vec3 = vec31;
                     vec31 = vec32;
                 }
 
                 TrailParticleOption trailparticleoption = new TrailParticleOption(vec31, i, randomsource.nextInt(40) + 10);
-                p_366930_.sendParticles(trailparticleoption, true, true, vec3.x, vec3.y, vec3.z, 1, 0.0, 0.0, 0.0, 0.0);
+                pLevel.sendParticles(trailparticleoption, true, true, vec3.x, vec3.y, vec3.z, 1, 0.0, 0.0, 0.0, 0.0);
             }
         }
     }
 
-    public void removeProtector(@Nullable DamageSource p_364053_) {
+    public void removeProtector(@Nullable DamageSource pDamageSource) {
         if (this.getCreakingProtector().orElse(null) instanceof Creaking creaking) {
-            if (p_364053_ == null) {
+            if (pDamageSource == null) {
                 creaking.tearDown();
             } else {
-                creaking.creakingDeathEffects(p_364053_);
+                creaking.creakingDeathEffects(pDamageSource);
                 creaking.setTearingDown();
                 creaking.setHealth(0.0F);
             }
@@ -309,8 +309,8 @@ public class CreakingHeartBlockEntity extends BlockEntity {
         }
     }
 
-    public boolean isProtector(Creaking p_367915_) {
-        return this.getCreakingProtector().map(p_375974_ -> p_375974_ == p_367915_).orElse(false);
+    public boolean isProtector(Creaking pCreaking) {
+        return this.getCreakingProtector().map(p_375974_ -> p_375974_ == pCreaking).orElse(false);
     }
 
     public int getAnalogOutputSignal() {

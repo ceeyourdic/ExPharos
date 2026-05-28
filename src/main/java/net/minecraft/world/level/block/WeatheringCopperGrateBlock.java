@@ -23,9 +23,9 @@ public class WeatheringCopperGrateBlock extends WaterloggedTransparentBlock impl
         return CODEC;
     }
 
-    protected WeatheringCopperGrateBlock(WeatheringCopper.WeatherState p_311827_, BlockBehaviour.Properties p_311858_) {
-        super(p_311858_);
-        this.weatherState = p_311827_;
+    protected WeatheringCopperGrateBlock(WeatheringCopper.WeatherState pWeatherState, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.weatherState = pWeatherState;
     }
 
     @Override

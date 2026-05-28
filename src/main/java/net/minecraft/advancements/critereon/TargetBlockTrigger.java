@@ -17,9 +17,9 @@ public class TargetBlockTrigger extends SimpleCriterionTrigger<TargetBlockTrigge
         return TargetBlockTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_70212_, Entity p_70213_, Vec3 p_70214_, int p_70215_) {
-        LootContext lootcontext = EntityPredicate.createContext(p_70212_, p_70213_);
-        this.trigger(p_70212_, p_70224_ -> p_70224_.matches(lootcontext, p_70214_, p_70215_));
+    public void trigger(ServerPlayer pPlayer, Entity pProjectile, Vec3 pVector, int pSignalStrength) {
+        LootContext lootcontext = EntityPredicate.createContext(pPlayer, pProjectile);
+        this.trigger(pPlayer, p_70224_ -> p_70224_.matches(lootcontext, pVector, pSignalStrength));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, MinMaxBounds.Ints signalStrength, Optional<ContextAwarePredicate> projectile)
@@ -35,12 +35,12 @@ public class TargetBlockTrigger extends SimpleCriterionTrigger<TargetBlockTrigge
                     .apply(p_325255_, TargetBlockTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<TargetBlockTrigger.TriggerInstance> targetHit(MinMaxBounds.Ints p_286700_, Optional<ContextAwarePredicate> p_299065_) {
-            return CriteriaTriggers.TARGET_BLOCK_HIT.createCriterion(new TargetBlockTrigger.TriggerInstance(Optional.empty(), p_286700_, p_299065_));
+        public static Criterion<TargetBlockTrigger.TriggerInstance> targetHit(MinMaxBounds.Ints pSignalStrength, Optional<ContextAwarePredicate> pProjectile) {
+            return CriteriaTriggers.TARGET_BLOCK_HIT.createCriterion(new TargetBlockTrigger.TriggerInstance(Optional.empty(), pSignalStrength, pProjectile));
         }
 
-        public boolean matches(LootContext p_70242_, Vec3 p_70243_, int p_70244_) {
-            return !this.signalStrength.matches(p_70244_) ? false : !this.projectile.isPresent() || this.projectile.get().matches(p_70242_);
+        public boolean matches(LootContext pContext, Vec3 pVector, int pSignalStrength) {
+            return !this.signalStrength.matches(pSignalStrength) ? false : !this.projectile.isPresent() || this.projectile.get().matches(pContext);
         }
 
         @Override

@@ -14,25 +14,25 @@ public class BlockEntitySignDoubleSidedEditableTextFix extends NamedEntityFix {
     public static final String FILTERED_CORRECT = "_filtered_correct";
     private static final String DEFAULT_COLOR = "black";
 
-    public BlockEntitySignDoubleSidedEditableTextFix(Schema p_277789_, String p_278061_, String p_277403_) {
-        super(p_277789_, false, p_278061_, References.BLOCK_ENTITY, p_277403_);
+    public BlockEntitySignDoubleSidedEditableTextFix(Schema pOutputSchema, String pName, String pEntityName) {
+        super(pOutputSchema, false, pName, References.BLOCK_ENTITY, pEntityName);
     }
 
-    private static <T> Dynamic<T> fixTag(Dynamic<T> p_278110_) {
-        return p_278110_.set("front_text", fixFrontTextTag(p_278110_)).set("back_text", createDefaultText(p_278110_)).set("is_waxed", p_278110_.createBoolean(false));
+    private static <T> Dynamic<T> fixTag(Dynamic<T> pTag) {
+        return pTag.set("front_text", fixFrontTextTag(pTag)).set("back_text", createDefaultText(pTag)).set("is_waxed", pTag.createBoolean(false));
     }
 
-    private static <T> Dynamic<T> fixFrontTextTag(Dynamic<T> p_300654_) {
-        Dynamic<T> dynamic = ComponentDataFixUtils.createEmptyComponent(p_300654_.getOps());
-        List<Dynamic<T>> list = getLines(p_300654_, "Text").map(p_297945_ -> p_297945_.orElse(dynamic)).toList();
-        Dynamic<T> dynamic1 = p_300654_.emptyMap()
-            .set("messages", p_300654_.createList(list.stream()))
-            .set("color", p_300654_.get("Color").result().orElse(p_300654_.createString("black")))
-            .set("has_glowing_text", p_300654_.get("GlowingText").result().orElse(p_300654_.createBoolean(false)))
-            .set("_filtered_correct", p_300654_.createBoolean(true));
-        List<Optional<Dynamic<T>>> list1 = getLines(p_300654_, "FilteredText").toList();
+    private static <T> Dynamic<T> fixFrontTextTag(Dynamic<T> pTag) {
+        Dynamic<T> dynamic = ComponentDataFixUtils.createEmptyComponent(pTag.getOps());
+        List<Dynamic<T>> list = getLines(pTag, "Text").map(p_297945_ -> p_297945_.orElse(dynamic)).toList();
+        Dynamic<T> dynamic1 = pTag.emptyMap()
+            .set("messages", pTag.createList(list.stream()))
+            .set("color", pTag.get("Color").result().orElse(pTag.createString("black")))
+            .set("has_glowing_text", pTag.get("GlowingText").result().orElse(pTag.createBoolean(false)))
+            .set("_filtered_correct", pTag.createBoolean(true));
+        List<Optional<Dynamic<T>>> list1 = getLines(pTag, "FilteredText").toList();
         if (list1.stream().anyMatch(Optional::isPresent)) {
-            dynamic1 = dynamic1.set("filtered_messages", p_300654_.createList(Streams.mapWithIndex(list1.stream(), (p_299542_, p_300269_) -> {
+            dynamic1 = dynamic1.set("filtered_messages", pTag.createList(Streams.mapWithIndex(list1.stream(), (p_299542_, p_300269_) -> {
                 Dynamic<T> dynamic2 = list.get((int)p_300269_);
                 return p_299542_.orElse(dynamic2);
             })));
@@ -41,25 +41,25 @@ public class BlockEntitySignDoubleSidedEditableTextFix extends NamedEntityFix {
         return dynamic1;
     }
 
-    private static <T> Stream<Optional<Dynamic<T>>> getLines(Dynamic<T> p_298173_, String p_299789_) {
+    private static <T> Stream<Optional<Dynamic<T>>> getLines(Dynamic<T> pDynamic, String pPrefix) {
         return Stream.of(
-            p_298173_.get(p_299789_ + "1").result(),
-            p_298173_.get(p_299789_ + "2").result(),
-            p_298173_.get(p_299789_ + "3").result(),
-            p_298173_.get(p_299789_ + "4").result()
+            pDynamic.get(pPrefix + "1").result(),
+            pDynamic.get(pPrefix + "2").result(),
+            pDynamic.get(pPrefix + "3").result(),
+            pDynamic.get(pPrefix + "4").result()
         );
     }
 
-    private static <T> Dynamic<T> createDefaultText(Dynamic<T> p_299439_) {
-        return p_299439_.emptyMap()
-            .set("messages", createEmptyLines(p_299439_))
-            .set("color", p_299439_.createString("black"))
-            .set("has_glowing_text", p_299439_.createBoolean(false));
+    private static <T> Dynamic<T> createDefaultText(Dynamic<T> pDynamic) {
+        return pDynamic.emptyMap()
+            .set("messages", createEmptyLines(pDynamic))
+            .set("color", pDynamic.createString("black"))
+            .set("has_glowing_text", pDynamic.createBoolean(false));
     }
 
-    private static <T> Dynamic<T> createEmptyLines(Dynamic<T> p_299579_) {
-        Dynamic<T> dynamic = ComponentDataFixUtils.createEmptyComponent(p_299579_.getOps());
-        return p_299579_.createList(Stream.of(dynamic, dynamic, dynamic, dynamic));
+    private static <T> Dynamic<T> createEmptyLines(Dynamic<T> pDynamic) {
+        Dynamic<T> dynamic = ComponentDataFixUtils.createEmptyComponent(pDynamic.getOps());
+        return pDynamic.createList(Stream.of(dynamic, dynamic, dynamic, dynamic));
     }
 
     @Override

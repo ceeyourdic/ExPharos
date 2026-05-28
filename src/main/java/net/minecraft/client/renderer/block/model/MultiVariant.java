@@ -56,19 +56,19 @@ public record MultiVariant(List<Variant> variants) implements UnbakedBlockStateM
 
     @OnlyIn(Dist.CLIENT)
     public static class Deserializer implements JsonDeserializer<MultiVariant> {
-        public MultiVariant deserialize(JsonElement p_111867_, Type p_111868_, JsonDeserializationContext p_111869_) throws JsonParseException {
+        public MultiVariant deserialize(JsonElement pJson, Type pType, JsonDeserializationContext pContext) throws JsonParseException {
             List<Variant> list = Lists.newArrayList();
-            if (p_111867_.isJsonArray()) {
-                JsonArray jsonarray = p_111867_.getAsJsonArray();
+            if (pJson.isJsonArray()) {
+                JsonArray jsonarray = pJson.getAsJsonArray();
                 if (jsonarray.isEmpty()) {
                     throw new JsonParseException("Empty variant array");
                 }
 
                 for (JsonElement jsonelement : jsonarray) {
-                    list.add(p_111869_.deserialize(jsonelement, Variant.class));
+                    list.add(pContext.deserialize(jsonelement, Variant.class));
                 }
             } else {
-                list.add(p_111869_.deserialize(p_111867_, Variant.class));
+                list.add(pContext.deserialize(pJson, Variant.class));
             }
 
             return new MultiVariant(list);

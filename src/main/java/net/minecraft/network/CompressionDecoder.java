@@ -16,18 +16,18 @@ public class CompressionDecoder extends ByteToMessageDecoder {
     private int threshold;
     private boolean validateDecompressed;
 
-    public CompressionDecoder(int p_182675_, boolean p_182676_) {
-        this.threshold = p_182675_;
-        this.validateDecompressed = p_182676_;
+    public CompressionDecoder(int pThreshold, boolean pValidateDecompressed) {
+        this.threshold = pThreshold;
+        this.validateDecompressed = pValidateDecompressed;
         this.inflater = new Inflater();
     }
 
     @Override
-    protected void decode(ChannelHandlerContext p_129441_, ByteBuf p_129442_, List<Object> p_129443_) throws Exception {
-        if (p_129442_.readableBytes() != 0) {
-            int i = VarInt.read(p_129442_);
+    protected void decode(ChannelHandlerContext pContext, ByteBuf pIn, List<Object> pOut) throws Exception {
+        if (pIn.readableBytes() != 0) {
+            int i = VarInt.read(pIn);
             if (i == 0) {
-                p_129443_.add(p_129442_.readBytes(p_129442_.readableBytes()));
+                pOut.add(pIn.readBytes(pIn.readableBytes()));
             } else {
                 if (this.validateDecompressed) {
                     if (i < this.threshold) {
@@ -39,39 +39,39 @@ public class CompressionDecoder extends ByteToMessageDecoder {
                     }
                 }
 
-                this.setupInflaterInput(p_129442_);
-                ByteBuf bytebuf = this.inflate(p_129441_, i);
+                this.setupInflaterInput(pIn);
+                ByteBuf bytebuf = this.inflate(pContext, i);
                 this.inflater.reset();
-                p_129443_.add(bytebuf);
+                pOut.add(bytebuf);
             }
         }
     }
 
-    private void setupInflaterInput(ByteBuf p_299798_) {
+    private void setupInflaterInput(ByteBuf pBuffer) {
         ByteBuffer bytebuffer;
-        if (p_299798_.nioBufferCount() > 0) {
-            bytebuffer = p_299798_.nioBuffer();
-            p_299798_.skipBytes(p_299798_.readableBytes());
+        if (pBuffer.nioBufferCount() > 0) {
+            bytebuffer = pBuffer.nioBuffer();
+            pBuffer.skipBytes(pBuffer.readableBytes());
         } else {
-            bytebuffer = ByteBuffer.allocateDirect(p_299798_.readableBytes());
-            p_299798_.readBytes(bytebuffer);
+            bytebuffer = ByteBuffer.allocateDirect(pBuffer.readableBytes());
+            pBuffer.readBytes(bytebuffer);
             bytebuffer.flip();
         }
 
         this.inflater.setInput(bytebuffer);
     }
 
-    private ByteBuf inflate(ChannelHandlerContext p_300050_, int p_298909_) throws DataFormatException {
-        ByteBuf bytebuf = p_300050_.alloc().directBuffer(p_298909_);
+    private ByteBuf inflate(ChannelHandlerContext pContext, int pSize) throws DataFormatException {
+        ByteBuf bytebuf = pContext.alloc().directBuffer(pSize);
 
         try {
-            ByteBuffer bytebuffer = bytebuf.internalNioBuffer(0, p_298909_);
+            ByteBuffer bytebuffer = bytebuf.internalNioBuffer(0, pSize);
             int i = bytebuffer.position();
             this.inflater.inflate(bytebuffer);
             int j = bytebuffer.position() - i;
-            if (j != p_298909_) {
+            if (j != pSize) {
                 throw new DecoderException(
-                    "Badly compressed packet - actual length of uncompressed payload " + j + " is does not match declared size " + p_298909_
+                    "Badly compressed packet - actual length of uncompressed payload " + j + " is does not match declared size " + pSize
                 );
             } else {
                 bytebuf.writerIndex(bytebuf.writerIndex() + j);
@@ -83,8 +83,8 @@ public class CompressionDecoder extends ByteToMessageDecoder {
         }
     }
 
-    public void setThreshold(int p_182678_, boolean p_182679_) {
-        this.threshold = p_182678_;
-        this.validateDecompressed = p_182679_;
+    public void setThreshold(int pThreshold, boolean pValidateDecompressed) {
+        this.threshold = pThreshold;
+        this.validateDecompressed = pValidateDecompressed;
     }
 }

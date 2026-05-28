@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import net.minecraft.network.protocol.Packet;
 
 public interface ConfigurationTask {
-    void start(Consumer<Packet<?>> p_299398_);
+    void start(Consumer<Packet<?>> pTask);
 
     ConfigurationTask.Type type();
 

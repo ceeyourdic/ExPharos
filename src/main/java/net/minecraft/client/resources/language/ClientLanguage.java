@@ -14,47 +14,46 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Lang;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class ClientLanguage extends Language {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final Map<String, String> storage;
     private final boolean defaultRightToLeft;
 
-    private ClientLanguage(Map<String, String> p_118914_, boolean p_118915_) {
-        this.storage = p_118914_;
-        this.defaultRightToLeft = p_118915_;
+    private ClientLanguage(Map<String, String> pStorage, boolean pDefaultRightToLeft) {
+        this.storage = pStorage;
+        this.defaultRightToLeft = pDefaultRightToLeft;
     }
 
-    public static ClientLanguage loadFrom(ResourceManager p_265765_, List<String> p_265743_, boolean p_265470_) {
+    public static ClientLanguage loadFrom(ResourceManager pResourceManager, List<String> pFilenames, boolean pDefaultRightToLeft) {
         Map<String, String> map = new HashMap<>();
 
-        for (String s : p_265743_) {
+        for (String s : pFilenames) {
             String s1 = String.format(Locale.ROOT, "lang/%s.json", s);
 
-            for (String s2 : p_265765_.getNamespaces()) {
+            for (String s2 : pResourceManager.getNamespaces()) {
                 try {
                     ResourceLocation resourcelocation = ResourceLocation.fromNamespaceAndPath(s2, s1);
-                    appendFrom(s, p_265765_.getResourceStack(resourcelocation), map);
-                } catch (Exception exception) {
-                    LOGGER.warn("Skipped language file: {}:{} ({})", s2, s1, exception.toString());
+                    appendFrom(s, pResourceManager.getResourceStack(resourcelocation), map);
+                    Lang.loadResources(pResourceManager, s, map);
+                } catch (Exception exception1) {
+                    LOGGER.warn("Skipped language file: {}:{} ({})", s2, s1, exception1.toString());
                 }
             }
         }
 
         DeprecatedTranslationsInfo.loadFromDefaultResource().applyToMap(map);
-        return new ClientLanguage(Map.copyOf(map), p_265470_);
+        return new ClientLanguage(Map.copyOf(map), pDefaultRightToLeft);
     }
 
-    private static void appendFrom(String p_235036_, List<Resource> p_235037_, Map<String, String> p_235038_) {
-        for (Resource resource : p_235037_) {
+    private static void appendFrom(String pLanguageName, List<Resource> pResources, Map<String, String> pDestinationMap) {
+        for (Resource resource : pResources) {
             try (InputStream inputstream = resource.open()) {
-                Language.loadFromJson(inputstream, p_235038_::put);
-            } catch (IOException ioexception) {
-                LOGGER.warn("Failed to load translations for {} from pack {}", p_235036_, resource.sourcePackId(), ioexception);
+                Language.loadFromJson(inputstream, pDestinationMap::put);
+            } catch (IOException ioexception1) {
+                LOGGER.warn("Failed to load translations for {} from pack {}", pLanguageName, resource.sourcePackId(), ioexception1);
             }
         }
     }
@@ -77,5 +76,9 @@ public class ClientLanguage extends Language {
     @Override
     public FormattedCharSequence getVisualOrder(FormattedText p_118925_) {
         return FormattedBidiReorder.reorder(p_118925_, this.defaultRightToLeft);
+    }
+
+    public Map<String, String> getLanguageData() {
+        return this.storage;
     }
 }

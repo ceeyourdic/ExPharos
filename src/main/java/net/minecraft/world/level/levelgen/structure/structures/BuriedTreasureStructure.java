@@ -20,9 +20,9 @@ public class BuriedTreasureStructure extends Structure {
         return onTopOfChunkCenter(p_227387_, Heightmap.Types.OCEAN_FLOOR_WG, p_227390_ -> generatePieces(p_227390_, p_227387_));
     }
 
-    private static void generatePieces(StructurePiecesBuilder p_227392_, Structure.GenerationContext p_227393_) {
-        BlockPos blockpos = new BlockPos(p_227393_.chunkPos().getBlockX(9), 90, p_227393_.chunkPos().getBlockZ(9));
-        p_227392_.addPiece(new BuriedTreasurePieces.BuriedTreasurePiece(blockpos));
+    private static void generatePieces(StructurePiecesBuilder pBuilder, Structure.GenerationContext pContext) {
+        BlockPos blockpos = new BlockPos(pContext.chunkPos().getBlockX(9), 90, pContext.chunkPos().getBlockZ(9));
+        pBuilder.addPiece(new BuriedTreasurePieces.BuriedTreasurePiece(blockpos));
     }
 
     @Override

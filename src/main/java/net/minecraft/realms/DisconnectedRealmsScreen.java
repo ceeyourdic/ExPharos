@@ -17,10 +17,10 @@ public class DisconnectedRealmsScreen extends RealmsScreen {
     private final Screen parent;
     private int textHeight;
 
-    public DisconnectedRealmsScreen(Screen p_120653_, Component p_120654_, Component p_120655_) {
-        super(p_120654_);
-        this.parent = p_120653_;
-        this.reason = p_120655_;
+    public DisconnectedRealmsScreen(Screen pParent, Component pTitle, Component pReason) {
+        super(pTitle);
+        this.parent = pParent;
+        this.reason = pReason;
     }
 
     @Override

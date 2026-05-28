@@ -5,28 +5,28 @@ import java.util.Optional;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public interface Term<S> {
-    boolean parse(ParseState<S> p_334989_, Scope p_334936_, Control p_335743_);
+    boolean parse(ParseState<S> pParseState, Scope pScope, Control pControl);
 
-    static <S> Term<S> named(Atom<?> p_334806_) {
-        return new Term.Reference<>(p_334806_);
+    static <S> Term<S> named(Atom<?> pName) {
+        return new Term.Reference<>(pName);
     }
 
-    static <S, T> Term<S> marker(Atom<T> p_333477_, T p_335010_) {
-        return new Term.Marker<>(p_333477_, p_335010_);
-    }
-
-    @SafeVarargs
-    static <S> Term<S> sequence(Term<S>... p_331306_) {
-        return new Term.Sequence<>(List.of(p_331306_));
+    static <S, T> Term<S> marker(Atom<T> pName, T pValue) {
+        return new Term.Marker<>(pName, pValue);
     }
 
     @SafeVarargs
-    static <S> Term<S> alternative(Term<S>... p_334441_) {
-        return new Term.Alternative<>(List.of(p_334441_));
+    static <S> Term<S> sequence(Term<S>... pElements) {
+        return new Term.Sequence<>(List.of(pElements));
     }
 
-    static <S> Term<S> optional(Term<S> p_335256_) {
-        return new Term.Maybe<>(p_335256_);
+    @SafeVarargs
+    static <S> Term<S> alternative(Term<S>... pElements) {
+        return new Term.Alternative<>(List.of(pElements));
+    }
+
+    static <S> Term<S> optional(Term<S> pTerm) {
+        return new Term.Maybe<>(pTerm);
     }
 
     static <S> Term<S> cut() {

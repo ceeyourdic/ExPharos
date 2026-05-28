@@ -8,17 +8,17 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SwordItem extends Item {
-    public SwordItem(ToolMaterial p_365226_, float p_361711_, float p_367826_, Item.Properties p_43272_) {
-        super(p_365226_.applySwordProperties(p_43272_, p_361711_, p_367826_));
+    public SwordItem(ToolMaterial pMaterial, float pAttackDamage, float pAttackSpeed, Item.Properties pProperties) {
+        super(pMaterial.applySwordProperties(pProperties, pAttackDamage, pAttackSpeed));
     }
 
     @Override
-    public boolean canAttackBlock(BlockState p_43291_, Level p_43292_, BlockPos p_43293_, Player p_43294_) {
-        return !p_43294_.isCreative();
+    public boolean canAttackBlock(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer) {
+        return !pPlayer.isCreative();
     }
 
     @Override
-    public boolean hurtEnemy(ItemStack p_43278_, LivingEntity p_43279_, LivingEntity p_43280_) {
+    public boolean hurtEnemy(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
         return true;
     }
 

@@ -26,8 +26,8 @@ public interface PlainTextContents extends ComponentContents {
         }
     };
 
-    static PlainTextContents create(String p_310243_) {
-        return (PlainTextContents)(p_310243_.isEmpty() ? EMPTY : new PlainTextContents.LiteralContents(p_310243_));
+    static PlainTextContents create(String pText) {
+        return (PlainTextContents)(pText.isEmpty() ? EMPTY : new PlainTextContents.LiteralContents(pText));
     }
 
     String text();

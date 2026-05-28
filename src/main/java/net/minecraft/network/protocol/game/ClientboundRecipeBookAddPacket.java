@@ -38,8 +38,8 @@ public record ClientboundRecipeBookAddPacket(List<ClientboundRecipeBookAddPacket
             ClientboundRecipeBookAddPacket.Entry::new
         );
 
-        public Entry(RecipeDisplayEntry p_369640_, boolean p_365244_, boolean p_364233_) {
-            this(p_369640_, (byte)((p_365244_ ? 1 : 0) | (p_364233_ ? 2 : 0)));
+        public Entry(RecipeDisplayEntry pContents, boolean pNotification, boolean pHighlight) {
+            this(pContents, (byte)((pNotification ? 1 : 0) | (pHighlight ? 2 : 0)));
         }
 
         public boolean notification() {

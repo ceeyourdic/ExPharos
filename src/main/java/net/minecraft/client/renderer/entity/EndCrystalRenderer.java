@@ -48,8 +48,8 @@ public class EndCrystalRenderer extends EntityRenderer<EndCrystal, EndCrystalRen
         super.render(p_362241_, p_114147_, p_114148_, p_114149_);
     }
 
-    public static float getY(float p_114160_) {
-        float f = Mth.sin(p_114160_ * 0.2F) / 2.0F + 0.5F;
+    public static float getY(float pAgeInTicks) {
+        float f = Mth.sin(pAgeInTicks * 0.2F) / 2.0F + 0.5F;
         f = (f * f + f) * 0.4F;
         return f - 1.4F;
     }
@@ -70,7 +70,7 @@ public class EndCrystalRenderer extends EntityRenderer<EndCrystal, EndCrystalRen
         }
     }
 
-    public boolean shouldRender(EndCrystal p_114169_, Frustum p_114170_, double p_114171_, double p_114172_, double p_114173_) {
-        return super.shouldRender(p_114169_, p_114170_, p_114171_, p_114172_, p_114173_) || p_114169_.getBeamTarget() != null;
+    public boolean shouldRender(EndCrystal pLivingEntity, Frustum pCamera, double pCamX, double pCamY, double pCamZ) {
+        return super.shouldRender(pLivingEntity, pCamera, pCamX, pCamY, pCamZ) || pLivingEntity.getBeamTarget() != null;
     }
 }

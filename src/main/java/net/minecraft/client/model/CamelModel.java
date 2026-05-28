@@ -26,9 +26,9 @@ public class CamelModel extends EntityModel<CamelRenderState> {
     private final ModelPart[] saddleParts;
     private final ModelPart[] ridingParts;
 
-    public CamelModel(ModelPart p_251834_) {
-        super(p_251834_);
-        ModelPart modelpart = p_251834_.getChild("body");
+    public CamelModel(ModelPart pRoot) {
+        super(pRoot);
+        ModelPart modelpart = pRoot.getChild("body");
         this.head = modelpart.getChild("head");
         this.saddleParts = new ModelPart[]{modelpart.getChild("saddle"), this.head.getChild("bridle")};
         this.ridingParts = new ModelPart[]{this.head.getChild("reins")};
@@ -137,21 +137,21 @@ public class CamelModel extends EntityModel<CamelRenderState> {
         this.animate(p_368486_.dashAnimationState, CamelAnimation.CAMEL_DASH, p_368486_.ageInTicks, 1.0F);
     }
 
-    private void applyHeadRotation(CamelRenderState p_367716_, float p_249176_, float p_251814_) {
-        p_249176_ = Mth.clamp(p_249176_, -30.0F, 30.0F);
-        p_251814_ = Mth.clamp(p_251814_, -25.0F, 45.0F);
-        if (p_367716_.jumpCooldown > 0.0F) {
-            float f = 45.0F * p_367716_.jumpCooldown / 55.0F;
-            p_251814_ = Mth.clamp(p_251814_ + f, -25.0F, 70.0F);
+    private void applyHeadRotation(CamelRenderState pRenderState, float pYRot, float pXRot) {
+        pYRot = Mth.clamp(pYRot, -30.0F, 30.0F);
+        pXRot = Mth.clamp(pXRot, -25.0F, 45.0F);
+        if (pRenderState.jumpCooldown > 0.0F) {
+            float f = 45.0F * pRenderState.jumpCooldown / 55.0F;
+            pXRot = Mth.clamp(pXRot + f, -25.0F, 70.0F);
         }
 
-        this.head.yRot = p_249176_ * (float) (Math.PI / 180.0);
-        this.head.xRot = p_251814_ * (float) (Math.PI / 180.0);
+        this.head.yRot = pYRot * (float) (Math.PI / 180.0);
+        this.head.xRot = pXRot * (float) (Math.PI / 180.0);
     }
 
-    private void toggleInvisibleParts(CamelRenderState p_363076_) {
-        boolean flag = p_363076_.isSaddled;
-        boolean flag1 = p_363076_.isRidden;
+    private void toggleInvisibleParts(CamelRenderState pRenderState) {
+        boolean flag = pRenderState.isSaddled;
+        boolean flag1 = pRenderState.isRidden;
 
         for (ModelPart modelpart : this.saddleParts) {
             modelpart.visible = flag;

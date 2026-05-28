@@ -16,9 +16,9 @@ public enum GraphicsStatus implements OptionEnum {
     private final int id;
     private final String key;
 
-    private GraphicsStatus(final int p_90771_, final String p_90772_) {
-        this.id = p_90771_;
-        this.key = p_90772_;
+    private GraphicsStatus(final int pId, final String pKey) {
+        this.id = pId;
+        this.key = pKey;
     }
 
     @Override
@@ -40,7 +40,7 @@ public enum GraphicsStatus implements OptionEnum {
         };
     }
 
-    public static GraphicsStatus byId(int p_90775_) {
-        return BY_ID.apply(p_90775_);
+    public static GraphicsStatus byId(int pId) {
+        return BY_ID.apply(pId);
     }
 }

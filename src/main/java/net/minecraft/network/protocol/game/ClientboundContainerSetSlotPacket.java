@@ -15,25 +15,25 @@ public class ClientboundContainerSetSlotPacket implements Packet<ClientGamePacke
     private final int slot;
     private final ItemStack itemStack;
 
-    public ClientboundContainerSetSlotPacket(int p_131982_, int p_182713_, int p_131983_, ItemStack p_131984_) {
-        this.containerId = p_131982_;
-        this.stateId = p_182713_;
-        this.slot = p_131983_;
-        this.itemStack = p_131984_.copy();
+    public ClientboundContainerSetSlotPacket(int pContainerId, int pStateId, int pSlot, ItemStack pItemStack) {
+        this.containerId = pContainerId;
+        this.stateId = pStateId;
+        this.slot = pSlot;
+        this.itemStack = pItemStack.copy();
     }
 
-    private ClientboundContainerSetSlotPacket(RegistryFriendlyByteBuf p_334368_) {
-        this.containerId = p_334368_.readContainerId();
-        this.stateId = p_334368_.readVarInt();
-        this.slot = p_334368_.readShort();
-        this.itemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(p_334368_);
+    private ClientboundContainerSetSlotPacket(RegistryFriendlyByteBuf pBuffer) {
+        this.containerId = pBuffer.readContainerId();
+        this.stateId = pBuffer.readVarInt();
+        this.slot = pBuffer.readShort();
+        this.itemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(pBuffer);
     }
 
-    private void write(RegistryFriendlyByteBuf p_330631_) {
-        p_330631_.writeContainerId(this.containerId);
-        p_330631_.writeVarInt(this.stateId);
-        p_330631_.writeShort(this.slot);
-        ItemStack.OPTIONAL_STREAM_CODEC.encode(p_330631_, this.itemStack);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeContainerId(this.containerId);
+        pBuffer.writeVarInt(this.stateId);
+        pBuffer.writeShort(this.slot);
+        ItemStack.OPTIONAL_STREAM_CODEC.encode(pBuffer, this.itemStack);
     }
 
     @Override
@@ -41,8 +41,8 @@ public class ClientboundContainerSetSlotPacket implements Packet<ClientGamePacke
         return GamePacketTypes.CLIENTBOUND_CONTAINER_SET_SLOT;
     }
 
-    public void handle(ClientGamePacketListener p_131990_) {
-        p_131990_.handleContainerSetSlot(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleContainerSetSlot(this);
     }
 
     public int getContainerId() {

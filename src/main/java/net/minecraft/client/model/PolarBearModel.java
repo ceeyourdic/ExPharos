@@ -17,8 +17,8 @@ public class PolarBearModel extends QuadrupedModel<PolarBearRenderState> {
     private static final float BABY_HEAD_SCALE = 2.25F;
     public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(true, 16.0F, 4.0F, 2.25F, 2.0F, 24.0F, Set.of("head"));
 
-    public PolarBearModel(ModelPart p_170829_) {
-        super(p_170829_);
+    public PolarBearModel(ModelPart pRoot) {
+        super(pRoot);
     }
 
     public static LayerDefinition createBodyLayer() {

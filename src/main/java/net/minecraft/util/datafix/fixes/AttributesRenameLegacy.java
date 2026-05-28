@@ -16,10 +16,10 @@ public class AttributesRenameLegacy extends DataFix {
     private final String name;
     private final UnaryOperator<String> renames;
 
-    public AttributesRenameLegacy(Schema p_369510_, String p_366609_, UnaryOperator<String> p_366659_) {
-        super(p_369510_, false);
-        this.name = p_366609_;
-        this.renames = p_366659_;
+    public AttributesRenameLegacy(Schema pOutputSchema, String pName, UnaryOperator<String> pRenames) {
+        super(pOutputSchema, false);
+        this.name = pName;
+        this.renames = pRenames;
     }
 
     @Override
@@ -33,12 +33,12 @@ public class AttributesRenameLegacy extends DataFix {
         );
     }
 
-    private Dynamic<?> fixName(Dynamic<?> p_362328_) {
-        return DataFixUtils.orElse(p_362328_.asString().result().map(this.renames).map(p_362328_::createString), p_362328_);
+    private Dynamic<?> fixName(Dynamic<?> pName) {
+        return DataFixUtils.orElse(pName.asString().result().map(this.renames).map(pName::createString), pName);
     }
 
-    private Typed<?> fixItemStackTag(Typed<?> p_369182_) {
-        return p_369182_.update(
+    private Typed<?> fixItemStackTag(Typed<?> pItemStackTag) {
+        return pItemStackTag.update(
             DSL.remainderFinder(),
             p_365782_ -> p_365782_.update(
                     "AttributeModifiers",
@@ -53,8 +53,8 @@ public class AttributesRenameLegacy extends DataFix {
         );
     }
 
-    private Typed<?> fixEntity(Typed<?> p_360706_) {
-        return p_360706_.update(
+    private Typed<?> fixEntity(Typed<?> pEntityTag) {
+        return pEntityTag.update(
             DSL.remainderFinder(),
             p_370146_ -> p_370146_.update(
                     "Attributes",

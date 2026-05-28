@@ -10,14 +10,14 @@ public record PoiAddedDebugPayload(BlockPos pos, String poiType, int freeTicketC
     );
     public static final CustomPacketPayload.Type<PoiAddedDebugPayload> TYPE = CustomPacketPayload.createType("debug/poi_added");
 
-    private PoiAddedDebugPayload(FriendlyByteBuf p_300736_) {
-        this(p_300736_.readBlockPos(), p_300736_.readUtf(), p_300736_.readInt());
+    private PoiAddedDebugPayload(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readBlockPos(), pBuffer.readUtf(), pBuffer.readInt());
     }
 
-    private void write(FriendlyByteBuf p_298137_) {
-        p_298137_.writeBlockPos(this.pos);
-        p_298137_.writeUtf(this.poiType);
-        p_298137_.writeInt(this.freeTicketCount);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeBlockPos(this.pos);
+        pBuffer.writeUtf(this.poiType);
+        pBuffer.writeInt(this.freeTicketCount);
     }
 
     @Override

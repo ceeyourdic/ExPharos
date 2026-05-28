@@ -38,27 +38,27 @@ public class SpawnEggItem extends Item {
     private static final Map<EntityType<? extends Mob>, SpawnEggItem> BY_ID = Maps.newIdentityHashMap();
     private final EntityType<?> defaultType;
 
-    public SpawnEggItem(EntityType<? extends Mob> p_43207_, Item.Properties p_43210_) {
-        super(p_43210_);
-        this.defaultType = p_43207_;
-        BY_ID.put(p_43207_, this);
+    public SpawnEggItem(EntityType<? extends Mob> pDefaultType, Item.Properties pProperties) {
+        super(pProperties);
+        this.defaultType = pDefaultType;
+        BY_ID.put(pDefaultType, this);
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext p_43223_) {
-        Level level = p_43223_.getLevel();
+    public InteractionResult useOn(UseOnContext pContext) {
+        Level level = pContext.getLevel();
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         } else {
-            ItemStack itemstack = p_43223_.getItemInHand();
-            BlockPos blockpos = p_43223_.getClickedPos();
-            Direction direction = p_43223_.getClickedFace();
+            ItemStack itemstack = pContext.getItemInHand();
+            BlockPos blockpos = pContext.getClickedPos();
+            Direction direction = pContext.getClickedFace();
             BlockState blockstate = level.getBlockState(blockpos);
             if (level.getBlockEntity(blockpos) instanceof Spawner spawner) {
                 EntityType<?> entitytype1 = this.getType(level.registryAccess(), itemstack);
                 spawner.setEntityId(entitytype1, level.getRandom());
                 level.sendBlockUpdated(blockpos, blockstate, blockstate, 3);
-                level.gameEvent(p_43223_.getPlayer(), GameEvent.BLOCK_CHANGE, blockpos);
+                level.gameEvent(pContext.getPlayer(), GameEvent.BLOCK_CHANGE, blockpos);
                 itemstack.shrink(1);
                 return InteractionResult.SUCCESS;
             } else {
@@ -73,7 +73,7 @@ public class SpawnEggItem extends Item {
                 if (entitytype.spawn(
                         (ServerLevel)level,
                         itemstack,
-                        p_43223_.getPlayer(),
+                        pContext.getPlayer(),
                         blockpos1,
                         EntitySpawnReason.SPAWN_ITEM_USE,
                         true,
@@ -81,7 +81,7 @@ public class SpawnEggItem extends Item {
                     )
                     != null) {
                     itemstack.shrink(1);
-                    level.gameEvent(p_43223_.getPlayer(), GameEvent.ENTITY_PLACE, blockpos);
+                    level.gameEvent(pContext.getPlayer(), GameEvent.ENTITY_PLACE, blockpos);
                 }
 
                 return InteractionResult.SUCCESS;
@@ -118,23 +118,23 @@ public class SpawnEggItem extends Item {
         }
     }
 
-    public boolean spawnsEntity(HolderLookup.Provider p_376104_, ItemStack p_331553_, EntityType<?> p_43232_) {
-        return Objects.equals(this.getType(p_376104_, p_331553_), p_43232_);
+    public boolean spawnsEntity(HolderLookup.Provider pRegistries, ItemStack pStack, EntityType<?> pEntityType) {
+        return Objects.equals(this.getType(pRegistries, pStack), pEntityType);
     }
 
     @Nullable
-    public static SpawnEggItem byId(@Nullable EntityType<?> p_43214_) {
-        return BY_ID.get(p_43214_);
+    public static SpawnEggItem byId(@Nullable EntityType<?> pType) {
+        return BY_ID.get(pType);
     }
 
     public static Iterable<SpawnEggItem> eggs() {
         return Iterables.unmodifiableIterable(BY_ID.values());
     }
 
-    public EntityType<?> getType(HolderLookup.Provider p_377295_, ItemStack p_334231_) {
-        CustomData customdata = p_334231_.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY);
+    public EntityType<?> getType(HolderLookup.Provider pRegistries, ItemStack pProvider) {
+        CustomData customdata = pProvider.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY);
         if (!customdata.isEmpty()) {
-            EntityType<?> entitytype = customdata.parseEntityType(p_377295_, Registries.ENTITY_TYPE);
+            EntityType<?> entitytype = customdata.parseEntityType(pRegistries, Registries.ENTITY_TYPE);
             if (entitytype != null) {
                 return entitytype;
             }
@@ -148,15 +148,15 @@ public class SpawnEggItem extends Item {
         return this.defaultType.requiredFeatures();
     }
 
-    public Optional<Mob> spawnOffspringFromSpawnEgg(Player p_43216_, Mob p_43217_, EntityType<? extends Mob> p_43218_, ServerLevel p_43219_, Vec3 p_43220_, ItemStack p_43221_) {
-        if (!this.spawnsEntity(p_43219_.registryAccess(), p_43221_, p_43218_)) {
+    public Optional<Mob> spawnOffspringFromSpawnEgg(Player pPlayer, Mob pMob, EntityType<? extends Mob> pEntityType, ServerLevel pServerLevel, Vec3 pPos, ItemStack pStack) {
+        if (!this.spawnsEntity(pServerLevel.registryAccess(), pStack, pEntityType)) {
             return Optional.empty();
         } else {
             Mob mob;
-            if (p_43217_ instanceof AgeableMob) {
-                mob = ((AgeableMob)p_43217_).getBreedOffspring(p_43219_, (AgeableMob)p_43217_);
+            if (pMob instanceof AgeableMob) {
+                mob = ((AgeableMob)pMob).getBreedOffspring(pServerLevel, (AgeableMob)pMob);
             } else {
-                mob = p_43218_.create(p_43219_, EntitySpawnReason.SPAWN_ITEM_USE);
+                mob = pEntityType.create(pServerLevel, EntitySpawnReason.SPAWN_ITEM_USE);
             }
 
             if (mob == null) {
@@ -166,10 +166,10 @@ public class SpawnEggItem extends Item {
                 if (!mob.isBaby()) {
                     return Optional.empty();
                 } else {
-                    mob.moveTo(p_43220_.x(), p_43220_.y(), p_43220_.z(), 0.0F, 0.0F);
-                    p_43219_.addFreshEntityWithPassengers(mob);
-                    mob.setCustomName(p_43221_.get(DataComponents.CUSTOM_NAME));
-                    p_43221_.consume(1, p_43216_);
+                    mob.moveTo(pPos.x(), pPos.y(), pPos.z(), 0.0F, 0.0F);
+                    pServerLevel.addFreshEntityWithPassengers(mob);
+                    mob.setCustomName(pStack.get(DataComponents.CUSTOM_NAME));
+                    pStack.consume(1, pPlayer);
                     return Optional.of(mob);
                 }
             }

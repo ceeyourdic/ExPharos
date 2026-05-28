@@ -41,16 +41,16 @@ public class CreakingAi {
         MemoryModuleType.ATTACK_COOLING_DOWN
     );
 
-    static void initCoreActivity(Brain<Creaking> p_368784_) {
-        p_368784_.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim<Creaking>(0.8F) {
+    static void initCoreActivity(Brain<Creaking> pBrain) {
+        pBrain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim<Creaking>(0.8F) {
             protected boolean checkExtraStartConditions(ServerLevel p_365067_, Creaking p_367896_) {
                 return p_367896_.canMove() && super.checkExtraStartConditions(p_365067_, p_367896_);
             }
         }, new LookAtTargetSink(45, 90), new MoveToTargetSink()));
     }
 
-    static void initIdleActivity(Brain<Creaking> p_364638_) {
-        p_364638_.addActivity(
+    static void initIdleActivity(Brain<Creaking> pBrain) {
+        pBrain.addActivity(
             Activity.IDLE,
             10,
             ImmutableList.of(
@@ -67,8 +67,8 @@ public class CreakingAi {
         );
     }
 
-    static void initFightActivity(Brain<Creaking> p_362435_) {
-        p_362435_.addActivityAndRemoveMemoryWhenStopped(
+    static void initFightActivity(Brain<Creaking> pBrain) {
+        pBrain.addActivityAndRemoveMemoryWhenStopped(
             Activity.FIGHT,
             10,
             ImmutableList.of(
@@ -84,21 +84,21 @@ public class CreakingAi {
         return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
     }
 
-    public static Brain<Creaking> makeBrain(Brain<Creaking> p_369511_) {
-        initCoreActivity(p_369511_);
-        initIdleActivity(p_369511_);
-        initFightActivity(p_369511_);
-        p_369511_.setCoreActivities(ImmutableSet.of(Activity.CORE));
-        p_369511_.setDefaultActivity(Activity.IDLE);
-        p_369511_.useDefaultActivity();
-        return p_369511_;
+    public static Brain<Creaking> makeBrain(Brain<Creaking> pBrain) {
+        initCoreActivity(pBrain);
+        initIdleActivity(pBrain);
+        initFightActivity(pBrain);
+        pBrain.setCoreActivities(ImmutableSet.of(Activity.CORE));
+        pBrain.setDefaultActivity(Activity.IDLE);
+        pBrain.useDefaultActivity();
+        return pBrain;
     }
 
-    public static void updateActivity(Creaking p_361187_) {
-        if (!p_361187_.canMove()) {
-            p_361187_.getBrain().useDefaultActivity();
+    public static void updateActivity(Creaking pCreaking) {
+        if (!pCreaking.canMove()) {
+            pCreaking.getBrain().useDefaultActivity();
         } else {
-            p_361187_.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.IDLE));
+            pCreaking.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.IDLE));
         }
     }
 }

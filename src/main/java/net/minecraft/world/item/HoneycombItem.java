@@ -86,8 +86,8 @@ public class HoneycombItem extends Item implements SignApplicator {
         }).orElse(InteractionResult.PASS);
     }
 
-    public static Optional<BlockState> getWaxed(BlockState p_150879_) {
-        return Optional.ofNullable(WAXABLES.get().get(p_150879_.getBlock())).map(p_150877_ -> p_150877_.withPropertiesOf(p_150879_));
+    public static Optional<BlockState> getWaxed(BlockState pState) {
+        return Optional.ofNullable(WAXABLES.get().get(pState.getBlock())).map(p_150877_ -> p_150877_.withPropertiesOf(pState));
     }
 
     @Override

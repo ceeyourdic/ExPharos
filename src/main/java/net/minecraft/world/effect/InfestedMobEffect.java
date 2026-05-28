@@ -18,10 +18,10 @@ class InfestedMobEffect extends MobEffect {
     private final float chanceToSpawn;
     private final ToIntFunction<RandomSource> spawnedCount;
 
-    protected InfestedMobEffect(MobEffectCategory p_330372_, int p_332310_, float p_334976_, ToIntFunction<RandomSource> p_328183_) {
-        super(p_330372_, p_332310_, ParticleTypes.INFESTED);
-        this.chanceToSpawn = p_334976_;
-        this.spawnedCount = p_328183_;
+    protected InfestedMobEffect(MobEffectCategory pCategory, int pColor, float pChanceToSpawn, ToIntFunction<RandomSource> pSpawnedCount) {
+        super(pCategory, pColor, ParticleTypes.INFESTED);
+        this.chanceToSpawn = pChanceToSpawn;
+        this.spawnedCount = pSpawnedCount;
     }
 
     @Override
@@ -35,16 +35,16 @@ class InfestedMobEffect extends MobEffect {
         }
     }
 
-    private void spawnSilverfish(ServerLevel p_367211_, LivingEntity p_327972_, double p_334243_, double p_334439_, double p_333358_) {
-        Silverfish silverfish = EntityType.SILVERFISH.create(p_367211_, EntitySpawnReason.TRIGGERED);
+    private void spawnSilverfish(ServerLevel pLevel, LivingEntity pEntity, double pX, double pY, double pZ) {
+        Silverfish silverfish = EntityType.SILVERFISH.create(pLevel, EntitySpawnReason.TRIGGERED);
         if (silverfish != null) {
-            RandomSource randomsource = p_327972_.getRandom();
+            RandomSource randomsource = pEntity.getRandom();
             float f = (float) (Math.PI / 2);
             float f1 = Mth.randomBetween(randomsource, (float) (-Math.PI / 2), (float) (Math.PI / 2));
-            Vector3f vector3f = p_327972_.getLookAngle().toVector3f().mul(0.3F).mul(1.0F, 1.5F, 1.0F).rotateY(f1);
-            silverfish.moveTo(p_334243_, p_334439_, p_333358_, p_367211_.getRandom().nextFloat() * 360.0F, 0.0F);
+            Vector3f vector3f = pEntity.getLookAngle().toVector3f().mul(0.3F).mul(1.0F, 1.5F, 1.0F).rotateY(f1);
+            silverfish.moveTo(pX, pY, pZ, pLevel.getRandom().nextFloat() * 360.0F, 0.0F);
             silverfish.setDeltaMovement(new Vec3(vector3f));
-            p_367211_.addFreshEntity(silverfish);
+            pLevel.addFreshEntity(silverfish);
             silverfish.playSound(SoundEvents.SILVERFISH_HURT);
         }
     }

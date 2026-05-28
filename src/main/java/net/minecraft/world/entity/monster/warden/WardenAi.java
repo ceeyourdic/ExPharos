@@ -93,8 +93,8 @@ public class WardenAi {
                 })
     );
 
-    public static void updateActivity(Warden p_219513_) {
-        p_219513_.getBrain()
+    public static void updateActivity(Warden pWarden) {
+        pWarden.getBrain()
             .setActiveActivityToFirstValid(
                 ImmutableList.of(
                     Activity.EMERGE, Activity.DIG, Activity.ROAR, Activity.FIGHT, Activity.INVESTIGATE, Activity.SNIFF, Activity.IDLE
@@ -102,15 +102,15 @@ public class WardenAi {
             );
     }
 
-    protected static Brain<?> makeBrain(Warden p_219521_, Dynamic<?> p_219522_) {
+    protected static Brain<?> makeBrain(Warden pWarden, Dynamic<?> pOps) {
         Brain.Provider<Warden> provider = Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
-        Brain<Warden> brain = provider.makeBrain(p_219522_);
+        Brain<Warden> brain = provider.makeBrain(pOps);
         initCoreActivity(brain);
         initEmergeActivity(brain);
         initDiggingActivity(brain);
         initIdleActivity(brain);
         initRoarActivity(brain);
-        initFightActivity(p_219521_, brain);
+        initFightActivity(pWarden, brain);
         initInvestigateActivity(brain);
         initSniffingActivity(brain);
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
@@ -119,26 +119,26 @@ public class WardenAi {
         return brain;
     }
 
-    private static void initCoreActivity(Brain<Warden> p_219511_) {
-        p_219511_.addActivity(
+    private static void initCoreActivity(Brain<Warden> pBrain) {
+        pBrain.addActivity(
             Activity.CORE, 0, ImmutableList.of(new Swim<>(0.8F), SetWardenLookTarget.create(), new LookAtTargetSink(45, 90), new MoveToTargetSink())
         );
     }
 
-    private static void initEmergeActivity(Brain<Warden> p_219527_) {
-        p_219527_.addActivityAndRemoveMemoryWhenStopped(Activity.EMERGE, 5, ImmutableList.of(new Emerging<>(EMERGE_DURATION)), MemoryModuleType.IS_EMERGING);
+    private static void initEmergeActivity(Brain<Warden> pBrain) {
+        pBrain.addActivityAndRemoveMemoryWhenStopped(Activity.EMERGE, 5, ImmutableList.of(new Emerging<>(EMERGE_DURATION)), MemoryModuleType.IS_EMERGING);
     }
 
-    private static void initDiggingActivity(Brain<Warden> p_219532_) {
-        p_219532_.addActivityWithConditions(
+    private static void initDiggingActivity(Brain<Warden> pBrain) {
+        pBrain.addActivityWithConditions(
             Activity.DIG,
             ImmutableList.of(Pair.of(0, new ForceUnmount()), Pair.of(1, new Digging<>(DIGGING_DURATION))),
             ImmutableSet.of(Pair.of(MemoryModuleType.ROAR_TARGET, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.DIG_COOLDOWN, MemoryStatus.VALUE_ABSENT))
         );
     }
 
-    private static void initIdleActivity(Brain<Warden> p_219537_) {
-        p_219537_.addActivity(
+    private static void initIdleActivity(Brain<Warden> pBrain) {
+        pBrain.addActivity(
             Activity.IDLE,
             10,
             ImmutableList.of(
@@ -152,8 +152,8 @@ public class WardenAi {
         );
     }
 
-    private static void initInvestigateActivity(Brain<Warden> p_219542_) {
-        p_219542_.addActivityAndRemoveMemoryWhenStopped(
+    private static void initInvestigateActivity(Brain<Warden> pBrain) {
+        pBrain.addActivityAndRemoveMemoryWhenStopped(
             Activity.INVESTIGATE,
             5,
             ImmutableList.of(SetRoarTarget.create(Warden::getEntityAngryAt), GoToTargetLocation.create(MemoryModuleType.DISTURBANCE_LOCATION, 2, 0.7F)),
@@ -161,26 +161,26 @@ public class WardenAi {
         );
     }
 
-    private static void initSniffingActivity(Brain<Warden> p_219544_) {
-        p_219544_.addActivityAndRemoveMemoryWhenStopped(
+    private static void initSniffingActivity(Brain<Warden> pBrain) {
+        pBrain.addActivityAndRemoveMemoryWhenStopped(
             Activity.SNIFF, 5, ImmutableList.of(SetRoarTarget.create(Warden::getEntityAngryAt), new Sniffing<>(SNIFFING_DURATION)), MemoryModuleType.IS_SNIFFING
         );
     }
 
-    private static void initRoarActivity(Brain<Warden> p_219546_) {
-        p_219546_.addActivityAndRemoveMemoryWhenStopped(Activity.ROAR, 10, ImmutableList.of(new Roar()), MemoryModuleType.ROAR_TARGET);
+    private static void initRoarActivity(Brain<Warden> pBrain) {
+        pBrain.addActivityAndRemoveMemoryWhenStopped(Activity.ROAR, 10, ImmutableList.of(new Roar()), MemoryModuleType.ROAR_TARGET);
     }
 
-    private static void initFightActivity(Warden p_219518_, Brain<Warden> p_219519_) {
-        p_219519_.addActivityAndRemoveMemoryWhenStopped(
+    private static void initFightActivity(Warden pWarden, Brain<Warden> pBrain) {
+        pBrain.addActivityAndRemoveMemoryWhenStopped(
             Activity.FIGHT,
             10,
             ImmutableList.of(
                 DIG_COOLDOWN_SETTER,
                 StopAttackingIfTargetInvalid.<Warden>create(
-                    (p_363002_, p_219540_) -> !p_219518_.getAngerLevel().isAngry() || !p_219518_.canTargetEntity(p_219540_), WardenAi::onTargetInvalid, false
+                    (p_363002_, p_219540_) -> !pWarden.getAngerLevel().isAngry() || !pWarden.canTargetEntity(p_219540_), WardenAi::onTargetInvalid, false
                 ),
-                SetEntityLookTarget.create(p_219535_ -> isTarget(p_219518_, p_219535_), (float)p_219518_.getAttributeValue(Attributes.FOLLOW_RANGE)),
+                SetEntityLookTarget.create(p_219535_ -> isTarget(pWarden, p_219535_), (float)pWarden.getAttributeValue(Attributes.FOLLOW_RANGE)),
                 SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(1.2F),
                 new SonicBoom(),
                 MeleeAttack.create(18)
@@ -189,33 +189,33 @@ public class WardenAi {
         );
     }
 
-    private static boolean isTarget(Warden p_219515_, LivingEntity p_219516_) {
-        return p_219515_.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).filter(p_219509_ -> p_219509_ == p_219516_).isPresent();
+    private static boolean isTarget(Warden pWarden, LivingEntity pEntity) {
+        return pWarden.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).filter(p_219509_ -> p_219509_ == pEntity).isPresent();
     }
 
-    private static void onTargetInvalid(ServerLevel p_363022_, Warden p_219529_, LivingEntity p_219530_) {
-        if (!p_219529_.canTargetEntity(p_219530_)) {
-            p_219529_.clearAnger(p_219530_);
+    private static void onTargetInvalid(ServerLevel pLevel, Warden pWarden, LivingEntity pTarget) {
+        if (!pWarden.canTargetEntity(pTarget)) {
+            pWarden.clearAnger(pTarget);
         }
 
-        setDigCooldown(p_219529_);
+        setDigCooldown(pWarden);
     }
 
-    public static void setDigCooldown(LivingEntity p_219506_) {
-        if (p_219506_.getBrain().hasMemoryValue(MemoryModuleType.DIG_COOLDOWN)) {
-            p_219506_.getBrain().setMemoryWithExpiry(MemoryModuleType.DIG_COOLDOWN, Unit.INSTANCE, 1200L);
+    public static void setDigCooldown(LivingEntity pEntity) {
+        if (pEntity.getBrain().hasMemoryValue(MemoryModuleType.DIG_COOLDOWN)) {
+            pEntity.getBrain().setMemoryWithExpiry(MemoryModuleType.DIG_COOLDOWN, Unit.INSTANCE, 1200L);
         }
     }
 
-    public static void setDisturbanceLocation(Warden p_219524_, BlockPos p_219525_) {
-        if (p_219524_.level().getWorldBorder().isWithinBounds(p_219525_)
-            && !p_219524_.getEntityAngryAt().isPresent()
-            && !p_219524_.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent()) {
-            setDigCooldown(p_219524_);
-            p_219524_.getBrain().setMemoryWithExpiry(MemoryModuleType.SNIFF_COOLDOWN, Unit.INSTANCE, 100L);
-            p_219524_.getBrain().setMemoryWithExpiry(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(p_219525_), 100L);
-            p_219524_.getBrain().setMemoryWithExpiry(MemoryModuleType.DISTURBANCE_LOCATION, p_219525_, 100L);
-            p_219524_.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+    public static void setDisturbanceLocation(Warden pWarden, BlockPos pDisturbanceLocation) {
+        if (pWarden.level().getWorldBorder().isWithinBounds(pDisturbanceLocation)
+            && !pWarden.getEntityAngryAt().isPresent()
+            && !pWarden.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent()) {
+            setDigCooldown(pWarden);
+            pWarden.getBrain().setMemoryWithExpiry(MemoryModuleType.SNIFF_COOLDOWN, Unit.INSTANCE, 100L);
+            pWarden.getBrain().setMemoryWithExpiry(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(pDisturbanceLocation), 100L);
+            pWarden.getBrain().setMemoryWithExpiry(MemoryModuleType.DISTURBANCE_LOCATION, pDisturbanceLocation, 100L);
+            pWarden.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
         }
     }
 }

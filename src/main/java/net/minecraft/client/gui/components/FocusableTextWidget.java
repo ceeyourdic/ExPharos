@@ -15,25 +15,25 @@ public class FocusableTextWidget extends MultiLineTextWidget {
     private final boolean alwaysShowBorder;
     private final int padding;
 
-    public FocusableTextWidget(int p_298289_, Component p_300031_, Font p_298235_) {
-        this(p_298289_, p_300031_, p_298235_, 4);
+    public FocusableTextWidget(int pMaxWidth, Component pMessage, Font pFont) {
+        this(pMaxWidth, pMessage, pFont, 4);
     }
 
-    public FocusableTextWidget(int p_335481_, Component p_335339_, Font p_328204_, int p_334529_) {
-        this(p_335481_, p_335339_, p_328204_, true, p_334529_);
+    public FocusableTextWidget(int pMaxWidth, Component pMessage, Font pFont, int pPadding) {
+        this(pMaxWidth, pMessage, pFont, true, pPadding);
     }
 
-    public FocusableTextWidget(int p_299147_, Component p_299786_, Font p_299475_, boolean p_299140_, int p_335803_) {
-        super(p_299786_, p_299475_);
-        this.setMaxWidth(p_299147_);
+    public FocusableTextWidget(int pMaxWidth, Component pMessage, Font pFont, boolean pAlwaysShowBorder, int pPadding) {
+        super(pMessage, pFont);
+        this.setMaxWidth(pMaxWidth);
         this.setCentered(true);
         this.active = true;
-        this.alwaysShowBorder = p_299140_;
-        this.padding = p_335803_;
+        this.alwaysShowBorder = pAlwaysShowBorder;
+        this.padding = pPadding;
     }
 
-    public void containWithin(int p_328277_) {
-        this.setMaxWidth(p_328277_ - this.padding * 4);
+    public void containWithin(int pWidth) {
+        this.setMaxWidth(pWidth - this.padding * 4);
     }
 
     @Override

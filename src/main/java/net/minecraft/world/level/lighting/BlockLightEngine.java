@@ -13,13 +13,13 @@ import net.minecraft.world.level.chunk.LightChunkGetter;
 public final class BlockLightEngine extends LightEngine<BlockLightSectionStorage.BlockDataLayerStorageMap, BlockLightSectionStorage> {
     private final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
-    public BlockLightEngine(LightChunkGetter p_75492_) {
-        this(p_75492_, new BlockLightSectionStorage(p_75492_));
+    public BlockLightEngine(LightChunkGetter pChunkSource) {
+        this(pChunkSource, new BlockLightSectionStorage(pChunkSource));
     }
 
     @VisibleForTesting
-    public BlockLightEngine(LightChunkGetter p_278252_, BlockLightSectionStorage p_278255_) {
-        super(p_278252_, p_278255_);
+    public BlockLightEngine(LightChunkGetter pChunkSource, BlockLightSectionStorage pStorage) {
+        super(pChunkSource, pStorage);
     }
 
     @Override
@@ -106,9 +106,9 @@ public final class BlockLightEngine extends LightEngine<BlockLightSectionStorage
         }
     }
 
-    private int getEmission(long p_285243_, BlockState p_284973_) {
-        int i = p_284973_.getLightEmission();
-        return i > 0 && this.storage.lightOnInSection(SectionPos.blockToSection(p_285243_)) ? i : 0;
+    private int getEmission(long pPackedPos, BlockState pState) {
+        int i = pState.getLightEmission();
+        return i > 0 && this.storage.lightOnInSection(SectionPos.blockToSection(pPackedPos)) ? i : 0;
     }
 
     @Override

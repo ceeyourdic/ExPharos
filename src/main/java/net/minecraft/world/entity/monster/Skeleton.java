@@ -35,8 +35,8 @@ public class Skeleton extends AbstractSkeleton {
         return this.getEntityData().get(DATA_STRAY_CONVERSION_ID);
     }
 
-    public void setFreezeConverting(boolean p_149843_) {
-        this.entityData.set(DATA_STRAY_CONVERSION_ID, p_149843_);
+    public void setFreezeConverting(boolean pIsFrozen) {
+        this.entityData.set(DATA_STRAY_CONVERSION_ID, pIsFrozen);
     }
 
     @Override
@@ -83,8 +83,8 @@ public class Skeleton extends AbstractSkeleton {
     }
 
     @VisibleForTesting
-    public void startFreezeConversion(int p_149831_) {
-        this.conversionTime = p_149831_;
+    public void startFreezeConversion(int pConversionTime) {
+        this.conversionTime = pConversionTime;
         this.setFreezeConverting(true);
     }
 
@@ -107,7 +107,7 @@ public class Skeleton extends AbstractSkeleton {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_33579_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.SKELETON_HURT;
     }
 

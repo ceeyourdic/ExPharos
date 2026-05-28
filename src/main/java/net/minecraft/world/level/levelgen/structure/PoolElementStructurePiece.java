@@ -37,38 +37,38 @@ public class PoolElementStructurePiece extends StructurePiece {
     private final LiquidSettings liquidSettings;
 
     public PoolElementStructurePiece(
-        StructureTemplateManager p_226495_,
-        StructurePoolElement p_226496_,
-        BlockPos p_226497_,
-        int p_226498_,
-        Rotation p_226499_,
-        BoundingBox p_226500_,
-        LiquidSettings p_345422_
+        StructureTemplateManager pStructureTemplateManager,
+        StructurePoolElement pElement,
+        BlockPos pPosition,
+        int pGroundLevelDelta,
+        Rotation pRotation,
+        BoundingBox pBoundingBox,
+        LiquidSettings pLiquidSettings
     ) {
-        super(StructurePieceType.JIGSAW, 0, p_226500_);
-        this.structureTemplateManager = p_226495_;
-        this.element = p_226496_;
-        this.position = p_226497_;
-        this.groundLevelDelta = p_226498_;
-        this.rotation = p_226499_;
-        this.liquidSettings = p_345422_;
+        super(StructurePieceType.JIGSAW, 0, pBoundingBox);
+        this.structureTemplateManager = pStructureTemplateManager;
+        this.element = pElement;
+        this.position = pPosition;
+        this.groundLevelDelta = pGroundLevelDelta;
+        this.rotation = pRotation;
+        this.liquidSettings = pLiquidSettings;
     }
 
-    public PoolElementStructurePiece(StructurePieceSerializationContext p_192406_, CompoundTag p_192407_) {
-        super(StructurePieceType.JIGSAW, p_192407_);
-        this.structureTemplateManager = p_192406_.structureTemplateManager();
-        this.position = new BlockPos(p_192407_.getInt("PosX"), p_192407_.getInt("PosY"), p_192407_.getInt("PosZ"));
-        this.groundLevelDelta = p_192407_.getInt("ground_level_delta");
-        DynamicOps<Tag> dynamicops = p_192406_.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+    public PoolElementStructurePiece(StructurePieceSerializationContext pContext, CompoundTag pTag) {
+        super(StructurePieceType.JIGSAW, pTag);
+        this.structureTemplateManager = pContext.structureTemplateManager();
+        this.position = new BlockPos(pTag.getInt("PosX"), pTag.getInt("PosY"), pTag.getInt("PosZ"));
+        this.groundLevelDelta = pTag.getInt("ground_level_delta");
+        DynamicOps<Tag> dynamicops = pContext.registryAccess().createSerializationContext(NbtOps.INSTANCE);
         this.element = StructurePoolElement.CODEC
-            .parse(dynamicops, p_192407_.getCompound("pool_element"))
+            .parse(dynamicops, pTag.getCompound("pool_element"))
             .getPartialOrThrow(p_341909_ -> new IllegalStateException("Invalid pool element found: " + p_341909_));
-        this.rotation = Rotation.valueOf(p_192407_.getString("rotation"));
+        this.rotation = Rotation.valueOf(pTag.getString("rotation"));
         this.boundingBox = this.element.getBoundingBox(this.structureTemplateManager, this.position, this.rotation);
-        ListTag listtag = p_192407_.getList("junctions", 10);
+        ListTag listtag = pTag.getList("junctions", 10);
         this.junctions.clear();
         listtag.forEach(p_204943_ -> this.junctions.add(JigsawJunction.deserialize(new Dynamic<>(dynamicops, p_204943_))));
-        this.liquidSettings = LiquidSettings.CODEC.parse(NbtOps.INSTANCE, p_192407_.get("liquid_settings")).result().orElse(JigsawStructure.DEFAULT_LIQUID_SETTINGS);
+        this.liquidSettings = LiquidSettings.CODEC.parse(NbtOps.INSTANCE, pTag.get("liquid_settings")).result().orElse(JigsawStructure.DEFAULT_LIQUID_SETTINGS);
     }
 
     @Override
@@ -109,17 +109,17 @@ public class PoolElementStructurePiece extends StructurePiece {
     }
 
     public void place(
-        WorldGenLevel p_226510_,
-        StructureManager p_226511_,
-        ChunkGenerator p_226512_,
-        RandomSource p_226513_,
-        BoundingBox p_226514_,
-        BlockPos p_226515_,
-        boolean p_226516_
+        WorldGenLevel pLevel,
+        StructureManager pStructureManager,
+        ChunkGenerator pGenerator,
+        RandomSource pRandom,
+        BoundingBox pBox,
+        BlockPos pPos,
+        boolean pKeepJigsaws
     ) {
         this.element
             .place(
-                this.structureTemplateManager, p_226510_, p_226511_, p_226512_, this.position, p_226515_, this.rotation, p_226514_, p_226513_, this.liquidSettings, p_226516_
+                this.structureTemplateManager, pLevel, pStructureManager, pGenerator, this.position, pPos, this.rotation, pBox, pRandom, this.liquidSettings, pKeepJigsaws
             );
     }
 
@@ -151,8 +151,8 @@ public class PoolElementStructurePiece extends StructurePiece {
         return this.groundLevelDelta;
     }
 
-    public void addJunction(JigsawJunction p_209917_) {
-        this.junctions.add(p_209917_);
+    public void addJunction(JigsawJunction pJunction) {
+        this.junctions.add(pJunction);
     }
 
     public List<JigsawJunction> getJunctions() {

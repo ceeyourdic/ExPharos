@@ -35,11 +35,11 @@ public class ChatReport extends Report {
         super(p_298678_, p_299093_, p_300487_);
     }
 
-    public void toggleReported(int p_300824_, AbuseReportLimits p_301279_) {
-        if (this.reportedMessages.contains(p_300824_)) {
-            this.reportedMessages.remove(p_300824_);
-        } else if (this.reportedMessages.size() < p_301279_.maxReportedMessageCount()) {
-            this.reportedMessages.add(p_300824_);
+    public void toggleReported(int pId, AbuseReportLimits pLimits) {
+        if (this.reportedMessages.contains(pId)) {
+            this.reportedMessages.remove(pId);
+        } else if (this.reportedMessages.size() < pLimits.maxReportedMessageCount()) {
+            this.reportedMessages.add(pId);
         }
     }
 
@@ -59,24 +59,24 @@ public class ChatReport extends Report {
 
     @OnlyIn(Dist.CLIENT)
     public static class Builder extends Report.Builder<ChatReport> {
-        public Builder(ChatReport p_300891_, AbuseReportLimits p_300207_) {
-            super(p_300891_, p_300207_);
+        public Builder(ChatReport pReport, AbuseReportLimits pLimits) {
+            super(pReport, pLimits);
         }
 
-        public Builder(UUID p_298582_, AbuseReportLimits p_300464_) {
-            super(new ChatReport(UUID.randomUUID(), Instant.now(), p_298582_), p_300464_);
+        public Builder(UUID pReportedProfileId, AbuseReportLimits pLimits) {
+            super(new ChatReport(UUID.randomUUID(), Instant.now(), pReportedProfileId), pLimits);
         }
 
         public IntSet reportedMessages() {
             return this.report.reportedMessages;
         }
 
-        public void toggleReported(int p_300108_) {
-            this.report.toggleReported(p_300108_, this.limits);
+        public void toggleReported(int pId) {
+            this.report.toggleReported(pId, this.limits);
         }
 
-        public boolean isReported(int p_298529_) {
-            return this.report.reportedMessages.contains(p_298529_);
+        public boolean isReported(int pId) {
+            return this.report.reportedMessages.contains(pId);
         }
 
         @Override
@@ -112,20 +112,20 @@ public class ChatReport extends Report {
             }
         }
 
-        private ReportEvidence buildEvidence(ReportingContext p_297642_) {
+        private ReportEvidence buildEvidence(ReportingContext pReportingContext) {
             List<ReportChatMessage> list = new ArrayList<>();
             ChatReportContextBuilder chatreportcontextbuilder = new ChatReportContextBuilder(this.limits.leadingContextMessageCount());
             chatreportcontextbuilder.collectAllContext(
-                p_297642_.chatLog(), this.report.reportedMessages, (p_299095_, p_300385_) -> list.add(this.buildReportedChatMessage(p_300385_, this.isReported(p_299095_)))
+                pReportingContext.chatLog(), this.report.reportedMessages, (p_299095_, p_300385_) -> list.add(this.buildReportedChatMessage(p_300385_, this.isReported(p_299095_)))
             );
             return new ReportEvidence(Lists.reverse(list));
         }
 
-        private ReportChatMessage buildReportedChatMessage(LoggedChatMessage.Player p_299286_, boolean p_299614_) {
-            SignedMessageLink signedmessagelink = p_299286_.message().link();
-            SignedMessageBody signedmessagebody = p_299286_.message().signedBody();
+        private ReportChatMessage buildReportedChatMessage(LoggedChatMessage.Player pChatMessage, boolean pMessageReported) {
+            SignedMessageLink signedmessagelink = pChatMessage.message().link();
+            SignedMessageBody signedmessagebody = pChatMessage.message().signedBody();
             List<ByteBuffer> list = signedmessagebody.lastSeen().entries().stream().map(MessageSignature::asByteBuffer).toList();
-            ByteBuffer bytebuffer = Optionull.map(p_299286_.message().signature(), MessageSignature::asByteBuffer);
+            ByteBuffer bytebuffer = Optionull.map(pChatMessage.message().signature(), MessageSignature::asByteBuffer);
             return new ReportChatMessage(
                 signedmessagelink.index(),
                 signedmessagelink.sender(),
@@ -135,7 +135,7 @@ public class ChatReport extends Report {
                 list,
                 signedmessagebody.content(),
                 bytebuffer,
-                p_299614_
+                pMessageReported
             );
         }
 

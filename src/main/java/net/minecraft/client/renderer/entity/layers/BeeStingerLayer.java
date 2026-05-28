@@ -14,8 +14,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class BeeStingerLayer<M extends PlayerModel> extends StuckInBodyLayer<M> {
     private static final ResourceLocation BEE_STINGER_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/bee/bee_stinger.png");
 
-    public BeeStingerLayer(LivingEntityRenderer<?, PlayerRenderState, M> p_116580_, EntityRendererProvider.Context p_367387_) {
-        super(p_116580_, new BeeStingerModel(p_367387_.bakeLayer(ModelLayers.BEE_STINGER)), BEE_STINGER_LOCATION, StuckInBodyLayer.PlacementStyle.ON_SURFACE);
+    public BeeStingerLayer(LivingEntityRenderer<?, PlayerRenderState, M> pRenderer, EntityRendererProvider.Context pContext) {
+        super(pRenderer, new BeeStingerModel(pContext.bakeLayer(ModelLayers.BEE_STINGER)), BEE_STINGER_LOCATION, StuckInBodyLayer.PlacementStyle.ON_SURFACE);
     }
 
     @Override

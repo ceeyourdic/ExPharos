@@ -16,13 +16,13 @@ public class LavaSlimeModel extends EntityModel<SlimeRenderState> {
     private static final int SEGMENT_COUNT = 8;
     private final ModelPart[] bodyCubes = new ModelPart[8];
 
-    public LavaSlimeModel(ModelPart p_170703_) {
-        super(p_170703_);
-        Arrays.setAll(this.bodyCubes, p_170709_ -> p_170703_.getChild(getSegmentName(p_170709_)));
+    public LavaSlimeModel(ModelPart pRoot) {
+        super(pRoot);
+        Arrays.setAll(this.bodyCubes, p_170709_ -> pRoot.getChild(getSegmentName(p_170709_)));
     }
 
-    private static String getSegmentName(int p_170706_) {
-        return "cube" + p_170706_;
+    private static String getSegmentName(int pIndex) {
+        return "cube" + pIndex;
     }
 
     public static LayerDefinition createBodyLayer() {

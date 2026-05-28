@@ -22,8 +22,8 @@ import net.minecraft.network.protocol.status.StatusProtocols;
 public class PacketReport implements DataProvider {
     private final PackOutput output;
 
-    public PacketReport(PackOutput p_343965_) {
-        this.output = p_343965_;
+    public PacketReport(PackOutput pOutput) {
+        this.output = pOutput;
     }
 
     @Override

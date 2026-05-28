@@ -8,8 +8,8 @@ public class ZeroBitStorage implements BitStorage {
     public static final long[] RAW = new long[0];
     private final int size;
 
-    public ZeroBitStorage(int p_184791_) {
-        this.size = p_184791_;
+    public ZeroBitStorage(int pSize) {
+        this.size = pSize;
     }
 
     @Override

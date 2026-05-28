@@ -32,8 +32,8 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
     protected ResourceKey<LootTable> lootTable;
     protected long lootTableSeed;
 
-    public DecoratedPotBlockEntity(BlockPos p_273660_, BlockState p_272831_) {
-        super(BlockEntityType.DECORATED_POT, p_273660_, p_272831_);
+    public DecoratedPotBlockEntity(BlockPos pPos, BlockState pState) {
+        super(BlockEntityType.DECORATED_POT, pPos, pState);
         this.decorations = PotDecorations.EMPTY;
     }
 
@@ -76,9 +76,9 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
         return this.decorations;
     }
 
-    public static ItemStack createDecoratedPotItem(PotDecorations p_331852_) {
+    public static ItemStack createDecoratedPotItem(PotDecorations pDecorations) {
         ItemStack itemstack = Items.DECORATED_POT.getDefaultInstance();
-        itemstack.set(DataComponents.POT_DECORATIONS, p_331852_);
+        itemstack.set(DataComponents.POT_DECORATIONS, pDecorations);
         return itemstack;
     }
 
@@ -152,9 +152,9 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
         return this;
     }
 
-    public void wobble(DecoratedPotBlockEntity.WobbleStyle p_312241_) {
+    public void wobble(DecoratedPotBlockEntity.WobbleStyle pStyle) {
         if (this.level != null && !this.level.isClientSide()) {
-            this.level.blockEvent(this.getBlockPos(), this.getBlockState().getBlock(), 1, p_312241_.ordinal());
+            this.level.blockEvent(this.getBlockPos(), this.getBlockState().getBlock(), 1, pStyle.ordinal());
         }
     }
 
@@ -175,8 +175,8 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 
         public final int duration;
 
-        private WobbleStyle(final int p_311481_) {
-            this.duration = p_311481_;
+        private WobbleStyle(final int pDuration) {
+            this.duration = pDuration;
         }
     }
 }

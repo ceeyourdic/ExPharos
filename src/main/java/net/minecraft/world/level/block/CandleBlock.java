@@ -168,10 +168,10 @@ public class CandleBlock extends AbstractCandleBlock implements SimpleWaterlogge
         }
     }
 
-    public static boolean canLight(BlockState p_152846_) {
-        return p_152846_.is(BlockTags.CANDLES, p_152810_ -> p_152810_.hasProperty(LIT) && p_152810_.hasProperty(WATERLOGGED))
-            && !p_152846_.getValue(LIT)
-            && !p_152846_.getValue(WATERLOGGED);
+    public static boolean canLight(BlockState pState) {
+        return pState.is(BlockTags.CANDLES, p_152810_ -> p_152810_.hasProperty(LIT) && p_152810_.hasProperty(WATERLOGGED))
+            && !pState.getValue(LIT)
+            && !pState.getValue(WATERLOGGED);
     }
 
     @Override

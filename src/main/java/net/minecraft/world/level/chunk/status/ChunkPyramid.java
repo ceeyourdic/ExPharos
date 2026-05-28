@@ -44,8 +44,8 @@ public record ChunkPyramid(ImmutableList<ChunkStep> steps) {
         .step(ChunkStatus.FULL, p_343704_ -> p_343704_.setTask(ChunkStatusTasks::full))
         .build();
 
-    public ChunkStep getStepTo(ChunkStatus p_343202_) {
-        return this.steps.get(p_343202_.getIndex());
+    public ChunkStep getStepTo(ChunkStatus pStatus) {
+        return this.steps.get(pStatus.getIndex());
     }
 
     public static class Builder {
@@ -55,15 +55,15 @@ public record ChunkPyramid(ImmutableList<ChunkStep> steps) {
             return new ChunkPyramid(ImmutableList.copyOf(this.steps));
         }
 
-        public ChunkPyramid.Builder step(ChunkStatus p_342085_, UnaryOperator<ChunkStep.Builder> p_342673_) {
+        public ChunkPyramid.Builder step(ChunkStatus pStatus, UnaryOperator<ChunkStep.Builder> pTask) {
             ChunkStep.Builder chunkstep$builder;
             if (this.steps.isEmpty()) {
-                chunkstep$builder = new ChunkStep.Builder(p_342085_);
+                chunkstep$builder = new ChunkStep.Builder(pStatus);
             } else {
-                chunkstep$builder = new ChunkStep.Builder(p_342085_, this.steps.getLast());
+                chunkstep$builder = new ChunkStep.Builder(pStatus, this.steps.getLast());
             }
 
-            this.steps.add(p_342673_.apply(chunkstep$builder).build());
+            this.steps.add(pTask.apply(chunkstep$builder).build());
             return this;
         }
     }

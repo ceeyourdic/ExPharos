@@ -42,19 +42,19 @@ public class LoomBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    protected MenuProvider getMenuProvider(BlockState p_54796_, Level p_54797_, BlockPos p_54798_) {
+    protected MenuProvider getMenuProvider(BlockState pState, Level pLevel, BlockPos pPos) {
         return new SimpleMenuProvider(
-            (p_54783_, p_54784_, p_54785_) -> new LoomMenu(p_54783_, p_54784_, ContainerLevelAccess.create(p_54797_, p_54798_)), CONTAINER_TITLE
+            (p_54783_, p_54784_, p_54785_) -> new LoomMenu(p_54783_, p_54784_, ContainerLevelAccess.create(pLevel, pPos)), CONTAINER_TITLE
         );
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_54779_) {
-        return this.defaultBlockState().setValue(FACING, p_54779_.getHorizontalDirection().getOpposite());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite());
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_54794_) {
-        p_54794_.add(FACING);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING);
     }
 }

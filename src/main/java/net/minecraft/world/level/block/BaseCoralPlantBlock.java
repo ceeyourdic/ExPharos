@@ -23,7 +23,7 @@ public class BaseCoralPlantBlock extends BaseCoralPlantTypeBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_49153_, BlockGetter p_49154_, BlockPos p_49155_, CollisionContext p_49156_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 }

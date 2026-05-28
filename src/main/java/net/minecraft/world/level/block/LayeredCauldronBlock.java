@@ -39,9 +39,9 @@ public class LayeredCauldronBlock extends AbstractCauldronBlock {
         return CODEC;
     }
 
-    public LayeredCauldronBlock(Biome.Precipitation p_310517_, CauldronInteraction.InteractionMap p_313151_, BlockBehaviour.Properties p_153522_) {
-        super(p_153522_, p_313151_);
-        this.precipitationType = p_310517_;
+    public LayeredCauldronBlock(Biome.Precipitation pPrecipitationType, CauldronInteraction.InteractionMap pInteractions, BlockBehaviour.Properties pProperties) {
+        super(pProperties, pInteractions);
+        this.precipitationType = pPrecipitationType;
         this.registerDefaultState(this.stateDefinition.any().setValue(LEVEL, Integer.valueOf(1)));
     }
 
@@ -70,19 +70,19 @@ public class LayeredCauldronBlock extends AbstractCauldronBlock {
         }
     }
 
-    private void handleEntityOnFireInside(BlockState p_153556_, Level p_153557_, BlockPos p_153558_) {
+    private void handleEntityOnFireInside(BlockState pState, Level pLevel, BlockPos pPos) {
         if (this.precipitationType == Biome.Precipitation.SNOW) {
-            lowerFillLevel(Blocks.WATER_CAULDRON.defaultBlockState().setValue(LEVEL, p_153556_.getValue(LEVEL)), p_153557_, p_153558_);
+            lowerFillLevel(Blocks.WATER_CAULDRON.defaultBlockState().setValue(LEVEL, pState.getValue(LEVEL)), pLevel, pPos);
         } else {
-            lowerFillLevel(p_153556_, p_153557_, p_153558_);
+            lowerFillLevel(pState, pLevel, pPos);
         }
     }
 
-    public static void lowerFillLevel(BlockState p_153560_, Level p_153561_, BlockPos p_153562_) {
-        int i = p_153560_.getValue(LEVEL) - 1;
-        BlockState blockstate = i == 0 ? Blocks.CAULDRON.defaultBlockState() : p_153560_.setValue(LEVEL, Integer.valueOf(i));
-        p_153561_.setBlockAndUpdate(p_153562_, blockstate);
-        p_153561_.gameEvent(GameEvent.BLOCK_CHANGE, p_153562_, GameEvent.Context.of(blockstate));
+    public static void lowerFillLevel(BlockState pState, Level pLevel, BlockPos pPos) {
+        int i = pState.getValue(LEVEL) - 1;
+        BlockState blockstate = i == 0 ? Blocks.CAULDRON.defaultBlockState() : pState.setValue(LEVEL, Integer.valueOf(i));
+        pLevel.setBlockAndUpdate(pPos, blockstate);
+        pLevel.gameEvent(GameEvent.BLOCK_CHANGE, pPos, GameEvent.Context.of(blockstate));
     }
 
     @Override

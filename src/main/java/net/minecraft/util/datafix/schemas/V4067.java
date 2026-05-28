@@ -13,8 +13,8 @@ public class V4067 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_368746_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_368746_);
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
         map.remove("minecraft:boat");
         map.remove("minecraft:chest_boat");
         this.registerSimple(map, "minecraft:oak_boat");
@@ -38,7 +38,7 @@ public class V4067 extends NamespacedSchema {
         return map;
     }
 
-    private void registerChestBoat(Map<String, Supplier<TypeTemplate>> p_365012_, String p_364668_) {
-        this.register(p_365012_, p_364668_, p_366954_ -> DSL.optionalFields("Items", DSL.list(References.ITEM_STACK.in(this))));
+    private void registerChestBoat(Map<String, Supplier<TypeTemplate>> pMap, String pName) {
+        this.register(pMap, pName, p_366954_ -> DSL.optionalFields("Items", DSL.list(References.ITEM_STACK.in(this))));
     }
 }

@@ -13,20 +13,20 @@ import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.phys.Vec3;
 
 public interface AllOf {
-    static <T, A extends T> MapCodec<A> codec(Codec<T> p_344213_, Function<List<T>, A> p_343453_, Function<A, List<T>> p_344873_) {
-        return RecordCodecBuilder.mapCodec(p_344396_ -> p_344396_.group(p_344213_.listOf().fieldOf("effects").forGetter(p_344873_)).apply(p_344396_, p_343453_));
+    static <T, A extends T> MapCodec<A> codec(Codec<T> pCodec, Function<List<T>, A> pGetter, Function<A, List<T>> pFactory) {
+        return RecordCodecBuilder.mapCodec(p_344396_ -> p_344396_.group(pCodec.listOf().fieldOf("effects").forGetter(pFactory)).apply(p_344396_, pGetter));
     }
 
-    static AllOf.EntityEffects entityEffects(EnchantmentEntityEffect... p_345218_) {
-        return new AllOf.EntityEffects(List.of(p_345218_));
+    static AllOf.EntityEffects entityEffects(EnchantmentEntityEffect... pEffects) {
+        return new AllOf.EntityEffects(List.of(pEffects));
     }
 
-    static AllOf.LocationBasedEffects locationBasedEffects(EnchantmentLocationBasedEffect... p_343547_) {
-        return new AllOf.LocationBasedEffects(List.of(p_343547_));
+    static AllOf.LocationBasedEffects locationBasedEffects(EnchantmentLocationBasedEffect... pEffects) {
+        return new AllOf.LocationBasedEffects(List.of(pEffects));
     }
 
-    static AllOf.ValueEffects valueEffects(EnchantmentValueEffect... p_344769_) {
-        return new AllOf.ValueEffects(List.of(p_344769_));
+    static AllOf.ValueEffects valueEffects(EnchantmentValueEffect... pEffects) {
+        return new AllOf.ValueEffects(List.of(pEffects));
     }
 
     public static record EntityEffects(List<EnchantmentEntityEffect> effects) implements EnchantmentEntityEffect {

@@ -9,12 +9,12 @@ public class ConstantFloat extends FloatProvider {
     public static final MapCodec<ConstantFloat> CODEC = Codec.FLOAT.fieldOf("value").xmap(ConstantFloat::of, ConstantFloat::getValue);
     private final float value;
 
-    public static ConstantFloat of(float p_146459_) {
-        return p_146459_ == 0.0F ? ZERO : new ConstantFloat(p_146459_);
+    public static ConstantFloat of(float pValue) {
+        return pValue == 0.0F ? ZERO : new ConstantFloat(pValue);
     }
 
-    private ConstantFloat(float p_146456_) {
-        this.value = p_146456_;
+    private ConstantFloat(float pValue) {
+        this.value = pValue;
     }
 
     public float getValue() {

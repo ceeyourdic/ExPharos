@@ -10,7 +10,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public interface FloatSampleSource extends FiniteAudioStream {
     int EXPECTED_MAX_FRAME_SIZE = 8192;
 
-    boolean readChunk(FloatConsumer p_328436_) throws IOException;
+    boolean readChunk(FloatConsumer pOutput) throws IOException;
 
     @Override
     default ByteBuffer read(int p_332929_) throws IOException {

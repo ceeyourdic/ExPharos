@@ -20,10 +20,10 @@ public class HorseInventoryScreen extends AbstractContainerScreen<HorseInventory
     private float xMouse;
     private float yMouse;
 
-    public HorseInventoryScreen(HorseInventoryMenu p_98817_, Inventory p_98818_, AbstractHorse p_98819_, int p_342509_) {
-        super(p_98817_, p_98818_, p_98819_.getDisplayName());
-        this.horse = p_98819_;
-        this.inventoryColumns = p_342509_;
+    public HorseInventoryScreen(HorseInventoryMenu pMenu, Inventory pInventory, AbstractHorse pHorse, int pInventoryColumns) {
+        super(pMenu, pInventory, pHorse.getDisplayName());
+        this.horse = pHorse;
+        this.inventoryColumns = pInventoryColumns;
     }
 
     @Override
@@ -46,8 +46,8 @@ public class HorseInventoryScreen extends AbstractContainerScreen<HorseInventory
         InventoryScreen.renderEntityInInventoryFollowsMouse(p_282553_, i + 26, j + 18, i + 78, j + 70, 17, 0.25F, this.xMouse, this.yMouse, this.horse);
     }
 
-    private void drawSlot(GuiGraphics p_377302_, int p_375725_, int p_375686_) {
-        p_377302_.blitSprite(RenderType::guiTextured, SLOT_SPRITE, p_375725_, p_375686_, 18, 18);
+    private void drawSlot(GuiGraphics pGuiGraphics, int pX, int pY) {
+        pGuiGraphics.blitSprite(RenderType::guiTextured, SLOT_SPRITE, pX, pY, 18, 18);
     }
 
     @Override

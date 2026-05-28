@@ -18,8 +18,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class BrushableBlockRenderer implements BlockEntityRenderer<BrushableBlockEntity> {
     private final ItemRenderer itemRenderer;
 
-    public BrushableBlockRenderer(BlockEntityRendererProvider.Context p_277899_) {
-        this.itemRenderer = p_277899_.getItemRenderer();
+    public BrushableBlockRenderer(BlockEntityRendererProvider.Context pContext) {
+        this.itemRenderer = pContext.getItemRenderer();
     }
 
     public void render(BrushableBlockEntity p_277712_, float p_277981_, PoseStack p_277490_, MultiBufferSource p_278015_, int p_277463_, int p_277346_) {
@@ -48,10 +48,10 @@ public class BrushableBlockRenderer implements BlockEntityRenderer<BrushableBloc
         }
     }
 
-    private float[] translations(Direction p_278030_, int p_277997_) {
+    private float[] translations(Direction pDirection, int pDustedLevel) {
         float[] afloat = new float[]{0.5F, 0.0F, 0.5F};
-        float f = (float)p_277997_ / 10.0F * 0.75F;
-        switch (p_278030_) {
+        float f = (float)pDustedLevel / 10.0F * 0.75F;
+        switch (pDirection) {
             case EAST:
                 afloat[0] = 0.73F + f;
                 break;

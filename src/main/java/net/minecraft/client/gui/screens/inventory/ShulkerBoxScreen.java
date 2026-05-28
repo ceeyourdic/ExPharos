@@ -13,8 +13,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class ShulkerBoxScreen extends AbstractContainerScreen<ShulkerBoxMenu> {
     private static final ResourceLocation CONTAINER_TEXTURE = ResourceLocation.withDefaultNamespace("textures/gui/container/shulker_box.png");
 
-    public ShulkerBoxScreen(ShulkerBoxMenu p_99240_, Inventory p_99241_, Component p_99242_) {
-        super(p_99240_, p_99241_, p_99242_);
+    public ShulkerBoxScreen(ShulkerBoxMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, pPlayerInventory, pTitle);
         this.imageHeight++;
     }
 

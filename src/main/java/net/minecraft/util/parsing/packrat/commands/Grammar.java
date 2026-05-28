@@ -17,13 +17,13 @@ import net.minecraft.util.parsing.packrat.ErrorEntry;
 import net.minecraft.util.parsing.packrat.ParseState;
 
 public record Grammar<T>(Dictionary<StringReader> rules, Atom<T> top) {
-    public Optional<T> parse(ParseState<StringReader> p_333096_) {
-        return p_333096_.parseTopRule(this.top);
+    public Optional<T> parse(ParseState<StringReader> pParseState) {
+        return pParseState.parseTopRule(this.top);
     }
 
-    public T parseForCommands(StringReader p_333110_) throws CommandSyntaxException {
+    public T parseForCommands(StringReader pReader) throws CommandSyntaxException {
         ErrorCollector.LongestOnly<StringReader> longestonly = new ErrorCollector.LongestOnly<>();
-        StringReaderParserState stringreaderparserstate = new StringReaderParserState(this.rules(), longestonly, p_333110_);
+        StringReaderParserState stringreaderparserstate = new StringReaderParserState(this.rules(), longestonly, pReader);
         Optional<T> optional = this.parse(stringreaderparserstate);
         if (optional.isPresent()) {
             return optional.get();
@@ -50,17 +50,17 @@ public record Grammar<T>(Dictionary<StringReader> rules, Atom<T> top) {
         }
     }
 
-    public CompletableFuture<Suggestions> parseForSuggestions(SuggestionsBuilder p_327864_) {
-        StringReader stringreader = new StringReader(p_327864_.getInput());
-        stringreader.setCursor(p_327864_.getStart());
+    public CompletableFuture<Suggestions> parseForSuggestions(SuggestionsBuilder pBuilder) {
+        StringReader stringreader = new StringReader(pBuilder.getInput());
+        stringreader.setCursor(pBuilder.getStart());
         ErrorCollector.LongestOnly<StringReader> longestonly = new ErrorCollector.LongestOnly<>();
         StringReaderParserState stringreaderparserstate = new StringReaderParserState(this.rules(), longestonly, stringreader);
         this.parse(stringreaderparserstate);
         List<ErrorEntry<StringReader>> list = longestonly.entries();
         if (list.isEmpty()) {
-            return p_327864_.buildFuture();
+            return pBuilder.buildFuture();
         } else {
-            SuggestionsBuilder suggestionsbuilder = p_327864_.createOffset(longestonly.cursor());
+            SuggestionsBuilder suggestionsbuilder = pBuilder.createOffset(longestonly.cursor());
 
             for (ErrorEntry<StringReader> errorentry : list) {
                 if (errorentry.suggestions() instanceof ResourceSuggestion resourcesuggestion) {

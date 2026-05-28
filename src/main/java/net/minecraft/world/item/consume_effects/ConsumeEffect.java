@@ -19,7 +19,7 @@ public interface ConsumeEffect {
 
     ConsumeEffect.Type<? extends ConsumeEffect> getType();
 
-    boolean apply(Level p_360718_, ItemStack p_366267_, LivingEntity p_362460_);
+    boolean apply(Level pLevel, ItemStack pStack, LivingEntity pEntity);
 
     public static record Type<T extends ConsumeEffect>(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
         public static final ConsumeEffect.Type<ApplyStatusEffectsConsumeEffect> APPLY_EFFECTS = register(
@@ -39,9 +39,9 @@ public interface ConsumeEffect {
         );
 
         private static <T extends ConsumeEffect> ConsumeEffect.Type<T> register(
-            String p_365986_, MapCodec<T> p_365536_, StreamCodec<RegistryFriendlyByteBuf, T> p_365056_
+            String pName, MapCodec<T> pCodec, StreamCodec<RegistryFriendlyByteBuf, T> pStreamCodec
         ) {
-            return Registry.register(BuiltInRegistries.CONSUME_EFFECT_TYPE, p_365986_, new ConsumeEffect.Type<>(p_365536_, p_365056_));
+            return Registry.register(BuiltInRegistries.CONSUME_EFFECT_TYPE, pName, new ConsumeEffect.Type<>(pCodec, pStreamCodec));
         }
     }
 }

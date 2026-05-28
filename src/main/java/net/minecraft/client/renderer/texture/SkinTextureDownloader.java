@@ -26,33 +26,33 @@ public class SkinTextureDownloader {
     private static final int SKIN_HEIGHT = 64;
     private static final int LEGACY_SKIN_HEIGHT = 32;
 
-    public static CompletableFuture<ResourceLocation> downloadAndRegisterSkin(ResourceLocation p_375945_, Path p_376675_, String p_377957_, boolean p_377468_) {
+    public static CompletableFuture<ResourceLocation> downloadAndRegisterSkin(ResourceLocation pTextureLocation, Path pPath, String pUrl, boolean pIsLegacySkin) {
         return CompletableFuture.<NativeImage>supplyAsync(() -> {
             NativeImage nativeimage;
             try {
-                nativeimage = downloadSkin(p_376675_, p_377957_);
+                nativeimage = downloadSkin(pPath, pUrl);
             } catch (IOException ioexception) {
                 throw new UncheckedIOException(ioexception);
             }
 
-            return p_377468_ ? processLegacySkin(nativeimage, p_377957_) : nativeimage;
-        }, Util.nonCriticalIoPool().forName("downloadTexture")).thenCompose(p_378652_ -> registerTextureInManager(p_375945_, p_378652_));
+            return pIsLegacySkin ? processLegacySkin(nativeimage, pUrl) : nativeimage;
+        }, Util.nonCriticalIoPool().forName("downloadTexture")).thenCompose(p_378652_ -> registerTextureInManager(pTextureLocation, p_378652_));
     }
 
-    private static NativeImage downloadSkin(Path p_376608_, String p_377291_) throws IOException {
-        if (Files.isRegularFile(p_376608_)) {
-            LOGGER.debug("Loading HTTP texture from local cache ({})", p_376608_);
+    private static NativeImage downloadSkin(Path pPath, String pUrl) throws IOException {
+        if (Files.isRegularFile(pPath)) {
+            LOGGER.debug("Loading HTTP texture from local cache ({})", pPath);
 
             NativeImage nativeimage1;
-            try (InputStream inputstream = Files.newInputStream(p_376608_)) {
+            try (InputStream inputstream = Files.newInputStream(pPath)) {
                 nativeimage1 = NativeImage.read(inputstream);
             }
 
             return nativeimage1;
         } else {
             HttpURLConnection httpurlconnection = null;
-            LOGGER.debug("Downloading HTTP texture from {} to {}", p_377291_, p_376608_);
-            URI uri = URI.create(p_377291_);
+            LOGGER.debug("Downloading HTTP texture from {} to {}", pUrl, pPath);
+            URI uri = URI.create(pUrl);
 
             NativeImage $$7;
             try {
@@ -68,10 +68,10 @@ public class SkinTextureDownloader {
                 byte[] abyte = httpurlconnection.getInputStream().readAllBytes();
 
                 try {
-                    FileUtil.createDirectoriesSafe(p_376608_.getParent());
-                    Files.write(p_376608_, abyte);
+                    FileUtil.createDirectoriesSafe(pPath.getParent());
+                    Files.write(pPath, abyte);
                 } catch (IOException ioexception) {
-                    LOGGER.warn("Failed to cache texture {} in {}", p_377291_, p_376608_);
+                    LOGGER.warn("Failed to cache texture {} in {}", pUrl, pPath);
                 }
 
                 $$7 = NativeImage.read(abyte);
@@ -85,24 +85,24 @@ public class SkinTextureDownloader {
         }
     }
 
-    private static CompletableFuture<ResourceLocation> registerTextureInManager(ResourceLocation p_376941_, NativeImage p_375665_) {
+    private static CompletableFuture<ResourceLocation> registerTextureInManager(ResourceLocation pLocation, NativeImage pImage) {
         Minecraft minecraft = Minecraft.getInstance();
         return CompletableFuture.supplyAsync(() -> {
-            minecraft.getTextureManager().register(p_376941_, new DynamicTexture(p_375665_));
-            return p_376941_;
+            minecraft.getTextureManager().register(pLocation, new DynamicTexture(pImage));
+            return pLocation;
         }, minecraft);
     }
 
-    private static NativeImage processLegacySkin(NativeImage p_378771_, String p_376069_) {
-        int i = p_378771_.getHeight();
-        int j = p_378771_.getWidth();
+    private static NativeImage processLegacySkin(NativeImage pImage, String pUrl) {
+        int i = pImage.getHeight();
+        int j = pImage.getWidth();
         if (j == 64 && (i == 32 || i == 64)) {
             boolean flag = i == 32;
             if (flag) {
                 NativeImage nativeimage = new NativeImage(64, 64, true);
-                nativeimage.copyFrom(p_378771_);
-                p_378771_.close();
-                p_378771_ = nativeimage;
+                nativeimage.copyFrom(pImage);
+                pImage.close();
+                pImage = nativeimage;
                 nativeimage.fillRect(0, 32, 64, 32, 0);
                 nativeimage.copyRect(4, 16, 16, 32, 4, 4, true, false);
                 nativeimage.copyRect(8, 16, 16, 32, 4, 4, true, false);
@@ -118,41 +118,41 @@ public class SkinTextureDownloader {
                 nativeimage.copyRect(52, 20, -8, 32, 4, 12, true, false);
             }
 
-            setNoAlpha(p_378771_, 0, 0, 32, 16);
+            setNoAlpha(pImage, 0, 0, 32, 16);
             if (flag) {
-                doNotchTransparencyHack(p_378771_, 32, 0, 64, 32);
+                doNotchTransparencyHack(pImage, 32, 0, 64, 32);
             }
 
-            setNoAlpha(p_378771_, 0, 16, 64, 32);
-            setNoAlpha(p_378771_, 16, 48, 48, 64);
-            return p_378771_;
+            setNoAlpha(pImage, 0, 16, 64, 32);
+            setNoAlpha(pImage, 16, 48, 48, 64);
+            return pImage;
         } else {
-            p_378771_.close();
-            throw new IllegalStateException("Discarding incorrectly sized (" + j + "x" + i + ") skin texture from " + p_376069_);
+            pImage.close();
+            throw new IllegalStateException("Discarding incorrectly sized (" + j + "x" + i + ") skin texture from " + pUrl);
         }
     }
 
-    private static void doNotchTransparencyHack(NativeImage p_377150_, int p_376728_, int p_375728_, int p_375419_, int p_376007_) {
-        for (int i = p_376728_; i < p_375419_; i++) {
-            for (int j = p_375728_; j < p_376007_; j++) {
-                int k = p_377150_.getPixel(i, j);
+    private static void doNotchTransparencyHack(NativeImage pImage, int pMinX, int pMinY, int pMaxX, int pMaxY) {
+        for (int i = pMinX; i < pMaxX; i++) {
+            for (int j = pMinY; j < pMaxY; j++) {
+                int k = pImage.getPixel(i, j);
                 if (ARGB.alpha(k) < 128) {
                     return;
                 }
             }
         }
 
-        for (int l = p_376728_; l < p_375419_; l++) {
-            for (int i1 = p_375728_; i1 < p_376007_; i1++) {
-                p_377150_.setPixel(l, i1, p_377150_.getPixel(l, i1) & 16777215);
+        for (int l = pMinX; l < pMaxX; l++) {
+            for (int i1 = pMinY; i1 < pMaxY; i1++) {
+                pImage.setPixel(l, i1, pImage.getPixel(l, i1) & 16777215);
             }
         }
     }
 
-    private static void setNoAlpha(NativeImage p_378167_, int p_376154_, int p_377364_, int p_378176_, int p_376328_) {
-        for (int i = p_376154_; i < p_378176_; i++) {
-            for (int j = p_377364_; j < p_376328_; j++) {
-                p_378167_.setPixel(i, j, ARGB.opaque(p_378167_.getPixel(i, j)));
+    private static void setNoAlpha(NativeImage pImage, int pMinX, int pMinY, int pMaxX, int pMaxY) {
+        for (int i = pMinX; i < pMaxX; i++) {
+            for (int j = pMinY; j < pMaxY; j++) {
+                pImage.setPixel(i, j, ARGB.opaque(pImage.getPixel(i, j)));
             }
         }
     }

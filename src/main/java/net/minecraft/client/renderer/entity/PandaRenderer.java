@@ -118,7 +118,7 @@ public class PandaRenderer extends AgeableMobRenderer<Panda, PandaRenderState, P
         }
     }
 
-    private float getAngle(float p_115625_, float p_115626_, int p_115627_, float p_115628_, float p_115629_) {
-        return (float)p_115627_ < p_115629_ ? Mth.lerp(p_115628_, p_115625_, p_115626_) : p_115625_;
+    private float getAngle(float pCurrentAngle, float pNextAngle, int pNextRollCounter, float pPartialTick, float pRollEndCount) {
+        return (float)pNextRollCounter < pRollEndCount ? Mth.lerp(pPartialTick, pCurrentAngle, pNextAngle) : pCurrentAngle;
     }
 }

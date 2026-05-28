@@ -33,9 +33,9 @@ public class MultiNoiseBiomeSourceParameterList {
     private final MultiNoiseBiomeSourceParameterList.Preset preset;
     private final Climate.ParameterList<Holder<Biome>> parameters;
 
-    public MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset p_275275_, HolderGetter<Biome> p_275192_) {
-        this.preset = p_275275_;
-        this.parameters = p_275275_.provider.apply(p_275192_::getOrThrow);
+    public MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset pPreset, HolderGetter<Biome> pBiomes) {
+        this.preset = pPreset;
+        this.parameters = pPreset.provider.apply(pBiomes::getOrThrow);
     }
 
     public Climate.ParameterList<Holder<Biome>> parameters() {
@@ -101,7 +101,7 @@ public class MultiNoiseBiomeSourceParameterList {
 
         @FunctionalInterface
         interface SourceProvider {
-            <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> p_275485_);
+            <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> pValueGetter);
         }
     }
 }

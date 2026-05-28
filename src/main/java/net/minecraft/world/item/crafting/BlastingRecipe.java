@@ -5,8 +5,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public class BlastingRecipe extends AbstractCookingRecipe {
-    public BlastingRecipe(String p_251053_, CookingBookCategory p_249936_, Ingredient p_251550_, ItemStack p_251027_, float p_250843_, int p_249841_) {
-        super(p_251053_, p_249936_, p_251550_, p_251027_, p_250843_, p_249841_);
+    public BlastingRecipe(String pGroup, CookingBookCategory pCategory, Ingredient pIngredient, ItemStack pResult, float pExperience, int pCookingTime) {
+        super(pGroup, pCategory, pIngredient, pResult, pExperience, pCookingTime);
     }
 
     @Override

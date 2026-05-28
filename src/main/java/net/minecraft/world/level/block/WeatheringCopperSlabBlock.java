@@ -21,9 +21,9 @@ public class WeatheringCopperSlabBlock extends SlabBlock implements WeatheringCo
         return CODEC;
     }
 
-    public WeatheringCopperSlabBlock(WeatheringCopper.WeatherState p_154938_, BlockBehaviour.Properties p_154939_) {
-        super(p_154939_);
-        this.weatherState = p_154938_;
+    public WeatheringCopperSlabBlock(WeatheringCopper.WeatherState pWeatherState, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.weatherState = pWeatherState;
     }
 
     @Override

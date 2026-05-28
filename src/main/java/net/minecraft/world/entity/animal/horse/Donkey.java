@@ -38,16 +38,16 @@ public class Donkey extends AbstractChestedHorse {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_30682_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.DONKEY_HURT;
     }
 
     @Override
-    public boolean canMate(Animal p_30679_) {
-        if (p_30679_ == this) {
+    public boolean canMate(Animal pOtherAnimal) {
+        if (pOtherAnimal == this) {
             return false;
         } else {
-            return !(p_30679_ instanceof Donkey) && !(p_30679_ instanceof Horse) ? false : this.canParent() && ((AbstractHorse)p_30679_).canParent();
+            return !(pOtherAnimal instanceof Donkey) && !(pOtherAnimal instanceof Horse) ? false : this.canParent() && ((AbstractHorse)pOtherAnimal).canParent();
         }
     }
 

@@ -21,14 +21,14 @@ class OozingMobEffect extends MobEffect {
     public static final int SLIME_SIZE = 2;
     private final ToIntFunction<RandomSource> spawnedCount;
 
-    protected OozingMobEffect(MobEffectCategory p_333140_, int p_332642_, ToIntFunction<RandomSource> p_334869_) {
-        super(p_333140_, p_332642_, ParticleTypes.ITEM_SLIME);
-        this.spawnedCount = p_334869_;
+    protected OozingMobEffect(MobEffectCategory pCategory, int pColor, ToIntFunction<RandomSource> pSpawnedCount) {
+        super(pCategory, pColor, ParticleTypes.ITEM_SLIME);
+        this.spawnedCount = pSpawnedCount;
     }
 
     @VisibleForTesting
-    protected static int numberOfSlimesToSpawn(int p_329727_, OozingMobEffect.NearbySlimes p_343265_, int p_333663_) {
-        return p_329727_ < 1 ? p_333663_ : Mth.clamp(0, p_329727_ - p_343265_.count(p_329727_), p_333663_);
+    protected static int numberOfSlimesToSpawn(int pMaxEntityCramming, OozingMobEffect.NearbySlimes pNearbySlimes, int pSpawnCount) {
+        return pMaxEntityCramming < 1 ? pSpawnCount : Mth.clamp(0, pMaxEntityCramming - pNearbySlimes.count(pMaxEntityCramming), pSpawnCount);
     }
 
     @Override
@@ -44,23 +44,23 @@ class OozingMobEffect extends MobEffect {
         }
     }
 
-    private void spawnSlimeOffspring(Level p_335546_, double p_331630_, double p_328143_, double p_332724_) {
-        Slime slime = EntityType.SLIME.create(p_335546_, EntitySpawnReason.TRIGGERED);
+    private void spawnSlimeOffspring(Level pLevel, double pX, double pY, double pZ) {
+        Slime slime = EntityType.SLIME.create(pLevel, EntitySpawnReason.TRIGGERED);
         if (slime != null) {
             slime.setSize(2, true);
-            slime.moveTo(p_331630_, p_328143_, p_332724_, p_335546_.getRandom().nextFloat() * 360.0F, 0.0F);
-            p_335546_.addFreshEntity(slime);
+            slime.moveTo(pX, pY, pZ, pLevel.getRandom().nextFloat() * 360.0F, 0.0F);
+            pLevel.addFreshEntity(slime);
         }
     }
 
     @FunctionalInterface
     protected interface NearbySlimes {
-        int count(int p_344907_);
+        int count(int pMaxEntityCramming);
 
-        static OozingMobEffect.NearbySlimes closeTo(LivingEntity p_342828_) {
+        static OozingMobEffect.NearbySlimes closeTo(LivingEntity pEntity) {
             return p_374929_ -> {
                 List<Slime> list = new ArrayList<>();
-                p_342828_.level().getEntities(EntityType.SLIME, p_342828_.getBoundingBox().inflate(2.0), p_344894_ -> p_344894_ != p_342828_, list, p_374929_);
+                pEntity.level().getEntities(EntityType.SLIME, pEntity.getBoundingBox().inflate(2.0), p_344894_ -> p_344894_ != pEntity, list, p_374929_);
                 return list.size();
             };
         }

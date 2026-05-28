@@ -11,10 +11,10 @@ public abstract class RecipeBookMenu extends AbstractContainerMenu {
     }
 
     public abstract RecipeBookMenu.PostPlaceAction handlePlacement(
-        boolean p_40119_, boolean p_363647_, RecipeHolder<?> p_297420_, ServerLevel p_367376_, Inventory p_364321_
+        boolean pUseMaxItems, boolean pIsCreative, RecipeHolder<?> pRecipe, ServerLevel pLevel, Inventory pPlayerInventory
     );
 
-    public abstract void fillCraftSlotsStackedContents(StackedItemContents p_365715_);
+    public abstract void fillCraftSlotsStackedContents(StackedItemContents pStackedItemContents);
 
     public abstract RecipeBookType getRecipeBookType();
 

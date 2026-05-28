@@ -166,9 +166,9 @@ public class RealmsMainScreen extends RealmsScreen {
     @Nullable
     private HeaderAndFooterLayout layout;
 
-    public RealmsMainScreen(Screen p_86315_) {
+    public RealmsMainScreen(Screen pLastScreen) {
         super(TITLE);
-        this.lastScreen = p_86315_;
+        this.lastScreen = pLastScreen;
         this.inviteNarrationLimiter = RateLimiter.create(0.016666668F);
     }
 
@@ -248,14 +248,14 @@ public class RealmsMainScreen extends RealmsScreen {
         }
     }
 
-    private void updateLayout(RealmsMainScreen.LayoutState p_297284_) {
-        if (this.activeLayoutState != p_297284_) {
+    private void updateLayout(RealmsMainScreen.LayoutState pLayoutState) {
+        if (this.activeLayoutState != pLayoutState) {
             if (this.layout != null) {
                 this.layout.visitWidgets(p_325098_ -> this.removeWidget(p_325098_));
             }
 
-            this.layout = this.createLayout(p_297284_);
-            this.activeLayoutState = p_297284_;
+            this.layout = this.createLayout(pLayoutState);
+            this.activeLayoutState = pLayoutState;
             this.layout.visitWidgets(p_325096_ -> {
                 AbstractWidget abstractwidget = this.addRenderableWidget(p_325096_);
             });
@@ -263,15 +263,15 @@ public class RealmsMainScreen extends RealmsScreen {
         }
     }
 
-    private HeaderAndFooterLayout createLayout(RealmsMainScreen.LayoutState p_299759_) {
+    private HeaderAndFooterLayout createLayout(RealmsMainScreen.LayoutState pLayoutState) {
         HeaderAndFooterLayout headerandfooterlayout = new HeaderAndFooterLayout(this);
         headerandfooterlayout.setHeaderHeight(44);
         headerandfooterlayout.addToHeader(this.createHeader());
-        Layout layout = this.createFooter(p_299759_);
+        Layout layout = this.createFooter(pLayoutState);
         layout.arrangeElements();
         headerandfooterlayout.setFooterHeight(layout.getHeight() + 22);
         headerandfooterlayout.addToFooter(layout);
-        switch (p_299759_) {
+        switch (pLayoutState) {
             case LOADING:
                 headerandfooterlayout.addToContents(new LoadingDotsWidget(this.font, LOADING_TEXT));
                 break;
@@ -299,10 +299,10 @@ public class RealmsMainScreen extends RealmsScreen {
         return linearlayout1;
     }
 
-    private Layout createFooter(RealmsMainScreen.LayoutState p_299205_) {
+    private Layout createFooter(RealmsMainScreen.LayoutState pLayoutState) {
         GridLayout gridlayout = new GridLayout().spacing(4);
         GridLayout.RowHelper gridlayout$rowhelper = gridlayout.createRowHelper(3);
-        if (p_299205_ == RealmsMainScreen.LayoutState.LIST) {
+        if (pLayoutState == RealmsMainScreen.LayoutState.LIST) {
             gridlayout$rowhelper.addChild(this.playButton);
             gridlayout$rowhelper.addChild(this.configureButton);
             gridlayout$rowhelper.addChild(this.renewButton);
@@ -332,21 +332,21 @@ public class RealmsMainScreen extends RealmsScreen {
         this.configureButton.active = realmsserver != null && this.shouldConfigureButtonBeActive(realmsserver);
     }
 
-    boolean shouldPlayButtonBeActive(RealmsServer p_86563_) {
-        boolean flag = !p_86563_.expired && p_86563_.state == RealmsServer.State.OPEN;
-        return flag && (p_86563_.isCompatible() || p_86563_.needsUpgrade() || isSelfOwnedServer(p_86563_));
+    boolean shouldPlayButtonBeActive(RealmsServer pRealmsServer) {
+        boolean flag = !pRealmsServer.expired && pRealmsServer.state == RealmsServer.State.OPEN;
+        return flag && (pRealmsServer.isCompatible() || pRealmsServer.needsUpgrade() || isSelfOwnedServer(pRealmsServer));
     }
 
-    private boolean shouldRenewButtonBeActive(RealmsServer p_86595_) {
-        return p_86595_.expired && isSelfOwnedServer(p_86595_);
+    private boolean shouldRenewButtonBeActive(RealmsServer pRealmsServer) {
+        return pRealmsServer.expired && isSelfOwnedServer(pRealmsServer);
     }
 
-    private boolean shouldConfigureButtonBeActive(RealmsServer p_86620_) {
-        return isSelfOwnedServer(p_86620_) && p_86620_.state != RealmsServer.State.UNINITIALIZED;
+    private boolean shouldConfigureButtonBeActive(RealmsServer pRealmsServer) {
+        return isSelfOwnedServer(pRealmsServer) && pRealmsServer.state != RealmsServer.State.UNINITIALIZED;
     }
 
-    private boolean shouldLeaveButtonBeActive(RealmsServer p_86645_) {
-        return !isSelfOwnedServer(p_86645_);
+    private boolean shouldLeaveButtonBeActive(RealmsServer pRealmsServer) {
+        return !isSelfOwnedServer(pRealmsServer);
     }
 
     @Override
@@ -371,9 +371,9 @@ public class RealmsMainScreen extends RealmsScreen {
         }
     }
 
-    private DataFetcher.Subscription initDataFetcher(RealmsDataFetcher p_238836_) {
-        DataFetcher.Subscription datafetcher$subscription = p_238836_.dataFetcher.createSubscription();
-        datafetcher$subscription.subscribe(p_238836_.serverListUpdateTask, p_308037_ -> {
+    private DataFetcher.Subscription initDataFetcher(RealmsDataFetcher pDataFetcher) {
+        DataFetcher.Subscription datafetcher$subscription = pDataFetcher.dataFetcher.createSubscription();
+        datafetcher$subscription.subscribe(pDataFetcher.serverListUpdateTask, p_308037_ -> {
             this.serverList.updateServersList(p_308037_.serverList());
             this.availableSnapshotServers = p_308037_.availableSnapshotServers();
             this.refreshListAndLayout();
@@ -409,27 +409,27 @@ public class RealmsMainScreen extends RealmsScreen {
                 this.refreshListAndLayout();
             }
         });
-        datafetcher$subscription.subscribe(p_238836_.pendingInvitesTask, p_296027_ -> {
+        datafetcher$subscription.subscribe(pDataFetcher.pendingInvitesTask, p_296027_ -> {
             this.pendingInvitesButton.setNotificationCount(p_296027_);
             this.pendingInvitesButton.setTooltip(p_296027_ == 0 ? Tooltip.create(NO_PENDING_INVITES) : Tooltip.create(PENDING_INVITES));
             if (p_296027_ > 0 && this.inviteNarrationLimiter.tryAcquire(1)) {
                 this.minecraft.getNarrator().sayNow(Component.translatable("mco.configure.world.invite.narration", p_296027_));
             }
         });
-        datafetcher$subscription.subscribe(p_238836_.trialAvailabilityTask, p_296031_ -> this.trialsAvailable = p_296031_);
-        datafetcher$subscription.subscribe(p_238836_.onlinePlayersTask, p_340705_ -> this.onlinePlayersPerRealm = p_340705_);
-        datafetcher$subscription.subscribe(p_238836_.newsTask, p_296037_ -> {
-            p_238836_.newsManager.updateUnreadNews(p_296037_);
-            this.newsLink = p_238836_.newsManager.newsLink();
-            this.newsButton.setNotificationCount(p_238836_.newsManager.hasUnreadNews() ? Integer.MAX_VALUE : 0);
+        datafetcher$subscription.subscribe(pDataFetcher.trialAvailabilityTask, p_296031_ -> this.trialsAvailable = p_296031_);
+        datafetcher$subscription.subscribe(pDataFetcher.onlinePlayersTask, p_340705_ -> this.onlinePlayersPerRealm = p_340705_);
+        datafetcher$subscription.subscribe(pDataFetcher.newsTask, p_296037_ -> {
+            pDataFetcher.newsManager.updateUnreadNews(p_296037_);
+            this.newsLink = pDataFetcher.newsManager.newsLink();
+            this.newsButton.setNotificationCount(pDataFetcher.newsManager.hasUnreadNews() ? Integer.MAX_VALUE : 0);
         });
         return datafetcher$subscription;
     }
 
-    void markNotificationsAsSeen(Collection<RealmsNotification> p_311351_) {
-        List<UUID> list = new ArrayList<>(p_311351_.size());
+    void markNotificationsAsSeen(Collection<RealmsNotification> pNotifications) {
+        List<UUID> list = new ArrayList<>(pNotifications.size());
 
-        for (RealmsNotification realmsnotification : p_311351_) {
+        for (RealmsNotification realmsnotification : pNotifications) {
             if (!realmsnotification.seen() && !this.handledSeenNotifications.contains(realmsnotification.uuid())) {
                 list.add(realmsnotification.uuid());
             }
@@ -443,15 +443,15 @@ public class RealmsMainScreen extends RealmsScreen {
         }
     }
 
-    private static <T> void callRealmsClient(RealmsMainScreen.RealmsCall<T> p_275561_, Consumer<T> p_275686_) {
+    private static <T> void callRealmsClient(RealmsMainScreen.RealmsCall<T> pCall, Consumer<T> pOnFinish) {
         Minecraft minecraft = Minecraft.getInstance();
         CompletableFuture.<T>supplyAsync(() -> {
             try {
-                return p_275561_.request(RealmsClient.create(minecraft));
+                return pCall.request(RealmsClient.create(minecraft));
             } catch (RealmsServiceException realmsserviceexception) {
                 throw new RuntimeException(realmsserviceexception);
             }
-        }).thenAcceptAsync(p_275686_, minecraft).exceptionally(p_274626_ -> {
+        }).thenAcceptAsync(pOnFinish, minecraft).exceptionally(p_274626_ -> {
             LOGGER.error("Failed to execute call to Realms Service", p_274626_);
             return null;
         });
@@ -491,24 +491,24 @@ public class RealmsMainScreen extends RealmsScreen {
         return list;
     }
 
-    private void onRenew(@Nullable RealmsServer p_193500_) {
-        if (p_193500_ != null) {
-            String s = CommonLinks.extendRealms(p_193500_.remoteSubscriptionId, this.minecraft.getUser().getProfileId(), p_193500_.expiredTrial);
+    private void onRenew(@Nullable RealmsServer pRealmsServer) {
+        if (pRealmsServer != null) {
+            String s = CommonLinks.extendRealms(pRealmsServer.remoteSubscriptionId, this.minecraft.getUser().getProfileId(), pRealmsServer.expiredTrial);
             this.minecraft.keyboardHandler.setClipboard(s);
             Util.getPlatform().openUri(s);
         }
     }
 
-    private void configureClicked(@Nullable RealmsServer p_86657_) {
-        if (p_86657_ != null && this.minecraft.isLocalPlayer(p_86657_.ownerUUID)) {
-            this.minecraft.setScreen(new RealmsConfigureWorldScreen(this, p_86657_.id));
+    private void configureClicked(@Nullable RealmsServer pRealmsServer) {
+        if (pRealmsServer != null && this.minecraft.isLocalPlayer(pRealmsServer.ownerUUID)) {
+            this.minecraft.setScreen(new RealmsConfigureWorldScreen(this, pRealmsServer.id));
         }
     }
 
-    private void leaveClicked(@Nullable RealmsServer p_86670_) {
-        if (p_86670_ != null && !this.minecraft.isLocalPlayer(p_86670_.ownerUUID)) {
+    private void leaveClicked(@Nullable RealmsServer pRealmsServer) {
+        if (pRealmsServer != null && !this.minecraft.isLocalPlayer(pRealmsServer.ownerUUID)) {
             Component component = Component.translatable("mco.configure.world.leave.question.line1");
-            this.minecraft.setScreen(RealmsPopups.infoPopupScreen(this, component, p_340701_ -> this.leaveServer(p_86670_)));
+            this.minecraft.setScreen(RealmsPopups.infoPopupScreen(this, component, p_340701_ -> this.leaveServer(pRealmsServer)));
         }
     }
 
@@ -517,13 +517,13 @@ public class RealmsMainScreen extends RealmsScreen {
         return this.realmSelectionList.getSelected() instanceof RealmsMainScreen.ServerEntry realmsmainscreen$serverentry ? realmsmainscreen$serverentry.getServer() : null;
     }
 
-    private void leaveServer(final RealmsServer p_193495_) {
+    private void leaveServer(final RealmsServer pServer) {
         (new Thread("Realms-leave-server") {
                 @Override
                 public void run() {
                     try {
                         RealmsClient realmsclient = RealmsClient.create();
-                        realmsclient.uninviteMyselfFrom(p_193495_.id);
+                        realmsclient.uninviteMyselfFrom(pServer.id);
                         RealmsMainScreen.this.minecraft.execute(RealmsMainScreen::refreshServerList);
                     } catch (RealmsServiceException realmsserviceexception) {
                         RealmsMainScreen.LOGGER.error("Couldn't configure world", (Throwable)realmsserviceexception);
@@ -536,12 +536,12 @@ public class RealmsMainScreen extends RealmsScreen {
         this.minecraft.setScreen(this);
     }
 
-    void dismissNotification(UUID p_275349_) {
+    void dismissNotification(UUID pUuid) {
         callRealmsClient(p_274628_ -> {
-            p_274628_.notificationsDismiss(List.of(p_275349_));
+            p_274628_.notificationsDismiss(List.of(pUuid));
             return null;
         }, p_274632_ -> {
-            this.notifications.removeIf(p_274621_ -> p_274621_.dismissable() && p_275349_.equals(p_274621_.uuid()));
+            this.notifications.removeIf(p_274621_ -> p_274621_.dismissable() && pUuid.equals(p_274621_.uuid()));
             this.refreshListAndLayout();
         });
     }
@@ -584,25 +584,25 @@ public class RealmsMainScreen extends RealmsScreen {
         this.minecraft.setScreen(new AddRealmPopupScreen(this, this.trialsAvailable));
     }
 
-    public static void play(@Nullable RealmsServer p_86516_, Screen p_86517_) {
-        play(p_86516_, p_86517_, false);
+    public static void play(@Nullable RealmsServer pRealmsServer, Screen pLastScreen) {
+        play(pRealmsServer, pLastScreen, false);
     }
 
-    public static void play(@Nullable RealmsServer p_312669_, Screen p_310591_, boolean p_309776_) {
-        if (p_312669_ != null) {
-            if (!isSnapshot() || p_309776_ || p_312669_.isMinigameActive()) {
-                Minecraft.getInstance().setScreen(new RealmsLongRunningMcoTaskScreen(p_310591_, new GetServerDetailsTask(p_310591_, p_312669_)));
+    public static void play(@Nullable RealmsServer pRealmsServer, Screen pLastScreen, boolean pAllowSnapshots) {
+        if (pRealmsServer != null) {
+            if (!isSnapshot() || pAllowSnapshots || pRealmsServer.isMinigameActive()) {
+                Minecraft.getInstance().setScreen(new RealmsLongRunningMcoTaskScreen(pLastScreen, new GetServerDetailsTask(pLastScreen, pRealmsServer)));
                 return;
             }
 
-            switch (p_312669_.compatibility) {
+            switch (pRealmsServer.compatibility) {
                 case COMPATIBLE:
-                    Minecraft.getInstance().setScreen(new RealmsLongRunningMcoTaskScreen(p_310591_, new GetServerDetailsTask(p_310591_, p_312669_)));
+                    Minecraft.getInstance().setScreen(new RealmsLongRunningMcoTaskScreen(pLastScreen, new GetServerDetailsTask(pLastScreen, pRealmsServer)));
                     break;
                 case UNVERIFIABLE:
                     confirmToPlay(
-                        p_312669_,
-                        p_310591_,
+                        pRealmsServer,
+                        pLastScreen,
                         Component.translatable("mco.compatibility.unverifiable.title").withColor(-171),
                         Component.translatable("mco.compatibility.unverifiable.message"),
                         CommonComponents.GUI_CONTINUE
@@ -610,28 +610,28 @@ public class RealmsMainScreen extends RealmsScreen {
                     break;
                 case NEEDS_DOWNGRADE:
                     confirmToPlay(
-                        p_312669_,
-                        p_310591_,
+                        pRealmsServer,
+                        pLastScreen,
                         Component.translatable("selectWorld.backupQuestion.downgrade").withColor(-2142128),
                         Component.translatable(
                             "mco.compatibility.downgrade.description",
-                            Component.literal(p_312669_.activeVersion).withColor(-171),
+                            Component.literal(pRealmsServer.activeVersion).withColor(-171),
                             Component.literal(SharedConstants.getCurrentVersion().getName()).withColor(-171)
                         ),
                         Component.translatable("mco.compatibility.downgrade")
                     );
                     break;
                 case NEEDS_UPGRADE:
-                    upgradeRealmAndPlay(p_312669_, p_310591_);
+                    upgradeRealmAndPlay(pRealmsServer, pLastScreen);
                     break;
                 case INCOMPATIBLE:
                     Minecraft.getInstance()
                         .setScreen(
-                            new PopupScreen.Builder(p_310591_, INCOMPATIBLE_POPUP_TITLE)
+                            new PopupScreen.Builder(pLastScreen, INCOMPATIBLE_POPUP_TITLE)
                                 .setMessage(
                                     Component.translatable(
                                         "mco.compatibility.incompatible.series.popup.message",
-                                        Component.literal(p_312669_.activeVersion).withColor(-171),
+                                        Component.literal(pRealmsServer.activeVersion).withColor(-171),
                                         Component.literal(SharedConstants.getCurrentVersion().getName()).withColor(-171)
                                     )
                                 )
@@ -642,7 +642,7 @@ public class RealmsMainScreen extends RealmsScreen {
                 case RELEASE_TYPE_INCOMPATIBLE:
                     Minecraft.getInstance()
                         .setScreen(
-                            new PopupScreen.Builder(p_310591_, INCOMPATIBLE_POPUP_TITLE)
+                            new PopupScreen.Builder(pLastScreen, INCOMPATIBLE_POPUP_TITLE)
                                 .setMessage(INCOMPATIBLE_RELEASE_TYPE_POPUP_MESSAGE)
                                 .addButton(CommonComponents.GUI_BACK, PopupScreen::onClose)
                                 .build()
@@ -651,51 +651,51 @@ public class RealmsMainScreen extends RealmsScreen {
         }
     }
 
-    private static void confirmToPlay(RealmsServer p_311893_, Screen p_310296_, Component p_309987_, Component p_309434_, Component p_311253_) {
-        Minecraft.getInstance().setScreen(new PopupScreen.Builder(p_310296_, p_309987_).setMessage(p_309434_).addButton(p_311253_, p_340704_ -> {
-            Minecraft.getInstance().setScreen(new RealmsLongRunningMcoTaskScreen(p_310296_, new GetServerDetailsTask(p_310296_, p_311893_)));
+    private static void confirmToPlay(RealmsServer pRealmsServer, Screen pLastScreen, Component pTitle, Component pMessage, Component pConfirmButton) {
+        Minecraft.getInstance().setScreen(new PopupScreen.Builder(pLastScreen, pTitle).setMessage(pMessage).addButton(pConfirmButton, p_340704_ -> {
+            Minecraft.getInstance().setScreen(new RealmsLongRunningMcoTaskScreen(pLastScreen, new GetServerDetailsTask(pLastScreen, pRealmsServer)));
             refreshServerList();
         }).addButton(CommonComponents.GUI_CANCEL, PopupScreen::onClose).build());
     }
 
-    private static void upgradeRealmAndPlay(RealmsServer p_343214_, Screen p_343698_) {
+    private static void upgradeRealmAndPlay(RealmsServer pServer, Screen pLastScreen) {
         Component component = Component.translatable("mco.compatibility.upgrade.title").withColor(-171);
         Component component1 = Component.translatable("mco.compatibility.upgrade");
-        Component component2 = Component.literal(p_343214_.activeVersion).withColor(-171);
+        Component component2 = Component.literal(pServer.activeVersion).withColor(-171);
         Component component3 = Component.literal(SharedConstants.getCurrentVersion().getName()).withColor(-171);
-        Component component4 = isSelfOwnedServer(p_343214_)
+        Component component4 = isSelfOwnedServer(pServer)
             ? Component.translatable("mco.compatibility.upgrade.description", component2, component3)
             : Component.translatable("mco.compatibility.upgrade.friend.description", component2, component3);
-        confirmToPlay(p_343214_, p_343698_, component, component4, component1);
+        confirmToPlay(pServer, pLastScreen, component, component4, component1);
     }
 
-    public static Component getVersionComponent(String p_312049_, boolean p_312280_) {
-        return getVersionComponent(p_312049_, p_312280_ ? -8355712 : -2142128);
+    public static Component getVersionComponent(String pVersion, boolean pCompatible) {
+        return getVersionComponent(pVersion, pCompatible ? -8355712 : -2142128);
     }
 
-    public static Component getVersionComponent(String p_311695_, int p_311083_) {
-        return (Component)(StringUtils.isBlank(p_311695_) ? CommonComponents.EMPTY : Component.literal(p_311695_).withColor(p_311083_));
+    public static Component getVersionComponent(String pVersion, int pColor) {
+        return (Component)(StringUtils.isBlank(pVersion) ? CommonComponents.EMPTY : Component.literal(pVersion).withColor(pColor));
     }
 
-    public static Component getGameModeComponent(int p_364136_, boolean p_361479_) {
-        return (Component)(p_361479_ ? Component.translatable("gameMode.hardcore").withColor(-65536) : GameType.byId(p_364136_).getLongDisplayName());
+    public static Component getGameModeComponent(int pGamemode, boolean pHardcore) {
+        return (Component)(pHardcore ? Component.translatable("gameMode.hardcore").withColor(-65536) : GameType.byId(pGamemode).getLongDisplayName());
     }
 
-    static boolean isSelfOwnedServer(RealmsServer p_86684_) {
-        return Minecraft.getInstance().isLocalPlayer(p_86684_.ownerUUID);
+    static boolean isSelfOwnedServer(RealmsServer pServer) {
+        return Minecraft.getInstance().isLocalPlayer(pServer.ownerUUID);
     }
 
-    private boolean isSelfOwnedNonExpiredServer(RealmsServer p_86689_) {
-        return isSelfOwnedServer(p_86689_) && !p_86689_.expired;
+    private boolean isSelfOwnedNonExpiredServer(RealmsServer pServer) {
+        return isSelfOwnedServer(pServer) && !pServer.expired;
     }
 
-    private void renderEnvironment(GuiGraphics p_298843_, String p_299597_, int p_300122_) {
-        p_298843_.pose().pushPose();
-        p_298843_.pose().translate((float)(this.width / 2 - 25), 20.0F, 0.0F);
-        p_298843_.pose().mulPose(Axis.ZP.rotationDegrees(-20.0F));
-        p_298843_.pose().scale(1.5F, 1.5F, 1.5F);
-        p_298843_.drawString(this.font, p_299597_, 0, 0, p_300122_);
-        p_298843_.pose().popPose();
+    private void renderEnvironment(GuiGraphics pGuiGraphics, String pText, int pColor) {
+        pGuiGraphics.pose().pushPose();
+        pGuiGraphics.pose().translate((float)(this.width / 2 - 25), 20.0F, 0.0F);
+        pGuiGraphics.pose().mulPose(Axis.ZP.rotationDegrees(-20.0F));
+        pGuiGraphics.pose().scale(1.5F, 1.5F, 1.5F);
+        pGuiGraphics.drawString(this.font, pText, 0, 0, pColor);
+        pGuiGraphics.pose().popPose();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -705,8 +705,8 @@ public class RealmsMainScreen extends RealmsScreen {
         private final WidgetTooltipHolder tooltip = new WidgetTooltipHolder();
         private final RealmsServer parent;
 
-        public AvailableSnapshotEntry(final RealmsServer p_311559_) {
-            this.parent = p_311559_;
+        public AvailableSnapshotEntry(final RealmsServer pParent) {
+            this.parent = pParent;
             this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.tooltip")));
         }
 
@@ -782,8 +782,8 @@ public class RealmsMainScreen extends RealmsScreen {
     class ButtonEntry extends RealmsMainScreen.Entry {
         private final Button button;
 
-        public ButtonEntry(final Button p_275726_) {
-            this.button = p_275726_;
+        public ButtonEntry(final Button pButton) {
+            this.button = pButton;
         }
 
         @Override
@@ -832,9 +832,9 @@ public class RealmsMainScreen extends RealmsScreen {
             ResourceLocation.withDefaultNamespace("widget/cross_button"), ResourceLocation.withDefaultNamespace("widget/cross_button_highlighted")
         );
 
-        protected CrossButton(Button.OnPress p_275420_, Component p_275193_) {
-            super(0, 0, 14, 14, SPRITES, p_275420_);
-            this.setTooltip(Tooltip.create(p_275193_));
+        protected CrossButton(Button.OnPress pOnPress, Component pMessage) {
+            super(0, 0, 14, 14, SPRITES, pOnPress);
+            this.setTooltip(Tooltip.create(pMessage));
         }
     }
 
@@ -868,117 +868,117 @@ public class RealmsMainScreen extends RealmsScreen {
         protected static final int PADDING_X = 7;
         protected static final int PADDING_Y = 2;
 
-        protected void renderStatusLights(RealmsServer p_312488_, GuiGraphics p_310620_, int p_309999_, int p_309772_, int p_310609_, int p_312927_) {
-            int i = p_309999_ - 10 - 7;
-            int j = p_309772_ + 2;
-            if (p_312488_.expired) {
-                this.drawRealmStatus(p_310620_, i, j, p_310609_, p_312927_, RealmsMainScreen.EXPIRED_SPRITE, () -> RealmsMainScreen.SERVER_EXPIRED_TOOLTIP);
-            } else if (p_312488_.state == RealmsServer.State.CLOSED) {
-                this.drawRealmStatus(p_310620_, i, j, p_310609_, p_312927_, RealmsMainScreen.CLOSED_SPRITE, () -> RealmsMainScreen.SERVER_CLOSED_TOOLTIP);
-            } else if (RealmsMainScreen.isSelfOwnedServer(p_312488_) && p_312488_.daysLeft < 7) {
+        protected void renderStatusLights(RealmsServer pRealmsServer, GuiGraphics pGuiGraphics, int pX, int pY, int pMouseX, int pMouseY) {
+            int i = pX - 10 - 7;
+            int j = pY + 2;
+            if (pRealmsServer.expired) {
+                this.drawRealmStatus(pGuiGraphics, i, j, pMouseX, pMouseY, RealmsMainScreen.EXPIRED_SPRITE, () -> RealmsMainScreen.SERVER_EXPIRED_TOOLTIP);
+            } else if (pRealmsServer.state == RealmsServer.State.CLOSED) {
+                this.drawRealmStatus(pGuiGraphics, i, j, pMouseX, pMouseY, RealmsMainScreen.CLOSED_SPRITE, () -> RealmsMainScreen.SERVER_CLOSED_TOOLTIP);
+            } else if (RealmsMainScreen.isSelfOwnedServer(pRealmsServer) && pRealmsServer.daysLeft < 7) {
                 this.drawRealmStatus(
-                    p_310620_,
+                    pGuiGraphics,
                     i,
                     j,
-                    p_310609_,
-                    p_312927_,
+                    pMouseX,
+                    pMouseY,
                     RealmsMainScreen.EXPIRES_SOON_SPRITE,
                     () -> {
-                        if (p_312488_.daysLeft <= 0) {
+                        if (pRealmsServer.daysLeft <= 0) {
                             return RealmsMainScreen.SERVER_EXPIRES_SOON_TOOLTIP;
                         } else {
-                            return (Component)(p_312488_.daysLeft == 1
+                            return (Component)(pRealmsServer.daysLeft == 1
                                 ? RealmsMainScreen.SERVER_EXPIRES_IN_DAY_TOOLTIP
-                                : Component.translatable("mco.selectServer.expires.days", p_312488_.daysLeft));
+                                : Component.translatable("mco.selectServer.expires.days", pRealmsServer.daysLeft));
                         }
                     }
                 );
-            } else if (p_312488_.state == RealmsServer.State.OPEN) {
-                this.drawRealmStatus(p_310620_, i, j, p_310609_, p_312927_, RealmsMainScreen.OPEN_SPRITE, () -> RealmsMainScreen.SERVER_OPEN_TOOLTIP);
+            } else if (pRealmsServer.state == RealmsServer.State.OPEN) {
+                this.drawRealmStatus(pGuiGraphics, i, j, pMouseX, pMouseY, RealmsMainScreen.OPEN_SPRITE, () -> RealmsMainScreen.SERVER_OPEN_TOOLTIP);
             }
         }
 
         private void drawRealmStatus(
-            GuiGraphics p_312727_, int p_311004_, int p_311259_, int p_310947_, int p_311421_, ResourceLocation p_313063_, Supplier<Component> p_312584_
+            GuiGraphics pGuiGraphics, int pX, int pY, int pMouseX, int pMouseY, ResourceLocation pSpriteLocation, Supplier<Component> pTooltipSupplier
         ) {
-            p_312727_.blitSprite(RenderType::guiTextured, p_313063_, p_311004_, p_311259_, 10, 28);
-            if (RealmsMainScreen.this.realmSelectionList.isMouseOver((double)p_310947_, (double)p_311421_)
-                && p_310947_ >= p_311004_
-                && p_310947_ <= p_311004_ + 10
-                && p_311421_ >= p_311259_
-                && p_311421_ <= p_311259_ + 28) {
-                RealmsMainScreen.this.setTooltipForNextRenderPass(p_312584_.get());
+            pGuiGraphics.blitSprite(RenderType::guiTextured, pSpriteLocation, pX, pY, 10, 28);
+            if (RealmsMainScreen.this.realmSelectionList.isMouseOver((double)pMouseX, (double)pMouseY)
+                && pMouseX >= pX
+                && pMouseX <= pX + 10
+                && pMouseY >= pY
+                && pMouseY <= pY + 28) {
+                RealmsMainScreen.this.setTooltipForNextRenderPass(pTooltipSupplier.get());
             }
         }
 
-        protected void renderThirdLine(GuiGraphics p_309875_, int p_309431_, int p_312885_, RealmsServer p_311246_) {
-            int i = this.textX(p_312885_);
-            int j = this.firstLineY(p_309431_);
+        protected void renderThirdLine(GuiGraphics pGuiGraphics, int pTop, int pLeft, RealmsServer pServer) {
+            int i = this.textX(pLeft);
+            int j = this.firstLineY(pTop);
             int k = this.thirdLineY(j);
-            if (!RealmsMainScreen.isSelfOwnedServer(p_311246_)) {
-                p_309875_.drawString(RealmsMainScreen.this.font, p_311246_.owner, i, this.thirdLineY(j), -8355712);
-            } else if (p_311246_.expired) {
-                Component component = p_311246_.expiredTrial ? RealmsMainScreen.TRIAL_EXPIRED_TEXT : RealmsMainScreen.SUBSCRIPTION_EXPIRED_TEXT;
-                p_309875_.drawString(RealmsMainScreen.this.font, component, i, k, -2142128);
+            if (!RealmsMainScreen.isSelfOwnedServer(pServer)) {
+                pGuiGraphics.drawString(RealmsMainScreen.this.font, pServer.owner, i, this.thirdLineY(j), -8355712);
+            } else if (pServer.expired) {
+                Component component = pServer.expiredTrial ? RealmsMainScreen.TRIAL_EXPIRED_TEXT : RealmsMainScreen.SUBSCRIPTION_EXPIRED_TEXT;
+                pGuiGraphics.drawString(RealmsMainScreen.this.font, component, i, k, -2142128);
             }
         }
 
-        protected void renderClampedString(GuiGraphics p_311967_, @Nullable String p_310470_, int p_311349_, int p_310646_, int p_312217_, int p_310447_) {
-            if (p_310470_ != null) {
-                int i = p_312217_ - p_311349_;
-                if (RealmsMainScreen.this.font.width(p_310470_) > i) {
-                    String s = RealmsMainScreen.this.font.plainSubstrByWidth(p_310470_, i - RealmsMainScreen.this.font.width("... "));
-                    p_311967_.drawString(RealmsMainScreen.this.font, s + "...", p_311349_, p_310646_, p_310447_);
+        protected void renderClampedString(GuiGraphics pGuiGraphics, @Nullable String pText, int pMinX, int pY, int pMaxX, int pColor) {
+            if (pText != null) {
+                int i = pMaxX - pMinX;
+                if (RealmsMainScreen.this.font.width(pText) > i) {
+                    String s = RealmsMainScreen.this.font.plainSubstrByWidth(pText, i - RealmsMainScreen.this.font.width("... "));
+                    pGuiGraphics.drawString(RealmsMainScreen.this.font, s + "...", pMinX, pY, pColor);
                 } else {
-                    p_311967_.drawString(RealmsMainScreen.this.font, p_310470_, p_311349_, p_310646_, p_310447_);
+                    pGuiGraphics.drawString(RealmsMainScreen.this.font, pText, pMinX, pY, pColor);
                 }
             }
         }
 
-        protected int versionTextX(int p_312234_, int p_313052_, Component p_311065_) {
-            return p_312234_ + p_313052_ - RealmsMainScreen.this.font.width(p_311065_) - 20;
+        protected int versionTextX(int pLeft, int pWidth, Component pVersionComponent) {
+            return pLeft + pWidth - RealmsMainScreen.this.font.width(pVersionComponent) - 20;
         }
 
-        protected int gameModeTextX(int p_361673_, int p_369353_, Component p_362134_) {
-            return p_361673_ + p_369353_ - RealmsMainScreen.this.font.width(p_362134_) - 20;
+        protected int gameModeTextX(int pLeft, int pWidth, Component pComponent) {
+            return pLeft + pWidth - RealmsMainScreen.this.font.width(pComponent) - 20;
         }
 
-        protected int renderGameMode(RealmsServer p_363303_, GuiGraphics p_363659_, int p_362703_, int p_363524_, int p_362657_) {
-            boolean flag = p_363303_.isHardcore;
-            int i = p_363303_.gameMode;
-            int j = p_362703_;
+        protected int renderGameMode(RealmsServer pServer, GuiGraphics pGuiGraphics, int pLeft, int pWidth, int pFirstLineY) {
+            boolean flag = pServer.isHardcore;
+            int i = pServer.gameMode;
+            int j = pLeft;
             if (GameType.isValidId(i)) {
                 Component component = RealmsMainScreen.getGameModeComponent(i, flag);
-                j = this.gameModeTextX(p_362703_, p_363524_, component);
-                p_363659_.drawString(RealmsMainScreen.this.font, component, j, this.secondLineY(p_362657_), -8355712);
+                j = this.gameModeTextX(pLeft, pWidth, component);
+                pGuiGraphics.drawString(RealmsMainScreen.this.font, component, j, this.secondLineY(pFirstLineY), -8355712);
             }
 
             if (flag) {
                 j -= 10;
-                p_363659_.blitSprite(RenderType::guiTextured, RealmsMainScreen.HARDCORE_MODE_SPRITE, j, this.secondLineY(p_362657_), 8, 8);
+                pGuiGraphics.blitSprite(RenderType::guiTextured, RealmsMainScreen.HARDCORE_MODE_SPRITE, j, this.secondLineY(pFirstLineY), 8, 8);
             }
 
             return j;
         }
 
-        protected int firstLineY(int p_311005_) {
-            return p_311005_ + 1;
+        protected int firstLineY(int pTop) {
+            return pTop + 1;
         }
 
         protected int lineHeight() {
             return 2 + 9;
         }
 
-        protected int textX(int p_312460_) {
-            return p_312460_ + 36 + 2;
+        protected int textX(int pLeft) {
+            return pLeft + 36 + 2;
         }
 
-        protected int secondLineY(int p_309933_) {
-            return p_309933_ + this.lineHeight();
+        protected int secondLineY(int pFirstLineY) {
+            return pFirstLineY + this.lineHeight();
         }
 
-        protected int thirdLineY(int p_310502_) {
-            return p_310502_ + this.lineHeight() * 2;
+        protected int thirdLineY(int pFirstLineY) {
+            return pFirstLineY + this.lineHeight() * 2;
         }
     }
 
@@ -1004,16 +1004,16 @@ public class RealmsMainScreen extends RealmsScreen {
         private static final int SPRITE_SIZE = 14;
         private int notificationCount;
 
-        public NotificationButton(Component p_299660_, ResourceLocation p_298832_, Button.OnPress p_297337_) {
-            super(20, 20, p_299660_, 14, 14, p_298832_, p_297337_, null);
+        public NotificationButton(Component pMessage, ResourceLocation pSprite, Button.OnPress pOnPress) {
+            super(20, 20, pMessage, 14, 14, pSprite, pOnPress, null);
         }
 
         int notificationCount() {
             return this.notificationCount;
         }
 
-        public void setNotificationCount(int p_300462_) {
-            this.notificationCount = p_300462_;
+        public void setNotificationCount(int pNotificationCount) {
+            this.notificationCount = pNotificationCount;
         }
 
         @Override
@@ -1024,8 +1024,8 @@ public class RealmsMainScreen extends RealmsScreen {
             }
         }
 
-        private void drawNotificationCounter(GuiGraphics p_301365_) {
-            p_301365_.blitSprite(
+        private void drawNotificationCounter(GuiGraphics pGuiGraphics) {
+            pGuiGraphics.blitSprite(
                 RenderType::guiTextured, NOTIFICATION_ICONS[Math.min(this.notificationCount, 6) - 1], this.getX() + this.getWidth() - 5, this.getY() - 3, 8, 8
             );
         }
@@ -1045,24 +1045,24 @@ public class RealmsMainScreen extends RealmsScreen {
         private final FrameLayout textFrame;
         private int lastEntryWidth = -1;
 
-        public NotificationMessageEntry(final Component p_275215_, final int p_301862_, final RealmsNotification p_275494_) {
-            this.text = p_275215_;
-            this.frameItemHeight = p_301862_;
+        public NotificationMessageEntry(final Component pText, final int pFrameItemHeight, final RealmsNotification pNotification) {
+            this.text = pText;
+            this.frameItemHeight = pFrameItemHeight;
             this.gridLayout = new GridLayout();
             int i = 7;
             this.gridLayout.addChild(ImageWidget.sprite(20, 20, RealmsMainScreen.INFO_SPRITE), 0, 0, this.gridLayout.newCellSettings().padding(7, 7, 0, 0));
             this.gridLayout.addChild(SpacerElement.width(40), 0, 0);
-            this.textFrame = this.gridLayout.addChild(new FrameLayout(0, 9 * 3 * (p_301862_ - 1)), 0, 1, this.gridLayout.newCellSettings().paddingTop(7));
+            this.textFrame = this.gridLayout.addChild(new FrameLayout(0, 9 * 3 * (pFrameItemHeight - 1)), 0, 1, this.gridLayout.newCellSettings().paddingTop(7));
             this.textWidget = this.textFrame
                 .addChild(
-                    new MultiLineTextWidget(p_275215_, RealmsMainScreen.this.font).setCentered(true), this.textFrame.newChildLayoutSettings().alignHorizontallyCenter().alignVerticallyTop()
+                    new MultiLineTextWidget(pText, RealmsMainScreen.this.font).setCentered(true), this.textFrame.newChildLayoutSettings().alignHorizontallyCenter().alignVerticallyTop()
                 );
             this.gridLayout.addChild(SpacerElement.width(40), 0, 2);
-            if (p_275494_.dismissable()) {
+            if (pNotification.dismissable()) {
                 this.dismissButton = this.gridLayout
                     .addChild(
                         new RealmsMainScreen.CrossButton(
-                            p_275478_ -> RealmsMainScreen.this.dismissNotification(p_275494_.uuid()), Component.translatable("mco.notification.dismiss")
+                            p_275478_ -> RealmsMainScreen.this.dismissNotification(pNotification.uuid()), Component.translatable("mco.notification.dismiss")
                         ),
                         0,
                         2,
@@ -1080,15 +1080,15 @@ public class RealmsMainScreen extends RealmsScreen {
             return this.dismissButton != null && this.dismissButton.keyPressed(p_275646_, p_275453_, p_275621_) ? true : super.keyPressed(p_275646_, p_275453_, p_275621_);
         }
 
-        private void updateEntryWidth(int p_275670_) {
-            if (this.lastEntryWidth != p_275670_) {
-                this.refreshLayout(p_275670_);
-                this.lastEntryWidth = p_275670_;
+        private void updateEntryWidth(int pEntryWidth) {
+            if (this.lastEntryWidth != pEntryWidth) {
+                this.refreshLayout(pEntryWidth);
+                this.lastEntryWidth = pEntryWidth;
             }
         }
 
-        private void refreshLayout(int p_275267_) {
-            int i = p_275267_ - 80;
+        private void refreshLayout(int pWidth) {
+            int i = pWidth - 80;
             this.textFrame.setMinWidth(i);
             this.textWidget.setMaxWidth(i);
             this.gridLayout.arrangeElements();
@@ -1149,9 +1149,9 @@ public class RealmsMainScreen extends RealmsScreen {
         private final RealmsServer server;
         private final WidgetTooltipHolder tooltip = new WidgetTooltipHolder();
 
-        public ParentEntry(final RealmsServer p_311143_) {
-            this.server = p_311143_;
-            if (!p_311143_.expired) {
+        public ParentEntry(final RealmsServer pServer) {
+            this.server = pServer;
+            if (!pServer.expired) {
                 this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.parent.tooltip")));
             }
         }
@@ -1212,21 +1212,21 @@ public class RealmsMainScreen extends RealmsScreen {
             return 300;
         }
 
-        void refreshEntries(RealmsMainScreen p_369757_, @Nullable RealmsServer p_362542_) {
+        void refreshEntries(RealmsMainScreen pScreen, @Nullable RealmsServer pServer) {
             this.clearEntries();
 
             for (RealmsNotification realmsnotification : RealmsMainScreen.this.notifications) {
                 if (realmsnotification instanceof RealmsNotification.VisitUrl realmsnotification$visiturl) {
-                    this.addEntriesForNotification(realmsnotification$visiturl, p_369757_);
+                    this.addEntriesForNotification(realmsnotification$visiturl, pScreen);
                     RealmsMainScreen.this.markNotificationsAsSeen(List.of(realmsnotification));
                     break;
                 }
             }
 
-            this.refreshServerEntries(p_362542_);
+            this.refreshServerEntries(pServer);
         }
 
-        private void refreshServerEntries(@Nullable RealmsServer p_365290_) {
+        private void refreshServerEntries(@Nullable RealmsServer pServer) {
             for (RealmsServer realmsserver : RealmsMainScreen.this.availableSnapshotServers) {
                 this.addEntry(RealmsMainScreen.this.new AvailableSnapshotEntry(realmsserver));
             }
@@ -1244,29 +1244,29 @@ public class RealmsMainScreen extends RealmsScreen {
                 }
 
                 this.addEntry(realmsmainscreen$entry);
-                if (p_365290_ != null && p_365290_.id == realmsserver1.id) {
+                if (pServer != null && pServer.id == realmsserver1.id) {
                     this.setSelected(realmsmainscreen$entry);
                 }
             }
         }
 
-        private void addEntriesForNotification(RealmsNotification.VisitUrl p_365197_, RealmsMainScreen p_363091_) {
-            Component component = p_365197_.getMessage();
+        private void addEntriesForNotification(RealmsNotification.VisitUrl pUrl, RealmsMainScreen pMainScreen) {
+            Component component = pUrl.getMessage();
             int i = RealmsMainScreen.this.font.wordWrapHeight(component, 216);
             int j = Mth.positiveCeilDiv(i + 7, 36) - 1;
-            this.addEntry(RealmsMainScreen.this.new NotificationMessageEntry(component, j + 2, p_365197_));
+            this.addEntry(RealmsMainScreen.this.new NotificationMessageEntry(component, j + 2, pUrl));
 
             for (int k = 0; k < j; k++) {
                 this.addEntry(RealmsMainScreen.this.new EmptyEntry());
             }
 
-            this.addEntry(RealmsMainScreen.this.new ButtonEntry(p_365197_.buildOpenLinkButton(p_363091_)));
+            this.addEntry(RealmsMainScreen.this.new ButtonEntry(pUrl.buildOpenLinkButton(pMainScreen)));
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     interface RealmsCall<T> {
-        T request(RealmsClient p_275639_) throws RealmsServiceException;
+        T request(RealmsClient pRealmsClient) throws RealmsServiceException;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -1277,13 +1277,13 @@ public class RealmsMainScreen extends RealmsScreen {
         private final RealmsServer serverData;
         private final WidgetTooltipHolder tooltip = new WidgetTooltipHolder();
 
-        public ServerEntry(final RealmsServer p_86856_) {
-            this.serverData = p_86856_;
-            boolean flag = RealmsMainScreen.isSelfOwnedServer(p_86856_);
-            if (RealmsMainScreen.isSnapshot() && flag && p_86856_.isSnapshotRealm()) {
-                this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.paired", p_86856_.parentWorldName)));
-            } else if (!flag && p_86856_.needsDowngrade()) {
-                this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.friendsRealm.downgrade", p_86856_.activeVersion)));
+        public ServerEntry(final RealmsServer pServerData) {
+            this.serverData = pServerData;
+            boolean flag = RealmsMainScreen.isSelfOwnedServer(pServerData);
+            if (RealmsMainScreen.isSnapshot() && flag && pServerData.isSnapshotRealm()) {
+                this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.paired", pServerData.parentWorldName)));
+            } else if (!flag && pServerData.needsDowngrade()) {
+                this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.friendsRealm.downgrade", pServerData.activeVersion)));
             }
         }
 
@@ -1318,51 +1318,51 @@ public class RealmsMainScreen extends RealmsScreen {
             }
         }
 
-        private void renderFirstLine(GuiGraphics p_311326_, int p_311522_, int p_312647_, int p_310935_) {
-            int i = this.textX(p_312647_);
-            int j = this.firstLineY(p_311522_);
+        private void renderFirstLine(GuiGraphics pGuiGraphics, int pTop, int pLeft, int pWidth) {
+            int i = this.textX(pLeft);
+            int j = this.firstLineY(pTop);
             Component component = RealmsMainScreen.getVersionComponent(this.serverData.activeVersion, this.serverData.isCompatible());
-            int k = this.versionTextX(p_312647_, p_310935_, component);
-            this.renderClampedString(p_311326_, this.serverData.getName(), i, j, k, -1);
+            int k = this.versionTextX(pLeft, pWidth, component);
+            this.renderClampedString(pGuiGraphics, this.serverData.getName(), i, j, k, -1);
             if (component != CommonComponents.EMPTY && !this.serverData.isMinigameActive()) {
-                p_311326_.drawString(RealmsMainScreen.this.font, component, k, j, -8355712);
+                pGuiGraphics.drawString(RealmsMainScreen.this.font, component, k, j, -8355712);
             }
         }
 
-        private void renderSecondLine(GuiGraphics p_311635_, int p_311064_, int p_310167_, int p_368548_) {
-            int i = this.textX(p_310167_);
-            int j = this.firstLineY(p_311064_);
+        private void renderSecondLine(GuiGraphics pGuiGraphics, int pTop, int pLeft, int pWidth) {
+            int i = this.textX(pLeft);
+            int j = this.firstLineY(pTop);
             int k = this.secondLineY(j);
             String s = this.serverData.getMinigameName();
             boolean flag = this.serverData.isMinigameActive();
             if (flag && s != null) {
                 Component component = Component.literal(s).withStyle(ChatFormatting.GRAY);
-                p_311635_.drawString(RealmsMainScreen.this.font, Component.translatable("mco.selectServer.minigameName", component).withColor(-171), i, k, -1);
+                pGuiGraphics.drawString(RealmsMainScreen.this.font, Component.translatable("mco.selectServer.minigameName", component).withColor(-171), i, k, -1);
             } else {
-                int l = this.renderGameMode(this.serverData, p_311635_, p_310167_, p_368548_, j);
-                this.renderClampedString(p_311635_, this.serverData.getDescription(), i, this.secondLineY(j), l, -8355712);
+                int l = this.renderGameMode(this.serverData, pGuiGraphics, pLeft, pWidth, j);
+                this.renderClampedString(pGuiGraphics, this.serverData.getDescription(), i, this.secondLineY(j), l, -8355712);
             }
         }
 
-        private boolean renderOnlinePlayers(GuiGraphics p_343952_, int p_344863_, int p_344728_, int p_342937_, int p_345144_, int p_344520_, int p_342333_) {
+        private boolean renderOnlinePlayers(GuiGraphics pGuiGraphics, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY) {
             List<ProfileResult> list = RealmsMainScreen.this.onlinePlayersPerRealm.getProfileResultsFor(this.serverData.id);
             if (!list.isEmpty()) {
-                int i = p_344728_ + p_342937_ - 21;
-                int j = p_344863_ + p_345144_ - 9 - 2;
+                int i = pLeft + pWidth - 21;
+                int j = pTop + pHeight - 9 - 2;
                 int k = i;
 
                 for (int l = 0; l < list.size(); l++) {
                     k -= 9 + (l == 0 ? 0 : 3);
-                    PlayerFaceRenderer.draw(p_343952_, Minecraft.getInstance().getSkinManager().getInsecureSkin(list.get(l).profile()), k, j, 9);
+                    PlayerFaceRenderer.draw(pGuiGraphics, Minecraft.getInstance().getSkinManager().getInsecureSkin(list.get(l).profile()), k, j, 9);
                 }
 
-                if (p_344520_ >= k && p_344520_ <= i && p_342333_ >= j && p_342333_ <= j + 9) {
-                    p_343952_.renderTooltip(
+                if (pMouseX >= k && pMouseX <= i && pMouseY >= j && pMouseY <= j + 9) {
+                    pGuiGraphics.renderTooltip(
                         RealmsMainScreen.this.font,
                         List.of(ONLINE_PLAYERS_TOOLTIP_HEADER),
                         Optional.of(new ClientActivePlayersTooltip.ActivePlayersTooltip(list)),
-                        p_344520_,
-                        p_342333_
+                        pMouseX,
+                        pMouseY
                     );
                     return true;
                 }

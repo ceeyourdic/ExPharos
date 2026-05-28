@@ -44,11 +44,11 @@ public class SkeletonHorse extends AbstractHorse {
     }
 
     public static boolean checkSkeletonHorseSpawnRules(
-        EntityType<? extends Animal> p_312158_, LevelAccessor p_312297_, EntitySpawnReason p_362187_, BlockPos p_312728_, RandomSource p_309547_
+        EntityType<? extends Animal> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return !EntitySpawnReason.isSpawner(p_362187_)
-            ? Animal.checkAnimalSpawnRules(p_312158_, p_312297_, p_362187_, p_312728_, p_309547_)
-            : EntitySpawnReason.ignoresLightRequirements(p_362187_) || isBrightEnoughToSpawn(p_312297_, p_312728_);
+        return !EntitySpawnReason.isSpawner(pSpawnReason)
+            ? Animal.checkAnimalSpawnRules(pEntityType, pLevel, pSpawnReason, pPos, pRandom)
+            : EntitySpawnReason.ignoresLightRequirements(pSpawnReason) || isBrightEnoughToSpawn(pLevel, pPos);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class SkeletonHorse extends AbstractHorse {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_30916_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.SKELETON_HORSE_HURT;
     }
 
@@ -96,11 +96,11 @@ public class SkeletonHorse extends AbstractHorse {
     }
 
     @Override
-    protected void playSwimSound(float p_30911_) {
+    protected void playSwimSound(float pVolume) {
         if (this.onGround()) {
             super.playSwimSound(0.3F);
         } else {
-            super.playSwimSound(Math.min(0.1F, p_30911_ * 25.0F));
+            super.playSwimSound(Math.min(0.1F, pVolume * 25.0F));
         }
     }
 
@@ -127,17 +127,17 @@ public class SkeletonHorse extends AbstractHorse {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_30907_) {
-        super.addAdditionalSaveData(p_30907_);
-        p_30907_.putBoolean("SkeletonTrap", this.isTrap());
-        p_30907_.putInt("SkeletonTrapTime", this.trapTime);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("SkeletonTrap", this.isTrap());
+        pCompound.putInt("SkeletonTrapTime", this.trapTime);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_30901_) {
-        super.readAdditionalSaveData(p_30901_);
-        this.setTrap(p_30901_.getBoolean("SkeletonTrap"));
-        this.trapTime = p_30901_.getInt("SkeletonTrapTime");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setTrap(pCompound.getBoolean("SkeletonTrap"));
+        this.trapTime = pCompound.getInt("SkeletonTrapTime");
     }
 
     @Override
@@ -149,10 +149,10 @@ public class SkeletonHorse extends AbstractHorse {
         return this.isTrap;
     }
 
-    public void setTrap(boolean p_30924_) {
-        if (p_30924_ != this.isTrap) {
-            this.isTrap = p_30924_;
-            if (p_30924_) {
+    public void setTrap(boolean pIsTrap) {
+        if (pIsTrap != this.isTrap) {
+            this.isTrap = pIsTrap;
+            if (pIsTrap) {
                 this.goalSelector.addGoal(1, this.skeletonTrapGoal);
             } else {
                 this.goalSelector.removeGoal(this.skeletonTrapGoal);
@@ -167,7 +167,7 @@ public class SkeletonHorse extends AbstractHorse {
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_30904_, InteractionHand p_30905_) {
-        return (InteractionResult)(!this.isTamed() ? InteractionResult.PASS : super.mobInteract(p_30904_, p_30905_));
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        return (InteractionResult)(!this.isTamed() ? InteractionResult.PASS : super.mobInteract(pPlayer, pHand));
     }
 }

@@ -45,17 +45,17 @@ public class SnowyDirtBlock extends Block {
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_56642_) {
-        BlockState blockstate = p_56642_.getLevel().getBlockState(p_56642_.getClickedPos().above());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockState blockstate = pContext.getLevel().getBlockState(pContext.getClickedPos().above());
         return this.defaultBlockState().setValue(SNOWY, Boolean.valueOf(isSnowySetting(blockstate)));
     }
 
-    protected static boolean isSnowySetting(BlockState p_154649_) {
-        return p_154649_.is(BlockTags.SNOW);
+    protected static boolean isSnowySetting(BlockState pState) {
+        return pState.is(BlockTags.SNOW);
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_56651_) {
-        p_56651_.add(SNOWY);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(SNOWY);
     }
 }

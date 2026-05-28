@@ -27,29 +27,29 @@ public class HeartParticle extends TextureSheetParticle {
     }
 
     @Override
-    public float getQuadSize(float p_106860_) {
-        return this.quadSize * Mth.clamp(((float)this.age + p_106860_) / (float)this.lifetime * 32.0F, 0.0F, 1.0F);
+    public float getQuadSize(float pScaleFactor) {
+        return this.quadSize * Mth.clamp(((float)this.age + pScaleFactor) / (float)this.lifetime * 32.0F, 0.0F, 1.0F);
     }
 
     @OnlyIn(Dist.CLIENT)
     public static class AngryVillagerProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public AngryVillagerProvider(SpriteSet p_106863_) {
-            this.sprite = p_106863_;
+        public AngryVillagerProvider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_106874_,
-            ClientLevel p_106875_,
-            double p_106876_,
-            double p_106877_,
-            double p_106878_,
-            double p_106879_,
-            double p_106880_,
-            double p_106881_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            HeartParticle heartparticle = new HeartParticle(p_106875_, p_106876_, p_106877_ + 0.5, p_106878_);
+            HeartParticle heartparticle = new HeartParticle(pLevel, pX, pY + 0.5, pZ);
             heartparticle.pickSprite(this.sprite);
             heartparticle.setColor(1.0F, 1.0F, 1.0F);
             return heartparticle;
@@ -60,21 +60,21 @@ public class HeartParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_106884_) {
-            this.sprite = p_106884_;
+        public Provider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_106895_,
-            ClientLevel p_106896_,
-            double p_106897_,
-            double p_106898_,
-            double p_106899_,
-            double p_106900_,
-            double p_106901_,
-            double p_106902_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            HeartParticle heartparticle = new HeartParticle(p_106896_, p_106897_, p_106898_, p_106899_);
+            HeartParticle heartparticle = new HeartParticle(pLevel, pX, pY, pZ);
             heartparticle.pickSprite(this.sprite);
             return heartparticle;
         }

@@ -30,11 +30,11 @@ public class CauldronBlock extends AbstractCauldronBlock {
         return false;
     }
 
-    protected static boolean shouldHandlePrecipitation(Level p_182451_, Biome.Precipitation p_182452_) {
-        if (p_182452_ == Biome.Precipitation.RAIN) {
-            return p_182451_.getRandom().nextFloat() < 0.05F;
+    protected static boolean shouldHandlePrecipitation(Level pLevel, Biome.Precipitation pPrecipitation) {
+        if (pPrecipitation == Biome.Precipitation.RAIN) {
+            return pLevel.getRandom().nextFloat() < 0.05F;
         } else {
-            return p_182452_ == Biome.Precipitation.SNOW ? p_182451_.getRandom().nextFloat() < 0.1F : false;
+            return pPrecipitation == Biome.Precipitation.SNOW ? pLevel.getRandom().nextFloat() < 0.1F : false;
         }
     }
 

@@ -14,10 +14,10 @@ public class RaftRenderer extends AbstractBoatRenderer {
     private final EntityModel<BoatRenderState> model;
     private final ResourceLocation texture;
 
-    public RaftRenderer(EntityRendererProvider.Context p_366402_, ModelLayerLocation p_364351_) {
-        super(p_366402_);
-        this.texture = p_364351_.model().withPath(p_369320_ -> "textures/entity/" + p_369320_ + ".png");
-        this.model = new RaftModel(p_366402_.bakeLayer(p_364351_));
+    public RaftRenderer(EntityRendererProvider.Context pContext, ModelLayerLocation pModelLayer) {
+        super(pContext);
+        this.texture = pModelLayer.model().withPath(p_369320_ -> "textures/entity/" + p_369320_ + ".png");
+        this.model = new RaftModel(pContext.bakeLayer(pModelLayer));
     }
 
     @Override

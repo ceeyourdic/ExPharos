@@ -11,12 +11,12 @@ public class SoulParticle extends RisingParticle {
     protected boolean isGlowing;
 
     SoulParticle(
-        ClientLevel p_107717_, double p_107718_, double p_107719_, double p_107720_, double p_107721_, double p_107722_, double p_107723_, SpriteSet p_107724_
+        ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites
     ) {
-        super(p_107717_, p_107718_, p_107719_, p_107720_, p_107721_, p_107722_, p_107723_);
-        this.sprites = p_107724_;
+        super(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
+        this.sprites = pSprites;
         this.scale(1.5F);
-        this.setSpriteFromAge(p_107724_);
+        this.setSpriteFromAge(pSprites);
     }
 
     @Override
@@ -39,8 +39,8 @@ public class SoulParticle extends RisingParticle {
     public static class EmissiveProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public EmissiveProvider(SpriteSet p_234083_) {
-            this.sprite = p_234083_;
+        public EmissiveProvider(SpriteSet pSprite) {
+            this.sprite = pSprite;
         }
 
         public Particle createParticle(
@@ -64,21 +64,21 @@ public class SoulParticle extends RisingParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_107739_) {
-            this.sprite = p_107739_;
+        public Provider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_107750_,
-            ClientLevel p_107751_,
-            double p_107752_,
-            double p_107753_,
-            double p_107754_,
-            double p_107755_,
-            double p_107756_,
-            double p_107757_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            SoulParticle soulparticle = new SoulParticle(p_107751_, p_107752_, p_107753_, p_107754_, p_107755_, p_107756_, p_107757_, this.sprite);
+            SoulParticle soulparticle = new SoulParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprite);
             soulparticle.setAlpha(1.0F);
             return soulparticle;
         }

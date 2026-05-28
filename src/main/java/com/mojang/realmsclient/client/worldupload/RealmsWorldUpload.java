@@ -38,14 +38,14 @@ public class RealmsWorldUpload {
     private FileUpload uploadTask;
 
     public RealmsWorldUpload(
-        Path p_365252_, RealmsWorldOptions p_367690_, User p_366652_, long p_368429_, int p_361659_, RealmsWorldUploadStatusTracker p_361427_
+        Path pWorldFolder, RealmsWorldOptions pWorldOptions, User pUser, long pRealmId, int pSlotId, RealmsWorldUploadStatusTracker pStatusCallback
     ) {
-        this.worldFolder = p_365252_;
-        this.worldOptions = p_367690_;
-        this.user = p_366652_;
-        this.realmId = p_368429_;
-        this.slotId = p_361659_;
-        this.statusCallback = p_361427_;
+        this.worldFolder = pWorldFolder;
+        this.worldOptions = pWorldOptions;
+        this.user = pUser;
+        this.realmId = pRealmId;
+        this.slotId = pSlotId;
+        this.statusCallback = pStatusCallback;
     }
 
     public CompletableFuture<?> packAndUpload() {

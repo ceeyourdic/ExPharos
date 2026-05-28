@@ -15,8 +15,8 @@ public record SlimePredicate(MinMaxBounds.Ints size) implements EntitySubPredica
                 .apply(p_325249_, SlimePredicate::new)
     );
 
-    public static SlimePredicate sized(MinMaxBounds.Ints p_223427_) {
-        return new SlimePredicate(p_223427_);
+    public static SlimePredicate sized(MinMaxBounds.Ints pSize) {
+        return new SlimePredicate(pSize);
     }
 
     @Override

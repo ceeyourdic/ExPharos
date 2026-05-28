@@ -24,9 +24,9 @@ public class CrafterScreen extends AbstractContainerScreen<CrafterMenu> {
     private static final Component DISABLED_SLOT_TOOLTIP = Component.translatable("gui.togglable_slot");
     private final Player player;
 
-    public CrafterScreen(CrafterMenu p_310211_, Inventory p_312788_, Component p_312962_) {
-        super(p_310211_, p_312788_, p_312962_);
-        this.player = p_312788_.player;
+    public CrafterScreen(CrafterMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, pPlayerInventory, pTitle);
+        this.player = pPlayerInventory.player;
     }
 
     @Override
@@ -57,18 +57,18 @@ public class CrafterScreen extends AbstractContainerScreen<CrafterMenu> {
         super.slotClicked(p_310794_, p_309597_, p_311886_, p_312328_);
     }
 
-    private void enableSlot(int p_309894_) {
-        this.updateSlotState(p_309894_, true);
+    private void enableSlot(int pSlot) {
+        this.updateSlotState(pSlot, true);
     }
 
-    private void disableSlot(int p_309649_) {
-        this.updateSlotState(p_309649_, false);
+    private void disableSlot(int pSlot) {
+        this.updateSlotState(pSlot, false);
     }
 
-    private void updateSlotState(int p_309759_, boolean p_311308_) {
-        this.menu.setSlotState(p_309759_, p_311308_);
-        super.handleSlotStateChanged(p_309759_, this.menu.containerId, p_311308_);
-        float f = p_311308_ ? 1.0F : 0.75F;
+    private void updateSlotState(int pSlot, boolean pState) {
+        this.menu.setSlotState(pSlot, pState);
+        super.handleSlotStateChanged(pSlot, this.menu.containerId, pState);
+        float f = pState ? 1.0F : 0.75F;
         this.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.4F, f);
     }
 
@@ -82,8 +82,8 @@ public class CrafterScreen extends AbstractContainerScreen<CrafterMenu> {
         super.renderSlot(p_310399_, p_312178_);
     }
 
-    private void renderDisabledSlot(GuiGraphics p_310437_, CrafterSlot p_309818_) {
-        p_310437_.blitSprite(RenderType::guiTextured, DISABLED_SLOT_LOCATION_SPRITE, p_309818_.x - 1, p_309818_.y - 1, 18, 18);
+    private void renderDisabledSlot(GuiGraphics pGuiGraphics, CrafterSlot pSlot) {
+        pGuiGraphics.blitSprite(RenderType::guiTextured, DISABLED_SLOT_LOCATION_SPRITE, pSlot.x - 1, pSlot.y - 1, 18, 18);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class CrafterScreen extends AbstractContainerScreen<CrafterMenu> {
         }
     }
 
-    private void renderRedstone(GuiGraphics p_311767_) {
+    private void renderRedstone(GuiGraphics pGuiGraphics) {
         int i = this.width / 2 + 9;
         int j = this.height / 2 - 48;
         ResourceLocation resourcelocation;
@@ -110,7 +110,7 @@ public class CrafterScreen extends AbstractContainerScreen<CrafterMenu> {
             resourcelocation = UNPOWERED_REDSTONE_LOCATION_SPRITE;
         }
 
-        p_311767_.blitSprite(RenderType::guiTextured, resourcelocation, i, j, 16, 16);
+        pGuiGraphics.blitSprite(RenderType::guiTextured, resourcelocation, i, j, 16, 16);
     }
 
     @Override

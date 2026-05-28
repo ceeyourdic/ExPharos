@@ -22,11 +22,11 @@ public class FollowTemptation extends Behavior<PathfinderMob> {
     private final Function<LivingEntity, Float> speedModifier;
     private final Function<LivingEntity, Double> closeEnoughDistance;
 
-    public FollowTemptation(Function<LivingEntity, Float> p_147486_) {
-        this(p_147486_, p_288784_ -> 2.5);
+    public FollowTemptation(Function<LivingEntity, Float> pSpeedModifier) {
+        this(pSpeedModifier, p_288784_ -> 2.5);
     }
 
-    public FollowTemptation(Function<LivingEntity, Float> p_288997_, Function<LivingEntity, Double> p_288972_) {
+    public FollowTemptation(Function<LivingEntity, Float> pSpeedModifier, Function<LivingEntity, Double> pCloseEnoughDistance) {
         super(Util.make(() -> {
             Builder<MemoryModuleType<?>, MemoryStatus> builder = ImmutableMap.builder();
             builder.put(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED);
@@ -38,16 +38,16 @@ public class FollowTemptation extends Behavior<PathfinderMob> {
             builder.put(MemoryModuleType.IS_PANICKING, MemoryStatus.VALUE_ABSENT);
             return builder.build();
         }));
-        this.speedModifier = p_288997_;
-        this.closeEnoughDistance = p_288972_;
+        this.speedModifier = pSpeedModifier;
+        this.closeEnoughDistance = pCloseEnoughDistance;
     }
 
-    protected float getSpeedModifier(PathfinderMob p_147498_) {
-        return this.speedModifier.apply(p_147498_);
+    protected float getSpeedModifier(PathfinderMob pPathfinder) {
+        return this.speedModifier.apply(pPathfinder);
     }
 
-    private Optional<Player> getTemptingPlayer(PathfinderMob p_147509_) {
-        return p_147509_.getBrain().getMemory(MemoryModuleType.TEMPTING_PLAYER);
+    private Optional<Player> getTemptingPlayer(PathfinderMob pPathfinder) {
+        return pPathfinder.getBrain().getMemory(MemoryModuleType.TEMPTING_PLAYER);
     }
 
     @Override

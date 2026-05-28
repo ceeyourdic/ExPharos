@@ -5,29 +5,29 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface LayoutSettings {
-    LayoutSettings padding(int p_265143_);
+    LayoutSettings padding(int pPadding);
 
-    LayoutSettings padding(int p_265473_, int p_265776_);
+    LayoutSettings padding(int pHorizontalPadding, int pVerticalPadding);
 
-    LayoutSettings padding(int p_265186_, int p_265177_, int p_265631_, int p_265369_);
+    LayoutSettings padding(int pPaddingLeft, int pPaddingTop, int pPaddingRight, int pPaddingBottom);
 
-    LayoutSettings paddingLeft(int p_265709_);
+    LayoutSettings paddingLeft(int pPaddingLeft);
 
-    LayoutSettings paddingTop(int p_265644_);
+    LayoutSettings paddingTop(int pPaddingTop);
 
-    LayoutSettings paddingRight(int p_265608_);
+    LayoutSettings paddingRight(int pPaddingRight);
 
-    LayoutSettings paddingBottom(int p_265758_);
+    LayoutSettings paddingBottom(int pPaddingBottom);
 
-    LayoutSettings paddingHorizontal(int p_265366_);
+    LayoutSettings paddingHorizontal(int pHorizontalPadding);
 
-    LayoutSettings paddingVertical(int p_265142_);
+    LayoutSettings paddingVertical(int pVerticalPadding);
 
-    LayoutSettings align(float p_265408_, float p_265269_);
+    LayoutSettings align(float pXAlignment, float pYAlignment);
 
-    LayoutSettings alignHorizontally(float p_265729_);
+    LayoutSettings alignHorizontally(float pXAlignment);
 
-    LayoutSettings alignVertically(float p_265557_);
+    LayoutSettings alignVertically(float pYAlignment);
 
     default LayoutSettings alignHorizontallyLeft() {
         return this.alignHorizontally(0.0F);
@@ -73,13 +73,13 @@ public interface LayoutSettings {
         public LayoutSettingsImpl() {
         }
 
-        public LayoutSettingsImpl(LayoutSettings.LayoutSettingsImpl p_265146_) {
-            this.paddingLeft = p_265146_.paddingLeft;
-            this.paddingTop = p_265146_.paddingTop;
-            this.paddingRight = p_265146_.paddingRight;
-            this.paddingBottom = p_265146_.paddingBottom;
-            this.xAlignment = p_265146_.xAlignment;
-            this.yAlignment = p_265146_.yAlignment;
+        public LayoutSettingsImpl(LayoutSettings.LayoutSettingsImpl pOther) {
+            this.paddingLeft = pOther.paddingLeft;
+            this.paddingTop = pOther.paddingTop;
+            this.paddingRight = pOther.paddingRight;
+            this.paddingBottom = pOther.paddingBottom;
+            this.xAlignment = pOther.xAlignment;
+            this.yAlignment = pOther.yAlignment;
         }
 
         public LayoutSettings.LayoutSettingsImpl padding(int p_265467_) {

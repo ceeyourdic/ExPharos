@@ -22,12 +22,12 @@ public class AirBlock extends Block {
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState p_48758_) {
+    protected RenderShape getRenderShape(BlockState pState) {
         return RenderShape.INVISIBLE;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_48760_, BlockGetter p_48761_, BlockPos p_48762_, CollisionContext p_48763_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return Shapes.empty();
     }
 }

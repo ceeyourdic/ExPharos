@@ -101,9 +101,9 @@ public class CrafterBlock extends BaseEntityBlock {
         return p_310928_.isClientSide ? null : createTickerHelper(p_310343_, BlockEntityType.CRAFTER, CrafterBlockEntity::serverTick);
     }
 
-    private void setBlockEntityTriggered(@Nullable BlockEntity p_312888_, boolean p_312611_) {
-        if (p_312888_ instanceof CrafterBlockEntity crafterblockentity) {
-            crafterblockentity.setTriggered(p_312611_);
+    private void setBlockEntityTriggered(@Nullable BlockEntity pBlockEntity, boolean pTriggered) {
+        if (pBlockEntity instanceof CrafterBlockEntity crafterblockentity) {
+            crafterblockentity.setTriggered(pTriggered);
         }
     }
 
@@ -150,26 +150,26 @@ public class CrafterBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
-    protected void dispenseFrom(BlockState p_313036_, ServerLevel p_310451_, BlockPos p_310774_) {
-        if (p_310451_.getBlockEntity(p_310774_) instanceof CrafterBlockEntity crafterblockentity) {
+    protected void dispenseFrom(BlockState pState, ServerLevel pLevel, BlockPos pPos) {
+        if (pLevel.getBlockEntity(pPos) instanceof CrafterBlockEntity crafterblockentity) {
             CraftingInput craftinginput = crafterblockentity.asCraftInput();
-            Optional<RecipeHolder<CraftingRecipe>> optional = getPotentialResults(p_310451_, craftinginput);
+            Optional<RecipeHolder<CraftingRecipe>> optional = getPotentialResults(pLevel, craftinginput);
             if (optional.isEmpty()) {
-                p_310451_.levelEvent(1050, p_310774_, 0);
+                pLevel.levelEvent(1050, pPos, 0);
             } else {
                 RecipeHolder<CraftingRecipe> recipeholder = optional.get();
-                ItemStack itemstack = recipeholder.value().assemble(craftinginput, p_310451_.registryAccess());
+                ItemStack itemstack = recipeholder.value().assemble(craftinginput, pLevel.registryAccess());
                 if (itemstack.isEmpty()) {
-                    p_310451_.levelEvent(1050, p_310774_, 0);
+                    pLevel.levelEvent(1050, pPos, 0);
                 } else {
                     crafterblockentity.setCraftingTicksRemaining(6);
-                    p_310451_.setBlock(p_310774_, p_313036_.setValue(CRAFTING, Boolean.valueOf(true)), 2);
-                    itemstack.onCraftedBySystem(p_310451_);
-                    this.dispenseItem(p_310451_, p_310774_, crafterblockentity, itemstack, p_313036_, recipeholder);
+                    pLevel.setBlock(pPos, pState.setValue(CRAFTING, Boolean.valueOf(true)), 2);
+                    itemstack.onCraftedBySystem(pLevel);
+                    this.dispenseItem(pLevel, pPos, crafterblockentity, itemstack, pState, recipeholder);
 
                     for (ItemStack itemstack1 : recipeholder.value().getRemainingItems(craftinginput)) {
                         if (!itemstack1.isEmpty()) {
-                            this.dispenseItem(p_310451_, p_310774_, crafterblockentity, itemstack1, p_313036_, recipeholder);
+                            this.dispenseItem(pLevel, pPos, crafterblockentity, itemstack1, pState, recipeholder);
                         }
                     }
 
@@ -184,20 +184,20 @@ public class CrafterBlock extends BaseEntityBlock {
         }
     }
 
-    public static Optional<RecipeHolder<CraftingRecipe>> getPotentialResults(ServerLevel p_367007_, CraftingInput p_342419_) {
-        return RECIPE_CACHE.get(p_367007_, p_342419_);
+    public static Optional<RecipeHolder<CraftingRecipe>> getPotentialResults(ServerLevel pLevel, CraftingInput pCraftingInput) {
+        return RECIPE_CACHE.get(pLevel, pCraftingInput);
     }
 
     private void dispenseItem(
-        ServerLevel p_336186_, BlockPos p_312358_, CrafterBlockEntity p_309887_, ItemStack p_310474_, BlockState p_310667_, RecipeHolder<?> p_329387_
+        ServerLevel pLevel, BlockPos pPos, CrafterBlockEntity pCrafter, ItemStack pStack, BlockState pState, RecipeHolder<?> pRecipe
     ) {
-        Direction direction = p_310667_.getValue(ORIENTATION).front();
-        Container container = HopperBlockEntity.getContainerAt(p_336186_, p_312358_.relative(direction));
-        ItemStack itemstack = p_310474_.copy();
-        if (container != null && (container instanceof CrafterBlockEntity || p_310474_.getCount() > container.getMaxStackSize(p_310474_))) {
+        Direction direction = pState.getValue(ORIENTATION).front();
+        Container container = HopperBlockEntity.getContainerAt(pLevel, pPos.relative(direction));
+        ItemStack itemstack = pStack.copy();
+        if (container != null && (container instanceof CrafterBlockEntity || pStack.getCount() > container.getMaxStackSize(pStack))) {
             while (!itemstack.isEmpty()) {
                 ItemStack itemstack2 = itemstack.copyWithCount(1);
-                ItemStack itemstack1 = HopperBlockEntity.addItem(p_309887_, container, itemstack2, direction.getOpposite());
+                ItemStack itemstack1 = HopperBlockEntity.addItem(pCrafter, container, itemstack2, direction.getOpposite());
                 if (!itemstack1.isEmpty()) {
                     break;
                 }
@@ -207,7 +207,7 @@ public class CrafterBlock extends BaseEntityBlock {
         } else if (container != null) {
             while (!itemstack.isEmpty()) {
                 int i = itemstack.getCount();
-                itemstack = HopperBlockEntity.addItem(p_309887_, container, itemstack, direction.getOpposite());
+                itemstack = HopperBlockEntity.addItem(pCrafter, container, itemstack, direction.getOpposite());
                 if (i == itemstack.getCount()) {
                     break;
                 }
@@ -215,16 +215,16 @@ public class CrafterBlock extends BaseEntityBlock {
         }
 
         if (!itemstack.isEmpty()) {
-            Vec3 vec3 = Vec3.atCenterOf(p_312358_);
+            Vec3 vec3 = Vec3.atCenterOf(pPos);
             Vec3 vec31 = vec3.relative(direction, 0.7);
-            DefaultDispenseItemBehavior.spawnItem(p_336186_, itemstack, 6, direction, vec31);
+            DefaultDispenseItemBehavior.spawnItem(pLevel, itemstack, 6, direction, vec31);
 
-            for (ServerPlayer serverplayer : p_336186_.getEntitiesOfClass(ServerPlayer.class, AABB.ofSize(vec3, 17.0, 17.0, 17.0))) {
-                CriteriaTriggers.CRAFTER_RECIPE_CRAFTED.trigger(serverplayer, p_329387_.id(), p_309887_.getItems());
+            for (ServerPlayer serverplayer : pLevel.getEntitiesOfClass(ServerPlayer.class, AABB.ofSize(vec3, 17.0, 17.0, 17.0))) {
+                CriteriaTriggers.CRAFTER_RECIPE_CRAFTED.trigger(serverplayer, pRecipe.id(), pCrafter.getItems());
             }
 
-            p_336186_.levelEvent(1049, p_312358_, 0);
-            p_336186_.levelEvent(2010, p_312358_, direction.get3DDataValue());
+            pLevel.levelEvent(1049, pPos, 0);
+            pLevel.levelEvent(2010, pPos, direction.get3DDataValue());
         }
     }
 

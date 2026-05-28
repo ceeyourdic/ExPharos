@@ -122,11 +122,11 @@ public class PowderSnowBlock extends Block implements BucketPickup {
         return Shapes.empty();
     }
 
-    public static boolean canEntityWalkOnPowderSnow(Entity p_154256_) {
-        if (p_154256_.getType().is(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS)) {
+    public static boolean canEntityWalkOnPowderSnow(Entity pEntity) {
+        if (pEntity.getType().is(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS)) {
             return true;
         } else {
-            return p_154256_ instanceof LivingEntity ? ((LivingEntity)p_154256_).getItemBySlot(EquipmentSlot.FEET).is(Items.LEATHER_BOOTS) : false;
+            return pEntity instanceof LivingEntity ? ((LivingEntity)pEntity).getItemBySlot(EquipmentSlot.FEET).is(Items.LEATHER_BOOTS) : false;
         }
     }
 

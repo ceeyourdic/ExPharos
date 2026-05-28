@@ -1,9 +1,5 @@
 package com.mojang.blaze3d.buffers;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-
-@OnlyIn(Dist.CLIENT)
 public enum BufferUsage {
     DYNAMIC_WRITE(35048, false, true),
     STATIC_WRITE(35044, false, true),
@@ -15,13 +11,13 @@ public enum BufferUsage {
     STATIC_COPY(35046, false, false),
     STREAM_COPY(35042, false, false);
 
-    final int id;
+    public final int id;
     final boolean readable;
     final boolean writable;
 
-    private BufferUsage(final int p_363086_, final boolean p_364371_, final boolean p_369858_) {
-        this.id = p_363086_;
-        this.readable = p_364371_;
-        this.writable = p_369858_;
+    private BufferUsage(final int pId, final boolean pReadable, final boolean pWritable) {
+        this.id = pId;
+        this.readable = pReadable;
+        this.writable = pWritable;
     }
 }

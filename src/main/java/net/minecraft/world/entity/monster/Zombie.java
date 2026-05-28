@@ -94,8 +94,8 @@ public class Zombie extends Monster {
         super(p_34271_, p_34272_);
     }
 
-    public Zombie(Level p_34274_) {
-        this(EntityType.ZOMBIE, p_34274_);
+    public Zombie(Level pLevel) {
+        this(EntityType.ZOMBIE, pLevel);
     }
 
     @Override
@@ -142,12 +142,12 @@ public class Zombie extends Monster {
         return this.canBreakDoors;
     }
 
-    public void setCanBreakDoors(boolean p_34337_) {
+    public void setCanBreakDoors(boolean pCanBreakDoors) {
         if (GoalUtils.hasGroundPathNavigation(this)) {
-            if (this.canBreakDoors != p_34337_) {
-                this.canBreakDoors = p_34337_;
-                ((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(p_34337_);
-                if (p_34337_) {
+            if (this.canBreakDoors != pCanBreakDoors) {
+                this.canBreakDoors = pCanBreakDoors;
+                ((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(pCanBreakDoors);
+                if (pCanBreakDoors) {
                     this.goalSelector.addGoal(1, this.breakDoorGoal);
                 } else {
                     this.goalSelector.removeGoal(this.breakDoorGoal);
@@ -174,24 +174,24 @@ public class Zombie extends Monster {
     }
 
     @Override
-    public void setBaby(boolean p_34309_) {
-        this.getEntityData().set(DATA_BABY_ID, p_34309_);
+    public void setBaby(boolean pChildZombie) {
+        this.getEntityData().set(DATA_BABY_ID, pChildZombie);
         if (this.level() != null && !this.level().isClientSide) {
             AttributeInstance attributeinstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
             attributeinstance.removeModifier(SPEED_MODIFIER_BABY_ID);
-            if (p_34309_) {
+            if (pChildZombie) {
                 attributeinstance.addTransientModifier(SPEED_MODIFIER_BABY);
             }
         }
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_34307_) {
-        if (DATA_BABY_ID.equals(p_34307_)) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        if (DATA_BABY_ID.equals(pKey)) {
             this.refreshDimensions();
         }
 
-        super.onSyncedDataUpdated(p_34307_);
+        super.onSyncedDataUpdated(pKey);
     }
 
     protected boolean convertsInWater() {
@@ -249,8 +249,8 @@ public class Zombie extends Monster {
         super.aiStep();
     }
 
-    private void startUnderWaterConversion(int p_34279_) {
-        this.conversionTime = p_34279_;
+    private void startUnderWaterConversion(int pConversionTime) {
+        this.conversionTime = pConversionTime;
         this.getEntityData().set(DATA_DROWNED_CONVERSION_ID, true);
     }
 
@@ -261,24 +261,24 @@ public class Zombie extends Monster {
         }
     }
 
-    protected void convertToZombieType(EntityType<? extends Zombie> p_34311_) {
+    protected void convertToZombieType(EntityType<? extends Zombie> pEntityType) {
         this.convertTo(
-            p_34311_,
+            pEntityType,
             ConversionParams.single(this, true, true),
             p_375145_ -> p_375145_.handleAttributes(p_375145_.level().getCurrentDifficultyAt(p_375145_.blockPosition()).getSpecialMultiplier())
         );
     }
 
     @VisibleForTesting
-    public boolean convertVillagerToZombieVillager(ServerLevel p_369430_, Villager p_360910_) {
-        ZombieVillager zombievillager = p_360910_.convertTo(EntityType.ZOMBIE_VILLAGER, ConversionParams.single(p_360910_, true, true), p_359258_ -> {
-            p_359258_.finalizeSpawn(p_369430_, p_369430_.getCurrentDifficultyAt(p_359258_.blockPosition()), EntitySpawnReason.CONVERSION, new Zombie.ZombieGroupData(false, true));
-            p_359258_.setVillagerData(p_360910_.getVillagerData());
-            p_359258_.setGossips(p_360910_.getGossips().store(NbtOps.INSTANCE));
-            p_359258_.setTradeOffers(p_360910_.getOffers().copy());
-            p_359258_.setVillagerXp(p_360910_.getVillagerXp());
+    public boolean convertVillagerToZombieVillager(ServerLevel pLevel, Villager pVillager) {
+        ZombieVillager zombievillager = pVillager.convertTo(EntityType.ZOMBIE_VILLAGER, ConversionParams.single(pVillager, true, true), p_359258_ -> {
+            p_359258_.finalizeSpawn(pLevel, pLevel.getCurrentDifficultyAt(p_359258_.blockPosition()), EntitySpawnReason.CONVERSION, new Zombie.ZombieGroupData(false, true));
+            p_359258_.setVillagerData(pVillager.getVillagerData());
+            p_359258_.setGossips(pVillager.getGossips().store(NbtOps.INSTANCE));
+            p_359258_.setTradeOffers(pVillager.getOffers().copy());
+            p_359258_.setVillagerXp(pVillager.getVillagerXp());
             if (!this.isSilent()) {
-                p_369430_.levelEvent(null, 1026, this.blockPosition(), 0);
+                pLevel.levelEvent(null, 1026, this.blockPosition(), 0);
             }
         });
         return zombievillager != null;
@@ -361,7 +361,7 @@ public class Zombie extends Monster {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_34327_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.ZOMBIE_HURT;
     }
 
@@ -375,7 +375,7 @@ public class Zombie extends Monster {
     }
 
     @Override
-    protected void playStepSound(BlockPos p_34316_, BlockState p_34317_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(this.getStepSound(), 0.15F, 1.0F);
     }
 
@@ -402,22 +402,22 @@ public class Zombie extends Monster {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_34319_) {
-        super.addAdditionalSaveData(p_34319_);
-        p_34319_.putBoolean("IsBaby", this.isBaby());
-        p_34319_.putBoolean("CanBreakDoors", this.canBreakDoors());
-        p_34319_.putInt("InWaterTime", this.isInWater() ? this.inWaterTime : -1);
-        p_34319_.putInt("DrownedConversionTime", this.isUnderWaterConverting() ? this.conversionTime : -1);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("IsBaby", this.isBaby());
+        pCompound.putBoolean("CanBreakDoors", this.canBreakDoors());
+        pCompound.putInt("InWaterTime", this.isInWater() ? this.inWaterTime : -1);
+        pCompound.putInt("DrownedConversionTime", this.isUnderWaterConverting() ? this.conversionTime : -1);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_34305_) {
-        super.readAdditionalSaveData(p_34305_);
-        this.setBaby(p_34305_.getBoolean("IsBaby"));
-        this.setCanBreakDoors(p_34305_.getBoolean("CanBreakDoors"));
-        this.inWaterTime = p_34305_.getInt("InWaterTime");
-        if (p_34305_.contains("DrownedConversionTime", 99) && p_34305_.getInt("DrownedConversionTime") > -1) {
-            this.startUnderWaterConversion(p_34305_.getInt("DrownedConversionTime"));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setBaby(pCompound.getBoolean("IsBaby"));
+        this.setCanBreakDoors(pCompound.getBoolean("CanBreakDoors"));
+        this.inWaterTime = pCompound.getInt("InWaterTime");
+        if (pCompound.contains("DrownedConversionTime", 99) && pCompound.getInt("DrownedConversionTime") > -1) {
+            this.startUnderWaterConversion(pCompound.getInt("DrownedConversionTime"));
         }
     }
 
@@ -443,8 +443,8 @@ public class Zombie extends Monster {
     }
 
     @Override
-    public boolean canHoldItem(ItemStack p_34332_) {
-        return p_34332_.is(Items.EGG) && this.isBaby() && this.isPassenger() ? false : super.canHoldItem(p_34332_);
+    public boolean canHoldItem(ItemStack pStack) {
+        return pStack.is(Items.EGG) && this.isBaby() && this.isPassenger() ? false : super.canHoldItem(pStack);
     }
 
     @Override
@@ -512,29 +512,29 @@ public class Zombie extends Monster {
     }
 
     @VisibleForTesting
-    public void setInWaterTime(int p_361653_) {
-        this.inWaterTime = p_361653_;
+    public void setInWaterTime(int pInWaterTime) {
+        this.inWaterTime = pInWaterTime;
     }
 
     @VisibleForTesting
-    public void setConversionTime(int p_365870_) {
-        this.conversionTime = p_365870_;
+    public void setConversionTime(int pConversionTime) {
+        this.conversionTime = pConversionTime;
     }
 
-    public static boolean getSpawnAsBabyOdds(RandomSource p_219163_) {
-        return p_219163_.nextFloat() < 0.05F;
+    public static boolean getSpawnAsBabyOdds(RandomSource pRandom) {
+        return pRandom.nextFloat() < 0.05F;
     }
 
-    protected void handleAttributes(float p_34340_) {
+    protected void handleAttributes(float pDifficulty) {
         this.randomizeReinforcementsChance();
         this.getAttribute(Attributes.KNOCKBACK_RESISTANCE)
             .addOrReplacePermanentModifier(new AttributeModifier(RANDOM_SPAWN_BONUS_ID, this.random.nextDouble() * 0.05F, AttributeModifier.Operation.ADD_VALUE));
-        double d0 = this.random.nextDouble() * 1.5 * (double)p_34340_;
+        double d0 = this.random.nextDouble() * 1.5 * (double)pDifficulty;
         if (d0 > 1.0) {
             this.getAttribute(Attributes.FOLLOW_RANGE).addOrReplacePermanentModifier(new AttributeModifier(ZOMBIE_RANDOM_SPAWN_BONUS_ID, d0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }
 
-        if (this.random.nextFloat() < p_34340_ * 0.05F) {
+        if (this.random.nextFloat() < pDifficulty * 0.05F) {
             this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE)
                 .addOrReplacePermanentModifier(new AttributeModifier(LEADER_ZOMBIE_BONUS_ID, this.random.nextDouble() * 0.25 + 0.5, AttributeModifier.Operation.ADD_VALUE));
             this.getAttribute(Attributes.MAX_HEALTH)
@@ -564,18 +564,18 @@ public class Zombie extends Monster {
     }
 
     class ZombieAttackTurtleEggGoal extends RemoveBlockGoal {
-        ZombieAttackTurtleEggGoal(final PathfinderMob p_34344_, final double p_34345_, final int p_34346_) {
-            super(Blocks.TURTLE_EGG, p_34344_, p_34345_, p_34346_);
+        ZombieAttackTurtleEggGoal(final PathfinderMob pMob, final double pSpeedModifier, final int pVerticalSearchRange) {
+            super(Blocks.TURTLE_EGG, pMob, pSpeedModifier, pVerticalSearchRange);
         }
 
         @Override
-        public void playDestroyProgressSound(LevelAccessor p_34351_, BlockPos p_34352_) {
-            p_34351_.playSound(null, p_34352_, SoundEvents.ZOMBIE_DESTROY_EGG, SoundSource.HOSTILE, 0.5F, 0.9F + Zombie.this.random.nextFloat() * 0.2F);
+        public void playDestroyProgressSound(LevelAccessor pLevel, BlockPos pPos) {
+            pLevel.playSound(null, pPos, SoundEvents.ZOMBIE_DESTROY_EGG, SoundSource.HOSTILE, 0.5F, 0.9F + Zombie.this.random.nextFloat() * 0.2F);
         }
 
         @Override
-        public void playBreakSound(Level p_34348_, BlockPos p_34349_) {
-            p_34348_.playSound(null, p_34349_, SoundEvents.TURTLE_EGG_BREAK, SoundSource.BLOCKS, 0.7F, 0.9F + p_34348_.random.nextFloat() * 0.2F);
+        public void playBreakSound(Level pLevel, BlockPos pPos) {
+            pLevel.playSound(null, pPos, SoundEvents.TURTLE_EGG_BREAK, SoundSource.BLOCKS, 0.7F, 0.9F + pLevel.random.nextFloat() * 0.2F);
         }
 
         @Override
@@ -588,9 +588,9 @@ public class Zombie extends Monster {
         public final boolean isBaby;
         public final boolean canSpawnJockey;
 
-        public ZombieGroupData(boolean p_34357_, boolean p_34358_) {
-            this.isBaby = p_34357_;
-            this.canSpawnJockey = p_34358_;
+        public ZombieGroupData(boolean pIsBaby, boolean pCanSpawnJockey) {
+            this.isBaby = pIsBaby;
+            this.canSpawnJockey = pCanSpawnJockey;
         }
     }
 }

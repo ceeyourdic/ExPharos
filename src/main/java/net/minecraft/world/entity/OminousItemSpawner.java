@@ -33,10 +33,10 @@ public class OminousItemSpawner extends Entity {
         this.noPhysics = true;
     }
 
-    public static OminousItemSpawner create(Level p_328154_, ItemStack p_332415_) {
-        OminousItemSpawner ominousitemspawner = new OminousItemSpawner(EntityType.OMINOUS_ITEM_SPAWNER, p_328154_);
-        ominousitemspawner.spawnItemAfterTicks = (long)p_328154_.random.nextIntBetweenInclusive(60, 120);
-        ominousitemspawner.setItem(p_332415_);
+    public static OminousItemSpawner create(Level pLevel, ItemStack pItem) {
+        OminousItemSpawner ominousitemspawner = new OminousItemSpawner(EntityType.OMINOUS_ITEM_SPAWNER, pLevel);
+        ominousitemspawner.spawnItemAfterTicks = (long)pLevel.random.nextIntBetweenInclusive(60, 120);
+        ominousitemspawner.setItem(pItem);
         return ominousitemspawner;
     }
 
@@ -50,14 +50,14 @@ public class OminousItemSpawner extends Entity {
         }
     }
 
-    private void tickServer(ServerLevel p_365525_) {
+    private void tickServer(ServerLevel pLevel) {
         if ((long)this.tickCount == this.spawnItemAfterTicks - 36L) {
-            p_365525_.playSound(null, this.blockPosition(), SoundEvents.TRIAL_SPAWNER_ABOUT_TO_SPAWN_ITEM, SoundSource.NEUTRAL);
+            pLevel.playSound(null, this.blockPosition(), SoundEvents.TRIAL_SPAWNER_ABOUT_TO_SPAWN_ITEM, SoundSource.NEUTRAL);
         }
 
         if ((long)this.tickCount >= this.spawnItemAfterTicks) {
             this.spawnItem();
-            this.kill(p_365525_);
+            this.kill(pLevel);
         }
     }
 
@@ -86,14 +86,14 @@ public class OminousItemSpawner extends Entity {
         }
     }
 
-    private Entity spawnProjectile(ServerLevel p_363229_, ProjectileItem p_362437_, ItemStack p_369507_) {
-        ProjectileItem.DispenseConfig projectileitem$dispenseconfig = p_362437_.createDispenseConfig();
-        projectileitem$dispenseconfig.overrideDispenseEvent().ifPresent(p_374937_ -> p_363229_.levelEvent(p_374937_, this.blockPosition(), 0));
+    private Entity spawnProjectile(ServerLevel pLevel, ProjectileItem pProjectileItem, ItemStack pStack) {
+        ProjectileItem.DispenseConfig projectileitem$dispenseconfig = pProjectileItem.createDispenseConfig();
+        projectileitem$dispenseconfig.overrideDispenseEvent().ifPresent(p_374937_ -> pLevel.levelEvent(p_374937_, this.blockPosition(), 0));
         Direction direction = Direction.DOWN;
         Projectile projectile = Projectile.spawnProjectileUsingShoot(
-            p_362437_.asProjectile(p_363229_, this.position(), p_369507_, direction),
-            p_363229_,
-            p_369507_,
+            pProjectileItem.asProjectile(pLevel, this.position(), pStack, direction),
+            pLevel,
+            pStack,
             (double)direction.getStepX(),
             (double)direction.getStepY(),
             (double)direction.getStepZ(),
@@ -172,8 +172,8 @@ public class OminousItemSpawner extends Entity {
         return this.getEntityData().get(DATA_ITEM);
     }
 
-    private void setItem(ItemStack p_328604_) {
-        this.getEntityData().set(DATA_ITEM, p_328604_);
+    private void setItem(ItemStack pItem) {
+        this.getEntityData().set(DATA_ITEM, pItem);
     }
 
     @Override

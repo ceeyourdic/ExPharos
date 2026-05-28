@@ -7,18 +7,18 @@ import net.minecraft.world.item.ItemStack;
 
 public interface DisplayContentsFactory<T> {
     public interface ForRemainders<T> extends DisplayContentsFactory<T> {
-        T addRemainder(T p_362972_, List<T> p_363372_);
+        T addRemainder(T pRemainder, List<T> pRemainderItems);
     }
 
     public interface ForStacks<T> extends DisplayContentsFactory<T> {
-        default T forStack(Holder<Item> p_364562_) {
-            return this.forStack(new ItemStack(p_364562_));
+        default T forStack(Holder<Item> pItem) {
+            return this.forStack(new ItemStack(pItem));
         }
 
-        default T forStack(Item p_361017_) {
-            return this.forStack(new ItemStack(p_361017_));
+        default T forStack(Item pItem) {
+            return this.forStack(new ItemStack(pItem));
         }
 
-        T forStack(ItemStack p_361037_);
+        T forStack(ItemStack pStack);
     }
 }

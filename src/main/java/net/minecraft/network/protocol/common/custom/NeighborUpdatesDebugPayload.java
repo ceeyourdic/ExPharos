@@ -10,13 +10,13 @@ public record NeighborUpdatesDebugPayload(long time, BlockPos pos) implements Cu
     );
     public static final CustomPacketPayload.Type<NeighborUpdatesDebugPayload> TYPE = CustomPacketPayload.createType("debug/neighbors_update");
 
-    private NeighborUpdatesDebugPayload(FriendlyByteBuf p_301219_) {
-        this(p_301219_.readVarLong(), p_301219_.readBlockPos());
+    private NeighborUpdatesDebugPayload(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readVarLong(), pBuffer.readBlockPos());
     }
 
-    private void write(FriendlyByteBuf p_300822_) {
-        p_300822_.writeVarLong(this.time);
-        p_300822_.writeBlockPos(this.pos);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarLong(this.time);
+        pBuffer.writeBlockPos(this.pos);
     }
 
     @Override

@@ -1,5 +1,10 @@
 package net.minecraft.client.gui.screens;
 
+import cn.lazymoon.Client;
+import cn.lazymoon.event.impl.misc.MessageEvent;
+import cn.lazymoon.event.impl.render.ChatGuiEvent;
+import cn.lazymoon.features.module.Module;
+import cn.lazymoon.ingameui.ui.ModuleWidget;
 import javax.annotation.Nullable;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
@@ -29,9 +34,9 @@ public class ChatScreen extends Screen {
     private String initial;
     CommandSuggestions commandSuggestions;
 
-    public ChatScreen(String p_95579_) {
+    public ChatScreen(String pInitial) {
         super(Component.translatable("chat_screen.title"));
-        this.initial = p_95579_;
+        this.initial = pInitial;
     }
 
     @Override
@@ -60,9 +65,9 @@ public class ChatScreen extends Screen {
     }
 
     @Override
-    public void resize(Minecraft p_95600_, int p_95601_, int p_95602_) {
+    public void resize(Minecraft pMinecraft, int pWidth, int pHeight) {
         String s = this.input.getValue();
-        this.init(p_95600_, p_95601_, p_95602_);
+        this.init(pMinecraft, pWidth, pHeight);
         this.setChatLine(s);
         this.commandSuggestions.updateCommandInfo();
     }
@@ -72,35 +77,35 @@ public class ChatScreen extends Screen {
         this.minecraft.gui.getChat().resetChatScroll();
     }
 
-    private void onEdited(String p_95611_) {
+    private void onEdited(String pValue) {
         String s = this.input.getValue();
         this.commandSuggestions.setAllowSuggestions(!s.equals(this.initial));
         this.commandSuggestions.updateCommandInfo();
     }
 
     @Override
-    public boolean keyPressed(int p_95591_, int p_95592_, int p_95593_) {
-        if (this.commandSuggestions.keyPressed(p_95591_, p_95592_, p_95593_)) {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (this.commandSuggestions.keyPressed(pKeyCode, pScanCode, pModifiers)) {
             return true;
-        } else if (super.keyPressed(p_95591_, p_95592_, p_95593_)) {
+        } else if (super.keyPressed(pKeyCode, pScanCode, pModifiers)) {
             return true;
-        } else if (p_95591_ == 256) {
+        } else if (pKeyCode == 256) {
             this.minecraft.setScreen(null);
             return true;
-        } else if (p_95591_ == 257 || p_95591_ == 335) {
+        } else if (pKeyCode == 257 || pKeyCode == 335) {
             this.handleChatInput(this.input.getValue(), true);
             this.minecraft.setScreen(null);
             return true;
-        } else if (p_95591_ == 265) {
+        } else if (pKeyCode == 265) {
             this.moveInHistory(-1);
             return true;
-        } else if (p_95591_ == 264) {
+        } else if (pKeyCode == 264) {
             this.moveInHistory(1);
             return true;
-        } else if (p_95591_ == 266) {
+        } else if (pKeyCode == 266) {
             this.minecraft.gui.getChat().scrollChat(this.minecraft.gui.getChat().getLinesPerPage() - 1);
             return true;
-        } else if (p_95591_ == 267) {
+        } else if (pKeyCode == 267) {
             this.minecraft.gui.getChat().scrollChat(-this.minecraft.gui.getChat().getLinesPerPage() + 1);
             return true;
         } else {
@@ -124,38 +129,38 @@ public class ChatScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double p_95585_, double p_95586_, int p_95587_) {
-        if (this.commandSuggestions.mouseClicked((double)((int)p_95585_), (double)((int)p_95586_), p_95587_)) {
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+        if (this.commandSuggestions.mouseClicked((double)((int)pMouseX), (double)((int)pMouseY), pButton)) {
             return true;
         } else {
-            if (p_95587_ == 0) {
+            if (pButton == 0) {
                 ChatComponent chatcomponent = this.minecraft.gui.getChat();
-                if (chatcomponent.handleChatQueueClicked(p_95585_, p_95586_)) {
+                if (chatcomponent.handleChatQueueClicked(pMouseX, pMouseY)) {
                     return true;
                 }
 
-                Style style = this.getComponentStyleAt(p_95585_, p_95586_);
+                Style style = this.getComponentStyleAt(pMouseX, pMouseY);
                 if (style != null && this.handleComponentClicked(style)) {
                     this.initial = this.input.getValue();
                     return true;
                 }
             }
 
-            return this.input.mouseClicked(p_95585_, p_95586_, p_95587_) ? true : super.mouseClicked(p_95585_, p_95586_, p_95587_);
+            return this.input.mouseClicked(pMouseX, pMouseY, pButton) ? true : super.mouseClicked(pMouseX, pMouseY, pButton);
         }
     }
 
     @Override
-    protected void insertText(String p_95606_, boolean p_95607_) {
-        if (p_95607_) {
-            this.input.setValue(p_95606_);
+    protected void insertText(String pText, boolean pOverwrite) {
+        if (pOverwrite) {
+            this.input.setValue(pText);
         } else {
-            this.input.insertText(p_95606_);
+            this.input.insertText(pText);
         }
     }
 
-    public void moveInHistory(int p_95589_) {
-        int i = this.historyPos + p_95589_;
+    public void moveInHistory(int pMsgPos) {
+        int i = this.historyPos + pMsgPos;
         int j = this.minecraft.gui.getChat().getRecentChat().size();
         i = Mth.clamp(i, 0, j);
         if (i != this.historyPos) {
@@ -176,6 +181,27 @@ public class ChatScreen extends Screen {
 
     @Override
     public void render(GuiGraphics p_282470_, int p_282674_, int p_282014_, float p_283132_) {
+        // Arcane mixin port: render chat-edit HUD widgets before the vanilla chat screen draws.
+        ChatGuiEvent chatGuiEvent = new ChatGuiEvent(p_282470_, p_282674_, p_282014_);
+        Client.INSTANCE.getEventManager().call(chatGuiEvent);
+        ModuleWidget draggingWidget = null;
+
+        for (Module module : Client.INSTANCE.getModuleManager().getAllModules()) {
+            if (module instanceof ModuleWidget widget && module.isState() && widget.shouldRender() && widget.dragging) {
+                draggingWidget = widget;
+                break;
+            }
+        }
+
+        for (Module module : Client.INSTANCE.getModuleManager().getAllModules()) {
+            if (module instanceof ModuleWidget widget && module.isState() && widget.shouldRender()) {
+                widget.onChatGUI(chatGuiEvent.getMouseX(), chatGuiEvent.getMouseY(), draggingWidget == null || draggingWidget == widget);
+                if (widget.dragging) {
+                    draggingWidget = widget;
+                }
+            }
+        }
+
         this.minecraft.gui.getChat().render(p_282470_, this.minecraft.gui.getGuiTicks(), p_282674_, p_282014_, true);
         p_282470_.fill(2, this.height - 14, this.width - 2, this.height - 2, this.minecraft.options.getBackgroundColor(Integer.MIN_VALUE));
         this.input.render(p_282470_, p_282674_, p_282014_, p_283132_);
@@ -204,8 +230,8 @@ public class ChatScreen extends Screen {
         return false;
     }
 
-    private void setChatLine(String p_95613_) {
-        this.input.setValue(p_95613_);
+    private void setChatLine(String pChatLine) {
+        this.input.setValue(pChatLine);
     }
 
     @Override
@@ -219,26 +245,38 @@ public class ChatScreen extends Screen {
     }
 
     @Nullable
-    private Style getComponentStyleAt(double p_232702_, double p_232703_) {
-        return this.minecraft.gui.getChat().getClickedComponentStyleAt(p_232702_, p_232703_);
+    private Style getComponentStyleAt(double pMouseX, double pMouseY) {
+        return this.minecraft.gui.getChat().getClickedComponentStyleAt(pMouseX, pMouseY);
     }
 
-    public void handleChatInput(String p_242400_, boolean p_242161_) {
-        p_242400_ = this.normalizeChatMessage(p_242400_);
-        if (!p_242400_.isEmpty()) {
-            if (p_242161_) {
-                this.minecraft.gui.getChat().addRecentChat(p_242400_);
+    public void handleChatInput(String pMessage, boolean pAddToRecentChat) {
+        pMessage = this.normalizeChatMessage(pMessage);
+        if (!pMessage.isEmpty()) {
+            // Arcane mixin port: MessageEvent mirrors the old ChatScreen.sendMessage HEAD injection and can consume chat input.
+            MessageEvent messageEvent = new MessageEvent(pMessage);
+            Client.INSTANCE.getEventManager().call(messageEvent);
+            if (messageEvent.isCancelled()) {
+                if (pAddToRecentChat) {
+                    this.minecraft.gui.getChat().addRecentChat(pMessage);
+                }
+
+                this.minecraft.setScreen(null);
+                return;
             }
 
-            if (p_242400_.startsWith("/")) {
-                this.minecraft.player.connection.sendCommand(p_242400_.substring(1));
+            if (pAddToRecentChat) {
+                this.minecraft.gui.getChat().addRecentChat(pMessage);
+            }
+
+            if (pMessage.startsWith("/")) {
+                this.minecraft.player.connection.sendCommand(pMessage.substring(1));
             } else {
-                this.minecraft.player.connection.sendChat(p_242400_);
+                this.minecraft.player.connection.sendChat(pMessage);
             }
         }
     }
 
-    public String normalizeChatMessage(String p_232707_) {
-        return StringUtil.trimChatMessage(StringUtils.normalizeSpace(p_232707_.trim()));
+    public String normalizeChatMessage(String pMessage) {
+        return StringUtil.trimChatMessage(StringUtils.normalizeSpace(pMessage.trim()));
     }
 }

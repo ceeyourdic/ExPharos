@@ -8,9 +8,9 @@ public class VarInt {
     private static final int CONTINUATION_BIT_MASK = 128;
     private static final int DATA_BITS_PER_BYTE = 7;
 
-    public static int getByteSize(int p_298763_) {
+    public static int getByteSize(int pData) {
         for (int i = 1; i < 5; i++) {
-            if ((p_298763_ & -1 << i * 7) == 0) {
+            if ((pData & -1 << i * 7) == 0) {
                 return i;
             }
         }
@@ -18,17 +18,17 @@ public class VarInt {
         return 5;
     }
 
-    public static boolean hasContinuationBit(byte p_299197_) {
-        return (p_299197_ & 128) == 128;
+    public static boolean hasContinuationBit(byte pData) {
+        return (pData & 128) == 128;
     }
 
-    public static int read(ByteBuf p_298603_) {
+    public static int read(ByteBuf pBuffer) {
         int i = 0;
         int j = 0;
 
         byte b0;
         do {
-            b0 = p_298603_.readByte();
+            b0 = pBuffer.readByte();
             i |= (b0 & 127) << j++ * 7;
             if (j > 5) {
                 throw new RuntimeException("VarInt too big");
@@ -38,13 +38,13 @@ public class VarInt {
         return i;
     }
 
-    public static ByteBuf write(ByteBuf p_300403_, int p_297833_) {
-        while ((p_297833_ & -128) != 0) {
-            p_300403_.writeByte(p_297833_ & 127 | 128);
-            p_297833_ >>>= 7;
+    public static ByteBuf write(ByteBuf pBuffer, int pValue) {
+        while ((pValue & -128) != 0) {
+            pBuffer.writeByte(pValue & 127 | 128);
+            pValue >>>= 7;
         }
 
-        p_300403_.writeByte(p_297833_);
-        return p_300403_;
+        pBuffer.writeByte(pValue);
+        return pBuffer;
     }
 }

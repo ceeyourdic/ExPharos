@@ -23,9 +23,9 @@ public class SetInstrumentFunction extends LootItemConditionalFunction {
     );
     private final TagKey<Instrument> options;
 
-    private SetInstrumentFunction(List<LootItemCondition> p_297631_, TagKey<Instrument> p_231009_) {
-        super(p_297631_);
-        this.options = p_231009_;
+    private SetInstrumentFunction(List<LootItemCondition> pConditions, TagKey<Instrument> pOptions) {
+        super(pConditions);
+        this.options = pOptions;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class SetInstrumentFunction extends LootItemConditionalFunction {
         return p_231017_;
     }
 
-    public static LootItemConditionalFunction.Builder<?> setInstrumentOptions(TagKey<Instrument> p_231012_) {
-        return simpleBuilder(p_297137_ -> new SetInstrumentFunction(p_297137_, p_231012_));
+    public static LootItemConditionalFunction.Builder<?> setInstrumentOptions(TagKey<Instrument> pInstrumentOptions) {
+        return simpleBuilder(p_297137_ -> new SetInstrumentFunction(p_297137_, pInstrumentOptions));
     }
 }

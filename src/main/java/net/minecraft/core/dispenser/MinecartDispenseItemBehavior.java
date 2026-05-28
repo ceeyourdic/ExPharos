@@ -18,8 +18,8 @@ public class MinecartDispenseItemBehavior extends DefaultDispenseItemBehavior {
     private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
     private final EntityType<? extends AbstractMinecart> entityType;
 
-    public MinecartDispenseItemBehavior(EntityType<? extends AbstractMinecart> p_367202_) {
-        this.entityType = p_367202_;
+    public MinecartDispenseItemBehavior(EntityType<? extends AbstractMinecart> pEntityType) {
+        this.entityType = pEntityType;
     }
 
     @Override
@@ -68,8 +68,8 @@ public class MinecartDispenseItemBehavior extends DefaultDispenseItemBehavior {
         return p_368867_;
     }
 
-    private static RailShape getRailShape(BlockState p_364080_) {
-        return p_364080_.getBlock() instanceof BaseRailBlock baserailblock ? p_364080_.getValue(baserailblock.getShapeProperty()) : RailShape.NORTH_SOUTH;
+    private static RailShape getRailShape(BlockState pState) {
+        return pState.getBlock() instanceof BaseRailBlock baserailblock ? pState.getValue(baserailblock.getShapeProperty()) : RailShape.NORTH_SOUTH;
     }
 
     @Override

@@ -41,12 +41,12 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
     private boolean focused;
     private final WidgetTooltipHolder tooltip = new WidgetTooltipHolder();
 
-    public AbstractWidget(int p_93629_, int p_93630_, int p_93631_, int p_93632_, Component p_93633_) {
-        this.x = p_93629_;
-        this.y = p_93630_;
-        this.width = p_93631_;
-        this.height = p_93632_;
-        this.message = p_93633_;
+    public AbstractWidget(int pX, int pY, int pWidth, int pHeight, Component pMessage) {
+        this.x = pX;
+        this.y = pY;
+        this.width = pWidth;
+        this.height = pHeight;
+        this.message = pMessage;
     }
 
     @Override
@@ -67,8 +67,8 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
         }
     }
 
-    public void setTooltip(@Nullable Tooltip p_259796_) {
-        this.tooltip.set(p_259796_);
+    public void setTooltip(@Nullable Tooltip pTooltip) {
+        this.tooltip.set(pTooltip);
     }
 
     @Nullable
@@ -76,70 +76,70 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
         return this.tooltip.get();
     }
 
-    public void setTooltipDelay(Duration p_334848_) {
-        this.tooltip.setDelay(p_334848_);
+    public void setTooltipDelay(Duration pTooltipDelay) {
+        this.tooltip.setDelay(pTooltipDelay);
     }
 
     protected MutableComponent createNarrationMessage() {
         return wrapDefaultNarrationMessage(this.getMessage());
     }
 
-    public static MutableComponent wrapDefaultNarrationMessage(Component p_168800_) {
-        return Component.translatable("gui.narrate.button", p_168800_);
+    public static MutableComponent wrapDefaultNarrationMessage(Component pMessage) {
+        return Component.translatable("gui.narrate.button", pMessage);
     }
 
-    protected abstract void renderWidget(GuiGraphics p_282139_, int p_268034_, int p_268009_, float p_268085_);
+    protected abstract void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick);
 
     protected static void renderScrollingString(
-        GuiGraphics p_281620_, Font p_282651_, Component p_281467_, int p_283621_, int p_282084_, int p_283398_, int p_281938_, int p_283471_
+        GuiGraphics pGuiGraphics, Font pFont, Component pText, int pMinX, int pMinY, int pMaxX, int pMaxY, int pColor
     ) {
-        renderScrollingString(p_281620_, p_282651_, p_281467_, (p_283621_ + p_283398_) / 2, p_283621_, p_282084_, p_283398_, p_281938_, p_283471_);
+        renderScrollingString(pGuiGraphics, pFont, pText, (pMinX + pMaxX) / 2, pMinX, pMinY, pMaxX, pMaxY, pColor);
     }
 
     protected static void renderScrollingString(
-        GuiGraphics p_298878_, Font p_301352_, Component p_297799_, int p_300294_, int p_297733_, int p_298903_, int p_300338_, int p_297281_, int p_299081_
+        GuiGraphics pGuiGraphics, Font pFont, Component pText, int pCenterX, int pMinX, int pMinY, int pMaxX, int pMaxY, int pColor
     ) {
-        int i = p_301352_.width(p_297799_);
-        int j = (p_298903_ + p_297281_ - 9) / 2 + 1;
-        int k = p_300338_ - p_297733_;
+        int i = pFont.width(pText);
+        int j = (pMinY + pMaxY - 9) / 2 + 1;
+        int k = pMaxX - pMinX;
         if (i > k) {
             int l = i - k;
             double d0 = (double)Util.getMillis() / 1000.0;
             double d1 = Math.max((double)l * 0.5, 3.0);
             double d2 = Math.sin((Math.PI / 2) * Math.cos((Math.PI * 2) * d0 / d1)) / 2.0 + 0.5;
             double d3 = Mth.lerp(d2, 0.0, (double)l);
-            p_298878_.enableScissor(p_297733_, p_298903_, p_300338_, p_297281_);
-            p_298878_.drawString(p_301352_, p_297799_, p_297733_ - (int)d3, j, p_299081_);
-            p_298878_.disableScissor();
+            pGuiGraphics.enableScissor(pMinX, pMinY, pMaxX, pMaxY);
+            pGuiGraphics.drawString(pFont, pText, pMinX - (int)d3, j, pColor);
+            pGuiGraphics.disableScissor();
         } else {
-            int i1 = Mth.clamp(p_300294_, p_297733_ + i / 2, p_300338_ - i / 2);
-            p_298878_.drawCenteredString(p_301352_, p_297799_, i1, j, p_299081_);
+            int i1 = Mth.clamp(pCenterX, pMinX + i / 2, pMaxX - i / 2);
+            pGuiGraphics.drawCenteredString(pFont, pText, i1, j, pColor);
         }
     }
 
-    protected void renderScrollingString(GuiGraphics p_281857_, Font p_282790_, int p_282664_, int p_282944_) {
-        int i = this.getX() + p_282664_;
-        int j = this.getX() + this.getWidth() - p_282664_;
-        renderScrollingString(p_281857_, p_282790_, this.getMessage(), i, this.getY(), j, this.getY() + this.getHeight(), p_282944_);
+    protected void renderScrollingString(GuiGraphics pGuiGraphics, Font pFont, int pWidth, int pColor) {
+        int i = this.getX() + pWidth;
+        int j = this.getX() + this.getWidth() - pWidth;
+        renderScrollingString(pGuiGraphics, pFont, this.getMessage(), i, this.getY(), j, this.getY() + this.getHeight(), pColor);
     }
 
-    public void onClick(double p_93634_, double p_93635_) {
+    public void onClick(double pMouseX, double pMouseY) {
     }
 
-    public void onRelease(double p_93669_, double p_93670_) {
+    public void onRelease(double pMouseX, double pMouseY) {
     }
 
-    protected void onDrag(double p_93636_, double p_93637_, double p_93638_, double p_93639_) {
+    protected void onDrag(double pMouseX, double pMouseY, double pDragX, double pDragY) {
     }
 
     @Override
-    public boolean mouseClicked(double p_93641_, double p_93642_, int p_93643_) {
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         if (this.active && this.visible) {
-            if (this.isValidClickButton(p_93643_)) {
-                boolean flag = this.isMouseOver(p_93641_, p_93642_);
+            if (this.isValidClickButton(pButton)) {
+                boolean flag = this.isMouseOver(pMouseX, pMouseY);
                 if (flag) {
                     this.playDownSound(Minecraft.getInstance().getSoundManager());
-                    this.onClick(p_93641_, p_93642_);
+                    this.onClick(pMouseX, pMouseY);
                     return true;
                 }
             }
@@ -151,23 +151,23 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
     }
 
     @Override
-    public boolean mouseReleased(double p_93684_, double p_93685_, int p_93686_) {
-        if (this.isValidClickButton(p_93686_)) {
-            this.onRelease(p_93684_, p_93685_);
+    public boolean mouseReleased(double pMouseX, double pMouseY, int pButton) {
+        if (this.isValidClickButton(pButton)) {
+            this.onRelease(pMouseX, pMouseY);
             return true;
         } else {
             return false;
         }
     }
 
-    protected boolean isValidClickButton(int p_93652_) {
-        return p_93652_ == 0;
+    protected boolean isValidClickButton(int pButton) {
+        return pButton == 0;
     }
 
     @Override
-    public boolean mouseDragged(double p_93645_, double p_93646_, int p_93647_, double p_93648_, double p_93649_) {
-        if (this.isValidClickButton(p_93647_)) {
-            this.onDrag(p_93645_, p_93646_, p_93648_, p_93649_);
+    public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
+        if (this.isValidClickButton(pButton)) {
+            this.onDrag(pMouseX, pMouseY, pDragX, pDragY);
             return true;
         } else {
             return false;
@@ -185,21 +185,21 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
     }
 
     @Override
-    public boolean isMouseOver(double p_93672_, double p_93673_) {
+    public boolean isMouseOver(double pMouseX, double pMouseY) {
         return this.active
             && this.visible
-            && p_93672_ >= (double)this.getX()
-            && p_93673_ >= (double)this.getY()
-            && p_93672_ < (double)this.getRight()
-            && p_93673_ < (double)this.getBottom();
+            && pMouseX >= (double)this.getX()
+            && pMouseY >= (double)this.getY()
+            && pMouseX < (double)this.getRight()
+            && pMouseY < (double)this.getBottom();
     }
 
-    public void playDownSound(SoundManager p_93665_) {
-        playButtonClickSound(p_93665_);
+    public void playDownSound(SoundManager pHandler) {
+        playButtonClickSound(pHandler);
     }
 
-    public static void playButtonClickSound(SoundManager p_363924_) {
-        p_363924_.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+    public static void playButtonClickSound(SoundManager pSoundManager) {
+        pSoundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     @Override
@@ -207,20 +207,20 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
         return this.width;
     }
 
-    public void setWidth(int p_93675_) {
-        this.width = p_93675_;
+    public void setWidth(int pWidth) {
+        this.width = pWidth;
     }
 
-    public void setHeight(int p_298443_) {
-        this.height = p_298443_;
+    public void setHeight(int pHeight) {
+        this.height = pHeight;
     }
 
-    public void setAlpha(float p_93651_) {
-        this.alpha = p_93651_;
+    public void setAlpha(float pAlpha) {
+        this.alpha = pAlpha;
     }
 
-    public void setMessage(Component p_93667_) {
-        this.message = p_93667_;
+    public void setMessage(Component pMessage) {
+        this.message = pMessage;
     }
 
     public Component getMessage() {
@@ -246,8 +246,8 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
     }
 
     @Override
-    public void setFocused(boolean p_93693_) {
-        this.focused = p_93693_;
+    public void setFocused(boolean pFocused) {
+        this.focused = pFocused;
     }
 
     @Override
@@ -265,15 +265,15 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
         this.tooltip.updateNarration(p_259921_);
     }
 
-    protected abstract void updateWidgetNarration(NarrationElementOutput p_259858_);
+    protected abstract void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput);
 
-    protected void defaultButtonNarrationText(NarrationElementOutput p_168803_) {
-        p_168803_.add(NarratedElementType.TITLE, this.createNarrationMessage());
+    protected void defaultButtonNarrationText(NarrationElementOutput pNarrationElementOutput) {
+        pNarrationElementOutput.add(NarratedElementType.TITLE, this.createNarrationMessage());
         if (this.active) {
             if (this.isFocused()) {
-                p_168803_.add(NarratedElementType.USAGE, Component.translatable("narration.button.usage.focused"));
+                pNarrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.button.usage.focused"));
             } else {
-                p_168803_.add(NarratedElementType.USAGE, Component.translatable("narration.button.usage.hovered"));
+                pNarrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.button.usage.hovered"));
             }
         }
     }
@@ -284,8 +284,8 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
     }
 
     @Override
-    public void setX(int p_254495_) {
-        this.x = p_254495_;
+    public void setX(int pX) {
+        this.x = pX;
     }
 
     @Override
@@ -294,8 +294,8 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
     }
 
     @Override
-    public void setY(int p_253718_) {
-        this.y = p_253718_;
+    public void setY(int pY) {
+        this.y = pY;
     }
 
     public int getRight() {
@@ -311,9 +311,9 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
         p_265566_.accept(this);
     }
 
-    public void setSize(int p_312975_, int p_312301_) {
-        this.width = p_312975_;
-        this.height = p_312301_;
+    public void setSize(int pWidth, int pHeight) {
+        this.width = pWidth;
+        this.height = pHeight;
     }
 
     @Override
@@ -321,9 +321,9 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
         return LayoutElement.super.getRectangle();
     }
 
-    public void setRectangle(int p_309908_, int p_310169_, int p_312247_, int p_310380_) {
-        this.setSize(p_309908_, p_310169_);
-        this.setPosition(p_312247_, p_310380_);
+    public void setRectangle(int pWidth, int pHeight, int pX, int pY) {
+        this.setSize(pWidth, pHeight);
+        this.setPosition(pX, pY);
     }
 
     @Override
@@ -331,7 +331,7 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
         return this.tabOrderGroup;
     }
 
-    public void setTabOrderGroup(int p_268123_) {
-        this.tabOrderGroup = p_268123_;
+    public void setTabOrderGroup(int pTabOrderGroup) {
+        this.tabOrderGroup = pTabOrderGroup;
     }
 }

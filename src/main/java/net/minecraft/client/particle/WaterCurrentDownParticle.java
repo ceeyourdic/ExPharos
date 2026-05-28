@@ -55,21 +55,21 @@ public class WaterCurrentDownParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_108464_) {
-            this.sprite = p_108464_;
+        public Provider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_108475_,
-            ClientLevel p_108476_,
-            double p_108477_,
-            double p_108478_,
-            double p_108479_,
-            double p_108480_,
-            double p_108481_,
-            double p_108482_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            WaterCurrentDownParticle watercurrentdownparticle = new WaterCurrentDownParticle(p_108476_, p_108477_, p_108478_, p_108479_);
+            WaterCurrentDownParticle watercurrentdownparticle = new WaterCurrentDownParticle(pLevel, pX, pY, pZ);
             watercurrentdownparticle.pickSprite(this.sprite);
             return watercurrentdownparticle;
         }

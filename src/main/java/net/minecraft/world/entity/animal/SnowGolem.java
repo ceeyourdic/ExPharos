@@ -69,16 +69,16 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_29923_) {
-        super.addAdditionalSaveData(p_29923_);
-        p_29923_.putBoolean("Pumpkin", this.hasPumpkin());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("Pumpkin", this.hasPumpkin());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_29915_) {
-        super.readAdditionalSaveData(p_29915_);
-        if (p_29915_.contains("Pumpkin")) {
-            this.setPumpkin(p_29915_.getBoolean("Pumpkin"));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("Pumpkin")) {
+            this.setPumpkin(pCompound.getBoolean("Pumpkin"));
         }
     }
 
@@ -115,10 +115,10 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
     }
 
     @Override
-    public void performRangedAttack(LivingEntity p_29912_, float p_29913_) {
-        double d0 = p_29912_.getX() - this.getX();
-        double d1 = p_29912_.getEyeY() - 1.1F;
-        double d2 = p_29912_.getZ() - this.getZ();
+    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
+        double d0 = pTarget.getX() - this.getX();
+        double d1 = pTarget.getEyeY() - 1.1F;
+        double d2 = pTarget.getZ() - this.getZ();
         double d3 = Math.sqrt(d0 * d0 + d2 * d2) * 0.2F;
         if (this.level() instanceof ServerLevel serverlevel) {
             ItemStack itemstack = new ItemStack(Items.SNOWBALL);
@@ -134,13 +134,13 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
     }
 
     @Override
-    protected InteractionResult mobInteract(Player p_29920_, InteractionHand p_29921_) {
-        ItemStack itemstack = p_29920_.getItemInHand(p_29921_);
+    protected InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
         if (itemstack.is(Items.SHEARS) && this.readyForShearing()) {
             if (this.level() instanceof ServerLevel serverlevel) {
                 this.shear(serverlevel, SoundSource.PLAYERS, itemstack);
-                this.gameEvent(GameEvent.SHEAR, p_29920_);
-                itemstack.hurtAndBreak(1, p_29920_, getSlotForHand(p_29921_));
+                this.gameEvent(GameEvent.SHEAR, pPlayer);
+                itemstack.hurtAndBreak(1, pPlayer, getSlotForHand(pHand));
             }
 
             return InteractionResult.SUCCESS;
@@ -165,9 +165,9 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
         return (this.entityData.get(DATA_PUMPKIN_ID) & 16) != 0;
     }
 
-    public void setPumpkin(boolean p_29937_) {
+    public void setPumpkin(boolean pPumpkinEquipped) {
         byte b0 = this.entityData.get(DATA_PUMPKIN_ID);
-        if (p_29937_) {
+        if (pPumpkinEquipped) {
             this.entityData.set(DATA_PUMPKIN_ID, (byte)(b0 | 16));
         } else {
             this.entityData.set(DATA_PUMPKIN_ID, (byte)(b0 & -17));
@@ -182,7 +182,7 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 
     @Nullable
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_29929_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.SNOW_GOLEM_HURT;
     }
 

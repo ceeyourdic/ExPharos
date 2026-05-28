@@ -43,30 +43,30 @@ public record BlockPredicate(Optional<HolderSet<Block>> blocks, Optional<StatePr
         BlockPredicate::new
     );
 
-    public boolean matches(ServerLevel p_17915_, BlockPos p_17916_) {
-        if (!p_17915_.isLoaded(p_17916_)) {
+    public boolean matches(ServerLevel pLevel, BlockPos pPos) {
+        if (!pLevel.isLoaded(pPos)) {
             return false;
         } else {
-            return !this.matchesState(p_17915_.getBlockState(p_17916_))
+            return !this.matchesState(pLevel.getBlockState(pPos))
                 ? false
-                : !this.nbt.isPresent() || matchesBlockEntity(p_17915_, p_17915_.getBlockEntity(p_17916_), this.nbt.get());
+                : !this.nbt.isPresent() || matchesBlockEntity(pLevel, pLevel.getBlockEntity(pPos), this.nbt.get());
         }
     }
 
-    public boolean matches(BlockInWorld p_335665_) {
-        return !this.matchesState(p_335665_.getState())
+    public boolean matches(BlockInWorld pBlock) {
+        return !this.matchesState(pBlock.getState())
             ? false
-            : !this.nbt.isPresent() || matchesBlockEntity(p_335665_.getLevel(), p_335665_.getEntity(), this.nbt.get());
+            : !this.nbt.isPresent() || matchesBlockEntity(pBlock.getLevel(), pBlock.getEntity(), this.nbt.get());
     }
 
-    private boolean matchesState(BlockState p_334077_) {
-        return this.blocks.isPresent() && !p_334077_.is(this.blocks.get())
+    private boolean matchesState(BlockState pState) {
+        return this.blocks.isPresent() && !pState.is(this.blocks.get())
             ? false
-            : !this.properties.isPresent() || this.properties.get().matches(p_334077_);
+            : !this.properties.isPresent() || this.properties.get().matches(pState);
     }
 
-    private static boolean matchesBlockEntity(LevelReader p_330206_, @Nullable BlockEntity p_327732_, NbtPredicate p_335422_) {
-        return p_327732_ != null && p_335422_.matches(p_327732_.saveWithFullMetadata(p_330206_.registryAccess()));
+    private static boolean matchesBlockEntity(LevelReader pLevel, @Nullable BlockEntity pBlockEntity, NbtPredicate pNbtPredicate) {
+        return pBlockEntity != null && pNbtPredicate.matches(pBlockEntity.saveWithFullMetadata(pLevel.registryAccess()));
     }
 
     public boolean requiresNbt() {
@@ -85,27 +85,27 @@ public record BlockPredicate(Optional<HolderSet<Block>> blocks, Optional<StatePr
             return new BlockPredicate.Builder();
         }
 
-        public BlockPredicate.Builder of(HolderGetter<Block> p_362819_, Block... p_367576_) {
-            return this.of(p_362819_, Arrays.asList(p_367576_));
+        public BlockPredicate.Builder of(HolderGetter<Block> pBlockRegistry, Block... pBlocks) {
+            return this.of(pBlockRegistry, Arrays.asList(pBlocks));
         }
 
-        public BlockPredicate.Builder of(HolderGetter<Block> p_362597_, Collection<Block> p_298036_) {
-            this.blocks = Optional.of(HolderSet.direct(Block::builtInRegistryHolder, p_298036_));
+        public BlockPredicate.Builder of(HolderGetter<Block> pBlockRegistry, Collection<Block> pBlocks) {
+            this.blocks = Optional.of(HolderSet.direct(Block::builtInRegistryHolder, pBlocks));
             return this;
         }
 
-        public BlockPredicate.Builder of(HolderGetter<Block> p_368525_, TagKey<Block> p_361542_) {
-            this.blocks = Optional.of(p_368525_.getOrThrow(p_361542_));
+        public BlockPredicate.Builder of(HolderGetter<Block> pBlockRegistry, TagKey<Block> pBlockTag) {
+            this.blocks = Optional.of(pBlockRegistry.getOrThrow(pBlockTag));
             return this;
         }
 
-        public BlockPredicate.Builder hasNbt(CompoundTag p_146725_) {
-            this.nbt = Optional.of(new NbtPredicate(p_146725_));
+        public BlockPredicate.Builder hasNbt(CompoundTag pNbt) {
+            this.nbt = Optional.of(new NbtPredicate(pNbt));
             return this;
         }
 
-        public BlockPredicate.Builder setProperties(StatePropertiesPredicate.Builder p_299418_) {
-            this.properties = p_299418_.build();
+        public BlockPredicate.Builder setProperties(StatePropertiesPredicate.Builder pProperties) {
+            this.properties = pProperties.build();
             return this;
         }
 

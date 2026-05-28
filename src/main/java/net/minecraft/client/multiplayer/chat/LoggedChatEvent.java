@@ -22,9 +22,9 @@ public interface LoggedChatEvent {
         private final String serializedName;
         private final Supplier<MapCodec<? extends LoggedChatEvent>> codec;
 
-        private Type(final String p_254335_, final Supplier<MapCodec<? extends LoggedChatEvent>> p_254115_) {
-            this.serializedName = p_254335_;
-            this.codec = p_254115_;
+        private Type(final String pSerializedName, final Supplier<MapCodec<? extends LoggedChatEvent>> pCodec) {
+            this.serializedName = pSerializedName;
+            this.codec = pCodec;
         }
 
         private MapCodec<? extends LoggedChatEvent> codec() {

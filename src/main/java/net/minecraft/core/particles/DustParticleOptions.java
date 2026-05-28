@@ -25,9 +25,9 @@ public class DustParticleOptions extends ScalableParticleOptionsBase {
     );
     private final int color;
 
-    public DustParticleOptions(int p_364098_, float p_254154_) {
-        super(p_254154_);
-        this.color = p_364098_;
+    public DustParticleOptions(int pColor, float pScale) {
+        super(pScale);
+        this.color = pColor;
     }
 
     @Override

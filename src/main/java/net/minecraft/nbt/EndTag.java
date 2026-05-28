@@ -47,7 +47,7 @@ public class EndTag implements Tag {
     }
 
     @Override
-    public void write(DataOutput p_128539_) throws IOException {
+    public void write(DataOutput pOutput) throws IOException {
     }
 
     @Override

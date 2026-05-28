@@ -47,23 +47,23 @@ public class BaseCoralWallFanBlock extends BaseCoralFanBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_49219_, BlockGetter p_49220_, BlockPos p_49221_, CollisionContext p_49222_) {
-        return SHAPES.get(p_49219_.getValue(FACING));
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return SHAPES.get(pState.getValue(FACING));
     }
 
     @Override
-    protected BlockState rotate(BlockState p_49207_, Rotation p_49208_) {
-        return p_49207_.setValue(FACING, p_49208_.rotate(p_49207_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_49204_, Mirror p_49205_) {
-        return p_49204_.rotate(p_49205_.getRotation(p_49204_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_49217_) {
-        p_49217_.add(FACING, WATERLOGGED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, WATERLOGGED);
     }
 
     @Override
@@ -85,20 +85,20 @@ public class BaseCoralWallFanBlock extends BaseCoralFanBlock {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_49200_, LevelReader p_49201_, BlockPos p_49202_) {
-        Direction direction = p_49200_.getValue(FACING);
-        BlockPos blockpos = p_49202_.relative(direction.getOpposite());
-        BlockState blockstate = p_49201_.getBlockState(blockpos);
-        return blockstate.isFaceSturdy(p_49201_, blockpos, direction);
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        Direction direction = pState.getValue(FACING);
+        BlockPos blockpos = pPos.relative(direction.getOpposite());
+        BlockState blockstate = pLevel.getBlockState(blockpos);
+        return blockstate.isFaceSturdy(pLevel, blockpos, direction);
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_49198_) {
-        BlockState blockstate = super.getStateForPlacement(p_49198_);
-        LevelReader levelreader = p_49198_.getLevel();
-        BlockPos blockpos = p_49198_.getClickedPos();
-        Direction[] adirection = p_49198_.getNearestLookingDirections();
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockState blockstate = super.getStateForPlacement(pContext);
+        LevelReader levelreader = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
+        Direction[] adirection = pContext.getNearestLookingDirections();
 
         for (Direction direction : adirection) {
             if (direction.getAxis().isHorizontal()) {

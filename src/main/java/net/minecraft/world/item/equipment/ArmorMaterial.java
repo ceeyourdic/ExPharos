@@ -26,41 +26,41 @@ public record ArmorMaterial(
     TagKey<Item> repairIngredient,
     ResourceKey<EquipmentAsset> assetId
 ) {
-    public Item.Properties humanoidProperties(Item.Properties p_365115_, ArmorType p_369272_) {
-        return p_365115_.durability(p_369272_.getDurability(this.durability))
-            .attributes(this.createAttributes(p_369272_))
+    public Item.Properties humanoidProperties(Item.Properties pProperties, ArmorType pArmorType) {
+        return pProperties.durability(pArmorType.getDurability(this.durability))
+            .attributes(this.createAttributes(pArmorType))
             .enchantable(this.enchantmentValue)
-            .component(DataComponents.EQUIPPABLE, Equippable.builder(p_369272_.getSlot()).setEquipSound(this.equipSound).setAsset(this.assetId).build())
+            .component(DataComponents.EQUIPPABLE, Equippable.builder(pArmorType.getSlot()).setEquipSound(this.equipSound).setAsset(this.assetId).build())
             .repairable(this.repairIngredient);
     }
 
-    public Item.Properties animalProperties(Item.Properties p_364372_, HolderSet<EntityType<?>> p_370025_) {
-        return p_364372_.durability(ArmorType.BODY.getDurability(this.durability))
+    public Item.Properties animalProperties(Item.Properties pProperties, HolderSet<EntityType<?>> pAllowedEntities) {
+        return pProperties.durability(ArmorType.BODY.getDurability(this.durability))
             .attributes(this.createAttributes(ArmorType.BODY))
             .repairable(this.repairIngredient)
             .component(
                 DataComponents.EQUIPPABLE,
-                Equippable.builder(EquipmentSlot.BODY).setEquipSound(this.equipSound).setAsset(this.assetId).setAllowedEntities(p_370025_).build()
+                Equippable.builder(EquipmentSlot.BODY).setEquipSound(this.equipSound).setAsset(this.assetId).setAllowedEntities(pAllowedEntities).build()
             );
     }
 
-    public Item.Properties animalProperties(Item.Properties p_369061_, Holder<SoundEvent> p_362547_, boolean p_365564_, HolderSet<EntityType<?>> p_362091_) {
-        if (p_365564_) {
-            p_369061_ = p_369061_.durability(ArmorType.BODY.getDurability(this.durability)).repairable(this.repairIngredient);
+    public Item.Properties animalProperties(Item.Properties pProperties, Holder<SoundEvent> pEquipSound, boolean pDamageOnHurt, HolderSet<EntityType<?>> pAllowedEntities) {
+        if (pDamageOnHurt) {
+            pProperties = pProperties.durability(ArmorType.BODY.getDurability(this.durability)).repairable(this.repairIngredient);
         }
 
-        return p_369061_.attributes(this.createAttributes(ArmorType.BODY))
+        return pProperties.attributes(this.createAttributes(ArmorType.BODY))
             .component(
                 DataComponents.EQUIPPABLE,
-                Equippable.builder(EquipmentSlot.BODY).setEquipSound(p_362547_).setAsset(this.assetId).setAllowedEntities(p_362091_).setDamageOnHurt(p_365564_).build()
+                Equippable.builder(EquipmentSlot.BODY).setEquipSound(pEquipSound).setAsset(this.assetId).setAllowedEntities(pAllowedEntities).setDamageOnHurt(pDamageOnHurt).build()
             );
     }
 
-    private ItemAttributeModifiers createAttributes(ArmorType p_361798_) {
-        int i = this.defense.getOrDefault(p_361798_, 0);
+    private ItemAttributeModifiers createAttributes(ArmorType pArmorType) {
+        int i = this.defense.getOrDefault(pArmorType, 0);
         ItemAttributeModifiers.Builder itemattributemodifiers$builder = ItemAttributeModifiers.builder();
-        EquipmentSlotGroup equipmentslotgroup = EquipmentSlotGroup.bySlot(p_361798_.getSlot());
-        ResourceLocation resourcelocation = ResourceLocation.withDefaultNamespace("armor." + p_361798_.getName());
+        EquipmentSlotGroup equipmentslotgroup = EquipmentSlotGroup.bySlot(pArmorType.getSlot());
+        ResourceLocation resourcelocation = ResourceLocation.withDefaultNamespace("armor." + pArmorType.getName());
         itemattributemodifiers$builder.add(
             Attributes.ARMOR, new AttributeModifier(resourcelocation, (double)i, AttributeModifier.Operation.ADD_VALUE), equipmentslotgroup
         );

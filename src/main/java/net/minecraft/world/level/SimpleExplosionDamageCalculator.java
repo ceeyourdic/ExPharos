@@ -15,11 +15,11 @@ public class SimpleExplosionDamageCalculator extends ExplosionDamageCalculator {
     private final Optional<Float> knockbackMultiplier;
     private final Optional<HolderSet<Block>> immuneBlocks;
 
-    public SimpleExplosionDamageCalculator(boolean p_344116_, boolean p_343987_, Optional<Float> p_342644_, Optional<HolderSet<Block>> p_343081_) {
-        this.explodesBlocks = p_344116_;
-        this.damagesEntities = p_343987_;
-        this.knockbackMultiplier = p_342644_;
-        this.immuneBlocks = p_343081_;
+    public SimpleExplosionDamageCalculator(boolean pExplodesBlocks, boolean pDamagesEntities, Optional<Float> pKnockbackMultiplier, Optional<HolderSet<Block>> pImmuneBlocks) {
+        this.explodesBlocks = pExplodesBlocks;
+        this.damagesEntities = pDamagesEntities;
+        this.knockbackMultiplier = pKnockbackMultiplier;
+        this.immuneBlocks = pImmuneBlocks;
     }
 
     @Override

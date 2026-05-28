@@ -15,39 +15,39 @@ public class DropInvalidSignDataFix extends NamedEntityFix {
         "Text1", "Text2", "Text3", "Text4", "FilteredText1", "FilteredText2", "FilteredText3", "FilteredText4", "Color", "GlowingText"
     };
 
-    public DropInvalidSignDataFix(Schema p_297458_, String p_300331_, String p_300869_) {
-        super(p_297458_, false, p_300331_, References.BLOCK_ENTITY, p_300869_);
+    public DropInvalidSignDataFix(Schema pOutputSchema, String pName, String pEntityName) {
+        super(pOutputSchema, false, pName, References.BLOCK_ENTITY, pEntityName);
     }
 
-    private static <T> Dynamic<T> fix(Dynamic<T> p_297398_) {
-        p_297398_ = p_297398_.update("front_text", DropInvalidSignDataFix::fixText);
-        p_297398_ = p_297398_.update("back_text", DropInvalidSignDataFix::fixText);
+    private static <T> Dynamic<T> fix(Dynamic<T> pDynamic) {
+        pDynamic = pDynamic.update("front_text", DropInvalidSignDataFix::fixText);
+        pDynamic = pDynamic.update("back_text", DropInvalidSignDataFix::fixText);
 
         for (String s : FIELDS_TO_DROP) {
-            p_297398_ = p_297398_.remove(s);
+            pDynamic = pDynamic.remove(s);
         }
 
-        return p_297398_;
+        return pDynamic;
     }
 
-    private static <T> Dynamic<T> fixText(Dynamic<T> p_299128_) {
-        boolean flag = p_299128_.get("_filtered_correct").asBoolean(false);
+    private static <T> Dynamic<T> fixText(Dynamic<T> pTextDynamic) {
+        boolean flag = pTextDynamic.get("_filtered_correct").asBoolean(false);
         if (flag) {
-            return p_299128_.remove("_filtered_correct");
+            return pTextDynamic.remove("_filtered_correct");
         } else {
-            Optional<Stream<Dynamic<T>>> optional = p_299128_.get("filtered_messages").asStreamOpt().result();
+            Optional<Stream<Dynamic<T>>> optional = pTextDynamic.get("filtered_messages").asStreamOpt().result();
             if (optional.isEmpty()) {
-                return p_299128_;
+                return pTextDynamic;
             } else {
-                Dynamic<T> dynamic = ComponentDataFixUtils.createEmptyComponent(p_299128_.getOps());
-                List<Dynamic<T>> list = p_299128_.get("messages").asStreamOpt().result().orElse(Stream.of()).toList();
+                Dynamic<T> dynamic = ComponentDataFixUtils.createEmptyComponent(pTextDynamic.getOps());
+                List<Dynamic<T>> list = pTextDynamic.get("messages").asStreamOpt().result().orElse(Stream.of()).toList();
                 List<Dynamic<T>> list1 = Streams.mapWithIndex(optional.get(), (p_298117_, p_298041_) -> {
                     Dynamic<T> dynamic1 = p_298041_ < (long)list.size() ? list.get((int)p_298041_) : dynamic;
                     return p_298117_.equals(dynamic) ? dynamic1 : p_298117_;
                 }).toList();
                 return list1.stream().allMatch(p_300495_ -> p_300495_.equals(dynamic))
-                    ? p_299128_.remove("filtered_messages")
-                    : p_299128_.set("filtered_messages", p_299128_.createList(list1.stream()));
+                    ? pTextDynamic.remove("filtered_messages")
+                    : pTextDynamic.set("filtered_messages", pTextDynamic.createList(list1.stream()));
             }
         }
     }

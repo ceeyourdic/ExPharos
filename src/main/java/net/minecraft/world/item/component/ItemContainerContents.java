@@ -27,35 +27,35 @@ public final class ItemContainerContents {
     private final NonNullList<ItemStack> items;
     private final int hashCode;
 
-    private ItemContainerContents(NonNullList<ItemStack> p_334672_) {
-        if (p_334672_.size() > 256) {
-            throw new IllegalArgumentException("Got " + p_334672_.size() + " items, but maximum is 256");
+    private ItemContainerContents(NonNullList<ItemStack> pItems) {
+        if (pItems.size() > 256) {
+            throw new IllegalArgumentException("Got " + pItems.size() + " items, but maximum is 256");
         } else {
-            this.items = p_334672_;
-            this.hashCode = ItemStack.hashStackList(p_334672_);
+            this.items = pItems;
+            this.hashCode = ItemStack.hashStackList(pItems);
         }
     }
 
-    private ItemContainerContents(int p_336350_) {
-        this(NonNullList.withSize(p_336350_, ItemStack.EMPTY));
+    private ItemContainerContents(int pSize) {
+        this(NonNullList.withSize(pSize, ItemStack.EMPTY));
     }
 
-    private ItemContainerContents(List<ItemStack> p_332487_) {
-        this(p_332487_.size());
+    private ItemContainerContents(List<ItemStack> pItems) {
+        this(pItems.size());
 
-        for (int i = 0; i < p_332487_.size(); i++) {
-            this.items.set(i, p_332487_.get(i));
+        for (int i = 0; i < pItems.size(); i++) {
+            this.items.set(i, pItems.get(i));
         }
     }
 
-    private static ItemContainerContents fromSlots(List<ItemContainerContents.Slot> p_334537_) {
-        OptionalInt optionalint = p_334537_.stream().mapToInt(ItemContainerContents.Slot::index).max();
+    private static ItemContainerContents fromSlots(List<ItemContainerContents.Slot> pSlots) {
+        OptionalInt optionalint = pSlots.stream().mapToInt(ItemContainerContents.Slot::index).max();
         if (optionalint.isEmpty()) {
             return EMPTY;
         } else {
             ItemContainerContents itemcontainercontents = new ItemContainerContents(optionalint.getAsInt() + 1);
 
-            for (ItemContainerContents.Slot itemcontainercontents$slot : p_334537_) {
+            for (ItemContainerContents.Slot itemcontainercontents$slot : pSlots) {
                 itemcontainercontents.items.set(itemcontainercontents$slot.index(), itemcontainercontents$slot.item());
             }
 
@@ -63,24 +63,24 @@ public final class ItemContainerContents {
         }
     }
 
-    public static ItemContainerContents fromItems(List<ItemStack> p_329219_) {
-        int i = findLastNonEmptySlot(p_329219_);
+    public static ItemContainerContents fromItems(List<ItemStack> pItems) {
+        int i = findLastNonEmptySlot(pItems);
         if (i == -1) {
             return EMPTY;
         } else {
             ItemContainerContents itemcontainercontents = new ItemContainerContents(i + 1);
 
             for (int j = 0; j <= i; j++) {
-                itemcontainercontents.items.set(j, p_329219_.get(j).copy());
+                itemcontainercontents.items.set(j, pItems.get(j).copy());
             }
 
             return itemcontainercontents;
         }
     }
 
-    private static int findLastNonEmptySlot(List<ItemStack> p_332919_) {
-        for (int i = p_332919_.size() - 1; i >= 0; i--) {
-            if (!p_332919_.get(i).isEmpty()) {
+    private static int findLastNonEmptySlot(List<ItemStack> pItems) {
+        for (int i = pItems.size() - 1; i >= 0; i--) {
+            if (!pItems.get(i).isEmpty()) {
                 return i;
             }
         }
@@ -101,10 +101,10 @@ public final class ItemContainerContents {
         return list;
     }
 
-    public void copyInto(NonNullList<ItemStack> p_333460_) {
-        for (int i = 0; i < p_333460_.size(); i++) {
+    public void copyInto(NonNullList<ItemStack> pList) {
+        for (int i = 0; i < pList.size(); i++) {
             ItemStack itemstack = i < this.items.size() ? this.items.get(i) : ItemStack.EMPTY;
-            p_333460_.set(i, itemstack.copy());
+            pList.set(i, itemstack.copy());
         }
     }
 
@@ -129,11 +129,11 @@ public final class ItemContainerContents {
     }
 
     @Override
-    public boolean equals(Object p_331196_) {
-        if (this == p_331196_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            if (p_331196_ instanceof ItemContainerContents itemcontainercontents && ItemStack.listMatches(this.items, itemcontainercontents.items)) {
+            if (pOther instanceof ItemContainerContents itemcontainercontents && ItemStack.listMatches(this.items, itemcontainercontents.items)) {
                 return true;
             }
 

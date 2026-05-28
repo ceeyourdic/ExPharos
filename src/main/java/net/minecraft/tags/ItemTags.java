@@ -182,7 +182,7 @@ public final class ItemTags {
     private ItemTags() {
     }
 
-    private static TagKey<Item> bind(String p_203855_) {
-        return TagKey.create(Registries.ITEM, ResourceLocation.withDefaultNamespace(p_203855_));
+    private static TagKey<Item> bind(String pName) {
+        return TagKey.create(Registries.ITEM, ResourceLocation.withDefaultNamespace(pName));
     }
 }

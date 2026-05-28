@@ -20,9 +20,9 @@ public class EvokerFangsModel extends EntityModel<EvokerFangsRenderState> {
     private final ModelPart upperJaw;
     private final ModelPart lowerJaw;
 
-    public EvokerFangsModel(ModelPart p_170555_) {
-        super(p_170555_);
-        this.base = p_170555_.getChild("base");
+    public EvokerFangsModel(ModelPart pRoot) {
+        super(pRoot);
+        this.base = pRoot.getChild("base");
         this.upperJaw = this.base.getChild("upper_jaw");
         this.lowerJaw = this.base.getChild("lower_jaw");
     }

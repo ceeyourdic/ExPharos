@@ -25,8 +25,8 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 public class BehaviorBuilder<E extends LivingEntity, M> implements App<BehaviorBuilder.Mu<E>, M> {
     private final BehaviorBuilder.TriggerWithResult<E, M> trigger;
 
-    public static <E extends LivingEntity, M> BehaviorBuilder<E, M> unbox(App<BehaviorBuilder.Mu<E>, M> p_259593_) {
-        return (BehaviorBuilder<E, M>)p_259593_;
+    public static <E extends LivingEntity, M> BehaviorBuilder<E, M> unbox(App<BehaviorBuilder.Mu<E>, M> pApp) {
+        return (BehaviorBuilder<E, M>)pApp;
     }
 
     public static <E extends LivingEntity> BehaviorBuilder.Instance<E> instance() {
@@ -34,10 +34,10 @@ public class BehaviorBuilder<E extends LivingEntity, M> implements App<BehaviorB
     }
 
     public static <E extends LivingEntity> OneShot<E> create(
-        Function<BehaviorBuilder.Instance<E>, ? extends App<BehaviorBuilder.Mu<E>, Trigger<E>>> p_259386_
+        Function<BehaviorBuilder.Instance<E>, ? extends App<BehaviorBuilder.Mu<E>, Trigger<E>>> pInitializer
     ) {
         final BehaviorBuilder.TriggerWithResult<E, Trigger<E>> triggerwithresult = get(
-            (App<BehaviorBuilder.Mu<E>, Trigger<E>>)p_259386_.apply(instance())
+            (App<BehaviorBuilder.Mu<E>, Trigger<E>>)pInitializer.apply(instance())
         );
         return new OneShot<E>() {
             @Override
@@ -58,49 +58,49 @@ public class BehaviorBuilder<E extends LivingEntity, M> implements App<BehaviorB
         };
     }
 
-    public static <E extends LivingEntity> OneShot<E> sequence(Trigger<? super E> p_260174_, Trigger<? super E> p_259134_) {
-        return create(p_259495_ -> p_259495_.group(p_259495_.ifTriggered(p_260174_)).apply(p_259495_, p_260322_ -> p_259134_::trigger));
+    public static <E extends LivingEntity> OneShot<E> sequence(Trigger<? super E> pPredicateTrigger, Trigger<? super E> pTrigger) {
+        return create(p_259495_ -> p_259495_.group(p_259495_.ifTriggered(pPredicateTrigger)).apply(p_259495_, p_260322_ -> pTrigger::trigger));
     }
 
-    public static <E extends LivingEntity> OneShot<E> triggerIf(Predicate<E> p_260059_, OneShot<? super E> p_259640_) {
-        return sequence(triggerIf(p_260059_), p_259640_);
+    public static <E extends LivingEntity> OneShot<E> triggerIf(Predicate<E> pPredicate, OneShot<? super E> pTrigger) {
+        return sequence(triggerIf(pPredicate), pTrigger);
     }
 
-    public static <E extends LivingEntity> OneShot<E> triggerIf(Predicate<E> p_260112_) {
-        return create(p_260353_ -> p_260353_.point((p_259280_, p_259428_, p_259845_) -> p_260112_.test(p_259428_)));
+    public static <E extends LivingEntity> OneShot<E> triggerIf(Predicate<E> pPredicate) {
+        return create(p_260353_ -> p_260353_.point((p_259280_, p_259428_, p_259845_) -> pPredicate.test(p_259428_)));
     }
 
-    public static <E extends LivingEntity> OneShot<E> triggerIf(BiPredicate<ServerLevel, E> p_259227_) {
-        return create(p_260191_ -> p_260191_.point((p_259079_, p_259093_, p_260140_) -> p_259227_.test(p_259079_, p_259093_)));
+    public static <E extends LivingEntity> OneShot<E> triggerIf(BiPredicate<ServerLevel, E> pPredicate) {
+        return create(p_260191_ -> p_260191_.point((p_259079_, p_259093_, p_260140_) -> pPredicate.test(p_259079_, p_259093_)));
     }
 
-    static <E extends LivingEntity, M> BehaviorBuilder.TriggerWithResult<E, M> get(App<BehaviorBuilder.Mu<E>, M> p_259615_) {
-        return unbox(p_259615_).trigger;
+    static <E extends LivingEntity, M> BehaviorBuilder.TriggerWithResult<E, M> get(App<BehaviorBuilder.Mu<E>, M> pApp) {
+        return unbox(pApp).trigger;
     }
 
-    BehaviorBuilder(BehaviorBuilder.TriggerWithResult<E, M> p_260164_) {
-        this.trigger = p_260164_;
+    BehaviorBuilder(BehaviorBuilder.TriggerWithResult<E, M> pTrigger) {
+        this.trigger = pTrigger;
     }
 
-    static <E extends LivingEntity, M> BehaviorBuilder<E, M> create(BehaviorBuilder.TriggerWithResult<E, M> p_259575_) {
-        return new BehaviorBuilder<>(p_259575_);
+    static <E extends LivingEntity, M> BehaviorBuilder<E, M> create(BehaviorBuilder.TriggerWithResult<E, M> pTrigger) {
+        return new BehaviorBuilder<>(pTrigger);
     }
 
     static final class Constant<E extends LivingEntity, A> extends BehaviorBuilder<E, A> {
-        Constant(A p_259906_) {
-            this(p_259906_, () -> "C[" + p_259906_ + "]");
+        Constant(A pValue) {
+            this(pValue, () -> "C[" + pValue + "]");
         }
 
-        Constant(final A p_259514_, final Supplier<String> p_259950_) {
+        Constant(final A pValue, final Supplier<String> pName) {
             super(new BehaviorBuilder.TriggerWithResult<E, A>() {
                 @Override
                 public A tryTrigger(ServerLevel p_259561_, E p_259467_, long p_259297_) {
-                    return p_259514_;
+                    return pValue;
                 }
 
                 @Override
                 public String debugString() {
-                    return p_259950_.get();
+                    return pName.get();
                 }
 
                 @Override
@@ -112,43 +112,43 @@ public class BehaviorBuilder<E extends LivingEntity, M> implements App<BehaviorB
     }
 
     public static final class Instance<E extends LivingEntity> implements Applicative<BehaviorBuilder.Mu<E>, BehaviorBuilder.Instance.Mu<E>> {
-        public <Value> Optional<Value> tryGet(MemoryAccessor<OptionalBox.Mu, Value> p_259352_) {
-            return OptionalBox.unbox(p_259352_.value());
+        public <Value> Optional<Value> tryGet(MemoryAccessor<OptionalBox.Mu, Value> pMemory) {
+            return OptionalBox.unbox(pMemory.value());
         }
 
-        public <Value> Value get(MemoryAccessor<IdF.Mu, Value> p_259206_) {
-            return IdF.get(p_259206_.value());
+        public <Value> Value get(MemoryAccessor<IdF.Mu, Value> pMemory) {
+            return IdF.get(pMemory.value());
         }
 
-        public <Value> BehaviorBuilder<E, MemoryAccessor<OptionalBox.Mu, Value>> registered(MemoryModuleType<Value> p_259477_) {
-            return new BehaviorBuilder.PureMemory<>(new MemoryCondition.Registered<>(p_259477_));
+        public <Value> BehaviorBuilder<E, MemoryAccessor<OptionalBox.Mu, Value>> registered(MemoryModuleType<Value> pMemoryType) {
+            return new BehaviorBuilder.PureMemory<>(new MemoryCondition.Registered<>(pMemoryType));
         }
 
-        public <Value> BehaviorBuilder<E, MemoryAccessor<IdF.Mu, Value>> present(MemoryModuleType<Value> p_259673_) {
-            return new BehaviorBuilder.PureMemory<>(new MemoryCondition.Present<>(p_259673_));
+        public <Value> BehaviorBuilder<E, MemoryAccessor<IdF.Mu, Value>> present(MemoryModuleType<Value> pMemoryType) {
+            return new BehaviorBuilder.PureMemory<>(new MemoryCondition.Present<>(pMemoryType));
         }
 
-        public <Value> BehaviorBuilder<E, MemoryAccessor<Const.Mu<Unit>, Value>> absent(MemoryModuleType<Value> p_260198_) {
-            return new BehaviorBuilder.PureMemory<>(new MemoryCondition.Absent<>(p_260198_));
+        public <Value> BehaviorBuilder<E, MemoryAccessor<Const.Mu<Unit>, Value>> absent(MemoryModuleType<Value> pMemoryType) {
+            return new BehaviorBuilder.PureMemory<>(new MemoryCondition.Absent<>(pMemoryType));
         }
 
-        public BehaviorBuilder<E, Unit> ifTriggered(Trigger<? super E> p_260247_) {
-            return new BehaviorBuilder.TriggerWrapper<>(p_260247_);
+        public BehaviorBuilder<E, Unit> ifTriggered(Trigger<? super E> pTrigger) {
+            return new BehaviorBuilder.TriggerWrapper<>(pTrigger);
         }
 
-        public <A> BehaviorBuilder<E, A> point(A p_259634_) {
-            return new BehaviorBuilder.Constant<>(p_259634_);
+        public <A> BehaviorBuilder<E, A> point(A pValue) {
+            return new BehaviorBuilder.Constant<>(pValue);
         }
 
-        public <A> BehaviorBuilder<E, A> point(Supplier<String> p_260070_, A p_260295_) {
-            return new BehaviorBuilder.Constant<>(p_260295_, p_260070_);
+        public <A> BehaviorBuilder<E, A> point(Supplier<String> pName, A pValue) {
+            return new BehaviorBuilder.Constant<>(pValue, pName);
         }
 
         @Override
-        public <A, R> Function<App<BehaviorBuilder.Mu<E>, A>, App<BehaviorBuilder.Mu<E>, R>> lift1(App<BehaviorBuilder.Mu<E>, Function<A, R>> p_259294_) {
+        public <A, R> Function<App<BehaviorBuilder.Mu<E>, A>, App<BehaviorBuilder.Mu<E>, R>> lift1(App<BehaviorBuilder.Mu<E>, Function<A, R>> pBehavior) {
             return p_259751_ -> {
                 final BehaviorBuilder.TriggerWithResult<E, A> triggerwithresult = BehaviorBuilder.get(p_259751_);
-                final BehaviorBuilder.TriggerWithResult<E, Function<A, R>> triggerwithresult1 = BehaviorBuilder.get(p_259294_);
+                final BehaviorBuilder.TriggerWithResult<E, Function<A, R>> triggerwithresult1 = BehaviorBuilder.get(pBehavior);
                 return BehaviorBuilder.create(new BehaviorBuilder.TriggerWithResult<E, R>() {
                     @Override
                     public R tryTrigger(ServerLevel p_259603_, E p_260233_, long p_259654_) {
@@ -174,18 +174,18 @@ public class BehaviorBuilder<E extends LivingEntity, M> implements App<BehaviorB
             };
         }
 
-        public <T, R> BehaviorBuilder<E, R> map(final Function<? super T, ? extends R> p_259963_, App<BehaviorBuilder.Mu<E>, T> p_260355_) {
-            final BehaviorBuilder.TriggerWithResult<E, T> triggerwithresult = BehaviorBuilder.get(p_260355_);
+        public <T, R> BehaviorBuilder<E, R> map(final Function<? super T, ? extends R> pMapper, App<BehaviorBuilder.Mu<E>, T> pBehavior) {
+            final BehaviorBuilder.TriggerWithResult<E, T> triggerwithresult = BehaviorBuilder.get(pBehavior);
             return BehaviorBuilder.create(new BehaviorBuilder.TriggerWithResult<E, R>() {
                 @Override
                 public R tryTrigger(ServerLevel p_259755_, E p_259656_, long p_259300_) {
                     T t = triggerwithresult.tryTrigger(p_259755_, p_259656_, p_259300_);
-                    return (R)(t == null ? null : p_259963_.apply(t));
+                    return (R)(t == null ? null : pMapper.apply(t));
                 }
 
                 @Override
                 public String debugString() {
-                    return triggerwithresult.debugString() + ".map[" + p_259963_ + "]";
+                    return triggerwithresult.debugString() + ".map[" + pMapper + "]";
                 }
 
                 @Override
@@ -196,11 +196,11 @@ public class BehaviorBuilder<E extends LivingEntity, M> implements App<BehaviorB
         }
 
         public <A, B, R> BehaviorBuilder<E, R> ap2(
-            App<BehaviorBuilder.Mu<E>, BiFunction<A, B, R>> p_259535_, App<BehaviorBuilder.Mu<E>, A> p_259162_, App<BehaviorBuilder.Mu<E>, B> p_259733_
+            App<BehaviorBuilder.Mu<E>, BiFunction<A, B, R>> pMapper, App<BehaviorBuilder.Mu<E>, A> pBehavior1, App<BehaviorBuilder.Mu<E>, B> pBehavior2
         ) {
-            final BehaviorBuilder.TriggerWithResult<E, A> triggerwithresult = BehaviorBuilder.get(p_259162_);
-            final BehaviorBuilder.TriggerWithResult<E, B> triggerwithresult1 = BehaviorBuilder.get(p_259733_);
-            final BehaviorBuilder.TriggerWithResult<E, BiFunction<A, B, R>> triggerwithresult2 = BehaviorBuilder.get(p_259535_);
+            final BehaviorBuilder.TriggerWithResult<E, A> triggerwithresult = BehaviorBuilder.get(pBehavior1);
+            final BehaviorBuilder.TriggerWithResult<E, B> triggerwithresult1 = BehaviorBuilder.get(pBehavior2);
+            final BehaviorBuilder.TriggerWithResult<E, BiFunction<A, B, R>> triggerwithresult2 = BehaviorBuilder.get(pMapper);
             return BehaviorBuilder.create(new BehaviorBuilder.TriggerWithResult<E, R>() {
                 @Override
                 public R tryTrigger(ServerLevel p_259274_, E p_259817_, long p_259820_) {
@@ -231,15 +231,15 @@ public class BehaviorBuilder<E extends LivingEntity, M> implements App<BehaviorB
         }
 
         public <T1, T2, T3, R> BehaviorBuilder<E, R> ap3(
-            App<BehaviorBuilder.Mu<E>, Function3<T1, T2, T3, R>> p_260239_,
-            App<BehaviorBuilder.Mu<E>, T1> p_259239_,
-            App<BehaviorBuilder.Mu<E>, T2> p_259638_,
-            App<BehaviorBuilder.Mu<E>, T3> p_259969_
+            App<BehaviorBuilder.Mu<E>, Function3<T1, T2, T3, R>> pMapper,
+            App<BehaviorBuilder.Mu<E>, T1> pBehavior1,
+            App<BehaviorBuilder.Mu<E>, T2> pBehavior2,
+            App<BehaviorBuilder.Mu<E>, T3> pBehavior3
         ) {
-            final BehaviorBuilder.TriggerWithResult<E, T1> triggerwithresult = BehaviorBuilder.get(p_259239_);
-            final BehaviorBuilder.TriggerWithResult<E, T2> triggerwithresult1 = BehaviorBuilder.get(p_259638_);
-            final BehaviorBuilder.TriggerWithResult<E, T3> triggerwithresult2 = BehaviorBuilder.get(p_259969_);
-            final BehaviorBuilder.TriggerWithResult<E, Function3<T1, T2, T3, R>> triggerwithresult3 = BehaviorBuilder.get(p_260239_);
+            final BehaviorBuilder.TriggerWithResult<E, T1> triggerwithresult = BehaviorBuilder.get(pBehavior1);
+            final BehaviorBuilder.TriggerWithResult<E, T2> triggerwithresult1 = BehaviorBuilder.get(pBehavior2);
+            final BehaviorBuilder.TriggerWithResult<E, T3> triggerwithresult2 = BehaviorBuilder.get(pBehavior3);
+            final BehaviorBuilder.TriggerWithResult<E, Function3<T1, T2, T3, R>> triggerwithresult3 = BehaviorBuilder.get(pMapper);
             return BehaviorBuilder.create(
                 new BehaviorBuilder.TriggerWithResult<E, R>() {
                     @Override
@@ -283,17 +283,17 @@ public class BehaviorBuilder<E extends LivingEntity, M> implements App<BehaviorB
         }
 
         public <T1, T2, T3, T4, R> BehaviorBuilder<E, R> ap4(
-            App<BehaviorBuilder.Mu<E>, Function4<T1, T2, T3, T4, R>> p_259519_,
-            App<BehaviorBuilder.Mu<E>, T1> p_259829_,
-            App<BehaviorBuilder.Mu<E>, T2> p_259314_,
-            App<BehaviorBuilder.Mu<E>, T3> p_260089_,
-            App<BehaviorBuilder.Mu<E>, T4> p_259136_
+            App<BehaviorBuilder.Mu<E>, Function4<T1, T2, T3, T4, R>> pMapper,
+            App<BehaviorBuilder.Mu<E>, T1> pBehavior1,
+            App<BehaviorBuilder.Mu<E>, T2> pBehavior2,
+            App<BehaviorBuilder.Mu<E>, T3> pBehavior3,
+            App<BehaviorBuilder.Mu<E>, T4> pBehavior4
         ) {
-            final BehaviorBuilder.TriggerWithResult<E, T1> triggerwithresult = BehaviorBuilder.get(p_259829_);
-            final BehaviorBuilder.TriggerWithResult<E, T2> triggerwithresult1 = BehaviorBuilder.get(p_259314_);
-            final BehaviorBuilder.TriggerWithResult<E, T3> triggerwithresult2 = BehaviorBuilder.get(p_260089_);
-            final BehaviorBuilder.TriggerWithResult<E, T4> triggerwithresult3 = BehaviorBuilder.get(p_259136_);
-            final BehaviorBuilder.TriggerWithResult<E, Function4<T1, T2, T3, T4, R>> triggerwithresult4 = BehaviorBuilder.get(p_259519_);
+            final BehaviorBuilder.TriggerWithResult<E, T1> triggerwithresult = BehaviorBuilder.get(pBehavior1);
+            final BehaviorBuilder.TriggerWithResult<E, T2> triggerwithresult1 = BehaviorBuilder.get(pBehavior2);
+            final BehaviorBuilder.TriggerWithResult<E, T3> triggerwithresult2 = BehaviorBuilder.get(pBehavior3);
+            final BehaviorBuilder.TriggerWithResult<E, T4> triggerwithresult3 = BehaviorBuilder.get(pBehavior4);
+            final BehaviorBuilder.TriggerWithResult<E, Function4<T1, T2, T3, T4, R>> triggerwithresult4 = BehaviorBuilder.get(pMapper);
             return BehaviorBuilder.create(
                 new BehaviorBuilder.TriggerWithResult<E, R>() {
                     @Override
@@ -353,17 +353,17 @@ public class BehaviorBuilder<E extends LivingEntity, M> implements App<BehaviorB
     }
 
     static final class PureMemory<E extends LivingEntity, F extends K1, Value> extends BehaviorBuilder<E, MemoryAccessor<F, Value>> {
-        PureMemory(final MemoryCondition<F, Value> p_259776_) {
+        PureMemory(final MemoryCondition<F, Value> pMemoryCondition) {
             super(new BehaviorBuilder.TriggerWithResult<E, MemoryAccessor<F, Value>>() {
                 public MemoryAccessor<F, Value> tryTrigger(ServerLevel p_259899_, E p_259558_, long p_259793_) {
                     Brain<?> brain = p_259558_.getBrain();
-                    Optional<Value> optional = brain.getMemoryInternal(p_259776_.memory());
-                    return optional == null ? null : p_259776_.createAccessor(brain, optional);
+                    Optional<Value> optional = brain.getMemoryInternal(pMemoryCondition.memory());
+                    return optional == null ? null : pMemoryCondition.createAccessor(brain, optional);
                 }
 
                 @Override
                 public String debugString() {
-                    return "M[" + p_259776_ + "]";
+                    return "M[" + pMemoryCondition + "]";
                 }
 
                 @Override
@@ -376,22 +376,22 @@ public class BehaviorBuilder<E extends LivingEntity, M> implements App<BehaviorB
 
     interface TriggerWithResult<E extends LivingEntity, R> {
         @Nullable
-        R tryTrigger(ServerLevel p_259864_, E p_259042_, long p_260282_);
+        R tryTrigger(ServerLevel pLevel, E pEntity, long pGameTime);
 
         String debugString();
     }
 
     static final class TriggerWrapper<E extends LivingEntity> extends BehaviorBuilder<E, Unit> {
-        TriggerWrapper(final Trigger<? super E> p_259310_) {
+        TriggerWrapper(final Trigger<? super E> pTrigger) {
             super(new BehaviorBuilder.TriggerWithResult<E, Unit>() {
                 @Nullable
                 public Unit tryTrigger(ServerLevel p_259397_, E p_260169_, long p_259155_) {
-                    return p_259310_.trigger(p_259397_, p_260169_, p_259155_) ? Unit.INSTANCE : null;
+                    return pTrigger.trigger(p_259397_, p_260169_, p_259155_) ? Unit.INSTANCE : null;
                 }
 
                 @Override
                 public String debugString() {
-                    return "T[" + p_259310_ + "]";
+                    return "T[" + pTrigger + "]";
                 }
             });
         }

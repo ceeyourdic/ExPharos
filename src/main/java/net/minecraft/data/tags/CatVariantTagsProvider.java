@@ -8,8 +8,8 @@ import net.minecraft.tags.CatVariantTags;
 import net.minecraft.world.entity.animal.CatVariant;
 
 public class CatVariantTagsProvider extends TagsProvider<CatVariant> {
-    public CatVariantTagsProvider(PackOutput p_256547_, CompletableFuture<HolderLookup.Provider> p_256090_) {
-        super(p_256547_, Registries.CAT_VARIANT, p_256090_);
+    public CatVariantTagsProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pProvider) {
+        super(pOutput, Registries.CAT_VARIANT, pProvider);
     }
 
     @Override

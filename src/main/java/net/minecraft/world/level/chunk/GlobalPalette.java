@@ -8,12 +8,12 @@ import net.minecraft.network.FriendlyByteBuf;
 public class GlobalPalette<T> implements Palette<T> {
     private final IdMap<T> registry;
 
-    public GlobalPalette(IdMap<T> p_187897_) {
-        this.registry = p_187897_;
+    public GlobalPalette(IdMap<T> pRegistry) {
+        this.registry = pRegistry;
     }
 
-    public static <A> Palette<A> create(int p_187899_, IdMap<A> p_187900_, PaletteResize<A> p_187901_, List<A> p_187902_) {
-        return new GlobalPalette<>(p_187900_);
+    public static <A> Palette<A> create(int pBits, IdMap<A> pRegistry, PaletteResize<A> pResizeHandler, List<A> pValues) {
+        return new GlobalPalette<>(pRegistry);
     }
 
     @Override

@@ -26,8 +26,8 @@ public abstract class GrowingPlantBodyBlock extends GrowingPlantBlock implements
     @Override
     protected abstract MapCodec<? extends GrowingPlantBodyBlock> codec();
 
-    protected BlockState updateHeadAfterConvertedFromBody(BlockState p_153326_, BlockState p_153327_) {
-        return p_153327_;
+    protected BlockState updateHeadAfterConvertedFromBody(BlockState pHead, BlockState pBody) {
+        return pBody;
     }
 
     @Override
@@ -82,14 +82,14 @@ public abstract class GrowingPlantBodyBlock extends GrowingPlantBlock implements
         }
     }
 
-    private Optional<BlockPos> getHeadPos(BlockGetter p_153323_, BlockPos p_153324_, Block p_153325_) {
-        return BlockUtil.getTopConnectedBlock(p_153323_, p_153324_, p_153325_, this.growthDirection, this.getHeadBlock());
+    private Optional<BlockPos> getHeadPos(BlockGetter pLevel, BlockPos pPos, Block pBlock) {
+        return BlockUtil.getTopConnectedBlock(pLevel, pPos, pBlock, this.growthDirection, this.getHeadBlock());
     }
 
     @Override
-    protected boolean canBeReplaced(BlockState p_53910_, BlockPlaceContext p_53911_) {
-        boolean flag = super.canBeReplaced(p_53910_, p_53911_);
-        return flag && p_53911_.getItemInHand().is(this.getHeadBlock().asItem()) ? false : flag;
+    protected boolean canBeReplaced(BlockState pState, BlockPlaceContext pUseContext) {
+        boolean flag = super.canBeReplaced(pState, pUseContext);
+        return flag && pUseContext.getItemInHand().is(this.getHeadBlock().asItem()) ? false : flag;
     }
 
     @Override

@@ -11,16 +11,16 @@ public class ServerboundLockDifficultyPacket implements Packet<ServerGamePacketL
     );
     private final boolean locked;
 
-    public ServerboundLockDifficultyPacket(boolean p_134108_) {
-        this.locked = p_134108_;
+    public ServerboundLockDifficultyPacket(boolean pLocked) {
+        this.locked = pLocked;
     }
 
-    private ServerboundLockDifficultyPacket(FriendlyByteBuf p_179673_) {
-        this.locked = p_179673_.readBoolean();
+    private ServerboundLockDifficultyPacket(FriendlyByteBuf pBuffer) {
+        this.locked = pBuffer.readBoolean();
     }
 
-    private void write(FriendlyByteBuf p_134117_) {
-        p_134117_.writeBoolean(this.locked);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeBoolean(this.locked);
     }
 
     @Override
@@ -28,8 +28,8 @@ public class ServerboundLockDifficultyPacket implements Packet<ServerGamePacketL
         return GamePacketTypes.SERVERBOUND_LOCK_DIFFICULTY;
     }
 
-    public void handle(ServerGamePacketListener p_134114_) {
-        p_134114_.handleLockDifficulty(this);
+    public void handle(ServerGamePacketListener pHandler) {
+        pHandler.handleLockDifficulty(this);
     }
 
     public boolean isLocked() {

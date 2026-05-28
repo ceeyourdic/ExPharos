@@ -23,9 +23,9 @@ public interface ProfileKeyPairManager {
         }
     };
 
-    static ProfileKeyPairManager create(UserApiService p_253925_, User p_254501_, Path p_254206_) {
-        return (ProfileKeyPairManager)(p_254501_.getType() == User.Type.MSA
-            ? new AccountProfileKeyPairManager(p_253925_, p_254501_.getProfileId(), p_254206_)
+    static ProfileKeyPairManager create(UserApiService pUserApiService, User pUser, Path pGameDirectory) {
+        return (ProfileKeyPairManager)(pUser.getType() == User.Type.MSA
+            ? new AccountProfileKeyPairManager(pUserApiService, pUser.getProfileId(), pGameDirectory)
             : EMPTY_KEY_MANAGER);
     }
 

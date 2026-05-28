@@ -12,19 +12,19 @@ public class ClientboundProjectilePowerPacket implements Packet<ClientGamePacket
     private final int id;
     private final double accelerationPower;
 
-    public ClientboundProjectilePowerPacket(int p_336104_, double p_330780_) {
-        this.id = p_336104_;
-        this.accelerationPower = p_330780_;
+    public ClientboundProjectilePowerPacket(int pId, double pAccelerationPower) {
+        this.id = pId;
+        this.accelerationPower = pAccelerationPower;
     }
 
-    private ClientboundProjectilePowerPacket(FriendlyByteBuf p_328922_) {
-        this.id = p_328922_.readVarInt();
-        this.accelerationPower = p_328922_.readDouble();
+    private ClientboundProjectilePowerPacket(FriendlyByteBuf pBuffer) {
+        this.id = pBuffer.readVarInt();
+        this.accelerationPower = pBuffer.readDouble();
     }
 
-    private void write(FriendlyByteBuf p_331545_) {
-        p_331545_.writeVarInt(this.id);
-        p_331545_.writeDouble(this.accelerationPower);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.id);
+        pBuffer.writeDouble(this.accelerationPower);
     }
 
     @Override

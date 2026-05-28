@@ -8,8 +8,8 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.serialization.Dynamic;
 
 public class OptionsMenuBlurrinessFix extends DataFix {
-    public OptionsMenuBlurrinessFix(Schema p_342701_) {
-        super(p_342701_, false);
+    public OptionsMenuBlurrinessFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override
@@ -24,9 +24,9 @@ public class OptionsMenuBlurrinessFix extends DataFix {
         );
     }
 
-    private int convertToIntRange(String p_343273_) {
+    private int convertToIntRange(String pValue) {
         try {
-            return Math.round(Float.parseFloat(p_343273_) * 10.0F);
+            return Math.round(Float.parseFloat(pValue) * 10.0F);
         } catch (NumberFormatException numberformatexception) {
             return 5;
         }

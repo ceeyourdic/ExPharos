@@ -13,11 +13,11 @@ import net.minecraft.util.SignatureValidator;
 public record Services(MinecraftSessionService sessionService, ServicesKeySet servicesKeySet, GameProfileRepository profileRepository, GameProfileCache profileCache) {
     private static final String USERID_CACHE_FILE = "usercache.json";
 
-    public static Services create(YggdrasilAuthenticationService p_214345_, File p_214346_) {
-        MinecraftSessionService minecraftsessionservice = p_214345_.createMinecraftSessionService();
-        GameProfileRepository gameprofilerepository = p_214345_.createProfileRepository();
-        GameProfileCache gameprofilecache = new GameProfileCache(gameprofilerepository, new File(p_214346_, "usercache.json"));
-        return new Services(minecraftsessionservice, p_214345_.getServicesKeySet(), gameprofilerepository, gameprofilecache);
+    public static Services create(YggdrasilAuthenticationService pAuthenticationService, File pProfileRepository) {
+        MinecraftSessionService minecraftsessionservice = pAuthenticationService.createMinecraftSessionService();
+        GameProfileRepository gameprofilerepository = pAuthenticationService.createProfileRepository();
+        GameProfileCache gameprofilecache = new GameProfileCache(gameprofilerepository, new File(pProfileRepository, "usercache.json"));
+        return new Services(minecraftsessionservice, pAuthenticationService.getServicesKeySet(), gameprofilerepository, gameprofilecache);
     }
 
     @Nullable

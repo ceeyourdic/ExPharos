@@ -12,16 +12,16 @@ public class ServerboundChangeDifficultyPacket implements Packet<ServerGamePacke
     );
     private final Difficulty difficulty;
 
-    public ServerboundChangeDifficultyPacket(Difficulty p_133817_) {
-        this.difficulty = p_133817_;
+    public ServerboundChangeDifficultyPacket(Difficulty pDifficulty) {
+        this.difficulty = pDifficulty;
     }
 
-    private ServerboundChangeDifficultyPacket(FriendlyByteBuf p_179542_) {
-        this.difficulty = Difficulty.byId(p_179542_.readUnsignedByte());
+    private ServerboundChangeDifficultyPacket(FriendlyByteBuf pBuffer) {
+        this.difficulty = Difficulty.byId(pBuffer.readUnsignedByte());
     }
 
-    private void write(FriendlyByteBuf p_133826_) {
-        p_133826_.writeByte(this.difficulty.getId());
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeByte(this.difficulty.getId());
     }
 
     @Override
@@ -29,8 +29,8 @@ public class ServerboundChangeDifficultyPacket implements Packet<ServerGamePacke
         return GamePacketTypes.SERVERBOUND_CHANGE_DIFFICULTY;
     }
 
-    public void handle(ServerGamePacketListener p_133823_) {
-        p_133823_.handleChangeDifficulty(this);
+    public void handle(ServerGamePacketListener pHandler) {
+        pHandler.handleChangeDifficulty(this);
     }
 
     public Difficulty getDifficulty() {

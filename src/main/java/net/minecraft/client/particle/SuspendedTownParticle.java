@@ -27,8 +27,8 @@ public class SuspendedTownParticle extends TextureSheetParticle {
     }
 
     @Override
-    public void move(double p_108122_, double p_108123_, double p_108124_) {
-        this.setBoundingBox(this.getBoundingBox().move(p_108122_, p_108123_, p_108124_));
+    public void move(double pX, double pY, double pZ) {
+        this.setBoundingBox(this.getBoundingBox().move(pX, pY, pZ));
         this.setLocationFromBoundingbox();
     }
 
@@ -51,24 +51,24 @@ public class SuspendedTownParticle extends TextureSheetParticle {
     public static class ComposterFillProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public ComposterFillProvider(SpriteSet p_108128_) {
-            this.sprite = p_108128_;
+        public ComposterFillProvider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_108139_,
-            ClientLevel p_108140_,
-            double p_108141_,
-            double p_108142_,
-            double p_108143_,
-            double p_108144_,
-            double p_108145_,
-            double p_108146_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            SuspendedTownParticle suspendedtownparticle = new SuspendedTownParticle(p_108140_, p_108141_, p_108142_, p_108143_, p_108144_, p_108145_, p_108146_);
+            SuspendedTownParticle suspendedtownparticle = new SuspendedTownParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
             suspendedtownparticle.pickSprite(this.sprite);
             suspendedtownparticle.setColor(1.0F, 1.0F, 1.0F);
-            suspendedtownparticle.setLifetime(3 + p_108140_.getRandom().nextInt(5));
+            suspendedtownparticle.setLifetime(3 + pLevel.getRandom().nextInt(5));
             return suspendedtownparticle;
         }
     }
@@ -77,24 +77,24 @@ public class SuspendedTownParticle extends TextureSheetParticle {
     public static class DolphinSpeedProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public DolphinSpeedProvider(SpriteSet p_108149_) {
-            this.sprite = p_108149_;
+        public DolphinSpeedProvider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_108160_,
-            ClientLevel p_108161_,
-            double p_108162_,
-            double p_108163_,
-            double p_108164_,
-            double p_108165_,
-            double p_108166_,
-            double p_108167_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            SuspendedTownParticle suspendedtownparticle = new SuspendedTownParticle(p_108161_, p_108162_, p_108163_, p_108164_, p_108165_, p_108166_, p_108167_);
+            SuspendedTownParticle suspendedtownparticle = new SuspendedTownParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
             suspendedtownparticle.setColor(0.3F, 0.5F, 1.0F);
             suspendedtownparticle.pickSprite(this.sprite);
-            suspendedtownparticle.setAlpha(1.0F - p_108161_.random.nextFloat() * 0.7F);
+            suspendedtownparticle.setAlpha(1.0F - pLevel.random.nextFloat() * 0.7F);
             suspendedtownparticle.setLifetime(suspendedtownparticle.getLifetime() / 2);
             return suspendedtownparticle;
         }
@@ -104,8 +104,8 @@ public class SuspendedTownParticle extends TextureSheetParticle {
     public static class EggCrackProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public EggCrackProvider(SpriteSet p_277756_) {
-            this.sprite = p_277756_;
+        public EggCrackProvider(SpriteSet pSprite) {
+            this.sprite = pSprite;
         }
 
         public Particle createParticle(
@@ -129,21 +129,21 @@ public class SuspendedTownParticle extends TextureSheetParticle {
     public static class HappyVillagerProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public HappyVillagerProvider(SpriteSet p_108170_) {
-            this.sprite = p_108170_;
+        public HappyVillagerProvider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_108181_,
-            ClientLevel p_108182_,
-            double p_108183_,
-            double p_108184_,
-            double p_108185_,
-            double p_108186_,
-            double p_108187_,
-            double p_108188_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            SuspendedTownParticle suspendedtownparticle = new SuspendedTownParticle(p_108182_, p_108183_, p_108184_, p_108185_, p_108186_, p_108187_, p_108188_);
+            SuspendedTownParticle suspendedtownparticle = new SuspendedTownParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
             suspendedtownparticle.pickSprite(this.sprite);
             suspendedtownparticle.setColor(1.0F, 1.0F, 1.0F);
             return suspendedtownparticle;
@@ -154,21 +154,21 @@ public class SuspendedTownParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_108191_) {
-            this.sprite = p_108191_;
+        public Provider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_108202_,
-            ClientLevel p_108203_,
-            double p_108204_,
-            double p_108205_,
-            double p_108206_,
-            double p_108207_,
-            double p_108208_,
-            double p_108209_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            SuspendedTownParticle suspendedtownparticle = new SuspendedTownParticle(p_108203_, p_108204_, p_108205_, p_108206_, p_108207_, p_108208_, p_108209_);
+            SuspendedTownParticle suspendedtownparticle = new SuspendedTownParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
             suspendedtownparticle.pickSprite(this.sprite);
             return suspendedtownparticle;
         }

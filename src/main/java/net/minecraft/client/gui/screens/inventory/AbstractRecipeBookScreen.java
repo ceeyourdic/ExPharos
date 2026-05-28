@@ -20,9 +20,9 @@ public abstract class AbstractRecipeBookScreen<T extends RecipeBookMenu> extends
     private final RecipeBookComponent<?> recipeBookComponent;
     private boolean widthTooNarrow;
 
-    public AbstractRecipeBookScreen(T p_365857_, RecipeBookComponent<?> p_370150_, Inventory p_369435_, Component p_366314_) {
-        super(p_365857_, p_369435_, p_366314_);
-        this.recipeBookComponent = p_370150_;
+    public AbstractRecipeBookScreen(T pMenu, RecipeBookComponent<?> pRecipeBookComponent, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, pPlayerInventory, pTitle);
+        this.recipeBookComponent = pRecipeBookComponent;
     }
 
     @Override

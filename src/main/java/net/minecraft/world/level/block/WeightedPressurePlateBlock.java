@@ -32,15 +32,15 @@ public class WeightedPressurePlateBlock extends BasePressurePlateBlock {
         return CODEC;
     }
 
-    protected WeightedPressurePlateBlock(int p_273669_, BlockSetType p_272868_, BlockBehaviour.Properties p_273512_) {
-        super(p_273512_, p_272868_);
+    protected WeightedPressurePlateBlock(int pMaxWeight, BlockSetType pType, BlockBehaviour.Properties pProperties) {
+        super(pProperties, pType);
         this.registerDefaultState(this.stateDefinition.any().setValue(POWER, Integer.valueOf(0)));
-        this.maxWeight = p_273669_;
+        this.maxWeight = pMaxWeight;
     }
 
     @Override
-    protected int getSignalStrength(Level p_58213_, BlockPos p_58214_) {
-        int i = Math.min(getEntityCount(p_58213_, TOUCH_AABB.move(p_58214_), Entity.class), this.maxWeight);
+    protected int getSignalStrength(Level pLevel, BlockPos pPos) {
+        int i = Math.min(getEntityCount(pLevel, TOUCH_AABB.move(pPos), Entity.class), this.maxWeight);
         if (i > 0) {
             float f = (float)Math.min(this.maxWeight, i) / (float)this.maxWeight;
             return Mth.ceil(f * 15.0F);
@@ -50,13 +50,13 @@ public class WeightedPressurePlateBlock extends BasePressurePlateBlock {
     }
 
     @Override
-    protected int getSignalForState(BlockState p_58220_) {
-        return p_58220_.getValue(POWER);
+    protected int getSignalForState(BlockState pState) {
+        return pState.getValue(POWER);
     }
 
     @Override
-    protected BlockState setSignalForState(BlockState p_58208_, int p_58209_) {
-        return p_58208_.setValue(POWER, Integer.valueOf(p_58209_));
+    protected BlockState setSignalForState(BlockState pState, int pStrength) {
+        return pState.setValue(POWER, Integer.valueOf(pStrength));
     }
 
     @Override
@@ -65,7 +65,7 @@ public class WeightedPressurePlateBlock extends BasePressurePlateBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_58211_) {
-        p_58211_.add(POWER);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(POWER);
     }
 }

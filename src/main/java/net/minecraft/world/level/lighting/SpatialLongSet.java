@@ -9,19 +9,19 @@ import net.minecraft.util.Mth;
 public class SpatialLongSet extends LongLinkedOpenHashSet {
     private final SpatialLongSet.InternalMap map;
 
-    public SpatialLongSet(int p_164462_, float p_164463_) {
-        super(p_164462_, p_164463_);
-        this.map = new SpatialLongSet.InternalMap(p_164462_ / 64, p_164463_);
+    public SpatialLongSet(int pExpectedSize, float pLoadFactor) {
+        super(pExpectedSize, pLoadFactor);
+        this.map = new SpatialLongSet.InternalMap(pExpectedSize / 64, pLoadFactor);
     }
 
     @Override
-    public boolean add(long p_164465_) {
-        return this.map.addBit(p_164465_);
+    public boolean add(long pValue) {
+        return this.map.addBit(pValue);
     }
 
     @Override
-    public boolean rem(long p_164468_) {
-        return this.map.removeBit(p_164468_);
+    public boolean rem(long pValue) {
+        return this.map.removeBit(pValue);
     }
 
     @Override
@@ -51,31 +51,31 @@ public class SpatialLongSet extends LongLinkedOpenHashSet {
         private long lastOuterKey;
         private final int minSize;
 
-        public InternalMap(int p_164483_, float p_164484_) {
-            super(p_164483_, p_164484_);
-            this.minSize = p_164483_;
+        public InternalMap(int pMinSize, float pLoadFactor) {
+            super(pMinSize, pLoadFactor);
+            this.minSize = pMinSize;
         }
 
-        static long getOuterKey(long p_164490_) {
-            return p_164490_ & ~OUTER_MASK;
+        static long getOuterKey(long pValue) {
+            return pValue & ~OUTER_MASK;
         }
 
-        static int getInnerKey(long p_164498_) {
-            int i = (int)(p_164498_ >>> X_OFFSET & 3L);
-            int j = (int)(p_164498_ >>> 0 & 3L);
-            int k = (int)(p_164498_ >>> Z_OFFSET & 3L);
+        static int getInnerKey(long pValue) {
+            int i = (int)(pValue >>> X_OFFSET & 3L);
+            int j = (int)(pValue >>> 0 & 3L);
+            int k = (int)(pValue >>> Z_OFFSET & 3L);
             return i << 4 | k << 2 | j;
         }
 
-        static long getFullKey(long p_164492_, int p_164493_) {
-            p_164492_ |= (long)(p_164493_ >>> 4 & 3) << X_OFFSET;
-            p_164492_ |= (long)(p_164493_ >>> 2 & 3) << Z_OFFSET;
-            return p_164492_ | (long)(p_164493_ >>> 0 & 3) << 0;
+        static long getFullKey(long pValue, int pTrailingZeros) {
+            pValue |= (long)(pTrailingZeros >>> 4 & 3) << X_OFFSET;
+            pValue |= (long)(pTrailingZeros >>> 2 & 3) << Z_OFFSET;
+            return pValue | (long)(pTrailingZeros >>> 0 & 3) << 0;
         }
 
-        public boolean addBit(long p_164500_) {
-            long i = getOuterKey(p_164500_);
-            int j = getInnerKey(p_164500_);
+        public boolean addBit(long pValue) {
+            long i = getOuterKey(pValue);
+            int j = getInnerKey(pValue);
             long k = 1L << j;
             int l;
             if (i == 0L) {
@@ -122,15 +122,15 @@ public class SpatialLongSet extends LongLinkedOpenHashSet {
             return false;
         }
 
-        private boolean replaceBit(int p_164487_, long p_164488_) {
-            boolean flag = (this.value[p_164487_] & p_164488_) != 0L;
-            this.value[p_164487_] = this.value[p_164487_] | p_164488_;
+        private boolean replaceBit(int pIndex, long pValue) {
+            boolean flag = (this.value[pIndex] & pValue) != 0L;
+            this.value[pIndex] = this.value[pIndex] | pValue;
             return flag;
         }
 
-        public boolean removeBit(long p_164502_) {
-            long i = getOuterKey(p_164502_);
-            int j = getInnerKey(p_164502_);
+        public boolean removeBit(long pValue) {
+            long i = getOuterKey(pValue);
+            int j = getInnerKey(pValue);
             long k = 1L << j;
             if (i == 0L) {
                 return this.containsNullKey ? this.removeFromNullEntry(k) : false;
@@ -154,11 +154,11 @@ public class SpatialLongSet extends LongLinkedOpenHashSet {
             }
         }
 
-        private boolean removeFromNullEntry(long p_164504_) {
-            if ((this.value[this.n] & p_164504_) == 0L) {
+        private boolean removeFromNullEntry(long pValue) {
+            if ((this.value[this.n] & pValue) == 0L) {
                 return false;
             } else {
-                this.value[this.n] = this.value[this.n] & ~p_164504_;
+                this.value[this.n] = this.value[this.n] & ~pValue;
                 if (this.value[this.n] != 0L) {
                     return true;
                 } else {
@@ -174,18 +174,18 @@ public class SpatialLongSet extends LongLinkedOpenHashSet {
             }
         }
 
-        private boolean removeFromEntry(int p_164495_, long p_164496_) {
-            if ((this.value[p_164495_] & p_164496_) == 0L) {
+        private boolean removeFromEntry(int pIndex, long pValue) {
+            if ((this.value[pIndex] & pValue) == 0L) {
                 return false;
             } else {
-                this.value[p_164495_] = this.value[p_164495_] & ~p_164496_;
-                if (this.value[p_164495_] != 0L) {
+                this.value[pIndex] = this.value[pIndex] & ~pValue;
+                if (this.value[pIndex] != 0L) {
                     return true;
                 } else {
                     this.lastPos = -1;
                     this.size--;
-                    this.fixPointers(p_164495_);
-                    this.shiftKeys(p_164495_);
+                    this.fixPointers(pIndex);
+                    this.shiftKeys(pIndex);
                     if (this.size < this.maxFill / 4 && this.n > 16) {
                         this.rehash(this.n / 2);
                     }
@@ -213,9 +213,9 @@ public class SpatialLongSet extends LongLinkedOpenHashSet {
         }
 
         @Override
-        protected void rehash(int p_164506_) {
-            if (p_164506_ > this.minSize) {
-                super.rehash(p_164506_);
+        protected void rehash(int pNewSize) {
+            if (pNewSize > this.minSize) {
+                super.rehash(pNewSize);
             }
         }
     }

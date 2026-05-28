@@ -7,15 +7,15 @@ import net.minecraft.server.PlayerAdvancements;
 
 public class ImpossibleTrigger implements CriterionTrigger<ImpossibleTrigger.TriggerInstance> {
     @Override
-    public void addPlayerListener(PlayerAdvancements p_41565_, CriterionTrigger.Listener<ImpossibleTrigger.TriggerInstance> p_41566_) {
+    public void addPlayerListener(PlayerAdvancements pPlayerAdvancements, CriterionTrigger.Listener<ImpossibleTrigger.TriggerInstance> pListener) {
     }
 
     @Override
-    public void removePlayerListener(PlayerAdvancements p_41572_, CriterionTrigger.Listener<ImpossibleTrigger.TriggerInstance> p_41573_) {
+    public void removePlayerListener(PlayerAdvancements pPlayerAdvancements, CriterionTrigger.Listener<ImpossibleTrigger.TriggerInstance> pListener) {
     }
 
     @Override
-    public void removePlayerListeners(PlayerAdvancements p_41563_) {
+    public void removePlayerListeners(PlayerAdvancements pPlayerAdvancements) {
     }
 
     @Override

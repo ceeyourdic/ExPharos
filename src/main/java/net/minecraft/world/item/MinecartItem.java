@@ -19,20 +19,20 @@ import net.minecraft.world.phys.Vec3;
 public class MinecartItem extends Item {
     private final EntityType<? extends AbstractMinecart> type;
 
-    public MinecartItem(EntityType<? extends AbstractMinecart> p_364411_, Item.Properties p_42939_) {
-        super(p_42939_);
-        this.type = p_364411_;
+    public MinecartItem(EntityType<? extends AbstractMinecart> pType, Item.Properties pProperties) {
+        super(pProperties);
+        this.type = pType;
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext p_42943_) {
-        Level level = p_42943_.getLevel();
-        BlockPos blockpos = p_42943_.getClickedPos();
+    public InteractionResult useOn(UseOnContext pContext) {
+        Level level = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
         BlockState blockstate = level.getBlockState(blockpos);
         if (!blockstate.is(BlockTags.RAILS)) {
             return InteractionResult.FAIL;
         } else {
-            ItemStack itemstack = p_42943_.getItemInHand();
+            ItemStack itemstack = pContext.getItemInHand();
             RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock
                 ? blockstate.getValue(((BaseRailBlock)blockstate.getBlock()).getShapeProperty())
                 : RailShape.NORTH_SOUTH;
@@ -43,7 +43,7 @@ public class MinecartItem extends Item {
 
             Vec3 vec3 = new Vec3((double)blockpos.getX() + 0.5, (double)blockpos.getY() + 0.0625 + d0, (double)blockpos.getZ() + 0.5);
             AbstractMinecart abstractminecart = AbstractMinecart.createMinecart(
-                level, vec3.x, vec3.y, vec3.z, this.type, EntitySpawnReason.DISPENSER, itemstack, p_42943_.getPlayer()
+                level, vec3.x, vec3.y, vec3.z, this.type, EntitySpawnReason.DISPENSER, itemstack, pContext.getPlayer()
             );
             if (abstractminecart == null) {
                 return InteractionResult.FAIL;
@@ -59,7 +59,7 @@ public class MinecartItem extends Item {
                 if (level instanceof ServerLevel serverlevel) {
                     serverlevel.addFreshEntity(abstractminecart);
                     serverlevel.gameEvent(
-                        GameEvent.ENTITY_PLACE, blockpos, GameEvent.Context.of(p_42943_.getPlayer(), serverlevel.getBlockState(blockpos.below()))
+                        GameEvent.ENTITY_PLACE, blockpos, GameEvent.Context.of(pContext.getPlayer(), serverlevel.getBlockState(blockpos.below()))
                     );
                 }
 

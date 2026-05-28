@@ -153,19 +153,19 @@ public class MangrovePropaguleBlock extends SaplingBlock implements SimpleWaterl
         }
     }
 
-    private static boolean isHanging(BlockState p_221500_) {
-        return p_221500_.getValue(HANGING);
+    private static boolean isHanging(BlockState pState) {
+        return pState.getValue(HANGING);
     }
 
-    private static boolean isFullyGrown(BlockState p_221502_) {
-        return p_221502_.getValue(AGE) == 4;
+    private static boolean isFullyGrown(BlockState pState) {
+        return pState.getValue(AGE) == 4;
     }
 
     public static BlockState createNewHangingPropagule() {
         return createNewHangingPropagule(0);
     }
 
-    public static BlockState createNewHangingPropagule(int p_221486_) {
-        return Blocks.MANGROVE_PROPAGULE.defaultBlockState().setValue(HANGING, Boolean.valueOf(true)).setValue(AGE, Integer.valueOf(p_221486_));
+    public static BlockState createNewHangingPropagule(int pAge) {
+        return Blocks.MANGROVE_PROPAGULE.defaultBlockState().setValue(HANGING, Boolean.valueOf(true)).setValue(AGE, Integer.valueOf(pAge));
     }
 }

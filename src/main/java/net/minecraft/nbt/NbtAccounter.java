@@ -9,35 +9,35 @@ public class NbtAccounter {
     private final int maxDepth;
     private int depth;
 
-    public NbtAccounter(long p_128922_, int p_301724_) {
-        this.quota = p_128922_;
-        this.maxDepth = p_301724_;
+    public NbtAccounter(long pQuota, int pMaxDepth) {
+        this.quota = pQuota;
+        this.maxDepth = pMaxDepth;
     }
 
-    public static NbtAccounter create(long p_301706_) {
-        return new NbtAccounter(p_301706_, 512);
+    public static NbtAccounter create(long pQuota) {
+        return new NbtAccounter(pQuota, 512);
     }
 
     public static NbtAccounter unlimitedHeap() {
         return new NbtAccounter(Long.MAX_VALUE, 512);
     }
 
-    public void accountBytes(long p_301856_, long p_301857_) {
-        this.accountBytes(p_301856_ * p_301857_);
+    public void accountBytes(long pBytesPerItem, long pItems) {
+        this.accountBytes(pBytesPerItem * pItems);
     }
 
-    public void accountBytes(long p_263515_) {
-        if (this.usage + p_263515_ > this.quota) {
+    public void accountBytes(long pBytes) {
+        if (this.usage + pBytes > this.quota) {
             throw new NbtAccounterException(
                 "Tried to read NBT tag that was too big; tried to allocate: "
                     + this.usage
                     + " + "
-                    + p_263515_
+                    + pBytes
                     + " bytes where max allowed: "
                     + this.quota
             );
         } else {
-            this.usage += p_263515_;
+            this.usage += pBytes;
         }
     }
 

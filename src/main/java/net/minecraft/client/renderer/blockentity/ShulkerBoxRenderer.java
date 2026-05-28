@@ -14,19 +14,16 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class ShulkerBoxRenderer implements BlockEntityRenderer<ShulkerBoxBlockEntity> {
     private final ShulkerBoxRenderer.ShulkerBoxModel model;
 
-    public ShulkerBoxRenderer(BlockEntityRendererProvider.Context p_173626_) {
-        this(p_173626_.getModelSet());
+    public ShulkerBoxRenderer(BlockEntityRendererProvider.Context pContext) {
+        this(pContext.getModelSet());
     }
 
-    public ShulkerBoxRenderer(EntityModelSet p_376600_) {
-        this.model = new ShulkerBoxRenderer.ShulkerBoxModel(p_376600_.bakeLayer(ModelLayers.SHULKER_BOX));
+    public ShulkerBoxRenderer(EntityModelSet pModelSet) {
+        this.model = new ShulkerBoxRenderer.ShulkerBoxModel(pModelSet.bakeLayer(ModelLayers.SHULKER_BOX));
     }
 
     public void render(ShulkerBoxBlockEntity p_112478_, float p_112479_, PoseStack p_112480_, MultiBufferSource p_112481_, int p_112482_, int p_112483_) {
@@ -44,33 +41,32 @@ public class ShulkerBoxRenderer implements BlockEntityRenderer<ShulkerBoxBlockEn
     }
 
     public void render(
-        PoseStack p_377777_, MultiBufferSource p_376764_, int p_375733_, int p_376539_, Direction p_378012_, float p_376701_, Material p_377573_
+        PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay, Direction pFacing, float pProgress, Material pMaterial
     ) {
-        p_377777_.pushPose();
-        p_377777_.translate(0.5F, 0.5F, 0.5F);
+        pPoseStack.pushPose();
+        pPoseStack.translate(0.5F, 0.5F, 0.5F);
         float f = 0.9995F;
-        p_377777_.scale(0.9995F, 0.9995F, 0.9995F);
-        p_377777_.mulPose(p_378012_.getRotation());
-        p_377777_.scale(1.0F, -1.0F, -1.0F);
-        p_377777_.translate(0.0F, -1.0F, 0.0F);
-        this.model.animate(p_376701_);
-        VertexConsumer vertexconsumer = p_377573_.buffer(p_376764_, this.model::renderType);
-        this.model.renderToBuffer(p_377777_, vertexconsumer, p_375733_, p_376539_);
-        p_377777_.popPose();
+        pPoseStack.scale(0.9995F, 0.9995F, 0.9995F);
+        pPoseStack.mulPose(pFacing.getRotation());
+        pPoseStack.scale(1.0F, -1.0F, -1.0F);
+        pPoseStack.translate(0.0F, -1.0F, 0.0F);
+        this.model.animate(pProgress);
+        VertexConsumer vertexconsumer = pMaterial.buffer(pBufferSource, this.model::renderType);
+        this.model.renderToBuffer(pPoseStack, vertexconsumer, pPackedLight, pPackedOverlay);
+        pPoseStack.popPose();
     }
 
-    @OnlyIn(Dist.CLIENT)
-    static class ShulkerBoxModel extends Model {
+    public static class ShulkerBoxModel extends Model {
         private final ModelPart lid;
 
-        public ShulkerBoxModel(ModelPart p_366433_) {
-            super(p_366433_, RenderType::entityCutoutNoCull);
-            this.lid = p_366433_.getChild("lid");
+        public ShulkerBoxModel(ModelPart pRoot) {
+            super(pRoot, RenderType::entityCutoutNoCull);
+            this.lid = pRoot.getChild("lid");
         }
 
-        public void animate(float p_363916_) {
-            this.lid.setPos(0.0F, 24.0F - p_363916_ * 0.5F * 16.0F, 0.0F);
-            this.lid.yRot = 270.0F * p_363916_ * (float) (Math.PI / 180.0);
+        public void animate(float pProgress) {
+            this.lid.setPos(0.0F, 24.0F - pProgress * 0.5F * 16.0F, 0.0F);
+            this.lid.yRot = 270.0F * pProgress * (float) (Math.PI / 180.0);
         }
     }
 }

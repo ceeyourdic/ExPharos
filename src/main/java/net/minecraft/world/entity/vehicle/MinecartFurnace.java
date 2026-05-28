@@ -94,52 +94,52 @@ public class MinecartFurnace extends AbstractMinecart {
         return super.applyNaturalSlowdown(vec3);
     }
 
-    private Vec3 calculateNewPushAlong(Vec3 p_362599_) {
+    private Vec3 calculateNewPushAlong(Vec3 pSpeed) {
         double d0 = 1.0E-4;
         double d1 = 0.001;
-        return this.push.horizontalDistanceSqr() > 1.0E-4 && p_362599_.horizontalDistanceSqr() > 0.001
-            ? this.push.projectedOn(p_362599_).normalize().scale(this.push.length())
+        return this.push.horizontalDistanceSqr() > 1.0E-4 && pSpeed.horizontalDistanceSqr() > 0.001
+            ? this.push.projectedOn(pSpeed).normalize().scale(this.push.length())
             : this.push;
     }
 
     @Override
-    public InteractionResult interact(Player p_38562_, InteractionHand p_38563_) {
-        ItemStack itemstack = p_38562_.getItemInHand(p_38563_);
+    public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
         if (itemstack.is(ItemTags.FURNACE_MINECART_FUEL) && this.fuel + 3600 <= 32000) {
-            itemstack.consume(1, p_38562_);
+            itemstack.consume(1, pPlayer);
             this.fuel += 3600;
         }
 
         if (this.fuel > 0) {
-            this.push = this.position().subtract(p_38562_.position()).horizontal();
+            this.push = this.position().subtract(pPlayer.position()).horizontal();
         }
 
         return InteractionResult.SUCCESS;
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag p_38567_) {
-        super.addAdditionalSaveData(p_38567_);
-        p_38567_.putDouble("PushX", this.push.x);
-        p_38567_.putDouble("PushZ", this.push.z);
-        p_38567_.putShort("Fuel", (short)this.fuel);
+    protected void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putDouble("PushX", this.push.x);
+        pCompound.putDouble("PushZ", this.push.z);
+        pCompound.putShort("Fuel", (short)this.fuel);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag p_38565_) {
-        super.readAdditionalSaveData(p_38565_);
-        double d0 = p_38565_.getDouble("PushX");
-        double d1 = p_38565_.getDouble("PushZ");
+    protected void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        double d0 = pCompound.getDouble("PushX");
+        double d1 = pCompound.getDouble("PushZ");
         this.push = new Vec3(d0, 0.0, d1);
-        this.fuel = p_38565_.getShort("Fuel");
+        this.fuel = pCompound.getShort("Fuel");
     }
 
     protected boolean hasFuel() {
         return this.entityData.get(DATA_ID_FUEL);
     }
 
-    protected void setHasFuel(boolean p_38577_) {
-        this.entityData.set(DATA_ID_FUEL, p_38577_);
+    protected void setHasFuel(boolean pHasFuel) {
+        this.entityData.set(DATA_ID_FUEL, pHasFuel);
     }
 
     @Override

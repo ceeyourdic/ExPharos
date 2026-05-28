@@ -39,10 +39,10 @@ public class ChaseClient {
     @Nullable
     private Thread thread;
 
-    public ChaseClient(String p_195990_, int p_195991_, MinecraftServer p_195992_) {
-        this.serverHost = p_195990_;
-        this.serverPort = p_195991_;
-        this.server = p_195992_;
+    public ChaseClient(String pServerHost, int pServerPort, MinecraftServer pServer) {
+        this.serverHost = pServerHost;
+        this.serverPort = pServerPort;
+        this.server = pServer;
     }
 
     public void start() {
@@ -98,8 +98,8 @@ public class ChaseClient {
         }
     }
 
-    private void handleMessage(String p_195995_) {
-        try (Scanner scanner = new Scanner(new StringReader(p_195995_))) {
+    private void handleMessage(String pMessage) {
+        try (Scanner scanner = new Scanner(new StringReader(pMessage))) {
             scanner.useLocale(Locale.ROOT);
             String s = scanner.next();
             if ("t".equals(s)) {
@@ -108,12 +108,12 @@ public class ChaseClient {
                 LOGGER.warn("Unknown message type '{}'", s);
             }
         } catch (NoSuchElementException nosuchelementexception) {
-            LOGGER.warn("Could not parse message '{}', ignoring", p_195995_);
+            LOGGER.warn("Could not parse message '{}', ignoring", pMessage);
         }
     }
 
-    private void handleTeleport(Scanner p_195997_) {
-        this.parseTarget(p_195997_)
+    private void handleTeleport(Scanner pScanner) {
+        this.parseTarget(pScanner)
             .ifPresent(
                 p_195999_ -> this.executeCommand(
                         String.format(
@@ -130,21 +130,21 @@ public class ChaseClient {
             );
     }
 
-    private Optional<ChaseClient.TeleportTarget> parseTarget(Scanner p_196004_) {
-        ResourceKey<Level> resourcekey = ChaseCommand.DIMENSION_NAMES.get(p_196004_.next());
+    private Optional<ChaseClient.TeleportTarget> parseTarget(Scanner pScanner) {
+        ResourceKey<Level> resourcekey = ChaseCommand.DIMENSION_NAMES.get(pScanner.next());
         if (resourcekey == null) {
             return Optional.empty();
         } else {
-            float f = p_196004_.nextFloat();
-            float f1 = p_196004_.nextFloat();
-            float f2 = p_196004_.nextFloat();
-            float f3 = p_196004_.nextFloat();
-            float f4 = p_196004_.nextFloat();
+            float f = pScanner.nextFloat();
+            float f1 = pScanner.nextFloat();
+            float f2 = pScanner.nextFloat();
+            float f3 = pScanner.nextFloat();
+            float f4 = pScanner.nextFloat();
             return Optional.of(new ChaseClient.TeleportTarget(resourcekey, new Vec3((double)f, (double)f1, (double)f2), new Vec2(f4, f3)));
         }
     }
 
-    private void executeCommand(String p_196002_) {
+    private void executeCommand(String pCommand) {
         this.server
             .execute(
                 () -> {
@@ -164,7 +164,7 @@ public class ChaseClient {
                             serverplayer
                         );
                         Commands commands = this.server.getCommands();
-                        commands.performPrefixedCommand(commandsourcestack, p_196002_);
+                        commands.performPrefixedCommand(commandsourcestack, pCommand);
                     }
                 }
             );

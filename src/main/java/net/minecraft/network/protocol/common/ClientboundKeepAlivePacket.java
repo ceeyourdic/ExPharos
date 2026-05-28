@@ -11,16 +11,16 @@ public class ClientboundKeepAlivePacket implements Packet<ClientCommonPacketList
     );
     private final long id;
 
-    public ClientboundKeepAlivePacket(long p_300888_) {
-        this.id = p_300888_;
+    public ClientboundKeepAlivePacket(long pId) {
+        this.id = pId;
     }
 
-    private ClientboundKeepAlivePacket(FriendlyByteBuf p_300278_) {
-        this.id = p_300278_.readLong();
+    private ClientboundKeepAlivePacket(FriendlyByteBuf pBuffer) {
+        this.id = pBuffer.readLong();
     }
 
-    private void write(FriendlyByteBuf p_299560_) {
-        p_299560_.writeLong(this.id);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeLong(this.id);
     }
 
     @Override

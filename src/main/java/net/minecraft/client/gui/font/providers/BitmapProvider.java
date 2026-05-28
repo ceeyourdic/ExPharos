@@ -23,19 +23,17 @@ import net.minecraft.client.gui.font.CodepointMap;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.util.FontUtils;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class BitmapProvider implements GlyphProvider {
     static final Logger LOGGER = LogUtils.getLogger();
     private final NativeImage image;
     private final CodepointMap<BitmapProvider.Glyph> glyphs;
 
-    BitmapProvider(NativeImage p_285380_, CodepointMap<BitmapProvider.Glyph> p_285445_) {
-        this.image = p_285380_;
-        this.glyphs = p_285445_;
+    BitmapProvider(NativeImage pImage, CodepointMap<BitmapProvider.Glyph> pGlyphs) {
+        this.image = pImage;
+        this.glyphs = pGlyphs;
     }
 
     @Override
@@ -54,49 +52,56 @@ public class BitmapProvider implements GlyphProvider {
         return IntSets.unmodifiable(this.glyphs.keySet());
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static record Definition(ResourceLocation file, int height, int ascent, int[][] codepointGrid) implements GlyphProviderDefinition {
-        private static final Codec<int[][]> CODEPOINT_GRID_CODEC = Codec.STRING.listOf().xmap(p_286900_ -> {
-            int i = p_286900_.size();
+        private static final Codec<int[][]> CODEPOINT_GRID_CODEC = Codec.STRING.listOf().xmap(listIn -> {
+            int i = listIn.size();
             int[][] aint = new int[i][];
 
             for (int j = 0; j < i; j++) {
-                aint[j] = p_286900_.get(j).codePoints().toArray();
+                aint[j] = listIn.get(j).codePoints().toArray();
             }
 
             return aint;
-        }, p_286828_ -> {
-            List<String> list = new ArrayList<>(p_286828_.length);
+        }, intsIn -> {
+            List<String> list = new ArrayList<>(intsIn.length);
 
-            for (int[] aint : p_286828_) {
+            for (int[] aint : intsIn) {
                 list.add(new String(aint, 0, aint.length));
             }
 
             return list;
         }).validate(BitmapProvider.Definition::validateDimensions);
         public static final MapCodec<BitmapProvider.Definition> CODEC = RecordCodecBuilder.<BitmapProvider.Definition>mapCodec(
-                p_286905_ -> p_286905_.group(
+                defIn -> defIn.group(
                             ResourceLocation.CODEC.fieldOf("file").forGetter(BitmapProvider.Definition::file),
                             Codec.INT.optionalFieldOf("height", Integer.valueOf(8)).forGetter(BitmapProvider.Definition::height),
                             Codec.INT.fieldOf("ascent").forGetter(BitmapProvider.Definition::ascent),
                             CODEPOINT_GRID_CODEC.fieldOf("chars").forGetter(BitmapProvider.Definition::codepointGrid)
                         )
-                        .apply(p_286905_, BitmapProvider.Definition::new)
+                        .apply(defIn, BitmapProvider.Definition::new)
             )
             .validate(BitmapProvider.Definition::validate);
 
-        private static DataResult<int[][]> validateDimensions(int[][] p_286348_) {
-            int i = p_286348_.length;
+        public Definition(ResourceLocation file, int height, int ascent, int[][] codepointGrid) {
+            file = FontUtils.getHdFontLocation(file);
+            this.file = file;
+            this.height = height;
+            this.ascent = ascent;
+            this.codepointGrid = codepointGrid;
+        }
+
+        private static DataResult<int[][]> validateDimensions(int[][] pDimensions) {
+            int i = pDimensions.length;
             if (i == 0) {
                 return DataResult.error(() -> "Expected to find data in codepoint grid");
             } else {
-                int[] aint = p_286348_[0];
+                int[] aint = pDimensions[0];
                 int j = aint.length;
                 if (j == 0) {
                     return DataResult.error(() -> "Expected to find data in codepoint grid");
                 } else {
                     for (int k = 1; k < i; k++) {
-                        int[] aint1 = p_286348_[k];
+                        int[] aint1 = pDimensions[k];
                         if (aint1.length != j) {
                             return DataResult.error(
                                 () -> "Lines in codepoint grid have to be the same length (found: "
@@ -108,15 +113,15 @@ public class BitmapProvider implements GlyphProvider {
                         }
                     }
 
-                    return DataResult.success(p_286348_);
+                    return DataResult.success(pDimensions);
                 }
             }
         }
 
-        private static DataResult<BitmapProvider.Definition> validate(BitmapProvider.Definition p_286662_) {
-            return p_286662_.ascent > p_286662_.height
-                ? DataResult.error(() -> "Ascent " + p_286662_.ascent + " higher than height " + p_286662_.height)
-                : DataResult.success(p_286662_);
+        private static DataResult<BitmapProvider.Definition> validate(BitmapProvider.Definition pDefinition) {
+            return pDefinition.ascent > pDefinition.height
+                ? DataResult.error(() -> "Ascent " + pDefinition.ascent + " higher than height " + pDefinition.height)
+                : DataResult.success(pDefinition);
         }
 
         @Override
@@ -129,11 +134,11 @@ public class BitmapProvider implements GlyphProvider {
             return Either.left(this::load);
         }
 
-        private GlyphProvider load(ResourceManager p_286694_) throws IOException {
+        private GlyphProvider load(ResourceManager pResourceManager) throws IOException {
             ResourceLocation resourcelocation = this.file.withPrefix("textures/");
 
             BitmapProvider bitmapprovider;
-            try (InputStream inputstream = p_286694_.open(resourcelocation)) {
+            try (InputStream inputstream = pResourceManager.open(resourcelocation)) {
                 NativeImage nativeimage = NativeImage.read(NativeImage.Format.RGBA, inputstream);
                 int i = nativeimage.getWidth();
                 int j = nativeimage.getHeight();
@@ -165,14 +170,14 @@ public class BitmapProvider implements GlyphProvider {
             return bitmapprovider;
         }
 
-        private int getActualGlyphWidth(NativeImage p_286449_, int p_286656_, int p_286554_, int p_286657_, int p_286307_) {
+        private int getActualGlyphWidth(NativeImage pImage, int pWidth, int pHeight, int pX, int pY) {
             int i;
-            for (i = p_286656_ - 1; i >= 0; i--) {
-                int j = p_286657_ * p_286656_ + i;
+            for (i = pWidth - 1; i >= 0; i--) {
+                int j = pX * pWidth + i;
 
-                for (int k = 0; k < p_286554_; k++) {
-                    int l = p_286307_ * p_286554_ + k;
-                    if (p_286449_.getLuminanceOrAlpha(j, l) != 0) {
+                for (int k = 0; k < pHeight; k++) {
+                    int l = pY * pHeight + k;
+                    if (pImage.getLuminanceOrAlpha(j, l) != 0) {
                         return i + 1;
                     }
                 }
@@ -182,7 +187,6 @@ public class BitmapProvider implements GlyphProvider {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     static record Glyph(float scale, NativeImage image, int offsetX, int offsetY, int width, int height, int advance, int ascent)
         implements GlyphInfo {
         @Override

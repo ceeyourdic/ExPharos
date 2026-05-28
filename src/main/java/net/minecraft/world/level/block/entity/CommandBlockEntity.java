@@ -65,8 +65,8 @@ public class CommandBlockEntity extends BlockEntity {
         }
     };
 
-    public CommandBlockEntity(BlockPos p_155380_, BlockState p_155381_) {
-        super(BlockEntityType.COMMAND_BLOCK, p_155380_, p_155381_);
+    public CommandBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        super(BlockEntityType.COMMAND_BLOCK, pPos, pBlockState);
     }
 
     @Override
@@ -91,8 +91,8 @@ public class CommandBlockEntity extends BlockEntity {
         return this.commandBlock;
     }
 
-    public void setPowered(boolean p_59136_) {
-        this.powered = p_59136_;
+    public void setPowered(boolean pPowered) {
+        this.powered = pPowered;
     }
 
     public boolean isPowered() {
@@ -103,10 +103,10 @@ public class CommandBlockEntity extends BlockEntity {
         return this.auto;
     }
 
-    public void setAutomatic(boolean p_59138_) {
+    public void setAutomatic(boolean pAuto) {
         boolean flag = this.auto;
-        this.auto = p_59138_;
-        if (!flag && p_59138_ && !this.powered && this.level != null && this.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
+        this.auto = pAuto;
+        if (!flag && pAuto && !this.powered && this.level != null && this.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
             this.scheduleTick();
         }
     }

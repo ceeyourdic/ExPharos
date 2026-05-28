@@ -30,12 +30,12 @@ public abstract class PacketEvent extends Event {
     @DataAmount
     public final int bytes;
 
-    public PacketEvent(String p_299040_, String p_335198_, String p_329249_, SocketAddress p_185421_, int p_185419_) {
-        this.protocolId = p_299040_;
-        this.packetDirection = p_335198_;
-        this.packetId = p_329249_;
-        this.remoteAddress = p_185421_.toString();
-        this.bytes = p_185419_;
+    public PacketEvent(String pProtocolId, String pPacketDirection, String pPacketId, SocketAddress pAddress, int pBytes) {
+        this.protocolId = pProtocolId;
+        this.packetDirection = pPacketDirection;
+        this.packetId = pPacketId;
+        this.remoteAddress = pAddress.toString();
+        this.bytes = pBytes;
     }
 
     public static final class Fields {

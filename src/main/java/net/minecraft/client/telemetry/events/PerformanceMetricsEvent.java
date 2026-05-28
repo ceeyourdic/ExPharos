@@ -57,7 +57,7 @@ public final class PerformanceMetricsEvent extends AggregatedTelemetryEvent {
         this.resetValues();
     }
 
-    private static long toKilobytes(long p_261471_) {
-        return p_261471_ / 1000L;
+    private static long toKilobytes(long pBytes) {
+        return pBytes / 1000L;
     }
 }

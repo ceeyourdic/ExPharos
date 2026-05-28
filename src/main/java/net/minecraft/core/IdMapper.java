@@ -18,27 +18,27 @@ public class IdMapper<T> implements IdMap<T> {
         this(512);
     }
 
-    public IdMapper(int p_122658_) {
-        this.idToT = Lists.newArrayListWithExpectedSize(p_122658_);
-        this.tToId = new Reference2IntOpenHashMap<>(p_122658_);
+    public IdMapper(int pExpectedSize) {
+        this.idToT = Lists.newArrayListWithExpectedSize(pExpectedSize);
+        this.tToId = new Reference2IntOpenHashMap<>(pExpectedSize);
         this.tToId.defaultReturnValue(-1);
     }
 
-    public void addMapping(T p_122665_, int p_122666_) {
-        this.tToId.put(p_122665_, p_122666_);
+    public void addMapping(T pKey, int pValue) {
+        this.tToId.put(pKey, pValue);
 
-        while (this.idToT.size() <= p_122666_) {
+        while (this.idToT.size() <= pValue) {
             this.idToT.add(null);
         }
 
-        this.idToT.set(p_122666_, p_122665_);
-        if (this.nextId <= p_122666_) {
-            this.nextId = p_122666_ + 1;
+        this.idToT.set(pValue, pKey);
+        if (this.nextId <= pValue) {
+            this.nextId = pValue + 1;
         }
     }
 
-    public void add(T p_122668_) {
-        this.addMapping(p_122668_, this.nextId);
+    public void add(T pKey) {
+        this.addMapping(pKey, this.nextId);
     }
 
     @Override
@@ -57,8 +57,8 @@ public class IdMapper<T> implements IdMap<T> {
         return Iterators.filter(this.idToT.iterator(), Objects::nonNull);
     }
 
-    public boolean contains(int p_175381_) {
-        return this.byId(p_175381_) != null;
+    public boolean contains(int pId) {
+        return this.byId(pId) != null;
     }
 
     @Override

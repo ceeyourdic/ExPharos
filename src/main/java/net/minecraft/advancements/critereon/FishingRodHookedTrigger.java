@@ -21,9 +21,9 @@ public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHo
         return FishingRodHookedTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_40417_, ItemStack p_40418_, FishingHook p_40419_, Collection<ItemStack> p_40420_) {
-        LootContext lootcontext = EntityPredicate.createContext(p_40417_, (Entity)(p_40419_.getHookedIn() != null ? p_40419_.getHookedIn() : p_40419_));
-        this.trigger(p_40417_, p_40425_ -> p_40425_.matches(p_40418_, lootcontext, p_40420_));
+    public void trigger(ServerPlayer pPlayer, ItemStack pRod, FishingHook pEntity, Collection<ItemStack> pStacks) {
+        LootContext lootcontext = EntityPredicate.createContext(pPlayer, (Entity)(pEntity.getHookedIn() != null ? pEntity.getHookedIn() : pEntity));
+        this.trigger(pPlayer, p_40425_ -> p_40425_.matches(pRod, lootcontext, pStacks));
     }
 
     public static record TriggerInstance(
@@ -40,26 +40,26 @@ public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHo
         );
 
         public static Criterion<FishingRodHookedTrigger.TriggerInstance> fishedItem(
-            Optional<ItemPredicate> p_300012_, Optional<EntityPredicate> p_297455_, Optional<ItemPredicate> p_297238_
+            Optional<ItemPredicate> pRod, Optional<EntityPredicate> pEntity, Optional<ItemPredicate> pItem
         ) {
             return CriteriaTriggers.FISHING_ROD_HOOKED
-                .createCriterion(new FishingRodHookedTrigger.TriggerInstance(Optional.empty(), p_300012_, EntityPredicate.wrap(p_297455_), p_297238_));
+                .createCriterion(new FishingRodHookedTrigger.TriggerInstance(Optional.empty(), pRod, EntityPredicate.wrap(pEntity), pItem));
         }
 
-        public boolean matches(ItemStack p_40444_, LootContext p_40445_, Collection<ItemStack> p_40446_) {
-            if (this.rod.isPresent() && !this.rod.get().test(p_40444_)) {
+        public boolean matches(ItemStack pRod, LootContext pContext, Collection<ItemStack> pStacks) {
+            if (this.rod.isPresent() && !this.rod.get().test(pRod)) {
                 return false;
-            } else if (this.entity.isPresent() && !this.entity.get().matches(p_40445_)) {
+            } else if (this.entity.isPresent() && !this.entity.get().matches(pContext)) {
                 return false;
             } else {
                 if (this.item.isPresent()) {
                     boolean flag = false;
-                    Entity entity = p_40445_.getOptionalParameter(LootContextParams.THIS_ENTITY);
+                    Entity entity = pContext.getOptionalParameter(LootContextParams.THIS_ENTITY);
                     if (entity instanceof ItemEntity itementity && this.item.get().test(itementity.getItem())) {
                         flag = true;
                     }
 
-                    for (ItemStack itemstack : p_40446_) {
+                    for (ItemStack itemstack : pStacks) {
                         if (this.item.get().test(itemstack)) {
                             flag = true;
                             break;

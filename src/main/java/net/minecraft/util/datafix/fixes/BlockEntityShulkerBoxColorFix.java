@@ -6,8 +6,8 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.serialization.Dynamic;
 
 public class BlockEntityShulkerBoxColorFix extends NamedEntityFix {
-    public BlockEntityShulkerBoxColorFix(Schema p_14855_, boolean p_14856_) {
-        super(p_14855_, p_14856_, "BlockEntityShulkerBoxColorFix", References.BLOCK_ENTITY, "minecraft:shulker_box");
+    public BlockEntityShulkerBoxColorFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType, "BlockEntityShulkerBoxColorFix", References.BLOCK_ENTITY, "minecraft:shulker_box");
     }
 
     @Override

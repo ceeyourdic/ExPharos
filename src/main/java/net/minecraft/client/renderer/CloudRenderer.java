@@ -20,12 +20,11 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.shaders.Shaders;
 import org.joml.Matrix4f;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class CloudRenderer extends SimplePreparableReloadListener<Optional<CloudRenderer.TextureData>> implements AutoCloseable {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.withDefaultNamespace("textures/environment/clouds.png");
@@ -79,8 +78,8 @@ public class CloudRenderer extends SimplePreparableReloadListener<Optional<Cloud
             }
 
             return optional;
-        } catch (IOException ioexception) {
-            LOGGER.error("Failed to load cloud texture", (Throwable)ioexception);
+        } catch (IOException ioexception1) {
+            LOGGER.error("Failed to load cloud texture", (Throwable)ioexception1);
             return Optional.empty();
         }
     }
@@ -90,41 +89,41 @@ public class CloudRenderer extends SimplePreparableReloadListener<Optional<Cloud
         this.needsRebuild = true;
     }
 
-    private static boolean isCellEmpty(int p_366824_) {
-        return ARGB.alpha(p_366824_) < 10;
+    private static boolean isCellEmpty(int pColor) {
+        return ARGB.alpha(pColor) < 10;
     }
 
-    private static long packCellData(int p_364599_, boolean p_362267_, boolean p_364671_, boolean p_363926_, boolean p_361986_) {
-        return (long)p_364599_ << 4
-            | (long)((p_362267_ ? 1 : 0) << 3)
-            | (long)((p_364671_ ? 1 : 0) << 2)
-            | (long)((p_363926_ ? 1 : 0) << 1)
-            | (long)((p_361986_ ? 1 : 0) << 0);
+    private static long packCellData(int pColor, boolean pNorthEmpty, boolean pEastEmpty, boolean pSouthEmpty, boolean pWestEmpty) {
+        return (long)pColor << 4
+            | (long)((pNorthEmpty ? 1 : 0) << 3)
+            | (long)((pEastEmpty ? 1 : 0) << 2)
+            | (long)((pSouthEmpty ? 1 : 0) << 1)
+            | (long)((pWestEmpty ? 1 : 0) << 0);
     }
 
-    private static int getColor(long p_362131_) {
-        return (int)(p_362131_ >> 4 & 4294967295L);
+    private static int getColor(long pCellData) {
+        return (int)(pCellData >> 4 & 4294967295L);
     }
 
-    private static boolean isNorthEmpty(long p_369910_) {
-        return (p_369910_ >> 3 & 1L) != 0L;
+    private static boolean isNorthEmpty(long pCellData) {
+        return (pCellData >> 3 & 1L) != 0L;
     }
 
-    private static boolean isEastEmpty(long p_365859_) {
-        return (p_365859_ >> 2 & 1L) != 0L;
+    private static boolean isEastEmpty(long pCellData) {
+        return (pCellData >> 2 & 1L) != 0L;
     }
 
-    private static boolean isSouthEmpty(long p_362752_) {
-        return (p_362752_ >> 1 & 1L) != 0L;
+    private static boolean isSouthEmpty(long pCellData) {
+        return (pCellData >> 1 & 1L) != 0L;
     }
 
-    private static boolean isWestEmpty(long p_366272_) {
-        return (p_366272_ >> 0 & 1L) != 0L;
+    private static boolean isWestEmpty(long pCellData) {
+        return (pCellData >> 0 & 1L) != 0L;
     }
 
-    public void render(int p_369834_, CloudStatus p_363277_, float p_367079_, Matrix4f p_369388_, Matrix4f p_361189_, Vec3 p_367264_, float p_364211_) {
+    public void render(int pHeight, CloudStatus pCloudStatus, float pColor, Matrix4f pFrustumMatrix, Matrix4f pProjectionMatrix, Vec3 pCameraPosiiton, float pTicks) {
         if (this.texture != null) {
-            float f = (float)((double)p_367079_ - p_367264_.y);
+            float f = (float)((double)pColor - pCameraPosiiton.y);
             float f1 = f + 4.0F;
             CloudRenderer.RelativeCameraPos cloudrenderer$relativecamerapos;
             if (f1 < 0.0F) {
@@ -135,8 +134,8 @@ public class CloudRenderer extends SimplePreparableReloadListener<Optional<Cloud
                 cloudrenderer$relativecamerapos = CloudRenderer.RelativeCameraPos.INSIDE_CLOUDS;
             }
 
-            double d0 = p_367264_.x + (double)(p_364211_ * 0.030000001F);
-            double d1 = p_367264_.z + 3.96F;
+            double d0 = pCameraPosiiton.x + (double)(pTicks * 0.030000001F);
+            double d1 = pCameraPosiiton.z + 3.96F;
             double d2 = (double)this.texture.width * 12.0;
             double d3 = (double)this.texture.height * 12.0;
             d0 -= (double)Mth.floor(d0 / d2) * d2;
@@ -145,19 +144,19 @@ public class CloudRenderer extends SimplePreparableReloadListener<Optional<Cloud
             int j = Mth.floor(d1 / 12.0);
             float f2 = (float)(d0 - (double)((float)i * 12.0F));
             float f3 = (float)(d1 - (double)((float)j * 12.0F));
-            RenderType rendertype = p_363277_ == CloudStatus.FANCY ? RenderType.clouds() : RenderType.flatClouds();
+            RenderType rendertype = pCloudStatus == CloudStatus.FANCY ? RenderType.clouds() : RenderType.flatClouds();
             this.vertexBuffer.bind();
             if (this.needsRebuild
                 || i != this.prevCellX
                 || j != this.prevCellZ
                 || cloudrenderer$relativecamerapos != this.prevRelativeCameraPos
-                || p_363277_ != this.prevType) {
+                || pCloudStatus != this.prevType) {
                 this.needsRebuild = false;
                 this.prevCellX = i;
                 this.prevCellZ = j;
                 this.prevRelativeCameraPos = cloudrenderer$relativecamerapos;
-                this.prevType = p_363277_;
-                MeshData meshdata = this.buildMesh(Tesselator.getInstance(), i, j, p_363277_, cloudrenderer$relativecamerapos, rendertype);
+                this.prevType = pCloudStatus;
+                MeshData meshdata = this.buildMesh(Tesselator.getInstance(), i, j, pCloudStatus, cloudrenderer$relativecamerapos, rendertype);
                 if (meshdata != null) {
                     this.vertexBuffer.upload(meshdata);
                     this.vertexBufferEmpty = false;
@@ -167,53 +166,61 @@ public class CloudRenderer extends SimplePreparableReloadListener<Optional<Cloud
             }
 
             if (!this.vertexBufferEmpty) {
-                RenderSystem.setShaderColor(ARGB.redFloat(p_369834_), ARGB.greenFloat(p_369834_), ARGB.blueFloat(p_369834_), 1.0F);
-                if (p_363277_ == CloudStatus.FANCY) {
-                    this.drawWithRenderType(RenderType.cloudsDepthOnly(), p_369388_, p_361189_, f2, f, f3);
+                RenderSystem.setShaderColor(ARGB.redFloat(pHeight), ARGB.greenFloat(pHeight), ARGB.blueFloat(pHeight), 1.0F);
+                if (pCloudStatus == CloudStatus.FANCY) {
+                    this.drawWithRenderType(RenderType.cloudsDepthOnly(), pFrustumMatrix, pProjectionMatrix, f2, f, f3);
                 }
 
-                this.drawWithRenderType(rendertype, p_369388_, p_361189_, f2, f, f3);
+                this.drawWithRenderType(rendertype, pFrustumMatrix, pProjectionMatrix, f2, f, f3);
                 VertexBuffer.unbind();
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             }
         }
     }
 
-    private void drawWithRenderType(RenderType p_363350_, Matrix4f p_367527_, Matrix4f p_365707_, float p_363452_, float p_363001_, float p_369823_) {
-        p_363350_.setupRenderState();
+    private void drawWithRenderType(RenderType pRenderType, Matrix4f pFrustumMatrix, Matrix4f pProjectionMatrix, float pX, float pY, float pZ) {
+        pRenderType.setupRenderState();
         CompiledShaderProgram compiledshaderprogram = RenderSystem.getShader();
         if (compiledshaderprogram != null && compiledshaderprogram.MODEL_OFFSET != null) {
-            compiledshaderprogram.MODEL_OFFSET.set(-p_363452_, p_363001_, -p_369823_);
+            compiledshaderprogram.MODEL_OFFSET.set(-pX, pY, -pZ);
         }
 
-        this.vertexBuffer.drawWithShader(p_367527_, p_365707_, compiledshaderprogram);
-        p_363350_.clearRenderState();
+        if (Config.isShaders()) {
+            Shaders.uniform_modelOffset.setValue(-pX, pY, -pZ);
+        }
+
+        this.vertexBuffer.drawWithShader(pFrustumMatrix, pProjectionMatrix, compiledshaderprogram);
+        if (Config.isShaders()) {
+            Shaders.uniform_modelOffset.setValue(0.0F, 0.0F, 0.0F);
+        }
+
+        pRenderType.clearRenderState();
     }
 
     @Nullable
     private MeshData buildMesh(
-        Tesselator p_369688_, int p_363487_, int p_363111_, CloudStatus p_369576_, CloudRenderer.RelativeCameraPos p_366327_, RenderType p_364317_
+        Tesselator pTesselator, int pCellX, int pCellZ, CloudStatus pCloudStatus, CloudRenderer.RelativeCameraPos pRelativeCameraPos, RenderType pRenderType
     ) {
         float f = 0.8F;
         int i = ARGB.colorFromFloat(0.8F, 1.0F, 1.0F, 1.0F);
         int j = ARGB.colorFromFloat(0.8F, 0.9F, 0.9F, 0.9F);
         int k = ARGB.colorFromFloat(0.8F, 0.7F, 0.7F, 0.7F);
         int l = ARGB.colorFromFloat(0.8F, 0.8F, 0.8F, 0.8F);
-        BufferBuilder bufferbuilder = p_369688_.begin(p_364317_.mode(), p_364317_.format());
-        this.buildMesh(p_366327_, bufferbuilder, p_363487_, p_363111_, k, i, j, l, p_369576_ == CloudStatus.FANCY);
+        BufferBuilder bufferbuilder = pTesselator.begin(pRenderType.mode(), pRenderType.format());
+        this.buildMesh(pRelativeCameraPos, bufferbuilder, pCellX, pCellZ, k, i, j, l, Config.isCloudsFancy());
         return bufferbuilder.build();
     }
 
     private void buildMesh(
-        CloudRenderer.RelativeCameraPos p_369002_,
-        BufferBuilder p_368338_,
-        int p_362583_,
-        int p_363426_,
-        int p_366474_,
-        int p_363821_,
-        int p_368216_,
-        int p_370211_,
-        boolean p_369773_
+        CloudRenderer.RelativeCameraPos pRelativeCameraPos,
+        BufferBuilder pBufferBuilder,
+        int pCellX,
+        int pCellZ,
+        int pBottomColor,
+        int pTopColor,
+        int pSideColor,
+        int pFrontColor,
+        boolean pFancyClouds
     ) {
         if (this.texture != null) {
             int i = 32;
@@ -223,25 +230,25 @@ public class CloudRenderer extends SimplePreparableReloadListener<Optional<Cloud
 
             for (int l = -32; l <= 32; l++) {
                 for (int i1 = -32; i1 <= 32; i1++) {
-                    int j1 = Math.floorMod(p_362583_ + i1, j);
-                    int k1 = Math.floorMod(p_363426_ + l, k);
+                    int j1 = Math.floorMod(pCellX + i1, j);
+                    int k1 = Math.floorMod(pCellZ + l, k);
                     long l1 = along[j1 + k1 * j];
                     if (l1 != 0L) {
                         int i2 = getColor(l1);
-                        if (p_369773_) {
+                        if (pFancyClouds) {
                             this.buildExtrudedCell(
-                                p_369002_,
-                                p_368338_,
-                                ARGB.multiply(p_366474_, i2),
-                                ARGB.multiply(p_363821_, i2),
-                                ARGB.multiply(p_368216_, i2),
-                                ARGB.multiply(p_370211_, i2),
+                                pRelativeCameraPos,
+                                pBufferBuilder,
+                                ARGB.multiply(pBottomColor, i2),
+                                ARGB.multiply(pTopColor, i2),
+                                ARGB.multiply(pSideColor, i2),
+                                ARGB.multiply(pFrontColor, i2),
                                 i1,
                                 l,
                                 l1
                             );
                         } else {
-                            this.buildFlatCell(p_368338_, ARGB.multiply(p_363821_, i2), i1, l);
+                            this.buildFlatCell(pBufferBuilder, ARGB.multiply(pTopColor, i2), i1, l);
                         }
                     }
                 }
@@ -249,102 +256,102 @@ public class CloudRenderer extends SimplePreparableReloadListener<Optional<Cloud
         }
     }
 
-    private void buildFlatCell(BufferBuilder p_362581_, int p_362314_, int p_368834_, int p_364116_) {
-        float f = (float)p_368834_ * 12.0F;
+    private void buildFlatCell(BufferBuilder pBufferBuilder, int pColor, int pX, int pY) {
+        float f = (float)pX * 12.0F;
         float f1 = f + 12.0F;
-        float f2 = (float)p_364116_ * 12.0F;
+        float f2 = (float)pY * 12.0F;
         float f3 = f2 + 12.0F;
-        p_362581_.addVertex(f, 0.0F, f2).setColor(p_362314_);
-        p_362581_.addVertex(f, 0.0F, f3).setColor(p_362314_);
-        p_362581_.addVertex(f1, 0.0F, f3).setColor(p_362314_);
-        p_362581_.addVertex(f1, 0.0F, f2).setColor(p_362314_);
+        pBufferBuilder.addVertex(f, 0.0F, f2).setColor(pColor);
+        pBufferBuilder.addVertex(f, 0.0F, f3).setColor(pColor);
+        pBufferBuilder.addVertex(f1, 0.0F, f3).setColor(pColor);
+        pBufferBuilder.addVertex(f1, 0.0F, f2).setColor(pColor);
     }
 
     private void buildExtrudedCell(
-        CloudRenderer.RelativeCameraPos p_361197_,
-        BufferBuilder p_364242_,
-        int p_363655_,
-        int p_363819_,
-        int p_369270_,
-        int p_370048_,
-        int p_360917_,
-        int p_364085_,
-        long p_369137_
+        CloudRenderer.RelativeCameraPos pRelativeCameraPos,
+        BufferBuilder pBufferBuilder,
+        int pBottomColor,
+        int pTopColor,
+        int pSideColor,
+        int pFrontColor,
+        int pX,
+        int pY,
+        long pCellData
     ) {
-        float f = (float)p_360917_ * 12.0F;
+        float f = (float)pX * 12.0F;
         float f1 = f + 12.0F;
         float f2 = 0.0F;
         float f3 = 4.0F;
-        float f4 = (float)p_364085_ * 12.0F;
+        float f4 = (float)pY * 12.0F;
         float f5 = f4 + 12.0F;
-        if (p_361197_ != CloudRenderer.RelativeCameraPos.BELOW_CLOUDS) {
-            p_364242_.addVertex(f, 4.0F, f4).setColor(p_363819_);
-            p_364242_.addVertex(f, 4.0F, f5).setColor(p_363819_);
-            p_364242_.addVertex(f1, 4.0F, f5).setColor(p_363819_);
-            p_364242_.addVertex(f1, 4.0F, f4).setColor(p_363819_);
+        if (pRelativeCameraPos != CloudRenderer.RelativeCameraPos.BELOW_CLOUDS) {
+            pBufferBuilder.addVertex(f, 4.0F, f4).setColor(pTopColor);
+            pBufferBuilder.addVertex(f, 4.0F, f5).setColor(pTopColor);
+            pBufferBuilder.addVertex(f1, 4.0F, f5).setColor(pTopColor);
+            pBufferBuilder.addVertex(f1, 4.0F, f4).setColor(pTopColor);
         }
 
-        if (p_361197_ != CloudRenderer.RelativeCameraPos.ABOVE_CLOUDS) {
-            p_364242_.addVertex(f1, 0.0F, f4).setColor(p_363655_);
-            p_364242_.addVertex(f1, 0.0F, f5).setColor(p_363655_);
-            p_364242_.addVertex(f, 0.0F, f5).setColor(p_363655_);
-            p_364242_.addVertex(f, 0.0F, f4).setColor(p_363655_);
+        if (pRelativeCameraPos != CloudRenderer.RelativeCameraPos.ABOVE_CLOUDS) {
+            pBufferBuilder.addVertex(f1, 0.0F, f4).setColor(pBottomColor);
+            pBufferBuilder.addVertex(f1, 0.0F, f5).setColor(pBottomColor);
+            pBufferBuilder.addVertex(f, 0.0F, f5).setColor(pBottomColor);
+            pBufferBuilder.addVertex(f, 0.0F, f4).setColor(pBottomColor);
         }
 
-        if (isNorthEmpty(p_369137_) && p_364085_ > 0) {
-            p_364242_.addVertex(f, 0.0F, f4).setColor(p_370048_);
-            p_364242_.addVertex(f, 4.0F, f4).setColor(p_370048_);
-            p_364242_.addVertex(f1, 4.0F, f4).setColor(p_370048_);
-            p_364242_.addVertex(f1, 0.0F, f4).setColor(p_370048_);
+        if (isNorthEmpty(pCellData) && pY > 0) {
+            pBufferBuilder.addVertex(f, 0.0F, f4).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f, 4.0F, f4).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f1, 4.0F, f4).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f1, 0.0F, f4).setColor(pFrontColor);
         }
 
-        if (isSouthEmpty(p_369137_) && p_364085_ < 0) {
-            p_364242_.addVertex(f1, 0.0F, f5).setColor(p_370048_);
-            p_364242_.addVertex(f1, 4.0F, f5).setColor(p_370048_);
-            p_364242_.addVertex(f, 4.0F, f5).setColor(p_370048_);
-            p_364242_.addVertex(f, 0.0F, f5).setColor(p_370048_);
+        if (isSouthEmpty(pCellData) && pY < 0) {
+            pBufferBuilder.addVertex(f1, 0.0F, f5).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f1, 4.0F, f5).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f, 4.0F, f5).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f, 0.0F, f5).setColor(pFrontColor);
         }
 
-        if (isWestEmpty(p_369137_) && p_360917_ > 0) {
-            p_364242_.addVertex(f, 0.0F, f5).setColor(p_369270_);
-            p_364242_.addVertex(f, 4.0F, f5).setColor(p_369270_);
-            p_364242_.addVertex(f, 4.0F, f4).setColor(p_369270_);
-            p_364242_.addVertex(f, 0.0F, f4).setColor(p_369270_);
+        if (isWestEmpty(pCellData) && pX > 0) {
+            pBufferBuilder.addVertex(f, 0.0F, f5).setColor(pSideColor);
+            pBufferBuilder.addVertex(f, 4.0F, f5).setColor(pSideColor);
+            pBufferBuilder.addVertex(f, 4.0F, f4).setColor(pSideColor);
+            pBufferBuilder.addVertex(f, 0.0F, f4).setColor(pSideColor);
         }
 
-        if (isEastEmpty(p_369137_) && p_360917_ < 0) {
-            p_364242_.addVertex(f1, 0.0F, f4).setColor(p_369270_);
-            p_364242_.addVertex(f1, 4.0F, f4).setColor(p_369270_);
-            p_364242_.addVertex(f1, 4.0F, f5).setColor(p_369270_);
-            p_364242_.addVertex(f1, 0.0F, f5).setColor(p_369270_);
+        if (isEastEmpty(pCellData) && pX < 0) {
+            pBufferBuilder.addVertex(f1, 0.0F, f4).setColor(pSideColor);
+            pBufferBuilder.addVertex(f1, 4.0F, f4).setColor(pSideColor);
+            pBufferBuilder.addVertex(f1, 4.0F, f5).setColor(pSideColor);
+            pBufferBuilder.addVertex(f1, 0.0F, f5).setColor(pSideColor);
         }
 
-        boolean flag = Math.abs(p_360917_) <= 1 && Math.abs(p_364085_) <= 1;
+        boolean flag = Math.abs(pX) <= 1 && Math.abs(pY) <= 1;
         if (flag) {
-            p_364242_.addVertex(f1, 4.0F, f4).setColor(p_363819_);
-            p_364242_.addVertex(f1, 4.0F, f5).setColor(p_363819_);
-            p_364242_.addVertex(f, 4.0F, f5).setColor(p_363819_);
-            p_364242_.addVertex(f, 4.0F, f4).setColor(p_363819_);
-            p_364242_.addVertex(f, 0.0F, f4).setColor(p_363655_);
-            p_364242_.addVertex(f, 0.0F, f5).setColor(p_363655_);
-            p_364242_.addVertex(f1, 0.0F, f5).setColor(p_363655_);
-            p_364242_.addVertex(f1, 0.0F, f4).setColor(p_363655_);
-            p_364242_.addVertex(f1, 0.0F, f4).setColor(p_370048_);
-            p_364242_.addVertex(f1, 4.0F, f4).setColor(p_370048_);
-            p_364242_.addVertex(f, 4.0F, f4).setColor(p_370048_);
-            p_364242_.addVertex(f, 0.0F, f4).setColor(p_370048_);
-            p_364242_.addVertex(f, 0.0F, f5).setColor(p_370048_);
-            p_364242_.addVertex(f, 4.0F, f5).setColor(p_370048_);
-            p_364242_.addVertex(f1, 4.0F, f5).setColor(p_370048_);
-            p_364242_.addVertex(f1, 0.0F, f5).setColor(p_370048_);
-            p_364242_.addVertex(f, 0.0F, f4).setColor(p_369270_);
-            p_364242_.addVertex(f, 4.0F, f4).setColor(p_369270_);
-            p_364242_.addVertex(f, 4.0F, f5).setColor(p_369270_);
-            p_364242_.addVertex(f, 0.0F, f5).setColor(p_369270_);
-            p_364242_.addVertex(f1, 0.0F, f5).setColor(p_369270_);
-            p_364242_.addVertex(f1, 4.0F, f5).setColor(p_369270_);
-            p_364242_.addVertex(f1, 4.0F, f4).setColor(p_369270_);
-            p_364242_.addVertex(f1, 0.0F, f4).setColor(p_369270_);
+            pBufferBuilder.addVertex(f1, 4.0F, f4).setColor(pTopColor);
+            pBufferBuilder.addVertex(f1, 4.0F, f5).setColor(pTopColor);
+            pBufferBuilder.addVertex(f, 4.0F, f5).setColor(pTopColor);
+            pBufferBuilder.addVertex(f, 4.0F, f4).setColor(pTopColor);
+            pBufferBuilder.addVertex(f, 0.0F, f4).setColor(pBottomColor);
+            pBufferBuilder.addVertex(f, 0.0F, f5).setColor(pBottomColor);
+            pBufferBuilder.addVertex(f1, 0.0F, f5).setColor(pBottomColor);
+            pBufferBuilder.addVertex(f1, 0.0F, f4).setColor(pBottomColor);
+            pBufferBuilder.addVertex(f1, 0.0F, f4).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f1, 4.0F, f4).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f, 4.0F, f4).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f, 0.0F, f4).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f, 0.0F, f5).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f, 4.0F, f5).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f1, 4.0F, f5).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f1, 0.0F, f5).setColor(pFrontColor);
+            pBufferBuilder.addVertex(f, 0.0F, f4).setColor(pSideColor);
+            pBufferBuilder.addVertex(f, 4.0F, f4).setColor(pSideColor);
+            pBufferBuilder.addVertex(f, 4.0F, f5).setColor(pSideColor);
+            pBufferBuilder.addVertex(f, 0.0F, f5).setColor(pSideColor);
+            pBufferBuilder.addVertex(f1, 0.0F, f5).setColor(pSideColor);
+            pBufferBuilder.addVertex(f1, 4.0F, f5).setColor(pSideColor);
+            pBufferBuilder.addVertex(f1, 4.0F, f4).setColor(pSideColor);
+            pBufferBuilder.addVertex(f1, 0.0F, f4).setColor(pSideColor);
         }
     }
 
@@ -357,14 +364,12 @@ public class CloudRenderer extends SimplePreparableReloadListener<Optional<Cloud
         this.vertexBuffer.close();
     }
 
-    @OnlyIn(Dist.CLIENT)
     static enum RelativeCameraPos {
         ABOVE_CLOUDS,
         INSIDE_CLOUDS,
         BELOW_CLOUDS;
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static record TextureData(long[] cells, int width, int height) {
     }
 }

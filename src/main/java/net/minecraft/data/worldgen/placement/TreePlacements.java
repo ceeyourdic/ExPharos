@@ -51,8 +51,8 @@ public class TreePlacements {
     public static final ResourceKey<PlacedFeature> FANCY_OAK_BEES = PlacementUtils.createKey("fancy_oak_bees");
     public static final ResourceKey<PlacedFeature> CHERRY_BEES_005 = PlacementUtils.createKey("cherry_bees_005");
 
-    public static void bootstrap(BootstrapContext<PlacedFeature> p_330667_) {
-        HolderGetter<ConfiguredFeature<?, ?>> holdergetter = p_330667_.lookup(Registries.CONFIGURED_FEATURE);
+    public static void bootstrap(BootstrapContext<PlacedFeature> pContext) {
+        HolderGetter<ConfiguredFeature<?, ?>> holdergetter = pContext.lookup(Registries.CONFIGURED_FEATURE);
         Holder<ConfiguredFeature<?, ?>> holder = holdergetter.getOrThrow(TreeFeatures.CRIMSON_FUNGUS);
         Holder<ConfiguredFeature<?, ?>> holder1 = holdergetter.getOrThrow(TreeFeatures.WARPED_FUNGUS);
         Holder<ConfiguredFeature<?, ?>> holder2 = holdergetter.getOrThrow(TreeFeatures.OAK);
@@ -82,41 +82,41 @@ public class TreePlacements {
         Holder<ConfiguredFeature<?, ?>> holder26 = holdergetter.getOrThrow(TreeFeatures.FANCY_OAK_BEES_002);
         Holder<ConfiguredFeature<?, ?>> holder27 = holdergetter.getOrThrow(TreeFeatures.FANCY_OAK_BEES);
         Holder<ConfiguredFeature<?, ?>> holder28 = holdergetter.getOrThrow(TreeFeatures.CHERRY_BEES_005);
-        PlacementUtils.register(p_330667_, CRIMSON_FUNGI, holder, CountOnEveryLayerPlacement.of(8), BiomeFilter.biome());
-        PlacementUtils.register(p_330667_, WARPED_FUNGI, holder1, CountOnEveryLayerPlacement.of(8), BiomeFilter.biome());
-        PlacementUtils.register(p_330667_, OAK_CHECKED, holder2, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
-        PlacementUtils.register(p_330667_, DARK_OAK_CHECKED, holder3, PlacementUtils.filteredByBlockSurvival(Blocks.DARK_OAK_SAPLING));
-        PlacementUtils.register(p_330667_, PALE_OAK_CHECKED, holder4, PlacementUtils.filteredByBlockSurvival(Blocks.PALE_OAK_SAPLING));
-        PlacementUtils.register(p_330667_, PALE_OAK_CREAKING_CHECKED, holder5, PlacementUtils.filteredByBlockSurvival(Blocks.PALE_OAK_SAPLING));
-        PlacementUtils.register(p_330667_, BIRCH_CHECKED, holder6, PlacementUtils.filteredByBlockSurvival(Blocks.BIRCH_SAPLING));
-        PlacementUtils.register(p_330667_, ACACIA_CHECKED, holder7, PlacementUtils.filteredByBlockSurvival(Blocks.ACACIA_SAPLING));
-        PlacementUtils.register(p_330667_, SPRUCE_CHECKED, holder8, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
-        PlacementUtils.register(p_330667_, MANGROVE_CHECKED, holder9, PlacementUtils.filteredByBlockSurvival(Blocks.MANGROVE_PROPAGULE));
-        PlacementUtils.register(p_330667_, CHERRY_CHECKED, holder10, PlacementUtils.filteredByBlockSurvival(Blocks.CHERRY_SAPLING));
+        PlacementUtils.register(pContext, CRIMSON_FUNGI, holder, CountOnEveryLayerPlacement.of(8), BiomeFilter.biome());
+        PlacementUtils.register(pContext, WARPED_FUNGI, holder1, CountOnEveryLayerPlacement.of(8), BiomeFilter.biome());
+        PlacementUtils.register(pContext, OAK_CHECKED, holder2, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
+        PlacementUtils.register(pContext, DARK_OAK_CHECKED, holder3, PlacementUtils.filteredByBlockSurvival(Blocks.DARK_OAK_SAPLING));
+        PlacementUtils.register(pContext, PALE_OAK_CHECKED, holder4, PlacementUtils.filteredByBlockSurvival(Blocks.PALE_OAK_SAPLING));
+        PlacementUtils.register(pContext, PALE_OAK_CREAKING_CHECKED, holder5, PlacementUtils.filteredByBlockSurvival(Blocks.PALE_OAK_SAPLING));
+        PlacementUtils.register(pContext, BIRCH_CHECKED, holder6, PlacementUtils.filteredByBlockSurvival(Blocks.BIRCH_SAPLING));
+        PlacementUtils.register(pContext, ACACIA_CHECKED, holder7, PlacementUtils.filteredByBlockSurvival(Blocks.ACACIA_SAPLING));
+        PlacementUtils.register(pContext, SPRUCE_CHECKED, holder8, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
+        PlacementUtils.register(pContext, MANGROVE_CHECKED, holder9, PlacementUtils.filteredByBlockSurvival(Blocks.MANGROVE_PROPAGULE));
+        PlacementUtils.register(pContext, CHERRY_CHECKED, holder10, PlacementUtils.filteredByBlockSurvival(Blocks.CHERRY_SAPLING));
         BlockPredicate blockpredicate = BlockPredicate.matchesBlocks(Direction.DOWN.getUnitVec3i(), Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW);
         List<PlacementModifier> list = List.of(
             EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.not(BlockPredicate.matchesBlocks(Blocks.POWDER_SNOW)), 8),
             BlockPredicateFilter.forPredicate(blockpredicate)
         );
-        PlacementUtils.register(p_330667_, PINE_ON_SNOW, holder11, list);
-        PlacementUtils.register(p_330667_, SPRUCE_ON_SNOW, holder8, list);
-        PlacementUtils.register(p_330667_, PINE_CHECKED, holder11, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
-        PlacementUtils.register(p_330667_, JUNGLE_TREE_CHECKED, holder12, PlacementUtils.filteredByBlockSurvival(Blocks.JUNGLE_SAPLING));
-        PlacementUtils.register(p_330667_, FANCY_OAK_CHECKED, holder13, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
-        PlacementUtils.register(p_330667_, MEGA_JUNGLE_TREE_CHECKED, holder14, PlacementUtils.filteredByBlockSurvival(Blocks.JUNGLE_SAPLING));
-        PlacementUtils.register(p_330667_, MEGA_SPRUCE_CHECKED, holder15, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
-        PlacementUtils.register(p_330667_, MEGA_PINE_CHECKED, holder16, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
-        PlacementUtils.register(p_330667_, TALL_MANGROVE_CHECKED, holder17, PlacementUtils.filteredByBlockSurvival(Blocks.MANGROVE_PROPAGULE));
-        PlacementUtils.register(p_330667_, JUNGLE_BUSH, holder18, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
-        PlacementUtils.register(p_330667_, SUPER_BIRCH_BEES_0002, holder19, PlacementUtils.filteredByBlockSurvival(Blocks.BIRCH_SAPLING));
-        PlacementUtils.register(p_330667_, SUPER_BIRCH_BEES, holder20, PlacementUtils.filteredByBlockSurvival(Blocks.BIRCH_SAPLING));
-        PlacementUtils.register(p_330667_, OAK_BEES_0002, holder21, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
-        PlacementUtils.register(p_330667_, OAK_BEES_002, holder22, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
-        PlacementUtils.register(p_330667_, BIRCH_BEES_0002_PLACED, holder23, PlacementUtils.filteredByBlockSurvival(Blocks.BIRCH_SAPLING));
-        PlacementUtils.register(p_330667_, BIRCH_BEES_002, holder24, PlacementUtils.filteredByBlockSurvival(Blocks.BIRCH_SAPLING));
-        PlacementUtils.register(p_330667_, FANCY_OAK_BEES_0002, holder25, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
-        PlacementUtils.register(p_330667_, FANCY_OAK_BEES_002, holder26, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
-        PlacementUtils.register(p_330667_, FANCY_OAK_BEES, holder27, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
-        PlacementUtils.register(p_330667_, CHERRY_BEES_005, holder28, PlacementUtils.filteredByBlockSurvival(Blocks.CHERRY_SAPLING));
+        PlacementUtils.register(pContext, PINE_ON_SNOW, holder11, list);
+        PlacementUtils.register(pContext, SPRUCE_ON_SNOW, holder8, list);
+        PlacementUtils.register(pContext, PINE_CHECKED, holder11, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
+        PlacementUtils.register(pContext, JUNGLE_TREE_CHECKED, holder12, PlacementUtils.filteredByBlockSurvival(Blocks.JUNGLE_SAPLING));
+        PlacementUtils.register(pContext, FANCY_OAK_CHECKED, holder13, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
+        PlacementUtils.register(pContext, MEGA_JUNGLE_TREE_CHECKED, holder14, PlacementUtils.filteredByBlockSurvival(Blocks.JUNGLE_SAPLING));
+        PlacementUtils.register(pContext, MEGA_SPRUCE_CHECKED, holder15, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
+        PlacementUtils.register(pContext, MEGA_PINE_CHECKED, holder16, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
+        PlacementUtils.register(pContext, TALL_MANGROVE_CHECKED, holder17, PlacementUtils.filteredByBlockSurvival(Blocks.MANGROVE_PROPAGULE));
+        PlacementUtils.register(pContext, JUNGLE_BUSH, holder18, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
+        PlacementUtils.register(pContext, SUPER_BIRCH_BEES_0002, holder19, PlacementUtils.filteredByBlockSurvival(Blocks.BIRCH_SAPLING));
+        PlacementUtils.register(pContext, SUPER_BIRCH_BEES, holder20, PlacementUtils.filteredByBlockSurvival(Blocks.BIRCH_SAPLING));
+        PlacementUtils.register(pContext, OAK_BEES_0002, holder21, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
+        PlacementUtils.register(pContext, OAK_BEES_002, holder22, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
+        PlacementUtils.register(pContext, BIRCH_BEES_0002_PLACED, holder23, PlacementUtils.filteredByBlockSurvival(Blocks.BIRCH_SAPLING));
+        PlacementUtils.register(pContext, BIRCH_BEES_002, holder24, PlacementUtils.filteredByBlockSurvival(Blocks.BIRCH_SAPLING));
+        PlacementUtils.register(pContext, FANCY_OAK_BEES_0002, holder25, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
+        PlacementUtils.register(pContext, FANCY_OAK_BEES_002, holder26, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
+        PlacementUtils.register(pContext, FANCY_OAK_BEES, holder27, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
+        PlacementUtils.register(pContext, CHERRY_BEES_005, holder28, PlacementUtils.filteredByBlockSurvival(Blocks.CHERRY_SAPLING));
     }
 }

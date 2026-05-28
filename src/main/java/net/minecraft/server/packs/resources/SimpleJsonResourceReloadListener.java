@@ -27,46 +27,46 @@ public abstract class SimpleJsonResourceReloadListener<T> extends SimplePreparab
     private final Codec<T> codec;
     private final FileToIdConverter lister;
 
-    protected SimpleJsonResourceReloadListener(HolderLookup.Provider p_378826_, Codec<T> p_361980_, ResourceKey<? extends Registry<T>> p_376437_) {
-        this(p_378826_.createSerializationContext(JsonOps.INSTANCE), p_361980_, FileToIdConverter.registry(p_376437_));
+    protected SimpleJsonResourceReloadListener(HolderLookup.Provider pProvider, Codec<T> pCodec, ResourceKey<? extends Registry<T>> pRegistryKey) {
+        this(pProvider.createSerializationContext(JsonOps.INSTANCE), pCodec, FileToIdConverter.registry(pRegistryKey));
     }
 
-    protected SimpleJsonResourceReloadListener(Codec<T> p_370137_, FileToIdConverter p_375758_) {
-        this(JsonOps.INSTANCE, p_370137_, p_375758_);
+    protected SimpleJsonResourceReloadListener(Codec<T> pCodec, FileToIdConverter pLister) {
+        this(JsonOps.INSTANCE, pCodec, pLister);
     }
 
-    private SimpleJsonResourceReloadListener(DynamicOps<JsonElement> p_376631_, Codec<T> p_362926_, FileToIdConverter p_376605_) {
-        this.ops = p_376631_;
-        this.codec = p_362926_;
-        this.lister = p_376605_;
+    private SimpleJsonResourceReloadListener(DynamicOps<JsonElement> pOps, Codec<T> pCodec, FileToIdConverter pLister) {
+        this.ops = pOps;
+        this.codec = pCodec;
+        this.lister = pLister;
     }
 
-    protected Map<ResourceLocation, T> prepare(ResourceManager p_10771_, ProfilerFiller p_10772_) {
+    protected Map<ResourceLocation, T> prepare(ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         Map<ResourceLocation, T> map = new HashMap<>();
-        scanDirectory(p_10771_, this.lister, this.ops, this.codec, map);
+        scanDirectory(pResourceManager, this.lister, this.ops, this.codec, map);
         return map;
     }
 
     public static <T> void scanDirectory(
-        ResourceManager p_279308_,
-        ResourceKey<? extends Registry<T>> p_377536_,
-        DynamicOps<JsonElement> p_369854_,
-        Codec<T> p_368755_,
-        Map<ResourceLocation, T> p_279404_
+        ResourceManager pResourceManager,
+        ResourceKey<? extends Registry<T>> pRegistryKey,
+        DynamicOps<JsonElement> pOps,
+        Codec<T> pCodec,
+        Map<ResourceLocation, T> pOutput
     ) {
-        scanDirectory(p_279308_, FileToIdConverter.registry(p_377536_), p_369854_, p_368755_, p_279404_);
+        scanDirectory(pResourceManager, FileToIdConverter.registry(pRegistryKey), pOps, pCodec, pOutput);
     }
 
     public static <T> void scanDirectory(
-        ResourceManager p_376562_, FileToIdConverter p_377980_, DynamicOps<JsonElement> p_378080_, Codec<T> p_376362_, Map<ResourceLocation, T> p_377922_
+        ResourceManager pResourceManager, FileToIdConverter pLister, DynamicOps<JsonElement> pOps, Codec<T> pCodec, Map<ResourceLocation, T> pOutput
     ) {
-        for (Entry<ResourceLocation, Resource> entry : p_377980_.listMatchingResources(p_376562_).entrySet()) {
+        for (Entry<ResourceLocation, Resource> entry : pLister.listMatchingResources(pResourceManager).entrySet()) {
             ResourceLocation resourcelocation = entry.getKey();
-            ResourceLocation resourcelocation1 = p_377980_.fileToId(resourcelocation);
+            ResourceLocation resourcelocation1 = pLister.fileToId(resourcelocation);
 
             try (Reader reader = entry.getValue().openAsReader()) {
-                p_376362_.parse(p_378080_, JsonParser.parseReader(reader)).ifSuccess(p_370131_ -> {
-                    if (p_377922_.putIfAbsent(resourcelocation1, (T)p_370131_) != null) {
+                pCodec.parse(pOps, JsonParser.parseReader(reader)).ifSuccess(p_370131_ -> {
+                    if (pOutput.putIfAbsent(resourcelocation1, (T)p_370131_) != null) {
                         throw new IllegalStateException("Duplicate data file ignored with ID " + resourcelocation1);
                     }
                 }).ifError(p_362245_ -> LOGGER.error("Couldn't parse data file '{}' from '{}': {}", resourcelocation1, resourcelocation, p_362245_));

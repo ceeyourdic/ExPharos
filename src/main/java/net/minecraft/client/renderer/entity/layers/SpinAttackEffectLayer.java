@@ -19,9 +19,9 @@ public class SpinAttackEffectLayer extends RenderLayer<PlayerRenderState, Player
     public static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/trident_riptide.png");
     private final SpinAttackEffectModel model;
 
-    public SpinAttackEffectLayer(RenderLayerParent<PlayerRenderState, PlayerModel> p_174540_, EntityModelSet p_174541_) {
-        super(p_174540_);
-        this.model = new SpinAttackEffectModel(p_174541_.bakeLayer(ModelLayers.PLAYER_SPIN_ATTACK));
+    public SpinAttackEffectLayer(RenderLayerParent<PlayerRenderState, PlayerModel> pRenderer, EntityModelSet pModelSet) {
+        super(pRenderer);
+        this.model = new SpinAttackEffectModel(pModelSet.bakeLayer(ModelLayers.PLAYER_SPIN_ATTACK));
     }
 
     public void render(PoseStack p_117515_, MultiBufferSource p_117516_, int p_117517_, PlayerRenderState p_367130_, float p_117519_, float p_117520_) {

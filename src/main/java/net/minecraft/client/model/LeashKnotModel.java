@@ -15,9 +15,9 @@ public class LeashKnotModel extends EntityModel<EntityRenderState> {
     private static final String KNOT = "knot";
     private final ModelPart knot;
 
-    public LeashKnotModel(ModelPart p_170714_) {
-        super(p_170714_);
-        this.knot = p_170714_.getChild("knot");
+    public LeashKnotModel(ModelPart pRoot) {
+        super(pRoot);
+        this.knot = pRoot.getChild("knot");
     }
 
     public static LayerDefinition createBodyLayer() {

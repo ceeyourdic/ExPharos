@@ -23,10 +23,10 @@ public class RealmsSettingsScreen extends RealmsScreen {
     private EditBox descEdit;
     private EditBox nameEdit;
 
-    public RealmsSettingsScreen(RealmsConfigureWorldScreen p_89829_, RealmsServer p_89830_) {
+    public RealmsSettingsScreen(RealmsConfigureWorldScreen pConfigureWorldScreen, RealmsServer pServerData) {
         super(Component.translatable("mco.configure.world.settings.title"));
-        this.configureWorldScreen = p_89829_;
-        this.serverData = p_89830_;
+        this.configureWorldScreen = pConfigureWorldScreen;
+        this.serverData = pServerData;
     }
 
     @Override

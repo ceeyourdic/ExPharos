@@ -29,7 +29,7 @@ public interface StructureProcessorType<P extends StructureProcessor> {
 
     MapCodec<P> codec();
 
-    static <P extends StructureProcessor> StructureProcessorType<P> register(String p_74477_, MapCodec<P> p_329428_) {
-        return Registry.register(BuiltInRegistries.STRUCTURE_PROCESSOR, p_74477_, () -> p_329428_);
+    static <P extends StructureProcessor> StructureProcessorType<P> register(String pName, MapCodec<P> pCodec) {
+        return Registry.register(BuiltInRegistries.STRUCTURE_PROCESSOR, pName, () -> pCodec);
     }
 }

@@ -28,17 +28,17 @@ public class TadpoleAi {
     private static final float SPEED_MULTIPLIER_WHEN_IDLING_IN_WATER = 0.5F;
     private static final float SPEED_MULTIPLIER_WHEN_TEMPTED = 1.25F;
 
-    protected static Brain<?> makeBrain(Brain<Tadpole> p_218742_) {
-        initCoreActivity(p_218742_);
-        initIdleActivity(p_218742_);
-        p_218742_.setCoreActivities(ImmutableSet.of(Activity.CORE));
-        p_218742_.setDefaultActivity(Activity.IDLE);
-        p_218742_.useDefaultActivity();
-        return p_218742_;
+    protected static Brain<?> makeBrain(Brain<Tadpole> pBrain) {
+        initCoreActivity(pBrain);
+        initIdleActivity(pBrain);
+        pBrain.setCoreActivities(ImmutableSet.of(Activity.CORE));
+        pBrain.setDefaultActivity(Activity.IDLE);
+        pBrain.useDefaultActivity();
+        return pBrain;
     }
 
-    private static void initCoreActivity(Brain<Tadpole> p_218746_) {
-        p_218746_.addActivity(
+    private static void initCoreActivity(Brain<Tadpole> pBrain) {
+        pBrain.addActivity(
             Activity.CORE,
             0,
             ImmutableList.of(
@@ -47,8 +47,8 @@ public class TadpoleAi {
         );
     }
 
-    private static void initIdleActivity(Brain<Tadpole> p_218748_) {
-        p_218748_.addActivity(
+    private static void initIdleActivity(Brain<Tadpole> pBrain) {
+        pBrain.addActivity(
             Activity.IDLE,
             ImmutableList.of(
                 Pair.of(0, SetEntityLookTargetSometimes.create(EntityType.PLAYER, 6.0F, UniformInt.of(30, 60))),
@@ -71,7 +71,7 @@ public class TadpoleAi {
         );
     }
 
-    public static void updateActivity(Tadpole p_218744_) {
-        p_218744_.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.IDLE));
+    public static void updateActivity(Tadpole pTadpole) {
+        pTadpole.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.IDLE));
     }
 }

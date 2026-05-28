@@ -85,16 +85,16 @@ public class Turtle extends Animal {
         this.moveControl = new Turtle.TurtleMoveControl(this);
     }
 
-    public void setHomePos(BlockPos p_30220_) {
-        this.entityData.set(HOME_POS, p_30220_);
+    public void setHomePos(BlockPos pHomePos) {
+        this.entityData.set(HOME_POS, pHomePos);
     }
 
     BlockPos getHomePos() {
         return this.entityData.get(HOME_POS);
     }
 
-    void setTravelPos(BlockPos p_30224_) {
-        this.entityData.set(TRAVEL_POS, p_30224_);
+    void setTravelPos(BlockPos pTravelPos) {
+        this.entityData.set(TRAVEL_POS, pTravelPos);
     }
 
     BlockPos getTravelPos() {
@@ -105,33 +105,33 @@ public class Turtle extends Animal {
         return this.entityData.get(HAS_EGG);
     }
 
-    void setHasEgg(boolean p_30235_) {
-        this.entityData.set(HAS_EGG, p_30235_);
+    void setHasEgg(boolean pHasEgg) {
+        this.entityData.set(HAS_EGG, pHasEgg);
     }
 
     public boolean isLayingEgg() {
         return this.entityData.get(LAYING_EGG);
     }
 
-    void setLayingEgg(boolean p_30237_) {
-        this.layEggCounter = p_30237_ ? 1 : 0;
-        this.entityData.set(LAYING_EGG, p_30237_);
+    void setLayingEgg(boolean pIsLayingEgg) {
+        this.layEggCounter = pIsLayingEgg ? 1 : 0;
+        this.entityData.set(LAYING_EGG, pIsLayingEgg);
     }
 
     boolean isGoingHome() {
         return this.entityData.get(GOING_HOME);
     }
 
-    void setGoingHome(boolean p_30239_) {
-        this.entityData.set(GOING_HOME, p_30239_);
+    void setGoingHome(boolean pIsGoingHome) {
+        this.entityData.set(GOING_HOME, pIsGoingHome);
     }
 
     boolean isTravelling() {
         return this.entityData.get(TRAVELLING);
     }
 
-    void setTravelling(boolean p_30241_) {
-        this.entityData.set(TRAVELLING, p_30241_);
+    void setTravelling(boolean pIsTravelling) {
+        this.entityData.set(TRAVELLING, pIsTravelling);
     }
 
     @Override
@@ -146,28 +146,28 @@ public class Turtle extends Animal {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_30176_) {
-        super.addAdditionalSaveData(p_30176_);
-        p_30176_.putInt("HomePosX", this.getHomePos().getX());
-        p_30176_.putInt("HomePosY", this.getHomePos().getY());
-        p_30176_.putInt("HomePosZ", this.getHomePos().getZ());
-        p_30176_.putBoolean("HasEgg", this.hasEgg());
-        p_30176_.putInt("TravelPosX", this.getTravelPos().getX());
-        p_30176_.putInt("TravelPosY", this.getTravelPos().getY());
-        p_30176_.putInt("TravelPosZ", this.getTravelPos().getZ());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("HomePosX", this.getHomePos().getX());
+        pCompound.putInt("HomePosY", this.getHomePos().getY());
+        pCompound.putInt("HomePosZ", this.getHomePos().getZ());
+        pCompound.putBoolean("HasEgg", this.hasEgg());
+        pCompound.putInt("TravelPosX", this.getTravelPos().getX());
+        pCompound.putInt("TravelPosY", this.getTravelPos().getY());
+        pCompound.putInt("TravelPosZ", this.getTravelPos().getZ());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_30162_) {
-        int i = p_30162_.getInt("HomePosX");
-        int j = p_30162_.getInt("HomePosY");
-        int k = p_30162_.getInt("HomePosZ");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        int i = pCompound.getInt("HomePosX");
+        int j = pCompound.getInt("HomePosY");
+        int k = pCompound.getInt("HomePosZ");
         this.setHomePos(new BlockPos(i, j, k));
-        super.readAdditionalSaveData(p_30162_);
-        this.setHasEgg(p_30162_.getBoolean("HasEgg"));
-        int l = p_30162_.getInt("TravelPosX");
-        int i1 = p_30162_.getInt("TravelPosY");
-        int j1 = p_30162_.getInt("TravelPosZ");
+        super.readAdditionalSaveData(pCompound);
+        this.setHasEgg(pCompound.getBoolean("HasEgg"));
+        int l = pCompound.getInt("TravelPosX");
+        int i1 = pCompound.getInt("TravelPosY");
+        int j1 = pCompound.getInt("TravelPosZ");
         this.setTravelPos(new BlockPos(l, i1, j1));
     }
 
@@ -180,9 +180,9 @@ public class Turtle extends Animal {
     }
 
     public static boolean checkTurtleSpawnRules(
-        EntityType<Turtle> p_218277_, LevelAccessor p_218278_, EntitySpawnReason p_362525_, BlockPos p_218280_, RandomSource p_218281_
+        EntityType<Turtle> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return p_218280_.getY() < p_218278_.getSeaLevel() + 4 && TurtleEggBlock.onSand(p_218278_, p_218280_) && isBrightEnoughToSpawn(p_218278_, p_218280_);
+        return pPos.getY() < pLevel.getSeaLevel() + 4 && TurtleEggBlock.onSand(pLevel, pPos) && isBrightEnoughToSpawn(pLevel, pPos);
     }
 
     @Override
@@ -219,8 +219,8 @@ public class Turtle extends Animal {
     }
 
     @Override
-    protected void playSwimSound(float p_30192_) {
-        super.playSwimSound(p_30192_ * 1.5F);
+    protected void playSwimSound(float pVolume) {
+        super.playSwimSound(pVolume * 1.5F);
     }
 
     @Override
@@ -230,7 +230,7 @@ public class Turtle extends Animal {
 
     @Nullable
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_30202_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return this.isBaby() ? SoundEvents.TURTLE_HURT_BABY : SoundEvents.TURTLE_HURT;
     }
 
@@ -241,7 +241,7 @@ public class Turtle extends Animal {
     }
 
     @Override
-    protected void playStepSound(BlockPos p_30173_, BlockState p_30174_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         SoundEvent soundevent = this.isBaby() ? SoundEvents.TURTLE_SHAMBLE_BABY : SoundEvents.TURTLE_SHAMBLE;
         this.playSound(soundevent, 0.15F, 1.0F);
     }
@@ -262,8 +262,8 @@ public class Turtle extends Animal {
     }
 
     @Override
-    protected PathNavigation createNavigation(Level p_30171_) {
-        return new Turtle.TurtlePathNavigation(this, p_30171_);
+    protected PathNavigation createNavigation(Level pLevel) {
+        return new Turtle.TurtlePathNavigation(this, pLevel);
     }
 
     @Nullable
@@ -273,16 +273,16 @@ public class Turtle extends Animal {
     }
 
     @Override
-    public boolean isFood(ItemStack p_30231_) {
-        return p_30231_.is(ItemTags.TURTLE_FOOD);
+    public boolean isFood(ItemStack pStack) {
+        return pStack.is(ItemTags.TURTLE_FOOD);
     }
 
     @Override
-    public float getWalkTargetValue(BlockPos p_30159_, LevelReader p_30160_) {
-        if (!this.isGoingHome() && p_30160_.getFluidState(p_30159_).is(FluidTags.WATER)) {
+    public float getWalkTargetValue(BlockPos pPos, LevelReader pLevel) {
+        if (!this.isGoingHome() && pLevel.getFluidState(pPos).is(FluidTags.WATER)) {
             return 10.0F;
         } else {
-            return TurtleEggBlock.onSand(p_30160_, p_30159_) ? 10.0F : p_30160_.getPathfindingCostFromLightLevels(p_30159_);
+            return TurtleEggBlock.onSand(pLevel, pPos) ? 10.0F : pLevel.getPathfindingCostFromLightLevels(pPos);
         }
     }
 
@@ -307,16 +307,16 @@ public class Turtle extends Animal {
     }
 
     @Override
-    public void travel(Vec3 p_30218_) {
+    public void travel(Vec3 pTravelVector) {
         if (this.isControlledByLocalInstance() && this.isInWater()) {
-            this.moveRelative(0.1F, p_30218_);
+            this.moveRelative(0.1F, pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9));
             if (this.getTarget() == null && (!this.isGoingHome() || !this.getHomePos().closerToCenterThan(this.position(), 20.0))) {
                 this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.005, 0.0));
             }
         } else {
-            super.travel(p_30218_);
+            super.travel(pTravelVector);
         }
     }
 
@@ -326,8 +326,8 @@ public class Turtle extends Animal {
     }
 
     @Override
-    public void thunderHit(ServerLevel p_30140_, LightningBolt p_30141_) {
-        this.hurtServer(p_30140_, this.damageSources().lightningBolt(), Float.MAX_VALUE);
+    public void thunderHit(ServerLevel pLevel, LightningBolt pLightning) {
+        this.hurtServer(pLevel, this.damageSources().lightningBolt(), Float.MAX_VALUE);
     }
 
     @Override
@@ -338,9 +338,9 @@ public class Turtle extends Animal {
     static class TurtleBreedGoal extends BreedGoal {
         private final Turtle turtle;
 
-        TurtleBreedGoal(Turtle p_30244_, double p_30245_) {
-            super(p_30244_, p_30245_);
-            this.turtle = p_30244_;
+        TurtleBreedGoal(Turtle pTurtle, double pSpeedModifier) {
+            super(pTurtle, pSpeedModifier);
+            this.turtle = pTurtle;
         }
 
         @Override
@@ -384,9 +384,9 @@ public class Turtle extends Animal {
         private int closeToHomeTryTicks;
         private static final int GIVE_UP_TICKS = 600;
 
-        TurtleGoHomeGoal(Turtle p_30253_, double p_30254_) {
-            this.turtle = p_30253_;
-            this.speedModifier = p_30254_;
+        TurtleGoHomeGoal(Turtle pTurtle, double pSpeedModifier) {
+            this.turtle = pTurtle;
+            this.speedModifier = pSpeedModifier;
         }
 
         @Override
@@ -450,9 +450,9 @@ public class Turtle extends Animal {
         private static final int GIVE_UP_TICKS = 1200;
         private final Turtle turtle;
 
-        TurtleGoToWaterGoal(Turtle p_30262_, double p_30263_) {
-            super(p_30262_, p_30262_.isBaby() ? 2.0 : p_30263_, 24);
-            this.turtle = p_30262_;
+        TurtleGoToWaterGoal(Turtle pTurtle, double pSpeedModifier) {
+            super(pTurtle, pTurtle.isBaby() ? 2.0 : pSpeedModifier, 24);
+            this.turtle = pTurtle;
             this.verticalSearchStart = -1;
         }
 
@@ -476,17 +476,17 @@ public class Turtle extends Animal {
         }
 
         @Override
-        protected boolean isValidTarget(LevelReader p_30270_, BlockPos p_30271_) {
-            return p_30270_.getBlockState(p_30271_).is(Blocks.WATER);
+        protected boolean isValidTarget(LevelReader pLevel, BlockPos pPos) {
+            return pLevel.getBlockState(pPos).is(Blocks.WATER);
         }
     }
 
     static class TurtleLayEggGoal extends MoveToBlockGoal {
         private final Turtle turtle;
 
-        TurtleLayEggGoal(Turtle p_30276_, double p_30277_) {
-            super(p_30276_, p_30277_, 16);
-            this.turtle = p_30276_;
+        TurtleLayEggGoal(Turtle pTurtle, double pSpeedModifier) {
+            super(pTurtle, pSpeedModifier, 16);
+            this.turtle = pTurtle;
         }
 
         @Override
@@ -527,17 +527,17 @@ public class Turtle extends Animal {
         }
 
         @Override
-        protected boolean isValidTarget(LevelReader p_30280_, BlockPos p_30281_) {
-            return !p_30280_.isEmptyBlock(p_30281_.above()) ? false : TurtleEggBlock.isSand(p_30280_, p_30281_);
+        protected boolean isValidTarget(LevelReader pLevel, BlockPos pPos) {
+            return !pLevel.isEmptyBlock(pPos.above()) ? false : TurtleEggBlock.isSand(pLevel, pPos);
         }
     }
 
     static class TurtleMoveControl extends MoveControl {
         private final Turtle turtle;
 
-        TurtleMoveControl(Turtle p_30286_) {
-            super(p_30286_);
-            this.turtle = p_30286_;
+        TurtleMoveControl(Turtle pTurtle) {
+            super(pTurtle);
+            this.turtle = pTurtle;
         }
 
         private void updateSpeed() {
@@ -581,8 +581,8 @@ public class Turtle extends Animal {
     }
 
     static class TurtlePanicGoal extends PanicGoal {
-        TurtlePanicGoal(Turtle p_30290_, double p_30291_) {
-            super(p_30290_, p_30291_);
+        TurtlePanicGoal(Turtle pTurtle, double pSpeedModifier) {
+            super(pTurtle, pSpeedModifier);
         }
 
         @Override
@@ -604,26 +604,26 @@ public class Turtle extends Animal {
     }
 
     static class TurtlePathNavigation extends AmphibiousPathNavigation {
-        TurtlePathNavigation(Turtle p_30294_, Level p_30295_) {
-            super(p_30294_, p_30295_);
+        TurtlePathNavigation(Turtle pTurtle, Level pLevel) {
+            super(pTurtle, pLevel);
         }
 
         @Override
-        public boolean isStableDestination(BlockPos p_30300_) {
+        public boolean isStableDestination(BlockPos pPos) {
             if (this.mob instanceof Turtle turtle && turtle.isTravelling()) {
-                return this.level.getBlockState(p_30300_).is(Blocks.WATER);
+                return this.level.getBlockState(pPos).is(Blocks.WATER);
             }
 
-            return !this.level.getBlockState(p_30300_.below()).isAir();
+            return !this.level.getBlockState(pPos.below()).isAir();
         }
     }
 
     static class TurtleRandomStrollGoal extends RandomStrollGoal {
         private final Turtle turtle;
 
-        TurtleRandomStrollGoal(Turtle p_30303_, double p_30304_, int p_30305_) {
-            super(p_30303_, p_30304_, p_30305_);
-            this.turtle = p_30303_;
+        TurtleRandomStrollGoal(Turtle pTurtle, double pSpeedModifier, int pInterval) {
+            super(pTurtle, pSpeedModifier, pInterval);
+            this.turtle = pTurtle;
         }
 
         @Override
@@ -637,9 +637,9 @@ public class Turtle extends Animal {
         private final double speedModifier;
         private boolean stuck;
 
-        TurtleTravelGoal(Turtle p_30333_, double p_30334_) {
-            this.turtle = p_30333_;
-            this.speedModifier = p_30334_;
+        TurtleTravelGoal(Turtle pTurtle, double pSpeedModifier) {
+            this.turtle = pTurtle;
+            this.speedModifier = pSpeedModifier;
         }
 
         @Override

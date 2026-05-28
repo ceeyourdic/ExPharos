@@ -13,16 +13,16 @@ public interface VerticalAnchor {
     VerticalAnchor BOTTOM = aboveBottom(0);
     VerticalAnchor TOP = belowTop(0);
 
-    static VerticalAnchor absolute(int p_158923_) {
-        return new VerticalAnchor.Absolute(p_158923_);
+    static VerticalAnchor absolute(int pValue) {
+        return new VerticalAnchor.Absolute(pValue);
     }
 
-    static VerticalAnchor aboveBottom(int p_158931_) {
-        return new VerticalAnchor.AboveBottom(p_158931_);
+    static VerticalAnchor aboveBottom(int pValue) {
+        return new VerticalAnchor.AboveBottom(pValue);
     }
 
-    static VerticalAnchor belowTop(int p_158936_) {
-        return new VerticalAnchor.BelowTop(p_158936_);
+    static VerticalAnchor belowTop(int pValue) {
+        return new VerticalAnchor.BelowTop(pValue);
     }
 
     static VerticalAnchor bottom() {
@@ -33,21 +33,21 @@ public interface VerticalAnchor {
         return TOP;
     }
 
-    private static VerticalAnchor merge(Either<VerticalAnchor.Absolute, Either<VerticalAnchor.AboveBottom, VerticalAnchor.BelowTop>> p_158925_) {
-        return p_158925_.map(Function.identity(), Either::unwrap);
+    private static VerticalAnchor merge(Either<VerticalAnchor.Absolute, Either<VerticalAnchor.AboveBottom, VerticalAnchor.BelowTop>> pAnchor) {
+        return pAnchor.map(Function.identity(), Either::unwrap);
     }
 
-    private static Either<VerticalAnchor.Absolute, Either<VerticalAnchor.AboveBottom, VerticalAnchor.BelowTop>> split(VerticalAnchor p_158927_) {
-        return p_158927_ instanceof VerticalAnchor.Absolute
-            ? Either.left((VerticalAnchor.Absolute)p_158927_)
+    private static Either<VerticalAnchor.Absolute, Either<VerticalAnchor.AboveBottom, VerticalAnchor.BelowTop>> split(VerticalAnchor pAnchor) {
+        return pAnchor instanceof VerticalAnchor.Absolute
+            ? Either.left((VerticalAnchor.Absolute)pAnchor)
             : Either.right(
-                p_158927_ instanceof VerticalAnchor.AboveBottom
-                    ? Either.left((VerticalAnchor.AboveBottom)p_158927_)
-                    : Either.right((VerticalAnchor.BelowTop)p_158927_)
+                pAnchor instanceof VerticalAnchor.AboveBottom
+                    ? Either.left((VerticalAnchor.AboveBottom)pAnchor)
+                    : Either.right((VerticalAnchor.BelowTop)pAnchor)
             );
     }
 
-    int resolveY(WorldGenerationContext p_158928_);
+    int resolveY(WorldGenerationContext pContext);
 
     public static record AboveBottom(int offset) implements VerticalAnchor {
         public static final Codec<VerticalAnchor.AboveBottom> CODEC = Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y)

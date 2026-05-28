@@ -52,27 +52,27 @@ public abstract class RandomizableContainerBlockEntity extends BaseContainerBloc
     }
 
     @Override
-    public ItemStack getItem(int p_59611_) {
+    public ItemStack getItem(int pIndex) {
         this.unpackLootTable(null);
-        return super.getItem(p_59611_);
+        return super.getItem(pIndex);
     }
 
     @Override
-    public ItemStack removeItem(int p_59613_, int p_59614_) {
+    public ItemStack removeItem(int pIndex, int pCount) {
         this.unpackLootTable(null);
-        return super.removeItem(p_59613_, p_59614_);
+        return super.removeItem(pIndex, pCount);
     }
 
     @Override
-    public ItemStack removeItemNoUpdate(int p_59630_) {
+    public ItemStack removeItemNoUpdate(int pIndex) {
         this.unpackLootTable(null);
-        return super.removeItemNoUpdate(p_59630_);
+        return super.removeItemNoUpdate(pIndex);
     }
 
     @Override
-    public void setItem(int p_59616_, ItemStack p_59617_) {
+    public void setItem(int pIndex, ItemStack pStack) {
         this.unpackLootTable(null);
-        super.setItem(p_59616_, p_59617_);
+        super.setItem(pIndex, pStack);
     }
 
     @Override

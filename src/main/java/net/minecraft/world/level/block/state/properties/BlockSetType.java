@@ -197,9 +197,9 @@ public record BlockSetType(
         )
     );
 
-    public BlockSetType(String p_272860_) {
+    public BlockSetType(String pName) {
         this(
-            p_272860_,
+            pName,
             true,
             true,
             true,
@@ -216,9 +216,9 @@ public record BlockSetType(
         );
     }
 
-    private static BlockSetType register(BlockSetType p_273033_) {
-        TYPES.put(p_273033_.name, p_273033_);
-        return p_273033_;
+    private static BlockSetType register(BlockSetType pValue) {
+        TYPES.put(pValue.name, pValue);
+        return pValue;
     }
 
     public static Stream<BlockSetType> values() {

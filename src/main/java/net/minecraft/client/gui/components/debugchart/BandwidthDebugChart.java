@@ -30,13 +30,13 @@ public class BandwidthDebugChart extends AbstractDebugChart {
         this.drawStringWithShade(p_298580_, toDisplayStringInternal(1048576.0), p_298671_ + 1, p_300317_ - getSampleHeightInternal(1048576.0) + 1);
     }
 
-    private void drawLabeledLineAtValue(GuiGraphics p_297903_, int p_297652_, int p_298530_, int p_300952_, int p_298161_) {
-        this.drawLineWithLabel(p_297903_, p_297652_, p_298530_, p_300952_ - getSampleHeightInternal((double)p_298161_), toDisplayStringInternal((double)p_298161_));
+    private void drawLabeledLineAtValue(GuiGraphics pGuiGraphics, int pX, int pWidth, int pY, int pValue) {
+        this.drawLineWithLabel(pGuiGraphics, pX, pWidth, pY - getSampleHeightInternal((double)pValue), toDisplayStringInternal((double)pValue));
     }
 
-    private void drawLineWithLabel(GuiGraphics p_298208_, int p_300180_, int p_297727_, int p_299631_, String p_301319_) {
-        this.drawStringWithShade(p_298208_, p_301319_, p_300180_ + 1, p_299631_ + 1);
-        p_298208_.hLine(RenderType.guiOverlay(), p_300180_, p_300180_ + p_297727_ - 1, p_299631_, -1);
+    private void drawLineWithLabel(GuiGraphics pGuiGraphics, int pX, int pWidth, int pY, String pText) {
+        this.drawStringWithShade(pGuiGraphics, pText, pX + 1, pY + 1);
+        pGuiGraphics.hLine(RenderType.guiOverlay(), pX, pX + pWidth - 1, pY, -1);
     }
 
     @Override
@@ -44,13 +44,13 @@ public class BandwidthDebugChart extends AbstractDebugChart {
         return toDisplayStringInternal(toBytesPerSecond(p_299768_));
     }
 
-    private static String toDisplayStringInternal(double p_299142_) {
-        if (p_299142_ >= 1048576.0) {
-            return String.format(Locale.ROOT, "%.1f MiB/s", p_299142_ / 1048576.0);
+    private static String toDisplayStringInternal(double pValue) {
+        if (pValue >= 1048576.0) {
+            return String.format(Locale.ROOT, "%.1f MiB/s", pValue / 1048576.0);
         } else {
-            return p_299142_ >= 1024.0
-                ? String.format(Locale.ROOT, "%.1f KiB/s", p_299142_ / 1024.0)
-                : String.format(Locale.ROOT, "%d B/s", Mth.floor(p_299142_));
+            return pValue >= 1024.0
+                ? String.format(Locale.ROOT, "%.1f KiB/s", pValue / 1024.0)
+                : String.format(Locale.ROOT, "%d B/s", Mth.floor(pValue));
         }
     }
 
@@ -59,8 +59,8 @@ public class BandwidthDebugChart extends AbstractDebugChart {
         return getSampleHeightInternal(toBytesPerSecond(p_299298_));
     }
 
-    private static int getSampleHeightInternal(double p_298407_) {
-        return (int)Math.round(Math.log(p_298407_ + 1.0) * 60.0 / Math.log(1048576.0));
+    private static int getSampleHeightInternal(double pValue) {
+        return (int)Math.round(Math.log(pValue + 1.0) * 60.0 / Math.log(1048576.0));
     }
 
     @Override
@@ -68,7 +68,7 @@ public class BandwidthDebugChart extends AbstractDebugChart {
         return this.getSampleColor(toBytesPerSecond((double)p_297628_), 0.0, -16711681, 8192.0, -6250241, 1.048576E7, -65536);
     }
 
-    private static double toBytesPerSecond(double p_298688_) {
-        return p_298688_ * 20.0;
+    private static double toBytesPerSecond(double pBytesPerTick) {
+        return pBytesPerTick * 20.0;
     }
 }

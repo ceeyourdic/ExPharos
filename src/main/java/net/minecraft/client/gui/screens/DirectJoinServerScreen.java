@@ -21,17 +21,17 @@ public class DirectJoinServerScreen extends Screen {
     private final BooleanConsumer callback;
     private final Screen lastScreen;
 
-    public DirectJoinServerScreen(Screen p_95960_, BooleanConsumer p_95961_, ServerData p_95962_) {
+    public DirectJoinServerScreen(Screen pLastScreen, BooleanConsumer pCallback, ServerData pServerData) {
         super(Component.translatable("selectServer.direct"));
-        this.lastScreen = p_95960_;
-        this.serverData = p_95962_;
-        this.callback = p_95961_;
+        this.lastScreen = pLastScreen;
+        this.serverData = pServerData;
+        this.callback = pCallback;
     }
 
     @Override
-    public boolean keyPressed(int p_95964_, int p_95965_, int p_95966_) {
-        if (!this.selectButton.active || this.getFocused() != this.ipEdit || p_95964_ != 257 && p_95964_ != 335) {
-            return super.keyPressed(p_95964_, p_95965_, p_95966_);
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (!this.selectButton.active || this.getFocused() != this.ipEdit || pKeyCode != 257 && pKeyCode != 335) {
+            return super.keyPressed(pKeyCode, pScanCode, pModifiers);
         } else {
             this.onSelect();
             return true;
@@ -64,9 +64,9 @@ public class DirectJoinServerScreen extends Screen {
     }
 
     @Override
-    public void resize(Minecraft p_95973_, int p_95974_, int p_95975_) {
+    public void resize(Minecraft pMinecraft, int pWidth, int pHeight) {
         String s = this.ipEdit.getValue();
-        this.init(p_95973_, p_95974_, p_95975_);
+        this.init(pMinecraft, pWidth, pHeight);
         this.ipEdit.setValue(s);
     }
 

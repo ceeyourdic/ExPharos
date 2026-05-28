@@ -75,14 +75,14 @@ public class WorldUpgrader implements AutoCloseable {
     static final Pattern REGEX = Pattern.compile("^r\\.(-?[0-9]+)\\.(-?[0-9]+)\\.mca$");
     final DimensionDataStorage overworldDataStorage;
 
-    public WorldUpgrader(LevelStorageSource.LevelStorageAccess p_249922_, DataFixer p_250273_, RegistryAccess p_334652_, boolean p_250738_, boolean p_335488_) {
-        this.dimensions = p_334652_.lookupOrThrow(Registries.LEVEL_STEM);
+    public WorldUpgrader(LevelStorageSource.LevelStorageAccess pLevelStorage, DataFixer pDataFixer, RegistryAccess pRegistryAccess, boolean pEraseCache, boolean pRecreateRegionFiles) {
+        this.dimensions = pRegistryAccess.lookupOrThrow(Registries.LEVEL_STEM);
         this.levels = this.dimensions.registryKeySet().stream().map(Registries::levelStemToLevel).collect(Collectors.toUnmodifiableSet());
-        this.eraseCache = p_250738_;
-        this.dataFixer = p_250273_;
-        this.levelStorage = p_249922_;
-        this.overworldDataStorage = new DimensionDataStorage(this.levelStorage.getDimensionPath(Level.OVERWORLD).resolve("data"), p_250273_, p_334652_);
-        this.recreateRegionFiles = p_335488_;
+        this.eraseCache = pEraseCache;
+        this.dataFixer = pDataFixer;
+        this.levelStorage = pLevelStorage;
+        this.overworldDataStorage = new DimensionDataStorage(this.levelStorage.getDimensionPath(Level.OVERWORLD).resolve("data"), pDataFixer, pRegistryAccess);
+        this.recreateRegionFiles = pRecreateRegionFiles;
         this.thread = THREAD_FACTORY.newThread(this::work);
         this.thread.setUncaughtExceptionHandler((p_18825_, p_18826_) -> {
             LOGGER.error("Error upgrading world", p_18826_);
@@ -123,8 +123,8 @@ public class WorldUpgrader implements AutoCloseable {
         return this.levels;
     }
 
-    public float dimensionProgress(ResourceKey<Level> p_18828_) {
-        return this.progressMap.getFloat(p_18828_);
+    public float dimensionProgress(ResourceKey<Level> pLevel) {
+        return this.progressMap.getFloat(pLevel);
     }
 
     public float getProgress() {
@@ -152,8 +152,8 @@ public class WorldUpgrader implements AutoCloseable {
         this.overworldDataStorage.close();
     }
 
-    static Path resolveRecreateDirectory(Path p_330107_) {
-        return p_330107_.resolveSibling("new_" + p_330107_.getFileName().toString());
+    static Path resolveRecreateDirectory(Path pPath) {
+        return pPath.resolveSibling("new_" + pPath.getFileName().toString());
     }
 
     abstract class AbstractUpgrader<T extends AutoCloseable> {
@@ -165,12 +165,12 @@ public class WorldUpgrader implements AutoCloseable {
         protected CompletableFuture<Void> previousWriteFuture;
         protected final DataFixTypes dataFixType;
 
-        AbstractUpgrader(final DataFixTypes p_332379_, final String p_334432_, final String p_334138_, final Component p_370034_, final Component p_366745_) {
-            this.dataFixType = p_332379_;
-            this.type = p_334432_;
-            this.folderName = p_334138_;
-            this.upgradingStatus = p_370034_;
-            this.finishedStatus = p_366745_;
+        AbstractUpgrader(final DataFixTypes pDataFixType, final String pType, final String pFolderName, final Component pUpgradingStatus, final Component pFinishedStatus) {
+            this.dataFixType = pDataFixType;
+            this.type = pType;
+            this.folderName = pFolderName;
+            this.upgradingStatus = pUpgradingStatus;
+            this.finishedStatus = pFinishedStatus;
         }
 
         public void upgrade() {
@@ -246,17 +246,17 @@ public class WorldUpgrader implements AutoCloseable {
             return list;
         }
 
-        protected abstract T createStorage(RegionStorageInfo p_328836_, Path p_332071_);
+        protected abstract T createStorage(RegionStorageInfo pRegionStorageInfo, Path pPath);
 
-        private ListIterator<WorldUpgrader.FileToUpgrade> getFilesToProcess(RegionStorageInfo p_332870_, Path p_331013_) {
-            List<WorldUpgrader.FileToUpgrade> list = getAllChunkPositions(p_332870_, p_331013_);
+        private ListIterator<WorldUpgrader.FileToUpgrade> getFilesToProcess(RegionStorageInfo pRegionStorageInfo, Path pPath) {
+            List<WorldUpgrader.FileToUpgrade> list = getAllChunkPositions(pRegionStorageInfo, pPath);
             WorldUpgrader.this.totalFiles = WorldUpgrader.this.totalFiles + list.size();
             WorldUpgrader.this.totalChunks = WorldUpgrader.this.totalChunks + list.stream().mapToInt(p_328536_ -> p_328536_.chunksToUpgrade.size()).sum();
             return list.listIterator();
         }
 
-        private static List<WorldUpgrader.FileToUpgrade> getAllChunkPositions(RegionStorageInfo p_330333_, Path p_330743_) {
-            File[] afile = p_330743_.toFile().listFiles((p_336334_, p_329184_) -> p_329184_.endsWith(".mca"));
+        private static List<WorldUpgrader.FileToUpgrade> getAllChunkPositions(RegionStorageInfo pRegionStorageInfo, Path pPath) {
+            File[] afile = pPath.toFile().listFiles((p_336334_, p_329184_) -> p_329184_.endsWith(".mca"));
             if (afile == null) {
                 return List.of();
             } else {
@@ -269,7 +269,7 @@ public class WorldUpgrader implements AutoCloseable {
                         int j = Integer.parseInt(matcher.group(2)) << 5;
                         List<ChunkPos> list1 = Lists.newArrayList();
 
-                        try (RegionFile regionfile = new RegionFile(p_330333_, file1.toPath(), p_330743_, true)) {
+                        try (RegionFile regionfile = new RegionFile(pRegionStorageInfo, file1.toPath(), pPath, true)) {
                             for (int k = 0; k < 32; k++) {
                                 for (int l = 0; l < 32; l++) {
                                     ChunkPos chunkpos = new ChunkPos(k + i, l + j);
@@ -292,18 +292,18 @@ public class WorldUpgrader implements AutoCloseable {
             }
         }
 
-        private boolean processOnePosition(ResourceKey<Level> p_328452_, T p_333889_, ChunkPos p_332028_) {
+        private boolean processOnePosition(ResourceKey<Level> pDimesion, T pStorage, ChunkPos pChunkPos) {
             boolean flag = false;
 
             try {
-                flag = this.tryProcessOnePosition(p_333889_, p_332028_, p_328452_);
+                flag = this.tryProcessOnePosition(pStorage, pChunkPos, pDimesion);
             } catch (CompletionException | ReportedException reportedexception) {
                 Throwable throwable = reportedexception.getCause();
                 if (!(throwable instanceof IOException)) {
                     throw reportedexception;
                 }
 
-                WorldUpgrader.LOGGER.error("Error upgrading chunk {}", p_332028_, throwable);
+                WorldUpgrader.LOGGER.error("Error upgrading chunk {}", pChunkPos, throwable);
             }
 
             if (flag) {
@@ -315,15 +315,15 @@ public class WorldUpgrader implements AutoCloseable {
             return flag;
         }
 
-        protected abstract boolean tryProcessOnePosition(T p_329483_, ChunkPos p_327751_, ResourceKey<Level> p_335733_);
+        protected abstract boolean tryProcessOnePosition(T pChunkStorage, ChunkPos pChunkPos, ResourceKey<Level> pDimension);
 
-        private void onFileFinished(RegionFile p_332836_) {
+        private void onFileFinished(RegionFile pRegionFile) {
             if (WorldUpgrader.this.recreateRegionFiles) {
                 if (this.previousWriteFuture != null) {
                     this.previousWriteFuture.join();
                 }
 
-                Path path = p_332836_.getPath();
+                Path path = pRegionFile.getPath();
                 Path path1 = path.getParent();
                 Path path2 = WorldUpgrader.resolveRecreateDirectory(path1).resolve(path.getFileName().toString());
 
@@ -430,8 +430,8 @@ public class WorldUpgrader implements AutoCloseable {
     }
 
     abstract class SimpleRegionStorageUpgrader extends WorldUpgrader.AbstractUpgrader<SimpleRegionStorage> {
-        SimpleRegionStorageUpgrader(final DataFixTypes p_332054_, final String p_328150_, final Component p_363471_, final Component p_366494_) {
-            super(p_332054_, p_328150_, p_328150_, p_363471_, p_366494_);
+        SimpleRegionStorageUpgrader(final DataFixTypes pDataFixType, final String pType, final Component pUpgradingStatus, final Component pFinishedStatus) {
+            super(pDataFixType, pType, pType, pUpgradingStatus, pFinishedStatus);
         }
 
         protected SimpleRegionStorage createStorage(RegionStorageInfo p_328549_, Path p_333111_) {
@@ -467,6 +467,6 @@ public class WorldUpgrader implements AutoCloseable {
             return false;
         }
 
-        protected abstract CompoundTag upgradeTag(SimpleRegionStorage p_328302_, CompoundTag p_330493_);
+        protected abstract CompoundTag upgradeTag(SimpleRegionStorage pRegionStorage, CompoundTag pChunkTag);
     }
 }

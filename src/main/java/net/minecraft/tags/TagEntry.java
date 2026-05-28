@@ -28,72 +28,72 @@ public class TagEntry {
     private final boolean tag;
     private final boolean required;
 
-    private TagEntry(ResourceLocation p_215918_, boolean p_215919_, boolean p_215920_) {
-        this.id = p_215918_;
-        this.tag = p_215919_;
-        this.required = p_215920_;
+    private TagEntry(ResourceLocation pId, boolean pTag, boolean pRequired) {
+        this.id = pId;
+        this.tag = pTag;
+        this.required = pRequired;
     }
 
-    private TagEntry(ExtraCodecs.TagOrElementLocation p_215922_, boolean p_215923_) {
-        this.id = p_215922_.id();
-        this.tag = p_215922_.tag();
-        this.required = p_215923_;
+    private TagEntry(ExtraCodecs.TagOrElementLocation pTagOrElementLocation, boolean pRequired) {
+        this.id = pTagOrElementLocation.id();
+        this.tag = pTagOrElementLocation.tag();
+        this.required = pRequired;
     }
 
     private ExtraCodecs.TagOrElementLocation elementOrTag() {
         return new ExtraCodecs.TagOrElementLocation(this.id, this.tag);
     }
 
-    public static TagEntry element(ResourceLocation p_215926_) {
-        return new TagEntry(p_215926_, false, true);
+    public static TagEntry element(ResourceLocation pElementLocation) {
+        return new TagEntry(pElementLocation, false, true);
     }
 
-    public static TagEntry optionalElement(ResourceLocation p_215944_) {
-        return new TagEntry(p_215944_, false, false);
+    public static TagEntry optionalElement(ResourceLocation pElementLocation) {
+        return new TagEntry(pElementLocation, false, false);
     }
 
-    public static TagEntry tag(ResourceLocation p_215950_) {
-        return new TagEntry(p_215950_, true, true);
+    public static TagEntry tag(ResourceLocation pTagLocation) {
+        return new TagEntry(pTagLocation, true, true);
     }
 
-    public static TagEntry optionalTag(ResourceLocation p_215954_) {
-        return new TagEntry(p_215954_, true, false);
+    public static TagEntry optionalTag(ResourceLocation pTagLocation) {
+        return new TagEntry(pTagLocation, true, false);
     }
 
-    public <T> boolean build(TagEntry.Lookup<T> p_215928_, Consumer<T> p_215929_) {
+    public <T> boolean build(TagEntry.Lookup<T> pLookup, Consumer<T> pConsumer) {
         if (this.tag) {
-            Collection<T> collection = p_215928_.tag(this.id);
+            Collection<T> collection = pLookup.tag(this.id);
             if (collection == null) {
                 return !this.required;
             }
 
-            collection.forEach(p_215929_);
+            collection.forEach(pConsumer);
         } else {
-            T t = p_215928_.element(this.id, this.required);
+            T t = pLookup.element(this.id, this.required);
             if (t == null) {
                 return !this.required;
             }
 
-            p_215929_.accept(t);
+            pConsumer.accept(t);
         }
 
         return true;
     }
 
-    public void visitRequiredDependencies(Consumer<ResourceLocation> p_215939_) {
+    public void visitRequiredDependencies(Consumer<ResourceLocation> pVisitor) {
         if (this.tag && this.required) {
-            p_215939_.accept(this.id);
+            pVisitor.accept(this.id);
         }
     }
 
-    public void visitOptionalDependencies(Consumer<ResourceLocation> p_215948_) {
+    public void visitOptionalDependencies(Consumer<ResourceLocation> pVisitor) {
         if (this.tag && !this.required) {
-            p_215948_.accept(this.id);
+            pVisitor.accept(this.id);
         }
     }
 
-    public boolean verifyIfPresent(Predicate<ResourceLocation> p_215941_, Predicate<ResourceLocation> p_215942_) {
-        return !this.required || (this.tag ? p_215942_ : p_215941_).test(this.id);
+    public boolean verifyIfPresent(Predicate<ResourceLocation> pElementPredicate, Predicate<ResourceLocation> pTagPredicate) {
+        return !this.required || (this.tag ? pTagPredicate : pElementPredicate).test(this.id);
     }
 
     @Override
@@ -113,9 +113,9 @@ public class TagEntry {
 
     public interface Lookup<T> {
         @Nullable
-        T element(ResourceLocation p_215956_, boolean p_362986_);
+        T element(ResourceLocation pId, boolean pRequired);
 
         @Nullable
-        Collection<T> tag(ResourceLocation p_215957_);
+        Collection<T> tag(ResourceLocation pId);
     }
 }

@@ -17,7 +17,7 @@ public interface GraphicsResourceAllocator {
         }
     };
 
-    <T> T acquire(ResourceDescriptor<T> p_362950_);
+    <T> T acquire(ResourceDescriptor<T> pDescriptor);
 
-    <T> void release(ResourceDescriptor<T> p_368482_, T p_369841_);
+    <T> void release(ResourceDescriptor<T> pDescriptor, T pValue);
 }

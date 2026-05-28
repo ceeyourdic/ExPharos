@@ -13,13 +13,13 @@ public record GameEventDebugPayload(ResourceKey<GameEvent> gameEventType, Vec3 p
     );
     public static final CustomPacketPayload.Type<GameEventDebugPayload> TYPE = CustomPacketPayload.createType("debug/game_event");
 
-    private GameEventDebugPayload(FriendlyByteBuf p_299092_) {
-        this(p_299092_.readResourceKey(Registries.GAME_EVENT), p_299092_.readVec3());
+    private GameEventDebugPayload(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readResourceKey(Registries.GAME_EVENT), pBuffer.readVec3());
     }
 
-    private void write(FriendlyByteBuf p_298899_) {
-        p_298899_.writeResourceKey(this.gameEventType);
-        p_298899_.writeVec3(this.pos);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeResourceKey(this.gameEventType);
+        pBuffer.writeVec3(this.pos);
     }
 
     @Override

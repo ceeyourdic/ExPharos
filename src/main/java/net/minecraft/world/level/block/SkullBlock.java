@@ -42,7 +42,7 @@ public class SkullBlock extends AbstractSkullBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_56331_, BlockGetter p_56332_, BlockPos p_56333_, CollisionContext p_56334_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return this.getType() == SkullBlock.Types.PIGLIN ? PIGLIN_SHAPE : SHAPE;
     }
 
@@ -52,24 +52,24 @@ public class SkullBlock extends AbstractSkullBlock {
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_56321_) {
-        return super.getStateForPlacement(p_56321_).setValue(ROTATION, Integer.valueOf(RotationSegment.convertToSegment(p_56321_.getRotation())));
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return super.getStateForPlacement(pContext).setValue(ROTATION, Integer.valueOf(RotationSegment.convertToSegment(pContext.getRotation())));
     }
 
     @Override
-    protected BlockState rotate(BlockState p_56326_, Rotation p_56327_) {
-        return p_56326_.setValue(ROTATION, Integer.valueOf(p_56327_.rotate(p_56326_.getValue(ROTATION), ROTATIONS)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(ROTATION, Integer.valueOf(pRotation.rotate(pState.getValue(ROTATION), ROTATIONS)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_56323_, Mirror p_56324_) {
-        return p_56323_.setValue(ROTATION, Integer.valueOf(p_56324_.mirror(p_56323_.getValue(ROTATION), ROTATIONS)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.setValue(ROTATION, Integer.valueOf(pMirror.mirror(pState.getValue(ROTATION), ROTATIONS)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_56329_) {
-        super.createBlockStateDefinition(p_56329_);
-        p_56329_.add(ROTATION);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        super.createBlockStateDefinition(pBuilder);
+        pBuilder.add(ROTATION);
     }
 
     public interface Type extends StringRepresentable {
@@ -88,9 +88,9 @@ public class SkullBlock extends AbstractSkullBlock {
 
         private final String name;
 
-        private Types(final String p_310892_) {
-            this.name = p_310892_;
-            TYPES.put(p_310892_, this);
+        private Types(final String pName) {
+            this.name = pName;
+            TYPES.put(pName, this);
         }
 
         @Override

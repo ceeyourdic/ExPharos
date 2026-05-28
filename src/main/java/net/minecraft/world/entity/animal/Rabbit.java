@@ -144,19 +144,19 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
         }
     }
 
-    public float getJumpCompletion(float p_29736_) {
-        return this.jumpDuration == 0 ? 0.0F : ((float)this.jumpTicks + p_29736_) / (float)this.jumpDuration;
+    public float getJumpCompletion(float pPartialTick) {
+        return this.jumpDuration == 0 ? 0.0F : ((float)this.jumpTicks + pPartialTick) / (float)this.jumpDuration;
     }
 
-    public void setSpeedModifier(double p_29726_) {
-        this.getNavigation().setSpeedModifier(p_29726_);
-        this.moveControl.setWantedPosition(this.moveControl.getWantedX(), this.moveControl.getWantedY(), this.moveControl.getWantedZ(), p_29726_);
+    public void setSpeedModifier(double pSpeedModifier) {
+        this.getNavigation().setSpeedModifier(pSpeedModifier);
+        this.moveControl.setWantedPosition(this.moveControl.getWantedX(), this.moveControl.getWantedY(), this.moveControl.getWantedZ(), pSpeedModifier);
     }
 
     @Override
-    public void setJumping(boolean p_29732_) {
-        super.setJumping(p_29732_);
-        if (p_29732_) {
+    public void setJumping(boolean pJumping) {
+        super.setJumping(pJumping);
+        if (pJumping) {
             this.playSound(this.getJumpSound(), this.getSoundVolume(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * 0.8F);
         }
     }
@@ -227,8 +227,8 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
         return false;
     }
 
-    private void facePoint(double p_29687_, double p_29688_) {
-        this.setYRot((float)(Mth.atan2(p_29688_ - this.getZ(), p_29687_ - this.getX()) * 180.0F / (float)Math.PI) - 90.0F);
+    private void facePoint(double pX, double pZ) {
+        this.setYRot((float)(Mth.atan2(pZ - this.getZ(), pX - this.getX()) * 180.0F / (float)Math.PI) - 90.0F);
     }
 
     private void enableJumpControl() {
@@ -269,17 +269,17 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_29697_) {
-        super.addAdditionalSaveData(p_29697_);
-        p_29697_.putInt("RabbitType", this.getVariant().id);
-        p_29697_.putInt("MoreCarrotTicks", this.moreCarrotTicks);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("RabbitType", this.getVariant().id);
+        pCompound.putInt("MoreCarrotTicks", this.moreCarrotTicks);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_29684_) {
-        super.readAdditionalSaveData(p_29684_);
-        this.setVariant(Rabbit.Variant.byId(p_29684_.getInt("RabbitType")));
-        this.moreCarrotTicks = p_29684_.getInt("MoreCarrotTicks");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setVariant(Rabbit.Variant.byId(pCompound.getInt("RabbitType")));
+        this.moreCarrotTicks = pCompound.getInt("MoreCarrotTicks");
     }
 
     protected SoundEvent getJumpSound() {
@@ -292,7 +292,7 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_29715_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.RABBIT_HURT;
     }
 
@@ -336,8 +336,8 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
     }
 
     @Override
-    public boolean isFood(ItemStack p_29729_) {
-        return p_29729_.is(ItemTags.RABBIT_FOOD);
+    public boolean isFood(ItemStack pStack) {
+        return pStack.is(ItemTags.RABBIT_FOOD);
     }
 
     public Rabbit.Variant getVariant() {
@@ -376,9 +376,9 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
         return super.finalizeSpawn(p_29678_, p_29679_, p_367611_, p_29681_);
     }
 
-    private static Rabbit.Variant getRandomRabbitVariant(LevelAccessor p_262699_, BlockPos p_262700_) {
-        Holder<Biome> holder = p_262699_.getBiome(p_262700_);
-        int i = p_262699_.getRandom().nextInt(100);
+    private static Rabbit.Variant getRandomRabbitVariant(LevelAccessor pLevel, BlockPos pPos) {
+        Holder<Biome> holder = pLevel.getBiome(pPos);
+        int i = pLevel.getRandom().nextInt(100);
         if (holder.is(BiomeTags.SPAWNS_WHITE_RABBITS)) {
             return i < 80 ? Rabbit.Variant.WHITE : Rabbit.Variant.WHITE_SPLOTCHED;
         } else if (holder.is(BiomeTags.SPAWNS_GOLD_RABBITS)) {
@@ -389,9 +389,9 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
     }
 
     public static boolean checkRabbitSpawnRules(
-        EntityType<Rabbit> p_218256_, LevelAccessor p_218257_, EntitySpawnReason p_365577_, BlockPos p_218259_, RandomSource p_218260_
+        EntityType<Rabbit> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return p_218257_.getBlockState(p_218259_.below()).is(BlockTags.RABBITS_SPAWNABLE_ON) && isBrightEnoughToSpawn(p_218257_, p_218259_);
+        return pLevel.getBlockState(pPos.below()).is(BlockTags.RABBITS_SPAWNABLE_ON) && isBrightEnoughToSpawn(pLevel, pPos);
     }
 
     boolean wantsMoreFood() {
@@ -417,9 +417,9 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
     static class RabbitAvoidEntityGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {
         private final Rabbit rabbit;
 
-        public RabbitAvoidEntityGoal(Rabbit p_29743_, Class<T> p_29744_, float p_29745_, double p_29746_, double p_29747_) {
-            super(p_29743_, p_29744_, p_29745_, p_29746_, p_29747_);
-            this.rabbit = p_29743_;
+        public RabbitAvoidEntityGoal(Rabbit pRabbit, Class<T> pEntityClassToAvoid, float pMaxDist, double pWalkSpeedModifier, double pSprintSpeedModifier) {
+            super(pRabbit, pEntityClassToAvoid, pMaxDist, pWalkSpeedModifier, pSprintSpeedModifier);
+            this.rabbit = pRabbit;
         }
 
         @Override
@@ -431,9 +431,9 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
     public static class RabbitGroupData extends AgeableMob.AgeableMobGroupData {
         public final Rabbit.Variant variant;
 
-        public RabbitGroupData(Rabbit.Variant p_262662_) {
+        public RabbitGroupData(Rabbit.Variant pVariant) {
             super(1.0F);
-            this.variant = p_262662_;
+            this.variant = pVariant;
         }
     }
 
@@ -441,9 +441,9 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
         private final Rabbit rabbit;
         private boolean canJump;
 
-        public RabbitJumpControl(Rabbit p_186229_) {
-            super(p_186229_);
-            this.rabbit = p_186229_;
+        public RabbitJumpControl(Rabbit pRabbit) {
+            super(pRabbit);
+            this.rabbit = pRabbit;
         }
 
         public boolean wantJump() {
@@ -454,8 +454,8 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
             return this.canJump;
         }
 
-        public void setCanJump(boolean p_29759_) {
-            this.canJump = p_29759_;
+        public void setCanJump(boolean pCanJump) {
+            this.canJump = pCanJump;
         }
 
         @Override
@@ -471,9 +471,9 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
         private final Rabbit rabbit;
         private double nextJumpSpeed;
 
-        public RabbitMoveControl(Rabbit p_29766_) {
-            super(p_29766_);
-            this.rabbit = p_29766_;
+        public RabbitMoveControl(Rabbit pRabbit) {
+            super(pRabbit);
+            this.rabbit = pRabbit;
         }
 
         @Override
@@ -488,14 +488,14 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
         }
 
         @Override
-        public void setWantedPosition(double p_29769_, double p_29770_, double p_29771_, double p_29772_) {
+        public void setWantedPosition(double pX, double pY, double pZ, double pSpeed) {
             if (this.rabbit.isInWater()) {
-                p_29772_ = 1.5;
+                pSpeed = 1.5;
             }
 
-            super.setWantedPosition(p_29769_, p_29770_, p_29771_, p_29772_);
-            if (p_29772_ > 0.0) {
-                this.nextJumpSpeed = p_29772_;
+            super.setWantedPosition(pX, pY, pZ, pSpeed);
+            if (pSpeed > 0.0) {
+                this.nextJumpSpeed = pSpeed;
             }
         }
     }
@@ -503,9 +503,9 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
     static class RabbitPanicGoal extends PanicGoal {
         private final Rabbit rabbit;
 
-        public RabbitPanicGoal(Rabbit p_29775_, double p_29776_) {
-            super(p_29775_, p_29776_);
-            this.rabbit = p_29775_;
+        public RabbitPanicGoal(Rabbit pRabbit, double pSpeedModifier) {
+            super(pRabbit, pSpeedModifier);
+            this.rabbit = pRabbit;
         }
 
         @Override
@@ -520,9 +520,9 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
         private boolean wantsToRaid;
         private boolean canRaid;
 
-        public RaidGardenGoal(Rabbit p_29782_) {
-            super(p_29782_, 0.7F, 16);
-            this.rabbit = p_29782_;
+        public RaidGardenGoal(Rabbit pRabbit) {
+            super(pRabbit, 0.7F, 16);
+            this.rabbit = pRabbit;
         }
 
         @Override
@@ -581,10 +581,10 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
         }
 
         @Override
-        protected boolean isValidTarget(LevelReader p_29785_, BlockPos p_29786_) {
-            BlockState blockstate = p_29785_.getBlockState(p_29786_);
+        protected boolean isValidTarget(LevelReader pLevel, BlockPos pPos) {
+            BlockState blockstate = pLevel.getBlockState(pPos);
             if (blockstate.is(Blocks.FARMLAND) && this.wantsToRaid && !this.canRaid) {
-                blockstate = p_29785_.getBlockState(p_29786_.above());
+                blockstate = pLevel.getBlockState(pPos.above());
                 if (blockstate.getBlock() instanceof CarrotBlock && ((CarrotBlock)blockstate.getBlock()).isMaxAge(blockstate)) {
                     this.canRaid = true;
                     return true;
@@ -609,9 +609,9 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
         final int id;
         private final String name;
 
-        private Variant(final int p_262657_, final String p_262679_) {
-            this.id = p_262657_;
-            this.name = p_262679_;
+        private Variant(final int pId, final String pName) {
+            this.id = pId;
+            this.name = pName;
         }
 
         @Override
@@ -623,8 +623,8 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
             return this.id;
         }
 
-        public static Rabbit.Variant byId(int p_262665_) {
-            return BY_ID.apply(p_262665_);
+        public static Rabbit.Variant byId(int pId) {
+            return BY_ID.apply(pId);
         }
     }
 }

@@ -18,10 +18,10 @@ public class LevelLightEngine implements LightEventListener {
     @Nullable
     private final LightEngine<?, ?> skyEngine;
 
-    public LevelLightEngine(LightChunkGetter p_75805_, boolean p_75806_, boolean p_75807_) {
-        this.levelHeightAccessor = p_75805_.getLevel();
-        this.blockEngine = p_75806_ ? new BlockLightEngine(p_75805_) : null;
-        this.skyEngine = p_75807_ ? new SkyLightEngine(p_75805_) : null;
+    public LevelLightEngine(LightChunkGetter pLightChunkGetter, boolean pBlockLight, boolean pSkyLight) {
+        this.levelHeightAccessor = pLightChunkGetter.getLevel();
+        this.blockEngine = pBlockLight ? new BlockLightEngine(pLightChunkGetter) : null;
+        this.skyEngine = pSkyLight ? new SkyLightEngine(pLightChunkGetter) : null;
     }
 
     private LevelLightEngine() {
@@ -61,13 +61,13 @@ public class LevelLightEngine implements LightEventListener {
     }
 
     @Override
-    public void updateSectionStatus(SectionPos p_75827_, boolean p_75828_) {
+    public void updateSectionStatus(SectionPos pPos, boolean pIsEmpty) {
         if (this.blockEngine != null) {
-            this.blockEngine.updateSectionStatus(p_75827_, p_75828_);
+            this.blockEngine.updateSectionStatus(pPos, pIsEmpty);
         }
 
         if (this.skyEngine != null) {
-            this.skyEngine.updateSectionStatus(p_75827_, p_75828_);
+            this.skyEngine.updateSectionStatus(pPos, pIsEmpty);
         }
     }
 
@@ -93,66 +93,66 @@ public class LevelLightEngine implements LightEventListener {
         }
     }
 
-    public LayerLightEventListener getLayerListener(LightLayer p_75815_) {
-        if (p_75815_ == LightLayer.BLOCK) {
+    public LayerLightEventListener getLayerListener(LightLayer pType) {
+        if (pType == LightLayer.BLOCK) {
             return (LayerLightEventListener)(this.blockEngine == null ? LayerLightEventListener.DummyLightLayerEventListener.INSTANCE : this.blockEngine);
         } else {
             return (LayerLightEventListener)(this.skyEngine == null ? LayerLightEventListener.DummyLightLayerEventListener.INSTANCE : this.skyEngine);
         }
     }
 
-    public String getDebugData(LightLayer p_75817_, SectionPos p_75818_) {
-        if (p_75817_ == LightLayer.BLOCK) {
+    public String getDebugData(LightLayer pLightLayer, SectionPos pSectionPos) {
+        if (pLightLayer == LightLayer.BLOCK) {
             if (this.blockEngine != null) {
-                return this.blockEngine.getDebugData(p_75818_.asLong());
+                return this.blockEngine.getDebugData(pSectionPos.asLong());
             }
         } else if (this.skyEngine != null) {
-            return this.skyEngine.getDebugData(p_75818_.asLong());
+            return this.skyEngine.getDebugData(pSectionPos.asLong());
         }
 
         return "n/a";
     }
 
-    public LayerLightSectionStorage.SectionType getDebugSectionType(LightLayer p_285008_, SectionPos p_285336_) {
-        if (p_285008_ == LightLayer.BLOCK) {
+    public LayerLightSectionStorage.SectionType getDebugSectionType(LightLayer pLightLayer, SectionPos pSectionPos) {
+        if (pLightLayer == LightLayer.BLOCK) {
             if (this.blockEngine != null) {
-                return this.blockEngine.getDebugSectionType(p_285336_.asLong());
+                return this.blockEngine.getDebugSectionType(pSectionPos.asLong());
             }
         } else if (this.skyEngine != null) {
-            return this.skyEngine.getDebugSectionType(p_285336_.asLong());
+            return this.skyEngine.getDebugSectionType(pSectionPos.asLong());
         }
 
         return LayerLightSectionStorage.SectionType.EMPTY;
     }
 
-    public void queueSectionData(LightLayer p_285328_, SectionPos p_284962_, @Nullable DataLayer p_285035_) {
-        if (p_285328_ == LightLayer.BLOCK) {
+    public void queueSectionData(LightLayer pLightLayer, SectionPos pSectionPos, @Nullable DataLayer pDataLayer) {
+        if (pLightLayer == LightLayer.BLOCK) {
             if (this.blockEngine != null) {
-                this.blockEngine.queueSectionData(p_284962_.asLong(), p_285035_);
+                this.blockEngine.queueSectionData(pSectionPos.asLong(), pDataLayer);
             }
         } else if (this.skyEngine != null) {
-            this.skyEngine.queueSectionData(p_284962_.asLong(), p_285035_);
+            this.skyEngine.queueSectionData(pSectionPos.asLong(), pDataLayer);
         }
     }
 
-    public void retainData(ChunkPos p_75829_, boolean p_75830_) {
+    public void retainData(ChunkPos pPos, boolean pRetain) {
         if (this.blockEngine != null) {
-            this.blockEngine.retainData(p_75829_, p_75830_);
+            this.blockEngine.retainData(pPos, pRetain);
         }
 
         if (this.skyEngine != null) {
-            this.skyEngine.retainData(p_75829_, p_75830_);
+            this.skyEngine.retainData(pPos, pRetain);
         }
     }
 
-    public int getRawBrightness(BlockPos p_75832_, int p_75833_) {
-        int i = this.skyEngine == null ? 0 : this.skyEngine.getLightValue(p_75832_) - p_75833_;
-        int j = this.blockEngine == null ? 0 : this.blockEngine.getLightValue(p_75832_);
+    public int getRawBrightness(BlockPos pBlockPos, int pAmount) {
+        int i = this.skyEngine == null ? 0 : this.skyEngine.getLightValue(pBlockPos) - pAmount;
+        int j = this.blockEngine == null ? 0 : this.blockEngine.getLightValue(pBlockPos);
         return Math.max(j, i);
     }
 
-    public boolean lightOnInColumn(long p_369308_) {
-        return this.blockEngine == null || this.blockEngine.storage.lightOnInColumn(p_369308_) && (this.skyEngine == null || this.skyEngine.storage.lightOnInColumn(p_369308_));
+    public boolean lightOnInColumn(long pColumnPos) {
+        return this.blockEngine == null || this.blockEngine.storage.lightOnInColumn(pColumnPos) && (this.skyEngine == null || this.skyEngine.storage.lightOnInColumn(pColumnPos));
     }
 
     public int getLightSectionCount() {

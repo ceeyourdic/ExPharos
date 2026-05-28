@@ -56,10 +56,10 @@ public abstract class PathNavigation {
     private boolean isStuck;
     private float requiredPathLength = 16.0F;
 
-    public PathNavigation(Mob p_26515_, Level p_26516_) {
-        this.mob = p_26515_;
-        this.level = p_26516_;
-        this.pathFinder = this.createPathFinder(Mth.floor(p_26515_.getAttributeBaseValue(Attributes.FOLLOW_RANGE) * 16.0));
+    public PathNavigation(Mob pMob, Level pLevel) {
+        this.mob = pMob;
+        this.level = pLevel;
+        this.pathFinder = this.createPathFinder(Mth.floor(pMob.getAttributeBaseValue(Attributes.FOLLOW_RANGE) * 16.0));
     }
 
     public void updatePathfinderMaxVisitedNodes() {
@@ -67,8 +67,8 @@ public abstract class PathNavigation {
         this.pathFinder.setMaxVisitedNodes(i);
     }
 
-    public void setRequiredPathLength(float p_370213_) {
-        this.requiredPathLength = p_370213_;
+    public void setRequiredPathLength(float pRequiredPathLength) {
+        this.requiredPathLength = pRequiredPathLength;
         this.updatePathfinderMaxVisitedNodes();
     }
 
@@ -80,8 +80,8 @@ public abstract class PathNavigation {
         this.maxVisitedNodesMultiplier = 1.0F;
     }
 
-    public void setMaxVisitedNodesMultiplier(float p_26530_) {
-        this.maxVisitedNodesMultiplier = p_26530_;
+    public void setMaxVisitedNodesMultiplier(float pMultiplier) {
+        this.maxVisitedNodesMultiplier = pMultiplier;
     }
 
     @Nullable
@@ -89,10 +89,10 @@ public abstract class PathNavigation {
         return this.targetPos;
     }
 
-    protected abstract PathFinder createPathFinder(int p_26531_);
+    protected abstract PathFinder createPathFinder(int pMaxVisitedNodes);
 
-    public void setSpeedModifier(double p_26518_) {
-        this.speedModifier = p_26518_;
+    public void setSpeedModifier(double pSpeed) {
+        this.speedModifier = pSpeed;
     }
 
     public void recomputePath() {
@@ -109,61 +109,61 @@ public abstract class PathNavigation {
     }
 
     @Nullable
-    public final Path createPath(double p_26525_, double p_26526_, double p_26527_, int p_26528_) {
-        return this.createPath(BlockPos.containing(p_26525_, p_26526_, p_26527_), p_26528_);
+    public final Path createPath(double pX, double pY, double pZ, int pAccuracy) {
+        return this.createPath(BlockPos.containing(pX, pY, pZ), pAccuracy);
     }
 
     @Nullable
-    public Path createPath(Stream<BlockPos> p_26557_, int p_26558_) {
-        return this.createPath(p_26557_.collect(Collectors.toSet()), 8, false, p_26558_);
+    public Path createPath(Stream<BlockPos> pTargets, int pAccuracy) {
+        return this.createPath(pTargets.collect(Collectors.toSet()), 8, false, pAccuracy);
     }
 
     @Nullable
-    public Path createPath(Set<BlockPos> p_26549_, int p_26550_) {
-        return this.createPath(p_26549_, 8, false, p_26550_);
+    public Path createPath(Set<BlockPos> pPositions, int pDistance) {
+        return this.createPath(pPositions, 8, false, pDistance);
     }
 
     @Nullable
-    public Path createPath(BlockPos p_26546_, int p_26547_) {
-        return this.createPath(ImmutableSet.of(p_26546_), 8, false, p_26547_);
+    public Path createPath(BlockPos pPos, int pAccuracy) {
+        return this.createPath(ImmutableSet.of(pPos), 8, false, pAccuracy);
     }
 
     @Nullable
-    public Path createPath(BlockPos p_148219_, int p_148220_, int p_148221_) {
-        return this.createPath(ImmutableSet.of(p_148219_), 8, false, p_148220_, (float)p_148221_);
+    public Path createPath(BlockPos pPos, int pRegionOffset, int pAccuracy) {
+        return this.createPath(ImmutableSet.of(pPos), 8, false, pRegionOffset, (float)pAccuracy);
     }
 
     @Nullable
-    public Path createPath(Entity p_26534_, int p_26535_) {
-        return this.createPath(ImmutableSet.of(p_26534_.blockPosition()), 16, true, p_26535_);
+    public Path createPath(Entity pEntity, int pAccuracy) {
+        return this.createPath(ImmutableSet.of(pEntity.blockPosition()), 16, true, pAccuracy);
     }
 
     @Nullable
-    protected Path createPath(Set<BlockPos> p_26552_, int p_26553_, boolean p_26554_, int p_26555_) {
-        return this.createPath(p_26552_, p_26553_, p_26554_, p_26555_, this.getMaxPathLength());
+    protected Path createPath(Set<BlockPos> pTargets, int pRegionOffset, boolean pOffsetUpward, int pAccuracy) {
+        return this.createPath(pTargets, pRegionOffset, pOffsetUpward, pAccuracy, this.getMaxPathLength());
     }
 
     @Nullable
-    protected Path createPath(Set<BlockPos> p_148223_, int p_148224_, boolean p_148225_, int p_148226_, float p_148227_) {
-        if (p_148223_.isEmpty()) {
+    protected Path createPath(Set<BlockPos> pTargets, int pRegionOffset, boolean pOffsetUpward, int pAccuracy, float pFollowRange) {
+        if (pTargets.isEmpty()) {
             return null;
         } else if (this.mob.getY() < (double)this.level.getMinY()) {
             return null;
         } else if (!this.canUpdatePath()) {
             return null;
-        } else if (this.path != null && !this.path.isDone() && p_148223_.contains(this.targetPos)) {
+        } else if (this.path != null && !this.path.isDone() && pTargets.contains(this.targetPos)) {
             return this.path;
         } else {
             ProfilerFiller profilerfiller = Profiler.get();
             profilerfiller.push("pathfind");
-            BlockPos blockpos = p_148225_ ? this.mob.blockPosition().above() : this.mob.blockPosition();
-            int i = (int)(p_148227_ + (float)p_148224_);
+            BlockPos blockpos = pOffsetUpward ? this.mob.blockPosition().above() : this.mob.blockPosition();
+            int i = (int)(pFollowRange + (float)pRegionOffset);
             PathNavigationRegion pathnavigationregion = new PathNavigationRegion(this.level, blockpos.offset(-i, -i, -i), blockpos.offset(i, i, i));
-            Path path = this.pathFinder.findPath(pathnavigationregion, this.mob, p_148223_, p_148227_, p_148226_, this.maxVisitedNodesMultiplier);
+            Path path = this.pathFinder.findPath(pathnavigationregion, this.mob, pTargets, pFollowRange, pAccuracy, this.maxVisitedNodesMultiplier);
             profilerfiller.pop();
             if (path != null && path.getTarget() != null) {
                 this.targetPos = path.getTarget();
-                this.reachRange = p_148226_;
+                this.reachRange = pAccuracy;
                 this.resetStuckTimeout();
             }
 
@@ -171,26 +171,26 @@ public abstract class PathNavigation {
         }
     }
 
-    public boolean moveTo(double p_26520_, double p_26521_, double p_26522_, double p_26523_) {
-        return this.moveTo(this.createPath(p_26520_, p_26521_, p_26522_, 1), p_26523_);
+    public boolean moveTo(double pX, double pY, double pZ, double pSpeed) {
+        return this.moveTo(this.createPath(pX, pY, pZ, 1), pSpeed);
     }
 
-    public boolean moveTo(double p_330495_, double p_329397_, double p_335206_, int p_329667_, double p_331294_) {
-        return this.moveTo(this.createPath(p_330495_, p_329397_, p_335206_, p_329667_), p_331294_);
+    public boolean moveTo(double pX, double pY, double pZ, int pAccuracy, double pSpeed) {
+        return this.moveTo(this.createPath(pX, pY, pZ, pAccuracy), pSpeed);
     }
 
-    public boolean moveTo(Entity p_26532_, double p_26533_) {
-        Path path = this.createPath(p_26532_, 1);
-        return path != null && this.moveTo(path, p_26533_);
+    public boolean moveTo(Entity pEntity, double pSpeed) {
+        Path path = this.createPath(pEntity, 1);
+        return path != null && this.moveTo(path, pSpeed);
     }
 
-    public boolean moveTo(@Nullable Path p_26537_, double p_26538_) {
-        if (p_26537_ == null) {
+    public boolean moveTo(@Nullable Path pPathentity, double pSpeed) {
+        if (pPathentity == null) {
             this.path = null;
             return false;
         } else {
-            if (!p_26537_.sameAs(this.path)) {
-                this.path = p_26537_;
+            if (!pPathentity.sameAs(this.path)) {
+                this.path = pPathentity;
             }
 
             if (this.isDone()) {
@@ -200,7 +200,7 @@ public abstract class PathNavigation {
                 if (this.path.getNodeCount() <= 0) {
                     return false;
                 } else {
-                    this.speedModifier = p_26538_;
+                    this.speedModifier = pSpeed;
                     Vec3 vec3 = this.getTempMobPos();
                     this.lastStuckCheck = this.tick;
                     this.lastStuckCheckPos = vec3;
@@ -243,9 +243,9 @@ public abstract class PathNavigation {
         }
     }
 
-    protected double getGroundY(Vec3 p_186132_) {
-        BlockPos blockpos = BlockPos.containing(p_186132_);
-        return this.level.getBlockState(blockpos.below()).isAir() ? p_186132_.y : WalkNodeEvaluator.getFloorLevel(this.level, blockpos);
+    protected double getGroundY(Vec3 pVec) {
+        BlockPos blockpos = BlockPos.containing(pVec);
+        return this.level.getBlockState(blockpos.below()).isAir() ? pVec.y : WalkNodeEvaluator.getFloorLevel(this.level, blockpos);
     }
 
     protected void followThePath() {
@@ -263,19 +263,19 @@ public abstract class PathNavigation {
         this.doStuckDetection(vec3);
     }
 
-    private boolean shouldTargetNextNodeInDirection(Vec3 p_26560_) {
+    private boolean shouldTargetNextNodeInDirection(Vec3 pVec) {
         if (this.path.getNextNodeIndex() + 1 >= this.path.getNodeCount()) {
             return false;
         } else {
             Vec3 vec3 = Vec3.atBottomCenterOf(this.path.getNextNodePos());
-            if (!p_26560_.closerThan(vec3, 2.0)) {
+            if (!pVec.closerThan(vec3, 2.0)) {
                 return false;
-            } else if (this.canMoveDirectly(p_26560_, this.path.getNextEntityPos(this.mob))) {
+            } else if (this.canMoveDirectly(pVec, this.path.getNextEntityPos(this.mob))) {
                 return true;
             } else {
                 Vec3 vec31 = Vec3.atBottomCenterOf(this.path.getNodePos(this.path.getNextNodeIndex() + 1));
-                Vec3 vec32 = vec3.subtract(p_26560_);
-                Vec3 vec33 = vec31.subtract(p_26560_);
+                Vec3 vec32 = vec3.subtract(pVec);
+                Vec3 vec33 = vec31.subtract(pVec);
                 double d0 = vec32.lengthSqr();
                 double d1 = vec33.lengthSqr();
                 boolean flag = d1 < d0;
@@ -291,11 +291,11 @@ public abstract class PathNavigation {
         }
     }
 
-    protected void doStuckDetection(Vec3 p_26539_) {
+    protected void doStuckDetection(Vec3 pPositionVec3) {
         if (this.tick - this.lastStuckCheck > 100) {
             float f = this.mob.getSpeed() >= 1.0F ? this.mob.getSpeed() : this.mob.getSpeed() * this.mob.getSpeed();
             float f1 = f * 100.0F * 0.25F;
-            if (p_26539_.distanceToSqr(this.lastStuckCheckPos) < (double)(f1 * f1)) {
+            if (pPositionVec3.distanceToSqr(this.lastStuckCheckPos) < (double)(f1 * f1)) {
                 this.isStuck = true;
                 this.stop();
             } else {
@@ -303,7 +303,7 @@ public abstract class PathNavigation {
             }
 
             this.lastStuckCheck = this.tick;
-            this.lastStuckCheckPos = p_26539_;
+            this.lastStuckCheckPos = pPositionVec3;
         }
 
         if (this.path != null && !this.path.isDone()) {
@@ -313,7 +313,7 @@ public abstract class PathNavigation {
                 this.timeoutTimer = this.timeoutTimer + (i - this.lastTimeoutCheck);
             } else {
                 this.timeoutCachedNode = vec3i;
-                double d0 = p_26539_.distanceTo(Vec3.atBottomCenterOf(this.timeoutCachedNode));
+                double d0 = pPositionVec3.distanceTo(Vec3.atBottomCenterOf(this.timeoutCachedNode));
                 this.timeoutLimit = this.mob.getSpeed() > 0.0F ? d0 / (double)this.mob.getSpeed() * 20.0 : 0.0;
             }
 
@@ -369,24 +369,24 @@ public abstract class PathNavigation {
         }
     }
 
-    protected boolean canMoveDirectly(Vec3 p_186133_, Vec3 p_186134_) {
+    protected boolean canMoveDirectly(Vec3 pPosVec31, Vec3 pPosVec32) {
         return false;
     }
 
-    public boolean canCutCorner(PathType p_334253_) {
-        return p_334253_ != PathType.DANGER_FIRE && p_334253_ != PathType.DANGER_OTHER && p_334253_ != PathType.WALKABLE_DOOR;
+    public boolean canCutCorner(PathType pPathType) {
+        return pPathType != PathType.DANGER_FIRE && pPathType != PathType.DANGER_OTHER && pPathType != PathType.WALKABLE_DOOR;
     }
 
-    protected static boolean isClearForMovementBetween(Mob p_262599_, Vec3 p_262674_, Vec3 p_262586_, boolean p_262676_) {
-        Vec3 vec3 = new Vec3(p_262586_.x, p_262586_.y + (double)p_262599_.getBbHeight() * 0.5, p_262586_.z);
-        return p_262599_.level()
-                .clip(new ClipContext(p_262674_, vec3, ClipContext.Block.COLLIDER, p_262676_ ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE, p_262599_))
+    protected static boolean isClearForMovementBetween(Mob pMob, Vec3 pPos1, Vec3 pPos2, boolean pAllowSwimming) {
+        Vec3 vec3 = new Vec3(pPos2.x, pPos2.y + (double)pMob.getBbHeight() * 0.5, pPos2.z);
+        return pMob.level()
+                .clip(new ClipContext(pPos1, vec3, ClipContext.Block.COLLIDER, pAllowSwimming ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE, pMob))
                 .getType()
             == HitResult.Type.MISS;
     }
 
-    public boolean isStableDestination(BlockPos p_26545_) {
-        BlockPos blockpos = p_26545_.below();
+    public boolean isStableDestination(BlockPos pPos) {
+        BlockPos blockpos = pPos.below();
         return this.level.getBlockState(blockpos).isSolidRender();
     }
 
@@ -394,15 +394,15 @@ public abstract class PathNavigation {
         return this.nodeEvaluator;
     }
 
-    public void setCanFloat(boolean p_26563_) {
-        this.nodeEvaluator.setCanFloat(p_26563_);
+    public void setCanFloat(boolean pCanSwim) {
+        this.nodeEvaluator.setCanFloat(pCanSwim);
     }
 
     public boolean canFloat() {
         return this.nodeEvaluator.canFloat();
     }
 
-    public boolean shouldRecomputePath(BlockPos p_200904_) {
+    public boolean shouldRecomputePath(BlockPos pPos) {
         if (this.hasDelayedRecomputation) {
             return false;
         } else if (this.path != null && !this.path.isDone() && this.path.getNodeCount() != 0) {
@@ -412,7 +412,7 @@ public abstract class PathNavigation {
                 ((double)node.y + this.mob.getY()) / 2.0,
                 ((double)node.z + this.mob.getZ()) / 2.0
             );
-            return p_200904_.closerToCenterThan(vec3, (double)(this.path.getNodeCount() - this.path.getNextNodeIndex()));
+            return pPos.closerToCenterThan(vec3, (double)(this.path.getNodeCount() - this.path.getNextNodeIndex()));
         } else {
             return false;
         }

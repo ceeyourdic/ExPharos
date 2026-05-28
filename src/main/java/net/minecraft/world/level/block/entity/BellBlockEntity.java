@@ -35,69 +35,69 @@ public class BellBlockEntity extends BlockEntity {
     private boolean resonating;
     private int resonationTicks;
 
-    public BellBlockEntity(BlockPos p_155173_, BlockState p_155174_) {
-        super(BlockEntityType.BELL, p_155173_, p_155174_);
+    public BellBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        super(BlockEntityType.BELL, pPos, pBlockState);
     }
 
     @Override
-    public boolean triggerEvent(int p_58837_, int p_58838_) {
-        if (p_58837_ == 1) {
+    public boolean triggerEvent(int pId, int pType) {
+        if (pId == 1) {
             this.updateEntities();
             this.resonationTicks = 0;
-            this.clickDirection = Direction.from3DDataValue(p_58838_);
+            this.clickDirection = Direction.from3DDataValue(pType);
             this.ticks = 0;
             this.shaking = true;
             return true;
         } else {
-            return super.triggerEvent(p_58837_, p_58838_);
+            return super.triggerEvent(pId, pType);
         }
     }
 
     private static void tick(
-        Level p_155181_, BlockPos p_155182_, BlockState p_155183_, BellBlockEntity p_155184_, BellBlockEntity.ResonationEndAction p_155185_
+        Level pLevel, BlockPos pPos, BlockState pState, BellBlockEntity pBlockEntity, BellBlockEntity.ResonationEndAction pResonationEndAction
     ) {
-        if (p_155184_.shaking) {
-            p_155184_.ticks++;
+        if (pBlockEntity.shaking) {
+            pBlockEntity.ticks++;
         }
 
-        if (p_155184_.ticks >= 50) {
-            p_155184_.shaking = false;
-            p_155184_.ticks = 0;
+        if (pBlockEntity.ticks >= 50) {
+            pBlockEntity.shaking = false;
+            pBlockEntity.ticks = 0;
         }
 
-        if (p_155184_.ticks >= 5 && p_155184_.resonationTicks == 0 && areRaidersNearby(p_155182_, p_155184_.nearbyEntities)) {
-            p_155184_.resonating = true;
-            p_155181_.playSound(null, p_155182_, SoundEvents.BELL_RESONATE, SoundSource.BLOCKS, 1.0F, 1.0F);
+        if (pBlockEntity.ticks >= 5 && pBlockEntity.resonationTicks == 0 && areRaidersNearby(pPos, pBlockEntity.nearbyEntities)) {
+            pBlockEntity.resonating = true;
+            pLevel.playSound(null, pPos, SoundEvents.BELL_RESONATE, SoundSource.BLOCKS, 1.0F, 1.0F);
         }
 
-        if (p_155184_.resonating) {
-            if (p_155184_.resonationTicks < 40) {
-                p_155184_.resonationTicks++;
+        if (pBlockEntity.resonating) {
+            if (pBlockEntity.resonationTicks < 40) {
+                pBlockEntity.resonationTicks++;
             } else {
-                p_155185_.run(p_155181_, p_155182_, p_155184_.nearbyEntities);
-                p_155184_.resonating = false;
+                pResonationEndAction.run(pLevel, pPos, pBlockEntity.nearbyEntities);
+                pBlockEntity.resonating = false;
             }
         }
     }
 
-    public static void clientTick(Level p_155176_, BlockPos p_155177_, BlockState p_155178_, BellBlockEntity p_155179_) {
-        tick(p_155176_, p_155177_, p_155178_, p_155179_, BellBlockEntity::showBellParticles);
+    public static void clientTick(Level pLevel, BlockPos pPos, BlockState pState, BellBlockEntity pBlockEntity) {
+        tick(pLevel, pPos, pState, pBlockEntity, BellBlockEntity::showBellParticles);
     }
 
-    public static void serverTick(Level p_155203_, BlockPos p_155204_, BlockState p_155205_, BellBlockEntity p_155206_) {
-        tick(p_155203_, p_155204_, p_155205_, p_155206_, BellBlockEntity::makeRaidersGlow);
+    public static void serverTick(Level pLevel, BlockPos pPos, BlockState pState, BellBlockEntity pBlockEntity) {
+        tick(pLevel, pPos, pState, pBlockEntity, BellBlockEntity::makeRaidersGlow);
     }
 
-    public void onHit(Direction p_58835_) {
+    public void onHit(Direction pDirection) {
         BlockPos blockpos = this.getBlockPos();
-        this.clickDirection = p_58835_;
+        this.clickDirection = pDirection;
         if (this.shaking) {
             this.ticks = 0;
         } else {
             this.shaking = true;
         }
 
-        this.level.blockEvent(blockpos, this.getBlockState().getBlock(), 1, p_58835_.get3DDataValue());
+        this.level.blockEvent(blockpos, this.getBlockState().getBlock(), 1, pDirection.get3DDataValue());
     }
 
     private void updateEntities() {
@@ -117,11 +117,11 @@ public class BellBlockEntity extends BlockEntity {
         }
     }
 
-    private static boolean areRaidersNearby(BlockPos p_155200_, List<LivingEntity> p_155201_) {
-        for (LivingEntity livingentity : p_155201_) {
+    private static boolean areRaidersNearby(BlockPos pPos, List<LivingEntity> pRaiders) {
+        for (LivingEntity livingentity : pRaiders) {
             if (livingentity.isAlive()
                 && !livingentity.isRemoved()
-                && p_155200_.closerToCenterThan(livingentity.position(), 32.0)
+                && pPos.closerToCenterThan(livingentity.position(), 32.0)
                 && livingentity.getType().is(EntityTypeTags.RAIDERS)) {
                 return true;
             }
@@ -130,49 +130,49 @@ public class BellBlockEntity extends BlockEntity {
         return false;
     }
 
-    private static void makeRaidersGlow(Level p_155187_, BlockPos p_155188_, List<LivingEntity> p_155189_) {
-        p_155189_.stream().filter(p_155219_ -> isRaiderWithinRange(p_155188_, p_155219_)).forEach(BellBlockEntity::glow);
+    private static void makeRaidersGlow(Level pLevel, BlockPos pPos, List<LivingEntity> pRaiders) {
+        pRaiders.stream().filter(p_155219_ -> isRaiderWithinRange(pPos, p_155219_)).forEach(BellBlockEntity::glow);
     }
 
-    private static void showBellParticles(Level p_155208_, BlockPos p_155209_, List<LivingEntity> p_155210_) {
+    private static void showBellParticles(Level pLevel, BlockPos pPos, List<LivingEntity> pRaiders) {
         MutableInt mutableint = new MutableInt(16700985);
-        int i = (int)p_155210_.stream().filter(p_375333_ -> p_155209_.closerToCenterThan(p_375333_.position(), 48.0)).count();
-        p_155210_.stream()
-            .filter(p_155213_ -> isRaiderWithinRange(p_155209_, p_155213_))
+        int i = (int)pRaiders.stream().filter(p_375333_ -> pPos.closerToCenterThan(p_375333_.position(), 48.0)).count();
+        pRaiders.stream()
+            .filter(p_155213_ -> isRaiderWithinRange(pPos, p_155213_))
             .forEach(
                 p_327289_ -> {
                     float f = 1.0F;
                     double d0 = Math.sqrt(
-                        (p_327289_.getX() - (double)p_155209_.getX()) * (p_327289_.getX() - (double)p_155209_.getX())
-                            + (p_327289_.getZ() - (double)p_155209_.getZ()) * (p_327289_.getZ() - (double)p_155209_.getZ())
+                        (p_327289_.getX() - (double)pPos.getX()) * (p_327289_.getX() - (double)pPos.getX())
+                            + (p_327289_.getZ() - (double)pPos.getZ()) * (p_327289_.getZ() - (double)pPos.getZ())
                     );
-                    double d1 = (double)((float)p_155209_.getX() + 0.5F) + 1.0 / d0 * (p_327289_.getX() - (double)p_155209_.getX());
-                    double d2 = (double)((float)p_155209_.getZ() + 0.5F) + 1.0 / d0 * (p_327289_.getZ() - (double)p_155209_.getZ());
+                    double d1 = (double)((float)pPos.getX() + 0.5F) + 1.0 / d0 * (p_327289_.getX() - (double)pPos.getX());
+                    double d2 = (double)((float)pPos.getZ() + 0.5F) + 1.0 / d0 * (p_327289_.getZ() - (double)pPos.getZ());
                     int j = Mth.clamp((i - 21) / -2, 3, 15);
 
                     for (int k = 0; k < j; k++) {
                         int l = mutableint.addAndGet(5);
-                        p_155208_.addParticle(
-                            ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, l), d1, (double)((float)p_155209_.getY() + 0.5F), d2, 0.0, 0.0, 0.0
+                        pLevel.addParticle(
+                            ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, l), d1, (double)((float)pPos.getY() + 0.5F), d2, 0.0, 0.0, 0.0
                         );
                     }
                 }
             );
     }
 
-    private static boolean isRaiderWithinRange(BlockPos p_155197_, LivingEntity p_155198_) {
-        return p_155198_.isAlive()
-            && !p_155198_.isRemoved()
-            && p_155197_.closerToCenterThan(p_155198_.position(), 48.0)
-            && p_155198_.getType().is(EntityTypeTags.RAIDERS);
+    private static boolean isRaiderWithinRange(BlockPos pPos, LivingEntity pRaider) {
+        return pRaider.isAlive()
+            && !pRaider.isRemoved()
+            && pPos.closerToCenterThan(pRaider.position(), 48.0)
+            && pRaider.getType().is(EntityTypeTags.RAIDERS);
     }
 
-    private static void glow(LivingEntity p_58841_) {
-        p_58841_.addEffect(new MobEffectInstance(MobEffects.GLOWING, 60));
+    private static void glow(LivingEntity pEntity) {
+        pEntity.addEffect(new MobEffectInstance(MobEffects.GLOWING, 60));
     }
 
     @FunctionalInterface
     interface ResonationEndAction {
-        void run(Level p_155221_, BlockPos p_155222_, List<LivingEntity> p_155223_);
+        void run(Level pLevel, BlockPos pPos, List<LivingEntity> pRaiders);
     }
 }

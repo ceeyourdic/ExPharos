@@ -34,11 +34,11 @@ public class SetContainerLootTable extends LootItemConditionalFunction {
     private final long seed;
     private final Holder<BlockEntityType<?>> type;
 
-    private SetContainerLootTable(List<LootItemCondition> p_297857_, ResourceKey<LootTable> p_335799_, long p_193047_, Holder<BlockEntityType<?>> p_300516_) {
-        super(p_297857_);
-        this.name = p_335799_;
-        this.seed = p_193047_;
-        this.type = p_300516_;
+    private SetContainerLootTable(List<LootItemCondition> pConditions, ResourceKey<LootTable> pName, long pSeed, Holder<BlockEntityType<?>> pType) {
+        super(pConditions);
+        this.name = pName;
+        this.seed = pSeed;
+        this.type = pType;
     }
 
     @Override
@@ -47,12 +47,12 @@ public class SetContainerLootTable extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_80967_, LootContext p_80968_) {
-        if (p_80967_.isEmpty()) {
-            return p_80967_;
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        if (pStack.isEmpty()) {
+            return pStack;
         } else {
-            p_80967_.set(DataComponents.CONTAINER_LOOT, new SeededContainerLoot(this.name, this.seed));
-            return p_80967_;
+            pStack.set(DataComponents.CONTAINER_LOOT, new SeededContainerLoot(this.name, this.seed));
+            return pStack;
         }
     }
 
@@ -68,11 +68,11 @@ public class SetContainerLootTable extends LootItemConditionalFunction {
         }
     }
 
-    public static LootItemConditionalFunction.Builder<?> withLootTable(BlockEntityType<?> p_193050_, ResourceKey<LootTable> p_334597_) {
-        return simpleBuilder(p_327599_ -> new SetContainerLootTable(p_327599_, p_334597_, 0L, p_193050_.builtInRegistryHolder()));
+    public static LootItemConditionalFunction.Builder<?> withLootTable(BlockEntityType<?> pType, ResourceKey<LootTable> pToolTable) {
+        return simpleBuilder(p_327599_ -> new SetContainerLootTable(p_327599_, pToolTable, 0L, pType.builtInRegistryHolder()));
     }
 
-    public static LootItemConditionalFunction.Builder<?> withLootTable(BlockEntityType<?> p_193053_, ResourceKey<LootTable> p_332251_, long p_193055_) {
-        return simpleBuilder(p_327596_ -> new SetContainerLootTable(p_327596_, p_332251_, p_193055_, p_193053_.builtInRegistryHolder()));
+    public static LootItemConditionalFunction.Builder<?> withLootTable(BlockEntityType<?> pType, ResourceKey<LootTable> pLootTable, long pSeed) {
+        return simpleBuilder(p_327596_ -> new SetContainerLootTable(p_327596_, pLootTable, pSeed, pType.builtInRegistryHolder()));
     }
 }

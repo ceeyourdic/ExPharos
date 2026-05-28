@@ -15,8 +15,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class ArrowModel extends EntityModel<ArrowRenderState> {
-    public ArrowModel(ModelPart p_364391_) {
-        super(p_364391_, RenderType::entityCutout);
+    public ArrowModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entityCutout);
     }
 
     public static LayerDefinition createBodyLayer() {

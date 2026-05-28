@@ -17,9 +17,9 @@ public interface Recipe<T extends RecipeInput> {
     StreamCodec<RegistryFriendlyByteBuf, Recipe<?>> STREAM_CODEC = ByteBufCodecs.registry(Registries.RECIPE_SERIALIZER)
         .dispatch(Recipe::getSerializer, RecipeSerializer::streamCodec);
 
-    boolean matches(T p_343697_, Level p_44003_);
+    boolean matches(T pInput, Level pLevel);
 
-    ItemStack assemble(T p_343633_, HolderLookup.Provider p_332698_);
+    ItemStack assemble(T pInput, HolderLookup.Provider pRegistries);
 
     default boolean isSpecial() {
         return false;

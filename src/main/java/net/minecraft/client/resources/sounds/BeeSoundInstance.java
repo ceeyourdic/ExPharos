@@ -16,12 +16,12 @@ public abstract class BeeSoundInstance extends AbstractTickableSoundInstance {
     protected final Bee bee;
     private boolean hasSwitched;
 
-    public BeeSoundInstance(Bee p_119621_, SoundEvent p_119622_, SoundSource p_119623_) {
-        super(p_119622_, p_119623_, SoundInstance.createUnseededRandom());
-        this.bee = p_119621_;
-        this.x = (double)((float)p_119621_.getX());
-        this.y = (double)((float)p_119621_.getY());
-        this.z = (double)((float)p_119621_.getZ());
+    public BeeSoundInstance(Bee pBee, SoundEvent pSoundEvent, SoundSource pSource) {
+        super(pSoundEvent, pSource, SoundInstance.createUnseededRandom());
+        this.bee = pBee;
+        this.x = (double)((float)pBee.getX());
+        this.y = (double)((float)pBee.getY());
+        this.z = (double)((float)pBee.getZ());
         this.looping = true;
         this.delay = 0;
         this.volume = 0.0F;

@@ -23,11 +23,11 @@ public class SmithingTransformRecipe implements SmithingRecipe {
     @Nullable
     private PlacementInfo placementInfo;
 
-    public SmithingTransformRecipe(Optional<Ingredient> p_366010_, Optional<Ingredient> p_367568_, Optional<Ingredient> p_365900_, ItemStack p_267031_) {
-        this.template = p_366010_;
-        this.base = p_367568_;
-        this.addition = p_365900_;
-        this.result = p_267031_;
+    public SmithingTransformRecipe(Optional<Ingredient> pTemplate, Optional<Ingredient> pBase, Optional<Ingredient> pAddition, ItemStack pResult) {
+        this.template = pTemplate;
+        this.base = pBase;
+        this.addition = pAddition;
+        this.result = pResult;
     }
 
     public ItemStack assemble(SmithingRecipeInput p_343590_, HolderLookup.Provider p_331030_) {

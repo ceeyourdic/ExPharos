@@ -22,8 +22,8 @@ public class AppendLoot implements RuleBlockEntityModifier {
     );
     private final ResourceKey<LootTable> lootTable;
 
-    public AppendLoot(ResourceKey<LootTable> p_334648_) {
-        this.lootTable = p_334648_;
+    public AppendLoot(ResourceKey<LootTable> pLootTable) {
+        this.lootTable = pLootTable;
     }
 
     @Override

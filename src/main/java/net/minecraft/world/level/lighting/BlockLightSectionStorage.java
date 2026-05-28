@@ -8,20 +8,20 @@ import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 
 public class BlockLightSectionStorage extends LayerLightSectionStorage<BlockLightSectionStorage.BlockDataLayerStorageMap> {
-    protected BlockLightSectionStorage(LightChunkGetter p_75511_) {
-        super(LightLayer.BLOCK, p_75511_, new BlockLightSectionStorage.BlockDataLayerStorageMap(new Long2ObjectOpenHashMap<>()));
+    protected BlockLightSectionStorage(LightChunkGetter pChunkSource) {
+        super(LightLayer.BLOCK, pChunkSource, new BlockLightSectionStorage.BlockDataLayerStorageMap(new Long2ObjectOpenHashMap<>()));
     }
 
     @Override
-    protected int getLightValue(long p_75513_) {
-        long i = SectionPos.blockToSection(p_75513_);
+    protected int getLightValue(long pLevelPos) {
+        long i = SectionPos.blockToSection(pLevelPos);
         DataLayer datalayer = this.getDataLayer(i, false);
         return datalayer == null
             ? 0
             : datalayer.get(
-                SectionPos.sectionRelative(BlockPos.getX(p_75513_)),
-                SectionPos.sectionRelative(BlockPos.getY(p_75513_)),
-                SectionPos.sectionRelative(BlockPos.getZ(p_75513_))
+                SectionPos.sectionRelative(BlockPos.getX(pLevelPos)),
+                SectionPos.sectionRelative(BlockPos.getY(pLevelPos)),
+                SectionPos.sectionRelative(BlockPos.getZ(pLevelPos))
             );
     }
 

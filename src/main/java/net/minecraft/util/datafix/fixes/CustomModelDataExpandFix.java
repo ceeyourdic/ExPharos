@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class CustomModelDataExpandFix extends DataFix {
-    public CustomModelDataExpandFix(Schema p_376714_) {
-        super(p_376714_, false);
+    public CustomModelDataExpandFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override

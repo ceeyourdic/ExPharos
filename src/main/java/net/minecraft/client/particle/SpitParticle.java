@@ -18,21 +18,21 @@ public class SpitParticle extends ExplodeParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public Provider(SpriteSet p_107909_) {
-            this.sprites = p_107909_;
+        public Provider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_107920_,
-            ClientLevel p_107921_,
-            double p_107922_,
-            double p_107923_,
-            double p_107924_,
-            double p_107925_,
-            double p_107926_,
-            double p_107927_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            return new SpitParticle(p_107921_, p_107922_, p_107923_, p_107924_, p_107925_, p_107926_, p_107927_, this.sprites);
+            return new SpitParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites);
         }
     }
 }

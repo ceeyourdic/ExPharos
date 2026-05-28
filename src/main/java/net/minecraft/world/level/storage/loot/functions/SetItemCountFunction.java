@@ -27,10 +27,10 @@ public class SetItemCountFunction extends LootItemConditionalFunction {
     private final NumberProvider value;
     private final boolean add;
 
-    private SetItemCountFunction(List<LootItemCondition> p_298181_, NumberProvider p_165410_, boolean p_165411_) {
-        super(p_298181_);
-        this.value = p_165410_;
-        this.add = p_165411_;
+    private SetItemCountFunction(List<LootItemCondition> pConditions, NumberProvider pValue, boolean pAdd) {
+        super(pConditions);
+        this.value = pValue;
+        this.add = pAdd;
     }
 
     @Override
@@ -44,17 +44,17 @@ public class SetItemCountFunction extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_81006_, LootContext p_81007_) {
-        int i = this.add ? p_81006_.getCount() : 0;
-        p_81006_.setCount(i + this.value.getInt(p_81007_));
-        return p_81006_;
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        int i = this.add ? pStack.getCount() : 0;
+        pStack.setCount(i + this.value.getInt(pContext));
+        return pStack;
     }
 
-    public static LootItemConditionalFunction.Builder<?> setCount(NumberProvider p_165413_) {
-        return simpleBuilder(p_297144_ -> new SetItemCountFunction(p_297144_, p_165413_, false));
+    public static LootItemConditionalFunction.Builder<?> setCount(NumberProvider pCountValue) {
+        return simpleBuilder(p_297144_ -> new SetItemCountFunction(p_297144_, pCountValue, false));
     }
 
-    public static LootItemConditionalFunction.Builder<?> setCount(NumberProvider p_165415_, boolean p_165416_) {
-        return simpleBuilder(p_297142_ -> new SetItemCountFunction(p_297142_, p_165415_, p_165416_));
+    public static LootItemConditionalFunction.Builder<?> setCount(NumberProvider pCountValue, boolean pAdd) {
+        return simpleBuilder(p_297142_ -> new SetItemCountFunction(p_297142_, pCountValue, pAdd));
     }
 }

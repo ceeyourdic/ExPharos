@@ -20,46 +20,46 @@ public record PositionMoveRotation(Vec3 position, Vec3 deltaMovement, float yRot
         PositionMoveRotation::new
     );
 
-    public static PositionMoveRotation of(Entity p_361379_) {
-        return new PositionMoveRotation(p_361379_.position(), p_361379_.getKnownMovement(), p_361379_.getYRot(), p_361379_.getXRot());
+    public static PositionMoveRotation of(Entity pEntity) {
+        return new PositionMoveRotation(pEntity.position(), pEntity.getKnownMovement(), pEntity.getYRot(), pEntity.getXRot());
     }
 
-    public static PositionMoveRotation ofEntityUsingLerpTarget(Entity p_366606_) {
+    public static PositionMoveRotation ofEntityUsingLerpTarget(Entity pEntity) {
         return new PositionMoveRotation(
-            new Vec3(p_366606_.lerpTargetX(), p_366606_.lerpTargetY(), p_366606_.lerpTargetZ()), p_366606_.getKnownMovement(), p_366606_.getYRot(), p_366606_.getXRot()
+            new Vec3(pEntity.lerpTargetX(), pEntity.lerpTargetY(), pEntity.lerpTargetZ()), pEntity.getKnownMovement(), pEntity.getYRot(), pEntity.getXRot()
         );
     }
 
-    public static PositionMoveRotation of(TeleportTransition p_368179_) {
-        return new PositionMoveRotation(p_368179_.position(), p_368179_.deltaMovement(), p_368179_.yRot(), p_368179_.xRot());
+    public static PositionMoveRotation of(TeleportTransition pTeleportTransition) {
+        return new PositionMoveRotation(pTeleportTransition.position(), pTeleportTransition.deltaMovement(), pTeleportTransition.yRot(), pTeleportTransition.xRot());
     }
 
-    public static PositionMoveRotation calculateAbsolute(PositionMoveRotation p_364389_, PositionMoveRotation p_363716_, Set<Relative> p_370218_) {
-        double d0 = p_370218_.contains(Relative.X) ? p_364389_.position.x : 0.0;
-        double d1 = p_370218_.contains(Relative.Y) ? p_364389_.position.y : 0.0;
-        double d2 = p_370218_.contains(Relative.Z) ? p_364389_.position.z : 0.0;
-        float f = p_370218_.contains(Relative.Y_ROT) ? p_364389_.yRot : 0.0F;
-        float f1 = p_370218_.contains(Relative.X_ROT) ? p_364389_.xRot : 0.0F;
-        Vec3 vec3 = new Vec3(d0 + p_363716_.position.x, d1 + p_363716_.position.y, d2 + p_363716_.position.z);
-        float f2 = f + p_363716_.yRot;
-        float f3 = f1 + p_363716_.xRot;
-        Vec3 vec31 = p_364389_.deltaMovement;
-        if (p_370218_.contains(Relative.ROTATE_DELTA)) {
-            float f4 = p_364389_.yRot - f2;
-            float f5 = p_364389_.xRot - f3;
+    public static PositionMoveRotation calculateAbsolute(PositionMoveRotation pCurrent, PositionMoveRotation pAfter, Set<Relative> pRelatives) {
+        double d0 = pRelatives.contains(Relative.X) ? pCurrent.position.x : 0.0;
+        double d1 = pRelatives.contains(Relative.Y) ? pCurrent.position.y : 0.0;
+        double d2 = pRelatives.contains(Relative.Z) ? pCurrent.position.z : 0.0;
+        float f = pRelatives.contains(Relative.Y_ROT) ? pCurrent.yRot : 0.0F;
+        float f1 = pRelatives.contains(Relative.X_ROT) ? pCurrent.xRot : 0.0F;
+        Vec3 vec3 = new Vec3(d0 + pAfter.position.x, d1 + pAfter.position.y, d2 + pAfter.position.z);
+        float f2 = f + pAfter.yRot;
+        float f3 = f1 + pAfter.xRot;
+        Vec3 vec31 = pCurrent.deltaMovement;
+        if (pRelatives.contains(Relative.ROTATE_DELTA)) {
+            float f4 = pCurrent.yRot - f2;
+            float f5 = pCurrent.xRot - f3;
             vec31 = vec31.xRot((float)Math.toRadians((double)f5));
             vec31 = vec31.yRot((float)Math.toRadians((double)f4));
         }
 
         Vec3 vec32 = new Vec3(
-            calculateDelta(vec31.x, p_363716_.deltaMovement.x, p_370218_, Relative.DELTA_X),
-            calculateDelta(vec31.y, p_363716_.deltaMovement.y, p_370218_, Relative.DELTA_Y),
-            calculateDelta(vec31.z, p_363716_.deltaMovement.z, p_370218_, Relative.DELTA_Z)
+            calculateDelta(vec31.x, pAfter.deltaMovement.x, pRelatives, Relative.DELTA_X),
+            calculateDelta(vec31.y, pAfter.deltaMovement.y, pRelatives, Relative.DELTA_Y),
+            calculateDelta(vec31.z, pAfter.deltaMovement.z, pRelatives, Relative.DELTA_Z)
         );
         return new PositionMoveRotation(vec3, vec32, f2, f3);
     }
 
-    private static double calculateDelta(double p_366007_, double p_365256_, Set<Relative> p_365151_, Relative p_367876_) {
-        return p_365151_.contains(p_367876_) ? p_366007_ + p_365256_ : p_365256_;
+    private static double calculateDelta(double pPosition, double pDeltaMovement, Set<Relative> pRelatives, Relative pDeltaRelative) {
+        return pRelatives.contains(pDeltaRelative) ? pPosition + pDeltaMovement : pDeltaMovement;
     }
 }

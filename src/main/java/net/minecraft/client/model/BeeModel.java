@@ -34,9 +34,9 @@ public class BeeModel extends EntityModel<BeeRenderState> {
     private final ModelPart rightAntenna;
     private float rollAmount;
 
-    public BeeModel(ModelPart p_170439_) {
-        super(p_170439_);
-        this.bone = p_170439_.getChild("bone");
+    public BeeModel(ModelPart pRoot) {
+        super(pRoot);
+        this.bone = pRoot.getChild("bone");
         ModelPart modelpart = this.bone.getChild("body");
         this.stinger = modelpart.getChild("stinger");
         this.leftAntenna = modelpart.getChild("left_antenna");

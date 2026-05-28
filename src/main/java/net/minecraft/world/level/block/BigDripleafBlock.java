@@ -91,45 +91,45 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
         this.shapesCache = this.getShapeForEachState(BigDripleafBlock::calculateShape);
     }
 
-    private static VoxelShape calculateShape(BlockState p_152318_) {
-        return Shapes.or(LEAF_SHAPES.get(p_152318_.getValue(TILT)), STEM_SHAPES.get(p_152318_.getValue(FACING)));
+    private static VoxelShape calculateShape(BlockState pState) {
+        return Shapes.or(LEAF_SHAPES.get(pState.getValue(TILT)), STEM_SHAPES.get(pState.getValue(FACING)));
     }
 
-    public static void placeWithRandomHeight(LevelAccessor p_220793_, RandomSource p_220794_, BlockPos p_220795_, Direction p_220796_) {
-        int i = Mth.nextInt(p_220794_, 2, 5);
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = p_220795_.mutable();
+    public static void placeWithRandomHeight(LevelAccessor pLevel, RandomSource pRandom, BlockPos pPos, Direction pDirection) {
+        int i = Mth.nextInt(pRandom, 2, 5);
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.mutable();
         int j = 0;
 
-        while (j < i && canPlaceAt(p_220793_, blockpos$mutableblockpos, p_220793_.getBlockState(blockpos$mutableblockpos))) {
+        while (j < i && canPlaceAt(pLevel, blockpos$mutableblockpos, pLevel.getBlockState(blockpos$mutableblockpos))) {
             j++;
             blockpos$mutableblockpos.move(Direction.UP);
         }
 
-        int k = p_220795_.getY() + j - 1;
-        blockpos$mutableblockpos.setY(p_220795_.getY());
+        int k = pPos.getY() + j - 1;
+        blockpos$mutableblockpos.setY(pPos.getY());
 
         while (blockpos$mutableblockpos.getY() < k) {
-            BigDripleafStemBlock.place(p_220793_, blockpos$mutableblockpos, p_220793_.getFluidState(blockpos$mutableblockpos), p_220796_);
+            BigDripleafStemBlock.place(pLevel, blockpos$mutableblockpos, pLevel.getFluidState(blockpos$mutableblockpos), pDirection);
             blockpos$mutableblockpos.move(Direction.UP);
         }
 
-        place(p_220793_, blockpos$mutableblockpos, p_220793_.getFluidState(blockpos$mutableblockpos), p_220796_);
+        place(pLevel, blockpos$mutableblockpos, pLevel.getFluidState(blockpos$mutableblockpos), pDirection);
     }
 
-    private static boolean canReplace(BlockState p_152320_) {
-        return p_152320_.isAir() || p_152320_.is(Blocks.WATER) || p_152320_.is(Blocks.SMALL_DRIPLEAF);
+    private static boolean canReplace(BlockState pState) {
+        return pState.isAir() || pState.is(Blocks.WATER) || pState.is(Blocks.SMALL_DRIPLEAF);
     }
 
-    protected static boolean canPlaceAt(LevelHeightAccessor p_152252_, BlockPos p_152253_, BlockState p_152254_) {
-        return !p_152252_.isOutsideBuildHeight(p_152253_) && canReplace(p_152254_);
+    protected static boolean canPlaceAt(LevelHeightAccessor pLevel, BlockPos pPos, BlockState pState) {
+        return !pLevel.isOutsideBuildHeight(pPos) && canReplace(pState);
     }
 
-    protected static boolean place(LevelAccessor p_152242_, BlockPos p_152243_, FluidState p_152244_, Direction p_152245_) {
+    protected static boolean place(LevelAccessor pLevel, BlockPos pPos, FluidState pFluidState, Direction pDirection) {
         BlockState blockstate = Blocks.BIG_DRIPLEAF
             .defaultBlockState()
-            .setValue(WATERLOGGED, Boolean.valueOf(p_152244_.isSourceOfType(Fluids.WATER)))
-            .setValue(FACING, p_152245_);
-        return p_152242_.setBlock(p_152243_, blockstate, 3);
+            .setValue(WATERLOGGED, Boolean.valueOf(pFluidState.isSourceOfType(Fluids.WATER)))
+            .setValue(FACING, pDirection);
+        return pLevel.setBlock(pPos, blockstate, 3);
     }
 
     @Override
@@ -227,39 +227,39 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
         }
     }
 
-    private static void playTiltSound(Level p_152233_, BlockPos p_152234_, SoundEvent p_152235_) {
-        float f = Mth.randomBetween(p_152233_.random, 0.8F, 1.2F);
-        p_152233_.playSound(null, p_152234_, p_152235_, SoundSource.BLOCKS, 1.0F, f);
+    private static void playTiltSound(Level pLevel, BlockPos pPos, SoundEvent pSound) {
+        float f = Mth.randomBetween(pLevel.random, 0.8F, 1.2F);
+        pLevel.playSound(null, pPos, pSound, SoundSource.BLOCKS, 1.0F, f);
     }
 
-    private static boolean canEntityTilt(BlockPos p_152302_, Entity p_152303_) {
-        return p_152303_.onGround() && p_152303_.position().y > (double)((float)p_152302_.getY() + 0.6875F);
+    private static boolean canEntityTilt(BlockPos pPos, Entity pEntity) {
+        return pEntity.onGround() && pEntity.position().y > (double)((float)pPos.getY() + 0.6875F);
     }
 
-    private void setTiltAndScheduleTick(BlockState p_152283_, Level p_152284_, BlockPos p_152285_, Tilt p_152286_, @Nullable SoundEvent p_152287_) {
-        setTilt(p_152283_, p_152284_, p_152285_, p_152286_);
-        if (p_152287_ != null) {
-            playTiltSound(p_152284_, p_152285_, p_152287_);
+    private void setTiltAndScheduleTick(BlockState pState, Level pLevel, BlockPos pPos, Tilt pTilt, @Nullable SoundEvent pSound) {
+        setTilt(pState, pLevel, pPos, pTilt);
+        if (pSound != null) {
+            playTiltSound(pLevel, pPos, pSound);
         }
 
-        int i = DELAY_UNTIL_NEXT_TILT_STATE.getInt(p_152286_);
+        int i = DELAY_UNTIL_NEXT_TILT_STATE.getInt(pTilt);
         if (i != -1) {
-            p_152284_.scheduleTick(p_152285_, this, i);
+            pLevel.scheduleTick(pPos, this, i);
         }
     }
 
-    private static void resetTilt(BlockState p_152314_, Level p_152315_, BlockPos p_152316_) {
-        setTilt(p_152314_, p_152315_, p_152316_, Tilt.NONE);
-        if (p_152314_.getValue(TILT) != Tilt.NONE) {
-            playTiltSound(p_152315_, p_152316_, SoundEvents.BIG_DRIPLEAF_TILT_UP);
+    private static void resetTilt(BlockState pState, Level pLevel, BlockPos pPos) {
+        setTilt(pState, pLevel, pPos, Tilt.NONE);
+        if (pState.getValue(TILT) != Tilt.NONE) {
+            playTiltSound(pLevel, pPos, SoundEvents.BIG_DRIPLEAF_TILT_UP);
         }
     }
 
-    private static void setTilt(BlockState p_152278_, Level p_152279_, BlockPos p_152280_, Tilt p_152281_) {
-        Tilt tilt = p_152278_.getValue(TILT);
-        p_152279_.setBlock(p_152280_, p_152278_.setValue(TILT, p_152281_), 2);
-        if (p_152281_.causesVibration() && p_152281_ != tilt) {
-            p_152279_.gameEvent(null, GameEvent.BLOCK_CHANGE, p_152280_);
+    private static void setTilt(BlockState pState, Level pLevel, BlockPos pPos, Tilt pTilt) {
+        Tilt tilt = pState.getValue(TILT);
+        pLevel.setBlock(pPos, pState.setValue(TILT, pTilt), 2);
+        if (pTilt.causesVibration() && pTilt != tilt) {
+            pLevel.gameEvent(null, GameEvent.BLOCK_CHANGE, pPos);
         }
     }
 

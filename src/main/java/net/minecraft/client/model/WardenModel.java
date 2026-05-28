@@ -35,9 +35,9 @@ public class WardenModel extends EntityModel<WardenRenderState> {
     private final List<ModelPart> bioluminescentLayerModelParts;
     private final List<ModelPart> pulsatingSpotsLayerModelParts;
 
-    public WardenModel(ModelPart p_233512_) {
-        super(p_233512_, RenderType::entityCutoutNoCull);
-        this.bone = p_233512_.getChild("bone");
+    public WardenModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entityCutoutNoCull);
+        this.bone = pRoot.getChild("bone");
         this.body = this.bone.getChild("body");
         this.head = this.body.getChild("head");
         this.rightLeg = this.bone.getChild("right_leg");
@@ -117,13 +117,13 @@ public class WardenModel extends EntityModel<WardenRenderState> {
         this.animate(p_366602_.sniffAnimationState, WardenAnimation.WARDEN_SNIFF, p_366602_.ageInTicks);
     }
 
-    private void animateHeadLookTarget(float p_233517_, float p_233518_) {
-        this.head.xRot = p_233518_ * (float) (Math.PI / 180.0);
-        this.head.yRot = p_233517_ * (float) (Math.PI / 180.0);
+    private void animateHeadLookTarget(float pYaw, float pPitch) {
+        this.head.xRot = pPitch * (float) (Math.PI / 180.0);
+        this.head.yRot = pYaw * (float) (Math.PI / 180.0);
     }
 
-    private void animateIdlePose(float p_233515_) {
-        float f = p_233515_ * 0.1F;
+    private void animateIdlePose(float pAgeInTicks) {
+        float f = pAgeInTicks * 0.1F;
         float f1 = Mth.cos(f);
         float f2 = Mth.sin(f);
         this.head.zRot += 0.06F * f1;
@@ -132,9 +132,9 @@ public class WardenModel extends EntityModel<WardenRenderState> {
         this.body.xRot += 0.025F * f1;
     }
 
-    private void animateWalk(float p_233539_, float p_233540_) {
-        float f = Math.min(0.5F, 3.0F * p_233540_);
-        float f1 = p_233539_ * 0.8662F;
+    private void animateWalk(float pLimbSwing, float pLimbSwingAmount) {
+        float f = Math.min(0.5F, 3.0F * pLimbSwingAmount);
+        float f1 = pLimbSwing * 0.8662F;
         float f2 = Mth.cos(f1);
         float f3 = Mth.sin(f1);
         float f4 = Math.min(0.35F, f);
@@ -162,25 +162,25 @@ public class WardenModel extends EntityModel<WardenRenderState> {
         this.rightArm.y = -13.0F;
     }
 
-    private void animateTendrils(WardenRenderState p_370212_, float p_233528_) {
-        float f = p_370212_.tendrilAnimation * (float)(Math.cos((double)p_233528_ * 2.25) * Math.PI * 0.1F);
+    private void animateTendrils(WardenRenderState pRenderState, float pAgeInTicks) {
+        float f = pRenderState.tendrilAnimation * (float)(Math.cos((double)pAgeInTicks * 2.25) * Math.PI * 0.1F);
         this.leftTendril.xRot = f;
         this.rightTendril.xRot = -f;
     }
 
-    public List<ModelPart> getTendrilsLayerModelParts(WardenRenderState p_361179_) {
+    public List<ModelPart> getTendrilsLayerModelParts(WardenRenderState pRenderState) {
         return this.tendrilsLayerModelParts;
     }
 
-    public List<ModelPart> getHeartLayerModelParts(WardenRenderState p_367277_) {
+    public List<ModelPart> getHeartLayerModelParts(WardenRenderState pRenderState) {
         return this.heartLayerModelParts;
     }
 
-    public List<ModelPart> getBioluminescentLayerModelParts(WardenRenderState p_366811_) {
+    public List<ModelPart> getBioluminescentLayerModelParts(WardenRenderState pRenderState) {
         return this.bioluminescentLayerModelParts;
     }
 
-    public List<ModelPart> getPulsatingSpotsLayerModelParts(WardenRenderState p_366755_) {
+    public List<ModelPart> getPulsatingSpotsLayerModelParts(WardenRenderState pRenderState) {
         return this.pulsatingSpotsLayerModelParts;
     }
 }

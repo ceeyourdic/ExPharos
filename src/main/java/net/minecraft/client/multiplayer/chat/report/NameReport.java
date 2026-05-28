@@ -17,9 +17,9 @@ import org.apache.commons.lang3.StringUtils;
 public class NameReport extends Report {
     private final String reportedName;
 
-    NameReport(UUID p_300103_, Instant p_297358_, UUID p_301007_, String p_301332_) {
-        super(p_300103_, p_297358_, p_301007_);
-        this.reportedName = p_301332_;
+    NameReport(UUID pReportId, Instant pCreatedAt, UUID pReportedProfileId, String pReportedName) {
+        super(pReportId, pCreatedAt, pReportedProfileId);
+        this.reportedName = pReportedName;
     }
 
     public String getReportedName() {
@@ -40,12 +40,12 @@ public class NameReport extends Report {
 
     @OnlyIn(Dist.CLIENT)
     public static class Builder extends Report.Builder<NameReport> {
-        public Builder(NameReport p_297219_, AbuseReportLimits p_298998_) {
-            super(p_297219_, p_298998_);
+        public Builder(NameReport pReport, AbuseReportLimits pLimits) {
+            super(pReport, pLimits);
         }
 
-        public Builder(UUID p_298683_, String p_299992_, AbuseReportLimits p_299650_) {
-            super(new NameReport(UUID.randomUUID(), Instant.now(), p_298683_, p_299992_), p_299650_);
+        public Builder(UUID pReportedProfileId, String pReportedName, AbuseReportLimits pLimits) {
+            super(new NameReport(UUID.randomUUID(), Instant.now(), pReportedProfileId, pReportedName), pLimits);
         }
 
         @Override

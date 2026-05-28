@@ -38,12 +38,12 @@ public record SelectableRecipe<T extends Recipe<?>>(SlotDisplay optionDisplay, O
             );
         }
 
-        public boolean acceptsInput(ItemStack p_366997_) {
-            return this.entries.stream().anyMatch(p_368592_ -> p_368592_.input.test(p_366997_));
+        public boolean acceptsInput(ItemStack pStack) {
+            return this.entries.stream().anyMatch(p_368592_ -> p_368592_.input.test(pStack));
         }
 
-        public SelectableRecipe.SingleInputSet<T> selectByInput(ItemStack p_368693_) {
-            return new SelectableRecipe.SingleInputSet<>(this.entries.stream().filter(p_364349_ -> p_364349_.input.test(p_368693_)).toList());
+        public SelectableRecipe.SingleInputSet<T> selectByInput(ItemStack pStack) {
+            return new SelectableRecipe.SingleInputSet<>(this.entries.stream().filter(p_364349_ -> p_364349_.input.test(pStack)).toList());
         }
 
         public boolean isEmpty() {

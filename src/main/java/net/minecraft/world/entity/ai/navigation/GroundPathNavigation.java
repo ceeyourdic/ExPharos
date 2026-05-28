@@ -41,48 +41,48 @@ public class GroundPathNavigation extends PathNavigation {
     }
 
     @Override
-    public Path createPath(BlockPos p_26475_, int p_26476_) {
-        LevelChunk levelchunk = this.level.getChunkSource().getChunkNow(SectionPos.blockToSectionCoord(p_26475_.getX()), SectionPos.blockToSectionCoord(p_26475_.getZ()));
+    public Path createPath(BlockPos pPos, int pAccuracy) {
+        LevelChunk levelchunk = this.level.getChunkSource().getChunkNow(SectionPos.blockToSectionCoord(pPos.getX()), SectionPos.blockToSectionCoord(pPos.getZ()));
         if (levelchunk == null) {
             return null;
         } else {
-            if (levelchunk.getBlockState(p_26475_).isAir()) {
-                BlockPos.MutableBlockPos blockpos$mutableblockpos = p_26475_.mutable().move(Direction.DOWN);
+            if (levelchunk.getBlockState(pPos).isAir()) {
+                BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.mutable().move(Direction.DOWN);
 
                 while (blockpos$mutableblockpos.getY() > this.level.getMinY() && levelchunk.getBlockState(blockpos$mutableblockpos).isAir()) {
                     blockpos$mutableblockpos.move(Direction.DOWN);
                 }
 
                 if (blockpos$mutableblockpos.getY() > this.level.getMinY()) {
-                    return super.createPath(blockpos$mutableblockpos.above(), p_26476_);
+                    return super.createPath(blockpos$mutableblockpos.above(), pAccuracy);
                 }
 
-                blockpos$mutableblockpos.setY(p_26475_.getY() + 1);
+                blockpos$mutableblockpos.setY(pPos.getY() + 1);
 
                 while (blockpos$mutableblockpos.getY() <= this.level.getMaxY() && levelchunk.getBlockState(blockpos$mutableblockpos).isAir()) {
                     blockpos$mutableblockpos.move(Direction.UP);
                 }
 
-                p_26475_ = blockpos$mutableblockpos;
+                pPos = blockpos$mutableblockpos;
             }
 
-            if (!levelchunk.getBlockState(p_26475_).isSolid()) {
-                return super.createPath(p_26475_, p_26476_);
+            if (!levelchunk.getBlockState(pPos).isSolid()) {
+                return super.createPath(pPos, pAccuracy);
             } else {
-                BlockPos.MutableBlockPos blockpos$mutableblockpos1 = p_26475_.mutable().move(Direction.UP);
+                BlockPos.MutableBlockPos blockpos$mutableblockpos1 = pPos.mutable().move(Direction.UP);
 
                 while (blockpos$mutableblockpos1.getY() <= this.level.getMaxY() && levelchunk.getBlockState(blockpos$mutableblockpos1).isSolid()) {
                     blockpos$mutableblockpos1.move(Direction.UP);
                 }
 
-                return super.createPath(blockpos$mutableblockpos1.immutable(), p_26476_);
+                return super.createPath(blockpos$mutableblockpos1.immutable(), pAccuracy);
             }
         }
     }
 
     @Override
-    public Path createPath(Entity p_26465_, int p_26466_) {
-        return this.createPath(p_26465_.blockPosition(), p_26466_);
+    public Path createPath(Entity pEntity, int p_26466_) {
+        return this.createPath(pEntity.blockPosition(), p_26466_);
     }
 
     private int getSurfaceY() {
@@ -122,23 +122,23 @@ public class GroundPathNavigation extends PathNavigation {
         }
     }
 
-    protected boolean hasValidPathType(PathType p_329492_) {
-        if (p_329492_ == PathType.WATER) {
+    protected boolean hasValidPathType(PathType pPathType) {
+        if (pPathType == PathType.WATER) {
             return false;
         } else {
-            return p_329492_ == PathType.LAVA ? false : p_329492_ != PathType.OPEN;
+            return pPathType == PathType.LAVA ? false : pPathType != PathType.OPEN;
         }
     }
 
-    public void setCanOpenDoors(boolean p_26478_) {
-        this.nodeEvaluator.setCanOpenDoors(p_26478_);
+    public void setCanOpenDoors(boolean pCanOpenDoors) {
+        this.nodeEvaluator.setCanOpenDoors(pCanOpenDoors);
     }
 
-    public void setAvoidSun(boolean p_26491_) {
-        this.avoidSun = p_26491_;
+    public void setAvoidSun(boolean pAvoidSun) {
+        this.avoidSun = pAvoidSun;
     }
 
-    public void setCanWalkOverFences(boolean p_255877_) {
-        this.nodeEvaluator.setCanWalkOverFences(p_255877_);
+    public void setCanWalkOverFences(boolean pCanWalkOverFences) {
+        this.nodeEvaluator.setCanWalkOverFences(pCanWalkOverFences);
     }
 }

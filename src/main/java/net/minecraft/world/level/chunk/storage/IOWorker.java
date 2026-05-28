@@ -35,14 +35,14 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
     private final Long2ObjectLinkedOpenHashMap<CompletableFuture<BitSet>> regionCacheForBlender = new Long2ObjectLinkedOpenHashMap<>();
     private static final int REGION_CACHE_SIZE = 1024;
 
-    protected IOWorker(RegionStorageInfo p_335181_, Path p_196930_, boolean p_196931_) {
-        this.storage = new RegionFileStorage(p_335181_, p_196930_, p_196931_);
-        this.consecutiveExecutor = new PriorityConsecutiveExecutor(IOWorker.Priority.values().length, Util.ioPool(), "IOWorker-" + p_335181_.type());
+    protected IOWorker(RegionStorageInfo pInfo, Path pFolder, boolean pSync) {
+        this.storage = new RegionFileStorage(pInfo, pFolder, pSync);
+        this.consecutiveExecutor = new PriorityConsecutiveExecutor(IOWorker.Priority.values().length, Util.ioPool(), "IOWorker-" + pInfo.type());
     }
 
-    public boolean isOldChunkAround(ChunkPos p_223472_, int p_223473_) {
-        ChunkPos chunkpos = new ChunkPos(p_223472_.x - p_223473_, p_223472_.z - p_223473_);
-        ChunkPos chunkpos1 = new ChunkPos(p_223472_.x + p_223473_, p_223472_.z + p_223473_);
+    public boolean isOldChunkAround(ChunkPos pChunkPos, int pRadius) {
+        ChunkPos chunkpos = new ChunkPos(pChunkPos.x - pRadius, pChunkPos.z - pRadius);
+        ChunkPos chunkpos1 = new ChunkPos(pChunkPos.x + pRadius, pChunkPos.z + pRadius);
 
         for (int i = chunkpos.getRegionX(); i <= chunkpos1.getRegionX(); i++) {
             for (int j = chunkpos.getRegionZ(); j <= chunkpos1.getRegionZ(); j++) {
@@ -69,12 +69,12 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
         return false;
     }
 
-    private CompletableFuture<BitSet> getOrCreateOldDataForRegion(int p_223464_, int p_223465_) {
-        long i = ChunkPos.asLong(p_223464_, p_223465_);
+    private CompletableFuture<BitSet> getOrCreateOldDataForRegion(int pChunkX, int pChunkZ) {
+        long i = ChunkPos.asLong(pChunkX, pChunkZ);
         synchronized (this.regionCacheForBlender) {
             CompletableFuture<BitSet> completablefuture = this.regionCacheForBlender.getAndMoveToFirst(i);
             if (completablefuture == null) {
-                completablefuture = this.createOldDataForRegion(p_223464_, p_223465_);
+                completablefuture = this.createOldDataForRegion(pChunkX, pChunkZ);
                 this.regionCacheForBlender.putAndMoveToFirst(i, completablefuture);
                 if (this.regionCacheForBlender.size() > 1024) {
                     this.regionCacheForBlender.removeLast();
@@ -85,11 +85,11 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
         }
     }
 
-    private CompletableFuture<BitSet> createOldDataForRegion(int p_223490_, int p_223491_) {
+    private CompletableFuture<BitSet> createOldDataForRegion(int pChunkX, int pChunkZ) {
         return CompletableFuture.supplyAsync(
             () -> {
-                ChunkPos chunkpos = ChunkPos.minFromRegion(p_223490_, p_223491_);
-                ChunkPos chunkpos1 = ChunkPos.maxFromRegion(p_223490_, p_223491_);
+                ChunkPos chunkpos = ChunkPos.minFromRegion(pChunkX, pChunkZ);
+                ChunkPos chunkpos1 = ChunkPos.maxFromRegion(pChunkX, pChunkZ);
                 BitSet bitset = new BitSet();
                 ChunkPos.rangeClosed(chunkpos, chunkpos1)
                     .forEach(
@@ -117,46 +117,46 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
         );
     }
 
-    private boolean isOldChunk(CompoundTag p_223485_) {
-        return p_223485_.contains("DataVersion", 99) && p_223485_.getInt("DataVersion") >= 4185 ? p_223485_.contains("blending_data", 10) : true;
+    private boolean isOldChunk(CompoundTag pChunkData) {
+        return pChunkData.contains("DataVersion", 99) && pChunkData.getInt("DataVersion") >= 4185 ? pChunkData.contains("blending_data", 10) : true;
     }
 
-    public CompletableFuture<Void> store(ChunkPos p_63539_, @Nullable CompoundTag p_63540_) {
-        return this.store(p_63539_, () -> p_63540_);
+    public CompletableFuture<Void> store(ChunkPos pChunkPos, @Nullable CompoundTag pChunkData) {
+        return this.store(pChunkPos, () -> pChunkData);
     }
 
-    public CompletableFuture<Void> store(ChunkPos p_363895_, Supplier<CompoundTag> p_367671_) {
+    public CompletableFuture<Void> store(ChunkPos pChunkPos, Supplier<CompoundTag> pDataSupplier) {
         return this.<CompletableFuture<Void>>submitTask(() -> {
-            CompoundTag compoundtag = p_367671_.get();
-            IOWorker.PendingStore ioworker$pendingstore = this.pendingWrites.computeIfAbsent(p_363895_, p_223488_ -> new IOWorker.PendingStore(compoundtag));
+            CompoundTag compoundtag = pDataSupplier.get();
+            IOWorker.PendingStore ioworker$pendingstore = this.pendingWrites.computeIfAbsent(pChunkPos, p_223488_ -> new IOWorker.PendingStore(compoundtag));
             ioworker$pendingstore.data = compoundtag;
             return ioworker$pendingstore.result;
         }).thenCompose(Function.identity());
     }
 
-    public CompletableFuture<Optional<CompoundTag>> loadAsync(ChunkPos p_156588_) {
+    public CompletableFuture<Optional<CompoundTag>> loadAsync(ChunkPos pChunkPos) {
         return this.submitThrowingTask(() -> {
-            IOWorker.PendingStore ioworker$pendingstore = this.pendingWrites.get(p_156588_);
+            IOWorker.PendingStore ioworker$pendingstore = this.pendingWrites.get(pChunkPos);
             if (ioworker$pendingstore != null) {
                 return Optional.ofNullable(ioworker$pendingstore.copyData());
             } else {
                 try {
-                    CompoundTag compoundtag = this.storage.read(p_156588_);
+                    CompoundTag compoundtag = this.storage.read(pChunkPos);
                     return Optional.ofNullable(compoundtag);
                 } catch (Exception exception) {
-                    LOGGER.warn("Failed to read chunk {}", p_156588_, exception);
+                    LOGGER.warn("Failed to read chunk {}", pChunkPos, exception);
                     throw exception;
                 }
             }
         });
     }
 
-    public CompletableFuture<Void> synchronize(boolean p_182499_) {
+    public CompletableFuture<Void> synchronize(boolean pFlushStorage) {
         CompletableFuture<Void> completablefuture = this.<CompletableFuture<Void>>submitTask(
                 () -> CompletableFuture.allOf(this.pendingWrites.values().stream().map(p_223475_ -> p_223475_.result).toArray(CompletableFuture[]::new))
             )
             .thenCompose(Function.identity());
-        return p_182499_ ? completablefuture.thenCompose(p_360563_ -> this.submitThrowingTask(() -> {
+        return pFlushStorage ? completablefuture.thenCompose(p_360563_ -> this.submitThrowingTask(() -> {
                 try {
                     this.storage.flush();
                     return null;
@@ -188,11 +188,11 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
         });
     }
 
-    private <T> CompletableFuture<T> submitThrowingTask(IOWorker.ThrowingSupplier<T> p_363182_) {
+    private <T> CompletableFuture<T> submitThrowingTask(IOWorker.ThrowingSupplier<T> pTask) {
         return this.consecutiveExecutor.scheduleWithResult(IOWorker.Priority.FOREGROUND.ordinal(), p_360568_ -> {
             if (!this.shutdownRequested.get()) {
                 try {
-                    p_360568_.complete(p_363182_.get());
+                    p_360568_.complete(pTask.get());
                 } catch (Exception exception) {
                     p_360568_.completeExceptionally(exception);
                 }
@@ -202,10 +202,10 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
         });
     }
 
-    private <T> CompletableFuture<T> submitTask(Supplier<T> p_63546_) {
+    private <T> CompletableFuture<T> submitTask(Supplier<T> pTask) {
         return this.consecutiveExecutor.scheduleWithResult(IOWorker.Priority.FOREGROUND.ordinal(), p_360561_ -> {
             if (!this.shutdownRequested.get()) {
-                p_360561_.complete(p_63546_.get());
+                p_360561_.complete(pTask.get());
             }
 
             this.tellStorePending();
@@ -224,13 +224,13 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
         this.consecutiveExecutor.schedule(new StrictQueue.RunnableWithPriority(IOWorker.Priority.BACKGROUND.ordinal(), this::storePendingChunk));
     }
 
-    private void runStore(ChunkPos p_63536_, IOWorker.PendingStore p_63537_) {
+    private void runStore(ChunkPos pChunkPos, IOWorker.PendingStore pPendingStore) {
         try {
-            this.storage.write(p_63536_, p_63537_.data);
-            p_63537_.result.complete(null);
+            this.storage.write(pChunkPos, pPendingStore.data);
+            pPendingStore.result.complete(null);
         } catch (Exception exception) {
-            LOGGER.error("Failed to store chunk {}", p_63536_, exception);
-            p_63537_.result.completeExceptionally(exception);
+            LOGGER.error("Failed to store chunk {}", pChunkPos, exception);
+            pPendingStore.result.completeExceptionally(exception);
         }
     }
 
@@ -261,8 +261,8 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
         CompoundTag data;
         final CompletableFuture<Void> result = new CompletableFuture<>();
 
-        public PendingStore(@Nullable CompoundTag p_63568_) {
-            this.data = p_63568_;
+        public PendingStore(@Nullable CompoundTag pData) {
+            this.data = pData;
         }
 
         @Nullable

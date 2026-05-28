@@ -43,48 +43,48 @@ public class IglooPieces {
     );
 
     public static void addPieces(
-        StructureTemplateManager p_227549_, BlockPos p_227550_, Rotation p_227551_, StructurePieceAccessor p_227552_, RandomSource p_227553_
+        StructureTemplateManager pStructureTemplateManager, BlockPos pStartPos, Rotation pRotation, StructurePieceAccessor pPieces, RandomSource pRandom
     ) {
-        if (p_227553_.nextDouble() < 0.5) {
-            int i = p_227553_.nextInt(8) + 4;
-            p_227552_.addPiece(new IglooPieces.IglooPiece(p_227549_, STRUCTURE_LOCATION_LABORATORY, p_227550_, p_227551_, i * 3));
+        if (pRandom.nextDouble() < 0.5) {
+            int i = pRandom.nextInt(8) + 4;
+            pPieces.addPiece(new IglooPieces.IglooPiece(pStructureTemplateManager, STRUCTURE_LOCATION_LABORATORY, pStartPos, pRotation, i * 3));
 
             for (int j = 0; j < i - 1; j++) {
-                p_227552_.addPiece(new IglooPieces.IglooPiece(p_227549_, STRUCTURE_LOCATION_LADDER, p_227550_, p_227551_, j * 3));
+                pPieces.addPiece(new IglooPieces.IglooPiece(pStructureTemplateManager, STRUCTURE_LOCATION_LADDER, pStartPos, pRotation, j * 3));
             }
         }
 
-        p_227552_.addPiece(new IglooPieces.IglooPiece(p_227549_, STRUCTURE_LOCATION_IGLOO, p_227550_, p_227551_, 0));
+        pPieces.addPiece(new IglooPieces.IglooPiece(pStructureTemplateManager, STRUCTURE_LOCATION_IGLOO, pStartPos, pRotation, 0));
     }
 
     public static class IglooPiece extends TemplateStructurePiece {
-        public IglooPiece(StructureTemplateManager p_227555_, ResourceLocation p_227556_, BlockPos p_227557_, Rotation p_227558_, int p_227559_) {
+        public IglooPiece(StructureTemplateManager pStructureTemplateManager, ResourceLocation pLocation, BlockPos pStartPos, Rotation pRotation, int pDown) {
             super(
                 StructurePieceType.IGLOO,
                 0,
-                p_227555_,
-                p_227556_,
-                p_227556_.toString(),
-                makeSettings(p_227558_, p_227556_),
-                makePosition(p_227556_, p_227557_, p_227559_)
+                pStructureTemplateManager,
+                pLocation,
+                pLocation.toString(),
+                makeSettings(pRotation, pLocation),
+                makePosition(pLocation, pStartPos, pDown)
             );
         }
 
-        public IglooPiece(StructureTemplateManager p_227561_, CompoundTag p_227562_) {
-            super(StructurePieceType.IGLOO, p_227562_, p_227561_, p_227589_ -> makeSettings(Rotation.valueOf(p_227562_.getString("Rot")), p_227589_));
+        public IglooPiece(StructureTemplateManager pStructureTemplateManager, CompoundTag pTag) {
+            super(StructurePieceType.IGLOO, pTag, pStructureTemplateManager, p_227589_ -> makeSettings(Rotation.valueOf(pTag.getString("Rot")), p_227589_));
         }
 
-        private static StructurePlaceSettings makeSettings(Rotation p_227576_, ResourceLocation p_227577_) {
+        private static StructurePlaceSettings makeSettings(Rotation pRotation, ResourceLocation pLocation) {
             return new StructurePlaceSettings()
-                .setRotation(p_227576_)
+                .setRotation(pRotation)
                 .setMirror(Mirror.NONE)
-                .setRotationPivot(IglooPieces.PIVOTS.get(p_227577_))
+                .setRotationPivot(IglooPieces.PIVOTS.get(pLocation))
                 .addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK)
                 .setLiquidSettings(LiquidSettings.IGNORE_WATERLOGGING);
         }
 
-        private static BlockPos makePosition(ResourceLocation p_227564_, BlockPos p_227565_, int p_227566_) {
-            return p_227565_.offset(IglooPieces.OFFSETS.get(p_227564_)).below(p_227566_);
+        private static BlockPos makePosition(ResourceLocation pLocation, BlockPos pPos, int pDown) {
+            return pPos.offset(IglooPieces.OFFSETS.get(pLocation)).below(pDown);
         }
 
         @Override

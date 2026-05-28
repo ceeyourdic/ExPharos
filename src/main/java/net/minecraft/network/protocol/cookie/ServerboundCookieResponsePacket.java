@@ -13,13 +13,13 @@ public record ServerboundCookieResponsePacket(ResourceLocation key, @Nullable by
         ServerboundCookieResponsePacket::write, ServerboundCookieResponsePacket::new
     );
 
-    private ServerboundCookieResponsePacket(FriendlyByteBuf p_335580_) {
-        this(p_335580_.readResourceLocation(), p_335580_.readNullable(ClientboundStoreCookiePacket.PAYLOAD_STREAM_CODEC));
+    private ServerboundCookieResponsePacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readResourceLocation(), pBuffer.readNullable(ClientboundStoreCookiePacket.PAYLOAD_STREAM_CODEC));
     }
 
-    private void write(FriendlyByteBuf p_329068_) {
-        p_329068_.writeResourceLocation(this.key);
-        p_329068_.writeNullable(this.payload, ClientboundStoreCookiePacket.PAYLOAD_STREAM_CODEC);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeResourceLocation(this.key);
+        pBuffer.writeNullable(this.payload, ClientboundStoreCookiePacket.PAYLOAD_STREAM_CODEC);
     }
 
     @Override

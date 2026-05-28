@@ -9,12 +9,12 @@ public class RarityFilter extends PlacementFilter {
     public static final MapCodec<RarityFilter> CODEC = ExtraCodecs.POSITIVE_INT.fieldOf("chance").xmap(RarityFilter::new, p_191907_ -> p_191907_.chance);
     private final int chance;
 
-    private RarityFilter(int p_191899_) {
-        this.chance = p_191899_;
+    private RarityFilter(int pChance) {
+        this.chance = pChance;
     }
 
-    public static RarityFilter onAverageOnceEvery(int p_191901_) {
-        return new RarityFilter(p_191901_);
+    public static RarityFilter onAverageOnceEvery(int pChance) {
+        return new RarityFilter(pChance);
     }
 
     @Override

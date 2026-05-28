@@ -16,8 +16,8 @@ public class RotatedBlockProvider extends BlockStateProvider {
         .xmap(RotatedBlockProvider::new, p_68793_ -> p_68793_.block);
     private final Block block;
 
-    public RotatedBlockProvider(Block p_68790_) {
-        this.block = p_68790_;
+    public RotatedBlockProvider(Block pBlock) {
+        this.block = pBlock;
     }
 
     @Override

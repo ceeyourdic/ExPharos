@@ -17,12 +17,12 @@ public class RaidDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
     private final Minecraft minecraft;
     private Collection<BlockPos> raidCenters = Lists.newArrayList();
 
-    public RaidDebugRenderer(Minecraft p_113650_) {
-        this.minecraft = p_113650_;
+    public RaidDebugRenderer(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
-    public void setRaidCenters(Collection<BlockPos> p_113664_) {
-        this.raidCenters = p_113664_;
+    public void setRaidCenters(Collection<BlockPos> pRaidCenters) {
+        this.raidCenters = pRaidCenters;
     }
 
     @Override
@@ -36,16 +36,16 @@ public class RaidDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
         }
     }
 
-    private static void highlightRaidCenter(PoseStack p_270914_, MultiBufferSource p_270517_, BlockPos p_270208_) {
-        DebugRenderer.renderFilledUnitCube(p_270914_, p_270517_, p_270208_, 1.0F, 0.0F, 0.0F, 0.15F);
-        renderTextOverBlock(p_270914_, p_270517_, "Raid center", p_270208_, -65536);
+    private static void highlightRaidCenter(PoseStack pPoseStack, MultiBufferSource pBuffer, BlockPos pPos) {
+        DebugRenderer.renderFilledUnitCube(pPoseStack, pBuffer, pPos, 1.0F, 0.0F, 0.0F, 0.15F);
+        renderTextOverBlock(pPoseStack, pBuffer, "Raid center", pPos, -65536);
     }
 
-    private static void renderTextOverBlock(PoseStack p_270092_, MultiBufferSource p_270518_, String p_270237_, BlockPos p_270941_, int p_270307_) {
-        double d0 = (double)p_270941_.getX() + 0.5;
-        double d1 = (double)p_270941_.getY() + 1.3;
-        double d2 = (double)p_270941_.getZ() + 0.5;
-        DebugRenderer.renderFloatingText(p_270092_, p_270518_, p_270237_, d0, d1, d2, p_270307_, 0.04F, true, 0.0F, true);
+    private static void renderTextOverBlock(PoseStack pPoseStack, MultiBufferSource pBuffer, String pText, BlockPos pPos, int pColor) {
+        double d0 = (double)pPos.getX() + 0.5;
+        double d1 = (double)pPos.getY() + 1.3;
+        double d2 = (double)pPos.getZ() + 0.5;
+        DebugRenderer.renderFloatingText(pPoseStack, pBuffer, pText, d0, d1, d2, pColor, 0.04F, true, 0.0F, true);
     }
 
     private Camera getCamera() {

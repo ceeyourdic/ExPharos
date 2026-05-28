@@ -9,8 +9,8 @@ import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 
 public class WorldPresetTagsProvider extends TagsProvider<WorldPreset> {
-    public WorldPresetTagsProvider(PackOutput p_255701_, CompletableFuture<HolderLookup.Provider> p_255974_) {
-        super(p_255701_, Registries.WORLD_PRESET, p_255974_);
+    public WorldPresetTagsProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pProvider) {
+        super(pOutput, Registries.WORLD_PRESET, pProvider);
     }
 
     @Override

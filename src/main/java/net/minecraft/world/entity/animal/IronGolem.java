@@ -99,17 +99,17 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
     }
 
     @Override
-    protected int decreaseAirSupply(int p_28882_) {
-        return p_28882_;
+    protected int decreaseAirSupply(int pAir) {
+        return pAir;
     }
 
     @Override
-    protected void doPush(Entity p_28839_) {
-        if (p_28839_ instanceof Enemy && !(p_28839_ instanceof Creeper) && this.getRandom().nextInt(20) == 0) {
-            this.setTarget((LivingEntity)p_28839_);
+    protected void doPush(Entity pEntity) {
+        if (pEntity instanceof Enemy && !(pEntity instanceof Creeper) && this.getRandom().nextInt(20) == 0) {
+            this.setTarget((LivingEntity)pEntity);
         }
 
-        super.doPush(p_28839_);
+        super.doPush(pEntity);
     }
 
     @Override
@@ -134,26 +134,26 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
     }
 
     @Override
-    public boolean canAttackType(EntityType<?> p_28851_) {
-        if (this.isPlayerCreated() && p_28851_ == EntityType.PLAYER) {
+    public boolean canAttackType(EntityType<?> pType) {
+        if (this.isPlayerCreated() && pType == EntityType.PLAYER) {
             return false;
         } else {
-            return p_28851_ == EntityType.CREEPER ? false : super.canAttackType(p_28851_);
+            return pType == EntityType.CREEPER ? false : super.canAttackType(pType);
         }
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_28867_) {
-        super.addAdditionalSaveData(p_28867_);
-        p_28867_.putBoolean("PlayerCreated", this.isPlayerCreated());
-        this.addPersistentAngerSaveData(p_28867_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("PlayerCreated", this.isPlayerCreated());
+        this.addPersistentAngerSaveData(pCompound);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_28857_) {
-        super.readAdditionalSaveData(p_28857_);
-        this.setPlayerCreated(p_28857_.getBoolean("PlayerCreated"));
-        this.readPersistentAngerSaveData(this.level(), p_28857_);
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setPlayerCreated(pCompound.getBoolean("PlayerCreated"));
+        this.readPersistentAngerSaveData(this.level(), pCompound);
     }
 
     @Override
@@ -162,8 +162,8 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
     }
 
     @Override
-    public void setRemainingPersistentAngerTime(int p_28859_) {
-        this.remainingPersistentAngerTime = p_28859_;
+    public void setRemainingPersistentAngerTime(int pTime) {
+        this.remainingPersistentAngerTime = pTime;
     }
 
     @Override
@@ -172,8 +172,8 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
     }
 
     @Override
-    public void setPersistentAngerTarget(@Nullable UUID p_28855_) {
-        this.persistentAngerTarget = p_28855_;
+    public void setPersistentAngerTarget(@Nullable UUID pTarget) {
+        this.persistentAngerTarget = pTarget;
     }
 
     @Nullable
@@ -238,8 +238,8 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
         return this.attackAnimationTick;
     }
 
-    public void offerFlower(boolean p_28886_) {
-        if (p_28886_) {
+    public void offerFlower(boolean pOfferingFlower) {
+        if (pOfferingFlower) {
             this.offerFlowerTick = 400;
             this.level().broadcastEntityEvent(this, (byte)11);
         } else {
@@ -249,7 +249,7 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_28872_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.IRON_GOLEM_HURT;
     }
 
@@ -259,8 +259,8 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
     }
 
     @Override
-    protected InteractionResult mobInteract(Player p_28861_, InteractionHand p_28862_) {
-        ItemStack itemstack = p_28861_.getItemInHand(p_28862_);
+    protected InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
         if (!itemstack.is(Items.IRON_INGOT)) {
             return InteractionResult.PASS;
         } else {
@@ -271,14 +271,14 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
             } else {
                 float f1 = 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F;
                 this.playSound(SoundEvents.IRON_GOLEM_REPAIR, 1.0F, f1);
-                itemstack.consume(1, p_28861_);
+                itemstack.consume(1, pPlayer);
                 return InteractionResult.SUCCESS;
             }
         }
     }
 
     @Override
-    protected void playStepSound(BlockPos p_28864_, BlockState p_28865_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(SoundEvents.IRON_GOLEM_STEP, 1.0F, 1.0F);
     }
 
@@ -290,9 +290,9 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
         return (this.entityData.get(DATA_FLAGS_ID) & 1) != 0;
     }
 
-    public void setPlayerCreated(boolean p_28888_) {
+    public void setPlayerCreated(boolean pPlayerCreated) {
         byte b0 = this.entityData.get(DATA_FLAGS_ID);
-        if (p_28888_) {
+        if (pPlayerCreated) {
             this.entityData.set(DATA_FLAGS_ID, (byte)(b0 | 1));
         } else {
             this.entityData.set(DATA_FLAGS_ID, (byte)(b0 & -2));
@@ -300,28 +300,28 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
     }
 
     @Override
-    public void die(DamageSource p_28846_) {
-        super.die(p_28846_);
+    public void die(DamageSource pCause) {
+        super.die(pCause);
     }
 
     @Override
-    public boolean checkSpawnObstruction(LevelReader p_28853_) {
+    public boolean checkSpawnObstruction(LevelReader pLevel) {
         BlockPos blockpos = this.blockPosition();
         BlockPos blockpos1 = blockpos.below();
-        BlockState blockstate = p_28853_.getBlockState(blockpos1);
-        if (!blockstate.entityCanStandOn(p_28853_, blockpos1, this)) {
+        BlockState blockstate = pLevel.getBlockState(blockpos1);
+        if (!blockstate.entityCanStandOn(pLevel, blockpos1, this)) {
             return false;
         } else {
             for (int i = 1; i < 3; i++) {
                 BlockPos blockpos2 = blockpos.above(i);
-                BlockState blockstate1 = p_28853_.getBlockState(blockpos2);
-                if (!NaturalSpawner.isValidEmptySpawnBlock(p_28853_, blockpos2, blockstate1, blockstate1.getFluidState(), EntityType.IRON_GOLEM)) {
+                BlockState blockstate1 = pLevel.getBlockState(blockpos2);
+                if (!NaturalSpawner.isValidEmptySpawnBlock(pLevel, blockpos2, blockstate1, blockstate1.getFluidState(), EntityType.IRON_GOLEM)) {
                     return false;
                 }
             }
 
-            return NaturalSpawner.isValidEmptySpawnBlock(p_28853_, blockpos, p_28853_.getBlockState(blockpos), Fluids.EMPTY.defaultFluidState(), EntityType.IRON_GOLEM)
-                && p_28853_.isUnobstructed(this);
+            return NaturalSpawner.isValidEmptySpawnBlock(pLevel, blockpos, pLevel.getBlockState(blockpos), Fluids.EMPTY.defaultFluidState(), EntityType.IRON_GOLEM)
+                && pLevel.isUnobstructed(this);
         }
     }
 

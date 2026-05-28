@@ -44,41 +44,41 @@ public class RealmsWorldOptions extends ValueObject {
     private static final String DEFAULT_TEMPLATE_IMAGE = null;
 
     public RealmsWorldOptions(
-        boolean p_167302_,
-        boolean p_167303_,
-        int p_167306_,
-        boolean p_167304_,
-        int p_167308_,
-        int p_167309_,
-        boolean p_167305_,
-        boolean p_167307_,
-        String p_167311_,
-        String p_311180_,
-        RealmsServer.Compatibility p_311981_
+        boolean pPvp,
+        boolean pSpawnMonsters,
+        int pSpawnProtection,
+        boolean pCommandBlocks,
+        int pDifficulty,
+        int pGameMode,
+        boolean pHardcore,
+        boolean pForceGameMode,
+        String pSlotName,
+        String pVersion,
+        RealmsServer.Compatibility pCompatibility
     ) {
-        this.pvp = p_167302_;
-        this.spawnMonsters = p_167303_;
-        this.spawnProtection = p_167306_;
-        this.commandBlocks = p_167304_;
-        this.difficulty = p_167308_;
-        this.gameMode = p_167309_;
-        this.hardcore = p_167305_;
-        this.forceGameMode = p_167307_;
-        this.slotName = p_167311_;
-        this.version = p_311180_;
-        this.compatibility = p_311981_;
+        this.pvp = pPvp;
+        this.spawnMonsters = pSpawnMonsters;
+        this.spawnProtection = pSpawnProtection;
+        this.commandBlocks = pCommandBlocks;
+        this.difficulty = pDifficulty;
+        this.gameMode = pGameMode;
+        this.hardcore = pHardcore;
+        this.forceGameMode = pForceGameMode;
+        this.slotName = pSlotName;
+        this.version = pVersion;
+        this.compatibility = pCompatibility;
     }
 
     public static RealmsWorldOptions createDefaults() {
         return new RealmsWorldOptions(true, true, 0, false, 2, 0, false, false, "", "", DEFAULT_COMPATIBILITY);
     }
 
-    public static RealmsWorldOptions createDefaultsWith(GameType p_364043_, Difficulty p_366299_, boolean p_368672_, String p_361621_, String p_365919_) {
-        return new RealmsWorldOptions(true, true, 0, false, p_366299_.getId(), p_364043_.getId(), p_368672_, false, p_365919_, p_361621_, DEFAULT_COMPATIBILITY);
+    public static RealmsWorldOptions createDefaultsWith(GameType pGameMode, Difficulty pDifficulty, boolean pHardcore, String pVersion, String pSlotName) {
+        return new RealmsWorldOptions(true, true, 0, false, pDifficulty.getId(), pGameMode.getId(), pHardcore, false, pSlotName, pVersion, DEFAULT_COMPATIBILITY);
     }
 
-    public static RealmsWorldOptions createFromSettings(LevelSettings p_361674_, String p_370223_) {
-        return createDefaultsWith(p_361674_.gameType(), p_361674_.difficulty(), p_361674_.hardcore(), p_370223_, p_361674_.levelName());
+    public static RealmsWorldOptions createFromSettings(LevelSettings pSettings, String pVersion) {
+        return createDefaultsWith(pSettings.gameType(), pSettings.difficulty(), pSettings.hardcore(), pVersion, pSettings.levelName());
     }
 
     public static RealmsWorldOptions createEmptyDefaults() {
@@ -87,39 +87,39 @@ public class RealmsWorldOptions extends ValueObject {
         return realmsworldoptions;
     }
 
-    public void setEmpty(boolean p_87631_) {
-        this.empty = p_87631_;
+    public void setEmpty(boolean pEmpty) {
+        this.empty = pEmpty;
     }
 
-    public static RealmsWorldOptions parse(JsonObject p_87629_, RealmsSettings p_363227_) {
+    public static RealmsWorldOptions parse(JsonObject pJson, RealmsSettings pRealmsSettings) {
         RealmsWorldOptions realmsworldoptions = new RealmsWorldOptions(
-            JsonUtils.getBooleanOr("pvp", p_87629_, true),
-            JsonUtils.getBooleanOr("spawnMonsters", p_87629_, true),
-            JsonUtils.getIntOr("spawnProtection", p_87629_, 0),
-            JsonUtils.getBooleanOr("commandBlocks", p_87629_, false),
-            JsonUtils.getIntOr("difficulty", p_87629_, 2),
-            JsonUtils.getIntOr("gameMode", p_87629_, 0),
-            p_363227_.hardcore(),
-            JsonUtils.getBooleanOr("forceGameMode", p_87629_, false),
-            JsonUtils.getRequiredStringOr("slotName", p_87629_, ""),
-            JsonUtils.getRequiredStringOr("version", p_87629_, ""),
-            RealmsServer.getCompatibility(JsonUtils.getRequiredStringOr("compatibility", p_87629_, RealmsServer.Compatibility.UNVERIFIABLE.name()))
+            JsonUtils.getBooleanOr("pvp", pJson, true),
+            JsonUtils.getBooleanOr("spawnMonsters", pJson, true),
+            JsonUtils.getIntOr("spawnProtection", pJson, 0),
+            JsonUtils.getBooleanOr("commandBlocks", pJson, false),
+            JsonUtils.getIntOr("difficulty", pJson, 2),
+            JsonUtils.getIntOr("gameMode", pJson, 0),
+            pRealmsSettings.hardcore(),
+            JsonUtils.getBooleanOr("forceGameMode", pJson, false),
+            JsonUtils.getRequiredStringOr("slotName", pJson, ""),
+            JsonUtils.getRequiredStringOr("version", pJson, ""),
+            RealmsServer.getCompatibility(JsonUtils.getRequiredStringOr("compatibility", pJson, RealmsServer.Compatibility.UNVERIFIABLE.name()))
         );
-        realmsworldoptions.templateId = JsonUtils.getLongOr("worldTemplateId", p_87629_, -1L);
-        realmsworldoptions.templateImage = JsonUtils.getStringOr("worldTemplateImage", p_87629_, DEFAULT_TEMPLATE_IMAGE);
+        realmsworldoptions.templateId = JsonUtils.getLongOr("worldTemplateId", pJson, -1L);
+        realmsworldoptions.templateImage = JsonUtils.getStringOr("worldTemplateImage", pJson, DEFAULT_TEMPLATE_IMAGE);
         return realmsworldoptions;
     }
 
-    public String getSlotName(int p_87627_) {
+    public String getSlotName(int pSlotIndex) {
         if (StringUtil.isBlank(this.slotName)) {
-            return this.empty ? I18n.get("mco.configure.world.slot.empty") : this.getDefaultSlotName(p_87627_);
+            return this.empty ? I18n.get("mco.configure.world.slot.empty") : this.getDefaultSlotName(pSlotIndex);
         } else {
             return this.slotName;
         }
     }
 
-    public String getDefaultSlotName(int p_87634_) {
-        return I18n.get("mco.configure.world.slot", p_87634_);
+    public String getDefaultSlotName(int pSlotIndex) {
+        return I18n.get("mco.configure.world.slot", pSlotIndex);
     }
 
     public String toJson() {

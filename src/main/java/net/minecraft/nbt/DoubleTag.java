@@ -45,17 +45,17 @@ public class DoubleTag extends NumericTag {
     };
     private final double data;
 
-    private DoubleTag(double p_128498_) {
-        this.data = p_128498_;
+    private DoubleTag(double pData) {
+        this.data = pData;
     }
 
-    public static DoubleTag valueOf(double p_128501_) {
-        return p_128501_ == 0.0 ? ZERO : new DoubleTag(p_128501_);
+    public static DoubleTag valueOf(double pData) {
+        return pData == 0.0 ? ZERO : new DoubleTag(pData);
     }
 
     @Override
-    public void write(DataOutput p_128503_) throws IOException {
-        p_128503_.writeDouble(this.data);
+    public void write(DataOutput pOutput) throws IOException {
+        pOutput.writeDouble(this.data);
     }
 
     @Override
@@ -78,8 +78,8 @@ public class DoubleTag extends NumericTag {
     }
 
     @Override
-    public boolean equals(Object p_128512_) {
-        return this == p_128512_ ? true : p_128512_ instanceof DoubleTag && this.data == ((DoubleTag)p_128512_).data;
+    public boolean equals(Object pOther) {
+        return this == pOther ? true : pOther instanceof DoubleTag && this.data == ((DoubleTag)pOther).data;
     }
 
     @Override

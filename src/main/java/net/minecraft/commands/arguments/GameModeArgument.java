@@ -24,20 +24,20 @@ public class GameModeArgument implements ArgumentType<GameType> {
         p_308349_ -> Component.translatableEscape("argument.gamemode.invalid", p_308349_)
     );
 
-    public GameType parse(StringReader p_260111_) throws CommandSyntaxException {
-        String s = p_260111_.readUnquotedString();
+    public GameType parse(StringReader pReader) throws CommandSyntaxException {
+        String s = pReader.readUnquotedString();
         GameType gametype = GameType.byName(s, null);
         if (gametype == null) {
-            throw ERROR_INVALID.createWithContext(p_260111_, s);
+            throw ERROR_INVALID.createWithContext(pReader, s);
         } else {
             return gametype;
         }
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_259767_, SuggestionsBuilder p_259515_) {
-        return p_259767_.getSource() instanceof SharedSuggestionProvider
-            ? SharedSuggestionProvider.suggest(Arrays.stream(VALUES).map(GameType::getName), p_259515_)
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> pContext, SuggestionsBuilder pBuilder) {
+        return pContext.getSource() instanceof SharedSuggestionProvider
+            ? SharedSuggestionProvider.suggest(Arrays.stream(VALUES).map(GameType::getName), pBuilder)
             : Suggestions.empty();
     }
 
@@ -50,7 +50,7 @@ public class GameModeArgument implements ArgumentType<GameType> {
         return new GameModeArgument();
     }
 
-    public static GameType getGameMode(CommandContext<CommandSourceStack> p_259927_, String p_260246_) throws CommandSyntaxException {
-        return p_259927_.getArgument(p_260246_, GameType.class);
+    public static GameType getGameMode(CommandContext<CommandSourceStack> pContext, String pName) throws CommandSyntaxException {
+        return pContext.getArgument(pName, GameType.class);
     }
 }

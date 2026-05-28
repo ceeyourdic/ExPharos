@@ -109,22 +109,22 @@ public record SerializableChunkData(
     public static final String SKY_LIGHT_TAG = "SkyLight";
 
     @Nullable
-    public static SerializableChunkData parse(LevelHeightAccessor p_366637_, RegistryAccess p_364474_, CompoundTag p_368975_) {
-        if (!p_368975_.contains("Status", 8)) {
+    public static SerializableChunkData parse(LevelHeightAccessor pLevelHeightAccessor, RegistryAccess pRegistries, CompoundTag pTag) {
+        if (!pTag.contains("Status", 8)) {
             return null;
         } else {
-            ChunkPos chunkpos = new ChunkPos(p_368975_.getInt("xPos"), p_368975_.getInt("zPos"));
-            long i = p_368975_.getLong("LastUpdate");
-            long j = p_368975_.getLong("InhabitedTime");
-            ChunkStatus chunkstatus = ChunkStatus.byName(p_368975_.getString("Status"));
-            UpgradeData upgradedata = p_368975_.contains("UpgradeData", 10)
-                ? new UpgradeData(p_368975_.getCompound("UpgradeData"), p_366637_)
+            ChunkPos chunkpos = new ChunkPos(pTag.getInt("xPos"), pTag.getInt("zPos"));
+            long i = pTag.getLong("LastUpdate");
+            long j = pTag.getLong("InhabitedTime");
+            ChunkStatus chunkstatus = ChunkStatus.byName(pTag.getString("Status"));
+            UpgradeData upgradedata = pTag.contains("UpgradeData", 10)
+                ? new UpgradeData(pTag.getCompound("UpgradeData"), pLevelHeightAccessor)
                 : UpgradeData.EMPTY;
-            boolean flag = p_368975_.getBoolean("isLightOn");
+            boolean flag = pTag.getBoolean("isLightOn");
             BlendingData.Packed blendingdata$packed;
-            if (p_368975_.contains("blending_data", 10)) {
+            if (pTag.contains("blending_data", 10)) {
                 blendingdata$packed = BlendingData.Packed.CODEC
-                    .parse(NbtOps.INSTANCE, p_368975_.getCompound("blending_data"))
+                    .parse(NbtOps.INSTANCE, pTag.getCompound("blending_data"))
                     .resultOrPartial(LOGGER::error)
                     .orElse(null);
             } else {
@@ -132,9 +132,9 @@ public record SerializableChunkData(
             }
 
             BelowZeroRetrogen belowzeroretrogen;
-            if (p_368975_.contains("below_zero_retrogen", 10)) {
+            if (pTag.contains("below_zero_retrogen", 10)) {
                 belowzeroretrogen = BelowZeroRetrogen.CODEC
-                    .parse(NbtOps.INSTANCE, p_368975_.getCompound("below_zero_retrogen"))
+                    .parse(NbtOps.INSTANCE, pTag.getCompound("below_zero_retrogen"))
                     .resultOrPartial(LOGGER::error)
                     .orElse(null);
             } else {
@@ -142,13 +142,13 @@ public record SerializableChunkData(
             }
 
             long[] along;
-            if (p_368975_.contains("carving_mask", 12)) {
-                along = p_368975_.getLongArray("carving_mask");
+            if (pTag.contains("carving_mask", 12)) {
+                along = pTag.getLongArray("carving_mask");
             } else {
                 along = null;
             }
 
-            CompoundTag compoundtag = p_368975_.getCompound("Heightmaps");
+            CompoundTag compoundtag = pTag.getCompound("Heightmaps");
             Map<Heightmap.Types, long[]> map = new EnumMap<>(Heightmap.Types.class);
 
             for (Heightmap.Types heightmap$types : chunkstatus.heightmapsAfter()) {
@@ -159,13 +159,13 @@ public record SerializableChunkData(
             }
 
             List<SavedTick<Block>> list1 = SavedTick.loadTickList(
-                p_368975_.getList("block_ticks", 10), p_367354_ -> BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(p_367354_)), chunkpos
+                pTag.getList("block_ticks", 10), p_367354_ -> BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(p_367354_)), chunkpos
             );
             List<SavedTick<Fluid>> list2 = SavedTick.loadTickList(
-                p_368975_.getList("fluid_ticks", 10), p_369392_ -> BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(p_369392_)), chunkpos
+                pTag.getList("fluid_ticks", 10), p_369392_ -> BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(p_369392_)), chunkpos
             );
             ChunkAccess.PackedTicks chunkaccess$packedticks = new ChunkAccess.PackedTicks(list1, list2);
-            ListTag listtag = p_368975_.getList("PostProcessing", 9);
+            ListTag listtag = pTag.getList("PostProcessing", 9);
             ShortList[] ashortlist = new ShortList[listtag.size()];
 
             for (int k = 0; k < listtag.size(); k++) {
@@ -179,19 +179,19 @@ public record SerializableChunkData(
                 ashortlist[k] = shortlist;
             }
 
-            List<CompoundTag> list3 = Lists.transform(p_368975_.getList("entities", 10), p_364930_ -> (CompoundTag)p_364930_);
-            List<CompoundTag> list4 = Lists.transform(p_368975_.getList("block_entities", 10), p_370018_ -> (CompoundTag)p_370018_);
-            CompoundTag compoundtag2 = p_368975_.getCompound("structures");
-            ListTag listtag2 = p_368975_.getList("sections", 10);
+            List<CompoundTag> list3 = Lists.transform(pTag.getList("entities", 10), p_364930_ -> (CompoundTag)p_364930_);
+            List<CompoundTag> list4 = Lists.transform(pTag.getList("block_entities", 10), p_370018_ -> (CompoundTag)p_370018_);
+            CompoundTag compoundtag2 = pTag.getCompound("structures");
+            ListTag listtag2 = pTag.getList("sections", 10);
             List<SerializableChunkData.SectionData> list = new ArrayList<>(listtag2.size());
-            Registry<Biome> registry = p_364474_.lookupOrThrow(Registries.BIOME);
+            Registry<Biome> registry = pRegistries.lookupOrThrow(Registries.BIOME);
             Codec<PalettedContainerRO<Holder<Biome>>> codec = makeBiomeCodec(registry);
 
             for (int i1 = 0; i1 < listtag2.size(); i1++) {
                 CompoundTag compoundtag1 = listtag2.getCompound(i1);
                 int j1 = compoundtag1.getByte("Y");
                 LevelChunkSection levelchunksection;
-                if (j1 >= p_366637_.getMinSectionY() && j1 <= p_366637_.getMaxSectionY()) {
+                if (j1 >= pLevelHeightAccessor.getMinSectionY() && j1 <= pLevelHeightAccessor.getMaxSectionY()) {
                     PalettedContainer<BlockState> palettedcontainer;
                     if (compoundtag1.contains("block_states", 10)) {
                         palettedcontainer = BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundtag1.getCompound("block_states"))
@@ -225,7 +225,7 @@ public record SerializableChunkData(
             return new SerializableChunkData(
                 registry,
                 chunkpos,
-                p_366637_.getMinSectionY(),
+                pLevelHeightAccessor.getMinSectionY(),
                 i,
                 j,
                 chunkstatus,
@@ -245,32 +245,32 @@ public record SerializableChunkData(
         }
     }
 
-    public ProtoChunk read(ServerLevel p_368634_, PoiManager p_362734_, RegionStorageInfo p_366907_, ChunkPos p_363624_) {
-        if (!Objects.equals(p_363624_, this.chunkPos)) {
-            LOGGER.error("Chunk file at {} is in the wrong location; relocating. (Expected {}, got {})", p_363624_, p_363624_, this.chunkPos);
-            p_368634_.getServer().reportMisplacedChunk(this.chunkPos, p_363624_, p_366907_);
+    public ProtoChunk read(ServerLevel pLevel, PoiManager pPoiManager, RegionStorageInfo pRegionStorageInfo, ChunkPos pPos) {
+        if (!Objects.equals(pPos, this.chunkPos)) {
+            LOGGER.error("Chunk file at {} is in the wrong location; relocating. (Expected {}, got {})", pPos, pPos, this.chunkPos);
+            pLevel.getServer().reportMisplacedChunk(this.chunkPos, pPos, pRegionStorageInfo);
         }
 
-        int i = p_368634_.getSectionsCount();
+        int i = pLevel.getSectionsCount();
         LevelChunkSection[] alevelchunksection = new LevelChunkSection[i];
-        boolean flag = p_368634_.dimensionType().hasSkyLight();
-        ChunkSource chunksource = p_368634_.getChunkSource();
+        boolean flag = pLevel.dimensionType().hasSkyLight();
+        ChunkSource chunksource = pLevel.getChunkSource();
         LevelLightEngine levellightengine = chunksource.getLightEngine();
-        Registry<Biome> registry = p_368634_.registryAccess().lookupOrThrow(Registries.BIOME);
+        Registry<Biome> registry = pLevel.registryAccess().lookupOrThrow(Registries.BIOME);
         boolean flag1 = false;
 
         for (SerializableChunkData.SectionData serializablechunkdata$sectiondata : this.sectionData) {
-            SectionPos sectionpos = SectionPos.of(p_363624_, serializablechunkdata$sectiondata.y);
+            SectionPos sectionpos = SectionPos.of(pPos, serializablechunkdata$sectiondata.y);
             if (serializablechunkdata$sectiondata.chunkSection != null) {
-                alevelchunksection[p_368634_.getSectionIndexFromSectionY(serializablechunkdata$sectiondata.y)] = serializablechunkdata$sectiondata.chunkSection;
-                p_362734_.checkConsistencyWithBlocks(sectionpos, serializablechunkdata$sectiondata.chunkSection);
+                alevelchunksection[pLevel.getSectionIndexFromSectionY(serializablechunkdata$sectiondata.y)] = serializablechunkdata$sectiondata.chunkSection;
+                pPoiManager.checkConsistencyWithBlocks(sectionpos, serializablechunkdata$sectiondata.chunkSection);
             }
 
             boolean flag2 = serializablechunkdata$sectiondata.blockLight != null;
             boolean flag3 = flag && serializablechunkdata$sectiondata.skyLight != null;
             if (flag2 || flag3) {
                 if (!flag1) {
-                    levellightengine.retainData(p_363624_, true);
+                    levellightengine.retainData(pPos, true);
                     flag1 = true;
                 }
 
@@ -290,21 +290,21 @@ public record SerializableChunkData(
             LevelChunkTicks<Block> levelchunkticks = new LevelChunkTicks<>(this.packedTicks.blocks());
             LevelChunkTicks<Fluid> levelchunkticks1 = new LevelChunkTicks<>(this.packedTicks.fluids());
             chunkaccess = new LevelChunk(
-                p_368634_.getLevel(),
-                p_363624_,
+                pLevel.getLevel(),
+                pPos,
                 this.upgradeData,
                 levelchunkticks,
                 levelchunkticks1,
                 this.inhabitedTime,
                 alevelchunksection,
-                postLoadChunk(p_368634_, this.entities, this.blockEntities),
+                postLoadChunk(pLevel, this.entities, this.blockEntities),
                 BlendingData.unpack(this.blendingData)
             );
         } else {
             ProtoChunkTicks<Block> protochunkticks = ProtoChunkTicks.load(this.packedTicks.blocks());
             ProtoChunkTicks<Fluid> protochunkticks1 = ProtoChunkTicks.load(this.packedTicks.fluids());
             ProtoChunk protochunk1 = new ProtoChunk(
-                p_363624_, this.upgradeData, alevelchunksection, protochunkticks, protochunkticks1, p_368634_, registry, BlendingData.unpack(this.blendingData)
+                pPos, this.upgradeData, alevelchunksection, protochunkticks, protochunkticks1, pLevel, registry, BlendingData.unpack(this.blendingData)
             );
             chunkaccess = protochunk1;
             protochunk1.setInhabitedTime(this.inhabitedTime);
@@ -331,8 +331,8 @@ public record SerializableChunkData(
         }
 
         Heightmap.primeHeightmaps(chunkaccess, enumset);
-        chunkaccess.setAllStarts(unpackStructureStart(StructurePieceSerializationContext.fromLevel(p_368634_), this.structureData, p_368634_.getSeed()));
-        chunkaccess.setAllReferences(unpackStructureReferences(p_368634_.registryAccess(), p_363624_, this.structureData));
+        chunkaccess.setAllStarts(unpackStructureStart(StructurePieceSerializationContext.fromLevel(pLevel), this.structureData, pLevel.getSeed()));
+        chunkaccess.setAllReferences(unpackStructureReferences(pLevel.registryAccess(), pPos, this.structureData));
 
         for (int j = 0; j < this.postProcessingSections.length; j++) {
             chunkaccess.addPackedPostProcess(this.postProcessingSections[j], j);
@@ -359,27 +359,27 @@ public record SerializableChunkData(
         }
     }
 
-    private static void logErrors(ChunkPos p_362005_, int p_366847_, String p_369695_) {
-        LOGGER.error("Recoverable errors when loading section [{}, {}, {}]: {}", p_362005_.x, p_366847_, p_362005_.z, p_369695_);
+    private static void logErrors(ChunkPos pChunkPos, int pSectionY, String pError) {
+        LOGGER.error("Recoverable errors when loading section [{}, {}, {}]: {}", pChunkPos.x, pSectionY, pChunkPos.z, pError);
     }
 
-    private static Codec<PalettedContainerRO<Holder<Biome>>> makeBiomeCodec(Registry<Biome> p_368397_) {
+    private static Codec<PalettedContainerRO<Holder<Biome>>> makeBiomeCodec(Registry<Biome> pBiomeRegistry) {
         return PalettedContainer.codecRO(
-            p_368397_.asHolderIdMap(), p_368397_.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, p_368397_.getOrThrow(Biomes.PLAINS)
+            pBiomeRegistry.asHolderIdMap(), pBiomeRegistry.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, pBiomeRegistry.getOrThrow(Biomes.PLAINS)
         );
     }
 
-    public static SerializableChunkData copyOf(ServerLevel p_369088_, ChunkAccess p_363062_) {
-        if (!p_363062_.canBeSerialized()) {
-            throw new IllegalArgumentException("Chunk can't be serialized: " + p_363062_);
+    public static SerializableChunkData copyOf(ServerLevel pLevel, ChunkAccess pChunk) {
+        if (!pChunk.canBeSerialized()) {
+            throw new IllegalArgumentException("Chunk can't be serialized: " + pChunk);
         } else {
-            ChunkPos chunkpos = p_363062_.getPos();
+            ChunkPos chunkpos = pChunk.getPos();
             List<SerializableChunkData.SectionData> list = new ArrayList<>();
-            LevelChunkSection[] alevelchunksection = p_363062_.getSections();
-            LevelLightEngine levellightengine = p_369088_.getChunkSource().getLightEngine();
+            LevelChunkSection[] alevelchunksection = pChunk.getSections();
+            LevelLightEngine levellightengine = pLevel.getChunkSource().getLightEngine();
 
             for (int i = levellightengine.getMinLightSection(); i < levellightengine.getMaxLightSection(); i++) {
-                int j = p_363062_.getSectionIndexFromSectionY(i);
+                int j = pChunk.getSectionIndexFromSectionY(i);
                 boolean flag = j >= 0 && j < alevelchunksection.length;
                 DataLayer datalayer = levellightengine.getLayerListener(LightLayer.BLOCK).getDataLayerData(SectionPos.of(chunkpos, i));
                 DataLayer datalayer1 = levellightengine.getLayerListener(LightLayer.SKY).getDataLayerData(SectionPos.of(chunkpos, i));
@@ -391,10 +391,10 @@ public record SerializableChunkData(
                 }
             }
 
-            List<CompoundTag> list1 = new ArrayList<>(p_363062_.getBlockEntitiesPos().size());
+            List<CompoundTag> list1 = new ArrayList<>(pChunk.getBlockEntitiesPos().size());
 
-            for (BlockPos blockpos : p_363062_.getBlockEntitiesPos()) {
-                CompoundTag compoundtag = p_363062_.getBlockEntityNbtForSaving(blockpos, p_369088_.registryAccess());
+            for (BlockPos blockpos : pChunk.getBlockEntitiesPos()) {
+                CompoundTag compoundtag = pChunk.getBlockEntityNbtForSaving(blockpos, pLevel.registryAccess());
                 if (compoundtag != null) {
                     list1.add(compoundtag);
                 }
@@ -402,8 +402,8 @@ public record SerializableChunkData(
 
             List<CompoundTag> list2 = new ArrayList<>();
             long[] along = null;
-            if (p_363062_.getPersistedStatus().getChunkType() == ChunkType.PROTOCHUNK) {
-                ProtoChunk protochunk = (ProtoChunk)p_363062_;
+            if (pChunk.getPersistedStatus().getChunkType() == ChunkType.PROTOCHUNK) {
+                ProtoChunk protochunk = (ProtoChunk)pChunk;
                 list2.addAll(protochunk.getEntities());
                 CarvingMask carvingmask = protochunk.getCarvingMask();
                 if (carvingmask != null) {
@@ -413,33 +413,33 @@ public record SerializableChunkData(
 
             Map<Heightmap.Types, long[]> map = new EnumMap<>(Heightmap.Types.class);
 
-            for (Entry<Heightmap.Types, Heightmap> entry : p_363062_.getHeightmaps()) {
-                if (p_363062_.getPersistedStatus().heightmapsAfter().contains(entry.getKey())) {
+            for (Entry<Heightmap.Types, Heightmap> entry : pChunk.getHeightmaps()) {
+                if (pChunk.getPersistedStatus().heightmapsAfter().contains(entry.getKey())) {
                     long[] along1 = entry.getValue().getRawData();
                     map.put(entry.getKey(), (long[])along1.clone());
                 }
             }
 
-            ChunkAccess.PackedTicks chunkaccess$packedticks = p_363062_.getTicksForSerialization(p_369088_.getGameTime());
-            ShortList[] ashortlist = Arrays.stream(p_363062_.getPostProcessing())
+            ChunkAccess.PackedTicks chunkaccess$packedticks = pChunk.getTicksForSerialization(pLevel.getGameTime());
+            ShortList[] ashortlist = Arrays.stream(pChunk.getPostProcessing())
                 .map(p_366782_ -> p_366782_ != null ? new ShortArrayList(p_366782_) : null)
                 .toArray(ShortList[]::new);
-            CompoundTag compoundtag1 = packStructureData(StructurePieceSerializationContext.fromLevel(p_369088_), chunkpos, p_363062_.getAllStarts(), p_363062_.getAllReferences());
+            CompoundTag compoundtag1 = packStructureData(StructurePieceSerializationContext.fromLevel(pLevel), chunkpos, pChunk.getAllStarts(), pChunk.getAllReferences());
             return new SerializableChunkData(
-                p_369088_.registryAccess().lookupOrThrow(Registries.BIOME),
+                pLevel.registryAccess().lookupOrThrow(Registries.BIOME),
                 chunkpos,
-                p_363062_.getMinSectionY(),
-                p_369088_.getGameTime(),
-                p_363062_.getInhabitedTime(),
-                p_363062_.getPersistedStatus(),
-                Optionull.map(p_363062_.getBlendingData(), BlendingData::pack),
-                p_363062_.getBelowZeroRetrogen(),
-                p_363062_.getUpgradeData().copy(),
+                pChunk.getMinSectionY(),
+                pLevel.getGameTime(),
+                pChunk.getInhabitedTime(),
+                pChunk.getPersistedStatus(),
+                Optionull.map(pChunk.getBlendingData(), BlendingData::pack),
+                pChunk.getBelowZeroRetrogen(),
+                pChunk.getUpgradeData().copy(),
                 along,
                 map,
                 chunkaccess$packedticks,
                 ashortlist,
-                p_363062_.isLightCorrect(),
+                pChunk.isLightCorrect(),
                 list,
                 list2,
                 list1,
@@ -525,41 +525,41 @@ public record SerializableChunkData(
         return compoundtag;
     }
 
-    private static void saveTicks(CompoundTag p_366243_, ChunkAccess.PackedTicks p_367613_) {
+    private static void saveTicks(CompoundTag pTag, ChunkAccess.PackedTicks pTicks) {
         ListTag listtag = new ListTag();
 
-        for (SavedTick<Block> savedtick : p_367613_.blocks()) {
+        for (SavedTick<Block> savedtick : pTicks.blocks()) {
             listtag.add(savedtick.save(p_367401_ -> BuiltInRegistries.BLOCK.getKey(p_367401_).toString()));
         }
 
-        p_366243_.put("block_ticks", listtag);
+        pTag.put("block_ticks", listtag);
         ListTag listtag1 = new ListTag();
 
-        for (SavedTick<Fluid> savedtick1 : p_367613_.fluids()) {
+        for (SavedTick<Fluid> savedtick1 : pTicks.fluids()) {
             listtag1.add(savedtick1.save(p_368053_ -> BuiltInRegistries.FLUID.getKey(p_368053_).toString()));
         }
 
-        p_366243_.put("fluid_ticks", listtag1);
+        pTag.put("fluid_ticks", listtag1);
     }
 
-    public static ChunkType getChunkTypeFromTag(@Nullable CompoundTag p_362607_) {
-        return p_362607_ != null ? ChunkStatus.byName(p_362607_.getString("Status")).getChunkType() : ChunkType.PROTOCHUNK;
+    public static ChunkType getChunkTypeFromTag(@Nullable CompoundTag pTag) {
+        return pTag != null ? ChunkStatus.byName(pTag.getString("Status")).getChunkType() : ChunkType.PROTOCHUNK;
     }
 
     @Nullable
-    private static LevelChunk.PostLoadProcessor postLoadChunk(ServerLevel p_367726_, List<CompoundTag> p_368624_, List<CompoundTag> p_369871_) {
-        return p_368624_.isEmpty() && p_369871_.isEmpty() ? null : p_361871_ -> {
-            if (!p_368624_.isEmpty()) {
-                p_367726_.addLegacyChunkEntities(EntityType.loadEntitiesRecursive(p_368624_, p_367726_, EntitySpawnReason.LOAD));
+    private static LevelChunk.PostLoadProcessor postLoadChunk(ServerLevel pLevel, List<CompoundTag> pEntities, List<CompoundTag> pBlockEntities) {
+        return pEntities.isEmpty() && pBlockEntities.isEmpty() ? null : p_361871_ -> {
+            if (!pEntities.isEmpty()) {
+                pLevel.addLegacyChunkEntities(EntityType.loadEntitiesRecursive(pEntities, pLevel, EntitySpawnReason.LOAD));
             }
 
-            for (CompoundTag compoundtag : p_369871_) {
+            for (CompoundTag compoundtag : pBlockEntities) {
                 boolean flag = compoundtag.getBoolean("keepPacked");
                 if (flag) {
                     p_361871_.setBlockEntityNbt(compoundtag);
                 } else {
                     BlockPos blockpos = BlockEntity.getPosFromTag(compoundtag);
-                    BlockEntity blockentity = BlockEntity.loadStatic(blockpos, p_361871_.getBlockState(blockpos), compoundtag, p_367726_.registryAccess());
+                    BlockEntity blockentity = BlockEntity.loadStatic(blockpos, p_361871_.getBlockState(blockpos), compoundtag, pLevel.registryAccess());
                     if (blockentity != null) {
                         p_361871_.setBlockEntity(blockentity);
                     }
@@ -569,21 +569,21 @@ public record SerializableChunkData(
     }
 
     private static CompoundTag packStructureData(
-        StructurePieceSerializationContext p_365342_, ChunkPos p_366115_, Map<Structure, StructureStart> p_361842_, Map<Structure, LongSet> p_369653_
+        StructurePieceSerializationContext pContext, ChunkPos pPos, Map<Structure, StructureStart> pStructureStarts, Map<Structure, LongSet> pReferences
     ) {
         CompoundTag compoundtag = new CompoundTag();
         CompoundTag compoundtag1 = new CompoundTag();
-        Registry<Structure> registry = p_365342_.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+        Registry<Structure> registry = pContext.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 
-        for (Entry<Structure, StructureStart> entry : p_361842_.entrySet()) {
+        for (Entry<Structure, StructureStart> entry : pStructureStarts.entrySet()) {
             ResourceLocation resourcelocation = registry.getKey(entry.getKey());
-            compoundtag1.put(resourcelocation.toString(), entry.getValue().createTag(p_365342_, p_366115_));
+            compoundtag1.put(resourcelocation.toString(), entry.getValue().createTag(pContext, pPos));
         }
 
         compoundtag.put("starts", compoundtag1);
         CompoundTag compoundtag2 = new CompoundTag();
 
-        for (Entry<Structure, LongSet> entry1 : p_369653_.entrySet()) {
+        for (Entry<Structure, LongSet> entry1 : pReferences.entrySet()) {
             if (!entry1.getValue().isEmpty()) {
                 ResourceLocation resourcelocation1 = registry.getKey(entry1.getKey());
                 compoundtag2.put(resourcelocation1.toString(), new LongArrayTag(entry1.getValue()));
@@ -594,10 +594,10 @@ public record SerializableChunkData(
         return compoundtag;
     }
 
-    private static Map<Structure, StructureStart> unpackStructureStart(StructurePieceSerializationContext p_368168_, CompoundTag p_361005_, long p_364111_) {
+    private static Map<Structure, StructureStart> unpackStructureStart(StructurePieceSerializationContext pContext, CompoundTag pTag, long pSeed) {
         Map<Structure, StructureStart> map = Maps.newHashMap();
-        Registry<Structure> registry = p_368168_.registryAccess().lookupOrThrow(Registries.STRUCTURE);
-        CompoundTag compoundtag = p_361005_.getCompound("starts");
+        Registry<Structure> registry = pContext.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+        CompoundTag compoundtag = pTag.getCompound("starts");
 
         for (String s : compoundtag.getAllKeys()) {
             ResourceLocation resourcelocation = ResourceLocation.tryParse(s);
@@ -605,7 +605,7 @@ public record SerializableChunkData(
             if (structure == null) {
                 LOGGER.error("Unknown structure start: {}", resourcelocation);
             } else {
-                StructureStart structurestart = StructureStart.loadStaticStart(p_368168_, compoundtag.getCompound(s), p_364111_);
+                StructureStart structurestart = StructureStart.loadStaticStart(pContext, compoundtag.getCompound(s), pSeed);
                 if (structurestart != null) {
                     map.put(structure, structurestart);
                 }
@@ -615,23 +615,23 @@ public record SerializableChunkData(
         return map;
     }
 
-    private static Map<Structure, LongSet> unpackStructureReferences(RegistryAccess p_360899_, ChunkPos p_366437_, CompoundTag p_368599_) {
+    private static Map<Structure, LongSet> unpackStructureReferences(RegistryAccess pRegistries, ChunkPos pPos, CompoundTag pTag) {
         Map<Structure, LongSet> map = Maps.newHashMap();
-        Registry<Structure> registry = p_360899_.lookupOrThrow(Registries.STRUCTURE);
-        CompoundTag compoundtag = p_368599_.getCompound("References");
+        Registry<Structure> registry = pRegistries.lookupOrThrow(Registries.STRUCTURE);
+        CompoundTag compoundtag = pTag.getCompound("References");
 
         for (String s : compoundtag.getAllKeys()) {
             ResourceLocation resourcelocation = ResourceLocation.tryParse(s);
             Structure structure = registry.getValue(resourcelocation);
             if (structure == null) {
-                LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", resourcelocation, p_366437_);
+                LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", resourcelocation, pPos);
             } else {
                 long[] along = compoundtag.getLongArray(s);
                 if (along.length != 0) {
                     map.put(structure, new LongOpenHashSet(Arrays.stream(along).filter(p_365743_ -> {
                         ChunkPos chunkpos = new ChunkPos(p_365743_);
-                        if (chunkpos.getChessboardDistance(p_366437_) > 8) {
-                            LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", resourcelocation, chunkpos, p_366437_);
+                        if (chunkpos.getChessboardDistance(pPos) > 8) {
+                            LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", resourcelocation, chunkpos, pPos);
                             return false;
                         } else {
                             return true;
@@ -644,10 +644,10 @@ public record SerializableChunkData(
         return map;
     }
 
-    private static ListTag packOffsets(ShortList[] p_365024_) {
+    private static ListTag packOffsets(ShortList[] pOffsets) {
         ListTag listtag = new ListTag();
 
-        for (ShortList shortlist : p_365024_) {
+        for (ShortList shortlist : pOffsets) {
             ListTag listtag1 = new ListTag();
             if (shortlist != null) {
                 for (int i = 0; i < shortlist.size(); i++) {

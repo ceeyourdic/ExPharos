@@ -33,21 +33,21 @@ public class ClientAdvancements {
     @Nullable
     private AdvancementHolder selectedTab;
 
-    public ClientAdvancements(Minecraft p_286782_, WorldSessionTelemetryManager p_286391_) {
-        this.minecraft = p_286782_;
-        this.telemetryManager = p_286391_;
+    public ClientAdvancements(Minecraft pMinecraft, WorldSessionTelemetryManager pTelemetryManager) {
+        this.minecraft = pMinecraft;
+        this.telemetryManager = pTelemetryManager;
     }
 
-    public void update(ClientboundUpdateAdvancementsPacket p_104400_) {
-        if (p_104400_.shouldReset()) {
+    public void update(ClientboundUpdateAdvancementsPacket pPacket) {
+        if (pPacket.shouldReset()) {
             this.tree.clear();
             this.progress.clear();
         }
 
-        this.tree.remove(p_104400_.getRemoved());
-        this.tree.addAll(p_104400_.getAdded());
+        this.tree.remove(pPacket.getRemoved());
+        this.tree.addAll(pPacket.getAdded());
 
-        for (Entry<ResourceLocation, AdvancementProgress> entry : p_104400_.getProgress().entrySet()) {
+        for (Entry<ResourceLocation, AdvancementProgress> entry : pPacket.getProgress().entrySet()) {
             AdvancementNode advancementnode = this.tree.get(entry.getKey());
             if (advancementnode != null) {
                 AdvancementProgress advancementprogress = entry.getValue();
@@ -57,7 +57,7 @@ public class ClientAdvancements {
                     this.listener.onUpdateAdvancementProgress(advancementnode, advancementprogress);
                 }
 
-                if (!p_104400_.shouldReset() && advancementprogress.isDone()) {
+                if (!pPacket.shouldReset() && advancementprogress.isDone()) {
                     if (this.minecraft.level != null) {
                         this.telemetryManager.onAdvancementDone(this.minecraft.level, advancementnode.holder());
                     }
@@ -77,44 +77,44 @@ public class ClientAdvancements {
         return this.tree;
     }
 
-    public void setSelectedTab(@Nullable AdvancementHolder p_298261_, boolean p_104403_) {
+    public void setSelectedTab(@Nullable AdvancementHolder pAdvancement, boolean pTellServer) {
         ClientPacketListener clientpacketlistener = this.minecraft.getConnection();
-        if (clientpacketlistener != null && p_298261_ != null && p_104403_) {
-            clientpacketlistener.send(ServerboundSeenAdvancementsPacket.openedTab(p_298261_));
+        if (clientpacketlistener != null && pAdvancement != null && pTellServer) {
+            clientpacketlistener.send(ServerboundSeenAdvancementsPacket.openedTab(pAdvancement));
         }
 
-        if (this.selectedTab != p_298261_) {
-            this.selectedTab = p_298261_;
+        if (this.selectedTab != pAdvancement) {
+            this.selectedTab = pAdvancement;
             if (this.listener != null) {
-                this.listener.onSelectedTabChanged(p_298261_);
+                this.listener.onSelectedTabChanged(pAdvancement);
             }
         }
     }
 
-    public void setListener(@Nullable ClientAdvancements.Listener p_104398_) {
-        this.listener = p_104398_;
-        this.tree.setListener(p_104398_);
-        if (p_104398_ != null) {
+    public void setListener(@Nullable ClientAdvancements.Listener pListener) {
+        this.listener = pListener;
+        this.tree.setListener(pListener);
+        if (pListener != null) {
             this.progress.forEach((p_297914_, p_300709_) -> {
                 AdvancementNode advancementnode = this.tree.get(p_297914_);
                 if (advancementnode != null) {
-                    p_104398_.onUpdateAdvancementProgress(advancementnode, p_300709_);
+                    pListener.onUpdateAdvancementProgress(advancementnode, p_300709_);
                 }
             });
-            p_104398_.onSelectedTabChanged(this.selectedTab);
+            pListener.onSelectedTabChanged(this.selectedTab);
         }
     }
 
     @Nullable
-    public AdvancementHolder get(ResourceLocation p_301273_) {
-        AdvancementNode advancementnode = this.tree.get(p_301273_);
+    public AdvancementHolder get(ResourceLocation pId) {
+        AdvancementNode advancementnode = this.tree.get(pId);
         return advancementnode != null ? advancementnode.holder() : null;
     }
 
     @OnlyIn(Dist.CLIENT)
     public interface Listener extends AdvancementTree.Listener {
-        void onUpdateAdvancementProgress(AdvancementNode p_299734_, AdvancementProgress p_104405_);
+        void onUpdateAdvancementProgress(AdvancementNode pAdvancement, AdvancementProgress pAdvancementProgress);
 
-        void onSelectedTabChanged(@Nullable AdvancementHolder p_301401_);
+        void onSelectedTabChanged(@Nullable AdvancementHolder pAdvancement);
     }
 }

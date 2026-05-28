@@ -23,43 +23,43 @@ public class ChunkSkyLightSources {
     private final BlockPos.MutableBlockPos mutablePos1 = new BlockPos.MutableBlockPos();
     private final BlockPos.MutableBlockPos mutablePos2 = new BlockPos.MutableBlockPos();
 
-    public ChunkSkyLightSources(LevelHeightAccessor p_285502_) {
-        this.minY = p_285502_.getMinY() - 1;
-        int i = p_285502_.getMaxY() + 1;
+    public ChunkSkyLightSources(LevelHeightAccessor pLevel) {
+        this.minY = pLevel.getMinY() - 1;
+        int i = pLevel.getMaxY() + 1;
         int j = Mth.ceillog2(i - this.minY + 1);
         this.heightmap = new SimpleBitStorage(j, 256);
     }
 
-    public void fillFrom(ChunkAccess p_285152_) {
-        int i = p_285152_.getHighestFilledSectionIndex();
+    public void fillFrom(ChunkAccess pChunk) {
+        int i = pChunk.getHighestFilledSectionIndex();
         if (i == -1) {
             this.fill(this.minY);
         } else {
             for (int j = 0; j < 16; j++) {
                 for (int k = 0; k < 16; k++) {
-                    int l = Math.max(this.findLowestSourceY(p_285152_, i, k, j), this.minY);
+                    int l = Math.max(this.findLowestSourceY(pChunk, i, k, j), this.minY);
                     this.set(index(k, j), l);
                 }
             }
         }
     }
 
-    private int findLowestSourceY(ChunkAccess p_285214_, int p_285171_, int p_285021_, int p_285226_) {
-        int i = SectionPos.sectionToBlockCoord(p_285214_.getSectionYFromSectionIndex(p_285171_) + 1);
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = this.mutablePos1.set(p_285021_, i, p_285226_);
+    private int findLowestSourceY(ChunkAccess pChunk, int pSectionIndex, int pX, int pZ) {
+        int i = SectionPos.sectionToBlockCoord(pChunk.getSectionYFromSectionIndex(pSectionIndex) + 1);
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = this.mutablePos1.set(pX, i, pZ);
         BlockPos.MutableBlockPos blockpos$mutableblockpos1 = this.mutablePos2.setWithOffset(blockpos$mutableblockpos, Direction.DOWN);
         BlockState blockstate = Blocks.AIR.defaultBlockState();
 
-        for (int j = p_285171_; j >= 0; j--) {
-            LevelChunkSection levelchunksection = p_285214_.getSection(j);
+        for (int j = pSectionIndex; j >= 0; j--) {
+            LevelChunkSection levelchunksection = pChunk.getSection(j);
             if (levelchunksection.hasOnlyAir()) {
                 blockstate = Blocks.AIR.defaultBlockState();
-                int l = p_285214_.getSectionYFromSectionIndex(j);
+                int l = pChunk.getSectionYFromSectionIndex(j);
                 blockpos$mutableblockpos.setY(SectionPos.sectionToBlockCoord(l));
                 blockpos$mutableblockpos1.setY(blockpos$mutableblockpos.getY() - 1);
             } else {
                 for (int k = 15; k >= 0; k--) {
-                    BlockState blockstate1 = levelchunksection.getBlockState(p_285021_, k, p_285226_);
+                    BlockState blockstate1 = levelchunksection.getBlockState(pX, k, pZ);
                     if (isEdgeOccluded(blockstate, blockstate1)) {
                         return blockpos$mutableblockpos.getY();
                     }
@@ -74,51 +74,51 @@ public class ChunkSkyLightSources {
         return this.minY;
     }
 
-    public boolean update(BlockGetter p_285514_, int p_284999_, int p_285358_, int p_284944_) {
-        int i = p_285358_ + 1;
-        int j = index(p_284999_, p_284944_);
+    public boolean update(BlockGetter pLevel, int pX, int pY, int pZ) {
+        int i = pY + 1;
+        int j = index(pX, pZ);
         int k = this.get(j);
         if (i < k) {
             return false;
         } else {
-            BlockPos blockpos = this.mutablePos1.set(p_284999_, p_285358_ + 1, p_284944_);
-            BlockState blockstate = p_285514_.getBlockState(blockpos);
-            BlockPos blockpos1 = this.mutablePos2.set(p_284999_, p_285358_, p_284944_);
-            BlockState blockstate1 = p_285514_.getBlockState(blockpos1);
-            if (this.updateEdge(p_285514_, j, k, blockpos, blockstate, blockpos1, blockstate1)) {
+            BlockPos blockpos = this.mutablePos1.set(pX, pY + 1, pZ);
+            BlockState blockstate = pLevel.getBlockState(blockpos);
+            BlockPos blockpos1 = this.mutablePos2.set(pX, pY, pZ);
+            BlockState blockstate1 = pLevel.getBlockState(blockpos1);
+            if (this.updateEdge(pLevel, j, k, blockpos, blockstate, blockpos1, blockstate1)) {
                 return true;
             } else {
-                BlockPos blockpos2 = this.mutablePos1.set(p_284999_, p_285358_ - 1, p_284944_);
-                BlockState blockstate2 = p_285514_.getBlockState(blockpos2);
-                return this.updateEdge(p_285514_, j, k, blockpos1, blockstate1, blockpos2, blockstate2);
+                BlockPos blockpos2 = this.mutablePos1.set(pX, pY - 1, pZ);
+                BlockState blockstate2 = pLevel.getBlockState(blockpos2);
+                return this.updateEdge(pLevel, j, k, blockpos1, blockstate1, blockpos2, blockstate2);
             }
         }
     }
 
     private boolean updateEdge(
-        BlockGetter p_285066_, int p_285184_, int p_285101_, BlockPos p_285446_, BlockState p_285185_, BlockPos p_285103_, BlockState p_285009_
+        BlockGetter pLevel, int pIndex, int pMinY, BlockPos pPos1, BlockState pState1, BlockPos pPos2, BlockState pState2
     ) {
-        int i = p_285446_.getY();
-        if (isEdgeOccluded(p_285185_, p_285009_)) {
-            if (i > p_285101_) {
-                this.set(p_285184_, i);
+        int i = pPos1.getY();
+        if (isEdgeOccluded(pState1, pState2)) {
+            if (i > pMinY) {
+                this.set(pIndex, i);
                 return true;
             }
-        } else if (i == p_285101_) {
-            this.set(p_285184_, this.findLowestSourceBelow(p_285066_, p_285103_, p_285009_));
+        } else if (i == pMinY) {
+            this.set(pIndex, this.findLowestSourceBelow(pLevel, pPos2, pState2));
             return true;
         }
 
         return false;
     }
 
-    private int findLowestSourceBelow(BlockGetter p_285279_, BlockPos p_285119_, BlockState p_285096_) {
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = this.mutablePos1.set(p_285119_);
-        BlockPos.MutableBlockPos blockpos$mutableblockpos1 = this.mutablePos2.setWithOffset(p_285119_, Direction.DOWN);
-        BlockState blockstate = p_285096_;
+    private int findLowestSourceBelow(BlockGetter pLevel, BlockPos pPos, BlockState pState) {
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = this.mutablePos1.set(pPos);
+        BlockPos.MutableBlockPos blockpos$mutableblockpos1 = this.mutablePos2.setWithOffset(pPos, Direction.DOWN);
+        BlockState blockstate = pState;
 
         while (blockpos$mutableblockpos1.getY() >= this.minY) {
-            BlockState blockstate1 = p_285279_.getBlockState(blockpos$mutableblockpos1);
+            BlockState blockstate1 = pLevel.getBlockState(blockpos$mutableblockpos1);
             if (isEdgeOccluded(blockstate, blockstate1)) {
                 return blockpos$mutableblockpos.getY();
             }
@@ -131,18 +131,18 @@ public class ChunkSkyLightSources {
         return this.minY;
     }
 
-    private static boolean isEdgeOccluded(BlockState p_285219_, BlockState p_285512_) {
-        if (p_285512_.getLightBlock() != 0) {
+    private static boolean isEdgeOccluded(BlockState pState1, BlockState pState2) {
+        if (pState2.getLightBlock() != 0) {
             return true;
         } else {
-            VoxelShape voxelshape = LightEngine.getOcclusionShape(p_285219_, Direction.DOWN);
-            VoxelShape voxelshape1 = LightEngine.getOcclusionShape(p_285512_, Direction.UP);
+            VoxelShape voxelshape = LightEngine.getOcclusionShape(pState1, Direction.DOWN);
+            VoxelShape voxelshape1 = LightEngine.getOcclusionShape(pState2, Direction.UP);
             return Shapes.faceShapeOccludes(voxelshape, voxelshape1);
         }
     }
 
-    public int getLowestSourceY(int p_285247_, int p_285082_) {
-        int i = this.get(index(p_285247_, p_285082_));
+    public int getLowestSourceY(int pX, int pZ) {
+        int i = this.get(index(pX, pZ));
         return this.extendSourcesBelowWorld(i);
     }
 
@@ -159,27 +159,27 @@ public class ChunkSkyLightSources {
         return this.extendSourcesBelowWorld(i + this.minY);
     }
 
-    private void fill(int p_285311_) {
-        int i = p_285311_ - this.minY;
+    private void fill(int pValue) {
+        int i = pValue - this.minY;
 
         for (int j = 0; j < this.heightmap.getSize(); j++) {
             this.heightmap.set(j, i);
         }
     }
 
-    private void set(int p_285323_, int p_285220_) {
-        this.heightmap.set(p_285323_, p_285220_ - this.minY);
+    private void set(int pIndex, int pValue) {
+        this.heightmap.set(pIndex, pValue - this.minY);
     }
 
-    private int get(int p_284951_) {
-        return this.heightmap.get(p_284951_) + this.minY;
+    private int get(int pIndex) {
+        return this.heightmap.get(pIndex) + this.minY;
     }
 
-    private int extendSourcesBelowWorld(int p_284953_) {
-        return p_284953_ == this.minY ? Integer.MIN_VALUE : p_284953_;
+    private int extendSourcesBelowWorld(int pY) {
+        return pY == this.minY ? Integer.MIN_VALUE : pY;
     }
 
-    private static int index(int p_284980_, int p_285277_) {
-        return p_284980_ + p_285277_ * 16;
+    private static int index(int pX, int pZ) {
+        return pX + pZ * 16;
     }
 }

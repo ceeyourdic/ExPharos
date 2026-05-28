@@ -75,66 +75,66 @@ public class Crypt {
         }
     }
 
-    public static byte[] digestData(String p_13591_, PublicKey p_13592_, SecretKey p_13593_) throws CryptException {
+    public static byte[] digestData(String pServerId, PublicKey pPublicKey, SecretKey pSecretKey) throws CryptException {
         try {
-            return digestData(p_13591_.getBytes("ISO_8859_1"), p_13593_.getEncoded(), p_13592_.getEncoded());
+            return digestData(pServerId.getBytes("ISO_8859_1"), pSecretKey.getEncoded(), pPublicKey.getEncoded());
         } catch (Exception exception) {
             throw new CryptException(exception);
         }
     }
 
-    private static byte[] digestData(byte[]... p_13603_) throws Exception {
+    private static byte[] digestData(byte[]... pData) throws Exception {
         MessageDigest messagedigest = MessageDigest.getInstance("SHA-1");
 
-        for (byte[] abyte : p_13603_) {
+        for (byte[] abyte : pData) {
             messagedigest.update(abyte);
         }
 
         return messagedigest.digest();
     }
 
-    private static <T extends Key> T rsaStringToKey(String p_216072_, String p_216073_, String p_216074_, Crypt.ByteArrayToKeyFunction<T> p_216075_) throws CryptException {
-        int i = p_216072_.indexOf(p_216073_);
+    private static <T extends Key> T rsaStringToKey(String pKeyBase64, String pHeader, String pFooter, Crypt.ByteArrayToKeyFunction<T> pKeyFunction) throws CryptException {
+        int i = pKeyBase64.indexOf(pHeader);
         if (i != -1) {
-            i += p_216073_.length();
-            int j = p_216072_.indexOf(p_216074_, i);
-            p_216072_ = p_216072_.substring(i, j + 1);
+            i += pHeader.length();
+            int j = pKeyBase64.indexOf(pFooter, i);
+            pKeyBase64 = pKeyBase64.substring(i, j + 1);
         }
 
         try {
-            return p_216075_.apply(Base64.getMimeDecoder().decode(p_216072_));
+            return pKeyFunction.apply(Base64.getMimeDecoder().decode(pKeyBase64));
         } catch (IllegalArgumentException illegalargumentexception) {
             throw new CryptException(illegalargumentexception);
         }
     }
 
-    public static PrivateKey stringToPemRsaPrivateKey(String p_216070_) throws CryptException {
-        return rsaStringToKey(p_216070_, "-----BEGIN RSA PRIVATE KEY-----", "-----END RSA PRIVATE KEY-----", Crypt::byteToPrivateKey);
+    public static PrivateKey stringToPemRsaPrivateKey(String pKeyBase64) throws CryptException {
+        return rsaStringToKey(pKeyBase64, "-----BEGIN RSA PRIVATE KEY-----", "-----END RSA PRIVATE KEY-----", Crypt::byteToPrivateKey);
     }
 
-    public static PublicKey stringToRsaPublicKey(String p_216081_) throws CryptException {
-        return rsaStringToKey(p_216081_, "-----BEGIN RSA PUBLIC KEY-----", "-----END RSA PUBLIC KEY-----", Crypt::byteToPublicKey);
+    public static PublicKey stringToRsaPublicKey(String pKeyBase64) throws CryptException {
+        return rsaStringToKey(pKeyBase64, "-----BEGIN RSA PUBLIC KEY-----", "-----END RSA PUBLIC KEY-----", Crypt::byteToPublicKey);
     }
 
-    public static String rsaPublicKeyToString(PublicKey p_216079_) {
-        if (!"RSA".equals(p_216079_.getAlgorithm())) {
+    public static String rsaPublicKeyToString(PublicKey pKey) {
+        if (!"RSA".equals(pKey.getAlgorithm())) {
             throw new IllegalArgumentException("Public key must be RSA");
         } else {
-            return "-----BEGIN RSA PUBLIC KEY-----\n" + MIME_ENCODER.encodeToString(p_216079_.getEncoded()) + "\n-----END RSA PUBLIC KEY-----\n";
+            return "-----BEGIN RSA PUBLIC KEY-----\n" + MIME_ENCODER.encodeToString(pKey.getEncoded()) + "\n-----END RSA PUBLIC KEY-----\n";
         }
     }
 
-    public static String pemRsaPrivateKeyToString(PrivateKey p_216077_) {
-        if (!"RSA".equals(p_216077_.getAlgorithm())) {
+    public static String pemRsaPrivateKeyToString(PrivateKey pKey) {
+        if (!"RSA".equals(pKey.getAlgorithm())) {
             throw new IllegalArgumentException("Private key must be RSA");
         } else {
-            return "-----BEGIN RSA PRIVATE KEY-----\n" + MIME_ENCODER.encodeToString(p_216077_.getEncoded()) + "\n-----END RSA PRIVATE KEY-----\n";
+            return "-----BEGIN RSA PRIVATE KEY-----\n" + MIME_ENCODER.encodeToString(pKey.getEncoded()) + "\n-----END RSA PRIVATE KEY-----\n";
         }
     }
 
-    private static PrivateKey byteToPrivateKey(byte[] p_216083_) throws CryptException {
+    private static PrivateKey byteToPrivateKey(byte[] pKeyBytes) throws CryptException {
         try {
-            EncodedKeySpec encodedkeyspec = new PKCS8EncodedKeySpec(p_216083_);
+            EncodedKeySpec encodedkeyspec = new PKCS8EncodedKeySpec(pKeyBytes);
             KeyFactory keyfactory = KeyFactory.getInstance("RSA");
             return keyfactory.generatePrivate(encodedkeyspec);
         } catch (Exception exception) {
@@ -142,9 +142,9 @@ public class Crypt {
         }
     }
 
-    public static PublicKey byteToPublicKey(byte[] p_13601_) throws CryptException {
+    public static PublicKey byteToPublicKey(byte[] pEncodedKey) throws CryptException {
         try {
-            EncodedKeySpec encodedkeyspec = new X509EncodedKeySpec(p_13601_);
+            EncodedKeySpec encodedkeyspec = new X509EncodedKeySpec(pEncodedKey);
             KeyFactory keyfactory = KeyFactory.getInstance("RSA");
             return keyfactory.generatePublic(encodedkeyspec);
         } catch (Exception exception) {
@@ -152,8 +152,8 @@ public class Crypt {
         }
     }
 
-    public static SecretKey decryptByteToSecretKey(PrivateKey p_13598_, byte[] p_13599_) throws CryptException {
-        byte[] abyte = decryptUsingKey(p_13598_, p_13599_);
+    public static SecretKey decryptByteToSecretKey(PrivateKey pKey, byte[] pSecretKeyEncrypted) throws CryptException {
+        byte[] abyte = decryptUsingKey(pKey, pSecretKeyEncrypted);
 
         try {
             return new SecretKeySpec(abyte, "AES");
@@ -162,32 +162,32 @@ public class Crypt {
         }
     }
 
-    public static byte[] encryptUsingKey(Key p_13595_, byte[] p_13596_) throws CryptException {
-        return cipherData(1, p_13595_, p_13596_);
+    public static byte[] encryptUsingKey(Key pKey, byte[] pData) throws CryptException {
+        return cipherData(1, pKey, pData);
     }
 
-    public static byte[] decryptUsingKey(Key p_13606_, byte[] p_13607_) throws CryptException {
-        return cipherData(2, p_13606_, p_13607_);
+    public static byte[] decryptUsingKey(Key pKey, byte[] pData) throws CryptException {
+        return cipherData(2, pKey, pData);
     }
 
-    private static byte[] cipherData(int p_13587_, Key p_13588_, byte[] p_13589_) throws CryptException {
+    private static byte[] cipherData(int pOpMode, Key pKey, byte[] pData) throws CryptException {
         try {
-            return setupCipher(p_13587_, p_13588_.getAlgorithm(), p_13588_).doFinal(p_13589_);
+            return setupCipher(pOpMode, pKey.getAlgorithm(), pKey).doFinal(pData);
         } catch (Exception exception) {
             throw new CryptException(exception);
         }
     }
 
-    private static Cipher setupCipher(int p_13580_, String p_13581_, Key p_13582_) throws Exception {
-        Cipher cipher = Cipher.getInstance(p_13581_);
-        cipher.init(p_13580_, p_13582_);
+    private static Cipher setupCipher(int pOpMode, String pTransformation, Key pKey) throws Exception {
+        Cipher cipher = Cipher.getInstance(pTransformation);
+        cipher.init(pOpMode, pKey);
         return cipher;
     }
 
-    public static Cipher getCipher(int p_13584_, Key p_13585_) throws CryptException {
+    public static Cipher getCipher(int pOpMode, Key pKey) throws CryptException {
         try {
             Cipher cipher = Cipher.getInstance("AES/CFB8/NoPadding");
-            cipher.init(p_13584_, p_13585_, new IvParameterSpec(p_13585_.getEncoded()));
+            cipher.init(pOpMode, pKey, new IvParameterSpec(pKey.getEncoded()));
             return cipher;
         } catch (Exception exception) {
             throw new CryptException(exception);
@@ -195,23 +195,23 @@ public class Crypt {
     }
 
     interface ByteArrayToKeyFunction<T extends Key> {
-        T apply(byte[] p_216089_) throws CryptException;
+        T apply(byte[] pBytes) throws CryptException;
     }
 
     public static record SaltSignaturePair(long salt, byte[] signature) {
         public static final Crypt.SaltSignaturePair EMPTY = new Crypt.SaltSignaturePair(0L, ByteArrays.EMPTY_ARRAY);
 
-        public SaltSignaturePair(FriendlyByteBuf p_216098_) {
-            this(p_216098_.readLong(), p_216098_.readByteArray());
+        public SaltSignaturePair(FriendlyByteBuf pBuffer) {
+            this(pBuffer.readLong(), pBuffer.readByteArray());
         }
 
         public boolean isValid() {
             return this.signature.length > 0;
         }
 
-        public static void write(FriendlyByteBuf p_216101_, Crypt.SaltSignaturePair p_216102_) {
-            p_216101_.writeLong(p_216102_.salt);
-            p_216101_.writeByteArray(p_216102_.signature);
+        public static void write(FriendlyByteBuf pBuffer, Crypt.SaltSignaturePair pSignaturePair) {
+            pBuffer.writeLong(pSignaturePair.salt);
+            pBuffer.writeByteArray(pSignaturePair.signature);
         }
 
         public byte[] saltAsBytes() {

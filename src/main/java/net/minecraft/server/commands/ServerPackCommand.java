@@ -15,8 +15,8 @@ import net.minecraft.network.protocol.common.ClientboundResourcePackPopPacket;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 
 public class ServerPackCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> p_311476_) {
-        p_311476_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("serverpack")
                 .requires(p_312279_ -> p_312279_.hasPermission(2))
                 .then(
@@ -62,21 +62,21 @@ public class ServerPackCommand {
         );
     }
 
-    private static void sendToAllConnections(CommandSourceStack p_311498_, Packet<?> p_310286_) {
-        p_311498_.getServer().getConnection().getConnections().forEach(p_310319_ -> p_310319_.send(p_310286_));
+    private static void sendToAllConnections(CommandSourceStack pSource, Packet<?> pPacket) {
+        pSource.getServer().getConnection().getConnections().forEach(p_310319_ -> p_310319_.send(pPacket));
     }
 
-    private static int pushPack(CommandSourceStack p_309403_, String p_309919_, Optional<UUID> p_311640_, Optional<String> p_311429_) {
-        UUID uuid = p_311640_.orElseGet(() -> UUID.nameUUIDFromBytes(p_309919_.getBytes(StandardCharsets.UTF_8)));
-        String s = p_311429_.orElse("");
-        ClientboundResourcePackPushPacket clientboundresourcepackpushpacket = new ClientboundResourcePackPushPacket(uuid, p_309919_, s, false, null);
-        sendToAllConnections(p_309403_, clientboundresourcepackpushpacket);
+    private static int pushPack(CommandSourceStack pSource, String pUrl, Optional<UUID> pUuid, Optional<String> pHash) {
+        UUID uuid = pUuid.orElseGet(() -> UUID.nameUUIDFromBytes(pUrl.getBytes(StandardCharsets.UTF_8)));
+        String s = pHash.orElse("");
+        ClientboundResourcePackPushPacket clientboundresourcepackpushpacket = new ClientboundResourcePackPushPacket(uuid, pUrl, s, false, null);
+        sendToAllConnections(pSource, clientboundresourcepackpushpacket);
         return 0;
     }
 
-    private static int popPack(CommandSourceStack p_311491_, UUID p_311737_) {
-        ClientboundResourcePackPopPacket clientboundresourcepackpoppacket = new ClientboundResourcePackPopPacket(Optional.of(p_311737_));
-        sendToAllConnections(p_311491_, clientboundresourcepackpoppacket);
+    private static int popPack(CommandSourceStack pSource, UUID pUuid) {
+        ClientboundResourcePackPopPacket clientboundresourcepackpoppacket = new ClientboundResourcePackPopPacket(Optional.of(pUuid));
+        sendToAllConnections(pSource, clientboundresourcepackpoppacket);
         return 0;
     }
 }

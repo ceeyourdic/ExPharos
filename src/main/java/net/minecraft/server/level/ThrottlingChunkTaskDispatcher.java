@@ -14,10 +14,10 @@ public class ThrottlingChunkTaskDispatcher extends ChunkTaskDispatcher {
     private final int maxChunksInExecution;
     private final String executorSchedulerName;
 
-    public ThrottlingChunkTaskDispatcher(TaskScheduler<Runnable> p_364785_, Executor p_366572_, int p_363868_) {
-        super(p_364785_, p_366572_);
-        this.maxChunksInExecution = p_363868_;
-        this.executorSchedulerName = p_364785_.name();
+    public ThrottlingChunkTaskDispatcher(TaskScheduler<Runnable> pExecutor, Executor pDispatcher, int pMaxChunksInExecution) {
+        super(pExecutor, pDispatcher);
+        this.maxChunksInExecution = pMaxChunksInExecution;
+        this.executorSchedulerName = pExecutor.name();
     }
 
     @Override

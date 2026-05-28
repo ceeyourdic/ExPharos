@@ -79,45 +79,45 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
     };
 
     public static NoiseChunk forChunk(
-        ChunkAccess p_224353_,
-        RandomState p_224354_,
-        DensityFunctions.BeardifierOrMarker p_224355_,
-        NoiseGeneratorSettings p_224356_,
-        Aquifer.FluidPicker p_224357_,
-        Blender p_224358_
+        ChunkAccess pChunk,
+        RandomState pState,
+        DensityFunctions.BeardifierOrMarker pBeardifierOrMarker,
+        NoiseGeneratorSettings pNoiseGeneratorSettings,
+        Aquifer.FluidPicker pFluidPicke,
+        Blender pBlender
     ) {
-        NoiseSettings noisesettings = p_224356_.noiseSettings().clampToHeightAccessor(p_224353_);
-        ChunkPos chunkpos = p_224353_.getPos();
+        NoiseSettings noisesettings = pNoiseGeneratorSettings.noiseSettings().clampToHeightAccessor(pChunk);
+        ChunkPos chunkpos = pChunk.getPos();
         int i = 16 / noisesettings.getCellWidth();
-        return new NoiseChunk(i, p_224354_, chunkpos.getMinBlockX(), chunkpos.getMinBlockZ(), noisesettings, p_224355_, p_224356_, p_224357_, p_224358_);
+        return new NoiseChunk(i, pState, chunkpos.getMinBlockX(), chunkpos.getMinBlockZ(), noisesettings, pBeardifierOrMarker, pNoiseGeneratorSettings, pFluidPicke, pBlender);
     }
 
     public NoiseChunk(
-        int p_224343_,
-        RandomState p_224344_,
-        int p_224345_,
-        int p_224346_,
-        NoiseSettings p_224347_,
-        DensityFunctions.BeardifierOrMarker p_224348_,
-        NoiseGeneratorSettings p_224349_,
-        Aquifer.FluidPicker p_224350_,
-        Blender p_224351_
+        int pCellCountXZ,
+        RandomState pRandom,
+        int pFirstNoiseX,
+        int pFirstNoiseZ,
+        NoiseSettings pNoiseSettings,
+        DensityFunctions.BeardifierOrMarker pBeardifier,
+        NoiseGeneratorSettings pNoiseGeneratorSettings,
+        Aquifer.FluidPicker pFluidPicker,
+        Blender pBlendifier
     ) {
-        this.noiseSettings = p_224347_;
-        this.cellWidth = p_224347_.getCellWidth();
-        this.cellHeight = p_224347_.getCellHeight();
-        this.cellCountXZ = p_224343_;
-        this.cellCountY = Mth.floorDiv(p_224347_.height(), this.cellHeight);
-        this.cellNoiseMinY = Mth.floorDiv(p_224347_.minY(), this.cellHeight);
-        this.firstCellX = Math.floorDiv(p_224345_, this.cellWidth);
-        this.firstCellZ = Math.floorDiv(p_224346_, this.cellWidth);
+        this.noiseSettings = pNoiseSettings;
+        this.cellWidth = pNoiseSettings.getCellWidth();
+        this.cellHeight = pNoiseSettings.getCellHeight();
+        this.cellCountXZ = pCellCountXZ;
+        this.cellCountY = Mth.floorDiv(pNoiseSettings.height(), this.cellHeight);
+        this.cellNoiseMinY = Mth.floorDiv(pNoiseSettings.minY(), this.cellHeight);
+        this.firstCellX = Math.floorDiv(pFirstNoiseX, this.cellWidth);
+        this.firstCellZ = Math.floorDiv(pFirstNoiseZ, this.cellWidth);
         this.interpolators = Lists.newArrayList();
         this.cellCaches = Lists.newArrayList();
-        this.firstNoiseX = QuartPos.fromBlock(p_224345_);
-        this.firstNoiseZ = QuartPos.fromBlock(p_224346_);
-        this.noiseSizeXZ = QuartPos.fromBlock(p_224343_ * this.cellWidth);
-        this.blender = p_224351_;
-        this.beardifier = p_224348_;
+        this.firstNoiseX = QuartPos.fromBlock(pFirstNoiseX);
+        this.firstNoiseZ = QuartPos.fromBlock(pFirstNoiseZ);
+        this.noiseSizeXZ = QuartPos.fromBlock(pCellCountXZ * this.cellWidth);
+        this.blender = pBlendifier;
+        this.beardifier = pBeardifier;
         this.blendAlpha = new NoiseChunk.FlatCache(new NoiseChunk.BlendAlpha(), false);
         this.blendOffset = new NoiseChunk.FlatCache(new NoiseChunk.BlendOffset(), false);
 
@@ -128,21 +128,21 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
             for (int l = 0; l <= this.noiseSizeXZ; l++) {
                 int i1 = this.firstNoiseZ + l;
                 int j1 = QuartPos.toBlock(i1);
-                Blender.BlendingOutput blender$blendingoutput = p_224351_.blendOffsetAndFactor(k, j1);
+                Blender.BlendingOutput blender$blendingoutput = pBlendifier.blendOffsetAndFactor(k, j1);
                 this.blendAlpha.values[i][l] = blender$blendingoutput.alpha();
                 this.blendOffset.values[i][l] = blender$blendingoutput.blendingOffset();
             }
         }
 
-        NoiseRouter noiserouter = p_224344_.router();
+        NoiseRouter noiserouter = pRandom.router();
         NoiseRouter noiserouter1 = noiserouter.mapAll(this::wrap);
-        if (!p_224349_.isAquifersEnabled()) {
-            this.aquifer = Aquifer.createDisabled(p_224350_);
+        if (!pNoiseGeneratorSettings.isAquifersEnabled()) {
+            this.aquifer = Aquifer.createDisabled(pFluidPicker);
         } else {
-            int k1 = SectionPos.blockToSectionCoord(p_224345_);
-            int l1 = SectionPos.blockToSectionCoord(p_224346_);
+            int k1 = SectionPos.blockToSectionCoord(pFirstNoiseX);
+            int l1 = SectionPos.blockToSectionCoord(pFirstNoiseZ);
             this.aquifer = Aquifer.create(
-                this, new ChunkPos(k1, l1), noiserouter1, p_224344_.aquiferRandom(), p_224347_.minY(), p_224347_.height(), p_224350_
+                this, new ChunkPos(k1, l1), noiserouter1, pRandom.aquiferRandom(), pNoiseSettings.minY(), pNoiseSettings.height(), pFluidPicker
             );
         }
 
@@ -152,23 +152,23 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
             )
             .mapAll(this::wrap);
         list.add(p_209217_ -> this.aquifer.computeSubstance(p_209217_, densityfunction.compute(p_209217_)));
-        if (p_224349_.oreVeinsEnabled()) {
-            list.add(OreVeinifier.create(noiserouter1.veinToggle(), noiserouter1.veinRidged(), noiserouter1.veinGap(), p_224344_.oreRandom()));
+        if (pNoiseGeneratorSettings.oreVeinsEnabled()) {
+            list.add(OreVeinifier.create(noiserouter1.veinToggle(), noiserouter1.veinRidged(), noiserouter1.veinGap(), pRandom.oreRandom()));
         }
 
         this.blockStateRule = new MaterialRuleList(list.toArray(new NoiseChunk.BlockStateFiller[0]));
         this.initialDensityNoJaggedness = noiserouter1.initialDensityWithoutJaggedness();
     }
 
-    protected Climate.Sampler cachedClimateSampler(NoiseRouter p_224360_, List<Climate.ParameterPoint> p_224361_) {
+    protected Climate.Sampler cachedClimateSampler(NoiseRouter pNoiseRouter, List<Climate.ParameterPoint> pPoints) {
         return new Climate.Sampler(
-            p_224360_.temperature().mapAll(this::wrap),
-            p_224360_.vegetation().mapAll(this::wrap),
-            p_224360_.continents().mapAll(this::wrap),
-            p_224360_.erosion().mapAll(this::wrap),
-            p_224360_.depth().mapAll(this::wrap),
-            p_224360_.ridges().mapAll(this::wrap),
-            p_224361_
+            pNoiseRouter.temperature().mapAll(this::wrap),
+            pNoiseRouter.vegetation().mapAll(this::wrap),
+            pNoiseRouter.continents().mapAll(this::wrap),
+            pNoiseRouter.erosion().mapAll(this::wrap),
+            pNoiseRouter.depth().mapAll(this::wrap),
+            pNoiseRouter.ridges().mapAll(this::wrap),
+            pPoints
         );
     }
 
@@ -192,15 +192,15 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
         return this.cellStartBlockZ + this.inCellZ;
     }
 
-    public int preliminarySurfaceLevel(int p_198257_, int p_198258_) {
-        int i = QuartPos.toBlock(QuartPos.fromBlock(p_198257_));
-        int j = QuartPos.toBlock(QuartPos.fromBlock(p_198258_));
+    public int preliminarySurfaceLevel(int pX, int pZ) {
+        int i = QuartPos.toBlock(QuartPos.fromBlock(pX));
+        int j = QuartPos.toBlock(QuartPos.fromBlock(pZ));
         return this.preliminarySurfaceLevel.computeIfAbsent(ColumnPos.asLong(i, j), this::computePreliminarySurfaceLevel);
     }
 
-    private int computePreliminarySurfaceLevel(long p_198250_) {
-        int i = ColumnPos.getX(p_198250_);
-        int j = ColumnPos.getZ(p_198250_);
+    private int computePreliminarySurfaceLevel(long pPackedChunkPos) {
+        int i = ColumnPos.getX(pPackedChunkPos);
+        int j = ColumnPos.getZ(pPackedChunkPos);
         int k = this.noiseSettings.minY();
 
         for (int l = k + this.noiseSettings.height(); l >= k; l -= this.cellHeight) {
@@ -217,8 +217,8 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
         return this.blender;
     }
 
-    private void fillSlice(boolean p_209221_, int p_209222_) {
-        this.cellStartBlockX = p_209222_ * this.cellWidth;
+    private void fillSlice(boolean pIsSlice0, int pStart) {
+        this.cellStartBlockX = pStart * this.cellWidth;
         this.inCellX = 0;
 
         for (int i = 0; i < this.cellCountXZ + 1; i++) {
@@ -228,7 +228,7 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
             this.arrayInterpolationCounter++;
 
             for (NoiseChunk.NoiseInterpolator noisechunk$noiseinterpolator : this.interpolators) {
-                double[] adouble = (p_209221_ ? noisechunk$noiseinterpolator.slice0 : noisechunk$noiseinterpolator.slice1)[i];
+                double[] adouble = (pIsSlice0 ? noisechunk$noiseinterpolator.slice0 : noisechunk$noiseinterpolator.slice1)[i];
                 noisechunk$noiseinterpolator.fillArray(adouble, this.sliceFillingContextProvider);
             }
         }
@@ -246,9 +246,9 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
         }
     }
 
-    public void advanceCellX(int p_188750_) {
-        this.fillSlice(false, this.firstCellX + p_188750_ + 1);
-        this.cellStartBlockX = (this.firstCellX + p_188750_) * this.cellWidth;
+    public void advanceCellX(int pIncrement) {
+        this.fillSlice(false, this.firstCellX + pIncrement + 1);
+        this.cellStartBlockX = (this.firstCellX + pIncrement) * this.cellWidth;
     }
 
     public NoiseChunk forIndex(int p_209240_) {
@@ -281,14 +281,14 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
         }
     }
 
-    public void selectCellYZ(int p_188811_, int p_188812_) {
+    public void selectCellYZ(int pY, int pZ) {
         for (NoiseChunk.NoiseInterpolator noisechunk$noiseinterpolator : this.interpolators) {
-            noisechunk$noiseinterpolator.selectCellYZ(p_188811_, p_188812_);
+            noisechunk$noiseinterpolator.selectCellYZ(pY, pZ);
         }
 
         this.fillingCell = true;
-        this.cellStartBlockY = (p_188811_ + this.cellNoiseMinY) * this.cellHeight;
-        this.cellStartBlockZ = (this.firstCellZ + p_188812_) * this.cellWidth;
+        this.cellStartBlockY = (pY + this.cellNoiseMinY) * this.cellHeight;
+        this.cellStartBlockZ = (this.firstCellZ + pZ) * this.cellWidth;
         this.arrayInterpolationCounter++;
 
         for (NoiseChunk.CacheAllInCell noisechunk$cacheallincell : this.cellCaches) {
@@ -299,28 +299,28 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
         this.fillingCell = false;
     }
 
-    public void updateForY(int p_209192_, double p_209193_) {
-        this.inCellY = p_209192_ - this.cellStartBlockY;
+    public void updateForY(int pCellEndBlockY, double pY) {
+        this.inCellY = pCellEndBlockY - this.cellStartBlockY;
 
         for (NoiseChunk.NoiseInterpolator noisechunk$noiseinterpolator : this.interpolators) {
-            noisechunk$noiseinterpolator.updateForY(p_209193_);
+            noisechunk$noiseinterpolator.updateForY(pY);
         }
     }
 
-    public void updateForX(int p_209231_, double p_209232_) {
-        this.inCellX = p_209231_ - this.cellStartBlockX;
+    public void updateForX(int pCellEndBlockX, double pX) {
+        this.inCellX = pCellEndBlockX - this.cellStartBlockX;
 
         for (NoiseChunk.NoiseInterpolator noisechunk$noiseinterpolator : this.interpolators) {
-            noisechunk$noiseinterpolator.updateForX(p_209232_);
+            noisechunk$noiseinterpolator.updateForX(pX);
         }
     }
 
-    public void updateForZ(int p_209242_, double p_209243_) {
-        this.inCellZ = p_209242_ - this.cellStartBlockZ;
+    public void updateForZ(int pCellEndBlockZ, double pZ) {
+        this.inCellZ = pCellEndBlockZ - this.cellStartBlockZ;
         this.interpolationCounter++;
 
         for (NoiseChunk.NoiseInterpolator noisechunk$noiseinterpolator : this.interpolators) {
-            noisechunk$noiseinterpolator.updateForZ(p_209243_);
+            noisechunk$noiseinterpolator.updateForZ(pZ);
         }
     }
 
@@ -348,24 +348,24 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
         return this.cellHeight;
     }
 
-    Blender.BlendingOutput getOrComputeBlendingOutput(int p_209245_, int p_209246_) {
-        long i = ChunkPos.asLong(p_209245_, p_209246_);
+    Blender.BlendingOutput getOrComputeBlendingOutput(int pChunkX, int pChunkZ) {
+        long i = ChunkPos.asLong(pChunkX, pChunkZ);
         if (this.lastBlendingDataPos == i) {
             return this.lastBlendingOutput;
         } else {
             this.lastBlendingDataPos = i;
-            Blender.BlendingOutput blender$blendingoutput = this.blender.blendOffsetAndFactor(p_209245_, p_209246_);
+            Blender.BlendingOutput blender$blendingoutput = this.blender.blendOffsetAndFactor(pChunkX, pChunkZ);
             this.lastBlendingOutput = blender$blendingoutput;
             return blender$blendingoutput;
         }
     }
 
-    protected DensityFunction wrap(DensityFunction p_209214_) {
-        return this.wrapped.computeIfAbsent(p_209214_, this::wrapNew);
+    protected DensityFunction wrap(DensityFunction pDensityFunction) {
+        return this.wrapped.computeIfAbsent(pDensityFunction, this::wrapNew);
     }
 
-    private DensityFunction wrapNew(DensityFunction p_209234_) {
-        if (p_209234_ instanceof DensityFunctions.Marker densityfunctions$marker) {
+    private DensityFunction wrapNew(DensityFunction pDensityFunction) {
+        if (pDensityFunction instanceof DensityFunctions.Marker densityfunctions$marker) {
             return (DensityFunction)(switch (densityfunctions$marker.type()) {
                 case Interpolated -> new NoiseChunk.NoiseInterpolator(densityfunctions$marker.wrapped());
                 case FlatCache -> new NoiseChunk.FlatCache(densityfunctions$marker.wrapped(), true);
@@ -375,21 +375,21 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
             });
         } else {
             if (this.blender != Blender.empty()) {
-                if (p_209234_ == DensityFunctions.BlendAlpha.INSTANCE) {
+                if (pDensityFunction == DensityFunctions.BlendAlpha.INSTANCE) {
                     return this.blendAlpha;
                 }
 
-                if (p_209234_ == DensityFunctions.BlendOffset.INSTANCE) {
+                if (pDensityFunction == DensityFunctions.BlendOffset.INSTANCE) {
                     return this.blendOffset;
                 }
             }
 
-            if (p_209234_ == DensityFunctions.BeardifierMarker.INSTANCE) {
+            if (pDensityFunction == DensityFunctions.BeardifierMarker.INSTANCE) {
                 return this.beardifier;
             } else {
-                return p_209234_ instanceof DensityFunctions.HolderHolder densityfunctions$holderholder
+                return pDensityFunction instanceof DensityFunctions.HolderHolder densityfunctions$holderholder
                     ? densityfunctions$holderholder.function().value()
-                    : p_209234_;
+                    : pDensityFunction;
             }
         }
     }
@@ -471,7 +471,7 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
     @FunctionalInterface
     public interface BlockStateFiller {
         @Nullable
-        BlockState calculate(DensityFunction.FunctionContext p_209283_);
+        BlockState calculate(DensityFunction.FunctionContext pContext);
     }
 
     static class Cache2D implements DensityFunctions.MarkerOrMarked, NoiseChunk.NoiseChunkDensityFunction {
@@ -479,8 +479,8 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
         private long lastPos2D = ChunkPos.INVALID_CHUNK_POS;
         private double lastValue;
 
-        Cache2D(DensityFunction p_209288_) {
-            this.function = p_209288_;
+        Cache2D(DensityFunction pFunction) {
+            this.function = pFunction;
         }
 
         @Override
@@ -518,8 +518,8 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
         final DensityFunction noiseFiller;
         final double[] values;
 
-        CacheAllInCell(final DensityFunction p_209301_) {
-            this.noiseFiller = p_209301_;
+        CacheAllInCell(final DensityFunction pNoiseFilter) {
+            this.noiseFiller = pNoiseFilter;
             this.values = new double[NoiseChunk.this.cellWidth * NoiseChunk.this.cellWidth * NoiseChunk.this.cellHeight];
             NoiseChunk.this.cellCaches.add(this);
         }
@@ -564,8 +564,8 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
         @Nullable
         private double[] lastArray;
 
-        CacheOnce(final DensityFunction p_209317_) {
-            this.function = p_209317_;
+        CacheOnce(final DensityFunction pFunction) {
+            this.function = pFunction;
         }
 
         @Override
@@ -615,10 +615,10 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
         private final DensityFunction noiseFiller;
         final double[][] values;
 
-        FlatCache(final DensityFunction p_209330_, final boolean p_209331_) {
-            this.noiseFiller = p_209330_;
+        FlatCache(final DensityFunction pNoiseFiller, final boolean pComputeValues) {
+            this.noiseFiller = pNoiseFiller;
             this.values = new double[NoiseChunk.this.noiseSizeXZ + 1][NoiseChunk.this.noiseSizeXZ + 1];
-            if (p_209331_) {
+            if (pComputeValues) {
                 for (int i = 0; i <= NoiseChunk.this.noiseSizeXZ; i++) {
                     int j = NoiseChunk.this.firstNoiseX + i;
                     int k = QuartPos.toBlock(j);
@@ -626,7 +626,7 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
                     for (int l = 0; l <= NoiseChunk.this.noiseSizeXZ; l++) {
                         int i1 = NoiseChunk.this.firstNoiseZ + l;
                         int j1 = QuartPos.toBlock(i1);
-                        this.values[i][l] = p_209330_.compute(new DensityFunction.SinglePointContext(k, 0, j1));
+                        this.values[i][l] = pNoiseFiller.compute(new DensityFunction.SinglePointContext(k, 0, j1));
                     }
                 }
             }
@@ -692,16 +692,16 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
         private double valueZ1;
         private double value;
 
-        NoiseInterpolator(final DensityFunction p_209345_) {
-            this.noiseFiller = p_209345_;
+        NoiseInterpolator(final DensityFunction pNoiseFilter) {
+            this.noiseFiller = pNoiseFilter;
             this.slice0 = this.allocateSlice(NoiseChunk.this.cellCountY, NoiseChunk.this.cellCountXZ);
             this.slice1 = this.allocateSlice(NoiseChunk.this.cellCountY, NoiseChunk.this.cellCountXZ);
             NoiseChunk.this.interpolators.add(this);
         }
 
-        private double[][] allocateSlice(int p_188855_, int p_188856_) {
-            int i = p_188856_ + 1;
-            int j = p_188855_ + 1;
+        private double[][] allocateSlice(int pCellCountY, int pCellCountXZ) {
+            int i = pCellCountXZ + 1;
+            int j = pCellCountY + 1;
             double[][] adouble = new double[i][j];
 
             for (int k = 0; k < i; k++) {
@@ -711,31 +711,31 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
             return adouble;
         }
 
-        void selectCellYZ(int p_188864_, int p_188865_) {
-            this.noise000 = this.slice0[p_188865_][p_188864_];
-            this.noise001 = this.slice0[p_188865_ + 1][p_188864_];
-            this.noise100 = this.slice1[p_188865_][p_188864_];
-            this.noise101 = this.slice1[p_188865_ + 1][p_188864_];
-            this.noise010 = this.slice0[p_188865_][p_188864_ + 1];
-            this.noise011 = this.slice0[p_188865_ + 1][p_188864_ + 1];
-            this.noise110 = this.slice1[p_188865_][p_188864_ + 1];
-            this.noise111 = this.slice1[p_188865_ + 1][p_188864_ + 1];
+        void selectCellYZ(int pY, int pZ) {
+            this.noise000 = this.slice0[pZ][pY];
+            this.noise001 = this.slice0[pZ + 1][pY];
+            this.noise100 = this.slice1[pZ][pY];
+            this.noise101 = this.slice1[pZ + 1][pY];
+            this.noise010 = this.slice0[pZ][pY + 1];
+            this.noise011 = this.slice0[pZ + 1][pY + 1];
+            this.noise110 = this.slice1[pZ][pY + 1];
+            this.noise111 = this.slice1[pZ + 1][pY + 1];
         }
 
-        void updateForY(double p_188851_) {
-            this.valueXZ00 = Mth.lerp(p_188851_, this.noise000, this.noise010);
-            this.valueXZ10 = Mth.lerp(p_188851_, this.noise100, this.noise110);
-            this.valueXZ01 = Mth.lerp(p_188851_, this.noise001, this.noise011);
-            this.valueXZ11 = Mth.lerp(p_188851_, this.noise101, this.noise111);
+        void updateForY(double pY) {
+            this.valueXZ00 = Mth.lerp(pY, this.noise000, this.noise010);
+            this.valueXZ10 = Mth.lerp(pY, this.noise100, this.noise110);
+            this.valueXZ01 = Mth.lerp(pY, this.noise001, this.noise011);
+            this.valueXZ11 = Mth.lerp(pY, this.noise101, this.noise111);
         }
 
-        void updateForX(double p_188862_) {
-            this.valueZ0 = Mth.lerp(p_188862_, this.valueXZ00, this.valueXZ10);
-            this.valueZ1 = Mth.lerp(p_188862_, this.valueXZ01, this.valueXZ11);
+        void updateForX(double pX) {
+            this.valueZ0 = Mth.lerp(pX, this.valueXZ00, this.valueXZ10);
+            this.valueZ1 = Mth.lerp(pX, this.valueXZ01, this.valueXZ11);
         }
 
-        void updateForZ(double p_188867_) {
-            this.value = Mth.lerp(p_188867_, this.valueZ0, this.valueZ1);
+        void updateForZ(double pZ) {
+            this.value = Mth.lerp(pZ, this.valueZ0, this.valueZ1);
         }
 
         @Override

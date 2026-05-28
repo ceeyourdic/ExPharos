@@ -13,32 +13,32 @@ public class V1466 extends NamespacedSchema {
     }
 
     @Override
-    public void registerTypes(Schema p_17694_, Map<String, Supplier<TypeTemplate>> p_17695_, Map<String, Supplier<TypeTemplate>> p_17696_) {
-        super.registerTypes(p_17694_, p_17695_, p_17696_);
-        p_17694_.registerType(
+    public void registerTypes(Schema pSchema, Map<String, Supplier<TypeTemplate>> pEntityTypes, Map<String, Supplier<TypeTemplate>> pBlockEntityTypes) {
+        super.registerTypes(pSchema, pEntityTypes, pBlockEntityTypes);
+        pSchema.registerType(
             false,
             References.CHUNK,
             () -> DSL.fields(
                     "Level",
                     DSL.optionalFields(
                         "Entities",
-                        DSL.list(References.ENTITY_TREE.in(p_17694_)),
+                        DSL.list(References.ENTITY_TREE.in(pSchema)),
                         "TileEntities",
-                        DSL.list(DSL.or(References.BLOCK_ENTITY.in(p_17694_), DSL.remainder())),
+                        DSL.list(DSL.or(References.BLOCK_ENTITY.in(pSchema), DSL.remainder())),
                         "TileTicks",
-                        DSL.list(DSL.fields("i", References.BLOCK_NAME.in(p_17694_))),
+                        DSL.list(DSL.fields("i", References.BLOCK_NAME.in(pSchema))),
                         "Sections",
-                        DSL.list(DSL.optionalFields("Palette", DSL.list(References.BLOCK_STATE.in(p_17694_)))),
+                        DSL.list(DSL.optionalFields("Palette", DSL.list(References.BLOCK_STATE.in(pSchema)))),
                         "Structures",
-                        DSL.optionalFields("Starts", DSL.compoundList(References.STRUCTURE_FEATURE.in(p_17694_)))
+                        DSL.optionalFields("Starts", DSL.compoundList(References.STRUCTURE_FEATURE.in(pSchema)))
                     )
                 )
         );
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_17692_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_17692_);
+    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(pSchema);
         map.put("DUMMY", DSL::remainder);
         return map;
     }

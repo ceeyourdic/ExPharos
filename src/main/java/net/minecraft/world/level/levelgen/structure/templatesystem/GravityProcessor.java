@@ -21,9 +21,9 @@ public class GravityProcessor extends StructureProcessor {
     private final Heightmap.Types heightmap;
     private final int offset;
 
-    public GravityProcessor(Heightmap.Types p_74105_, int p_74106_) {
-        this.heightmap = p_74105_;
-        this.offset = p_74106_;
+    public GravityProcessor(Heightmap.Types pHeightmap, int pOffset) {
+        this.heightmap = pHeightmap;
+        this.offset = pOffset;
     }
 
     @Nullable

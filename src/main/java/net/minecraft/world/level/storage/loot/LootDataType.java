@@ -14,8 +14,8 @@ public record LootDataType<T>(ResourceKey<Registry<T>> registryKey, Codec<T> cod
     public static final LootDataType<LootItemFunction> MODIFIER = new LootDataType<>(Registries.ITEM_MODIFIER, LootItemFunctions.ROOT_CODEC, createSimpleValidator());
     public static final LootDataType<LootTable> TABLE = new LootDataType<>(Registries.LOOT_TABLE, LootTable.DIRECT_CODEC, createLootTableValidator());
 
-    public void runValidation(ValidationContext p_279366_, ResourceKey<T> p_329223_, T p_279124_) {
-        this.validator.run(p_279366_, p_329223_, p_279124_);
+    public void runValidation(ValidationContext pContext, ResourceKey<T> pKey, T pValue) {
+        this.validator.run(pContext, pKey, pValue);
     }
 
     public static Stream<LootDataType<?>> values() {
@@ -36,6 +36,6 @@ public record LootDataType<T>(ResourceKey<Registry<T>> registryKey, Codec<T> cod
 
     @FunctionalInterface
     public interface Validator<T> {
-        void run(ValidationContext p_279419_, ResourceKey<T> p_334619_, T p_279326_);
+        void run(ValidationContext pContext, ResourceKey<T> pKey, T pValue);
     }
 }

@@ -28,9 +28,9 @@ import net.minecraft.world.level.gameevent.GameEvent;
 public class InstrumentItem extends Item {
     private final TagKey<Instrument> instruments;
 
-    public InstrumentItem(TagKey<Instrument> p_220100_, Item.Properties p_220099_) {
-        super(p_220099_);
-        this.instruments = p_220100_;
+    public InstrumentItem(TagKey<Instrument> pInstruments, Item.Properties pProperties) {
+        super(pProperties);
+        this.instruments = pInstruments;
     }
 
     @Override
@@ -47,9 +47,9 @@ public class InstrumentItem extends Item {
         }
     }
 
-    public static ItemStack create(Item p_220108_, Holder<Instrument> p_220109_) {
-        ItemStack itemstack = new ItemStack(p_220108_);
-        itemstack.set(DataComponents.INSTRUMENT, p_220109_);
+    public static ItemStack create(Item pItem, Holder<Instrument> pInstrument) {
+        ItemStack itemstack = new ItemStack(pItem);
+        itemstack.set(DataComponents.INSTRUMENT, pInstrument);
         return itemstack;
     }
 
@@ -75,12 +75,12 @@ public class InstrumentItem extends Item {
         return optional.<Integer>map(p_359409_ -> Mth.floor(p_359409_.value().useDuration() * 20.0F)).orElse(0);
     }
 
-    private Optional<Holder<Instrument>> getInstrument(ItemStack p_220135_, HolderLookup.Provider p_365790_) {
-        Holder<Instrument> holder = p_220135_.get(DataComponents.INSTRUMENT);
+    private Optional<Holder<Instrument>> getInstrument(ItemStack pStack, HolderLookup.Provider pRegistries) {
+        Holder<Instrument> holder = pStack.get(DataComponents.INSTRUMENT);
         if (holder != null) {
             return Optional.of(holder);
         } else {
-            Optional<HolderSet.Named<Instrument>> optional = p_365790_.lookupOrThrow(Registries.INSTRUMENT).get(this.instruments);
+            Optional<HolderSet.Named<Instrument>> optional = pRegistries.lookupOrThrow(Registries.INSTRUMENT).get(this.instruments);
             if (optional.isPresent()) {
                 Iterator<Holder<Instrument>> iterator = optional.get().iterator();
                 if (iterator.hasNext()) {
@@ -97,10 +97,10 @@ public class InstrumentItem extends Item {
         return ItemUseAnimation.TOOT_HORN;
     }
 
-    private static void play(Level p_220127_, Player p_220128_, Instrument p_220129_) {
-        SoundEvent soundevent = p_220129_.soundEvent().value();
-        float f = p_220129_.range() / 16.0F;
-        p_220127_.playSound(p_220128_, p_220128_, soundevent, SoundSource.RECORDS, f, 1.0F);
-        p_220127_.gameEvent(GameEvent.INSTRUMENT_PLAY, p_220128_.position(), GameEvent.Context.of(p_220128_));
+    private static void play(Level pLevel, Player pPlayer, Instrument pInstrument) {
+        SoundEvent soundevent = pInstrument.soundEvent().value();
+        float f = pInstrument.range() / 16.0F;
+        pLevel.playSound(pPlayer, pPlayer, soundevent, SoundSource.RECORDS, f, 1.0F);
+        pLevel.gameEvent(GameEvent.INSTRUMENT_PLAY, pPlayer.position(), GameEvent.Context.of(pPlayer));
     }
 }

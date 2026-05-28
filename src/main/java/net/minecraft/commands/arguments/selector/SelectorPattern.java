@@ -8,18 +8,18 @@ import com.mojang.serialization.DataResult;
 public record SelectorPattern(String pattern, EntitySelector resolved) {
     public static final Codec<SelectorPattern> CODEC = Codec.STRING.comapFlatMap(SelectorPattern::parse, SelectorPattern::pattern);
 
-    public static DataResult<SelectorPattern> parse(String p_366515_) {
+    public static DataResult<SelectorPattern> parse(String pPattern) {
         try {
-            EntitySelectorParser entityselectorparser = new EntitySelectorParser(new StringReader(p_366515_), true);
-            return DataResult.success(new SelectorPattern(p_366515_, entityselectorparser.parse()));
+            EntitySelectorParser entityselectorparser = new EntitySelectorParser(new StringReader(pPattern), true);
+            return DataResult.success(new SelectorPattern(pPattern, entityselectorparser.parse()));
         } catch (CommandSyntaxException commandsyntaxexception) {
-            return DataResult.error(() -> "Invalid selector component: " + p_366515_ + ": " + commandsyntaxexception.getMessage());
+            return DataResult.error(() -> "Invalid selector component: " + pPattern + ": " + commandsyntaxexception.getMessage());
         }
     }
 
     @Override
-    public boolean equals(Object p_368445_) {
-        if (p_368445_ instanceof SelectorPattern selectorpattern && this.pattern.equals(selectorpattern.pattern)) {
+    public boolean equals(Object pOther) {
+        if (pOther instanceof SelectorPattern selectorpattern && this.pattern.equals(selectorpattern.pattern)) {
             return true;
         }
 

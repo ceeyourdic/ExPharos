@@ -9,7 +9,7 @@ public class ShulkerBoxSlot extends Slot {
     }
 
     @Override
-    public boolean mayPlace(ItemStack p_40207_) {
-        return p_40207_.getItem().canFitInsideContainerItems();
+    public boolean mayPlace(ItemStack pStack) {
+        return pStack.getItem().canFitInsideContainerItems();
     }
 }

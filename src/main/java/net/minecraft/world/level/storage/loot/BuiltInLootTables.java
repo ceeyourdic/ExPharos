@@ -126,21 +126,21 @@ public class BuiltInLootTables {
     public static final ResourceKey<LootTable> OCEAN_RUIN_WARM_ARCHAEOLOGY = register("archaeology/ocean_ruin_warm");
     public static final ResourceKey<LootTable> OCEAN_RUIN_COLD_ARCHAEOLOGY = register("archaeology/ocean_ruin_cold");
 
-    private static void makeDyeKeyMap(EnumMap<DyeColor, ResourceKey<LootTable>> p_369364_, String p_362359_) {
+    private static void makeDyeKeyMap(EnumMap<DyeColor, ResourceKey<LootTable>> pOutput, String pName) {
         for (DyeColor dyecolor : DyeColor.values()) {
-            p_369364_.put(dyecolor, register(p_362359_ + "/" + dyecolor.getName()));
+            pOutput.put(dyecolor, register(pName + "/" + dyecolor.getName()));
         }
     }
 
-    private static ResourceKey<LootTable> register(String p_78768_) {
-        return register(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.withDefaultNamespace(p_78768_)));
+    private static ResourceKey<LootTable> register(String pName) {
+        return register(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.withDefaultNamespace(pName)));
     }
 
-    private static ResourceKey<LootTable> register(ResourceKey<LootTable> p_330139_) {
-        if (LOCATIONS.add(p_330139_)) {
-            return p_330139_;
+    private static ResourceKey<LootTable> register(ResourceKey<LootTable> pName) {
+        if (LOCATIONS.add(pName)) {
+            return pName;
         } else {
-            throw new IllegalArgumentException(p_330139_.location() + " is already a registered built-in loot table");
+            throw new IllegalArgumentException(pName.location() + " is already a registered built-in loot table");
         }
     }
 

@@ -10,9 +10,9 @@ import javax.annotation.Nullable;
 import net.minecraft.commands.execution.TraceCallbacks;
 
 public interface ExecutionCommandSource<T extends ExecutionCommandSource<T>> {
-    boolean hasPermission(int p_309473_);
+    boolean hasPermission(int pPermissionLevel);
 
-    T withCallback(CommandResultCallback p_311254_);
+    T withCallback(CommandResultCallback pCallback);
 
     CommandResultCallback callback();
 
@@ -22,12 +22,12 @@ public interface ExecutionCommandSource<T extends ExecutionCommandSource<T>> {
 
     CommandDispatcher<T> dispatcher();
 
-    void handleError(CommandExceptionType p_311834_, Message p_310647_, boolean p_310226_, @Nullable TraceCallbacks p_312033_);
+    void handleError(CommandExceptionType pExceptionType, Message pMessage, boolean pSuccess, @Nullable TraceCallbacks pTraceCallbacks);
 
     boolean isSilent();
 
-    default void handleError(CommandSyntaxException p_311076_, boolean p_310707_, @Nullable TraceCallbacks p_311569_) {
-        this.handleError(p_311076_.getType(), p_311076_.getRawMessage(), p_310707_, p_311569_);
+    default void handleError(CommandSyntaxException pException, boolean pSuccess, @Nullable TraceCallbacks pTraceCallbacks) {
+        this.handleError(pException.getType(), pException.getRawMessage(), pSuccess, pTraceCallbacks);
     }
 
     static <T extends ExecutionCommandSource<T>> ResultConsumer<T> resultConsumer() {

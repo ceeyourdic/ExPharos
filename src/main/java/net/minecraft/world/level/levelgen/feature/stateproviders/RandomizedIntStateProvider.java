@@ -29,24 +29,24 @@ public class RandomizedIntStateProvider extends BlockStateProvider {
     private IntegerProperty property;
     private final IntProvider values;
 
-    public RandomizedIntStateProvider(BlockStateProvider p_161562_, IntegerProperty p_161563_, IntProvider p_161564_) {
-        this.source = p_161562_;
-        this.property = p_161563_;
-        this.propertyName = p_161563_.getName();
-        this.values = p_161564_;
-        Collection<Integer> collection = p_161563_.getPossibleValues();
+    public RandomizedIntStateProvider(BlockStateProvider pSource, IntegerProperty pProperty, IntProvider pValues) {
+        this.source = pSource;
+        this.property = pProperty;
+        this.propertyName = pProperty.getName();
+        this.values = pValues;
+        Collection<Integer> collection = pProperty.getPossibleValues();
 
-        for (int i = p_161564_.getMinValue(); i <= p_161564_.getMaxValue(); i++) {
+        for (int i = pValues.getMinValue(); i <= pValues.getMaxValue(); i++) {
             if (!collection.contains(i)) {
-                throw new IllegalArgumentException("Property value out of range: " + p_161563_.getName() + ": " + i);
+                throw new IllegalArgumentException("Property value out of range: " + pProperty.getName() + ": " + i);
             }
         }
     }
 
-    public RandomizedIntStateProvider(BlockStateProvider p_161566_, String p_161567_, IntProvider p_161568_) {
-        this.source = p_161566_;
-        this.propertyName = p_161567_;
-        this.values = p_161568_;
+    public RandomizedIntStateProvider(BlockStateProvider pSource, String pPropertyName, IntProvider pValues) {
+        this.source = pSource;
+        this.propertyName = pPropertyName;
+        this.values = pValues;
     }
 
     @Override
@@ -70,10 +70,10 @@ public class RandomizedIntStateProvider extends BlockStateProvider {
     }
 
     @Nullable
-    private static IntegerProperty findProperty(BlockState p_161571_, String p_161572_) {
-        Collection<Property<?>> collection = p_161571_.getProperties();
+    private static IntegerProperty findProperty(BlockState pState, String pPropertyName) {
+        Collection<Property<?>> collection = pState.getProperties();
         Optional<IntegerProperty> optional = collection.stream()
-            .filter(p_161583_ -> p_161583_.getName().equals(p_161572_))
+            .filter(p_161583_ -> p_161583_.getName().equals(pPropertyName))
             .filter(p_161588_ -> p_161588_ instanceof IntegerProperty)
             .map(p_161574_ -> (IntegerProperty)p_161574_)
             .findAny();

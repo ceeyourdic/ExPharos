@@ -10,16 +10,16 @@ public class BubblePopParticle extends TextureSheetParticle {
     private final SpriteSet sprites;
 
     BubblePopParticle(
-        ClientLevel p_105814_, double p_105815_, double p_105816_, double p_105817_, double p_105818_, double p_105819_, double p_105820_, SpriteSet p_105821_
+        ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites
     ) {
-        super(p_105814_, p_105815_, p_105816_, p_105817_);
-        this.sprites = p_105821_;
+        super(pLevel, pX, pY, pZ);
+        this.sprites = pSprites;
         this.lifetime = 4;
         this.gravity = 0.008F;
-        this.xd = p_105818_;
-        this.yd = p_105819_;
-        this.zd = p_105820_;
-        this.setSpriteFromAge(p_105821_);
+        this.xd = pXSpeed;
+        this.yd = pYSpeed;
+        this.zd = pZSpeed;
+        this.setSpriteFromAge(pSprites);
     }
 
     @Override
@@ -45,21 +45,21 @@ public class BubblePopParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public Provider(SpriteSet p_105836_) {
-            this.sprites = p_105836_;
+        public Provider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_105847_,
-            ClientLevel p_105848_,
-            double p_105849_,
-            double p_105850_,
-            double p_105851_,
-            double p_105852_,
-            double p_105853_,
-            double p_105854_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            return new BubblePopParticle(p_105848_, p_105849_, p_105850_, p_105851_, p_105852_, p_105853_, p_105854_, this.sprites);
+            return new BubblePopParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites);
         }
     }
 }

@@ -17,10 +17,10 @@ public class CuredZombieVillagerTrigger extends SimpleCriterionTrigger<CuredZomb
         return CuredZombieVillagerTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_24275_, Zombie p_24276_, Villager p_24277_) {
-        LootContext lootcontext = EntityPredicate.createContext(p_24275_, p_24276_);
-        LootContext lootcontext1 = EntityPredicate.createContext(p_24275_, p_24277_);
-        this.trigger(p_24275_, p_24285_ -> p_24285_.matches(lootcontext, lootcontext1));
+    public void trigger(ServerPlayer pPlayer, Zombie pZombie, Villager pVillager) {
+        LootContext lootcontext = EntityPredicate.createContext(pPlayer, pZombie);
+        LootContext lootcontext1 = EntityPredicate.createContext(pPlayer, pVillager);
+        this.trigger(pPlayer, p_24285_ -> p_24285_.matches(lootcontext, lootcontext1));
     }
 
     public static record TriggerInstance(
@@ -39,10 +39,10 @@ public class CuredZombieVillagerTrigger extends SimpleCriterionTrigger<CuredZomb
             return CriteriaTriggers.CURED_ZOMBIE_VILLAGER.createCriterion(new CuredZombieVillagerTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty()));
         }
 
-        public boolean matches(LootContext p_24300_, LootContext p_24301_) {
-            return this.zombie.isPresent() && !this.zombie.get().matches(p_24300_)
+        public boolean matches(LootContext pZombie, LootContext pVillager) {
+            return this.zombie.isPresent() && !this.zombie.get().matches(pZombie)
                 ? false
-                : !this.villager.isPresent() || this.villager.get().matches(p_24301_);
+                : !this.villager.isPresent() || this.villager.get().matches(pVillager);
         }
 
         @Override

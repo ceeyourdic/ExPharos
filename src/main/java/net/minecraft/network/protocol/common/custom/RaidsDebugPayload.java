@@ -11,12 +11,12 @@ public record RaidsDebugPayload(List<BlockPos> raidCenters) implements CustomPac
     );
     public static final CustomPacketPayload.Type<RaidsDebugPayload> TYPE = CustomPacketPayload.createType("debug/raids");
 
-    private RaidsDebugPayload(FriendlyByteBuf p_298262_) {
-        this(p_298262_.readList(BlockPos.STREAM_CODEC));
+    private RaidsDebugPayload(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readList(BlockPos.STREAM_CODEC));
     }
 
-    private void write(FriendlyByteBuf p_298176_) {
-        p_298176_.writeCollection(this.raidCenters, BlockPos.STREAM_CODEC);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeCollection(this.raidCenters, BlockPos.STREAM_CODEC);
     }
 
     @Override

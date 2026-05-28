@@ -31,7 +31,7 @@ public record ServerboundEditBookPacket(int slot, List<String> pages, Optional<S
         return GamePacketTypes.SERVERBOUND_EDIT_BOOK;
     }
 
-    public void handle(ServerGamePacketListener p_134008_) {
-        p_134008_.handleEditBook(this);
+    public void handle(ServerGamePacketListener pHandler) {
+        pHandler.handleEditBook(this);
     }
 }

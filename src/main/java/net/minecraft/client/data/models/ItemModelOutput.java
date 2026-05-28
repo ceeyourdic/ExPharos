@@ -7,7 +7,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface ItemModelOutput {
-    void accept(Item p_375406_, ItemModel.Unbaked p_376490_);
+    void accept(Item pItem, ItemModel.Unbaked pModel);
 
-    void copy(Item p_376683_, Item p_376863_);
+    void copy(Item pItem1, Item pItem2);
 }

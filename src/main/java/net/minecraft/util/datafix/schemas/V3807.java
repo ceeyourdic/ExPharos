@@ -13,18 +13,18 @@ public class V3807 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_328421_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_328421_);
-        p_328421_.register(
+    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(pSchema);
+        pSchema.register(
             map,
             "minecraft:vault",
             () -> DSL.optionalFields(
                     "config",
-                    DSL.optionalFields("key_item", References.ITEM_STACK.in(p_328421_)),
+                    DSL.optionalFields("key_item", References.ITEM_STACK.in(pSchema)),
                     "server_data",
-                    DSL.optionalFields("items_to_eject", DSL.list(References.ITEM_STACK.in(p_328421_))),
+                    DSL.optionalFields("items_to_eject", DSL.list(References.ITEM_STACK.in(pSchema))),
                     "shared_data",
-                    DSL.optionalFields("display_item", References.ITEM_STACK.in(p_328421_))
+                    DSL.optionalFields("display_item", References.ITEM_STACK.in(pSchema))
                 )
         );
         return map;

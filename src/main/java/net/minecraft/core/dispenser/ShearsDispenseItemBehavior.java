@@ -34,15 +34,15 @@ public class ShearsDispenseItemBehavior extends OptionalDispenseItemBehavior {
         return p_123581_;
     }
 
-    private static boolean tryShearBeehive(ServerLevel p_123577_, BlockPos p_123578_) {
-        BlockState blockstate = p_123577_.getBlockState(p_123578_);
+    private static boolean tryShearBeehive(ServerLevel pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
         if (blockstate.is(BlockTags.BEEHIVES, p_202454_ -> p_202454_.hasProperty(BeehiveBlock.HONEY_LEVEL) && p_202454_.getBlock() instanceof BeehiveBlock)) {
             int i = blockstate.getValue(BeehiveBlock.HONEY_LEVEL);
             if (i >= 5) {
-                p_123577_.playSound(null, p_123578_, SoundEvents.BEEHIVE_SHEAR, SoundSource.BLOCKS, 1.0F, 1.0F);
-                BeehiveBlock.dropHoneycomb(p_123577_, p_123578_);
-                ((BeehiveBlock)blockstate.getBlock()).releaseBeesAndResetHoneyLevel(p_123577_, blockstate, p_123578_, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
-                p_123577_.gameEvent(null, GameEvent.SHEAR, p_123578_);
+                pLevel.playSound(null, pPos, SoundEvents.BEEHIVE_SHEAR, SoundSource.BLOCKS, 1.0F, 1.0F);
+                BeehiveBlock.dropHoneycomb(pLevel, pPos);
+                ((BeehiveBlock)blockstate.getBlock()).releaseBeesAndResetHoneyLevel(pLevel, blockstate, pPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
+                pLevel.gameEvent(null, GameEvent.SHEAR, pPos);
                 return true;
             }
         }
@@ -50,11 +50,11 @@ public class ShearsDispenseItemBehavior extends OptionalDispenseItemBehavior {
         return false;
     }
 
-    private static boolean tryShearLivingEntity(ServerLevel p_123583_, BlockPos p_123584_, ItemStack p_364606_) {
-        for (LivingEntity livingentity : p_123583_.getEntitiesOfClass(LivingEntity.class, new AABB(p_123584_), EntitySelector.NO_SPECTATORS)) {
+    private static boolean tryShearLivingEntity(ServerLevel pLevel, BlockPos pPos, ItemStack pStack) {
+        for (LivingEntity livingentity : pLevel.getEntitiesOfClass(LivingEntity.class, new AABB(pPos), EntitySelector.NO_SPECTATORS)) {
             if (livingentity instanceof Shearable shearable && shearable.readyForShearing()) {
-                shearable.shear(p_123583_, SoundSource.BLOCKS, p_364606_);
-                p_123583_.gameEvent(null, GameEvent.SHEAR, p_123584_);
+                shearable.shear(pLevel, SoundSource.BLOCKS, pStack);
+                pLevel.gameEvent(null, GameEvent.SHEAR, pPos);
                 return true;
             }
         }

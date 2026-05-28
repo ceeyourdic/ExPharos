@@ -83,30 +83,30 @@ public class MossyCarpetBlock extends Block implements BonemealableBlock {
         return Shapes.empty();
     }
 
-    private static VoxelShape calculateShape(BlockState p_363638_) {
+    private static VoxelShape calculateShape(BlockState pState) {
         VoxelShape voxelshape = Shapes.empty();
-        if (p_363638_.getValue(BASE)) {
+        if (pState.getValue(BASE)) {
             voxelshape = DOWN_AABB;
         }
-        voxelshape = switch ((WallSide)p_363638_.getValue(NORTH)) {
+        voxelshape = switch ((WallSide)pState.getValue(NORTH)) {
             case NONE -> voxelshape;
             case LOW -> Shapes.or(voxelshape, NORTH_SHORT_AABB);
             case TALL -> Shapes.or(voxelshape, NORTH_AABB);
         };
 
-        voxelshape = switch ((WallSide)p_363638_.getValue(SOUTH)) {
+        voxelshape = switch ((WallSide)pState.getValue(SOUTH)) {
             case NONE -> voxelshape;
             case LOW -> Shapes.or(voxelshape, SOUTH_SHORT_AABB);
             case TALL -> Shapes.or(voxelshape, SOUTH_AABB);
         };
 
-        voxelshape = switch ((WallSide)p_363638_.getValue(EAST)) {
+        voxelshape = switch ((WallSide)pState.getValue(EAST)) {
             case NONE -> voxelshape;
             case LOW -> Shapes.or(voxelshape, EAST_SHORT_AABB);
             case TALL -> Shapes.or(voxelshape, EAST_AABB);
         };
 
-        voxelshape = switch ((WallSide)p_363638_.getValue(WEST)) {
+        voxelshape = switch ((WallSide)pState.getValue(WEST)) {
             case NONE -> voxelshape;
             case LOW -> Shapes.or(voxelshape, WEST_SHORT_AABB);
             case TALL -> Shapes.or(voxelshape, WEST_AABB);
@@ -135,12 +135,12 @@ public class MossyCarpetBlock extends Block implements BonemealableBlock {
         return p_367593_.getValue(BASE) ? !blockstate.isAir() : blockstate.is(this) && blockstate.getValue(BASE);
     }
 
-    private static boolean hasFaces(BlockState p_361239_) {
-        if (p_361239_.getValue(BASE)) {
+    private static boolean hasFaces(BlockState pState) {
+        if (pState.getValue(BASE)) {
             return true;
         } else {
             for (EnumProperty<WallSide> enumproperty : PROPERTY_BY_DIRECTION.values()) {
-                if (p_361239_.getValue(enumproperty) != WallSide.NONE) {
+                if (pState.getValue(enumproperty) != WallSide.NONE) {
                     return true;
                 }
             }
@@ -149,30 +149,30 @@ public class MossyCarpetBlock extends Block implements BonemealableBlock {
         }
     }
 
-    private static boolean canSupportAtFace(BlockGetter p_370010_, BlockPos p_362757_, Direction p_361992_) {
-        return p_361992_ == Direction.UP ? false : MultifaceBlock.canAttachTo(p_370010_, p_362757_, p_361992_);
+    private static boolean canSupportAtFace(BlockGetter pLevel, BlockPos pPos, Direction pDirection) {
+        return pDirection == Direction.UP ? false : MultifaceBlock.canAttachTo(pLevel, pPos, pDirection);
     }
 
-    private static BlockState getUpdatedState(BlockState p_368960_, BlockGetter p_360799_, BlockPos p_361234_, boolean p_368579_) {
+    private static BlockState getUpdatedState(BlockState pState, BlockGetter pLevel, BlockPos pPos, boolean pTip) {
         BlockState blockstate = null;
         BlockState blockstate1 = null;
-        p_368579_ |= p_368960_.getValue(BASE);
+        pTip |= pState.getValue(BASE);
 
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             EnumProperty<WallSide> enumproperty = getPropertyForFace(direction);
-            WallSide wallside = canSupportAtFace(p_360799_, p_361234_, direction) ? (p_368579_ ? WallSide.LOW : p_368960_.getValue(enumproperty)) : WallSide.NONE;
+            WallSide wallside = canSupportAtFace(pLevel, pPos, direction) ? (pTip ? WallSide.LOW : pState.getValue(enumproperty)) : WallSide.NONE;
             if (wallside == WallSide.LOW) {
                 if (blockstate == null) {
-                    blockstate = p_360799_.getBlockState(p_361234_.above());
+                    blockstate = pLevel.getBlockState(pPos.above());
                 }
 
                 if (blockstate.is(Blocks.PALE_MOSS_CARPET) && blockstate.getValue(enumproperty) != WallSide.NONE && !blockstate.getValue(BASE)) {
                     wallside = WallSide.TALL;
                 }
 
-                if (!p_368960_.getValue(BASE)) {
+                if (!pState.getValue(BASE)) {
                     if (blockstate1 == null) {
-                        blockstate1 = p_360799_.getBlockState(p_361234_.below());
+                        blockstate1 = pLevel.getBlockState(pPos.below());
                     }
 
                     if (blockstate1.is(Blocks.PALE_MOSS_CARPET) && blockstate1.getValue(enumproperty) == WallSide.NONE) {
@@ -181,10 +181,10 @@ public class MossyCarpetBlock extends Block implements BonemealableBlock {
                 }
             }
 
-            p_368960_ = p_368960_.setValue(enumproperty, wallside);
+            pState = pState.setValue(enumproperty, wallside);
         }
 
-        return p_368960_;
+        return pState;
     }
 
     @Nullable
@@ -193,13 +193,13 @@ public class MossyCarpetBlock extends Block implements BonemealableBlock {
         return getUpdatedState(this.defaultBlockState(), p_363369_.getLevel(), p_363369_.getClickedPos(), true);
     }
 
-    public static void placeAt(LevelAccessor p_369832_, BlockPos p_369165_, RandomSource p_364489_, int p_362052_) {
+    public static void placeAt(LevelAccessor pLevel, BlockPos pPos, RandomSource pRandom, int pFlags) {
         BlockState blockstate = Blocks.PALE_MOSS_CARPET.defaultBlockState();
-        BlockState blockstate1 = getUpdatedState(blockstate, p_369832_, p_369165_, true);
-        p_369832_.setBlock(p_369165_, blockstate1, 3);
-        BlockState blockstate2 = createTopperWithSideChance(p_369832_, p_369165_, p_364489_::nextBoolean);
+        BlockState blockstate1 = getUpdatedState(blockstate, pLevel, pPos, true);
+        pLevel.setBlock(pPos, blockstate1, 3);
+        BlockState blockstate2 = createTopperWithSideChance(pLevel, pPos, pRandom::nextBoolean);
         if (!blockstate2.isAir()) {
-            p_369832_.setBlock(p_369165_.above(), blockstate2, p_362052_);
+            pLevel.setBlock(pPos.above(), blockstate2, pFlags);
         }
     }
 
@@ -214,17 +214,17 @@ public class MossyCarpetBlock extends Block implements BonemealableBlock {
         }
     }
 
-    private static BlockState createTopperWithSideChance(BlockGetter p_362586_, BlockPos p_370077_, BooleanSupplier p_367276_) {
-        BlockPos blockpos = p_370077_.above();
-        BlockState blockstate = p_362586_.getBlockState(blockpos);
+    private static BlockState createTopperWithSideChance(BlockGetter pLevel, BlockPos pPos, BooleanSupplier pPlaceSide) {
+        BlockPos blockpos = pPos.above();
+        BlockState blockstate = pLevel.getBlockState(blockpos);
         boolean flag = blockstate.is(Blocks.PALE_MOSS_CARPET);
         if ((!flag || !blockstate.getValue(BASE)) && (flag || blockstate.canBeReplaced())) {
             BlockState blockstate1 = Blocks.PALE_MOSS_CARPET.defaultBlockState().setValue(BASE, Boolean.valueOf(false));
-            BlockState blockstate2 = getUpdatedState(blockstate1, p_362586_, p_370077_.above(), true);
+            BlockState blockstate2 = getUpdatedState(blockstate1, pLevel, pPos.above(), true);
 
             for (Direction direction : Direction.Plane.HORIZONTAL) {
                 EnumProperty<WallSide> enumproperty = getPropertyForFace(direction);
-                if (blockstate2.getValue(enumproperty) != WallSide.NONE && !p_367276_.getAsBoolean()) {
+                if (blockstate2.getValue(enumproperty) != WallSide.NONE && !pPlaceSide.getAsBoolean()) {
                     blockstate2 = blockstate2.setValue(enumproperty, WallSide.NONE);
                 }
             }
@@ -288,8 +288,8 @@ public class MossyCarpetBlock extends Block implements BonemealableBlock {
     }
 
     @Nullable
-    public static EnumProperty<WallSide> getPropertyForFace(Direction p_368837_) {
-        return PROPERTY_BY_DIRECTION.get(p_368837_);
+    public static EnumProperty<WallSide> getPropertyForFace(Direction pDirection) {
+        return PROPERTY_BY_DIRECTION.get(pDirection);
     }
 
     @Override

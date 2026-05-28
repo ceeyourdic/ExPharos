@@ -60,15 +60,15 @@ public class DeltaFeature extends Feature<DeltaFeatureConfiguration> {
         return flag;
     }
 
-    private static boolean isClear(LevelAccessor p_65552_, BlockPos p_65553_, DeltaFeatureConfiguration p_65554_) {
-        BlockState blockstate = p_65552_.getBlockState(p_65553_);
-        if (blockstate.is(p_65554_.contents().getBlock())) {
+    private static boolean isClear(LevelAccessor pLevel, BlockPos pPos, DeltaFeatureConfiguration pConfig) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
+        if (blockstate.is(pConfig.contents().getBlock())) {
             return false;
         } else if (CANNOT_REPLACE.contains(blockstate.getBlock())) {
             return false;
         } else {
             for (Direction direction : DIRECTIONS) {
-                boolean flag = p_65552_.getBlockState(p_65553_.relative(direction)).isAir();
+                boolean flag = pLevel.getBlockState(pPos.relative(direction)).isAir();
                 if (flag && direction != Direction.UP || !flag && direction == Direction.UP) {
                     return false;
                 }

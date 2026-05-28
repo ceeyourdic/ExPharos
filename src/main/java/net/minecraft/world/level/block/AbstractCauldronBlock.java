@@ -40,18 +40,18 @@ public abstract class AbstractCauldronBlock extends Block {
     @Override
     protected abstract MapCodec<? extends AbstractCauldronBlock> codec();
 
-    public AbstractCauldronBlock(BlockBehaviour.Properties p_151946_, CauldronInteraction.InteractionMap p_312076_) {
-        super(p_151946_);
-        this.interactions = p_312076_;
+    public AbstractCauldronBlock(BlockBehaviour.Properties pProperties, CauldronInteraction.InteractionMap pInteractions) {
+        super(pProperties);
+        this.interactions = pInteractions;
     }
 
-    protected double getContentHeight(BlockState p_151948_) {
+    protected double getContentHeight(BlockState pState) {
         return 0.0;
     }
 
-    protected boolean isEntityInsideContent(BlockState p_151980_, BlockPos p_151981_, Entity p_151982_) {
-        return p_151982_.getY() < (double)p_151981_.getY() + this.getContentHeight(p_151980_)
-            && p_151982_.getBoundingBox().maxY > (double)p_151981_.getY() + 0.25;
+    protected boolean isEntityInsideContent(BlockState pState, BlockPos pPos, Entity pEntity) {
+        return pEntity.getY() < (double)pPos.getY() + this.getContentHeight(pState)
+            && pEntity.getBoundingBox().maxY > (double)pPos.getY() + 0.25;
     }
 
     @Override
@@ -82,7 +82,7 @@ public abstract class AbstractCauldronBlock extends Block {
         return false;
     }
 
-    public abstract boolean isFull(BlockState p_151984_);
+    public abstract boolean isFull(BlockState pState);
 
     @Override
     protected void tick(BlockState p_220702_, ServerLevel p_220703_, BlockPos p_220704_, RandomSource p_220705_) {
@@ -95,10 +95,10 @@ public abstract class AbstractCauldronBlock extends Block {
         }
     }
 
-    protected boolean canReceiveStalactiteDrip(Fluid p_151983_) {
+    protected boolean canReceiveStalactiteDrip(Fluid pFluid) {
         return false;
     }
 
-    protected void receiveStalactiteDrip(BlockState p_151975_, Level p_151976_, BlockPos p_151977_, Fluid p_151978_) {
+    protected void receiveStalactiteDrip(BlockState pState, Level pLevel, BlockPos pPos, Fluid pFluid) {
     }
 }

@@ -20,8 +20,8 @@ public class TracyBootstrap {
         }
     }
 
-    private static int messageColor(Level p_363373_) {
-        return switch (p_363373_) {
+    private static int messageColor(Level pLevel) {
+        return switch (pLevel) {
             case DEBUG -> 11184810;
             case WARN -> 16777130;
             case ERROR -> 16755370;

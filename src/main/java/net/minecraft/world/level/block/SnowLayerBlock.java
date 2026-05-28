@@ -64,27 +64,27 @@ public class SnowLayerBlock extends Block {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_56620_, BlockGetter p_56621_, BlockPos p_56622_, CollisionContext p_56623_) {
-        return SHAPE_BY_LAYER[p_56620_.getValue(LAYERS)];
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return SHAPE_BY_LAYER[pState.getValue(LAYERS)];
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState p_56625_, BlockGetter p_56626_, BlockPos p_56627_, CollisionContext p_56628_) {
-        return SHAPE_BY_LAYER[p_56625_.getValue(LAYERS) - 1];
+    protected VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return SHAPE_BY_LAYER[pState.getValue(LAYERS) - 1];
     }
 
     @Override
-    protected VoxelShape getBlockSupportShape(BlockState p_56632_, BlockGetter p_56633_, BlockPos p_56634_) {
-        return SHAPE_BY_LAYER[p_56632_.getValue(LAYERS)];
+    protected VoxelShape getBlockSupportShape(BlockState pState, BlockGetter pReader, BlockPos pPos) {
+        return SHAPE_BY_LAYER[pState.getValue(LAYERS)];
     }
 
     @Override
-    protected VoxelShape getVisualShape(BlockState p_56597_, BlockGetter p_56598_, BlockPos p_56599_, CollisionContext p_56600_) {
-        return SHAPE_BY_LAYER[p_56597_.getValue(LAYERS)];
+    protected VoxelShape getVisualShape(BlockState pState, BlockGetter pReader, BlockPos pPos, CollisionContext pContext) {
+        return SHAPE_BY_LAYER[pState.getValue(LAYERS)];
     }
 
     @Override
-    protected boolean useShapeForLightOcclusion(BlockState p_56630_) {
+    protected boolean useShapeForLightOcclusion(BlockState pState) {
         return true;
     }
 
@@ -94,14 +94,14 @@ public class SnowLayerBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_56602_, LevelReader p_56603_, BlockPos p_56604_) {
-        BlockState blockstate = p_56603_.getBlockState(p_56604_.below());
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos.below());
         if (blockstate.is(BlockTags.SNOW_LAYER_CANNOT_SURVIVE_ON)) {
             return false;
         } else {
             return blockstate.is(BlockTags.SNOW_LAYER_CAN_SURVIVE_ON)
                 ? true
-                : Block.isFaceFull(blockstate.getCollisionShape(p_56603_, p_56604_.below()), Direction.UP)
+                : Block.isFaceFull(blockstate.getCollisionShape(pLevel, pPos.below()), Direction.UP)
                     || blockstate.is(this) && blockstate.getValue(LAYERS) == 8;
         }
     }
@@ -131,29 +131,29 @@ public class SnowLayerBlock extends Block {
     }
 
     @Override
-    protected boolean canBeReplaced(BlockState p_56589_, BlockPlaceContext p_56590_) {
-        int i = p_56589_.getValue(LAYERS);
-        if (!p_56590_.getItemInHand().is(this.asItem()) || i >= 8) {
+    protected boolean canBeReplaced(BlockState pState, BlockPlaceContext pUseContext) {
+        int i = pState.getValue(LAYERS);
+        if (!pUseContext.getItemInHand().is(this.asItem()) || i >= 8) {
             return i == 1;
         } else {
-            return p_56590_.replacingClickedOnBlock() ? p_56590_.getClickedFace() == Direction.UP : true;
+            return pUseContext.replacingClickedOnBlock() ? pUseContext.getClickedFace() == Direction.UP : true;
         }
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_56587_) {
-        BlockState blockstate = p_56587_.getLevel().getBlockState(p_56587_.getClickedPos());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockState blockstate = pContext.getLevel().getBlockState(pContext.getClickedPos());
         if (blockstate.is(this)) {
             int i = blockstate.getValue(LAYERS);
             return blockstate.setValue(LAYERS, Integer.valueOf(Math.min(8, i + 1)));
         } else {
-            return super.getStateForPlacement(p_56587_);
+            return super.getStateForPlacement(pContext);
         }
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_56613_) {
-        p_56613_.add(LAYERS);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(LAYERS);
     }
 }

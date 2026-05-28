@@ -9,31 +9,31 @@ import net.minecraft.world.level.block.state.BlockState;
 public interface ChangeOverTimeBlock<T extends Enum<T>> {
     int SCAN_DISTANCE = 4;
 
-    Optional<BlockState> getNext(BlockState p_153040_);
+    Optional<BlockState> getNext(BlockState pState);
 
     float getChanceModifier();
 
-    default void changeOverTime(BlockState p_311790_, ServerLevel p_309416_, BlockPos p_310092_, RandomSource p_310572_) {
+    default void changeOverTime(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
         float f = 0.05688889F;
-        if (p_310572_.nextFloat() < 0.05688889F) {
-            this.getNextState(p_311790_, p_309416_, p_310092_, p_310572_).ifPresent(p_153039_ -> p_309416_.setBlockAndUpdate(p_310092_, p_153039_));
+        if (pRandom.nextFloat() < 0.05688889F) {
+            this.getNextState(pState, pLevel, pPos, pRandom).ifPresent(p_153039_ -> pLevel.setBlockAndUpdate(pPos, p_153039_));
         }
     }
 
     T getAge();
 
-    default Optional<BlockState> getNextState(BlockState p_311503_, ServerLevel p_311331_, BlockPos p_309459_, RandomSource p_312041_) {
+    default Optional<BlockState> getNextState(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
         int i = this.getAge().ordinal();
         int j = 0;
         int k = 0;
 
-        for (BlockPos blockpos : BlockPos.withinManhattan(p_309459_, 4, 4, 4)) {
-            int l = blockpos.distManhattan(p_309459_);
+        for (BlockPos blockpos : BlockPos.withinManhattan(pPos, 4, 4, 4)) {
+            int l = blockpos.distManhattan(pPos);
             if (l > 4) {
                 break;
             }
 
-            if (!blockpos.equals(p_309459_) && p_311331_.getBlockState(blockpos).getBlock() instanceof ChangeOverTimeBlock<?> changeovertimeblock) {
+            if (!blockpos.equals(pPos) && pLevel.getBlockState(blockpos).getBlock() instanceof ChangeOverTimeBlock<?> changeovertimeblock) {
                 Enum<?> oenum = changeovertimeblock.getAge();
                 if (this.getAge().getClass() == oenum.getClass()) {
                     int i1 = oenum.ordinal();
@@ -52,6 +52,6 @@ public interface ChangeOverTimeBlock<T extends Enum<T>> {
 
         float f = (float)(k + 1) / (float)(k + j + 1);
         float f1 = f * f * this.getChanceModifier();
-        return p_312041_.nextFloat() < f1 ? this.getNext(p_311503_) : Optional.empty();
+        return pRandom.nextFloat() < f1 ? this.getNext(pState) : Optional.empty();
     }
 }

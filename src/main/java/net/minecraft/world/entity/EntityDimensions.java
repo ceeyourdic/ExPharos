@@ -4,49 +4,49 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public record EntityDimensions(float width, float height, float eyeHeight, EntityAttachments attachments, boolean fixed) {
-    private EntityDimensions(float p_20381_, float p_20382_, boolean p_20383_) {
-        this(p_20381_, p_20382_, defaultEyeHeight(p_20382_), EntityAttachments.createDefault(p_20381_, p_20382_), p_20383_);
+    private EntityDimensions(float pWidth, float pHeight, boolean pFixed) {
+        this(pWidth, pHeight, defaultEyeHeight(pHeight), EntityAttachments.createDefault(pWidth, pHeight), pFixed);
     }
 
-    private static float defaultEyeHeight(float p_331315_) {
-        return p_331315_ * 0.85F;
+    private static float defaultEyeHeight(float pHeight) {
+        return pHeight * 0.85F;
     }
 
-    public AABB makeBoundingBox(Vec3 p_20394_) {
-        return this.makeBoundingBox(p_20394_.x, p_20394_.y, p_20394_.z);
+    public AABB makeBoundingBox(Vec3 pPos) {
+        return this.makeBoundingBox(pPos.x, pPos.y, pPos.z);
     }
 
-    public AABB makeBoundingBox(double p_20385_, double p_20386_, double p_20387_) {
+    public AABB makeBoundingBox(double pX, double pY, double pZ) {
         float f = this.width / 2.0F;
         float f1 = this.height;
-        return new AABB(p_20385_ - (double)f, p_20386_, p_20387_ - (double)f, p_20385_ + (double)f, p_20386_ + (double)f1, p_20387_ + (double)f);
+        return new AABB(pX - (double)f, pY, pZ - (double)f, pX + (double)f, pY + (double)f1, pZ + (double)f);
     }
 
-    public EntityDimensions scale(float p_20389_) {
-        return this.scale(p_20389_, p_20389_);
+    public EntityDimensions scale(float pFactor) {
+        return this.scale(pFactor, pFactor);
     }
 
-    public EntityDimensions scale(float p_20391_, float p_20392_) {
-        return !this.fixed && (p_20391_ != 1.0F || p_20392_ != 1.0F)
+    public EntityDimensions scale(float pWidthFactor, float pHeightFactor) {
+        return !this.fixed && (pWidthFactor != 1.0F || pHeightFactor != 1.0F)
             ? new EntityDimensions(
-                this.width * p_20391_, this.height * p_20392_, this.eyeHeight * p_20392_, this.attachments.scale(p_20391_, p_20392_, p_20391_), false
+                this.width * pWidthFactor, this.height * pHeightFactor, this.eyeHeight * pHeightFactor, this.attachments.scale(pWidthFactor, pHeightFactor, pWidthFactor), false
             )
             : this;
     }
 
-    public static EntityDimensions scalable(float p_20396_, float p_20397_) {
-        return new EntityDimensions(p_20396_, p_20397_, false);
+    public static EntityDimensions scalable(float pWidth, float pHeight) {
+        return new EntityDimensions(pWidth, pHeight, false);
     }
 
-    public static EntityDimensions fixed(float p_20399_, float p_20400_) {
-        return new EntityDimensions(p_20399_, p_20400_, true);
+    public static EntityDimensions fixed(float pWidth, float pHeight) {
+        return new EntityDimensions(pWidth, pHeight, true);
     }
 
-    public EntityDimensions withEyeHeight(float p_333362_) {
-        return new EntityDimensions(this.width, this.height, p_333362_, this.attachments, this.fixed);
+    public EntityDimensions withEyeHeight(float pEyeHeight) {
+        return new EntityDimensions(this.width, this.height, pEyeHeight, this.attachments, this.fixed);
     }
 
-    public EntityDimensions withAttachments(EntityAttachments.Builder p_328127_) {
-        return new EntityDimensions(this.width, this.height, this.eyeHeight, p_328127_.build(this.width, this.height), this.fixed);
+    public EntityDimensions withAttachments(EntityAttachments.Builder pAttachments) {
+        return new EntityDimensions(this.width, this.height, this.eyeHeight, pAttachments.build(this.width, this.height), this.fixed);
     }
 }

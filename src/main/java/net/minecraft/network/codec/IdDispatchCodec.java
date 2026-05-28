@@ -16,10 +16,10 @@ public class IdDispatchCodec<B extends ByteBuf, V, T> implements StreamCodec<B, 
     private final List<IdDispatchCodec.Entry<B, V, T>> byId;
     private final Object2IntMap<T> toId;
 
-    IdDispatchCodec(Function<V, ? extends T> p_330610_, List<IdDispatchCodec.Entry<B, V, T>> p_334834_, Object2IntMap<T> p_327784_) {
-        this.typeGetter = p_330610_;
-        this.byId = p_334834_;
-        this.toId = p_327784_;
+    IdDispatchCodec(Function<V, ? extends T> pTypeGetter, List<IdDispatchCodec.Entry<B, V, T>> pById, Object2IntMap<T> pToId) {
+        this.typeGetter = pTypeGetter;
+        this.byId = pById;
+        this.toId = pToId;
     }
 
     public V decode(B p_327793_) {
@@ -55,20 +55,20 @@ public class IdDispatchCodec<B extends ByteBuf, V, T> implements StreamCodec<B, 
         }
     }
 
-    public static <B extends ByteBuf, V, T> IdDispatchCodec.Builder<B, V, T> builder(Function<V, ? extends T> p_331962_) {
-        return new IdDispatchCodec.Builder<>(p_331962_);
+    public static <B extends ByteBuf, V, T> IdDispatchCodec.Builder<B, V, T> builder(Function<V, ? extends T> pTypeGetter) {
+        return new IdDispatchCodec.Builder<>(pTypeGetter);
     }
 
     public static class Builder<B extends ByteBuf, V, T> {
         private final List<IdDispatchCodec.Entry<B, V, T>> entries = new ArrayList<>();
         private final Function<V, ? extends T> typeGetter;
 
-        Builder(Function<V, ? extends T> p_330341_) {
-            this.typeGetter = p_330341_;
+        Builder(Function<V, ? extends T> pTypeGetter) {
+            this.typeGetter = pTypeGetter;
         }
 
-        public IdDispatchCodec.Builder<B, V, T> add(T p_333313_, StreamCodec<? super B, ? extends V> p_330239_) {
-            this.entries.add(new IdDispatchCodec.Entry<>(p_330239_, p_333313_));
+        public IdDispatchCodec.Builder<B, V, T> add(T pType, StreamCodec<? super B, ? extends V> pSerializer) {
+            this.entries.add(new IdDispatchCodec.Entry<>(pSerializer, pType));
             return this;
         }
 

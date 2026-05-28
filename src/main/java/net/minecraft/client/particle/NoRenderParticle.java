@@ -19,7 +19,7 @@ public class NoRenderParticle extends Particle {
     }
 
     @Override
-    public final void render(VertexConsumer p_107162_, Camera p_107163_, float p_107164_) {
+    public final void render(VertexConsumer pBuffer, Camera pRenderInfo, float pPartialTicks) {
     }
 
     @Override

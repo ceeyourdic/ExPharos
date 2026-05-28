@@ -18,9 +18,9 @@ public class BellModel extends Model {
     private static final String BELL_BODY = "bell_body";
     private final ModelPart bellBody;
 
-    public BellModel(ModelPart p_363820_) {
-        super(p_363820_, RenderType::entitySolid);
-        this.bellBody = p_363820_.getChild("bell_body");
+    public BellModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entitySolid);
+        this.bellBody = pRoot.getChild("bell_body");
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -35,19 +35,19 @@ public class BellModel extends Model {
         return LayerDefinition.create(meshdefinition, 32, 32);
     }
 
-    public void setupAnim(BellBlockEntity p_368573_, float p_361141_) {
-        float f = (float)p_368573_.ticks + p_361141_;
+    public void setupAnim(BellBlockEntity pBell, float pPartialTick) {
+        float f = (float)pBell.ticks + pPartialTick;
         float f1 = 0.0F;
         float f2 = 0.0F;
-        if (p_368573_.shaking) {
+        if (pBell.shaking) {
             float f3 = Mth.sin(f / (float) Math.PI) / (4.0F + f / 3.0F);
-            if (p_368573_.clickDirection == Direction.NORTH) {
+            if (pBell.clickDirection == Direction.NORTH) {
                 f1 = -f3;
-            } else if (p_368573_.clickDirection == Direction.SOUTH) {
+            } else if (pBell.clickDirection == Direction.SOUTH) {
                 f1 = f3;
-            } else if (p_368573_.clickDirection == Direction.EAST) {
+            } else if (pBell.clickDirection == Direction.EAST) {
                 f2 = -f3;
-            } else if (p_368573_.clickDirection == Direction.WEST) {
+            } else if (pBell.clickDirection == Direction.WEST) {
                 f2 = f3;
             }
         }

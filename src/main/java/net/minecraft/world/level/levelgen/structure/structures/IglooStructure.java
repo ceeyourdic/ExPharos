@@ -23,12 +23,12 @@ public class IglooStructure extends Structure {
         return onTopOfChunkCenter(p_227595_, Heightmap.Types.WORLD_SURFACE_WG, p_227598_ -> this.generatePieces(p_227598_, p_227595_));
     }
 
-    private void generatePieces(StructurePiecesBuilder p_227600_, Structure.GenerationContext p_227601_) {
-        ChunkPos chunkpos = p_227601_.chunkPos();
-        WorldgenRandom worldgenrandom = p_227601_.random();
+    private void generatePieces(StructurePiecesBuilder pBuilder, Structure.GenerationContext pContext) {
+        ChunkPos chunkpos = pContext.chunkPos();
+        WorldgenRandom worldgenrandom = pContext.random();
         BlockPos blockpos = new BlockPos(chunkpos.getMinBlockX(), 90, chunkpos.getMinBlockZ());
         Rotation rotation = Rotation.getRandom(worldgenrandom);
-        IglooPieces.addPieces(p_227601_.structureTemplateManager(), blockpos, rotation, p_227600_, worldgenrandom);
+        IglooPieces.addPieces(pContext.structureTemplateManager(), blockpos, rotation, pBuilder, worldgenrandom);
     }
 
     @Override

@@ -147,8 +147,8 @@ public class LakeFeature extends Feature<LakeFeature.Configuration> {
         }
     }
 
-    private boolean canReplaceBlock(BlockState p_190952_) {
-        return !p_190952_.is(BlockTags.FEATURES_CANNOT_REPLACE);
+    private boolean canReplaceBlock(BlockState pState) {
+        return !pState.is(BlockTags.FEATURES_CANNOT_REPLACE);
     }
 
     public static record Configuration(BlockStateProvider fluid, BlockStateProvider barrier) implements FeatureConfiguration {

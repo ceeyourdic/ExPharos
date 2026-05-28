@@ -5,15 +5,15 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
 public record DiscardedPayload(ResourceLocation id) implements CustomPacketPayload {
-    public static <T extends FriendlyByteBuf> StreamCodec<T, DiscardedPayload> codec(ResourceLocation p_328904_, int p_334650_) {
+    public static <T extends FriendlyByteBuf> StreamCodec<T, DiscardedPayload> codec(ResourceLocation pId, int pMaxSize) {
         return CustomPacketPayload.codec((p_330619_, p_329210_) -> {
         }, p_333509_ -> {
             int i = p_333509_.readableBytes();
-            if (i >= 0 && i <= p_334650_) {
+            if (i >= 0 && i <= pMaxSize) {
                 p_333509_.skipBytes(i);
-                return new DiscardedPayload(p_328904_);
+                return new DiscardedPayload(pId);
             } else {
-                throw new IllegalArgumentException("Payload may not be larger than " + p_334650_ + " bytes");
+                throw new IllegalArgumentException("Payload may not be larger than " + pMaxSize + " bytes");
             }
         });
     }

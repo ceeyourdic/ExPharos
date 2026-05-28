@@ -24,18 +24,18 @@ public class PanicGoal extends Goal {
     protected boolean isRunning;
     private final Function<PathfinderMob, TagKey<DamageType>> panicCausingDamageTypes;
 
-    public PanicGoal(PathfinderMob p_25691_, double p_25692_) {
-        this(p_25691_, p_25692_, DamageTypeTags.PANIC_CAUSES);
+    public PanicGoal(PathfinderMob pMob, double pSpeedModifier) {
+        this(pMob, pSpeedModifier, DamageTypeTags.PANIC_CAUSES);
     }
 
-    public PanicGoal(PathfinderMob p_344360_, double p_345088_, TagKey<DamageType> p_345524_) {
-        this(p_344360_, p_345088_, p_341380_ -> p_345524_);
+    public PanicGoal(PathfinderMob pMob, double pSpeedModifier, TagKey<DamageType> pPanicCausingDamageTypes) {
+        this(pMob, pSpeedModifier, p_341380_ -> pPanicCausingDamageTypes);
     }
 
-    public PanicGoal(PathfinderMob p_343339_, double p_343298_, Function<PathfinderMob, TagKey<DamageType>> p_344730_) {
-        this.mob = p_343339_;
-        this.speedModifier = p_343298_;
-        this.panicCausingDamageTypes = p_344730_;
+    public PanicGoal(PathfinderMob pMob, double pSpeedModifier, Function<PathfinderMob, TagKey<DamageType>> pPanicCausingDamageTypes) {
+        this.mob = pMob;
+        this.speedModifier = pSpeedModifier;
+        this.panicCausingDamageTypes = pPanicCausingDamageTypes;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE));
     }
 
@@ -95,10 +95,10 @@ public class PanicGoal extends Goal {
     }
 
     @Nullable
-    protected BlockPos lookForWater(BlockGetter p_198173_, Entity p_198174_, int p_198175_) {
-        BlockPos blockpos = p_198174_.blockPosition();
-        return !p_198173_.getBlockState(blockpos).getCollisionShape(p_198173_, blockpos).isEmpty()
+    protected BlockPos lookForWater(BlockGetter pLevel, Entity pEntity, int pRange) {
+        BlockPos blockpos = pEntity.blockPosition();
+        return !pLevel.getBlockState(blockpos).getCollisionShape(pLevel, blockpos).isEmpty()
             ? null
-            : BlockPos.findClosestMatch(p_198174_.blockPosition(), p_198175_, 1, p_196649_ -> p_198173_.getFluidState(p_196649_).is(FluidTags.WATER)).orElse(null);
+            : BlockPos.findClosestMatch(pEntity.blockPosition(), pRange, 1, p_196649_ -> pLevel.getFluidState(p_196649_).is(FluidTags.WATER)).orElse(null);
     }
 }

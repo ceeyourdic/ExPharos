@@ -50,8 +50,8 @@ public record VaultConfig(
         );
     }
 
-    public VaultConfig(ResourceKey<LootTable> p_335368_, double p_335328_, double p_335598_, ItemStack p_328193_, Optional<ResourceKey<LootTable>> p_333693_) {
-        this(p_335368_, p_335328_, p_335598_, p_328193_, p_333693_, DEFAULT.playerDetector(), DEFAULT.entitySelector());
+    public VaultConfig(ResourceKey<LootTable> pLootTable, double pActivationRange, double pDeactivationRange, ItemStack pKeyItem, Optional<ResourceKey<LootTable>> pOverrideLootTableToDisplay) {
+        this(pLootTable, pActivationRange, pDeactivationRange, pKeyItem, pOverrideLootTableToDisplay, DEFAULT.playerDetector(), DEFAULT.entitySelector());
     }
 
     private DataResult<VaultConfig> validate() {

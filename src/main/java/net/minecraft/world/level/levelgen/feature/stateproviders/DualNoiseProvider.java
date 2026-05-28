@@ -32,19 +32,19 @@ public class DualNoiseProvider extends NoiseProvider {
     private final NormalNoise slowNoise;
 
     public DualNoiseProvider(
-        InclusiveRange<Integer> p_191396_,
-        NormalNoise.NoiseParameters p_191397_,
-        float p_191398_,
-        long p_191399_,
-        NormalNoise.NoiseParameters p_191400_,
-        float p_191401_,
-        List<BlockState> p_191402_
+        InclusiveRange<Integer> pVariety,
+        NormalNoise.NoiseParameters pSlowNoiseParameters,
+        float pSlowScale,
+        long pSeed,
+        NormalNoise.NoiseParameters pParameters,
+        float pScale,
+        List<BlockState> pStates
     ) {
-        super(p_191399_, p_191400_, p_191401_, p_191402_);
-        this.variety = p_191396_;
-        this.slowNoiseParameters = p_191397_;
-        this.slowScale = p_191398_;
-        this.slowNoise = NormalNoise.create(new WorldgenRandom(new LegacyRandomSource(p_191399_)), p_191397_);
+        super(pSeed, pParameters, pScale, pStates);
+        this.variety = pVariety;
+        this.slowNoiseParameters = pSlowNoiseParameters;
+        this.slowScale = pSlowScale;
+        this.slowNoise = NormalNoise.create(new WorldgenRandom(new LegacyRandomSource(pSeed)), pSlowNoiseParameters);
     }
 
     @Override
@@ -65,12 +65,12 @@ public class DualNoiseProvider extends NoiseProvider {
         return this.getRandomState(list, p_225911_, (double)this.scale);
     }
 
-    protected double getSlowNoiseValue(BlockPos p_191407_) {
+    protected double getSlowNoiseValue(BlockPos pPos) {
         return this.slowNoise
             .getValue(
-                (double)((float)p_191407_.getX() * this.slowScale),
-                (double)((float)p_191407_.getY() * this.slowScale),
-                (double)((float)p_191407_.getZ() * this.slowScale)
+                (double)((float)pPos.getX() * this.slowScale),
+                (double)((float)pPos.getY() * this.slowScale),
+                (double)((float)pPos.getZ() * this.slowScale)
             );
     }
 }

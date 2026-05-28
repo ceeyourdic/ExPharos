@@ -8,7 +8,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public record EnchantedItemInUse(ItemStack itemStack, @Nullable EquipmentSlot inSlot, @Nullable LivingEntity owner, Consumer<Item> onBreak) {
-    public EnchantedItemInUse(ItemStack p_343725_, EquipmentSlot p_342093_, LivingEntity p_344478_) {
-        this(p_343725_, p_342093_, p_344478_, p_345140_ -> p_344478_.onEquippedItemBroken(p_345140_, p_342093_));
+    public EnchantedItemInUse(ItemStack pItemStack, EquipmentSlot pInSlot, LivingEntity pOwner) {
+        this(pItemStack, pInSlot, pOwner, p_345140_ -> pOwner.onEquippedItemBroken(p_345140_, pInSlot));
     }
 }

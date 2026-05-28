@@ -34,16 +34,16 @@ public class ImposterProtoChunk extends ProtoChunk {
     private final LevelChunk wrapped;
     private final boolean allowWrites;
 
-    public ImposterProtoChunk(LevelChunk p_187920_, boolean p_187921_) {
+    public ImposterProtoChunk(LevelChunk pWrapped, boolean pAllowWrites) {
         super(
-            p_187920_.getPos(),
+            pWrapped.getPos(),
             UpgradeData.EMPTY,
-            p_187920_.levelHeightAccessor,
-            p_187920_.getLevel().registryAccess().lookupOrThrow(Registries.BIOME),
-            p_187920_.getBlendingData()
+            pWrapped.levelHeightAccessor,
+            pWrapped.getLevel().registryAccess().lookupOrThrow(Registries.BIOME),
+            pWrapped.getBlendingData()
         );
-        this.wrapped = p_187920_;
-        this.allowWrites = p_187921_;
+        this.wrapped = pWrapped;
+        this.allowWrites = pAllowWrites;
     }
 
     @Nullable
@@ -103,11 +103,11 @@ public class ImposterProtoChunk extends ProtoChunk {
     public void setHeightmap(Heightmap.Types p_62706_, long[] p_62707_) {
     }
 
-    private Heightmap.Types fixType(Heightmap.Types p_62742_) {
-        if (p_62742_ == Heightmap.Types.WORLD_SURFACE_WG) {
+    private Heightmap.Types fixType(Heightmap.Types pType) {
+        if (pType == Heightmap.Types.WORLD_SURFACE_WG) {
             return Heightmap.Types.WORLD_SURFACE;
         } else {
-            return p_62742_ == Heightmap.Types.OCEAN_FLOOR_WG ? Heightmap.Types.OCEAN_FLOOR : p_62742_;
+            return pType == Heightmap.Types.OCEAN_FLOOR_WG ? Heightmap.Types.OCEAN_FLOOR : pType;
         }
     }
 

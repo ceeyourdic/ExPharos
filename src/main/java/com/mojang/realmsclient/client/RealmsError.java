@@ -25,25 +25,25 @@ public interface RealmsError {
 
     String logMessage();
 
-    static RealmsError parse(int p_298954_, String p_87304_) {
-        if (p_298954_ == 429) {
+    static RealmsError parse(int pHttpCode, String pPayload) {
+        if (pHttpCode == 429) {
             return RealmsError.CustomError.SERVICE_BUSY;
-        } else if (Strings.isNullOrEmpty(p_87304_)) {
-            return RealmsError.CustomError.noPayload(p_298954_);
+        } else if (Strings.isNullOrEmpty(pPayload)) {
+            return RealmsError.CustomError.noPayload(pHttpCode);
         } else {
             try {
-                JsonObject jsonobject = JsonParser.parseString(p_87304_).getAsJsonObject();
+                JsonObject jsonobject = JsonParser.parseString(pPayload).getAsJsonObject();
                 String s = GsonHelper.getAsString(jsonobject, "reason", null);
                 String s1 = GsonHelper.getAsString(jsonobject, "errorMsg", null);
                 int i = GsonHelper.getAsInt(jsonobject, "errorCode", -1);
                 if (s1 != null || s != null || i != -1) {
-                    return new RealmsError.ErrorWithJsonPayload(p_298954_, i != -1 ? i : p_298954_, s, s1);
+                    return new RealmsError.ErrorWithJsonPayload(pHttpCode, i != -1 ? i : pHttpCode, s, s1);
                 }
             } catch (Exception exception) {
                 LOGGER.error("Could not parse RealmsError", (Throwable)exception);
             }
 
-            return new RealmsError.ErrorWithRawPayload(p_298954_, p_87304_);
+            return new RealmsError.ErrorWithRawPayload(pHttpCode, pPayload);
         }
     }
 
@@ -72,20 +72,20 @@ public interface RealmsError {
         public static final RealmsError.CustomError SERVICE_BUSY = new RealmsError.CustomError(429, Component.translatable("mco.errorMessage.serviceBusy"));
         public static final Component RETRY_MESSAGE = Component.translatable("mco.errorMessage.retry");
 
-        public static RealmsError.CustomError unknownCompatibilityResponse(String p_300024_) {
-            return new RealmsError.CustomError(500, Component.translatable("mco.errorMessage.realmsService.unknownCompatibility", p_300024_));
+        public static RealmsError.CustomError unknownCompatibilityResponse(String pPayload) {
+            return new RealmsError.CustomError(500, Component.translatable("mco.errorMessage.realmsService.unknownCompatibility", pPayload));
         }
 
-        public static RealmsError.CustomError connectivityError(RealmsHttpException p_298467_) {
-            return new RealmsError.CustomError(500, Component.translatable("mco.errorMessage.realmsService.connectivity", p_298467_.getMessage()));
+        public static RealmsError.CustomError connectivityError(RealmsHttpException pPayload) {
+            return new RealmsError.CustomError(500, Component.translatable("mco.errorMessage.realmsService.connectivity", pPayload.getMessage()));
         }
 
-        public static RealmsError.CustomError retry(int p_297862_) {
-            return new RealmsError.CustomError(p_297862_, RETRY_MESSAGE);
+        public static RealmsError.CustomError retry(int pHttpCode) {
+            return new RealmsError.CustomError(pHttpCode, RETRY_MESSAGE);
         }
 
-        public static RealmsError.CustomError noPayload(int p_298598_) {
-            return new RealmsError.CustomError(p_298598_, null);
+        public static RealmsError.CustomError noPayload(int pHttpCode) {
+            return new RealmsError.CustomError(pHttpCode, null);
         }
 
         @Override

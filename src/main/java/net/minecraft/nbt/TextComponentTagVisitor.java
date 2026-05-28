@@ -51,12 +51,12 @@ public class TextComponentTagVisitor implements TagVisitor {
     private int depth;
     private final MutableComponent result = Component.empty();
 
-    public TextComponentTagVisitor(String p_178251_) {
-        this.indentation = p_178251_;
+    public TextComponentTagVisitor(String pIndentation) {
+        this.indentation = pIndentation;
     }
 
-    public Component visit(Tag p_178282_) {
-        p_178282_.accept(this);
+    public Component visit(Tag pTag) {
+        pTag.accept(this);
         return this.result;
     }
 
@@ -242,17 +242,17 @@ public class TextComponentTagVisitor implements TagVisitor {
         }
     }
 
-    private void appendSubTag(Tag p_345236_, boolean p_344785_) {
-        if (p_344785_) {
+    private void appendSubTag(Tag pTag, boolean pIndent) {
+        if (pIndent) {
             this.indentDepth++;
         }
 
         this.depth++;
 
         try {
-            p_345236_.accept(this);
+            pTag.accept(this);
         } finally {
-            if (p_344785_) {
+            if (pIndent) {
                 this.indentDepth--;
             }
 
@@ -260,11 +260,11 @@ public class TextComponentTagVisitor implements TagVisitor {
         }
     }
 
-    protected static Component handleEscapePretty(String p_178254_) {
-        if (SIMPLE_VALUE.matcher(p_178254_).matches()) {
-            return Component.literal(p_178254_).withStyle(SYNTAX_HIGHLIGHTING_KEY);
+    protected static Component handleEscapePretty(String pText) {
+        if (SIMPLE_VALUE.matcher(pText).matches()) {
+            return Component.literal(pText).withStyle(SYNTAX_HIGHLIGHTING_KEY);
         } else {
-            String s = StringTag.quoteAndEscape(p_178254_);
+            String s = StringTag.quoteAndEscape(pText);
             String s1 = s.substring(0, 1);
             Component component = Component.literal(s.substring(1, s.length() - 1)).withStyle(SYNTAX_HIGHLIGHTING_KEY);
             return Component.literal(s1).append(component).append(s1);

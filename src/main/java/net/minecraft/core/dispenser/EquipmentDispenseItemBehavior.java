@@ -17,15 +17,15 @@ public class EquipmentDispenseItemBehavior extends DefaultDispenseItemBehavior {
         return dispenseEquipment(p_361136_, p_365597_) ? p_365597_ : super.execute(p_361136_, p_365597_);
     }
 
-    public static boolean dispenseEquipment(BlockSource p_366555_, ItemStack p_367321_) {
-        BlockPos blockpos = p_366555_.pos().relative(p_366555_.state().getValue(DispenserBlock.FACING));
-        List<LivingEntity> list = p_366555_.level().getEntitiesOfClass(LivingEntity.class, new AABB(blockpos), p_368089_ -> p_368089_.canEquipWithDispenser(p_367321_));
+    public static boolean dispenseEquipment(BlockSource pBlockSource, ItemStack pItem) {
+        BlockPos blockpos = pBlockSource.pos().relative(pBlockSource.state().getValue(DispenserBlock.FACING));
+        List<LivingEntity> list = pBlockSource.level().getEntitiesOfClass(LivingEntity.class, new AABB(blockpos), p_368089_ -> p_368089_.canEquipWithDispenser(pItem));
         if (list.isEmpty()) {
             return false;
         } else {
             LivingEntity livingentity = list.getFirst();
-            EquipmentSlot equipmentslot = livingentity.getEquipmentSlotForItem(p_367321_);
-            ItemStack itemstack = p_367321_.split(1);
+            EquipmentSlot equipmentslot = livingentity.getEquipmentSlotForItem(pItem);
+            ItemStack itemstack = pItem.split(1);
             livingentity.setItemSlot(equipmentslot, itemstack);
             if (livingentity instanceof Mob mob) {
                 mob.setDropChance(equipmentslot, 2.0F);

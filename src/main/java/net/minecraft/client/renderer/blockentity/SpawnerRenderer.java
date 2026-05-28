@@ -16,8 +16,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class SpawnerRenderer implements BlockEntityRenderer<SpawnerBlockEntity> {
     private final EntityRenderDispatcher entityRenderer;
 
-    public SpawnerRenderer(BlockEntityRendererProvider.Context p_173673_) {
-        this.entityRenderer = p_173673_.getEntityRenderer();
+    public SpawnerRenderer(BlockEntityRendererProvider.Context pContext) {
+        this.entityRenderer = pContext.getEntityRenderer();
     }
 
     public void render(SpawnerBlockEntity p_112563_, float p_112564_, PoseStack p_112565_, MultiBufferSource p_112566_, int p_112567_, int p_112568_) {
@@ -32,29 +32,29 @@ public class SpawnerRenderer implements BlockEntityRenderer<SpawnerBlockEntity> 
     }
 
     public static void renderEntityInSpawner(
-        float p_311595_,
-        PoseStack p_313192_,
-        MultiBufferSource p_313178_,
-        int p_312511_,
-        Entity p_312144_,
-        EntityRenderDispatcher p_311572_,
-        double p_310509_,
-        double p_310548_
+        float pPartialTick,
+        PoseStack pPoseStack,
+        MultiBufferSource pBuffer,
+        int pPackedLight,
+        Entity pEntity,
+        EntityRenderDispatcher pEntityRenderer,
+        double pOSpin,
+        double pSpin
     ) {
-        p_313192_.pushPose();
-        p_313192_.translate(0.5F, 0.0F, 0.5F);
+        pPoseStack.pushPose();
+        pPoseStack.translate(0.5F, 0.0F, 0.5F);
         float f = 0.53125F;
-        float f1 = Math.max(p_312144_.getBbWidth(), p_312144_.getBbHeight());
+        float f1 = Math.max(pEntity.getBbWidth(), pEntity.getBbHeight());
         if ((double)f1 > 1.0) {
             f /= f1;
         }
 
-        p_313192_.translate(0.0F, 0.4F, 0.0F);
-        p_313192_.mulPose(Axis.YP.rotationDegrees((float)Mth.lerp((double)p_311595_, p_310509_, p_310548_) * 10.0F));
-        p_313192_.translate(0.0F, -0.2F, 0.0F);
-        p_313192_.mulPose(Axis.XP.rotationDegrees(-30.0F));
-        p_313192_.scale(f, f, f);
-        p_311572_.render(p_312144_, 0.0, 0.0, 0.0, p_311595_, p_313192_, p_313178_, p_312511_);
-        p_313192_.popPose();
+        pPoseStack.translate(0.0F, 0.4F, 0.0F);
+        pPoseStack.mulPose(Axis.YP.rotationDegrees((float)Mth.lerp((double)pPartialTick, pOSpin, pSpin) * 10.0F));
+        pPoseStack.translate(0.0F, -0.2F, 0.0F);
+        pPoseStack.mulPose(Axis.XP.rotationDegrees(-30.0F));
+        pPoseStack.scale(f, f, f);
+        pEntityRenderer.render(pEntity, 0.0, 0.0, 0.0, pPartialTick, pPoseStack, pBuffer, pPackedLight);
+        pPoseStack.popPose();
     }
 }

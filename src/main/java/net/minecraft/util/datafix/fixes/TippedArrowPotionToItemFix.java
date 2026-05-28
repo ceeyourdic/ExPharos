@@ -5,8 +5,8 @@ import com.mojang.serialization.Dynamic;
 import java.util.Optional;
 
 public class TippedArrowPotionToItemFix extends NamedEntityWriteReadFix {
-    public TippedArrowPotionToItemFix(Schema p_332998_) {
-        super(p_332998_, false, "TippedArrowPotionToItemFix", References.ENTITY, "minecraft:arrow");
+    public TippedArrowPotionToItemFix(Schema pOutputSchema) {
+        super(pOutputSchema, false, "TippedArrowPotionToItemFix", References.ENTITY, "minecraft:arrow");
     }
 
     @Override

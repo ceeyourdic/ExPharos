@@ -16,23 +16,23 @@ public abstract class SpriteIconButton extends Button {
     protected final int spriteHeight;
 
     SpriteIconButton(
-        int p_297620_,
-        int p_300275_,
-        Component p_297544_,
-        int p_298263_,
-        int p_299223_,
-        ResourceLocation p_297738_,
-        Button.OnPress p_297736_,
-        @Nullable Button.CreateNarration p_335316_
+        int pWidth,
+        int pHeight,
+        Component pMessage,
+        int pSpriteWidth,
+        int pSpriteHeight,
+        ResourceLocation pSprite,
+        Button.OnPress pOnPress,
+        @Nullable Button.CreateNarration pCreateNarration
     ) {
-        super(0, 0, p_297620_, p_300275_, p_297544_, p_297736_, p_335316_ == null ? DEFAULT_NARRATION : p_335316_);
-        this.spriteWidth = p_298263_;
-        this.spriteHeight = p_299223_;
-        this.sprite = p_297738_;
+        super(0, 0, pWidth, pHeight, pMessage, pOnPress, pCreateNarration == null ? DEFAULT_NARRATION : pCreateNarration);
+        this.spriteWidth = pSpriteWidth;
+        this.spriteHeight = pSpriteHeight;
+        this.sprite = pSprite;
     }
 
-    public static SpriteIconButton.Builder builder(Component p_299964_, Button.OnPress p_301369_, boolean p_298501_) {
-        return new SpriteIconButton.Builder(p_299964_, p_301369_, p_298501_);
+    public static SpriteIconButton.Builder builder(Component pMessage, Button.OnPress pOnPress, boolean pIconOnly) {
+        return new SpriteIconButton.Builder(pMessage, pOnPress, pIconOnly);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -49,32 +49,32 @@ public abstract class SpriteIconButton extends Button {
         @Nullable
         Button.CreateNarration narration;
 
-        public Builder(Component p_298778_, Button.OnPress p_297973_, boolean p_297512_) {
-            this.message = p_298778_;
-            this.onPress = p_297973_;
-            this.iconOnly = p_297512_;
+        public Builder(Component pMessage, Button.OnPress pOnPress, boolean pIconOnly) {
+            this.message = pMessage;
+            this.onPress = pOnPress;
+            this.iconOnly = pIconOnly;
         }
 
-        public SpriteIconButton.Builder width(int p_298805_) {
-            this.width = p_298805_;
+        public SpriteIconButton.Builder width(int pWidth) {
+            this.width = pWidth;
             return this;
         }
 
-        public SpriteIconButton.Builder size(int p_301312_, int p_297726_) {
-            this.width = p_301312_;
-            this.height = p_297726_;
+        public SpriteIconButton.Builder size(int pWidth, int pHeight) {
+            this.width = pWidth;
+            this.height = pHeight;
             return this;
         }
 
-        public SpriteIconButton.Builder sprite(ResourceLocation p_298738_, int p_301308_, int p_297593_) {
-            this.sprite = p_298738_;
-            this.spriteWidth = p_301308_;
-            this.spriteHeight = p_297593_;
+        public SpriteIconButton.Builder sprite(ResourceLocation pSprite, int pSpriteWidth, int pSpriteHeight) {
+            this.sprite = pSprite;
+            this.spriteWidth = pSpriteWidth;
+            this.spriteHeight = pSpriteHeight;
             return this;
         }
 
-        public SpriteIconButton.Builder narration(Button.CreateNarration p_328959_) {
-            this.narration = p_328959_;
+        public SpriteIconButton.Builder narration(Button.CreateNarration pNarration) {
+            this.narration = pNarration;
             return this;
         }
 

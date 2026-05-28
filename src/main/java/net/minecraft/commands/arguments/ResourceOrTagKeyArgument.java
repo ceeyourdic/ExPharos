@@ -29,45 +29,45 @@ public class ResourceOrTagKeyArgument<T> implements ArgumentType<ResourceOrTagKe
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "012", "#skeletons", "#minecraft:skeletons");
     final ResourceKey<? extends Registry<T>> registryKey;
 
-    public ResourceOrTagKeyArgument(ResourceKey<? extends Registry<T>> p_248579_) {
-        this.registryKey = p_248579_;
+    public ResourceOrTagKeyArgument(ResourceKey<? extends Registry<T>> pRegistryKey) {
+        this.registryKey = pRegistryKey;
     }
 
-    public static <T> ResourceOrTagKeyArgument<T> resourceOrTagKey(ResourceKey<? extends Registry<T>> p_249175_) {
-        return new ResourceOrTagKeyArgument<>(p_249175_);
+    public static <T> ResourceOrTagKeyArgument<T> resourceOrTagKey(ResourceKey<? extends Registry<T>> pRegistryKey) {
+        return new ResourceOrTagKeyArgument<>(pRegistryKey);
     }
 
     public static <T> ResourceOrTagKeyArgument.Result<T> getResourceOrTagKey(
-        CommandContext<CommandSourceStack> p_252162_, String p_248628_, ResourceKey<Registry<T>> p_249008_, DynamicCommandExceptionType p_251387_
+        CommandContext<CommandSourceStack> pContext, String pArgument, ResourceKey<Registry<T>> pRegistryKey, DynamicCommandExceptionType pDynamicCommandExceptionType
     ) throws CommandSyntaxException {
-        ResourceOrTagKeyArgument.Result<?> result = p_252162_.getArgument(p_248628_, ResourceOrTagKeyArgument.Result.class);
-        Optional<ResourceOrTagKeyArgument.Result<T>> optional = result.cast(p_249008_);
-        return optional.orElseThrow(() -> p_251387_.create(result));
+        ResourceOrTagKeyArgument.Result<?> result = pContext.getArgument(pArgument, ResourceOrTagKeyArgument.Result.class);
+        Optional<ResourceOrTagKeyArgument.Result<T>> optional = result.cast(pRegistryKey);
+        return optional.orElseThrow(() -> pDynamicCommandExceptionType.create(result));
     }
 
-    public ResourceOrTagKeyArgument.Result<T> parse(StringReader p_250307_) throws CommandSyntaxException {
-        if (p_250307_.canRead() && p_250307_.peek() == '#') {
-            int i = p_250307_.getCursor();
+    public ResourceOrTagKeyArgument.Result<T> parse(StringReader pReader) throws CommandSyntaxException {
+        if (pReader.canRead() && pReader.peek() == '#') {
+            int i = pReader.getCursor();
 
             try {
-                p_250307_.skip();
-                ResourceLocation resourcelocation1 = ResourceLocation.read(p_250307_);
+                pReader.skip();
+                ResourceLocation resourcelocation1 = ResourceLocation.read(pReader);
                 return new ResourceOrTagKeyArgument.TagResult<>(TagKey.create(this.registryKey, resourcelocation1));
             } catch (CommandSyntaxException commandsyntaxexception) {
-                p_250307_.setCursor(i);
+                pReader.setCursor(i);
                 throw commandsyntaxexception;
             }
         } else {
-            ResourceLocation resourcelocation = ResourceLocation.read(p_250307_);
+            ResourceLocation resourcelocation = ResourceLocation.read(pReader);
             return new ResourceOrTagKeyArgument.ResourceResult<>(ResourceKey.create(this.registryKey, resourcelocation));
         }
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_251659_, SuggestionsBuilder p_251141_) {
-        return p_251659_.getSource() instanceof SharedSuggestionProvider sharedsuggestionprovider
-            ? sharedsuggestionprovider.suggestRegistryElements(this.registryKey, SharedSuggestionProvider.ElementSuggestionType.ALL, p_251141_, p_251659_)
-            : p_251141_.buildFuture();
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> pContext, SuggestionsBuilder pBuilder) {
+        return pContext.getSource() instanceof SharedSuggestionProvider sharedsuggestionprovider
+            ? sharedsuggestionprovider.suggestRegistryElements(this.registryKey, SharedSuggestionProvider.ElementSuggestionType.ALL, pBuilder, pContext)
+            : pBuilder.buildFuture();
     }
 
     @Override
@@ -95,8 +95,8 @@ public class ResourceOrTagKeyArgument<T> implements ArgumentType<ResourceOrTagKe
         public final class Template implements ArgumentTypeInfo.Template<ResourceOrTagKeyArgument<T>> {
             final ResourceKey<? extends Registry<T>> registryKey;
 
-            Template(final ResourceKey<? extends Registry<T>> p_251992_) {
-                this.registryKey = p_251992_;
+            Template(final ResourceKey<? extends Registry<T>> pRegistryKey) {
+                this.registryKey = pRegistryKey;
             }
 
             public ResourceOrTagKeyArgument<T> instantiate(CommandBuildContext p_251559_) {
@@ -121,8 +121,8 @@ public class ResourceOrTagKeyArgument<T> implements ArgumentType<ResourceOrTagKe
             return this.key.cast(p_251369_).map(ResourceOrTagKeyArgument.ResourceResult::new);
         }
 
-        public boolean test(Holder<T> p_250257_) {
-            return p_250257_.is(this.key);
+        public boolean test(Holder<T> pHolder) {
+            return pHolder.is(this.key);
         }
 
         @Override
@@ -134,7 +134,7 @@ public class ResourceOrTagKeyArgument<T> implements ArgumentType<ResourceOrTagKe
     public interface Result<T> extends Predicate<Holder<T>> {
         Either<ResourceKey<T>, TagKey<T>> unwrap();
 
-        <E> Optional<ResourceOrTagKeyArgument.Result<E>> cast(ResourceKey<? extends Registry<E>> p_251612_);
+        <E> Optional<ResourceOrTagKeyArgument.Result<E>> cast(ResourceKey<? extends Registry<E>> pRegistryKey);
 
         String asPrintable();
     }
@@ -150,8 +150,8 @@ public class ResourceOrTagKeyArgument<T> implements ArgumentType<ResourceOrTagKe
             return this.key.cast(p_251833_).map(ResourceOrTagKeyArgument.TagResult::new);
         }
 
-        public boolean test(Holder<T> p_252238_) {
-            return p_252238_.is(this.key);
+        public boolean test(Holder<T> pHolder) {
+            return pHolder.is(this.key);
         }
 
         @Override

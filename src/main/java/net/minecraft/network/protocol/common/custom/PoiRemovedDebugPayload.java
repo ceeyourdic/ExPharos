@@ -10,12 +10,12 @@ public record PoiRemovedDebugPayload(BlockPos pos) implements CustomPacketPayloa
     );
     public static final CustomPacketPayload.Type<PoiRemovedDebugPayload> TYPE = CustomPacketPayload.createType("debug/poi_removed");
 
-    private PoiRemovedDebugPayload(FriendlyByteBuf p_300036_) {
-        this(p_300036_.readBlockPos());
+    private PoiRemovedDebugPayload(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readBlockPos());
     }
 
-    private void write(FriendlyByteBuf p_300931_) {
-        p_300931_.writeBlockPos(this.pos);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeBlockPos(this.pos);
     }
 
     @Override

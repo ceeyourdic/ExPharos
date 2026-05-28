@@ -18,8 +18,8 @@ public class SonicBoomParticle extends HugeExplosionParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public Provider(SpriteSet p_234036_) {
-            this.sprites = p_234036_;
+        public Provider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(

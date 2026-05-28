@@ -19,9 +19,9 @@ public class WeightedListInt extends IntProvider {
     private final int minValue;
     private final int maxValue;
 
-    public WeightedListInt(SimpleWeightedRandomList<IntProvider> p_185915_) {
-        this.distribution = p_185915_;
-        List<WeightedEntry.Wrapper<IntProvider>> list = p_185915_.unwrap();
+    public WeightedListInt(SimpleWeightedRandomList<IntProvider> pDistribution) {
+        this.distribution = pDistribution;
+        List<WeightedEntry.Wrapper<IntProvider>> list = pDistribution.unwrap();
         int i = Integer.MAX_VALUE;
         int j = Integer.MIN_VALUE;
 

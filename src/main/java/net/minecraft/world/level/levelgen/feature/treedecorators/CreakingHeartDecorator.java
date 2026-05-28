@@ -20,8 +20,8 @@ public class CreakingHeartDecorator extends TreeDecorator {
         .xmap(CreakingHeartDecorator::new, p_364526_ -> p_364526_.probability);
     private final float probability;
 
-    public CreakingHeartDecorator(float p_363257_) {
-        this.probability = p_363257_;
+    public CreakingHeartDecorator(float pProbability) {
+        this.probability = pProbability;
     }
 
     @Override

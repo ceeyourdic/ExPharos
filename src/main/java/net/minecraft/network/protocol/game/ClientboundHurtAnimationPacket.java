@@ -11,17 +11,17 @@ public record ClientboundHurtAnimationPacket(int id, float yaw) implements Packe
         ClientboundHurtAnimationPacket::write, ClientboundHurtAnimationPacket::new
     );
 
-    public ClientboundHurtAnimationPacket(LivingEntity p_265293_) {
-        this(p_265293_.getId(), p_265293_.getHurtDir());
+    public ClientboundHurtAnimationPacket(LivingEntity pEntity) {
+        this(pEntity.getId(), pEntity.getHurtDir());
     }
 
-    private ClientboundHurtAnimationPacket(FriendlyByteBuf p_265181_) {
-        this(p_265181_.readVarInt(), p_265181_.readFloat());
+    private ClientboundHurtAnimationPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readVarInt(), pBuffer.readFloat());
     }
 
-    private void write(FriendlyByteBuf p_265156_) {
-        p_265156_.writeVarInt(this.id);
-        p_265156_.writeFloat(this.yaw);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.id);
+        pBuffer.writeFloat(this.yaw);
     }
 
     @Override

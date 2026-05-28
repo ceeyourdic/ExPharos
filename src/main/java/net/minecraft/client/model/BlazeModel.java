@@ -17,15 +17,15 @@ public class BlazeModel extends EntityModel<LivingEntityRenderState> {
     private final ModelPart[] upperBodyParts;
     private final ModelPart head;
 
-    public BlazeModel(ModelPart p_170443_) {
-        super(p_170443_);
-        this.head = p_170443_.getChild("head");
+    public BlazeModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
         this.upperBodyParts = new ModelPart[12];
-        Arrays.setAll(this.upperBodyParts, p_170449_ -> p_170443_.getChild(getPartName(p_170449_)));
+        Arrays.setAll(this.upperBodyParts, p_170449_ -> pRoot.getChild(getPartName(p_170449_)));
     }
 
-    private static String getPartName(int p_170446_) {
-        return "part" + p_170446_;
+    private static String getPartName(int pIndex) {
+        return "part" + pIndex;
     }
 
     public static LayerDefinition createBodyLayer() {

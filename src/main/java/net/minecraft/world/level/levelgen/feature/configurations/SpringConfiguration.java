@@ -26,11 +26,11 @@ public class SpringConfiguration implements FeatureConfiguration {
     public final int holeCount;
     public final HolderSet<Block> validBlocks;
 
-    public SpringConfiguration(FluidState p_204848_, boolean p_204849_, int p_204850_, int p_204851_, HolderSet<Block> p_204852_) {
-        this.state = p_204848_;
-        this.requiresBlockBelow = p_204849_;
-        this.rockCount = p_204850_;
-        this.holeCount = p_204851_;
-        this.validBlocks = p_204852_;
+    public SpringConfiguration(FluidState pState, boolean pRequiresBlockBelow, int pRockCount, int pHoleCount, HolderSet<Block> pValidBlocks) {
+        this.state = pState;
+        this.requiresBlockBelow = pRequiresBlockBelow;
+        this.rockCount = pRockCount;
+        this.holeCount = pHoleCount;
+        this.validBlocks = pValidBlocks;
     }
 }

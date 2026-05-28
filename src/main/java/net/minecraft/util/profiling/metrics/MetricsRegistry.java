@@ -15,8 +15,8 @@ public class MetricsRegistry {
     private MetricsRegistry() {
     }
 
-    public void add(ProfilerMeasured p_146073_) {
-        this.measuredInstances.put(p_146073_, null);
+    public void add(ProfilerMeasured pKey) {
+        this.measuredInstances.put(pKey, null);
     }
 
     public List<MetricSampler> getRegisteredSamplers() {
@@ -28,8 +28,8 @@ public class MetricsRegistry {
         return aggregateDuplicates(map);
     }
 
-    private static List<MetricSampler> aggregateDuplicates(Map<String, List<MetricSampler>> p_146077_) {
-        return p_146077_.entrySet().stream().map(p_146075_ -> {
+    private static List<MetricSampler> aggregateDuplicates(Map<String, List<MetricSampler>> pSamplers) {
+        return pSamplers.entrySet().stream().map(p_146075_ -> {
             String s = p_146075_.getKey();
             List<MetricSampler> list = p_146075_.getValue();
             return (MetricSampler)(list.size() > 1 ? new MetricsRegistry.AggregatedMetricSampler(s, list) : list.get(0));
@@ -39,29 +39,29 @@ public class MetricsRegistry {
     static class AggregatedMetricSampler extends MetricSampler {
         private final List<MetricSampler> delegates;
 
-        AggregatedMetricSampler(String p_146082_, List<MetricSampler> p_146083_) {
-            super(p_146082_, p_146083_.get(0).getCategory(), () -> averageValueFromDelegates(p_146083_), () -> beforeTick(p_146083_), thresholdTest(p_146083_));
-            this.delegates = p_146083_;
+        AggregatedMetricSampler(String pName, List<MetricSampler> pDelegates) {
+            super(pName, pDelegates.get(0).getCategory(), () -> averageValueFromDelegates(pDelegates), () -> beforeTick(pDelegates), thresholdTest(pDelegates));
+            this.delegates = pDelegates;
         }
 
-        private static MetricSampler.ThresholdTest thresholdTest(List<MetricSampler> p_146088_) {
-            return p_146091_ -> p_146088_.stream().anyMatch(p_146086_ -> p_146086_.thresholdTest != null ? p_146086_.thresholdTest.test(p_146091_) : false);
+        private static MetricSampler.ThresholdTest thresholdTest(List<MetricSampler> pSamplers) {
+            return p_146091_ -> pSamplers.stream().anyMatch(p_146086_ -> p_146086_.thresholdTest != null ? p_146086_.thresholdTest.test(p_146091_) : false);
         }
 
-        private static void beforeTick(List<MetricSampler> p_146093_) {
-            for (MetricSampler metricsampler : p_146093_) {
+        private static void beforeTick(List<MetricSampler> pSamplers) {
+            for (MetricSampler metricsampler : pSamplers) {
                 metricsampler.onStartTick();
             }
         }
 
-        private static double averageValueFromDelegates(List<MetricSampler> p_146095_) {
+        private static double averageValueFromDelegates(List<MetricSampler> pSamplers) {
             double d0 = 0.0;
 
-            for (MetricSampler metricsampler : p_146095_) {
+            for (MetricSampler metricsampler : pSamplers) {
                 d0 += metricsampler.getSampler().getAsDouble();
             }
 
-            return d0 / (double)p_146095_.size();
+            return d0 / (double)pSamplers.size();
         }
 
         @Override

@@ -9,8 +9,8 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 public class TradeRebalanceEnchantmentTagsProvider extends TagsProvider<Enchantment> {
-    public TradeRebalanceEnchantmentTagsProvider(PackOutput p_343252_, CompletableFuture<HolderLookup.Provider> p_345008_) {
-        super(p_343252_, Registries.ENCHANTMENT, p_345008_);
+    public TradeRebalanceEnchantmentTagsProvider(PackOutput pPackOutput, CompletableFuture<HolderLookup.Provider> pProvider) {
+        super(pPackOutput, Registries.ENCHANTMENT, pProvider);
     }
 
     @Override

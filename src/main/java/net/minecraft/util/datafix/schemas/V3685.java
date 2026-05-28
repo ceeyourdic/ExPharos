@@ -12,16 +12,16 @@ public class V3685 extends NamespacedSchema {
         super(p_311526_, p_311989_);
     }
 
-    protected static TypeTemplate abstractArrow(Schema p_309540_) {
-        return DSL.optionalFields("inBlockState", References.BLOCK_STATE.in(p_309540_), "item", References.ITEM_STACK.in(p_309540_));
+    protected static TypeTemplate abstractArrow(Schema pSchema) {
+        return DSL.optionalFields("inBlockState", References.BLOCK_STATE.in(pSchema), "item", References.ITEM_STACK.in(pSchema));
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_312739_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_312739_);
-        p_312739_.register(map, "minecraft:trident", () -> abstractArrow(p_312739_));
-        p_312739_.register(map, "minecraft:spectral_arrow", () -> abstractArrow(p_312739_));
-        p_312739_.register(map, "minecraft:arrow", () -> abstractArrow(p_312739_));
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
+        pSchema.register(map, "minecraft:trident", () -> abstractArrow(pSchema));
+        pSchema.register(map, "minecraft:spectral_arrow", () -> abstractArrow(pSchema));
+        pSchema.register(map, "minecraft:arrow", () -> abstractArrow(pSchema));
         return map;
     }
 }

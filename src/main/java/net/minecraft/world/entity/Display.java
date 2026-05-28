@@ -127,11 +127,11 @@ public abstract class Display extends Entity {
         return false;
     }
 
-    private static Transformation createTransformation(SynchedEntityData p_270278_) {
-        Vector3f vector3f = p_270278_.get(DATA_TRANSLATION_ID);
-        Quaternionf quaternionf = p_270278_.get(DATA_LEFT_ROTATION_ID);
-        Vector3f vector3f1 = p_270278_.get(DATA_SCALE_ID);
-        Quaternionf quaternionf1 = p_270278_.get(DATA_RIGHT_ROTATION_ID);
+    private static Transformation createTransformation(SynchedEntityData pSynchedEntityData) {
+        Vector3f vector3f = pSynchedEntityData.get(DATA_TRANSLATION_ID);
+        Quaternionf quaternionf = pSynchedEntityData.get(DATA_LEFT_ROTATION_ID);
+        Vector3f vector3f1 = pSynchedEntityData.get(DATA_SCALE_ID);
+        Quaternionf quaternionf1 = pSynchedEntityData.get(DATA_RIGHT_ROTATION_ID);
         return new Transformation(vector3f, quaternionf, vector3f1, quaternionf1);
     }
 
@@ -182,7 +182,7 @@ public abstract class Display extends Entity {
         }
     }
 
-    protected abstract void updateRenderSubState(boolean p_277603_, float p_277810_);
+    protected abstract void updateRenderSubState(boolean pInterpolate, float pPartialTick);
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder p_327982_) {
@@ -268,11 +268,11 @@ public abstract class Display extends Entity {
         }
     }
 
-    private void setTransformation(Transformation p_270186_) {
-        this.entityData.set(DATA_TRANSLATION_ID, p_270186_.getTranslation());
-        this.entityData.set(DATA_LEFT_ROTATION_ID, p_270186_.getLeftRotation());
-        this.entityData.set(DATA_SCALE_ID, p_270186_.getScale());
-        this.entityData.set(DATA_RIGHT_ROTATION_ID, p_270186_.getRightRotation());
+    private void setTransformation(Transformation pTransformation) {
+        this.entityData.set(DATA_TRANSLATION_ID, pTransformation.getTranslation());
+        this.entityData.set(DATA_LEFT_ROTATION_ID, pTransformation.getLeftRotation());
+        this.entityData.set(DATA_SCALE_ID, pTransformation.getScale());
+        this.entityData.set(DATA_RIGHT_ROTATION_ID, pTransformation.getRightRotation());
     }
 
     @Override
@@ -356,40 +356,40 @@ public abstract class Display extends Entity {
         return this.renderState;
     }
 
-    private void setTransformationInterpolationDuration(int p_297488_) {
-        this.entityData.set(DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID, p_297488_);
+    private void setTransformationInterpolationDuration(int pTransformationInterpolationDuration) {
+        this.entityData.set(DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID, pTransformationInterpolationDuration);
     }
 
     private int getTransformationInterpolationDuration() {
         return this.entityData.get(DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID);
     }
 
-    private void setTransformationInterpolationDelay(int p_300640_) {
-        this.entityData.set(DATA_TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS_ID, p_300640_, true);
+    private void setTransformationInterpolationDelay(int pTransformationInterpolationDelay) {
+        this.entityData.set(DATA_TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS_ID, pTransformationInterpolationDelay, true);
     }
 
     private int getTransformationInterpolationDelay() {
         return this.entityData.get(DATA_TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS_ID);
     }
 
-    private void setPosRotInterpolationDuration(int p_300107_) {
-        this.entityData.set(DATA_POS_ROT_INTERPOLATION_DURATION_ID, p_300107_);
+    private void setPosRotInterpolationDuration(int pPosRotInterpolationDuration) {
+        this.entityData.set(DATA_POS_ROT_INTERPOLATION_DURATION_ID, pPosRotInterpolationDuration);
     }
 
     private int getPosRotInterpolationDuration() {
         return this.entityData.get(DATA_POS_ROT_INTERPOLATION_DURATION_ID);
     }
 
-    private void setBillboardConstraints(Display.BillboardConstraints p_270345_) {
-        this.entityData.set(DATA_BILLBOARD_RENDER_CONSTRAINTS_ID, p_270345_.getId());
+    private void setBillboardConstraints(Display.BillboardConstraints pBillboardConstraints) {
+        this.entityData.set(DATA_BILLBOARD_RENDER_CONSTRAINTS_ID, pBillboardConstraints.getId());
     }
 
     private Display.BillboardConstraints getBillboardConstraints() {
         return Display.BillboardConstraints.BY_ID.apply(this.entityData.get(DATA_BILLBOARD_RENDER_CONSTRAINTS_ID));
     }
 
-    private void setBrightnessOverride(@Nullable Brightness p_270461_) {
-        this.entityData.set(DATA_BRIGHTNESS_OVERRIDE_ID, p_270461_ != null ? p_270461_.pack() : -1);
+    private void setBrightnessOverride(@Nullable Brightness pBrightnessOverride) {
+        this.entityData.set(DATA_BRIGHTNESS_OVERRIDE_ID, pBrightnessOverride != null ? pBrightnessOverride.pack() : -1);
     }
 
     @Nullable
@@ -402,57 +402,57 @@ public abstract class Display extends Entity {
         return this.entityData.get(DATA_BRIGHTNESS_OVERRIDE_ID);
     }
 
-    private void setViewRange(float p_270907_) {
-        this.entityData.set(DATA_VIEW_RANGE_ID, p_270907_);
+    private void setViewRange(float pViewRange) {
+        this.entityData.set(DATA_VIEW_RANGE_ID, pViewRange);
     }
 
     private float getViewRange() {
         return this.entityData.get(DATA_VIEW_RANGE_ID);
     }
 
-    private void setShadowRadius(float p_270122_) {
-        this.entityData.set(DATA_SHADOW_RADIUS_ID, p_270122_);
+    private void setShadowRadius(float pShadowRadius) {
+        this.entityData.set(DATA_SHADOW_RADIUS_ID, pShadowRadius);
     }
 
     private float getShadowRadius() {
         return this.entityData.get(DATA_SHADOW_RADIUS_ID);
     }
 
-    private void setShadowStrength(float p_270866_) {
-        this.entityData.set(DATA_SHADOW_STRENGTH_ID, p_270866_);
+    private void setShadowStrength(float pShadowStrength) {
+        this.entityData.set(DATA_SHADOW_STRENGTH_ID, pShadowStrength);
     }
 
     private float getShadowStrength() {
         return this.entityData.get(DATA_SHADOW_STRENGTH_ID);
     }
 
-    private void setWidth(float p_270741_) {
-        this.entityData.set(DATA_WIDTH_ID, p_270741_);
+    private void setWidth(float pWidth) {
+        this.entityData.set(DATA_WIDTH_ID, pWidth);
     }
 
     private float getWidth() {
         return this.entityData.get(DATA_WIDTH_ID);
     }
 
-    private void setHeight(float p_270716_) {
-        this.entityData.set(DATA_HEIGHT_ID, p_270716_);
+    private void setHeight(float pHeight) {
+        this.entityData.set(DATA_HEIGHT_ID, pHeight);
     }
 
     private int getGlowColorOverride() {
         return this.entityData.get(DATA_GLOW_COLOR_OVERRIDE_ID);
     }
 
-    private void setGlowColorOverride(int p_270784_) {
-        this.entityData.set(DATA_GLOW_COLOR_OVERRIDE_ID, p_270784_);
+    private void setGlowColorOverride(int pGlowColorOverride) {
+        this.entityData.set(DATA_GLOW_COLOR_OVERRIDE_ID, pGlowColorOverride);
     }
 
-    public float calculateInterpolationProgress(float p_272675_) {
+    public float calculateInterpolationProgress(float pPartialTick) {
         int i = this.interpolationDuration;
         if (i <= 0) {
             return 1.0F;
         } else {
             float f = (float)((long)this.tickCount - this.interpolationStartClientTick);
-            float f1 = f + p_272675_;
+            float f1 = f + pPartialTick;
             float f2 = Mth.clamp(Mth.inverseLerp(f1, 0.0F, (float)i), 0.0F, 1.0F);
             this.lastProgress = f2;
             return f2;
@@ -502,10 +502,10 @@ public abstract class Display extends Entity {
         );
     }
 
-    private Display.RenderState createInterpolatedRenderState(Display.RenderState p_277365_, float p_277948_) {
-        Transformation transformation = p_277365_.transformation.get(p_277948_);
-        float f = p_277365_.shadowRadius.get(p_277948_);
-        float f1 = p_277365_.shadowStrength.get(p_277948_);
+    private Display.RenderState createInterpolatedRenderState(Display.RenderState pRenderState, float pPartialTick) {
+        Transformation transformation = pRenderState.transformation.get(pPartialTick);
+        float f = pRenderState.shadowRadius.get(pPartialTick);
+        float f1 = pRenderState.shadowStrength.get(pPartialTick);
         return new Display.RenderState(
             new Display.TransformationInterpolator(transformation, createTransformation(this.entityData)),
             this.getBillboardConstraints(),
@@ -529,9 +529,9 @@ public abstract class Display extends Entity {
         private final byte id;
         private final String name;
 
-        private BillboardConstraints(final byte p_270785_, final String p_270544_) {
-            this.name = p_270544_;
-            this.id = p_270785_;
+        private BillboardConstraints(final byte pId, final String pName) {
+            this.name = pName;
+            this.id = pId;
         }
 
         @Override
@@ -572,8 +572,8 @@ public abstract class Display extends Entity {
             return this.entityData.get(DATA_BLOCK_STATE_ID);
         }
 
-        private void setBlockState(BlockState p_270267_) {
-            this.entityData.set(DATA_BLOCK_STATE_ID, p_270267_);
+        private void setBlockState(BlockState pBlockState) {
+            this.entityData.set(DATA_BLOCK_STATE_ID, pBlockState);
         }
 
         @Override
@@ -611,29 +611,29 @@ public abstract class Display extends Entity {
 
     @FunctionalInterface
     public interface FloatInterpolator {
-        static Display.FloatInterpolator constant(float p_277894_) {
-            return p_278040_ -> p_277894_;
+        static Display.FloatInterpolator constant(float pValue) {
+            return p_278040_ -> pValue;
         }
 
-        float get(float p_270330_);
+        float get(float pPartialTick);
     }
 
     @FunctionalInterface
     public interface GenericInterpolator<T> {
-        static <T> Display.GenericInterpolator<T> constant(T p_277718_) {
-            return p_277907_ -> p_277718_;
+        static <T> Display.GenericInterpolator<T> constant(T pValue) {
+            return p_277907_ -> pValue;
         }
 
-        T get(float p_270270_);
+        T get(float pPartialTick);
     }
 
     @FunctionalInterface
     public interface IntInterpolator {
-        static Display.IntInterpolator constant(int p_277348_) {
-            return p_277356_ -> p_277348_;
+        static Display.IntInterpolator constant(int pValue) {
+            return p_277356_ -> pValue;
         }
 
-        int get(float p_270183_);
+        int get(float pPartialTick);
     }
 
     public static class ItemDisplay extends Display {
@@ -668,12 +668,12 @@ public abstract class Display extends Entity {
             return this.entityData.get(DATA_ITEM_STACK_ID);
         }
 
-        private void setItemStack(ItemStack p_270310_) {
-            this.entityData.set(DATA_ITEM_STACK_ID, p_270310_);
+        private void setItemStack(ItemStack pItemStack) {
+            this.entityData.set(DATA_ITEM_STACK_ID, pItemStack);
         }
 
-        private void setItemTransform(ItemDisplayContext p_270370_) {
-            this.entityData.set(DATA_ITEM_DISPLAY_ID, p_270370_.getId());
+        private void setItemTransform(ItemDisplayContext pItemTransform) {
+            this.entityData.set(DATA_ITEM_DISPLAY_ID, pItemTransform.getId());
         }
 
         private ItemDisplayContext getItemTransform() {
@@ -750,22 +750,22 @@ public abstract class Display extends Entity {
         final double targetYRot;
         final double targetXRot;
 
-        PosRotInterpolationTarget(int p_297638_, double p_297433_, double p_297414_, double p_300814_, double p_297927_, double p_297784_) {
-            this.steps = p_297638_;
-            this.targetX = p_297433_;
-            this.targetY = p_297414_;
-            this.targetZ = p_300814_;
-            this.targetYRot = p_297927_;
-            this.targetXRot = p_297784_;
+        PosRotInterpolationTarget(int pSteps, double pTargetX, double pTargetY, double pTargetZ, double pTargetYRot, double pTargetXRot) {
+            this.steps = pSteps;
+            this.targetX = pTargetX;
+            this.targetY = pTargetY;
+            this.targetZ = pTargetZ;
+            this.targetYRot = pTargetYRot;
+            this.targetXRot = pTargetXRot;
         }
 
-        void applyTargetPosAndRot(Entity p_297540_) {
-            p_297540_.setPos(this.targetX, this.targetY, this.targetZ);
-            p_297540_.setRot((float)this.targetYRot, (float)this.targetXRot);
+        void applyTargetPosAndRot(Entity pEntity) {
+            pEntity.setPos(this.targetX, this.targetY, this.targetZ);
+            pEntity.setRot((float)this.targetYRot, (float)this.targetXRot);
         }
 
-        void applyLerpStep(Entity p_300902_) {
-            p_300902_.lerpPositionAndRotationStep(this.steps, this.targetX, this.targetY, this.targetZ, this.targetYRot, this.targetXRot);
+        void applyLerpStep(Entity pEntity) {
+            pEntity.lerpPositionAndRotationStep(this.steps, this.targetX, this.targetY, this.targetZ, this.targetYRot, this.targetXRot);
         }
     }
 
@@ -834,44 +834,44 @@ public abstract class Display extends Entity {
             return this.entityData.get(DATA_TEXT_ID);
         }
 
-        private void setText(Component p_270902_) {
-            this.entityData.set(DATA_TEXT_ID, p_270902_);
+        private void setText(Component pText) {
+            this.entityData.set(DATA_TEXT_ID, pText);
         }
 
         private int getLineWidth() {
             return this.entityData.get(DATA_LINE_WIDTH_ID);
         }
 
-        private void setLineWidth(int p_270545_) {
-            this.entityData.set(DATA_LINE_WIDTH_ID, p_270545_);
+        private void setLineWidth(int pLineWidth) {
+            this.entityData.set(DATA_LINE_WIDTH_ID, pLineWidth);
         }
 
         private byte getTextOpacity() {
             return this.entityData.get(DATA_TEXT_OPACITY_ID);
         }
 
-        private void setTextOpacity(byte p_270583_) {
-            this.entityData.set(DATA_TEXT_OPACITY_ID, p_270583_);
+        private void setTextOpacity(byte pTextOpacity) {
+            this.entityData.set(DATA_TEXT_OPACITY_ID, pTextOpacity);
         }
 
         private int getBackgroundColor() {
             return this.entityData.get(DATA_BACKGROUND_COLOR_ID);
         }
 
-        private void setBackgroundColor(int p_270241_) {
-            this.entityData.set(DATA_BACKGROUND_COLOR_ID, p_270241_);
+        private void setBackgroundColor(int pBackgroundColor) {
+            this.entityData.set(DATA_BACKGROUND_COLOR_ID, pBackgroundColor);
         }
 
         private byte getFlags() {
             return this.entityData.get(DATA_STYLE_FLAGS_ID);
         }
 
-        private void setFlags(byte p_270855_) {
-            this.entityData.set(DATA_STYLE_FLAGS_ID, p_270855_);
+        private void setFlags(byte pFlags) {
+            this.entityData.set(DATA_STYLE_FLAGS_ID, pFlags);
         }
 
-        private static byte loadFlag(byte p_270219_, CompoundTag p_270994_, String p_270958_, byte p_270701_) {
-            return p_270994_.getBoolean(p_270958_) ? (byte)(p_270219_ | p_270701_) : p_270219_;
+        private static byte loadFlag(byte pCurrentValue, CompoundTag pTag, String pFlag, byte pMask) {
+            return pTag.getBoolean(pFlag) ? (byte)(pCurrentValue | pMask) : pCurrentValue;
         }
 
         @Override
@@ -923,8 +923,8 @@ public abstract class Display extends Entity {
             }
         }
 
-        private static void storeFlag(byte p_270879_, CompoundTag p_270177_, String p_270294_, byte p_270853_) {
-            p_270177_.putBoolean(p_270294_, (p_270879_ & p_270853_) != 0);
+        private static void storeFlag(byte pCurrentValue, CompoundTag pTag, String pFlag, byte pMask) {
+            pTag.putBoolean(pFlag, (pCurrentValue & pMask) != 0);
         }
 
         @Override
@@ -969,9 +969,9 @@ public abstract class Display extends Entity {
             );
         }
 
-        private Display.TextDisplay.TextRenderState createInterpolatedTextRenderState(Display.TextDisplay.TextRenderState p_278000_, float p_277646_) {
-            int i = p_278000_.backgroundColor.get(p_277646_);
-            int j = p_278000_.textOpacity.get(p_277646_);
+        private Display.TextDisplay.TextRenderState createInterpolatedTextRenderState(Display.TextDisplay.TextRenderState pRenderState, float pPartialTick) {
+            int i = pRenderState.backgroundColor.get(pPartialTick);
+            int j = pRenderState.textOpacity.get(pPartialTick);
             return new Display.TextDisplay.TextRenderState(
                 this.getText(),
                 this.getLineWidth(),
@@ -981,10 +981,10 @@ public abstract class Display extends Entity {
             );
         }
 
-        public Display.TextDisplay.CachedInfo cacheDisplay(Display.TextDisplay.LineSplitter p_270682_) {
+        public Display.TextDisplay.CachedInfo cacheDisplay(Display.TextDisplay.LineSplitter pSplitter) {
             if (this.clientDisplayCache == null) {
                 if (this.textRenderState != null) {
-                    this.clientDisplayCache = p_270682_.split(this.textRenderState.text(), this.textRenderState.lineWidth());
+                    this.clientDisplayCache = pSplitter.split(this.textRenderState.text(), this.textRenderState.lineWidth());
                 } else {
                     this.clientDisplayCache = new Display.TextDisplay.CachedInfo(List.of(), 0);
                 }
@@ -993,11 +993,11 @@ public abstract class Display extends Entity {
             return this.clientDisplayCache;
         }
 
-        public static Display.TextDisplay.Align getAlign(byte p_270911_) {
-            if ((p_270911_ & 8) != 0) {
+        public static Display.TextDisplay.Align getAlign(byte pFlags) {
+            if ((pFlags & 8) != 0) {
                 return Display.TextDisplay.Align.LEFT;
             } else {
-                return (p_270911_ & 16) != 0 ? Display.TextDisplay.Align.RIGHT : Display.TextDisplay.Align.CENTER;
+                return (pFlags & 16) != 0 ? Display.TextDisplay.Align.RIGHT : Display.TextDisplay.Align.CENTER;
             }
         }
 
@@ -1009,8 +1009,8 @@ public abstract class Display extends Entity {
             public static final Codec<Display.TextDisplay.Align> CODEC = StringRepresentable.fromEnum(Display.TextDisplay.Align::values);
             private final String name;
 
-            private Align(final String p_270554_) {
-                this.name = p_270554_;
+            private Align(final String pName) {
+                this.name = pName;
             }
 
             @Override
@@ -1027,7 +1027,7 @@ public abstract class Display extends Entity {
 
         @FunctionalInterface
         public interface LineSplitter {
-            Display.TextDisplay.CachedInfo split(Component p_270086_, int p_270526_);
+            Display.TextDisplay.CachedInfo split(Component pText, int pMaxWidth);
         }
 
         public static record TextRenderState(

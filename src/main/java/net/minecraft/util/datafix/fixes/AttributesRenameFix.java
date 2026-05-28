@@ -15,10 +15,10 @@ public class AttributesRenameFix extends DataFix {
     private final String name;
     private final UnaryOperator<String> renames;
 
-    public AttributesRenameFix(Schema p_364410_, String p_366408_, UnaryOperator<String> p_366138_) {
-        super(p_364410_, false);
-        this.name = p_366408_;
-        this.renames = p_366138_;
+    public AttributesRenameFix(Schema pOutputSchema, String pName, UnaryOperator<String> pRenames) {
+        super(pOutputSchema, false);
+        this.name = pName;
+        this.renames = pRenames;
     }
 
     @Override
@@ -30,8 +30,8 @@ public class AttributesRenameFix extends DataFix {
         );
     }
 
-    private Typed<?> fixDataComponents(Typed<?> p_365772_) {
-        return p_365772_.update(
+    private Typed<?> fixDataComponents(Typed<?> pDataComponents) {
+        return pDataComponents.update(
             DSL.remainderFinder(),
             p_366382_ -> p_366382_.update(
                     "minecraft:attribute_modifiers",
@@ -45,8 +45,8 @@ public class AttributesRenameFix extends DataFix {
         );
     }
 
-    private Typed<?> fixEntity(Typed<?> p_364704_) {
-        return p_364704_.update(
+    private Typed<?> fixEntity(Typed<?> pData) {
+        return pData.update(
             DSL.remainderFinder(),
             p_362710_ -> p_362710_.update(
                     "attributes",
@@ -57,11 +57,11 @@ public class AttributesRenameFix extends DataFix {
         );
     }
 
-    private Dynamic<?> fixIdField(Dynamic<?> p_366579_) {
-        return ExtraDataFixUtils.fixStringField(p_366579_, "id", this.renames);
+    private Dynamic<?> fixIdField(Dynamic<?> pData) {
+        return ExtraDataFixUtils.fixStringField(pData, "id", this.renames);
     }
 
-    private Dynamic<?> fixTypeField(Dynamic<?> p_367667_) {
-        return ExtraDataFixUtils.fixStringField(p_367667_, "type", this.renames);
+    private Dynamic<?> fixTypeField(Dynamic<?> pData) {
+        return ExtraDataFixUtils.fixStringField(pData, "type", this.renames);
     }
 }

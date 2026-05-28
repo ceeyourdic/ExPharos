@@ -35,12 +35,12 @@ public abstract class AbstractCandleBlock extends Block {
         super(p_151898_);
     }
 
-    protected abstract Iterable<Vec3> getParticleOffsets(BlockState p_151927_);
+    protected abstract Iterable<Vec3> getParticleOffsets(BlockState pState);
 
-    public static boolean isLit(BlockState p_151934_) {
-        return p_151934_.hasProperty(LIT)
-            && (p_151934_.is(BlockTags.CANDLES) || p_151934_.is(BlockTags.CANDLE_CAKES))
-            && p_151934_.getValue(LIT);
+    public static boolean isLit(BlockState pState) {
+        return pState.hasProperty(LIT)
+            && (pState.is(BlockTags.CANDLES) || pState.is(BlockTags.CANDLE_CAKES))
+            && pState.getValue(LIT);
     }
 
     @Override
@@ -50,8 +50,8 @@ public abstract class AbstractCandleBlock extends Block {
         }
     }
 
-    protected boolean canBeLit(BlockState p_151935_) {
-        return !p_151935_.getValue(LIT);
+    protected boolean canBeLit(BlockState pState) {
+        return !pState.getValue(LIT);
     }
 
     @Override
@@ -68,38 +68,38 @@ public abstract class AbstractCandleBlock extends Block {
         }
     }
 
-    private static void addParticlesAndSound(Level p_220688_, Vec3 p_220689_, RandomSource p_220690_) {
-        float f = p_220690_.nextFloat();
+    private static void addParticlesAndSound(Level pLevel, Vec3 pOffset, RandomSource pRandom) {
+        float f = pRandom.nextFloat();
         if (f < 0.3F) {
-            p_220688_.addParticle(ParticleTypes.SMOKE, p_220689_.x, p_220689_.y, p_220689_.z, 0.0, 0.0, 0.0);
+            pLevel.addParticle(ParticleTypes.SMOKE, pOffset.x, pOffset.y, pOffset.z, 0.0, 0.0, 0.0);
             if (f < 0.17F) {
-                p_220688_.playLocalSound(
-                    p_220689_.x + 0.5,
-                    p_220689_.y + 0.5,
-                    p_220689_.z + 0.5,
+                pLevel.playLocalSound(
+                    pOffset.x + 0.5,
+                    pOffset.y + 0.5,
+                    pOffset.z + 0.5,
                     SoundEvents.CANDLE_AMBIENT,
                     SoundSource.BLOCKS,
-                    1.0F + p_220690_.nextFloat(),
-                    p_220690_.nextFloat() * 0.7F + 0.3F,
+                    1.0F + pRandom.nextFloat(),
+                    pRandom.nextFloat() * 0.7F + 0.3F,
                     false
                 );
             }
         }
 
-        p_220688_.addParticle(ParticleTypes.SMALL_FLAME, p_220689_.x, p_220689_.y, p_220689_.z, 0.0, 0.0, 0.0);
+        pLevel.addParticle(ParticleTypes.SMALL_FLAME, pOffset.x, pOffset.y, pOffset.z, 0.0, 0.0, 0.0);
     }
 
-    public static void extinguish(@Nullable Player p_151900_, BlockState p_151901_, LevelAccessor p_151902_, BlockPos p_151903_) {
-        setLit(p_151902_, p_151901_, p_151903_, false);
-        if (p_151901_.getBlock() instanceof AbstractCandleBlock) {
-            ((AbstractCandleBlock)p_151901_.getBlock())
-                .getParticleOffsets(p_151901_)
+    public static void extinguish(@Nullable Player pPlayer, BlockState pState, LevelAccessor pLevel, BlockPos pPos) {
+        setLit(pLevel, pState, pPos, false);
+        if (pState.getBlock() instanceof AbstractCandleBlock) {
+            ((AbstractCandleBlock)pState.getBlock())
+                .getParticleOffsets(pState)
                 .forEach(
-                    p_151926_ -> p_151902_.addParticle(
+                    p_151926_ -> pLevel.addParticle(
                             ParticleTypes.SMOKE,
-                            (double)p_151903_.getX() + p_151926_.x(),
-                            (double)p_151903_.getY() + p_151926_.y(),
-                            (double)p_151903_.getZ() + p_151926_.z(),
+                            (double)pPos.getX() + p_151926_.x(),
+                            (double)pPos.getY() + p_151926_.y(),
+                            (double)pPos.getZ() + p_151926_.z(),
                             0.0,
                             0.1F,
                             0.0
@@ -107,12 +107,12 @@ public abstract class AbstractCandleBlock extends Block {
                 );
         }
 
-        p_151902_.playSound(null, p_151903_, SoundEvents.CANDLE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, 1.0F);
-        p_151902_.gameEvent(p_151900_, GameEvent.BLOCK_CHANGE, p_151903_);
+        pLevel.playSound(null, pPos, SoundEvents.CANDLE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, 1.0F);
+        pLevel.gameEvent(pPlayer, GameEvent.BLOCK_CHANGE, pPos);
     }
 
-    private static void setLit(LevelAccessor p_151919_, BlockState p_151920_, BlockPos p_151921_, boolean p_151922_) {
-        p_151919_.setBlock(p_151921_, p_151920_.setValue(LIT, Boolean.valueOf(p_151922_)), 11);
+    private static void setLit(LevelAccessor pLevel, BlockState pState, BlockPos pPos, boolean pLit) {
+        pLevel.setBlock(pPos, pState.setValue(LIT, Boolean.valueOf(pLit)), 11);
     }
 
     @Override

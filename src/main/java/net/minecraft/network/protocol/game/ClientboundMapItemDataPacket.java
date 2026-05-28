@@ -31,9 +31,9 @@ public record ClientboundMapItemDataPacket(
     );
 
     public ClientboundMapItemDataPacket(
-        MapId p_332536_, byte p_327887_, boolean p_335452_, @Nullable Collection<MapDecoration> p_328950_, @Nullable MapItemSavedData.MapPatch p_329006_
+        MapId pMapId, byte pScale, boolean pLocked, @Nullable Collection<MapDecoration> pDecorations, @Nullable MapItemSavedData.MapPatch pColorPatch
     ) {
-        this(p_332536_, p_327887_, p_335452_, p_328950_ != null ? Optional.of(List.copyOf(p_328950_)) : Optional.empty(), Optional.ofNullable(p_329006_));
+        this(pMapId, pScale, pLocked, pDecorations != null ? Optional.of(List.copyOf(pDecorations)) : Optional.empty(), Optional.ofNullable(pColorPatch));
     }
 
     @Override
@@ -41,12 +41,12 @@ public record ClientboundMapItemDataPacket(
         return GamePacketTypes.CLIENTBOUND_MAP_ITEM_DATA;
     }
 
-    public void handle(ClientGamePacketListener p_132444_) {
-        p_132444_.handleMapItemData(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleMapItemData(this);
     }
 
-    public void applyToMap(MapItemSavedData p_132438_) {
-        this.decorations.ifPresent(p_132438_::addClientSideDecorations);
-        this.colorPatch.ifPresent(p_326099_ -> p_326099_.applyToMap(p_132438_));
+    public void applyToMap(MapItemSavedData pMapData) {
+        this.decorations.ifPresent(pMapData::addClientSideDecorations);
+        this.colorPatch.ifPresent(p_326099_ -> p_326099_.applyToMap(pMapData));
     }
 }

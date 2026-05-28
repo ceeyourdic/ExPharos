@@ -11,8 +11,8 @@ import org.joml.Matrix4f;
 public class ClientTextTooltip implements ClientTooltipComponent {
     private final FormattedCharSequence text;
 
-    public ClientTextTooltip(FormattedCharSequence p_169938_) {
-        this.text = p_169938_;
+    public ClientTextTooltip(FormattedCharSequence pText) {
+        this.text = pText;
     }
 
     @Override

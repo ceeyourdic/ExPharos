@@ -14,23 +14,23 @@ public class Varint21FrameDecoder extends ByteToMessageDecoder {
     @Nullable
     private final BandwidthDebugMonitor monitor;
 
-    public Varint21FrameDecoder(@Nullable BandwidthDebugMonitor p_297525_) {
-        this.monitor = p_297525_;
+    public Varint21FrameDecoder(@Nullable BandwidthDebugMonitor pMonitor) {
+        this.monitor = pMonitor;
     }
 
     @Override
-    protected void handlerRemoved0(ChannelHandlerContext p_299287_) {
+    protected void handlerRemoved0(ChannelHandlerContext pContext) {
         this.helperBuf.release();
     }
 
-    private static boolean copyVarint(ByteBuf p_299967_, ByteBuf p_298224_) {
+    private static boolean copyVarint(ByteBuf pIn, ByteBuf pOut) {
         for (int i = 0; i < 3; i++) {
-            if (!p_299967_.isReadable()) {
+            if (!pIn.isReadable()) {
                 return false;
             }
 
-            byte b0 = p_299967_.readByte();
-            p_298224_.writeByte(b0);
+            byte b0 = pIn.readByte();
+            pOut.writeByte(b0);
             if (!VarInt.hasContinuationBit(b0)) {
                 return true;
             }
@@ -40,21 +40,21 @@ public class Varint21FrameDecoder extends ByteToMessageDecoder {
     }
 
     @Override
-    protected void decode(ChannelHandlerContext p_130566_, ByteBuf p_130567_, List<Object> p_130568_) {
-        p_130567_.markReaderIndex();
+    protected void decode(ChannelHandlerContext pContext, ByteBuf pIn, List<Object> pOut) {
+        pIn.markReaderIndex();
         this.helperBuf.clear();
-        if (!copyVarint(p_130567_, this.helperBuf)) {
-            p_130567_.resetReaderIndex();
+        if (!copyVarint(pIn, this.helperBuf)) {
+            pIn.resetReaderIndex();
         } else {
             int i = VarInt.read(this.helperBuf);
-            if (p_130567_.readableBytes() < i) {
-                p_130567_.resetReaderIndex();
+            if (pIn.readableBytes() < i) {
+                pIn.resetReaderIndex();
             } else {
                 if (this.monitor != null) {
                     this.monitor.onReceive(i + VarInt.getByteSize(i));
                 }
 
-                p_130568_.add(p_130567_.readBytes(i));
+                pOut.add(pIn.readBytes(i));
             }
         }
     }

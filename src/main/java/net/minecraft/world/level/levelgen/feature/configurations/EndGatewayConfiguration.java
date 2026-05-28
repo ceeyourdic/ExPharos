@@ -17,13 +17,13 @@ public class EndGatewayConfiguration implements FeatureConfiguration {
     private final Optional<BlockPos> exit;
     private final boolean exact;
 
-    private EndGatewayConfiguration(Optional<BlockPos> p_67644_, boolean p_67645_) {
-        this.exit = p_67644_;
-        this.exact = p_67645_;
+    private EndGatewayConfiguration(Optional<BlockPos> pExit, boolean pExact) {
+        this.exit = pExit;
+        this.exact = pExact;
     }
 
-    public static EndGatewayConfiguration knownExit(BlockPos p_67651_, boolean p_67652_) {
-        return new EndGatewayConfiguration(Optional.of(p_67651_), p_67652_);
+    public static EndGatewayConfiguration knownExit(BlockPos pExit, boolean pExact) {
+        return new EndGatewayConfiguration(Optional.of(pExit), pExact);
     }
 
     public static EndGatewayConfiguration delayedExitSearch() {

@@ -23,18 +23,18 @@ public class DataFetcher {
     final TimeUnit resolution;
     final TimeSource timeSource;
 
-    public DataFetcher(Executor p_239381_, TimeUnit p_239382_, TimeSource p_239383_) {
-        this.executor = p_239381_;
-        this.resolution = p_239382_;
-        this.timeSource = p_239383_;
+    public DataFetcher(Executor pExecutor, TimeUnit pResolution, TimeSource pTimeSource) {
+        this.executor = pExecutor;
+        this.resolution = pResolution;
+        this.timeSource = pTimeSource;
     }
 
-    public <T> DataFetcher.Task<T> createTask(String p_239623_, Callable<T> p_239624_, Duration p_239625_, RepeatedDelayStrategy p_239626_) {
-        long i = this.resolution.convert(p_239625_);
+    public <T> DataFetcher.Task<T> createTask(String pId, Callable<T> pUpdater, Duration pPeriod, RepeatedDelayStrategy pRepeatStrategy) {
+        long i = this.resolution.convert(pPeriod);
         if (i == 0L) {
-            throw new IllegalArgumentException("Period of " + p_239625_ + " too short for selected resolution of " + this.resolution);
+            throw new IllegalArgumentException("Period of " + pPeriod + " too short for selected resolution of " + this.resolution);
         } else {
-            return new DataFetcher.Task<>(p_239623_, p_239624_, i, p_239626_);
+            return new DataFetcher.Task<>(pId, pUpdater, i, pRepeatStrategy);
         }
     }
 
@@ -52,13 +52,13 @@ public class DataFetcher {
         private final Consumer<T> output;
         private long lastCheckTime = -1L;
 
-        SubscribedTask(final DataFetcher.Task<T> p_239959_, final Consumer<T> p_239960_) {
-            this.task = p_239959_;
-            this.output = p_239960_;
+        SubscribedTask(final DataFetcher.Task<T> pTask, final Consumer<T> pOutput) {
+            this.task = pTask;
+            this.output = pOutput;
         }
 
-        void update(long p_239226_) {
-            this.task.updateIfNeeded(p_239226_);
+        void update(long pTime) {
+            this.task.updateIfNeeded(pTime);
             this.runCallbackIfNeeded();
         }
 
@@ -88,8 +88,8 @@ public class DataFetcher {
     public class Subscription {
         private final List<DataFetcher.SubscribedTask<?>> subscriptions = new ArrayList<>();
 
-        public <T> void subscribe(DataFetcher.Task<T> p_239442_, Consumer<T> p_239443_) {
-            DataFetcher.SubscribedTask<T> subscribedtask = DataFetcher.this.new SubscribedTask<>(p_239442_, p_239443_);
+        public <T> void subscribe(DataFetcher.Task<T> pTask, Consumer<T> pOutput) {
+            DataFetcher.SubscribedTask<T> subscribedtask = DataFetcher.this.new SubscribedTask<>(pTask, pOutput);
             this.subscriptions.add(subscribedtask);
             subscribedtask.runCallbackIfNeeded();
         }
@@ -129,14 +129,14 @@ public class DataFetcher {
         DataFetcher.SuccessfulComputationResult<T> lastResult;
         private long nextUpdate = -1L;
 
-        Task(final String p_239074_, final Callable<T> p_239075_, final long p_239076_, final RepeatedDelayStrategy p_239077_) {
-            this.id = p_239074_;
-            this.updater = p_239075_;
-            this.period = p_239076_;
-            this.repeatStrategy = p_239077_;
+        Task(final String pId, final Callable<T> pUpdater, final long pPeriod, final RepeatedDelayStrategy pRepeatStrategy) {
+            this.id = pId;
+            this.updater = pUpdater;
+            this.period = pPeriod;
+            this.repeatStrategy = pRepeatStrategy;
         }
 
-        void updateIfNeeded(long p_239710_) {
+        void updateIfNeeded(long pTime) {
             if (this.pendingTask != null) {
                 DataFetcher.ComputationResult<T> computationresult = this.pendingTask.getNow(null);
                 if (computationresult == null) {
@@ -155,7 +155,7 @@ public class DataFetcher {
                 });
             }
 
-            if (this.nextUpdate <= p_239710_) {
+            if (this.nextUpdate <= pTime) {
                 this.pendingTask = CompletableFuture.supplyAsync(() -> {
                     try {
                         T t = this.updater.call();

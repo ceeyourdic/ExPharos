@@ -12,8 +12,8 @@ public record LightPredicate(MinMaxBounds.Ints composite) {
                 .apply(p_325226_, LightPredicate::new)
     );
 
-    public boolean matches(ServerLevel p_51342_, BlockPos p_51343_) {
-        return !p_51342_.isLoaded(p_51343_) ? false : this.composite.matches(p_51342_.getMaxLocalRawBrightness(p_51343_));
+    public boolean matches(ServerLevel pLevel, BlockPos pPos) {
+        return !pLevel.isLoaded(pPos) ? false : this.composite.matches(pLevel.getMaxLocalRawBrightness(pPos));
     }
 
     public static class Builder {
@@ -23,8 +23,8 @@ public record LightPredicate(MinMaxBounds.Ints composite) {
             return new LightPredicate.Builder();
         }
 
-        public LightPredicate.Builder setComposite(MinMaxBounds.Ints p_153105_) {
-            this.composite = p_153105_;
+        public LightPredicate.Builder setComposite(MinMaxBounds.Ints pComposite) {
+            this.composite = pComposite;
             return this;
         }
 

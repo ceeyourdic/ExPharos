@@ -37,20 +37,20 @@ public class RamTarget extends Behavior<Goat> {
     private final Function<Goat, SoundEvent> getHornBreakSound;
 
     public RamTarget(
-        Function<Goat, UniformInt> p_217342_,
-        TargetingConditions p_217343_,
-        float p_217344_,
-        ToDoubleFunction<Goat> p_217345_,
-        Function<Goat, SoundEvent> p_217346_,
-        Function<Goat, SoundEvent> p_217347_
+        Function<Goat, UniformInt> pGetTimeBetweenRams,
+        TargetingConditions pRamTargeting,
+        float pSpeed,
+        ToDoubleFunction<Goat> pGetKnockbackForce,
+        Function<Goat, SoundEvent> pGetImpactSound,
+        Function<Goat, SoundEvent> pGetHornBreakSound
     ) {
         super(ImmutableMap.of(MemoryModuleType.RAM_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT, MemoryModuleType.RAM_TARGET, MemoryStatus.VALUE_PRESENT), 200);
-        this.getTimeBetweenRams = p_217342_;
-        this.ramTargeting = p_217343_;
-        this.speed = p_217344_;
-        this.getKnockbackForce = p_217345_;
-        this.getImpactSound = p_217346_;
-        this.getHornBreakSound = p_217347_;
+        this.getTimeBetweenRams = pGetTimeBetweenRams;
+        this.ramTargeting = pRamTargeting;
+        this.speed = pSpeed;
+        this.getKnockbackForce = pGetKnockbackForce;
+        this.getImpactSound = pGetImpactSound;
+        this.getHornBreakSound = pGetHornBreakSound;
         this.ramDirection = Vec3.ZERO;
     }
 
@@ -106,15 +106,15 @@ public class RamTarget extends Behavior<Goat> {
         }
     }
 
-    private boolean hasRammedHornBreakingBlock(ServerLevel p_217363_, Goat p_217364_) {
-        Vec3 vec3 = p_217364_.getDeltaMovement().multiply(1.0, 0.0, 1.0).normalize();
-        BlockPos blockpos = BlockPos.containing(p_217364_.position().add(vec3));
-        return p_217363_.getBlockState(blockpos).is(BlockTags.SNAPS_GOAT_HORN) || p_217363_.getBlockState(blockpos.above()).is(BlockTags.SNAPS_GOAT_HORN);
+    private boolean hasRammedHornBreakingBlock(ServerLevel pLevel, Goat pOwner) {
+        Vec3 vec3 = pOwner.getDeltaMovement().multiply(1.0, 0.0, 1.0).normalize();
+        BlockPos blockpos = BlockPos.containing(pOwner.position().add(vec3));
+        return pLevel.getBlockState(blockpos).is(BlockTags.SNAPS_GOAT_HORN) || pLevel.getBlockState(blockpos.above()).is(BlockTags.SNAPS_GOAT_HORN);
     }
 
-    protected void finishRam(ServerLevel p_217356_, Goat p_217357_) {
-        p_217356_.broadcastEntityEvent(p_217357_, (byte)59);
-        p_217357_.getBrain().setMemory(MemoryModuleType.RAM_COOLDOWN_TICKS, this.getTimeBetweenRams.apply(p_217357_).sample(p_217356_.random));
-        p_217357_.getBrain().eraseMemory(MemoryModuleType.RAM_TARGET);
+    protected void finishRam(ServerLevel pLevel, Goat pOwner) {
+        pLevel.broadcastEntityEvent(pOwner, (byte)59);
+        pOwner.getBrain().setMemory(MemoryModuleType.RAM_COOLDOWN_TICKS, this.getTimeBetweenRams.apply(pOwner).sample(pLevel.random));
+        pOwner.getBrain().eraseMemory(MemoryModuleType.RAM_TARGET);
     }
 }

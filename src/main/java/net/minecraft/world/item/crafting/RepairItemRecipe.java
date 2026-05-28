@@ -18,14 +18,14 @@ public class RepairItemRecipe extends CustomRecipe {
     }
 
     @Nullable
-    private static Pair<ItemStack, ItemStack> getItemsToCombine(CraftingInput p_344890_) {
-        if (p_344890_.ingredientCount() != 2) {
+    private static Pair<ItemStack, ItemStack> getItemsToCombine(CraftingInput pInput) {
+        if (pInput.ingredientCount() != 2) {
             return null;
         } else {
             ItemStack itemstack = null;
 
-            for (int i = 0; i < p_344890_.size(); i++) {
-                ItemStack itemstack1 = p_344890_.getItem(i);
+            for (int i = 0; i < pInput.size(); i++) {
+                ItemStack itemstack1 = pInput.getItem(i);
                 if (!itemstack1.isEmpty()) {
                     if (itemstack != null) {
                         return canCombine(itemstack, itemstack1) ? Pair.of(itemstack, itemstack1) : null;
@@ -39,14 +39,14 @@ public class RepairItemRecipe extends CustomRecipe {
         }
     }
 
-    private static boolean canCombine(ItemStack p_335534_, ItemStack p_329259_) {
-        return p_329259_.is(p_335534_.getItem())
-            && p_335534_.getCount() == 1
-            && p_329259_.getCount() == 1
-            && p_335534_.has(DataComponents.MAX_DAMAGE)
-            && p_329259_.has(DataComponents.MAX_DAMAGE)
-            && p_335534_.has(DataComponents.DAMAGE)
-            && p_329259_.has(DataComponents.DAMAGE);
+    private static boolean canCombine(ItemStack pStack1, ItemStack pStack2) {
+        return pStack2.is(pStack1.getItem())
+            && pStack1.getCount() == 1
+            && pStack2.getCount() == 1
+            && pStack1.has(DataComponents.MAX_DAMAGE)
+            && pStack2.has(DataComponents.MAX_DAMAGE)
+            && pStack1.has(DataComponents.DAMAGE)
+            && pStack2.has(DataComponents.DAMAGE);
     }
 
     public boolean matches(CraftingInput p_344438_, Level p_44139_) {

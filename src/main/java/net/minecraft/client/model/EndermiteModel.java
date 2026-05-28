@@ -18,16 +18,16 @@ public class EndermiteModel extends EntityModel<EntityRenderState> {
     private static final int[][] BODY_TEXS = new int[][]{{0, 0}, {0, 5}, {0, 14}, {0, 18}};
     private final ModelPart[] bodyParts = new ModelPart[4];
 
-    public EndermiteModel(ModelPart p_170545_) {
-        super(p_170545_);
+    public EndermiteModel(ModelPart pRoot) {
+        super(pRoot);
 
         for (int i = 0; i < 4; i++) {
-            this.bodyParts[i] = p_170545_.getChild(createSegmentName(i));
+            this.bodyParts[i] = pRoot.getChild(createSegmentName(i));
         }
     }
 
-    private static String createSegmentName(int p_170548_) {
-        return "segment" + p_170548_;
+    private static String createSegmentName(int pIndex) {
+        return "segment" + pIndex;
     }
 
     public static LayerDefinition createBodyLayer() {

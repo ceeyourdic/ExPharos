@@ -22,14 +22,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public interface SelectItemModelProperty<T> {
     @Nullable
-    T get(ItemStack p_378017_, @Nullable ClientLevel p_375849_, @Nullable LivingEntity p_377186_, int p_375524_, ItemDisplayContext p_378106_);
+    T get(ItemStack pStack, @Nullable ClientLevel pLevel, @Nullable LivingEntity pEntity, int pSeed, ItemDisplayContext pDisplayContext);
 
     SelectItemModelProperty.Type<? extends SelectItemModelProperty<T>, T> type();
 
     @OnlyIn(Dist.CLIENT)
     public static record Type<P extends SelectItemModelProperty<T>, T>(MapCodec<SelectItemModel.UnbakedSwitch<P, T>> switchCodec) {
-        public static <P extends SelectItemModelProperty<T>, T> SelectItemModelProperty.Type<P, T> create(MapCodec<P> p_376943_, Codec<T> p_376938_) {
-            Codec<List<SelectItemModel.SwitchCase<T>>> codec = SelectItemModel.SwitchCase.codec(p_376938_)
+        public static <P extends SelectItemModelProperty<T>, T> SelectItemModelProperty.Type<P, T> create(MapCodec<P> pMapCodec, Codec<T> pCodec) {
+            Codec<List<SelectItemModel.SwitchCase<T>>> codec = SelectItemModel.SwitchCase.codec(pCodec)
                 .listOf()
                 .validate(
                     p_375867_ -> {
@@ -57,7 +57,7 @@ public interface SelectItemModelProperty<T> {
                 );
             MapCodec<SelectItemModel.UnbakedSwitch<P, T>> mapcodec = RecordCodecBuilder.mapCodec(
                 p_378451_ -> p_378451_.group(
-                            p_376943_.forGetter(SelectItemModel.UnbakedSwitch::property),
+                            pMapCodec.forGetter(SelectItemModel.UnbakedSwitch::property),
                             codec.fieldOf("cases").forGetter(SelectItemModel.UnbakedSwitch::cases)
                         )
                         .apply(p_378451_, SelectItemModel.UnbakedSwitch::new)

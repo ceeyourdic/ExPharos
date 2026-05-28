@@ -43,15 +43,15 @@ public class EntryGroup extends CompositeEntryBase {
         };
     }
 
-    public static EntryGroup.Builder list(LootPoolEntryContainer.Builder<?>... p_165138_) {
-        return new EntryGroup.Builder(p_165138_);
+    public static EntryGroup.Builder list(LootPoolEntryContainer.Builder<?>... pChildren) {
+        return new EntryGroup.Builder(pChildren);
     }
 
     public static class Builder extends LootPoolEntryContainer.Builder<EntryGroup.Builder> {
         private final ImmutableList.Builder<LootPoolEntryContainer> entries = ImmutableList.builder();
 
-        public Builder(LootPoolEntryContainer.Builder<?>... p_165141_) {
-            for (LootPoolEntryContainer.Builder<?> builder : p_165141_) {
+        public Builder(LootPoolEntryContainer.Builder<?>... pChildren) {
+            for (LootPoolEntryContainer.Builder<?> builder : pChildren) {
                 this.entries.add(builder.build());
             }
         }

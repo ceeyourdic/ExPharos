@@ -64,36 +64,36 @@ public class LongJump extends Behavior<Breeze> {
         );
     }
 
-    public static boolean canRun(ServerLevel p_328434_, Breeze p_330036_) {
-        if (!p_330036_.onGround() && !p_330036_.isInWater()) {
+    public static boolean canRun(ServerLevel pLevel, Breeze pBreeze) {
+        if (!pBreeze.onGround() && !pBreeze.isInWater()) {
             return false;
-        } else if (Swim.shouldSwim(p_330036_)) {
+        } else if (Swim.shouldSwim(pBreeze)) {
             return false;
-        } else if (p_330036_.getBrain().checkMemory(MemoryModuleType.BREEZE_JUMP_TARGET, MemoryStatus.VALUE_PRESENT)) {
+        } else if (pBreeze.getBrain().checkMemory(MemoryModuleType.BREEZE_JUMP_TARGET, MemoryStatus.VALUE_PRESENT)) {
             return true;
         } else {
-            LivingEntity livingentity = p_330036_.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
+            LivingEntity livingentity = pBreeze.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
             if (livingentity == null) {
                 return false;
-            } else if (outOfAggroRange(p_330036_, livingentity)) {
-                p_330036_.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+            } else if (outOfAggroRange(pBreeze, livingentity)) {
+                pBreeze.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
                 return false;
-            } else if (tooCloseForJump(p_330036_, livingentity)) {
+            } else if (tooCloseForJump(pBreeze, livingentity)) {
                 return false;
-            } else if (!canJumpFromCurrentPosition(p_328434_, p_330036_)) {
+            } else if (!canJumpFromCurrentPosition(pLevel, pBreeze)) {
                 return false;
             } else {
-                BlockPos blockpos = snapToSurface(p_330036_, BreezeUtil.randomPointBehindTarget(livingentity, p_330036_.getRandom()));
+                BlockPos blockpos = snapToSurface(pBreeze, BreezeUtil.randomPointBehindTarget(livingentity, pBreeze.getRandom()));
                 if (blockpos == null) {
                     return false;
                 } else {
-                    BlockState blockstate = p_328434_.getBlockState(blockpos.below());
-                    if (p_330036_.getType().isBlockDangerous(blockstate)) {
+                    BlockState blockstate = pLevel.getBlockState(blockpos.below());
+                    if (pBreeze.getType().isBlockDangerous(blockstate)) {
                         return false;
-                    } else if (!BreezeUtil.hasLineOfSight(p_330036_, blockpos.getCenter()) && !BreezeUtil.hasLineOfSight(p_330036_, blockpos.above(4).getCenter())) {
+                    } else if (!BreezeUtil.hasLineOfSight(pBreeze, blockpos.getCenter()) && !BreezeUtil.hasLineOfSight(pBreeze, blockpos.above(4).getCenter())) {
                         return false;
                     } else {
-                        p_330036_.getBrain().setMemory(MemoryModuleType.BREEZE_JUMP_TARGET, blockpos);
+                        pBreeze.getBrain().setMemory(MemoryModuleType.BREEZE_JUMP_TARGET, blockpos);
                         return true;
                     }
                 }
@@ -166,50 +166,50 @@ public class LongJump extends Behavior<Breeze> {
         p_311681_.getBrain().eraseMemory(MemoryModuleType.BREEZE_LEAVING_WATER);
     }
 
-    private static boolean isFinishedInhaling(Breeze p_330141_) {
-        return p_330141_.getBrain().getMemory(MemoryModuleType.BREEZE_JUMP_INHALING).isEmpty() && p_330141_.getPose() == Pose.INHALING;
+    private static boolean isFinishedInhaling(Breeze pBreeze) {
+        return pBreeze.getBrain().getMemory(MemoryModuleType.BREEZE_JUMP_INHALING).isEmpty() && pBreeze.getPose() == Pose.INHALING;
     }
 
-    private static boolean isFinishedJumping(Breeze p_330755_) {
-        boolean flag = p_330755_.getPose() == Pose.LONG_JUMPING;
-        boolean flag1 = p_330755_.onGround();
-        boolean flag2 = p_330755_.isInWater() && p_330755_.getBrain().checkMemory(MemoryModuleType.BREEZE_LEAVING_WATER, MemoryStatus.VALUE_ABSENT);
+    private static boolean isFinishedJumping(Breeze pBreeze) {
+        boolean flag = pBreeze.getPose() == Pose.LONG_JUMPING;
+        boolean flag1 = pBreeze.onGround();
+        boolean flag2 = pBreeze.isInWater() && pBreeze.getBrain().checkMemory(MemoryModuleType.BREEZE_LEAVING_WATER, MemoryStatus.VALUE_ABSENT);
         return flag && (flag1 || flag2);
     }
 
     @Nullable
-    private static BlockPos snapToSurface(LivingEntity p_312785_, Vec3 p_311613_) {
+    private static BlockPos snapToSurface(LivingEntity pOwner, Vec3 pTargetPos) {
         ClipContext clipcontext = new ClipContext(
-            p_311613_, p_311613_.relative(Direction.DOWN, 10.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p_312785_
+            pTargetPos, pTargetPos.relative(Direction.DOWN, 10.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, pOwner
         );
-        HitResult hitresult = p_312785_.level().clip(clipcontext);
+        HitResult hitresult = pOwner.level().clip(clipcontext);
         if (hitresult.getType() == HitResult.Type.BLOCK) {
             return BlockPos.containing(hitresult.getLocation()).above();
         } else {
             ClipContext clipcontext1 = new ClipContext(
-                p_311613_, p_311613_.relative(Direction.UP, 10.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p_312785_
+                pTargetPos, pTargetPos.relative(Direction.UP, 10.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, pOwner
             );
-            HitResult hitresult1 = p_312785_.level().clip(clipcontext1);
+            HitResult hitresult1 = pOwner.level().clip(clipcontext1);
             return hitresult1.getType() == HitResult.Type.BLOCK ? BlockPos.containing(hitresult1.getLocation()).above() : null;
         }
     }
 
-    private static boolean outOfAggroRange(Breeze p_310244_, LivingEntity p_309508_) {
-        return !p_309508_.closerThan(p_310244_, p_310244_.getAttributeValue(Attributes.FOLLOW_RANGE));
+    private static boolean outOfAggroRange(Breeze pBreeze, LivingEntity pTarget) {
+        return !pTarget.closerThan(pBreeze, pBreeze.getAttributeValue(Attributes.FOLLOW_RANGE));
     }
 
-    private static boolean tooCloseForJump(Breeze p_310091_, LivingEntity p_311303_) {
-        return p_311303_.distanceTo(p_310091_) - 4.0F <= 0.0F;
+    private static boolean tooCloseForJump(Breeze pBreeze, LivingEntity pTarget) {
+        return pTarget.distanceTo(pBreeze) - 4.0F <= 0.0F;
     }
 
-    private static boolean canJumpFromCurrentPosition(ServerLevel p_312023_, Breeze p_313218_) {
-        BlockPos blockpos = p_313218_.blockPosition();
-        if (p_312023_.getBlockState(blockpos).is(Blocks.HONEY_BLOCK)) {
+    private static boolean canJumpFromCurrentPosition(ServerLevel pLevel, Breeze pBreeze) {
+        BlockPos blockpos = pBreeze.blockPosition();
+        if (pLevel.getBlockState(blockpos).is(Blocks.HONEY_BLOCK)) {
             return false;
         } else {
             for (int i = 1; i <= 4; i++) {
                 BlockPos blockpos1 = blockpos.relative(Direction.UP, i);
-                if (!p_312023_.getBlockState(blockpos1).isAir() && !p_312023_.getFluidState(blockpos1).is(FluidTags.WATER)) {
+                if (!pLevel.getBlockState(blockpos1).isAir() && !pLevel.getFluidState(blockpos1).is(FluidTags.WATER)) {
                     return false;
                 }
             }
@@ -218,13 +218,13 @@ public class LongJump extends Behavior<Breeze> {
         }
     }
 
-    private static Optional<Vec3> calculateOptimalJumpVector(Breeze p_310143_, RandomSource p_313023_, Vec3 p_309973_) {
-        for (int i : Util.shuffledCopy(ALLOWED_ANGLES, p_313023_)) {
-            float f = 0.058333334F * (float)p_310143_.getAttributeValue(Attributes.FOLLOW_RANGE);
-            Optional<Vec3> optional = LongJumpUtil.calculateJumpVectorForAngle(p_310143_, p_309973_, f, i, false);
+    private static Optional<Vec3> calculateOptimalJumpVector(Breeze pBreeze, RandomSource pRandom, Vec3 pTarget) {
+        for (int i : Util.shuffledCopy(ALLOWED_ANGLES, pRandom)) {
+            float f = 0.058333334F * (float)pBreeze.getAttributeValue(Attributes.FOLLOW_RANGE);
+            Optional<Vec3> optional = LongJumpUtil.calculateJumpVectorForAngle(pBreeze, pTarget, f, i, false);
             if (optional.isPresent()) {
-                if (p_310143_.hasEffect(MobEffects.JUMP)) {
-                    double d0 = optional.get().normalize().y * (double)p_310143_.getJumpBoostPower();
+                if (pBreeze.hasEffect(MobEffects.JUMP)) {
+                    double d0 = optional.get().normalize().y * (double)pBreeze.getJumpBoostPower();
                     return optional.map(p_359268_ -> p_359268_.add(0.0, d0, 0.0));
                 }
 

@@ -43,18 +43,18 @@ public class BannerBlock extends AbstractBannerBlock {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_49019_, LevelReader p_49020_, BlockPos p_49021_) {
-        return p_49020_.getBlockState(p_49021_.below()).isSolid();
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        return pLevel.getBlockState(pPos.below()).isSolid();
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_49038_, BlockGetter p_49039_, BlockPos p_49040_, CollisionContext p_49041_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_49017_) {
-        return this.defaultBlockState().setValue(ROTATION, Integer.valueOf(RotationSegment.convertToSegment(p_49017_.getRotation() + 180.0F)));
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.defaultBlockState().setValue(ROTATION, Integer.valueOf(RotationSegment.convertToSegment(pContext.getRotation() + 180.0F)));
     }
 
     @Override
@@ -74,21 +74,21 @@ public class BannerBlock extends AbstractBannerBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState p_49026_, Rotation p_49027_) {
-        return p_49026_.setValue(ROTATION, Integer.valueOf(p_49027_.rotate(p_49026_.getValue(ROTATION), 16)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(ROTATION, Integer.valueOf(pRotation.rotate(pState.getValue(ROTATION), 16)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_49023_, Mirror p_49024_) {
-        return p_49023_.setValue(ROTATION, Integer.valueOf(p_49024_.mirror(p_49023_.getValue(ROTATION), 16)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.setValue(ROTATION, Integer.valueOf(pMirror.mirror(pState.getValue(ROTATION), 16)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_49036_) {
-        p_49036_.add(ROTATION);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(ROTATION);
     }
 
-    public static Block byColor(DyeColor p_49015_) {
-        return BY_COLOR.getOrDefault(p_49015_, Blocks.WHITE_BANNER);
+    public static Block byColor(DyeColor pColor) {
+        return BY_COLOR.getOrDefault(pColor, Blocks.WHITE_BANNER);
     }
 }

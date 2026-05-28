@@ -23,8 +23,8 @@ public record ClientboundTeleportEntityPacket(int id, PositionMoveRotation chang
         ClientboundTeleportEntityPacket::new
     );
 
-    public static ClientboundTeleportEntityPacket teleport(int p_360951_, PositionMoveRotation p_369497_, Set<Relative> p_362690_, boolean p_361553_) {
-        return new ClientboundTeleportEntityPacket(p_360951_, p_369497_, p_362690_, p_361553_);
+    public static ClientboundTeleportEntityPacket teleport(int pId, PositionMoveRotation pChange, Set<Relative> pRelatives, boolean pOnGround) {
+        return new ClientboundTeleportEntityPacket(pId, pChange, pRelatives, pOnGround);
     }
 
     @Override
@@ -32,7 +32,7 @@ public record ClientboundTeleportEntityPacket(int id, PositionMoveRotation chang
         return GamePacketTypes.CLIENTBOUND_TELEPORT_ENTITY;
     }
 
-    public void handle(ClientGamePacketListener p_133544_) {
-        p_133544_.handleTeleportEntity(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleTeleportEntity(this);
     }
 }

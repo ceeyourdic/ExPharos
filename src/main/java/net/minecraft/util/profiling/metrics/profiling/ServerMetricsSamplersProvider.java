@@ -27,9 +27,9 @@ public class ServerMetricsSamplersProvider implements MetricsSamplerProvider {
     private final Set<MetricSampler> samplers = new ObjectOpenHashSet<>();
     private final ProfilerSamplerAdapter samplerFactory = new ProfilerSamplerAdapter();
 
-    public ServerMetricsSamplersProvider(LongSupplier p_146180_, boolean p_146181_) {
-        this.samplers.add(tickTimeSampler(p_146180_));
-        if (p_146181_) {
+    public ServerMetricsSamplersProvider(LongSupplier pTimeSource, boolean pDedicatedServer) {
+        this.samplers.add(tickTimeSampler(pTimeSource));
+        if (pDedicatedServer) {
             this.samplers.addAll(runtimeIndependentSamplers());
         }
     }
@@ -65,11 +65,11 @@ public class ServerMetricsSamplersProvider implements MetricsSamplerProvider {
         return this.samplers;
     }
 
-    public static MetricSampler tickTimeSampler(final LongSupplier p_146189_) {
+    public static MetricSampler tickTimeSampler(final LongSupplier pTimeSource) {
         Stopwatch stopwatch = Stopwatch.createUnstarted(new Ticker() {
             @Override
             public long read() {
-                return p_146189_.getAsLong();
+                return pTimeSource.getAsLong();
             }
         });
         ToDoubleFunction<Stopwatch> todoublefunction = p_146187_ -> {
@@ -96,7 +96,7 @@ public class ServerMetricsSamplersProvider implements MetricsSamplerProvider {
         private double[] currentLoad = this.processor.getProcessorCpuLoadBetweenTicks(this.previousCpuLoadTick);
         private long lastPollMs;
 
-        public double loadForCpu(int p_146208_) {
+        public double loadForCpu(int pIndex) {
             long i = System.currentTimeMillis();
             if (this.lastPollMs == 0L || this.lastPollMs + 501L < i) {
                 this.currentLoad = this.processor.getProcessorCpuLoadBetweenTicks(this.previousCpuLoadTick);
@@ -104,7 +104,7 @@ public class ServerMetricsSamplersProvider implements MetricsSamplerProvider {
                 this.lastPollMs = i;
             }
 
-            return this.currentLoad[p_146208_] * 100.0;
+            return this.currentLoad[pIndex] * 100.0;
         }
     }
 }

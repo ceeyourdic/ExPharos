@@ -10,8 +10,8 @@ public class SingleThreadedRandomSource implements BitRandomSource {
     private long seed;
     private final MarsagliaPolarGaussian gaussianSource = new MarsagliaPolarGaussian(this);
 
-    public SingleThreadedRandomSource(long p_189353_) {
-        this.setSeed(p_189353_);
+    public SingleThreadedRandomSource(long pSeed) {
+        this.setSeed(pSeed);
     }
 
     @Override

@@ -31,9 +31,9 @@ public class BiomeParametersDumpReport implements DataProvider {
     private static final MapCodec<ResourceKey<Biome>> ENTRY_CODEC = ResourceKey.codec(Registries.BIOME).fieldOf("biome");
     private static final Codec<Climate.ParameterList<ResourceKey<Biome>>> CODEC = Climate.ParameterList.codec(ENTRY_CODEC).fieldOf("biomes").codec();
 
-    public BiomeParametersDumpReport(PackOutput p_256322_, CompletableFuture<HolderLookup.Provider> p_256222_) {
-        this.topPath = p_256322_.getOutputFolder(PackOutput.Target.REPORTS).resolve("biome_parameters");
-        this.registries = p_256222_;
+    public BiomeParametersDumpReport(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pRegistries) {
+        this.topPath = pOutput.getOutputFolder(PackOutput.Target.REPORTS).resolve("biome_parameters");
+        this.registries = pRegistries;
     }
 
     @Override
@@ -61,15 +61,15 @@ public class BiomeParametersDumpReport implements DataProvider {
     }
 
     private static <E> CompletableFuture<?> dumpValue(
-        Path p_254407_, CachedOutput p_254093_, DynamicOps<JsonElement> p_253788_, Encoder<E> p_254276_, E p_254073_
+        Path pPath, CachedOutput pOutput, DynamicOps<JsonElement> pOps, Encoder<E> pEncoder, E pValue
     ) {
-        Optional<JsonElement> optional = p_254276_.encodeStart(p_253788_, p_254073_)
-            .resultOrPartial(p_236195_ -> LOGGER.error("Couldn't serialize element {}: {}", p_254407_, p_236195_));
-        return optional.isPresent() ? DataProvider.saveStable(p_254093_, optional.get(), p_254407_) : CompletableFuture.completedFuture(null);
+        Optional<JsonElement> optional = pEncoder.encodeStart(pOps, pValue)
+            .resultOrPartial(p_236195_ -> LOGGER.error("Couldn't serialize element {}: {}", pPath, p_236195_));
+        return optional.isPresent() ? DataProvider.saveStable(pOutput, optional.get(), pPath) : CompletableFuture.completedFuture(null);
     }
 
-    private Path createPath(ResourceLocation p_236179_) {
-        return this.topPath.resolve(p_236179_.getNamespace()).resolve(p_236179_.getPath() + ".json");
+    private Path createPath(ResourceLocation pLocation) {
+        return this.topPath.resolve(pLocation.getNamespace()).resolve(pLocation.getPath() + ".json");
     }
 
     @Override

@@ -21,14 +21,14 @@ public class NoiseBasedCountPlacement extends RepeatingPlacement {
     private final double noiseFactor;
     private final double noiseOffset;
 
-    private NoiseBasedCountPlacement(int p_191728_, double p_191729_, double p_191730_) {
-        this.noiseToCountRatio = p_191728_;
-        this.noiseFactor = p_191729_;
-        this.noiseOffset = p_191730_;
+    private NoiseBasedCountPlacement(int pNoiseToCountRatio, double pNoiseFactor, double pNoiseOffset) {
+        this.noiseToCountRatio = pNoiseToCountRatio;
+        this.noiseFactor = pNoiseFactor;
+        this.noiseOffset = pNoiseOffset;
     }
 
-    public static NoiseBasedCountPlacement of(int p_191732_, double p_191733_, double p_191734_) {
-        return new NoiseBasedCountPlacement(p_191732_, p_191733_, p_191734_);
+    public static NoiseBasedCountPlacement of(int pNoiseToCountRatio, double pNoiseFactor, double pNoiseOffset) {
+        return new NoiseBasedCountPlacement(pNoiseToCountRatio, pNoiseFactor, pNoiseOffset);
     }
 
     @Override

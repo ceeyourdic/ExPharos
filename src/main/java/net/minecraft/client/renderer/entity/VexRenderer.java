@@ -21,7 +21,7 @@ public class VexRenderer extends MobRenderer<Vex, VexRenderState, VexModel> {
         this.addLayer(new ItemInHandLayer<>(this));
     }
 
-    protected int getBlockLightLevel(Vex p_116298_, BlockPos p_116299_) {
+    protected int getBlockLightLevel(Vex pEntity, BlockPos pPos) {
         return 15;
     }
 

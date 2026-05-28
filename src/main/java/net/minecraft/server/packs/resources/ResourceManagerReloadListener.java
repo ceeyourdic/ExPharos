@@ -19,5 +19,5 @@ public interface ResourceManagerReloadListener extends PreparableReloadListener 
         }, p_10757_);
     }
 
-    void onResourceManagerReload(ResourceManager p_10758_);
+    void onResourceManagerReload(ResourceManager pResourceManager);
 }

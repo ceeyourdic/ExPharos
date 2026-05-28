@@ -28,28 +28,28 @@ public class ItemInput {
     private final Holder<Item> item;
     private final DataComponentPatch components;
 
-    public ItemInput(Holder<Item> p_235282_, DataComponentPatch p_343000_) {
-        this.item = p_235282_;
-        this.components = p_343000_;
+    public ItemInput(Holder<Item> pItem, DataComponentPatch pComponents) {
+        this.item = pItem;
+        this.components = pComponents;
     }
 
     public Item getItem() {
         return this.item.value();
     }
 
-    public ItemStack createItemStack(int p_120981_, boolean p_120982_) throws CommandSyntaxException {
-        ItemStack itemstack = new ItemStack(this.item, p_120981_);
+    public ItemStack createItemStack(int pCount, boolean pAllowOversizedStacks) throws CommandSyntaxException {
+        ItemStack itemstack = new ItemStack(this.item, pCount);
         itemstack.applyComponents(this.components);
-        if (p_120982_ && p_120981_ > itemstack.getMaxStackSize()) {
+        if (pAllowOversizedStacks && pCount > itemstack.getMaxStackSize()) {
             throw ERROR_STACK_TOO_BIG.create(this.getItemName(), itemstack.getMaxStackSize());
         } else {
             return itemstack;
         }
     }
 
-    public String serialize(HolderLookup.Provider p_331128_) {
+    public String serialize(HolderLookup.Provider pLevelRegistry) {
         StringBuilder stringbuilder = new StringBuilder(this.getItemName());
-        String s = this.serializeComponents(p_331128_);
+        String s = this.serializeComponents(pLevelRegistry);
         if (!s.isEmpty()) {
             stringbuilder.append('[');
             stringbuilder.append(s);
@@ -59,8 +59,8 @@ public class ItemInput {
         return stringbuilder.toString();
     }
 
-    private String serializeComponents(HolderLookup.Provider p_332272_) {
-        DynamicOps<Tag> dynamicops = p_332272_.createSerializationContext(NbtOps.INSTANCE);
+    private String serializeComponents(HolderLookup.Provider pLevelRegistries) {
+        DynamicOps<Tag> dynamicops = pLevelRegistries.createSerializationContext(NbtOps.INSTANCE);
         return this.components.entrySet().stream().flatMap(p_340970_ -> {
             DataComponentType<?> datacomponenttype = p_340970_.getKey();
             ResourceLocation resourcelocation = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(datacomponenttype);

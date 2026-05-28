@@ -8,12 +8,10 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.extensions.IForgeBakedModel;
 
-@OnlyIn(Dist.CLIENT)
-public interface BakedModel {
-    List<BakedQuad> getQuads(@Nullable BlockState p_235039_, @Nullable Direction p_235040_, RandomSource p_235041_);
+public interface BakedModel extends IForgeBakedModel {
+    List<BakedQuad> getQuads(@Nullable BlockState pState, @Nullable Direction pDirection, RandomSource pRandom);
 
     boolean useAmbientOcclusion();
 
@@ -23,5 +21,7 @@ public interface BakedModel {
 
     TextureAtlasSprite getParticleIcon();
 
-    ItemTransforms getTransforms();
+    default ItemTransforms getTransforms() {
+        return ItemTransforms.NO_TRANSFORMS;
+    }
 }

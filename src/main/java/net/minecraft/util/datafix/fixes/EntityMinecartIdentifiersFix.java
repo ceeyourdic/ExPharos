@@ -9,8 +9,8 @@ import com.mojang.serialization.Dynamic;
 import net.minecraft.Util;
 
 public class EntityMinecartIdentifiersFix extends EntityRenameFix {
-    public EntityMinecartIdentifiersFix(Schema p_15479_) {
-        super("EntityMinecartIdentifiersFix", p_15479_, true);
+    public EntityMinecartIdentifiersFix(Schema pOutputSchema) {
+        super("EntityMinecartIdentifiersFix", pOutputSchema, true);
     }
 
     @Override

@@ -14,8 +14,8 @@ public class GameTestTicker {
     private GameTestTicker() {
     }
 
-    public void add(GameTestInfo p_127789_) {
-        this.testInfos.add(p_127789_);
+    public void add(GameTestInfo pTestInfo) {
+        this.testInfos.add(pTestInfo);
     }
 
     public void clear() {
@@ -26,12 +26,12 @@ public class GameTestTicker {
         }
     }
 
-    public void setRunner(GameTestRunner p_328613_) {
+    public void setRunner(GameTestRunner pRunner) {
         if (this.runner != null) {
             Util.logAndPauseIfInIde("The runner was already set in GameTestTicker");
         }
 
-        this.runner = p_328613_;
+        this.runner = pRunner;
     }
 
     public void tick() {

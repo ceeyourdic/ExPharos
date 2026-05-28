@@ -32,9 +32,9 @@ public class FeaturePoolElement extends StructurePoolElement {
     private final Holder<PlacedFeature> feature;
     private final CompoundTag defaultJigsawNBT;
 
-    protected FeaturePoolElement(Holder<PlacedFeature> p_210209_, StructureTemplatePool.Projection p_210210_) {
-        super(p_210210_);
-        this.feature = p_210209_;
+    protected FeaturePoolElement(Holder<PlacedFeature> pFeature, StructureTemplatePool.Projection pProjection) {
+        super(pProjection);
+        this.feature = pFeature;
         this.defaultJigsawNBT = this.fillDefaultJigsawNBT();
     }
 

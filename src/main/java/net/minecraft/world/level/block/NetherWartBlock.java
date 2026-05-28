@@ -38,18 +38,18 @@ public class NetherWartBlock extends BushBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_54986_, BlockGetter p_54987_, BlockPos p_54988_, CollisionContext p_54989_) {
-        return SHAPE_BY_AGE[p_54986_.getValue(AGE)];
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return SHAPE_BY_AGE[pState.getValue(AGE)];
     }
 
     @Override
-    protected boolean mayPlaceOn(BlockState p_54991_, BlockGetter p_54992_, BlockPos p_54993_) {
-        return p_54991_.is(Blocks.SOUL_SAND);
+    protected boolean mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return pState.is(Blocks.SOUL_SAND);
     }
 
     @Override
-    protected boolean isRandomlyTicking(BlockState p_54979_) {
-        return p_54979_.getValue(AGE) < 3;
+    protected boolean isRandomlyTicking(BlockState pState) {
+        return pState.getValue(AGE) < 3;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class NetherWartBlock extends BushBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_54977_) {
-        p_54977_.add(AGE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(AGE);
     }
 }

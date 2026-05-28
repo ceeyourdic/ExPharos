@@ -22,9 +22,9 @@ public class BannerSpecialRenderer implements SpecialModelRenderer<BannerPattern
     private final BannerRenderer bannerRenderer;
     private final DyeColor baseColor;
 
-    public BannerSpecialRenderer(DyeColor p_377632_, BannerRenderer p_376830_) {
-        this.bannerRenderer = p_376830_;
-        this.baseColor = p_377632_;
+    public BannerSpecialRenderer(DyeColor pBaseColor, BannerRenderer pBannerRenderer) {
+        this.bannerRenderer = pBannerRenderer;
+        this.baseColor = pBaseColor;
     }
 
     @Nullable

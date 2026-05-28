@@ -11,13 +11,12 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.CustomColors;
 
-@OnlyIn(Dist.CLIENT)
 public record Potion(int defaultColor) implements ItemTintSource {
     public static final MapCodec<Potion> MAP_CODEC = RecordCodecBuilder.mapCodec(
-        p_378138_ -> p_378138_.group(ExtraCodecs.RGB_COLOR_CODEC.fieldOf("default").forGetter(Potion::defaultColor)).apply(p_378138_, Potion::new)
+        potionIn -> potionIn.group(ExtraCodecs.RGB_COLOR_CODEC.fieldOf("default").forGetter(Potion::defaultColor)).apply(potionIn, Potion::new)
     );
 
     public Potion() {
@@ -27,7 +26,8 @@ public record Potion(int defaultColor) implements ItemTintSource {
     @Override
     public int calculate(ItemStack p_377068_, @Nullable ClientLevel p_375615_, @Nullable LivingEntity p_376005_) {
         PotionContents potioncontents = p_377068_.get(DataComponents.POTION_CONTENTS);
-        return potioncontents != null ? ARGB.opaque(potioncontents.getColorOr(this.defaultColor)) : ARGB.opaque(this.defaultColor);
+        int i = Config.isCustomColors() ? CustomColors.getPotionColor(0, this.defaultColor) : this.defaultColor;
+        return potioncontents != null ? ARGB.opaque(potioncontents.getColorOr(i)) : ARGB.opaque(i);
     }
 
     @Override

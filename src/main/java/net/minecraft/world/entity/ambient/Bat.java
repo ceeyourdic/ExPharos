@@ -75,7 +75,7 @@ public class Bat extends AmbientCreature {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_27451_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.BAT_HURT;
     }
 
@@ -90,7 +90,7 @@ public class Bat extends AmbientCreature {
     }
 
     @Override
-    protected void doPush(Entity p_27415_) {
+    protected void doPush(Entity pEntity) {
     }
 
     @Override
@@ -105,9 +105,9 @@ public class Bat extends AmbientCreature {
         return (this.entityData.get(DATA_ID_FLAGS) & 1) != 0;
     }
 
-    public void setResting(boolean p_27457_) {
+    public void setResting(boolean pIsResting) {
         byte b0 = this.entityData.get(DATA_ID_FLAGS);
-        if (p_27457_) {
+        if (pIsResting) {
             this.entityData.set(DATA_ID_FLAGS, (byte)(b0 | 1));
         } else {
             this.entityData.set(DATA_ID_FLAGS, (byte)(b0 & -2));
@@ -188,7 +188,7 @@ public class Bat extends AmbientCreature {
     }
 
     @Override
-    protected void checkFallDamage(double p_27419_, boolean p_27420_, BlockState p_27421_, BlockPos p_27422_) {
+    protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {
     }
 
     @Override
@@ -210,35 +210,35 @@ public class Bat extends AmbientCreature {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_27427_) {
-        super.readAdditionalSaveData(p_27427_);
-        this.entityData.set(DATA_ID_FLAGS, p_27427_.getByte("BatFlags"));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.entityData.set(DATA_ID_FLAGS, pCompound.getByte("BatFlags"));
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_27443_) {
-        super.addAdditionalSaveData(p_27443_);
-        p_27443_.putByte("BatFlags", this.entityData.get(DATA_ID_FLAGS));
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putByte("BatFlags", this.entityData.get(DATA_ID_FLAGS));
     }
 
-    public static boolean checkBatSpawnRules(EntityType<Bat> p_218099_, LevelAccessor p_218100_, EntitySpawnReason p_364019_, BlockPos p_218102_, RandomSource p_218103_) {
-        if (p_218102_.getY() >= p_218100_.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, p_218102_).getY()) {
+    public static boolean checkBatSpawnRules(EntityType<Bat> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandomSource) {
+        if (pPos.getY() >= pLevel.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, pPos).getY()) {
             return false;
         } else {
-            int i = p_218100_.getMaxLocalRawBrightness(p_218102_);
+            int i = pLevel.getMaxLocalRawBrightness(pPos);
             int j = 4;
             if (isHalloween()) {
                 j = 7;
-            } else if (p_218103_.nextBoolean()) {
+            } else if (pRandomSource.nextBoolean()) {
                 return false;
             }
 
-            if (i > p_218103_.nextInt(j)) {
+            if (i > pRandomSource.nextInt(j)) {
                 return false;
             } else {
-                return !p_218100_.getBlockState(p_218102_.below()).is(BlockTags.BATS_SPAWNABLE_ON)
+                return !pLevel.getBlockState(pPos.below()).is(BlockTags.BATS_SPAWNABLE_ON)
                     ? false
-                    : checkMobSpawnRules(p_218099_, p_218100_, p_364019_, p_218102_, p_218103_);
+                    : checkMobSpawnRules(pEntityType, pLevel, pSpawnReason, pPos, pRandomSource);
             }
         }
     }

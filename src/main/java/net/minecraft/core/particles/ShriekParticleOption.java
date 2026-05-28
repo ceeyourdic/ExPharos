@@ -17,8 +17,8 @@ public class ShriekParticleOption implements ParticleOptions {
     );
     private final int delay;
 
-    public ShriekParticleOption(int p_235949_) {
-        this.delay = p_235949_;
+    public ShriekParticleOption(int pDelay) {
+        this.delay = pDelay;
     }
 
     @Override

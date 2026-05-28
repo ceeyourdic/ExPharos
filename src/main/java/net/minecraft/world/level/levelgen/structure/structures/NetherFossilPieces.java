@@ -39,22 +39,22 @@ public class NetherFossilPieces {
         ResourceLocation.withDefaultNamespace("nether_fossils/fossil_14")
     };
 
-    public static void addPieces(StructureTemplateManager p_228535_, StructurePieceAccessor p_228536_, RandomSource p_228537_, BlockPos p_228538_) {
-        Rotation rotation = Rotation.getRandom(p_228537_);
-        p_228536_.addPiece(new NetherFossilPieces.NetherFossilPiece(p_228535_, Util.getRandom(FOSSILS, p_228537_), p_228538_, rotation));
+    public static void addPieces(StructureTemplateManager pStructureManager, StructurePieceAccessor pPieces, RandomSource pRandom, BlockPos pPos) {
+        Rotation rotation = Rotation.getRandom(pRandom);
+        pPieces.addPiece(new NetherFossilPieces.NetherFossilPiece(pStructureManager, Util.getRandom(FOSSILS, pRandom), pPos, rotation));
     }
 
     public static class NetherFossilPiece extends TemplateStructurePiece {
-        public NetherFossilPiece(StructureTemplateManager p_228540_, ResourceLocation p_228541_, BlockPos p_228542_, Rotation p_228543_) {
-            super(StructurePieceType.NETHER_FOSSIL, 0, p_228540_, p_228541_, p_228541_.toString(), makeSettings(p_228543_), p_228542_);
+        public NetherFossilPiece(StructureTemplateManager pStructureManager, ResourceLocation pLocation, BlockPos pPos, Rotation pRotation) {
+            super(StructurePieceType.NETHER_FOSSIL, 0, pStructureManager, pLocation, pLocation.toString(), makeSettings(pRotation), pPos);
         }
 
-        public NetherFossilPiece(StructureTemplateManager p_228545_, CompoundTag p_228546_) {
-            super(StructurePieceType.NETHER_FOSSIL, p_228546_, p_228545_, p_228568_ -> makeSettings(Rotation.valueOf(p_228546_.getString("Rot"))));
+        public NetherFossilPiece(StructureTemplateManager pStructureManager, CompoundTag pTag) {
+            super(StructurePieceType.NETHER_FOSSIL, pTag, pStructureManager, p_228568_ -> makeSettings(Rotation.valueOf(pTag.getString("Rot"))));
         }
 
-        private static StructurePlaceSettings makeSettings(Rotation p_228556_) {
-            return new StructurePlaceSettings().setRotation(p_228556_).setMirror(Mirror.NONE).addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
+        private static StructurePlaceSettings makeSettings(Rotation pRotation) {
+            return new StructurePlaceSettings().setRotation(pRotation).setMirror(Mirror.NONE).addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
         }
 
         @Override

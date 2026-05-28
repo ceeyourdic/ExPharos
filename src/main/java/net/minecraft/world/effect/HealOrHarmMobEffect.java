@@ -8,9 +8,9 @@ import net.minecraft.world.entity.LivingEntity;
 class HealOrHarmMobEffect extends InstantenousMobEffect {
     private final boolean isHarm;
 
-    public HealOrHarmMobEffect(MobEffectCategory p_299212_, int p_300917_, boolean p_300221_) {
-        super(p_299212_, p_300917_);
-        this.isHarm = p_300221_;
+    public HealOrHarmMobEffect(MobEffectCategory pCategory, int pColor, boolean pIsHarm) {
+        super(pCategory, pColor);
+        this.isHarm = pIsHarm;
     }
 
     @Override

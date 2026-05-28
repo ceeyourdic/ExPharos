@@ -6416,32 +6416,32 @@ public class Blocks {
     public static final Block POTTED_OPEN_EYEBLOSSOM = register("potted_open_eyeblossom", p_375327_ -> new FlowerPotBlock(OPEN_EYEBLOSSOM, p_375327_), flowerPotProperties().randomTicks());
     public static final Block POTTED_CLOSED_EYEBLOSSOM = register("potted_closed_eyeblossom", p_375325_ -> new FlowerPotBlock(CLOSED_EYEBLOSSOM, p_375325_), flowerPotProperties().randomTicks());
 
-    private static ToIntFunction<BlockState> litBlockEmission(int p_50760_) {
-        return p_50763_ -> p_50763_.getValue(BlockStateProperties.LIT) ? p_50760_ : 0;
+    private static ToIntFunction<BlockState> litBlockEmission(int pLightValue) {
+        return p_50763_ -> p_50763_.getValue(BlockStateProperties.LIT) ? pLightValue : 0;
     }
 
-    private static Function<BlockState, MapColor> waterloggedMapColor(MapColor p_332831_) {
-        return p_327248_ -> p_327248_.getValue(BlockStateProperties.WATERLOGGED) ? MapColor.WATER : p_332831_;
+    private static Function<BlockState, MapColor> waterloggedMapColor(MapColor pUnwaterloggedMapColor) {
+        return p_327248_ -> p_327248_.getValue(BlockStateProperties.WATERLOGGED) ? MapColor.WATER : pUnwaterloggedMapColor;
     }
 
-    private static Boolean never(BlockState p_50779_, BlockGetter p_50780_, BlockPos p_50781_, EntityType<?> p_50782_) {
+    private static Boolean never(BlockState pState, BlockGetter pLevel, BlockPos pPos, EntityType<?> pEntity) {
         return false;
     }
 
-    private static Boolean always(BlockState p_50810_, BlockGetter p_50811_, BlockPos p_50812_, EntityType<?> p_50813_) {
+    private static Boolean always(BlockState pState, BlockGetter pLevel, BlockPos pPos, EntityType<?> pEntity) {
         return true;
     }
 
-    private static Boolean ocelotOrParrot(BlockState p_50822_, BlockGetter p_50823_, BlockPos p_50824_, EntityType<?> p_50825_) {
-        return p_50825_ == EntityType.OCELOT || p_50825_ == EntityType.PARROT;
+    private static Boolean ocelotOrParrot(BlockState pState, BlockGetter pLevel, BlockPos pPos, EntityType<?> pEntity) {
+        return pEntity == EntityType.OCELOT || pEntity == EntityType.PARROT;
     }
 
-    private static Block registerBed(String p_362471_, DyeColor p_360977_) {
+    private static Block registerBed(String pName, DyeColor pColor) {
         return register(
-            p_362471_,
-            p_360339_ -> new BedBlock(p_360977_, p_360339_),
+            pName,
+            p_360339_ -> new BedBlock(pColor, p_360339_),
             BlockBehaviour.Properties.of()
-                .mapColor(p_284863_ -> p_284863_.getValue(BedBlock.PART) == BedPart.FOOT ? p_360977_.getMapColor() : MapColor.WOOL)
+                .mapColor(p_284863_ -> p_284863_.getValue(BedBlock.PART) == BedPart.FOOT ? pColor.getMapColor() : MapColor.WOOL)
                 .sound(SoundType.WOOD)
                 .strength(0.2F)
                 .noOcclusion()
@@ -6450,37 +6450,37 @@ public class Blocks {
         );
     }
 
-    private static BlockBehaviour.Properties logProperties(MapColor p_367100_, MapColor p_365916_, SoundType p_366098_) {
+    private static BlockBehaviour.Properties logProperties(MapColor pSideColor, MapColor pTopColor, SoundType pSound) {
         return BlockBehaviour.Properties.of()
-            .mapColor(p_152624_ -> p_152624_.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y ? p_367100_ : p_365916_)
+            .mapColor(p_152624_ -> p_152624_.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y ? pSideColor : pTopColor)
             .instrument(NoteBlockInstrument.BASS)
             .strength(2.0F)
-            .sound(p_366098_)
+            .sound(pSound)
             .ignitedByLava();
     }
 
-    private static BlockBehaviour.Properties netherStemProperties(MapColor p_369138_) {
+    private static BlockBehaviour.Properties netherStemProperties(MapColor pColor) {
         return BlockBehaviour.Properties.of()
-            .mapColor(p_152620_ -> p_369138_)
+            .mapColor(p_152620_ -> pColor)
             .instrument(NoteBlockInstrument.BASS)
             .strength(2.0F)
             .sound(SoundType.STEM);
     }
 
-    private static boolean always(BlockState p_50775_, BlockGetter p_50776_, BlockPos p_50777_) {
+    private static boolean always(BlockState pState, BlockGetter pBlockGetter, BlockPos pPos) {
         return true;
     }
 
-    private static boolean never(BlockState p_50806_, BlockGetter p_50807_, BlockPos p_50808_) {
+    private static boolean never(BlockState pState, BlockGetter pBlockGetter, BlockPos pPos) {
         return false;
     }
 
-    private static Block registerStainedGlass(String p_367585_, DyeColor p_367654_) {
+    private static Block registerStainedGlass(String pName, DyeColor pColor) {
         return register(
-            p_367585_,
-            p_360218_ -> new StainedGlassBlock(p_367654_, p_360218_),
+            pName,
+            p_360218_ -> new StainedGlassBlock(pColor, p_360218_),
             BlockBehaviour.Properties.of()
-                .mapColor(p_367654_)
+                .mapColor(pColor)
                 .instrument(NoteBlockInstrument.HAT)
                 .strength(0.3F)
                 .sound(SoundType.GLASS)
@@ -6492,12 +6492,12 @@ public class Blocks {
         );
     }
 
-    private static BlockBehaviour.Properties leavesProperties(SoundType p_361048_) {
+    private static BlockBehaviour.Properties leavesProperties(SoundType pSound) {
         return BlockBehaviour.Properties.of()
             .mapColor(MapColor.PLANT)
             .strength(0.2F)
             .randomTicks()
-            .sound(p_361048_)
+            .sound(pSound)
             .noOcclusion()
             .isValidSpawn(Blocks::ocelotOrParrot)
             .isSuffocating(Blocks::never)
@@ -6507,9 +6507,9 @@ public class Blocks {
             .isRedstoneConductor(Blocks::never);
     }
 
-    private static BlockBehaviour.Properties shulkerBoxProperties(MapColor p_365058_) {
+    private static BlockBehaviour.Properties shulkerBoxProperties(MapColor pMapColor) {
         return BlockBehaviour.Properties.of()
-            .mapColor(p_365058_)
+            .mapColor(pMapColor)
             .forceSolidOn()
             .strength(2.0F)
             .dynamicShape()
@@ -6537,9 +6537,9 @@ public class Blocks {
         return BlockBehaviour.Properties.of().instabreak().noOcclusion().pushReaction(PushReaction.DESTROY);
     }
 
-    private static BlockBehaviour.Properties candleProperties(MapColor p_361309_) {
+    private static BlockBehaviour.Properties candleProperties(MapColor pMapColor) {
         return BlockBehaviour.Properties.of()
-            .mapColor(p_361309_)
+            .mapColor(pMapColor)
             .noOcclusion()
             .strength(0.1F)
             .sound(SoundType.CANDLE)
@@ -6548,43 +6548,43 @@ public class Blocks {
     }
 
     @Deprecated
-    private static Block registerLegacyStair(String p_361419_, Block p_365308_) {
-        return register(p_361419_, p_360127_ -> new StairBlock(p_365308_.defaultBlockState(), p_360127_), BlockBehaviour.Properties.ofLegacyCopy(p_365308_));
+    private static Block registerLegacyStair(String pName, Block pBaseBlock) {
+        return register(pName, p_360127_ -> new StairBlock(pBaseBlock.defaultBlockState(), p_360127_), BlockBehaviour.Properties.ofLegacyCopy(pBaseBlock));
     }
 
-    private static Block registerStair(String p_362163_, Block p_367131_) {
-        return register(p_362163_, p_360344_ -> new StairBlock(p_367131_.defaultBlockState(), p_360344_), BlockBehaviour.Properties.ofFullCopy(p_367131_));
+    private static Block registerStair(String pName, Block pBaseBlock) {
+        return register(pName, p_360344_ -> new StairBlock(pBaseBlock.defaultBlockState(), p_360344_), BlockBehaviour.Properties.ofFullCopy(pBaseBlock));
     }
 
-    private static BlockBehaviour.Properties wallVariant(Block p_364015_, boolean p_361131_) {
-        BlockBehaviour.Properties blockbehaviour$properties = p_364015_.properties();
-        BlockBehaviour.Properties blockbehaviour$properties1 = BlockBehaviour.Properties.of().overrideLootTable(p_364015_.getLootTable());
-        if (p_361131_) {
-            blockbehaviour$properties1 = blockbehaviour$properties1.overrideDescription(p_364015_.getDescriptionId());
+    private static BlockBehaviour.Properties wallVariant(Block pBaseBlock, boolean pOverrideDescription) {
+        BlockBehaviour.Properties blockbehaviour$properties = pBaseBlock.properties();
+        BlockBehaviour.Properties blockbehaviour$properties1 = BlockBehaviour.Properties.of().overrideLootTable(pBaseBlock.getLootTable());
+        if (pOverrideDescription) {
+            blockbehaviour$properties1 = blockbehaviour$properties1.overrideDescription(pBaseBlock.getDescriptionId());
         }
 
         return blockbehaviour$properties1;
     }
 
-    private static Block register(ResourceKey<Block> p_309992_, Function<BlockBehaviour.Properties, Block> p_365267_, BlockBehaviour.Properties p_360839_) {
-        Block block = p_365267_.apply(p_360839_.setId(p_309992_));
-        return Registry.register(BuiltInRegistries.BLOCK, p_309992_, block);
+    private static Block register(ResourceKey<Block> pResourceKey, Function<BlockBehaviour.Properties, Block> pFactory, BlockBehaviour.Properties pProperties) {
+        Block block = pFactory.apply(pProperties.setId(pResourceKey));
+        return Registry.register(BuiltInRegistries.BLOCK, pResourceKey, block);
     }
 
-    private static Block register(ResourceKey<Block> p_361493_, BlockBehaviour.Properties p_365827_) {
-        return register(p_361493_, Block::new, p_365827_);
+    private static Block register(ResourceKey<Block> pResourceKey, BlockBehaviour.Properties pProperties) {
+        return register(pResourceKey, Block::new, pProperties);
     }
 
-    private static ResourceKey<Block> vanillaBlockId(String p_360731_) {
-        return ResourceKey.create(Registries.BLOCK, ResourceLocation.withDefaultNamespace(p_360731_));
+    private static ResourceKey<Block> vanillaBlockId(String pName) {
+        return ResourceKey.create(Registries.BLOCK, ResourceLocation.withDefaultNamespace(pName));
     }
 
-    private static Block register(String p_362355_, Function<BlockBehaviour.Properties, Block> p_369791_, BlockBehaviour.Properties p_370078_) {
-        return register(vanillaBlockId(p_362355_), p_369791_, p_370078_);
+    private static Block register(String pName, Function<BlockBehaviour.Properties, Block> pFactory, BlockBehaviour.Properties pProperties) {
+        return register(vanillaBlockId(pName), pFactory, pProperties);
     }
 
-    private static Block register(String p_50796_, BlockBehaviour.Properties p_362760_) {
-        return register(p_50796_, Block::new, p_362760_);
+    private static Block register(String pName, BlockBehaviour.Properties pProperties) {
+        return register(pName, Block::new, pProperties);
     }
 
     static {

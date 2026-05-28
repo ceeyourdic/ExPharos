@@ -36,18 +36,18 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
     protected abstract MapCodec<? extends DiodeBlock> codec();
 
     @Override
-    protected VoxelShape getShape(BlockState p_52556_, BlockGetter p_52557_, BlockPos p_52558_, CollisionContext p_52559_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_52538_, LevelReader p_52539_, BlockPos p_52540_) {
-        BlockPos blockpos = p_52540_.below();
-        return this.canSurviveOn(p_52539_, blockpos, p_52539_.getBlockState(blockpos));
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.below();
+        return this.canSurviveOn(pLevel, blockpos, pLevel.getBlockState(blockpos));
     }
 
-    protected boolean canSurviveOn(LevelReader p_299987_, BlockPos p_298116_, BlockState p_297597_) {
-        return p_297597_.isFaceSturdy(p_299987_, p_298116_, Direction.UP, SupportType.RIGID);
+    protected boolean canSurviveOn(LevelReader pLevel, BlockPos pPos, BlockState pState) {
+        return pState.isFaceSturdy(pLevel, pPos, Direction.UP, SupportType.RIGID);
     }
 
     @Override
@@ -67,16 +67,16 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    protected int getDirectSignal(BlockState p_52561_, BlockGetter p_52562_, BlockPos p_52563_, Direction p_52564_) {
-        return p_52561_.getSignal(p_52562_, p_52563_, p_52564_);
+    protected int getDirectSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
+        return pBlockState.getSignal(pBlockAccess, pPos, pSide);
     }
 
     @Override
-    protected int getSignal(BlockState p_52520_, BlockGetter p_52521_, BlockPos p_52522_, Direction p_52523_) {
-        if (!p_52520_.getValue(POWERED)) {
+    protected int getSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
+        if (!pBlockState.getValue(POWERED)) {
             return 0;
         } else {
-            return p_52520_.getValue(FACING) == p_52523_ ? this.getOutputSignal(p_52521_, p_52522_, p_52520_) : 0;
+            return pBlockState.getValue(FACING) == pSide ? this.getOutputSignal(pBlockAccess, pPos, pBlockState) : 0;
         }
     }
 
@@ -95,108 +95,108 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
         }
     }
 
-    protected void checkTickOnNeighbor(Level p_52577_, BlockPos p_52578_, BlockState p_52579_) {
-        if (!this.isLocked(p_52577_, p_52578_, p_52579_)) {
-            boolean flag = p_52579_.getValue(POWERED);
-            boolean flag1 = this.shouldTurnOn(p_52577_, p_52578_, p_52579_);
-            if (flag != flag1 && !p_52577_.getBlockTicks().willTickThisTick(p_52578_, this)) {
+    protected void checkTickOnNeighbor(Level pLevel, BlockPos pPos, BlockState pState) {
+        if (!this.isLocked(pLevel, pPos, pState)) {
+            boolean flag = pState.getValue(POWERED);
+            boolean flag1 = this.shouldTurnOn(pLevel, pPos, pState);
+            if (flag != flag1 && !pLevel.getBlockTicks().willTickThisTick(pPos, this)) {
                 TickPriority tickpriority = TickPriority.HIGH;
-                if (this.shouldPrioritize(p_52577_, p_52578_, p_52579_)) {
+                if (this.shouldPrioritize(pLevel, pPos, pState)) {
                     tickpriority = TickPriority.EXTREMELY_HIGH;
                 } else if (flag) {
                     tickpriority = TickPriority.VERY_HIGH;
                 }
 
-                p_52577_.scheduleTick(p_52578_, this, this.getDelay(p_52579_), tickpriority);
+                pLevel.scheduleTick(pPos, this, this.getDelay(pState), tickpriority);
             }
         }
     }
 
-    public boolean isLocked(LevelReader p_52511_, BlockPos p_52512_, BlockState p_52513_) {
+    public boolean isLocked(LevelReader pLevel, BlockPos pPos, BlockState pState) {
         return false;
     }
 
-    protected boolean shouldTurnOn(Level p_52502_, BlockPos p_52503_, BlockState p_52504_) {
-        return this.getInputSignal(p_52502_, p_52503_, p_52504_) > 0;
+    protected boolean shouldTurnOn(Level pLevel, BlockPos pPos, BlockState pState) {
+        return this.getInputSignal(pLevel, pPos, pState) > 0;
     }
 
-    protected int getInputSignal(Level p_52544_, BlockPos p_52545_, BlockState p_52546_) {
-        Direction direction = p_52546_.getValue(FACING);
-        BlockPos blockpos = p_52545_.relative(direction);
-        int i = p_52544_.getSignal(blockpos, direction);
+    protected int getInputSignal(Level pLevel, BlockPos pPos, BlockState pState) {
+        Direction direction = pState.getValue(FACING);
+        BlockPos blockpos = pPos.relative(direction);
+        int i = pLevel.getSignal(blockpos, direction);
         if (i >= 15) {
             return i;
         } else {
-            BlockState blockstate = p_52544_.getBlockState(blockpos);
+            BlockState blockstate = pLevel.getBlockState(blockpos);
             return Math.max(i, blockstate.is(Blocks.REDSTONE_WIRE) ? blockstate.getValue(RedStoneWireBlock.POWER) : 0);
         }
     }
 
-    protected int getAlternateSignal(SignalGetter p_277358_, BlockPos p_277763_, BlockState p_277604_) {
-        Direction direction = p_277604_.getValue(FACING);
+    protected int getAlternateSignal(SignalGetter pLevel, BlockPos pPos, BlockState pState) {
+        Direction direction = pState.getValue(FACING);
         Direction direction1 = direction.getClockWise();
         Direction direction2 = direction.getCounterClockWise();
         boolean flag = this.sideInputDiodesOnly();
         return Math.max(
-            p_277358_.getControlInputSignal(p_277763_.relative(direction1), direction1, flag), p_277358_.getControlInputSignal(p_277763_.relative(direction2), direction2, flag)
+            pLevel.getControlInputSignal(pPos.relative(direction1), direction1, flag), pLevel.getControlInputSignal(pPos.relative(direction2), direction2, flag)
         );
     }
 
     @Override
-    protected boolean isSignalSource(BlockState p_52572_) {
+    protected boolean isSignalSource(BlockState pState) {
         return true;
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_52501_) {
-        return this.defaultBlockState().setValue(FACING, p_52501_.getHorizontalDirection().getOpposite());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite());
     }
 
     @Override
-    public void setPlacedBy(Level p_52506_, BlockPos p_52507_, BlockState p_52508_, LivingEntity p_52509_, ItemStack p_52510_) {
-        if (this.shouldTurnOn(p_52506_, p_52507_, p_52508_)) {
-            p_52506_.scheduleTick(p_52507_, this, 1);
+    public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, LivingEntity pPlacer, ItemStack pStack) {
+        if (this.shouldTurnOn(pLevel, pPos, pState)) {
+            pLevel.scheduleTick(pPos, this, 1);
         }
     }
 
     @Override
-    protected void onPlace(BlockState p_52566_, Level p_52567_, BlockPos p_52568_, BlockState p_52569_, boolean p_52570_) {
-        this.updateNeighborsInFront(p_52567_, p_52568_, p_52566_);
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        this.updateNeighborsInFront(pLevel, pPos, pState);
     }
 
     @Override
-    protected void onRemove(BlockState p_52532_, Level p_52533_, BlockPos p_52534_, BlockState p_52535_, boolean p_52536_) {
-        if (!p_52536_ && !p_52532_.is(p_52535_.getBlock())) {
-            super.onRemove(p_52532_, p_52533_, p_52534_, p_52535_, p_52536_);
-            this.updateNeighborsInFront(p_52533_, p_52534_, p_52532_);
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        if (!pIsMoving && !pState.is(pNewState.getBlock())) {
+            super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+            this.updateNeighborsInFront(pLevel, pPos, pState);
         }
     }
 
-    protected void updateNeighborsInFront(Level p_52581_, BlockPos p_52582_, BlockState p_52583_) {
-        Direction direction = p_52583_.getValue(FACING);
-        BlockPos blockpos = p_52582_.relative(direction.getOpposite());
-        Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(p_52581_, direction.getOpposite(), Direction.UP);
-        p_52581_.neighborChanged(blockpos, this, orientation);
-        p_52581_.updateNeighborsAtExceptFromFacing(blockpos, this, direction, orientation);
+    protected void updateNeighborsInFront(Level pLevel, BlockPos pPos, BlockState pState) {
+        Direction direction = pState.getValue(FACING);
+        BlockPos blockpos = pPos.relative(direction.getOpposite());
+        Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(pLevel, direction.getOpposite(), Direction.UP);
+        pLevel.neighborChanged(blockpos, this, orientation);
+        pLevel.updateNeighborsAtExceptFromFacing(blockpos, this, direction, orientation);
     }
 
     protected boolean sideInputDiodesOnly() {
         return false;
     }
 
-    protected int getOutputSignal(BlockGetter p_52541_, BlockPos p_52542_, BlockState p_52543_) {
+    protected int getOutputSignal(BlockGetter pLevel, BlockPos pPos, BlockState pState) {
         return 15;
     }
 
-    public static boolean isDiode(BlockState p_52587_) {
-        return p_52587_.getBlock() instanceof DiodeBlock;
+    public static boolean isDiode(BlockState pState) {
+        return pState.getBlock() instanceof DiodeBlock;
     }
 
-    public boolean shouldPrioritize(BlockGetter p_52574_, BlockPos p_52575_, BlockState p_52576_) {
-        Direction direction = p_52576_.getValue(FACING).getOpposite();
-        BlockState blockstate = p_52574_.getBlockState(p_52575_.relative(direction));
+    public boolean shouldPrioritize(BlockGetter pLevel, BlockPos pPos, BlockState pState) {
+        Direction direction = pState.getValue(FACING).getOpposite();
+        BlockState blockstate = pLevel.getBlockState(pPos.relative(direction));
         return isDiode(blockstate) && blockstate.getValue(FACING) != direction;
     }
 
-    protected abstract int getDelay(BlockState p_52584_);
+    protected abstract int getDelay(BlockState pState);
 }

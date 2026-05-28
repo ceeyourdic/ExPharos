@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import net.minecraft.util.ARGB;
 
 public class MapColor {
-    private static final MapColor[] MATERIAL_COLORS = new MapColor[64];
+    public static final MapColor[] MATERIAL_COLORS = new MapColor[64];
     public static final MapColor NONE = new MapColor(0, 0);
     public static final MapColor GRASS = new MapColor(1, 8368696);
     public static final MapColor SAND = new MapColor(2, 16247203);
@@ -67,40 +67,40 @@ public class MapColor {
     public static final MapColor DEEPSLATE = new MapColor(59, 6579300);
     public static final MapColor RAW_IRON = new MapColor(60, 14200723);
     public static final MapColor GLOW_LICHEN = new MapColor(61, 8365974);
-    public final int col;
+    public int col;
     public final int id;
 
-    private MapColor(int p_285303_, int p_284979_) {
-        if (p_285303_ >= 0 && p_285303_ <= 63) {
-            this.id = p_285303_;
-            this.col = p_284979_;
-            MATERIAL_COLORS[p_285303_] = this;
+    private MapColor(int pId, int pCol) {
+        if (pId >= 0 && pId <= 63) {
+            this.id = pId;
+            this.col = pCol;
+            MATERIAL_COLORS[pId] = this;
         } else {
             throw new IndexOutOfBoundsException("Map colour ID must be between 0 and 63 (inclusive)");
         }
     }
 
-    public int calculateARGBColor(MapColor.Brightness p_369141_) {
-        return this == NONE ? 0 : ARGB.scaleRGB(ARGB.opaque(this.col), p_369141_.modifier);
+    public int calculateARGBColor(MapColor.Brightness pBrightness) {
+        return this == NONE ? 0 : ARGB.scaleRGB(ARGB.opaque(this.col), pBrightness.modifier);
     }
 
-    public static MapColor byId(int p_285273_) {
-        Preconditions.checkPositionIndex(p_285273_, MATERIAL_COLORS.length, "material id");
-        return byIdUnsafe(p_285273_);
+    public static MapColor byId(int pId) {
+        Preconditions.checkPositionIndex(pId, MATERIAL_COLORS.length, "material id");
+        return byIdUnsafe(pId);
     }
 
-    private static MapColor byIdUnsafe(int p_285180_) {
-        MapColor mapcolor = MATERIAL_COLORS[p_285180_];
+    private static MapColor byIdUnsafe(int pId) {
+        MapColor mapcolor = MATERIAL_COLORS[pId];
         return mapcolor != null ? mapcolor : NONE;
     }
 
-    public static int getColorFromPackedId(int p_285190_) {
-        int i = p_285190_ & 0xFF;
+    public static int getColorFromPackedId(int pPackedId) {
+        int i = pPackedId & 0xFF;
         return byIdUnsafe(i >> 2).calculateARGBColor(MapColor.Brightness.byIdUnsafe(i & 3));
     }
 
-    public byte getPackedId(MapColor.Brightness p_285070_) {
-        return (byte)(this.id << 2 | p_285070_.id & 3);
+    public byte getPackedId(MapColor.Brightness pBrightness) {
+        return (byte)(this.id << 2 | pBrightness.id & 3);
     }
 
     public static enum Brightness {
@@ -113,18 +113,18 @@ public class MapColor {
         public final int id;
         public final int modifier;
 
-        private Brightness(final int p_284956_, final int p_285069_) {
-            this.id = p_284956_;
-            this.modifier = p_285069_;
+        private Brightness(final int pId, final int pModifier) {
+            this.id = pId;
+            this.modifier = pModifier;
         }
 
-        public static MapColor.Brightness byId(int p_284960_) {
-            Preconditions.checkPositionIndex(p_284960_, VALUES.length, "brightness id");
-            return byIdUnsafe(p_284960_);
+        public static MapColor.Brightness byId(int pId) {
+            Preconditions.checkPositionIndex(pId, VALUES.length, "brightness id");
+            return byIdUnsafe(pId);
         }
 
-        static MapColor.Brightness byIdUnsafe(int p_285089_) {
-            return VALUES[p_285089_];
+        static MapColor.Brightness byIdUnsafe(int pId) {
+            return VALUES[pId];
         }
     }
 }

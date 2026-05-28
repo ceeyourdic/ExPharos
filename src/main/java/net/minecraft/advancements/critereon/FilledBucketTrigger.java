@@ -15,8 +15,8 @@ public class FilledBucketTrigger extends SimpleCriterionTrigger<FilledBucketTrig
         return FilledBucketTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_38773_, ItemStack p_38774_) {
-        this.trigger(p_38773_, p_38777_ -> p_38777_.matches(p_38774_));
+    public void trigger(ServerPlayer pPlayer, ItemStack pStack) {
+        this.trigger(pPlayer, p_38777_ -> p_38777_.matches(pStack));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item)
@@ -29,12 +29,12 @@ public class FilledBucketTrigger extends SimpleCriterionTrigger<FilledBucketTrig
                     .apply(p_325212_, FilledBucketTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<FilledBucketTrigger.TriggerInstance> filledBucket(ItemPredicate.Builder p_297424_) {
-            return CriteriaTriggers.FILLED_BUCKET.createCriterion(new FilledBucketTrigger.TriggerInstance(Optional.empty(), Optional.of(p_297424_.build())));
+        public static Criterion<FilledBucketTrigger.TriggerInstance> filledBucket(ItemPredicate.Builder pItem) {
+            return CriteriaTriggers.FILLED_BUCKET.createCriterion(new FilledBucketTrigger.TriggerInstance(Optional.empty(), Optional.of(pItem.build())));
         }
 
-        public boolean matches(ItemStack p_38792_) {
-            return !this.item.isPresent() || this.item.get().test(p_38792_);
+        public boolean matches(ItemStack pStack) {
+            return !this.item.isPresent() || this.item.get().test(pStack);
         }
 
         @Override

@@ -31,7 +31,7 @@ public record ClientboundExplodePacket(Vec3 center, Optional<Vec3> playerKnockba
         return GamePacketTypes.CLIENTBOUND_EXPLODE;
     }
 
-    public void handle(ClientGamePacketListener p_132126_) {
-        p_132126_.handleExplosion(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleExplosion(this);
     }
 }

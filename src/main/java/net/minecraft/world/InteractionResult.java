@@ -19,6 +19,11 @@ public sealed interface InteractionResult
         return false;
     }
 
+    // Arcane mixin port: Yarn-style success/accepted query.
+    default boolean isAccepted() {
+        return this.consumesAction();
+    }
+
     public static record Fail() implements InteractionResult {
     }
 
@@ -36,8 +41,8 @@ public sealed interface InteractionResult
             return true;
         }
 
-        public InteractionResult.Success heldItemTransformedTo(ItemStack p_362659_) {
-            return new InteractionResult.Success(this.swingSource, new InteractionResult.ItemContext(true, p_362659_));
+        public InteractionResult.Success heldItemTransformedTo(ItemStack pStack) {
+            return new InteractionResult.Success(this.swingSource, new InteractionResult.ItemContext(true, pStack));
         }
 
         public InteractionResult.Success withoutItem() {

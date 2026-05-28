@@ -27,15 +27,15 @@ public class PackSelectionModel {
     final Runnable onListChanged;
     private final Consumer<PackRepository> output;
 
-    public PackSelectionModel(Runnable p_99909_, Function<Pack, ResourceLocation> p_99910_, PackRepository p_99911_, Consumer<PackRepository> p_99912_) {
-        this.onListChanged = p_99909_;
-        this.iconGetter = p_99910_;
-        this.repository = p_99911_;
-        this.selected = Lists.newArrayList(p_99911_.getSelectedPacks());
+    public PackSelectionModel(Runnable pOnListChanged, Function<Pack, ResourceLocation> pIconGetter, PackRepository pRepository, Consumer<PackRepository> pOutput) {
+        this.onListChanged = pOnListChanged;
+        this.iconGetter = pIconGetter;
+        this.repository = pRepository;
+        this.selected = Lists.newArrayList(pRepository.getSelectedPacks());
         Collections.reverse(this.selected);
-        this.unselected = Lists.newArrayList(p_99911_.getAvailablePacks());
+        this.unselected = Lists.newArrayList(pRepository.getAvailablePacks());
         this.unselected.removeAll(this.selected);
-        this.output = p_99912_;
+        this.output = pOutput;
     }
 
     public Stream<PackSelectionModel.Entry> getUnselected() {
@@ -112,8 +112,8 @@ public class PackSelectionModel {
     abstract class EntryBase implements PackSelectionModel.Entry {
         private final Pack pack;
 
-        public EntryBase(final Pack p_99936_) {
-            this.pack = p_99936_;
+        public EntryBase(final Pack pPack) {
+            this.pack = pPack;
         }
 
         protected abstract List<Pack> getSelfList();
@@ -175,11 +175,11 @@ public class PackSelectionModel {
             }
         }
 
-        protected void move(int p_99939_) {
+        protected void move(int pOffset) {
             List<Pack> list = this.getSelfList();
             int i = list.indexOf(this.pack);
             list.remove(i);
-            list.add(i + p_99939_, this.pack);
+            list.add(i + pOffset, this.pack);
             PackSelectionModel.this.onListChanged.run();
         }
 

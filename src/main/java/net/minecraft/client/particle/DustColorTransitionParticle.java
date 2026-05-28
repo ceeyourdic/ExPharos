@@ -14,28 +14,28 @@ public class DustColorTransitionParticle extends DustParticleBase<DustColorTrans
     private final Vector3f toColor;
 
     protected DustColorTransitionParticle(
-        ClientLevel p_172053_,
-        double p_172054_,
-        double p_172055_,
-        double p_172056_,
-        double p_172057_,
-        double p_172058_,
-        double p_172059_,
-        DustColorTransitionOptions p_172060_,
-        SpriteSet p_172061_
+        ClientLevel pLevel,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed,
+        DustColorTransitionOptions pOptions,
+        SpriteSet pSprites
     ) {
-        super(p_172053_, p_172054_, p_172055_, p_172056_, p_172057_, p_172058_, p_172059_, p_172060_, p_172061_);
+        super(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, pOptions, pSprites);
         float f = this.random.nextFloat() * 0.4F + 0.6F;
-        this.fromColor = this.randomizeColor(p_172060_.getFromColor(), f);
-        this.toColor = this.randomizeColor(p_172060_.getToColor(), f);
+        this.fromColor = this.randomizeColor(pOptions.getFromColor(), f);
+        this.toColor = this.randomizeColor(pOptions.getToColor(), f);
     }
 
-    private Vector3f randomizeColor(Vector3f p_254318_, float p_254472_) {
-        return new Vector3f(this.randomizeColor(p_254318_.x(), p_254472_), this.randomizeColor(p_254318_.y(), p_254472_), this.randomizeColor(p_254318_.z(), p_254472_));
+    private Vector3f randomizeColor(Vector3f pVector, float pMultiplier) {
+        return new Vector3f(this.randomizeColor(pVector.x(), pMultiplier), this.randomizeColor(pVector.y(), pMultiplier), this.randomizeColor(pVector.z(), pMultiplier));
     }
 
-    private void lerpColors(float p_172070_) {
-        float f = ((float)this.age + p_172070_) / ((float)this.lifetime + 1.0F);
+    private void lerpColors(float pPartialTick) {
+        float f = ((float)this.age + pPartialTick) / ((float)this.lifetime + 1.0F);
         Vector3f vector3f = new Vector3f(this.fromColor).lerp(this.toColor, f);
         this.rCol = vector3f.x();
         this.gCol = vector3f.y();
@@ -52,8 +52,8 @@ public class DustColorTransitionParticle extends DustParticleBase<DustColorTrans
     public static class Provider implements ParticleProvider<DustColorTransitionOptions> {
         private final SpriteSet sprites;
 
-        public Provider(SpriteSet p_172073_) {
-            this.sprites = p_172073_;
+        public Provider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(

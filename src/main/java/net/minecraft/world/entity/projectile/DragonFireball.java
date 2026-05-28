@@ -21,14 +21,14 @@ public class DragonFireball extends AbstractHurtingProjectile {
         super(p_36892_, p_36893_);
     }
 
-    public DragonFireball(Level p_36903_, LivingEntity p_36904_, Vec3 p_344327_) {
-        super(EntityType.DRAGON_FIREBALL, p_36904_, p_344327_, p_36903_);
+    public DragonFireball(Level pLevel, LivingEntity pOwner, Vec3 pMovement) {
+        super(EntityType.DRAGON_FIREBALL, pOwner, pMovement, pLevel);
     }
 
     @Override
-    protected void onHit(HitResult p_36913_) {
-        super.onHit(p_36913_);
-        if (p_36913_.getType() != HitResult.Type.ENTITY || !this.ownedBy(((EntityHitResult)p_36913_).getEntity())) {
+    protected void onHit(HitResult pResult) {
+        super.onHit(pResult);
+        if (pResult.getType() != HitResult.Type.ENTITY || !this.ownedBy(((EntityHitResult)pResult).getEntity())) {
             if (!this.level().isClientSide) {
                 List<LivingEntity> list = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0, 2.0, 4.0));
                 AreaEffectCloud areaeffectcloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());

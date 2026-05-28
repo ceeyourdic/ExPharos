@@ -27,10 +27,10 @@ public class DeathScreen extends Screen {
     @Nullable
     private Button exitToTitleButton;
 
-    public DeathScreen(@Nullable Component p_95911_, boolean p_95912_) {
-        super(Component.translatable(p_95912_ ? "deathScreen.title.hardcore" : "deathScreen.title"));
-        this.causeOfDeath = p_95911_;
-        this.hardcore = p_95912_;
+    public DeathScreen(@Nullable Component pCauseOfDeath, boolean pHardcore) {
+        super(Component.translatable(pHardcore ? "deathScreen.title.hardcore" : "deathScreen.title"));
+        this.causeOfDeath = pCauseOfDeath;
+        this.hardcore = pHardcore;
     }
 
     @Override
@@ -123,33 +123,33 @@ public class DeathScreen extends Screen {
         renderDeathBackground(p_298829_, this.width, this.height);
     }
 
-    static void renderDeathBackground(GuiGraphics p_335473_, int p_330553_, int p_333774_) {
-        p_335473_.fillGradient(0, 0, p_330553_, p_333774_, 1615855616, -1602211792);
+    static void renderDeathBackground(GuiGraphics pGuiGraphics, int pWidth, int pHeight) {
+        pGuiGraphics.fillGradient(0, 0, pWidth, pHeight, 1615855616, -1602211792);
     }
 
     @Nullable
-    private Style getClickedComponentStyleAt(int p_95918_) {
+    private Style getClickedComponentStyleAt(int pX) {
         if (this.causeOfDeath == null) {
             return null;
         } else {
             int i = this.minecraft.font.width(this.causeOfDeath);
             int j = this.width / 2 - i / 2;
             int k = this.width / 2 + i / 2;
-            return p_95918_ >= j && p_95918_ <= k ? this.minecraft.font.getSplitter().componentStyleAtWidth(this.causeOfDeath, p_95918_ - j) : null;
+            return pX >= j && pX <= k ? this.minecraft.font.getSplitter().componentStyleAtWidth(this.causeOfDeath, pX - j) : null;
         }
     }
 
     @Override
-    public boolean mouseClicked(double p_95914_, double p_95915_, int p_95916_) {
-        if (this.causeOfDeath != null && p_95915_ > 85.0 && p_95915_ < (double)(85 + 9)) {
-            Style style = this.getClickedComponentStyleAt((int)p_95914_);
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+        if (this.causeOfDeath != null && pMouseY > 85.0 && pMouseY < (double)(85 + 9)) {
+            Style style = this.getClickedComponentStyleAt((int)pMouseX);
             if (style != null && style.getClickEvent() != null && style.getClickEvent().getAction() == ClickEvent.Action.OPEN_URL) {
                 this.handleComponentClicked(style);
                 return false;
             }
         }
 
-        return super.mouseClicked(p_95914_, p_95915_, p_95916_);
+        return super.mouseClicked(pMouseX, pMouseY, pButton);
     }
 
     @Override
@@ -166,9 +166,9 @@ public class DeathScreen extends Screen {
         }
     }
 
-    private void setButtonsActive(boolean p_273413_) {
+    private void setButtonsActive(boolean pActive) {
         for (Button button : this.exitButtons) {
-            button.active = p_273413_;
+            button.active = pActive;
         }
     }
 

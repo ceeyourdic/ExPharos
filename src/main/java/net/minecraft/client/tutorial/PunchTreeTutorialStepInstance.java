@@ -25,8 +25,8 @@ public class PunchTreeTutorialStepInstance implements TutorialStepInstance {
     private int timeWaiting;
     private int resetCount;
 
-    public PunchTreeTutorialStepInstance(Tutorial p_120549_) {
-        this.tutorial = p_120549_;
+    public PunchTreeTutorialStepInstance(Tutorial pTutorial) {
+        this.tutorial = pTutorial;
     }
 
     @Override
@@ -67,14 +67,14 @@ public class PunchTreeTutorialStepInstance implements TutorialStepInstance {
     }
 
     @Override
-    public void onDestroyBlock(ClientLevel p_120554_, BlockPos p_120555_, BlockState p_120556_, float p_120557_) {
-        boolean flag = p_120556_.is(BlockTags.LOGS);
-        if (flag && p_120557_ > 0.0F) {
+    public void onDestroyBlock(ClientLevel pLevel, BlockPos pPos, BlockState pState, float pDiggingStage) {
+        boolean flag = pState.is(BlockTags.LOGS);
+        if (flag && pDiggingStage > 0.0F) {
             if (this.toast != null) {
-                this.toast.updateProgress(p_120557_);
+                this.toast.updateProgress(pDiggingStage);
             }
 
-            if (p_120557_ >= 1.0F) {
+            if (pDiggingStage >= 1.0F) {
                 this.tutorial.setStep(TutorialSteps.OPEN_INVENTORY);
             }
         } else if (this.toast != null) {
@@ -85,8 +85,8 @@ public class PunchTreeTutorialStepInstance implements TutorialStepInstance {
     }
 
     @Override
-    public void onGetItem(ItemStack p_120552_) {
-        if (p_120552_.is(ItemTags.LOGS)) {
+    public void onGetItem(ItemStack pStack) {
+        if (pStack.is(ItemTags.LOGS)) {
             this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
         }
     }

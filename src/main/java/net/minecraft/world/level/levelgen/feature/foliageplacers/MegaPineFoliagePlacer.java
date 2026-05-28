@@ -18,9 +18,9 @@ public class MegaPineFoliagePlacer extends FoliagePlacer {
     );
     private final IntProvider crownHeight;
 
-    public MegaPineFoliagePlacer(IntProvider p_161470_, IntProvider p_161471_, IntProvider p_161472_) {
-        super(p_161470_, p_161471_);
-        this.crownHeight = p_161472_;
+    public MegaPineFoliagePlacer(IntProvider pRadius, IntProvider pOffset, IntProvider pCrownHeight) {
+        super(pRadius, pOffset);
+        this.crownHeight = pCrownHeight;
     }
 
     @Override

@@ -31,8 +31,8 @@ public class WindChargeRenderer extends EntityRenderer<AbstractWindCharge, Entit
         super.render(p_369820_, p_312831_, p_311698_, p_311600_);
     }
 
-    protected float xOffset(float p_311672_) {
-        return p_311672_ * 0.03F;
+    protected float xOffset(float pTickCount) {
+        return pTickCount * 0.03F;
     }
 
     @Override

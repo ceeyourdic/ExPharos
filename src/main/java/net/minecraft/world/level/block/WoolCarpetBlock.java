@@ -18,9 +18,9 @@ public class WoolCarpetBlock extends CarpetBlock {
         return CODEC;
     }
 
-    protected WoolCarpetBlock(DyeColor p_58291_, BlockBehaviour.Properties p_58292_) {
-        super(p_58292_);
-        this.color = p_58291_;
+    protected WoolCarpetBlock(DyeColor pColor, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.color = pColor;
     }
 
     public DyeColor getColor() {

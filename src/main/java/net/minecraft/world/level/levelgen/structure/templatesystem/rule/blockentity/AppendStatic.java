@@ -13,8 +13,8 @@ public class AppendStatic implements RuleBlockEntityModifier {
     );
     private final CompoundTag tag;
 
-    public AppendStatic(CompoundTag p_277900_) {
-        this.tag = p_277900_;
+    public AppendStatic(CompoundTag pTag) {
+        this.tag = pTag;
     }
 
     @Override

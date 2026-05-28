@@ -10,9 +10,9 @@ public class LevelEntityGetterAdapter<T extends EntityAccess> implements LevelEn
     private final EntityLookup<T> visibleEntities;
     private final EntitySectionStorage<T> sectionStorage;
 
-    public LevelEntityGetterAdapter(EntityLookup<T> p_156943_, EntitySectionStorage<T> p_156944_) {
-        this.visibleEntities = p_156943_;
-        this.sectionStorage = p_156944_;
+    public LevelEntityGetterAdapter(EntityLookup<T> pVisibleEntities, EntitySectionStorage<T> pSectionStorage) {
+        this.visibleEntities = pVisibleEntities;
+        this.sectionStorage = pSectionStorage;
     }
 
     @Nullable

@@ -26,18 +26,18 @@ public class BreezeModel extends EntityModel<BreezeRenderState> {
     private final ModelPart windBottom;
     private final ModelPart rods;
 
-    public BreezeModel(ModelPart p_309507_) {
-        super(p_309507_, RenderType::entityTranslucent);
-        this.wind = p_309507_.getChild("wind_body");
+    public BreezeModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entityTranslucent);
+        this.wind = pRoot.getChild("wind_body");
         this.windBottom = this.wind.getChild("wind_bottom");
         this.windMid = this.windBottom.getChild("wind_mid");
         this.windTop = this.windMid.getChild("wind_top");
-        this.head = p_309507_.getChild("body").getChild("head");
+        this.head = pRoot.getChild("body").getChild("head");
         this.eyes = this.head.getChild("eyes");
-        this.rods = p_309507_.getChild("body").getChild("rods");
+        this.rods = pRoot.getChild("body").getChild("rods");
     }
 
-    public static LayerDefinition createBodyLayer(int p_329286_, int p_330152_) {
+    public static LayerDefinition createBodyLayer(int pWidth, int pHeight) {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
         PartDefinition partdefinition1 = partdefinition.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
@@ -103,7 +103,7 @@ public class BreezeModel extends EntityModel<BreezeRenderState> {
                 .addBox(-2.5F, -8.0F, -2.5F, 5.0F, 8.0F, 5.0F, new CubeDeformation(0.0F)),
             PartPose.offset(0.0F, -6.0F, 0.0F)
         );
-        return LayerDefinition.create(meshdefinition, p_329286_, p_330152_);
+        return LayerDefinition.create(meshdefinition, pWidth, pHeight);
     }
 
     public void setupAnim(BreezeRenderState p_364657_) {

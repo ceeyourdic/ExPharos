@@ -72,64 +72,64 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
     }
 
     private void generateCutOut(
-        RandomSource p_225100_,
-        LevelAccessor p_225101_,
-        int p_225102_,
-        int p_225103_,
-        BlockPos p_225104_,
-        boolean p_225105_,
-        int p_225106_,
-        double p_225107_,
-        int p_225108_
+        RandomSource pRandom,
+        LevelAccessor pLevel,
+        int pMajorAxis,
+        int pHeight,
+        BlockPos pPos,
+        boolean pElliptical,
+        int pEllipseRadius,
+        double pAngle,
+        int pMinorAxis
     ) {
-        int i = p_225100_.nextBoolean() ? -1 : 1;
-        int j = p_225100_.nextBoolean() ? -1 : 1;
-        int k = p_225100_.nextInt(Math.max(p_225102_ / 2 - 2, 1));
-        if (p_225100_.nextBoolean()) {
-            k = p_225102_ / 2 + 1 - p_225100_.nextInt(Math.max(p_225102_ - p_225102_ / 2 - 1, 1));
+        int i = pRandom.nextBoolean() ? -1 : 1;
+        int j = pRandom.nextBoolean() ? -1 : 1;
+        int k = pRandom.nextInt(Math.max(pMajorAxis / 2 - 2, 1));
+        if (pRandom.nextBoolean()) {
+            k = pMajorAxis / 2 + 1 - pRandom.nextInt(Math.max(pMajorAxis - pMajorAxis / 2 - 1, 1));
         }
 
-        int l = p_225100_.nextInt(Math.max(p_225102_ / 2 - 2, 1));
-        if (p_225100_.nextBoolean()) {
-            l = p_225102_ / 2 + 1 - p_225100_.nextInt(Math.max(p_225102_ - p_225102_ / 2 - 1, 1));
+        int l = pRandom.nextInt(Math.max(pMajorAxis / 2 - 2, 1));
+        if (pRandom.nextBoolean()) {
+            l = pMajorAxis / 2 + 1 - pRandom.nextInt(Math.max(pMajorAxis - pMajorAxis / 2 - 1, 1));
         }
 
-        if (p_225105_) {
-            k = l = p_225100_.nextInt(Math.max(p_225106_ - 5, 1));
+        if (pElliptical) {
+            k = l = pRandom.nextInt(Math.max(pEllipseRadius - 5, 1));
         }
 
         BlockPos blockpos = new BlockPos(i * k, 0, j * l);
-        double d0 = p_225105_ ? p_225107_ + (Math.PI / 2) : p_225100_.nextDouble() * 2.0 * Math.PI;
+        double d0 = pElliptical ? pAngle + (Math.PI / 2) : pRandom.nextDouble() * 2.0 * Math.PI;
 
-        for (int i1 = 0; i1 < p_225103_ - 3; i1++) {
-            int j1 = this.heightDependentRadiusRound(p_225100_, i1, p_225103_, p_225102_);
-            this.carve(j1, i1, p_225104_, p_225101_, false, d0, blockpos, p_225106_, p_225108_);
+        for (int i1 = 0; i1 < pHeight - 3; i1++) {
+            int j1 = this.heightDependentRadiusRound(pRandom, i1, pHeight, pMajorAxis);
+            this.carve(j1, i1, pPos, pLevel, false, d0, blockpos, pEllipseRadius, pMinorAxis);
         }
 
-        for (int k1 = -1; k1 > -p_225103_ + p_225100_.nextInt(5); k1--) {
-            int l1 = this.heightDependentRadiusSteep(p_225100_, -k1, p_225103_, p_225102_);
-            this.carve(l1, k1, p_225104_, p_225101_, true, d0, blockpos, p_225106_, p_225108_);
+        for (int k1 = -1; k1 > -pHeight + pRandom.nextInt(5); k1--) {
+            int l1 = this.heightDependentRadiusSteep(pRandom, -k1, pHeight, pMajorAxis);
+            this.carve(l1, k1, pPos, pLevel, true, d0, blockpos, pEllipseRadius, pMinorAxis);
         }
     }
 
     private void carve(
-        int p_66036_, int p_66037_, BlockPos p_66038_, LevelAccessor p_66039_, boolean p_66040_, double p_66041_, BlockPos p_66042_, int p_66043_, int p_66044_
+        int pRadius, int pLocalY, BlockPos pPos, LevelAccessor pLevel, boolean pPlaceWater, double pPerpendicularAngle, BlockPos pEllipseOrigin, int pMajorRadius, int pMinorRadius
     ) {
-        int i = p_66036_ + 1 + p_66043_ / 3;
-        int j = Math.min(p_66036_ - 3, 3) + p_66044_ / 2 - 1;
+        int i = pRadius + 1 + pMajorRadius / 3;
+        int j = Math.min(pRadius - 3, 3) + pMinorRadius / 2 - 1;
 
         for (int k = -i; k < i; k++) {
             for (int l = -i; l < i; l++) {
-                double d0 = this.signedDistanceEllipse(k, l, p_66042_, i, j, p_66041_);
+                double d0 = this.signedDistanceEllipse(k, l, pEllipseOrigin, i, j, pPerpendicularAngle);
                 if (d0 < 0.0) {
-                    BlockPos blockpos = p_66038_.offset(k, p_66037_, l);
-                    BlockState blockstate = p_66039_.getBlockState(blockpos);
+                    BlockPos blockpos = pPos.offset(k, pLocalY, l);
+                    BlockState blockstate = pLevel.getBlockState(blockpos);
                     if (isIcebergState(blockstate) || blockstate.is(Blocks.SNOW_BLOCK)) {
-                        if (p_66040_) {
-                            this.setBlock(p_66039_, blockpos, Blocks.WATER.defaultBlockState());
+                        if (pPlaceWater) {
+                            this.setBlock(pLevel, blockpos, Blocks.WATER.defaultBlockState());
                         } else {
-                            this.setBlock(p_66039_, blockpos, Blocks.AIR.defaultBlockState());
-                            this.removeFloatingSnowLayer(p_66039_, blockpos);
+                            this.setBlock(pLevel, blockpos, Blocks.AIR.defaultBlockState());
+                            this.removeFloatingSnowLayer(pLevel, blockpos);
                         }
                     }
                 }
@@ -137,147 +137,147 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
         }
     }
 
-    private void removeFloatingSnowLayer(LevelAccessor p_66049_, BlockPos p_66050_) {
-        if (p_66049_.getBlockState(p_66050_.above()).is(Blocks.SNOW)) {
-            this.setBlock(p_66049_, p_66050_.above(), Blocks.AIR.defaultBlockState());
+    private void removeFloatingSnowLayer(LevelAccessor pLevel, BlockPos pPos) {
+        if (pLevel.getBlockState(pPos.above()).is(Blocks.SNOW)) {
+            this.setBlock(pLevel, pPos.above(), Blocks.AIR.defaultBlockState());
         }
     }
 
     private void generateIcebergBlock(
-        LevelAccessor p_225110_,
-        RandomSource p_225111_,
-        BlockPos p_225112_,
-        int p_225113_,
-        int p_225114_,
-        int p_225115_,
-        int p_225116_,
-        int p_225117_,
-        int p_225118_,
-        boolean p_225119_,
-        int p_225120_,
-        double p_225121_,
-        boolean p_225122_,
-        BlockState p_225123_
+        LevelAccessor pLevel,
+        RandomSource pRandom,
+        BlockPos pPos,
+        int pHeight,
+        int pLocalX,
+        int pLocalY,
+        int pLocalZ,
+        int pRadius,
+        int pMajorRadius,
+        boolean pElliptical,
+        int pMinorRadius,
+        double pAngle,
+        boolean pPlaceSnow,
+        BlockState pState
     ) {
-        double d0 = p_225119_
-            ? this.signedDistanceEllipse(p_225114_, p_225116_, BlockPos.ZERO, p_225118_, this.getEllipseC(p_225115_, p_225113_, p_225120_), p_225121_)
-            : this.signedDistanceCircle(p_225114_, p_225116_, BlockPos.ZERO, p_225117_, p_225111_);
+        double d0 = pElliptical
+            ? this.signedDistanceEllipse(pLocalX, pLocalZ, BlockPos.ZERO, pMajorRadius, this.getEllipseC(pLocalY, pHeight, pMinorRadius), pAngle)
+            : this.signedDistanceCircle(pLocalX, pLocalZ, BlockPos.ZERO, pRadius, pRandom);
         if (d0 < 0.0) {
-            BlockPos blockpos = p_225112_.offset(p_225114_, p_225115_, p_225116_);
-            double d1 = p_225119_ ? -0.5 : (double)(-6 - p_225111_.nextInt(3));
-            if (d0 > d1 && p_225111_.nextDouble() > 0.9) {
+            BlockPos blockpos = pPos.offset(pLocalX, pLocalY, pLocalZ);
+            double d1 = pElliptical ? -0.5 : (double)(-6 - pRandom.nextInt(3));
+            if (d0 > d1 && pRandom.nextDouble() > 0.9) {
                 return;
             }
 
-            this.setIcebergBlock(blockpos, p_225110_, p_225111_, p_225113_ - p_225115_, p_225113_, p_225119_, p_225122_, p_225123_);
+            this.setIcebergBlock(blockpos, pLevel, pRandom, pHeight - pLocalY, pHeight, pElliptical, pPlaceSnow, pState);
         }
     }
 
     private void setIcebergBlock(
-        BlockPos p_225125_,
-        LevelAccessor p_225126_,
-        RandomSource p_225127_,
-        int p_225128_,
-        int p_225129_,
-        boolean p_225130_,
-        boolean p_225131_,
-        BlockState p_225132_
+        BlockPos pPos,
+        LevelAccessor pLevel,
+        RandomSource pRandom,
+        int pHeightRemaining,
+        int pHeight,
+        boolean pElliptical,
+        boolean pPlaceSnow,
+        BlockState pState
     ) {
-        BlockState blockstate = p_225126_.getBlockState(p_225125_);
+        BlockState blockstate = pLevel.getBlockState(pPos);
         if (blockstate.isAir() || blockstate.is(Blocks.SNOW_BLOCK) || blockstate.is(Blocks.ICE) || blockstate.is(Blocks.WATER)) {
-            boolean flag = !p_225130_ || p_225127_.nextDouble() > 0.05;
-            int i = p_225130_ ? 3 : 2;
-            if (p_225131_
+            boolean flag = !pElliptical || pRandom.nextDouble() > 0.05;
+            int i = pElliptical ? 3 : 2;
+            if (pPlaceSnow
                 && !blockstate.is(Blocks.WATER)
-                && (double)p_225128_ <= (double)p_225127_.nextInt(Math.max(1, p_225129_ / i)) + (double)p_225129_ * 0.6
+                && (double)pHeightRemaining <= (double)pRandom.nextInt(Math.max(1, pHeight / i)) + (double)pHeight * 0.6
                 && flag) {
-                this.setBlock(p_225126_, p_225125_, Blocks.SNOW_BLOCK.defaultBlockState());
+                this.setBlock(pLevel, pPos, Blocks.SNOW_BLOCK.defaultBlockState());
             } else {
-                this.setBlock(p_225126_, p_225125_, p_225132_);
+                this.setBlock(pLevel, pPos, pState);
             }
         }
     }
 
-    private int getEllipseC(int p_66019_, int p_66020_, int p_66021_) {
-        int i = p_66021_;
-        if (p_66019_ > 0 && p_66020_ - p_66019_ <= 3) {
-            i = p_66021_ - (4 - (p_66020_ - p_66019_));
+    private int getEllipseC(int pY, int pHeight, int pMinorAxis) {
+        int i = pMinorAxis;
+        if (pY > 0 && pHeight - pY <= 3) {
+            i = pMinorAxis - (4 - (pHeight - pY));
         }
 
         return i;
     }
 
-    private double signedDistanceCircle(int p_225089_, int p_225090_, BlockPos p_225091_, int p_225092_, RandomSource p_225093_) {
-        float f = 10.0F * Mth.clamp(p_225093_.nextFloat(), 0.2F, 0.8F) / (float)p_225092_;
+    private double signedDistanceCircle(int pX, int pZ, BlockPos pCenter, int pRadius, RandomSource pRandom) {
+        float f = 10.0F * Mth.clamp(pRandom.nextFloat(), 0.2F, 0.8F) / (float)pRadius;
         return (double)f
-            + Math.pow((double)(p_225089_ - p_225091_.getX()), 2.0)
-            + Math.pow((double)(p_225090_ - p_225091_.getZ()), 2.0)
-            - Math.pow((double)p_225092_, 2.0);
+            + Math.pow((double)(pX - pCenter.getX()), 2.0)
+            + Math.pow((double)(pZ - pCenter.getZ()), 2.0)
+            - Math.pow((double)pRadius, 2.0);
     }
 
-    private double signedDistanceEllipse(int p_66023_, int p_66024_, BlockPos p_66025_, int p_66026_, int p_66027_, double p_66028_) {
+    private double signedDistanceEllipse(int pX, int pZ, BlockPos pCenter, int pMajorRadius, int pMinorRadius, double pAngle) {
         return Math.pow(
-                ((double)(p_66023_ - p_66025_.getX()) * Math.cos(p_66028_) - (double)(p_66024_ - p_66025_.getZ()) * Math.sin(p_66028_))
-                    / (double)p_66026_,
+                ((double)(pX - pCenter.getX()) * Math.cos(pAngle) - (double)(pZ - pCenter.getZ()) * Math.sin(pAngle))
+                    / (double)pMajorRadius,
                 2.0
             )
             + Math.pow(
-                ((double)(p_66023_ - p_66025_.getX()) * Math.sin(p_66028_) + (double)(p_66024_ - p_66025_.getZ()) * Math.cos(p_66028_))
-                    / (double)p_66027_,
+                ((double)(pX - pCenter.getX()) * Math.sin(pAngle) + (double)(pZ - pCenter.getZ()) * Math.cos(pAngle))
+                    / (double)pMinorRadius,
                 2.0
             )
             - 1.0;
     }
 
-    private int heightDependentRadiusRound(RandomSource p_225095_, int p_225096_, int p_225097_, int p_225098_) {
-        float f = 3.5F - p_225095_.nextFloat();
-        float f1 = (1.0F - (float)Math.pow((double)p_225096_, 2.0) / ((float)p_225097_ * f)) * (float)p_225098_;
-        if (p_225097_ > 15 + p_225095_.nextInt(5)) {
-            int i = p_225096_ < 3 + p_225095_.nextInt(6) ? p_225096_ / 2 : p_225096_;
-            f1 = (1.0F - (float)i / ((float)p_225097_ * f * 0.4F)) * (float)p_225098_;
+    private int heightDependentRadiusRound(RandomSource pRandom, int pY, int pHeight, int pMajorAxis) {
+        float f = 3.5F - pRandom.nextFloat();
+        float f1 = (1.0F - (float)Math.pow((double)pY, 2.0) / ((float)pHeight * f)) * (float)pMajorAxis;
+        if (pHeight > 15 + pRandom.nextInt(5)) {
+            int i = pY < 3 + pRandom.nextInt(6) ? pY / 2 : pY;
+            f1 = (1.0F - (float)i / ((float)pHeight * f * 0.4F)) * (float)pMajorAxis;
         }
 
         return Mth.ceil(f1 / 2.0F);
     }
 
-    private int heightDependentRadiusEllipse(int p_66110_, int p_66111_, int p_66112_) {
+    private int heightDependentRadiusEllipse(int pY, int pHeight, int pMaxRadius) {
         float f = 1.0F;
-        float f1 = (1.0F - (float)Math.pow((double)p_66110_, 2.0) / ((float)p_66111_ * 1.0F)) * (float)p_66112_;
+        float f1 = (1.0F - (float)Math.pow((double)pY, 2.0) / ((float)pHeight * 1.0F)) * (float)pMaxRadius;
         return Mth.ceil(f1 / 2.0F);
     }
 
-    private int heightDependentRadiusSteep(RandomSource p_225134_, int p_225135_, int p_225136_, int p_225137_) {
-        float f = 1.0F + p_225134_.nextFloat() / 2.0F;
-        float f1 = (1.0F - (float)p_225135_ / ((float)p_225136_ * f)) * (float)p_225137_;
+    private int heightDependentRadiusSteep(RandomSource pRandom, int pY, int pHeight, int pMaxRadius) {
+        float f = 1.0F + pRandom.nextFloat() / 2.0F;
+        float f1 = (1.0F - (float)pY / ((float)pHeight * f)) * (float)pMaxRadius;
         return Mth.ceil(f1 / 2.0F);
     }
 
-    private static boolean isIcebergState(BlockState p_159886_) {
-        return p_159886_.is(Blocks.PACKED_ICE) || p_159886_.is(Blocks.SNOW_BLOCK) || p_159886_.is(Blocks.BLUE_ICE);
+    private static boolean isIcebergState(BlockState pState) {
+        return pState.is(Blocks.PACKED_ICE) || pState.is(Blocks.SNOW_BLOCK) || pState.is(Blocks.BLUE_ICE);
     }
 
-    private boolean belowIsAir(BlockGetter p_66046_, BlockPos p_66047_) {
-        return p_66046_.getBlockState(p_66047_.below()).isAir();
+    private boolean belowIsAir(BlockGetter pLevel, BlockPos pPos) {
+        return pLevel.getBlockState(pPos.below()).isAir();
     }
 
-    private void smooth(LevelAccessor p_66052_, BlockPos p_66053_, int p_66054_, int p_66055_, boolean p_66056_, int p_66057_) {
-        int i = p_66056_ ? p_66057_ : p_66054_ / 2;
+    private void smooth(LevelAccessor pLevel, BlockPos pPos, int pMajorRadius, int pHeight, boolean pElliptical, int pMinorRadius) {
+        int i = pElliptical ? pMinorRadius : pMajorRadius / 2;
 
         for (int j = -i; j <= i; j++) {
             for (int k = -i; k <= i; k++) {
-                for (int l = 0; l <= p_66055_; l++) {
-                    BlockPos blockpos = p_66053_.offset(j, l, k);
-                    BlockState blockstate = p_66052_.getBlockState(blockpos);
+                for (int l = 0; l <= pHeight; l++) {
+                    BlockPos blockpos = pPos.offset(j, l, k);
+                    BlockState blockstate = pLevel.getBlockState(blockpos);
                     if (isIcebergState(blockstate) || blockstate.is(Blocks.SNOW)) {
-                        if (this.belowIsAir(p_66052_, blockpos)) {
-                            this.setBlock(p_66052_, blockpos, Blocks.AIR.defaultBlockState());
-                            this.setBlock(p_66052_, blockpos.above(), Blocks.AIR.defaultBlockState());
+                        if (this.belowIsAir(pLevel, blockpos)) {
+                            this.setBlock(pLevel, blockpos, Blocks.AIR.defaultBlockState());
+                            this.setBlock(pLevel, blockpos.above(), Blocks.AIR.defaultBlockState());
                         } else if (isIcebergState(blockstate)) {
                             BlockState[] ablockstate = new BlockState[]{
-                                p_66052_.getBlockState(blockpos.west()),
-                                p_66052_.getBlockState(blockpos.east()),
-                                p_66052_.getBlockState(blockpos.north()),
-                                p_66052_.getBlockState(blockpos.south())
+                                pLevel.getBlockState(blockpos.west()),
+                                pLevel.getBlockState(blockpos.east()),
+                                pLevel.getBlockState(blockpos.north()),
+                                pLevel.getBlockState(blockpos.south())
                             };
                             int i1 = 0;
 
@@ -288,7 +288,7 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
                             }
 
                             if (i1 >= 3) {
-                                this.setBlock(p_66052_, blockpos, Blocks.AIR.defaultBlockState());
+                                this.setBlock(pLevel, blockpos, Blocks.AIR.defaultBlockState());
                             }
                         }
                     }

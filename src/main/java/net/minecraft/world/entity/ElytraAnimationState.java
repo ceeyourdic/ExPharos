@@ -14,8 +14,8 @@ public class ElytraAnimationState {
     private float rotZOld;
     private final LivingEntity entity;
 
-    public ElytraAnimationState(LivingEntity p_369283_) {
-        this.entity = p_369283_;
+    public ElytraAnimationState(LivingEntity pEntity) {
+        this.entity = pEntity;
     }
 
     public void tick() {
@@ -51,15 +51,15 @@ public class ElytraAnimationState {
         this.rotZ = this.rotZ + (f1 - this.rotZ) * 0.3F;
     }
 
-    public float getRotX(float p_361516_) {
-        return Mth.lerp(p_361516_, this.rotXOld, this.rotX);
+    public float getRotX(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.rotXOld, this.rotX);
     }
 
-    public float getRotY(float p_362262_) {
-        return Mth.lerp(p_362262_, this.rotYOld, this.rotY);
+    public float getRotY(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.rotYOld, this.rotY);
     }
 
-    public float getRotZ(float p_368210_) {
-        return Mth.lerp(p_368210_, this.rotZOld, this.rotZ);
+    public float getRotZ(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.rotZOld, this.rotZ);
     }
 }

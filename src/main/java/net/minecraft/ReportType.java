@@ -127,20 +127,20 @@ public record ReportType(String header, List<String> nuggets) {
         }
     }
 
-    public void appendHeader(StringBuilder p_344403_, List<String> p_343736_) {
-        p_344403_.append("---- ");
-        p_344403_.append(this.header());
-        p_344403_.append(" ----\n");
-        p_344403_.append("// ");
-        p_344403_.append(this.getErrorComment());
-        p_344403_.append('\n');
+    public void appendHeader(StringBuilder pBuilder, List<String> pLinks) {
+        pBuilder.append("---- ");
+        pBuilder.append(this.header());
+        pBuilder.append(" ----\n");
+        pBuilder.append("// ");
+        pBuilder.append(this.getErrorComment());
+        pBuilder.append('\n');
 
-        for (String s : p_343736_) {
-            p_344403_.append("// ");
-            p_344403_.append(s);
-            p_344403_.append('\n');
+        for (String s : pLinks) {
+            pBuilder.append("// ");
+            pBuilder.append(s);
+            pBuilder.append('\n');
         }
 
-        p_344403_.append('\n');
+        pBuilder.append('\n');
     }
 }

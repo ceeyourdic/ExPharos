@@ -11,10 +11,10 @@ public class V2509 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_17890_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_17890_);
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
         map.remove("minecraft:zombie_pigman");
-        p_17890_.register(map, "minecraft:zombified_piglin", () -> V100.equipment(p_17890_));
+        pSchema.register(map, "minecraft:zombified_piglin", () -> V100.equipment(pSchema));
         return map;
     }
 }

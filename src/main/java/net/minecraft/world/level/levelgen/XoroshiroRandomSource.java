@@ -13,20 +13,20 @@ public class XoroshiroRandomSource implements RandomSource {
     private Xoroshiro128PlusPlus randomNumberGenerator;
     private final MarsagliaPolarGaussian gaussianSource = new MarsagliaPolarGaussian(this);
 
-    public XoroshiroRandomSource(long p_190102_) {
-        this.randomNumberGenerator = new Xoroshiro128PlusPlus(RandomSupport.upgradeSeedTo128bit(p_190102_));
+    public XoroshiroRandomSource(long pSeed) {
+        this.randomNumberGenerator = new Xoroshiro128PlusPlus(RandomSupport.upgradeSeedTo128bit(pSeed));
     }
 
-    public XoroshiroRandomSource(RandomSupport.Seed128bit p_289014_) {
-        this.randomNumberGenerator = new Xoroshiro128PlusPlus(p_289014_);
+    public XoroshiroRandomSource(RandomSupport.Seed128bit pSeed) {
+        this.randomNumberGenerator = new Xoroshiro128PlusPlus(pSeed);
     }
 
-    public XoroshiroRandomSource(long p_190104_, long p_190105_) {
-        this.randomNumberGenerator = new Xoroshiro128PlusPlus(p_190104_, p_190105_);
+    public XoroshiroRandomSource(long pSeedLo, long pSeedHi) {
+        this.randomNumberGenerator = new Xoroshiro128PlusPlus(pSeedLo, pSeedHi);
     }
 
-    private XoroshiroRandomSource(Xoroshiro128PlusPlus p_287656_) {
-        this.randomNumberGenerator = p_287656_;
+    private XoroshiroRandomSource(Xoroshiro128PlusPlus pRandomNumberGenerator) {
+        this.randomNumberGenerator = pRandomNumberGenerator;
     }
 
     @Override
@@ -102,17 +102,17 @@ public class XoroshiroRandomSource implements RandomSource {
         }
     }
 
-    private long nextBits(int p_190108_) {
-        return this.randomNumberGenerator.nextLong() >>> 64 - p_190108_;
+    private long nextBits(int pBits) {
+        return this.randomNumberGenerator.nextLong() >>> 64 - pBits;
     }
 
     public static class XoroshiroPositionalRandomFactory implements PositionalRandomFactory {
         private final long seedLo;
         private final long seedHi;
 
-        public XoroshiroPositionalRandomFactory(long p_190127_, long p_190128_) {
-            this.seedLo = p_190127_;
-            this.seedHi = p_190128_;
+        public XoroshiroPositionalRandomFactory(long pSeedLo, long pSeedHi) {
+            this.seedLo = pSeedLo;
+            this.seedHi = pSeedHi;
         }
 
         @Override

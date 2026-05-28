@@ -19,8 +19,8 @@ public record InvertedLootItemCondition(LootItemCondition term) implements LootI
         return LootItemConditions.INVERTED;
     }
 
-    public boolean test(LootContext p_81689_) {
-        return !this.term.test(p_81689_);
+    public boolean test(LootContext pContext) {
+        return !this.term.test(pContext);
     }
 
     @Override
@@ -34,8 +34,8 @@ public record InvertedLootItemCondition(LootItemCondition term) implements LootI
         this.term.validate(p_81691_);
     }
 
-    public static LootItemCondition.Builder invert(LootItemCondition.Builder p_81695_) {
-        InvertedLootItemCondition invertedlootitemcondition = new InvertedLootItemCondition(p_81695_.build());
+    public static LootItemCondition.Builder invert(LootItemCondition.Builder pToInvert) {
+        InvertedLootItemCondition invertedlootitemcondition = new InvertedLootItemCondition(pToInvert.build());
         return () -> invertedlootitemcondition;
     }
 }

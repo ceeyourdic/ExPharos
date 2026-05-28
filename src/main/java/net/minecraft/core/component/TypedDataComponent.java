@@ -28,23 +28,23 @@ public record TypedDataComponent<T>(DataComponentType<T> type, T value) {
         }
     };
 
-    static TypedDataComponent<?> fromEntryUnchecked(Entry<DataComponentType<?>, Object> p_335332_) {
-        return createUnchecked(p_335332_.getKey(), p_335332_.getValue());
+    static TypedDataComponent<?> fromEntryUnchecked(Entry<DataComponentType<?>, Object> pEntry) {
+        return createUnchecked(pEntry.getKey(), pEntry.getValue());
     }
 
-    public static <T> TypedDataComponent<T> createUnchecked(DataComponentType<T> p_332647_, Object p_330924_) {
-        return new TypedDataComponent<>(p_332647_, (T)p_330924_);
+    public static <T> TypedDataComponent<T> createUnchecked(DataComponentType<T> pType, Object pValue) {
+        return new TypedDataComponent<>(pType, (T)pValue);
     }
 
-    public void applyTo(PatchedDataComponentMap p_334157_) {
-        p_334157_.set(this.type, this.value);
+    public void applyTo(PatchedDataComponentMap pMap) {
+        pMap.set(this.type, this.value);
     }
 
-    public <D> DataResult<D> encodeValue(DynamicOps<D> p_331110_) {
+    public <D> DataResult<D> encodeValue(DynamicOps<D> pOps) {
         Codec<T> codec = this.type.codec();
         return codec == null
             ? DataResult.error(() -> "Component of type " + this.type + " is not encodable")
-            : codec.encodeStart(p_331110_, this.value);
+            : codec.encodeStart(pOps, this.value);
     }
 
     @Override

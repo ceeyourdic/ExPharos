@@ -25,8 +25,8 @@ public record StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType boun
         );
         private final String id;
 
-        private BoundingBoxType(final String p_210067_) {
-            this.id = p_210067_;
+        private BoundingBoxType(final String pId) {
+            this.id = pId;
         }
 
         @Override

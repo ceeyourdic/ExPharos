@@ -70,6 +70,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
     private final List<NarratableEntry> narratables = Lists.newArrayList();
     @Nullable
     protected Minecraft minecraft;
+    // Arcane mixin port: Yarn field name for official minecraft screen reference.
+    protected Minecraft client;
     private boolean initialized;
     public int width;
     public int height;
@@ -95,8 +97,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
             }
         });
 
-    protected Screen(Component p_96550_) {
-        this.title = p_96550_;
+    protected Screen(Component pTitle) {
+        this.title = pTitle;
     }
 
     public Component getTitle() {
@@ -107,10 +109,10 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
         return this.getTitle();
     }
 
-    public final void renderWithTooltip(GuiGraphics p_282345_, int p_283456_, int p_283586_, float p_282339_) {
-        this.render(p_282345_, p_283456_, p_283586_, p_282339_);
+    public final void renderWithTooltip(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+        this.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
         if (this.deferredTooltipRendering != null) {
-            p_282345_.renderTooltip(this.font, this.deferredTooltipRendering.tooltip(), this.deferredTooltipRendering.positioner(), p_283456_, p_283586_);
+            pGuiGraphics.renderTooltip(this.font, this.deferredTooltipRendering.tooltip(), this.deferredTooltipRendering.positioner(), pMouseX, pMouseY);
             this.deferredTooltipRendering = null;
         }
     }
@@ -125,14 +127,14 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
     }
 
     @Override
-    public boolean keyPressed(int p_96552_, int p_96553_, int p_96554_) {
-        if (p_96552_ == 256 && this.shouldCloseOnEsc()) {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (pKeyCode == 256 && this.shouldCloseOnEsc()) {
             this.onClose();
             return true;
-        } else if (super.keyPressed(p_96552_, p_96553_, p_96554_)) {
+        } else if (super.keyPressed(pKeyCode, pScanCode, pModifiers)) {
             return true;
         } else {
-            FocusNavigationEvent focusnavigationevent = (FocusNavigationEvent)(switch (p_96552_) {
+            FocusNavigationEvent focusnavigationevent = (FocusNavigationEvent)(switch (pKeyCode) {
                 case 258 -> this.createTabEvent();
                 default -> null;
                 case 262 -> this.createArrowEvent(ScreenDirection.RIGHT);
@@ -161,8 +163,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
         return new FocusNavigationEvent.TabNavigation(flag);
     }
 
-    private FocusNavigationEvent.ArrowNavigation createArrowEvent(ScreenDirection p_265049_) {
-        return new FocusNavigationEvent.ArrowNavigation(p_265049_);
+    private FocusNavigationEvent.ArrowNavigation createArrowEvent(ScreenDirection pDirection) {
+        return new FocusNavigationEvent.ArrowNavigation(pDirection);
     }
 
     protected void setInitialFocus() {
@@ -175,8 +177,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
         }
     }
 
-    protected void setInitialFocus(GuiEventListener p_265756_) {
-        ComponentPath componentpath = ComponentPath.path(this, p_265756_.nextFocusPath(new FocusNavigationEvent.InitialFocus()));
+    protected void setInitialFocus(GuiEventListener pListener) {
+        ComponentPath componentpath = ComponentPath.path(this, pListener.nextFocusPath(new FocusNavigationEvent.InitialFocus()));
         if (componentpath != null) {
             this.changeFocus(componentpath);
         }
@@ -190,9 +192,9 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
     }
 
     @VisibleForTesting
-    protected void changeFocus(ComponentPath p_265308_) {
+    protected void changeFocus(ComponentPath pPath) {
         this.clearFocus();
-        p_265308_.applyFocus(true);
+        pPath.applyFocus(true);
     }
 
     public boolean shouldCloseOnEsc() {
@@ -203,32 +205,32 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
         this.minecraft.setScreen(null);
     }
 
-    protected <T extends GuiEventListener & Renderable & NarratableEntry> T addRenderableWidget(T p_169406_) {
-        this.renderables.add(p_169406_);
-        return this.addWidget(p_169406_);
+    protected <T extends GuiEventListener & Renderable & NarratableEntry> T addRenderableWidget(T pWidget) {
+        this.renderables.add(pWidget);
+        return this.addWidget(pWidget);
     }
 
-    protected <T extends Renderable> T addRenderableOnly(T p_254514_) {
-        this.renderables.add(p_254514_);
-        return p_254514_;
+    protected <T extends Renderable> T addRenderableOnly(T pRenderable) {
+        this.renderables.add(pRenderable);
+        return pRenderable;
     }
 
-    protected <T extends GuiEventListener & NarratableEntry> T addWidget(T p_96625_) {
-        this.children.add(p_96625_);
-        this.narratables.add(p_96625_);
-        return p_96625_;
+    protected <T extends GuiEventListener & NarratableEntry> T addWidget(T pListener) {
+        this.children.add(pListener);
+        this.narratables.add(pListener);
+        return pListener;
     }
 
-    protected void removeWidget(GuiEventListener p_169412_) {
-        if (p_169412_ instanceof Renderable) {
-            this.renderables.remove((Renderable)p_169412_);
+    protected void removeWidget(GuiEventListener pListener) {
+        if (pListener instanceof Renderable) {
+            this.renderables.remove((Renderable)pListener);
         }
 
-        if (p_169412_ instanceof NarratableEntry) {
-            this.narratables.remove((NarratableEntry)p_169412_);
+        if (pListener instanceof NarratableEntry) {
+            this.narratables.remove((NarratableEntry)pListener);
         }
 
-        this.children.remove(p_169412_);
+        this.children.remove(pListener);
     }
 
     protected void clearWidgets() {
@@ -237,25 +239,25 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
         this.narratables.clear();
     }
 
-    public static List<Component> getTooltipFromItem(Minecraft p_281881_, ItemStack p_282833_) {
-        return p_282833_.getTooltipLines(
-            Item.TooltipContext.of(p_281881_.level),
-            p_281881_.player,
-            p_281881_.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL
+    public static List<Component> getTooltipFromItem(Minecraft pMinecraft, ItemStack pItem) {
+        return pItem.getTooltipLines(
+            Item.TooltipContext.of(pMinecraft.level),
+            pMinecraft.player,
+            pMinecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL
         );
     }
 
-    protected void insertText(String p_96587_, boolean p_96588_) {
+    protected void insertText(String pText, boolean pOverwrite) {
     }
 
-    public boolean handleComponentClicked(@Nullable Style p_96592_) {
-        if (p_96592_ == null) {
+    public boolean handleComponentClicked(@Nullable Style pStyle) {
+        if (pStyle == null) {
             return false;
         } else {
-            ClickEvent clickevent = p_96592_.getClickEvent();
+            ClickEvent clickevent = pStyle.getClickEvent();
             if (hasShiftDown()) {
-                if (p_96592_.getInsertion() != null) {
-                    this.insertText(p_96592_.getInsertion(), false);
+                if (pStyle.getInsertion() != null) {
+                    this.insertText(pStyle.getInsertion(), false);
                 }
             } else if (clickevent != null) {
                 if (clickevent.getAction() == ClickEvent.Action.OPEN_URL) {
@@ -305,11 +307,12 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
         }
     }
 
-    public final void init(Minecraft p_96607_, int p_96608_, int p_96609_) {
-        this.minecraft = p_96607_;
-        this.font = p_96607_.font;
-        this.width = p_96608_;
-        this.height = p_96609_;
+    public final void init(Minecraft pMinecraft, int pWidth, int pHeight) {
+        this.minecraft = pMinecraft;
+        this.client = pMinecraft;
+        this.font = pMinecraft.font;
+        this.width = pWidth;
+        this.height = pHeight;
         if (!this.initialized) {
             this.init();
             this.setInitialFocus();
@@ -346,13 +349,13 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
     public void added() {
     }
 
-    public void renderBackground(GuiGraphics p_283688_, int p_299421_, int p_298679_, float p_297268_) {
+    public void renderBackground(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         if (this.minecraft.level == null) {
-            this.renderPanorama(p_283688_, p_297268_);
+            this.renderPanorama(pGuiGraphics, pPartialTick);
         }
 
         this.renderBlurredBackground();
-        this.renderMenuBackground(p_283688_);
+        this.renderMenuBackground(pGuiGraphics);
     }
 
     protected void renderBlurredBackground() {
@@ -360,31 +363,36 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
         this.minecraft.getMainRenderTarget().bindWrite(false);
     }
 
-    protected void renderPanorama(GuiGraphics p_332550_, float p_335227_) {
-        PANORAMA.render(p_332550_, this.width, this.height, 1.0F, p_335227_);
+    protected void renderPanorama(GuiGraphics pGuiGraphics, float pPartialTick) {
+        PANORAMA.render(pGuiGraphics, this.width, this.height, 1.0F, pPartialTick);
     }
 
-    protected void renderMenuBackground(GuiGraphics p_332667_) {
-        this.renderMenuBackground(p_332667_, 0, 0, this.width, this.height);
+    protected void renderMenuBackground(GuiGraphics pPartialTick) {
+        this.renderMenuBackground(pPartialTick, 0, 0, this.width, this.height);
     }
 
-    protected void renderMenuBackground(GuiGraphics p_334761_, int p_328355_, int p_328091_, int p_332954_, int p_331811_) {
-        renderMenuBackgroundTexture(p_334761_, this.minecraft.level == null ? MENU_BACKGROUND : INWORLD_MENU_BACKGROUND, p_328355_, p_328091_, 0.0F, 0.0F, p_332954_, p_331811_);
+    protected void renderMenuBackground(GuiGraphics pGuiGraphics, int pX, int pY, int pWidth, int pHeight) {
+        renderMenuBackgroundTexture(pGuiGraphics, this.minecraft.level == null ? MENU_BACKGROUND : INWORLD_MENU_BACKGROUND, pX, pY, 0.0F, 0.0F, pWidth, pHeight);
     }
 
     public static void renderMenuBackgroundTexture(
-        GuiGraphics p_331670_, ResourceLocation p_330833_, int p_332491_, int p_335034_, float p_330279_, float p_334888_, int p_331386_, int p_330145_
+        GuiGraphics pGuiGraphics, ResourceLocation pTexture, int pX, int pY, float pUOffset, float pVOffset, int pWidth, int pHeight
     ) {
         int i = 32;
-        p_331670_.blit(RenderType::guiTextured, p_330833_, p_332491_, p_335034_, p_330279_, p_334888_, p_331386_, p_330145_, 32, 32);
+        pGuiGraphics.blit(RenderType::guiTextured, pTexture, pX, pY, pUOffset, pVOffset, pWidth, pHeight, 32, 32);
     }
 
-    public void renderTransparentBackground(GuiGraphics p_300203_) {
-        p_300203_.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+    public void renderTransparentBackground(GuiGraphics pGuiGraphics) {
+        pGuiGraphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
     }
 
     public boolean isPauseScreen() {
         return true;
+    }
+
+    // Arcane mixin port: Yarn screen hook name for official isPauseScreen().
+    public boolean shouldPause() {
+        return this.isPauseScreen();
     }
 
     public static boolean hasControlDown() {
@@ -405,66 +413,66 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
             || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 346);
     }
 
-    public static boolean isCut(int p_96629_) {
-        return p_96629_ == 88 && hasControlDown() && !hasShiftDown() && !hasAltDown();
+    public static boolean isCut(int pKeyCode) {
+        return pKeyCode == 88 && hasControlDown() && !hasShiftDown() && !hasAltDown();
     }
 
-    public static boolean isPaste(int p_96631_) {
-        return p_96631_ == 86 && hasControlDown() && !hasShiftDown() && !hasAltDown();
+    public static boolean isPaste(int pKeyCode) {
+        return pKeyCode == 86 && hasControlDown() && !hasShiftDown() && !hasAltDown();
     }
 
-    public static boolean isCopy(int p_96633_) {
-        return p_96633_ == 67 && hasControlDown() && !hasShiftDown() && !hasAltDown();
+    public static boolean isCopy(int pKeyCode) {
+        return pKeyCode == 67 && hasControlDown() && !hasShiftDown() && !hasAltDown();
     }
 
-    public static boolean isSelectAll(int p_96635_) {
-        return p_96635_ == 65 && hasControlDown() && !hasShiftDown() && !hasAltDown();
+    public static boolean isSelectAll(int pKeyCode) {
+        return pKeyCode == 65 && hasControlDown() && !hasShiftDown() && !hasAltDown();
     }
 
     protected void repositionElements() {
         this.rebuildWidgets();
     }
 
-    public void resize(Minecraft p_96575_, int p_96576_, int p_96577_) {
-        this.width = p_96576_;
-        this.height = p_96577_;
+    public void resize(Minecraft pMinecraft, int pWidth, int pHeight) {
+        this.width = pWidth;
+        this.height = pHeight;
         this.repositionElements();
     }
 
-    public void fillCrashDetails(CrashReport p_363781_) {
-        CrashReportCategory crashreportcategory = p_363781_.addCategory("Affected screen", 1);
+    public void fillCrashDetails(CrashReport pCrashReport) {
+        CrashReportCategory crashreportcategory = pCrashReport.addCategory("Affected screen", 1);
         crashreportcategory.setDetail("Screen name", () -> this.getClass().getCanonicalName());
     }
 
-    protected boolean isValidCharacterForName(String p_96584_, char p_96585_, int p_96586_) {
-        int i = p_96584_.indexOf(58);
-        int j = p_96584_.indexOf(47);
-        if (p_96585_ == ':') {
-            return (j == -1 || p_96586_ <= j) && i == -1;
+    protected boolean isValidCharacterForName(String pText, char pCharTyped, int pCursorPos) {
+        int i = pText.indexOf(58);
+        int j = pText.indexOf(47);
+        if (pCharTyped == ':') {
+            return (j == -1 || pCursorPos <= j) && i == -1;
         } else {
-            return p_96585_ == '/'
-                ? p_96586_ > i
-                : p_96585_ == '_' || p_96585_ == '-' || p_96585_ >= 'a' && p_96585_ <= 'z' || p_96585_ >= '0' && p_96585_ <= '9' || p_96585_ == '.';
+            return pCharTyped == '/'
+                ? pCursorPos > i
+                : pCharTyped == '_' || pCharTyped == '-' || pCharTyped >= 'a' && pCharTyped <= 'z' || pCharTyped >= '0' && pCharTyped <= '9' || pCharTyped == '.';
         }
     }
 
     @Override
-    public boolean isMouseOver(double p_96595_, double p_96596_) {
+    public boolean isMouseOver(double pMouseX, double pMouseY) {
         return true;
     }
 
-    public void onFilesDrop(List<Path> p_96591_) {
+    public void onFilesDrop(List<Path> pPacks) {
     }
 
-    private void scheduleNarration(long p_169381_, boolean p_169382_) {
-        this.nextNarrationTime = Util.getMillis() + p_169381_;
-        if (p_169382_) {
+    private void scheduleNarration(long pDelay, boolean pStopSuppression) {
+        this.nextNarrationTime = Util.getMillis() + pDelay;
+        if (pStopSuppression) {
             this.narrationSuppressTime = Long.MIN_VALUE;
         }
     }
 
-    private void suppressNarration(long p_169379_) {
-        this.narrationSuppressTime = Util.getMillis() + p_169379_;
+    private void suppressNarration(long pTime) {
+        this.narrationSuppressTime = Util.getMillis() + pTime;
     }
 
     public void afterMouseMove() {
@@ -493,15 +501,15 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
         }
     }
 
-    public void triggerImmediateNarration(boolean p_169408_) {
+    public void triggerImmediateNarration(boolean pOnlyNarrateNew) {
         if (this.shouldRunNarration()) {
-            this.runNarration(p_169408_);
+            this.runNarration(pOnlyNarrateNew);
         }
     }
 
-    private void runNarration(boolean p_169410_) {
+    private void runNarration(boolean pOnlyNarrateNew) {
         this.narrationState.update(this::updateNarrationState);
-        String s = this.narrationState.collectNarrationText(!p_169410_);
+        String s = this.narrationState.collectNarrationText(!pOnlyNarrateNew);
         if (!s.isEmpty()) {
             this.minecraft.getNarrator().sayNow(s);
         }
@@ -511,16 +519,16 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
         return true;
     }
 
-    protected void updateNarrationState(NarrationElementOutput p_169396_) {
-        p_169396_.add(NarratedElementType.TITLE, this.getNarrationMessage());
+    protected void updateNarrationState(NarrationElementOutput pOutput) {
+        pOutput.add(NarratedElementType.TITLE, this.getNarrationMessage());
         if (this.shouldNarrateNavigation()) {
-            p_169396_.add(NarratedElementType.USAGE, USAGE_NARRATION);
+            pOutput.add(NarratedElementType.USAGE, USAGE_NARRATION);
         }
 
-        this.updateNarratedWidget(p_169396_);
+        this.updateNarratedWidget(pOutput);
     }
 
-    protected void updateNarratedWidget(NarrationElementOutput p_169403_) {
+    protected void updateNarratedWidget(NarrationElementOutput pNarrationElementOutput) {
         List<? extends NarratableEntry> list = this.narratables
             .stream()
             .flatMap(p_374575_ -> p_374575_.getNarratables().stream())
@@ -534,15 +542,15 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
             }
 
             if (list.size() > 1) {
-                p_169403_.add(
+                pNarrationElementOutput.add(
                     NarratedElementType.POSITION, Component.translatable("narrator.position.screen", screen$narratablesearchresult.index + 1, list.size())
                 );
                 if (screen$narratablesearchresult.priority == NarratableEntry.NarrationPriority.FOCUSED) {
-                    p_169403_.add(NarratedElementType.USAGE, this.getUsageNarration());
+                    pNarrationElementOutput.add(NarratedElementType.USAGE, this.getUsageNarration());
                 }
             }
 
-            screen$narratablesearchresult.entry.updateNarration(p_169403_.nest());
+            screen$narratablesearchresult.entry.updateNarration(pNarrationElementOutput.nest());
         }
     }
 
@@ -551,16 +559,16 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
     }
 
     @Nullable
-    public static Screen.NarratableSearchResult findNarratableWidget(List<? extends NarratableEntry> p_169401_, @Nullable NarratableEntry p_169402_) {
+    public static Screen.NarratableSearchResult findNarratableWidget(List<? extends NarratableEntry> pEntries, @Nullable NarratableEntry pTarget) {
         Screen.NarratableSearchResult screen$narratablesearchresult = null;
         Screen.NarratableSearchResult screen$narratablesearchresult1 = null;
         int i = 0;
 
-        for (int j = p_169401_.size(); i < j; i++) {
-            NarratableEntry narratableentry = p_169401_.get(i);
+        for (int j = pEntries.size(); i < j; i++) {
+            NarratableEntry narratableentry = pEntries.get(i);
             NarratableEntry.NarrationPriority narratableentry$narrationpriority = narratableentry.narrationPriority();
             if (narratableentry$narrationpriority.isTerminal()) {
-                if (narratableentry != p_169402_) {
+                if (narratableentry != pTarget) {
                     return new Screen.NarratableSearchResult(narratableentry, i, narratableentry$narrationpriority);
                 }
 
@@ -576,8 +584,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
         return screen$narratablesearchresult != null ? screen$narratablesearchresult : screen$narratablesearchresult1;
     }
 
-    public void updateNarratorStatus(boolean p_345154_) {
-        if (p_345154_) {
+    public void updateNarratorStatus(boolean pNarratorEnabled) {
+        if (pNarratorEnabled) {
             this.scheduleNarration(NARRATE_DELAY_NARRATOR_ENABLED, false);
         }
 
@@ -590,22 +598,22 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
         this.deferredTooltipRendering = null;
     }
 
-    public void setTooltipForNextRenderPass(List<FormattedCharSequence> p_259937_) {
-        this.setTooltipForNextRenderPass(p_259937_, DefaultTooltipPositioner.INSTANCE, true);
+    public void setTooltipForNextRenderPass(List<FormattedCharSequence> pTooltip) {
+        this.setTooltipForNextRenderPass(pTooltip, DefaultTooltipPositioner.INSTANCE, true);
     }
 
-    public void setTooltipForNextRenderPass(List<FormattedCharSequence> p_262939_, ClientTooltipPositioner p_263078_, boolean p_263107_) {
-        if (this.deferredTooltipRendering == null || p_263107_) {
-            this.deferredTooltipRendering = new Screen.DeferredTooltipRendering(p_262939_, p_263078_);
+    public void setTooltipForNextRenderPass(List<FormattedCharSequence> pTooltip, ClientTooltipPositioner pPositioner, boolean pOverride) {
+        if (this.deferredTooltipRendering == null || pOverride) {
+            this.deferredTooltipRendering = new Screen.DeferredTooltipRendering(pTooltip, pPositioner);
         }
     }
 
-    public void setTooltipForNextRenderPass(Component p_259986_) {
-        this.setTooltipForNextRenderPass(Tooltip.splitTooltip(this.minecraft, p_259986_));
+    public void setTooltipForNextRenderPass(Component pTooltip) {
+        this.setTooltipForNextRenderPass(Tooltip.splitTooltip(this.minecraft, pTooltip));
     }
 
-    public void setTooltipForNextRenderPass(Tooltip p_262992_, ClientTooltipPositioner p_262980_, boolean p_262988_) {
-        this.setTooltipForNextRenderPass(p_262992_.toCharSequence(this.minecraft), p_262980_, p_262988_);
+    public void setTooltipForNextRenderPass(Tooltip pTooltip, ClientTooltipPositioner pPositioner, boolean pOverride) {
+        this.setTooltipForNextRenderPass(pTooltip.toCharSequence(this.minecraft), pPositioner, pOverride);
     }
 
     public Font getFont() {
@@ -636,10 +644,10 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
         public final int index;
         public final NarratableEntry.NarrationPriority priority;
 
-        public NarratableSearchResult(NarratableEntry p_169424_, int p_169425_, NarratableEntry.NarrationPriority p_169426_) {
-            this.entry = p_169424_;
-            this.index = p_169425_;
-            this.priority = p_169426_;
+        public NarratableSearchResult(NarratableEntry pEntry, int pIndex, NarratableEntry.NarrationPriority pPriority) {
+            this.entry = pEntry;
+            this.index = pIndex;
+            this.priority = pPriority;
         }
     }
 }

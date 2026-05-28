@@ -159,8 +159,8 @@ public class DragonStrafePlayerPhase extends AbstractDragonPhaseInstance {
         this.attackTarget = null;
     }
 
-    public void setTarget(LivingEntity p_31359_) {
-        this.attackTarget = p_31359_;
+    public void setTarget(LivingEntity pAttackTarget) {
+        this.attackTarget = pAttackTarget;
         int i = this.dragon.findClosestNode();
         int j = this.dragon.findClosestNode(this.attackTarget.getX(), this.attackTarget.getY(), this.attackTarget.getZ());
         int k = this.attackTarget.getBlockX();

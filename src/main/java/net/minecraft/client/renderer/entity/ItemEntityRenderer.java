@@ -56,10 +56,10 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity, ItemEntityRen
         }
     }
 
-    public static void renderMultipleFromCount(PoseStack p_330844_, MultiBufferSource p_333382_, int p_334169_, ItemClusterRenderState p_377874_, RandomSource p_331892_) {
-        p_331892_.setSeed((long)p_377874_.seed);
-        int i = p_377874_.count;
-        ItemStackRenderState itemstackrenderstate = p_377874_.item;
+    public static void renderMultipleFromCount(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, ItemClusterRenderState pRenderState, RandomSource pRandom) {
+        pRandom.setSeed((long)pRenderState.seed);
+        int i = pRenderState.count;
+        ItemStackRenderState itemstackrenderstate = pRenderState.item;
         boolean flag = itemstackrenderstate.isGui3d();
         float f = itemstackrenderstate.transform().scale.x();
         float f1 = itemstackrenderstate.transform().scale.y();
@@ -68,28 +68,28 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity, ItemEntityRen
             float f3 = -0.0F * (float)(i - 1) * 0.5F * f;
             float f4 = -0.0F * (float)(i - 1) * 0.5F * f1;
             float f5 = -0.09375F * (float)(i - 1) * 0.5F * f2;
-            p_330844_.translate(f3, f4, f5);
+            pPoseStack.translate(f3, f4, f5);
         }
 
         for (int j = 0; j < i; j++) {
-            p_330844_.pushPose();
+            pPoseStack.pushPose();
             if (j > 0) {
                 if (flag) {
-                    float f7 = (p_331892_.nextFloat() * 2.0F - 1.0F) * 0.15F;
-                    float f9 = (p_331892_.nextFloat() * 2.0F - 1.0F) * 0.15F;
-                    float f6 = (p_331892_.nextFloat() * 2.0F - 1.0F) * 0.15F;
-                    p_330844_.translate(f7, f9, f6);
+                    float f7 = (pRandom.nextFloat() * 2.0F - 1.0F) * 0.15F;
+                    float f9 = (pRandom.nextFloat() * 2.0F - 1.0F) * 0.15F;
+                    float f6 = (pRandom.nextFloat() * 2.0F - 1.0F) * 0.15F;
+                    pPoseStack.translate(f7, f9, f6);
                 } else {
-                    float f8 = (p_331892_.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
-                    float f10 = (p_331892_.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
-                    p_330844_.translate(f8, f10, 0.0F);
+                    float f8 = (pRandom.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
+                    float f10 = (pRandom.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
+                    pPoseStack.translate(f8, f10, 0.0F);
                 }
             }
 
-            itemstackrenderstate.render(p_330844_, p_333382_, p_334169_, OverlayTexture.NO_OVERLAY);
-            p_330844_.popPose();
+            itemstackrenderstate.render(pPoseStack, pBufferSource, pPackedLight, OverlayTexture.NO_OVERLAY);
+            pPoseStack.popPose();
             if (!flag) {
-                p_330844_.translate(0.0F * f, 0.0F * f1, 0.09375F * f2);
+                pPoseStack.translate(0.0F * f, 0.0F * f1, 0.09375F * f2);
             }
         }
     }

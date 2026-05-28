@@ -6,7 +6,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface VillagerLikeModel {
-    void hatVisible(boolean p_375953_);
+    void hatVisible(boolean pHatVisible);
 
-    void translateToArms(PoseStack p_375845_);
+    void translateToArms(PoseStack pPoseStack);
 }

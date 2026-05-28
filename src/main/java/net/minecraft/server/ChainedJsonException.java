@@ -11,23 +11,23 @@ public class ChainedJsonException extends IOException {
     private final List<ChainedJsonException.Entry> entries = Lists.newArrayList();
     private final String message;
 
-    public ChainedJsonException(String p_135902_) {
+    public ChainedJsonException(String pMessage) {
         this.entries.add(new ChainedJsonException.Entry());
-        this.message = p_135902_;
+        this.message = pMessage;
     }
 
-    public ChainedJsonException(String p_135904_, Throwable p_135905_) {
-        super(p_135905_);
+    public ChainedJsonException(String pMessage, Throwable pCause) {
+        super(pCause);
         this.entries.add(new ChainedJsonException.Entry());
-        this.message = p_135904_;
+        this.message = pMessage;
     }
 
-    public void prependJsonKey(String p_135909_) {
-        this.entries.get(0).addJsonKey(p_135909_);
+    public void prependJsonKey(String pKey) {
+        this.entries.get(0).addJsonKey(pKey);
     }
 
-    public void setFilenameAndFlush(String p_135911_) {
-        this.entries.get(0).filename = p_135911_;
+    public void setFilenameAndFlush(String pFilename) {
+        this.entries.get(0).filename = pFilename;
         this.entries.add(0, new ChainedJsonException.Entry());
     }
 
@@ -36,16 +36,16 @@ public class ChainedJsonException extends IOException {
         return "Invalid " + this.entries.get(this.entries.size() - 1) + ": " + this.message;
     }
 
-    public static ChainedJsonException forException(Exception p_135907_) {
-        if (p_135907_ instanceof ChainedJsonException) {
-            return (ChainedJsonException)p_135907_;
+    public static ChainedJsonException forException(Exception pException) {
+        if (pException instanceof ChainedJsonException) {
+            return (ChainedJsonException)pException;
         } else {
-            String s = p_135907_.getMessage();
-            if (p_135907_ instanceof FileNotFoundException) {
+            String s = pException.getMessage();
+            if (pException instanceof FileNotFoundException) {
                 s = "File not found";
             }
 
-            return new ChainedJsonException(s, p_135907_);
+            return new ChainedJsonException(s, pException);
         }
     }
 
@@ -57,8 +57,8 @@ public class ChainedJsonException extends IOException {
         Entry() {
         }
 
-        void addJsonKey(String p_135919_) {
-            this.jsonKeys.add(0, p_135919_);
+        void addJsonKey(String pKey) {
+            this.jsonKeys.add(0, pKey);
         }
 
         @Nullable

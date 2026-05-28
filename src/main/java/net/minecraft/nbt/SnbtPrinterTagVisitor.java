@@ -40,14 +40,14 @@ public class SnbtPrinterTagVisitor implements TagVisitor {
         this("    ", 0, Lists.newArrayList());
     }
 
-    public SnbtPrinterTagVisitor(String p_178107_, int p_178108_, List<String> p_178109_) {
-        this.indentation = p_178107_;
-        this.depth = p_178108_;
-        this.path = p_178109_;
+    public SnbtPrinterTagVisitor(String pIndentation, int pDepth, List<String> pPath) {
+        this.indentation = pIndentation;
+        this.depth = pDepth;
+        this.path = pPath;
     }
 
-    public String visit(Tag p_178142_) {
-        p_178142_.accept(this);
+    public String visit(Tag pTag) {
+        pTag.accept(this);
         return this.result;
     }
 
@@ -209,12 +209,12 @@ public class SnbtPrinterTagVisitor implements TagVisitor {
         this.path.remove(this.path.size() - 1);
     }
 
-    private void pushPath(String p_178145_) {
-        this.path.add(p_178145_);
+    private void pushPath(String pKey) {
+        this.path.add(pKey);
     }
 
-    protected List<String> getKeys(CompoundTag p_178147_) {
-        Set<String> set = Sets.newHashSet(p_178147_.getAllKeys());
+    protected List<String> getKeys(CompoundTag pTag) {
+        Set<String> set = Sets.newHashSet(pTag.getAllKeys());
         List<String> list = Lists.newArrayList();
         List<String> list1 = KEY_ORDER.get(this.pathString());
         if (list1 != null) {
@@ -239,8 +239,8 @@ public class SnbtPrinterTagVisitor implements TagVisitor {
         return String.join(".", this.path);
     }
 
-    protected static String handleEscapePretty(String p_178112_) {
-        return SIMPLE_VALUE.matcher(p_178112_).matches() ? p_178112_ : StringTag.quoteAndEscape(p_178112_);
+    protected static String handleEscapePretty(String pText) {
+        return SIMPLE_VALUE.matcher(pText).matches() ? pText : StringTag.quoteAndEscape(pText);
     }
 
     @Override

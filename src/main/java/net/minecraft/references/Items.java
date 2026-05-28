@@ -9,7 +9,7 @@ public class Items {
     public static final ResourceKey<Item> PUMPKIN_SEEDS = createKey("pumpkin_seeds");
     public static final ResourceKey<Item> MELON_SEEDS = createKey("melon_seeds");
 
-    private static ResourceKey<Item> createKey(String p_311525_) {
-        return ResourceKey.create(Registries.ITEM, ResourceLocation.withDefaultNamespace(p_311525_));
+    private static ResourceKey<Item> createKey(String pId) {
+        return ResourceKey.create(Registries.ITEM, ResourceLocation.withDefaultNamespace(pId));
     }
 }

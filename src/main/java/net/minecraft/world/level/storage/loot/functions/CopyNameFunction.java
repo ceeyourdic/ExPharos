@@ -23,9 +23,9 @@ public class CopyNameFunction extends LootItemConditionalFunction {
     );
     private final CopyNameFunction.NameSource source;
 
-    private CopyNameFunction(List<LootItemCondition> p_300985_, CopyNameFunction.NameSource p_80178_) {
-        super(p_300985_);
-        this.source = p_80178_;
+    private CopyNameFunction(List<LootItemCondition> pConditions, CopyNameFunction.NameSource pSource) {
+        super(pConditions);
+        this.source = pSource;
     }
 
     @Override
@@ -39,16 +39,16 @@ public class CopyNameFunction extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_80185_, LootContext p_80186_) {
-        if (p_80186_.getOptionalParameter(this.source.param) instanceof Nameable nameable) {
-            p_80185_.set(DataComponents.CUSTOM_NAME, nameable.getCustomName());
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        if (pContext.getOptionalParameter(this.source.param) instanceof Nameable nameable) {
+            pStack.set(DataComponents.CUSTOM_NAME, nameable.getCustomName());
         }
 
-        return p_80185_;
+        return pStack;
     }
 
-    public static LootItemConditionalFunction.Builder<?> copyName(CopyNameFunction.NameSource p_80188_) {
-        return simpleBuilder(p_297080_ -> new CopyNameFunction(p_297080_, p_80188_));
+    public static LootItemConditionalFunction.Builder<?> copyName(CopyNameFunction.NameSource pSource) {
+        return simpleBuilder(p_297080_ -> new CopyNameFunction(p_297080_, pSource));
     }
 
     public static enum NameSource implements StringRepresentable {
@@ -61,9 +61,9 @@ public class CopyNameFunction extends LootItemConditionalFunction {
         private final String name;
         final ContextKey<?> param;
 
-        private NameSource(final String p_80206_, final ContextKey<?> p_364144_) {
-            this.name = p_80206_;
-            this.param = p_364144_;
+        private NameSource(final String pName, final ContextKey<?> pParam) {
+            this.name = pName;
+            this.param = pParam;
         }
 
         @Override

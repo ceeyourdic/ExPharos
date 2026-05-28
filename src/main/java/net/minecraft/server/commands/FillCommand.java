@@ -35,8 +35,8 @@ public class FillCommand {
     static final BlockInput HOLLOW_CORE = new BlockInput(Blocks.AIR.defaultBlockState(), Collections.emptySet(), null);
     private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.fill.failed"));
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_214443_, CommandBuildContext p_214444_) {
-        p_214443_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher, CommandBuildContext pContext) {
+        pDispatcher.register(
             Commands.literal("fill")
                 .requires(p_137384_ -> p_137384_.hasPermission(2))
                 .then(
@@ -44,7 +44,7 @@ public class FillCommand {
                         .then(
                             Commands.argument("to", BlockPosArgument.blockPos())
                                 .then(
-                                    Commands.argument("block", BlockStateArgument.block(p_214444_))
+                                    Commands.argument("block", BlockStateArgument.block(pContext))
                                         .executes(
                                             p_137405_ -> fillBlocks(
                                                     p_137405_.getSource(),
@@ -70,7 +70,7 @@ public class FillCommand {
                                                         )
                                                 )
                                                 .then(
-                                                    Commands.argument("filter", BlockPredicateArgument.blockPredicate(p_214444_))
+                                                    Commands.argument("filter", BlockPredicateArgument.blockPredicate(pContext))
                                                         .executes(
                                                             p_137401_ -> fillBlocks(
                                                                     p_137401_.getSource(),
@@ -148,22 +148,22 @@ public class FillCommand {
     }
 
     private static int fillBlocks(
-        CommandSourceStack p_137386_, BoundingBox p_137387_, BlockInput p_137388_, FillCommand.Mode p_137389_, @Nullable Predicate<BlockInWorld> p_137390_
+        CommandSourceStack pSource, BoundingBox pArea, BlockInput pNewBlock, FillCommand.Mode pMode, @Nullable Predicate<BlockInWorld> pReplacingPredicate
     ) throws CommandSyntaxException {
-        int i = p_137387_.getXSpan() * p_137387_.getYSpan() * p_137387_.getZSpan();
-        int j = p_137386_.getLevel().getGameRules().getInt(GameRules.RULE_COMMAND_MODIFICATION_BLOCK_LIMIT);
+        int i = pArea.getXSpan() * pArea.getYSpan() * pArea.getZSpan();
+        int j = pSource.getLevel().getGameRules().getInt(GameRules.RULE_COMMAND_MODIFICATION_BLOCK_LIMIT);
         if (i > j) {
             throw ERROR_AREA_TOO_LARGE.create(j, i);
         } else {
             List<BlockPos> list = Lists.newArrayList();
-            ServerLevel serverlevel = p_137386_.getLevel();
+            ServerLevel serverlevel = pSource.getLevel();
             int k = 0;
 
             for (BlockPos blockpos : BlockPos.betweenClosed(
-                p_137387_.minX(), p_137387_.minY(), p_137387_.minZ(), p_137387_.maxX(), p_137387_.maxY(), p_137387_.maxZ()
+                pArea.minX(), pArea.minY(), pArea.minZ(), pArea.maxX(), pArea.maxY(), pArea.maxZ()
             )) {
-                if (p_137390_ == null || p_137390_.test(new BlockInWorld(serverlevel, blockpos, true))) {
-                    BlockInput blockinput = p_137389_.filter.filter(p_137387_, blockpos, p_137388_, serverlevel);
+                if (pReplacingPredicate == null || pReplacingPredicate.test(new BlockInWorld(serverlevel, blockpos, true))) {
+                    BlockInput blockinput = pMode.filter.filter(pArea, blockpos, pNewBlock, serverlevel);
                     if (blockinput != null) {
                         BlockEntity blockentity = serverlevel.getBlockEntity(blockpos);
                         Clearable.tryClear(blockentity);
@@ -184,7 +184,7 @@ public class FillCommand {
                 throw ERROR_FAILED.create();
             } else {
                 int l = k;
-                p_137386_.sendSuccess(() -> Component.translatable("commands.fill.success", l), true);
+                pSource.sendSuccess(() -> Component.translatable("commands.fill.success", l), true);
                 return k;
             }
         }
@@ -219,8 +219,8 @@ public class FillCommand {
 
         public final SetBlockCommand.Filter filter;
 
-        private Mode(final SetBlockCommand.Filter p_137416_) {
-            this.filter = p_137416_;
+        private Mode(final SetBlockCommand.Filter pFilter) {
+            this.filter = pFilter;
         }
     }
 }

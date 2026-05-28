@@ -10,15 +10,15 @@ public record GameTestAddMarkerDebugPayload(BlockPos pos, int color, String text
     );
     public static final CustomPacketPayload.Type<GameTestAddMarkerDebugPayload> TYPE = CustomPacketPayload.createType("debug/game_test_add_marker");
 
-    private GameTestAddMarkerDebugPayload(FriendlyByteBuf p_300441_) {
-        this(p_300441_.readBlockPos(), p_300441_.readInt(), p_300441_.readUtf(), p_300441_.readInt());
+    private GameTestAddMarkerDebugPayload(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readBlockPos(), pBuffer.readInt(), pBuffer.readUtf(), pBuffer.readInt());
     }
 
-    private void write(FriendlyByteBuf p_300444_) {
-        p_300444_.writeBlockPos(this.pos);
-        p_300444_.writeInt(this.color);
-        p_300444_.writeUtf(this.text);
-        p_300444_.writeInt(this.durationMs);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeBlockPos(this.pos);
+        pBuffer.writeInt(this.color);
+        pBuffer.writeUtf(this.text);
+        pBuffer.writeInt(this.durationMs);
     }
 
     @Override

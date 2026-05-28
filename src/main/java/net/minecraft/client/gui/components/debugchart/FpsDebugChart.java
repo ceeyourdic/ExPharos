@@ -44,7 +44,7 @@ public class FpsDebugChart extends AbstractDebugChart {
         return this.getSampleColor(toMilliseconds((double)p_299478_), 0.0, -16711936, 28.0, -256, 56.0, -65536);
     }
 
-    private static double toMilliseconds(double p_301228_) {
-        return p_301228_ / 1000000.0;
+    private static double toMilliseconds(double pValue) {
+        return pValue / 1000000.0;
     }
 }

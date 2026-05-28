@@ -71,10 +71,10 @@ public class HangingMossBlock extends Block implements BonemealableBlock {
         return this.canStayAtPosition(p_367417_, p_366634_);
     }
 
-    private boolean canStayAtPosition(BlockGetter p_365484_, BlockPos p_362413_) {
-        BlockPos blockpos = p_362413_.relative(Direction.UP);
-        BlockState blockstate = p_365484_.getBlockState(blockpos);
-        return MultifaceBlock.canAttachTo(p_365484_, Direction.UP, blockpos, blockstate) || blockstate.is(Blocks.PALE_HANGING_MOSS);
+    private boolean canStayAtPosition(BlockGetter pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.relative(Direction.UP);
+        BlockState blockstate = pLevel.getBlockState(blockpos);
+        return MultifaceBlock.canAttachTo(pLevel, Direction.UP, blockpos, blockstate) || blockstate.is(Blocks.PALE_HANGING_MOSS);
     }
 
     @Override
@@ -112,17 +112,17 @@ public class HangingMossBlock extends Block implements BonemealableBlock {
         return this.canGrowInto(p_362841_.getBlockState(this.getTip(p_362841_, p_362408_).below()));
     }
 
-    private boolean canGrowInto(BlockState p_369343_) {
-        return p_369343_.isAir();
+    private boolean canGrowInto(BlockState pState) {
+        return pState.isAir();
     }
 
-    public BlockPos getTip(BlockGetter p_363698_, BlockPos p_367170_) {
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = p_367170_.mutable();
+    public BlockPos getTip(BlockGetter pLevel, BlockPos pPos) {
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.mutable();
 
         BlockState blockstate;
         do {
             blockpos$mutableblockpos.move(Direction.DOWN);
-            blockstate = p_363698_.getBlockState(blockpos$mutableblockpos);
+            blockstate = pLevel.getBlockState(blockpos$mutableblockpos);
         } while (blockstate.is(this));
 
         return blockpos$mutableblockpos.relative(Direction.UP).immutable();

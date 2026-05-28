@@ -28,22 +28,22 @@ public class FossilFeatureConfiguration implements FeatureConfiguration {
     public final int maxEmptyCornersAllowed;
 
     public FossilFeatureConfiguration(
-        List<ResourceLocation> p_204751_,
-        List<ResourceLocation> p_204752_,
-        Holder<StructureProcessorList> p_204753_,
-        Holder<StructureProcessorList> p_204754_,
-        int p_204755_
+        List<ResourceLocation> pFossilStructures,
+        List<ResourceLocation> pOverlayStructures,
+        Holder<StructureProcessorList> pFossilProcessors,
+        Holder<StructureProcessorList> pOverlayProcessors,
+        int pMaxEmptyCornersAllowed
     ) {
-        if (p_204751_.isEmpty()) {
+        if (pFossilStructures.isEmpty()) {
             throw new IllegalArgumentException("Fossil structure lists need at least one entry");
-        } else if (p_204751_.size() != p_204752_.size()) {
+        } else if (pFossilStructures.size() != pOverlayStructures.size()) {
             throw new IllegalArgumentException("Fossil structure lists must be equal lengths");
         } else {
-            this.fossilStructures = p_204751_;
-            this.overlayStructures = p_204752_;
-            this.fossilProcessors = p_204753_;
-            this.overlayProcessors = p_204754_;
-            this.maxEmptyCornersAllowed = p_204755_;
+            this.fossilStructures = pFossilStructures;
+            this.overlayStructures = pOverlayStructures;
+            this.fossilProcessors = pFossilProcessors;
+            this.overlayProcessors = pOverlayProcessors;
+            this.maxEmptyCornersAllowed = pMaxEmptyCornersAllowed;
         }
     }
 }

@@ -32,9 +32,9 @@ public enum DisplaySlot implements StringRepresentable {
     private final int id;
     private final String name;
 
-    private DisplaySlot(final int p_299274_, final String p_299536_) {
-        this.id = p_299274_;
-        this.name = p_299536_;
+    private DisplaySlot(final int pId, final String pName) {
+        this.id = pId;
+        this.name = pName;
     }
 
     public int id() {
@@ -47,8 +47,8 @@ public enum DisplaySlot implements StringRepresentable {
     }
 
     @Nullable
-    public static DisplaySlot teamColorToSlot(ChatFormatting p_298500_) {
-        return switch (p_298500_) {
+    public static DisplaySlot teamColorToSlot(ChatFormatting pFormatting) {
+        return switch (pFormatting) {
             case BLACK -> TEAM_BLACK;
             case DARK_BLUE -> TEAM_DARK_BLUE;
             case DARK_GREEN -> TEAM_DARK_GREEN;

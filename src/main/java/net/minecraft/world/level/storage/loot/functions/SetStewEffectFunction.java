@@ -44,9 +44,9 @@ public class SetStewEffectFunction extends LootItemConditionalFunction {
     );
     private final List<SetStewEffectFunction.EffectEntry> effects;
 
-    SetStewEffectFunction(List<LootItemCondition> p_298902_, List<SetStewEffectFunction.EffectEntry> p_298444_) {
-        super(p_298902_);
-        this.effects = p_298444_;
+    SetStewEffectFunction(List<LootItemCondition> pConditions, List<SetStewEffectFunction.EffectEntry> pEffects) {
+        super(pConditions);
+        this.effects = pEffects;
     }
 
     @Override
@@ -60,20 +60,20 @@ public class SetStewEffectFunction extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_81223_, LootContext p_81224_) {
-        if (p_81223_.is(Items.SUSPICIOUS_STEW) && !this.effects.isEmpty()) {
-            SetStewEffectFunction.EffectEntry setsteweffectfunction$effectentry = Util.getRandom(this.effects, p_81224_.getRandom());
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        if (pStack.is(Items.SUSPICIOUS_STEW) && !this.effects.isEmpty()) {
+            SetStewEffectFunction.EffectEntry setsteweffectfunction$effectentry = Util.getRandom(this.effects, pContext.getRandom());
             Holder<MobEffect> holder = setsteweffectfunction$effectentry.effect();
-            int i = setsteweffectfunction$effectentry.duration().getInt(p_81224_);
+            int i = setsteweffectfunction$effectentry.duration().getInt(pContext);
             if (!holder.value().isInstantenous()) {
                 i *= 20;
             }
 
             SuspiciousStewEffects.Entry suspicioussteweffects$entry = new SuspiciousStewEffects.Entry(holder, i);
-            p_81223_.update(DataComponents.SUSPICIOUS_STEW_EFFECTS, SuspiciousStewEffects.EMPTY, suspicioussteweffects$entry, SuspiciousStewEffects::withEffectAdded);
-            return p_81223_;
+            pStack.update(DataComponents.SUSPICIOUS_STEW_EFFECTS, SuspiciousStewEffects.EMPTY, suspicioussteweffects$entry, SuspiciousStewEffects::withEffectAdded);
+            return pStack;
         } else {
-            return p_81223_;
+            return pStack;
         }
     }
 
@@ -88,8 +88,8 @@ public class SetStewEffectFunction extends LootItemConditionalFunction {
             return this;
         }
 
-        public SetStewEffectFunction.Builder withEffect(Holder<MobEffect> p_331394_, NumberProvider p_165474_) {
-            this.effects.add(new SetStewEffectFunction.EffectEntry(p_331394_, p_165474_));
+        public SetStewEffectFunction.Builder withEffect(Holder<MobEffect> pEffect, NumberProvider pAmplifier) {
+            this.effects.add(new SetStewEffectFunction.EffectEntry(pEffect, pAmplifier));
             return this;
         }
 

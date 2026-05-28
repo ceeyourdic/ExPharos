@@ -25,14 +25,14 @@ public class VeryBiasedToBottomHeight extends HeightProvider {
     private final VerticalAnchor maxInclusive;
     private final int inner;
 
-    private VeryBiasedToBottomHeight(VerticalAnchor p_162052_, VerticalAnchor p_162053_, int p_162054_) {
-        this.minInclusive = p_162052_;
-        this.maxInclusive = p_162053_;
-        this.inner = p_162054_;
+    private VeryBiasedToBottomHeight(VerticalAnchor pMinInclusive, VerticalAnchor pMaxInclusive, int pInner) {
+        this.minInclusive = pMinInclusive;
+        this.maxInclusive = pMaxInclusive;
+        this.inner = pInner;
     }
 
-    public static VeryBiasedToBottomHeight of(VerticalAnchor p_162059_, VerticalAnchor p_162060_, int p_162061_) {
-        return new VeryBiasedToBottomHeight(p_162059_, p_162060_, p_162061_);
+    public static VeryBiasedToBottomHeight of(VerticalAnchor pMinInclusive, VerticalAnchor pMaxInclusive, int pInner) {
+        return new VeryBiasedToBottomHeight(pMinInclusive, pMaxInclusive, pInner);
     }
 
     @Override

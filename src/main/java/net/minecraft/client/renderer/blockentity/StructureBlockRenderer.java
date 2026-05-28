@@ -22,7 +22,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class StructureBlockRenderer implements BlockEntityRenderer<StructureBlockEntity> {
-    public StructureBlockRenderer(BlockEntityRendererProvider.Context p_173675_) {
+    public StructureBlockRenderer(BlockEntityRendererProvider.Context pContext) {
     }
 
     public void render(StructureBlockEntity p_112583_, float p_112584_, PoseStack p_112585_, MultiBufferSource p_112586_, int p_112587_, int p_112588_) {
@@ -97,13 +97,13 @@ public class StructureBlockRenderer implements BlockEntityRenderer<StructureBloc
         }
     }
 
-    private void renderInvisibleBlocks(StructureBlockEntity p_173677_, MultiBufferSource p_342236_, PoseStack p_173680_) {
-        BlockGetter blockgetter = p_173677_.getLevel();
-        VertexConsumer vertexconsumer = p_342236_.getBuffer(RenderType.lines());
-        BlockPos blockpos = p_173677_.getBlockPos();
-        BlockPos blockpos1 = StructureUtils.getStructureOrigin(p_173677_);
+    private void renderInvisibleBlocks(StructureBlockEntity pBlockEntity, MultiBufferSource pBufferSource, PoseStack pPoseStack) {
+        BlockGetter blockgetter = pBlockEntity.getLevel();
+        VertexConsumer vertexconsumer = pBufferSource.getBuffer(RenderType.lines());
+        BlockPos blockpos = pBlockEntity.getBlockPos();
+        BlockPos blockpos1 = StructureUtils.getStructureOrigin(pBlockEntity);
 
-        for (BlockPos blockpos2 : BlockPos.betweenClosed(blockpos1, blockpos1.offset(p_173677_.getStructureSize()).offset(-1, -1, -1))) {
+        for (BlockPos blockpos2 : BlockPos.betweenClosed(blockpos1, blockpos1.offset(pBlockEntity.getStructureSize()).offset(-1, -1, -1))) {
             BlockState blockstate = blockgetter.getBlockState(blockpos2);
             boolean flag = blockstate.isAir();
             boolean flag1 = blockstate.is(Blocks.STRUCTURE_VOID);
@@ -119,24 +119,24 @@ public class StructureBlockRenderer implements BlockEntityRenderer<StructureBloc
                 double d4 = (double)((float)(blockpos2.getY() - blockpos.getY()) + 0.55F + f);
                 double d5 = (double)((float)(blockpos2.getZ() - blockpos.getZ()) + 0.55F + f);
                 if (flag) {
-                    ShapeRenderer.renderLineBox(p_173680_, vertexconsumer, d0, d1, d2, d3, d4, d5, 0.5F, 0.5F, 1.0F, 1.0F, 0.5F, 0.5F, 1.0F);
+                    ShapeRenderer.renderLineBox(pPoseStack, vertexconsumer, d0, d1, d2, d3, d4, d5, 0.5F, 0.5F, 1.0F, 1.0F, 0.5F, 0.5F, 1.0F);
                 } else if (flag1) {
-                    ShapeRenderer.renderLineBox(p_173680_, vertexconsumer, d0, d1, d2, d3, d4, d5, 1.0F, 0.75F, 0.75F, 1.0F, 1.0F, 0.75F, 0.75F);
+                    ShapeRenderer.renderLineBox(pPoseStack, vertexconsumer, d0, d1, d2, d3, d4, d5, 1.0F, 0.75F, 0.75F, 1.0F, 1.0F, 0.75F, 0.75F);
                 } else if (flag2) {
-                    ShapeRenderer.renderLineBox(p_173680_, vertexconsumer, d0, d1, d2, d3, d4, d5, 1.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F);
+                    ShapeRenderer.renderLineBox(pPoseStack, vertexconsumer, d0, d1, d2, d3, d4, d5, 1.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F);
                 } else if (flag3) {
-                    ShapeRenderer.renderLineBox(p_173680_, vertexconsumer, d0, d1, d2, d3, d4, d5, 1.0F, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F);
+                    ShapeRenderer.renderLineBox(pPoseStack, vertexconsumer, d0, d1, d2, d3, d4, d5, 1.0F, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F);
                 }
             }
         }
     }
 
-    private void renderStructureVoids(StructureBlockEntity p_343397_, VertexConsumer p_344738_, PoseStack p_342214_) {
-        BlockGetter blockgetter = p_343397_.getLevel();
+    private void renderStructureVoids(StructureBlockEntity pBlockEntity, VertexConsumer pBuffer, PoseStack pPoseStack) {
+        BlockGetter blockgetter = pBlockEntity.getLevel();
         if (blockgetter != null) {
-            BlockPos blockpos = p_343397_.getBlockPos();
-            BlockPos blockpos1 = StructureUtils.getStructureOrigin(p_343397_);
-            Vec3i vec3i = p_343397_.getStructureSize();
+            BlockPos blockpos = pBlockEntity.getBlockPos();
+            BlockPos blockpos1 = StructureUtils.getStructureOrigin(pBlockEntity);
+            Vec3i vec3i = pBlockEntity.getStructureSize();
             DiscreteVoxelShape discretevoxelshape = new BitSetDiscreteVoxelShape(vec3i.getX(), vec3i.getY(), vec3i.getZ());
 
             for (BlockPos blockpos2 : BlockPos.betweenClosed(blockpos1, blockpos1.offset(vec3i).offset(-1, -1, -1))) {
@@ -157,7 +157,7 @@ public class StructureBlockRenderer implements BlockEntityRenderer<StructureBloc
                 float f4 = (float)(p_345263_ + blockpos1.getX() - blockpos.getX()) + 0.5F + 0.48F;
                 float f5 = (float)(p_344165_ + blockpos1.getY() - blockpos.getY()) + 0.5F + 0.48F;
                 float f6 = (float)(p_344494_ + blockpos1.getZ() - blockpos.getZ()) + 0.5F + 0.48F;
-                ShapeRenderer.renderFace(p_342214_, p_344738_, p_342299_, f1, f2, f3, f4, f5, f6, 0.75F, 0.75F, 1.0F, 0.2F);
+                ShapeRenderer.renderFace(pPoseStack, pBuffer, p_342299_, f1, f2, f3, f4, f5, f6, 0.75F, 0.75F, 1.0F, 0.2F);
             });
         }
     }

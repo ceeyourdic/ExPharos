@@ -18,67 +18,67 @@ public class DefaultDispenseItemBehavior implements DispenseItemBehavior {
         return itemstack;
     }
 
-    protected ItemStack execute(BlockSource p_301824_, ItemStack p_123386_) {
-        Direction direction = p_301824_.state().getValue(DispenserBlock.FACING);
-        Position position = DispenserBlock.getDispensePosition(p_301824_);
-        ItemStack itemstack = p_123386_.split(1);
-        spawnItem(p_301824_.level(), itemstack, 6, direction, position);
-        return p_123386_;
+    protected ItemStack execute(BlockSource pBlockSource, ItemStack pItem) {
+        Direction direction = pBlockSource.state().getValue(DispenserBlock.FACING);
+        Position position = DispenserBlock.getDispensePosition(pBlockSource);
+        ItemStack itemstack = pItem.split(1);
+        spawnItem(pBlockSource.level(), itemstack, 6, direction, position);
+        return pItem;
     }
 
-    public static void spawnItem(Level p_123379_, ItemStack p_123380_, int p_123381_, Direction p_123382_, Position p_123383_) {
-        double d0 = p_123383_.x();
-        double d1 = p_123383_.y();
-        double d2 = p_123383_.z();
-        if (p_123382_.getAxis() == Direction.Axis.Y) {
+    public static void spawnItem(Level pLevel, ItemStack pStack, int pSpeed, Direction pFacing, Position pPosition) {
+        double d0 = pPosition.x();
+        double d1 = pPosition.y();
+        double d2 = pPosition.z();
+        if (pFacing.getAxis() == Direction.Axis.Y) {
             d1 -= 0.125;
         } else {
             d1 -= 0.15625;
         }
 
-        ItemEntity itementity = new ItemEntity(p_123379_, d0, d1, d2, p_123380_);
-        double d3 = p_123379_.random.nextDouble() * 0.1 + 0.2;
+        ItemEntity itementity = new ItemEntity(pLevel, d0, d1, d2, pStack);
+        double d3 = pLevel.random.nextDouble() * 0.1 + 0.2;
         itementity.setDeltaMovement(
-            p_123379_.random.triangle((double)p_123382_.getStepX() * d3, 0.0172275 * (double)p_123381_),
-            p_123379_.random.triangle(0.2, 0.0172275 * (double)p_123381_),
-            p_123379_.random.triangle((double)p_123382_.getStepZ() * d3, 0.0172275 * (double)p_123381_)
+            pLevel.random.triangle((double)pFacing.getStepX() * d3, 0.0172275 * (double)pSpeed),
+            pLevel.random.triangle(0.2, 0.0172275 * (double)pSpeed),
+            pLevel.random.triangle((double)pFacing.getStepZ() * d3, 0.0172275 * (double)pSpeed)
         );
-        p_123379_.addFreshEntity(itementity);
+        pLevel.addFreshEntity(itementity);
     }
 
-    protected void playSound(BlockSource p_123384_) {
-        playDefaultSound(p_123384_);
+    protected void playSound(BlockSource pBlockSource) {
+        playDefaultSound(pBlockSource);
     }
 
-    protected void playAnimation(BlockSource p_123388_, Direction p_123389_) {
-        playDefaultAnimation(p_123388_, p_123389_);
+    protected void playAnimation(BlockSource pBlockSource, Direction pDirection) {
+        playDefaultAnimation(pBlockSource, pDirection);
     }
 
-    private static void playDefaultSound(BlockSource p_343539_) {
-        p_343539_.level().levelEvent(1000, p_343539_.pos(), 0);
+    private static void playDefaultSound(BlockSource pBlockSource) {
+        pBlockSource.level().levelEvent(1000, pBlockSource.pos(), 0);
     }
 
-    private static void playDefaultAnimation(BlockSource p_342920_, Direction p_343526_) {
-        p_342920_.level().levelEvent(2000, p_342920_.pos(), p_343526_.get3DDataValue());
+    private static void playDefaultAnimation(BlockSource pBlockSource, Direction pDirection) {
+        pBlockSource.level().levelEvent(2000, pBlockSource.pos(), pDirection.get3DDataValue());
     }
 
-    protected ItemStack consumeWithRemainder(BlockSource p_344354_, ItemStack p_343730_, ItemStack p_344011_) {
-        p_343730_.shrink(1);
-        if (p_343730_.isEmpty()) {
-            return p_344011_;
+    protected ItemStack consumeWithRemainder(BlockSource pBlockSource, ItemStack pStack, ItemStack pRemainder) {
+        pStack.shrink(1);
+        if (pStack.isEmpty()) {
+            return pRemainder;
         } else {
-            this.addToInventoryOrDispense(p_344354_, p_344011_);
-            return p_343730_;
+            this.addToInventoryOrDispense(pBlockSource, pRemainder);
+            return pStack;
         }
     }
 
-    private void addToInventoryOrDispense(BlockSource p_343398_, ItemStack p_344816_) {
-        ItemStack itemstack = p_343398_.blockEntity().insertItem(p_344816_);
+    private void addToInventoryOrDispense(BlockSource pBlockSource, ItemStack pRemainder) {
+        ItemStack itemstack = pBlockSource.blockEntity().insertItem(pRemainder);
         if (!itemstack.isEmpty()) {
-            Direction direction = p_343398_.state().getValue(DispenserBlock.FACING);
-            spawnItem(p_343398_.level(), itemstack, 6, direction, DispenserBlock.getDispensePosition(p_343398_));
-            playDefaultSound(p_343398_);
-            playDefaultAnimation(p_343398_, direction);
+            Direction direction = pBlockSource.state().getValue(DispenserBlock.FACING);
+            spawnItem(pBlockSource.level(), itemstack, 6, direction, DispenserBlock.getDispensePosition(pBlockSource));
+            playDefaultSound(pBlockSource);
+            playDefaultAnimation(pBlockSource, direction);
         }
     }
 }

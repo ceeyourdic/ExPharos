@@ -27,83 +27,83 @@ public class NbtIo {
         StandardOpenOption.SYNC, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
     };
 
-    public static CompoundTag readCompressed(Path p_310303_, NbtAccounter p_311830_) throws IOException {
+    public static CompoundTag readCompressed(Path pPath, NbtAccounter pAccounter) throws IOException {
         CompoundTag compoundtag;
         try (
-            InputStream inputstream = Files.newInputStream(p_310303_);
+            InputStream inputstream = Files.newInputStream(pPath);
             InputStream inputstream1 = new FastBufferedInputStream(inputstream);
         ) {
-            compoundtag = readCompressed(inputstream1, p_311830_);
+            compoundtag = readCompressed(inputstream1, pAccounter);
         }
 
         return compoundtag;
     }
 
-    private static DataInputStream createDecompressorStream(InputStream p_202494_) throws IOException {
-        return new DataInputStream(new FastBufferedInputStream(new GZIPInputStream(p_202494_)));
+    private static DataInputStream createDecompressorStream(InputStream pZippedStream) throws IOException {
+        return new DataInputStream(new FastBufferedInputStream(new GZIPInputStream(pZippedStream)));
     }
 
-    private static DataOutputStream createCompressorStream(OutputStream p_310411_) throws IOException {
-        return new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(p_310411_)));
+    private static DataOutputStream createCompressorStream(OutputStream pOutputSteam) throws IOException {
+        return new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(pOutputSteam)));
     }
 
-    public static CompoundTag readCompressed(InputStream p_313037_, NbtAccounter p_312435_) throws IOException {
+    public static CompoundTag readCompressed(InputStream pZippedStream, NbtAccounter pAccounter) throws IOException {
         CompoundTag compoundtag;
-        try (DataInputStream datainputstream = createDecompressorStream(p_313037_)) {
-            compoundtag = read(datainputstream, p_312435_);
+        try (DataInputStream datainputstream = createDecompressorStream(pZippedStream)) {
+            compoundtag = read(datainputstream, pAccounter);
         }
 
         return compoundtag;
     }
 
-    public static void parseCompressed(Path p_310443_, StreamTagVisitor p_202489_, NbtAccounter p_301727_) throws IOException {
+    public static void parseCompressed(Path pPath, StreamTagVisitor pVisitor, NbtAccounter pAccounter) throws IOException {
         try (
-            InputStream inputstream = Files.newInputStream(p_310443_);
+            InputStream inputstream = Files.newInputStream(pPath);
             InputStream inputstream1 = new FastBufferedInputStream(inputstream);
         ) {
-            parseCompressed(inputstream1, p_202489_, p_301727_);
+            parseCompressed(inputstream1, pVisitor, pAccounter);
         }
     }
 
-    public static void parseCompressed(InputStream p_202491_, StreamTagVisitor p_202492_, NbtAccounter p_301762_) throws IOException {
-        try (DataInputStream datainputstream = createDecompressorStream(p_202491_)) {
-            parse(datainputstream, p_202492_, p_301762_);
+    public static void parseCompressed(InputStream pZippedStream, StreamTagVisitor pVisitor, NbtAccounter pAccounter) throws IOException {
+        try (DataInputStream datainputstream = createDecompressorStream(pZippedStream)) {
+            parse(datainputstream, pVisitor, pAccounter);
         }
     }
 
-    public static void writeCompressed(CompoundTag p_128945_, Path p_310344_) throws IOException {
+    public static void writeCompressed(CompoundTag pCompoundTag, Path pPath) throws IOException {
         try (
-            OutputStream outputstream = Files.newOutputStream(p_310344_, SYNC_OUTPUT_OPTIONS);
+            OutputStream outputstream = Files.newOutputStream(pPath, SYNC_OUTPUT_OPTIONS);
             OutputStream outputstream1 = new BufferedOutputStream(outputstream);
         ) {
-            writeCompressed(p_128945_, outputstream1);
+            writeCompressed(pCompoundTag, outputstream1);
         }
     }
 
-    public static void writeCompressed(CompoundTag p_128948_, OutputStream p_128949_) throws IOException {
-        try (DataOutputStream dataoutputstream = createCompressorStream(p_128949_)) {
-            write(p_128948_, dataoutputstream);
+    public static void writeCompressed(CompoundTag pCompoundTag, OutputStream pOutputStream) throws IOException {
+        try (DataOutputStream dataoutputstream = createCompressorStream(pOutputStream)) {
+            write(pCompoundTag, dataoutputstream);
         }
     }
 
-    public static void write(CompoundTag p_128956_, Path p_311890_) throws IOException {
+    public static void write(CompoundTag pCompoundTag, Path pPath) throws IOException {
         try (
-            OutputStream outputstream = Files.newOutputStream(p_311890_, SYNC_OUTPUT_OPTIONS);
+            OutputStream outputstream = Files.newOutputStream(pPath, SYNC_OUTPUT_OPTIONS);
             OutputStream outputstream1 = new BufferedOutputStream(outputstream);
             DataOutputStream dataoutputstream = new DataOutputStream(outputstream1);
         ) {
-            write(p_128956_, dataoutputstream);
+            write(pCompoundTag, dataoutputstream);
         }
     }
 
     @Nullable
-    public static CompoundTag read(Path p_310670_) throws IOException {
-        if (!Files.exists(p_310670_)) {
+    public static CompoundTag read(Path pPath) throws IOException {
+        if (!Files.exists(pPath)) {
             return null;
         } else {
             CompoundTag compoundtag;
             try (
-                InputStream inputstream = Files.newInputStream(p_310670_);
+                InputStream inputstream = Files.newInputStream(pPath);
                 DataInputStream datainputstream = new DataInputStream(inputstream);
             ) {
                 compoundtag = read(datainputstream, NbtAccounter.unlimitedHeap());
@@ -113,12 +113,12 @@ public class NbtIo {
         }
     }
 
-    public static CompoundTag read(DataInput p_128929_) throws IOException {
-        return read(p_128929_, NbtAccounter.unlimitedHeap());
+    public static CompoundTag read(DataInput pInput) throws IOException {
+        return read(pInput, NbtAccounter.unlimitedHeap());
     }
 
-    public static CompoundTag read(DataInput p_128935_, NbtAccounter p_128936_) throws IOException {
-        Tag tag = readUnnamedTag(p_128935_, p_128936_);
+    public static CompoundTag read(DataInput pInput, NbtAccounter pAccounter) throws IOException {
+        Tag tag = readUnnamedTag(pInput, pAccounter);
         if (tag instanceof CompoundTag) {
             return (CompoundTag)tag;
         } else {
@@ -126,73 +126,73 @@ public class NbtIo {
         }
     }
 
-    public static void write(CompoundTag p_128942_, DataOutput p_128943_) throws IOException {
-        writeUnnamedTagWithFallback(p_128942_, p_128943_);
+    public static void write(CompoundTag pCompoundTag, DataOutput pOutput) throws IOException {
+        writeUnnamedTagWithFallback(pCompoundTag, pOutput);
     }
 
-    public static void parse(DataInput p_197510_, StreamTagVisitor p_197511_, NbtAccounter p_301755_) throws IOException {
-        TagType<?> tagtype = TagTypes.getType(p_197510_.readByte());
+    public static void parse(DataInput pInput, StreamTagVisitor pVisitor, NbtAccounter pAccounter) throws IOException {
+        TagType<?> tagtype = TagTypes.getType(pInput.readByte());
         if (tagtype == EndTag.TYPE) {
-            if (p_197511_.visitRootEntry(EndTag.TYPE) == StreamTagVisitor.ValueResult.CONTINUE) {
-                p_197511_.visitEnd();
+            if (pVisitor.visitRootEntry(EndTag.TYPE) == StreamTagVisitor.ValueResult.CONTINUE) {
+                pVisitor.visitEnd();
             }
         } else {
-            switch (p_197511_.visitRootEntry(tagtype)) {
+            switch (pVisitor.visitRootEntry(tagtype)) {
                 case HALT:
                 default:
                     break;
                 case BREAK:
-                    StringTag.skipString(p_197510_);
-                    tagtype.skip(p_197510_, p_301755_);
+                    StringTag.skipString(pInput);
+                    tagtype.skip(pInput, pAccounter);
                     break;
                 case CONTINUE:
-                    StringTag.skipString(p_197510_);
-                    tagtype.parse(p_197510_, p_197511_, p_301755_);
+                    StringTag.skipString(pInput);
+                    tagtype.parse(pInput, pVisitor, pAccounter);
             }
         }
     }
 
-    public static Tag readAnyTag(DataInput p_301023_, NbtAccounter p_299704_) throws IOException {
-        byte b0 = p_301023_.readByte();
-        return (Tag)(b0 == 0 ? EndTag.INSTANCE : readTagSafe(p_301023_, p_299704_, b0));
+    public static Tag readAnyTag(DataInput pInput, NbtAccounter pAccounter) throws IOException {
+        byte b0 = pInput.readByte();
+        return (Tag)(b0 == 0 ? EndTag.INSTANCE : readTagSafe(pInput, pAccounter, b0));
     }
 
-    public static void writeAnyTag(Tag p_300328_, DataOutput p_297970_) throws IOException {
-        p_297970_.writeByte(p_300328_.getId());
-        if (p_300328_.getId() != 0) {
-            p_300328_.write(p_297970_);
+    public static void writeAnyTag(Tag pTag, DataOutput pOutput) throws IOException {
+        pOutput.writeByte(pTag.getId());
+        if (pTag.getId() != 0) {
+            pTag.write(pOutput);
         }
     }
 
-    public static void writeUnnamedTag(Tag p_128951_, DataOutput p_128952_) throws IOException {
-        p_128952_.writeByte(p_128951_.getId());
-        if (p_128951_.getId() != 0) {
-            p_128952_.writeUTF("");
-            p_128951_.write(p_128952_);
+    public static void writeUnnamedTag(Tag pTag, DataOutput pOutput) throws IOException {
+        pOutput.writeByte(pTag.getId());
+        if (pTag.getId() != 0) {
+            pOutput.writeUTF("");
+            pTag.write(pOutput);
         }
     }
 
-    public static void writeUnnamedTagWithFallback(Tag p_310490_, DataOutput p_311501_) throws IOException {
-        writeUnnamedTag(p_310490_, new NbtIo.StringFallbackDataOutput(p_311501_));
+    public static void writeUnnamedTagWithFallback(Tag pTag, DataOutput pOutput) throws IOException {
+        writeUnnamedTag(pTag, new NbtIo.StringFallbackDataOutput(pOutput));
     }
 
-    private static Tag readUnnamedTag(DataInput p_128931_, NbtAccounter p_128933_) throws IOException {
-        byte b0 = p_128931_.readByte();
+    private static Tag readUnnamedTag(DataInput pInput, NbtAccounter pAccounter) throws IOException {
+        byte b0 = pInput.readByte();
         if (b0 == 0) {
             return EndTag.INSTANCE;
         } else {
-            StringTag.skipString(p_128931_);
-            return readTagSafe(p_128931_, p_128933_, b0);
+            StringTag.skipString(pInput);
+            return readTagSafe(pInput, pAccounter, b0);
         }
     }
 
-    private static Tag readTagSafe(DataInput p_299672_, NbtAccounter p_299171_, byte p_300451_) {
+    private static Tag readTagSafe(DataInput pInput, NbtAccounter pAccounter, byte pType) {
         try {
-            return TagTypes.getType(p_300451_).load(p_299672_, p_299171_);
+            return TagTypes.getType(pType).load(pInput, pAccounter);
         } catch (IOException ioexception) {
             CrashReport crashreport = CrashReport.forThrowable(ioexception, "Loading NBT data");
             CrashReportCategory crashreportcategory = crashreport.addCategory("NBT Tag");
-            crashreportcategory.setDetail("Tag type", p_300451_);
+            crashreportcategory.setDetail("Tag type", pType);
             throw new ReportedNbtException(crashreport);
         }
     }

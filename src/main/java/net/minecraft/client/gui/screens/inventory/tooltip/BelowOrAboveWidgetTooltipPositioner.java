@@ -10,8 +10,8 @@ import org.joml.Vector2ic;
 public class BelowOrAboveWidgetTooltipPositioner implements ClientTooltipPositioner {
     private final ScreenRectangle screenRectangle;
 
-    public BelowOrAboveWidgetTooltipPositioner(ScreenRectangle p_312932_) {
-        this.screenRectangle = p_312932_;
+    public BelowOrAboveWidgetTooltipPositioner(ScreenRectangle pScreenRectangle) {
+        this.screenRectangle = pScreenRectangle;
     }
 
     @Override

@@ -40,10 +40,10 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
     private final Optional<HolderSet<Enchantment>> options;
     private final boolean onlyCompatible;
 
-    EnchantRandomlyFunction(List<LootItemCondition> p_298352_, Optional<HolderSet<Enchantment>> p_297532_, boolean p_344714_) {
-        super(p_298352_);
-        this.options = p_297532_;
-        this.onlyCompatible = p_344714_;
+    EnchantRandomlyFunction(List<LootItemCondition> pConditons, Optional<HolderSet<Enchantment>> pOptions, boolean pOnlyCompatible) {
+        super(pConditons);
+        this.options = pOptions;
+        this.onlyCompatible = pOnlyCompatible;
     }
 
     @Override
@@ -52,40 +52,40 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_80429_, LootContext p_80430_) {
-        RandomSource randomsource = p_80430_.getRandom();
-        boolean flag = p_80429_.is(Items.BOOK);
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        RandomSource randomsource = pContext.getRandom();
+        boolean flag = pStack.is(Items.BOOK);
         boolean flag1 = !flag && this.onlyCompatible;
         Stream<Holder<Enchantment>> stream = this.options
             .map(HolderSet::stream)
-            .orElseGet(() -> p_80430_.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).listElements().map(Function.identity()))
-            .filter(p_341995_ -> !flag1 || p_341995_.value().canEnchant(p_80429_));
+            .orElseGet(() -> pContext.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).listElements().map(Function.identity()))
+            .filter(p_341995_ -> !flag1 || p_341995_.value().canEnchant(pStack));
         List<Holder<Enchantment>> list = stream.toList();
         Optional<Holder<Enchantment>> optional = Util.getRandomSafe(list, randomsource);
         if (optional.isEmpty()) {
-            LOGGER.warn("Couldn't find a compatible enchantment for {}", p_80429_);
-            return p_80429_;
+            LOGGER.warn("Couldn't find a compatible enchantment for {}", pStack);
+            return pStack;
         } else {
-            return enchantItem(p_80429_, optional.get(), randomsource);
+            return enchantItem(pStack, optional.get(), randomsource);
         }
     }
 
-    private static ItemStack enchantItem(ItemStack p_230980_, Holder<Enchantment> p_343939_, RandomSource p_230982_) {
-        int i = Mth.nextInt(p_230982_, p_343939_.value().getMinLevel(), p_343939_.value().getMaxLevel());
-        if (p_230980_.is(Items.BOOK)) {
-            p_230980_ = new ItemStack(Items.ENCHANTED_BOOK);
+    private static ItemStack enchantItem(ItemStack pStack, Holder<Enchantment> pEnchantment, RandomSource pRandom) {
+        int i = Mth.nextInt(pRandom, pEnchantment.value().getMinLevel(), pEnchantment.value().getMaxLevel());
+        if (pStack.is(Items.BOOK)) {
+            pStack = new ItemStack(Items.ENCHANTED_BOOK);
         }
 
-        p_230980_.enchant(p_343939_, i);
-        return p_230980_;
+        pStack.enchant(pEnchantment, i);
+        return pStack;
     }
 
     public static EnchantRandomlyFunction.Builder randomEnchantment() {
         return new EnchantRandomlyFunction.Builder();
     }
 
-    public static EnchantRandomlyFunction.Builder randomApplicableEnchantment(HolderLookup.Provider p_343847_) {
-        return randomEnchantment().withOneOf(p_343847_.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(EnchantmentTags.ON_RANDOM_LOOT));
+    public static EnchantRandomlyFunction.Builder randomApplicableEnchantment(HolderLookup.Provider pRegistries) {
+        return randomEnchantment().withOneOf(pRegistries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(EnchantmentTags.ON_RANDOM_LOOT));
     }
 
     public static class Builder extends LootItemConditionalFunction.Builder<EnchantRandomlyFunction.Builder> {
@@ -96,13 +96,13 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
             return this;
         }
 
-        public EnchantRandomlyFunction.Builder withEnchantment(Holder<Enchantment> p_342993_) {
-            this.options = Optional.of(HolderSet.direct(p_342993_));
+        public EnchantRandomlyFunction.Builder withEnchantment(Holder<Enchantment> pEnchantment) {
+            this.options = Optional.of(HolderSet.direct(pEnchantment));
             return this;
         }
 
-        public EnchantRandomlyFunction.Builder withOneOf(HolderSet<Enchantment> p_344102_) {
-            this.options = Optional.of(p_344102_);
+        public EnchantRandomlyFunction.Builder withOneOf(HolderSet<Enchantment> pEnchantments) {
+            this.options = Optional.of(pEnchantments);
             return this;
         }
 

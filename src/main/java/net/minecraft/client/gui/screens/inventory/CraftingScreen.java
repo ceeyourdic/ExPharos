@@ -15,8 +15,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class CraftingScreen extends AbstractRecipeBookScreen<CraftingMenu> {
     private static final ResourceLocation CRAFTING_TABLE_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/crafting_table.png");
 
-    public CraftingScreen(CraftingMenu p_98448_, Inventory p_98449_, Component p_98450_) {
-        super(p_98448_, new CraftingRecipeBookComponent(p_98448_), p_98449_, p_98450_);
+    public CraftingScreen(CraftingMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, new CraftingRecipeBookComponent(pMenu), pPlayerInventory, pTitle);
     }
 
     @Override

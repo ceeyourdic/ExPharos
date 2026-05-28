@@ -76,17 +76,17 @@ public class GameTestServer extends MinecraftServer {
     private MultipleTestTracker testTracker;
 
     public static GameTestServer create(
-        Thread p_206607_, LevelStorageSource.LevelStorageAccess p_206608_, PackRepository p_206609_, Collection<TestFunction> p_206610_, BlockPos p_206611_
+        Thread pServerThread, LevelStorageSource.LevelStorageAccess pStorageSource, PackRepository pPackRepository, Collection<TestFunction> pTestBatches, BlockPos pSpawnPos
     ) {
-        if (p_206610_.isEmpty()) {
+        if (pTestBatches.isEmpty()) {
             throw new IllegalArgumentException("No test functions were given!");
         } else {
-            p_206609_.reload();
+            pPackRepository.reload();
             WorldDataConfiguration worlddataconfiguration = new WorldDataConfiguration(
-                new DataPackConfig(new ArrayList<>(p_206609_.getAvailableIds()), List.of()), ENABLED_FEATURES
+                new DataPackConfig(new ArrayList<>(pPackRepository.getAvailableIds()), List.of()), ENABLED_FEATURES
             );
             LevelSettings levelsettings = new LevelSettings("Test Level", GameType.CREATIVE, false, Difficulty.NORMAL, true, TEST_GAME_RULES, worlddataconfiguration);
-            WorldLoader.PackConfig worldloader$packconfig = new WorldLoader.PackConfig(p_206609_, worlddataconfiguration, false, true);
+            WorldLoader.PackConfig worldloader$packconfig = new WorldLoader.PackConfig(pPackRepository, worlddataconfiguration, false, true);
             WorldLoader.InitConfig worldloader$initconfig = new WorldLoader.InitConfig(worldloader$packconfig, Commands.CommandSelection.DEDICATED, 4);
 
             try {
@@ -118,7 +118,7 @@ public class GameTestServer extends MinecraftServer {
                     .get();
                 stopwatch.stop();
                 LOGGER.debug("Finished resource loading after {} ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
-                return new GameTestServer(p_206607_, p_206608_, p_206609_, worldstem, p_206610_, p_206611_);
+                return new GameTestServer(pServerThread, pStorageSource, pPackRepository, worldstem, pTestBatches, pSpawnPos);
             } catch (Exception exception) {
                 LOGGER.warn("Failed to load vanilla datapack, bit oops", (Throwable)exception);
                 System.exit(-1);
@@ -128,16 +128,16 @@ public class GameTestServer extends MinecraftServer {
     }
 
     private GameTestServer(
-        Thread p_206597_,
-        LevelStorageSource.LevelStorageAccess p_206598_,
-        PackRepository p_206599_,
-        WorldStem p_206600_,
-        Collection<TestFunction> p_206601_,
-        BlockPos p_206602_
+        Thread pServerThread,
+        LevelStorageSource.LevelStorageAccess pStorageSource,
+        PackRepository pPackRepository,
+        WorldStem pWorldStem,
+        Collection<TestFunction> pTestBatches,
+        BlockPos pSpawnPos
     ) {
-        super(p_206597_, p_206598_, p_206599_, p_206600_, Proxy.NO_PROXY, DataFixers.getDataFixer(), NO_SERVICES, LoggerChunkProgressListener::createFromGameruleRadius);
-        this.testFunctions = Lists.newArrayList(p_206601_);
-        this.spawnPos = p_206602_;
+        super(pServerThread, pStorageSource, pPackRepository, pWorldStem, Proxy.NO_PROXY, DataFixers.getDataFixer(), NO_SERVICES, LoggerChunkProgressListener::createFromGameruleRadius);
+        this.testFunctions = Lists.newArrayList(pTestBatches);
+        this.spawnPos = pSpawnPos;
     }
 
     @Override
@@ -222,9 +222,9 @@ public class GameTestServer extends MinecraftServer {
         System.exit(1);
     }
 
-    private void startTests(ServerLevel p_177625_) {
-        BlockPos blockpos = new BlockPos(p_177625_.random.nextIntBetweenInclusive(-14999992, 14999992), -59, p_177625_.random.nextIntBetweenInclusive(-14999992, 14999992));
-        GameTestRunner gametestrunner = GameTestRunner.Builder.fromBatches(this.testBatches, p_177625_)
+    private void startTests(ServerLevel pServerLevel) {
+        BlockPos blockpos = new BlockPos(pServerLevel.random.nextIntBetweenInclusive(-14999992, 14999992), -59, pServerLevel.random.nextIntBetweenInclusive(-14999992, 14999992));
+        GameTestRunner gametestrunner = GameTestRunner.Builder.fromBatches(this.testBatches, pServerLevel)
             .newStructureSpawner(new StructureGridSpawner(blockpos, 8, false))
             .build();
         Collection<GameTestInfo> collection = gametestrunner.getTestInfos();

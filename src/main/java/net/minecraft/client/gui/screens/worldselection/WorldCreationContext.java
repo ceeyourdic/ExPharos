@@ -28,50 +28,50 @@ public record WorldCreationContext(
     InitialWorldCreationOptions initialWorldCreationOptions
 ) {
     public WorldCreationContext(
-        WorldGenSettings p_249130_, LayeredRegistryAccess<RegistryLayer> p_248513_, ReloadableServerResources p_251786_, WorldDataConfiguration p_248593_
+        WorldGenSettings pWorldGenSettings, LayeredRegistryAccess<RegistryLayer> pWorldGenRegistries, ReloadableServerResources pDataPackResources, WorldDataConfiguration pDataConfiguration
     ) {
         this(
-            p_249130_.options(),
-            p_249130_.dimensions(),
-            p_248513_,
-            p_251786_,
-            p_248593_,
+            pWorldGenSettings.options(),
+            pWorldGenSettings.dimensions(),
+            pWorldGenRegistries,
+            pDataPackResources,
+            pDataConfiguration,
             new InitialWorldCreationOptions(WorldCreationUiState.SelectedGameMode.SURVIVAL, Set.of(), null)
         );
     }
 
     public WorldCreationContext(
-        WorldOptions p_249836_,
-        WorldDimensions p_250641_,
-        LayeredRegistryAccess<RegistryLayer> p_251794_,
-        ReloadableServerResources p_250560_,
-        WorldDataConfiguration p_248539_,
-        InitialWorldCreationOptions p_367482_
+        WorldOptions pWorldOptions,
+        WorldDimensions pWorldDimensions,
+        LayeredRegistryAccess<RegistryLayer> pWorldGenRegistries,
+        ReloadableServerResources pDataPackResources,
+        WorldDataConfiguration pDataConfiguration,
+        InitialWorldCreationOptions pInitialWorldCreationOptions
     ) {
         this(
-            p_249836_,
-            p_251794_.getLayer(RegistryLayer.DIMENSIONS).lookupOrThrow(Registries.LEVEL_STEM),
-            p_250641_,
-            p_251794_.replaceFrom(RegistryLayer.DIMENSIONS),
-            p_250560_,
-            p_248539_,
-            p_367482_
+            pWorldOptions,
+            pWorldGenRegistries.getLayer(RegistryLayer.DIMENSIONS).lookupOrThrow(Registries.LEVEL_STEM),
+            pWorldDimensions,
+            pWorldGenRegistries.replaceFrom(RegistryLayer.DIMENSIONS),
+            pDataPackResources,
+            pDataConfiguration,
+            pInitialWorldCreationOptions
         );
     }
 
-    public WorldCreationContext withSettings(WorldOptions p_249492_, WorldDimensions p_250298_) {
-        return new WorldCreationContext(p_249492_, this.datapackDimensions, p_250298_, this.worldgenRegistries, this.dataPackResources, this.dataConfiguration, this.initialWorldCreationOptions);
+    public WorldCreationContext withSettings(WorldOptions pOptions, WorldDimensions pSelectedDimensions) {
+        return new WorldCreationContext(pOptions, this.datapackDimensions, pSelectedDimensions, this.worldgenRegistries, this.dataPackResources, this.dataConfiguration, this.initialWorldCreationOptions);
     }
 
-    public WorldCreationContext withOptions(WorldCreationContext.OptionsModifier p_252288_) {
+    public WorldCreationContext withOptions(WorldCreationContext.OptionsModifier pOptionsModifier) {
         return new WorldCreationContext(
-            p_252288_.apply(this.options), this.datapackDimensions, this.selectedDimensions, this.worldgenRegistries, this.dataPackResources, this.dataConfiguration, this.initialWorldCreationOptions
+            pOptionsModifier.apply(this.options), this.datapackDimensions, this.selectedDimensions, this.worldgenRegistries, this.dataPackResources, this.dataConfiguration, this.initialWorldCreationOptions
         );
     }
 
-    public WorldCreationContext withDimensions(WorldCreationContext.DimensionsUpdater p_250676_) {
+    public WorldCreationContext withDimensions(WorldCreationContext.DimensionsUpdater pDimensionsUpdater) {
         return new WorldCreationContext(
-            this.options, this.datapackDimensions, p_250676_.apply(this.worldgenLoadContext(), this.selectedDimensions), this.worldgenRegistries, this.dataPackResources, this.dataConfiguration, this.initialWorldCreationOptions
+            this.options, this.datapackDimensions, pDimensionsUpdater.apply(this.worldgenLoadContext(), this.selectedDimensions), this.worldgenRegistries, this.dataPackResources, this.dataConfiguration, this.initialWorldCreationOptions
         );
     }
 

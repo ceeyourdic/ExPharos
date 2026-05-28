@@ -47,15 +47,15 @@ public class ExperimentsScreen extends Screen {
     @Nullable
     private ExperimentsScreen.ScrollArea scrollArea;
 
-    public ExperimentsScreen(Screen p_270165_, PackRepository p_270308_, Consumer<PackRepository> p_270392_) {
+    public ExperimentsScreen(Screen pParent, PackRepository pPackRepository, Consumer<PackRepository> pOutput) {
         super(TITLE);
-        this.parent = p_270165_;
-        this.packRepository = p_270308_;
-        this.output = p_270392_;
+        this.parent = pParent;
+        this.packRepository = pPackRepository;
+        this.output = pOutput;
 
-        for (Pack pack : p_270308_.getAvailablePacks()) {
+        for (Pack pack : pPackRepository.getAvailablePacks()) {
             if (pack.getPackSource() == PackSource.FEATURE) {
-                this.packs.put(pack, p_270308_.getSelectedPacks().contains(pack));
+                this.packs.put(pack, pPackRepository.getSelectedPacks().contains(pack));
             }
         }
     }
@@ -87,9 +87,9 @@ public class ExperimentsScreen extends Screen {
         this.repositionElements();
     }
 
-    private static Component getHumanReadableTitle(Pack p_270861_) {
-        String s = "dataPack." + p_270861_.getId() + ".name";
-        return (Component)(I18n.exists(s) ? Component.translatable(s) : p_270861_.getTitle());
+    private static Component getHumanReadableTitle(Pack pPack) {
+        String s = "dataPack." + pPack.getId() + ".name";
+        return (Component)(I18n.exists(s) ? Component.translatable(s) : pPack.getTitle());
     }
 
     @Override
@@ -130,14 +130,14 @@ public class ExperimentsScreen extends Screen {
         private final List<AbstractWidget> children = new ArrayList<>();
         private final Layout layout;
 
-        public ScrollArea(final Layout p_376411_, final int p_378171_, final int p_376142_) {
-            super(0, 0, p_378171_, p_376142_, CommonComponents.EMPTY);
-            this.layout = p_376411_;
-            p_376411_.visitWidgets(this::addWidget);
+        public ScrollArea(final Layout pLayout, final int pWidth, final int pHeight) {
+            super(0, 0, pWidth, pHeight, CommonComponents.EMPTY);
+            this.layout = pLayout;
+            pLayout.visitWidgets(this::addWidget);
         }
 
-        public void addWidget(AbstractWidget p_375436_) {
-            this.children.add(p_375436_);
+        public void addWidget(AbstractWidget pWidget) {
+            this.children.add(pWidget);
         }
 
         @Override

@@ -17,6 +17,7 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -24,16 +25,19 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.reflect.Reflector;
+import net.optifine.shaders.Shaders;
 
-@OnlyIn(Dist.CLIENT)
 public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T, ItemFrameRenderState> {
     public static final int GLOW_FRAME_BRIGHTNESS = 5;
     public static final int BRIGHT_MAP_LIGHT_ADJUSTMENT = 30;
     private final ItemModelResolver itemModelResolver;
     private final MapRenderer mapRenderer;
     private final BlockRenderDispatcher blockRenderer;
+    private static double itemRenderDistanceSq = 4096.0;
+    private static boolean renderItemFrame = false;
+    private static Minecraft mc = Minecraft.getInstance();
 
     public ItemFrameRenderer(EntityRendererProvider.Context p_174204_) {
         super(p_174204_);
@@ -93,35 +97,42 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T, It
             p_115061_.translate(0.0F, 0.0F, 0.4375F);
         }
 
-        if (p_361692_.mapId != null) {
-            int j = p_361692_.rotation % 4 * 2;
-            p_115061_.mulPose(Axis.ZP.rotationDegrees((float)j * 360.0F / 8.0F));
-            p_115061_.mulPose(Axis.ZP.rotationDegrees(180.0F));
-            float f2 = 0.0078125F;
-            p_115061_.scale(0.0078125F, 0.0078125F, 0.0078125F);
-            p_115061_.translate(-64.0F, -64.0F, 0.0F);
-            p_115061_.translate(0.0F, 0.0F, -1.0F);
-            int i = this.getLightCoords(p_361692_.isGlowFrame, 15728850, p_115063_);
-            this.mapRenderer.render(p_361692_.mapRenderState, p_115061_, p_115062_, true, i);
-        } else if (!p_361692_.item.isEmpty()) {
-            p_115061_.mulPose(Axis.ZP.rotationDegrees((float)p_361692_.rotation * 360.0F / 8.0F));
-            int k = this.getLightCoords(p_361692_.isGlowFrame, 15728880, p_115063_);
-            p_115061_.scale(0.5F, 0.5F, 0.5F);
-            p_361692_.item.render(p_115061_, p_115062_, k, OverlayTexture.NO_OVERLAY);
+        if (!Reflector.ForgeEventFactoryClient_onRenderItemInFrame.callBoolean(p_361692_, this, p_115061_, p_115062_, p_115063_)) {
+            if (p_361692_.mapId != null) {
+                int j = p_361692_.rotation % 4 * 2;
+                p_115061_.mulPose(Axis.ZP.rotationDegrees((float)j * 360.0F / 8.0F));
+                p_115061_.mulPose(Axis.ZP.rotationDegrees(180.0F));
+                float f2 = 0.0078125F;
+                p_115061_.scale(0.0078125F, 0.0078125F, 0.0078125F);
+                p_115061_.translate(-64.0F, -64.0F, 0.0F);
+                p_115061_.translate(0.0F, 0.0F, -1.0F);
+                int i = this.getLightCoords(p_361692_.isGlowFrame, 15728850, p_115063_);
+                this.mapRenderer.render(p_361692_.mapRenderState, p_115061_, p_115062_, true, i);
+            } else if (!p_361692_.item.isEmpty()) {
+                p_115061_.mulPose(Axis.ZP.rotationDegrees((float)p_361692_.rotation * 360.0F / 8.0F));
+                int k = this.getLightCoords(p_361692_.isGlowFrame, 15728880, p_115063_);
+                p_115061_.scale(0.5F, 0.5F, 0.5F);
+                renderItemFrame = true;
+                if (this.isRenderItem(p_361692_.entity)) {
+                    p_361692_.item.render(p_115061_, p_115062_, k, OverlayTexture.NO_OVERLAY);
+                }
+
+                renderItemFrame = false;
+            }
         }
 
         p_115061_.popPose();
     }
 
-    private int getLightCoords(boolean p_368253_, int p_174210_, int p_174211_) {
-        return p_368253_ ? p_174210_ : p_174211_;
+    private int getLightCoords(boolean pIsGlowFrame, int pGlowLight, int pNormalLight) {
+        return pIsGlowFrame ? pGlowLight : pNormalLight;
     }
 
-    private static ModelResourceLocation getFrameModelResourceLocation(ItemFrameRenderState p_375535_) {
-        if (p_375535_.mapId != null) {
-            return p_375535_.isGlowFrame ? BlockStateModelLoader.GLOW_MAP_FRAME_LOCATION : BlockStateModelLoader.MAP_FRAME_LOCATION;
+    private static ModelResourceLocation getFrameModelResourceLocation(ItemFrameRenderState pRenderState) {
+        if (pRenderState.mapId != null) {
+            return pRenderState.isGlowFrame ? BlockStateModelLoader.GLOW_MAP_FRAME_LOCATION : BlockStateModelLoader.MAP_FRAME_LOCATION;
         } else {
-            return p_375535_.isGlowFrame ? BlockStateModelLoader.GLOW_FRAME_LOCATION : BlockStateModelLoader.FRAME_LOCATION;
+            return pRenderState.isGlowFrame ? BlockStateModelLoader.GLOW_FRAME_LOCATION : BlockStateModelLoader.FRAME_LOCATION;
         }
     }
 
@@ -159,5 +170,32 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T, It
                 }
             }
         }
+    }
+
+    private boolean isRenderItem(Entity itemFrame) {
+        if (Shaders.isShadowPass) {
+            return false;
+        } else {
+            if (!Config.zoomMode) {
+                Entity entity = mc.getCameraEntity();
+                double d0 = itemFrame.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
+                if (d0 > itemRenderDistanceSq) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    public static void updateItemRenderDistance() {
+        Minecraft minecraft = Minecraft.getInstance();
+        double d0 = (double)Config.limit(minecraft.options.fov().get(), 1, 120);
+        double d1 = Math.max(6.0 * (double)minecraft.getWindow().getScreenHeight() / d0, 16.0);
+        itemRenderDistanceSq = d1 * d1;
+    }
+
+    public static boolean isRenderItemFrame() {
+        return renderItemFrame;
     }
 }

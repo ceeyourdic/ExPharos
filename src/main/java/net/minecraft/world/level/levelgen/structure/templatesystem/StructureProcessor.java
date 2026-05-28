@@ -9,26 +9,26 @@ import net.minecraft.world.level.ServerLevelAccessor;
 public abstract class StructureProcessor {
     @Nullable
     public StructureTemplate.StructureBlockInfo processBlock(
-        LevelReader p_74416_,
-        BlockPos p_74417_,
-        BlockPos p_74418_,
-        StructureTemplate.StructureBlockInfo p_74419_,
-        StructureTemplate.StructureBlockInfo p_74420_,
-        StructurePlaceSettings p_74421_
+        LevelReader pLevel,
+        BlockPos pOffset,
+        BlockPos pPos,
+        StructureTemplate.StructureBlockInfo pBlockInfo,
+        StructureTemplate.StructureBlockInfo pRelativeBlockInfo,
+        StructurePlaceSettings pSettings
     ) {
-        return p_74420_;
+        return pRelativeBlockInfo;
     }
 
     protected abstract StructureProcessorType<?> getType();
 
     public List<StructureTemplate.StructureBlockInfo> finalizeProcessing(
-        ServerLevelAccessor p_278247_,
-        BlockPos p_277590_,
-        BlockPos p_277935_,
-        List<StructureTemplate.StructureBlockInfo> p_278070_,
-        List<StructureTemplate.StructureBlockInfo> p_278053_,
-        StructurePlaceSettings p_277497_
+        ServerLevelAccessor pServerLevel,
+        BlockPos pOffset,
+        BlockPos pPos,
+        List<StructureTemplate.StructureBlockInfo> pOriginalBlockInfos,
+        List<StructureTemplate.StructureBlockInfo> pProcessedBlockInfos,
+        StructurePlaceSettings pSettings
     ) {
-        return p_278053_;
+        return pProcessedBlockInfos;
     }
 }

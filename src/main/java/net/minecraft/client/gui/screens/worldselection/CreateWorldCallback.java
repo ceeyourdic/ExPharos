@@ -11,5 +11,5 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @FunctionalInterface
 @OnlyIn(Dist.CLIENT)
 public interface CreateWorldCallback {
-    boolean create(CreateWorldScreen p_364262_, LayeredRegistryAccess<RegistryLayer> p_369104_, PrimaryLevelData p_369111_, @Nullable Path p_363769_);
+    boolean create(CreateWorldScreen pCreateWorldScreen, LayeredRegistryAccess<RegistryLayer> pRegistryAccess, PrimaryLevelData pLevelData, @Nullable Path pTempDataPackDir);
 }

@@ -42,8 +42,8 @@ public class MinecartHopper extends AbstractMinecartContainer implements Hopper 
     }
 
     @Override
-    public void activateMinecart(int p_38596_, int p_38597_, int p_38598_, boolean p_38599_) {
-        boolean flag = !p_38599_;
+    public void activateMinecart(int pX, int pY, int pZ, boolean pReceivingPower) {
+        boolean flag = !pReceivingPower;
         if (flag != this.isEnabled()) {
             this.setEnabled(flag);
         }
@@ -53,8 +53,8 @@ public class MinecartHopper extends AbstractMinecartContainer implements Hopper 
         return this.enabled;
     }
 
-    public void setEnabled(boolean p_38614_) {
-        this.enabled = p_38614_;
+    public void setEnabled(boolean pEnabled) {
+        this.enabled = pEnabled;
     }
 
     @Override
@@ -123,19 +123,19 @@ public class MinecartHopper extends AbstractMinecartContainer implements Hopper 
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag p_38608_) {
-        super.addAdditionalSaveData(p_38608_);
-        p_38608_.putBoolean("Enabled", this.enabled);
+    protected void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("Enabled", this.enabled);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag p_38606_) {
-        super.readAdditionalSaveData(p_38606_);
-        this.enabled = p_38606_.contains("Enabled") ? p_38606_.getBoolean("Enabled") : true;
+    protected void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.enabled = pCompound.contains("Enabled") ? pCompound.getBoolean("Enabled") : true;
     }
 
     @Override
-    public AbstractContainerMenu createMenu(int p_38601_, Inventory p_38602_) {
-        return new HopperMenu(p_38601_, p_38602_, this);
+    public AbstractContainerMenu createMenu(int pId, Inventory pPlayerInventory) {
+        return new HopperMenu(pId, pPlayerInventory, this);
     }
 }

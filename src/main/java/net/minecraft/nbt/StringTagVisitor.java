@@ -9,8 +9,8 @@ public class StringTagVisitor implements TagVisitor {
     private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");
     private final StringBuilder builder = new StringBuilder();
 
-    public String visit(Tag p_178188_) {
-        p_178188_.accept(this);
+    public String visit(Tag pTag) {
+        pTag.accept(this);
         return this.builder.toString();
     }
 
@@ -129,8 +129,8 @@ public class StringTagVisitor implements TagVisitor {
         this.builder.append('}');
     }
 
-    protected static String handleEscape(String p_178160_) {
-        return SIMPLE_VALUE.matcher(p_178160_).matches() ? p_178160_ : StringTag.quoteAndEscape(p_178160_);
+    protected static String handleEscape(String pText) {
+        return SIMPLE_VALUE.matcher(pText).matches() ? pText : StringTag.quoteAndEscape(pText);
     }
 
     @Override

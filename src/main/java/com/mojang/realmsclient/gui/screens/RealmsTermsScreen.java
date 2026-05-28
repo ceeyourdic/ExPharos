@@ -29,10 +29,10 @@ public class RealmsTermsScreen extends RealmsScreen {
     private final RealmsServer realmsServer;
     private boolean onLink;
 
-    public RealmsTermsScreen(Screen p_90033_, RealmsServer p_90035_) {
+    public RealmsTermsScreen(Screen pLastScreen, RealmsServer pRealmsServer) {
         super(TITLE);
-        this.lastScreen = p_90033_;
-        this.realmsServer = p_90035_;
+        this.lastScreen = pLastScreen;
+        this.realmsServer = pRealmsServer;
     }
 
     @Override

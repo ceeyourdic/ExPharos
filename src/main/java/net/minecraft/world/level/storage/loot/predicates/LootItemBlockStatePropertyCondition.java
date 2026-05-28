@@ -25,11 +25,11 @@ public record LootItemBlockStatePropertyCondition(Holder<Block> block, Optional<
         )
         .validate(LootItemBlockStatePropertyCondition::validate);
 
-    private static DataResult<LootItemBlockStatePropertyCondition> validate(LootItemBlockStatePropertyCondition p_298673_) {
-        return p_298673_.properties()
-            .flatMap(p_297356_ -> p_297356_.checkState(p_298673_.block().value().getStateDefinition()))
-            .map(p_298572_ -> DataResult.<LootItemBlockStatePropertyCondition>error(() -> "Block " + p_298673_.block() + " has no property" + p_298572_))
-            .orElse(DataResult.success(p_298673_));
+    private static DataResult<LootItemBlockStatePropertyCondition> validate(LootItemBlockStatePropertyCondition pCondition) {
+        return pCondition.properties()
+            .flatMap(p_297356_ -> p_297356_.checkState(pCondition.block().value().getStateDefinition()))
+            .map(p_298572_ -> DataResult.<LootItemBlockStatePropertyCondition>error(() -> "Block " + pCondition.block() + " has no property" + p_298572_))
+            .orElse(DataResult.success(pCondition));
     }
 
     @Override
@@ -42,25 +42,25 @@ public record LootItemBlockStatePropertyCondition(Holder<Block> block, Optional<
         return Set.of(LootContextParams.BLOCK_STATE);
     }
 
-    public boolean test(LootContext p_81772_) {
-        BlockState blockstate = p_81772_.getOptionalParameter(LootContextParams.BLOCK_STATE);
+    public boolean test(LootContext pContext) {
+        BlockState blockstate = pContext.getOptionalParameter(LootContextParams.BLOCK_STATE);
         return blockstate != null && blockstate.is(this.block) && (this.properties.isEmpty() || this.properties.get().matches(blockstate));
     }
 
-    public static LootItemBlockStatePropertyCondition.Builder hasBlockStateProperties(Block p_81770_) {
-        return new LootItemBlockStatePropertyCondition.Builder(p_81770_);
+    public static LootItemBlockStatePropertyCondition.Builder hasBlockStateProperties(Block pBlock) {
+        return new LootItemBlockStatePropertyCondition.Builder(pBlock);
     }
 
     public static class Builder implements LootItemCondition.Builder {
         private final Holder<Block> block;
         private Optional<StatePropertiesPredicate> properties = Optional.empty();
 
-        public Builder(Block p_81783_) {
-            this.block = p_81783_.builtInRegistryHolder();
+        public Builder(Block pBlock) {
+            this.block = pBlock.builtInRegistryHolder();
         }
 
-        public LootItemBlockStatePropertyCondition.Builder setProperties(StatePropertiesPredicate.Builder p_81785_) {
-            this.properties = p_81785_.build();
+        public LootItemBlockStatePropertyCondition.Builder setProperties(StatePropertiesPredicate.Builder pStatePredicateBuilder) {
+            this.properties = pStatePredicateBuilder.build();
             return this;
         }
 

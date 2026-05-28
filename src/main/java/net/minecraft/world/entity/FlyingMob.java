@@ -11,18 +11,18 @@ public abstract class FlyingMob extends Mob {
     }
 
     @Override
-    protected void checkFallDamage(double p_20809_, boolean p_20810_, BlockState p_20811_, BlockPos p_20812_) {
+    protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {
     }
 
     @Override
-    public void travel(Vec3 p_20818_) {
+    public void travel(Vec3 pTravelVector) {
         if (this.isControlledByLocalInstance()) {
             if (this.isInWater()) {
-                this.moveRelative(0.02F, p_20818_);
+                this.moveRelative(0.02F, pTravelVector);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 this.setDeltaMovement(this.getDeltaMovement().scale(0.8F));
             } else if (this.isInLava()) {
-                this.moveRelative(0.02F, p_20818_);
+                this.moveRelative(0.02F, pTravelVector);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
             } else {
@@ -37,7 +37,7 @@ public abstract class FlyingMob extends Mob {
                     f = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.91F;
                 }
 
-                this.moveRelative(this.onGround() ? 0.1F * f1 : 0.02F, p_20818_);
+                this.moveRelative(this.onGround() ? 0.1F * f1 : 0.02F, pTravelVector);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 this.setDeltaMovement(this.getDeltaMovement().scale((double)f));
             }

@@ -13,13 +13,13 @@ public class V3081 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_216795_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_216795_);
-        p_216795_.register(
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
+        pSchema.register(
             map,
             "minecraft:warden",
             () -> DSL.optionalFields(
-                    "listener", DSL.optionalFields("event", DSL.optionalFields("game_event", References.GAME_EVENT_NAME.in(p_216795_))), V100.equipment(p_216795_)
+                    "listener", DSL.optionalFields("event", DSL.optionalFields("game_event", References.GAME_EVENT_NAME.in(pSchema))), V100.equipment(pSchema)
                 )
         );
         return map;

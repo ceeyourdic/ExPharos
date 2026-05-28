@@ -86,18 +86,18 @@ public class ArmadilloAi {
         return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
     }
 
-    protected static Brain<?> makeBrain(Brain<Armadillo> p_329024_) {
-        initCoreActivity(p_329024_);
-        initIdleActivity(p_329024_);
-        initScaredActivity(p_329024_);
-        p_329024_.setCoreActivities(Set.of(Activity.CORE));
-        p_329024_.setDefaultActivity(Activity.IDLE);
-        p_329024_.useDefaultActivity();
-        return p_329024_;
+    protected static Brain<?> makeBrain(Brain<Armadillo> pBrain) {
+        initCoreActivity(pBrain);
+        initIdleActivity(pBrain);
+        initScaredActivity(pBrain);
+        pBrain.setCoreActivities(Set.of(Activity.CORE));
+        pBrain.setDefaultActivity(Activity.IDLE);
+        pBrain.useDefaultActivity();
+        return pBrain;
     }
 
-    private static void initCoreActivity(Brain<Armadillo> p_330038_) {
-        p_330038_.addActivity(
+    private static void initCoreActivity(Brain<Armadillo> pBrain) {
+        pBrain.addActivity(
             Activity.CORE,
             0,
             ImmutableList.of(new Swim<>(0.8F), new ArmadilloAi.ArmadilloPanic(2.0F), new LookAtTargetSink(45, 90), new MoveToTargetSink() {
@@ -113,8 +113,8 @@ public class ArmadilloAi {
         );
     }
 
-    private static void initIdleActivity(Brain<Armadillo> p_334108_) {
-        p_334108_.addActivity(
+    private static void initIdleActivity(Brain<Armadillo> pBrain) {
+        pBrain.addActivity(
             Activity.IDLE,
             ImmutableList.of(
                 Pair.of(0, SetEntityLookTargetSometimes.create(EntityType.PLAYER, 6.0F, UniformInt.of(30, 60))),
@@ -144,16 +144,16 @@ public class ArmadilloAi {
         );
     }
 
-    private static void initScaredActivity(Brain<Armadillo> p_333900_) {
-        p_333900_.addActivityWithConditions(
+    private static void initScaredActivity(Brain<Armadillo> pBrain) {
+        pBrain.addActivityWithConditions(
             Activity.PANIC,
             ImmutableList.of(Pair.of(0, new ArmadilloAi.ArmadilloBallUp())),
             Set.of(Pair.of(MemoryModuleType.DANGER_DETECTED_RECENTLY, MemoryStatus.VALUE_PRESENT), Pair.of(MemoryModuleType.IS_PANICKING, MemoryStatus.VALUE_ABSENT))
         );
     }
 
-    public static void updateActivity(Armadillo p_328298_) {
-        p_328298_.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.PANIC, Activity.IDLE));
+    public static void updateActivity(Armadillo pArmadillo) {
+        pArmadillo.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.PANIC, Activity.IDLE));
     }
 
     public static Predicate<ItemStack> getTemptations() {
@@ -207,8 +207,8 @@ public class ArmadilloAi {
             }
         }
 
-        private int pickNextPeekTimer(Armadillo p_335572_) {
-            return Armadillo.ArmadilloState.SCARED.animationDuration() + p_335572_.getRandom().nextIntBetweenInclusive(100, 400);
+        private int pickNextPeekTimer(Armadillo pArmadillo) {
+            return Armadillo.ArmadilloState.SCARED.animationDuration() + pArmadillo.getRandom().nextIntBetweenInclusive(100, 400);
         }
 
         protected boolean checkExtraStartConditions(ServerLevel p_332996_, Armadillo p_331814_) {

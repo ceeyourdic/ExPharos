@@ -14,29 +14,29 @@ public final class Selector {
     private static final Comparator<Property.Value<?>> COMPARE_BY_NAME = Comparator.comparing(p_376774_ -> p_376774_.property().getName());
     private final List<Property.Value<?>> values;
 
-    public Selector extend(Property.Value<?> p_376266_) {
-        return new Selector(ImmutableList.<Property.Value<?>>builder().addAll(this.values).add(p_376266_).build());
+    public Selector extend(Property.Value<?> pValue) {
+        return new Selector(ImmutableList.<Property.Value<?>>builder().addAll(this.values).add(pValue).build());
     }
 
-    public Selector extend(Selector p_376155_) {
-        return new Selector(ImmutableList.<Property.Value<?>>builder().addAll(this.values).addAll(p_376155_.values).build());
+    public Selector extend(Selector pSelector) {
+        return new Selector(ImmutableList.<Property.Value<?>>builder().addAll(this.values).addAll(pSelector.values).build());
     }
 
-    private Selector(List<Property.Value<?>> p_378787_) {
-        this.values = p_378787_;
+    private Selector(List<Property.Value<?>> pValues) {
+        this.values = pValues;
     }
 
     public static Selector empty() {
         return EMPTY;
     }
 
-    public static Selector of(Property.Value<?>... p_378231_) {
-        return new Selector(ImmutableList.copyOf(p_378231_));
+    public static Selector of(Property.Value<?>... pValues) {
+        return new Selector(ImmutableList.copyOf(pValues));
     }
 
     @Override
-    public boolean equals(Object p_377697_) {
-        return this == p_377697_ || p_377697_ instanceof Selector && this.values.equals(((Selector)p_377697_).values);
+    public boolean equals(Object pOther) {
+        return this == pOther || pOther instanceof Selector && this.values.equals(((Selector)pOther).values);
     }
 
     @Override

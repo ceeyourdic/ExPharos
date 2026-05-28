@@ -360,8 +360,8 @@ public class Goat extends Animal {
         return this.entityData.get(DATA_IS_SCREAMING_GOAT);
     }
 
-    public void setScreamingGoat(boolean p_149406_) {
-        this.entityData.set(DATA_IS_SCREAMING_GOAT, p_149406_);
+    public void setScreamingGoat(boolean pIsScreamingGoat) {
+        this.entityData.set(DATA_IS_SCREAMING_GOAT, pIsScreamingGoat);
     }
 
     public float getRammingXHeadRot() {
@@ -369,8 +369,8 @@ public class Goat extends Animal {
     }
 
     public static boolean checkGoatSpawnRules(
-        EntityType<? extends Animal> p_218753_, LevelAccessor p_218754_, EntitySpawnReason p_366718_, BlockPos p_218756_, RandomSource p_218757_
+        EntityType<? extends Animal> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return p_218754_.getBlockState(p_218756_.below()).is(BlockTags.GOATS_SPAWNABLE_ON) && isBrightEnoughToSpawn(p_218754_, p_218756_);
+        return pLevel.getBlockState(pPos.below()).is(BlockTags.GOATS_SPAWNABLE_ON) && isBrightEnoughToSpawn(pLevel, pPos);
     }
 }

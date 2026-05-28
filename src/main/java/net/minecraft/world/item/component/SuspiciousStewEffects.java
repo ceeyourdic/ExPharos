@@ -31,8 +31,8 @@ public record SuspiciousStewEffects(List<SuspiciousStewEffects.Entry> effects) i
         .apply(ByteBufCodecs.list())
         .map(SuspiciousStewEffects::new, SuspiciousStewEffects::effects);
 
-    public SuspiciousStewEffects withEffectAdded(SuspiciousStewEffects.Entry p_330002_) {
-        return new SuspiciousStewEffects(Util.copyAndAdd(this.effects, p_330002_));
+    public SuspiciousStewEffects withEffectAdded(SuspiciousStewEffects.Entry pEntry) {
+        return new SuspiciousStewEffects(Util.copyAndAdd(this.effects, pEntry));
     }
 
     @Override

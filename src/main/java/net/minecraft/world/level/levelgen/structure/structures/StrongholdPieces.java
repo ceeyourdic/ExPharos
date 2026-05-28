@@ -95,71 +95,71 @@ public class StrongholdPieces {
     }
 
     private static StrongholdPieces.StrongholdPiece findAndCreatePieceFactory(
-        Class<? extends StrongholdPieces.StrongholdPiece> p_229427_,
-        StructurePieceAccessor p_229428_,
-        RandomSource p_229429_,
-        int p_229430_,
-        int p_229431_,
-        int p_229432_,
-        @Nullable Direction p_229433_,
-        int p_229434_
+        Class<? extends StrongholdPieces.StrongholdPiece> pPieceClass,
+        StructurePieceAccessor pPieces,
+        RandomSource pRandom,
+        int pX,
+        int pY,
+        int pZ,
+        @Nullable Direction pDirection,
+        int pGenDepth
     ) {
         StrongholdPieces.StrongholdPiece strongholdpieces$strongholdpiece = null;
-        if (p_229427_ == StrongholdPieces.Straight.class) {
-            strongholdpieces$strongholdpiece = StrongholdPieces.Straight.createPiece(p_229428_, p_229429_, p_229430_, p_229431_, p_229432_, p_229433_, p_229434_);
-        } else if (p_229427_ == StrongholdPieces.PrisonHall.class) {
+        if (pPieceClass == StrongholdPieces.Straight.class) {
+            strongholdpieces$strongholdpiece = StrongholdPieces.Straight.createPiece(pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth);
+        } else if (pPieceClass == StrongholdPieces.PrisonHall.class) {
             strongholdpieces$strongholdpiece = StrongholdPieces.PrisonHall.createPiece(
-                p_229428_, p_229429_, p_229430_, p_229431_, p_229432_, p_229433_, p_229434_
+                pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth
             );
-        } else if (p_229427_ == StrongholdPieces.LeftTurn.class) {
-            strongholdpieces$strongholdpiece = StrongholdPieces.LeftTurn.createPiece(p_229428_, p_229429_, p_229430_, p_229431_, p_229432_, p_229433_, p_229434_);
-        } else if (p_229427_ == StrongholdPieces.RightTurn.class) {
-            strongholdpieces$strongholdpiece = StrongholdPieces.RightTurn.createPiece(p_229428_, p_229429_, p_229430_, p_229431_, p_229432_, p_229433_, p_229434_);
-        } else if (p_229427_ == StrongholdPieces.RoomCrossing.class) {
+        } else if (pPieceClass == StrongholdPieces.LeftTurn.class) {
+            strongholdpieces$strongholdpiece = StrongholdPieces.LeftTurn.createPiece(pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth);
+        } else if (pPieceClass == StrongholdPieces.RightTurn.class) {
+            strongholdpieces$strongholdpiece = StrongholdPieces.RightTurn.createPiece(pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth);
+        } else if (pPieceClass == StrongholdPieces.RoomCrossing.class) {
             strongholdpieces$strongholdpiece = StrongholdPieces.RoomCrossing.createPiece(
-                p_229428_, p_229429_, p_229430_, p_229431_, p_229432_, p_229433_, p_229434_
+                pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth
             );
-        } else if (p_229427_ == StrongholdPieces.StraightStairsDown.class) {
+        } else if (pPieceClass == StrongholdPieces.StraightStairsDown.class) {
             strongholdpieces$strongholdpiece = StrongholdPieces.StraightStairsDown.createPiece(
-                p_229428_, p_229429_, p_229430_, p_229431_, p_229432_, p_229433_, p_229434_
+                pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth
             );
-        } else if (p_229427_ == StrongholdPieces.StairsDown.class) {
+        } else if (pPieceClass == StrongholdPieces.StairsDown.class) {
             strongholdpieces$strongholdpiece = StrongholdPieces.StairsDown.createPiece(
-                p_229428_, p_229429_, p_229430_, p_229431_, p_229432_, p_229433_, p_229434_
+                pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth
             );
-        } else if (p_229427_ == StrongholdPieces.FiveCrossing.class) {
+        } else if (pPieceClass == StrongholdPieces.FiveCrossing.class) {
             strongholdpieces$strongholdpiece = StrongholdPieces.FiveCrossing.createPiece(
-                p_229428_, p_229429_, p_229430_, p_229431_, p_229432_, p_229433_, p_229434_
+                pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth
             );
-        } else if (p_229427_ == StrongholdPieces.ChestCorridor.class) {
+        } else if (pPieceClass == StrongholdPieces.ChestCorridor.class) {
             strongholdpieces$strongholdpiece = StrongholdPieces.ChestCorridor.createPiece(
-                p_229428_, p_229429_, p_229430_, p_229431_, p_229432_, p_229433_, p_229434_
+                pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth
             );
-        } else if (p_229427_ == StrongholdPieces.Library.class) {
-            strongholdpieces$strongholdpiece = StrongholdPieces.Library.createPiece(p_229428_, p_229429_, p_229430_, p_229431_, p_229432_, p_229433_, p_229434_);
-        } else if (p_229427_ == StrongholdPieces.PortalRoom.class) {
-            strongholdpieces$strongholdpiece = StrongholdPieces.PortalRoom.createPiece(p_229428_, p_229430_, p_229431_, p_229432_, p_229433_, p_229434_);
+        } else if (pPieceClass == StrongholdPieces.Library.class) {
+            strongholdpieces$strongholdpiece = StrongholdPieces.Library.createPiece(pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth);
+        } else if (pPieceClass == StrongholdPieces.PortalRoom.class) {
+            strongholdpieces$strongholdpiece = StrongholdPieces.PortalRoom.createPiece(pPieces, pX, pY, pZ, pDirection, pGenDepth);
         }
 
         return strongholdpieces$strongholdpiece;
     }
 
     private static StrongholdPieces.StrongholdPiece generatePieceFromSmallDoor(
-        StrongholdPieces.StartPiece p_229418_,
-        StructurePieceAccessor p_229419_,
-        RandomSource p_229420_,
-        int p_229421_,
-        int p_229422_,
-        int p_229423_,
-        Direction p_229424_,
-        int p_229425_
+        StrongholdPieces.StartPiece pPiece,
+        StructurePieceAccessor pPieces,
+        RandomSource pRandom,
+        int pX,
+        int pY,
+        int pZ,
+        Direction pDirection,
+        int pGenDepth
     ) {
         if (!updatePieceWeight()) {
             return null;
         } else {
             if (imposedPiece != null) {
                 StrongholdPieces.StrongholdPiece strongholdpieces$strongholdpiece = findAndCreatePieceFactory(
-                    imposedPiece, p_229419_, p_229420_, p_229421_, p_229422_, p_229423_, p_229424_, p_229425_
+                    imposedPiece, pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth
                 );
                 imposedPiece = null;
                 if (strongholdpieces$strongholdpiece != null) {
@@ -171,21 +171,21 @@ public class StrongholdPieces {
 
             while (j < 5) {
                 j++;
-                int i = p_229420_.nextInt(totalWeight);
+                int i = pRandom.nextInt(totalWeight);
 
                 for (StrongholdPieces.PieceWeight strongholdpieces$pieceweight : currentPieces) {
                     i -= strongholdpieces$pieceweight.weight;
                     if (i < 0) {
-                        if (!strongholdpieces$pieceweight.doPlace(p_229425_) || strongholdpieces$pieceweight == p_229418_.previousPiece) {
+                        if (!strongholdpieces$pieceweight.doPlace(pGenDepth) || strongholdpieces$pieceweight == pPiece.previousPiece) {
                             break;
                         }
 
                         StrongholdPieces.StrongholdPiece strongholdpieces$strongholdpiece1 = findAndCreatePieceFactory(
-                            strongholdpieces$pieceweight.pieceClass, p_229419_, p_229420_, p_229421_, p_229422_, p_229423_, p_229424_, p_229425_
+                            strongholdpieces$pieceweight.pieceClass, pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth
                         );
                         if (strongholdpieces$strongholdpiece1 != null) {
                             strongholdpieces$pieceweight.placeCount++;
-                            p_229418_.previousPiece = strongholdpieces$pieceweight;
+                            pPiece.previousPiece = strongholdpieces$pieceweight;
                             if (!strongholdpieces$pieceweight.isValid()) {
                                 currentPieces.remove(strongholdpieces$pieceweight);
                             }
@@ -196,28 +196,28 @@ public class StrongholdPieces {
                 }
             }
 
-            BoundingBox boundingbox = StrongholdPieces.FillerCorridor.findPieceBox(p_229419_, p_229420_, p_229421_, p_229422_, p_229423_, p_229424_);
-            return boundingbox != null && boundingbox.minY() > 1 ? new StrongholdPieces.FillerCorridor(p_229425_, boundingbox, p_229424_) : null;
+            BoundingBox boundingbox = StrongholdPieces.FillerCorridor.findPieceBox(pPieces, pRandom, pX, pY, pZ, pDirection);
+            return boundingbox != null && boundingbox.minY() > 1 ? new StrongholdPieces.FillerCorridor(pGenDepth, boundingbox, pDirection) : null;
         }
     }
 
     static StructurePiece generateAndAddPiece(
-        StrongholdPieces.StartPiece p_229437_,
-        StructurePieceAccessor p_229438_,
-        RandomSource p_229439_,
-        int p_229440_,
-        int p_229441_,
-        int p_229442_,
-        @Nullable Direction p_229443_,
-        int p_229444_
+        StrongholdPieces.StartPiece pPiece,
+        StructurePieceAccessor pPieces,
+        RandomSource pRandom,
+        int pX,
+        int pY,
+        int pZ,
+        @Nullable Direction pDirection,
+        int pGenDepth
     ) {
-        if (p_229444_ > 50) {
+        if (pGenDepth > 50) {
             return null;
-        } else if (Math.abs(p_229440_ - p_229437_.getBoundingBox().minX()) <= 112 && Math.abs(p_229442_ - p_229437_.getBoundingBox().minZ()) <= 112) {
-            StructurePiece structurepiece = generatePieceFromSmallDoor(p_229437_, p_229438_, p_229439_, p_229440_, p_229441_, p_229442_, p_229443_, p_229444_ + 1);
+        } else if (Math.abs(pX - pPiece.getBoundingBox().minX()) <= 112 && Math.abs(pZ - pPiece.getBoundingBox().minZ()) <= 112) {
+            StructurePiece structurepiece = generatePieceFromSmallDoor(pPiece, pPieces, pRandom, pX, pY, pZ, pDirection, pGenDepth + 1);
             if (structurepiece != null) {
-                p_229438_.addPiece(structurepiece);
-                p_229437_.pendingChildren.add(structurepiece);
+                pPieces.addPiece(structurepiece);
+                pPiece.pendingChildren.add(structurepiece);
             }
 
             return structurepiece;
@@ -232,15 +232,15 @@ public class StrongholdPieces {
         private static final int DEPTH = 7;
         private boolean hasPlacedChest;
 
-        public ChestCorridor(int p_229465_, RandomSource p_229466_, BoundingBox p_229467_, Direction p_229468_) {
-            super(StructurePieceType.STRONGHOLD_CHEST_CORRIDOR, p_229465_, p_229467_);
-            this.setOrientation(p_229468_);
-            this.entryDoor = this.randomSmallDoor(p_229466_);
+        public ChestCorridor(int pGenDepth, RandomSource pRandom, BoundingBox pBox, Direction pOrientation) {
+            super(StructurePieceType.STRONGHOLD_CHEST_CORRIDOR, pGenDepth, pBox);
+            this.setOrientation(pOrientation);
+            this.entryDoor = this.randomSmallDoor(pRandom);
         }
 
-        public ChestCorridor(CompoundTag p_229470_) {
-            super(StructurePieceType.STRONGHOLD_CHEST_CORRIDOR, p_229470_);
-            this.hasPlacedChest = p_229470_.getBoolean("Chest");
+        public ChestCorridor(CompoundTag pTag) {
+            super(StructurePieceType.STRONGHOLD_CHEST_CORRIDOR, pTag);
+            this.hasPlacedChest = pTag.getBoolean("Chest");
         }
 
         @Override
@@ -255,11 +255,11 @@ public class StrongholdPieces {
         }
 
         public static StrongholdPieces.ChestCorridor createPiece(
-            StructurePieceAccessor p_229484_, RandomSource p_229485_, int p_229486_, int p_229487_, int p_229488_, Direction p_229489_, int p_229490_
+            StructurePieceAccessor pPieces, RandomSource pRandom, int pX, int pY, int pZ, Direction pOrientation, int pGenDepth
         ) {
-            BoundingBox boundingbox = BoundingBox.orientBox(p_229486_, p_229487_, p_229488_, -1, -1, 0, 5, 5, 7, p_229489_);
-            return isOkBox(boundingbox) && p_229484_.findCollisionPiece(boundingbox) == null
-                ? new StrongholdPieces.ChestCorridor(p_229490_, p_229485_, boundingbox, p_229489_)
+            BoundingBox boundingbox = BoundingBox.orientBox(pX, pY, pZ, -1, -1, 0, 5, 5, 7, pOrientation);
+            return isOkBox(boundingbox) && pPieces.findCollisionPiece(boundingbox) == null
+                ? new StrongholdPieces.ChestCorridor(pGenDepth, pRandom, boundingbox, pOrientation)
                 : null;
         }
 
@@ -296,15 +296,15 @@ public class StrongholdPieces {
     public static class FillerCorridor extends StrongholdPieces.StrongholdPiece {
         private final int steps;
 
-        public FillerCorridor(int p_229496_, BoundingBox p_229497_, Direction p_229498_) {
-            super(StructurePieceType.STRONGHOLD_FILLER_CORRIDOR, p_229496_, p_229497_);
-            this.setOrientation(p_229498_);
-            this.steps = p_229498_ != Direction.NORTH && p_229498_ != Direction.SOUTH ? p_229497_.getXSpan() : p_229497_.getZSpan();
+        public FillerCorridor(int pGenDepth, BoundingBox pBox, Direction pOrientation) {
+            super(StructurePieceType.STRONGHOLD_FILLER_CORRIDOR, pGenDepth, pBox);
+            this.setOrientation(pOrientation);
+            this.steps = pOrientation != Direction.NORTH && pOrientation != Direction.SOUTH ? pBox.getXSpan() : pBox.getZSpan();
         }
 
-        public FillerCorridor(CompoundTag p_229500_) {
-            super(StructurePieceType.STRONGHOLD_FILLER_CORRIDOR, p_229500_);
-            this.steps = p_229500_.getInt("Steps");
+        public FillerCorridor(CompoundTag pTag) {
+            super(StructurePieceType.STRONGHOLD_FILLER_CORRIDOR, pTag);
+            this.steps = pTag.getInt("Steps");
         }
 
         @Override
@@ -314,19 +314,19 @@ public class StrongholdPieces {
         }
 
         public static BoundingBox findPieceBox(
-            StructurePieceAccessor p_229510_, RandomSource p_229511_, int p_229512_, int p_229513_, int p_229514_, Direction p_229515_
+            StructurePieceAccessor pPieces, RandomSource pRandom, int pX, int pY, int pZ, Direction pOrientation
         ) {
             int i = 3;
-            BoundingBox boundingbox = BoundingBox.orientBox(p_229512_, p_229513_, p_229514_, -1, -1, 0, 5, 5, 4, p_229515_);
-            StructurePiece structurepiece = p_229510_.findCollisionPiece(boundingbox);
+            BoundingBox boundingbox = BoundingBox.orientBox(pX, pY, pZ, -1, -1, 0, 5, 5, 4, pOrientation);
+            StructurePiece structurepiece = pPieces.findCollisionPiece(boundingbox);
             if (structurepiece == null) {
                 return null;
             } else {
                 if (structurepiece.getBoundingBox().minY() == boundingbox.minY()) {
                     for (int j = 2; j >= 1; j--) {
-                        boundingbox = BoundingBox.orientBox(p_229512_, p_229513_, p_229514_, -1, -1, 0, 5, 5, j, p_229515_);
+                        boundingbox = BoundingBox.orientBox(pX, pY, pZ, -1, -1, 0, 5, 5, j, pOrientation);
                         if (!structurepiece.getBoundingBox().intersects(boundingbox)) {
-                            return BoundingBox.orientBox(p_229512_, p_229513_, p_229514_, -1, -1, 0, 5, 5, j + 1, p_229515_);
+                            return BoundingBox.orientBox(pX, pY, pZ, -1, -1, 0, 5, 5, j + 1, pOrientation);
                         }
                     }
                 }
@@ -378,22 +378,22 @@ public class StrongholdPieces {
         private final boolean rightLow;
         private final boolean rightHigh;
 
-        public FiveCrossing(int p_229527_, RandomSource p_229528_, BoundingBox p_229529_, Direction p_229530_) {
-            super(StructurePieceType.STRONGHOLD_FIVE_CROSSING, p_229527_, p_229529_);
-            this.setOrientation(p_229530_);
-            this.entryDoor = this.randomSmallDoor(p_229528_);
-            this.leftLow = p_229528_.nextBoolean();
-            this.leftHigh = p_229528_.nextBoolean();
-            this.rightLow = p_229528_.nextBoolean();
-            this.rightHigh = p_229528_.nextInt(3) > 0;
+        public FiveCrossing(int pGenDepth, RandomSource pRandom, BoundingBox pBox, Direction pOrientation) {
+            super(StructurePieceType.STRONGHOLD_FIVE_CROSSING, pGenDepth, pBox);
+            this.setOrientation(pOrientation);
+            this.entryDoor = this.randomSmallDoor(pRandom);
+            this.leftLow = pRandom.nextBoolean();
+            this.leftHigh = pRandom.nextBoolean();
+            this.rightLow = pRandom.nextBoolean();
+            this.rightHigh = pRandom.nextInt(3) > 0;
         }
 
-        public FiveCrossing(CompoundTag p_229532_) {
-            super(StructurePieceType.STRONGHOLD_FIVE_CROSSING, p_229532_);
-            this.leftLow = p_229532_.getBoolean("leftLow");
-            this.leftHigh = p_229532_.getBoolean("leftHigh");
-            this.rightLow = p_229532_.getBoolean("rightLow");
-            this.rightHigh = p_229532_.getBoolean("rightHigh");
+        public FiveCrossing(CompoundTag pTag) {
+            super(StructurePieceType.STRONGHOLD_FIVE_CROSSING, pTag);
+            this.leftLow = pTag.getBoolean("leftLow");
+            this.leftHigh = pTag.getBoolean("leftHigh");
+            this.rightLow = pTag.getBoolean("rightLow");
+            this.rightHigh = pTag.getBoolean("rightHigh");
         }
 
         @Override
@@ -434,11 +434,11 @@ public class StrongholdPieces {
         }
 
         public static StrongholdPieces.FiveCrossing createPiece(
-            StructurePieceAccessor p_229546_, RandomSource p_229547_, int p_229548_, int p_229549_, int p_229550_, Direction p_229551_, int p_229552_
+            StructurePieceAccessor pPieces, RandomSource pRandom, int pX, int pY, int pZ, Direction pOrientation, int pGenDepth
         ) {
-            BoundingBox boundingbox = BoundingBox.orientBox(p_229548_, p_229549_, p_229550_, -4, -3, 0, 10, 9, 11, p_229551_);
-            return isOkBox(boundingbox) && p_229546_.findCollisionPiece(boundingbox) == null
-                ? new StrongholdPieces.FiveCrossing(p_229552_, p_229547_, boundingbox, p_229551_)
+            BoundingBox boundingbox = BoundingBox.orientBox(pX, pY, pZ, -4, -3, 0, 10, 9, 11, pOrientation);
+            return isOkBox(boundingbox) && pPieces.findCollisionPiece(boundingbox) == null
+                ? new StrongholdPieces.FiveCrossing(pGenDepth, pRandom, boundingbox, pOrientation)
                 : null;
         }
 
@@ -501,14 +501,14 @@ public class StrongholdPieces {
     }
 
     public static class LeftTurn extends StrongholdPieces.Turn {
-        public LeftTurn(int p_229557_, RandomSource p_229558_, BoundingBox p_229559_, Direction p_229560_) {
-            super(StructurePieceType.STRONGHOLD_LEFT_TURN, p_229557_, p_229559_);
-            this.setOrientation(p_229560_);
-            this.entryDoor = this.randomSmallDoor(p_229558_);
+        public LeftTurn(int pGenDepth, RandomSource pRandom, BoundingBox pBox, Direction pOrientation) {
+            super(StructurePieceType.STRONGHOLD_LEFT_TURN, pGenDepth, pBox);
+            this.setOrientation(pOrientation);
+            this.entryDoor = this.randomSmallDoor(pRandom);
         }
 
-        public LeftTurn(CompoundTag p_229562_) {
-            super(StructurePieceType.STRONGHOLD_LEFT_TURN, p_229562_);
+        public LeftTurn(CompoundTag pTag) {
+            super(StructurePieceType.STRONGHOLD_LEFT_TURN, pTag);
         }
 
         @Override
@@ -522,11 +522,11 @@ public class StrongholdPieces {
         }
 
         public static StrongholdPieces.LeftTurn createPiece(
-            StructurePieceAccessor p_229576_, RandomSource p_229577_, int p_229578_, int p_229579_, int p_229580_, Direction p_229581_, int p_229582_
+            StructurePieceAccessor pPieces, RandomSource pRandom, int pX, int pY, int pZ, Direction pOrientation, int pGenDepth
         ) {
-            BoundingBox boundingbox = BoundingBox.orientBox(p_229578_, p_229579_, p_229580_, -1, -1, 0, 5, 5, 5, p_229581_);
-            return isOkBox(boundingbox) && p_229576_.findCollisionPiece(boundingbox) == null
-                ? new StrongholdPieces.LeftTurn(p_229582_, p_229577_, boundingbox, p_229581_)
+            BoundingBox boundingbox = BoundingBox.orientBox(pX, pY, pZ, -1, -1, 0, 5, 5, 5, pOrientation);
+            return isOkBox(boundingbox) && pPieces.findCollisionPiece(boundingbox) == null
+                ? new StrongholdPieces.LeftTurn(pGenDepth, pRandom, boundingbox, pOrientation)
                 : null;
         }
 
@@ -558,16 +558,16 @@ public class StrongholdPieces {
         protected static final int DEPTH = 15;
         private final boolean isTall;
 
-        public Library(int p_229589_, RandomSource p_229590_, BoundingBox p_229591_, Direction p_229592_) {
-            super(StructurePieceType.STRONGHOLD_LIBRARY, p_229589_, p_229591_);
-            this.setOrientation(p_229592_);
-            this.entryDoor = this.randomSmallDoor(p_229590_);
-            this.isTall = p_229591_.getYSpan() > 6;
+        public Library(int pGenDepth, RandomSource pRandom, BoundingBox pBox, Direction pOrientation) {
+            super(StructurePieceType.STRONGHOLD_LIBRARY, pGenDepth, pBox);
+            this.setOrientation(pOrientation);
+            this.entryDoor = this.randomSmallDoor(pRandom);
+            this.isTall = pBox.getYSpan() > 6;
         }
 
-        public Library(CompoundTag p_229594_) {
-            super(StructurePieceType.STRONGHOLD_LIBRARY, p_229594_);
-            this.isTall = p_229594_.getBoolean("Tall");
+        public Library(CompoundTag pTag) {
+            super(StructurePieceType.STRONGHOLD_LIBRARY, pTag);
+            this.isTall = pTag.getBoolean("Tall");
         }
 
         @Override
@@ -577,17 +577,17 @@ public class StrongholdPieces {
         }
 
         public static StrongholdPieces.Library createPiece(
-            StructurePieceAccessor p_229604_, RandomSource p_229605_, int p_229606_, int p_229607_, int p_229608_, Direction p_229609_, int p_229610_
+            StructurePieceAccessor pPieces, RandomSource pRandom, int pX, int pY, int pZ, Direction pOrientation, int pGenDepth
         ) {
-            BoundingBox boundingbox = BoundingBox.orientBox(p_229606_, p_229607_, p_229608_, -4, -1, 0, 14, 11, 15, p_229609_);
-            if (!isOkBox(boundingbox) || p_229604_.findCollisionPiece(boundingbox) != null) {
-                boundingbox = BoundingBox.orientBox(p_229606_, p_229607_, p_229608_, -4, -1, 0, 14, 6, 15, p_229609_);
-                if (!isOkBox(boundingbox) || p_229604_.findCollisionPiece(boundingbox) != null) {
+            BoundingBox boundingbox = BoundingBox.orientBox(pX, pY, pZ, -4, -1, 0, 14, 11, 15, pOrientation);
+            if (!isOkBox(boundingbox) || pPieces.findCollisionPiece(boundingbox) != null) {
+                boundingbox = BoundingBox.orientBox(pX, pY, pZ, -4, -1, 0, 14, 6, 15, pOrientation);
+                if (!isOkBox(boundingbox) || pPieces.findCollisionPiece(boundingbox) != null) {
                     return null;
                 }
             }
 
-            return new StrongholdPieces.Library(p_229610_, p_229605_, boundingbox, p_229609_);
+            return new StrongholdPieces.Library(pGenDepth, pRandom, boundingbox, pOrientation);
         }
 
         @Override
@@ -754,13 +754,13 @@ public class StrongholdPieces {
         public int placeCount;
         public final int maxPlaceCount;
 
-        public PieceWeight(Class<? extends StrongholdPieces.StrongholdPiece> p_229619_, int p_229620_, int p_229621_) {
-            this.pieceClass = p_229619_;
-            this.weight = p_229620_;
-            this.maxPlaceCount = p_229621_;
+        public PieceWeight(Class<? extends StrongholdPieces.StrongholdPiece> pPieceClass, int pWeight, int pMaxPlaceCount) {
+            this.pieceClass = pPieceClass;
+            this.weight = pWeight;
+            this.maxPlaceCount = pMaxPlaceCount;
         }
 
-        public boolean doPlace(int p_229623_) {
+        public boolean doPlace(int pGenDepth) {
             return this.maxPlaceCount == 0 || this.placeCount < this.maxPlaceCount;
         }
 
@@ -775,14 +775,14 @@ public class StrongholdPieces {
         protected static final int DEPTH = 16;
         private boolean hasPlacedSpawner;
 
-        public PortalRoom(int p_229629_, BoundingBox p_229630_, Direction p_229631_) {
-            super(StructurePieceType.STRONGHOLD_PORTAL_ROOM, p_229629_, p_229630_);
-            this.setOrientation(p_229631_);
+        public PortalRoom(int pGenDepth, BoundingBox pBox, Direction pOrientation) {
+            super(StructurePieceType.STRONGHOLD_PORTAL_ROOM, pGenDepth, pBox);
+            this.setOrientation(pOrientation);
         }
 
-        public PortalRoom(CompoundTag p_229633_) {
-            super(StructurePieceType.STRONGHOLD_PORTAL_ROOM, p_229633_);
-            this.hasPlacedSpawner = p_229633_.getBoolean("Mob");
+        public PortalRoom(CompoundTag pTag) {
+            super(StructurePieceType.STRONGHOLD_PORTAL_ROOM, pTag);
+            this.hasPlacedSpawner = pTag.getBoolean("Mob");
         }
 
         @Override
@@ -799,11 +799,11 @@ public class StrongholdPieces {
         }
 
         public static StrongholdPieces.PortalRoom createPiece(
-            StructurePieceAccessor p_229647_, int p_229648_, int p_229649_, int p_229650_, Direction p_229651_, int p_229652_
+            StructurePieceAccessor pPieces, int pX, int pY, int pZ, Direction pOrientation, int pGenDepth
         ) {
-            BoundingBox boundingbox = BoundingBox.orientBox(p_229648_, p_229649_, p_229650_, -4, -1, 0, 11, 8, 16, p_229651_);
-            return isOkBox(boundingbox) && p_229647_.findCollisionPiece(boundingbox) == null
-                ? new StrongholdPieces.PortalRoom(p_229652_, boundingbox, p_229651_)
+            BoundingBox boundingbox = BoundingBox.orientBox(pX, pY, pZ, -4, -1, 0, 11, 8, 16, pOrientation);
+            return isOkBox(boundingbox) && pPieces.findCollisionPiece(boundingbox) == null
+                ? new StrongholdPieces.PortalRoom(pGenDepth, boundingbox, pOrientation)
                 : null;
         }
 
@@ -914,14 +914,14 @@ public class StrongholdPieces {
         protected static final int HEIGHT = 5;
         protected static final int DEPTH = 11;
 
-        public PrisonHall(int p_229660_, RandomSource p_229661_, BoundingBox p_229662_, Direction p_229663_) {
-            super(StructurePieceType.STRONGHOLD_PRISON_HALL, p_229660_, p_229662_);
-            this.setOrientation(p_229663_);
-            this.entryDoor = this.randomSmallDoor(p_229661_);
+        public PrisonHall(int pGenDepth, RandomSource pRandom, BoundingBox pBox, Direction pOrientation) {
+            super(StructurePieceType.STRONGHOLD_PRISON_HALL, pGenDepth, pBox);
+            this.setOrientation(pOrientation);
+            this.entryDoor = this.randomSmallDoor(pRandom);
         }
 
-        public PrisonHall(CompoundTag p_229665_) {
-            super(StructurePieceType.STRONGHOLD_PRISON_HALL, p_229665_);
+        public PrisonHall(CompoundTag pTag) {
+            super(StructurePieceType.STRONGHOLD_PRISON_HALL, pTag);
         }
 
         @Override
@@ -930,11 +930,11 @@ public class StrongholdPieces {
         }
 
         public static StrongholdPieces.PrisonHall createPiece(
-            StructurePieceAccessor p_229679_, RandomSource p_229680_, int p_229681_, int p_229682_, int p_229683_, Direction p_229684_, int p_229685_
+            StructurePieceAccessor pPieces, RandomSource pRandom, int pX, int pY, int pZ, Direction pOrientation, int pGenDepth
         ) {
-            BoundingBox boundingbox = BoundingBox.orientBox(p_229681_, p_229682_, p_229683_, -1, -1, 0, 9, 5, 11, p_229684_);
-            return isOkBox(boundingbox) && p_229679_.findCollisionPiece(boundingbox) == null
-                ? new StrongholdPieces.PrisonHall(p_229685_, p_229680_, boundingbox, p_229684_)
+            BoundingBox boundingbox = BoundingBox.orientBox(pX, pY, pZ, -1, -1, 0, 9, 5, 11, pOrientation);
+            return isOkBox(boundingbox) && pPieces.findCollisionPiece(boundingbox) == null
+                ? new StrongholdPieces.PrisonHall(pGenDepth, pRandom, boundingbox, pOrientation)
                 : null;
         }
 
@@ -1037,14 +1037,14 @@ public class StrongholdPieces {
     }
 
     public static class RightTurn extends StrongholdPieces.Turn {
-        public RightTurn(int p_229687_, RandomSource p_229688_, BoundingBox p_229689_, Direction p_229690_) {
-            super(StructurePieceType.STRONGHOLD_RIGHT_TURN, p_229687_, p_229689_);
-            this.setOrientation(p_229690_);
-            this.entryDoor = this.randomSmallDoor(p_229688_);
+        public RightTurn(int pGenDepth, RandomSource pRandom, BoundingBox pBox, Direction pOrientation) {
+            super(StructurePieceType.STRONGHOLD_RIGHT_TURN, pGenDepth, pBox);
+            this.setOrientation(pOrientation);
+            this.entryDoor = this.randomSmallDoor(pRandom);
         }
 
-        public RightTurn(CompoundTag p_229692_) {
-            super(StructurePieceType.STRONGHOLD_RIGHT_TURN, p_229692_);
+        public RightTurn(CompoundTag pTag) {
+            super(StructurePieceType.STRONGHOLD_RIGHT_TURN, pTag);
         }
 
         @Override
@@ -1058,11 +1058,11 @@ public class StrongholdPieces {
         }
 
         public static StrongholdPieces.RightTurn createPiece(
-            StructurePieceAccessor p_229706_, RandomSource p_229707_, int p_229708_, int p_229709_, int p_229710_, Direction p_229711_, int p_229712_
+            StructurePieceAccessor pPieces, RandomSource pRandom, int pX, int pY, int pZ, Direction pOrientation, int pGenDepth
         ) {
-            BoundingBox boundingbox = BoundingBox.orientBox(p_229708_, p_229709_, p_229710_, -1, -1, 0, 5, 5, 5, p_229711_);
-            return isOkBox(boundingbox) && p_229706_.findCollisionPiece(boundingbox) == null
-                ? new StrongholdPieces.RightTurn(p_229712_, p_229707_, boundingbox, p_229711_)
+            BoundingBox boundingbox = BoundingBox.orientBox(pX, pY, pZ, -1, -1, 0, 5, 5, 5, pOrientation);
+            return isOkBox(boundingbox) && pPieces.findCollisionPiece(boundingbox) == null
+                ? new StrongholdPieces.RightTurn(pGenDepth, pRandom, boundingbox, pOrientation)
                 : null;
         }
 
@@ -1093,16 +1093,16 @@ public class StrongholdPieces {
         protected static final int DEPTH = 11;
         protected final int type;
 
-        public RoomCrossing(int p_229718_, RandomSource p_229719_, BoundingBox p_229720_, Direction p_229721_) {
-            super(StructurePieceType.STRONGHOLD_ROOM_CROSSING, p_229718_, p_229720_);
-            this.setOrientation(p_229721_);
-            this.entryDoor = this.randomSmallDoor(p_229719_);
-            this.type = p_229719_.nextInt(5);
+        public RoomCrossing(int pGenDepth, RandomSource pRandom, BoundingBox pBox, Direction pOrientation) {
+            super(StructurePieceType.STRONGHOLD_ROOM_CROSSING, pGenDepth, pBox);
+            this.setOrientation(pOrientation);
+            this.entryDoor = this.randomSmallDoor(pRandom);
+            this.type = pRandom.nextInt(5);
         }
 
-        public RoomCrossing(CompoundTag p_229723_) {
-            super(StructurePieceType.STRONGHOLD_ROOM_CROSSING, p_229723_);
-            this.type = p_229723_.getInt("Type");
+        public RoomCrossing(CompoundTag pTag) {
+            super(StructurePieceType.STRONGHOLD_ROOM_CROSSING, pTag);
+            this.type = pTag.getInt("Type");
         }
 
         @Override
@@ -1119,11 +1119,11 @@ public class StrongholdPieces {
         }
 
         public static StrongholdPieces.RoomCrossing createPiece(
-            StructurePieceAccessor p_229737_, RandomSource p_229738_, int p_229739_, int p_229740_, int p_229741_, Direction p_229742_, int p_229743_
+            StructurePieceAccessor pPieces, RandomSource pRandom, int pX, int pY, int pZ, Direction pOrientation, int pGenDepth
         ) {
-            BoundingBox boundingbox = BoundingBox.orientBox(p_229739_, p_229740_, p_229741_, -4, -1, 0, 11, 7, 11, p_229742_);
-            return isOkBox(boundingbox) && p_229737_.findCollisionPiece(boundingbox) == null
-                ? new StrongholdPieces.RoomCrossing(p_229743_, p_229738_, boundingbox, p_229742_)
+            BoundingBox boundingbox = BoundingBox.orientBox(pX, pY, pZ, -4, -1, 0, 11, 7, 11, pOrientation);
+            return isOkBox(boundingbox) && pPieces.findCollisionPiece(boundingbox) == null
+                ? new StrongholdPieces.RoomCrossing(pGenDepth, pRandom, boundingbox, pOrientation)
                 : null;
         }
 
@@ -1250,18 +1250,18 @@ public class StrongholdPieces {
         private static final int DEPTH = 5;
         private final boolean isSource;
 
-        public StairsDown(StructurePieceType p_229764_, int p_229765_, int p_229766_, int p_229767_, Direction p_229768_) {
-            super(p_229764_, p_229765_, makeBoundingBox(p_229766_, 64, p_229767_, p_229768_, 5, 11, 5));
+        public StairsDown(StructurePieceType pType, int pGenDepth, int pX, int pZ, Direction pOrientation) {
+            super(pType, pGenDepth, makeBoundingBox(pX, 64, pZ, pOrientation, 5, 11, 5));
             this.isSource = true;
-            this.setOrientation(p_229768_);
+            this.setOrientation(pOrientation);
             this.entryDoor = StrongholdPieces.StrongholdPiece.SmallDoorType.OPENING;
         }
 
-        public StairsDown(int p_229759_, RandomSource p_229760_, BoundingBox p_229761_, Direction p_229762_) {
-            super(StructurePieceType.STRONGHOLD_STAIRS_DOWN, p_229759_, p_229761_);
+        public StairsDown(int pGenDepth, RandomSource pRandom, BoundingBox pBox, Direction pOrientation) {
+            super(StructurePieceType.STRONGHOLD_STAIRS_DOWN, pGenDepth, pBox);
             this.isSource = false;
-            this.setOrientation(p_229762_);
-            this.entryDoor = this.randomSmallDoor(p_229760_);
+            this.setOrientation(pOrientation);
+            this.entryDoor = this.randomSmallDoor(pRandom);
         }
 
         public StairsDown(StructurePieceType p_229770_, CompoundTag p_229771_) {
@@ -1269,8 +1269,8 @@ public class StrongholdPieces {
             this.isSource = p_229771_.getBoolean("Source");
         }
 
-        public StairsDown(CompoundTag p_229773_) {
-            this(StructurePieceType.STRONGHOLD_STAIRS_DOWN, p_229773_);
+        public StairsDown(CompoundTag pTag) {
+            this(StructurePieceType.STRONGHOLD_STAIRS_DOWN, pTag);
         }
 
         @Override
@@ -1289,11 +1289,11 @@ public class StrongholdPieces {
         }
 
         public static StrongholdPieces.StairsDown createPiece(
-            StructurePieceAccessor p_229787_, RandomSource p_229788_, int p_229789_, int p_229790_, int p_229791_, Direction p_229792_, int p_229793_
+            StructurePieceAccessor pPieces, RandomSource pRandom, int pX, int pY, int pZ, Direction pOrientation, int pGenDepth
         ) {
-            BoundingBox boundingbox = BoundingBox.orientBox(p_229789_, p_229790_, p_229791_, -1, -7, 0, 5, 11, 5, p_229792_);
-            return isOkBox(boundingbox) && p_229787_.findCollisionPiece(boundingbox) == null
-                ? new StrongholdPieces.StairsDown(p_229793_, p_229788_, boundingbox, p_229792_)
+            BoundingBox boundingbox = BoundingBox.orientBox(pX, pY, pZ, -1, -7, 0, 5, 11, 5, pOrientation);
+            return isOkBox(boundingbox) && pPieces.findCollisionPiece(boundingbox) == null
+                ? new StrongholdPieces.StairsDown(pGenDepth, pRandom, boundingbox, pOrientation)
                 : null;
         }
 
@@ -1336,8 +1336,8 @@ public class StrongholdPieces {
         public StrongholdPieces.PortalRoom portalRoomPiece;
         public final List<StructurePiece> pendingChildren = Lists.newArrayList();
 
-        public StartPiece(RandomSource p_229801_, int p_229802_, int p_229803_) {
-            super(StructurePieceType.STRONGHOLD_START, 0, p_229802_, p_229803_, getRandomHorizontalDirection(p_229801_));
+        public StartPiece(RandomSource pRandom, int pX, int pZ) {
+            super(StructurePieceType.STRONGHOLD_START, 0, pX, pZ, getRandomHorizontalDirection(pRandom));
         }
 
         public StartPiece(CompoundTag p_229805_) {
@@ -1357,18 +1357,18 @@ public class StrongholdPieces {
         private final boolean leftChild;
         private final boolean rightChild;
 
-        public Straight(int p_229813_, RandomSource p_229814_, BoundingBox p_229815_, Direction p_229816_) {
-            super(StructurePieceType.STRONGHOLD_STRAIGHT, p_229813_, p_229815_);
-            this.setOrientation(p_229816_);
-            this.entryDoor = this.randomSmallDoor(p_229814_);
-            this.leftChild = p_229814_.nextInt(2) == 0;
-            this.rightChild = p_229814_.nextInt(2) == 0;
+        public Straight(int pGenDepth, RandomSource pRandom, BoundingBox pBox, Direction pOrientation) {
+            super(StructurePieceType.STRONGHOLD_STRAIGHT, pGenDepth, pBox);
+            this.setOrientation(pOrientation);
+            this.entryDoor = this.randomSmallDoor(pRandom);
+            this.leftChild = pRandom.nextInt(2) == 0;
+            this.rightChild = pRandom.nextInt(2) == 0;
         }
 
-        public Straight(CompoundTag p_229818_) {
-            super(StructurePieceType.STRONGHOLD_STRAIGHT, p_229818_);
-            this.leftChild = p_229818_.getBoolean("Left");
-            this.rightChild = p_229818_.getBoolean("Right");
+        public Straight(CompoundTag pTag) {
+            super(StructurePieceType.STRONGHOLD_STRAIGHT, pTag);
+            this.leftChild = pTag.getBoolean("Left");
+            this.rightChild = pTag.getBoolean("Right");
         }
 
         @Override
@@ -1391,11 +1391,11 @@ public class StrongholdPieces {
         }
 
         public static StrongholdPieces.Straight createPiece(
-            StructurePieceAccessor p_229832_, RandomSource p_229833_, int p_229834_, int p_229835_, int p_229836_, Direction p_229837_, int p_229838_
+            StructurePieceAccessor pPieces, RandomSource pRandom, int pX, int pY, int pZ, Direction pDirection, int pGenDepth
         ) {
-            BoundingBox boundingbox = BoundingBox.orientBox(p_229834_, p_229835_, p_229836_, -1, -1, 0, 5, 5, 7, p_229837_);
-            return isOkBox(boundingbox) && p_229832_.findCollisionPiece(boundingbox) == null
-                ? new StrongholdPieces.Straight(p_229838_, p_229833_, boundingbox, p_229837_)
+            BoundingBox boundingbox = BoundingBox.orientBox(pX, pY, pZ, -1, -1, 0, 5, 5, 7, pDirection);
+            return isOkBox(boundingbox) && pPieces.findCollisionPiece(boundingbox) == null
+                ? new StrongholdPieces.Straight(pGenDepth, pRandom, boundingbox, pDirection)
                 : null;
         }
 
@@ -1433,14 +1433,14 @@ public class StrongholdPieces {
         private static final int HEIGHT = 11;
         private static final int DEPTH = 8;
 
-        public StraightStairsDown(int p_229846_, RandomSource p_229847_, BoundingBox p_229848_, Direction p_229849_) {
-            super(StructurePieceType.STRONGHOLD_STRAIGHT_STAIRS_DOWN, p_229846_, p_229848_);
-            this.setOrientation(p_229849_);
-            this.entryDoor = this.randomSmallDoor(p_229847_);
+        public StraightStairsDown(int pGenDepth, RandomSource pRandom, BoundingBox pBox, Direction pOrientation) {
+            super(StructurePieceType.STRONGHOLD_STRAIGHT_STAIRS_DOWN, pGenDepth, pBox);
+            this.setOrientation(pOrientation);
+            this.entryDoor = this.randomSmallDoor(pRandom);
         }
 
-        public StraightStairsDown(CompoundTag p_229851_) {
-            super(StructurePieceType.STRONGHOLD_STRAIGHT_STAIRS_DOWN, p_229851_);
+        public StraightStairsDown(CompoundTag pTag) {
+            super(StructurePieceType.STRONGHOLD_STRAIGHT_STAIRS_DOWN, pTag);
         }
 
         @Override
@@ -1449,11 +1449,11 @@ public class StrongholdPieces {
         }
 
         public static StrongholdPieces.StraightStairsDown createPiece(
-            StructurePieceAccessor p_229865_, RandomSource p_229866_, int p_229867_, int p_229868_, int p_229869_, Direction p_229870_, int p_229871_
+            StructurePieceAccessor pPieces, RandomSource pRandom, int pX, int pY, int pZ, Direction pOrientation, int pGenDepth
         ) {
-            BoundingBox boundingbox = BoundingBox.orientBox(p_229867_, p_229868_, p_229869_, -1, -7, 0, 5, 11, 8, p_229870_);
-            return isOkBox(boundingbox) && p_229865_.findCollisionPiece(boundingbox) == null
-                ? new StrongholdPieces.StraightStairsDown(p_229871_, p_229866_, boundingbox, p_229870_)
+            BoundingBox boundingbox = BoundingBox.orientBox(pX, pY, pZ, -1, -7, 0, 5, 11, 8, pOrientation);
+            return isOkBox(boundingbox) && pPieces.findCollisionPiece(boundingbox) == null
+                ? new StrongholdPieces.StraightStairsDown(pGenDepth, pRandom, boundingbox, pOrientation)
                 : null;
         }
 
@@ -1503,145 +1503,145 @@ public class StrongholdPieces {
         }
 
         protected void generateSmallDoor(
-            WorldGenLevel p_229881_,
-            RandomSource p_229882_,
-            BoundingBox p_229883_,
-            StrongholdPieces.StrongholdPiece.SmallDoorType p_229884_,
-            int p_229885_,
-            int p_229886_,
-            int p_229887_
+            WorldGenLevel pLevel,
+            RandomSource pRandom,
+            BoundingBox pBox,
+            StrongholdPieces.StrongholdPiece.SmallDoorType pType,
+            int pX,
+            int pY,
+            int pZ
         ) {
-            switch (p_229884_) {
+            switch (pType) {
                 case OPENING:
                     this.generateBox(
-                        p_229881_, p_229883_, p_229885_, p_229886_, p_229887_, p_229885_ + 3 - 1, p_229886_ + 3 - 1, p_229887_, CAVE_AIR, CAVE_AIR, false
+                        pLevel, pBox, pX, pY, pZ, pX + 3 - 1, pY + 3 - 1, pZ, CAVE_AIR, CAVE_AIR, false
                     );
                     break;
                 case WOOD_DOOR:
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_, p_229886_, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_, p_229886_ + 1, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_, p_229886_ + 2, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_ + 1, p_229886_ + 2, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_ + 2, p_229886_ + 2, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_ + 2, p_229886_ + 1, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_ + 2, p_229886_, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.OAK_DOOR.defaultBlockState(), p_229885_ + 1, p_229886_, p_229887_, p_229883_);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX, pY, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX, pY + 1, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX, pY + 2, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX + 1, pY + 2, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX + 2, pY + 2, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX + 2, pY + 1, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX + 2, pY, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.OAK_DOOR.defaultBlockState(), pX + 1, pY, pZ, pBox);
                     this.placeBlock(
-                        p_229881_,
+                        pLevel,
                         Blocks.OAK_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER),
-                        p_229885_ + 1,
-                        p_229886_ + 1,
-                        p_229887_,
-                        p_229883_
+                        pX + 1,
+                        pY + 1,
+                        pZ,
+                        pBox
                     );
                     break;
                 case GRATES:
-                    this.placeBlock(p_229881_, Blocks.CAVE_AIR.defaultBlockState(), p_229885_ + 1, p_229886_, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.CAVE_AIR.defaultBlockState(), p_229885_ + 1, p_229886_ + 1, p_229887_, p_229883_);
+                    this.placeBlock(pLevel, Blocks.CAVE_AIR.defaultBlockState(), pX + 1, pY, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.CAVE_AIR.defaultBlockState(), pX + 1, pY + 1, pZ, pBox);
                     this.placeBlock(
-                        p_229881_,
+                        pLevel,
                         Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.WEST, Boolean.valueOf(true)),
-                        p_229885_,
-                        p_229886_,
-                        p_229887_,
-                        p_229883_
+                        pX,
+                        pY,
+                        pZ,
+                        pBox
                     );
                     this.placeBlock(
-                        p_229881_,
+                        pLevel,
                         Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.WEST, Boolean.valueOf(true)),
-                        p_229885_,
-                        p_229886_ + 1,
-                        p_229887_,
-                        p_229883_
+                        pX,
+                        pY + 1,
+                        pZ,
+                        pBox
                     );
                     this.placeBlock(
-                        p_229881_,
+                        pLevel,
                         Blocks.IRON_BARS
                             .defaultBlockState()
                             .setValue(IronBarsBlock.EAST, Boolean.valueOf(true))
                             .setValue(IronBarsBlock.WEST, Boolean.valueOf(true)),
-                        p_229885_,
-                        p_229886_ + 2,
-                        p_229887_,
-                        p_229883_
+                        pX,
+                        pY + 2,
+                        pZ,
+                        pBox
                     );
                     this.placeBlock(
-                        p_229881_,
+                        pLevel,
                         Blocks.IRON_BARS
                             .defaultBlockState()
                             .setValue(IronBarsBlock.EAST, Boolean.valueOf(true))
                             .setValue(IronBarsBlock.WEST, Boolean.valueOf(true)),
-                        p_229885_ + 1,
-                        p_229886_ + 2,
-                        p_229887_,
-                        p_229883_
+                        pX + 1,
+                        pY + 2,
+                        pZ,
+                        pBox
                     );
                     this.placeBlock(
-                        p_229881_,
+                        pLevel,
                         Blocks.IRON_BARS
                             .defaultBlockState()
                             .setValue(IronBarsBlock.EAST, Boolean.valueOf(true))
                             .setValue(IronBarsBlock.WEST, Boolean.valueOf(true)),
-                        p_229885_ + 2,
-                        p_229886_ + 2,
-                        p_229887_,
-                        p_229883_
+                        pX + 2,
+                        pY + 2,
+                        pZ,
+                        pBox
                     );
                     this.placeBlock(
-                        p_229881_,
+                        pLevel,
                         Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, Boolean.valueOf(true)),
-                        p_229885_ + 2,
-                        p_229886_ + 1,
-                        p_229887_,
-                        p_229883_
+                        pX + 2,
+                        pY + 1,
+                        pZ,
+                        pBox
                     );
                     this.placeBlock(
-                        p_229881_,
+                        pLevel,
                         Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, Boolean.valueOf(true)),
-                        p_229885_ + 2,
-                        p_229886_,
-                        p_229887_,
-                        p_229883_
+                        pX + 2,
+                        pY,
+                        pZ,
+                        pBox
                     );
                     break;
                 case IRON_DOOR:
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_, p_229886_, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_, p_229886_ + 1, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_, p_229886_ + 2, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_ + 1, p_229886_ + 2, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_ + 2, p_229886_ + 2, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_ + 2, p_229886_ + 1, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.STONE_BRICKS.defaultBlockState(), p_229885_ + 2, p_229886_, p_229887_, p_229883_);
-                    this.placeBlock(p_229881_, Blocks.IRON_DOOR.defaultBlockState(), p_229885_ + 1, p_229886_, p_229887_, p_229883_);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX, pY, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX, pY + 1, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX, pY + 2, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX + 1, pY + 2, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX + 2, pY + 2, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX + 2, pY + 1, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.STONE_BRICKS.defaultBlockState(), pX + 2, pY, pZ, pBox);
+                    this.placeBlock(pLevel, Blocks.IRON_DOOR.defaultBlockState(), pX + 1, pY, pZ, pBox);
                     this.placeBlock(
-                        p_229881_,
+                        pLevel,
                         Blocks.IRON_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER),
-                        p_229885_ + 1,
-                        p_229886_ + 1,
-                        p_229887_,
-                        p_229883_
+                        pX + 1,
+                        pY + 1,
+                        pZ,
+                        pBox
                     );
                     this.placeBlock(
-                        p_229881_,
+                        pLevel,
                         Blocks.STONE_BUTTON.defaultBlockState().setValue(ButtonBlock.FACING, Direction.NORTH),
-                        p_229885_ + 2,
-                        p_229886_ + 1,
-                        p_229887_ + 1,
-                        p_229883_
+                        pX + 2,
+                        pY + 1,
+                        pZ + 1,
+                        pBox
                     );
                     this.placeBlock(
-                        p_229881_,
+                        pLevel,
                         Blocks.STONE_BUTTON.defaultBlockState().setValue(ButtonBlock.FACING, Direction.SOUTH),
-                        p_229885_ + 2,
-                        p_229886_ + 1,
-                        p_229887_ - 1,
-                        p_229883_
+                        pX + 2,
+                        pY + 1,
+                        pZ - 1,
+                        pBox
                     );
             }
         }
 
-        protected StrongholdPieces.StrongholdPiece.SmallDoorType randomSmallDoor(RandomSource p_229900_) {
-            int i = p_229900_.nextInt(5);
+        protected StrongholdPieces.StrongholdPiece.SmallDoorType randomSmallDoor(RandomSource pRandom) {
+            int i = pRandom.nextInt(5);
             switch (i) {
                 case 0:
                 case 1:
@@ -1658,52 +1658,52 @@ public class StrongholdPieces {
 
         @Nullable
         protected StructurePiece generateSmallDoorChildForward(
-            StrongholdPieces.StartPiece p_229894_, StructurePieceAccessor p_229895_, RandomSource p_229896_, int p_229897_, int p_229898_
+            StrongholdPieces.StartPiece pStartPiece, StructurePieceAccessor pPieces, RandomSource pRandom, int pOffsetX, int pOffsetY
         ) {
             Direction direction = this.getOrientation();
             if (direction != null) {
                 switch (direction) {
                     case NORTH:
                         return StrongholdPieces.generateAndAddPiece(
-                            p_229894_,
-                            p_229895_,
-                            p_229896_,
-                            this.boundingBox.minX() + p_229897_,
-                            this.boundingBox.minY() + p_229898_,
+                            pStartPiece,
+                            pPieces,
+                            pRandom,
+                            this.boundingBox.minX() + pOffsetX,
+                            this.boundingBox.minY() + pOffsetY,
                             this.boundingBox.minZ() - 1,
                             direction,
                             this.getGenDepth()
                         );
                     case SOUTH:
                         return StrongholdPieces.generateAndAddPiece(
-                            p_229894_,
-                            p_229895_,
-                            p_229896_,
-                            this.boundingBox.minX() + p_229897_,
-                            this.boundingBox.minY() + p_229898_,
+                            pStartPiece,
+                            pPieces,
+                            pRandom,
+                            this.boundingBox.minX() + pOffsetX,
+                            this.boundingBox.minY() + pOffsetY,
                             this.boundingBox.maxZ() + 1,
                             direction,
                             this.getGenDepth()
                         );
                     case WEST:
                         return StrongholdPieces.generateAndAddPiece(
-                            p_229894_,
-                            p_229895_,
-                            p_229896_,
+                            pStartPiece,
+                            pPieces,
+                            pRandom,
                             this.boundingBox.minX() - 1,
-                            this.boundingBox.minY() + p_229898_,
-                            this.boundingBox.minZ() + p_229897_,
+                            this.boundingBox.minY() + pOffsetY,
+                            this.boundingBox.minZ() + pOffsetX,
                             direction,
                             this.getGenDepth()
                         );
                     case EAST:
                         return StrongholdPieces.generateAndAddPiece(
-                            p_229894_,
-                            p_229895_,
-                            p_229896_,
+                            pStartPiece,
+                            pPieces,
+                            pRandom,
                             this.boundingBox.maxX() + 1,
-                            this.boundingBox.minY() + p_229898_,
-                            this.boundingBox.minZ() + p_229897_,
+                            this.boundingBox.minY() + pOffsetY,
+                            this.boundingBox.minZ() + pOffsetX,
                             direction,
                             this.getGenDepth()
                         );
@@ -1715,51 +1715,51 @@ public class StrongholdPieces {
 
         @Nullable
         protected StructurePiece generateSmallDoorChildLeft(
-            StrongholdPieces.StartPiece p_229902_, StructurePieceAccessor p_229903_, RandomSource p_229904_, int p_229905_, int p_229906_
+            StrongholdPieces.StartPiece pStartPiece, StructurePieceAccessor pPieces, RandomSource pRandom, int pOffsetY, int pOffsetX
         ) {
             Direction direction = this.getOrientation();
             if (direction != null) {
                 switch (direction) {
                     case NORTH:
                         return StrongholdPieces.generateAndAddPiece(
-                            p_229902_,
-                            p_229903_,
-                            p_229904_,
+                            pStartPiece,
+                            pPieces,
+                            pRandom,
                             this.boundingBox.minX() - 1,
-                            this.boundingBox.minY() + p_229905_,
-                            this.boundingBox.minZ() + p_229906_,
+                            this.boundingBox.minY() + pOffsetY,
+                            this.boundingBox.minZ() + pOffsetX,
                             Direction.WEST,
                             this.getGenDepth()
                         );
                     case SOUTH:
                         return StrongholdPieces.generateAndAddPiece(
-                            p_229902_,
-                            p_229903_,
-                            p_229904_,
+                            pStartPiece,
+                            pPieces,
+                            pRandom,
                             this.boundingBox.minX() - 1,
-                            this.boundingBox.minY() + p_229905_,
-                            this.boundingBox.minZ() + p_229906_,
+                            this.boundingBox.minY() + pOffsetY,
+                            this.boundingBox.minZ() + pOffsetX,
                             Direction.WEST,
                             this.getGenDepth()
                         );
                     case WEST:
                         return StrongholdPieces.generateAndAddPiece(
-                            p_229902_,
-                            p_229903_,
-                            p_229904_,
-                            this.boundingBox.minX() + p_229906_,
-                            this.boundingBox.minY() + p_229905_,
+                            pStartPiece,
+                            pPieces,
+                            pRandom,
+                            this.boundingBox.minX() + pOffsetX,
+                            this.boundingBox.minY() + pOffsetY,
                             this.boundingBox.minZ() - 1,
                             Direction.NORTH,
                             this.getGenDepth()
                         );
                     case EAST:
                         return StrongholdPieces.generateAndAddPiece(
-                            p_229902_,
-                            p_229903_,
-                            p_229904_,
-                            this.boundingBox.minX() + p_229906_,
-                            this.boundingBox.minY() + p_229905_,
+                            pStartPiece,
+                            pPieces,
+                            pRandom,
+                            this.boundingBox.minX() + pOffsetX,
+                            this.boundingBox.minY() + pOffsetY,
                             this.boundingBox.minZ() - 1,
                             Direction.NORTH,
                             this.getGenDepth()
@@ -1772,51 +1772,51 @@ public class StrongholdPieces {
 
         @Nullable
         protected StructurePiece generateSmallDoorChildRight(
-            StrongholdPieces.StartPiece p_229908_, StructurePieceAccessor p_229909_, RandomSource p_229910_, int p_229911_, int p_229912_
+            StrongholdPieces.StartPiece pStartPiece, StructurePieceAccessor pPieces, RandomSource pRandom, int pOffsetY, int pOffsetX
         ) {
             Direction direction = this.getOrientation();
             if (direction != null) {
                 switch (direction) {
                     case NORTH:
                         return StrongholdPieces.generateAndAddPiece(
-                            p_229908_,
-                            p_229909_,
-                            p_229910_,
+                            pStartPiece,
+                            pPieces,
+                            pRandom,
                             this.boundingBox.maxX() + 1,
-                            this.boundingBox.minY() + p_229911_,
-                            this.boundingBox.minZ() + p_229912_,
+                            this.boundingBox.minY() + pOffsetY,
+                            this.boundingBox.minZ() + pOffsetX,
                             Direction.EAST,
                             this.getGenDepth()
                         );
                     case SOUTH:
                         return StrongholdPieces.generateAndAddPiece(
-                            p_229908_,
-                            p_229909_,
-                            p_229910_,
+                            pStartPiece,
+                            pPieces,
+                            pRandom,
                             this.boundingBox.maxX() + 1,
-                            this.boundingBox.minY() + p_229911_,
-                            this.boundingBox.minZ() + p_229912_,
+                            this.boundingBox.minY() + pOffsetY,
+                            this.boundingBox.minZ() + pOffsetX,
                             Direction.EAST,
                             this.getGenDepth()
                         );
                     case WEST:
                         return StrongholdPieces.generateAndAddPiece(
-                            p_229908_,
-                            p_229909_,
-                            p_229910_,
-                            this.boundingBox.minX() + p_229912_,
-                            this.boundingBox.minY() + p_229911_,
+                            pStartPiece,
+                            pPieces,
+                            pRandom,
+                            this.boundingBox.minX() + pOffsetX,
+                            this.boundingBox.minY() + pOffsetY,
                             this.boundingBox.maxZ() + 1,
                             Direction.SOUTH,
                             this.getGenDepth()
                         );
                     case EAST:
                         return StrongholdPieces.generateAndAddPiece(
-                            p_229908_,
-                            p_229909_,
-                            p_229910_,
-                            this.boundingBox.minX() + p_229912_,
-                            this.boundingBox.minY() + p_229911_,
+                            pStartPiece,
+                            pPieces,
+                            pRandom,
+                            this.boundingBox.minX() + pOffsetX,
+                            this.boundingBox.minY() + pOffsetY,
                             this.boundingBox.maxZ() + 1,
                             Direction.SOUTH,
                             this.getGenDepth()
@@ -1827,8 +1827,8 @@ public class StrongholdPieces {
             return null;
         }
 
-        protected static boolean isOkBox(BoundingBox p_229889_) {
-            return p_229889_ != null && p_229889_.minY() > 10;
+        protected static boolean isOkBox(BoundingBox pBox) {
+            return pBox != null && pBox.minY() > 10;
         }
 
         protected static enum SmallDoorType {

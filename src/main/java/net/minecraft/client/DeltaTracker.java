@@ -1,5 +1,6 @@
 package net.minecraft.client;
 
+import cn.lazymoon.utils.client.ClientUtil;
 import it.unimi.dsi.fastutil.floats.FloatUnaryOperator;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -11,7 +12,12 @@ public interface DeltaTracker {
 
     float getGameTimeDeltaTicks();
 
-    float getGameTimeDeltaPartialTick(boolean p_345465_);
+    float getGameTimeDeltaPartialTick(boolean pRunsNormally);
+
+    // Arcane mixin port: Yarn name for official game-time partial tick accessor.
+    default float getTickDelta(boolean pRunsNormally) {
+        return this.getGameTimeDeltaPartialTick(pRunsNormally);
+    }
 
     float getRealtimeDeltaTicks();
 
@@ -19,8 +25,8 @@ public interface DeltaTracker {
     public static class DefaultValue implements DeltaTracker {
         private final float value;
 
-        DefaultValue(float p_343701_) {
-            this.value = p_343701_;
+        DefaultValue(float pValue) {
+            this.value = pValue;
         }
 
         @Override
@@ -52,33 +58,34 @@ public interface DeltaTracker {
         private boolean paused;
         private boolean frozen;
 
-        public Timer(float p_343882_, long p_344080_, FloatUnaryOperator p_343677_) {
-            this.msPerTick = 1000.0F / p_343882_;
-            this.lastUiMs = this.lastMs = p_344080_;
-            this.targetMsptProvider = p_343677_;
+        public Timer(float pTicksPerSecond, long pTime, FloatUnaryOperator pTargetMsptProvider) {
+            this.msPerTick = 1000.0F / pTicksPerSecond;
+            this.lastUiMs = this.lastMs = pTime;
+            this.targetMsptProvider = pTargetMsptProvider;
         }
 
-        public int advanceTime(long p_343106_, boolean p_342855_) {
-            this.advanceRealTime(p_343106_);
-            return p_342855_ ? this.advanceGameTime(p_343106_) : 0;
+        public int advanceTime(long pTime, boolean pAdvanceGameTime) {
+            this.advanceRealTime(pTime);
+            return pAdvanceGameTime ? this.advanceGameTime(pTime) : 0;
         }
 
-        private int advanceGameTime(long p_342679_) {
-            this.deltaTicks = (float)(p_342679_ - this.lastMs) / this.targetMsptProvider.apply(this.msPerTick);
-            this.lastMs = p_342679_;
+        private int advanceGameTime(long pTime) {
+            // Arcane mixin port: ClientUtil.timer scales the client render tick counter.
+            this.deltaTicks = (float)(pTime - this.lastMs) / this.targetMsptProvider.apply(this.msPerTick) * ClientUtil.timer;
+            this.lastMs = pTime;
             this.deltaTickResidual = this.deltaTickResidual + this.deltaTicks;
             int i = (int)this.deltaTickResidual;
             this.deltaTickResidual -= (float)i;
             return i;
         }
 
-        private void advanceRealTime(long p_342368_) {
-            this.realtimeDeltaTicks = (float)(p_342368_ - this.lastUiMs) / this.msPerTick;
-            this.lastUiMs = p_342368_;
+        private void advanceRealTime(long pTime) {
+            this.realtimeDeltaTicks = (float)(pTime - this.lastUiMs) / this.msPerTick;
+            this.lastUiMs = pTime;
         }
 
-        public void updatePauseState(boolean p_342098_) {
-            if (p_342098_) {
+        public void updatePauseState(boolean pPaused) {
+            if (pPaused) {
                 this.pause();
             } else {
                 this.unPause();
@@ -101,8 +108,8 @@ public interface DeltaTracker {
             this.paused = false;
         }
 
-        public void updateFrozenState(boolean p_344005_) {
-            this.frozen = p_344005_;
+        public void updateFrozenState(boolean pFrozen) {
+            this.frozen = pFrozen;
         }
 
         @Override

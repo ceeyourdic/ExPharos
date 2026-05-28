@@ -29,17 +29,17 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
     private final EnumSet<ClientboundPlayerInfoUpdatePacket.Action> actions;
     private final List<ClientboundPlayerInfoUpdatePacket.Entry> entries;
 
-    public ClientboundPlayerInfoUpdatePacket(EnumSet<ClientboundPlayerInfoUpdatePacket.Action> p_251739_, Collection<ServerPlayer> p_251579_) {
-        this.actions = p_251739_;
-        this.entries = p_251579_.stream().map(ClientboundPlayerInfoUpdatePacket.Entry::new).toList();
+    public ClientboundPlayerInfoUpdatePacket(EnumSet<ClientboundPlayerInfoUpdatePacket.Action> pActions, Collection<ServerPlayer> pPlayers) {
+        this.actions = pActions;
+        this.entries = pPlayers.stream().map(ClientboundPlayerInfoUpdatePacket.Entry::new).toList();
     }
 
-    public ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action p_251648_, ServerPlayer p_252273_) {
-        this.actions = EnumSet.of(p_251648_);
-        this.entries = List.of(new ClientboundPlayerInfoUpdatePacket.Entry(p_252273_));
+    public ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action pAction, ServerPlayer pPlayer) {
+        this.actions = EnumSet.of(pAction);
+        this.entries = List.of(new ClientboundPlayerInfoUpdatePacket.Entry(pPlayer));
     }
 
-    public static ClientboundPlayerInfoUpdatePacket createPlayerInitializing(Collection<ServerPlayer> p_252314_) {
+    public static ClientboundPlayerInfoUpdatePacket createPlayerInitializing(Collection<ServerPlayer> pPlayers) {
         EnumSet<ClientboundPlayerInfoUpdatePacket.Action> enumset = EnumSet.of(
             ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER,
             ClientboundPlayerInfoUpdatePacket.Action.INITIALIZE_CHAT,
@@ -50,12 +50,12 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
             ClientboundPlayerInfoUpdatePacket.Action.UPDATE_HAT,
             ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LIST_ORDER
         );
-        return new ClientboundPlayerInfoUpdatePacket(enumset, p_252314_);
+        return new ClientboundPlayerInfoUpdatePacket(enumset, pPlayers);
     }
 
-    private ClientboundPlayerInfoUpdatePacket(RegistryFriendlyByteBuf p_330420_) {
-        this.actions = p_330420_.readEnumSet(ClientboundPlayerInfoUpdatePacket.Action.class);
-        this.entries = p_330420_.readList(
+    private ClientboundPlayerInfoUpdatePacket(RegistryFriendlyByteBuf pBuffer) {
+        this.actions = pBuffer.readEnumSet(ClientboundPlayerInfoUpdatePacket.Action.class);
+        this.entries = pBuffer.readList(
             p_326100_ -> {
                 ClientboundPlayerInfoUpdatePacket.EntryBuilder clientboundplayerinfoupdatepacket$entrybuilder = new ClientboundPlayerInfoUpdatePacket.EntryBuilder(
                     p_326100_.readUUID()
@@ -71,9 +71,9 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
         );
     }
 
-    private void write(RegistryFriendlyByteBuf p_332405_) {
-        p_332405_.writeEnumSet(this.actions, ClientboundPlayerInfoUpdatePacket.Action.class);
-        p_332405_.writeCollection(this.entries, (p_326101_, p_326102_) -> {
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeEnumSet(this.actions, ClientboundPlayerInfoUpdatePacket.Action.class);
+        pBuffer.writeCollection(this.entries, (p_326101_, p_326102_) -> {
             p_326101_.writeUUID(p_326102_.profileId());
 
             for (ClientboundPlayerInfoUpdatePacket.Action clientboundplayerinfoupdatepacket$action : this.actions) {
@@ -146,17 +146,17 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
         final ClientboundPlayerInfoUpdatePacket.Action.Reader reader;
         final ClientboundPlayerInfoUpdatePacket.Action.Writer writer;
 
-        private Action(final ClientboundPlayerInfoUpdatePacket.Action.Reader p_249392_, final ClientboundPlayerInfoUpdatePacket.Action.Writer p_250487_) {
-            this.reader = p_249392_;
-            this.writer = p_250487_;
+        private Action(final ClientboundPlayerInfoUpdatePacket.Action.Reader pReader, final ClientboundPlayerInfoUpdatePacket.Action.Writer pWriter) {
+            this.reader = pReader;
+            this.writer = pWriter;
         }
 
         public interface Reader {
-            void read(ClientboundPlayerInfoUpdatePacket.EntryBuilder p_251859_, RegistryFriendlyByteBuf p_332411_);
+            void read(ClientboundPlayerInfoUpdatePacket.EntryBuilder pEntryBuilder, RegistryFriendlyByteBuf pBuffer);
         }
 
         public interface Writer {
-            void write(RegistryFriendlyByteBuf p_330677_, ClientboundPlayerInfoUpdatePacket.Entry p_249783_);
+            void write(RegistryFriendlyByteBuf pBuffer, ClientboundPlayerInfoUpdatePacket.Entry pEntry);
         }
     }
 
@@ -171,17 +171,17 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
         int listOrder,
         @Nullable RemoteChatSession.Data chatSession
     ) {
-        Entry(ServerPlayer p_252094_) {
+        Entry(ServerPlayer pPlayer) {
             this(
-                p_252094_.getUUID(),
-                p_252094_.getGameProfile(),
+                pPlayer.getUUID(),
+                pPlayer.getGameProfile(),
                 true,
-                p_252094_.connection.latency(),
-                p_252094_.gameMode.getGameModeForPlayer(),
-                p_252094_.getTabListDisplayName(),
-                p_252094_.isModelPartShown(PlayerModelPart.HAT),
-                p_252094_.getTabListOrder(),
-                Optionull.map(p_252094_.getChatSession(), RemoteChatSession::asData)
+                pPlayer.connection.latency(),
+                pPlayer.gameMode.getGameModeForPlayer(),
+                pPlayer.getTabListDisplayName(),
+                pPlayer.isModelPartShown(PlayerModelPart.HAT),
+                pPlayer.getTabListOrder(),
+                Optionull.map(pPlayer.getChatSession(), RemoteChatSession::asData)
             );
         }
     }
@@ -200,8 +200,8 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
         @Nullable
         RemoteChatSession.Data chatSession;
 
-        EntryBuilder(UUID p_251670_) {
-            this.profileId = p_251670_;
+        EntryBuilder(UUID pProfileId) {
+            this.profileId = pProfileId;
         }
 
         ClientboundPlayerInfoUpdatePacket.Entry build() {

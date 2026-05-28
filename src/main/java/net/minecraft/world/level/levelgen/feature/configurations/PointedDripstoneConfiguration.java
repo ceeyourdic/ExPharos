@@ -19,10 +19,10 @@ public class PointedDripstoneConfiguration implements FeatureConfiguration {
     public final float chanceOfSpreadRadius2;
     public final float chanceOfSpreadRadius3;
 
-    public PointedDripstoneConfiguration(float p_191281_, float p_191282_, float p_191283_, float p_191284_) {
-        this.chanceOfTallerDripstone = p_191281_;
-        this.chanceOfDirectionalSpread = p_191282_;
-        this.chanceOfSpreadRadius2 = p_191283_;
-        this.chanceOfSpreadRadius3 = p_191284_;
+    public PointedDripstoneConfiguration(float pChanceOfTallerDripstone, float pChanceOfDirectionalSpread, float pChanceOfSpreadRadius2, float pChanceOfSpreadRadius3) {
+        this.chanceOfTallerDripstone = pChanceOfTallerDripstone;
+        this.chanceOfDirectionalSpread = pChanceOfDirectionalSpread;
+        this.chanceOfSpreadRadius2 = pChanceOfSpreadRadius2;
+        this.chanceOfSpreadRadius3 = pChanceOfSpreadRadius3;
     }
 }

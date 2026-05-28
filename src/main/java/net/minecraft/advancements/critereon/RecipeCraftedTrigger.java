@@ -21,8 +21,8 @@ public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTr
         return RecipeCraftedTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_281468_, ResourceKey<Recipe<?>> p_366112_, List<ItemStack> p_282070_) {
-        this.trigger(p_281468_, p_357629_ -> p_357629_.matches(p_366112_, p_282070_));
+    public void trigger(ServerPlayer pPlayer, ResourceKey<Recipe<?>> pRecipeId, List<ItemStack> pIngredients) {
+        this.trigger(pPlayer, p_357629_ -> p_357629_.matches(pRecipeId, pIngredients));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, ResourceKey<Recipe<?>> recipeId, List<ItemPredicate> ingredients)
@@ -36,26 +36,26 @@ public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTr
                     .apply(p_357630_, RecipeCraftedTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<RecipeCraftedTrigger.TriggerInstance> craftedItem(ResourceKey<Recipe<?>> p_364431_, List<ItemPredicate.Builder> p_299678_) {
+        public static Criterion<RecipeCraftedTrigger.TriggerInstance> craftedItem(ResourceKey<Recipe<?>> pRecipeId, List<ItemPredicate.Builder> pIngredients) {
             return CriteriaTriggers.RECIPE_CRAFTED
                 .createCriterion(
-                    new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), p_364431_, p_299678_.stream().map(ItemPredicate.Builder::build).toList())
+                    new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), pRecipeId, pIngredients.stream().map(ItemPredicate.Builder::build).toList())
                 );
         }
 
-        public static Criterion<RecipeCraftedTrigger.TriggerInstance> craftedItem(ResourceKey<Recipe<?>> p_368041_) {
-            return CriteriaTriggers.RECIPE_CRAFTED.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), p_368041_, List.of()));
+        public static Criterion<RecipeCraftedTrigger.TriggerInstance> craftedItem(ResourceKey<Recipe<?>> pRecipeId) {
+            return CriteriaTriggers.RECIPE_CRAFTED.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), pRecipeId, List.of()));
         }
 
-        public static Criterion<RecipeCraftedTrigger.TriggerInstance> crafterCraftedItem(ResourceKey<Recipe<?>> p_369526_) {
-            return CriteriaTriggers.CRAFTER_RECIPE_CRAFTED.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), p_369526_, List.of()));
+        public static Criterion<RecipeCraftedTrigger.TriggerInstance> crafterCraftedItem(ResourceKey<Recipe<?>> pRecipeId) {
+            return CriteriaTriggers.CRAFTER_RECIPE_CRAFTED.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), pRecipeId, List.of()));
         }
 
-        boolean matches(ResourceKey<Recipe<?>> p_361469_, List<ItemStack> p_283698_) {
-            if (p_361469_ != this.recipeId) {
+        boolean matches(ResourceKey<Recipe<?>> pRecipeId, List<ItemStack> pIngredients) {
+            if (pRecipeId != this.recipeId) {
                 return false;
             } else {
-                List<ItemStack> list = new ArrayList<>(p_283698_);
+                List<ItemStack> list = new ArrayList<>(pIngredients);
 
                 for (ItemPredicate itempredicate : this.ingredients) {
                     boolean flag = false;

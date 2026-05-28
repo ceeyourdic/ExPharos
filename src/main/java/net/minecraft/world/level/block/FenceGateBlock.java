@@ -61,9 +61,9 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
         return CODEC;
     }
 
-    public FenceGateBlock(WoodType p_273340_, BlockBehaviour.Properties p_273352_) {
-        super(p_273352_.sound(p_273340_.soundType()));
-        this.type = p_273340_;
+    public FenceGateBlock(WoodType pType, BlockBehaviour.Properties pProperties) {
+        super(pProperties.sound(pType.soundType()));
+        this.type = pType;
         this.registerDefaultState(
             this.stateDefinition
                 .any()
@@ -74,11 +74,11 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_53391_, BlockGetter p_53392_, BlockPos p_53393_, CollisionContext p_53394_) {
-        if (p_53391_.getValue(IN_WALL)) {
-            return p_53391_.getValue(FACING).getAxis() == Direction.Axis.X ? X_SHAPE_LOW : Z_SHAPE_LOW;
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        if (pState.getValue(IN_WALL)) {
+            return pState.getValue(FACING).getAxis() == Direction.Axis.X ? X_SHAPE_LOW : Z_SHAPE_LOW;
         } else {
-            return p_53391_.getValue(FACING).getAxis() == Direction.Axis.X ? X_SHAPE : Z_SHAPE;
+            return pState.getValue(FACING).getAxis() == Direction.Axis.X ? X_SHAPE : Z_SHAPE;
         }
     }
 
@@ -112,11 +112,11 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState p_53396_, BlockGetter p_53397_, BlockPos p_53398_, CollisionContext p_53399_) {
-        if (p_53396_.getValue(OPEN)) {
+    protected VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        if (pState.getValue(OPEN)) {
             return Shapes.empty();
         } else {
-            return p_53396_.getValue(FACING).getAxis() == Direction.Axis.Z ? Z_COLLISION_SHAPE : X_COLLISION_SHAPE;
+            return pState.getValue(FACING).getAxis() == Direction.Axis.Z ? Z_COLLISION_SHAPE : X_COLLISION_SHAPE;
         }
     }
 
@@ -144,11 +144,11 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_53358_) {
-        Level level = p_53358_.getLevel();
-        BlockPos blockpos = p_53358_.getClickedPos();
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        Level level = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
         boolean flag = level.hasNeighborSignal(blockpos);
-        Direction direction = p_53358_.getHorizontalDirection();
+        Direction direction = pContext.getHorizontalDirection();
         Direction.Axis direction$axis = direction.getAxis();
         boolean flag1 = direction$axis == Direction.Axis.Z
                 && (this.isWall(level.getBlockState(blockpos.west())) || this.isWall(level.getBlockState(blockpos.east())))
@@ -160,8 +160,8 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
             .setValue(IN_WALL, Boolean.valueOf(flag1));
     }
 
-    private boolean isWall(BlockState p_53405_) {
-        return p_53405_.is(BlockTags.WALLS);
+    private boolean isWall(BlockState pState) {
+        return pState.is(BlockTags.WALLS);
     }
 
     @Override
@@ -233,11 +233,11 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_53389_) {
-        p_53389_.add(FACING, OPEN, POWERED, IN_WALL);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, OPEN, POWERED, IN_WALL);
     }
 
-    public static boolean connectsToDirection(BlockState p_53379_, Direction p_53380_) {
-        return p_53379_.getValue(FACING).getAxis() == p_53380_.getClockWise().getAxis();
+    public static boolean connectsToDirection(BlockState pState, Direction pDirection) {
+        return pState.getValue(FACING).getAxis() == pDirection.getClockWise().getAxis();
     }
 }

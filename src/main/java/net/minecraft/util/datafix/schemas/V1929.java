@@ -13,30 +13,30 @@ public class V1929 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_17820_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_17820_);
-        p_17820_.register(
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
+        pSchema.register(
             map,
             "minecraft:wandering_trader",
             p_326700_ -> DSL.optionalFields(
                     "Inventory",
-                    DSL.list(References.ITEM_STACK.in(p_17820_)),
+                    DSL.list(References.ITEM_STACK.in(pSchema)),
                     "Offers",
-                    DSL.optionalFields("Recipes", DSL.list(References.VILLAGER_TRADE.in(p_17820_))),
-                    V100.equipment(p_17820_)
+                    DSL.optionalFields("Recipes", DSL.list(References.VILLAGER_TRADE.in(pSchema))),
+                    V100.equipment(pSchema)
                 )
         );
-        p_17820_.register(
+        pSchema.register(
             map,
             "minecraft:trader_llama",
             p_17815_ -> DSL.optionalFields(
                     "Items",
-                    DSL.list(References.ITEM_STACK.in(p_17820_)),
+                    DSL.list(References.ITEM_STACK.in(pSchema)),
                     "SaddleItem",
-                    References.ITEM_STACK.in(p_17820_),
+                    References.ITEM_STACK.in(pSchema),
                     "DecorItem",
-                    References.ITEM_STACK.in(p_17820_),
-                    V100.equipment(p_17820_)
+                    References.ITEM_STACK.in(pSchema),
+                    V100.equipment(pSchema)
                 )
         );
         return map;

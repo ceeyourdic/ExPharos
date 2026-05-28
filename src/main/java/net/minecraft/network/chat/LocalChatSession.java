@@ -5,12 +5,12 @@ import net.minecraft.util.Signer;
 import net.minecraft.world.entity.player.ProfileKeyPair;
 
 public record LocalChatSession(UUID sessionId, ProfileKeyPair keyPair) {
-    public static LocalChatSession create(ProfileKeyPair p_250798_) {
-        return new LocalChatSession(UUID.randomUUID(), p_250798_);
+    public static LocalChatSession create(ProfileKeyPair pKeyPair) {
+        return new LocalChatSession(UUID.randomUUID(), pKeyPair);
     }
 
-    public SignedMessageChain.Encoder createMessageEncoder(UUID p_251085_) {
-        return new SignedMessageChain(p_251085_, this.sessionId).encoder(Signer.from(this.keyPair.privateKey(), "SHA256withRSA"));
+    public SignedMessageChain.Encoder createMessageEncoder(UUID pSender) {
+        return new SignedMessageChain(pSender, this.sessionId).encoder(Signer.from(this.keyPair.privateKey(), "SHA256withRSA"));
     }
 
     public RemoteChatSession asRemote() {

@@ -25,23 +25,23 @@ public class DisconnectedScreen extends Screen {
     private final Component buttonText;
     private final LinearLayout layout = LinearLayout.vertical();
 
-    public DisconnectedScreen(Screen p_95993_, Component p_95994_, Component p_95995_) {
-        this(p_95993_, p_95994_, new DisconnectionDetails(p_95995_));
+    public DisconnectedScreen(Screen pParent, Component pTitle, Component pReason) {
+        this(pParent, pTitle, new DisconnectionDetails(pReason));
     }
 
-    public DisconnectedScreen(Screen p_279153_, Component p_279183_, Component p_279332_, Component p_279257_) {
-        this(p_279153_, p_279183_, new DisconnectionDetails(p_279332_), p_279257_);
+    public DisconnectedScreen(Screen pParent, Component pTitle, Component pReason, Component pButtonText) {
+        this(pParent, pTitle, new DisconnectionDetails(pReason), pButtonText);
     }
 
-    public DisconnectedScreen(Screen p_344110_, Component p_342861_, DisconnectionDetails p_343143_) {
-        this(p_344110_, p_342861_, p_343143_, TO_SERVER_LIST);
+    public DisconnectedScreen(Screen pParent, Component pTitle, DisconnectionDetails pDetails) {
+        this(pParent, pTitle, pDetails, TO_SERVER_LIST);
     }
 
-    public DisconnectedScreen(Screen p_342965_, Component p_344528_, DisconnectionDetails p_343777_, Component p_345398_) {
-        super(p_344528_);
-        this.parent = p_342965_;
-        this.details = p_343777_;
-        this.buttonText = p_345398_;
+    public DisconnectedScreen(Screen pParent, Component pTitle, DisconnectionDetails pDetails, Component pButtonText) {
+        super(pTitle);
+        this.parent = pParent;
+        this.details = pDetails;
+        this.buttonText = pButtonText;
     }
 
     @Override

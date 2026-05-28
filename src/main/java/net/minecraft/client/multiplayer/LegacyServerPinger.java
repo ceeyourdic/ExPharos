@@ -18,15 +18,15 @@ public class LegacyServerPinger extends SimpleChannelInboundHandler<ByteBuf> {
     private final ServerAddress address;
     private final LegacyServerPinger.Output output;
 
-    public LegacyServerPinger(ServerAddress p_300035_, LegacyServerPinger.Output p_299531_) {
-        this.address = p_300035_;
-        this.output = p_299531_;
+    public LegacyServerPinger(ServerAddress pAddress, LegacyServerPinger.Output pOutput) {
+        this.address = pAddress;
+        this.output = pOutput;
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext p_300254_) throws Exception {
-        super.channelActive(p_300254_);
-        ByteBuf bytebuf = p_300254_.alloc().buffer();
+    public void channelActive(ChannelHandlerContext pContext) throws Exception {
+        super.channelActive(pContext);
+        ByteBuf bytebuf = pContext.alloc().buffer();
 
         try {
             bytebuf.writeByte(254);
@@ -41,17 +41,17 @@ public class LegacyServerPinger extends SimpleChannelInboundHandler<ByteBuf> {
             bytebuf.writeInt(this.address.getPort());
             int k = bytebuf.writerIndex() - j;
             bytebuf.setShort(i, k);
-            p_300254_.channel().writeAndFlush(bytebuf).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+            pContext.channel().writeAndFlush(bytebuf).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         } catch (Exception exception) {
             bytebuf.release();
             throw exception;
         }
     }
 
-    protected void channelRead0(ChannelHandlerContext p_299467_, ByteBuf p_298668_) {
-        short short1 = p_298668_.readUnsignedByte();
+    protected void channelRead0(ChannelHandlerContext pContext, ByteBuf pBuffer) {
+        short short1 = pBuffer.readUnsignedByte();
         if (short1 == 255) {
-            String s = LegacyProtocolUtils.readLegacyString(p_298668_);
+            String s = LegacyProtocolUtils.readLegacyString(pBuffer);
             List<String> list = SPLITTER.splitToList(s);
             if ("\u00a71".equals(list.get(0))) {
                 int i = Mth.getInt(list.get(1), 0);
@@ -63,17 +63,17 @@ public class LegacyServerPinger extends SimpleChannelInboundHandler<ByteBuf> {
             }
         }
 
-        p_299467_.close();
+        pContext.close();
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext p_300590_, Throwable p_301394_) {
-        p_300590_.close();
+    public void exceptionCaught(ChannelHandlerContext pContext, Throwable pException) {
+        pContext.close();
     }
 
     @FunctionalInterface
     @OnlyIn(Dist.CLIENT)
     public interface Output {
-        void handleResponse(int p_297950_, String p_298283_, String p_299118_, int p_300225_, int p_298727_);
+        void handleResponse(int pProtocolVersion, String pVersion, String pMotd, int pPlayers, int pCapacity);
     }
 }

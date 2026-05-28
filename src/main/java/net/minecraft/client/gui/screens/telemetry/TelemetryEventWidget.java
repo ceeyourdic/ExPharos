@@ -37,14 +37,14 @@ public class TelemetryEventWidget extends AbstractTextAreaWidget {
     @Nullable
     private DoubleConsumer onScrolledListener;
 
-    public TelemetryEventWidget(int p_261584_, int p_261895_, int p_261803_, int p_261967_, Font p_261662_) {
-        super(p_261584_, p_261895_, p_261803_, p_261967_, Component.empty());
-        this.font = p_261662_;
+    public TelemetryEventWidget(int pX, int pY, int pWidth, int pHeight, Font pFont) {
+        super(pX, pY, pWidth, pHeight, Component.empty());
+        this.font = pFont;
         this.content = this.buildContent(Minecraft.getInstance().telemetryOptInExtra());
     }
 
-    public void onOptInChanged(boolean p_261772_) {
-        this.content = this.buildContent(p_261772_);
+    public void onOptInChanged(boolean pOptIn) {
+        this.content = this.buildContent(pOptIn);
         this.refreshScrollAmount();
     }
 
@@ -53,14 +53,14 @@ public class TelemetryEventWidget extends AbstractTextAreaWidget {
         this.refreshScrollAmount();
     }
 
-    private TelemetryEventWidget.Content buildContent(boolean p_261628_) {
+    private TelemetryEventWidget.Content buildContent(boolean pOptIn) {
         TelemetryEventWidget.ContentBuilder telemetryeventwidget$contentbuilder = new TelemetryEventWidget.ContentBuilder(this.containerWidth());
         List<TelemetryEventType> list = new ArrayList<>(TelemetryEventType.values());
         list.sort(Comparator.comparing(TelemetryEventType::isOptIn));
 
         for (int i = 0; i < list.size(); i++) {
             TelemetryEventType telemetryeventtype = list.get(i);
-            boolean flag = telemetryeventtype.isOptIn() && !p_261628_;
+            boolean flag = telemetryeventtype.isOptIn() && !pOptIn;
             this.addEventType(telemetryeventwidget$contentbuilder, telemetryeventtype, flag);
             if (i < list.size() - 1) {
                 telemetryeventwidget$contentbuilder.addSpacer(9);
@@ -70,8 +70,8 @@ public class TelemetryEventWidget extends AbstractTextAreaWidget {
         return telemetryeventwidget$contentbuilder.build();
     }
 
-    public void setOnScrolledListener(@Nullable DoubleConsumer p_261686_) {
-        this.onScrolledListener = p_261686_;
+    public void setOnScrolledListener(@Nullable DoubleConsumer pOnScrolledListener) {
+        this.onScrolledListener = pOnScrolledListener;
     }
 
     @Override
@@ -107,22 +107,22 @@ public class TelemetryEventWidget extends AbstractTextAreaWidget {
         p_261538_.add(NarratedElementType.TITLE, this.content.narration());
     }
 
-    private Component grayOutIfDisabled(Component p_311715_, boolean p_310771_) {
-        return (Component)(p_310771_ ? p_311715_.copy().withStyle(ChatFormatting.GRAY) : p_311715_);
+    private Component grayOutIfDisabled(Component pComponent, boolean pDisabled) {
+        return (Component)(pDisabled ? pComponent.copy().withStyle(ChatFormatting.GRAY) : pComponent);
     }
 
-    private void addEventType(TelemetryEventWidget.ContentBuilder p_261823_, TelemetryEventType p_262127_, boolean p_310858_) {
-        String s = p_262127_.isOptIn() ? (p_310858_ ? "telemetry.event.optional.disabled" : "telemetry.event.optional") : "telemetry.event.required";
-        p_261823_.addHeader(this.font, this.grayOutIfDisabled(Component.translatable(s, p_262127_.title()), p_310858_));
-        p_261823_.addHeader(this.font, p_262127_.description().withStyle(ChatFormatting.GRAY));
-        p_261823_.addSpacer(9 / 2);
-        p_261823_.addLine(this.font, this.grayOutIfDisabled(PROPERTY_TITLE, p_310858_), 2);
-        this.addEventTypeProperties(p_262127_, p_261823_, p_310858_);
+    private void addEventType(TelemetryEventWidget.ContentBuilder pContentBuilder, TelemetryEventType pEventType, boolean pDisabled) {
+        String s = pEventType.isOptIn() ? (pDisabled ? "telemetry.event.optional.disabled" : "telemetry.event.optional") : "telemetry.event.required";
+        pContentBuilder.addHeader(this.font, this.grayOutIfDisabled(Component.translatable(s, pEventType.title()), pDisabled));
+        pContentBuilder.addHeader(this.font, pEventType.description().withStyle(ChatFormatting.GRAY));
+        pContentBuilder.addSpacer(9 / 2);
+        pContentBuilder.addLine(this.font, this.grayOutIfDisabled(PROPERTY_TITLE, pDisabled), 2);
+        this.addEventTypeProperties(pEventType, pContentBuilder, pDisabled);
     }
 
-    private void addEventTypeProperties(TelemetryEventType p_262105_, TelemetryEventWidget.ContentBuilder p_261932_, boolean p_310254_) {
-        for (TelemetryProperty<?> telemetryproperty : p_262105_.properties()) {
-            p_261932_.addLine(this.font, this.grayOutIfDisabled(telemetryproperty.title(), p_310254_));
+    private void addEventTypeProperties(TelemetryEventType pEventType, TelemetryEventWidget.ContentBuilder pContentBuilder, boolean pDisabled) {
+        for (TelemetryProperty<?> telemetryproperty : pEventType.properties()) {
+            pContentBuilder.addLine(this.font, this.grayOutIfDisabled(telemetryproperty.title(), pDisabled));
         }
     }
 
@@ -140,33 +140,33 @@ public class TelemetryEventWidget extends AbstractTextAreaWidget {
         private final LinearLayout layout;
         private final MutableComponent narration = Component.empty();
 
-        public ContentBuilder(int p_261784_) {
-            this.width = p_261784_;
+        public ContentBuilder(int pWidth) {
+            this.width = pWidth;
             this.layout = LinearLayout.vertical();
             this.layout.defaultCellSetting().alignHorizontallyLeft();
-            this.layout.addChild(SpacerElement.width(p_261784_));
+            this.layout.addChild(SpacerElement.width(pWidth));
         }
 
-        public void addLine(Font p_261503_, Component p_261550_) {
-            this.addLine(p_261503_, p_261550_, 0);
+        public void addLine(Font pFont, Component pMessage) {
+            this.addLine(pFont, pMessage, 0);
         }
 
-        public void addLine(Font p_261894_, Component p_261816_, int p_261721_) {
-            this.layout.addChild(new MultiLineTextWidget(p_261816_, p_261894_).setMaxWidth(this.width), p_300900_ -> p_300900_.paddingBottom(p_261721_));
-            this.narration.append(p_261816_).append("\n");
+        public void addLine(Font pFont, Component pMessage, int pPadding) {
+            this.layout.addChild(new MultiLineTextWidget(pMessage, pFont).setMaxWidth(this.width), p_300900_ -> p_300900_.paddingBottom(pPadding));
+            this.narration.append(pMessage).append("\n");
         }
 
-        public void addHeader(Font p_261496_, Component p_261670_) {
+        public void addHeader(Font pFont, Component pMessage) {
             this.layout
                 .addChild(
-                    new MultiLineTextWidget(p_261670_, p_261496_).setMaxWidth(this.width - 64).setCentered(true),
+                    new MultiLineTextWidget(pMessage, pFont).setMaxWidth(this.width - 64).setCentered(true),
                     p_298721_ -> p_298721_.alignHorizontallyCenter().paddingHorizontal(32)
                 );
-            this.narration.append(p_261670_).append("\n");
+            this.narration.append(pMessage).append("\n");
         }
 
-        public void addSpacer(int p_261997_) {
-            this.layout.addChild(SpacerElement.height(p_261997_));
+        public void addSpacer(int pHeight) {
+            this.layout.addChild(SpacerElement.height(pHeight));
         }
 
         public TelemetryEventWidget.Content build() {

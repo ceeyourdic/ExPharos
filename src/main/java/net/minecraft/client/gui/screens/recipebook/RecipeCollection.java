@@ -19,20 +19,20 @@ public class RecipeCollection {
     private final Set<RecipeDisplayId> craftable = new HashSet<>();
     private final Set<RecipeDisplayId> selected = new HashSet<>();
 
-    public RecipeCollection(List<RecipeDisplayEntry> p_267051_) {
-        this.entries = p_267051_;
+    public RecipeCollection(List<RecipeDisplayEntry> pEntries) {
+        this.entries = pEntries;
     }
 
-    public void selectRecipes(StackedItemContents p_361916_, Predicate<RecipeDisplay> p_365877_) {
+    public void selectRecipes(StackedItemContents pStackedItemContents, Predicate<RecipeDisplay> pFilter) {
         for (RecipeDisplayEntry recipedisplayentry : this.entries) {
-            boolean flag = p_365877_.test(recipedisplayentry.display());
+            boolean flag = pFilter.test(recipedisplayentry.display());
             if (flag) {
                 this.selected.add(recipedisplayentry.id());
             } else {
                 this.selected.remove(recipedisplayentry.id());
             }
 
-            if (flag && recipedisplayentry.canCraft(p_361916_)) {
+            if (flag && recipedisplayentry.canCraft(pStackedItemContents)) {
                 this.craftable.add(recipedisplayentry.id());
             } else {
                 this.craftable.remove(recipedisplayentry.id());
@@ -40,8 +40,8 @@ public class RecipeCollection {
         }
     }
 
-    public boolean isCraftable(RecipeDisplayId p_366818_) {
-        return this.craftable.contains(p_366818_);
+    public boolean isCraftable(RecipeDisplayId pRecipe) {
+        return this.craftable.contains(pRecipe);
     }
 
     public boolean hasCraftable() {
@@ -56,8 +56,8 @@ public class RecipeCollection {
         return this.entries;
     }
 
-    public List<RecipeDisplayEntry> getSelectedRecipes(RecipeCollection.CraftableStatus p_369775_) {
-        Predicate<RecipeDisplayId> predicate = switch (p_369775_) {
+    public List<RecipeDisplayEntry> getSelectedRecipes(RecipeCollection.CraftableStatus pCraftableStatus) {
+        Predicate<RecipeDisplayId> predicate = switch (pCraftableStatus) {
             case ANY -> this.selected::contains;
             case CRAFTABLE -> this.craftable::contains;
             case NOT_CRAFTABLE -> p_361783_ -> this.selected.contains(p_361783_) && !this.craftable.contains(p_361783_);

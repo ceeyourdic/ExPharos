@@ -32,8 +32,8 @@ public class RealmsAvailability {
         return future;
     }
 
-    private static boolean shouldRefresh(CompletableFuture<RealmsAvailability.Result> p_299038_) {
-        RealmsAvailability.Result realmsavailability$result = p_299038_.getNow(null);
+    private static boolean shouldRefresh(CompletableFuture<RealmsAvailability.Result> pFuture) {
+        RealmsAvailability.Result realmsavailability$result = pFuture.getNow(null);
         return realmsavailability$result != null && realmsavailability$result.exception() != null;
     }
 
@@ -66,24 +66,24 @@ public class RealmsAvailability {
 
     @OnlyIn(Dist.CLIENT)
     public static record Result(RealmsAvailability.Type type, @Nullable RealmsServiceException exception) {
-        public Result(RealmsAvailability.Type p_298726_) {
-            this(p_298726_, null);
+        public Result(RealmsAvailability.Type pType) {
+            this(pType, null);
         }
 
-        public Result(RealmsServiceException p_297806_) {
-            this(RealmsAvailability.Type.UNEXPECTED_ERROR, p_297806_);
+        public Result(RealmsServiceException pException) {
+            this(RealmsAvailability.Type.UNEXPECTED_ERROR, pException);
         }
 
         @Nullable
-        public Screen createErrorScreen(Screen p_299167_) {
+        public Screen createErrorScreen(Screen pLastScreen) {
             return (Screen)(switch (this.type) {
                 case SUCCESS -> null;
-                case INCOMPATIBLE_CLIENT -> new RealmsClientOutdatedScreen(p_299167_);
-                case NEEDS_PARENTAL_CONSENT -> new RealmsParentalConsentScreen(p_299167_);
+                case INCOMPATIBLE_CLIENT -> new RealmsClientOutdatedScreen(pLastScreen);
+                case NEEDS_PARENTAL_CONSENT -> new RealmsParentalConsentScreen(pLastScreen);
                 case AUTHENTICATION_ERROR -> new RealmsGenericErrorScreen(
-                Component.translatable("mco.error.invalid.session.title"), Component.translatable("mco.error.invalid.session.message"), p_299167_
+                Component.translatable("mco.error.invalid.session.title"), Component.translatable("mco.error.invalid.session.message"), pLastScreen
             );
-                case UNEXPECTED_ERROR -> new RealmsGenericErrorScreen(Objects.requireNonNull(this.exception), p_299167_);
+                case UNEXPECTED_ERROR -> new RealmsGenericErrorScreen(Objects.requireNonNull(this.exception), pLastScreen);
             });
         }
     }

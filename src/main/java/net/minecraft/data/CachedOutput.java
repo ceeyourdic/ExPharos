@@ -12,5 +12,5 @@ public interface CachedOutput {
         Files.write(p_308470_, p_308471_);
     };
 
-    void writeIfNeeded(Path p_236022_, byte[] p_236023_, HashCode p_236024_) throws IOException;
+    void writeIfNeeded(Path pFilePath, byte[] pData, HashCode pHashCode) throws IOException;
 }

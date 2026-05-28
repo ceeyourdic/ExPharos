@@ -10,8 +10,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class MinecartCommandBlockEditScreen extends AbstractCommandBlockEditScreen {
     private final BaseCommandBlock commandBlock;
 
-    public MinecartCommandBlockEditScreen(BaseCommandBlock p_99216_) {
-        this.commandBlock = p_99216_;
+    public MinecartCommandBlockEditScreen(BaseCommandBlock pCommandBlock) {
+        this.commandBlock = pCommandBlock;
     }
 
     @Override

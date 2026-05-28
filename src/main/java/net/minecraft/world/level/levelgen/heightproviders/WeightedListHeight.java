@@ -16,8 +16,8 @@ public class WeightedListHeight extends HeightProvider {
     );
     private final SimpleWeightedRandomList<HeightProvider> distribution;
 
-    public WeightedListHeight(SimpleWeightedRandomList<HeightProvider> p_191536_) {
-        this.distribution = p_191536_;
+    public WeightedListHeight(SimpleWeightedRandomList<HeightProvider> pDistribution) {
+        this.distribution = pDistribution;
     }
 
     @Override

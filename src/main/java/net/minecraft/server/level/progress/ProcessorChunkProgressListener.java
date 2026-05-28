@@ -11,20 +11,20 @@ public class ProcessorChunkProgressListener implements ChunkProgressListener {
     private final ConsecutiveExecutor consecutiveExecutor;
     private boolean started;
 
-    private ProcessorChunkProgressListener(ChunkProgressListener p_9640_, Executor p_9641_) {
-        this.delegate = p_9640_;
-        this.consecutiveExecutor = new ConsecutiveExecutor(p_9641_, "progressListener");
+    private ProcessorChunkProgressListener(ChunkProgressListener pDelegate, Executor pDispatcher) {
+        this.delegate = pDelegate;
+        this.consecutiveExecutor = new ConsecutiveExecutor(pDispatcher, "progressListener");
     }
 
-    public static ProcessorChunkProgressListener createStarted(ChunkProgressListener p_143584_, Executor p_143585_) {
-        ProcessorChunkProgressListener processorchunkprogresslistener = new ProcessorChunkProgressListener(p_143584_, p_143585_);
+    public static ProcessorChunkProgressListener createStarted(ChunkProgressListener pDelegate, Executor pDispatcher) {
+        ProcessorChunkProgressListener processorchunkprogresslistener = new ProcessorChunkProgressListener(pDelegate, pDispatcher);
         processorchunkprogresslistener.start();
         return processorchunkprogresslistener;
     }
 
     @Override
-    public void updateSpawnPos(ChunkPos p_9643_) {
-        this.consecutiveExecutor.schedule(() -> this.delegate.updateSpawnPos(p_9643_));
+    public void updateSpawnPos(ChunkPos pCenter) {
+        this.consecutiveExecutor.schedule(() -> this.delegate.updateSpawnPos(pCenter));
     }
 
     @Override

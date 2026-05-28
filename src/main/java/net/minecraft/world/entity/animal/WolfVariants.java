@@ -25,44 +25,44 @@ public class WolfVariants {
     public static final ResourceKey<WolfVariant> STRIPED = createKey("striped");
     public static final ResourceKey<WolfVariant> DEFAULT = PALE;
 
-    private static ResourceKey<WolfVariant> createKey(String p_335110_) {
-        return ResourceKey.create(Registries.WOLF_VARIANT, ResourceLocation.withDefaultNamespace(p_335110_));
+    private static ResourceKey<WolfVariant> createKey(String pName) {
+        return ResourceKey.create(Registries.WOLF_VARIANT, ResourceLocation.withDefaultNamespace(pName));
     }
 
-    static void register(BootstrapContext<WolfVariant> p_328632_, ResourceKey<WolfVariant> p_331459_, String p_329414_, ResourceKey<Biome> p_332564_) {
-        register(p_328632_, p_331459_, p_329414_, HolderSet.direct(p_328632_.lookup(Registries.BIOME).getOrThrow(p_332564_)));
+    static void register(BootstrapContext<WolfVariant> pContext, ResourceKey<WolfVariant> pKey, String pName, ResourceKey<Biome> pSpawnBiome) {
+        register(pContext, pKey, pName, HolderSet.direct(pContext.lookup(Registries.BIOME).getOrThrow(pSpawnBiome)));
     }
 
-    static void register(BootstrapContext<WolfVariant> p_334941_, ResourceKey<WolfVariant> p_335312_, String p_334468_, TagKey<Biome> p_335491_) {
-        register(p_334941_, p_335312_, p_334468_, p_334941_.lookup(Registries.BIOME).getOrThrow(p_335491_));
+    static void register(BootstrapContext<WolfVariant> pContext, ResourceKey<WolfVariant> pKey, String pName, TagKey<Biome> pSpawnBiomes) {
+        register(pContext, pKey, pName, pContext.lookup(Registries.BIOME).getOrThrow(pSpawnBiomes));
     }
 
-    static void register(BootstrapContext<WolfVariant> p_332159_, ResourceKey<WolfVariant> p_330575_, String p_333153_, HolderSet<Biome> p_334914_) {
-        ResourceLocation resourcelocation = ResourceLocation.withDefaultNamespace("entity/wolf/" + p_333153_);
-        ResourceLocation resourcelocation1 = ResourceLocation.withDefaultNamespace("entity/wolf/" + p_333153_ + "_tame");
-        ResourceLocation resourcelocation2 = ResourceLocation.withDefaultNamespace("entity/wolf/" + p_333153_ + "_angry");
-        p_332159_.register(p_330575_, new WolfVariant(resourcelocation, resourcelocation1, resourcelocation2, p_334914_));
+    static void register(BootstrapContext<WolfVariant> pContext, ResourceKey<WolfVariant> pKey, String pName, HolderSet<Biome> pSpawnBiomes) {
+        ResourceLocation resourcelocation = ResourceLocation.withDefaultNamespace("entity/wolf/" + pName);
+        ResourceLocation resourcelocation1 = ResourceLocation.withDefaultNamespace("entity/wolf/" + pName + "_tame");
+        ResourceLocation resourcelocation2 = ResourceLocation.withDefaultNamespace("entity/wolf/" + pName + "_angry");
+        pContext.register(pKey, new WolfVariant(resourcelocation, resourcelocation1, resourcelocation2, pSpawnBiomes));
     }
 
-    public static Holder<WolfVariant> getSpawnVariant(RegistryAccess p_330241_, Holder<Biome> p_331959_) {
-        Registry<WolfVariant> registry = p_330241_.lookupOrThrow(Registries.WOLF_VARIANT);
+    public static Holder<WolfVariant> getSpawnVariant(RegistryAccess pRegistryAccess, Holder<Biome> pBiome) {
+        Registry<WolfVariant> registry = pRegistryAccess.lookupOrThrow(Registries.WOLF_VARIANT);
         return registry.listElements()
-            .filter(p_329793_ -> p_329793_.value().biomes().contains(p_331959_))
+            .filter(p_329793_ -> p_329793_.value().biomes().contains(pBiome))
             .findFirst()
             .or(() -> registry.get(DEFAULT))
             .or(registry::getAny)
             .orElseThrow();
     }
 
-    public static void bootstrap(BootstrapContext<WolfVariant> p_332045_) {
-        register(p_332045_, PALE, "wolf", Biomes.TAIGA);
-        register(p_332045_, SPOTTED, "wolf_spotted", BiomeTags.IS_SAVANNA);
-        register(p_332045_, SNOWY, "wolf_snowy", Biomes.GROVE);
-        register(p_332045_, BLACK, "wolf_black", Biomes.OLD_GROWTH_PINE_TAIGA);
-        register(p_332045_, ASHEN, "wolf_ashen", Biomes.SNOWY_TAIGA);
-        register(p_332045_, RUSTY, "wolf_rusty", BiomeTags.IS_JUNGLE);
-        register(p_332045_, WOODS, "wolf_woods", Biomes.FOREST);
-        register(p_332045_, CHESTNUT, "wolf_chestnut", Biomes.OLD_GROWTH_SPRUCE_TAIGA);
-        register(p_332045_, STRIPED, "wolf_striped", BiomeTags.IS_BADLANDS);
+    public static void bootstrap(BootstrapContext<WolfVariant> pContext) {
+        register(pContext, PALE, "wolf", Biomes.TAIGA);
+        register(pContext, SPOTTED, "wolf_spotted", BiomeTags.IS_SAVANNA);
+        register(pContext, SNOWY, "wolf_snowy", Biomes.GROVE);
+        register(pContext, BLACK, "wolf_black", Biomes.OLD_GROWTH_PINE_TAIGA);
+        register(pContext, ASHEN, "wolf_ashen", Biomes.SNOWY_TAIGA);
+        register(pContext, RUSTY, "wolf_rusty", BiomeTags.IS_JUNGLE);
+        register(pContext, WOODS, "wolf_woods", Biomes.FOREST);
+        register(pContext, CHESTNUT, "wolf_chestnut", Biomes.OLD_GROWTH_SPRUCE_TAIGA);
+        register(pContext, STRIPED, "wolf_striped", BiomeTags.IS_BADLANDS);
     }
 }

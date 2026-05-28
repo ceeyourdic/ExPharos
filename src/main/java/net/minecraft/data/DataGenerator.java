@@ -22,11 +22,11 @@ public class DataGenerator {
     private final WorldVersion version;
     private final boolean alwaysGenerate;
 
-    public DataGenerator(Path p_251724_, WorldVersion p_250554_, boolean p_251323_) {
-        this.rootOutputFolder = p_251724_;
+    public DataGenerator(Path pRootOutputFolder, WorldVersion pVersion, boolean pAlwaysGenerate) {
+        this.rootOutputFolder = pRootOutputFolder;
         this.vanillaPackOutput = new PackOutput(this.rootOutputFolder);
-        this.version = p_250554_;
-        this.alwaysGenerate = p_251323_;
+        this.version = pVersion;
+        this.alwaysGenerate = pAlwaysGenerate;
     }
 
     public void run() throws IOException {
@@ -49,13 +49,13 @@ public class DataGenerator {
         hashcache.purgeStaleAndWrite();
     }
 
-    public DataGenerator.PackGenerator getVanillaPack(boolean p_254422_) {
-        return new DataGenerator.PackGenerator(p_254422_, "vanilla", this.vanillaPackOutput);
+    public DataGenerator.PackGenerator getVanillaPack(boolean pToRun) {
+        return new DataGenerator.PackGenerator(pToRun, "vanilla", this.vanillaPackOutput);
     }
 
-    public DataGenerator.PackGenerator getBuiltinDatapack(boolean p_253826_, String p_254134_) {
-        Path path = this.vanillaPackOutput.getOutputFolder(PackOutput.Target.DATA_PACK).resolve("minecraft").resolve("datapacks").resolve(p_254134_);
-        return new DataGenerator.PackGenerator(p_253826_, p_254134_, new PackOutput(path));
+    public DataGenerator.PackGenerator getBuiltinDatapack(boolean pToRun, String pProviderPrefix) {
+        Path path = this.vanillaPackOutput.getOutputFolder(PackOutput.Target.DATA_PACK).resolve("minecraft").resolve("datapacks").resolve(pProviderPrefix);
+        return new DataGenerator.PackGenerator(pToRun, pProviderPrefix, new PackOutput(path));
     }
 
     static {
@@ -67,14 +67,14 @@ public class DataGenerator {
         private final String providerPrefix;
         private final PackOutput output;
 
-        PackGenerator(final boolean p_253884_, final String p_254544_, final PackOutput p_254363_) {
-            this.toRun = p_253884_;
-            this.providerPrefix = p_254544_;
-            this.output = p_254363_;
+        PackGenerator(final boolean pToRun, final String pProviderPrefix, final PackOutput pOutput) {
+            this.toRun = pToRun;
+            this.providerPrefix = pProviderPrefix;
+            this.output = pOutput;
         }
 
-        public <T extends DataProvider> T addProvider(DataProvider.Factory<T> p_254382_) {
-            T t = p_254382_.create(this.output);
+        public <T extends DataProvider> T addProvider(DataProvider.Factory<T> pFactory) {
+            T t = pFactory.create(this.output);
             String s = this.providerPrefix + "/" + t.getName();
             if (!DataGenerator.this.allProviderIds.add(s)) {
                 throw new IllegalStateException("Duplicate provider: " + s);

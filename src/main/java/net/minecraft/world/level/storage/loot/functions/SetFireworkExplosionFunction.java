@@ -35,19 +35,19 @@ public class SetFireworkExplosionFunction extends LootItemConditionalFunction {
     final Optional<Boolean> twinkle;
 
     public SetFireworkExplosionFunction(
-        List<LootItemCondition> p_328435_,
-        Optional<FireworkExplosion.Shape> p_335053_,
-        Optional<IntList> p_331523_,
-        Optional<IntList> p_331948_,
-        Optional<Boolean> p_330337_,
-        Optional<Boolean> p_335969_
+        List<LootItemCondition> pConditions,
+        Optional<FireworkExplosion.Shape> pShape,
+        Optional<IntList> pColors,
+        Optional<IntList> pFadeColors,
+        Optional<Boolean> pTrail,
+        Optional<Boolean> pTwinkle
     ) {
-        super(p_328435_);
-        this.shape = p_335053_;
-        this.colors = p_331523_;
-        this.fadeColors = p_331948_;
-        this.trail = p_330337_;
-        this.twinkle = p_335969_;
+        super(pConditions);
+        this.shape = pShape;
+        this.colors = pColors;
+        this.fadeColors = pFadeColors;
+        this.trail = pTrail;
+        this.twinkle = pTwinkle;
     }
 
     @Override
@@ -56,13 +56,13 @@ public class SetFireworkExplosionFunction extends LootItemConditionalFunction {
         return p_328627_;
     }
 
-    private FireworkExplosion apply(FireworkExplosion p_329657_) {
+    private FireworkExplosion apply(FireworkExplosion pFireworkExplosion) {
         return new FireworkExplosion(
-            this.shape.orElseGet(p_329657_::shape),
-            this.colors.orElseGet(p_329657_::colors),
-            this.fadeColors.orElseGet(p_329657_::fadeColors),
-            this.trail.orElseGet(p_329657_::hasTrail),
-            this.twinkle.orElseGet(p_329657_::hasTwinkle)
+            this.shape.orElseGet(pFireworkExplosion::shape),
+            this.colors.orElseGet(pFireworkExplosion::colors),
+            this.fadeColors.orElseGet(pFireworkExplosion::fadeColors),
+            this.trail.orElseGet(pFireworkExplosion::hasTrail),
+            this.twinkle.orElseGet(pFireworkExplosion::hasTwinkle)
         );
     }
 

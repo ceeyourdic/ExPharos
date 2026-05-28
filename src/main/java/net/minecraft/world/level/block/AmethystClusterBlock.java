@@ -49,23 +49,23 @@ public class AmethystClusterBlock extends AmethystBlock implements SimpleWaterlo
         return CODEC;
     }
 
-    public AmethystClusterBlock(float p_313148_, float p_309607_, BlockBehaviour.Properties p_152017_) {
-        super(p_152017_);
+    public AmethystClusterBlock(float pHeight, float pAabbOffset, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
         this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, Boolean.valueOf(false)).setValue(FACING, Direction.UP));
-        this.upAabb = Block.box((double)p_309607_, 0.0, (double)p_309607_, (double)(16.0F - p_309607_), (double)p_313148_, (double)(16.0F - p_309607_));
+        this.upAabb = Block.box((double)pAabbOffset, 0.0, (double)pAabbOffset, (double)(16.0F - pAabbOffset), (double)pHeight, (double)(16.0F - pAabbOffset));
         this.downAabb = Block.box(
-            (double)p_309607_, (double)(16.0F - p_313148_), (double)p_309607_, (double)(16.0F - p_309607_), 16.0, (double)(16.0F - p_309607_)
+            (double)pAabbOffset, (double)(16.0F - pHeight), (double)pAabbOffset, (double)(16.0F - pAabbOffset), 16.0, (double)(16.0F - pAabbOffset)
         );
         this.northAabb = Block.box(
-            (double)p_309607_, (double)p_309607_, (double)(16.0F - p_313148_), (double)(16.0F - p_309607_), (double)(16.0F - p_309607_), 16.0
+            (double)pAabbOffset, (double)pAabbOffset, (double)(16.0F - pHeight), (double)(16.0F - pAabbOffset), (double)(16.0F - pAabbOffset), 16.0
         );
-        this.southAabb = Block.box((double)p_309607_, (double)p_309607_, 0.0, (double)(16.0F - p_309607_), (double)(16.0F - p_309607_), (double)p_313148_);
-        this.eastAabb = Block.box(0.0, (double)p_309607_, (double)p_309607_, (double)p_313148_, (double)(16.0F - p_309607_), (double)(16.0F - p_309607_));
+        this.southAabb = Block.box((double)pAabbOffset, (double)pAabbOffset, 0.0, (double)(16.0F - pAabbOffset), (double)(16.0F - pAabbOffset), (double)pHeight);
+        this.eastAabb = Block.box(0.0, (double)pAabbOffset, (double)pAabbOffset, (double)pHeight, (double)(16.0F - pAabbOffset), (double)(16.0F - pAabbOffset));
         this.westAabb = Block.box(
-            (double)(16.0F - p_313148_), (double)p_309607_, (double)p_309607_, 16.0, (double)(16.0F - p_309607_), (double)(16.0F - p_309607_)
+            (double)(16.0F - pHeight), (double)pAabbOffset, (double)pAabbOffset, 16.0, (double)(16.0F - pAabbOffset), (double)(16.0F - pAabbOffset)
         );
-        this.height = p_313148_;
-        this.aabbOffset = p_309607_;
+        this.height = pHeight;
+        this.aabbOffset = pAabbOffset;
     }
 
     @Override

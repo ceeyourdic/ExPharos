@@ -28,15 +28,15 @@ public class ClampedNormalFloat extends FloatProvider {
     private final float min;
     private final float max;
 
-    public static ClampedNormalFloat of(float p_146424_, float p_146425_, float p_146426_, float p_146427_) {
-        return new ClampedNormalFloat(p_146424_, p_146425_, p_146426_, p_146427_);
+    public static ClampedNormalFloat of(float pMean, float pDeviation, float pMin, float pMax) {
+        return new ClampedNormalFloat(pMean, pDeviation, pMin, pMax);
     }
 
-    private ClampedNormalFloat(float p_146418_, float p_146419_, float p_146420_, float p_146421_) {
-        this.mean = p_146418_;
-        this.deviation = p_146419_;
-        this.min = p_146420_;
-        this.max = p_146421_;
+    private ClampedNormalFloat(float pMean, float pDeviation, float pMin, float pMax) {
+        this.mean = pMean;
+        this.deviation = pDeviation;
+        this.min = pMin;
+        this.max = pMax;
     }
 
     @Override
@@ -44,8 +44,8 @@ public class ClampedNormalFloat extends FloatProvider {
         return sample(p_216836_, this.mean, this.deviation, this.min, this.max);
     }
 
-    public static float sample(RandomSource p_216838_, float p_216839_, float p_216840_, float p_216841_, float p_216842_) {
-        return Mth.clamp(Mth.normal(p_216838_, p_216839_, p_216840_), p_216841_, p_216842_);
+    public static float sample(RandomSource pRandom, float pMean, float pDeviation, float pMin, float pMax) {
+        return Mth.clamp(Mth.normal(pRandom, pMean, pDeviation), pMin, pMax);
     }
 
     @Override

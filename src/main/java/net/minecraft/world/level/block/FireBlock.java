@@ -87,25 +87,25 @@ public class FireBlock extends BaseFireBlock {
         );
     }
 
-    private static VoxelShape calculateShape(BlockState p_53491_) {
+    private static VoxelShape calculateShape(BlockState pState) {
         VoxelShape voxelshape = Shapes.empty();
-        if (p_53491_.getValue(UP)) {
+        if (pState.getValue(UP)) {
             voxelshape = UP_AABB;
         }
 
-        if (p_53491_.getValue(NORTH)) {
+        if (pState.getValue(NORTH)) {
             voxelshape = Shapes.or(voxelshape, NORTH_AABB);
         }
 
-        if (p_53491_.getValue(SOUTH)) {
+        if (pState.getValue(SOUTH)) {
             voxelshape = Shapes.or(voxelshape, SOUTH_AABB);
         }
 
-        if (p_53491_.getValue(EAST)) {
+        if (pState.getValue(EAST)) {
             voxelshape = Shapes.or(voxelshape, EAST_AABB);
         }
 
-        if (p_53491_.getValue(WEST)) {
+        if (pState.getValue(WEST)) {
             voxelshape = Shapes.or(voxelshape, WEST_AABB);
         }
 
@@ -127,25 +127,25 @@ public class FireBlock extends BaseFireBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_53474_, BlockGetter p_53475_, BlockPos p_53476_, CollisionContext p_53477_) {
-        return this.shapesCache.get(p_53474_.setValue(AGE, Integer.valueOf(0)));
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return this.shapesCache.get(pState.setValue(AGE, Integer.valueOf(0)));
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_53427_) {
-        return this.getStateForPlacement(p_53427_.getLevel(), p_53427_.getClickedPos());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.getStateForPlacement(pContext.getLevel(), pContext.getClickedPos());
     }
 
-    protected BlockState getStateForPlacement(BlockGetter p_53471_, BlockPos p_53472_) {
-        BlockPos blockpos = p_53472_.below();
-        BlockState blockstate = p_53471_.getBlockState(blockpos);
-        if (!this.canBurn(blockstate) && !blockstate.isFaceSturdy(p_53471_, blockpos, Direction.UP)) {
+    protected BlockState getStateForPlacement(BlockGetter pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.below();
+        BlockState blockstate = pLevel.getBlockState(blockpos);
+        if (!this.canBurn(blockstate) && !blockstate.isFaceSturdy(pLevel, blockpos, Direction.UP)) {
             BlockState blockstate1 = this.defaultBlockState();
 
             for (Direction direction : Direction.values()) {
                 BooleanProperty booleanproperty = PROPERTY_BY_DIRECTION.get(direction);
                 if (booleanproperty != null) {
-                    blockstate1 = blockstate1.setValue(booleanproperty, Boolean.valueOf(this.canBurn(p_53471_.getBlockState(p_53472_.relative(direction)))));
+                    blockstate1 = blockstate1.setValue(booleanproperty, Boolean.valueOf(this.canBurn(pLevel.getBlockState(pPos.relative(direction)))));
                 }
             }
 
@@ -156,9 +156,9 @@ public class FireBlock extends BaseFireBlock {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_53454_, LevelReader p_53455_, BlockPos p_53456_) {
-        BlockPos blockpos = p_53456_.below();
-        return p_53455_.getBlockState(blockpos).isFaceSturdy(p_53455_, blockpos, Direction.UP) || this.isValidFireLocation(p_53455_, p_53456_);
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.below();
+        return pLevel.getBlockState(blockpos).isFaceSturdy(pLevel, blockpos, Direction.UP) || this.isValidFireLocation(pLevel, pPos);
     }
 
     @Override
@@ -239,52 +239,52 @@ public class FireBlock extends BaseFireBlock {
         }
     }
 
-    protected boolean isNearRain(Level p_53429_, BlockPos p_53430_) {
-        return p_53429_.isRainingAt(p_53430_)
-            || p_53429_.isRainingAt(p_53430_.west())
-            || p_53429_.isRainingAt(p_53430_.east())
-            || p_53429_.isRainingAt(p_53430_.north())
-            || p_53429_.isRainingAt(p_53430_.south());
+    protected boolean isNearRain(Level pLevel, BlockPos pPos) {
+        return pLevel.isRainingAt(pPos)
+            || pLevel.isRainingAt(pPos.west())
+            || pLevel.isRainingAt(pPos.east())
+            || pLevel.isRainingAt(pPos.north())
+            || pLevel.isRainingAt(pPos.south());
     }
 
-    private int getBurnOdds(BlockState p_221165_) {
-        return p_221165_.hasProperty(BlockStateProperties.WATERLOGGED) && p_221165_.getValue(BlockStateProperties.WATERLOGGED)
+    private int getBurnOdds(BlockState pState) {
+        return pState.hasProperty(BlockStateProperties.WATERLOGGED) && pState.getValue(BlockStateProperties.WATERLOGGED)
             ? 0
-            : this.burnOdds.getInt(p_221165_.getBlock());
+            : this.burnOdds.getInt(pState.getBlock());
     }
 
-    private int getIgniteOdds(BlockState p_221167_) {
-        return p_221167_.hasProperty(BlockStateProperties.WATERLOGGED) && p_221167_.getValue(BlockStateProperties.WATERLOGGED)
+    private int getIgniteOdds(BlockState pState) {
+        return pState.hasProperty(BlockStateProperties.WATERLOGGED) && pState.getValue(BlockStateProperties.WATERLOGGED)
             ? 0
-            : this.igniteOdds.getInt(p_221167_.getBlock());
+            : this.igniteOdds.getInt(pState.getBlock());
     }
 
-    private void checkBurnOut(Level p_221151_, BlockPos p_221152_, int p_221153_, RandomSource p_221154_, int p_221155_) {
-        int i = this.getBurnOdds(p_221151_.getBlockState(p_221152_));
-        if (p_221154_.nextInt(p_221153_) < i) {
-            BlockState blockstate = p_221151_.getBlockState(p_221152_);
-            if (p_221154_.nextInt(p_221155_ + 10) < 5 && !p_221151_.isRainingAt(p_221152_)) {
-                int j = Math.min(p_221155_ + p_221154_.nextInt(5) / 4, 15);
-                p_221151_.setBlock(p_221152_, this.getStateWithAge(p_221151_, p_221152_, j), 3);
+    private void checkBurnOut(Level pLevel, BlockPos pPos, int pChance, RandomSource pRandom, int pAge) {
+        int i = this.getBurnOdds(pLevel.getBlockState(pPos));
+        if (pRandom.nextInt(pChance) < i) {
+            BlockState blockstate = pLevel.getBlockState(pPos);
+            if (pRandom.nextInt(pAge + 10) < 5 && !pLevel.isRainingAt(pPos)) {
+                int j = Math.min(pAge + pRandom.nextInt(5) / 4, 15);
+                pLevel.setBlock(pPos, this.getStateWithAge(pLevel, pPos, j), 3);
             } else {
-                p_221151_.removeBlock(p_221152_, false);
+                pLevel.removeBlock(pPos, false);
             }
 
             Block block = blockstate.getBlock();
             if (block instanceof TntBlock) {
-                TntBlock.explode(p_221151_, p_221152_);
+                TntBlock.explode(pLevel, pPos);
             }
         }
     }
 
-    private BlockState getStateWithAge(LevelReader p_366459_, BlockPos p_53439_, int p_53440_) {
-        BlockState blockstate = getState(p_366459_, p_53439_);
-        return blockstate.is(Blocks.FIRE) ? blockstate.setValue(AGE, Integer.valueOf(p_53440_)) : blockstate;
+    private BlockState getStateWithAge(LevelReader pLevel, BlockPos pPos, int pAge) {
+        BlockState blockstate = getState(pLevel, pPos);
+        return blockstate.is(Blocks.FIRE) ? blockstate.setValue(AGE, Integer.valueOf(pAge)) : blockstate;
     }
 
-    private boolean isValidFireLocation(BlockGetter p_53486_, BlockPos p_53487_) {
+    private boolean isValidFireLocation(BlockGetter pLevel, BlockPos pPos) {
         for (Direction direction : Direction.values()) {
-            if (this.canBurn(p_53486_.getBlockState(p_53487_.relative(direction)))) {
+            if (this.canBurn(pLevel.getBlockState(pPos.relative(direction)))) {
                 return true;
             }
         }
@@ -292,14 +292,14 @@ public class FireBlock extends BaseFireBlock {
         return false;
     }
 
-    private int getIgniteOdds(LevelReader p_221157_, BlockPos p_221158_) {
-        if (!p_221157_.isEmptyBlock(p_221158_)) {
+    private int getIgniteOdds(LevelReader pLevel, BlockPos pPos) {
+        if (!pLevel.isEmptyBlock(pPos)) {
             return 0;
         } else {
             int i = 0;
 
             for (Direction direction : Direction.values()) {
-                BlockState blockstate = p_221157_.getBlockState(p_221158_.relative(direction));
+                BlockState blockstate = pLevel.getBlockState(pPos.relative(direction));
                 i = Math.max(this.getIgniteOdds(blockstate), i);
             }
 
@@ -308,28 +308,28 @@ public class FireBlock extends BaseFireBlock {
     }
 
     @Override
-    protected boolean canBurn(BlockState p_53489_) {
-        return this.getIgniteOdds(p_53489_) > 0;
+    protected boolean canBurn(BlockState pState) {
+        return this.getIgniteOdds(pState) > 0;
     }
 
     @Override
-    protected void onPlace(BlockState p_53479_, Level p_53480_, BlockPos p_53481_, BlockState p_53482_, boolean p_53483_) {
-        super.onPlace(p_53479_, p_53480_, p_53481_, p_53482_, p_53483_);
-        p_53480_.scheduleTick(p_53481_, this, getFireTickDelay(p_53480_.random));
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        super.onPlace(pState, pLevel, pPos, pOldState, pIsMoving);
+        pLevel.scheduleTick(pPos, this, getFireTickDelay(pLevel.random));
     }
 
-    private static int getFireTickDelay(RandomSource p_221149_) {
-        return 30 + p_221149_.nextInt(10);
+    private static int getFireTickDelay(RandomSource pRandom) {
+        return 30 + pRandom.nextInt(10);
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_53465_) {
-        p_53465_.add(AGE, NORTH, EAST, SOUTH, WEST, UP);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(AGE, NORTH, EAST, SOUTH, WEST, UP);
     }
 
-    public void setFlammable(Block p_53445_, int p_53446_, int p_53447_) {
-        this.igniteOdds.put(p_53445_, p_53446_);
-        this.burnOdds.put(p_53445_, p_53447_);
+    public void setFlammable(Block pBlock, int pEncouragement, int pFlammability) {
+        this.igniteOdds.put(pBlock, pEncouragement);
+        this.burnOdds.put(pBlock, pFlammability);
     }
 
     public static void bootStrap() {

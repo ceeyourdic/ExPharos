@@ -1654,32 +1654,32 @@ public class SoundEvents {
     public static final SoundEvent APPLY_EFFECT_TRIAL_OMEN = register("event.mob_effect.trial_omen");
     public static final SoundEvent APPLY_EFFECT_RAID_OMEN = register("event.mob_effect.raid_omen");
 
-    private static Holder<SoundEvent> register(ResourceLocation p_263323_, ResourceLocation p_263411_, float p_263385_) {
-        return Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, p_263323_, SoundEvent.createFixedRangeEvent(p_263411_, p_263385_));
+    private static Holder<SoundEvent> register(ResourceLocation pName, ResourceLocation pLocation, float pRange) {
+        return Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, pName, SoundEvent.createFixedRangeEvent(pLocation, pRange));
     }
 
-    private static SoundEvent register(String p_12657_) {
-        return register(ResourceLocation.withDefaultNamespace(p_12657_));
+    private static SoundEvent register(String pName) {
+        return register(ResourceLocation.withDefaultNamespace(pName));
     }
 
-    private static SoundEvent register(ResourceLocation p_263332_) {
-        return register(p_263332_, p_263332_);
+    private static SoundEvent register(ResourceLocation pName) {
+        return register(pName, pName);
     }
 
-    private static Holder.Reference<SoundEvent> registerForHolder(String p_263391_) {
-        return registerForHolder(ResourceLocation.withDefaultNamespace(p_263391_));
+    private static Holder.Reference<SoundEvent> registerForHolder(String pName) {
+        return registerForHolder(ResourceLocation.withDefaultNamespace(pName));
     }
 
-    private static Holder.Reference<SoundEvent> registerForHolder(ResourceLocation p_263361_) {
-        return registerForHolder(p_263361_, p_263361_);
+    private static Holder.Reference<SoundEvent> registerForHolder(ResourceLocation pName) {
+        return registerForHolder(pName, pName);
     }
 
-    private static SoundEvent register(ResourceLocation p_263388_, ResourceLocation p_263340_) {
-        return Registry.register(BuiltInRegistries.SOUND_EVENT, p_263388_, SoundEvent.createVariableRangeEvent(p_263340_));
+    private static SoundEvent register(ResourceLocation pName, ResourceLocation pLocation) {
+        return Registry.register(BuiltInRegistries.SOUND_EVENT, pName, SoundEvent.createVariableRangeEvent(pLocation));
     }
 
-    private static Holder.Reference<SoundEvent> registerForHolder(ResourceLocation p_263362_, ResourceLocation p_263424_) {
-        return Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, p_263362_, SoundEvent.createVariableRangeEvent(p_263424_));
+    private static Holder.Reference<SoundEvent> registerForHolder(ResourceLocation pName, ResourceLocation pLocation) {
+        return Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, pName, SoundEvent.createVariableRangeEvent(pLocation));
     }
 
     private static ImmutableList<Holder.Reference<SoundEvent>> registerGoatHornSoundVariants() {

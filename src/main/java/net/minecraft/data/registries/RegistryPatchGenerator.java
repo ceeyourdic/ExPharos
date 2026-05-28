@@ -15,14 +15,14 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class RegistryPatchGenerator {
     public static CompletableFuture<RegistrySetBuilder.PatchedRegistries> createLookup(
-        CompletableFuture<HolderLookup.Provider> p_310881_, RegistrySetBuilder p_310262_
+        CompletableFuture<HolderLookup.Provider> pLookup, RegistrySetBuilder pRegistrySetBuilder
     ) {
-        return p_310881_.thenApply(
+        return pLookup.thenApply(
             p_309945_ -> {
                 RegistryAccess.Frozen registryaccess$frozen = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
                 Cloner.Factory cloner$factory = new Cloner.Factory();
                 RegistryDataLoader.WORLDGEN_REGISTRIES.forEach(p_313050_ -> p_313050_.runWithArguments(cloner$factory::addCodec));
-                RegistrySetBuilder.PatchedRegistries registrysetbuilder$patchedregistries = p_310262_.buildPatch(
+                RegistrySetBuilder.PatchedRegistries registrysetbuilder$patchedregistries = pRegistrySetBuilder.buildPatch(
                     registryaccess$frozen, p_309945_, cloner$factory
                 );
                 HolderLookup.Provider holderlookup$provider = registrysetbuilder$patchedregistries.full();

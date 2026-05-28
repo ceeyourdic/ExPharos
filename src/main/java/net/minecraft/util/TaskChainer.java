@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 public interface TaskChainer {
     Logger LOGGER = LogUtils.getLogger();
 
-    static TaskChainer immediate(final Executor p_251122_) {
+    static TaskChainer immediate(final Executor pExecutor) {
         return new TaskChainer() {
             @Override
             public <T> void append(CompletableFuture<T> p_310200_, Consumer<T> p_310807_) {
-                p_310200_.thenAcceptAsync(p_310807_, p_251122_).exceptionally(p_311935_ -> {
+                p_310200_.thenAcceptAsync(p_310807_, pExecutor).exceptionally(p_311935_ -> {
                     LOGGER.error("Task failed", p_311935_);
                     return null;
                 });
@@ -22,9 +22,9 @@ public interface TaskChainer {
         };
     }
 
-    default void append(Runnable p_312303_) {
-        this.append(CompletableFuture.completedFuture(null), p_308979_ -> p_312303_.run());
+    default void append(Runnable pTask) {
+        this.append(CompletableFuture.completedFuture(null), p_308979_ -> pTask.run());
     }
 
-    <T> void append(CompletableFuture<T> p_310192_, Consumer<T> p_312983_);
+    <T> void append(CompletableFuture<T> pFuture, Consumer<T> pConsumer);
 }

@@ -13,19 +13,19 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 public class PillagerOutpostPools {
     public static final ResourceKey<StructureTemplatePool> START = Pools.createKey("pillager_outpost/base_plates");
 
-    public static void bootstrap(BootstrapContext<StructureTemplatePool> p_328246_) {
-        HolderGetter<StructureProcessorList> holdergetter = p_328246_.lookup(Registries.PROCESSOR_LIST);
+    public static void bootstrap(BootstrapContext<StructureTemplatePool> pContext) {
+        HolderGetter<StructureProcessorList> holdergetter = pContext.lookup(Registries.PROCESSOR_LIST);
         Holder<StructureProcessorList> holder = holdergetter.getOrThrow(ProcessorLists.OUTPOST_ROT);
-        HolderGetter<StructureTemplatePool> holdergetter1 = p_328246_.lookup(Registries.TEMPLATE_POOL);
+        HolderGetter<StructureTemplatePool> holdergetter1 = pContext.lookup(Registries.TEMPLATE_POOL);
         Holder<StructureTemplatePool> holder1 = holdergetter1.getOrThrow(Pools.EMPTY);
-        p_328246_.register(
+        pContext.register(
             START,
             new StructureTemplatePool(
                 holder1, ImmutableList.of(Pair.of(StructurePoolElement.legacy("pillager_outpost/base_plate"), 1)), StructureTemplatePool.Projection.RIGID
             )
         );
         Pools.register(
-            p_328246_,
+            pContext,
             "pillager_outpost/towers",
             new StructureTemplatePool(
                 holder1,
@@ -44,7 +44,7 @@ public class PillagerOutpostPools {
             )
         );
         Pools.register(
-            p_328246_,
+            pContext,
             "pillager_outpost/feature_plates",
             new StructureTemplatePool(
                 holder1,
@@ -53,7 +53,7 @@ public class PillagerOutpostPools {
             )
         );
         Pools.register(
-            p_328246_,
+            pContext,
             "pillager_outpost/features",
             new StructureTemplatePool(
                 holder1,

@@ -58,8 +58,8 @@ public class PiglinModel extends AbstractPiglinModel<PiglinRenderState> {
         }
     }
 
-    private void holdWeaponHigh(PiglinRenderState p_368860_) {
-        if (p_368860_.mainArm == HumanoidArm.LEFT) {
+    private void holdWeaponHigh(PiglinRenderState pRenderState) {
+        if (pRenderState.mainArm == HumanoidArm.LEFT) {
             this.leftArm.xRot = -1.8F;
         } else {
             this.rightArm.xRot = -1.8F;

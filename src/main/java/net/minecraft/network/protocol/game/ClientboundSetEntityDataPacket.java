@@ -14,32 +14,32 @@ public record ClientboundSetEntityDataPacket(int id, List<SynchedEntityData.Data
     );
     public static final int EOF_MARKER = 255;
 
-    private ClientboundSetEntityDataPacket(RegistryFriendlyByteBuf p_335656_) {
-        this(p_335656_.readVarInt(), unpack(p_335656_));
+    private ClientboundSetEntityDataPacket(RegistryFriendlyByteBuf pBuffer) {
+        this(pBuffer.readVarInt(), unpack(pBuffer));
     }
 
-    private static void pack(List<SynchedEntityData.DataValue<?>> p_253940_, RegistryFriendlyByteBuf p_331850_) {
-        for (SynchedEntityData.DataValue<?> datavalue : p_253940_) {
-            datavalue.write(p_331850_);
+    private static void pack(List<SynchedEntityData.DataValue<?>> pDataValues, RegistryFriendlyByteBuf pBuffer) {
+        for (SynchedEntityData.DataValue<?> datavalue : pDataValues) {
+            datavalue.write(pBuffer);
         }
 
-        p_331850_.writeByte(255);
+        pBuffer.writeByte(255);
     }
 
-    private static List<SynchedEntityData.DataValue<?>> unpack(RegistryFriendlyByteBuf p_330932_) {
+    private static List<SynchedEntityData.DataValue<?>> unpack(RegistryFriendlyByteBuf pBuffer) {
         List<SynchedEntityData.DataValue<?>> list = new ArrayList<>();
 
         int i;
-        while ((i = p_330932_.readUnsignedByte()) != 255) {
-            list.add(SynchedEntityData.DataValue.read(p_330932_, i));
+        while ((i = pBuffer.readUnsignedByte()) != 255) {
+            list.add(SynchedEntityData.DataValue.read(pBuffer, i));
         }
 
         return list;
     }
 
-    private void write(RegistryFriendlyByteBuf p_333245_) {
-        p_333245_.writeVarInt(this.id);
-        pack(this.packedItems, p_333245_);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.id);
+        pack(this.packedItems, pBuffer);
     }
 
     @Override
@@ -47,7 +47,7 @@ public record ClientboundSetEntityDataPacket(int id, List<SynchedEntityData.Data
         return GamePacketTypes.CLIENTBOUND_SET_ENTITY_DATA;
     }
 
-    public void handle(ClientGamePacketListener p_133155_) {
-        p_133155_.handleSetEntityData(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleSetEntityData(this);
     }
 }

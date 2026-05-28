@@ -25,13 +25,13 @@ public class UniformHeight extends HeightProvider {
     private final VerticalAnchor maxInclusive;
     private final LongSet warnedFor = new LongOpenHashSet();
 
-    private UniformHeight(VerticalAnchor p_162029_, VerticalAnchor p_162030_) {
-        this.minInclusive = p_162029_;
-        this.maxInclusive = p_162030_;
+    private UniformHeight(VerticalAnchor pMinInclusive, VerticalAnchor pMaxInclusive) {
+        this.minInclusive = pMinInclusive;
+        this.maxInclusive = pMaxInclusive;
     }
 
-    public static UniformHeight of(VerticalAnchor p_162035_, VerticalAnchor p_162036_) {
-        return new UniformHeight(p_162035_, p_162036_);
+    public static UniformHeight of(VerticalAnchor pMinInclusive, VerticalAnchor pMaxInclusive) {
+        return new UniformHeight(pMinInclusive, pMaxInclusive);
     }
 
     @Override

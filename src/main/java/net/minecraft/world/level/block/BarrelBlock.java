@@ -51,9 +51,9 @@ public class BarrelBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void onRemove(BlockState p_49076_, Level p_49077_, BlockPos p_49078_, BlockState p_49079_, boolean p_49080_) {
-        Containers.dropContentsOnDestroy(p_49076_, p_49079_, p_49077_, p_49078_);
-        super.onRemove(p_49076_, p_49077_, p_49078_, p_49079_, p_49080_);
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        Containers.dropContentsOnDestroy(pState, pNewState, pLevel, pPos);
+        super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
     }
 
     @Override
@@ -71,32 +71,32 @@ public class BarrelBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected boolean hasAnalogOutputSignal(BlockState p_49058_) {
+    protected boolean hasAnalogOutputSignal(BlockState pState) {
         return true;
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState p_49065_, Level p_49066_, BlockPos p_49067_) {
-        return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(p_49066_.getBlockEntity(p_49067_));
+    protected int getAnalogOutputSignal(BlockState pBlockState, Level pLevel, BlockPos pPos) {
+        return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(pLevel.getBlockEntity(pPos));
     }
 
     @Override
-    protected BlockState rotate(BlockState p_49085_, Rotation p_49086_) {
-        return p_49085_.setValue(FACING, p_49086_.rotate(p_49085_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_49082_, Mirror p_49083_) {
-        return p_49082_.rotate(p_49083_.getRotation(p_49082_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_49088_) {
-        p_49088_.add(FACING, OPEN);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, OPEN);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_49048_) {
-        return this.defaultBlockState().setValue(FACING, p_49048_.getNearestLookingDirection().getOpposite());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.defaultBlockState().setValue(FACING, pContext.getNearestLookingDirection().getOpposite());
     }
 }

@@ -8,13 +8,13 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface PackReloadConfig {
-    void scheduleReload(PackReloadConfig.Callbacks p_312695_);
+    void scheduleReload(PackReloadConfig.Callbacks pCallbacks);
 
     @OnlyIn(Dist.CLIENT)
     public interface Callbacks {
         void onSuccess();
 
-        void onFailure(boolean p_313000_);
+        void onFailure(boolean pRecoveryFailure);
 
         List<PackReloadConfig.IdAndPath> packsToLoad();
     }

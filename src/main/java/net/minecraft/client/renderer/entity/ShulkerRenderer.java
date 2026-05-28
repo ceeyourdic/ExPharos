@@ -34,19 +34,19 @@ public class ShulkerRenderer extends MobRenderer<Shulker, ShulkerRenderState, Sh
         return p_368997_.renderOffset;
     }
 
-    public boolean shouldRender(Shulker p_115913_, Frustum p_115914_, double p_115915_, double p_115916_, double p_115917_) {
-        if (super.shouldRender(p_115913_, p_115914_, p_115915_, p_115916_, p_115917_)) {
+    public boolean shouldRender(Shulker pLivingEntity, Frustum pCamera, double pCamX, double pCamY, double pCamZ) {
+        if (super.shouldRender(pLivingEntity, pCamera, pCamX, pCamY, pCamZ)) {
             return true;
         } else {
-            Vec3 vec3 = p_115913_.getRenderPosition(0.0F);
+            Vec3 vec3 = pLivingEntity.getRenderPosition(0.0F);
             if (vec3 == null) {
                 return false;
             } else {
-                EntityType<?> entitytype = p_115913_.getType();
+                EntityType<?> entitytype = pLivingEntity.getType();
                 float f = entitytype.getHeight() / 2.0F;
                 float f1 = entitytype.getWidth() / 2.0F;
-                Vec3 vec31 = Vec3.atBottomCenterOf(p_115913_.blockPosition());
-                return p_115914_.isVisible(
+                Vec3 vec31 = Vec3.atBottomCenterOf(pLivingEntity.blockPosition());
+                return pCamera.isVisible(
                     new AABB(vec3.x, vec3.y + (double)f, vec3.z, vec31.x, vec31.y + (double)f, vec31.z)
                         .inflate((double)f1, (double)f, (double)f1)
                 );
@@ -72,8 +72,8 @@ public class ShulkerRenderer extends MobRenderer<Shulker, ShulkerRenderState, Sh
         p_368032_.attachFace = p_360848_.getAttachFace();
     }
 
-    public static ResourceLocation getTextureLocation(@Nullable DyeColor p_174376_) {
-        return p_174376_ == null ? DEFAULT_TEXTURE_LOCATION : TEXTURE_LOCATION[p_174376_.getId()];
+    public static ResourceLocation getTextureLocation(@Nullable DyeColor pColor) {
+        return pColor == null ? DEFAULT_TEXTURE_LOCATION : TEXTURE_LOCATION[pColor.getId()];
     }
 
     protected void setupRotations(ShulkerRenderState p_363517_, PoseStack p_115908_, float p_115909_, float p_115910_) {

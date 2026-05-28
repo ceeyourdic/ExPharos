@@ -1,10 +1,7 @@
 package com.mojang.blaze3d.vertex;
 
 import javax.annotation.Nullable;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class Tesselator {
     private static final int MAX_BYTES = 786432;
     private final ByteBufferBuilder buffer;
@@ -27,19 +24,23 @@ public class Tesselator {
         }
     }
 
-    public Tesselator(int p_85912_) {
-        this.buffer = new ByteBufferBuilder(p_85912_);
+    public Tesselator(int pCapacity) {
+        this.buffer = new ByteBufferBuilder(pCapacity);
     }
 
     public Tesselator() {
         this(786432);
     }
 
-    public BufferBuilder begin(VertexFormat.Mode p_342351_, VertexFormat p_344902_) {
-        return new BufferBuilder(this.buffer, p_342351_, p_344902_);
+    public BufferBuilder begin(VertexFormat.Mode pMode, VertexFormat pFormat) {
+        return new BufferBuilder(this.buffer, pMode, pFormat);
     }
 
     public void clear() {
         this.buffer.clear();
+    }
+
+    public void draw(BufferBuilder bufferIn) {
+        BufferUploader.drawWithShader(bufferIn.buildOrThrow());
     }
 }

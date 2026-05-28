@@ -12,17 +12,17 @@ public class V4071 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_367045_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_367045_);
-        p_367045_.register(map, "minecraft:creaking", () -> V100.equipment(p_367045_));
-        p_367045_.register(map, "minecraft:creaking_transient", () -> V100.equipment(p_367045_));
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
+        pSchema.register(map, "minecraft:creaking", () -> V100.equipment(pSchema));
+        pSchema.register(map, "minecraft:creaking_transient", () -> V100.equipment(pSchema));
         return map;
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_366043_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_366043_);
-        p_366043_.register(map, "minecraft:creaking_heart", () -> DSL.optionalFields());
+    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(pSchema);
+        pSchema.register(map, "minecraft:creaking_heart", () -> DSL.optionalFields());
         return map;
     }
 }

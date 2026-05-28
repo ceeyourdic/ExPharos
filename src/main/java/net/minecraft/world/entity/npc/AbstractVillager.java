@@ -67,8 +67,8 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
         return this.entityData.get(DATA_UNHAPPY_COUNTER);
     }
 
-    public void setUnhappyCounter(int p_35320_) {
-        this.entityData.set(DATA_UNHAPPY_COUNTER, p_35320_);
+    public void setUnhappyCounter(int pUnhappyCounter) {
+        this.entityData.set(DATA_UNHAPPY_COUNTER, pUnhappyCounter);
     }
 
     @Override
@@ -83,8 +83,8 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
     }
 
     @Override
-    public void setTradingPlayer(@Nullable Player p_35314_) {
-        this.tradingPlayer = p_35314_;
+    public void setTradingPlayer(@Nullable Player pPlayer) {
+        this.tradingPlayer = pPlayer;
     }
 
     @Nullable
@@ -112,24 +112,24 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
     }
 
     @Override
-    public void overrideOffers(@Nullable MerchantOffers p_35276_) {
+    public void overrideOffers(@Nullable MerchantOffers pOffers) {
     }
 
     @Override
-    public void overrideXp(int p_35322_) {
+    public void overrideXp(int pXp) {
     }
 
     @Override
-    public void notifyTrade(MerchantOffer p_35274_) {
-        p_35274_.increaseUses();
+    public void notifyTrade(MerchantOffer pOffer) {
+        pOffer.increaseUses();
         this.ambientSoundTime = -this.getAmbientSoundInterval();
-        this.rewardTradeXp(p_35274_);
+        this.rewardTradeXp(pOffer);
         if (this.tradingPlayer instanceof ServerPlayer) {
-            CriteriaTriggers.TRADE.trigger((ServerPlayer)this.tradingPlayer, this, p_35274_.getResult());
+            CriteriaTriggers.TRADE.trigger((ServerPlayer)this.tradingPlayer, this, pOffer.getResult());
         }
     }
 
-    protected abstract void rewardTradeXp(MerchantOffer p_35299_);
+    protected abstract void rewardTradeXp(MerchantOffer pOffer);
 
     @Override
     public boolean showProgressBar() {
@@ -137,10 +137,10 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
     }
 
     @Override
-    public void notifyTradeUpdated(ItemStack p_35316_) {
+    public void notifyTradeUpdated(ItemStack pStack) {
         if (!this.level().isClientSide && this.ambientSoundTime > -this.getAmbientSoundInterval() + 20) {
             this.ambientSoundTime = -this.getAmbientSoundInterval();
-            this.makeSound(this.getTradeUpdatedSound(!p_35316_.isEmpty()));
+            this.makeSound(this.getTradeUpdatedSound(!pStack.isEmpty()));
         }
     }
 
@@ -149,8 +149,8 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
         return SoundEvents.VILLAGER_YES;
     }
 
-    protected SoundEvent getTradeUpdatedSound(boolean p_35323_) {
-        return p_35323_ ? SoundEvents.VILLAGER_YES : SoundEvents.VILLAGER_NO;
+    protected SoundEvent getTradeUpdatedSound(boolean pIsYesSound) {
+        return pIsYesSound ? SoundEvents.VILLAGER_YES : SoundEvents.VILLAGER_NO;
     }
 
     public void playCelebrateSound() {
@@ -158,29 +158,29 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_35301_) {
-        super.addAdditionalSaveData(p_35301_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
         if (!this.level().isClientSide) {
             MerchantOffers merchantoffers = this.getOffers();
             if (!merchantoffers.isEmpty()) {
-                p_35301_.put("Offers", MerchantOffers.CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), merchantoffers).getOrThrow());
+                pCompound.put("Offers", MerchantOffers.CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), merchantoffers).getOrThrow());
             }
         }
 
-        this.writeInventoryToTag(p_35301_, this.registryAccess());
+        this.writeInventoryToTag(pCompound, this.registryAccess());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_35290_) {
-        super.readAdditionalSaveData(p_35290_);
-        if (p_35290_.contains("Offers")) {
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("Offers")) {
             MerchantOffers.CODEC
-                .parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), p_35290_.get("Offers"))
+                .parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), pCompound.get("Offers"))
                 .resultOrPartial(Util.prefix("Failed to load offers: ", LOGGER::warn))
                 .ifPresent(p_328744_ -> this.offers = p_328744_);
         }
 
-        this.readInventoryFromTag(p_35290_, this.registryAccess());
+        this.readInventoryFromTag(pCompound, this.registryAccess());
     }
 
     @Nullable
@@ -195,17 +195,17 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
     }
 
     @Override
-    public void die(DamageSource p_35270_) {
-        super.die(p_35270_);
+    public void die(DamageSource pCause) {
+        super.die(pCause);
         this.stopTrading();
     }
 
-    protected void addParticlesAroundSelf(ParticleOptions p_35288_) {
+    protected void addParticlesAroundSelf(ParticleOptions pParticleOption) {
         for (int i = 0; i < 5; i++) {
             double d0 = this.random.nextGaussian() * 0.02;
             double d1 = this.random.nextGaussian() * 0.02;
             double d2 = this.random.nextGaussian() * 0.02;
-            this.level().addParticle(p_35288_, this.getRandomX(1.0), this.getRandomY() + 1.0, this.getRandomZ(1.0), d0, d1, d2);
+            this.level().addParticle(pParticleOption, this.getRandomX(1.0), this.getRandomY() + 1.0, this.getRandomZ(1.0), d0, d1, d2);
         }
     }
 
@@ -227,24 +227,24 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 
     protected abstract void updateTrades();
 
-    protected void addOffersFromItemListings(MerchantOffers p_35278_, VillagerTrades.ItemListing[] p_35279_, int p_35280_) {
-        ArrayList<VillagerTrades.ItemListing> arraylist = Lists.newArrayList(p_35279_);
+    protected void addOffersFromItemListings(MerchantOffers pGivenMerchantOffers, VillagerTrades.ItemListing[] pNewTrades, int pMaxNumbers) {
+        ArrayList<VillagerTrades.ItemListing> arraylist = Lists.newArrayList(pNewTrades);
         int i = 0;
 
-        while (i < p_35280_ && !arraylist.isEmpty()) {
+        while (i < pMaxNumbers && !arraylist.isEmpty()) {
             MerchantOffer merchantoffer = arraylist.remove(this.random.nextInt(arraylist.size())).getOffer(this, this.random);
             if (merchantoffer != null) {
-                p_35278_.add(merchantoffer);
+                pGivenMerchantOffers.add(merchantoffer);
                 i++;
             }
         }
     }
 
     @Override
-    public Vec3 getRopeHoldPosition(float p_35318_) {
-        float f = Mth.lerp(p_35318_, this.yBodyRotO, this.yBodyRot) * (float) (Math.PI / 180.0);
+    public Vec3 getRopeHoldPosition(float pPartialTicks) {
+        float f = Mth.lerp(pPartialTicks, this.yBodyRotO, this.yBodyRot) * (float) (Math.PI / 180.0);
         Vec3 vec3 = new Vec3(0.0, this.getBoundingBox().getYsize() - 1.0, 0.2);
-        return this.getPosition(p_35318_).add(vec3.yRot(-f));
+        return this.getPosition(pPartialTicks).add(vec3.yRot(-f));
     }
 
     @Override

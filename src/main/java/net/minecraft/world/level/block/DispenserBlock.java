@@ -56,12 +56,12 @@ public class DispenserBlock extends BaseEntityBlock {
         return CODEC;
     }
 
-    public static void registerBehavior(ItemLike p_52673_, DispenseItemBehavior p_52674_) {
-        DISPENSER_REGISTRY.put(p_52673_.asItem(), p_52674_);
+    public static void registerBehavior(ItemLike pItem, DispenseItemBehavior pBehavior) {
+        DISPENSER_REGISTRY.put(pItem.asItem(), pBehavior);
     }
 
-    public static void registerProjectileBehavior(ItemLike p_329878_) {
-        DISPENSER_REGISTRY.put(p_329878_.asItem(), new ProjectileDispenseBehavior(p_329878_.asItem()));
+    public static void registerProjectileBehavior(ItemLike pItem) {
+        DISPENSER_REGISTRY.put(pItem.asItem(), new ProjectileDispenseBehavior(pItem.asItem()));
     }
 
     protected DispenserBlock(BlockBehaviour.Properties p_52664_) {
@@ -79,19 +79,19 @@ public class DispenserBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
-    protected void dispenseFrom(ServerLevel p_52665_, BlockState p_301828_, BlockPos p_52666_) {
-        DispenserBlockEntity dispenserblockentity = p_52665_.getBlockEntity(p_52666_, BlockEntityType.DISPENSER).orElse(null);
+    protected void dispenseFrom(ServerLevel pLevel, BlockState pState, BlockPos pPos) {
+        DispenserBlockEntity dispenserblockentity = pLevel.getBlockEntity(pPos, BlockEntityType.DISPENSER).orElse(null);
         if (dispenserblockentity == null) {
-            LOGGER.warn("Ignoring dispensing attempt for Dispenser without matching block entity at {}", p_52666_);
+            LOGGER.warn("Ignoring dispensing attempt for Dispenser without matching block entity at {}", pPos);
         } else {
-            BlockSource blocksource = new BlockSource(p_52665_, p_52666_, p_301828_, dispenserblockentity);
-            int i = dispenserblockentity.getRandomSlot(p_52665_.random);
+            BlockSource blocksource = new BlockSource(pLevel, pPos, pState, dispenserblockentity);
+            int i = dispenserblockentity.getRandomSlot(pLevel.random);
             if (i < 0) {
-                p_52665_.levelEvent(1001, p_52666_, 0);
-                p_52665_.gameEvent(GameEvent.BLOCK_ACTIVATE, p_52666_, GameEvent.Context.of(dispenserblockentity.getBlockState()));
+                pLevel.levelEvent(1001, pPos, 0);
+                pLevel.gameEvent(GameEvent.BLOCK_ACTIVATE, pPos, GameEvent.Context.of(dispenserblockentity.getBlockState()));
             } else {
                 ItemStack itemstack = dispenserblockentity.getItem(i);
-                DispenseItemBehavior dispenseitembehavior = this.getDispenseMethod(p_52665_, itemstack);
+                DispenseItemBehavior dispenseitembehavior = this.getDispenseMethod(pLevel, itemstack);
                 if (dispenseitembehavior != DispenseItemBehavior.NOOP) {
                     dispenserblockentity.setItem(i, dispenseitembehavior.dispense(blocksource, itemstack));
                 }
@@ -99,17 +99,17 @@ public class DispenserBlock extends BaseEntityBlock {
         }
     }
 
-    protected DispenseItemBehavior getDispenseMethod(Level p_328928_, ItemStack p_52667_) {
-        if (!p_52667_.isItemEnabled(p_328928_.enabledFeatures())) {
+    protected DispenseItemBehavior getDispenseMethod(Level pLevel, ItemStack pItem) {
+        if (!pItem.isItemEnabled(pLevel.enabledFeatures())) {
             return DEFAULT_BEHAVIOR;
         } else {
-            DispenseItemBehavior dispenseitembehavior = DISPENSER_REGISTRY.get(p_52667_.getItem());
-            return dispenseitembehavior != null ? dispenseitembehavior : getDefaultDispenseMethod(p_52667_);
+            DispenseItemBehavior dispenseitembehavior = DISPENSER_REGISTRY.get(pItem.getItem());
+            return dispenseitembehavior != null ? dispenseitembehavior : getDefaultDispenseMethod(pItem);
         }
     }
 
-    private static DispenseItemBehavior getDefaultDispenseMethod(ItemStack p_368297_) {
-        return (DispenseItemBehavior)(p_368297_.has(DataComponents.EQUIPPABLE) ? EquipmentDispenseItemBehavior.INSTANCE : DEFAULT_BEHAVIOR);
+    private static DispenseItemBehavior getDefaultDispenseMethod(ItemStack pStack) {
+        return (DispenseItemBehavior)(pStack.has(DataComponents.EQUIPPABLE) ? EquipmentDispenseItemBehavior.INSTANCE : DEFAULT_BEHAVIOR);
     }
 
     @Override
@@ -135,52 +135,52 @@ public class DispenserBlock extends BaseEntityBlock {
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_52669_) {
-        return this.defaultBlockState().setValue(FACING, p_52669_.getNearestLookingDirection().getOpposite());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.defaultBlockState().setValue(FACING, pContext.getNearestLookingDirection().getOpposite());
     }
 
     @Override
-    protected void onRemove(BlockState p_52707_, Level p_52708_, BlockPos p_52709_, BlockState p_52710_, boolean p_52711_) {
-        Containers.dropContentsOnDestroy(p_52707_, p_52710_, p_52708_, p_52709_);
-        super.onRemove(p_52707_, p_52708_, p_52709_, p_52710_, p_52711_);
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        Containers.dropContentsOnDestroy(pState, pNewState, pLevel, pPos);
+        super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
     }
 
-    public static Position getDispensePosition(BlockSource p_52721_) {
-        return getDispensePosition(p_52721_, 0.7, Vec3.ZERO);
+    public static Position getDispensePosition(BlockSource pBlockSource) {
+        return getDispensePosition(pBlockSource, 0.7, Vec3.ZERO);
     }
 
-    public static Position getDispensePosition(BlockSource p_330786_, double p_333084_, Vec3 p_335028_) {
-        Direction direction = p_330786_.state().getValue(FACING);
-        return p_330786_.center()
+    public static Position getDispensePosition(BlockSource pBlockSource, double pMultiplier, Vec3 pOffset) {
+        Direction direction = pBlockSource.state().getValue(FACING);
+        return pBlockSource.center()
             .add(
-                p_333084_ * (double)direction.getStepX() + p_335028_.x(),
-                p_333084_ * (double)direction.getStepY() + p_335028_.y(),
-                p_333084_ * (double)direction.getStepZ() + p_335028_.z()
+                pMultiplier * (double)direction.getStepX() + pOffset.x(),
+                pMultiplier * (double)direction.getStepY() + pOffset.y(),
+                pMultiplier * (double)direction.getStepZ() + pOffset.z()
             );
     }
 
     @Override
-    protected boolean hasAnalogOutputSignal(BlockState p_52682_) {
+    protected boolean hasAnalogOutputSignal(BlockState pState) {
         return true;
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState p_52689_, Level p_52690_, BlockPos p_52691_) {
-        return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(p_52690_.getBlockEntity(p_52691_));
+    protected int getAnalogOutputSignal(BlockState pBlockState, Level pLevel, BlockPos pPos) {
+        return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(pLevel.getBlockEntity(pPos));
     }
 
     @Override
-    protected BlockState rotate(BlockState p_52716_, Rotation p_52717_) {
-        return p_52716_.setValue(FACING, p_52717_.rotate(p_52716_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_52713_, Mirror p_52714_) {
-        return p_52713_.rotate(p_52714_.getRotation(p_52713_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_52719_) {
-        p_52719_.add(FACING, TRIGGERED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, TRIGGERED);
     }
 }

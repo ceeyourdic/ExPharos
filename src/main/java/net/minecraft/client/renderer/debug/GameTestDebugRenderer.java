@@ -15,8 +15,8 @@ public class GameTestDebugRenderer implements DebugRenderer.SimpleDebugRenderer 
     private static final float PADDING = 0.02F;
     private final Map<BlockPos, GameTestDebugRenderer.Marker> markers = Maps.newHashMap();
 
-    public void addMarker(BlockPos p_113525_, int p_113526_, String p_113527_, int p_113528_) {
-        this.markers.put(p_113525_, new GameTestDebugRenderer.Marker(p_113526_, p_113527_, Util.getMillis() + (long)p_113528_));
+    public void addMarker(BlockPos pPos, int pColor, String pText, int pRemoveAfter) {
+        this.markers.put(pPos, new GameTestDebugRenderer.Marker(pColor, pText, Util.getMillis() + (long)pRemoveAfter));
     }
 
     @Override
@@ -31,15 +31,15 @@ public class GameTestDebugRenderer implements DebugRenderer.SimpleDebugRenderer 
         this.markers.forEach((p_269737_, p_269738_) -> this.renderMarker(p_113519_, p_113520_, p_269737_, p_269738_));
     }
 
-    private void renderMarker(PoseStack p_270274_, MultiBufferSource p_271018_, BlockPos p_270918_, GameTestDebugRenderer.Marker p_270827_) {
+    private void renderMarker(PoseStack pPoseStack, MultiBufferSource pBuffer, BlockPos pPos, GameTestDebugRenderer.Marker pMarker) {
         DebugRenderer.renderFilledBox(
-            p_270274_, p_271018_, p_270918_, 0.02F, p_270827_.getR(), p_270827_.getG(), p_270827_.getB(), p_270827_.getA() * 0.75F
+            pPoseStack, pBuffer, pPos, 0.02F, pMarker.getR(), pMarker.getG(), pMarker.getB(), pMarker.getA() * 0.75F
         );
-        if (!p_270827_.text.isEmpty()) {
-            double d0 = (double)p_270918_.getX() + 0.5;
-            double d1 = (double)p_270918_.getY() + 1.2;
-            double d2 = (double)p_270918_.getZ() + 0.5;
-            DebugRenderer.renderFloatingText(p_270274_, p_271018_, p_270827_.text, d0, d1, d2, -1, 0.01F, true, 0.0F, true);
+        if (!pMarker.text.isEmpty()) {
+            double d0 = (double)pPos.getX() + 0.5;
+            double d1 = (double)pPos.getY() + 1.2;
+            double d2 = (double)pPos.getZ() + 0.5;
+            DebugRenderer.renderFloatingText(pPoseStack, pBuffer, pMarker.text, d0, d1, d2, -1, 0.01F, true, 0.0F, true);
         }
     }
 
@@ -49,10 +49,10 @@ public class GameTestDebugRenderer implements DebugRenderer.SimpleDebugRenderer 
         public String text;
         public long removeAtTime;
 
-        public Marker(int p_113536_, String p_113537_, long p_113538_) {
-            this.color = p_113536_;
-            this.text = p_113537_;
-            this.removeAtTime = p_113538_;
+        public Marker(int pColor, String pText, long pRemoveAtTime) {
+            this.color = pColor;
+            this.text = pText;
+            this.removeAtTime = pRemoveAtTime;
         }
 
         public float getR() {

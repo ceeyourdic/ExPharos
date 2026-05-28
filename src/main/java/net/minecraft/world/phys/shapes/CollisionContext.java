@@ -14,28 +14,28 @@ public interface CollisionContext {
         return EntityCollisionContext.EMPTY;
     }
 
-    static CollisionContext of(Entity p_82751_) {
-        Objects.requireNonNull(p_82751_);
+    static CollisionContext of(Entity pEntity) {
+        Objects.requireNonNull(pEntity);
 
-        return (CollisionContext)(switch (p_82751_) {
+        return (CollisionContext)(switch (pEntity) {
             case AbstractMinecart abstractminecart -> AbstractMinecart.useExperimentalMovement(abstractminecart.level())
             ? new MinecartCollisionContext(abstractminecart, false)
-            : new EntityCollisionContext(p_82751_, false);
-            default -> new EntityCollisionContext(p_82751_, false);
+            : new EntityCollisionContext(pEntity, false);
+            default -> new EntityCollisionContext(pEntity, false);
         });
     }
 
-    static CollisionContext of(Entity p_366094_, boolean p_366904_) {
-        return new EntityCollisionContext(p_366094_, p_366904_);
+    static CollisionContext of(Entity pEntity, boolean pCanStandOnFluid) {
+        return new EntityCollisionContext(pEntity, pCanStandOnFluid);
     }
 
     boolean isDescending();
 
-    boolean isAbove(VoxelShape p_82755_, BlockPos p_82756_, boolean p_82757_);
+    boolean isAbove(VoxelShape pShape, BlockPos pPos, boolean pCanAscend);
 
-    boolean isHoldingItem(Item p_82752_);
+    boolean isHoldingItem(Item pItem);
 
-    boolean canStandOnFluid(FluidState p_205110_, FluidState p_205111_);
+    boolean canStandOnFluid(FluidState pFluid1, FluidState pFluid2);
 
-    VoxelShape getCollisionShape(BlockState p_363466_, CollisionGetter p_365376_, BlockPos p_362678_);
+    VoxelShape getCollisionShape(BlockState pState, CollisionGetter pCollisionGetter, BlockPos pPos);
 }

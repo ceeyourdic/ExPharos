@@ -15,8 +15,8 @@ public class SimpleRandomFeatureConfiguration implements FeatureConfiguration {
         .codec();
     public final HolderSet<PlacedFeature> features;
 
-    public SimpleRandomFeatureConfiguration(HolderSet<PlacedFeature> p_204842_) {
-        this.features = p_204842_;
+    public SimpleRandomFeatureConfiguration(HolderSet<PlacedFeature> pFeatures) {
+        this.features = pFeatures;
     }
 
     @Override

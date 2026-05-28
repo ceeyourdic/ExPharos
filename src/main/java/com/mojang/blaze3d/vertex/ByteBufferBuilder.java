@@ -4,14 +4,14 @@ import com.mojang.jtracy.MemoryPool;
 import com.mojang.jtracy.TracyClient;
 import com.mojang.logging.LogUtils;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import javax.annotation.Nullable;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.render.BufferBuilderCache;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.MemoryUtil.MemoryAllocator;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class ByteBufferBuilder implements AutoCloseable {
     private static final MemoryPool MEMORY_POOL = TracyClient.createMemoryPool("ByteBufferBuilder");
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -24,41 +24,52 @@ public class ByteBufferBuilder implements AutoCloseable {
     private int nextResultOffset;
     private int resultCount;
     private int generation;
+    private BufferBuilderCache bufferBuilderCache;
+    private ByteBuffer byteBuffer;
+    private IntBuffer intBuffer;
+    private FloatBuffer floatBuffer;
 
-    public ByteBufferBuilder(int p_344576_) {
-        this.capacity = p_344576_;
-        this.pointer = ALLOCATOR.malloc((long)p_344576_);
-        MEMORY_POOL.malloc(this.pointer, p_344576_);
+    public ByteBufferBuilder(int pCapacity) {
+        this.capacity = pCapacity;
+        this.pointer = ALLOCATOR.malloc((long)pCapacity);
+        MEMORY_POOL.malloc(this.pointer, pCapacity);
         if (this.pointer == 0L) {
-            throw new OutOfMemoryError("Failed to allocate " + p_344576_ + " bytes");
+            throw new OutOfMemoryError("Failed to allocate " + pCapacity + " bytes");
+        } else {
+            this.byteBuffer = MemoryUtil.memByteBuffer(this.pointer, this.capacity);
+            this.intBuffer = this.byteBuffer.asIntBuffer();
+            this.floatBuffer = this.byteBuffer.asFloatBuffer();
         }
     }
 
-    public long reserve(int p_342985_) {
+    public long reserve(int pBytes) {
         int i = this.writeOffset;
-        int j = i + p_342985_;
+        int j = i + pBytes;
         this.ensureCapacity(j);
         this.writeOffset = j;
         return this.pointer + (long)i;
     }
 
-    private void ensureCapacity(int p_343904_) {
-        if (p_343904_ > this.capacity) {
+    private void ensureCapacity(int pSize) {
+        if (pSize > this.capacity) {
             int i = Math.min(this.capacity, 2097152);
-            int j = Math.max(this.capacity + i, p_343904_);
+            int j = Math.max(this.capacity + i, pSize);
             this.resize(j);
         }
     }
 
-    private void resize(int p_344270_) {
+    private void resize(int pNewSize) {
         MEMORY_POOL.free(this.pointer);
-        this.pointer = ALLOCATOR.realloc(this.pointer, (long)p_344270_);
-        MEMORY_POOL.malloc(this.pointer, p_344270_);
-        LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", this.capacity, p_344270_);
+        this.pointer = ALLOCATOR.realloc(this.pointer, (long)pNewSize);
+        MEMORY_POOL.malloc(this.pointer, pNewSize);
+        LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", this.capacity, pNewSize);
         if (this.pointer == 0L) {
-            throw new OutOfMemoryError("Failed to resize buffer from " + this.capacity + " bytes to " + p_344270_ + " bytes");
+            throw new OutOfMemoryError("Failed to resize buffer from " + this.capacity + " bytes to " + pNewSize + " bytes");
         } else {
-            this.capacity = p_344270_;
+            this.capacity = pNewSize;
+            this.byteBuffer = MemoryUtil.memByteBuffer(this.pointer, this.capacity);
+            this.intBuffer = this.byteBuffer.asIntBuffer();
+            this.floatBuffer = this.byteBuffer.asFloatBuffer();
         }
     }
 
@@ -92,8 +103,8 @@ public class ByteBufferBuilder implements AutoCloseable {
         }
     }
 
-    boolean isValid(int p_344177_) {
-        return p_344177_ == this.generation;
+    boolean isValid(int pGeneration) {
+        return pGeneration == this.generation;
     }
 
     void freeResult() {
@@ -120,6 +131,9 @@ public class ByteBufferBuilder implements AutoCloseable {
             ALLOCATOR.free(this.pointer);
             this.pointer = 0L;
             this.generation = -1;
+            this.byteBuffer = null;
+            this.intBuffer = null;
+            this.floatBuffer = null;
         }
     }
 
@@ -129,17 +143,53 @@ public class ByteBufferBuilder implements AutoCloseable {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    public int getCapacity() {
+        return this.capacity;
+    }
+
+    public ByteBuffer getByteBuffer() {
+        return this.byteBuffer;
+    }
+
+    public IntBuffer getIntBuffer() {
+        return this.intBuffer;
+    }
+
+    public FloatBuffer getFloatBuffer() {
+        return this.floatBuffer;
+    }
+
+    public int getNextResultOffset() {
+        return this.nextResultOffset;
+    }
+
+    public int getWriteOffset() {
+        return this.writeOffset;
+    }
+
+    public BufferBuilderCache getBufferBuilderCache() {
+        if (this.bufferBuilderCache == null) {
+            this.bufferBuilderCache = new BufferBuilderCache();
+        }
+
+        return this.bufferBuilderCache;
+    }
+
+    @Override
+    public String toString() {
+        return "resultOffset: " + this.nextResultOffset + ", writeOffset: " + this.writeOffset + ", capacity: " + this.capacity;
+    }
+
     public class Result implements AutoCloseable {
         private final int offset;
         private final int capacity;
         private final int generation;
         private boolean closed;
 
-        Result(final int p_343613_, final int p_344565_, final int p_344170_) {
-            this.offset = p_343613_;
-            this.capacity = p_344565_;
-            this.generation = p_344170_;
+        Result(final int pOffset, final int pCapacity, final int pGeneration) {
+            this.offset = pOffset;
+            this.capacity = pCapacity;
+            this.generation = pGeneration;
         }
 
         public ByteBuffer byteBuffer() {
@@ -158,6 +208,11 @@ public class ByteBufferBuilder implements AutoCloseable {
                     ByteBufferBuilder.this.freeResult();
                 }
             }
+        }
+
+        @Override
+        public String toString() {
+            return "offset: " + this.offset + ", capacity: " + this.capacity + ", generation: " + this.generation + ", closed: " + this.closed;
         }
     }
 }

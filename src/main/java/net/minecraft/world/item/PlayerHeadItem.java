@@ -8,16 +8,16 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 
 public class PlayerHeadItem extends StandingAndWallBlockItem {
-    public PlayerHeadItem(Block p_42971_, Block p_42972_, Item.Properties p_42973_) {
-        super(p_42971_, p_42972_, Direction.DOWN, p_42973_);
+    public PlayerHeadItem(Block pBlock, Block pWallBlock, Item.Properties pProperties) {
+        super(pBlock, pWallBlock, Direction.DOWN, pProperties);
     }
 
     @Override
-    public Component getName(ItemStack p_42977_) {
-        ResolvableProfile resolvableprofile = p_42977_.get(DataComponents.PROFILE);
+    public Component getName(ItemStack pStack) {
+        ResolvableProfile resolvableprofile = pStack.get(DataComponents.PROFILE);
         return (Component)(resolvableprofile != null && resolvableprofile.name().isPresent()
             ? Component.translatable(this.descriptionId + ".named", resolvableprofile.name().get())
-            : super.getName(p_42977_));
+            : super.getName(pStack));
     }
 
     @Override

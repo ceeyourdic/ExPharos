@@ -59,63 +59,63 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook, FishingHook
         super.render(p_362917_, p_114699_, p_114700_, p_114701_);
     }
 
-    public static HumanoidArm getHoldingArm(Player p_377586_) {
-        return p_377586_.getMainHandItem().getItem() instanceof FishingRodItem ? p_377586_.getMainArm() : p_377586_.getMainArm().getOpposite();
+    public static HumanoidArm getHoldingArm(Player pPlayer) {
+        return pPlayer.getMainHandItem().getItem() instanceof FishingRodItem ? pPlayer.getMainArm() : pPlayer.getMainArm().getOpposite();
     }
 
-    private Vec3 getPlayerHandPos(Player p_328037_, float p_328369_, float p_332926_) {
-        int i = getHoldingArm(p_328037_) == HumanoidArm.RIGHT ? 1 : -1;
-        if (this.entityRenderDispatcher.options.getCameraType().isFirstPerson() && p_328037_ == Minecraft.getInstance().player) {
+    private Vec3 getPlayerHandPos(Player pPlayer, float pHandAngle, float pPartialTick) {
+        int i = getHoldingArm(pPlayer) == HumanoidArm.RIGHT ? 1 : -1;
+        if (this.entityRenderDispatcher.options.getCameraType().isFirstPerson() && pPlayer == Minecraft.getInstance().player) {
             double d4 = 960.0 / (double)this.entityRenderDispatcher.options.fov().get().intValue();
             Vec3 vec3 = this.entityRenderDispatcher
                 .camera
                 .getNearPlane()
                 .getPointOnPlane((float)i * 0.525F, -0.1F)
                 .scale(d4)
-                .yRot(p_328369_ * 0.5F)
-                .xRot(-p_328369_ * 0.7F);
-            return p_328037_.getEyePosition(p_332926_).add(vec3);
+                .yRot(pHandAngle * 0.5F)
+                .xRot(-pHandAngle * 0.7F);
+            return pPlayer.getEyePosition(pPartialTick).add(vec3);
         } else {
-            float f = Mth.lerp(p_332926_, p_328037_.yBodyRotO, p_328037_.yBodyRot) * (float) (Math.PI / 180.0);
+            float f = Mth.lerp(pPartialTick, pPlayer.yBodyRotO, pPlayer.yBodyRot) * (float) (Math.PI / 180.0);
             double d0 = (double)Mth.sin(f);
             double d1 = (double)Mth.cos(f);
-            float f1 = p_328037_.getScale();
+            float f1 = pPlayer.getScale();
             double d2 = (double)i * 0.35 * (double)f1;
             double d3 = 0.8 * (double)f1;
-            float f2 = p_328037_.isCrouching() ? -0.1875F : 0.0F;
-            return p_328037_.getEyePosition(p_332926_).add(-d1 * d2 - d0 * d3, (double)f2 - 0.45 * (double)f1, -d0 * d2 + d1 * d3);
+            float f2 = pPlayer.isCrouching() ? -0.1875F : 0.0F;
+            return pPlayer.getEyePosition(pPartialTick).add(-d1 * d2 - d0 * d3, (double)f2 - 0.45 * (double)f1, -d0 * d2 + d1 * d3);
         }
     }
 
-    private static float fraction(int p_114691_, int p_114692_) {
-        return (float)p_114691_ / (float)p_114692_;
+    private static float fraction(int pNumerator, int pDenominator) {
+        return (float)pNumerator / (float)pDenominator;
     }
 
     private static void vertex(
-        VertexConsumer p_254464_, PoseStack.Pose p_328848_, int p_254296_, float p_253632_, int p_254132_, int p_254171_, int p_254026_
+        VertexConsumer pConsumer, PoseStack.Pose pPose, int pPackedLight, float pX, int pY, int pU, int pV
     ) {
-        p_254464_.addVertex(p_328848_, p_253632_ - 0.5F, (float)p_254132_ - 0.5F, 0.0F)
+        pConsumer.addVertex(pPose, pX - 0.5F, (float)pY - 0.5F, 0.0F)
             .setColor(-1)
-            .setUv((float)p_254171_, (float)p_254026_)
+            .setUv((float)pU, (float)pV)
             .setOverlay(OverlayTexture.NO_OVERLAY)
-            .setLight(p_254296_)
-            .setNormal(p_328848_, 0.0F, 1.0F, 0.0F);
+            .setLight(pPackedLight)
+            .setNormal(pPose, 0.0F, 1.0F, 0.0F);
     }
 
     private static void stringVertex(
-        float p_174119_, float p_174120_, float p_174121_, VertexConsumer p_174122_, PoseStack.Pose p_174123_, float p_174124_, float p_174125_
+        float pX, float pY, float pZ, VertexConsumer pConsumer, PoseStack.Pose pPose, float pStringFraction, float pNextStringFraction
     ) {
-        float f = p_174119_ * p_174124_;
-        float f1 = p_174120_ * (p_174124_ * p_174124_ + p_174124_) * 0.5F + 0.25F;
-        float f2 = p_174121_ * p_174124_;
-        float f3 = p_174119_ * p_174125_ - f;
-        float f4 = p_174120_ * (p_174125_ * p_174125_ + p_174125_) * 0.5F + 0.25F - f1;
-        float f5 = p_174121_ * p_174125_ - f2;
+        float f = pX * pStringFraction;
+        float f1 = pY * (pStringFraction * pStringFraction + pStringFraction) * 0.5F + 0.25F;
+        float f2 = pZ * pStringFraction;
+        float f3 = pX * pNextStringFraction - f;
+        float f4 = pY * (pNextStringFraction * pNextStringFraction + pNextStringFraction) * 0.5F + 0.25F - f1;
+        float f5 = pZ * pNextStringFraction - f2;
         float f6 = Mth.sqrt(f3 * f3 + f4 * f4 + f5 * f5);
         f3 /= f6;
         f4 /= f6;
         f5 /= f6;
-        p_174122_.addVertex(p_174123_, f, f1, f2).setColor(-16777216).setNormal(p_174123_, f3, f4, f5);
+        pConsumer.addVertex(pPose, f, f1, f2).setColor(-16777216).setNormal(pPose, f3, f4, f5);
     }
 
     public FishingHookRenderState createRenderState() {

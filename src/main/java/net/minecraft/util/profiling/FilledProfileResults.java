@@ -58,37 +58,37 @@ public class FilledProfileResults implements ProfileResults {
     private final int endTimeTicks;
     private final int tickDuration;
 
-    public FilledProfileResults(Map<String, ? extends ProfilerPathEntry> p_18464_, long p_18465_, int p_18466_, long p_18467_, int p_18468_) {
-        this.entries = p_18464_;
-        this.startTimeNano = p_18465_;
-        this.startTimeTicks = p_18466_;
-        this.endTimeNano = p_18467_;
-        this.endTimeTicks = p_18468_;
-        this.tickDuration = p_18468_ - p_18466_;
+    public FilledProfileResults(Map<String, ? extends ProfilerPathEntry> pEntries, long pStartTimeNano, int pStartTimeTicks, long pEndTimeNano, int pEndTimeTicks) {
+        this.entries = pEntries;
+        this.startTimeNano = pStartTimeNano;
+        this.startTimeTicks = pStartTimeTicks;
+        this.endTimeNano = pEndTimeNano;
+        this.endTimeTicks = pEndTimeTicks;
+        this.tickDuration = pEndTimeTicks - pStartTimeTicks;
     }
 
-    private ProfilerPathEntry getEntry(String p_18526_) {
-        ProfilerPathEntry profilerpathentry = this.entries.get(p_18526_);
+    private ProfilerPathEntry getEntry(String pKey) {
+        ProfilerPathEntry profilerpathentry = this.entries.get(pKey);
         return profilerpathentry != null ? profilerpathentry : EMPTY;
     }
 
     @Override
-    public List<ResultField> getTimes(String p_18493_) {
-        String s = p_18493_;
+    public List<ResultField> getTimes(String pSectionPath) {
+        String s = pSectionPath;
         ProfilerPathEntry profilerpathentry = this.getEntry("root");
         long i = profilerpathentry.getDuration();
-        ProfilerPathEntry profilerpathentry1 = this.getEntry(p_18493_);
+        ProfilerPathEntry profilerpathentry1 = this.getEntry(pSectionPath);
         long j = profilerpathentry1.getDuration();
         long k = profilerpathentry1.getCount();
         List<ResultField> list = Lists.newArrayList();
-        if (!p_18493_.isEmpty()) {
-            p_18493_ = p_18493_ + "\u001e";
+        if (!pSectionPath.isEmpty()) {
+            pSectionPath = pSectionPath + "\u001e";
         }
 
         long l = 0L;
 
         for (String s1 : this.entries.keySet()) {
-            if (isDirectChild(p_18493_, s1)) {
+            if (isDirectChild(pSectionPath, s1)) {
                 l += this.getEntry(s1).getDuration();
             }
         }
@@ -103,12 +103,12 @@ public class FilledProfileResults implements ProfileResults {
         }
 
         for (String s2 : this.entries.keySet()) {
-            if (isDirectChild(p_18493_, s2)) {
+            if (isDirectChild(pSectionPath, s2)) {
                 ProfilerPathEntry profilerpathentry2 = this.getEntry(s2);
                 long i1 = profilerpathentry2.getDuration();
                 double d0 = (double)i1 * 100.0 / (double)l;
                 double d1 = (double)i1 * 100.0 / (double)i;
-                String s3 = s2.substring(p_18493_.length());
+                String s3 = s2.substring(pSectionPath.length());
                 list.add(new ResultField(s3, d0, d1, profilerpathentry2.getCount()));
             }
         }
@@ -122,8 +122,8 @@ public class FilledProfileResults implements ProfileResults {
         return list;
     }
 
-    private static boolean isDirectChild(String p_18495_, String p_18496_) {
-        return p_18496_.length() > p_18495_.length() && p_18496_.startsWith(p_18495_) && p_18496_.indexOf(30, p_18495_.length() + 1) < 0;
+    private static boolean isDirectChild(String pSectionPath, String pEntry) {
+        return pEntry.length() > pSectionPath.length() && pEntry.startsWith(pSectionPath) && pEntry.indexOf(30, pSectionPath.length() + 1) < 0;
     }
 
     private Map<String, FilledProfileResults.CounterCollector> getCounterValues() {
@@ -184,14 +184,14 @@ public class FilledProfileResults implements ProfileResults {
         return flag;
     }
 
-    protected String getProfilerResults(long p_18486_, int p_18487_) {
+    protected String getProfilerResults(long pTimeSpan, int pTickSpan) {
         StringBuilder stringbuilder = new StringBuilder();
         ReportType.PROFILE.appendHeader(stringbuilder, List.of());
         stringbuilder.append("Version: ").append(SharedConstants.getCurrentVersion().getId()).append('\n');
-        stringbuilder.append("Time span: ").append(p_18486_ / 1000000L).append(" ms\n");
-        stringbuilder.append("Tick span: ").append(p_18487_).append(" ticks\n");
+        stringbuilder.append("Time span: ").append(pTimeSpan / 1000000L).append(" ms\n");
+        stringbuilder.append("Tick span: ").append(pTickSpan).append(" ticks\n");
         stringbuilder.append("// This is approximately ")
-            .append(String.format(Locale.ROOT, "%.2f", (float)p_18487_ / ((float)p_18486_ / 1.0E9F)))
+            .append(String.format(Locale.ROOT, "%.2f", (float)pTickSpan / ((float)pTimeSpan / 1.0E9F)))
             .append(" ticks per second. It should be ")
             .append(20)
             .append(" ticks per second\n\n");
@@ -201,7 +201,7 @@ public class FilledProfileResults implements ProfileResults {
         Map<String, FilledProfileResults.CounterCollector> map = this.getCounterValues();
         if (!map.isEmpty()) {
             stringbuilder.append("--- BEGIN COUNTER DUMP ---\n\n");
-            this.appendCounters(map, stringbuilder, p_18487_);
+            this.appendCounters(map, stringbuilder, pTickSpan);
             stringbuilder.append("--- END COUNTER DUMP ---\n\n");
         }
 
@@ -215,21 +215,21 @@ public class FilledProfileResults implements ProfileResults {
         return stringbuilder.toString();
     }
 
-    private static StringBuilder indentLine(StringBuilder p_18498_, int p_18499_) {
-        p_18498_.append(String.format(Locale.ROOT, "[%02d] ", p_18499_));
+    private static StringBuilder indentLine(StringBuilder pBuilder, int pIndents) {
+        pBuilder.append(String.format(Locale.ROOT, "[%02d] ", pIndents));
 
-        for (int i = 0; i < p_18499_; i++) {
-            p_18498_.append("|   ");
+        for (int i = 0; i < pIndents; i++) {
+            pBuilder.append("|   ");
         }
 
-        return p_18498_;
+        return pBuilder;
     }
 
-    private void appendProfilerResults(int p_18482_, String p_18483_, StringBuilder p_18484_) {
-        List<ResultField> list = this.getTimes(p_18483_);
-        Object2LongMap<String> object2longmap = ObjectUtils.firstNonNull(this.entries.get(p_18483_), EMPTY).getCounters();
+    private void appendProfilerResults(int pDepth, String pSectionPath, StringBuilder pBuilder) {
+        List<ResultField> list = this.getTimes(pSectionPath);
+        Object2LongMap<String> object2longmap = ObjectUtils.firstNonNull(this.entries.get(pSectionPath), EMPTY).getCounters();
         object2longmap.forEach(
-            (p_18508_, p_18509_) -> indentLine(p_18484_, p_18482_)
+            (p_18508_, p_18509_) -> indentLine(pBuilder, pDepth)
                     .append('#')
                     .append(p_18508_)
                     .append(' ')
@@ -241,7 +241,7 @@ public class FilledProfileResults implements ProfileResults {
         if (list.size() >= 3) {
             for (int i = 1; i < list.size(); i++) {
                 ResultField resultfield = list.get(i);
-                indentLine(p_18484_, p_18482_)
+                indentLine(pBuilder, pDepth)
                     .append(resultfield.name)
                     .append('(')
                     .append(resultfield.count)
@@ -255,39 +255,39 @@ public class FilledProfileResults implements ProfileResults {
                     .append("%\n");
                 if (!"unspecified".equals(resultfield.name)) {
                     try {
-                        this.appendProfilerResults(p_18482_ + 1, p_18483_ + "\u001e" + resultfield.name, p_18484_);
+                        this.appendProfilerResults(pDepth + 1, pSectionPath + "\u001e" + resultfield.name, pBuilder);
                     } catch (Exception exception) {
-                        p_18484_.append("[[ EXCEPTION ").append(exception).append(" ]]");
+                        pBuilder.append("[[ EXCEPTION ").append(exception).append(" ]]");
                     }
                 }
             }
         }
     }
 
-    private void appendCounterResults(int p_18476_, String p_18477_, FilledProfileResults.CounterCollector p_18478_, int p_18479_, StringBuilder p_18480_) {
-        indentLine(p_18480_, p_18476_)
-            .append(p_18477_)
+    private void appendCounterResults(int pIndents, String pName, FilledProfileResults.CounterCollector pCollector, int pTickSpan, StringBuilder pBuilder) {
+        indentLine(pBuilder, pIndents)
+            .append(pName)
             .append(" total:")
-            .append(p_18478_.selfValue)
+            .append(pCollector.selfValue)
             .append('/')
-            .append(p_18478_.totalValue)
+            .append(pCollector.totalValue)
             .append(" average: ")
-            .append(p_18478_.selfValue / (long)p_18479_)
+            .append(pCollector.selfValue / (long)pTickSpan)
             .append('/')
-            .append(p_18478_.totalValue / (long)p_18479_)
+            .append(pCollector.totalValue / (long)pTickSpan)
             .append('\n');
-        p_18478_.children
+        pCollector.children
             .entrySet()
             .stream()
             .sorted(COUNTER_ENTRY_COMPARATOR)
-            .forEach(p_18474_ -> this.appendCounterResults(p_18476_ + 1, p_18474_.getKey(), p_18474_.getValue(), p_18479_, p_18480_));
+            .forEach(p_18474_ -> this.appendCounterResults(pIndents + 1, p_18474_.getKey(), p_18474_.getValue(), pTickSpan, pBuilder));
     }
 
-    private void appendCounters(Map<String, FilledProfileResults.CounterCollector> p_18515_, StringBuilder p_18516_, int p_18517_) {
-        p_18515_.forEach((p_18503_, p_18504_) -> {
-            p_18516_.append("-- Counter: ").append(p_18503_).append(" --\n");
-            this.appendCounterResults(0, "root", p_18504_.children.get("root"), p_18517_, p_18516_);
-            p_18516_.append("\n\n");
+    private void appendCounters(Map<String, FilledProfileResults.CounterCollector> pCounters, StringBuilder pBuilder, int pTickSpan) {
+        pCounters.forEach((p_18503_, p_18504_) -> {
+            pBuilder.append("-- Counter: ").append(p_18503_).append(" --\n");
+            this.appendCounterResults(0, "root", p_18504_.children.get("root"), pTickSpan, pBuilder);
+            pBuilder.append("\n\n");
         });
     }
 
@@ -301,12 +301,12 @@ public class FilledProfileResults implements ProfileResults {
         long totalValue;
         final Map<String, FilledProfileResults.CounterCollector> children = Maps.newHashMap();
 
-        public void addValue(Iterator<String> p_18548_, long p_18549_) {
-            this.totalValue += p_18549_;
-            if (!p_18548_.hasNext()) {
-                this.selfValue += p_18549_;
+        public void addValue(Iterator<String> pCounters, long pValue) {
+            this.totalValue += pValue;
+            if (!pCounters.hasNext()) {
+                this.selfValue += pValue;
             } else {
-                this.children.computeIfAbsent(p_18548_.next(), p_18546_ -> new FilledProfileResults.CounterCollector()).addValue(p_18548_, p_18549_);
+                this.children.computeIfAbsent(pCounters.next(), p_18546_ -> new FilledProfileResults.CounterCollector()).addValue(pCounters, pValue);
             }
         }
     }

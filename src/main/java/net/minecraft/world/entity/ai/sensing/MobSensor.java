@@ -15,12 +15,12 @@ public class MobSensor<T extends LivingEntity> extends Sensor<T> {
     private final MemoryModuleType<Boolean> toSet;
     private final int memoryTimeToLive;
 
-    public MobSensor(int p_333366_, BiPredicate<T, LivingEntity> p_329126_, Predicate<T> p_334546_, MemoryModuleType<Boolean> p_334716_, int p_331675_) {
-        super(p_333366_);
-        this.mobTest = p_329126_;
-        this.readyTest = p_334546_;
-        this.toSet = p_334716_;
-        this.memoryTimeToLive = p_331675_;
+    public MobSensor(int pScanRate, BiPredicate<T, LivingEntity> pMobTest, Predicate<T> pReadyTest, MemoryModuleType<Boolean> pToSet, int pMemoryTimeToLive) {
+        super(pScanRate);
+        this.mobTest = pMobTest;
+        this.readyTest = pReadyTest;
+        this.toSet = pToSet;
+        this.memoryTimeToLive = pMemoryTimeToLive;
     }
 
     @Override
@@ -37,21 +37,21 @@ public class MobSensor<T extends LivingEntity> extends Sensor<T> {
         return Set.of(MemoryModuleType.NEAREST_LIVING_ENTITIES);
     }
 
-    public void checkForMobsNearby(T p_333520_) {
-        Optional<List<LivingEntity>> optional = p_333520_.getBrain().getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES);
+    public void checkForMobsNearby(T pSensingEntity) {
+        Optional<List<LivingEntity>> optional = pSensingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES);
         if (!optional.isEmpty()) {
-            boolean flag = optional.get().stream().anyMatch(p_329312_ -> this.mobTest.test(p_333520_, p_329312_));
+            boolean flag = optional.get().stream().anyMatch(p_329312_ -> this.mobTest.test(pSensingEntity, p_329312_));
             if (flag) {
-                this.mobDetected(p_333520_);
+                this.mobDetected(pSensingEntity);
             }
         }
     }
 
-    public void mobDetected(T p_332120_) {
-        p_332120_.getBrain().setMemoryWithExpiry(this.toSet, true, (long)this.memoryTimeToLive);
+    public void mobDetected(T pSensingEntity) {
+        pSensingEntity.getBrain().setMemoryWithExpiry(this.toSet, true, (long)this.memoryTimeToLive);
     }
 
-    public void clearMemory(T p_336340_) {
-        p_336340_.getBrain().eraseMemory(this.toSet);
+    public void clearMemory(T pSensingEntity) {
+        pSensingEntity.getBrain().eraseMemory(this.toSet);
     }
 }

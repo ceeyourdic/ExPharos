@@ -72,7 +72,7 @@ public class PolarBear extends Animal implements NeutralMob {
     }
 
     @Override
-    public boolean isFood(ItemStack p_29565_) {
+    public boolean isFood(ItemStack pStack) {
         return false;
     }
 
@@ -102,24 +102,24 @@ public class PolarBear extends Animal implements NeutralMob {
     }
 
     public static boolean checkPolarBearSpawnRules(
-        EntityType<PolarBear> p_218250_, LevelAccessor p_218251_, EntitySpawnReason p_362821_, BlockPos p_218253_, RandomSource p_218254_
+        EntityType<PolarBear> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        Holder<Biome> holder = p_218251_.getBiome(p_218253_);
+        Holder<Biome> holder = pLevel.getBiome(pPos);
         return !holder.is(BiomeTags.POLAR_BEARS_SPAWN_ON_ALTERNATE_BLOCKS)
-            ? checkAnimalSpawnRules(p_218250_, p_218251_, p_362821_, p_218253_, p_218254_)
-            : isBrightEnoughToSpawn(p_218251_, p_218253_) && p_218251_.getBlockState(p_218253_.below()).is(BlockTags.POLAR_BEARS_SPAWNABLE_ON_ALTERNATE);
+            ? checkAnimalSpawnRules(pEntityType, pLevel, pSpawnReason, pPos, pRandom)
+            : isBrightEnoughToSpawn(pLevel, pPos) && pLevel.getBlockState(pPos.below()).is(BlockTags.POLAR_BEARS_SPAWNABLE_ON_ALTERNATE);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_29541_) {
-        super.readAdditionalSaveData(p_29541_);
-        this.readPersistentAngerSaveData(this.level(), p_29541_);
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readPersistentAngerSaveData(this.level(), pCompound);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_29548_) {
-        super.addAdditionalSaveData(p_29548_);
-        this.addPersistentAngerSaveData(p_29548_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addPersistentAngerSaveData(pCompound);
     }
 
     @Override
@@ -128,8 +128,8 @@ public class PolarBear extends Animal implements NeutralMob {
     }
 
     @Override
-    public void setRemainingPersistentAngerTime(int p_29543_) {
-        this.remainingPersistentAngerTime = p_29543_;
+    public void setRemainingPersistentAngerTime(int pTime) {
+        this.remainingPersistentAngerTime = pTime;
     }
 
     @Override
@@ -138,8 +138,8 @@ public class PolarBear extends Animal implements NeutralMob {
     }
 
     @Override
-    public void setPersistentAngerTarget(@Nullable UUID p_29539_) {
-        this.persistentAngerTarget = p_29539_;
+    public void setPersistentAngerTarget(@Nullable UUID pTarget) {
+        this.persistentAngerTarget = pTarget;
     }
 
     @Nullable
@@ -154,7 +154,7 @@ public class PolarBear extends Animal implements NeutralMob {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_29559_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.POLAR_BEAR_HURT;
     }
 
@@ -164,7 +164,7 @@ public class PolarBear extends Animal implements NeutralMob {
     }
 
     @Override
-    protected void playStepSound(BlockPos p_29545_, BlockState p_29546_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(SoundEvents.POLAR_BEAR_STEP, 0.15F, 1.0F);
     }
 
@@ -221,12 +221,12 @@ public class PolarBear extends Animal implements NeutralMob {
         return this.entityData.get(DATA_STANDING_ID);
     }
 
-    public void setStanding(boolean p_29568_) {
-        this.entityData.set(DATA_STANDING_ID, p_29568_);
+    public void setStanding(boolean pStanding) {
+        this.entityData.set(DATA_STANDING_ID, pStanding);
     }
 
-    public float getStandingAnimationScale(float p_29570_) {
-        return Mth.lerp(p_29570_, this.clientSideStandAnimationO, this.clientSideStandAnimation) / 6.0F;
+    public float getStandingAnimationScale(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.clientSideStandAnimationO, this.clientSideStandAnimation) / 6.0F;
     }
 
     @Override
@@ -286,9 +286,9 @@ public class PolarBear extends Animal implements NeutralMob {
         }
 
         @Override
-        protected void alertOther(Mob p_29580_, LivingEntity p_29581_) {
-            if (p_29580_ instanceof PolarBear && !p_29580_.isBaby()) {
-                super.alertOther(p_29580_, p_29581_);
+        protected void alertOther(Mob pMob, LivingEntity pTarget) {
+            if (pMob instanceof PolarBear && !pMob.isBaby()) {
+                super.alertOther(pMob, pTarget);
             }
         }
     }

@@ -67,14 +67,14 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 
     protected abstract Component getDefaultName();
 
-    public boolean canOpen(Player p_58645_) {
-        return canUnlock(p_58645_, this.lockKey, this.getDisplayName());
+    public boolean canOpen(Player pPlayer) {
+        return canUnlock(pPlayer, this.lockKey, this.getDisplayName());
     }
 
-    public static boolean canUnlock(Player p_58630_, LockCode p_58631_, Component p_58632_) {
-        if (!p_58630_.isSpectator() && !p_58631_.unlocksWith(p_58630_.getMainHandItem())) {
-            p_58630_.displayClientMessage(Component.translatable("container.isLocked", p_58632_), true);
-            p_58630_.playNotifySound(SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 1.0F, 1.0F);
+    public static boolean canUnlock(Player pPlayer, LockCode pCode, Component pDisplayName) {
+        if (!pPlayer.isSpectator() && !pCode.unlocksWith(pPlayer.getMainHandItem())) {
+            pPlayer.displayClientMessage(Component.translatable("container.isLocked", pDisplayName), true);
+            pPlayer.playNotifySound(SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 1.0F, 1.0F);
             return false;
         } else {
             return true;
@@ -83,7 +83,7 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 
     protected abstract NonNullList<ItemStack> getItems();
 
-    protected abstract void setItems(NonNullList<ItemStack> p_330472_);
+    protected abstract void setItems(NonNullList<ItemStack> pItems);
 
     @Override
     public boolean isEmpty() {
@@ -139,7 +139,7 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
         return this.canOpen(p_58643_) ? this.createMenu(p_58641_, p_58642_) : null;
     }
 
-    protected abstract AbstractContainerMenu createMenu(int p_58627_, Inventory p_58628_);
+    protected abstract AbstractContainerMenu createMenu(int pContainerId, Inventory pInventory);
 
     @Override
     protected void applyImplicitComponents(BlockEntity.DataComponentInput p_329127_) {

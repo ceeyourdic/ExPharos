@@ -12,9 +12,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public abstract class AbstractZombieRenderer<T extends Zombie, S extends ZombieRenderState, M extends ZombieModel<S>> extends HumanoidMobRenderer<T, S, M> {
     private static final ResourceLocation ZOMBIE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/zombie/zombie.png");
 
-    protected AbstractZombieRenderer(EntityRendererProvider.Context p_173910_, M p_173911_, M p_173912_, M p_173913_, M p_369784_, M p_360801_, M p_367849_) {
-        super(p_173910_, p_173911_, p_173912_, 0.5F);
-        this.addLayer(new HumanoidArmorLayer<>(this, p_173913_, p_369784_, p_360801_, p_367849_, p_173910_.getEquipmentRenderer()));
+    protected AbstractZombieRenderer(EntityRendererProvider.Context pContext, M pAdultModel, M pBabyModel, M pInnerModel, M pOuterModel, M pInnerModelBaby, M pOuterModelBaby) {
+        super(pContext, pAdultModel, pBabyModel, 0.5F);
+        this.addLayer(new HumanoidArmorLayer<>(this, pInnerModel, pOuterModel, pInnerModelBaby, pOuterModelBaby, pContext.getEquipmentRenderer()));
     }
 
     public ResourceLocation getTextureLocation(S p_361963_) {

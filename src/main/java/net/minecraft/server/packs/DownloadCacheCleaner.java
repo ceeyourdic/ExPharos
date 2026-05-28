@@ -23,10 +23,10 @@ import org.slf4j.Logger;
 public class DownloadCacheCleaner {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static void vacuumCacheDir(Path p_311487_, int p_312653_) {
+    public static void vacuumCacheDir(Path pPath, int pMaxEntries) {
         try {
-            List<DownloadCacheCleaner.PathAndTime> list = listFilesWithModificationTimes(p_311487_);
-            int i = list.size() - p_312653_;
+            List<DownloadCacheCleaner.PathAndTime> list = listFilesWithModificationTimes(pPath);
+            int i = list.size() - pMaxEntries;
             if (i <= 0) {
                 return;
             }
@@ -51,7 +51,7 @@ public class DownloadCacheCleaner {
                 }
             }
 
-            set.remove(p_311487_);
+            set.remove(pPath);
 
             for (Path path1 : set) {
                 try {
@@ -62,16 +62,16 @@ public class DownloadCacheCleaner {
                 }
             }
         } catch (UncheckedIOException | IOException ioexception2) {
-            LOGGER.error("Failed to vacuum cache dir {}", p_311487_, ioexception2);
+            LOGGER.error("Failed to vacuum cache dir {}", pPath, ioexception2);
         }
     }
 
-    private static List<DownloadCacheCleaner.PathAndTime> listFilesWithModificationTimes(final Path p_311706_) throws IOException {
+    private static List<DownloadCacheCleaner.PathAndTime> listFilesWithModificationTimes(final Path pPath) throws IOException {
         try {
             final List<DownloadCacheCleaner.PathAndTime> list = new ArrayList<>();
-            Files.walkFileTree(p_311706_, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(pPath, new SimpleFileVisitor<Path>() {
                 public FileVisitResult visitFile(Path p_312027_, BasicFileAttributes p_309596_) {
-                    if (p_309596_.isRegularFile() && !p_312027_.getParent().equals(p_311706_)) {
+                    if (p_309596_.isRegularFile() && !p_312027_.getParent().equals(pPath)) {
                         FileTime filetime = p_309596_.lastModifiedTime();
                         list.add(new DownloadCacheCleaner.PathAndTime(p_312027_, filetime));
                     }
@@ -85,11 +85,11 @@ public class DownloadCacheCleaner {
         }
     }
 
-    private static List<DownloadCacheCleaner.PathAndPriority> prioritizeFilesInDirs(List<DownloadCacheCleaner.PathAndTime> p_312641_) {
+    private static List<DownloadCacheCleaner.PathAndPriority> prioritizeFilesInDirs(List<DownloadCacheCleaner.PathAndTime> pPaths) {
         List<DownloadCacheCleaner.PathAndPriority> list = new ArrayList<>();
         Object2IntOpenHashMap<Path> object2intopenhashmap = new Object2IntOpenHashMap<>();
 
-        for (DownloadCacheCleaner.PathAndTime downloadcachecleaner$pathandtime : p_312641_) {
+        for (DownloadCacheCleaner.PathAndTime downloadcachecleaner$pathandtime : pPaths) {
             int i = object2intopenhashmap.addTo(downloadcachecleaner$pathandtime.path.getParent(), 1);
             list.add(new DownloadCacheCleaner.PathAndPriority(downloadcachecleaner$pathandtime.path, i));
         }

@@ -15,8 +15,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class TridentModel extends Model {
     public static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/trident.png");
 
-    public TridentModel(ModelPart p_171016_) {
-        super(p_171016_, RenderType::entitySolid);
+    public TridentModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entitySolid);
     }
 
     public static LayerDefinition createLayer() {

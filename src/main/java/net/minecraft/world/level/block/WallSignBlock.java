@@ -57,23 +57,23 @@ public class WallSignBlock extends SignBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_58092_, BlockGetter p_58093_, BlockPos p_58094_, CollisionContext p_58095_) {
-        return AABBS.get(p_58092_.getValue(FACING));
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return AABBS.get(pState.getValue(FACING));
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_58073_, LevelReader p_58074_, BlockPos p_58075_) {
-        return p_58074_.getBlockState(p_58075_.relative(p_58073_.getValue(FACING).getOpposite())).isSolid();
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        return pLevel.getBlockState(pPos.relative(pState.getValue(FACING).getOpposite())).isSolid();
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_58071_) {
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
         BlockState blockstate = this.defaultBlockState();
-        FluidState fluidstate = p_58071_.getLevel().getFluidState(p_58071_.getClickedPos());
-        LevelReader levelreader = p_58071_.getLevel();
-        BlockPos blockpos = p_58071_.getClickedPos();
-        Direction[] adirection = p_58071_.getNearestLookingDirections();
+        FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
+        LevelReader levelreader = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
+        Direction[] adirection = pContext.getNearestLookingDirections();
 
         for (Direction direction : adirection) {
             if (direction.getAxis().isHorizontal()) {
@@ -116,17 +116,17 @@ public class WallSignBlock extends SignBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState p_58080_, Rotation p_58081_) {
-        return p_58080_.setValue(FACING, p_58081_.rotate(p_58080_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_58077_, Mirror p_58078_) {
-        return p_58077_.rotate(p_58078_.getRotation(p_58077_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_58090_) {
-        p_58090_.add(FACING, WATERLOGGED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, WATERLOGGED);
     }
 }

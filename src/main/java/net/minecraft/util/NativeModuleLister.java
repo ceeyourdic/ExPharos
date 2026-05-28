@@ -48,10 +48,10 @@ public class NativeModuleLister {
         }
     }
 
-    private static Optional<NativeModuleLister.NativeModuleVersion> tryGetVersion(String p_184674_) {
+    private static Optional<NativeModuleLister.NativeModuleVersion> tryGetVersion(String pFilename) {
         try {
             IntByReference intbyreference = new IntByReference();
-            int i = Version.INSTANCE.GetFileVersionInfoSize(p_184674_, intbyreference);
+            int i = Version.INSTANCE.GetFileVersionInfoSize(pFilename, intbyreference);
             if (i == 0) {
                 int i1 = Native.getLastError();
                 if (i1 != 1813 && i1 != 1812) {
@@ -61,7 +61,7 @@ public class NativeModuleLister {
                 }
             } else {
                 Pointer pointer = new Memory((long)i);
-                if (!Version.INSTANCE.GetFileVersionInfo(p_184674_, 0, i, pointer)) {
+                if (!Version.INSTANCE.GetFileVersionInfo(pFilename, 0, i, pointer)) {
                     throw new Win32Exception(Native.getLastError());
                 } else {
                     IntByReference intbyreference1 = new IntByReference();
@@ -82,19 +82,19 @@ public class NativeModuleLister {
                 }
             }
         } catch (Exception exception) {
-            LOGGER.info("Failed to find module info for {}", p_184674_, exception);
+            LOGGER.info("Failed to find module info for {}", pFilename, exception);
             return Optional.empty();
         }
     }
 
-    private static String langTableKey(String p_184676_, int p_184677_, int p_184678_) {
-        return String.format(Locale.ROOT, "\\StringFileInfo\\%04x%04x\\%s", p_184677_, p_184678_, p_184676_);
+    private static String langTableKey(String pKey, int pLang, int pCodepage) {
+        return String.format(Locale.ROOT, "\\StringFileInfo\\%04x%04x\\%s", pLang, pCodepage, pKey);
     }
 
-    private static OptionalInt findLangAndCodepage(int[] p_184682_) {
+    private static OptionalInt findLangAndCodepage(int[] pVersionValue) {
         OptionalInt optionalint = OptionalInt.empty();
 
-        for (int i : p_184682_) {
+        for (int i : pVersionValue) {
             if ((i & -65536) == 78643200 && (i & 65535) == 1033) {
                 return OptionalInt.of(i);
             }
@@ -105,27 +105,27 @@ public class NativeModuleLister {
         return optionalint;
     }
 
-    private static Pointer queryVersionValue(Pointer p_184670_, String p_184671_, IntByReference p_184672_) {
+    private static Pointer queryVersionValue(Pointer pBlock, String pSubBlock, IntByReference pSize) {
         PointerByReference pointerbyreference = new PointerByReference();
-        if (!Version.INSTANCE.VerQueryValue(p_184670_, p_184671_, pointerbyreference, p_184672_)) {
-            throw new UnsupportedOperationException("Can't get version value " + p_184671_);
+        if (!Version.INSTANCE.VerQueryValue(pBlock, pSubBlock, pointerbyreference, pSize)) {
+            throw new UnsupportedOperationException("Can't get version value " + pSubBlock);
         } else {
             return pointerbyreference.getValue();
         }
     }
 
-    private static String queryVersionString(Pointer p_184687_, String p_184688_, IntByReference p_184689_) {
+    private static String queryVersionString(Pointer pBlock, String pSubBlock, IntByReference pSize) {
         try {
-            Pointer pointer = queryVersionValue(p_184687_, p_184688_, p_184689_);
-            byte[] abyte = pointer.getByteArray(0L, (p_184689_.getValue() - 1) * 2);
+            Pointer pointer = queryVersionValue(pBlock, pSubBlock, pSize);
+            byte[] abyte = pointer.getByteArray(0L, (pSize.getValue() - 1) * 2);
             return new String(abyte, StandardCharsets.UTF_16LE);
         } catch (Exception exception) {
             return "";
         }
     }
 
-    public static void addCrashSection(CrashReportCategory p_184680_) {
-        p_184680_.setDetail(
+    public static void addCrashSection(CrashReportCategory pCrashSection) {
+        pCrashSection.setDetail(
             "Modules",
             () -> listModules()
                     .stream()
@@ -139,9 +139,9 @@ public class NativeModuleLister {
         public final String name;
         public final Optional<NativeModuleLister.NativeModuleVersion> version;
 
-        public NativeModuleInfo(String p_184693_, Optional<NativeModuleLister.NativeModuleVersion> p_184694_) {
-            this.name = p_184693_;
-            this.version = p_184694_;
+        public NativeModuleInfo(String pName, Optional<NativeModuleLister.NativeModuleVersion> pVersion) {
+            this.name = pName;
+            this.version = pVersion;
         }
 
         @Override
@@ -155,10 +155,10 @@ public class NativeModuleLister {
         public final String version;
         public final String company;
 
-        public NativeModuleVersion(String p_184702_, String p_184703_, String p_184704_) {
-            this.description = p_184702_;
-            this.version = p_184703_;
-            this.company = p_184704_;
+        public NativeModuleVersion(String pDescription, String pVersion, String pCompany) {
+            this.description = pDescription;
+            this.version = pVersion;
+            this.company = pCompany;
         }
 
         @Override

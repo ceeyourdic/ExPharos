@@ -46,29 +46,29 @@ public class LootPool {
     private final NumberProvider bonusRolls;
 
     LootPool(
-        List<LootPoolEntryContainer> p_298341_,
-        List<LootItemCondition> p_297697_,
-        List<LootItemFunction> p_299722_,
-        NumberProvider p_165131_,
-        NumberProvider p_165132_
+        List<LootPoolEntryContainer> pEntries,
+        List<LootItemCondition> pConditions,
+        List<LootItemFunction> pFunctions,
+        NumberProvider pRolls,
+        NumberProvider pBonusRolls
     ) {
-        this.entries = p_298341_;
-        this.conditions = p_297697_;
-        this.compositeCondition = Util.allOf(p_297697_);
-        this.functions = p_299722_;
-        this.compositeFunction = LootItemFunctions.compose(p_299722_);
-        this.rolls = p_165131_;
-        this.bonusRolls = p_165132_;
+        this.entries = pEntries;
+        this.conditions = pConditions;
+        this.compositeCondition = Util.allOf(pConditions);
+        this.functions = pFunctions;
+        this.compositeFunction = LootItemFunctions.compose(pFunctions);
+        this.rolls = pRolls;
+        this.bonusRolls = pBonusRolls;
     }
 
-    private void addRandomItem(Consumer<ItemStack> p_79059_, LootContext p_79060_) {
-        RandomSource randomsource = p_79060_.getRandom();
+    private void addRandomItem(Consumer<ItemStack> pStackConsumer, LootContext pContext) {
+        RandomSource randomsource = pContext.getRandom();
         List<LootPoolEntry> list = Lists.newArrayList();
         MutableInt mutableint = new MutableInt();
 
         for (LootPoolEntryContainer lootpoolentrycontainer : this.entries) {
-            lootpoolentrycontainer.expand(p_79060_, p_79048_ -> {
-                int k = p_79048_.getWeight(p_79060_.getLuck());
+            lootpoolentrycontainer.expand(pContext, p_79048_ -> {
+                int k = p_79048_.getWeight(pContext.getLuck());
                 if (k > 0) {
                     list.add(p_79048_);
                     mutableint.add(k);
@@ -79,14 +79,14 @@ public class LootPool {
         int i = list.size();
         if (mutableint.intValue() != 0 && i != 0) {
             if (i == 1) {
-                list.get(0).createItemStack(p_79059_, p_79060_);
+                list.get(0).createItemStack(pStackConsumer, pContext);
             } else {
                 int j = randomsource.nextInt(mutableint.intValue());
 
                 for (LootPoolEntry lootpoolentry : list) {
-                    j -= lootpoolentry.getWeight(p_79060_.getLuck());
+                    j -= lootpoolentry.getWeight(pContext.getLuck());
                     if (j < 0) {
-                        lootpoolentry.createItemStack(p_79059_, p_79060_);
+                        lootpoolentry.createItemStack(pStackConsumer, pContext);
                         return;
                     }
                 }
@@ -94,32 +94,32 @@ public class LootPool {
         }
     }
 
-    public void addRandomItems(Consumer<ItemStack> p_79054_, LootContext p_79055_) {
-        if (this.compositeCondition.test(p_79055_)) {
-            Consumer<ItemStack> consumer = LootItemFunction.decorate(this.compositeFunction, p_79054_, p_79055_);
-            int i = this.rolls.getInt(p_79055_) + Mth.floor(this.bonusRolls.getFloat(p_79055_) * p_79055_.getLuck());
+    public void addRandomItems(Consumer<ItemStack> pStackConsumer, LootContext pLootContext) {
+        if (this.compositeCondition.test(pLootContext)) {
+            Consumer<ItemStack> consumer = LootItemFunction.decorate(this.compositeFunction, pStackConsumer, pLootContext);
+            int i = this.rolls.getInt(pLootContext) + Mth.floor(this.bonusRolls.getFloat(pLootContext) * pLootContext.getLuck());
 
             for (int j = 0; j < i; j++) {
-                this.addRandomItem(consumer, p_79055_);
+                this.addRandomItem(consumer, pLootContext);
             }
         }
     }
 
-    public void validate(ValidationContext p_79052_) {
+    public void validate(ValidationContext pContext) {
         for (int i = 0; i < this.conditions.size(); i++) {
-            this.conditions.get(i).validate(p_79052_.forChild(".condition[" + i + "]"));
+            this.conditions.get(i).validate(pContext.forChild(".condition[" + i + "]"));
         }
 
         for (int j = 0; j < this.functions.size(); j++) {
-            this.functions.get(j).validate(p_79052_.forChild(".functions[" + j + "]"));
+            this.functions.get(j).validate(pContext.forChild(".functions[" + j + "]"));
         }
 
         for (int k = 0; k < this.entries.size(); k++) {
-            this.entries.get(k).validate(p_79052_.forChild(".entries[" + k + "]"));
+            this.entries.get(k).validate(pContext.forChild(".entries[" + k + "]"));
         }
 
-        this.rolls.validate(p_79052_.forChild(".rolls"));
-        this.bonusRolls.validate(p_79052_.forChild(".bonusRolls"));
+        this.rolls.validate(pContext.forChild(".rolls"));
+        this.bonusRolls.validate(pContext.forChild(".bonusRolls"));
     }
 
     public static LootPool.Builder lootPool() {
@@ -133,8 +133,8 @@ public class LootPool {
         private NumberProvider rolls = ConstantValue.exactly(1.0F);
         private NumberProvider bonusRolls = ConstantValue.exactly(0.0F);
 
-        public LootPool.Builder setRolls(NumberProvider p_165134_) {
-            this.rolls = p_165134_;
+        public LootPool.Builder setRolls(NumberProvider pRolls) {
+            this.rolls = pRolls;
             return this;
         }
 
@@ -142,13 +142,13 @@ public class LootPool {
             return this;
         }
 
-        public LootPool.Builder setBonusRolls(NumberProvider p_165136_) {
-            this.bonusRolls = p_165136_;
+        public LootPool.Builder setBonusRolls(NumberProvider pBonusRolls) {
+            this.bonusRolls = pBonusRolls;
             return this;
         }
 
-        public LootPool.Builder add(LootPoolEntryContainer.Builder<?> p_79077_) {
-            this.entries.add(p_79077_.build());
+        public LootPool.Builder add(LootPoolEntryContainer.Builder<?> pEntriesBuilder) {
+            this.entries.add(pEntriesBuilder.build());
             return this;
         }
 

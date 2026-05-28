@@ -25,8 +25,8 @@ public class WorldOptions {
     private final boolean generateBonusChest;
     private final Optional<String> legacyCustomOptions;
 
-    public WorldOptions(long p_251567_, boolean p_250743_, boolean p_250454_) {
-        this(p_251567_, p_250743_, p_250454_, Optional.empty());
+    public WorldOptions(long pSeed, boolean pGenerateStructures, boolean pGenerateBonusChest) {
+        this(pSeed, pGenerateStructures, pGenerateBonusChest, Optional.empty());
     }
 
     public static WorldOptions defaultWithRandomSeed() {
@@ -37,11 +37,11 @@ public class WorldOptions {
         return new WorldOptions(randomSeed(), false, false);
     }
 
-    private WorldOptions(long p_249191_, boolean p_250927_, boolean p_249013_, Optional<String> p_250735_) {
-        this.seed = p_249191_;
-        this.generateStructures = p_250927_;
-        this.generateBonusChest = p_249013_;
-        this.legacyCustomOptions = p_250735_;
+    private WorldOptions(long pSeed, boolean pGenerateStructures, boolean pGenerateBonusChest, Optional<String> pLegacyCustomOptions) {
+        this.seed = pSeed;
+        this.generateStructures = pGenerateStructures;
+        this.generateBonusChest = pGenerateBonusChest;
+        this.legacyCustomOptions = pLegacyCustomOptions;
     }
 
     public long seed() {
@@ -60,27 +60,27 @@ public class WorldOptions {
         return this.legacyCustomOptions.isPresent();
     }
 
-    public WorldOptions withBonusChest(boolean p_251744_) {
-        return new WorldOptions(this.seed, this.generateStructures, p_251744_, this.legacyCustomOptions);
+    public WorldOptions withBonusChest(boolean pGenerateBonusChest) {
+        return new WorldOptions(this.seed, this.generateStructures, pGenerateBonusChest, this.legacyCustomOptions);
     }
 
-    public WorldOptions withStructures(boolean p_251426_) {
-        return new WorldOptions(this.seed, p_251426_, this.generateBonusChest, this.legacyCustomOptions);
+    public WorldOptions withStructures(boolean pGenerateStructures) {
+        return new WorldOptions(this.seed, pGenerateStructures, this.generateBonusChest, this.legacyCustomOptions);
     }
 
-    public WorldOptions withSeed(OptionalLong p_261572_) {
-        return new WorldOptions(p_261572_.orElse(randomSeed()), this.generateStructures, this.generateBonusChest, this.legacyCustomOptions);
+    public WorldOptions withSeed(OptionalLong pSeed) {
+        return new WorldOptions(pSeed.orElse(randomSeed()), this.generateStructures, this.generateBonusChest, this.legacyCustomOptions);
     }
 
-    public static OptionalLong parseSeed(String p_262144_) {
-        p_262144_ = p_262144_.trim();
-        if (StringUtils.isEmpty(p_262144_)) {
+    public static OptionalLong parseSeed(String pSeed) {
+        pSeed = pSeed.trim();
+        if (StringUtils.isEmpty(pSeed)) {
             return OptionalLong.empty();
         } else {
             try {
-                return OptionalLong.of(Long.parseLong(p_262144_));
+                return OptionalLong.of(Long.parseLong(pSeed));
             } catch (NumberFormatException numberformatexception) {
-                return OptionalLong.of((long)p_262144_.hashCode());
+                return OptionalLong.of((long)pSeed.hashCode());
             }
         }
     }

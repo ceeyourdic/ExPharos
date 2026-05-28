@@ -1,20 +1,22 @@
 package net.minecraft.client.renderer.chunk;
 
 import javax.annotation.Nullable;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.model.data.ModelDataManager;
+import net.optifine.override.ChunkCacheOF;
 
-@OnlyIn(Dist.CLIENT)
 public class RenderChunkRegion implements BlockAndTintGetter {
     public static final int RADIUS = 1;
     public static final int SIZE = 3;
@@ -22,22 +24,28 @@ public class RenderChunkRegion implements BlockAndTintGetter {
     private final int minChunkZ;
     protected final RenderChunk[] chunks;
     protected final Level level;
+    private SectionPos sectionPos;
 
-    RenderChunkRegion(Level p_200456_, int p_200457_, int p_200458_, RenderChunk[] p_342584_) {
-        this.level = p_200456_;
-        this.minChunkX = p_200457_;
-        this.minChunkZ = p_200458_;
-        this.chunks = p_342584_;
+    RenderChunkRegion(Level pLevel, int pMinChunkX, int pMinChunkZ, RenderChunk[] pChunks) {
+        this(pLevel, pMinChunkX, pMinChunkZ, pChunks, null);
+    }
+
+    RenderChunkRegion(Level worldIn, int chunkStartXIn, int chunkStartYIn, RenderChunk[] chunksIn, SectionPos sectionPosIn) {
+        this.level = worldIn;
+        this.minChunkX = chunkStartXIn;
+        this.minChunkZ = chunkStartYIn;
+        this.chunks = chunksIn;
+        this.sectionPos = sectionPosIn;
     }
 
     @Override
-    public BlockState getBlockState(BlockPos p_112947_) {
-        return this.getChunk(SectionPos.blockToSectionCoord(p_112947_.getX()), SectionPos.blockToSectionCoord(p_112947_.getZ())).getBlockState(p_112947_);
+    public BlockState getBlockState(BlockPos pPos) {
+        return this.getChunk(SectionPos.blockToSectionCoord(pPos.getX()), SectionPos.blockToSectionCoord(pPos.getZ())).getBlockState(pPos);
     }
 
     @Override
-    public FluidState getFluidState(BlockPos p_112943_) {
-        return this.getChunk(SectionPos.blockToSectionCoord(p_112943_.getX()), SectionPos.blockToSectionCoord(p_112943_.getZ())).getBlockState(p_112943_).getFluidState();
+    public FluidState getFluidState(BlockPos pPos) {
+        return this.getChunk(SectionPos.blockToSectionCoord(pPos.getX()), SectionPos.blockToSectionCoord(pPos.getZ())).getBlockState(pPos).getFluidState();
     }
 
     @Override
@@ -52,17 +60,17 @@ public class RenderChunkRegion implements BlockAndTintGetter {
 
     @Nullable
     @Override
-    public BlockEntity getBlockEntity(BlockPos p_112945_) {
-        return this.getChunk(SectionPos.blockToSectionCoord(p_112945_.getX()), SectionPos.blockToSectionCoord(p_112945_.getZ())).getBlockEntity(p_112945_);
+    public BlockEntity getBlockEntity(BlockPos pPos) {
+        return this.getChunk(SectionPos.blockToSectionCoord(pPos.getX()), SectionPos.blockToSectionCoord(pPos.getZ())).getBlockEntity(pPos);
     }
 
-    private RenderChunk getChunk(int p_344830_, int p_345301_) {
-        return this.chunks[index(this.minChunkX, this.minChunkZ, p_344830_, p_345301_)];
+    public RenderChunk getChunk(int pX, int pZ) {
+        return this.chunks[index(this.minChunkX, this.minChunkZ, pX, pZ)];
     }
 
     @Override
-    public int getBlockTint(BlockPos p_112937_, ColorResolver p_112938_) {
-        return this.level.getBlockTint(p_112937_, p_112938_);
+    public int getBlockTint(BlockPos pPos, ColorResolver pColorResolver) {
+        return this.level.getBlockTint(pPos, pColorResolver);
     }
 
     @Override
@@ -75,7 +83,35 @@ public class RenderChunkRegion implements BlockAndTintGetter {
         return this.level.getHeight();
     }
 
-    public static int index(int p_345383_, int p_342744_, int p_343921_, int p_343462_) {
-        return p_343921_ - p_345383_ + (p_343462_ - p_342744_) * 3;
+    public static int index(int pMinX, int pMinZ, int pX, int pZ) {
+        return pX - pMinX + (pZ - pMinZ) * 3;
+    }
+
+    public Biome getBiome(BlockPos pos) {
+        return this.level.getBiome(pos).value();
+    }
+
+    public LevelChunk getLevelChunk(int cx, int cz) {
+        return this.getChunk(cx, cz).getChunk();
+    }
+
+    public ChunkCacheOF makeChunkCacheOF() {
+        return this.sectionPos == null ? null : new ChunkCacheOF(this, this.sectionPos);
+    }
+
+    public int getMinChunkX() {
+        return this.minChunkX;
+    }
+
+    public int getMinChunkZ() {
+        return this.minChunkZ;
+    }
+
+    public float getShade(float normalX, float normalY, float normalZ, boolean shade) {
+        return this.level instanceof ClientLevel clientlevel ? clientlevel.getShade(normalX, normalY, normalZ, shade) : 1.0F;
+    }
+
+    public ModelDataManager getModelDataManager() {
+        return this.level instanceof ClientLevel clientlevel ? clientlevel.getModelDataManager() : null;
     }
 }

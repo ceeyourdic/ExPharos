@@ -1,35 +1,35 @@
 package net.minecraft.client.renderer.chunk;
 
-import java.util.BitSet;
 import java.util.Set;
 import net.minecraft.core.Direction;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class VisibilitySet {
     private static final int FACINGS = Direction.values().length;
-    private final BitSet data = new BitSet(FACINGS * FACINGS);
+    private long bits;
 
-    public void add(Set<Direction> p_112991_) {
-        for (Direction direction : p_112991_) {
-            for (Direction direction1 : p_112991_) {
+    public void add(Set<Direction> pFaces) {
+        for (Direction direction : pFaces) {
+            for (Direction direction1 : pFaces) {
                 this.set(direction, direction1, true);
             }
         }
     }
 
-    public void set(Direction p_112987_, Direction p_112988_, boolean p_112989_) {
-        this.data.set(p_112987_.ordinal() + p_112988_.ordinal() * FACINGS, p_112989_);
-        this.data.set(p_112988_.ordinal() + p_112987_.ordinal() * FACINGS, p_112989_);
+    public void set(Direction pFace, Direction pOtherFace, boolean pVisible) {
+        this.setBit(pFace.ordinal() + pOtherFace.ordinal() * FACINGS, pVisible);
+        this.setBit(pOtherFace.ordinal() + pFace.ordinal() * FACINGS, pVisible);
     }
 
-    public void setAll(boolean p_112993_) {
-        this.data.set(0, this.data.size(), p_112993_);
+    public void setAll(boolean pVisible) {
+        if (pVisible) {
+            this.bits = -1L;
+        } else {
+            this.bits = 0L;
+        }
     }
 
-    public boolean visibilityBetween(Direction p_112984_, Direction p_112985_) {
-        return this.data.get(p_112984_.ordinal() + p_112985_.ordinal() * FACINGS);
+    public boolean visibilityBetween(Direction pFace, Direction pOtherFace) {
+        return this.getBit(pFace.ordinal() + pOtherFace.ordinal() * FACINGS);
     }
 
     @Override
@@ -59,5 +59,25 @@ public class VisibilitySet {
         }
 
         return stringbuilder.toString();
+    }
+
+    private boolean getBit(int i) {
+        return (this.bits & 1L << i) != 0L;
+    }
+
+    private void setBit(int i, boolean on) {
+        if (on) {
+            this.setBit(i);
+        } else {
+            this.clearBit(i);
+        }
+    }
+
+    private void setBit(int i) {
+        this.bits |= 1L << i;
+    }
+
+    private void clearBit(int i) {
+        this.bits &= ~(1L << i);
     }
 }

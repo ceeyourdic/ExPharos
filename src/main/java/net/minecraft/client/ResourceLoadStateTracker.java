@@ -20,24 +20,24 @@ public class ResourceLoadStateTracker {
     private ResourceLoadStateTracker.ReloadState reloadState;
     private int reloadCount;
 
-    public void startReload(ResourceLoadStateTracker.ReloadReason p_168558_, List<PackResources> p_168559_) {
+    public void startReload(ResourceLoadStateTracker.ReloadReason pReloadReason, List<PackResources> pPacks) {
         this.reloadCount++;
         if (this.reloadState != null && !this.reloadState.finished) {
             LOGGER.warn("Reload already ongoing, replacing");
         }
 
         this.reloadState = new ResourceLoadStateTracker.ReloadState(
-            p_168558_, p_168559_.stream().map(PackResources::packId).collect(ImmutableList.toImmutableList())
+            pReloadReason, pPacks.stream().map(PackResources::packId).collect(ImmutableList.toImmutableList())
         );
     }
 
-    public void startRecovery(Throwable p_168561_) {
+    public void startRecovery(Throwable pError) {
         if (this.reloadState == null) {
             LOGGER.warn("Trying to signal reload recovery, but nothing was started");
             this.reloadState = new ResourceLoadStateTracker.ReloadState(ResourceLoadStateTracker.ReloadReason.UNKNOWN, ImmutableList.of());
         }
 
-        this.reloadState.recoveryReloadInfo = new ResourceLoadStateTracker.RecoveryInfo(p_168561_);
+        this.reloadState.recoveryReloadInfo = new ResourceLoadStateTracker.RecoveryInfo(pError);
     }
 
     public void finishReload() {
@@ -48,8 +48,8 @@ public class ResourceLoadStateTracker {
         }
     }
 
-    public void fillCrashReport(CrashReport p_168563_) {
-        CrashReportCategory crashreportcategory = p_168563_.addCategory("Last reload");
+    public void fillCrashReport(CrashReport pReport) {
+        CrashReportCategory crashreportcategory = pReport.addCategory("Last reload");
         crashreportcategory.setDetail("Reload number", this.reloadCount);
         if (this.reloadState != null) {
             this.reloadState.fillCrashInfo(crashreportcategory);
@@ -60,13 +60,13 @@ public class ResourceLoadStateTracker {
     static class RecoveryInfo {
         private final Throwable error;
 
-        RecoveryInfo(Throwable p_168566_) {
-            this.error = p_168566_;
+        RecoveryInfo(Throwable pError) {
+            this.error = pError;
         }
 
-        public void fillCrashInfo(CrashReportCategory p_168569_) {
-            p_168569_.setDetail("Recovery", "Yes");
-            p_168569_.setDetail("Recovery reason", () -> {
+        public void fillCrashInfo(CrashReportCategory pCrash) {
+            pCrash.setDetail("Recovery", "Yes");
+            pCrash.setDetail("Recovery reason", () -> {
                 StringWriter stringwriter = new StringWriter();
                 this.error.printStackTrace(new PrintWriter(stringwriter));
                 return stringwriter.toString();
@@ -82,8 +82,8 @@ public class ResourceLoadStateTracker {
 
         final String name;
 
-        private ReloadReason(final String p_168579_) {
-            this.name = p_168579_;
+        private ReloadReason(final String pName) {
+            this.name = pName;
         }
     }
 
@@ -95,17 +95,17 @@ public class ResourceLoadStateTracker {
         ResourceLoadStateTracker.RecoveryInfo recoveryReloadInfo;
         boolean finished;
 
-        ReloadState(ResourceLoadStateTracker.ReloadReason p_168589_, List<String> p_168590_) {
-            this.reloadReason = p_168589_;
-            this.packs = p_168590_;
+        ReloadState(ResourceLoadStateTracker.ReloadReason pReloadReason, List<String> pPacks) {
+            this.reloadReason = pReloadReason;
+            this.packs = pPacks;
         }
 
-        public void fillCrashInfo(CrashReportCategory p_168593_) {
-            p_168593_.setDetail("Reload reason", this.reloadReason.name);
-            p_168593_.setDetail("Finished", this.finished ? "Yes" : "No");
-            p_168593_.setDetail("Packs", () -> String.join(", ", this.packs));
+        public void fillCrashInfo(CrashReportCategory pCrash) {
+            pCrash.setDetail("Reload reason", this.reloadReason.name);
+            pCrash.setDetail("Finished", this.finished ? "Yes" : "No");
+            pCrash.setDetail("Packs", () -> String.join(", ", this.packs));
             if (this.recoveryReloadInfo != null) {
-                this.recoveryReloadInfo.fillCrashInfo(p_168593_);
+                this.recoveryReloadInfo.fillCrashInfo(pCrash);
             }
         }
     }

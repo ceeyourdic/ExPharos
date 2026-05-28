@@ -33,18 +33,18 @@ public class ObserverBlock extends DirectionalBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_55125_) {
-        p_55125_.add(FACING, POWERED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, POWERED);
     }
 
     @Override
-    protected BlockState rotate(BlockState p_55115_, Rotation p_55116_) {
-        return p_55115_.setValue(FACING, p_55116_.rotate(p_55115_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRot) {
+        return pState.setValue(FACING, pRot.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_55112_, Mirror p_55113_) {
-        return p_55112_.rotate(p_55113_.getRotation(p_55112_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
@@ -77,57 +77,57 @@ public class ObserverBlock extends DirectionalBlock {
         return super.updateShape(p_55118_, p_362436_, p_366728_, p_55122_, p_55119_, p_55123_, p_55120_, p_368192_);
     }
 
-    private void startSignal(LevelReader p_369671_, ScheduledTickAccess p_365436_, BlockPos p_55094_) {
-        if (!p_369671_.isClientSide() && !p_365436_.getBlockTicks().hasScheduledTick(p_55094_, this)) {
-            p_365436_.scheduleTick(p_55094_, this, 2);
+    private void startSignal(LevelReader pLevel, ScheduledTickAccess pScheduledTickAccess, BlockPos pPos) {
+        if (!pLevel.isClientSide() && !pScheduledTickAccess.getBlockTicks().hasScheduledTick(pPos, this)) {
+            pScheduledTickAccess.scheduleTick(pPos, this, 2);
         }
     }
 
-    protected void updateNeighborsInFront(Level p_55089_, BlockPos p_55090_, BlockState p_55091_) {
-        Direction direction = p_55091_.getValue(FACING);
-        BlockPos blockpos = p_55090_.relative(direction.getOpposite());
-        Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(p_55089_, direction.getOpposite(), null);
-        p_55089_.neighborChanged(blockpos, this, orientation);
-        p_55089_.updateNeighborsAtExceptFromFacing(blockpos, this, direction, orientation);
+    protected void updateNeighborsInFront(Level pLevel, BlockPos pPos, BlockState pState) {
+        Direction direction = pState.getValue(FACING);
+        BlockPos blockpos = pPos.relative(direction.getOpposite());
+        Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(pLevel, direction.getOpposite(), null);
+        pLevel.neighborChanged(blockpos, this, orientation);
+        pLevel.updateNeighborsAtExceptFromFacing(blockpos, this, direction, orientation);
     }
 
     @Override
-    protected boolean isSignalSource(BlockState p_55138_) {
+    protected boolean isSignalSource(BlockState pState) {
         return true;
     }
 
     @Override
-    protected int getDirectSignal(BlockState p_55127_, BlockGetter p_55128_, BlockPos p_55129_, Direction p_55130_) {
-        return p_55127_.getSignal(p_55128_, p_55129_, p_55130_);
+    protected int getDirectSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
+        return pBlockState.getSignal(pBlockAccess, pPos, pSide);
     }
 
     @Override
-    protected int getSignal(BlockState p_55101_, BlockGetter p_55102_, BlockPos p_55103_, Direction p_55104_) {
-        return p_55101_.getValue(POWERED) && p_55101_.getValue(FACING) == p_55104_ ? 15 : 0;
+    protected int getSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
+        return pBlockState.getValue(POWERED) && pBlockState.getValue(FACING) == pSide ? 15 : 0;
     }
 
     @Override
-    protected void onPlace(BlockState p_55132_, Level p_55133_, BlockPos p_55134_, BlockState p_55135_, boolean p_55136_) {
-        if (!p_55132_.is(p_55135_.getBlock())) {
-            if (!p_55133_.isClientSide() && p_55132_.getValue(POWERED) && !p_55133_.getBlockTicks().hasScheduledTick(p_55134_, this)) {
-                BlockState blockstate = p_55132_.setValue(POWERED, Boolean.valueOf(false));
-                p_55133_.setBlock(p_55134_, blockstate, 18);
-                this.updateNeighborsInFront(p_55133_, p_55134_, blockstate);
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        if (!pState.is(pOldState.getBlock())) {
+            if (!pLevel.isClientSide() && pState.getValue(POWERED) && !pLevel.getBlockTicks().hasScheduledTick(pPos, this)) {
+                BlockState blockstate = pState.setValue(POWERED, Boolean.valueOf(false));
+                pLevel.setBlock(pPos, blockstate, 18);
+                this.updateNeighborsInFront(pLevel, pPos, blockstate);
             }
         }
     }
 
     @Override
-    protected void onRemove(BlockState p_55106_, Level p_55107_, BlockPos p_55108_, BlockState p_55109_, boolean p_55110_) {
-        if (!p_55106_.is(p_55109_.getBlock())) {
-            if (!p_55107_.isClientSide && p_55106_.getValue(POWERED) && p_55107_.getBlockTicks().hasScheduledTick(p_55108_, this)) {
-                this.updateNeighborsInFront(p_55107_, p_55108_, p_55106_.setValue(POWERED, Boolean.valueOf(false)));
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        if (!pState.is(pNewState.getBlock())) {
+            if (!pLevel.isClientSide && pState.getValue(POWERED) && pLevel.getBlockTicks().hasScheduledTick(pPos, this)) {
+                this.updateNeighborsInFront(pLevel, pPos, pState.setValue(POWERED, Boolean.valueOf(false)));
             }
         }
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_55087_) {
-        return this.defaultBlockState().setValue(FACING, p_55087_.getNearestLookingDirection().getOpposite().getOpposite());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.defaultBlockState().setValue(FACING, pContext.getNearestLookingDirection().getOpposite().getOpposite());
     }
 }

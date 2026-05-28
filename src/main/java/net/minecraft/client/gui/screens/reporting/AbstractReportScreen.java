@@ -54,19 +54,19 @@ public abstract class AbstractReportScreen<B extends Report.Builder<?>> extends 
     private Checkbox attestation;
     protected Button sendButton;
 
-    protected AbstractReportScreen(Component p_297559_, Screen p_299592_, ReportingContext p_300174_, B p_300351_) {
-        super(p_297559_);
-        this.lastScreen = p_299592_;
-        this.reportingContext = p_300174_;
-        this.reportBuilder = p_300351_;
+    protected AbstractReportScreen(Component pTitle, Screen pLastScreen, ReportingContext pReportingContext, B pReportBuilder) {
+        super(pTitle);
+        this.lastScreen = pLastScreen;
+        this.reportingContext = pReportingContext;
+        this.reportBuilder = pReportBuilder;
     }
 
-    protected MultiLineEditBox createCommentBox(int p_297252_, int p_301025_, Consumer<String> p_298469_) {
+    protected MultiLineEditBox createCommentBox(int pWidth, int pHeight, Consumer<String> pValueListener) {
         AbuseReportLimits abusereportlimits = this.reportingContext.sender().reportLimits();
-        MultiLineEditBox multilineeditbox = new MultiLineEditBox(this.font, 0, 0, p_297252_, p_301025_, DESCRIBE_PLACEHOLDER, MORE_COMMENTS_NARRATION);
+        MultiLineEditBox multilineeditbox = new MultiLineEditBox(this.font, 0, 0, pWidth, pHeight, DESCRIBE_PLACEHOLDER, MORE_COMMENTS_NARRATION);
         multilineeditbox.setValue(this.reportBuilder.comments());
         multilineeditbox.setCharacterLimit(abusereportlimits.maxOpinionCommentsLength());
-        multilineeditbox.setValueListener(p_298469_);
+        multilineeditbox.setValueListener(pValueListener);
         return multilineeditbox;
     }
 
@@ -140,10 +140,10 @@ public abstract class AbstractReportScreen<B extends Report.Builder<?>> extends 
         this.minecraft.setScreen(GenericWaitingScreen.createCompleted(REPORT_SENT_TITLE, REPORT_SENT_MESSAGE, CommonComponents.GUI_DONE, () -> this.minecraft.setScreen(null)));
     }
 
-    private void onReportSendError(Throwable p_297880_) {
-        LOGGER.error("Encountered error while sending abuse report", p_297880_);
+    private void onReportSendError(Throwable pThrowable) {
+        LOGGER.error("Encountered error while sending abuse report", pThrowable);
         Component component;
-        if (p_297880_.getCause() instanceof ThrowingComponent throwingcomponent) {
+        if (pThrowable.getCause() instanceof ThrowingComponent throwingcomponent) {
             component = throwingcomponent.getComponent();
         } else {
             component = REPORT_SEND_GENERIC_ERROR;
@@ -152,8 +152,8 @@ public abstract class AbstractReportScreen<B extends Report.Builder<?>> extends 
         this.displayReportSendError(component);
     }
 
-    private void displayReportSendError(Component p_301245_) {
-        Component component = p_301245_.copy().withStyle(ChatFormatting.RED);
+    private void displayReportSendError(Component pError) {
+        Component component = pError.copy().withStyle(ChatFormatting.RED);
         this.minecraft.setScreen(GenericWaitingScreen.createCompleted(REPORT_ERROR_TITLE, component, CommonComponents.GUI_BACK, () -> this.minecraft.setScreen(this)));
     }
 

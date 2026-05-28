@@ -43,23 +43,23 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
     private final Map<String, CriterionProgress> criteria;
     private AdvancementRequirements requirements = AdvancementRequirements.EMPTY;
 
-    private AdvancementProgress(Map<String, CriterionProgress> p_144358_) {
-        this.criteria = p_144358_;
+    private AdvancementProgress(Map<String, CriterionProgress> pCriteria) {
+        this.criteria = pCriteria;
     }
 
     public AdvancementProgress() {
         this.criteria = Maps.newHashMap();
     }
 
-    public void update(AdvancementRequirements p_300626_) {
-        Set<String> set = p_300626_.names();
+    public void update(AdvancementRequirements pRequirements) {
+        Set<String> set = pRequirements.names();
         this.criteria.entrySet().removeIf(p_8203_ -> !set.contains(p_8203_.getKey()));
 
         for (String s : set) {
             this.criteria.putIfAbsent(s, new CriterionProgress());
         }
 
-        this.requirements = p_300626_;
+        this.requirements = pRequirements;
     }
 
     public boolean isDone() {
@@ -76,8 +76,8 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
         return false;
     }
 
-    public boolean grantProgress(String p_8197_) {
-        CriterionProgress criterionprogress = this.criteria.get(p_8197_);
+    public boolean grantProgress(String pCriterionName) {
+        CriterionProgress criterionprogress = this.criteria.get(pCriterionName);
         if (criterionprogress != null && !criterionprogress.isDone()) {
             criterionprogress.grant();
             return true;
@@ -86,8 +86,8 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
         }
     }
 
-    public boolean revokeProgress(String p_8210_) {
-        CriterionProgress criterionprogress = this.criteria.get(p_8210_);
+    public boolean revokeProgress(String pCriterionName) {
+        CriterionProgress criterionprogress = this.criteria.get(pCriterionName);
         if (criterionprogress != null && criterionprogress.isDone()) {
             criterionprogress.revoke();
             return true;
@@ -101,22 +101,22 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
         return "AdvancementProgress{criteria=" + this.criteria + ", requirements=" + this.requirements + "}";
     }
 
-    public void serializeToNetwork(FriendlyByteBuf p_8205_) {
-        p_8205_.writeMap(this.criteria, FriendlyByteBuf::writeUtf, (p_144360_, p_144361_) -> p_144361_.serializeToNetwork(p_144360_));
+    public void serializeToNetwork(FriendlyByteBuf pBuffer) {
+        pBuffer.writeMap(this.criteria, FriendlyByteBuf::writeUtf, (p_144360_, p_144361_) -> p_144361_.serializeToNetwork(p_144360_));
     }
 
-    public static AdvancementProgress fromNetwork(FriendlyByteBuf p_8212_) {
-        Map<String, CriterionProgress> map = p_8212_.readMap(FriendlyByteBuf::readUtf, CriterionProgress::fromNetwork);
+    public static AdvancementProgress fromNetwork(FriendlyByteBuf pBuffer) {
+        Map<String, CriterionProgress> map = pBuffer.readMap(FriendlyByteBuf::readUtf, CriterionProgress::fromNetwork);
         return new AdvancementProgress(map);
     }
 
     @Nullable
-    public CriterionProgress getCriterion(String p_8215_) {
-        return this.criteria.get(p_8215_);
+    public CriterionProgress getCriterion(String pCriterionName) {
+        return this.criteria.get(pCriterionName);
     }
 
-    private boolean isCriterionDone(String p_301316_) {
-        CriterionProgress criterionprogress = this.getCriterion(p_301316_);
+    private boolean isCriterionDone(String pCriterionName) {
+        CriterionProgress criterionprogress = this.getCriterion(pCriterionName);
         return criterionprogress != null && criterionprogress.isDone();
     }
 
@@ -178,9 +178,9 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
         return this.criteria.values().stream().map(CriterionProgress::getObtained).filter(Objects::nonNull).min(Comparator.naturalOrder()).orElse(null);
     }
 
-    public int compareTo(AdvancementProgress p_8195_) {
+    public int compareTo(AdvancementProgress pOther) {
         Instant instant = this.getFirstProgressDate();
-        Instant instant1 = p_8195_.getFirstProgressDate();
+        Instant instant1 = pOther.getFirstProgressDate();
         if (instant == null && instant1 != null) {
             return 1;
         } else if (instant != null && instant1 == null) {

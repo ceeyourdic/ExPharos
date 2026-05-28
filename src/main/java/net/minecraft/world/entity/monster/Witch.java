@@ -83,7 +83,7 @@ public class Witch extends Raider implements RangedAttackMob {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_34154_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.WITCH_HURT;
     }
 
@@ -92,8 +92,8 @@ public class Witch extends Raider implements RangedAttackMob {
         return SoundEvents.WITCH_DEATH;
     }
 
-    public void setUsingItem(boolean p_34164_) {
-        this.getEntityData().set(DATA_USING_ITEM, p_34164_);
+    public void setUsingItem(boolean pUsingItem) {
+        this.getEntityData().set(DATA_USING_ITEM, pUsingItem);
     }
 
     public boolean isDrinkingPotion() {
@@ -182,8 +182,8 @@ public class Witch extends Raider implements RangedAttackMob {
     }
 
     @Override
-    public void handleEntityEvent(byte p_34138_) {
-        if (p_34138_ == 15) {
+    public void handleEntityEvent(byte pId) {
+        if (pId == 15) {
             for (int i = 0; i < this.random.nextInt(35) + 10; i++) {
                 this.level()
                     .addParticle(
@@ -197,46 +197,46 @@ public class Witch extends Raider implements RangedAttackMob {
                     );
             }
         } else {
-            super.handleEntityEvent(p_34138_);
+            super.handleEntityEvent(pId);
         }
     }
 
     @Override
-    protected float getDamageAfterMagicAbsorb(DamageSource p_34149_, float p_34150_) {
-        p_34150_ = super.getDamageAfterMagicAbsorb(p_34149_, p_34150_);
-        if (p_34149_.getEntity() == this) {
-            p_34150_ = 0.0F;
+    protected float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
+        pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
+        if (pSource.getEntity() == this) {
+            pDamage = 0.0F;
         }
 
-        if (p_34149_.is(DamageTypeTags.WITCH_RESISTANT_TO)) {
-            p_34150_ *= 0.15F;
+        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO)) {
+            pDamage *= 0.15F;
         }
 
-        return p_34150_;
+        return pDamage;
     }
 
     @Override
-    public void performRangedAttack(LivingEntity p_34143_, float p_34144_) {
+    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
         if (!this.isDrinkingPotion()) {
-            Vec3 vec3 = p_34143_.getDeltaMovement();
-            double d0 = p_34143_.getX() + vec3.x - this.getX();
-            double d1 = p_34143_.getEyeY() - 1.1F - this.getY();
-            double d2 = p_34143_.getZ() + vec3.z - this.getZ();
+            Vec3 vec3 = pTarget.getDeltaMovement();
+            double d0 = pTarget.getX() + vec3.x - this.getX();
+            double d1 = pTarget.getEyeY() - 1.1F - this.getY();
+            double d2 = pTarget.getZ() + vec3.z - this.getZ();
             double d3 = Math.sqrt(d0 * d0 + d2 * d2);
             Holder<Potion> holder = Potions.HARMING;
-            if (p_34143_ instanceof Raider) {
-                if (p_34143_.getHealth() <= 4.0F) {
+            if (pTarget instanceof Raider) {
+                if (pTarget.getHealth() <= 4.0F) {
                     holder = Potions.HEALING;
                 } else {
                     holder = Potions.REGENERATION;
                 }
 
                 this.setTarget(null);
-            } else if (d3 >= 8.0 && !p_34143_.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)) {
+            } else if (d3 >= 8.0 && !pTarget.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)) {
                 holder = Potions.SLOWNESS;
-            } else if (p_34143_.getHealth() >= 8.0F && !p_34143_.hasEffect(MobEffects.POISON)) {
+            } else if (pTarget.getHealth() >= 8.0F && !pTarget.hasEffect(MobEffects.POISON)) {
                 holder = Potions.POISON;
-            } else if (d3 <= 3.0 && !p_34143_.hasEffect(MobEffects.WEAKNESS) && this.random.nextFloat() < 0.25F) {
+            } else if (d3 <= 3.0 && !pTarget.hasEffect(MobEffects.WEAKNESS) && this.random.nextFloat() < 0.25F) {
                 holder = Potions.WEAKNESS;
             }
 

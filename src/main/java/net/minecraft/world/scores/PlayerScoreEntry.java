@@ -15,7 +15,7 @@ public record PlayerScoreEntry(String owner, int value, @Nullable Component disp
         return (Component)(this.display != null ? this.display : Component.literal(this.owner()));
     }
 
-    public MutableComponent formatValue(NumberFormat p_312365_) {
-        return Objects.requireNonNullElse(this.numberFormatOverride, p_312365_).format(this.value);
+    public MutableComponent formatValue(NumberFormat pFormat) {
+        return Objects.requireNonNullElse(this.numberFormatOverride, pFormat).format(this.value);
     }
 }

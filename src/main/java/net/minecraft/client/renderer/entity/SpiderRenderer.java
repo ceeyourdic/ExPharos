@@ -18,8 +18,8 @@ public class SpiderRenderer<T extends Spider> extends MobRenderer<T, LivingEntit
         this(p_174401_, ModelLayers.SPIDER);
     }
 
-    public SpiderRenderer(EntityRendererProvider.Context p_174403_, ModelLayerLocation p_174404_) {
-        super(p_174403_, new SpiderModel(p_174403_.bakeLayer(p_174404_)), 0.8F);
+    public SpiderRenderer(EntityRendererProvider.Context pContext, ModelLayerLocation pLayer) {
+        super(pContext, new SpiderModel(pContext.bakeLayer(pLayer)), 0.8F);
         this.addLayer(new SpiderEyesLayer<>(this));
     }
 

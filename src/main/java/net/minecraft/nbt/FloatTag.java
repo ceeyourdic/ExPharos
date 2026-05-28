@@ -45,17 +45,17 @@ public class FloatTag extends NumericTag {
     };
     private final float data;
 
-    private FloatTag(float p_128564_) {
-        this.data = p_128564_;
+    private FloatTag(float pData) {
+        this.data = pData;
     }
 
-    public static FloatTag valueOf(float p_128567_) {
-        return p_128567_ == 0.0F ? ZERO : new FloatTag(p_128567_);
+    public static FloatTag valueOf(float pData) {
+        return pData == 0.0F ? ZERO : new FloatTag(pData);
     }
 
     @Override
-    public void write(DataOutput p_128569_) throws IOException {
-        p_128569_.writeFloat(this.data);
+    public void write(DataOutput pOutput) throws IOException {
+        pOutput.writeFloat(this.data);
     }
 
     @Override
@@ -78,8 +78,8 @@ public class FloatTag extends NumericTag {
     }
 
     @Override
-    public boolean equals(Object p_128578_) {
-        return this == p_128578_ ? true : p_128578_ instanceof FloatTag && this.data == ((FloatTag)p_128578_).data;
+    public boolean equals(Object pOther) {
+        return this == pOther ? true : pOther instanceof FloatTag && this.data == ((FloatTag)pOther).data;
     }
 
     @Override

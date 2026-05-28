@@ -27,23 +27,23 @@ public abstract class DimensionSpecialEffects {
     private final boolean forceBrightLightmap;
     private final boolean constantAmbientLight;
 
-    public DimensionSpecialEffects(float p_108866_, boolean p_108867_, DimensionSpecialEffects.SkyType p_108868_, boolean p_108869_, boolean p_108870_) {
-        this.cloudLevel = p_108866_;
-        this.hasGround = p_108867_;
-        this.skyType = p_108868_;
-        this.forceBrightLightmap = p_108869_;
-        this.constantAmbientLight = p_108870_;
+    public DimensionSpecialEffects(float pCloudLevel, boolean pHasGround, DimensionSpecialEffects.SkyType pSkyType, boolean pForceBrightLightmap, boolean pConstantAmbientLight) {
+        this.cloudLevel = pCloudLevel;
+        this.hasGround = pHasGround;
+        this.skyType = pSkyType;
+        this.forceBrightLightmap = pForceBrightLightmap;
+        this.constantAmbientLight = pConstantAmbientLight;
     }
 
-    public static DimensionSpecialEffects forType(DimensionType p_108877_) {
-        return EFFECTS.get(p_108877_.effectsLocation());
+    public static DimensionSpecialEffects forType(DimensionType pDimensionType) {
+        return EFFECTS.get(pDimensionType.effectsLocation());
     }
 
-    public boolean isSunriseOrSunset(float p_361903_) {
+    public boolean isSunriseOrSunset(float pTimeOfDay) {
         return false;
     }
 
-    public int getSunriseOrSunsetColor(float p_367777_) {
+    public int getSunriseOrSunsetColor(float pTimeOfDay) {
         return 0;
     }
 
@@ -55,9 +55,9 @@ public abstract class DimensionSpecialEffects {
         return this.hasGround;
     }
 
-    public abstract Vec3 getBrightnessDependentFogColor(Vec3 p_108878_, float p_108879_);
+    public abstract Vec3 getBrightnessDependentFogColor(Vec3 pFogColor, float pBrightness);
 
-    public abstract boolean isFoggyAt(int p_108874_, int p_108875_);
+    public abstract boolean isFoggyAt(int pX, int pY);
 
     public DimensionSpecialEffects.SkyType skyType() {
         return this.skyType;

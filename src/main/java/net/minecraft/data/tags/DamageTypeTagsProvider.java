@@ -9,8 +9,8 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
 
 public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
-    public DamageTypeTagsProvider(PackOutput p_270719_, CompletableFuture<HolderLookup.Provider> p_270256_) {
-        super(p_270719_, Registries.DAMAGE_TYPE, p_270256_);
+    public DamageTypeTagsProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pLookupProvider) {
+        super(pOutput, Registries.DAMAGE_TYPE, pLookupProvider);
     }
 
     @Override

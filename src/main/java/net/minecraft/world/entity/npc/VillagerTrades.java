@@ -1248,16 +1248,16 @@ public class VillagerTrades {
         )
         .build();
 
-    private static VillagerTrades.ItemListing commonBooks(int p_301375_) {
+    private static VillagerTrades.ItemListing commonBooks(int pVillagerXp) {
         return new VillagerTrades.TypeSpecificTrade(
             ImmutableMap.<VillagerType, VillagerTrades.ItemListing>builder()
-                .put(VillagerType.DESERT, new VillagerTrades.EnchantBookForEmeralds(p_301375_, EnchantmentTags.TRADES_DESERT_COMMON))
-                .put(VillagerType.JUNGLE, new VillagerTrades.EnchantBookForEmeralds(p_301375_, EnchantmentTags.TRADES_JUNGLE_COMMON))
-                .put(VillagerType.PLAINS, new VillagerTrades.EnchantBookForEmeralds(p_301375_, EnchantmentTags.TRADES_PLAINS_COMMON))
-                .put(VillagerType.SAVANNA, new VillagerTrades.EnchantBookForEmeralds(p_301375_, EnchantmentTags.TRADES_SAVANNA_COMMON))
-                .put(VillagerType.SNOW, new VillagerTrades.EnchantBookForEmeralds(p_301375_, EnchantmentTags.TRADES_SNOW_COMMON))
-                .put(VillagerType.SWAMP, new VillagerTrades.EnchantBookForEmeralds(p_301375_, EnchantmentTags.TRADES_SWAMP_COMMON))
-                .put(VillagerType.TAIGA, new VillagerTrades.EnchantBookForEmeralds(p_301375_, EnchantmentTags.TRADES_TAIGA_COMMON))
+                .put(VillagerType.DESERT, new VillagerTrades.EnchantBookForEmeralds(pVillagerXp, EnchantmentTags.TRADES_DESERT_COMMON))
+                .put(VillagerType.JUNGLE, new VillagerTrades.EnchantBookForEmeralds(pVillagerXp, EnchantmentTags.TRADES_JUNGLE_COMMON))
+                .put(VillagerType.PLAINS, new VillagerTrades.EnchantBookForEmeralds(pVillagerXp, EnchantmentTags.TRADES_PLAINS_COMMON))
+                .put(VillagerType.SAVANNA, new VillagerTrades.EnchantBookForEmeralds(pVillagerXp, EnchantmentTags.TRADES_SAVANNA_COMMON))
+                .put(VillagerType.SNOW, new VillagerTrades.EnchantBookForEmeralds(pVillagerXp, EnchantmentTags.TRADES_SNOW_COMMON))
+                .put(VillagerType.SWAMP, new VillagerTrades.EnchantBookForEmeralds(pVillagerXp, EnchantmentTags.TRADES_SWAMP_COMMON))
+                .put(VillagerType.TAIGA, new VillagerTrades.EnchantBookForEmeralds(pVillagerXp, EnchantmentTags.TRADES_TAIGA_COMMON))
                 .build()
         );
     }
@@ -1276,16 +1276,16 @@ public class VillagerTrades {
         );
     }
 
-    private static Int2ObjectMap<VillagerTrades.ItemListing[]> toIntMap(ImmutableMap<Integer, VillagerTrades.ItemListing[]> p_35631_) {
-        return new Int2ObjectOpenHashMap<>(p_35631_);
+    private static Int2ObjectMap<VillagerTrades.ItemListing[]> toIntMap(ImmutableMap<Integer, VillagerTrades.ItemListing[]> pMap) {
+        return new Int2ObjectOpenHashMap<>(pMap);
     }
 
-    private static ItemCost potionCost(Holder<Potion> p_330304_) {
-        return new ItemCost(Items.POTION).withComponents(p_327045_ -> p_327045_.expect(DataComponents.POTION_CONTENTS, new PotionContents(p_330304_)));
+    private static ItemCost potionCost(Holder<Potion> pPotion) {
+        return new ItemCost(Items.POTION).withComponents(p_327045_ -> p_327045_.expect(DataComponents.POTION_CONTENTS, new PotionContents(pPotion)));
     }
 
-    private static ItemStack potion(Holder<Potion> p_328606_) {
-        return PotionContents.createItemStack(Items.POTION, p_328606_);
+    private static ItemStack potion(Holder<Potion> pPotion) {
+        return PotionContents.createItemStack(Items.POTION, pPotion);
     }
 
     static class DyedArmorForEmeralds implements VillagerTrades.ItemListing {
@@ -1294,15 +1294,15 @@ public class VillagerTrades {
         private final int maxUses;
         private final int villagerXp;
 
-        public DyedArmorForEmeralds(Item p_35639_, int p_35640_) {
-            this(p_35639_, p_35640_, 12, 1);
+        public DyedArmorForEmeralds(Item pItem, int pValue) {
+            this(pItem, pValue, 12, 1);
         }
 
-        public DyedArmorForEmeralds(Item p_35642_, int p_35643_, int p_35644_, int p_35645_) {
-            this.item = p_35642_;
-            this.value = p_35643_;
-            this.maxUses = p_35644_;
-            this.villagerXp = p_35645_;
+        public DyedArmorForEmeralds(Item pItem, int pValue, int pMaxUses, int pVillagerXp) {
+            this.item = pItem;
+            this.value = pValue;
+            this.maxUses = pMaxUses;
+            this.villagerXp = pVillagerXp;
         }
 
         @Override
@@ -1326,8 +1326,8 @@ public class VillagerTrades {
             return new MerchantOffer(itemcost, itemstack, this.maxUses, this.villagerXp, 0.2F);
         }
 
-        private static DyeItem getRandomDye(RandomSource p_219677_) {
-            return DyeItem.byColor(DyeColor.byId(p_219677_.nextInt(16)));
+        private static DyeItem getRandomDye(RandomSource pRandom) {
+            return DyeItem.byColor(DyeColor.byId(pRandom.nextInt(16)));
         }
     }
 
@@ -1338,19 +1338,19 @@ public class VillagerTrades {
         private final int emeraldAmount;
         private final float priceMultiplier;
 
-        public EmeraldForItems(ItemLike p_35657_, int p_35658_, int p_35659_, int p_35660_) {
-            this(p_35657_, p_35658_, p_35659_, p_35660_, 1);
+        public EmeraldForItems(ItemLike pItem, int pCost, int pMaxUses, int pVillagerXp) {
+            this(pItem, pCost, pMaxUses, pVillagerXp, 1);
         }
 
-        public EmeraldForItems(ItemLike p_300611_, int p_297735_, int p_299544_, int p_301092_, int p_299898_) {
-            this(new ItemCost(p_300611_.asItem(), p_297735_), p_299544_, p_301092_, p_299898_);
+        public EmeraldForItems(ItemLike pItem, int pCost, int pMaxUses, int pVillagerXp, int pEmeraldAmount) {
+            this(new ItemCost(pItem.asItem(), pCost), pMaxUses, pVillagerXp, pEmeraldAmount);
         }
 
-        public EmeraldForItems(ItemCost p_335758_, int p_299559_, int p_300826_, int p_297314_) {
-            this.itemStack = p_335758_;
-            this.maxUses = p_299559_;
-            this.villagerXp = p_300826_;
-            this.emeraldAmount = p_297314_;
+        public EmeraldForItems(ItemCost pItemStack, int pMaxUses, int pVillagerXp, int pEmeraldAmount) {
+            this.itemStack = pItemStack;
+            this.maxUses = pMaxUses;
+            this.villagerXp = pVillagerXp;
+            this.emeraldAmount = pEmeraldAmount;
             this.priceMultiplier = 0.05F;
         }
 
@@ -1366,14 +1366,14 @@ public class VillagerTrades {
         private final int maxUses;
         private final int villagerXp;
 
-        public EmeraldsForVillagerTypeItem(int p_35669_, int p_35670_, int p_35671_, Map<VillagerType, Item> p_35672_) {
-            BuiltInRegistries.VILLAGER_TYPE.stream().filter(p_35680_ -> !p_35672_.containsKey(p_35680_)).findAny().ifPresent(p_327046_ -> {
+        public EmeraldsForVillagerTypeItem(int pCost, int pMaxUses, int pVillagerXp, Map<VillagerType, Item> pTrades) {
+            BuiltInRegistries.VILLAGER_TYPE.stream().filter(p_35680_ -> !pTrades.containsKey(p_35680_)).findAny().ifPresent(p_327046_ -> {
                 throw new IllegalStateException("Missing trade for villager type: " + BuiltInRegistries.VILLAGER_TYPE.getKey(p_327046_));
             });
-            this.trades = p_35672_;
-            this.cost = p_35669_;
-            this.maxUses = p_35670_;
-            this.villagerXp = p_35671_;
+            this.trades = pTrades;
+            this.cost = pCost;
+            this.maxUses = pMaxUses;
+            this.villagerXp = pVillagerXp;
         }
 
         @Nullable
@@ -1394,15 +1394,15 @@ public class VillagerTrades {
         private final int minLevel;
         private final int maxLevel;
 
-        public EnchantBookForEmeralds(int p_299760_, TagKey<Enchantment> p_345024_) {
-            this(p_299760_, 0, Integer.MAX_VALUE, p_345024_);
+        public EnchantBookForEmeralds(int pVillagerXp, TagKey<Enchantment> pTradeableEnchantments) {
+            this(pVillagerXp, 0, Integer.MAX_VALUE, pTradeableEnchantments);
         }
 
-        public EnchantBookForEmeralds(int p_35683_, int p_342516_, int p_342586_, TagKey<Enchantment> p_344948_) {
-            this.minLevel = p_342516_;
-            this.maxLevel = p_342586_;
-            this.villagerXp = p_35683_;
-            this.tradeableEnchantments = p_344948_;
+        public EnchantBookForEmeralds(int pVillagerXp, int pMinLevel, int pMaxLevel, TagKey<Enchantment> pTradeableEnchantments) {
+            this.minLevel = pMinLevel;
+            this.maxLevel = pMaxLevel;
+            this.villagerXp = pVillagerXp;
+            this.tradeableEnchantments = pTradeableEnchantments;
         }
 
         @Override
@@ -1441,16 +1441,16 @@ public class VillagerTrades {
         private final int villagerXp;
         private final float priceMultiplier;
 
-        public EnchantedItemForEmeralds(Item p_35693_, int p_35694_, int p_35695_, int p_35696_) {
-            this(p_35693_, p_35694_, p_35695_, p_35696_, 0.05F);
+        public EnchantedItemForEmeralds(Item pItem, int pBaseEmeraldCost, int pMaxUses, int pVillagerXp) {
+            this(pItem, pBaseEmeraldCost, pMaxUses, pVillagerXp, 0.05F);
         }
 
-        public EnchantedItemForEmeralds(Item p_35698_, int p_35699_, int p_35700_, int p_35701_, float p_35702_) {
-            this.itemStack = new ItemStack(p_35698_);
-            this.baseEmeraldCost = p_35699_;
-            this.maxUses = p_35700_;
-            this.villagerXp = p_35701_;
-            this.priceMultiplier = p_35702_;
+        public EnchantedItemForEmeralds(Item pItem, int pBaseEmeraldCost, int pMaxUses, int pVillagerXp, float pPriceMultiplier) {
+            this.itemStack = new ItemStack(pItem);
+            this.baseEmeraldCost = pBaseEmeraldCost;
+            this.maxUses = pMaxUses;
+            this.villagerXp = pVillagerXp;
+            this.priceMultiplier = pPriceMultiplier;
         }
 
         @Override
@@ -1474,7 +1474,7 @@ public class VillagerTrades {
 
     public interface ItemListing {
         @Nullable
-        MerchantOffer getOffer(Entity p_219693_, RandomSource p_219694_);
+        MerchantOffer getOffer(Entity pTrader, RandomSource pRandom);
     }
 
     static class ItemsAndEmeraldsToItems implements VillagerTrades.ItemListing {
@@ -1486,46 +1486,46 @@ public class VillagerTrades {
         private final float priceMultiplier;
         private final Optional<ResourceKey<EnchantmentProvider>> enchantmentProvider;
 
-        public ItemsAndEmeraldsToItems(ItemLike p_35717_, int p_35718_, int p_35719_, Item p_35720_, int p_35721_, int p_35722_, int p_35723_, float p_300353_) {
-            this(p_35717_, p_35718_, p_35719_, new ItemStack(p_35720_), p_35721_, p_35722_, p_35723_, p_300353_);
+        public ItemsAndEmeraldsToItems(ItemLike pFromItem, int pFromItemCount, int pEmeraldCost, Item pToItem, int pToItemCount, int pMaxUses, int pVillagerXp, float pPriceMultiplier) {
+            this(pFromItem, pFromItemCount, pEmeraldCost, new ItemStack(pToItem), pToItemCount, pMaxUses, pVillagerXp, pPriceMultiplier);
         }
 
         private ItemsAndEmeraldsToItems(
-            ItemLike p_35725_, int p_35726_, int p_35728_, ItemStack p_300910_, int p_35729_, int p_35730_, int p_301344_, float p_299782_
+            ItemLike pFromItem, int pFromItemCount, int pEmeraldCost, ItemStack pToItem, int pToItemCount, int pMaxUses, int pVillagerXp, float pPriceMultiplier
         ) {
-            this(new ItemCost(p_35725_, p_35726_), p_35728_, p_300910_.copyWithCount(p_35729_), p_35730_, p_301344_, p_299782_, Optional.empty());
+            this(new ItemCost(pFromItem, pFromItemCount), pEmeraldCost, pToItem.copyWithCount(pToItemCount), pMaxUses, pVillagerXp, pPriceMultiplier, Optional.empty());
         }
 
         ItemsAndEmeraldsToItems(
-            ItemLike p_345235_,
-            int p_330712_,
-            int p_332809_,
-            ItemLike p_342153_,
-            int p_328609_,
-            int p_343606_,
-            int p_344539_,
-            float p_331228_,
-            ResourceKey<EnchantmentProvider> p_342198_
+            ItemLike pFromItem,
+            int pFromItemAmount,
+            int pEmeraldCost,
+            ItemLike pToItem,
+            int pToItemCount,
+            int pMaxUses,
+            int pVillagerXp,
+            float pPriceMultiplier,
+            ResourceKey<EnchantmentProvider> pEnchantmentProvider
         ) {
-            this(new ItemCost(p_345235_, p_330712_), p_332809_, new ItemStack(p_342153_, p_328609_), p_343606_, p_344539_, p_331228_, Optional.of(p_342198_));
+            this(new ItemCost(pFromItem, pFromItemAmount), pEmeraldCost, new ItemStack(pToItem, pToItemCount), pMaxUses, pVillagerXp, pPriceMultiplier, Optional.of(pEnchantmentProvider));
         }
 
         public ItemsAndEmeraldsToItems(
-            ItemCost p_345499_,
-            int p_343816_,
-            ItemStack p_345059_,
-            int p_343385_,
-            int p_344672_,
-            float p_342412_,
-            Optional<ResourceKey<EnchantmentProvider>> p_343477_
+            ItemCost pFromItem,
+            int pEmeraldCost,
+            ItemStack pToItem,
+            int pMaxUses,
+            int pVillagerXp,
+            float pPriceMultiplier,
+            Optional<ResourceKey<EnchantmentProvider>> pEnchantmentProvider
         ) {
-            this.fromItem = p_345499_;
-            this.emeraldCost = p_343816_;
-            this.toItem = p_345059_;
-            this.maxUses = p_343385_;
-            this.villagerXp = p_344672_;
-            this.priceMultiplier = p_342412_;
-            this.enchantmentProvider = p_343477_;
+            this.fromItem = pFromItem;
+            this.emeraldCost = pEmeraldCost;
+            this.toItem = pToItem;
+            this.maxUses = pMaxUses;
+            this.villagerXp = pVillagerXp;
+            this.priceMultiplier = pPriceMultiplier;
+            this.enchantmentProvider = pEnchantmentProvider;
         }
 
         @Nullable
@@ -1553,52 +1553,52 @@ public class VillagerTrades {
         private final float priceMultiplier;
         private final Optional<ResourceKey<EnchantmentProvider>> enchantmentProvider;
 
-        public ItemsForEmeralds(Block p_35765_, int p_35766_, int p_35767_, int p_35768_, int p_35769_) {
-            this(new ItemStack(p_35765_), p_35766_, p_35767_, p_35768_, p_35769_);
+        public ItemsForEmeralds(Block pBlock, int pEmeraldCost, int pNumberOfItems, int pMaxUses, int pVillagerXp) {
+            this(new ItemStack(pBlock), pEmeraldCost, pNumberOfItems, pMaxUses, pVillagerXp);
         }
 
-        public ItemsForEmeralds(Item p_35741_, int p_35742_, int p_35743_, int p_35744_) {
-            this(new ItemStack(p_35741_), p_35742_, p_35743_, 12, p_35744_);
+        public ItemsForEmeralds(Item pItem, int pEmeraldCost, int pNumberOfItems, int pVillagerXp) {
+            this(new ItemStack(pItem), pEmeraldCost, pNumberOfItems, 12, pVillagerXp);
         }
 
-        public ItemsForEmeralds(Item p_35746_, int p_35747_, int p_35748_, int p_35749_, int p_35750_) {
-            this(new ItemStack(p_35746_), p_35747_, p_35748_, p_35749_, p_35750_);
+        public ItemsForEmeralds(Item pItem, int pEmeraldCost, int pNumberOfItems, int pMaxUses, int pVillagerXp) {
+            this(new ItemStack(pItem), pEmeraldCost, pNumberOfItems, pMaxUses, pVillagerXp);
         }
 
-        public ItemsForEmeralds(ItemStack p_35752_, int p_35753_, int p_35754_, int p_35755_, int p_35756_) {
-            this(p_35752_, p_35753_, p_35754_, p_35755_, p_35756_, 0.05F);
+        public ItemsForEmeralds(ItemStack pItemStack, int pEmeraldCost, int pNumberOfItems, int pMaxUses, int pVillagerXp) {
+            this(pItemStack, pEmeraldCost, pNumberOfItems, pMaxUses, pVillagerXp, 0.05F);
         }
 
-        public ItemsForEmeralds(Item p_301313_, int p_300523_, int p_299652_, int p_301389_, int p_299423_, float p_297510_) {
-            this(new ItemStack(p_301313_), p_300523_, p_299652_, p_301389_, p_299423_, p_297510_);
-        }
-
-        public ItemsForEmeralds(
-            Item p_345207_, int p_343082_, int p_342104_, int p_342450_, int p_342353_, float p_343481_, ResourceKey<EnchantmentProvider> p_344418_
-        ) {
-            this(new ItemStack(p_345207_), p_343082_, p_342104_, p_342450_, p_342353_, p_343481_, Optional.of(p_344418_));
-        }
-
-        public ItemsForEmeralds(ItemStack p_35758_, int p_35759_, int p_35760_, int p_35761_, int p_35762_, float p_35763_) {
-            this(p_35758_, p_35759_, p_35760_, p_35761_, p_35762_, p_35763_, Optional.empty());
+        public ItemsForEmeralds(Item pItem, int pEmeraldCost, int pNumberOfItems, int pMaxUses, int pVillagerXp, float pPriceMultiplier) {
+            this(new ItemStack(pItem), pEmeraldCost, pNumberOfItems, pMaxUses, pVillagerXp, pPriceMultiplier);
         }
 
         public ItemsForEmeralds(
-            ItemStack p_343244_,
-            int p_342553_,
-            int p_342232_,
-            int p_342725_,
-            int p_344039_,
-            float p_342707_,
-            Optional<ResourceKey<EnchantmentProvider>> p_343690_
+            Item pItem, int pEmeraldCost, int pNumberOfItems, int pMaxUses, int pVillagerXp, float pPriceMultiplier, ResourceKey<EnchantmentProvider> pEnchantmentProvider
         ) {
-            this.itemStack = p_343244_;
-            this.emeraldCost = p_342553_;
-            this.itemStack.setCount(p_342232_);
-            this.maxUses = p_342725_;
-            this.villagerXp = p_344039_;
-            this.priceMultiplier = p_342707_;
-            this.enchantmentProvider = p_343690_;
+            this(new ItemStack(pItem), pEmeraldCost, pNumberOfItems, pMaxUses, pVillagerXp, pPriceMultiplier, Optional.of(pEnchantmentProvider));
+        }
+
+        public ItemsForEmeralds(ItemStack pItemStack, int pEmeraldCost, int pNumberOfItems, int pMaxUses, int pVillagerXp, float pPriceMultiplier) {
+            this(pItemStack, pEmeraldCost, pNumberOfItems, pMaxUses, pVillagerXp, pPriceMultiplier, Optional.empty());
+        }
+
+        public ItemsForEmeralds(
+            ItemStack pItemStack,
+            int pEmeraldCost,
+            int pNumberOfItems,
+            int pMaxUses,
+            int pVillagerXp,
+            float pPriceMultiplier,
+            Optional<ResourceKey<EnchantmentProvider>> pEnchantmentProvider
+        ) {
+            this.itemStack = pItemStack;
+            this.emeraldCost = pEmeraldCost;
+            this.itemStack.setCount(pNumberOfItems);
+            this.maxUses = pMaxUses;
+            this.villagerXp = pVillagerXp;
+            this.priceMultiplier = pPriceMultiplier;
+            this.enchantmentProvider = pEnchantmentProvider;
         }
 
         @Override
@@ -1620,14 +1620,14 @@ public class VillagerTrades {
         private final int xp;
         private final float priceMultiplier;
 
-        public SuspiciousStewForEmerald(Holder<MobEffect> p_329898_, int p_299744_, int p_336074_) {
-            this(new SuspiciousStewEffects(List.of(new SuspiciousStewEffects.Entry(p_329898_, p_299744_))), p_336074_, 0.05F);
+        public SuspiciousStewForEmerald(Holder<MobEffect> pEffect, int pDuration, int pXp) {
+            this(new SuspiciousStewEffects(List.of(new SuspiciousStewEffects.Entry(pEffect, pDuration))), pXp, 0.05F);
         }
 
-        public SuspiciousStewForEmerald(SuspiciousStewEffects p_332385_, int p_186314_, float p_327842_) {
-            this.effects = p_332385_;
-            this.xp = p_186314_;
-            this.priceMultiplier = p_327842_;
+        public SuspiciousStewForEmerald(SuspiciousStewEffects pEffects, int pXp, float pPriceMultiplier) {
+            this.effects = pEffects;
+            this.xp = pXp;
+            this.priceMultiplier = pPriceMultiplier;
         }
 
         @Nullable
@@ -1649,14 +1649,14 @@ public class VillagerTrades {
         private final int fromCount;
         private final float priceMultiplier;
 
-        public TippedArrowForItemsAndEmeralds(Item p_35793_, int p_35794_, Item p_35795_, int p_35796_, int p_35797_, int p_35798_, int p_35799_) {
-            this.toItem = new ItemStack(p_35795_);
-            this.emeraldCost = p_35797_;
-            this.maxUses = p_35798_;
-            this.villagerXp = p_35799_;
-            this.fromItem = p_35793_;
-            this.fromCount = p_35794_;
-            this.toCount = p_35796_;
+        public TippedArrowForItemsAndEmeralds(Item pFromItem, int pFromCount, Item pToItem, int pToCount, int pEmeraldCost, int pMaxUses, int pVillagerXp) {
+            this.toItem = new ItemStack(pToItem);
+            this.emeraldCost = pEmeraldCost;
+            this.maxUses = pMaxUses;
+            this.villagerXp = pVillagerXp;
+            this.fromItem = pFromItem;
+            this.fromCount = pFromCount;
+            this.toCount = pToCount;
             this.priceMultiplier = 0.05F;
         }
 
@@ -1683,14 +1683,14 @@ public class VillagerTrades {
         private final int villagerXp;
 
         public TreasureMapForEmeralds(
-            int p_207767_, TagKey<Structure> p_207768_, String p_207769_, Holder<MapDecorationType> p_332788_, int p_207771_, int p_207772_
+            int pEmeraldCost, TagKey<Structure> pDestination, String pDisplayName, Holder<MapDecorationType> pDestinationType, int pMaxUses, int pVillagerXp
         ) {
-            this.emeraldCost = p_207767_;
-            this.destination = p_207768_;
-            this.displayName = p_207769_;
-            this.destinationType = p_332788_;
-            this.maxUses = p_207771_;
-            this.villagerXp = p_207772_;
+            this.emeraldCost = pEmeraldCost;
+            this.destination = pDestination;
+            this.displayName = pDisplayName;
+            this.destinationType = pDestinationType;
+            this.maxUses = pMaxUses;
+            this.villagerXp = pVillagerXp;
         }
 
         @Nullable
@@ -1717,9 +1717,9 @@ public class VillagerTrades {
     }
 
     static record TypeSpecificTrade(Map<VillagerType, VillagerTrades.ItemListing> trades) implements VillagerTrades.ItemListing {
-        public static VillagerTrades.TypeSpecificTrade oneTradeInBiomes(VillagerTrades.ItemListing p_297877_, VillagerType... p_298107_) {
+        public static VillagerTrades.TypeSpecificTrade oneTradeInBiomes(VillagerTrades.ItemListing pListing, VillagerType... pTypes) {
             return new VillagerTrades.TypeSpecificTrade(
-                Arrays.stream(p_298107_).collect(Collectors.toMap(p_298558_ -> (VillagerType)p_298558_, p_298770_ -> p_297877_))
+                Arrays.stream(pTypes).collect(Collectors.toMap(p_298558_ -> (VillagerType)p_298558_, p_298770_ -> pListing))
             );
         }
 

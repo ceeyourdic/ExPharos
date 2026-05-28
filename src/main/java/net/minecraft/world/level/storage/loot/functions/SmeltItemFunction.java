@@ -21,8 +21,8 @@ public class SmeltItemFunction extends LootItemConditionalFunction {
         p_298512_ -> commonFields(p_298512_).apply(p_298512_, SmeltItemFunction::new)
     );
 
-    private SmeltItemFunction(List<LootItemCondition> p_298857_) {
-        super(p_298857_);
+    private SmeltItemFunction(List<LootItemCondition> pConditions) {
+        super(pConditions);
     }
 
     @Override
@@ -31,23 +31,23 @@ public class SmeltItemFunction extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_81268_, LootContext p_81269_) {
-        if (p_81268_.isEmpty()) {
-            return p_81268_;
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        if (pStack.isEmpty()) {
+            return pStack;
         } else {
-            SingleRecipeInput singlerecipeinput = new SingleRecipeInput(p_81268_);
-            Optional<RecipeHolder<SmeltingRecipe>> optional = p_81269_.getLevel()
+            SingleRecipeInput singlerecipeinput = new SingleRecipeInput(pStack);
+            Optional<RecipeHolder<SmeltingRecipe>> optional = pContext.getLevel()
                 .recipeAccess()
-                .getRecipeFor(RecipeType.SMELTING, singlerecipeinput, p_81269_.getLevel());
+                .getRecipeFor(RecipeType.SMELTING, singlerecipeinput, pContext.getLevel());
             if (optional.isPresent()) {
-                ItemStack itemstack = optional.get().value().assemble(singlerecipeinput, p_81269_.getLevel().registryAccess());
+                ItemStack itemstack = optional.get().value().assemble(singlerecipeinput, pContext.getLevel().registryAccess());
                 if (!itemstack.isEmpty()) {
-                    return itemstack.copyWithCount(p_81268_.getCount());
+                    return itemstack.copyWithCount(pStack.getCount());
                 }
             }
 
-            LOGGER.warn("Couldn't smelt {} because there is no smelting recipe", p_81268_);
-            return p_81268_;
+            LOGGER.warn("Couldn't smelt {} because there is no smelting recipe", pStack);
+            return pStack;
         }
     }
 

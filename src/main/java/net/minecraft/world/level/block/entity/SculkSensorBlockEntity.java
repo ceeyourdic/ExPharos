@@ -33,8 +33,8 @@ public class SculkSensorBlockEntity extends BlockEntity implements GameEventList
         this.vibrationListener = new VibrationSystem.Listener(this);
     }
 
-    public SculkSensorBlockEntity(BlockPos p_155635_, BlockState p_155636_) {
-        this(BlockEntityType.SCULK_SENSOR, p_155635_, p_155636_);
+    public SculkSensorBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        this(BlockEntityType.SCULK_SENSOR, pPos, pBlockState);
     }
 
     public VibrationSystem.User createVibrationUser() {
@@ -79,8 +79,8 @@ public class SculkSensorBlockEntity extends BlockEntity implements GameEventList
         return this.lastVibrationFrequency;
     }
 
-    public void setLastVibrationFrequency(int p_222801_) {
-        this.lastVibrationFrequency = p_222801_;
+    public void setLastVibrationFrequency(int pLastVibrationFrequency) {
+        this.lastVibrationFrequency = pLastVibrationFrequency;
     }
 
     public VibrationSystem.Listener getListener() {
@@ -92,9 +92,9 @@ public class SculkSensorBlockEntity extends BlockEntity implements GameEventList
         protected final BlockPos blockPos;
         private final PositionSource positionSource;
 
-        public VibrationUser(final BlockPos p_283482_) {
-            this.blockPos = p_283482_;
-            this.positionSource = new BlockPositionSource(p_283482_);
+        public VibrationUser(final BlockPos pPos) {
+            this.blockPos = pPos;
+            this.positionSource = new BlockPositionSource(pPos);
         }
 
         @Override

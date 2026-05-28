@@ -22,7 +22,7 @@ public class SmokerScreen extends AbstractFurnaceScreen<SmokerMenu> {
         new RecipeBookComponent.TabInfo(SearchRecipeBookCategory.SMOKER), new RecipeBookComponent.TabInfo(Items.PORKCHOP, RecipeBookCategories.SMOKER_FOOD)
     );
 
-    public SmokerScreen(SmokerMenu p_99300_, Inventory p_99301_, Component p_99302_) {
-        super(p_99300_, p_99301_, p_99302_, FILTER_NAME, TEXTURE, LIT_PROGRESS_SPRITE, BURN_PROGRESS_SPRITE, TABS);
+    public SmokerScreen(SmokerMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, pPlayerInventory, pTitle, FILTER_NAME, TEXTURE, LIT_PROGRESS_SPRITE, BURN_PROGRESS_SPRITE, TABS);
     }
 }

@@ -28,15 +28,15 @@ public class CommonLinks {
     public static final URI REALMS_CONTENT_CREATION = URI.create("https://aka.ms/MinecraftRealmsContentCreator");
     public static final String EXTEND_REALMS_LINK = "https://aka.ms/ExtendJavaRealms";
 
-    public static String extendRealms(@Nullable String p_276321_, UUID p_301276_, boolean p_276266_) {
-        return p_276321_ == null
+    public static String extendRealms(@Nullable String pSubscriptionId, UUID pProfileId, boolean pIsTrial) {
+        return pSubscriptionId == null
             ? "https://aka.ms/ExtendJavaRealms"
-            : extendRealms(p_276321_, p_301276_) + "&ref=" + (p_276266_ ? "expiredTrial" : "expiredRealm");
+            : extendRealms(pSubscriptionId, pProfileId) + "&ref=" + (pIsTrial ? "expiredTrial" : "expiredRealm");
     }
 
-    public static String extendRealms(@Nullable String p_276318_, UUID p_301122_) {
-        return p_276318_ == null
+    public static String extendRealms(@Nullable String pSubscriptionId, UUID pProfileId) {
+        return pSubscriptionId == null
             ? "https://aka.ms/ExtendJavaRealms"
-            : "https://aka.ms/ExtendJavaRealms?subscriptionId=" + p_276318_ + "&profileId=" + UndashedUuid.toString(p_301122_);
+            : "https://aka.ms/ExtendJavaRealms?subscriptionId=" + pSubscriptionId + "&profileId=" + UndashedUuid.toString(pProfileId);
     }
 }

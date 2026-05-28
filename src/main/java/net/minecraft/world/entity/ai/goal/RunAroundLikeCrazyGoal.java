@@ -14,9 +14,9 @@ public class RunAroundLikeCrazyGoal extends Goal {
     private double posY;
     private double posZ;
 
-    public RunAroundLikeCrazyGoal(AbstractHorse p_25890_, double p_25891_) {
-        this.horse = p_25890_;
-        this.speedModifier = p_25891_;
+    public RunAroundLikeCrazyGoal(AbstractHorse pHorse, double pSpeedModifier) {
+        this.horse = pHorse;
+        this.speedModifier = pSpeedModifier;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE));
     }
 

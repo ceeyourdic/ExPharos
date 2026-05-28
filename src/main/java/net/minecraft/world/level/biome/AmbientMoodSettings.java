@@ -23,11 +23,11 @@ public class AmbientMoodSettings {
     private final int blockSearchExtent;
     private final double soundPositionOffset;
 
-    public AmbientMoodSettings(Holder<SoundEvent> p_263350_, int p_263364_, int p_263333_, double p_263345_) {
-        this.soundEvent = p_263350_;
-        this.tickDelay = p_263364_;
-        this.blockSearchExtent = p_263333_;
-        this.soundPositionOffset = p_263345_;
+    public AmbientMoodSettings(Holder<SoundEvent> pSoundEvent, int pTickDelay, int pBlockSearchExtent, double pSoundPositionOffset) {
+        this.soundEvent = pSoundEvent;
+        this.tickDelay = pTickDelay;
+        this.blockSearchExtent = pBlockSearchExtent;
+        this.soundPositionOffset = pSoundPositionOffset;
     }
 
     public Holder<SoundEvent> getSoundEvent() {

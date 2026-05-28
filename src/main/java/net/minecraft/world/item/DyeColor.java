@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
@@ -17,7 +18,7 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.material.MapColor;
-import org.jetbrains.annotations.Contract;
+import net.optifine.reflect.Reflector;
 
 public enum DyeColor implements StringRepresentable {
     WHITE(0, "white", 16383998, MapColor.SNOW, 15790320, 16777215),
@@ -39,24 +40,28 @@ public enum DyeColor implements StringRepresentable {
 
     private static final IntFunction<DyeColor> BY_ID = ByIdMap.continuous(DyeColor::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
     private static final Int2ObjectOpenHashMap<DyeColor> BY_FIREWORK_COLOR = new Int2ObjectOpenHashMap<>(
-        Arrays.stream(values()).collect(Collectors.toMap(p_41064_ -> p_41064_.fireworkColor, p_41056_ -> (DyeColor)p_41056_))
+        Arrays.stream(values()).collect(Collectors.toMap(dyeColorIn -> dyeColorIn.fireworkColor, dyeColor2In -> (DyeColor)dyeColor2In))
     );
     public static final StringRepresentable.EnumCodec<DyeColor> CODEC = StringRepresentable.fromEnum(DyeColor::values);
     public static final StreamCodec<ByteBuf, DyeColor> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, DyeColor::getId);
     private final int id;
     private final String name;
     private final MapColor mapColor;
-    private final int textureDiffuseColor;
+    private int textureDiffuseColor;
     private final int fireworkColor;
     private final int textColor;
+    private final TagKey<Item> dyesTag;
+    private final TagKey<Item> dyedTag;
 
-    private DyeColor(final int p_41046_, final String p_41047_, final int p_41048_, final MapColor p_285297_, final int p_41050_, final int p_41051_) {
-        this.id = p_41046_;
-        this.name = p_41047_;
-        this.mapColor = p_285297_;
-        this.textColor = p_41051_;
-        this.textureDiffuseColor = ARGB.opaque(p_41048_);
-        this.fireworkColor = p_41050_;
+    private DyeColor(final int pId, final String pName, final int pTextureDefuseColor, final MapColor pMapColor, final int pFireworkColor, final int pTextColor) {
+        this.id = pId;
+        this.name = pName;
+        this.mapColor = pMapColor;
+        this.textColor = pTextColor;
+        this.textureDiffuseColor = ARGB.opaque(pTextureDefuseColor);
+        this.fireworkColor = pFireworkColor;
+        this.dyesTag = (TagKey<Item>)Reflector.ForgeItemTags_create.call("forge", "dyes/" + pName);
+        this.dyedTag = (TagKey<Item>)Reflector.ForgeItemTags_create.call("forge", "dyed/" + pName);
     }
 
     public int getId() {
@@ -83,20 +88,19 @@ public enum DyeColor implements StringRepresentable {
         return this.textColor;
     }
 
-    public static DyeColor byId(int p_41054_) {
-        return BY_ID.apply(p_41054_);
+    public static DyeColor byId(int pColorId) {
+        return BY_ID.apply(pColorId);
     }
 
     @Nullable
-    @Contract("_,!null->!null;_,null->_")
-    public static DyeColor byName(String p_41058_, @Nullable DyeColor p_41059_) {
-        DyeColor dyecolor = CODEC.byName(p_41058_);
-        return dyecolor != null ? dyecolor : p_41059_;
+    public static DyeColor byName(String pTranslationKey, @Nullable DyeColor pFallback) {
+        DyeColor dyecolor = CODEC.byName(pTranslationKey);
+        return dyecolor != null ? dyecolor : pFallback;
     }
 
     @Nullable
-    public static DyeColor byFireworkColor(int p_41062_) {
-        return BY_FIREWORK_COLOR.get(p_41062_);
+    public static DyeColor byFireworkColor(int pFireworkColor) {
+        return BY_FIREWORK_COLOR.get(pFireworkColor);
     }
 
     @Override
@@ -109,19 +113,36 @@ public enum DyeColor implements StringRepresentable {
         return this.name;
     }
 
-    public static DyeColor getMixedColor(ServerLevel p_377753_, DyeColor p_378336_, DyeColor p_376650_) {
-        CraftingInput craftinginput = makeCraftColorInput(p_378336_, p_376650_);
-        return p_377753_.recipeAccess()
-            .getRecipeFor(RecipeType.CRAFTING, craftinginput, p_377753_)
-            .map(p_375205_ -> p_375205_.value().assemble(craftinginput, p_377753_.registryAccess()))
+    public static DyeColor getMixedColor(ServerLevel pLevel, DyeColor pFirst, DyeColor pSecond) {
+        CraftingInput craftinginput = makeCraftColorInput(pFirst, pSecond);
+        return pLevel.recipeAccess()
+            .getRecipeFor(RecipeType.CRAFTING, craftinginput, pLevel)
+            .map(recipeIn -> recipeIn.value().assemble(craftinginput, pLevel.registryAccess()))
             .map(ItemStack::getItem)
             .filter(DyeItem.class::isInstance)
             .map(DyeItem.class::cast)
             .map(DyeItem::getDyeColor)
-            .orElseGet(() -> p_377753_.random.nextBoolean() ? p_378336_ : p_376650_);
+            .orElseGet(() -> pLevel.random.nextBoolean() ? pFirst : pSecond);
     }
 
-    private static CraftingInput makeCraftColorInput(DyeColor p_376875_, DyeColor p_378606_) {
-        return CraftingInput.of(2, 1, List.of(new ItemStack(DyeItem.byColor(p_376875_)), new ItemStack(DyeItem.byColor(p_378606_))));
+    private static CraftingInput makeCraftColorInput(DyeColor pFirst, DyeColor pSecond) {
+        return CraftingInput.of(2, 1, List.of(new ItemStack(DyeItem.byColor(pFirst)), new ItemStack(DyeItem.byColor(pSecond))));
+    }
+
+    public void setTextureDiffuseColor(int color) {
+        this.textureDiffuseColor = color;
+    }
+
+    public TagKey<Item> getTag() {
+        return this.dyesTag;
+    }
+
+    public TagKey<Item> getDyedTag() {
+        return this.dyedTag;
+    }
+
+    @Nullable
+    public static DyeColor getColor(ItemStack stack) {
+        return (DyeColor)Reflector.ForgeHooks_getDyeColorFromItemStack.call(stack);
     }
 }

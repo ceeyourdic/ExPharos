@@ -29,30 +29,30 @@ public record TimeCheck(Optional<Long> period, IntRange value) implements LootIt
         return this.value.getReferencedContextParams();
     }
 
-    public boolean test(LootContext p_82033_) {
-        ServerLevel serverlevel = p_82033_.getLevel();
+    public boolean test(LootContext pContext) {
+        ServerLevel serverlevel = pContext.getLevel();
         long i = serverlevel.getDayTime();
         if (this.period.isPresent()) {
             i %= this.period.get();
         }
 
-        return this.value.test(p_82033_, (int)i);
+        return this.value.test(pContext, (int)i);
     }
 
-    public static TimeCheck.Builder time(IntRange p_165510_) {
-        return new TimeCheck.Builder(p_165510_);
+    public static TimeCheck.Builder time(IntRange pTimeRange) {
+        return new TimeCheck.Builder(pTimeRange);
     }
 
     public static class Builder implements LootItemCondition.Builder {
         private Optional<Long> period = Optional.empty();
         private final IntRange value;
 
-        public Builder(IntRange p_165515_) {
-            this.value = p_165515_;
+        public Builder(IntRange pTimeRange) {
+            this.value = pTimeRange;
         }
 
-        public TimeCheck.Builder setPeriod(long p_165517_) {
-            this.period = Optional.of(p_165517_);
+        public TimeCheck.Builder setPeriod(long pPeriod) {
+            this.period = Optional.of(pPeriod);
             return this;
         }
 

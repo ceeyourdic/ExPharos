@@ -19,16 +19,16 @@ public class Button extends AbstractButton {
     protected final Button.OnPress onPress;
     protected final Button.CreateNarration createNarration;
 
-    public static Button.Builder builder(Component p_254439_, Button.OnPress p_254567_) {
-        return new Button.Builder(p_254439_, p_254567_);
+    public static Button.Builder builder(Component pMessage, Button.OnPress pOnPress) {
+        return new Button.Builder(pMessage, pOnPress);
     }
 
     protected Button(
-        int p_259075_, int p_259271_, int p_260232_, int p_260028_, Component p_259351_, Button.OnPress p_260152_, Button.CreateNarration p_259552_
+        int pX, int pY, int pWidth, int pHeight, Component pMessage, Button.OnPress pOnPress, Button.CreateNarration pCreateNarration
     ) {
-        super(p_259075_, p_259271_, p_260232_, p_260028_, p_259351_);
-        this.onPress = p_260152_;
-        this.createNarration = p_259552_;
+        super(pX, pY, pWidth, pHeight, pMessage);
+        this.onPress = pOnPress;
+        this.createNarration = pCreateNarration;
     }
 
     @Override
@@ -58,39 +58,39 @@ public class Button extends AbstractButton {
         private int height = 20;
         private Button.CreateNarration createNarration = Button.DEFAULT_NARRATION;
 
-        public Builder(Component p_254097_, Button.OnPress p_253761_) {
-            this.message = p_254097_;
-            this.onPress = p_253761_;
+        public Builder(Component pMessage, Button.OnPress pOnPress) {
+            this.message = pMessage;
+            this.onPress = pOnPress;
         }
 
-        public Button.Builder pos(int p_254538_, int p_254216_) {
-            this.x = p_254538_;
-            this.y = p_254216_;
+        public Button.Builder pos(int pX, int pY) {
+            this.x = pX;
+            this.y = pY;
             return this;
         }
 
-        public Button.Builder width(int p_254259_) {
-            this.width = p_254259_;
+        public Button.Builder width(int pWidth) {
+            this.width = pWidth;
             return this;
         }
 
-        public Button.Builder size(int p_253727_, int p_254457_) {
-            this.width = p_253727_;
-            this.height = p_254457_;
+        public Button.Builder size(int pWidth, int pHeight) {
+            this.width = pWidth;
+            this.height = pHeight;
             return this;
         }
 
-        public Button.Builder bounds(int p_254166_, int p_253872_, int p_254522_, int p_253985_) {
-            return this.pos(p_254166_, p_253872_).size(p_254522_, p_253985_);
+        public Button.Builder bounds(int pX, int pY, int pWidth, int pHeight) {
+            return this.pos(pX, pY).size(pWidth, pHeight);
         }
 
-        public Button.Builder tooltip(@Nullable Tooltip p_259609_) {
-            this.tooltip = p_259609_;
+        public Button.Builder tooltip(@Nullable Tooltip pTooltip) {
+            this.tooltip = pTooltip;
             return this;
         }
 
-        public Button.Builder createNarration(Button.CreateNarration p_253638_) {
-            this.createNarration = p_253638_;
+        public Button.Builder createNarration(Button.CreateNarration pCreateNarration) {
+            this.createNarration = pCreateNarration;
             return this;
         }
 
@@ -103,11 +103,11 @@ public class Button extends AbstractButton {
 
     @OnlyIn(Dist.CLIENT)
     public interface CreateNarration {
-        MutableComponent createNarrationMessage(Supplier<MutableComponent> p_253695_);
+        MutableComponent createNarrationMessage(Supplier<MutableComponent> pMessageSupplier);
     }
 
     @OnlyIn(Dist.CLIENT)
     public interface OnPress {
-        void onPress(Button p_93751_);
+        void onPress(Button pButton);
     }
 }

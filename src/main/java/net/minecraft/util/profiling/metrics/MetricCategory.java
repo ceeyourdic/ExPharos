@@ -13,8 +13,8 @@ public enum MetricCategory {
 
     private final String description;
 
-    private MetricCategory(final String p_145980_) {
-        this.description = p_145980_;
+    private MetricCategory(final String pDescription) {
+        this.description = pDescription;
     }
 
     public String getDescription() {

@@ -10,33 +10,33 @@ import net.minecraft.world.level.block.state.BlockState;
 public interface SignalGetter extends BlockGetter {
     Direction[] DIRECTIONS = Direction.values();
 
-    default int getDirectSignal(BlockPos p_277954_, Direction p_277342_) {
-        return this.getBlockState(p_277954_).getDirectSignal(this, p_277954_, p_277342_);
+    default int getDirectSignal(BlockPos pPos, Direction pDirection) {
+        return this.getBlockState(pPos).getDirectSignal(this, pPos, pDirection);
     }
 
-    default int getDirectSignalTo(BlockPos p_277959_) {
+    default int getDirectSignalTo(BlockPos pPos) {
         int i = 0;
-        i = Math.max(i, this.getDirectSignal(p_277959_.below(), Direction.DOWN));
+        i = Math.max(i, this.getDirectSignal(pPos.below(), Direction.DOWN));
         if (i >= 15) {
             return i;
         } else {
-            i = Math.max(i, this.getDirectSignal(p_277959_.above(), Direction.UP));
+            i = Math.max(i, this.getDirectSignal(pPos.above(), Direction.UP));
             if (i >= 15) {
                 return i;
             } else {
-                i = Math.max(i, this.getDirectSignal(p_277959_.north(), Direction.NORTH));
+                i = Math.max(i, this.getDirectSignal(pPos.north(), Direction.NORTH));
                 if (i >= 15) {
                     return i;
                 } else {
-                    i = Math.max(i, this.getDirectSignal(p_277959_.south(), Direction.SOUTH));
+                    i = Math.max(i, this.getDirectSignal(pPos.south(), Direction.SOUTH));
                     if (i >= 15) {
                         return i;
                     } else {
-                        i = Math.max(i, this.getDirectSignal(p_277959_.west(), Direction.WEST));
+                        i = Math.max(i, this.getDirectSignal(pPos.west(), Direction.WEST));
                         if (i >= 15) {
                             return i;
                         } else {
-                            i = Math.max(i, this.getDirectSignal(p_277959_.east(), Direction.EAST));
+                            i = Math.max(i, this.getDirectSignal(pPos.east(), Direction.EAST));
                             return i >= 15 ? i : i;
                         }
                     }
@@ -45,48 +45,48 @@ public interface SignalGetter extends BlockGetter {
         }
     }
 
-    default int getControlInputSignal(BlockPos p_277757_, Direction p_278104_, boolean p_277707_) {
-        BlockState blockstate = this.getBlockState(p_277757_);
-        if (p_277707_) {
-            return DiodeBlock.isDiode(blockstate) ? this.getDirectSignal(p_277757_, p_278104_) : 0;
+    default int getControlInputSignal(BlockPos pPos, Direction pDirection, boolean pDiodesOnly) {
+        BlockState blockstate = this.getBlockState(pPos);
+        if (pDiodesOnly) {
+            return DiodeBlock.isDiode(blockstate) ? this.getDirectSignal(pPos, pDirection) : 0;
         } else if (blockstate.is(Blocks.REDSTONE_BLOCK)) {
             return 15;
         } else if (blockstate.is(Blocks.REDSTONE_WIRE)) {
             return blockstate.getValue(RedStoneWireBlock.POWER);
         } else {
-            return blockstate.isSignalSource() ? this.getDirectSignal(p_277757_, p_278104_) : 0;
+            return blockstate.isSignalSource() ? this.getDirectSignal(pPos, pDirection) : 0;
         }
     }
 
-    default boolean hasSignal(BlockPos p_277371_, Direction p_277391_) {
-        return this.getSignal(p_277371_, p_277391_) > 0;
+    default boolean hasSignal(BlockPos pPos, Direction pDirection) {
+        return this.getSignal(pPos, pDirection) > 0;
     }
 
-    default int getSignal(BlockPos p_277961_, Direction p_277351_) {
-        BlockState blockstate = this.getBlockState(p_277961_);
-        int i = blockstate.getSignal(this, p_277961_, p_277351_);
-        return blockstate.isRedstoneConductor(this, p_277961_) ? Math.max(i, this.getDirectSignalTo(p_277961_)) : i;
+    default int getSignal(BlockPos pPos, Direction pDirection) {
+        BlockState blockstate = this.getBlockState(pPos);
+        int i = blockstate.getSignal(this, pPos, pDirection);
+        return blockstate.isRedstoneConductor(this, pPos) ? Math.max(i, this.getDirectSignalTo(pPos)) : i;
     }
 
-    default boolean hasNeighborSignal(BlockPos p_277626_) {
-        if (this.getSignal(p_277626_.below(), Direction.DOWN) > 0) {
+    default boolean hasNeighborSignal(BlockPos pPos) {
+        if (this.getSignal(pPos.below(), Direction.DOWN) > 0) {
             return true;
-        } else if (this.getSignal(p_277626_.above(), Direction.UP) > 0) {
+        } else if (this.getSignal(pPos.above(), Direction.UP) > 0) {
             return true;
-        } else if (this.getSignal(p_277626_.north(), Direction.NORTH) > 0) {
+        } else if (this.getSignal(pPos.north(), Direction.NORTH) > 0) {
             return true;
-        } else if (this.getSignal(p_277626_.south(), Direction.SOUTH) > 0) {
+        } else if (this.getSignal(pPos.south(), Direction.SOUTH) > 0) {
             return true;
         } else {
-            return this.getSignal(p_277626_.west(), Direction.WEST) > 0 ? true : this.getSignal(p_277626_.east(), Direction.EAST) > 0;
+            return this.getSignal(pPos.west(), Direction.WEST) > 0 ? true : this.getSignal(pPos.east(), Direction.EAST) > 0;
         }
     }
 
-    default int getBestNeighborSignal(BlockPos p_277977_) {
+    default int getBestNeighborSignal(BlockPos pPos) {
         int i = 0;
 
         for (Direction direction : DIRECTIONS) {
-            int j = this.getSignal(p_277977_.relative(direction), direction);
+            int j = this.getSignal(pPos.relative(direction), direction);
             if (j >= 15) {
                 return 15;
             }

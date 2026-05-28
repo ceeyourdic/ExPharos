@@ -11,10 +11,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class MapExtendingRecipe extends ShapedRecipe {
-    public MapExtendingRecipe(CraftingBookCategory p_250154_) {
+    public MapExtendingRecipe(CraftingBookCategory pCategory) {
         super(
             "",
-            p_250154_,
+            pCategory,
             ShapedRecipePattern.of(Map.of('#', Ingredient.of(Items.PAPER), 'x', Ingredient.of(Items.FILLED_MAP)), "###", "#x#", "###"),
             new ItemStack(Items.MAP)
         );
@@ -46,9 +46,9 @@ public class MapExtendingRecipe extends ShapedRecipe {
         return itemstack;
     }
 
-    private static ItemStack findFilledMap(CraftingInput p_345373_) {
-        for (int i = 0; i < p_345373_.size(); i++) {
-            ItemStack itemstack = p_345373_.getItem(i);
+    private static ItemStack findFilledMap(CraftingInput pInput) {
+        for (int i = 0; i < pInput.size(); i++) {
+            ItemStack itemstack = pInput.getItem(i);
             if (itemstack.has(DataComponents.MAP_ID)) {
                 return itemstack;
             }

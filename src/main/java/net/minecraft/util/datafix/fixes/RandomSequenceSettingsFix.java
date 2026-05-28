@@ -8,8 +8,8 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.serialization.Dynamic;
 
 public class RandomSequenceSettingsFix extends DataFix {
-    public RandomSequenceSettingsFix(Schema p_299509_) {
-        super(p_299509_, false);
+    public RandomSequenceSettingsFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override

@@ -18,18 +18,18 @@ public class IntegratedPlayerList extends PlayerList {
     @Nullable
     private CompoundTag playerData;
 
-    public IntegratedPlayerList(IntegratedServer p_251269_, LayeredRegistryAccess<RegistryLayer> p_250644_, PlayerDataStorage p_249022_) {
-        super(p_251269_, p_250644_, p_249022_, 8);
+    public IntegratedPlayerList(IntegratedServer pServer, LayeredRegistryAccess<RegistryLayer> pRegistries, PlayerDataStorage pPlayerIo) {
+        super(pServer, pRegistries, pPlayerIo, 8);
         this.setViewDistance(10);
     }
 
     @Override
-    protected void save(ServerPlayer p_120011_) {
-        if (this.getServer().isSingleplayerOwner(p_120011_.getGameProfile())) {
-            this.playerData = p_120011_.saveWithoutId(new CompoundTag());
+    protected void save(ServerPlayer pPlayer) {
+        if (this.getServer().isSingleplayerOwner(pPlayer.getGameProfile())) {
+            this.playerData = pPlayer.saveWithoutId(new CompoundTag());
         }
 
-        super.save(p_120011_);
+        super.save(pPlayer);
     }
 
     @Override

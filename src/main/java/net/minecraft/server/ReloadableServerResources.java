@@ -28,19 +28,19 @@ public class ReloadableServerResources {
     private final List<Registry.PendingTags<?>> postponedTags;
 
     private ReloadableServerResources(
-        LayeredRegistryAccess<RegistryLayer> p_368059_,
-        HolderLookup.Provider p_363207_,
-        FeatureFlagSet p_250695_,
-        Commands.CommandSelection p_206858_,
-        List<Registry.PendingTags<?>> p_364269_,
-        int p_206859_
+        LayeredRegistryAccess<RegistryLayer> pRegistryAccess,
+        HolderLookup.Provider pRegistries,
+        FeatureFlagSet pEnabledFeatures,
+        Commands.CommandSelection pCommandSelection,
+        List<Registry.PendingTags<?>> pPostponedTags,
+        int pFunctionCompilationLevel
     ) {
-        this.fullRegistryHolder = new ReloadableServerRegistries.Holder(p_368059_.compositeAccess());
-        this.postponedTags = p_364269_;
-        this.recipes = new RecipeManager(p_363207_);
-        this.commands = new Commands(p_206858_, CommandBuildContext.simple(p_363207_, p_250695_));
-        this.advancements = new ServerAdvancementManager(p_363207_);
-        this.functionLibrary = new ServerFunctionLibrary(p_206859_, this.commands.getDispatcher());
+        this.fullRegistryHolder = new ReloadableServerRegistries.Holder(pRegistryAccess.compositeAccess());
+        this.postponedTags = pPostponedTags;
+        this.recipes = new RecipeManager(pRegistries);
+        this.commands = new Commands(pCommandSelection, CommandBuildContext.simple(pRegistries, pEnabledFeatures));
+        this.advancements = new ServerAdvancementManager(pRegistries);
+        this.functionLibrary = new ServerFunctionLibrary(pFunctionCompilationLevel, this.commands.getDispatcher());
     }
 
     public ServerFunctionLibrary getFunctionLibrary() {
@@ -68,23 +68,23 @@ public class ReloadableServerResources {
     }
 
     public static CompletableFuture<ReloadableServerResources> loadResources(
-        ResourceManager p_248588_,
-        LayeredRegistryAccess<RegistryLayer> p_330376_,
-        List<Registry.PendingTags<?>> p_366334_,
-        FeatureFlagSet p_250212_,
-        Commands.CommandSelection p_249301_,
-        int p_251126_,
-        Executor p_249136_,
-        Executor p_249601_
+        ResourceManager pResourceManager,
+        LayeredRegistryAccess<RegistryLayer> pRegistryAccess,
+        List<Registry.PendingTags<?>> pPostponedTags,
+        FeatureFlagSet pEnabledFeatures,
+        Commands.CommandSelection pCommandSelection,
+        int pFunctionCompilationLevel,
+        Executor pBackgroundExecutor,
+        Executor pGameExecutor
     ) {
-        return ReloadableServerRegistries.reload(p_330376_, p_366334_, p_248588_, p_249136_)
+        return ReloadableServerRegistries.reload(pRegistryAccess, pPostponedTags, pResourceManager, pBackgroundExecutor)
             .thenCompose(
                 p_358539_ -> {
                     ReloadableServerResources reloadableserverresources = new ReloadableServerResources(
-                        p_358539_.layers(), p_358539_.lookupWithUpdatedTags(), p_250212_, p_249301_, p_366334_, p_251126_
+                        p_358539_.layers(), p_358539_.lookupWithUpdatedTags(), pEnabledFeatures, pCommandSelection, pPostponedTags, pFunctionCompilationLevel
                     );
                     return SimpleReloadInstance.create(
-                            p_248588_, reloadableserverresources.listeners(), p_249136_, p_249601_, DATA_RELOAD_INITIAL_TASK, LOGGER.isDebugEnabled()
+                            pResourceManager, reloadableserverresources.listeners(), pBackgroundExecutor, pGameExecutor, DATA_RELOAD_INITIAL_TASK, LOGGER.isDebugEnabled()
                         )
                         .done()
                         .thenApply(p_214306_ -> reloadableserverresources);

@@ -68,15 +68,15 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
         return CODEC;
     }
 
-    public BedBlock(DyeColor p_49454_, BlockBehaviour.Properties p_49455_) {
-        super(p_49455_);
-        this.color = p_49454_;
+    public BedBlock(DyeColor pColor, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.color = pColor;
         this.registerDefaultState(this.stateDefinition.any().setValue(PART, BedPart.FOOT).setValue(OCCUPIED, Boolean.valueOf(false)));
     }
 
     @Nullable
-    public static Direction getBedOrientation(BlockGetter p_49486_, BlockPos p_49487_) {
-        BlockState blockstate = p_49486_.getBlockState(p_49487_);
+    public static Direction getBedOrientation(BlockGetter pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
         return blockstate.getBlock() instanceof BedBlock ? blockstate.getValue(FACING) : null;
     }
 
@@ -120,12 +120,12 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
         }
     }
 
-    public static boolean canSetSpawn(Level p_49489_) {
-        return p_49489_.dimensionType().bedWorks();
+    public static boolean canSetSpawn(Level pLevel) {
+        return pLevel.dimensionType().bedWorks();
     }
 
-    private boolean kickVillagerOutOfBed(Level p_49491_, BlockPos p_49492_) {
-        List<Villager> list = p_49491_.getEntitiesOfClass(Villager.class, new AABB(p_49492_), LivingEntity::isSleeping);
+    private boolean kickVillagerOutOfBed(Level pLevel, BlockPos pPos) {
+        List<Villager> list = pLevel.getEntitiesOfClass(Villager.class, new AABB(pPos), LivingEntity::isSleeping);
         if (list.isEmpty()) {
             return false;
         } else {
@@ -148,11 +148,11 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
         }
     }
 
-    private void bounceUp(Entity p_49457_) {
-        Vec3 vec3 = p_49457_.getDeltaMovement();
+    private void bounceUp(Entity pEntity) {
+        Vec3 vec3 = pEntity.getDeltaMovement();
         if (vec3.y < 0.0) {
-            double d0 = p_49457_ instanceof LivingEntity ? 1.0 : 0.8;
-            p_49457_.setDeltaMovement(vec3.x, -vec3.y * 0.66F * d0, vec3.z);
+            double d0 = pEntity instanceof LivingEntity ? 1.0 : 0.8;
+            pEntity.setDeltaMovement(vec3.x, -vec3.y * 0.66F * d0, vec3.z);
         }
     }
 
@@ -176,8 +176,8 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
         }
     }
 
-    private static Direction getNeighbourDirection(BedPart p_49534_, Direction p_49535_) {
-        return p_49534_ == BedPart.FOOT ? p_49535_ : p_49535_.getOpposite();
+    private static Direction getNeighbourDirection(BedPart pPart, Direction pDirection) {
+        return pPart == BedPart.FOOT ? pDirection : pDirection.getOpposite();
     }
 
     @Override
@@ -199,17 +199,17 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_49479_) {
-        Direction direction = p_49479_.getHorizontalDirection();
-        BlockPos blockpos = p_49479_.getClickedPos();
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        Direction direction = pContext.getHorizontalDirection();
+        BlockPos blockpos = pContext.getClickedPos();
         BlockPos blockpos1 = blockpos.relative(direction);
-        Level level = p_49479_.getLevel();
-        return level.getBlockState(blockpos1).canBeReplaced(p_49479_) && level.getWorldBorder().isWithinBounds(blockpos1) ? this.defaultBlockState().setValue(FACING, direction) : null;
+        Level level = pContext.getLevel();
+        return level.getBlockState(blockpos1).canBeReplaced(pContext) && level.getWorldBorder().isWithinBounds(blockpos1) ? this.defaultBlockState().setValue(FACING, direction) : null;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_49547_, BlockGetter p_49548_, BlockPos p_49549_, CollisionContext p_49550_) {
-        Direction direction = getConnectedDirection(p_49547_).getOpposite();
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        Direction direction = getConnectedDirection(pState).getOpposite();
         switch (direction) {
             case NORTH:
                 return NORTH_SHAPE;
@@ -222,66 +222,66 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
         }
     }
 
-    public static Direction getConnectedDirection(BlockState p_49558_) {
-        Direction direction = p_49558_.getValue(FACING);
-        return p_49558_.getValue(PART) == BedPart.HEAD ? direction.getOpposite() : direction;
+    public static Direction getConnectedDirection(BlockState pState) {
+        Direction direction = pState.getValue(FACING);
+        return pState.getValue(PART) == BedPart.HEAD ? direction.getOpposite() : direction;
     }
 
-    public static DoubleBlockCombiner.BlockType getBlockType(BlockState p_49560_) {
-        BedPart bedpart = p_49560_.getValue(PART);
+    public static DoubleBlockCombiner.BlockType getBlockType(BlockState pState) {
+        BedPart bedpart = pState.getValue(PART);
         return bedpart == BedPart.HEAD ? DoubleBlockCombiner.BlockType.FIRST : DoubleBlockCombiner.BlockType.SECOND;
     }
 
-    private static boolean isBunkBed(BlockGetter p_49542_, BlockPos p_49543_) {
-        return p_49542_.getBlockState(p_49543_.below()).getBlock() instanceof BedBlock;
+    private static boolean isBunkBed(BlockGetter pLevel, BlockPos pPos) {
+        return pLevel.getBlockState(pPos.below()).getBlock() instanceof BedBlock;
     }
 
-    public static Optional<Vec3> findStandUpPosition(EntityType<?> p_261547_, CollisionGetter p_261946_, BlockPos p_261614_, Direction p_261648_, float p_261680_) {
-        Direction direction = p_261648_.getClockWise();
-        Direction direction1 = direction.isFacingAngle(p_261680_) ? direction.getOpposite() : direction;
-        if (isBunkBed(p_261946_, p_261614_)) {
-            return findBunkBedStandUpPosition(p_261547_, p_261946_, p_261614_, p_261648_, direction1);
+    public static Optional<Vec3> findStandUpPosition(EntityType<?> pEntityType, CollisionGetter pCollisionGetter, BlockPos pPos, Direction pDirection, float pYRot) {
+        Direction direction = pDirection.getClockWise();
+        Direction direction1 = direction.isFacingAngle(pYRot) ? direction.getOpposite() : direction;
+        if (isBunkBed(pCollisionGetter, pPos)) {
+            return findBunkBedStandUpPosition(pEntityType, pCollisionGetter, pPos, pDirection, direction1);
         } else {
-            int[][] aint = bedStandUpOffsets(p_261648_, direction1);
-            Optional<Vec3> optional = findStandUpPositionAtOffset(p_261547_, p_261946_, p_261614_, aint, true);
-            return optional.isPresent() ? optional : findStandUpPositionAtOffset(p_261547_, p_261946_, p_261614_, aint, false);
+            int[][] aint = bedStandUpOffsets(pDirection, direction1);
+            Optional<Vec3> optional = findStandUpPositionAtOffset(pEntityType, pCollisionGetter, pPos, aint, true);
+            return optional.isPresent() ? optional : findStandUpPositionAtOffset(pEntityType, pCollisionGetter, pPos, aint, false);
         }
     }
 
-    private static Optional<Vec3> findBunkBedStandUpPosition(EntityType<?> p_49464_, CollisionGetter p_49465_, BlockPos p_49466_, Direction p_49467_, Direction p_49468_) {
-        int[][] aint = bedSurroundStandUpOffsets(p_49467_, p_49468_);
-        Optional<Vec3> optional = findStandUpPositionAtOffset(p_49464_, p_49465_, p_49466_, aint, true);
+    private static Optional<Vec3> findBunkBedStandUpPosition(EntityType<?> pEntityType, CollisionGetter pCollisionGetter, BlockPos pPos, Direction pStateFacing, Direction pEntityFacing) {
+        int[][] aint = bedSurroundStandUpOffsets(pStateFacing, pEntityFacing);
+        Optional<Vec3> optional = findStandUpPositionAtOffset(pEntityType, pCollisionGetter, pPos, aint, true);
         if (optional.isPresent()) {
             return optional;
         } else {
-            BlockPos blockpos = p_49466_.below();
-            Optional<Vec3> optional1 = findStandUpPositionAtOffset(p_49464_, p_49465_, blockpos, aint, true);
+            BlockPos blockpos = pPos.below();
+            Optional<Vec3> optional1 = findStandUpPositionAtOffset(pEntityType, pCollisionGetter, blockpos, aint, true);
             if (optional1.isPresent()) {
                 return optional1;
             } else {
-                int[][] aint1 = bedAboveStandUpOffsets(p_49467_);
-                Optional<Vec3> optional2 = findStandUpPositionAtOffset(p_49464_, p_49465_, p_49466_, aint1, true);
+                int[][] aint1 = bedAboveStandUpOffsets(pStateFacing);
+                Optional<Vec3> optional2 = findStandUpPositionAtOffset(pEntityType, pCollisionGetter, pPos, aint1, true);
                 if (optional2.isPresent()) {
                     return optional2;
                 } else {
-                    Optional<Vec3> optional3 = findStandUpPositionAtOffset(p_49464_, p_49465_, p_49466_, aint, false);
+                    Optional<Vec3> optional3 = findStandUpPositionAtOffset(pEntityType, pCollisionGetter, pPos, aint, false);
                     if (optional3.isPresent()) {
                         return optional3;
                     } else {
-                        Optional<Vec3> optional4 = findStandUpPositionAtOffset(p_49464_, p_49465_, blockpos, aint, false);
-                        return optional4.isPresent() ? optional4 : findStandUpPositionAtOffset(p_49464_, p_49465_, p_49466_, aint1, false);
+                        Optional<Vec3> optional4 = findStandUpPositionAtOffset(pEntityType, pCollisionGetter, blockpos, aint, false);
+                        return optional4.isPresent() ? optional4 : findStandUpPositionAtOffset(pEntityType, pCollisionGetter, pPos, aint1, false);
                     }
                 }
             }
         }
     }
 
-    private static Optional<Vec3> findStandUpPositionAtOffset(EntityType<?> p_49470_, CollisionGetter p_49471_, BlockPos p_49472_, int[][] p_49473_, boolean p_49474_) {
+    private static Optional<Vec3> findStandUpPositionAtOffset(EntityType<?> pEntityType, CollisionGetter pCollisionGetter, BlockPos pPos, int[][] pOffsets, boolean pSimulate) {
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
-        for (int[] aint : p_49473_) {
-            blockpos$mutableblockpos.set(p_49472_.getX() + aint[0], p_49472_.getY(), p_49472_.getZ() + aint[1]);
-            Vec3 vec3 = DismountHelper.findSafeDismountLocation(p_49470_, p_49471_, blockpos$mutableblockpos, p_49474_);
+        for (int[] aint : pOffsets) {
+            blockpos$mutableblockpos.set(pPos.getX() + aint[0], pPos.getY(), pPos.getZ() + aint[1]);
+            Vec3 vec3 = DismountHelper.findSafeDismountLocation(pEntityType, pCollisionGetter, blockpos$mutableblockpos, pSimulate);
             if (vec3 != null) {
                 return Optional.of(vec3);
             }
@@ -291,8 +291,8 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_49532_) {
-        p_49532_.add(FACING, PART, OCCUPIED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, PART, OCCUPIED);
     }
 
     @Override
@@ -301,13 +301,13 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
     }
 
     @Override
-    public void setPlacedBy(Level p_49499_, BlockPos p_49500_, BlockState p_49501_, @Nullable LivingEntity p_49502_, ItemStack p_49503_) {
-        super.setPlacedBy(p_49499_, p_49500_, p_49501_, p_49502_, p_49503_);
-        if (!p_49499_.isClientSide) {
-            BlockPos blockpos = p_49500_.relative(p_49501_.getValue(FACING));
-            p_49499_.setBlock(blockpos, p_49501_.setValue(PART, BedPart.HEAD), 3);
-            p_49499_.blockUpdated(p_49500_, Blocks.AIR);
-            p_49501_.updateNeighbourShapes(p_49499_, p_49500_, 3);
+    public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
+        super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
+        if (!pLevel.isClientSide) {
+            BlockPos blockpos = pPos.relative(pState.getValue(FACING));
+            pLevel.setBlock(blockpos, pState.setValue(PART, BedPart.HEAD), 3);
+            pLevel.blockUpdated(pPos, Blocks.AIR);
+            pState.updateNeighbourShapes(pLevel, pPos, 3);
         }
     }
 
@@ -316,9 +316,9 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
     }
 
     @Override
-    protected long getSeed(BlockState p_49522_, BlockPos p_49523_) {
-        BlockPos blockpos = p_49523_.relative(p_49522_.getValue(FACING), p_49522_.getValue(PART) == BedPart.HEAD ? 0 : 1);
-        return Mth.getSeed(blockpos.getX(), p_49523_.getY(), blockpos.getZ());
+    protected long getSeed(BlockState pState, BlockPos pPos) {
+        BlockPos blockpos = pPos.relative(pState.getValue(FACING), pState.getValue(PART) == BedPart.HEAD ? 0 : 1);
+        return Mth.getSeed(blockpos.getX(), pPos.getY(), blockpos.getZ());
     }
 
     @Override
@@ -326,26 +326,26 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
         return false;
     }
 
-    private static int[][] bedStandUpOffsets(Direction p_49539_, Direction p_49540_) {
-        return ArrayUtils.addAll((int[][])bedSurroundStandUpOffsets(p_49539_, p_49540_), (int[][])bedAboveStandUpOffsets(p_49539_));
+    private static int[][] bedStandUpOffsets(Direction pFirstDir, Direction pSecondDir) {
+        return ArrayUtils.addAll((int[][])bedSurroundStandUpOffsets(pFirstDir, pSecondDir), (int[][])bedAboveStandUpOffsets(pFirstDir));
     }
 
-    private static int[][] bedSurroundStandUpOffsets(Direction p_49552_, Direction p_49553_) {
+    private static int[][] bedSurroundStandUpOffsets(Direction pFirstDir, Direction pSecondDir) {
         return new int[][]{
-            {p_49553_.getStepX(), p_49553_.getStepZ()},
-            {p_49553_.getStepX() - p_49552_.getStepX(), p_49553_.getStepZ() - p_49552_.getStepZ()},
-            {p_49553_.getStepX() - p_49552_.getStepX() * 2, p_49553_.getStepZ() - p_49552_.getStepZ() * 2},
-            {-p_49552_.getStepX() * 2, -p_49552_.getStepZ() * 2},
-            {-p_49553_.getStepX() - p_49552_.getStepX() * 2, -p_49553_.getStepZ() - p_49552_.getStepZ() * 2},
-            {-p_49553_.getStepX() - p_49552_.getStepX(), -p_49553_.getStepZ() - p_49552_.getStepZ()},
-            {-p_49553_.getStepX(), -p_49553_.getStepZ()},
-            {-p_49553_.getStepX() + p_49552_.getStepX(), -p_49553_.getStepZ() + p_49552_.getStepZ()},
-            {p_49552_.getStepX(), p_49552_.getStepZ()},
-            {p_49553_.getStepX() + p_49552_.getStepX(), p_49553_.getStepZ() + p_49552_.getStepZ()}
+            {pSecondDir.getStepX(), pSecondDir.getStepZ()},
+            {pSecondDir.getStepX() - pFirstDir.getStepX(), pSecondDir.getStepZ() - pFirstDir.getStepZ()},
+            {pSecondDir.getStepX() - pFirstDir.getStepX() * 2, pSecondDir.getStepZ() - pFirstDir.getStepZ() * 2},
+            {-pFirstDir.getStepX() * 2, -pFirstDir.getStepZ() * 2},
+            {-pSecondDir.getStepX() - pFirstDir.getStepX() * 2, -pSecondDir.getStepZ() - pFirstDir.getStepZ() * 2},
+            {-pSecondDir.getStepX() - pFirstDir.getStepX(), -pSecondDir.getStepZ() - pFirstDir.getStepZ()},
+            {-pSecondDir.getStepX(), -pSecondDir.getStepZ()},
+            {-pSecondDir.getStepX() + pFirstDir.getStepX(), -pSecondDir.getStepZ() + pFirstDir.getStepZ()},
+            {pFirstDir.getStepX(), pFirstDir.getStepZ()},
+            {pSecondDir.getStepX() + pFirstDir.getStepX(), pSecondDir.getStepZ() + pFirstDir.getStepZ()}
         };
     }
 
-    private static int[][] bedAboveStandUpOffsets(Direction p_49537_) {
-        return new int[][]{{0, 0}, {-p_49537_.getStepX(), -p_49537_.getStepZ()}};
+    private static int[][] bedAboveStandUpOffsets(Direction pDir) {
+        return new int[][]{{0, 0}, {-pDir.getStepX(), -pDir.getStepZ()}};
     }
 }

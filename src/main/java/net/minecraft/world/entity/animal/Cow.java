@@ -65,7 +65,7 @@ public class Cow extends Animal {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_28306_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.COW_HURT;
     }
 
@@ -75,7 +75,7 @@ public class Cow extends Animal {
     }
 
     @Override
-    protected void playStepSound(BlockPos p_28301_, BlockState p_28302_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(SoundEvents.COW_STEP, 0.15F, 1.0F);
     }
 
@@ -85,15 +85,15 @@ public class Cow extends Animal {
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_28298_, InteractionHand p_28299_) {
-        ItemStack itemstack = p_28298_.getItemInHand(p_28299_);
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
         if (itemstack.is(Items.BUCKET) && !this.isBaby()) {
-            p_28298_.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
-            ItemStack itemstack1 = ItemUtils.createFilledResult(itemstack, p_28298_, Items.MILK_BUCKET.getDefaultInstance());
-            p_28298_.setItemInHand(p_28299_, itemstack1);
+            pPlayer.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
+            ItemStack itemstack1 = ItemUtils.createFilledResult(itemstack, pPlayer, Items.MILK_BUCKET.getDefaultInstance());
+            pPlayer.setItemInHand(pHand, itemstack1);
             return InteractionResult.SUCCESS;
         } else {
-            return super.mobInteract(p_28298_, p_28299_);
+            return super.mobInteract(pPlayer, pHand);
         }
     }
 

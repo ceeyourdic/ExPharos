@@ -46,9 +46,9 @@ public class FloatArgumentInfo implements ArgumentTypeInfo<FloatArgumentType, Fl
         final float min;
         final float max;
 
-        Template(final float p_235529_, final float p_235530_) {
-            this.min = p_235529_;
-            this.max = p_235530_;
+        Template(final float pMin, final float pMax) {
+            this.min = pMin;
+            this.max = pMax;
         }
 
         public FloatArgumentType instantiate(CommandBuildContext p_235533_) {

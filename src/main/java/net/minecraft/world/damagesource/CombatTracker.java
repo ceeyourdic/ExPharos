@@ -29,18 +29,18 @@ public class CombatTracker {
     private boolean inCombat;
     private boolean takingDamage;
 
-    public CombatTracker(LivingEntity p_19285_) {
-        this.mob = p_19285_;
+    public CombatTracker(LivingEntity pMob) {
+        this.mob = pMob;
     }
 
-    public void recordDamage(DamageSource p_289533_, float p_289559_) {
+    public void recordDamage(DamageSource pSource, float pDamage) {
         this.recheckStatus();
         FallLocation falllocation = FallLocation.getCurrentFallLocation(this.mob);
-        CombatEntry combatentry = new CombatEntry(p_289533_, p_289559_, falllocation, this.mob.fallDistance);
+        CombatEntry combatentry = new CombatEntry(pSource, pDamage, falllocation, this.mob.fallDistance);
         this.entries.add(combatentry);
         this.lastDamageTime = this.mob.tickCount;
         this.takingDamage = true;
-        if (!this.inCombat && this.mob.isAlive() && shouldEnterCombat(p_289533_)) {
+        if (!this.inCombat && this.mob.isAlive() && shouldEnterCombat(pSource)) {
             this.inCombat = true;
             this.combatStartTime = this.mob.tickCount;
             this.combatEndTime = this.combatStartTime;
@@ -48,39 +48,39 @@ public class CombatTracker {
         }
     }
 
-    private static boolean shouldEnterCombat(DamageSource p_289554_) {
-        return p_289554_.getEntity() instanceof LivingEntity;
+    private static boolean shouldEnterCombat(DamageSource pSource) {
+        return pSource.getEntity() instanceof LivingEntity;
     }
 
-    private Component getMessageForAssistedFall(Entity p_289547_, Component p_289532_, String p_289555_, String p_289548_) {
-        ItemStack itemstack = p_289547_ instanceof LivingEntity livingentity ? livingentity.getMainHandItem() : ItemStack.EMPTY;
+    private Component getMessageForAssistedFall(Entity pEntity, Component pEntityDisplayName, String pHasWeaponTranslationKey, String pNoWeaponTranslationKey) {
+        ItemStack itemstack = pEntity instanceof LivingEntity livingentity ? livingentity.getMainHandItem() : ItemStack.EMPTY;
         return !itemstack.isEmpty() && itemstack.has(DataComponents.CUSTOM_NAME)
-            ? Component.translatable(p_289555_, this.mob.getDisplayName(), p_289532_, itemstack.getDisplayName())
-            : Component.translatable(p_289548_, this.mob.getDisplayName(), p_289532_);
+            ? Component.translatable(pHasWeaponTranslationKey, this.mob.getDisplayName(), pEntityDisplayName, itemstack.getDisplayName())
+            : Component.translatable(pNoWeaponTranslationKey, this.mob.getDisplayName(), pEntityDisplayName);
     }
 
-    private Component getFallMessage(CombatEntry p_289570_, @Nullable Entity p_289561_) {
-        DamageSource damagesource = p_289570_.source();
+    private Component getFallMessage(CombatEntry pCombatEntry, @Nullable Entity pEntity) {
+        DamageSource damagesource = pCombatEntry.source();
         if (!damagesource.is(DamageTypeTags.IS_FALL) && !damagesource.is(DamageTypeTags.ALWAYS_MOST_SIGNIFICANT_FALL)) {
-            Component component1 = getDisplayName(p_289561_);
+            Component component1 = getDisplayName(pEntity);
             Entity entity = damagesource.getEntity();
             Component component = getDisplayName(entity);
             if (component != null && !component.equals(component1)) {
                 return this.getMessageForAssistedFall(entity, component, "death.fell.assist.item", "death.fell.assist");
             } else {
                 return (Component)(component1 != null
-                    ? this.getMessageForAssistedFall(p_289561_, component1, "death.fell.finish.item", "death.fell.finish")
+                    ? this.getMessageForAssistedFall(pEntity, component1, "death.fell.finish.item", "death.fell.finish")
                     : Component.translatable("death.fell.killer", this.mob.getDisplayName()));
             }
         } else {
-            FallLocation falllocation = Objects.requireNonNullElse(p_289570_.fallLocation(), FallLocation.GENERIC);
+            FallLocation falllocation = Objects.requireNonNullElse(pCombatEntry.fallLocation(), FallLocation.GENERIC);
             return Component.translatable(falllocation.languageKey(), this.mob.getDisplayName());
         }
     }
 
     @Nullable
-    private static Component getDisplayName(@Nullable Entity p_289557_) {
-        return p_289557_ == null ? null : p_289557_.getDisplayName();
+    private static Component getDisplayName(@Nullable Entity pEntity) {
+        return pEntity == null ? null : pEntity.getDisplayName();
     }
 
     public Component getDeathMessage() {

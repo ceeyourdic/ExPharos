@@ -15,8 +15,8 @@ public class CocoaDecorator extends TreeDecorator {
         .xmap(CocoaDecorator::new, p_69989_ -> p_69989_.probability);
     private final float probability;
 
-    public CocoaDecorator(float p_69976_) {
-        this.probability = p_69976_;
+    public CocoaDecorator(float pProbability) {
+        this.probability = pProbability;
     }
 
     @Override

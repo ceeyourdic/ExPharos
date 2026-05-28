@@ -20,21 +20,21 @@ public class RandomOffsetPlacement extends PlacementModifier {
     private final IntProvider xzSpread;
     private final IntProvider ySpread;
 
-    public static RandomOffsetPlacement of(IntProvider p_191880_, IntProvider p_191881_) {
-        return new RandomOffsetPlacement(p_191880_, p_191881_);
+    public static RandomOffsetPlacement of(IntProvider pXzSpread, IntProvider pYSpread) {
+        return new RandomOffsetPlacement(pXzSpread, pYSpread);
     }
 
-    public static RandomOffsetPlacement vertical(IntProvider p_191878_) {
-        return new RandomOffsetPlacement(ConstantInt.of(0), p_191878_);
+    public static RandomOffsetPlacement vertical(IntProvider pYSpread) {
+        return new RandomOffsetPlacement(ConstantInt.of(0), pYSpread);
     }
 
-    public static RandomOffsetPlacement horizontal(IntProvider p_191892_) {
-        return new RandomOffsetPlacement(p_191892_, ConstantInt.of(0));
+    public static RandomOffsetPlacement horizontal(IntProvider pXzSpread) {
+        return new RandomOffsetPlacement(pXzSpread, ConstantInt.of(0));
     }
 
-    private RandomOffsetPlacement(IntProvider p_191875_, IntProvider p_191876_) {
-        this.xzSpread = p_191875_;
-        this.ySpread = p_191876_;
+    private RandomOffsetPlacement(IntProvider pXzSpread, IntProvider pYSpread) {
+        this.xzSpread = pXzSpread;
+        this.ySpread = pYSpread;
     }
 
     @Override

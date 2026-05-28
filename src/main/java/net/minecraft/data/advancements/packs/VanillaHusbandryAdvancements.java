@@ -652,14 +652,14 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
     }
 
     public static AdvancementHolder createBreedAllAnimalsAdvancement(
-        AdvancementHolder p_301269_,
-        Consumer<AdvancementHolder> p_266923_,
-        HolderGetter<EntityType<?>> p_367933_,
-        Stream<EntityType<?>> p_266961_,
-        Stream<EntityType<?>> p_266751_
+        AdvancementHolder pParent,
+        Consumer<AdvancementHolder> pWriter,
+        HolderGetter<EntityType<?>> pEntityTypeRegistry,
+        Stream<EntityType<?>> pBreedableAnimals,
+        Stream<EntityType<?>> pIndirectlyBreedableAnimals
     ) {
-        return addBreedable(Advancement.Builder.advancement(), p_266961_, p_367933_, p_266751_)
-            .parent(p_301269_)
+        return addBreedable(Advancement.Builder.advancement(), pBreedableAnimals, pEntityTypeRegistry, pIndirectlyBreedableAnimals)
+            .parent(pParent)
             .display(
                 Items.GOLDEN_CARROT,
                 Component.translatable("advancements.husbandry.breed_all_animals.title"),
@@ -671,105 +671,105 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
                 false
             )
             .rewards(AdvancementRewards.Builder.experience(100))
-            .save(p_266923_, "husbandry/bred_all_animals");
+            .save(pWriter, "husbandry/bred_all_animals");
     }
 
-    private static Advancement.Builder addLeashedFrogVariants(HolderGetter<EntityType<?>> p_362943_, HolderGetter<Item> p_369066_, Advancement.Builder p_249739_) {
+    private static Advancement.Builder addLeashedFrogVariants(HolderGetter<EntityType<?>> pEntityTypeRegistry, HolderGetter<Item> pItems, Advancement.Builder pBuilder) {
         BuiltInRegistries.FROG_VARIANT
             .listElements()
             .forEach(
-                p_358199_ -> p_249739_.addCriterion(
+                p_358199_ -> pBuilder.addCriterion(
                         p_358199_.key().location().toString(),
                         PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
-                            ItemPredicate.Builder.item().of(p_369066_, Items.LEAD),
+                            ItemPredicate.Builder.item().of(pItems, Items.LEAD),
                             Optional.of(
                                 EntityPredicate.wrap(
                                     EntityPredicate.Builder.entity()
-                                        .of(p_362943_, EntityType.FROG)
+                                        .of(pEntityTypeRegistry, EntityType.FROG)
                                         .subPredicate(EntitySubPredicates.frogVariant(p_358199_))
                                 )
                             )
                         )
                     )
             );
-        return p_249739_;
+        return pBuilder;
     }
 
-    private static Advancement.Builder addFood(Advancement.Builder p_248532_, HolderGetter<Item> p_364143_) {
+    private static Advancement.Builder addFood(Advancement.Builder pBuilder, HolderGetter<Item> pFood) {
         for (Item item : EDIBLE_ITEMS) {
-            p_248532_.addCriterion(BuiltInRegistries.ITEM.getKey(item).getPath(), ConsumeItemTrigger.TriggerInstance.usedItem(p_364143_, item));
+            pBuilder.addCriterion(BuiltInRegistries.ITEM.getKey(item).getPath(), ConsumeItemTrigger.TriggerInstance.usedItem(pFood, item));
         }
 
-        return p_248532_;
+        return pBuilder;
     }
 
     private static Advancement.Builder addBreedable(
-        Advancement.Builder p_266978_, Stream<EntityType<?>> p_267147_, HolderGetter<EntityType<?>> p_364973_, Stream<EntityType<?>> p_267091_
+        Advancement.Builder pBuilder, Stream<EntityType<?>> pBreedableAnimals, HolderGetter<EntityType<?>> pEntityTypeRegistry, Stream<EntityType<?>> pIndirectlyBreedableAnimals
     ) {
-        p_267147_.forEach(
-            p_358192_ -> p_266978_.addCriterion(
+        pBreedableAnimals.forEach(
+            p_358192_ -> pBuilder.addCriterion(
                     EntityType.getKey((EntityType<?>)p_358192_).toString(),
-                    BredAnimalsTrigger.TriggerInstance.bredAnimals(EntityPredicate.Builder.entity().of(p_364973_, (EntityType<?>)p_358192_))
+                    BredAnimalsTrigger.TriggerInstance.bredAnimals(EntityPredicate.Builder.entity().of(pEntityTypeRegistry, (EntityType<?>)p_358192_))
                 )
         );
-        p_267091_.forEach(
-            p_358195_ -> p_266978_.addCriterion(
+        pIndirectlyBreedableAnimals.forEach(
+            p_358195_ -> pBuilder.addCriterion(
                     EntityType.getKey((EntityType<?>)p_358195_).toString(),
                     BredAnimalsTrigger.TriggerInstance.bredAnimals(
-                        Optional.of(EntityPredicate.Builder.entity().of(p_364973_, (EntityType<?>)p_358195_).build()),
-                        Optional.of(EntityPredicate.Builder.entity().of(p_364973_, (EntityType<?>)p_358195_).build()),
+                        Optional.of(EntityPredicate.Builder.entity().of(pEntityTypeRegistry, (EntityType<?>)p_358195_).build()),
+                        Optional.of(EntityPredicate.Builder.entity().of(pEntityTypeRegistry, (EntityType<?>)p_358195_).build()),
                         Optional.empty()
                     )
                 )
         );
-        return p_266978_;
+        return pBuilder;
     }
 
-    private static Advancement.Builder addFishBuckets(Advancement.Builder p_249285_, HolderGetter<Item> p_365002_) {
+    private static Advancement.Builder addFishBuckets(Advancement.Builder pBuilder, HolderGetter<Item> pItemRegistry) {
         for (Item item : FISH_BUCKETS) {
-            p_249285_.addCriterion(
+            pBuilder.addCriterion(
                 BuiltInRegistries.ITEM.getKey(item).getPath(),
-                FilledBucketTrigger.TriggerInstance.filledBucket(ItemPredicate.Builder.item().of(p_365002_, item))
+                FilledBucketTrigger.TriggerInstance.filledBucket(ItemPredicate.Builder.item().of(pItemRegistry, item))
             );
         }
 
-        return p_249285_;
+        return pBuilder;
     }
 
-    private static Advancement.Builder addFish(Advancement.Builder p_248725_, HolderGetter<Item> p_367279_) {
+    private static Advancement.Builder addFish(Advancement.Builder pBuilder, HolderGetter<Item> pItemRegistry) {
         for (Item item : FISH) {
-            p_248725_.addCriterion(
+            pBuilder.addCriterion(
                 BuiltInRegistries.ITEM.getKey(item).getPath(),
                 FishingRodHookedTrigger.TriggerInstance.fishedItem(
-                    Optional.empty(), Optional.empty(), Optional.of(ItemPredicate.Builder.item().of(p_367279_, item).build())
+                    Optional.empty(), Optional.empty(), Optional.of(ItemPredicate.Builder.item().of(pItemRegistry, item).build())
                 )
             );
         }
 
-        return p_248725_;
+        return pBuilder;
     }
 
-    private static Advancement.Builder addCatVariants(Advancement.Builder p_249232_) {
+    private static Advancement.Builder addCatVariants(Advancement.Builder pBuilder) {
         BuiltInRegistries.CAT_VARIANT
             .listElements()
             .sorted(Comparator.comparing(p_325839_ -> p_325839_.key().location()))
             .forEach(
-                p_325843_ -> p_249232_.addCriterion(
+                p_325843_ -> pBuilder.addCriterion(
                         p_325843_.key().location().toString(),
                         TameAnimalTrigger.TriggerInstance.tamedAnimal(EntityPredicate.Builder.entity().subPredicate(EntitySubPredicates.catVariant(p_325843_)))
                     )
             );
-        return p_249232_;
+        return pBuilder;
     }
 
-    private static Advancement.Builder addTamedWolfVariants(Advancement.Builder p_336151_, HolderLookup.Provider p_331812_) {
-        HolderLookup.RegistryLookup<WolfVariant> registrylookup = p_331812_.lookupOrThrow(Registries.WOLF_VARIANT);
+    private static Advancement.Builder addTamedWolfVariants(Advancement.Builder pBuilder, HolderLookup.Provider pRegistries) {
+        HolderLookup.RegistryLookup<WolfVariant> registrylookup = pRegistries.lookupOrThrow(Registries.WOLF_VARIANT);
         registrylookup.listElementIds()
             .sorted(Comparator.comparing(ResourceKey::location))
             .forEach(
                 p_325846_ -> {
                     Holder<WolfVariant> holder = registrylookup.getOrThrow((ResourceKey<WolfVariant>)p_325846_);
-                    p_336151_.addCriterion(
+                    pBuilder.addCriterion(
                         p_325846_.location().toString(),
                         TameAnimalTrigger.TriggerInstance.tamedAnimal(
                             EntityPredicate.Builder.entity().subPredicate(EntitySubPredicates.wolfVariant(HolderSet.direct(holder)))
@@ -777,6 +777,6 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
                     );
                 }
             );
-        return p_336151_;
+        return pBuilder;
     }
 }

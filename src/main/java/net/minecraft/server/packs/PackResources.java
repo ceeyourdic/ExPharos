@@ -16,17 +16,17 @@ public interface PackResources extends AutoCloseable {
     String PACK_META = "pack.mcmeta";
 
     @Nullable
-    IoSupplier<InputStream> getRootResource(String... p_252049_);
+    IoSupplier<InputStream> getRootResource(String... pElements);
 
     @Nullable
-    IoSupplier<InputStream> getResource(PackType p_215339_, ResourceLocation p_249034_);
+    IoSupplier<InputStream> getResource(PackType pPackType, ResourceLocation pLocation);
 
-    void listResources(PackType p_10289_, String p_251379_, String p_251932_, PackResources.ResourceOutput p_249347_);
+    void listResources(PackType pPackType, String pNamespace, String pPath, PackResources.ResourceOutput pResourceOutput);
 
-    Set<String> getNamespaces(PackType p_10283_);
+    Set<String> getNamespaces(PackType pType);
 
     @Nullable
-    <T> T getMetadataSection(MetadataSectionType<T> p_375641_) throws IOException;
+    <T> T getMetadataSection(MetadataSectionType<T> pType) throws IOException;
 
     PackLocationInfo location();
 

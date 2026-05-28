@@ -23,25 +23,25 @@ public abstract class Sensor<E extends LivingEntity> {
     private final int scanRate;
     private long timeToTick;
 
-    public Sensor(int p_26800_) {
-        this.scanRate = p_26800_;
-        this.timeToTick = (long)RANDOM.nextInt(p_26800_);
+    public Sensor(int pScanRate) {
+        this.scanRate = pScanRate;
+        this.timeToTick = (long)RANDOM.nextInt(pScanRate);
     }
 
     public Sensor() {
         this(20);
     }
 
-    public final void tick(ServerLevel p_26807_, E p_26808_) {
+    public final void tick(ServerLevel pLevel, E pEntity) {
         if (--this.timeToTick <= 0L) {
             this.timeToTick = (long)this.scanRate;
-            this.updateTargetingConditionRanges(p_26808_);
-            this.doTick(p_26807_, p_26808_);
+            this.updateTargetingConditionRanges(pEntity);
+            this.doTick(pLevel, pEntity);
         }
     }
 
-    private void updateTargetingConditionRanges(E p_363611_) {
-        double d0 = p_363611_.getAttributeValue(Attributes.FOLLOW_RANGE);
+    private void updateTargetingConditionRanges(E pEntity) {
+        double d0 = pEntity.getAttributeValue(Attributes.FOLLOW_RANGE);
         TARGET_CONDITIONS.range(d0);
         TARGET_CONDITIONS_IGNORE_INVISIBILITY_TESTING.range(d0);
         ATTACK_TARGET_CONDITIONS.range(d0);
@@ -50,37 +50,37 @@ public abstract class Sensor<E extends LivingEntity> {
         ATTACK_TARGET_CONDITIONS_IGNORE_INVISIBILITY_AND_LINE_OF_SIGHT.range(d0);
     }
 
-    protected abstract void doTick(ServerLevel p_26801_, E p_26802_);
+    protected abstract void doTick(ServerLevel pLevel, E pEntity);
 
     public abstract Set<MemoryModuleType<?>> requires();
 
-    public static boolean isEntityTargetable(ServerLevel p_366483_, LivingEntity p_26804_, LivingEntity p_26805_) {
-        return p_26804_.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, p_26805_)
-            ? TARGET_CONDITIONS_IGNORE_INVISIBILITY_TESTING.test(p_366483_, p_26804_, p_26805_)
-            : TARGET_CONDITIONS.test(p_366483_, p_26804_, p_26805_);
+    public static boolean isEntityTargetable(ServerLevel pLevel, LivingEntity pEntity, LivingEntity pTarget) {
+        return pEntity.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, pTarget)
+            ? TARGET_CONDITIONS_IGNORE_INVISIBILITY_TESTING.test(pLevel, pEntity, pTarget)
+            : TARGET_CONDITIONS.test(pLevel, pEntity, pTarget);
     }
 
-    public static boolean isEntityAttackable(ServerLevel p_366750_, LivingEntity p_148313_, LivingEntity p_148314_) {
-        return p_148313_.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, p_148314_)
-            ? ATTACK_TARGET_CONDITIONS_IGNORE_INVISIBILITY_TESTING.test(p_366750_, p_148313_, p_148314_)
-            : ATTACK_TARGET_CONDITIONS.test(p_366750_, p_148313_, p_148314_);
+    public static boolean isEntityAttackable(ServerLevel pLevel, LivingEntity pEntity, LivingEntity pTarget) {
+        return pEntity.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, pTarget)
+            ? ATTACK_TARGET_CONDITIONS_IGNORE_INVISIBILITY_TESTING.test(pLevel, pEntity, pTarget)
+            : ATTACK_TARGET_CONDITIONS.test(pLevel, pEntity, pTarget);
     }
 
-    public static BiPredicate<ServerLevel, LivingEntity> wasEntityAttackableLastNTicks(LivingEntity p_367253_, int p_369240_) {
-        return rememberPositives(p_369240_, (p_366099_, p_365289_) -> isEntityAttackable(p_366099_, p_367253_, p_365289_));
+    public static BiPredicate<ServerLevel, LivingEntity> wasEntityAttackableLastNTicks(LivingEntity pEntity, int pTicks) {
+        return rememberPositives(pTicks, (p_366099_, p_365289_) -> isEntityAttackable(p_366099_, pEntity, p_365289_));
     }
 
-    public static boolean isEntityAttackableIgnoringLineOfSight(ServerLevel p_363536_, LivingEntity p_182378_, LivingEntity p_182379_) {
-        return p_182378_.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, p_182379_)
-            ? ATTACK_TARGET_CONDITIONS_IGNORE_INVISIBILITY_AND_LINE_OF_SIGHT.test(p_363536_, p_182378_, p_182379_)
-            : ATTACK_TARGET_CONDITIONS_IGNORE_LINE_OF_SIGHT.test(p_363536_, p_182378_, p_182379_);
+    public static boolean isEntityAttackableIgnoringLineOfSight(ServerLevel pLevel, LivingEntity pEntity, LivingEntity pTarget) {
+        return pEntity.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, pTarget)
+            ? ATTACK_TARGET_CONDITIONS_IGNORE_INVISIBILITY_AND_LINE_OF_SIGHT.test(pLevel, pEntity, pTarget)
+            : ATTACK_TARGET_CONDITIONS_IGNORE_LINE_OF_SIGHT.test(pLevel, pEntity, pTarget);
     }
 
-    static <T, U> BiPredicate<T, U> rememberPositives(int p_369527_, BiPredicate<T, U> p_365487_) {
+    static <T, U> BiPredicate<T, U> rememberPositives(int pTicks, BiPredicate<T, U> pPredicate) {
         AtomicInteger atomicinteger = new AtomicInteger(0);
         return (p_367981_, p_361364_) -> {
-            if (p_365487_.test(p_367981_, p_361364_)) {
-                atomicinteger.set(p_369527_);
+            if (pPredicate.test(p_367981_, p_361364_)) {
+                atomicinteger.set(pTicks);
                 return true;
             } else {
                 return atomicinteger.decrementAndGet() >= 0;

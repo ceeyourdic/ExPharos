@@ -17,25 +17,25 @@ public class ArmorStandArmorModel extends HumanoidModel<ArmorStandRenderState> {
         super(p_170346_);
     }
 
-    public static LayerDefinition createBodyLayer(CubeDeformation p_170348_) {
-        MeshDefinition meshdefinition = HumanoidModel.createMesh(p_170348_, 0.0F);
+    public static LayerDefinition createBodyLayer(CubeDeformation pCubeDeformation) {
+        MeshDefinition meshdefinition = HumanoidModel.createMesh(pCubeDeformation, 0.0F);
         PartDefinition partdefinition = meshdefinition.getRoot();
         PartDefinition partdefinition1 = partdefinition.addOrReplaceChild(
             "head",
-            CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, p_170348_),
+            CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, pCubeDeformation),
             PartPose.offset(0.0F, 1.0F, 0.0F)
         );
         partdefinition1.addOrReplaceChild(
-            "hat", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, p_170348_.extend(0.5F)), PartPose.ZERO
+            "hat", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, pCubeDeformation.extend(0.5F)), PartPose.ZERO
         );
         partdefinition.addOrReplaceChild(
             "right_leg",
-            CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_170348_.extend(-0.1F)),
+            CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, pCubeDeformation.extend(-0.1F)),
             PartPose.offset(-1.9F, 11.0F, 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "left_leg",
-            CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_170348_.extend(-0.1F)),
+            CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, pCubeDeformation.extend(-0.1F)),
             PartPose.offset(1.9F, 11.0F, 0.0F)
         );
         return LayerDefinition.create(meshdefinition, 64, 32);

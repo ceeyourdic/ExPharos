@@ -28,34 +28,34 @@ public record ClientboundLoginPacket(
         ClientboundLoginPacket::write, ClientboundLoginPacket::new
     );
 
-    private ClientboundLoginPacket(RegistryFriendlyByteBuf p_333088_) {
+    private ClientboundLoginPacket(RegistryFriendlyByteBuf pBuffer) {
         this(
-            p_333088_.readInt(),
-            p_333088_.readBoolean(),
-            p_333088_.readCollection(Sets::newHashSetWithExpectedSize, p_258210_ -> p_258210_.readResourceKey(Registries.DIMENSION)),
-            p_333088_.readVarInt(),
-            p_333088_.readVarInt(),
-            p_333088_.readVarInt(),
-            p_333088_.readBoolean(),
-            p_333088_.readBoolean(),
-            p_333088_.readBoolean(),
-            new CommonPlayerSpawnInfo(p_333088_),
-            p_333088_.readBoolean()
+            pBuffer.readInt(),
+            pBuffer.readBoolean(),
+            pBuffer.readCollection(Sets::newHashSetWithExpectedSize, p_258210_ -> p_258210_.readResourceKey(Registries.DIMENSION)),
+            pBuffer.readVarInt(),
+            pBuffer.readVarInt(),
+            pBuffer.readVarInt(),
+            pBuffer.readBoolean(),
+            pBuffer.readBoolean(),
+            pBuffer.readBoolean(),
+            new CommonPlayerSpawnInfo(pBuffer),
+            pBuffer.readBoolean()
         );
     }
 
-    private void write(RegistryFriendlyByteBuf p_329645_) {
-        p_329645_.writeInt(this.playerId);
-        p_329645_.writeBoolean(this.hardcore);
-        p_329645_.writeCollection(this.levels, FriendlyByteBuf::writeResourceKey);
-        p_329645_.writeVarInt(this.maxPlayers);
-        p_329645_.writeVarInt(this.chunkRadius);
-        p_329645_.writeVarInt(this.simulationDistance);
-        p_329645_.writeBoolean(this.reducedDebugInfo);
-        p_329645_.writeBoolean(this.showDeathScreen);
-        p_329645_.writeBoolean(this.doLimitedCrafting);
-        this.commonPlayerSpawnInfo.write(p_329645_);
-        p_329645_.writeBoolean(this.enforcesSecureChat);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeInt(this.playerId);
+        pBuffer.writeBoolean(this.hardcore);
+        pBuffer.writeCollection(this.levels, FriendlyByteBuf::writeResourceKey);
+        pBuffer.writeVarInt(this.maxPlayers);
+        pBuffer.writeVarInt(this.chunkRadius);
+        pBuffer.writeVarInt(this.simulationDistance);
+        pBuffer.writeBoolean(this.reducedDebugInfo);
+        pBuffer.writeBoolean(this.showDeathScreen);
+        pBuffer.writeBoolean(this.doLimitedCrafting);
+        this.commonPlayerSpawnInfo.write(pBuffer);
+        pBuffer.writeBoolean(this.enforcesSecureChat);
     }
 
     @Override
@@ -63,7 +63,7 @@ public record ClientboundLoginPacket(
         return GamePacketTypes.CLIENTBOUND_LOGIN;
     }
 
-    public void handle(ClientGamePacketListener p_132397_) {
-        p_132397_.handleLogin(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleLogin(this);
     }
 }

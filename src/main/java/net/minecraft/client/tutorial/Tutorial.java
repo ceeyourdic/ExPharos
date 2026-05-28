@@ -22,31 +22,31 @@ public class Tutorial {
     @Nullable
     private TutorialStepInstance instance;
 
-    public Tutorial(Minecraft p_175022_, Options p_175023_) {
-        this.minecraft = p_175022_;
+    public Tutorial(Minecraft pMinecraft, Options pOptions) {
+        this.minecraft = pMinecraft;
     }
 
-    public void onInput(ClientInput p_367719_) {
+    public void onInput(ClientInput pInput) {
         if (this.instance != null) {
-            this.instance.onInput(p_367719_);
+            this.instance.onInput(pInput);
         }
     }
 
-    public void onMouse(double p_120566_, double p_120567_) {
+    public void onMouse(double pVelocityX, double pVelocityY) {
         if (this.instance != null) {
-            this.instance.onMouse(p_120566_, p_120567_);
+            this.instance.onMouse(pVelocityX, pVelocityY);
         }
     }
 
-    public void onLookAt(@Nullable ClientLevel p_120579_, @Nullable HitResult p_120580_) {
-        if (this.instance != null && p_120580_ != null && p_120579_ != null) {
-            this.instance.onLookAt(p_120579_, p_120580_);
+    public void onLookAt(@Nullable ClientLevel pLevel, @Nullable HitResult pResult) {
+        if (this.instance != null && pResult != null && pLevel != null) {
+            this.instance.onLookAt(pLevel, pResult);
         }
     }
 
-    public void onDestroyBlock(ClientLevel p_120582_, BlockPos p_120583_, BlockState p_120584_, float p_120585_) {
+    public void onDestroyBlock(ClientLevel pLevel, BlockPos pPos, BlockState pState, float pDiggingStage) {
         if (this.instance != null) {
-            this.instance.onDestroyBlock(p_120582_, p_120583_, p_120584_, p_120585_);
+            this.instance.onDestroyBlock(pLevel, pPos, pState, pDiggingStage);
         }
     }
 
@@ -56,9 +56,9 @@ public class Tutorial {
         }
     }
 
-    public void onGetItem(ItemStack p_120569_) {
+    public void onGetItem(ItemStack pStack) {
         if (this.instance != null) {
-            this.instance.onGetItem(p_120569_);
+            this.instance.onGetItem(pStack);
         }
     }
 
@@ -89,12 +89,12 @@ public class Tutorial {
         }
     }
 
-    public void setStep(TutorialSteps p_120589_) {
-        this.minecraft.options.tutorialStep = p_120589_;
+    public void setStep(TutorialSteps pStep) {
+        this.minecraft.options.tutorialStep = pStep;
         this.minecraft.options.save();
         if (this.instance != null) {
             this.instance.clear();
-            this.instance = p_120589_.create(this);
+            this.instance = pStep.create(this);
         }
     }
 
@@ -106,10 +106,10 @@ public class Tutorial {
         return this.minecraft.gameMode == null ? false : this.minecraft.gameMode.getPlayerMode() == GameType.SURVIVAL;
     }
 
-    public static Component key(String p_120593_) {
-        return Component.keybind("key." + p_120593_).withStyle(ChatFormatting.BOLD);
+    public static Component key(String pKeybind) {
+        return Component.keybind("key." + pKeybind).withStyle(ChatFormatting.BOLD);
     }
 
-    public void onInventoryAction(ItemStack p_175025_, ItemStack p_175026_, ClickAction p_175027_) {
+    public void onInventoryAction(ItemStack pCarriedStack, ItemStack pSlottedStack, ClickAction pAction) {
     }
 }

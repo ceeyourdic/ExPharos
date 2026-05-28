@@ -12,15 +12,15 @@ public class MemoryServerHandshakePacketListenerImpl implements ServerHandshakeP
     private final MinecraftServer server;
     private final Connection connection;
 
-    public MemoryServerHandshakePacketListenerImpl(MinecraftServer p_9691_, Connection p_9692_) {
-        this.server = p_9691_;
-        this.connection = p_9692_;
+    public MemoryServerHandshakePacketListenerImpl(MinecraftServer pServer, Connection pConnection) {
+        this.server = pServer;
+        this.connection = pConnection;
     }
 
     @Override
-    public void handleIntention(ClientIntentionPacket p_9697_) {
-        if (p_9697_.intention() != ClientIntent.LOGIN) {
-            throw new UnsupportedOperationException("Invalid intention " + p_9697_.intention());
+    public void handleIntention(ClientIntentionPacket pPacket) {
+        if (pPacket.intention() != ClientIntent.LOGIN) {
+            throw new UnsupportedOperationException("Invalid intention " + pPacket.intention());
         } else {
             this.connection.setupInboundProtocol(LoginProtocols.SERVERBOUND, new ServerLoginPacketListenerImpl(this.server, this.connection, false));
             this.connection.setupOutboundProtocol(LoginProtocols.CLIENTBOUND);

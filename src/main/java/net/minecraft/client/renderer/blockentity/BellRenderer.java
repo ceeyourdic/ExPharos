@@ -18,8 +18,8 @@ public class BellRenderer implements BlockEntityRenderer<BellBlockEntity> {
     public static final Material BELL_RESOURCE_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.withDefaultNamespace("entity/bell/bell_body"));
     private final BellModel model;
 
-    public BellRenderer(BlockEntityRendererProvider.Context p_173554_) {
-        this.model = new BellModel(p_173554_.bakeLayer(ModelLayers.BELL));
+    public BellRenderer(BlockEntityRendererProvider.Context pContext) {
+        this.model = new BellModel(pContext.bakeLayer(ModelLayers.BELL));
     }
 
     public void render(BellBlockEntity p_112233_, float p_112234_, PoseStack p_112235_, MultiBufferSource p_112236_, int p_112237_, int p_112238_) {

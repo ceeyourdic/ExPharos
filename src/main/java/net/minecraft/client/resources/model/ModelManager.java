@@ -1,5 +1,6 @@
 package net.minecraft.client.resources.model;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
@@ -7,8 +8,11 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import java.io.Reader;
+import java.io.StringReader;
+import java.lang.invoke.StringConcatFactory;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +31,7 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SpecialBlockModelRenderer;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -43,11 +48,13 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.CustomItems;
+import net.optifine.reflect.Reflector;
+import net.optifine.util.PathUtils;
+import net.optifine.util.TextureUtils;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class ModelManager implements PreparableReloadListener, AutoCloseable {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final FileToIdConverter MODEL_LISTER = FileToIdConverter.json("models");
@@ -83,28 +90,31 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
     private BakedModel missingModel;
     private ItemModel missingItemModel;
     private Object2IntMap<BlockState> modelGroups = Object2IntMaps.emptyMap();
+    private Map<ModelResourceLocation, BakedModel> bakedBlockStateModelsView = Map.of();
+    private Map<ResourceLocation, ItemModel> bakedItemStackModelsView = Map.of();
+    private ModelBakery modelBakery;
 
-    public ModelManager(TextureManager p_119406_, BlockColors p_119407_, int p_119408_) {
-        this.blockColors = p_119407_;
-        this.maxMipmapLevels = p_119408_;
+    public ModelManager(TextureManager pTextureManager, BlockColors pBlockColors, int pMaxMipmapLevels) {
+        this.blockColors = pBlockColors;
+        this.maxMipmapLevels = pMaxMipmapLevels;
         this.blockModelShaper = new BlockModelShaper(this);
-        this.atlases = new AtlasSet(VANILLA_ATLASES, p_119406_);
+        this.atlases = new AtlasSet(VANILLA_ATLASES, pTextureManager);
     }
 
-    public BakedModel getModel(ModelResourceLocation p_119423_) {
-        return this.bakedBlockStateModels.getOrDefault(p_119423_, this.missingModel);
+    public BakedModel getModel(ModelResourceLocation pModelLocation) {
+        return this.bakedBlockStateModels.getOrDefault(pModelLocation, this.missingModel);
     }
 
     public BakedModel getMissingModel() {
         return this.missingModel;
     }
 
-    public ItemModel getItemModel(ResourceLocation p_376816_) {
-        return this.bakedItemStackModels.getOrDefault(p_376816_, this.missingItemModel);
+    public ItemModel getItemModel(ResourceLocation pModelLocation) {
+        return this.bakedItemStackModels.getOrDefault(pModelLocation, this.missingItemModel);
     }
 
-    public ClientItem.Properties getItemProperties(ResourceLocation p_378319_) {
-        return this.itemProperties.getOrDefault(p_378319_, ClientItem.Properties.DEFAULT);
+    public ClientItem.Properties getItemProperties(ResourceLocation pItemId) {
+        return this.itemProperties.getOrDefault(pItemId, ClientItem.Properties.DEFAULT);
     }
 
     public BlockModelShaper getBlockModelShaper() {
@@ -115,6 +125,7 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
     public final CompletableFuture<Void> reload(
         PreparableReloadListener.PreparationBarrier p_249079_, ResourceManager p_251134_, Executor p_250550_, Executor p_249221_
     ) {
+        Reflector.GeometryLoaderManager_init.call();
         UnbakedModel unbakedmodel = MissingBlockModel.missingModel();
         CompletableFuture<EntityModelSet> completablefuture = CompletableFuture.supplyAsync(EntityModelSet::vanilla, p_250550_);
         CompletableFuture<SpecialBlockModelRenderer> completablefuture1 = completablefuture.thenApplyAsync(SpecialBlockModelRenderer::vanilla, p_250550_);
@@ -122,9 +133,9 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
         CompletableFuture<BlockStateModelLoader.LoadedModels> completablefuture3 = BlockStateModelLoader.loadBlockStates(unbakedmodel, p_251134_, p_250550_);
         CompletableFuture<ClientItemInfoLoader.LoadedClientInfos> completablefuture4 = ClientItemInfoLoader.scheduleLoad(p_251134_, p_250550_);
         CompletableFuture<ModelDiscovery> completablefuture5 = CompletableFuture.allOf(completablefuture2, completablefuture3, completablefuture4)
-            .thenApplyAsync(p_374722_ -> discoverModelDependencies(unbakedmodel, completablefuture2.join(), completablefuture3.join(), completablefuture4.join()), p_250550_);
+            .thenApplyAsync(voidIn -> discoverModelDependencies(unbakedmodel, completablefuture2.join(), completablefuture3.join(), completablefuture4.join()), p_250550_);
         CompletableFuture<Object2IntMap<BlockState>> completablefuture6 = completablefuture3.thenApplyAsync(
-            p_358038_ -> buildModelGroups(this.blockColors, p_358038_), p_250550_
+            modelsIn -> buildModelGroups(this.blockColors, modelsIn), p_250550_
         );
         Map<ResourceLocation, CompletableFuture<AtlasSet.StitchResult>> map = this.atlases.scheduleLoad(p_251134_, this.maxMipmapLevels, p_250550_);
         return CompletableFuture.allOf(
@@ -135,17 +146,15 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
                     .toArray(CompletableFuture[]::new)
             )
             .thenApplyAsync(
-                p_374732_ -> {
+                voidIn -> {
                     Map<ResourceLocation, AtlasSet.StitchResult> map1 = map.entrySet()
                         .stream()
-                        .collect(Collectors.toMap(Entry::getKey, p_248988_ -> p_248988_.getValue().join()));
+                        .collect(Collectors.toMap(Entry::getKey, entryIn -> entryIn.getValue().join()));
                     ModelDiscovery modeldiscovery = completablefuture5.join();
                     Object2IntMap<BlockState> object2intmap = completablefuture6.join();
                     Set<ResourceLocation> set = modeldiscovery.getUnreferencedModels();
                     if (!set.isEmpty()) {
-                        LOGGER.debug(
-                            "Unreferenced models: \n{}", set.stream().sorted().map(p_374723_ -> "\t" + p_374723_ + "\n").collect(Collectors.joining())
-                        );
+                        LOGGER.debug("Unreferenced models: \n{}", set.stream().sorted().map(locIn -> "\t" + locIn + "\n").collect(Collectors.joining()));
                     }
 
                     ModelBakery modelbakery = new ModelBakery(
@@ -159,73 +168,87 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
                 },
                 p_250550_
             )
-            .thenCompose(p_252255_ -> p_252255_.readyForUpload.thenApply(p_251581_ -> (ModelManager.ReloadState)p_252255_))
+            .thenCompose(stateIn -> stateIn.readyForUpload.thenApply(void2In -> (ModelManager.ReloadState)stateIn))
             .thenCompose(p_249079_::wait)
-            .thenAcceptAsync(p_358039_ -> this.apply(p_358039_, Profiler.get()), p_249221_);
+            .thenAcceptAsync(stateIn -> this.apply(stateIn, Profiler.get()), p_249221_);
     }
 
-    private static CompletableFuture<Map<ResourceLocation, UnbakedModel>> loadBlockModels(ResourceManager p_251361_, Executor p_252189_) {
-        return CompletableFuture.<Map<ResourceLocation, Resource>>supplyAsync(() -> MODEL_LISTER.listMatchingResources(p_251361_), p_252189_)
+    private static CompletableFuture<Map<ResourceLocation, UnbakedModel>> loadBlockModels(ResourceManager pResourceManager, Executor pExecutor) {
+        return CompletableFuture.<Map<ResourceLocation, Resource>>supplyAsync(() -> MODEL_LISTER.listMatchingResources(pResourceManager), pExecutor)
             .thenCompose(
-                p_250597_ -> {
-                    List<CompletableFuture<Pair<ResourceLocation, BlockModel>>> list = new ArrayList<>(p_250597_.size());
+                resourcesIn -> {
+                    List<CompletableFuture<Pair<ResourceLocation, BlockModel>>> list = new ArrayList<>(resourcesIn.size());
+                    TextureUtils.registerCustomModels((Map<ResourceLocation, Resource>)resourcesIn);
 
-                    for (Entry<ResourceLocation, Resource> entry : p_250597_.entrySet()) {
+                    for (Entry<ResourceLocation, Resource> entry : resourcesIn.entrySet()) {
                         list.add(CompletableFuture.supplyAsync(() -> {
                             ResourceLocation resourcelocation = MODEL_LISTER.fileToId(entry.getKey());
 
                             try {
                                 Pair pair;
                                 try (Reader reader = entry.getValue().openAsReader()) {
-                                    pair = Pair.of(resourcelocation, BlockModel.fromStream(reader));
+                                    Reader reader1 = reader;
+                                    if (resourcelocation.isOptiFine()) {
+                                        String s = Config.readAll(reader);
+                                        String s1 = PathUtils.removeLast(resourcelocation.getPath());
+                                        s = s.replace("\"./", "\"" + s1 + "/");
+                                        reader1 = new StringReader(s);
+                                    }
+
+                                    pair = Pair.of(resourcelocation, BlockModel.fromStream(reader1));
                                 }
 
                                 return pair;
-                            } catch (Exception exception) {
-                                LOGGER.error("Failed to load model {}", entry.getKey(), exception);
+                            } catch (Exception exception1) {
+                                LOGGER.error("Failed to load model {}", entry.getKey(), exception1);
                                 return null;
                             }
-                        }, p_252189_));
+                        }, pExecutor));
                     }
 
                     return Util.sequence(list)
                         .thenApply(
-                            p_250813_ -> p_250813_.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableMap(Pair::getFirst, Pair::getSecond))
+                            modelsIn -> modelsIn.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableMap(Pair::getFirst, Pair::getSecond))
                         );
                 }
             );
     }
 
     private static ModelDiscovery discoverModelDependencies(
-        UnbakedModel p_364387_,
-        Map<ResourceLocation, UnbakedModel> p_360749_,
-        BlockStateModelLoader.LoadedModels p_366446_,
-        ClientItemInfoLoader.LoadedClientInfos p_378505_
+        UnbakedModel pMissingModel,
+        Map<ResourceLocation, UnbakedModel> pInputModels,
+        BlockStateModelLoader.LoadedModels pLoadedModels,
+        ClientItemInfoLoader.LoadedClientInfos pLoadedClientInfos
     ) {
-        ModelDiscovery modeldiscovery = new ModelDiscovery(p_360749_, p_364387_);
-        p_366446_.forResolving().forEach(modeldiscovery::addRoot);
-        p_378505_.contents().values().forEach(p_374734_ -> modeldiscovery.addRoot(p_374734_.model()));
+        ModelDiscovery modeldiscovery = new ModelDiscovery(pInputModels, pMissingModel);
+        pLoadedModels.forResolving().forEach(modeldiscovery::addRoot);
+        pLoadedClientInfos.contents().values().forEach(itemIn -> modeldiscovery.addRoot(itemIn.model()));
         modeldiscovery.registerSpecialModels();
         modeldiscovery.discoverDependencies();
+        if (Config.isCustomItems()) {
+            modeldiscovery.resolveCustomModels();
+            CustomItems.collectModelSprites(pInputModels);
+        }
+
         return modeldiscovery;
     }
 
     private static ModelManager.ReloadState loadModels(
-        ProfilerFiller p_252136_,
-        final Map<ResourceLocation, AtlasSet.StitchResult> p_250646_,
-        ModelBakery p_248945_,
-        Object2IntMap<BlockState> p_361513_,
-        EntityModelSet p_378097_,
-        SpecialBlockModelRenderer p_377275_
+        ProfilerFiller pProfiler,
+        final Map<ResourceLocation, AtlasSet.StitchResult> pAtlasPreperations,
+        ModelBakery pModelBakery,
+        Object2IntMap<BlockState> pModelGroups,
+        EntityModelSet pEntityModelSet,
+        SpecialBlockModelRenderer pSpecialBlockModelRenderer
     ) {
-        p_252136_.push("baking");
+        pProfiler.push("baking");
         final Multimap<String, Material> multimap = HashMultimap.create();
         final Multimap<String, String> multimap1 = HashMultimap.create();
-        final TextureAtlasSprite textureatlassprite = p_250646_.get(TextureAtlas.LOCATION_BLOCKS).missing();
-        ModelBakery.BakingResult modelbakery$bakingresult = p_248945_.bakeModels(new ModelBakery.TextureGetter() {
+        final TextureAtlasSprite textureatlassprite = pAtlasPreperations.get(TextureAtlas.LOCATION_BLOCKS).missing();
+        ModelBakery.BakingResult modelbakery$bakingresult = pModelBakery.bakeModels(new ModelBakery.TextureGetter() {
             @Override
             public TextureAtlasSprite get(ModelDebugName p_375833_, Material p_375858_) {
-                AtlasSet.StitchResult atlasset$stitchresult = p_250646_.get(p_375858_.atlasLocation());
+                AtlasSet.StitchResult atlasset$stitchresult = pAtlasPreperations.get(p_375858_.atlasLocation());
                 TextureAtlasSprite textureatlassprite1 = atlasset$stitchresult.getSprite(p_375858_.texture());
                 if (textureatlassprite1 != null) {
                     return textureatlassprite1;
@@ -243,45 +266,50 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
         });
         multimap.asMap()
             .forEach(
-                (p_376688_, p_252017_) -> LOGGER.warn(
-                        "Missing textures in model {}:\n{}",
-                        p_376688_,
-                        p_252017_.stream()
+                (locIn, materialsIn) -> LOGGER.warn(
+                        "Missing textures in model {}: {}",
+                        locIn,
+                        materialsIn.stream()
                             .sorted(Material.COMPARATOR)
-                            .map(p_325574_ -> "    " + p_325574_.atlasLocation() + ":" + p_325574_.texture())
-                            .collect(Collectors.joining("\n"))
+                            .map(materialIn -> materialIn.atlasLocation() + ":" + materialIn.texture())
+                            .collect(Collectors.joining(", "))
                     )
             );
         multimap1.asMap()
             .forEach(
-                (p_374739_, p_374740_) -> LOGGER.warn(
-                        "Missing texture references in model {}:\n{}",
-                        p_374739_,
-                        p_374740_.stream().sorted().map(p_374742_ -> "    " + p_374742_).collect(Collectors.joining("\n"))
+                (nameIn, refsIn) -> LOGGER.warn(
+                        "Missing texture references in model {}: {}",
+                        nameIn,
+                        refsIn.stream()
+                            .sorted()
+//                            .map(strIn -> StringConcatFactory.makeConcatWithConstants<"makeConcatWithConstants","\u0001">(strIn))
+                            .collect(Collectors.joining(", "))
                     )
             );
-        p_252136_.popPush("dispatch");
+        pProfiler.popPush("forge_modify_baking_result");
+        Reflector.ForgeHooksClient_onModifyBakingResult.call(pModelBakery, modelbakery$bakingresult);
+        pProfiler.popPush("dispatch");
         Map<BlockState, BakedModel> map = createBlockStateToModelDispatch(modelbakery$bakingresult.blockStateModels(), modelbakery$bakingresult.missingModel());
         CompletableFuture<Void> completablefuture = CompletableFuture.allOf(
-            p_250646_.values().stream().map(AtlasSet.StitchResult::readyForUpload).toArray(CompletableFuture[]::new)
+            pAtlasPreperations.values().stream().map(AtlasSet.StitchResult::readyForUpload).toArray(CompletableFuture[]::new)
         );
-        p_252136_.pop();
-        return new ModelManager.ReloadState(modelbakery$bakingresult, p_361513_, map, p_250646_, p_378097_, p_377275_, completablefuture);
+        pProfiler.pop();
+        return new ModelManager.ReloadState(modelbakery$bakingresult, pModelGroups, map, pAtlasPreperations, pEntityModelSet, pSpecialBlockModelRenderer, completablefuture, pModelBakery);
     }
 
-    private static Map<BlockState, BakedModel> createBlockStateToModelDispatch(Map<ModelResourceLocation, BakedModel> p_377857_, BakedModel p_378390_) {
+    private static Map<BlockState, BakedModel> createBlockStateToModelDispatch(Map<ModelResourceLocation, BakedModel> pBlockStateModels, BakedModel pMissingModel) {
         Map<BlockState, BakedModel> map = new IdentityHashMap<>();
 
         for (Block block : BuiltInRegistries.BLOCK) {
-            block.getStateDefinition().getPossibleStates().forEach(p_374738_ -> {
-                ResourceLocation resourcelocation = p_374738_.getBlock().builtInRegistryHolder().key().location();
-                ModelResourceLocation modelresourcelocation = BlockModelShaper.stateToModelLocation(resourcelocation, p_374738_);
-                BakedModel bakedmodel = p_377857_.get(modelresourcelocation);
+            block.getStateDefinition().getPossibleStates().forEach(stateIn -> {
+                ResourceLocation resourcelocation = stateIn.getBlock().builtInRegistryHolder().key().location();
+                ModelResourceLocation modelresourcelocation = BlockModelShaper.stateToModelLocation(resourcelocation, stateIn);
+                BakedModel bakedmodel = pBlockStateModels.get(modelresourcelocation);
                 if (bakedmodel == null) {
                     LOGGER.warn("Missing model for variant: '{}'", modelresourcelocation);
-                    map.putIfAbsent(p_374738_, p_378390_);
+                    map.putIfAbsent(stateIn, pMissingModel);
                 } else {
-                    map.put(p_374738_, bakedmodel);
+                    map.put(stateIn, bakedmodel);
                 }
             });
         }
@@ -289,37 +317,41 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
         return map;
     }
 
-    private static Object2IntMap<BlockState> buildModelGroups(BlockColors p_369941_, BlockStateModelLoader.LoadedModels p_360724_) {
-        return ModelGroupCollector.build(p_369941_, p_360724_);
+    private static Object2IntMap<BlockState> buildModelGroups(BlockColors pBlockColors, BlockStateModelLoader.LoadedModels pLoadedModels) {
+        return ModelGroupCollector.build(pBlockColors, pLoadedModels);
     }
 
-    private void apply(ModelManager.ReloadState p_248996_, ProfilerFiller p_251960_) {
-        p_251960_.push("upload");
-        p_248996_.atlasPreparations.values().forEach(AtlasSet.StitchResult::upload);
-        ModelBakery.BakingResult modelbakery$bakingresult = p_248996_.bakedModels;
+    private void apply(ModelManager.ReloadState pReloadState, ProfilerFiller pProfiler) {
+        pProfiler.push("upload");
+        pReloadState.atlasPreparations.values().forEach(AtlasSet.StitchResult::upload);
+        ModelBakery.BakingResult modelbakery$bakingresult = pReloadState.bakedModels;
         this.bakedBlockStateModels = modelbakery$bakingresult.blockStateModels();
         this.bakedItemStackModels = modelbakery$bakingresult.itemStackModels();
         this.itemProperties = modelbakery$bakingresult.itemProperties();
-        this.modelGroups = p_248996_.modelGroups;
+        this.modelGroups = pReloadState.modelGroups;
         this.missingModel = modelbakery$bakingresult.missingModel();
         this.missingItemModel = modelbakery$bakingresult.missingItemModel();
-        p_251960_.popPush("cache");
-        this.blockModelShaper.replaceCache(p_248996_.modelCache);
-        this.specialBlockModelRenderer = p_248996_.specialBlockModelRenderer;
-        this.entityModelSet = p_248996_.entityModelSet;
-        p_251960_.pop();
+        this.bakedBlockStateModelsView = Collections.unmodifiableMap(this.bakedBlockStateModels);
+        this.bakedItemStackModelsView = Collections.unmodifiableMap(this.bakedItemStackModels);
+        this.modelBakery = pReloadState.modelBakery();
+        Reflector.ForgeHooksClient_onModelBake.call(this, this.modelBakery);
+        pProfiler.popPush("cache");
+        this.blockModelShaper.replaceCache(pReloadState.modelCache);
+        this.specialBlockModelRenderer = pReloadState.specialBlockModelRenderer;
+        this.entityModelSet = pReloadState.entityModelSet;
+        pProfiler.pop();
     }
 
-    public boolean requiresRender(BlockState p_119416_, BlockState p_119417_) {
-        if (p_119416_ == p_119417_) {
+    public boolean requiresRender(BlockState pOldState, BlockState pNewState) {
+        if (pOldState == pNewState) {
             return false;
         } else {
-            int i = this.modelGroups.getInt(p_119416_);
+            int i = this.modelGroups.getInt(pOldState);
             if (i != -1) {
-                int j = this.modelGroups.getInt(p_119417_);
+                int j = this.modelGroups.getInt(pNewState);
                 if (i == j) {
-                    FluidState fluidstate = p_119416_.getFluidState();
-                    FluidState fluidstate1 = p_119417_.getFluidState();
+                    FluidState fluidstate = pOldState.getFluidState();
+                    FluidState fluidstate1 = pNewState.getFluidState();
                     return fluidstate != fluidstate1;
                 }
             }
@@ -328,8 +360,12 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
         }
     }
 
-    public TextureAtlas getAtlas(ResourceLocation p_119429_) {
-        return this.atlases.getAtlas(p_119429_);
+    public TextureAtlas getAtlas(ResourceLocation pLocation) {
+        if (this.atlases == null) {
+            throw new RuntimeException("getAtlasTexture called too early!");
+        } else {
+            return this.atlases.getAtlas(pLocation);
+        }
     }
 
     @Override
@@ -337,8 +373,25 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
         this.atlases.close();
     }
 
-    public void updateMaxMipLevel(int p_119411_) {
-        this.maxMipmapLevels = p_119411_;
+    public void updateMaxMipLevel(int pLevel) {
+        this.maxMipmapLevels = pLevel;
+    }
+
+    public BakedModel getBakedItemModel(ResourceLocation locationIn) {
+        ItemModel itemmodel = this.bakedItemStackModels.get(locationIn);
+        return itemmodel instanceof BlockModelWrapper blockmodelwrapper ? blockmodelwrapper.getModel() : this.getMissingModel();
+    }
+
+    public Map<ModelResourceLocation, BakedModel> getModels() {
+        return this.bakedBlockStateModelsView;
+    }
+
+    public Map<ResourceLocation, ItemModel> getItemModels() {
+        return this.bakedItemStackModelsView;
+    }
+
+    public ModelBakery getModelBakery() {
+        return Preconditions.checkNotNull(this.modelBakery, "Attempted to query model bakery before it has been initialized.");
     }
 
     public Supplier<SpecialBlockModelRenderer> specialBlockModelRenderer() {
@@ -349,7 +402,6 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
         return () -> this.entityModelSet;
     }
 
-    @OnlyIn(Dist.CLIENT)
     static record ReloadState(
         ModelBakery.BakingResult bakedModels,
         Object2IntMap<BlockState> modelGroups,
@@ -357,7 +409,8 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
         Map<ResourceLocation, AtlasSet.StitchResult> atlasPreparations,
         EntityModelSet entityModelSet,
         SpecialBlockModelRenderer specialBlockModelRenderer,
-        CompletableFuture<Void> readyForUpload
+        CompletableFuture<Void> readyForUpload,
+        ModelBakery modelBakery
     ) {
     }
 }

@@ -14,11 +14,11 @@ public class SaddleItem extends Item {
     }
 
     @Override
-    public InteractionResult interactLivingEntity(ItemStack p_43055_, Player p_43056_, LivingEntity p_43057_, InteractionHand p_43058_) {
-        if (p_43057_ instanceof Saddleable saddleable && p_43057_.isAlive() && !saddleable.isSaddled() && saddleable.isSaddleable()) {
-            if (!p_43056_.level().isClientSide) {
-                saddleable.equipSaddle(p_43055_.split(1), SoundSource.NEUTRAL);
-                p_43057_.level().gameEvent(p_43057_, GameEvent.EQUIP, p_43057_.position());
+    public InteractionResult interactLivingEntity(ItemStack pStack, Player pPlayer, LivingEntity pTarget, InteractionHand pHand) {
+        if (pTarget instanceof Saddleable saddleable && pTarget.isAlive() && !saddleable.isSaddled() && saddleable.isSaddleable()) {
+            if (!pPlayer.level().isClientSide) {
+                saddleable.equipSaddle(pStack.split(1), SoundSource.NEUTRAL);
+                pTarget.level().gameEvent(pTarget, GameEvent.EQUIP, pTarget.position());
             }
 
             return InteractionResult.SUCCESS;

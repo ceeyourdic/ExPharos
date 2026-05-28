@@ -66,21 +66,21 @@ public class Ocelot extends Animal {
         return this.entityData.get(DATA_TRUSTING);
     }
 
-    private void setTrusting(boolean p_29046_) {
-        this.entityData.set(DATA_TRUSTING, p_29046_);
+    private void setTrusting(boolean pTrusting) {
+        this.entityData.set(DATA_TRUSTING, pTrusting);
         this.reassessTrustingGoals();
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_29024_) {
-        super.addAdditionalSaveData(p_29024_);
-        p_29024_.putBoolean("Trusting", this.isTrusting());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("Trusting", this.isTrusting());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_29013_) {
-        super.readAdditionalSaveData(p_29013_);
-        this.setTrusting(p_29013_.getBoolean("Trusting"));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setTrusting(pCompound.getBoolean("Trusting"));
     }
 
     @Override
@@ -124,7 +124,7 @@ public class Ocelot extends Animal {
     }
 
     @Override
-    public boolean removeWhenFarAway(double p_29041_) {
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
         return !this.isTrusting() && this.tickCount > 2400;
     }
 
@@ -144,7 +144,7 @@ public class Ocelot extends Animal {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_29035_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.OCELOT_HURT;
     }
 
@@ -154,10 +154,10 @@ public class Ocelot extends Animal {
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_29021_, InteractionHand p_29022_) {
-        ItemStack itemstack = p_29021_.getItemInHand(p_29022_);
-        if ((this.temptGoal == null || this.temptGoal.isRunning()) && !this.isTrusting() && this.isFood(itemstack) && p_29021_.distanceToSqr(this) < 9.0) {
-            this.usePlayerItem(p_29021_, p_29022_, itemstack);
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
+        if ((this.temptGoal == null || this.temptGoal.isRunning()) && !this.isTrusting() && this.isFood(itemstack) && pPlayer.distanceToSqr(this) < 9.0) {
+            this.usePlayerItem(pPlayer, pHand, itemstack);
             if (!this.level().isClientSide) {
                 if (this.random.nextInt(3) == 0) {
                     this.setTrusting(true);
@@ -171,7 +171,7 @@ public class Ocelot extends Animal {
 
             return InteractionResult.SUCCESS;
         } else {
-            return super.mobInteract(p_29021_, p_29022_);
+            return super.mobInteract(pPlayer, pHand);
         }
     }
 
@@ -186,9 +186,9 @@ public class Ocelot extends Animal {
         }
     }
 
-    private void spawnTrustingParticles(boolean p_29048_) {
+    private void spawnTrustingParticles(boolean pIsTrusted) {
         ParticleOptions particleoptions = ParticleTypes.HEART;
-        if (!p_29048_) {
+        if (!pIsTrusted) {
             particleoptions = ParticleTypes.SMOKE;
         }
 
@@ -217,25 +217,25 @@ public class Ocelot extends Animal {
     }
 
     @Override
-    public boolean isFood(ItemStack p_29043_) {
-        return p_29043_.is(ItemTags.OCELOT_FOOD);
+    public boolean isFood(ItemStack pStack) {
+        return pStack.is(ItemTags.OCELOT_FOOD);
     }
 
     public static boolean checkOcelotSpawnRules(
-        EntityType<Ocelot> p_218207_, LevelAccessor p_218208_, EntitySpawnReason p_363006_, BlockPos p_218210_, RandomSource p_218211_
+        EntityType<Ocelot> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return p_218211_.nextInt(3) != 0;
+        return pRandom.nextInt(3) != 0;
     }
 
     @Override
-    public boolean checkSpawnObstruction(LevelReader p_29005_) {
-        if (p_29005_.isUnobstructed(this) && !p_29005_.containsAnyLiquid(this.getBoundingBox())) {
+    public boolean checkSpawnObstruction(LevelReader pLevel) {
+        if (pLevel.isUnobstructed(this) && !pLevel.containsAnyLiquid(this.getBoundingBox())) {
             BlockPos blockpos = this.blockPosition();
-            if (blockpos.getY() < p_29005_.getSeaLevel()) {
+            if (blockpos.getY() < pLevel.getSeaLevel()) {
                 return false;
             }
 
-            BlockState blockstate = p_29005_.getBlockState(blockpos.below());
+            BlockState blockstate = pLevel.getBlockState(blockpos.below());
             if (blockstate.is(Blocks.GRASS_BLOCK) || blockstate.is(BlockTags.LEAVES)) {
                 return true;
             }
@@ -267,9 +267,9 @@ public class Ocelot extends Animal {
     static class OcelotAvoidEntityGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {
         private final Ocelot ocelot;
 
-        public OcelotAvoidEntityGoal(Ocelot p_29051_, Class<T> p_29052_, float p_29053_, double p_29054_, double p_29055_) {
-            super(p_29051_, p_29052_, p_29053_, p_29054_, p_29055_, EntitySelector.NO_CREATIVE_OR_SPECTATOR::test);
-            this.ocelot = p_29051_;
+        public OcelotAvoidEntityGoal(Ocelot pOcelot, Class<T> pEntityClassToAvoid, float pMaxDist, double pWalkSpeedModifier, double pSprintSpeedModifier) {
+            super(pOcelot, pEntityClassToAvoid, pMaxDist, pWalkSpeedModifier, pSprintSpeedModifier, EntitySelector.NO_CREATIVE_OR_SPECTATOR::test);
+            this.ocelot = pOcelot;
         }
 
         @Override
@@ -286,9 +286,9 @@ public class Ocelot extends Animal {
     static class OcelotTemptGoal extends TemptGoal {
         private final Ocelot ocelot;
 
-        public OcelotTemptGoal(Ocelot p_29060_, double p_29061_, Predicate<ItemStack> p_330301_, boolean p_29063_) {
-            super(p_29060_, p_29061_, p_330301_, p_29063_);
-            this.ocelot = p_29060_;
+        public OcelotTemptGoal(Ocelot pOcelot, double pSpeedModifier, Predicate<ItemStack> pItems, boolean pCanScare) {
+            super(pOcelot, pSpeedModifier, pItems, pCanScare);
+            this.ocelot = pOcelot;
         }
 
         @Override

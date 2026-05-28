@@ -18,8 +18,8 @@ public class LeaveVineDecorator extends TreeDecorator {
         return TreeDecoratorType.LEAVE_VINE;
     }
 
-    public LeaveVineDecorator(float p_226031_) {
-        this.probability = p_226031_;
+    public LeaveVineDecorator(float pProbability) {
+        this.probability = pProbability;
     }
 
     @Override
@@ -56,12 +56,12 @@ public class LeaveVineDecorator extends TreeDecorator {
         });
     }
 
-    private static void addHangingVine(BlockPos p_226041_, BooleanProperty p_226042_, TreeDecorator.Context p_226043_) {
-        p_226043_.placeVine(p_226041_, p_226042_);
+    private static void addHangingVine(BlockPos pPos, BooleanProperty pSideProperty, TreeDecorator.Context pContext) {
+        pContext.placeVine(pPos, pSideProperty);
         int i = 4;
 
-        for (BlockPos blockpos = p_226041_.below(); p_226043_.isAir(blockpos) && i > 0; i--) {
-            p_226043_.placeVine(blockpos, p_226042_);
+        for (BlockPos blockpos = pPos.below(); pContext.isAir(blockpos) && i > 0; i--) {
+            pContext.placeVine(blockpos, pSideProperty);
             blockpos = blockpos.below();
         }
     }

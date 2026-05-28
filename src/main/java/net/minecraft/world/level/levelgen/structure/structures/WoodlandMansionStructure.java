@@ -34,10 +34,10 @@ public class WoodlandMansionStructure extends Structure {
             : Optional.of(new Structure.GenerationStub(blockpos, p_230240_ -> this.generatePieces(p_230240_, p_230235_, blockpos, rotation)));
     }
 
-    private void generatePieces(StructurePiecesBuilder p_230242_, Structure.GenerationContext p_230243_, BlockPos p_230244_, Rotation p_230245_) {
+    private void generatePieces(StructurePiecesBuilder pBuilder, Structure.GenerationContext pContext, BlockPos pPos, Rotation pRotation) {
         List<WoodlandMansionPieces.WoodlandMansionPiece> list = Lists.newLinkedList();
-        WoodlandMansionPieces.generateMansion(p_230243_.structureTemplateManager(), p_230244_, p_230245_, list, p_230243_.random());
-        list.forEach(p_230242_::addPiece);
+        WoodlandMansionPieces.generateMansion(pContext.structureTemplateManager(), pPos, pRotation, list, pContext.random());
+        list.forEach(pBuilder::addPiece);
     }
 
     @Override

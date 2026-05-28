@@ -426,11 +426,11 @@ public class BlockFamilies {
         .cracked(Blocks.CRACKED_DEEPSLATE_TILES)
         .getFamily();
 
-    private static BlockFamily.Builder familyBuilder(Block p_175936_) {
-        BlockFamily.Builder blockfamily$builder = new BlockFamily.Builder(p_175936_);
-        BlockFamily blockfamily = MAP.put(p_175936_, blockfamily$builder.getFamily());
+    private static BlockFamily.Builder familyBuilder(Block pBaseBlock) {
+        BlockFamily.Builder blockfamily$builder = new BlockFamily.Builder(pBaseBlock);
+        BlockFamily blockfamily = MAP.put(pBaseBlock, blockfamily$builder.getFamily());
         if (blockfamily != null) {
-            throw new IllegalStateException("Duplicate family definition for " + BuiltInRegistries.BLOCK.getKey(p_175936_));
+            throw new IllegalStateException("Duplicate family definition for " + BuiltInRegistries.BLOCK.getKey(pBaseBlock));
         } else {
             return blockfamily$builder;
         }

@@ -3,6 +3,7 @@ package net.minecraft.client.renderer.item;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Arrays;
 import javax.annotation.Nullable;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransform;
@@ -10,21 +11,25 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.SimpleBakedModel;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.model.data.ModelData;
+import net.optifine.Config;
+import net.optifine.CustomItems;
+import net.optifine.reflect.Reflector;
 
-@OnlyIn(Dist.CLIENT)
 public class ItemStackRenderState {
     ItemDisplayContext displayContext = ItemDisplayContext.NONE;
     boolean isLeftHand;
     private int activeLayerCount;
     private ItemStackRenderState.LayerRenderState[] layers = new ItemStackRenderState.LayerRenderState[]{new ItemStackRenderState.LayerRenderState()};
 
-    public void ensureCapacity(int p_378622_) {
+    public void ensureCapacity(int pExpectedSize) {
         int i = this.layers.length;
-        int j = this.activeLayerCount + p_378622_;
+        int j = this.activeLayerCount + pExpectedSize;
         if (j > i) {
             this.layers = Arrays.copyOf(this.layers, j);
 
@@ -67,12 +72,16 @@ public class ItemStackRenderState {
     }
 
     @Nullable
-    public TextureAtlasSprite pickParticleIcon(RandomSource p_376964_) {
+    public TextureAtlasSprite pickParticleIcon(RandomSource pRandom) {
         if (this.activeLayerCount == 0) {
             return null;
         } else {
-            BakedModel bakedmodel = this.layers[p_376964_.nextInt(this.activeLayerCount)].model;
-            return bakedmodel == null ? null : bakedmodel.getParticleIcon();
+            BakedModel bakedmodel = this.layers[pRandom.nextInt(this.activeLayerCount)].renderModel;
+            if (Reflector.ForgeHooksClient.exists()) {
+                return bakedmodel == null ? null : bakedmodel.getParticleIcon(ModelData.EMPTY);
+            } else {
+                return bakedmodel == null ? null : bakedmodel.getParticleIcon();
+            }
         }
     }
 
@@ -80,20 +89,18 @@ public class ItemStackRenderState {
         return this.firstLayer().transform();
     }
 
-    public void render(PoseStack p_375639_, MultiBufferSource p_377308_, int p_376259_, int p_376823_) {
+    public void render(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay) {
         for (int i = 0; i < this.activeLayerCount; i++) {
-            this.layers[i].render(p_375639_, p_377308_, p_376259_, p_376823_);
+            this.layers[i].render(pPoseStack, pBufferSource, pPackedLight, pPackedOverlay);
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static enum FoilType {
         NONE,
         STANDARD,
         SPECIAL;
     }
 
-    @OnlyIn(Dist.CLIENT)
     public class LayerRenderState {
         @Nullable
         BakedModel model;
@@ -105,6 +112,8 @@ public class ItemStackRenderState {
         private SpecialModelRenderer<Object> specialRenderer;
         @Nullable
         private Object argumentForSpecialRendering;
+        private ItemStack itemStack;
+        private BakedModel renderModel;
 
         public void clear() {
             this.model = null;
@@ -113,30 +122,44 @@ public class ItemStackRenderState {
             this.specialRenderer = null;
             this.argumentForSpecialRendering = null;
             Arrays.fill(this.tintLayers, -1);
+            this.renderModel = null;
         }
 
-        public void setupBlockModel(BakedModel p_377991_, RenderType p_377964_) {
-            this.model = p_377991_;
-            this.renderType = p_377964_;
+        public void setupBlockModel(BakedModel pModel, RenderType pRenderType) {
+            this.model = pModel;
+            this.renderType = pRenderType;
+            this.renderModel = this.model;
+            if (Config.isCustomItems()) {
+                this.model = this.getCustomItemModel(this.model, true);
+                this.renderModel = this.getCustomItemModel(this.model, false);
+            }
         }
 
-        public <T> void setupSpecialModel(SpecialModelRenderer<T> p_375891_, @Nullable T p_375474_, BakedModel p_376070_) {
-            this.model = p_376070_;
-            this.specialRenderer = eraseSpecialRenderer(p_375891_);
-            this.argumentForSpecialRendering = p_375474_;
+        public <T> void setupSpecialModel(SpecialModelRenderer<T> pSpecialRenderer, @Nullable T pArgumentForSpecialRendering, BakedModel pModel) {
+            this.model = pModel;
+            this.specialRenderer = eraseSpecialRenderer(pSpecialRenderer);
+            this.argumentForSpecialRendering = pArgumentForSpecialRendering;
+            this.renderModel = this.model;
+            if (Config.isCustomItems()) {
+                this.model = this.getCustomItemModel(this.model, true);
+                this.renderModel = this.getCustomItemModel(this.model, false);
+                if (this.renderModel != pModel && this.itemStack != null) {
+                    this.renderType = ItemBlockRenderTypes.getRenderType(this.itemStack);
+                }
+            }
         }
 
-        private static SpecialModelRenderer<Object> eraseSpecialRenderer(SpecialModelRenderer<?> p_377056_) {
-            return (SpecialModelRenderer<Object>)p_377056_;
+        private static SpecialModelRenderer<Object> eraseSpecialRenderer(SpecialModelRenderer<?> pSpecialRenderer) {
+            return (SpecialModelRenderer<Object>)pSpecialRenderer;
         }
 
-        public void setFoilType(ItemStackRenderState.FoilType p_377629_) {
-            this.foilType = p_377629_;
+        public void setFoilType(ItemStackRenderState.FoilType pFoilType) {
+            this.foilType = pFoilType;
         }
 
-        public int[] prepareTintLayers(int p_375742_) {
-            if (p_375742_ > this.tintLayers.length) {
-                this.tintLayers = new int[p_375742_];
+        public int[] prepareTintLayers(int pCount) {
+            if (pCount > this.tintLayers.length) {
+                this.tintLayers = new int[pCount];
                 Arrays.fill(this.tintLayers, -1);
             }
 
@@ -147,44 +170,66 @@ public class ItemStackRenderState {
             return this.model != null ? this.model.getTransforms().getTransform(ItemStackRenderState.this.displayContext) : ItemTransform.NO_TRANSFORM;
         }
 
-        void render(PoseStack p_377989_, MultiBufferSource p_377594_, int p_375616_, int p_376132_) {
-            p_377989_.pushPose();
-            this.transform().apply(ItemStackRenderState.this.isLeftHand, p_377989_);
-            p_377989_.translate(-0.5F, -0.5F, -0.5F);
-            if (this.specialRenderer != null) {
+        void render(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay) {
+            pPoseStack.pushPose();
+            if (Reflector.ForgeHooksClient.exists() && this.model != null) {
+                this.model.applyTransform(ItemStackRenderState.this.displayContext, pPoseStack, ItemStackRenderState.this.isLeftHand);
+            } else {
+                this.transform().apply(ItemStackRenderState.this.isLeftHand, pPoseStack);
+            }
+
+            pPoseStack.translate(-0.5F, -0.5F, -0.5F);
+            if (this.specialRenderer != null && this.renderType == null) {
                 this.specialRenderer
                     .render(
                         this.argumentForSpecialRendering,
                         ItemStackRenderState.this.displayContext,
-                        p_377989_,
-                        p_377594_,
-                        p_375616_,
-                        p_376132_,
+                        pPoseStack,
+                        pBufferSource,
+                        pPackedLight,
+                        pPackedOverlay,
                         this.foilType != ItemStackRenderState.FoilType.NONE
                     );
-            } else if (this.model != null) {
+            } else if (this.renderModel != null) {
                 ItemRenderer.renderItem(
                     ItemStackRenderState.this.displayContext,
-                    p_377989_,
-                    p_377594_,
-                    p_375616_,
-                    p_376132_,
+                    pPoseStack,
+                    pBufferSource,
+                    pPackedLight,
+                    pPackedOverlay,
                     this.tintLayers,
-                    this.model,
+                    this.renderModel,
                     this.renderType,
                     this.foilType
                 );
             }
 
-            p_377989_.popPose();
+            pPoseStack.popPose();
         }
 
         boolean isGui3d() {
-            return this.model != null && this.model.isGui3d();
+            return this.renderModel != null && this.renderModel.isGui3d();
         }
 
         boolean usesBlockLight() {
             return this.model != null && this.model.usesBlockLight();
+        }
+
+        private BakedModel getCustomItemModel(BakedModel modelIn, boolean fullModelIn) {
+            if (modelIn == null) {
+                return null;
+            } else {
+                ResourceLocation resourcelocation = modelIn instanceof SimpleBakedModel simplebakedmodel ? simplebakedmodel.getModelLocation() : null;
+                return CustomItems.getCustomItemModel(this.itemStack, modelIn, resourcelocation, fullModelIn);
+            }
+        }
+
+        public ItemStack getItemStack() {
+            return this.itemStack;
+        }
+
+        public void setItemStack(ItemStack itemStack) {
+            this.itemStack = itemStack;
         }
     }
 }

@@ -18,9 +18,9 @@ public class SetComponentsFunction extends LootItemConditionalFunction {
     );
     private final DataComponentPatch components;
 
-    private SetComponentsFunction(List<LootItemCondition> p_334087_, DataComponentPatch p_331768_) {
-        super(p_334087_);
-        this.components = p_331768_;
+    private SetComponentsFunction(List<LootItemCondition> pCondition, DataComponentPatch pComponents) {
+        super(pCondition);
+        this.components = pComponents;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class SetComponentsFunction extends LootItemConditionalFunction {
         return p_336175_;
     }
 
-    public static <T> LootItemConditionalFunction.Builder<?> setComponent(DataComponentType<T> p_334396_, T p_330070_) {
-        return simpleBuilder(p_328648_ -> new SetComponentsFunction(p_328648_, DataComponentPatch.builder().set(p_334396_, p_330070_).build()));
+    public static <T> LootItemConditionalFunction.Builder<?> setComponent(DataComponentType<T> pComponent, T pValue) {
+        return simpleBuilder(p_328648_ -> new SetComponentsFunction(p_328648_, DataComponentPatch.builder().set(pComponent, pValue).build()));
     }
 }

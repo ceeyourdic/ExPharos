@@ -18,8 +18,8 @@ public class SwimNodeEvaluator extends NodeEvaluator {
     private final boolean allowBreaching;
     private final Long2ObjectMap<PathType> pathTypesByPosCache = new Long2ObjectOpenHashMap<>();
 
-    public SwimNodeEvaluator(boolean p_77457_) {
-        this.allowBreaching = p_77457_;
+    public SwimNodeEvaluator(boolean pAllowBreaching) {
+        this.allowBreaching = pAllowBreaching;
     }
 
     @Override
@@ -80,25 +80,25 @@ public class SwimNodeEvaluator extends NodeEvaluator {
         return i;
     }
 
-    protected boolean isNodeValid(@Nullable Node p_192962_) {
-        return p_192962_ != null && !p_192962_.closed;
+    protected boolean isNodeValid(@Nullable Node pNode) {
+        return pNode != null && !pNode.closed;
     }
 
-    private static boolean hasMalus(@Nullable Node p_328144_) {
-        return p_328144_ != null && p_328144_.costMalus >= 0.0F;
+    private static boolean hasMalus(@Nullable Node pNode) {
+        return pNode != null && pNode.costMalus >= 0.0F;
     }
 
     @Nullable
-    protected Node findAcceptedNode(int p_263032_, int p_263066_, int p_263105_) {
+    protected Node findAcceptedNode(int pX, int pY, int pZ) {
         Node node = null;
-        PathType pathtype = this.getCachedBlockType(p_263032_, p_263066_, p_263105_);
+        PathType pathtype = this.getCachedBlockType(pX, pY, pZ);
         if (this.allowBreaching && pathtype == PathType.BREACH || pathtype == PathType.WATER) {
             float f = this.mob.getPathfindingMalus(pathtype);
             if (f >= 0.0F) {
-                node = this.getNode(p_263032_, p_263066_, p_263105_);
+                node = this.getNode(pX, pY, pZ);
                 node.type = pathtype;
                 node.costMalus = Math.max(node.costMalus, f);
-                if (this.currentContext.level().getFluidState(new BlockPos(p_263032_, p_263066_, p_263105_)).isEmpty()) {
+                if (this.currentContext.level().getFluidState(new BlockPos(pX, pY, pZ)).isEmpty()) {
                     node.costMalus += 8.0F;
                 }
             }
@@ -107,9 +107,9 @@ public class SwimNodeEvaluator extends NodeEvaluator {
         return node;
     }
 
-    protected PathType getCachedBlockType(int p_192968_, int p_192969_, int p_192970_) {
+    protected PathType getCachedBlockType(int pX, int pY, int pZ) {
         return this.pathTypesByPosCache
-            .computeIfAbsent(BlockPos.asLong(p_192968_, p_192969_, p_192970_), p_327515_ -> this.getPathType(this.currentContext, p_192968_, p_192969_, p_192970_));
+            .computeIfAbsent(BlockPos.asLong(pX, pY, pZ), p_327515_ -> this.getPathType(this.currentContext, pX, pY, pZ));
     }
 
     @Override

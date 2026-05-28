@@ -46,21 +46,21 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
     private boolean forceGameMode;
     RealmsSlotOptionsScreen.SettingsSlider spawnProtectionButton;
 
-    public RealmsSlotOptionsScreen(RealmsConfigureWorldScreen p_89886_, RealmsWorldOptions p_89887_, RealmsServer.WorldType p_89888_, int p_89889_) {
+    public RealmsSlotOptionsScreen(RealmsConfigureWorldScreen pParent, RealmsWorldOptions pOptions, RealmsServer.WorldType pWorldType, int pActiveSlot) {
         super(Component.translatable("mco.configure.world.buttons.options"));
-        this.parentScreen = p_89886_;
-        this.options = p_89887_;
-        this.worldType = p_89888_;
-        this.difficulty = findByIndex(DIFFICULTIES, p_89887_.difficulty, 2);
-        this.gameMode = findByIndex(GAME_MODES, p_89887_.gameMode, 0);
-        this.defaultSlotName = p_89887_.getDefaultSlotName(p_89889_);
-        this.setWorldName(p_89887_.getSlotName(p_89889_));
-        if (p_89888_ == RealmsServer.WorldType.NORMAL) {
-            this.pvp = p_89887_.pvp;
-            this.spawnProtection = p_89887_.spawnProtection;
-            this.forceGameMode = p_89887_.forceGameMode;
-            this.spawnMonsters = p_89887_.spawnMonsters;
-            this.commandBlocks = p_89887_.commandBlocks;
+        this.parentScreen = pParent;
+        this.options = pOptions;
+        this.worldType = pWorldType;
+        this.difficulty = findByIndex(DIFFICULTIES, pOptions.difficulty, 2);
+        this.gameMode = findByIndex(GAME_MODES, pOptions.gameMode, 0);
+        this.defaultSlotName = pOptions.getDefaultSlotName(pActiveSlot);
+        this.setWorldName(pOptions.getSlotName(pActiveSlot));
+        if (pWorldType == RealmsServer.WorldType.NORMAL) {
+            this.pvp = pOptions.pvp;
+            this.spawnProtection = pOptions.spawnProtection;
+            this.forceGameMode = pOptions.forceGameMode;
+            this.spawnMonsters = pOptions.spawnMonsters;
+            this.commandBlocks = pOptions.commandBlocks;
         } else {
             this.pvp = true;
             this.spawnProtection = 0;
@@ -75,17 +75,17 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
         this.minecraft.setScreen(this.parentScreen);
     }
 
-    private static <T> T findByIndex(List<T> p_167525_, int p_167526_, int p_167527_) {
+    private static <T> T findByIndex(List<T> pList, int pIndex, int pFallback) {
         try {
-            return p_167525_.get(p_167526_);
+            return pList.get(pIndex);
         } catch (IndexOutOfBoundsException indexoutofboundsexception) {
-            return p_167525_.get(p_167527_);
+            return pList.get(pFallback);
         }
     }
 
-    private static <T> int findIndex(List<T> p_167529_, T p_167530_, int p_167531_) {
-        int i = p_167529_.indexOf(p_167530_);
-        return i == -1 ? p_167531_ : i;
+    private static <T> int findIndex(List<T> pList, T pObject, int pFallback) {
+        int i = pList.indexOf(pObject);
+        return i == -1 ? pFallback : i;
     }
 
     @Override
@@ -198,13 +198,13 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, p_340725_ -> this.onClose()).bounds(i, row(13), this.columnWidth, 20).build());
     }
 
-    private CycleButton.OnValueChange<Boolean> confirmDangerousOption(Component p_231324_, Consumer<Boolean> p_231325_) {
+    private CycleButton.OnValueChange<Boolean> confirmDangerousOption(Component pQuestion, Consumer<Boolean> pOnPress) {
         return (p_340728_, p_340729_) -> {
             if (p_340729_) {
-                p_231325_.accept(true);
+                pOnPress.accept(true);
             } else {
-                this.minecraft.setScreen(RealmsPopups.warningPopupScreen(this, p_231324_, p_340724_ -> {
-                    p_231325_.accept(false);
+                this.minecraft.setScreen(RealmsPopups.warningPopupScreen(this, pQuestion, p_340724_ -> {
+                    pOnPress.accept(false);
                     p_340724_.onClose();
                 }));
             }
@@ -224,11 +224,11 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
         this.nameEdit.render(p_283210_, p_283172_, p_281531_, p_283191_);
     }
 
-    private void setWorldName(String p_231314_) {
-        if (p_231314_.equals(this.defaultSlotName)) {
+    private void setWorldName(String pName) {
+        if (pName.equals(this.defaultSlotName)) {
             this.worldName = "";
         } else {
-            this.worldName = p_231314_;
+            this.worldName = pName;
         }
     }
 
@@ -280,11 +280,11 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
         private final double minValue;
         private final double maxValue;
 
-        public SettingsSlider(final int p_89946_, final int p_89947_, final int p_89948_, final int p_89949_, final float p_89950_, final float p_89951_) {
-            super(p_89946_, p_89947_, p_89948_, 20, CommonComponents.EMPTY, 0.0);
-            this.minValue = (double)p_89950_;
-            this.maxValue = (double)p_89951_;
-            this.value = (double)((Mth.clamp((float)p_89949_, p_89950_, p_89951_) - p_89950_) / (p_89951_ - p_89950_));
+        public SettingsSlider(final int pX, final int pY, final int pWidth, final int pValue, final float pMinValue, final float pMaxValue) {
+            super(pX, pY, pWidth, 20, CommonComponents.EMPTY, 0.0);
+            this.minValue = (double)pMinValue;
+            this.maxValue = (double)pMaxValue;
+            this.value = (double)((Mth.clamp((float)pValue, pMinValue, pMaxValue) - pMinValue) / (pMaxValue - pMinValue));
             this.updateMessage();
         }
 

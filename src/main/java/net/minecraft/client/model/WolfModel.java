@@ -31,21 +31,21 @@ public class WolfModel extends EntityModel<WolfRenderState> {
     private final ModelPart upperBody;
     private static final int LEG_SIZE = 8;
 
-    public WolfModel(ModelPart p_171087_) {
-        super(p_171087_);
-        this.head = p_171087_.getChild("head");
+    public WolfModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
         this.realHead = this.head.getChild("real_head");
-        this.body = p_171087_.getChild("body");
-        this.upperBody = p_171087_.getChild("upper_body");
-        this.rightHindLeg = p_171087_.getChild("right_hind_leg");
-        this.leftHindLeg = p_171087_.getChild("left_hind_leg");
-        this.rightFrontLeg = p_171087_.getChild("right_front_leg");
-        this.leftFrontLeg = p_171087_.getChild("left_front_leg");
-        this.tail = p_171087_.getChild("tail");
+        this.body = pRoot.getChild("body");
+        this.upperBody = pRoot.getChild("upper_body");
+        this.rightHindLeg = pRoot.getChild("right_hind_leg");
+        this.leftHindLeg = pRoot.getChild("left_hind_leg");
+        this.rightFrontLeg = pRoot.getChild("right_front_leg");
+        this.leftFrontLeg = pRoot.getChild("left_front_leg");
+        this.tail = pRoot.getChild("tail");
         this.realTail = this.tail.getChild("real_tail");
     }
 
-    public static MeshDefinition createMeshDefinition(CubeDeformation p_330628_) {
+    public static MeshDefinition createMeshDefinition(CubeDeformation pCubeDeformation) {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
         float f = 13.5F;
@@ -54,26 +54,26 @@ public class WolfModel extends EntityModel<WolfRenderState> {
             "real_head",
             CubeListBuilder.create()
                 .texOffs(0, 0)
-                .addBox(-2.0F, -3.0F, -2.0F, 6.0F, 6.0F, 4.0F, p_330628_)
+                .addBox(-2.0F, -3.0F, -2.0F, 6.0F, 6.0F, 4.0F, pCubeDeformation)
                 .texOffs(16, 14)
-                .addBox(-2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F, p_330628_)
+                .addBox(-2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F, pCubeDeformation)
                 .texOffs(16, 14)
-                .addBox(2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F, p_330628_)
+                .addBox(2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F, pCubeDeformation)
                 .texOffs(0, 10)
-                .addBox(-0.5F, -0.001F, -5.0F, 3.0F, 3.0F, 4.0F, p_330628_),
+                .addBox(-0.5F, -0.001F, -5.0F, 3.0F, 3.0F, 4.0F, pCubeDeformation),
             PartPose.ZERO
         );
         partdefinition.addOrReplaceChild(
             "body",
-            CubeListBuilder.create().texOffs(18, 14).addBox(-3.0F, -2.0F, -3.0F, 6.0F, 9.0F, 6.0F, p_330628_),
+            CubeListBuilder.create().texOffs(18, 14).addBox(-3.0F, -2.0F, -3.0F, 6.0F, 9.0F, 6.0F, pCubeDeformation),
             PartPose.offsetAndRotation(0.0F, 14.0F, 2.0F, (float) (Math.PI / 2), 0.0F, 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "upper_body",
-            CubeListBuilder.create().texOffs(21, 0).addBox(-3.0F, -3.0F, -3.0F, 8.0F, 6.0F, 7.0F, p_330628_),
+            CubeListBuilder.create().texOffs(21, 0).addBox(-3.0F, -3.0F, -3.0F, 8.0F, 6.0F, 7.0F, pCubeDeformation),
             PartPose.offsetAndRotation(-1.0F, 14.0F, -3.0F, (float) (Math.PI / 2), 0.0F, 0.0F)
         );
-        CubeListBuilder cubelistbuilder = CubeListBuilder.create().texOffs(0, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F, p_330628_);
+        CubeListBuilder cubelistbuilder = CubeListBuilder.create().texOffs(0, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F, pCubeDeformation);
         partdefinition.addOrReplaceChild("right_hind_leg", cubelistbuilder, PartPose.offset(-2.5F, 16.0F, 7.0F));
         partdefinition.addOrReplaceChild("left_hind_leg", cubelistbuilder, PartPose.offset(0.5F, 16.0F, 7.0F));
         partdefinition.addOrReplaceChild("right_front_leg", cubelistbuilder, PartPose.offset(-2.5F, 16.0F, -4.0F));
@@ -82,7 +82,7 @@ public class WolfModel extends EntityModel<WolfRenderState> {
             "tail", CubeListBuilder.create(), PartPose.offsetAndRotation(-1.0F, 12.0F, 8.0F, (float) (Math.PI / 5), 0.0F, 0.0F)
         );
         partdefinition2.addOrReplaceChild(
-            "real_tail", CubeListBuilder.create().texOffs(9, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F, p_330628_), PartPose.ZERO
+            "real_tail", CubeListBuilder.create().texOffs(9, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F, pCubeDeformation), PartPose.ZERO
         );
         return meshdefinition;
     }

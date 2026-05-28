@@ -33,20 +33,20 @@ public abstract class TagsProvider<T> implements DataProvider {
     protected final ResourceKey<? extends Registry<T>> registryKey;
     private final Map<ResourceLocation, TagBuilder> builders = Maps.newLinkedHashMap();
 
-    protected TagsProvider(PackOutput p_256596_, ResourceKey<? extends Registry<T>> p_255886_, CompletableFuture<HolderLookup.Provider> p_256513_) {
-        this(p_256596_, p_255886_, p_256513_, CompletableFuture.completedFuture(TagsProvider.TagLookup.empty()));
+    protected TagsProvider(PackOutput pOutput, ResourceKey<? extends Registry<T>> pRegistryKey, CompletableFuture<HolderLookup.Provider> pLookupProvider) {
+        this(pOutput, pRegistryKey, pLookupProvider, CompletableFuture.completedFuture(TagsProvider.TagLookup.empty()));
     }
 
     protected TagsProvider(
-        PackOutput p_275432_,
-        ResourceKey<? extends Registry<T>> p_275476_,
-        CompletableFuture<HolderLookup.Provider> p_275222_,
-        CompletableFuture<TagsProvider.TagLookup<T>> p_275565_
+        PackOutput pOutput,
+        ResourceKey<? extends Registry<T>> pRegistryKey,
+        CompletableFuture<HolderLookup.Provider> pLookupProvider,
+        CompletableFuture<TagsProvider.TagLookup<T>> pParentProvider
     ) {
-        this.pathProvider = p_275432_.createRegistryTagsPathProvider(p_275476_);
-        this.registryKey = p_275476_;
-        this.parentProvider = p_275565_;
-        this.lookupProvider = p_275222_;
+        this.pathProvider = pOutput.createRegistryTagsPathProvider(pRegistryKey);
+        this.registryKey = pRegistryKey;
+        this.parentProvider = pParentProvider;
+        this.lookupProvider = pLookupProvider;
     }
 
     @Override
@@ -54,7 +54,7 @@ public abstract class TagsProvider<T> implements DataProvider {
         return "Tags for " + this.registryKey.location();
     }
 
-    protected abstract void addTags(HolderLookup.Provider p_256380_);
+    protected abstract void addTags(HolderLookup.Provider pProvider);
 
     @Override
     public CompletableFuture<?> run(CachedOutput p_253684_) {
@@ -104,13 +104,13 @@ public abstract class TagsProvider<T> implements DataProvider {
             );
     }
 
-    protected TagsProvider.TagAppender<T> tag(TagKey<T> p_206425_) {
-        TagBuilder tagbuilder = this.getOrCreateRawBuilder(p_206425_);
+    protected TagsProvider.TagAppender<T> tag(TagKey<T> pTag) {
+        TagBuilder tagbuilder = this.getOrCreateRawBuilder(pTag);
         return new TagsProvider.TagAppender<>(tagbuilder);
     }
 
-    protected TagBuilder getOrCreateRawBuilder(TagKey<T> p_236452_) {
-        return this.builders.computeIfAbsent(p_236452_.location(), p_236442_ -> TagBuilder.create());
+    protected TagBuilder getOrCreateRawBuilder(TagKey<T> pTag) {
+        return this.builders.computeIfAbsent(pTag.location(), p_236442_ -> TagBuilder.create());
     }
 
     public CompletableFuture<TagsProvider.TagLookup<T>> contentsGetter() {
@@ -128,44 +128,44 @@ public abstract class TagsProvider<T> implements DataProvider {
     protected static class TagAppender<T> {
         private final TagBuilder builder;
 
-        protected TagAppender(TagBuilder p_256426_) {
-            this.builder = p_256426_;
+        protected TagAppender(TagBuilder pBuilder) {
+            this.builder = pBuilder;
         }
 
-        public final TagsProvider.TagAppender<T> add(ResourceKey<T> p_256138_) {
-            this.builder.addElement(p_256138_.location());
+        public final TagsProvider.TagAppender<T> add(ResourceKey<T> pKey) {
+            this.builder.addElement(pKey.location());
             return this;
         }
 
         @SafeVarargs
-        public final TagsProvider.TagAppender<T> add(ResourceKey<T>... p_211102_) {
-            for (ResourceKey<T> resourcekey : p_211102_) {
+        public final TagsProvider.TagAppender<T> add(ResourceKey<T>... pKeys) {
+            for (ResourceKey<T> resourcekey : pKeys) {
                 this.builder.addElement(resourcekey.location());
             }
 
             return this;
         }
 
-        public final TagsProvider.TagAppender<T> addAll(List<ResourceKey<T>> p_328546_) {
-            for (ResourceKey<T> resourcekey : p_328546_) {
+        public final TagsProvider.TagAppender<T> addAll(List<ResourceKey<T>> pKeys) {
+            for (ResourceKey<T> resourcekey : pKeys) {
                 this.builder.addElement(resourcekey.location());
             }
 
             return this;
         }
 
-        public TagsProvider.TagAppender<T> addOptional(ResourceLocation p_176840_) {
-            this.builder.addOptionalElement(p_176840_);
+        public TagsProvider.TagAppender<T> addOptional(ResourceLocation pLocation) {
+            this.builder.addOptionalElement(pLocation);
             return this;
         }
 
-        public TagsProvider.TagAppender<T> addTag(TagKey<T> p_206429_) {
-            this.builder.addTag(p_206429_.location());
+        public TagsProvider.TagAppender<T> addTag(TagKey<T> pTag) {
+            this.builder.addTag(pTag.location());
             return this;
         }
 
-        public TagsProvider.TagAppender<T> addOptionalTag(ResourceLocation p_176842_) {
-            this.builder.addOptionalTag(p_176842_);
+        public TagsProvider.TagAppender<T> addOptionalTag(ResourceLocation pLocation) {
+            this.builder.addOptionalTag(pLocation);
             return this;
         }
     }
@@ -176,8 +176,8 @@ public abstract class TagsProvider<T> implements DataProvider {
             return p_275247_ -> Optional.empty();
         }
 
-        default boolean contains(TagKey<T> p_275413_) {
-            return this.apply(p_275413_).isPresent();
+        default boolean contains(TagKey<T> pKey) {
+            return this.apply(pKey).isPresent();
         }
     }
 }

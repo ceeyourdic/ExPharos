@@ -43,16 +43,16 @@ public class References {
     public static final TypeReference MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST = reference("multi_noise_biome_source_parameter_list");
     public static final TypeReference WORLD_GEN_SETTINGS = reference("world_gen_settings");
 
-    public static TypeReference reference(final String p_334673_) {
+    public static TypeReference reference(final String pName) {
         return new TypeReference() {
             @Override
             public String typeName() {
-                return p_334673_;
+                return pName;
             }
 
             @Override
             public String toString() {
-                return "@" + p_334673_;
+                return "@" + pName;
             }
         };
     }

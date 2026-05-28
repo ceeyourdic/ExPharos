@@ -6,8 +6,8 @@ import java.util.function.Consumer;
 import net.minecraft.util.profiling.metrics.MetricsRegistry;
 
 public class PriorityConsecutiveExecutor extends AbstractConsecutiveExecutor<StrictQueue.RunnableWithPriority> {
-    public PriorityConsecutiveExecutor(int p_368950_, Executor p_370095_, String p_367806_) {
-        super(new StrictQueue.FixedPriorityQueue(p_368950_), p_370095_, p_367806_);
+    public PriorityConsecutiveExecutor(int pSize, Executor pExecutor, String pName) {
+        super(new StrictQueue.FixedPriorityQueue(pSize), pExecutor, pName);
         MetricsRegistry.INSTANCE.add(this);
     }
 
@@ -15,9 +15,9 @@ public class PriorityConsecutiveExecutor extends AbstractConsecutiveExecutor<Str
         return new StrictQueue.RunnableWithPriority(0, p_370061_);
     }
 
-    public <Source> CompletableFuture<Source> scheduleWithResult(int p_364483_, Consumer<CompletableFuture<Source>> p_367272_) {
+    public <Source> CompletableFuture<Source> scheduleWithResult(int pPriority, Consumer<CompletableFuture<Source>> pResultConsumer) {
         CompletableFuture<Source> completablefuture = new CompletableFuture<>();
-        this.schedule(new StrictQueue.RunnableWithPriority(p_364483_, () -> p_367272_.accept(completablefuture)));
+        this.schedule(new StrictQueue.RunnableWithPriority(pPriority, () -> pResultConsumer.accept(completablefuture)));
         return completablefuture;
     }
 }

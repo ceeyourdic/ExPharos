@@ -45,18 +45,18 @@ public class BiomeGenerationSettings {
     private final Supplier<List<ConfiguredFeature<?, ?>>> flowerFeatures;
     private final Supplier<Set<PlacedFeature>> featureSet;
 
-    BiomeGenerationSettings(HolderSet<ConfiguredWorldCarver<?>> p_370229_, List<HolderSet<PlacedFeature>> p_186651_) {
-        this.carvers = p_370229_;
-        this.features = p_186651_;
+    BiomeGenerationSettings(HolderSet<ConfiguredWorldCarver<?>> pCarvers, List<HolderSet<PlacedFeature>> pFeatures) {
+        this.carvers = pCarvers;
+        this.features = pFeatures;
         this.flowerFeatures = Suppliers.memoize(
-            () -> p_186651_.stream()
+            () -> pFeatures.stream()
                     .flatMap(HolderSet::stream)
                     .map(Holder::value)
                     .flatMap(PlacedFeature::getFeatures)
                     .filter(p_186657_ -> p_186657_.feature() == Feature.FLOWER)
                     .collect(ImmutableList.toImmutableList())
         );
-        this.featureSet = Suppliers.memoize(() -> p_186651_.stream().flatMap(HolderSet::stream).map(Holder::value).collect(Collectors.toSet()));
+        this.featureSet = Suppliers.memoize(() -> pFeatures.stream().flatMap(HolderSet::stream).map(Holder::value).collect(Collectors.toSet()));
     }
 
     public Iterable<Holder<ConfiguredWorldCarver<?>>> getCarvers() {
@@ -71,26 +71,26 @@ public class BiomeGenerationSettings {
         return this.features;
     }
 
-    public boolean hasFeature(PlacedFeature p_186659_) {
-        return this.featureSet.get().contains(p_186659_);
+    public boolean hasFeature(PlacedFeature pFeature) {
+        return this.featureSet.get().contains(pFeature);
     }
 
     public static class Builder extends BiomeGenerationSettings.PlainBuilder {
         private final HolderGetter<PlacedFeature> placedFeatures;
         private final HolderGetter<ConfiguredWorldCarver<?>> worldCarvers;
 
-        public Builder(HolderGetter<PlacedFeature> p_255774_, HolderGetter<ConfiguredWorldCarver<?>> p_256003_) {
-            this.placedFeatures = p_255774_;
-            this.worldCarvers = p_256003_;
+        public Builder(HolderGetter<PlacedFeature> pPlacedFeatures, HolderGetter<ConfiguredWorldCarver<?>> pWorldCarvers) {
+            this.placedFeatures = pPlacedFeatures;
+            this.worldCarvers = pWorldCarvers;
         }
 
-        public BiomeGenerationSettings.Builder addFeature(GenerationStep.Decoration p_256059_, ResourceKey<PlacedFeature> p_256259_) {
-            this.addFeature(p_256059_.ordinal(), this.placedFeatures.getOrThrow(p_256259_));
+        public BiomeGenerationSettings.Builder addFeature(GenerationStep.Decoration pDecoration, ResourceKey<PlacedFeature> pFeature) {
+            this.addFeature(pDecoration.ordinal(), this.placedFeatures.getOrThrow(pFeature));
             return this;
         }
 
-        public BiomeGenerationSettings.Builder addCarver(ResourceKey<ConfiguredWorldCarver<?>> p_255733_) {
-            this.addCarver(this.worldCarvers.getOrThrow(p_255733_));
+        public BiomeGenerationSettings.Builder addCarver(ResourceKey<ConfiguredWorldCarver<?>> pCarver) {
+            this.addCarver(this.worldCarvers.getOrThrow(pCarver));
             return this;
         }
     }
@@ -99,23 +99,23 @@ public class BiomeGenerationSettings {
         private final List<Holder<ConfiguredWorldCarver<?>>> carvers = new ArrayList<>();
         private final List<List<Holder<PlacedFeature>>> features = new ArrayList<>();
 
-        public BiomeGenerationSettings.PlainBuilder addFeature(GenerationStep.Decoration p_256360_, Holder<PlacedFeature> p_256577_) {
-            return this.addFeature(p_256360_.ordinal(), p_256577_);
+        public BiomeGenerationSettings.PlainBuilder addFeature(GenerationStep.Decoration pDecoration, Holder<PlacedFeature> pFeature) {
+            return this.addFeature(pDecoration.ordinal(), pFeature);
         }
 
-        public BiomeGenerationSettings.PlainBuilder addFeature(int p_256305_, Holder<PlacedFeature> p_255636_) {
-            this.addFeatureStepsUpTo(p_256305_);
-            this.features.get(p_256305_).add(p_255636_);
+        public BiomeGenerationSettings.PlainBuilder addFeature(int pStep, Holder<PlacedFeature> pFeature) {
+            this.addFeatureStepsUpTo(pStep);
+            this.features.get(pStep).add(pFeature);
             return this;
         }
 
-        public BiomeGenerationSettings.PlainBuilder addCarver(Holder<ConfiguredWorldCarver<?>> p_256082_) {
-            this.carvers.add(p_256082_);
+        public BiomeGenerationSettings.PlainBuilder addCarver(Holder<ConfiguredWorldCarver<?>> pCarver) {
+            this.carvers.add(pCarver);
             return this;
         }
 
-        private void addFeatureStepsUpTo(int p_256411_) {
-            while (this.features.size() <= p_256411_) {
+        private void addFeatureStepsUpTo(int pStep) {
+            while (this.features.size() <= pStep) {
                 this.features.add(Lists.newArrayList());
             }
         }

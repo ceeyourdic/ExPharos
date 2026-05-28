@@ -38,10 +38,10 @@ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
     private final Map<Holder<Enchantment>, NumberProvider> enchantments;
     private final boolean add;
 
-    SetEnchantmentsFunction(List<LootItemCondition> p_300544_, Map<Holder<Enchantment>, NumberProvider> p_165338_, boolean p_165339_) {
-        super(p_300544_);
-        this.enchantments = Map.copyOf(p_165338_);
-        this.add = p_165339_;
+    SetEnchantmentsFunction(List<LootItemCondition> pConditions, Map<Holder<Enchantment>, NumberProvider> pEnchantments, boolean pAdd) {
+        super(pConditions);
+        this.enchantments = Map.copyOf(pEnchantments);
+        this.add = pAdd;
     }
 
     @Override
@@ -90,16 +90,16 @@ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
             this(false);
         }
 
-        public Builder(boolean p_165372_) {
-            this.add = p_165372_;
+        public Builder(boolean pAdd) {
+            this.add = pAdd;
         }
 
         protected SetEnchantmentsFunction.Builder getThis() {
             return this;
         }
 
-        public SetEnchantmentsFunction.Builder withEnchantment(Holder<Enchantment> p_342127_, NumberProvider p_165376_) {
-            this.enchantments.put(p_342127_, p_165376_);
+        public SetEnchantmentsFunction.Builder withEnchantment(Holder<Enchantment> pEnchantment, NumberProvider pLevel) {
+            this.enchantments.put(pEnchantment, pLevel);
             return this;
         }
 

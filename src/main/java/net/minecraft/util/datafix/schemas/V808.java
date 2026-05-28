@@ -12,14 +12,14 @@ public class V808 extends NamespacedSchema {
         super(p_18170_, p_18171_);
     }
 
-    protected static void registerInventory(Schema p_18175_, Map<String, Supplier<TypeTemplate>> p_18176_, String p_18177_) {
-        p_18175_.register(p_18176_, p_18177_, () -> DSL.optionalFields("Items", DSL.list(References.ITEM_STACK.in(p_18175_))));
+    protected static void registerInventory(Schema pSchema, Map<String, Supplier<TypeTemplate>> pMap, String pName) {
+        pSchema.register(pMap, pName, () -> DSL.optionalFields("Items", DSL.list(References.ITEM_STACK.in(pSchema))));
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_18179_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_18179_);
-        registerInventory(p_18179_, map, "minecraft:shulker_box");
+    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(pSchema);
+        registerInventory(pSchema, map, "minecraft:shulker_box");
         return map;
     }
 }

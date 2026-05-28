@@ -17,13 +17,13 @@ public class NoiseProvider extends NoiseBasedStateProvider {
     public static final MapCodec<NoiseProvider> CODEC = RecordCodecBuilder.mapCodec(p_191462_ -> noiseProviderCodec(p_191462_).apply(p_191462_, NoiseProvider::new));
     protected final List<BlockState> states;
 
-    protected static <P extends NoiseProvider> P4<Mu<P>, Long, NormalNoise.NoiseParameters, Float, List<BlockState>> noiseProviderCodec(Instance<P> p_191460_) {
-        return noiseCodec(p_191460_).and(ExtraCodecs.nonEmptyList(BlockState.CODEC.listOf()).fieldOf("states").forGetter(p_191448_ -> p_191448_.states));
+    protected static <P extends NoiseProvider> P4<Mu<P>, Long, NormalNoise.NoiseParameters, Float, List<BlockState>> noiseProviderCodec(Instance<P> pInstance) {
+        return noiseCodec(pInstance).and(ExtraCodecs.nonEmptyList(BlockState.CODEC.listOf()).fieldOf("states").forGetter(p_191448_ -> p_191448_.states));
     }
 
-    public NoiseProvider(long p_191442_, NormalNoise.NoiseParameters p_191443_, float p_191444_, List<BlockState> p_191445_) {
-        super(p_191442_, p_191443_, p_191444_);
-        this.states = p_191445_;
+    public NoiseProvider(long pSeed, NormalNoise.NoiseParameters pParameters, float pScale, List<BlockState> pStates) {
+        super(pSeed, pParameters, pScale);
+        this.states = pStates;
     }
 
     @Override
@@ -36,13 +36,13 @@ public class NoiseProvider extends NoiseBasedStateProvider {
         return this.getRandomState(this.states, p_225914_, (double)this.scale);
     }
 
-    protected BlockState getRandomState(List<BlockState> p_191453_, BlockPos p_191454_, double p_191455_) {
-        double d0 = this.getNoiseValue(p_191454_, p_191455_);
-        return this.getRandomState(p_191453_, d0);
+    protected BlockState getRandomState(List<BlockState> pPossibleStates, BlockPos pPos, double pDelta) {
+        double d0 = this.getNoiseValue(pPos, pDelta);
+        return this.getRandomState(pPossibleStates, d0);
     }
 
-    protected BlockState getRandomState(List<BlockState> p_191450_, double p_191451_) {
-        double d0 = Mth.clamp((1.0 + p_191451_) / 2.0, 0.0, 0.9999);
-        return p_191450_.get((int)(d0 * (double)p_191450_.size()));
+    protected BlockState getRandomState(List<BlockState> pPossibleStates, double pDelta) {
+        double d0 = Mth.clamp((1.0 + pDelta) / 2.0, 0.0, 0.9999);
+        return pPossibleStates.get((int)(d0 * (double)pPossibleStates.size()));
     }
 }

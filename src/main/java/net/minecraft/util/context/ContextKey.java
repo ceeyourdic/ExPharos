@@ -5,12 +5,12 @@ import net.minecraft.resources.ResourceLocation;
 public class ContextKey<T> {
     private final ResourceLocation name;
 
-    public ContextKey(ResourceLocation p_369113_) {
-        this.name = p_369113_;
+    public ContextKey(ResourceLocation pName) {
+        this.name = pName;
     }
 
-    public static <T> ContextKey<T> vanilla(String p_369920_) {
-        return new ContextKey<>(ResourceLocation.withDefaultNamespace(p_369920_));
+    public static <T> ContextKey<T> vanilla(String pName) {
+        return new ContextKey<>(ResourceLocation.withDefaultNamespace(pName));
     }
 
     public ResourceLocation name() {

@@ -18,10 +18,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public abstract class PropertyDispatch {
     private final Map<Selector, List<Variant>> values = Maps.newHashMap();
 
-    protected void putValue(Selector p_378338_, List<Variant> p_376928_) {
-        List<Variant> list = this.values.put(p_378338_, p_376928_);
+    protected void putValue(Selector pSelector, List<Variant> pVariants) {
+        List<Variant> list = this.values.put(pSelector, pVariants);
         if (list != null) {
-            throw new IllegalStateException("Value " + p_378338_ + " is already defined");
+            throw new IllegalStateException("Value " + pSelector + " is already defined");
         }
     }
 
@@ -46,38 +46,38 @@ public abstract class PropertyDispatch {
 
     abstract List<Property<?>> getDefinedProperties();
 
-    public static <T1 extends Comparable<T1>> PropertyDispatch.C1<T1> property(Property<T1> p_375693_) {
-        return new PropertyDispatch.C1<>(p_375693_);
+    public static <T1 extends Comparable<T1>> PropertyDispatch.C1<T1> property(Property<T1> pProperty1) {
+        return new PropertyDispatch.C1<>(pProperty1);
     }
 
-    public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>> PropertyDispatch.C2<T1, T2> properties(Property<T1> p_378486_, Property<T2> p_376121_) {
-        return new PropertyDispatch.C2<>(p_378486_, p_376121_);
+    public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>> PropertyDispatch.C2<T1, T2> properties(Property<T1> pProperty1, Property<T2> pProperty2) {
+        return new PropertyDispatch.C2<>(pProperty1, pProperty2);
     }
 
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>> PropertyDispatch.C3<T1, T2, T3> properties(
-        Property<T1> p_378219_, Property<T2> p_376157_, Property<T3> p_377920_
+        Property<T1> pProperty1, Property<T2> pProperty2, Property<T3> pProperty3
     ) {
-        return new PropertyDispatch.C3<>(p_378219_, p_376157_, p_377920_);
+        return new PropertyDispatch.C3<>(pProperty1, pProperty2, pProperty3);
     }
 
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>> PropertyDispatch.C4<T1, T2, T3, T4> properties(
-        Property<T1> p_376975_, Property<T2> p_376597_, Property<T3> p_375517_, Property<T4> p_375767_
+        Property<T1> pProperty1, Property<T2> pProperty2, Property<T3> pProperty3, Property<T4> pProperty4
     ) {
-        return new PropertyDispatch.C4<>(p_376975_, p_376597_, p_375517_, p_375767_);
+        return new PropertyDispatch.C4<>(pProperty1, pProperty2, pProperty3, pProperty4);
     }
 
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>> PropertyDispatch.C5<T1, T2, T3, T4, T5> properties(
-        Property<T1> p_378288_, Property<T2> p_376698_, Property<T3> p_375794_, Property<T4> p_377627_, Property<T5> p_377745_
+        Property<T1> pProperty1, Property<T2> pProperty2, Property<T3> pProperty3, Property<T4> pProperty4, Property<T5> pProperty5
     ) {
-        return new PropertyDispatch.C5<>(p_378288_, p_376698_, p_375794_, p_377627_, p_377745_);
+        return new PropertyDispatch.C5<>(pProperty1, pProperty2, pProperty3, pProperty4, pProperty5);
     }
 
     @OnlyIn(Dist.CLIENT)
     public static class C1<T1 extends Comparable<T1>> extends PropertyDispatch {
         private final Property<T1> property1;
 
-        C1(Property<T1> p_377319_) {
-            this.property1 = p_377319_;
+        C1(Property<T1> pProperty1) {
+            this.property1 = pProperty1;
         }
 
         @Override
@@ -85,23 +85,23 @@ public abstract class PropertyDispatch {
             return ImmutableList.of(this.property1);
         }
 
-        public PropertyDispatch.C1<T1> select(T1 p_377138_, List<Variant> p_378173_) {
-            Selector selector = Selector.of(this.property1.value(p_377138_));
-            this.putValue(selector, p_378173_);
+        public PropertyDispatch.C1<T1> select(T1 pValue1, List<Variant> pVariants) {
+            Selector selector = Selector.of(this.property1.value(pValue1));
+            this.putValue(selector, pVariants);
             return this;
         }
 
-        public PropertyDispatch.C1<T1> select(T1 p_378325_, Variant p_378155_) {
-            return this.select(p_378325_, Collections.singletonList(p_378155_));
+        public PropertyDispatch.C1<T1> select(T1 pValue1, Variant pVariant) {
+            return this.select(pValue1, Collections.singletonList(pVariant));
         }
 
-        public PropertyDispatch generate(Function<T1, Variant> p_376293_) {
-            this.property1.getPossibleValues().forEach(p_376551_ -> this.select((T1)p_376551_, p_376293_.apply((T1)p_376551_)));
+        public PropertyDispatch generate(Function<T1, Variant> pGenerator) {
+            this.property1.getPossibleValues().forEach(p_376551_ -> this.select((T1)p_376551_, pGenerator.apply((T1)p_376551_)));
             return this;
         }
 
-        public PropertyDispatch generateList(Function<T1, List<Variant>> p_375562_) {
-            this.property1.getPossibleValues().forEach(p_376612_ -> this.select((T1)p_376612_, p_375562_.apply((T1)p_376612_)));
+        public PropertyDispatch generateList(Function<T1, List<Variant>> pGenerator) {
+            this.property1.getPossibleValues().forEach(p_376612_ -> this.select((T1)p_376612_, pGenerator.apply((T1)p_376612_)));
             return this;
         }
     }
@@ -111,9 +111,9 @@ public abstract class PropertyDispatch {
         private final Property<T1> property1;
         private final Property<T2> property2;
 
-        C2(Property<T1> p_377098_, Property<T2> p_375939_) {
-            this.property1 = p_377098_;
-            this.property2 = p_375939_;
+        C2(Property<T1> pProperty1, Property<T2> pProperty2) {
+            this.property1 = pProperty1;
+            this.property2 = pProperty2;
         }
 
         @Override
@@ -121,34 +121,34 @@ public abstract class PropertyDispatch {
             return ImmutableList.of(this.property1, this.property2);
         }
 
-        public PropertyDispatch.C2<T1, T2> select(T1 p_376122_, T2 p_377213_, List<Variant> p_377552_) {
-            Selector selector = Selector.of(this.property1.value(p_376122_), this.property2.value(p_377213_));
-            this.putValue(selector, p_377552_);
+        public PropertyDispatch.C2<T1, T2> select(T1 pValue1, T2 pValue2, List<Variant> pVariants) {
+            Selector selector = Selector.of(this.property1.value(pValue1), this.property2.value(pValue2));
+            this.putValue(selector, pVariants);
             return this;
         }
 
-        public PropertyDispatch.C2<T1, T2> select(T1 p_375979_, T2 p_375490_, Variant p_376065_) {
-            return this.select(p_375979_, p_375490_, Collections.singletonList(p_376065_));
+        public PropertyDispatch.C2<T1, T2> select(T1 pValue1, T2 pValue2, Variant pVariant) {
+            return this.select(pValue1, pValue2, Collections.singletonList(pVariant));
         }
 
-        public PropertyDispatch generate(BiFunction<T1, T2, Variant> p_376615_) {
+        public PropertyDispatch generate(BiFunction<T1, T2, Variant> pGenerator) {
             this.property1
                 .getPossibleValues()
                 .forEach(
                     p_377154_ -> this.property2
                             .getPossibleValues()
-                            .forEach(p_376123_ -> this.select((T1)p_377154_, (T2)p_376123_, p_376615_.apply((T1)p_377154_, (T2)p_376123_)))
+                            .forEach(p_376123_ -> this.select((T1)p_377154_, (T2)p_376123_, pGenerator.apply((T1)p_377154_, (T2)p_376123_)))
                 );
             return this;
         }
 
-        public PropertyDispatch generateList(BiFunction<T1, T2, List<Variant>> p_378695_) {
+        public PropertyDispatch generateList(BiFunction<T1, T2, List<Variant>> pGenerator) {
             this.property1
                 .getPossibleValues()
                 .forEach(
                     p_375491_ -> this.property2
                             .getPossibleValues()
-                            .forEach(p_375416_ -> this.select((T1)p_375491_, (T2)p_375416_, p_378695_.apply((T1)p_375491_, (T2)p_375416_)))
+                            .forEach(p_375416_ -> this.select((T1)p_375491_, (T2)p_375416_, pGenerator.apply((T1)p_375491_, (T2)p_375416_)))
                 );
             return this;
         }
@@ -160,10 +160,10 @@ public abstract class PropertyDispatch {
         private final Property<T2> property2;
         private final Property<T3> property3;
 
-        C3(Property<T1> p_378639_, Property<T2> p_378424_, Property<T3> p_376367_) {
-            this.property1 = p_378639_;
-            this.property2 = p_378424_;
-            this.property3 = p_376367_;
+        C3(Property<T1> pProperty1, Property<T2> pProperty2, Property<T3> pProperty3) {
+            this.property1 = pProperty1;
+            this.property2 = pProperty2;
+            this.property3 = pProperty3;
         }
 
         @Override
@@ -171,17 +171,17 @@ public abstract class PropertyDispatch {
             return ImmutableList.of(this.property1, this.property2, this.property3);
         }
 
-        public PropertyDispatch.C3<T1, T2, T3> select(T1 p_376032_, T2 p_377076_, T3 p_378351_, List<Variant> p_378797_) {
-            Selector selector = Selector.of(this.property1.value(p_376032_), this.property2.value(p_377076_), this.property3.value(p_378351_));
-            this.putValue(selector, p_378797_);
+        public PropertyDispatch.C3<T1, T2, T3> select(T1 pValue1, T2 pValue2, T3 pValue3, List<Variant> pVariants) {
+            Selector selector = Selector.of(this.property1.value(pValue1), this.property2.value(pValue2), this.property3.value(pValue3));
+            this.putValue(selector, pVariants);
             return this;
         }
 
-        public PropertyDispatch.C3<T1, T2, T3> select(T1 p_375963_, T2 p_376963_, T3 p_376668_, Variant p_378537_) {
-            return this.select(p_375963_, p_376963_, p_376668_, Collections.singletonList(p_378537_));
+        public PropertyDispatch.C3<T1, T2, T3> select(T1 pValue1, T2 pValue2, T3 pValue3, Variant pVariant) {
+            return this.select(pValue1, pValue2, pValue3, Collections.singletonList(pVariant));
         }
 
-        public PropertyDispatch generate(PropertyDispatch.TriFunction<T1, T2, T3, Variant> p_377597_) {
+        public PropertyDispatch generate(PropertyDispatch.TriFunction<T1, T2, T3, Variant> pGenerator) {
             this.property1
                 .getPossibleValues()
                 .forEach(
@@ -195,7 +195,7 @@ public abstract class PropertyDispatch {
                                                     (T1)p_377047_,
                                                     (T2)p_377231_,
                                                     (T3)p_378204_,
-                                                    p_377597_.apply((T1)p_377047_, (T2)p_377231_, (T3)p_378204_)
+                                                    pGenerator.apply((T1)p_377047_, (T2)p_377231_, (T3)p_378204_)
                                                 )
                                         )
                             )
@@ -203,7 +203,7 @@ public abstract class PropertyDispatch {
             return this;
         }
 
-        public PropertyDispatch generateList(PropertyDispatch.TriFunction<T1, T2, T3, List<Variant>> p_377011_) {
+        public PropertyDispatch generateList(PropertyDispatch.TriFunction<T1, T2, T3, List<Variant>> pGenerator) {
             this.property1
                 .getPossibleValues()
                 .forEach(
@@ -217,7 +217,7 @@ public abstract class PropertyDispatch {
                                                     (T1)p_378613_,
                                                     (T2)p_376416_,
                                                     (T3)p_377650_,
-                                                    p_377011_.apply((T1)p_378613_, (T2)p_376416_, (T3)p_377650_)
+                                                    pGenerator.apply((T1)p_378613_, (T2)p_376416_, (T3)p_377650_)
                                                 )
                                         )
                             )
@@ -233,11 +233,11 @@ public abstract class PropertyDispatch {
         private final Property<T3> property3;
         private final Property<T4> property4;
 
-        C4(Property<T1> p_377852_, Property<T2> p_377209_, Property<T3> p_378386_, Property<T4> p_376113_) {
-            this.property1 = p_377852_;
-            this.property2 = p_377209_;
-            this.property3 = p_378386_;
-            this.property4 = p_376113_;
+        C4(Property<T1> pProperty1, Property<T2> pProperty2, Property<T3> pProperty3, Property<T4> pProperty4) {
+            this.property1 = pProperty1;
+            this.property2 = pProperty2;
+            this.property3 = pProperty3;
+            this.property4 = pProperty4;
         }
 
         @Override
@@ -245,19 +245,19 @@ public abstract class PropertyDispatch {
             return ImmutableList.of(this.property1, this.property2, this.property3, this.property4);
         }
 
-        public PropertyDispatch.C4<T1, T2, T3, T4> select(T1 p_375560_, T2 p_377739_, T3 p_375969_, T4 p_378016_, List<Variant> p_377859_) {
+        public PropertyDispatch.C4<T1, T2, T3, T4> select(T1 pValue1, T2 pValue2, T3 pValue3, T4 pValue4, List<Variant> pVariants) {
             Selector selector = Selector.of(
-                this.property1.value(p_375560_), this.property2.value(p_377739_), this.property3.value(p_375969_), this.property4.value(p_378016_)
+                this.property1.value(pValue1), this.property2.value(pValue2), this.property3.value(pValue3), this.property4.value(pValue4)
             );
-            this.putValue(selector, p_377859_);
+            this.putValue(selector, pVariants);
             return this;
         }
 
-        public PropertyDispatch.C4<T1, T2, T3, T4> select(T1 p_378307_, T2 p_376465_, T3 p_377599_, T4 p_378302_, Variant p_377845_) {
-            return this.select(p_378307_, p_376465_, p_377599_, p_378302_, Collections.singletonList(p_377845_));
+        public PropertyDispatch.C4<T1, T2, T3, T4> select(T1 pValue1, T2 pValue2, T3 pValue3, T4 pValue4, Variant pVariant) {
+            return this.select(pValue1, pValue2, pValue3, pValue4, Collections.singletonList(pVariant));
         }
 
-        public PropertyDispatch generate(PropertyDispatch.QuadFunction<T1, T2, T3, T4, Variant> p_377044_) {
+        public PropertyDispatch generate(PropertyDispatch.QuadFunction<T1, T2, T3, T4, Variant> pGenerator) {
             this.property1
                 .getPossibleValues()
                 .forEach(
@@ -275,7 +275,7 @@ public abstract class PropertyDispatch {
                                                                 (T2)p_375541_,
                                                                 (T3)p_376281_,
                                                                 (T4)p_378745_,
-                                                                p_377044_.apply((T1)p_376254_, (T2)p_375541_, (T3)p_376281_, (T4)p_378745_)
+                                                                pGenerator.apply((T1)p_376254_, (T2)p_375541_, (T3)p_376281_, (T4)p_378745_)
                                                             )
                                                     )
                                         )
@@ -284,7 +284,7 @@ public abstract class PropertyDispatch {
             return this;
         }
 
-        public PropertyDispatch generateList(PropertyDispatch.QuadFunction<T1, T2, T3, T4, List<Variant>> p_377997_) {
+        public PropertyDispatch generateList(PropertyDispatch.QuadFunction<T1, T2, T3, T4, List<Variant>> pGenerator) {
             this.property1
                 .getPossibleValues()
                 .forEach(
@@ -302,7 +302,7 @@ public abstract class PropertyDispatch {
                                                                 (T2)p_377581_,
                                                                 (T3)p_377467_,
                                                                 (T4)p_378381_,
-                                                                p_377997_.apply((T1)p_375676_, (T2)p_377581_, (T3)p_377467_, (T4)p_378381_)
+                                                                pGenerator.apply((T1)p_375676_, (T2)p_377581_, (T3)p_377467_, (T4)p_378381_)
                                                             )
                                                     )
                                         )
@@ -321,12 +321,12 @@ public abstract class PropertyDispatch {
         private final Property<T4> property4;
         private final Property<T5> property5;
 
-        C5(Property<T1> p_375447_, Property<T2> p_377052_, Property<T3> p_378060_, Property<T4> p_376870_, Property<T5> p_375803_) {
-            this.property1 = p_375447_;
-            this.property2 = p_377052_;
-            this.property3 = p_378060_;
-            this.property4 = p_376870_;
-            this.property5 = p_375803_;
+        C5(Property<T1> pProperty1, Property<T2> pProperty2, Property<T3> pProperty3, Property<T4> pProperty4, Property<T5> pProperty5) {
+            this.property1 = pProperty1;
+            this.property2 = pProperty2;
+            this.property3 = pProperty3;
+            this.property4 = pProperty4;
+            this.property5 = pProperty5;
         }
 
         @Override
@@ -334,23 +334,23 @@ public abstract class PropertyDispatch {
             return ImmutableList.of(this.property1, this.property2, this.property3, this.property4, this.property5);
         }
 
-        public PropertyDispatch.C5<T1, T2, T3, T4, T5> select(T1 p_378643_, T2 p_377480_, T3 p_376302_, T4 p_375916_, T5 p_378810_, List<Variant> p_376554_) {
+        public PropertyDispatch.C5<T1, T2, T3, T4, T5> select(T1 pValue1, T2 pValue2, T3 pValue3, T4 pValue4, T5 pValue5, List<Variant> pVariants) {
             Selector selector = Selector.of(
-                this.property1.value(p_378643_),
-                this.property2.value(p_377480_),
-                this.property3.value(p_376302_),
-                this.property4.value(p_375916_),
-                this.property5.value(p_378810_)
+                this.property1.value(pValue1),
+                this.property2.value(pValue2),
+                this.property3.value(pValue3),
+                this.property4.value(pValue4),
+                this.property5.value(pValue5)
             );
-            this.putValue(selector, p_376554_);
+            this.putValue(selector, pVariants);
             return this;
         }
 
-        public PropertyDispatch.C5<T1, T2, T3, T4, T5> select(T1 p_376524_, T2 p_376144_, T3 p_375814_, T4 p_377177_, T5 p_377254_, Variant p_377784_) {
-            return this.select(p_376524_, p_376144_, p_375814_, p_377177_, p_377254_, Collections.singletonList(p_377784_));
+        public PropertyDispatch.C5<T1, T2, T3, T4, T5> select(T1 pValue1, T2 pValue2, T3 pValue3, T4 pValue4, T5 pValue5, Variant pVariant) {
+            return this.select(pValue1, pValue2, pValue3, pValue4, pValue5, Collections.singletonList(pVariant));
         }
 
-        public PropertyDispatch generate(PropertyDispatch.PentaFunction<T1, T2, T3, T4, T5, Variant> p_378383_) {
+        public PropertyDispatch generate(PropertyDispatch.PentaFunction<T1, T2, T3, T4, T5, Variant> pGenerator) {
             this.property1
                 .getPossibleValues()
                 .forEach(
@@ -372,7 +372,7 @@ public abstract class PropertyDispatch {
                                                                             (T3)p_376810_,
                                                                             (T4)p_378107_,
                                                                             (T5)p_375506_,
-                                                                            p_378383_.apply(
+                                                                            pGenerator.apply(
                                                                                 (T1)p_376257_, (T2)p_378211_, (T3)p_376810_, (T4)p_378107_, (T5)p_375506_
                                                                             )
                                                                         )
@@ -384,7 +384,7 @@ public abstract class PropertyDispatch {
             return this;
         }
 
-        public PropertyDispatch generateList(PropertyDispatch.PentaFunction<T1, T2, T3, T4, T5, List<Variant>> p_376321_) {
+        public PropertyDispatch generateList(PropertyDispatch.PentaFunction<T1, T2, T3, T4, T5, List<Variant>> pGenerator) {
             this.property1
                 .getPossibleValues()
                 .forEach(
@@ -406,7 +406,7 @@ public abstract class PropertyDispatch {
                                                                             (T3)p_376509_,
                                                                             (T4)p_375940_,
                                                                             (T5)p_377883_,
-                                                                            p_376321_.apply(
+                                                                            pGenerator.apply(
                                                                                 (T1)p_378354_, (T2)p_377191_, (T3)p_376509_, (T4)p_375940_, (T5)p_377883_
                                                                             )
                                                                         )
@@ -422,18 +422,18 @@ public abstract class PropertyDispatch {
     @FunctionalInterface
     @OnlyIn(Dist.CLIENT)
     public interface PentaFunction<P1, P2, P3, P4, P5, R> {
-        R apply(P1 p_376349_, P2 p_378563_, P3 p_378655_, P4 p_378004_, P5 p_377691_);
+        R apply(P1 pP1, P2 pP2, P3 pP3, P4 pP4, P5 pP5);
     }
 
     @FunctionalInterface
     @OnlyIn(Dist.CLIENT)
     public interface QuadFunction<P1, P2, P3, P4, R> {
-        R apply(P1 p_377975_, P2 p_375938_, P3 p_378667_, P4 p_378201_);
+        R apply(P1 pP1, P2 pP2, P3 pP3, P4 pP4);
     }
 
     @FunctionalInterface
     @OnlyIn(Dist.CLIENT)
     public interface TriFunction<P1, P2, P3, R> {
-        R apply(P1 p_377666_, P2 p_375642_, P3 p_377932_);
+        R apply(P1 pP1, P2 pP2, P3 pP3);
     }
 }

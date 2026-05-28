@@ -24,20 +24,20 @@ public class GenericWaitingScreen extends Screen {
     private Button button;
     private int disableButtonTicks;
 
-    public static GenericWaitingScreen createWaiting(Component p_240310_, Component p_240311_, Runnable p_240312_) {
-        return new GenericWaitingScreen(p_240310_, null, p_240311_, p_240312_, 0);
+    public static GenericWaitingScreen createWaiting(Component pTitle, Component pButtonLabel, Runnable pButtonCallback) {
+        return new GenericWaitingScreen(pTitle, null, pButtonLabel, pButtonCallback, 0);
     }
 
-    public static GenericWaitingScreen createCompleted(Component p_240291_, Component p_240292_, Component p_240293_, Runnable p_240294_) {
-        return new GenericWaitingScreen(p_240291_, p_240292_, p_240293_, p_240294_, 20);
+    public static GenericWaitingScreen createCompleted(Component pTitle, Component pMessageText, Component pButtonLabel, Runnable pButtonCallback) {
+        return new GenericWaitingScreen(pTitle, pMessageText, pButtonLabel, pButtonCallback, 20);
     }
 
-    protected GenericWaitingScreen(Component p_240300_, @Nullable Component p_240301_, Component p_240302_, Runnable p_240303_, int p_240304_) {
-        super(p_240300_);
-        this.messageText = p_240301_;
-        this.buttonLabel = p_240302_;
-        this.buttonCallback = p_240303_;
-        this.disableButtonTicks = p_240304_;
+    protected GenericWaitingScreen(Component pTitle, @Nullable Component pMessageText, Component pButtonLabel, Runnable pButtonCallback, int pDisableButtonTicks) {
+        super(pTitle);
+        this.messageText = pMessageText;
+        this.buttonLabel = pButtonLabel;
+        this.buttonCallback = pButtonCallback;
+        this.disableButtonTicks = pDisableButtonTicks;
     }
 
     @Override

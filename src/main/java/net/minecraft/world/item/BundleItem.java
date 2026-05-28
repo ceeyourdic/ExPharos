@@ -40,8 +40,8 @@ public class BundleItem extends Item {
         super(p_150726_);
     }
 
-    public static float getFullnessDisplay(ItemStack p_150767_) {
-        BundleContents bundlecontents = p_150767_.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+    public static float getFullnessDisplay(ItemStack pStack) {
+        BundleContents bundlecontents = pStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
         return bundlecontents.weight().floatValue();
     }
 
@@ -130,10 +130,10 @@ public class BundleItem extends Item {
         return InteractionResult.SUCCESS;
     }
 
-    private void dropContent(Level p_369525_, Player p_369321_, ItemStack p_365964_) {
-        if (this.dropContent(p_365964_, p_369321_)) {
-            playDropContentsSound(p_369525_, p_369321_);
-            p_369321_.awardStat(Stats.ITEM_USED.get(this));
+    private void dropContent(Level pLevel, Player pPlayer, ItemStack pStack) {
+        if (this.dropContent(pStack, pPlayer)) {
+            playDropContentsSound(pLevel, pPlayer);
+            pPlayer.awardStat(Stats.ITEM_USED.get(this));
         }
     }
 
@@ -155,41 +155,41 @@ public class BundleItem extends Item {
         return bundlecontents.weight().compareTo(Fraction.ONE) >= 0 ? FULL_BAR_COLOR : BAR_COLOR;
     }
 
-    public static void toggleSelectedItem(ItemStack p_369957_, int p_362067_) {
-        BundleContents bundlecontents = p_369957_.get(DataComponents.BUNDLE_CONTENTS);
+    public static void toggleSelectedItem(ItemStack pBundle, int pSelectedItem) {
+        BundleContents bundlecontents = pBundle.get(DataComponents.BUNDLE_CONTENTS);
         if (bundlecontents != null) {
             BundleContents.Mutable bundlecontents$mutable = new BundleContents.Mutable(bundlecontents);
-            bundlecontents$mutable.toggleSelectedItem(p_362067_);
-            p_369957_.set(DataComponents.BUNDLE_CONTENTS, bundlecontents$mutable.toImmutable());
+            bundlecontents$mutable.toggleSelectedItem(pSelectedItem);
+            pBundle.set(DataComponents.BUNDLE_CONTENTS, bundlecontents$mutable.toImmutable());
         }
     }
 
-    public static boolean hasSelectedItem(ItemStack p_369004_) {
-        BundleContents bundlecontents = p_369004_.get(DataComponents.BUNDLE_CONTENTS);
+    public static boolean hasSelectedItem(ItemStack pBundle) {
+        BundleContents bundlecontents = pBundle.get(DataComponents.BUNDLE_CONTENTS);
         return bundlecontents != null && bundlecontents.getSelectedItem() != -1;
     }
 
-    public static int getSelectedItem(ItemStack p_368122_) {
-        BundleContents bundlecontents = p_368122_.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+    public static int getSelectedItem(ItemStack pBundle) {
+        BundleContents bundlecontents = pBundle.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
         return bundlecontents.getSelectedItem();
     }
 
-    public static ItemStack getSelectedItemStack(ItemStack p_363510_) {
-        BundleContents bundlecontents = p_363510_.get(DataComponents.BUNDLE_CONTENTS);
+    public static ItemStack getSelectedItemStack(ItemStack pBundle) {
+        BundleContents bundlecontents = pBundle.get(DataComponents.BUNDLE_CONTENTS);
         return bundlecontents != null && bundlecontents.getSelectedItem() != -1 ? bundlecontents.getItemUnsafe(bundlecontents.getSelectedItem()) : ItemStack.EMPTY;
     }
 
-    public static int getNumberOfItemsToShow(ItemStack p_363807_) {
-        BundleContents bundlecontents = p_363807_.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+    public static int getNumberOfItemsToShow(ItemStack pBundle) {
+        BundleContents bundlecontents = pBundle.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
         return bundlecontents.getNumberOfItemsToShow();
     }
 
-    private boolean dropContent(ItemStack p_366961_, Player p_369586_) {
-        BundleContents bundlecontents = p_366961_.get(DataComponents.BUNDLE_CONTENTS);
+    private boolean dropContent(ItemStack pStack, Player pPlayer) {
+        BundleContents bundlecontents = pStack.get(DataComponents.BUNDLE_CONTENTS);
         if (bundlecontents != null && !bundlecontents.isEmpty()) {
-            Optional<ItemStack> optional = removeOneItemFromBundle(p_366961_, p_369586_, bundlecontents);
+            Optional<ItemStack> optional = removeOneItemFromBundle(pStack, pPlayer, bundlecontents);
             if (optional.isPresent()) {
-                p_369586_.drop(optional.get(), true);
+                pPlayer.drop(optional.get(), true);
                 return true;
             } else {
                 return false;
@@ -199,12 +199,12 @@ public class BundleItem extends Item {
         }
     }
 
-    private static Optional<ItemStack> removeOneItemFromBundle(ItemStack p_366514_, Player p_363747_, BundleContents p_363035_) {
-        BundleContents.Mutable bundlecontents$mutable = new BundleContents.Mutable(p_363035_);
+    private static Optional<ItemStack> removeOneItemFromBundle(ItemStack pStack, Player pPlayer, BundleContents pBundleContents) {
+        BundleContents.Mutable bundlecontents$mutable = new BundleContents.Mutable(pBundleContents);
         ItemStack itemstack = bundlecontents$mutable.removeOne();
         if (itemstack != null) {
-            playRemoveOneSound(p_363747_);
-            p_366514_.set(DataComponents.BUNDLE_CONTENTS, bundlecontents$mutable.toImmutable());
+            playRemoveOneSound(pPlayer);
+            pStack.set(DataComponents.BUNDLE_CONTENTS, bundlecontents$mutable.toImmutable());
             return Optional.of(itemstack);
         } else {
             return Optional.empty();
@@ -272,8 +272,8 @@ public class BundleItem extends Item {
             .toList();
     }
 
-    public static Item getByColor(DyeColor p_369131_) {
-        return switch (p_369131_) {
+    public static Item getByColor(DyeColor pColor) {
+        return switch (pColor) {
             case WHITE -> Items.WHITE_BUNDLE;
             case ORANGE -> Items.ORANGE_BUNDLE;
             case MAGENTA -> Items.MAGENTA_BUNDLE;
@@ -293,28 +293,28 @@ public class BundleItem extends Item {
         };
     }
 
-    private static void playRemoveOneSound(Entity p_186343_) {
-        p_186343_.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + p_186343_.level().getRandom().nextFloat() * 0.4F);
+    private static void playRemoveOneSound(Entity pEntity) {
+        pEntity.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + pEntity.level().getRandom().nextFloat() * 0.4F);
     }
 
-    private static void playInsertSound(Entity p_186352_) {
-        p_186352_.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + p_186352_.level().getRandom().nextFloat() * 0.4F);
+    private static void playInsertSound(Entity pEntity) {
+        pEntity.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + pEntity.level().getRandom().nextFloat() * 0.4F);
     }
 
-    private static void playInsertFailSound(Entity p_367200_) {
-        p_367200_.playSound(SoundEvents.BUNDLE_INSERT_FAIL, 1.0F, 1.0F);
+    private static void playInsertFailSound(Entity pEntity) {
+        pEntity.playSound(SoundEvents.BUNDLE_INSERT_FAIL, 1.0F, 1.0F);
     }
 
-    private static void playDropContentsSound(Level p_362376_, Entity p_186354_) {
-        p_362376_.playSound(
-            null, p_186354_.blockPosition(), SoundEvents.BUNDLE_DROP_CONTENTS, SoundSource.PLAYERS, 0.8F, 0.8F + p_186354_.level().getRandom().nextFloat() * 0.4F
+    private static void playDropContentsSound(Level pLevel, Entity pEntity) {
+        pLevel.playSound(
+            null, pEntity.blockPosition(), SoundEvents.BUNDLE_DROP_CONTENTS, SoundSource.PLAYERS, 0.8F, 0.8F + pEntity.level().getRandom().nextFloat() * 0.4F
         );
     }
 
-    private void broadcastChangesOnContainerMenu(Player p_365714_) {
-        AbstractContainerMenu abstractcontainermenu = p_365714_.containerMenu;
+    private void broadcastChangesOnContainerMenu(Player pPlayer) {
+        AbstractContainerMenu abstractcontainermenu = pPlayer.containerMenu;
         if (abstractcontainermenu != null) {
-            abstractcontainermenu.slotsChanged(p_365714_.getInventory());
+            abstractcontainermenu.slotsChanged(pPlayer.getInventory());
         }
     }
 }

@@ -97,126 +97,126 @@ public class ItemStackComponentizationFix extends DataFix {
     );
     private static final Splitter PROPERTY_SPLITTER = Splitter.on(',');
 
-    public ItemStackComponentizationFix(Schema p_331666_) {
-        super(p_331666_, true);
+    public ItemStackComponentizationFix(Schema pOutputSchema) {
+        super(pOutputSchema, true);
     }
 
-    private static void fixItemStack(ItemStackComponentizationFix.ItemStackData p_335726_, Dynamic<?> p_329007_) {
-        int i = p_335726_.removeTag("HideFlags").asInt(0);
-        p_335726_.moveTagToComponent("Damage", "minecraft:damage", p_329007_.createInt(0));
-        p_335726_.moveTagToComponent("RepairCost", "minecraft:repair_cost", p_329007_.createInt(0));
-        p_335726_.moveTagToComponent("CustomModelData", "minecraft:custom_model_data");
-        p_335726_.removeTag("BlockStateTag").result().ifPresent(p_333568_ -> p_335726_.setComponent("minecraft:block_state", fixBlockStateTag((Dynamic<?>)p_333568_)));
-        p_335726_.moveTagToComponent("EntityTag", "minecraft:entity_data");
-        p_335726_.fixSubTag("BlockEntityTag", false, p_330163_ -> {
+    private static void fixItemStack(ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<?> pTag) {
+        int i = pItemStackData.removeTag("HideFlags").asInt(0);
+        pItemStackData.moveTagToComponent("Damage", "minecraft:damage", pTag.createInt(0));
+        pItemStackData.moveTagToComponent("RepairCost", "minecraft:repair_cost", pTag.createInt(0));
+        pItemStackData.moveTagToComponent("CustomModelData", "minecraft:custom_model_data");
+        pItemStackData.removeTag("BlockStateTag").result().ifPresent(p_333568_ -> pItemStackData.setComponent("minecraft:block_state", fixBlockStateTag((Dynamic<?>)p_333568_)));
+        pItemStackData.moveTagToComponent("EntityTag", "minecraft:entity_data");
+        pItemStackData.fixSubTag("BlockEntityTag", false, p_330163_ -> {
             String s = NamespacedSchema.ensureNamespaced(p_330163_.get("id").asString(""));
-            p_330163_ = fixBlockEntityTag(p_335726_, p_330163_, s);
+            p_330163_ = fixBlockEntityTag(pItemStackData, p_330163_, s);
             Dynamic<?> dynamic2 = p_330163_.remove("id");
             return dynamic2.equals(p_330163_.emptyMap()) ? dynamic2 : p_330163_;
         });
-        p_335726_.moveTagToComponent("BlockEntityTag", "minecraft:block_entity_data");
-        if (p_335726_.removeTag("Unbreakable").asBoolean(false)) {
-            Dynamic<?> dynamic = p_329007_.emptyMap();
+        pItemStackData.moveTagToComponent("BlockEntityTag", "minecraft:block_entity_data");
+        if (pItemStackData.removeTag("Unbreakable").asBoolean(false)) {
+            Dynamic<?> dynamic = pTag.emptyMap();
             if ((i & 4) != 0) {
-                dynamic = dynamic.set("show_in_tooltip", p_329007_.createBoolean(false));
+                dynamic = dynamic.set("show_in_tooltip", pTag.createBoolean(false));
             }
 
-            p_335726_.setComponent("minecraft:unbreakable", dynamic);
+            pItemStackData.setComponent("minecraft:unbreakable", dynamic);
         }
 
-        fixEnchantments(p_335726_, p_329007_, "Enchantments", "minecraft:enchantments", (i & 1) != 0);
-        if (p_335726_.is("minecraft:enchanted_book")) {
-            fixEnchantments(p_335726_, p_329007_, "StoredEnchantments", "minecraft:stored_enchantments", (i & 32) != 0);
+        fixEnchantments(pItemStackData, pTag, "Enchantments", "minecraft:enchantments", (i & 1) != 0);
+        if (pItemStackData.is("minecraft:enchanted_book")) {
+            fixEnchantments(pItemStackData, pTag, "StoredEnchantments", "minecraft:stored_enchantments", (i & 32) != 0);
         }
 
-        p_335726_.fixSubTag("display", false, p_332023_ -> fixDisplay(p_335726_, p_332023_, i));
-        fixAdventureModeChecks(p_335726_, p_329007_, i);
-        fixAttributeModifiers(p_335726_, p_329007_, i);
-        Optional<? extends Dynamic<?>> optional = p_335726_.removeTag("Trim").result();
+        pItemStackData.fixSubTag("display", false, p_332023_ -> fixDisplay(pItemStackData, p_332023_, i));
+        fixAdventureModeChecks(pItemStackData, pTag, i);
+        fixAttributeModifiers(pItemStackData, pTag, i);
+        Optional<? extends Dynamic<?>> optional = pItemStackData.removeTag("Trim").result();
         if (optional.isPresent()) {
             Dynamic<?> dynamic1 = (Dynamic<?>)optional.get();
             if ((i & 128) != 0) {
                 dynamic1 = dynamic1.set("show_in_tooltip", dynamic1.createBoolean(false));
             }
 
-            p_335726_.setComponent("minecraft:trim", dynamic1);
+            pItemStackData.setComponent("minecraft:trim", dynamic1);
         }
 
         if ((i & 32) != 0) {
-            p_335726_.setComponent("minecraft:hide_additional_tooltip", p_329007_.emptyMap());
+            pItemStackData.setComponent("minecraft:hide_additional_tooltip", pTag.emptyMap());
         }
 
-        if (p_335726_.is("minecraft:crossbow")) {
-            p_335726_.removeTag("Charged");
-            p_335726_.moveTagToComponent("ChargedProjectiles", "minecraft:charged_projectiles", p_329007_.createList(Stream.empty()));
+        if (pItemStackData.is("minecraft:crossbow")) {
+            pItemStackData.removeTag("Charged");
+            pItemStackData.moveTagToComponent("ChargedProjectiles", "minecraft:charged_projectiles", pTag.createList(Stream.empty()));
         }
 
-        if (p_335726_.is("minecraft:bundle")) {
-            p_335726_.moveTagToComponent("Items", "minecraft:bundle_contents", p_329007_.createList(Stream.empty()));
+        if (pItemStackData.is("minecraft:bundle")) {
+            pItemStackData.moveTagToComponent("Items", "minecraft:bundle_contents", pTag.createList(Stream.empty()));
         }
 
-        if (p_335726_.is("minecraft:filled_map")) {
-            p_335726_.moveTagToComponent("map", "minecraft:map_id");
-            Map<? extends Dynamic<?>, ? extends Dynamic<?>> map = p_335726_.removeTag("Decorations")
+        if (pItemStackData.is("minecraft:filled_map")) {
+            pItemStackData.moveTagToComponent("map", "minecraft:map_id");
+            Map<? extends Dynamic<?>, ? extends Dynamic<?>> map = pItemStackData.removeTag("Decorations")
                 .asStream()
                 .map(ItemStackComponentizationFix::fixMapDecoration)
                 .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, (p_328286_, p_333385_) -> p_328286_));
             if (!map.isEmpty()) {
-                p_335726_.setComponent("minecraft:map_decorations", p_329007_.createMap(map));
+                pItemStackData.setComponent("minecraft:map_decorations", pTag.createMap(map));
             }
         }
 
-        if (p_335726_.is(POTION_HOLDER_IDS)) {
-            fixPotionContents(p_335726_, p_329007_);
+        if (pItemStackData.is(POTION_HOLDER_IDS)) {
+            fixPotionContents(pItemStackData, pTag);
         }
 
-        if (p_335726_.is("minecraft:writable_book")) {
-            fixWritableBook(p_335726_, p_329007_);
+        if (pItemStackData.is("minecraft:writable_book")) {
+            fixWritableBook(pItemStackData, pTag);
         }
 
-        if (p_335726_.is("minecraft:written_book")) {
-            fixWrittenBook(p_335726_, p_329007_);
+        if (pItemStackData.is("minecraft:written_book")) {
+            fixWrittenBook(pItemStackData, pTag);
         }
 
-        if (p_335726_.is("minecraft:suspicious_stew")) {
-            p_335726_.moveTagToComponent("effects", "minecraft:suspicious_stew_effects");
+        if (pItemStackData.is("minecraft:suspicious_stew")) {
+            pItemStackData.moveTagToComponent("effects", "minecraft:suspicious_stew_effects");
         }
 
-        if (p_335726_.is("minecraft:debug_stick")) {
-            p_335726_.moveTagToComponent("DebugProperty", "minecraft:debug_stick_state");
+        if (pItemStackData.is("minecraft:debug_stick")) {
+            pItemStackData.moveTagToComponent("DebugProperty", "minecraft:debug_stick_state");
         }
 
-        if (p_335726_.is(BUCKETED_MOB_IDS)) {
-            fixBucketedMobData(p_335726_, p_329007_);
+        if (pItemStackData.is(BUCKETED_MOB_IDS)) {
+            fixBucketedMobData(pItemStackData, pTag);
         }
 
-        if (p_335726_.is("minecraft:goat_horn")) {
-            p_335726_.moveTagToComponent("instrument", "minecraft:instrument");
+        if (pItemStackData.is("minecraft:goat_horn")) {
+            pItemStackData.moveTagToComponent("instrument", "minecraft:instrument");
         }
 
-        if (p_335726_.is("minecraft:knowledge_book")) {
-            p_335726_.moveTagToComponent("Recipes", "minecraft:recipes");
+        if (pItemStackData.is("minecraft:knowledge_book")) {
+            pItemStackData.moveTagToComponent("Recipes", "minecraft:recipes");
         }
 
-        if (p_335726_.is("minecraft:compass")) {
-            fixLodestoneTracker(p_335726_, p_329007_);
+        if (pItemStackData.is("minecraft:compass")) {
+            fixLodestoneTracker(pItemStackData, pTag);
         }
 
-        if (p_335726_.is("minecraft:firework_rocket")) {
-            fixFireworkRocket(p_335726_);
+        if (pItemStackData.is("minecraft:firework_rocket")) {
+            fixFireworkRocket(pItemStackData);
         }
 
-        if (p_335726_.is("minecraft:firework_star")) {
-            fixFireworkStar(p_335726_);
+        if (pItemStackData.is("minecraft:firework_star")) {
+            fixFireworkStar(pItemStackData);
         }
 
-        if (p_335726_.is("minecraft:player_head")) {
-            p_335726_.removeTag("SkullOwner").result().ifPresent(p_328052_ -> p_335726_.setComponent("minecraft:profile", fixProfile((Dynamic<?>)p_328052_)));
+        if (pItemStackData.is("minecraft:player_head")) {
+            pItemStackData.removeTag("SkullOwner").result().ifPresent(p_328052_ -> pItemStackData.setComponent("minecraft:profile", fixProfile((Dynamic<?>)p_328052_)));
         }
     }
 
-    private static Dynamic<?> fixBlockStateTag(Dynamic<?> p_329060_) {
-        return DataFixUtils.orElse(p_329060_.asMapOpt().result().map(p_331937_ -> p_331937_.collect(Collectors.toMap(Pair::getFirst, p_330078_ -> {
+    private static Dynamic<?> fixBlockStateTag(Dynamic<?> pTag) {
+        return DataFixUtils.orElse(pTag.asMapOpt().result().map(p_331937_ -> p_331937_.collect(Collectors.toMap(Pair::getFirst, p_330078_ -> {
                 String s = ((Dynamic)p_330078_.getFirst()).asString("");
                 Dynamic<?> dynamic = (Dynamic<?>)p_330078_.getSecond();
                 if (BOOLEAN_BLOCK_STATE_PROPERTIES.contains(s)) {
@@ -228,147 +228,147 @@ public class ItemStackComponentizationFix extends DataFix {
 
                 Optional<Number> optional1 = dynamic.asNumber().result();
                 return optional1.isPresent() ? dynamic.createString(optional1.get().toString()) : dynamic;
-            }))).map(p_329060_::createMap), p_329060_);
+            }))).map(pTag::createMap), pTag);
     }
 
-    private static Dynamic<?> fixDisplay(ItemStackComponentizationFix.ItemStackData p_333136_, Dynamic<?> p_329974_, int p_330088_) {
-        p_333136_.setComponent("minecraft:custom_name", p_329974_.get("Name"));
-        p_333136_.setComponent("minecraft:lore", p_329974_.get("Lore"));
-        Optional<Integer> optional = p_329974_.get("color").asNumber().result().map(Number::intValue);
-        boolean flag = (p_330088_ & 64) != 0;
+    private static Dynamic<?> fixDisplay(ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<?> pTag, int pHideFlags) {
+        pItemStackData.setComponent("minecraft:custom_name", pTag.get("Name"));
+        pItemStackData.setComponent("minecraft:lore", pTag.get("Lore"));
+        Optional<Integer> optional = pTag.get("color").asNumber().result().map(Number::intValue);
+        boolean flag = (pHideFlags & 64) != 0;
         if (optional.isPresent() || flag) {
-            Dynamic<?> dynamic = p_329974_.emptyMap().set("rgb", p_329974_.createInt(optional.orElse(10511680)));
+            Dynamic<?> dynamic = pTag.emptyMap().set("rgb", pTag.createInt(optional.orElse(10511680)));
             if (flag) {
-                dynamic = dynamic.set("show_in_tooltip", p_329974_.createBoolean(false));
+                dynamic = dynamic.set("show_in_tooltip", pTag.createBoolean(false));
             }
 
-            p_333136_.setComponent("minecraft:dyed_color", dynamic);
+            pItemStackData.setComponent("minecraft:dyed_color", dynamic);
         }
 
-        Optional<String> optional1 = p_329974_.get("LocName").asString().result();
+        Optional<String> optional1 = pTag.get("LocName").asString().result();
         if (optional1.isPresent()) {
-            p_333136_.setComponent("minecraft:item_name", ComponentDataFixUtils.createTranslatableComponent(p_329974_.getOps(), optional1.get()));
+            pItemStackData.setComponent("minecraft:item_name", ComponentDataFixUtils.createTranslatableComponent(pTag.getOps(), optional1.get()));
         }
 
-        if (p_333136_.is("minecraft:filled_map")) {
-            p_333136_.setComponent("minecraft:map_color", p_329974_.get("MapColor"));
-            p_329974_ = p_329974_.remove("MapColor");
+        if (pItemStackData.is("minecraft:filled_map")) {
+            pItemStackData.setComponent("minecraft:map_color", pTag.get("MapColor"));
+            pTag = pTag.remove("MapColor");
         }
 
-        return p_329974_.remove("Name").remove("Lore").remove("color").remove("LocName");
+        return pTag.remove("Name").remove("Lore").remove("color").remove("LocName");
     }
 
-    private static <T> Dynamic<T> fixBlockEntityTag(ItemStackComponentizationFix.ItemStackData p_334120_, Dynamic<T> p_332622_, String p_334133_) {
-        p_334120_.setComponent("minecraft:lock", p_332622_.get("Lock"));
-        p_332622_ = p_332622_.remove("Lock");
-        Optional<Dynamic<T>> optional = p_332622_.get("LootTable").result();
+    private static <T> Dynamic<T> fixBlockEntityTag(ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<T> pTag, String pEntityId) {
+        pItemStackData.setComponent("minecraft:lock", pTag.get("Lock"));
+        pTag = pTag.remove("Lock");
+        Optional<Dynamic<T>> optional = pTag.get("LootTable").result();
         if (optional.isPresent()) {
-            Dynamic<T> dynamic = p_332622_.emptyMap().set("loot_table", optional.get());
-            long i = p_332622_.get("LootTableSeed").asLong(0L);
+            Dynamic<T> dynamic = pTag.emptyMap().set("loot_table", optional.get());
+            long i = pTag.get("LootTableSeed").asLong(0L);
             if (i != 0L) {
-                dynamic = dynamic.set("seed", p_332622_.createLong(i));
+                dynamic = dynamic.set("seed", pTag.createLong(i));
             }
 
-            p_334120_.setComponent("minecraft:container_loot", dynamic);
-            p_332622_ = p_332622_.remove("LootTable").remove("LootTableSeed");
+            pItemStackData.setComponent("minecraft:container_loot", dynamic);
+            pTag = pTag.remove("LootTable").remove("LootTableSeed");
         }
-        return switch (p_334133_) {
+        return switch (pEntityId) {
             case "minecraft:skull" -> {
-                p_334120_.setComponent("minecraft:note_block_sound", p_332622_.get("note_block_sound"));
-                yield p_332622_.remove("note_block_sound");
+                pItemStackData.setComponent("minecraft:note_block_sound", pTag.get("note_block_sound"));
+                yield pTag.remove("note_block_sound");
             }
             case "minecraft:decorated_pot" -> {
-                p_334120_.setComponent("minecraft:pot_decorations", p_332622_.get("sherds"));
-                Optional<Dynamic<T>> optional2 = p_332622_.get("item").result();
+                pItemStackData.setComponent("minecraft:pot_decorations", pTag.get("sherds"));
+                Optional<Dynamic<T>> optional2 = pTag.get("item").result();
                 if (optional2.isPresent()) {
-                    p_334120_.setComponent(
+                    pItemStackData.setComponent(
                         "minecraft:container",
-                        p_332622_.createList(Stream.of(p_332622_.emptyMap().set("slot", p_332622_.createInt(0)).set("item", optional2.get())))
+                        pTag.createList(Stream.of(pTag.emptyMap().set("slot", pTag.createInt(0)).set("item", optional2.get())))
                     );
                 }
 
-                yield p_332622_.remove("sherds").remove("item");
+                yield pTag.remove("sherds").remove("item");
             }
             case "minecraft:banner" -> {
-                p_334120_.setComponent("minecraft:banner_patterns", p_332622_.get("patterns"));
-                Optional<Number> optional1 = p_332622_.get("Base").asNumber().result();
+                pItemStackData.setComponent("minecraft:banner_patterns", pTag.get("patterns"));
+                Optional<Number> optional1 = pTag.get("Base").asNumber().result();
                 if (optional1.isPresent()) {
-                    p_334120_.setComponent("minecraft:base_color", p_332622_.createString(BannerPatternFormatFix.fixColor(optional1.get().intValue())));
+                    pItemStackData.setComponent("minecraft:base_color", pTag.createString(BannerPatternFormatFix.fixColor(optional1.get().intValue())));
                 }
 
-                yield p_332622_.remove("patterns").remove("Base");
+                yield pTag.remove("patterns").remove("Base");
             }
             case "minecraft:shulker_box", "minecraft:chest", "minecraft:trapped_chest", "minecraft:furnace", "minecraft:ender_chest", "minecraft:dispenser", "minecraft:dropper", "minecraft:brewing_stand", "minecraft:hopper", "minecraft:barrel", "minecraft:smoker", "minecraft:blast_furnace", "minecraft:campfire", "minecraft:chiseled_bookshelf", "minecraft:crafter" -> {
-                List<Dynamic<T>> list = p_332622_.get("Items")
+                List<Dynamic<T>> list = pTag.get("Items")
                     .asList(
                         p_334204_ -> p_334204_.emptyMap()
                                 .set("slot", p_334204_.createInt(p_334204_.get("Slot").asByte((byte)0) & 255))
                                 .set("item", p_334204_.remove("Slot"))
                     );
                 if (!list.isEmpty()) {
-                    p_334120_.setComponent("minecraft:container", p_332622_.createList(list.stream()));
+                    pItemStackData.setComponent("minecraft:container", pTag.createList(list.stream()));
                 }
 
-                yield p_332622_.remove("Items");
+                yield pTag.remove("Items");
             }
             case "minecraft:beehive" -> {
-                p_334120_.setComponent("minecraft:bees", p_332622_.get("bees"));
-                yield p_332622_.remove("bees");
+                pItemStackData.setComponent("minecraft:bees", pTag.get("bees"));
+                yield pTag.remove("bees");
             }
-            default -> p_332622_;
+            default -> pTag;
         };
     }
 
     private static void fixEnchantments(
-        ItemStackComponentizationFix.ItemStackData p_332552_, Dynamic<?> p_328849_, String p_333260_, String p_334340_, boolean p_329498_
+        ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<?> pTag, String pKey, String pComponent, boolean pHideEnchantments
     ) {
-        OptionalDynamic<?> optionaldynamic = p_332552_.removeTag(p_333260_);
+        OptionalDynamic<?> optionaldynamic = pItemStackData.removeTag(pKey);
         List<Pair<String, Integer>> list = optionaldynamic.asList(Function.identity())
             .stream()
             .flatMap(p_331550_ -> parseEnchantment((Dynamic<?>)p_331550_).stream())
             .toList();
-        if (!list.isEmpty() || p_329498_) {
-            Dynamic<?> dynamic = p_328849_.emptyMap();
-            Dynamic<?> dynamic1 = p_328849_.emptyMap();
+        if (!list.isEmpty() || pHideEnchantments) {
+            Dynamic<?> dynamic = pTag.emptyMap();
+            Dynamic<?> dynamic1 = pTag.emptyMap();
 
             for (Pair<String, Integer> pair : list) {
-                dynamic1 = dynamic1.set(pair.getFirst(), p_328849_.createInt(pair.getSecond()));
+                dynamic1 = dynamic1.set(pair.getFirst(), pTag.createInt(pair.getSecond()));
             }
 
             dynamic = dynamic.set("levels", dynamic1);
-            if (p_329498_) {
-                dynamic = dynamic.set("show_in_tooltip", p_328849_.createBoolean(false));
+            if (pHideEnchantments) {
+                dynamic = dynamic.set("show_in_tooltip", pTag.createBoolean(false));
             }
 
-            p_332552_.setComponent(p_334340_, dynamic);
+            pItemStackData.setComponent(pComponent, dynamic);
         }
 
         if (optionaldynamic.result().isPresent() && list.isEmpty()) {
-            p_332552_.setComponent("minecraft:enchantment_glint_override", p_328849_.createBoolean(true));
+            pItemStackData.setComponent("minecraft:enchantment_glint_override", pTag.createBoolean(true));
         }
     }
 
-    private static Optional<Pair<String, Integer>> parseEnchantment(Dynamic<?> p_328387_) {
-        return p_328387_.get("id")
+    private static Optional<Pair<String, Integer>> parseEnchantment(Dynamic<?> pEnchantmentTag) {
+        return pEnchantmentTag.get("id")
             .asString()
-            .apply2stable((p_335475_, p_333076_) -> Pair.of(p_335475_, Mth.clamp(p_333076_.intValue(), 0, 255)), p_328387_.get("lvl").asNumber())
+            .apply2stable((p_335475_, p_333076_) -> Pair.of(p_335475_, Mth.clamp(p_333076_.intValue(), 0, 255)), pEnchantmentTag.get("lvl").asNumber())
             .result();
     }
 
-    private static void fixAdventureModeChecks(ItemStackComponentizationFix.ItemStackData p_328938_, Dynamic<?> p_336252_, int p_331810_) {
-        fixBlockStatePredicates(p_328938_, p_336252_, "CanDestroy", "minecraft:can_break", (p_331810_ & 8) != 0);
-        fixBlockStatePredicates(p_328938_, p_336252_, "CanPlaceOn", "minecraft:can_place_on", (p_331810_ & 16) != 0);
+    private static void fixAdventureModeChecks(ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<?> pTag, int pHideFlags) {
+        fixBlockStatePredicates(pItemStackData, pTag, "CanDestroy", "minecraft:can_break", (pHideFlags & 8) != 0);
+        fixBlockStatePredicates(pItemStackData, pTag, "CanPlaceOn", "minecraft:can_place_on", (pHideFlags & 16) != 0);
     }
 
     private static void fixBlockStatePredicates(
-        ItemStackComponentizationFix.ItemStackData p_331433_, Dynamic<?> p_332377_, String p_332474_, String p_333138_, boolean p_334219_
+        ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<?> pTag, String pKey, String pComponent, boolean pHide
     ) {
-        Optional<? extends Dynamic<?>> optional = p_331433_.removeTag(p_332474_).result();
+        Optional<? extends Dynamic<?>> optional = pItemStackData.removeTag(pKey).result();
         if (!optional.isEmpty()) {
-            Dynamic<?> dynamic = p_332377_.emptyMap()
+            Dynamic<?> dynamic = pTag.emptyMap()
                 .set(
                     "predicates",
-                    p_332377_.createList(
+                    pTag.createList(
                         optional.get()
                             .asStream()
                             .map(
@@ -378,18 +378,18 @@ public class ItemStackComponentizationFix extends DataFix {
                             )
                     )
                 );
-            if (p_334219_) {
-                dynamic = dynamic.set("show_in_tooltip", p_332377_.createBoolean(false));
+            if (pHide) {
+                dynamic = dynamic.set("show_in_tooltip", pTag.createBoolean(false));
             }
 
-            p_331433_.setComponent(p_333138_, dynamic);
+            pItemStackData.setComponent(pComponent, dynamic);
         }
     }
 
-    private static Dynamic<?> fixBlockStatePredicate(Dynamic<?> p_330250_, String p_335482_) {
-        int i = p_335482_.indexOf(91);
-        int j = p_335482_.indexOf(123);
-        int k = p_335482_.length();
+    private static Dynamic<?> fixBlockStatePredicate(Dynamic<?> pTag, String pBlockId) {
+        int i = pBlockId.indexOf(91);
+        int j = pBlockId.indexOf(123);
+        int k = pBlockId.length();
         if (i != -1) {
             k = i;
         }
@@ -398,57 +398,57 @@ public class ItemStackComponentizationFix extends DataFix {
             k = Math.min(k, j);
         }
 
-        String s = p_335482_.substring(0, k);
-        Dynamic<?> dynamic = p_330250_.emptyMap().set("blocks", p_330250_.createString(s.trim()));
-        int l = p_335482_.indexOf(93);
+        String s = pBlockId.substring(0, k);
+        Dynamic<?> dynamic = pTag.emptyMap().set("blocks", pTag.createString(s.trim()));
+        int l = pBlockId.indexOf(93);
         if (i != -1 && l != -1) {
-            Dynamic<?> dynamic1 = p_330250_.emptyMap();
+            Dynamic<?> dynamic1 = pTag.emptyMap();
 
-            for (String s1 : PROPERTY_SPLITTER.split(p_335482_.substring(i + 1, l))) {
+            for (String s1 : PROPERTY_SPLITTER.split(pBlockId.substring(i + 1, l))) {
                 int i1 = s1.indexOf(61);
                 if (i1 != -1) {
                     String s2 = s1.substring(0, i1).trim();
                     String s3 = s1.substring(i1 + 1).trim();
-                    dynamic1 = dynamic1.set(s2, p_330250_.createString(s3));
+                    dynamic1 = dynamic1.set(s2, pTag.createString(s3));
                 }
             }
 
             dynamic = dynamic.set("state", dynamic1);
         }
 
-        int j1 = p_335482_.indexOf(125);
+        int j1 = pBlockId.indexOf(125);
         if (j != -1 && j1 != -1) {
-            dynamic = dynamic.set("nbt", p_330250_.createString(p_335482_.substring(j, j1 + 1)));
+            dynamic = dynamic.set("nbt", pTag.createString(pBlockId.substring(j, j1 + 1)));
         }
 
         return dynamic;
     }
 
-    private static void fixAttributeModifiers(ItemStackComponentizationFix.ItemStackData p_329869_, Dynamic<?> p_332943_, int p_330062_) {
-        OptionalDynamic<?> optionaldynamic = p_329869_.removeTag("AttributeModifiers");
+    private static void fixAttributeModifiers(ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<?> pTag, int pHideFlags) {
+        OptionalDynamic<?> optionaldynamic = pItemStackData.removeTag("AttributeModifiers");
         if (!optionaldynamic.result().isEmpty()) {
-            boolean flag = (p_330062_ & 2) != 0;
+            boolean flag = (pHideFlags & 2) != 0;
             List<? extends Dynamic<?>> list = optionaldynamic.asList(ItemStackComponentizationFix::fixAttributeModifier);
-            Dynamic<?> dynamic = p_332943_.emptyMap().set("modifiers", p_332943_.createList(list.stream()));
+            Dynamic<?> dynamic = pTag.emptyMap().set("modifiers", pTag.createList(list.stream()));
             if (flag) {
-                dynamic = dynamic.set("show_in_tooltip", p_332943_.createBoolean(false));
+                dynamic = dynamic.set("show_in_tooltip", pTag.createBoolean(false));
             }
 
-            p_329869_.setComponent("minecraft:attribute_modifiers", dynamic);
+            pItemStackData.setComponent("minecraft:attribute_modifiers", dynamic);
         }
     }
 
-    private static Dynamic<?> fixAttributeModifier(Dynamic<?> p_330280_) {
-        Dynamic<?> dynamic = p_330280_.emptyMap()
-            .set("name", p_330280_.createString(""))
-            .set("amount", p_330280_.createDouble(0.0))
-            .set("operation", p_330280_.createString("add_value"));
-        dynamic = Dynamic.copyField(p_330280_, "AttributeName", dynamic, "type");
-        dynamic = Dynamic.copyField(p_330280_, "Slot", dynamic, "slot");
-        dynamic = Dynamic.copyField(p_330280_, "UUID", dynamic, "uuid");
-        dynamic = Dynamic.copyField(p_330280_, "Name", dynamic, "name");
-        dynamic = Dynamic.copyField(p_330280_, "Amount", dynamic, "amount");
-        return Dynamic.copyAndFixField(p_330280_, "Operation", dynamic, "operation", p_334772_ -> {
+    private static Dynamic<?> fixAttributeModifier(Dynamic<?> pTag) {
+        Dynamic<?> dynamic = pTag.emptyMap()
+            .set("name", pTag.createString(""))
+            .set("amount", pTag.createDouble(0.0))
+            .set("operation", pTag.createString("add_value"));
+        dynamic = Dynamic.copyField(pTag, "AttributeName", dynamic, "type");
+        dynamic = Dynamic.copyField(pTag, "Slot", dynamic, "slot");
+        dynamic = Dynamic.copyField(pTag, "UUID", dynamic, "uuid");
+        dynamic = Dynamic.copyField(pTag, "Name", dynamic, "name");
+        dynamic = Dynamic.copyField(pTag, "Amount", dynamic, "amount");
+        return Dynamic.copyAndFixField(pTag, "Operation", dynamic, "operation", p_334772_ -> {
             return p_334772_.createString(switch (p_334772_.asInt(0)) {
                 case 1 -> "add_multiplied_base";
                 case 2 -> "add_multiplied_total";
@@ -457,18 +457,18 @@ public class ItemStackComponentizationFix extends DataFix {
         });
     }
 
-    private static Pair<Dynamic<?>, Dynamic<?>> fixMapDecoration(Dynamic<?> p_329859_) {
-        Dynamic<?> dynamic = DataFixUtils.orElseGet(p_329859_.get("id").result(), () -> p_329859_.createString(""));
-        Dynamic<?> dynamic1 = p_329859_.emptyMap()
-            .set("type", p_329859_.createString(fixMapDecorationType(p_329859_.get("type").asInt(0))))
-            .set("x", p_329859_.createDouble(p_329859_.get("x").asDouble(0.0)))
-            .set("z", p_329859_.createDouble(p_329859_.get("z").asDouble(0.0)))
-            .set("rotation", p_329859_.createFloat((float)p_329859_.get("rot").asDouble(0.0)));
+    private static Pair<Dynamic<?>, Dynamic<?>> fixMapDecoration(Dynamic<?> pTag) {
+        Dynamic<?> dynamic = DataFixUtils.orElseGet(pTag.get("id").result(), () -> pTag.createString(""));
+        Dynamic<?> dynamic1 = pTag.emptyMap()
+            .set("type", pTag.createString(fixMapDecorationType(pTag.get("type").asInt(0))))
+            .set("x", pTag.createDouble(pTag.get("x").asDouble(0.0)))
+            .set("z", pTag.createDouble(pTag.get("z").asDouble(0.0)))
+            .set("rotation", pTag.createFloat((float)pTag.get("rot").asDouble(0.0)));
         return Pair.of(dynamic, dynamic1);
     }
 
-    private static String fixMapDecorationType(int p_328497_) {
-        return switch (p_328497_) {
+    private static String fixMapDecorationType(int pDecorationType) {
+        return switch (pDecorationType) {
             case 1 -> "frame";
             case 2 -> "red_marker";
             case 3 -> "blue_marker";
@@ -506,47 +506,47 @@ public class ItemStackComponentizationFix extends DataFix {
         };
     }
 
-    private static void fixPotionContents(ItemStackComponentizationFix.ItemStackData p_329173_, Dynamic<?> p_331866_) {
-        Dynamic<?> dynamic = p_331866_.emptyMap();
-        Optional<String> optional = p_329173_.removeTag("Potion").asString().result().filter(p_334871_ -> !p_334871_.equals("minecraft:empty"));
+    private static void fixPotionContents(ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<?> pTag) {
+        Dynamic<?> dynamic = pTag.emptyMap();
+        Optional<String> optional = pItemStackData.removeTag("Potion").asString().result().filter(p_334871_ -> !p_334871_.equals("minecraft:empty"));
         if (optional.isPresent()) {
-            dynamic = dynamic.set("potion", p_331866_.createString(optional.get()));
+            dynamic = dynamic.set("potion", pTag.createString(optional.get()));
         }
 
-        dynamic = p_329173_.moveTagInto("CustomPotionColor", dynamic, "custom_color");
-        dynamic = p_329173_.moveTagInto("custom_potion_effects", dynamic, "custom_effects");
-        if (!dynamic.equals(p_331866_.emptyMap())) {
-            p_329173_.setComponent("minecraft:potion_contents", dynamic);
+        dynamic = pItemStackData.moveTagInto("CustomPotionColor", dynamic, "custom_color");
+        dynamic = pItemStackData.moveTagInto("custom_potion_effects", dynamic, "custom_effects");
+        if (!dynamic.equals(pTag.emptyMap())) {
+            pItemStackData.setComponent("minecraft:potion_contents", dynamic);
         }
     }
 
-    private static void fixWritableBook(ItemStackComponentizationFix.ItemStackData p_332414_, Dynamic<?> p_329764_) {
-        Dynamic<?> dynamic = fixBookPages(p_332414_, p_329764_);
+    private static void fixWritableBook(ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<?> pTag) {
+        Dynamic<?> dynamic = fixBookPages(pItemStackData, pTag);
         if (dynamic != null) {
-            p_332414_.setComponent("minecraft:writable_book_content", p_329764_.emptyMap().set("pages", dynamic));
+            pItemStackData.setComponent("minecraft:writable_book_content", pTag.emptyMap().set("pages", dynamic));
         }
     }
 
-    private static void fixWrittenBook(ItemStackComponentizationFix.ItemStackData p_333609_, Dynamic<?> p_330312_) {
-        Dynamic<?> dynamic = fixBookPages(p_333609_, p_330312_);
-        String s = p_333609_.removeTag("title").asString("");
-        Optional<String> optional = p_333609_.removeTag("filtered_title").asString().result();
-        Dynamic<?> dynamic1 = p_330312_.emptyMap();
-        dynamic1 = dynamic1.set("title", createFilteredText(p_330312_, s, optional));
-        dynamic1 = p_333609_.moveTagInto("author", dynamic1, "author");
-        dynamic1 = p_333609_.moveTagInto("resolved", dynamic1, "resolved");
-        dynamic1 = p_333609_.moveTagInto("generation", dynamic1, "generation");
+    private static void fixWrittenBook(ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<?> pTag) {
+        Dynamic<?> dynamic = fixBookPages(pItemStackData, pTag);
+        String s = pItemStackData.removeTag("title").asString("");
+        Optional<String> optional = pItemStackData.removeTag("filtered_title").asString().result();
+        Dynamic<?> dynamic1 = pTag.emptyMap();
+        dynamic1 = dynamic1.set("title", createFilteredText(pTag, s, optional));
+        dynamic1 = pItemStackData.moveTagInto("author", dynamic1, "author");
+        dynamic1 = pItemStackData.moveTagInto("resolved", dynamic1, "resolved");
+        dynamic1 = pItemStackData.moveTagInto("generation", dynamic1, "generation");
         if (dynamic != null) {
             dynamic1 = dynamic1.set("pages", dynamic);
         }
 
-        p_333609_.setComponent("minecraft:written_book_content", dynamic1);
+        pItemStackData.setComponent("minecraft:written_book_content", dynamic1);
     }
 
     @Nullable
-    private static Dynamic<?> fixBookPages(ItemStackComponentizationFix.ItemStackData p_335763_, Dynamic<?> p_328532_) {
-        List<String> list = p_335763_.removeTag("pages").asList(p_331615_ -> p_331615_.asString(""));
-        Map<String, String> map = p_335763_.removeTag("filtered_pages").asMap(p_335169_ -> p_335169_.asString("0"), p_329927_ -> p_329927_.asString(""));
+    private static Dynamic<?> fixBookPages(ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<?> pTag) {
+        List<String> list = pItemStackData.removeTag("pages").asList(p_331615_ -> p_331615_.asString(""));
+        Map<String, String> map = pItemStackData.removeTag("filtered_pages").asMap(p_335169_ -> p_335169_.asString("0"), p_329927_ -> p_329927_.asString(""));
         if (list.isEmpty()) {
             return null;
         } else {
@@ -555,67 +555,67 @@ public class ItemStackComponentizationFix extends DataFix {
             for (int i = 0; i < list.size(); i++) {
                 String s = list.get(i);
                 String s1 = map.get(String.valueOf(i));
-                list1.add(createFilteredText(p_328532_, s, Optional.ofNullable(s1)));
+                list1.add(createFilteredText(pTag, s, Optional.ofNullable(s1)));
             }
 
-            return p_328532_.createList(list1.stream());
+            return pTag.createList(list1.stream());
         }
     }
 
-    private static Dynamic<?> createFilteredText(Dynamic<?> p_330363_, String p_328510_, Optional<String> p_328222_) {
-        Dynamic<?> dynamic = p_330363_.emptyMap().set("raw", p_330363_.createString(p_328510_));
-        if (p_328222_.isPresent()) {
-            dynamic = dynamic.set("filtered", p_330363_.createString(p_328222_.get()));
+    private static Dynamic<?> createFilteredText(Dynamic<?> pTag, String pUnfilteredText, Optional<String> pFilteredText) {
+        Dynamic<?> dynamic = pTag.emptyMap().set("raw", pTag.createString(pUnfilteredText));
+        if (pFilteredText.isPresent()) {
+            dynamic = dynamic.set("filtered", pTag.createString(pFilteredText.get()));
         }
 
         return dynamic;
     }
 
-    private static void fixBucketedMobData(ItemStackComponentizationFix.ItemStackData p_328428_, Dynamic<?> p_327719_) {
-        Dynamic<?> dynamic = p_327719_.emptyMap();
+    private static void fixBucketedMobData(ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<?> pTag) {
+        Dynamic<?> dynamic = pTag.emptyMap();
 
         for (String s : BUCKETED_MOB_TAGS) {
-            dynamic = p_328428_.moveTagInto(s, dynamic, s);
+            dynamic = pItemStackData.moveTagInto(s, dynamic, s);
         }
 
-        if (!dynamic.equals(p_327719_.emptyMap())) {
-            p_328428_.setComponent("minecraft:bucket_entity_data", dynamic);
+        if (!dynamic.equals(pTag.emptyMap())) {
+            pItemStackData.setComponent("minecraft:bucket_entity_data", dynamic);
         }
     }
 
-    private static void fixLodestoneTracker(ItemStackComponentizationFix.ItemStackData p_330486_, Dynamic<?> p_329466_) {
-        Optional<? extends Dynamic<?>> optional = p_330486_.removeTag("LodestonePos").result();
-        Optional<? extends Dynamic<?>> optional1 = p_330486_.removeTag("LodestoneDimension").result();
+    private static void fixLodestoneTracker(ItemStackComponentizationFix.ItemStackData pItemStackData, Dynamic<?> pTag) {
+        Optional<? extends Dynamic<?>> optional = pItemStackData.removeTag("LodestonePos").result();
+        Optional<? extends Dynamic<?>> optional1 = pItemStackData.removeTag("LodestoneDimension").result();
         if (!optional.isEmpty() || !optional1.isEmpty()) {
-            boolean flag = p_330486_.removeTag("LodestoneTracked").asBoolean(true);
-            Dynamic<?> dynamic = p_329466_.emptyMap();
+            boolean flag = pItemStackData.removeTag("LodestoneTracked").asBoolean(true);
+            Dynamic<?> dynamic = pTag.emptyMap();
             if (optional.isPresent() && optional1.isPresent()) {
-                dynamic = dynamic.set("target", p_329466_.emptyMap().set("pos", (Dynamic<?>)optional.get()).set("dimension", (Dynamic<?>)optional1.get()));
+                dynamic = dynamic.set("target", pTag.emptyMap().set("pos", (Dynamic<?>)optional.get()).set("dimension", (Dynamic<?>)optional1.get()));
             }
 
             if (!flag) {
-                dynamic = dynamic.set("tracked", p_329466_.createBoolean(false));
+                dynamic = dynamic.set("tracked", pTag.createBoolean(false));
             }
 
-            p_330486_.setComponent("minecraft:lodestone_tracker", dynamic);
+            pItemStackData.setComponent("minecraft:lodestone_tracker", dynamic);
         }
     }
 
-    private static void fixFireworkStar(ItemStackComponentizationFix.ItemStackData p_334817_) {
-        p_334817_.fixSubTag("Explosion", true, p_334469_ -> {
-            p_334817_.setComponent("minecraft:firework_explosion", fixFireworkExplosion(p_334469_));
+    private static void fixFireworkStar(ItemStackComponentizationFix.ItemStackData pItemStackData) {
+        pItemStackData.fixSubTag("Explosion", true, p_334469_ -> {
+            pItemStackData.setComponent("minecraft:firework_explosion", fixFireworkExplosion(p_334469_));
             return p_334469_.remove("Type").remove("Colors").remove("FadeColors").remove("Trail").remove("Flicker");
         });
     }
 
-    private static void fixFireworkRocket(ItemStackComponentizationFix.ItemStackData p_329939_) {
-        p_329939_.fixSubTag(
+    private static void fixFireworkRocket(ItemStackComponentizationFix.ItemStackData pItemStackData) {
+        pItemStackData.fixSubTag(
             "Fireworks",
             true,
             p_335612_ -> {
                 Stream<? extends Dynamic<?>> stream = p_335612_.get("Explosions").asStream().map(ItemStackComponentizationFix::fixFireworkExplosion);
                 int i = p_335612_.get("Flight").asInt(0);
-                p_329939_.setComponent(
+                pItemStackData.setComponent(
                     "minecraft:fireworks",
                     p_335612_.emptyMap().set("explosions", p_335612_.createList(stream)).set("flight_duration", p_335612_.createByte((byte)i))
                 );
@@ -624,31 +624,31 @@ public class ItemStackComponentizationFix extends DataFix {
         );
     }
 
-    private static Dynamic<?> fixFireworkExplosion(Dynamic<?> p_327955_) {
-        p_327955_ = p_327955_.set("shape", p_327955_.createString(switch (p_327955_.get("Type").asInt(0)) {
+    private static Dynamic<?> fixFireworkExplosion(Dynamic<?> pTag) {
+        pTag = pTag.set("shape", pTag.createString(switch (pTag.get("Type").asInt(0)) {
             case 1 -> "large_ball";
             case 2 -> "star";
             case 3 -> "creeper";
             case 4 -> "burst";
             default -> "small_ball";
         })).remove("Type");
-        p_327955_ = p_327955_.renameField("Colors", "colors");
-        p_327955_ = p_327955_.renameField("FadeColors", "fade_colors");
-        p_327955_ = p_327955_.renameField("Trail", "has_trail");
-        return p_327955_.renameField("Flicker", "has_twinkle");
+        pTag = pTag.renameField("Colors", "colors");
+        pTag = pTag.renameField("FadeColors", "fade_colors");
+        pTag = pTag.renameField("Trail", "has_trail");
+        return pTag.renameField("Flicker", "has_twinkle");
     }
 
-    public static Dynamic<?> fixProfile(Dynamic<?> p_331244_) {
-        Optional<String> optional = p_331244_.asString().result();
+    public static Dynamic<?> fixProfile(Dynamic<?> pTag) {
+        Optional<String> optional = pTag.asString().result();
         if (optional.isPresent()) {
-            return isValidPlayerName(optional.get()) ? p_331244_.emptyMap().set("name", p_331244_.createString(optional.get())) : p_331244_.emptyMap();
+            return isValidPlayerName(optional.get()) ? pTag.emptyMap().set("name", pTag.createString(optional.get())) : pTag.emptyMap();
         } else {
-            String s = p_331244_.get("Name").asString("");
-            Optional<? extends Dynamic<?>> optional1 = p_331244_.get("Id").result();
-            Dynamic<?> dynamic = fixProfileProperties(p_331244_.get("Properties"));
-            Dynamic<?> dynamic1 = p_331244_.emptyMap();
+            String s = pTag.get("Name").asString("");
+            Optional<? extends Dynamic<?>> optional1 = pTag.get("Id").result();
+            Dynamic<?> dynamic = fixProfileProperties(pTag.get("Properties"));
+            Dynamic<?> dynamic1 = pTag.emptyMap();
             if (isValidPlayerName(s)) {
-                dynamic1 = dynamic1.set("name", p_331244_.createString(s));
+                dynamic1 = dynamic1.set("name", pTag.createString(s));
             }
 
             if (optional1.isPresent()) {
@@ -663,13 +663,13 @@ public class ItemStackComponentizationFix extends DataFix {
         }
     }
 
-    private static boolean isValidPlayerName(String p_332205_) {
-        return p_332205_.length() > 16 ? false : p_332205_.chars().filter(p_331992_ -> p_331992_ <= 32 || p_331992_ >= 127).findAny().isEmpty();
+    private static boolean isValidPlayerName(String pName) {
+        return pName.length() > 16 ? false : pName.chars().filter(p_331992_ -> p_331992_ <= 32 || p_331992_ >= 127).findAny().isEmpty();
     }
 
     @Nullable
-    private static Dynamic<?> fixProfileProperties(OptionalDynamic<?> p_329629_) {
-        Map<String, List<Pair<String, Optional<String>>>> map = p_329629_.asMap(
+    private static Dynamic<?> fixProfileProperties(OptionalDynamic<?> pTag) {
+        Map<String, List<Pair<String, Optional<String>>>> map = pTag.asMap(
             p_330311_ -> p_330311_.asString(""), p_331808_ -> p_331808_.asList(p_329294_ -> {
                     String s = p_329294_.get("Value").asString("");
                     Optional<String> optional = p_329294_.get("Signature").asString().result();
@@ -678,7 +678,7 @@ public class ItemStackComponentizationFix extends DataFix {
         );
         return map.isEmpty()
             ? null
-            : p_329629_.createList(
+            : pTag.createList(
                 map.entrySet()
                     .stream()
                     .flatMap(
@@ -686,11 +686,11 @@ public class ItemStackComponentizationFix extends DataFix {
                                 .stream()
                                 .map(
                                     p_335577_ -> {
-                                        Dynamic<?> dynamic = p_329629_.emptyMap()
-                                            .set("name", p_329629_.createString(p_334576_.getKey()))
-                                            .set("value", p_329629_.createString(p_335577_.getFirst()));
+                                        Dynamic<?> dynamic = pTag.emptyMap()
+                                            .set("name", pTag.createString(p_334576_.getKey()))
+                                            .set("value", pTag.createString(p_335577_.getFirst()));
                                         Optional<String> optional = p_335577_.getSecond();
-                                        return optional.isPresent() ? dynamic.set("signature", p_329629_.createString(optional.get())) : dynamic;
+                                        return optional.isPresent() ? dynamic.set("signature", pTag.createString(optional.get())) : dynamic;
                                     }
                                 )
                     )
@@ -720,65 +720,65 @@ public class ItemStackComponentizationFix extends DataFix {
         private final Dynamic<?> remainder;
         Dynamic<?> tag;
 
-        private ItemStackData(String p_330519_, int p_328981_, Dynamic<?> p_329116_) {
-            this.item = NamespacedSchema.ensureNamespaced(p_330519_);
-            this.count = p_328981_;
-            this.components = p_329116_.emptyMap();
-            this.tag = p_329116_.get("tag").orElseEmptyMap();
-            this.remainder = p_329116_.remove("tag");
+        private ItemStackData(String pItem, int pCount, Dynamic<?> pNbt) {
+            this.item = NamespacedSchema.ensureNamespaced(pItem);
+            this.count = pCount;
+            this.components = pNbt.emptyMap();
+            this.tag = pNbt.get("tag").orElseEmptyMap();
+            this.remainder = pNbt.remove("tag");
         }
 
-        public static Optional<ItemStackComponentizationFix.ItemStackData> read(Dynamic<?> p_327873_) {
-            return p_327873_.get("id")
+        public static Optional<ItemStackComponentizationFix.ItemStackData> read(Dynamic<?> pTag) {
+            return pTag.get("id")
                 .asString()
                 .apply2stable(
                     (p_336038_, p_334919_) -> new ItemStackComponentizationFix.ItemStackData(
-                            p_336038_, p_334919_.intValue(), p_327873_.remove("id").remove("Count")
+                            p_336038_, p_334919_.intValue(), pTag.remove("id").remove("Count")
                         ),
-                    p_327873_.get("Count").asNumber()
+                    pTag.get("Count").asNumber()
                 )
                 .result();
         }
 
-        public OptionalDynamic<?> removeTag(String p_327670_) {
-            OptionalDynamic<?> optionaldynamic = this.tag.get(p_327670_);
-            this.tag = this.tag.remove(p_327670_);
+        public OptionalDynamic<?> removeTag(String pKey) {
+            OptionalDynamic<?> optionaldynamic = this.tag.get(pKey);
+            this.tag = this.tag.remove(pKey);
             return optionaldynamic;
         }
 
-        public void setComponent(String p_334273_, Dynamic<?> p_334484_) {
-            this.components = this.components.set(p_334273_, p_334484_);
+        public void setComponent(String pComponent, Dynamic<?> pValue) {
+            this.components = this.components.set(pComponent, pValue);
         }
 
-        public void setComponent(String p_333518_, OptionalDynamic<?> p_335463_) {
-            p_335463_.result().ifPresent(p_334065_ -> this.components = this.components.set(p_333518_, (Dynamic<?>)p_334065_));
+        public void setComponent(String pComponent, OptionalDynamic<?> pValue) {
+            pValue.result().ifPresent(p_334065_ -> this.components = this.components.set(pComponent, (Dynamic<?>)p_334065_));
         }
 
-        public Dynamic<?> moveTagInto(String p_333380_, Dynamic<?> p_332781_, String p_332207_) {
-            Optional<? extends Dynamic<?>> optional = this.removeTag(p_333380_).result();
-            return optional.isPresent() ? p_332781_.set(p_332207_, (Dynamic<?>)optional.get()) : p_332781_;
+        public Dynamic<?> moveTagInto(String pOldKey, Dynamic<?> pTag, String pNewKey) {
+            Optional<? extends Dynamic<?>> optional = this.removeTag(pOldKey).result();
+            return optional.isPresent() ? pTag.set(pNewKey, (Dynamic<?>)optional.get()) : pTag;
         }
 
-        public void moveTagToComponent(String p_330725_, String p_334538_, Dynamic<?> p_328097_) {
-            Optional<? extends Dynamic<?>> optional = this.removeTag(p_330725_).result();
-            if (optional.isPresent() && !optional.get().equals(p_328097_)) {
-                this.setComponent(p_334538_, (Dynamic<?>)optional.get());
+        public void moveTagToComponent(String pKey, String pComponent, Dynamic<?> pTag) {
+            Optional<? extends Dynamic<?>> optional = this.removeTag(pKey).result();
+            if (optional.isPresent() && !optional.get().equals(pTag)) {
+                this.setComponent(pComponent, (Dynamic<?>)optional.get());
             }
         }
 
-        public void moveTagToComponent(String p_334513_, String p_335629_) {
-            this.removeTag(p_334513_).result().ifPresent(p_331999_ -> this.setComponent(p_335629_, (Dynamic<?>)p_331999_));
+        public void moveTagToComponent(String pKey, String pComponent) {
+            this.removeTag(pKey).result().ifPresent(p_331999_ -> this.setComponent(pComponent, (Dynamic<?>)p_331999_));
         }
 
-        public void fixSubTag(String p_334224_, boolean p_331760_, UnaryOperator<Dynamic<?>> p_335156_) {
-            OptionalDynamic<?> optionaldynamic = this.tag.get(p_334224_);
-            if (!p_331760_ || !optionaldynamic.result().isEmpty()) {
+        public void fixSubTag(String pKey, boolean pSkipIfEmpty, UnaryOperator<Dynamic<?>> pFixer) {
+            OptionalDynamic<?> optionaldynamic = this.tag.get(pKey);
+            if (!pSkipIfEmpty || !optionaldynamic.result().isEmpty()) {
                 Dynamic<?> dynamic = optionaldynamic.orElseEmptyMap();
-                dynamic = p_335156_.apply(dynamic);
+                dynamic = pFixer.apply(dynamic);
                 if (dynamic.equals(dynamic.emptyMap())) {
-                    this.tag = this.tag.remove(p_334224_);
+                    this.tag = this.tag.remove(pKey);
                 } else {
-                    this.tag = this.tag.set(p_334224_, dynamic);
+                    this.tag = this.tag.set(pKey, dynamic);
                 }
             }
         }
@@ -799,25 +799,25 @@ public class ItemStackComponentizationFix extends DataFix {
             return mergeRemainder(dynamic, this.remainder);
         }
 
-        private static <T> Dynamic<T> mergeRemainder(Dynamic<T> p_331283_, Dynamic<?> p_335645_) {
-            DynamicOps<T> dynamicops = p_331283_.getOps();
-            return dynamicops.getMap(p_331283_.getValue())
-                .flatMap(p_335224_ -> dynamicops.mergeToMap(p_335645_.convert(dynamicops).getValue(), (MapLike<T>)p_335224_))
+        private static <T> Dynamic<T> mergeRemainder(Dynamic<T> pTag, Dynamic<?> pRemainder) {
+            DynamicOps<T> dynamicops = pTag.getOps();
+            return dynamicops.getMap(pTag.getValue())
+                .flatMap(p_335224_ -> dynamicops.mergeToMap(pRemainder.convert(dynamicops).getValue(), (MapLike<T>)p_335224_))
                 .map(p_334956_ -> new Dynamic<>(dynamicops, (T)p_334956_))
                 .result()
-                .orElse(p_331283_);
+                .orElse(pTag);
         }
 
-        public boolean is(String p_328447_) {
-            return this.item.equals(p_328447_);
+        public boolean is(String pItem) {
+            return this.item.equals(pItem);
         }
 
-        public boolean is(Set<String> p_332697_) {
-            return p_332697_.contains(this.item);
+        public boolean is(Set<String> pItems) {
+            return pItems.contains(this.item);
         }
 
-        public boolean hasComponent(String p_329543_) {
-            return this.components.get(p_329543_).result().isPresent();
+        public boolean hasComponent(String pComponent) {
+            return this.components.get(pComponent).result().isPresent();
         }
     }
 }

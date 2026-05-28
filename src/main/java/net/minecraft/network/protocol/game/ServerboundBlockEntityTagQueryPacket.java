@@ -13,19 +13,19 @@ public class ServerboundBlockEntityTagQueryPacket implements Packet<ServerGamePa
     private final int transactionId;
     private final BlockPos pos;
 
-    public ServerboundBlockEntityTagQueryPacket(int p_336190_, BlockPos p_336300_) {
-        this.transactionId = p_336190_;
-        this.pos = p_336300_;
+    public ServerboundBlockEntityTagQueryPacket(int pTransactionId, BlockPos pPos) {
+        this.transactionId = pTransactionId;
+        this.pos = pPos;
     }
 
-    private ServerboundBlockEntityTagQueryPacket(FriendlyByteBuf p_328758_) {
-        this.transactionId = p_328758_.readVarInt();
-        this.pos = p_328758_.readBlockPos();
+    private ServerboundBlockEntityTagQueryPacket(FriendlyByteBuf pBuffer) {
+        this.transactionId = pBuffer.readVarInt();
+        this.pos = pBuffer.readBlockPos();
     }
 
-    private void write(FriendlyByteBuf p_333511_) {
-        p_333511_.writeVarInt(this.transactionId);
-        p_333511_.writeBlockPos(this.pos);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.transactionId);
+        pBuffer.writeBlockPos(this.pos);
     }
 
     @Override

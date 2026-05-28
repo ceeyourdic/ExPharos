@@ -16,16 +16,16 @@ public class RecipeMap {
     private final Multimap<RecipeType<?>, RecipeHolder<?>> byType;
     private final Map<ResourceKey<Recipe<?>>, RecipeHolder<?>> byKey;
 
-    private RecipeMap(Multimap<RecipeType<?>, RecipeHolder<?>> p_370021_, Map<ResourceKey<Recipe<?>>, RecipeHolder<?>> p_362655_) {
-        this.byType = p_370021_;
-        this.byKey = p_362655_;
+    private RecipeMap(Multimap<RecipeType<?>, RecipeHolder<?>> pByType, Map<ResourceKey<Recipe<?>>, RecipeHolder<?>> pByKey) {
+        this.byType = pByType;
+        this.byKey = pByKey;
     }
 
-    public static RecipeMap create(Iterable<RecipeHolder<?>> p_369802_) {
+    public static RecipeMap create(Iterable<RecipeHolder<?>> pRecipes) {
         Builder<RecipeType<?>, RecipeHolder<?>> builder = ImmutableMultimap.builder();
         com.google.common.collect.ImmutableMap.Builder<ResourceKey<Recipe<?>>, RecipeHolder<?>> builder1 = ImmutableMap.builder();
 
-        for (RecipeHolder<?> recipeholder : p_369802_) {
+        for (RecipeHolder<?> recipeholder : pRecipes) {
             builder.put(recipeholder.value().getType(), recipeholder);
             builder1.put(recipeholder.id(), recipeholder);
         }
@@ -33,8 +33,8 @@ public class RecipeMap {
         return new RecipeMap(builder.build(), builder1.build());
     }
 
-    public <I extends RecipeInput, T extends Recipe<I>> Collection<RecipeHolder<T>> byType(RecipeType<T> p_365239_) {
-        return (Collection<RecipeHolder<T>>)(Collection)this.byType.get(p_365239_);
+    public <I extends RecipeInput, T extends Recipe<I>> Collection<RecipeHolder<T>> byType(RecipeType<T> pType) {
+        return (Collection<RecipeHolder<T>>)(Collection)this.byType.get(pType);
     }
 
     public Collection<RecipeHolder<?>> values() {
@@ -42,13 +42,13 @@ public class RecipeMap {
     }
 
     @Nullable
-    public RecipeHolder<?> byKey(ResourceKey<Recipe<?>> p_363032_) {
-        return this.byKey.get(p_363032_);
+    public RecipeHolder<?> byKey(ResourceKey<Recipe<?>> pKey) {
+        return this.byKey.get(pKey);
     }
 
-    public <I extends RecipeInput, T extends Recipe<I>> Stream<RecipeHolder<T>> getRecipesFor(RecipeType<T> p_365973_, I p_364991_, Level p_364879_) {
-        return p_364991_.isEmpty()
+    public <I extends RecipeInput, T extends Recipe<I>> Stream<RecipeHolder<T>> getRecipesFor(RecipeType<T> pType, I pInput, Level pLevel) {
+        return pInput.isEmpty()
             ? Stream.empty()
-            : this.byType(p_365973_).stream().filter(p_363912_ -> p_363912_.value().matches(p_364991_, p_364879_));
+            : this.byType(pType).stream().filter(p_363912_ -> p_363912_.value().matches(pInput, pLevel));
     }
 }

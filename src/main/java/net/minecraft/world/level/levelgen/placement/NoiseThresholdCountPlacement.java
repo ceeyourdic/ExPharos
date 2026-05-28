@@ -21,14 +21,14 @@ public class NoiseThresholdCountPlacement extends RepeatingPlacement {
     private final int belowNoise;
     private final int aboveNoise;
 
-    private NoiseThresholdCountPlacement(double p_191753_, int p_191754_, int p_191755_) {
-        this.noiseLevel = p_191753_;
-        this.belowNoise = p_191754_;
-        this.aboveNoise = p_191755_;
+    private NoiseThresholdCountPlacement(double pNoiseLevel, int pBelowNoise, int pAboveNoise) {
+        this.noiseLevel = pNoiseLevel;
+        this.belowNoise = pBelowNoise;
+        this.aboveNoise = pAboveNoise;
     }
 
-    public static NoiseThresholdCountPlacement of(double p_191757_, int p_191758_, int p_191759_) {
-        return new NoiseThresholdCountPlacement(p_191757_, p_191758_, p_191759_);
+    public static NoiseThresholdCountPlacement of(double pNoiseLevel, int pBelowNoise, int pAboveNoise) {
+        return new NoiseThresholdCountPlacement(pNoiseLevel, pBelowNoise, pAboveNoise);
     }
 
     @Override

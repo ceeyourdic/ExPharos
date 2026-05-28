@@ -26,12 +26,12 @@ public record MatchTool(Optional<ItemPredicate> predicate) implements LootItemCo
         return Set.of(LootContextParams.TOOL);
     }
 
-    public boolean test(LootContext p_82000_) {
-        ItemStack itemstack = p_82000_.getOptionalParameter(LootContextParams.TOOL);
+    public boolean test(LootContext pContext) {
+        ItemStack itemstack = pContext.getOptionalParameter(LootContextParams.TOOL);
         return itemstack != null && (this.predicate.isEmpty() || this.predicate.get().test(itemstack));
     }
 
-    public static LootItemCondition.Builder toolMatches(ItemPredicate.Builder p_81998_) {
-        return () -> new MatchTool(Optional.of(p_81998_.build()));
+    public static LootItemCondition.Builder toolMatches(ItemPredicate.Builder pToolPredicateBuilder) {
+        return () -> new MatchTool(Optional.of(pToolPredicateBuilder.build()));
     }
 }

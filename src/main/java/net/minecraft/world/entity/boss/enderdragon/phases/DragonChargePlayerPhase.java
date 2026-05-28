@@ -39,8 +39,8 @@ public class DragonChargePlayerPhase extends AbstractDragonPhaseInstance {
         this.timeSinceCharge = 0;
     }
 
-    public void setTarget(Vec3 p_31208_) {
-        this.targetLocation = p_31208_;
+    public void setTarget(Vec3 pTargetLocation) {
+        this.targetLocation = pTargetLocation;
     }
 
     @Override

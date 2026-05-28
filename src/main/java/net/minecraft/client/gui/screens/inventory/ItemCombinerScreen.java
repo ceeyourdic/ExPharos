@@ -16,9 +16,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public abstract class ItemCombinerScreen<T extends ItemCombinerMenu> extends AbstractContainerScreen<T> implements ContainerListener {
     private final ResourceLocation menuResource;
 
-    public ItemCombinerScreen(T p_98901_, Inventory p_98902_, Component p_98903_, ResourceLocation p_98904_) {
-        super(p_98901_, p_98902_, p_98903_);
-        this.menuResource = p_98904_;
+    public ItemCombinerScreen(T pMenu, Inventory pPlayerInventory, Component pTitle, ResourceLocation pMenuResource) {
+        super(pMenu, pPlayerInventory, pTitle);
+        this.menuResource = pMenuResource;
     }
 
     protected void subInit() {
@@ -44,7 +44,7 @@ public abstract class ItemCombinerScreen<T extends ItemCombinerMenu> extends Abs
         this.renderTooltip(p_281810_, p_283312_, p_283420_);
     }
 
-    protected void renderFg(GuiGraphics p_283399_, int p_98928_, int p_98929_, float p_98930_) {
+    protected void renderFg(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
     }
 
     @Override
@@ -53,13 +53,13 @@ public abstract class ItemCombinerScreen<T extends ItemCombinerMenu> extends Abs
         this.renderErrorIcon(p_282749_, this.leftPos, this.topPos);
     }
 
-    protected abstract void renderErrorIcon(GuiGraphics p_281990_, int p_266822_, int p_267045_);
+    protected abstract void renderErrorIcon(GuiGraphics pGuiGraphics, int pX, int pY);
 
     @Override
     public void dataChanged(AbstractContainerMenu p_169759_, int p_169760_, int p_169761_) {
     }
 
     @Override
-    public void slotChanged(AbstractContainerMenu p_98910_, int p_98911_, ItemStack p_98912_) {
+    public void slotChanged(AbstractContainerMenu pContainerToSend, int pSlotInd, ItemStack pStack) {
     }
 }

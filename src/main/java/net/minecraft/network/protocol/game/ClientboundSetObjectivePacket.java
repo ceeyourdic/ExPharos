@@ -26,35 +26,35 @@ public class ClientboundSetObjectivePacket implements Packet<ClientGamePacketLis
     private final Optional<NumberFormat> numberFormat;
     private final int method;
 
-    public ClientboundSetObjectivePacket(Objective p_133258_, int p_133259_) {
-        this.objectiveName = p_133258_.getName();
-        this.displayName = p_133258_.getDisplayName();
-        this.renderType = p_133258_.getRenderType();
-        this.numberFormat = Optional.ofNullable(p_133258_.numberFormat());
-        this.method = p_133259_;
+    public ClientboundSetObjectivePacket(Objective pObjective, int pMethod) {
+        this.objectiveName = pObjective.getName();
+        this.displayName = pObjective.getDisplayName();
+        this.renderType = pObjective.getRenderType();
+        this.numberFormat = Optional.ofNullable(pObjective.numberFormat());
+        this.method = pMethod;
     }
 
-    private ClientboundSetObjectivePacket(RegistryFriendlyByteBuf p_330039_) {
-        this.objectiveName = p_330039_.readUtf();
-        this.method = p_330039_.readByte();
+    private ClientboundSetObjectivePacket(RegistryFriendlyByteBuf pBuffer) {
+        this.objectiveName = pBuffer.readUtf();
+        this.method = pBuffer.readByte();
         if (this.method != 0 && this.method != 2) {
             this.displayName = CommonComponents.EMPTY;
             this.renderType = ObjectiveCriteria.RenderType.INTEGER;
             this.numberFormat = Optional.empty();
         } else {
-            this.displayName = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(p_330039_);
-            this.renderType = p_330039_.readEnum(ObjectiveCriteria.RenderType.class);
-            this.numberFormat = NumberFormatTypes.OPTIONAL_STREAM_CODEC.decode(p_330039_);
+            this.displayName = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(pBuffer);
+            this.renderType = pBuffer.readEnum(ObjectiveCriteria.RenderType.class);
+            this.numberFormat = NumberFormatTypes.OPTIONAL_STREAM_CODEC.decode(pBuffer);
         }
     }
 
-    private void write(RegistryFriendlyByteBuf p_332439_) {
-        p_332439_.writeUtf(this.objectiveName);
-        p_332439_.writeByte(this.method);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeUtf(this.objectiveName);
+        pBuffer.writeByte(this.method);
         if (this.method == 0 || this.method == 2) {
-            ComponentSerialization.TRUSTED_STREAM_CODEC.encode(p_332439_, this.displayName);
-            p_332439_.writeEnum(this.renderType);
-            NumberFormatTypes.OPTIONAL_STREAM_CODEC.encode(p_332439_, this.numberFormat);
+            ComponentSerialization.TRUSTED_STREAM_CODEC.encode(pBuffer, this.displayName);
+            pBuffer.writeEnum(this.renderType);
+            NumberFormatTypes.OPTIONAL_STREAM_CODEC.encode(pBuffer, this.numberFormat);
         }
     }
 
@@ -63,8 +63,8 @@ public class ClientboundSetObjectivePacket implements Packet<ClientGamePacketLis
         return GamePacketTypes.CLIENTBOUND_SET_OBJECTIVE;
     }
 
-    public void handle(ClientGamePacketListener p_133265_) {
-        p_133265_.handleAddObjective(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleAddObjective(this);
     }
 
     public String getObjectiveName() {

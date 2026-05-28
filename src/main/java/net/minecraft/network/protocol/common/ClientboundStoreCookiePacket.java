@@ -15,13 +15,13 @@ public record ClientboundStoreCookiePacket(ResourceLocation key, byte[] payload)
     private static final int MAX_PAYLOAD_SIZE = 5120;
     public static final StreamCodec<ByteBuf, byte[]> PAYLOAD_STREAM_CODEC = ByteBufCodecs.byteArray(5120);
 
-    private ClientboundStoreCookiePacket(FriendlyByteBuf p_331845_) {
-        this(p_331845_.readResourceLocation(), PAYLOAD_STREAM_CODEC.decode(p_331845_));
+    private ClientboundStoreCookiePacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readResourceLocation(), PAYLOAD_STREAM_CODEC.decode(pBuffer));
     }
 
-    private void write(FriendlyByteBuf p_330443_) {
-        p_330443_.writeResourceLocation(this.key);
-        PAYLOAD_STREAM_CODEC.encode(p_330443_, this.payload);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeResourceLocation(this.key);
+        PAYLOAD_STREAM_CODEC.encode(pBuffer, this.payload);
     }
 
     @Override

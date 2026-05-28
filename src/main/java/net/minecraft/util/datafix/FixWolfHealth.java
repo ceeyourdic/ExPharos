@@ -13,8 +13,8 @@ public class FixWolfHealth extends NamedEntityFix {
     private static final String WOLF_ID = "minecraft:wolf";
     private static final String WOLF_HEALTH = "minecraft:generic.max_health";
 
-    public FixWolfHealth(Schema p_332178_) {
-        super(p_332178_, false, "FixWolfHealth", References.ENTITY, "minecraft:wolf");
+    public FixWolfHealth(Schema pOutputSchema) {
+        super(pOutputSchema, false, "FixWolfHealth", References.ENTITY, "minecraft:wolf");
     }
 
     @Override

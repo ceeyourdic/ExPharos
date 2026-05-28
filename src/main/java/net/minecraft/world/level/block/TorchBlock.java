@@ -34,9 +34,9 @@ public class TorchBlock extends BaseTorchBlock {
         return CODEC;
     }
 
-    protected TorchBlock(SimpleParticleType p_310235_, BlockBehaviour.Properties p_57491_) {
-        super(p_57491_);
-        this.flameParticle = p_310235_;
+    protected TorchBlock(SimpleParticleType pFlameParticle, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.flameParticle = pFlameParticle;
     }
 
     @Override

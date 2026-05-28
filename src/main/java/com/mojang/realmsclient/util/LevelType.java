@@ -17,9 +17,9 @@ public enum LevelType {
     private final int index;
     private final Component name;
 
-    private LevelType(final int p_239483_, final ResourceKey<WorldPreset> p_239484_) {
-        this.index = p_239483_;
-        this.name = Component.translatable(p_239484_.location().toLanguageKey("generator"));
+    private LevelType(final int pIndex, final ResourceKey<WorldPreset> pPresetKey) {
+        this.index = pIndex;
+        this.name = Component.translatable(pPresetKey.location().toLanguageKey("generator"));
     }
 
     public Component getName() {

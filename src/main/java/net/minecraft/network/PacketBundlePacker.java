@@ -13,34 +13,34 @@ public class PacketBundlePacker extends MessageToMessageDecoder<Packet<?>> {
     @Nullable
     private BundlerInfo.Bundler currentBundler;
 
-    public PacketBundlePacker(BundlerInfo p_333768_) {
-        this.bundlerInfo = p_333768_;
+    public PacketBundlePacker(BundlerInfo pBundlerInfo) {
+        this.bundlerInfo = pBundlerInfo;
     }
 
-    protected void decode(ChannelHandlerContext p_265208_, Packet<?> p_265182_, List<Object> p_265368_) throws Exception {
+    protected void decode(ChannelHandlerContext pContext, Packet<?> pPacket, List<Object> p_265368_) throws Exception {
         if (this.currentBundler != null) {
-            verifyNonTerminalPacket(p_265182_);
-            Packet<?> packet = this.currentBundler.addPacket(p_265182_);
+            verifyNonTerminalPacket(pPacket);
+            Packet<?> packet = this.currentBundler.addPacket(pPacket);
             if (packet != null) {
                 this.currentBundler = null;
                 p_265368_.add(packet);
             }
         } else {
-            BundlerInfo.Bundler bundlerinfo$bundler = this.bundlerInfo.startPacketBundling(p_265182_);
+            BundlerInfo.Bundler bundlerinfo$bundler = this.bundlerInfo.startPacketBundling(pPacket);
             if (bundlerinfo$bundler != null) {
-                verifyNonTerminalPacket(p_265182_);
+                verifyNonTerminalPacket(pPacket);
                 this.currentBundler = bundlerinfo$bundler;
             } else {
-                p_265368_.add(p_265182_);
-                if (p_265182_.isTerminal()) {
-                    p_265208_.pipeline().remove(p_265208_.name());
+                p_265368_.add(pPacket);
+                if (pPacket.isTerminal()) {
+                    pContext.pipeline().remove(pContext.name());
                 }
             }
         }
     }
 
-    private static void verifyNonTerminalPacket(Packet<?> p_329638_) {
-        if (p_329638_.isTerminal()) {
+    private static void verifyNonTerminalPacket(Packet<?> pPacket) {
+        if (pPacket.isTerminal()) {
             throw new DecoderException("Terminal message received in bundle");
         }
     }

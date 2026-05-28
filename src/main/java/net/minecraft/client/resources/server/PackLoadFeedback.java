@@ -6,9 +6,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface PackLoadFeedback {
-    void reportUpdate(UUID p_312796_, PackLoadFeedback.Update p_311319_);
+    void reportUpdate(UUID pId, PackLoadFeedback.Update pUpdate);
 
-    void reportFinalResult(UUID p_309920_, PackLoadFeedback.FinalResult p_312819_);
+    void reportFinalResult(UUID pId, PackLoadFeedback.FinalResult pResult);
 
     @OnlyIn(Dist.CLIENT)
     public static enum FinalResult {

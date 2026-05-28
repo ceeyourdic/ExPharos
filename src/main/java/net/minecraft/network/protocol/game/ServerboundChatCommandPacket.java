@@ -10,12 +10,12 @@ public record ServerboundChatCommandPacket(String command) implements Packet<Ser
         ServerboundChatCommandPacket::write, ServerboundChatCommandPacket::new
     );
 
-    private ServerboundChatCommandPacket(FriendlyByteBuf p_237932_) {
-        this(p_237932_.readUtf());
+    private ServerboundChatCommandPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readUtf());
     }
 
-    private void write(FriendlyByteBuf p_237936_) {
-        p_237936_.writeUtf(this.command);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeUtf(this.command);
     }
 
     @Override

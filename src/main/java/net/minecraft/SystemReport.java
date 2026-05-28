@@ -63,43 +63,43 @@ public class SystemReport {
         });
     }
 
-    public void setDetail(String p_143520_, String p_143521_) {
-        this.entries.put(p_143520_, p_143521_);
+    public void setDetail(String pIdentifier, String pValue) {
+        this.entries.put(pIdentifier, pValue);
     }
 
-    public void setDetail(String p_143523_, Supplier<String> p_143524_) {
+    public void setDetail(String pIdentifier, Supplier<String> pValueSupplier) {
         try {
-            this.setDetail(p_143523_, p_143524_.get());
+            this.setDetail(pIdentifier, pValueSupplier.get());
         } catch (Exception exception) {
-            LOGGER.warn("Failed to get system info for {}", p_143523_, exception);
-            this.setDetail(p_143523_, "ERR");
+            LOGGER.warn("Failed to get system info for {}", pIdentifier, exception);
+            this.setDetail(pIdentifier, "ERR");
         }
     }
 
-    private void putHardware(SystemInfo p_143536_) {
-        HardwareAbstractionLayer hardwareabstractionlayer = p_143536_.getHardware();
+    private void putHardware(SystemInfo pInfo) {
+        HardwareAbstractionLayer hardwareabstractionlayer = pInfo.getHardware();
         this.ignoreErrors("processor", () -> this.putProcessor(hardwareabstractionlayer.getProcessor()));
         this.ignoreErrors("graphics", () -> this.putGraphics(hardwareabstractionlayer.getGraphicsCards()));
         this.ignoreErrors("memory", () -> this.putMemory(hardwareabstractionlayer.getMemory()));
         this.ignoreErrors("storage", this::putStorage);
     }
 
-    private void ignoreErrors(String p_143517_, Runnable p_143518_) {
+    private void ignoreErrors(String pGroupIdentifier, Runnable pExecutor) {
         try {
-            p_143518_.run();
+            pExecutor.run();
         } catch (Throwable throwable) {
-            LOGGER.warn("Failed retrieving info for group {}", p_143517_, throwable);
+            LOGGER.warn("Failed retrieving info for group {}", pGroupIdentifier, throwable);
         }
     }
 
-    public static float sizeInMiB(long p_342777_) {
-        return (float)p_342777_ / 1048576.0F;
+    public static float sizeInMiB(long pBytes) {
+        return (float)pBytes / 1048576.0F;
     }
 
-    private void putPhysicalMemory(List<PhysicalMemory> p_143532_) {
+    private void putPhysicalMemory(List<PhysicalMemory> pMemorySlots) {
         int i = 0;
 
-        for (PhysicalMemory physicalmemory : p_143532_) {
+        for (PhysicalMemory physicalmemory : pMemorySlots) {
             String s = String.format(Locale.ROOT, "Memory slot #%d ", i++);
             this.setDetail(s + "capacity (MiB)", () -> String.format(Locale.ROOT, "%.2f", sizeInMiB(physicalmemory.getCapacity())));
             this.setDetail(s + "clockSpeed (GHz)", () -> String.format(Locale.ROOT, "%.2f", (float)physicalmemory.getClockSpeed() / 1.0E9F));
@@ -107,22 +107,22 @@ public class SystemReport {
         }
     }
 
-    private void putVirtualMemory(VirtualMemory p_143550_) {
-        this.setDetail("Virtual memory max (MiB)", () -> String.format(Locale.ROOT, "%.2f", sizeInMiB(p_143550_.getVirtualMax())));
-        this.setDetail("Virtual memory used (MiB)", () -> String.format(Locale.ROOT, "%.2f", sizeInMiB(p_143550_.getVirtualInUse())));
-        this.setDetail("Swap memory total (MiB)", () -> String.format(Locale.ROOT, "%.2f", sizeInMiB(p_143550_.getSwapTotal())));
-        this.setDetail("Swap memory used (MiB)", () -> String.format(Locale.ROOT, "%.2f", sizeInMiB(p_143550_.getSwapUsed())));
+    private void putVirtualMemory(VirtualMemory pMemory) {
+        this.setDetail("Virtual memory max (MiB)", () -> String.format(Locale.ROOT, "%.2f", sizeInMiB(pMemory.getVirtualMax())));
+        this.setDetail("Virtual memory used (MiB)", () -> String.format(Locale.ROOT, "%.2f", sizeInMiB(pMemory.getVirtualInUse())));
+        this.setDetail("Swap memory total (MiB)", () -> String.format(Locale.ROOT, "%.2f", sizeInMiB(pMemory.getSwapTotal())));
+        this.setDetail("Swap memory used (MiB)", () -> String.format(Locale.ROOT, "%.2f", sizeInMiB(pMemory.getSwapUsed())));
     }
 
-    private void putMemory(GlobalMemory p_143542_) {
-        this.ignoreErrors("physical memory", () -> this.putPhysicalMemory(p_143542_.getPhysicalMemory()));
-        this.ignoreErrors("virtual memory", () -> this.putVirtualMemory(p_143542_.getVirtualMemory()));
+    private void putMemory(GlobalMemory pMemory) {
+        this.ignoreErrors("physical memory", () -> this.putPhysicalMemory(pMemory.getPhysicalMemory()));
+        this.ignoreErrors("virtual memory", () -> this.putVirtualMemory(pMemory.getVirtualMemory()));
     }
 
-    private void putGraphics(List<GraphicsCard> p_143553_) {
+    private void putGraphics(List<GraphicsCard> pGpus) {
         int i = 0;
 
-        for (GraphicsCard graphicscard : p_143553_) {
+        for (GraphicsCard graphicscard : pGpus) {
             String s = String.format(Locale.ROOT, "Graphics card #%d ", i++);
             this.setDetail(s + "name", graphicscard::getName);
             this.setDetail(s + "vendor", graphicscard::getVendor);
@@ -132,16 +132,16 @@ public class SystemReport {
         }
     }
 
-    private void putProcessor(CentralProcessor p_143540_) {
-        ProcessorIdentifier processoridentifier = p_143540_.getProcessorIdentifier();
+    private void putProcessor(CentralProcessor pCpu) {
+        ProcessorIdentifier processoridentifier = pCpu.getProcessorIdentifier();
         this.setDetail("Processor Vendor", processoridentifier::getVendor);
         this.setDetail("Processor Name", processoridentifier::getName);
         this.setDetail("Identifier", processoridentifier::getIdentifier);
         this.setDetail("Microarchitecture", processoridentifier::getMicroarchitecture);
         this.setDetail("Frequency (GHz)", () -> String.format(Locale.ROOT, "%.2f", (float)processoridentifier.getVendorFreq() / 1.0E9F));
-        this.setDetail("Number of physical packages", () -> String.valueOf(p_143540_.getPhysicalPackageCount()));
-        this.setDetail("Number of physical CPUs", () -> String.valueOf(p_143540_.getPhysicalProcessorCount()));
-        this.setDetail("Number of logical CPUs", () -> String.valueOf(p_143540_.getLogicalProcessorCount()));
+        this.setDetail("Number of physical packages", () -> String.valueOf(pCpu.getPhysicalPackageCount()));
+        this.setDetail("Number of physical CPUs", () -> String.valueOf(pCpu.getPhysicalProcessorCount()));
+        this.setDetail("Number of logical CPUs", () -> String.valueOf(pCpu.getLogicalProcessorCount()));
     }
 
     private void putStorage() {
@@ -152,15 +152,15 @@ public class SystemReport {
         this.putSpaceForPath("workdir", () -> "");
     }
 
-    private void putSpaceForProperty(String p_345490_) {
-        this.putSpaceForPath(p_345490_, () -> System.getProperty(p_345490_));
+    private void putSpaceForProperty(String pProperty) {
+        this.putSpaceForPath(pProperty, () -> System.getProperty(pProperty));
     }
 
-    private void putSpaceForPath(String p_344137_, Supplier<String> p_344490_) {
-        String s = "Space in storage for " + p_344137_ + " (MiB)";
+    private void putSpaceForPath(String pProperty, Supplier<String> pValueSupplier) {
+        String s = "Space in storage for " + pProperty + " (MiB)";
 
         try {
-            String s1 = p_344490_.get();
+            String s1 = pValueSupplier.get();
             if (s1 == null) {
                 this.setDetail(s, "<path not set>");
                 return;
@@ -171,22 +171,22 @@ public class SystemReport {
                 s, String.format(Locale.ROOT, "available: %.2f, total: %.2f", sizeInMiB(filestore.getUsableSpace()), sizeInMiB(filestore.getTotalSpace()))
             );
         } catch (InvalidPathException invalidpathexception) {
-            LOGGER.warn("{} is not a path", p_344137_, invalidpathexception);
+            LOGGER.warn("{} is not a path", pProperty, invalidpathexception);
             this.setDetail(s, "<invalid path>");
         } catch (Exception exception) {
-            LOGGER.warn("Failed retrieving storage space for {}", p_344137_, exception);
+            LOGGER.warn("Failed retrieving storage space for {}", pProperty, exception);
             this.setDetail(s, "ERR");
         }
     }
 
-    public void appendToCrashReportString(StringBuilder p_143526_) {
-        p_143526_.append("-- ").append("System Details").append(" --\n");
-        p_143526_.append("Details:");
+    public void appendToCrashReportString(StringBuilder pReportAppender) {
+        pReportAppender.append("-- ").append("System Details").append(" --\n");
+        pReportAppender.append("Details:");
         this.entries.forEach((p_143529_, p_143530_) -> {
-            p_143526_.append("\n\t");
-            p_143526_.append(p_143529_);
-            p_143526_.append(": ");
-            p_143526_.append(p_143530_);
+            pReportAppender.append("\n\t");
+            pReportAppender.append(p_143529_);
+            pReportAppender.append(": ");
+            pReportAppender.append(p_143530_);
         });
     }
 

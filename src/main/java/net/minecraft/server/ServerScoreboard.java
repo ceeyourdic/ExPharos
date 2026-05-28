@@ -31,8 +31,8 @@ public class ServerScoreboard extends Scoreboard {
     private final Set<Objective> trackedObjectives = Sets.newHashSet();
     private final List<Runnable> dirtyListeners = Lists.newArrayList();
 
-    public ServerScoreboard(MinecraftServer p_136197_) {
-        this.server = p_136197_;
+    public ServerScoreboard(MinecraftServer pServer) {
+        this.server = pServer;
     }
 
     @Override
@@ -113,61 +113,61 @@ public class ServerScoreboard extends Scoreboard {
     }
 
     @Override
-    public void removePlayerFromTeam(String p_136223_, PlayerTeam p_136224_) {
-        super.removePlayerFromTeam(p_136223_, p_136224_);
-        this.server.getPlayerList().broadcastAll(ClientboundSetPlayerTeamPacket.createPlayerPacket(p_136224_, p_136223_, ClientboundSetPlayerTeamPacket.Action.REMOVE));
+    public void removePlayerFromTeam(String pUsername, PlayerTeam pPlayerTeam) {
+        super.removePlayerFromTeam(pUsername, pPlayerTeam);
+        this.server.getPlayerList().broadcastAll(ClientboundSetPlayerTeamPacket.createPlayerPacket(pPlayerTeam, pUsername, ClientboundSetPlayerTeamPacket.Action.REMOVE));
         this.setDirty();
     }
 
     @Override
-    public void onObjectiveAdded(Objective p_136202_) {
-        super.onObjectiveAdded(p_136202_);
+    public void onObjectiveAdded(Objective pObjective) {
+        super.onObjectiveAdded(pObjective);
         this.setDirty();
     }
 
     @Override
-    public void onObjectiveChanged(Objective p_136219_) {
-        super.onObjectiveChanged(p_136219_);
-        if (this.trackedObjectives.contains(p_136219_)) {
-            this.server.getPlayerList().broadcastAll(new ClientboundSetObjectivePacket(p_136219_, 2));
+    public void onObjectiveChanged(Objective pObjective) {
+        super.onObjectiveChanged(pObjective);
+        if (this.trackedObjectives.contains(pObjective)) {
+            this.server.getPlayerList().broadcastAll(new ClientboundSetObjectivePacket(pObjective, 2));
         }
 
         this.setDirty();
     }
 
     @Override
-    public void onObjectiveRemoved(Objective p_136226_) {
-        super.onObjectiveRemoved(p_136226_);
-        if (this.trackedObjectives.contains(p_136226_)) {
-            this.stopTrackingObjective(p_136226_);
+    public void onObjectiveRemoved(Objective pObjective) {
+        super.onObjectiveRemoved(pObjective);
+        if (this.trackedObjectives.contains(pObjective)) {
+            this.stopTrackingObjective(pObjective);
         }
 
         this.setDirty();
     }
 
     @Override
-    public void onTeamAdded(PlayerTeam p_136204_) {
-        super.onTeamAdded(p_136204_);
-        this.server.getPlayerList().broadcastAll(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(p_136204_, true));
+    public void onTeamAdded(PlayerTeam pPlayerTeam) {
+        super.onTeamAdded(pPlayerTeam);
+        this.server.getPlayerList().broadcastAll(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(pPlayerTeam, true));
         this.setDirty();
     }
 
     @Override
-    public void onTeamChanged(PlayerTeam p_136221_) {
-        super.onTeamChanged(p_136221_);
-        this.server.getPlayerList().broadcastAll(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(p_136221_, false));
+    public void onTeamChanged(PlayerTeam pPlayerTeam) {
+        super.onTeamChanged(pPlayerTeam);
+        this.server.getPlayerList().broadcastAll(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(pPlayerTeam, false));
         this.setDirty();
     }
 
     @Override
-    public void onTeamRemoved(PlayerTeam p_136228_) {
-        super.onTeamRemoved(p_136228_);
-        this.server.getPlayerList().broadcastAll(ClientboundSetPlayerTeamPacket.createRemovePacket(p_136228_));
+    public void onTeamRemoved(PlayerTeam pPlayerTeam) {
+        super.onTeamRemoved(pPlayerTeam);
+        this.server.getPlayerList().broadcastAll(ClientboundSetPlayerTeamPacket.createRemovePacket(pPlayerTeam));
         this.setDirty();
     }
 
-    public void addDirtyListener(Runnable p_136208_) {
-        this.dirtyListeners.add(p_136208_);
+    public void addDirtyListener(Runnable pRunnable) {
+        this.dirtyListeners.add(pRunnable);
     }
 
     protected void setDirty() {
@@ -176,21 +176,21 @@ public class ServerScoreboard extends Scoreboard {
         }
     }
 
-    public List<Packet<?>> getStartTrackingPackets(Objective p_136230_) {
+    public List<Packet<?>> getStartTrackingPackets(Objective pObjective) {
         List<Packet<?>> list = Lists.newArrayList();
-        list.add(new ClientboundSetObjectivePacket(p_136230_, 0));
+        list.add(new ClientboundSetObjectivePacket(pObjective, 0));
 
         for (DisplaySlot displayslot : DisplaySlot.values()) {
-            if (this.getDisplayObjective(displayslot) == p_136230_) {
-                list.add(new ClientboundSetDisplayObjectivePacket(displayslot, p_136230_));
+            if (this.getDisplayObjective(displayslot) == pObjective) {
+                list.add(new ClientboundSetDisplayObjectivePacket(displayslot, pObjective));
             }
         }
 
-        for (PlayerScoreEntry playerscoreentry : this.listPlayerScores(p_136230_)) {
+        for (PlayerScoreEntry playerscoreentry : this.listPlayerScores(pObjective)) {
             list.add(
                 new ClientboundSetScorePacket(
                     playerscoreentry.owner(),
-                    p_136230_.getName(),
+                    pObjective.getName(),
                     playerscoreentry.value(),
                     Optional.ofNullable(playerscoreentry.display()),
                     Optional.ofNullable(playerscoreentry.numberFormatOverride())
@@ -201,8 +201,8 @@ public class ServerScoreboard extends Scoreboard {
         return list;
     }
 
-    public void startTrackingObjective(Objective p_136232_) {
-        List<Packet<?>> list = this.getStartTrackingPackets(p_136232_);
+    public void startTrackingObjective(Objective pObjective) {
+        List<Packet<?>> list = this.getStartTrackingPackets(pObjective);
 
         for (ServerPlayer serverplayer : this.server.getPlayerList().getPlayers()) {
             for (Packet<?> packet : list) {
@@ -210,24 +210,24 @@ public class ServerScoreboard extends Scoreboard {
             }
         }
 
-        this.trackedObjectives.add(p_136232_);
+        this.trackedObjectives.add(pObjective);
     }
 
-    public List<Packet<?>> getStopTrackingPackets(Objective p_136234_) {
+    public List<Packet<?>> getStopTrackingPackets(Objective pObjective) {
         List<Packet<?>> list = Lists.newArrayList();
-        list.add(new ClientboundSetObjectivePacket(p_136234_, 1));
+        list.add(new ClientboundSetObjectivePacket(pObjective, 1));
 
         for (DisplaySlot displayslot : DisplaySlot.values()) {
-            if (this.getDisplayObjective(displayslot) == p_136234_) {
-                list.add(new ClientboundSetDisplayObjectivePacket(displayslot, p_136234_));
+            if (this.getDisplayObjective(displayslot) == pObjective) {
+                list.add(new ClientboundSetDisplayObjectivePacket(displayslot, pObjective));
             }
         }
 
         return list;
     }
 
-    public void stopTrackingObjective(Objective p_136236_) {
-        List<Packet<?>> list = this.getStopTrackingPackets(p_136236_);
+    public void stopTrackingObjective(Objective pObjective) {
+        List<Packet<?>> list = this.getStopTrackingPackets(pObjective);
 
         for (ServerPlayer serverplayer : this.server.getPlayerList().getPlayers()) {
             for (Packet<?> packet : list) {
@@ -235,14 +235,14 @@ public class ServerScoreboard extends Scoreboard {
             }
         }
 
-        this.trackedObjectives.remove(p_136236_);
+        this.trackedObjectives.remove(pObjective);
     }
 
-    public int getObjectiveDisplaySlotCount(Objective p_136238_) {
+    public int getObjectiveDisplaySlotCount(Objective pObjective) {
         int i = 0;
 
         for (DisplaySlot displayslot : DisplaySlot.values()) {
-            if (this.getDisplayObjective(displayslot) == p_136238_) {
+            if (this.getDisplayObjective(displayslot) == pObjective) {
                 i++;
             }
         }
@@ -260,8 +260,8 @@ public class ServerScoreboard extends Scoreboard {
         return scoreboardsavedata;
     }
 
-    private ScoreboardSaveData createData(CompoundTag p_180014_, HolderLookup.Provider p_336023_) {
-        return this.createData().load(p_180014_, p_336023_);
+    private ScoreboardSaveData createData(CompoundTag pTag, HolderLookup.Provider pRegistries) {
+        return this.createData().load(pTag, pRegistries);
     }
 
     public static enum Method {

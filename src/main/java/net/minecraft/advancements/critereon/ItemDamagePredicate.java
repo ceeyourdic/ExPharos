@@ -25,7 +25,7 @@ public record ItemDamagePredicate(MinMaxBounds.Ints durability, MinMaxBounds.Int
         return !this.durability.matches(p_335150_.getMaxDamage() - p_329961_) ? false : this.damage.matches(p_329961_);
     }
 
-    public static ItemDamagePredicate durability(MinMaxBounds.Ints p_335837_) {
-        return new ItemDamagePredicate(p_335837_, MinMaxBounds.Ints.ANY);
+    public static ItemDamagePredicate durability(MinMaxBounds.Ints pDamage) {
+        return new ItemDamagePredicate(pDamage, MinMaxBounds.Ints.ANY);
     }
 }

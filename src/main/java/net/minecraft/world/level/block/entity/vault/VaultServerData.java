@@ -35,18 +35,18 @@ public class VaultServerData {
     private int totalEjectionsNeeded;
     boolean isDirty;
 
-    VaultServerData(Set<UUID> p_334629_, long p_331265_, List<ItemStack> p_330511_, int p_333688_) {
-        this.rewardedPlayers.addAll(p_334629_);
-        this.stateUpdatingResumesAt = p_331265_;
-        this.itemsToEject.addAll(p_330511_);
-        this.totalEjectionsNeeded = p_333688_;
+    VaultServerData(Set<UUID> pRewardedPlayers, long pStateUpdatingResumesAt, List<ItemStack> pItemsToEject, int pTotalEjectionsNeeded) {
+        this.rewardedPlayers.addAll(pRewardedPlayers);
+        this.stateUpdatingResumesAt = pStateUpdatingResumesAt;
+        this.itemsToEject.addAll(pItemsToEject);
+        this.totalEjectionsNeeded = pTotalEjectionsNeeded;
     }
 
     VaultServerData() {
     }
 
-    void setLastInsertFailTimestamp(long p_336284_) {
-        this.lastInsertFailTimestamp = p_336284_;
+    void setLastInsertFailTimestamp(long pLastInsertFailTimestamp) {
+        this.lastInsertFailTimestamp = pLastInsertFailTimestamp;
     }
 
     long getLastInsertFailTimestamp() {
@@ -57,13 +57,13 @@ public class VaultServerData {
         return this.rewardedPlayers;
     }
 
-    boolean hasRewardedPlayer(Player p_336078_) {
-        return this.rewardedPlayers.contains(p_336078_.getUUID());
+    boolean hasRewardedPlayer(Player pPlayer) {
+        return this.rewardedPlayers.contains(pPlayer.getUUID());
     }
 
     @VisibleForTesting
-    public void addToRewardedPlayers(Player p_332874_) {
-        this.rewardedPlayers.add(p_332874_.getUUID());
+    public void addToRewardedPlayers(Player pPlayer) {
+        this.rewardedPlayers.add(pPlayer.getUUID());
         if (this.rewardedPlayers.size() > 128) {
             Iterator<UUID> iterator = this.rewardedPlayers.iterator();
             if (iterator.hasNext()) {
@@ -79,8 +79,8 @@ public class VaultServerData {
         return this.stateUpdatingResumesAt;
     }
 
-    void pauseStateUpdatingUntil(long p_330777_) {
-        this.stateUpdatingResumesAt = p_330777_;
+    void pauseStateUpdatingUntil(long pTime) {
+        this.stateUpdatingResumesAt = pTime;
         this.markChanged();
     }
 
@@ -93,9 +93,9 @@ public class VaultServerData {
         this.markChanged();
     }
 
-    void setItemsToEject(List<ItemStack> p_332570_) {
+    void setItemsToEject(List<ItemStack> pItemsToEject) {
         this.itemsToEject.clear();
-        this.itemsToEject.addAll(p_332570_);
+        this.itemsToEject.addAll(pItemsToEject);
         this.totalEjectionsNeeded = this.itemsToEject.size();
         this.markChanged();
     }
@@ -113,12 +113,12 @@ public class VaultServerData {
         }
     }
 
-    void set(VaultServerData p_329637_) {
-        this.stateUpdatingResumesAt = p_329637_.stateUpdatingResumesAt();
+    void set(VaultServerData pOther) {
+        this.stateUpdatingResumesAt = pOther.stateUpdatingResumesAt();
         this.itemsToEject.clear();
-        this.itemsToEject.addAll(p_329637_.itemsToEject);
+        this.itemsToEject.addAll(pOther.itemsToEject);
         this.rewardedPlayers.clear();
-        this.rewardedPlayers.addAll(p_329637_.rewardedPlayers);
+        this.rewardedPlayers.addAll(pOther.rewardedPlayers);
     }
 
     private void markChanged() {

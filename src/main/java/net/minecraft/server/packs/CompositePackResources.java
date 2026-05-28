@@ -15,14 +15,14 @@ import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.resources.IoSupplier;
 
 public class CompositePackResources implements PackResources {
-    private final PackResources primaryPackResources;
-    private final List<PackResources> packResourcesStack;
+    public final PackResources primaryPackResources;
+    public final List<PackResources> packResourcesStack;
 
-    public CompositePackResources(PackResources p_301152_, List<PackResources> p_299588_) {
-        this.primaryPackResources = p_301152_;
-        List<PackResources> list = new ArrayList<>(p_299588_.size() + 1);
-        list.addAll(Lists.reverse(p_299588_));
-        list.add(p_301152_);
+    public CompositePackResources(PackResources pPrimaryPackResources, List<PackResources> pPackResourcesStack) {
+        this.primaryPackResources = pPrimaryPackResources;
+        List<PackResources> list = new ArrayList<>(pPackResourcesStack.size() + 1);
+        list.addAll(Lists.reverse(pPackResourcesStack));
+        list.add(pPrimaryPackResources);
         this.packResourcesStack = List.copyOf(list);
     }
 

@@ -6,38 +6,48 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.optifine.util.StrUtils;
 
 public class FileToIdConverter {
     private final String prefix;
     private final String extension;
 
-    public FileToIdConverter(String p_248876_, String p_251478_) {
-        this.prefix = p_248876_;
-        this.extension = p_251478_;
+    public FileToIdConverter(String pPrefix, String pExtenstion) {
+        this.prefix = pPrefix;
+        this.extension = pExtenstion;
     }
 
-    public static FileToIdConverter json(String p_248754_) {
-        return new FileToIdConverter(p_248754_, ".json");
+    public static FileToIdConverter json(String pName) {
+        return new FileToIdConverter(pName, ".json");
     }
 
-    public static FileToIdConverter registry(ResourceKey<? extends Registry<?>> p_375453_) {
-        return json(Registries.elementsDirPath(p_375453_));
+    public static FileToIdConverter registry(ResourceKey<? extends Registry<?>> pRegistryKey) {
+        return json(Registries.elementsDirPath(pRegistryKey));
     }
 
-    public ResourceLocation idToFile(ResourceLocation p_251878_) {
-        return p_251878_.withPath(this.prefix + "/" + p_251878_.getPath() + this.extension);
+    public ResourceLocation idToFile(ResourceLocation pId) {
+        return pId.withPath(this.prefix + "/" + pId.getPath() + this.extension);
     }
 
-    public ResourceLocation fileToId(ResourceLocation p_249595_) {
-        String s = p_249595_.getPath();
-        return p_249595_.withPath(s.substring(this.prefix.length() + 1, s.length() - this.extension.length()));
+    public ResourceLocation fileToId(ResourceLocation pFile) {
+        if (!pFile.getPath().startsWith(this.prefix)) {
+            return pFile.withPath(StrUtils.removeSuffix(pFile.getPath(), this.extension));
+        } else {
+            String s = pFile.getPath();
+            return pFile.withPath(s.substring(this.prefix.length() + 1, s.length() - this.extension.length()));
+        }
     }
 
-    public Map<ResourceLocation, Resource> listMatchingResources(ResourceManager p_252045_) {
-        return p_252045_.listResources(this.prefix, p_251986_ -> p_251986_.getPath().endsWith(this.extension));
+    public Map<ResourceLocation, Resource> listMatchingResources(ResourceManager pResourceManager) {
+        return pResourceManager.listResources(this.prefix, locIn -> locIn.getPath().endsWith(this.extension));
     }
 
-    public Map<ResourceLocation, List<Resource>> listMatchingResourceStacks(ResourceManager p_249881_) {
-        return p_249881_.listResourceStacks(this.prefix, p_248700_ -> p_248700_.getPath().endsWith(this.extension));
+    public Map<ResourceLocation, List<Resource>> listMatchingResourceStacks(ResourceManager pResourceManager) {
+        return pResourceManager.listResourceStacks(this.prefix, locIn -> locIn.getPath().endsWith(this.extension));
+    }
+
+    public boolean matches(ResourceLocation loc) {
+        String s = loc.getPath();
+        return s.startsWith(this.prefix) && s.endsWith(this.extension);
     }
 }

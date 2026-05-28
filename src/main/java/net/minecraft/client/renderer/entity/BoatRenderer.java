@@ -20,11 +20,11 @@ public class BoatRenderer extends AbstractBoatRenderer {
     private final ResourceLocation texture;
     private final EntityModel<BoatRenderState> model;
 
-    public BoatRenderer(EntityRendererProvider.Context p_234563_, ModelLayerLocation p_369070_) {
-        super(p_234563_);
-        this.texture = p_369070_.model().withPath(p_357968_ -> "textures/entity/" + p_357968_ + ".png");
-        this.waterPatchModel = new Model.Simple(p_234563_.bakeLayer(ModelLayers.BOAT_WATER_PATCH), p_357969_ -> RenderType.waterMask());
-        this.model = new BoatModel(p_234563_.bakeLayer(p_369070_));
+    public BoatRenderer(EntityRendererProvider.Context pContext, ModelLayerLocation pModelLayer) {
+        super(pContext);
+        this.texture = pModelLayer.model().withPath(p_357968_ -> "textures/entity/" + p_357968_ + ".png");
+        this.waterPatchModel = new Model.Simple(pContext.bakeLayer(ModelLayers.BOAT_WATER_PATCH), p_357969_ -> RenderType.waterMask());
+        this.model = new BoatModel(pContext.bakeLayer(pModelLayer));
     }
 
     @Override

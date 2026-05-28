@@ -27,13 +27,13 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
     private final DyeColor baseColor;
     private BannerPatternLayers patterns = BannerPatternLayers.EMPTY;
 
-    public BannerBlockEntity(BlockPos p_155035_, BlockState p_155036_) {
-        this(p_155035_, p_155036_, ((AbstractBannerBlock)p_155036_.getBlock()).getColor());
+    public BannerBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        this(pPos, pBlockState, ((AbstractBannerBlock)pBlockState.getBlock()).getColor());
     }
 
-    public BannerBlockEntity(BlockPos p_155038_, BlockState p_155039_, DyeColor p_155040_) {
-        super(BlockEntityType.BANNER, p_155038_, p_155039_);
-        this.baseColor = p_155040_;
+    public BannerBlockEntity(BlockPos pPos, BlockState pBlockState, DyeColor pBaseColor) {
+        super(BlockEntityType.BANNER, pPos, pBlockState);
+        this.baseColor = pBaseColor;
     }
 
     @Override

@@ -14,8 +14,8 @@ public class GrindstoneScreen extends AbstractContainerScreen<GrindstoneMenu> {
     private static final ResourceLocation ERROR_SPRITE = ResourceLocation.withDefaultNamespace("container/grindstone/error");
     private static final ResourceLocation GRINDSTONE_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/grindstone.png");
 
-    public GrindstoneScreen(GrindstoneMenu p_98782_, Inventory p_98783_, Component p_98784_) {
-        super(p_98782_, p_98783_, p_98784_);
+    public GrindstoneScreen(GrindstoneMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, pPlayerInventory, pTitle);
     }
 
     @Override

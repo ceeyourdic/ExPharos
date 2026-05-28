@@ -15,41 +15,41 @@ import java.util.function.Function;
 public abstract class AbstractUUIDFix extends DataFix {
     protected TypeReference typeReference;
 
-    public AbstractUUIDFix(Schema p_14572_, TypeReference p_14573_) {
-        super(p_14572_, false);
-        this.typeReference = p_14573_;
+    public AbstractUUIDFix(Schema pOutputSchema, TypeReference pTypeReference) {
+        super(pOutputSchema, false);
+        this.typeReference = pTypeReference;
     }
 
-    protected Typed<?> updateNamedChoice(Typed<?> p_14575_, String p_14576_, Function<Dynamic<?>, Dynamic<?>> p_14577_) {
-        Type<?> type = this.getInputSchema().getChoiceType(this.typeReference, p_14576_);
-        Type<?> type1 = this.getOutputSchema().getChoiceType(this.typeReference, p_14576_);
-        return p_14575_.updateTyped(DSL.namedChoice(p_14576_, type), type1, p_14607_ -> p_14607_.update(DSL.remainderFinder(), p_14577_));
+    protected Typed<?> updateNamedChoice(Typed<?> pTyped, String pChoiceName, Function<Dynamic<?>, Dynamic<?>> pUpdater) {
+        Type<?> type = this.getInputSchema().getChoiceType(this.typeReference, pChoiceName);
+        Type<?> type1 = this.getOutputSchema().getChoiceType(this.typeReference, pChoiceName);
+        return pTyped.updateTyped(DSL.namedChoice(pChoiceName, type), type1, p_14607_ -> p_14607_.update(DSL.remainderFinder(), pUpdater));
     }
 
-    protected static Optional<Dynamic<?>> replaceUUIDString(Dynamic<?> p_14591_, String p_14592_, String p_14593_) {
-        return createUUIDFromString(p_14591_, p_14592_).map(p_14616_ -> p_14591_.remove(p_14592_).set(p_14593_, (Dynamic<?>)p_14616_));
+    protected static Optional<Dynamic<?>> replaceUUIDString(Dynamic<?> pDynamic, String pOldKey, String pNewKey) {
+        return createUUIDFromString(pDynamic, pOldKey).map(p_14616_ -> pDynamic.remove(pOldKey).set(pNewKey, (Dynamic<?>)p_14616_));
     }
 
-    protected static Optional<Dynamic<?>> replaceUUIDMLTag(Dynamic<?> p_14609_, String p_14610_, String p_14611_) {
-        return p_14609_.get(p_14610_)
+    protected static Optional<Dynamic<?>> replaceUUIDMLTag(Dynamic<?> pDynamic, String pOldKey, String pNewKey) {
+        return pDynamic.get(pOldKey)
             .result()
             .flatMap(AbstractUUIDFix::createUUIDFromML)
-            .map(p_14598_ -> p_14609_.remove(p_14610_).set(p_14611_, (Dynamic<?>)p_14598_));
+            .map(p_14598_ -> pDynamic.remove(pOldKey).set(pNewKey, (Dynamic<?>)p_14598_));
     }
 
-    protected static Optional<Dynamic<?>> replaceUUIDLeastMost(Dynamic<?> p_14618_, String p_14619_, String p_14620_) {
-        String s = p_14619_ + "Most";
-        String s1 = p_14619_ + "Least";
-        return createUUIDFromLongs(p_14618_, s, s1).map(p_14604_ -> p_14618_.remove(s).remove(s1).set(p_14620_, (Dynamic<?>)p_14604_));
+    protected static Optional<Dynamic<?>> replaceUUIDLeastMost(Dynamic<?> pDynamic, String pOldKey, String pNewKey) {
+        String s = pOldKey + "Most";
+        String s1 = pOldKey + "Least";
+        return createUUIDFromLongs(pDynamic, s, s1).map(p_14604_ -> pDynamic.remove(s).remove(s1).set(pNewKey, (Dynamic<?>)p_14604_));
     }
 
-    protected static Optional<Dynamic<?>> createUUIDFromString(Dynamic<?> p_14588_, String p_14589_) {
-        return p_14588_.get(p_14589_).result().flatMap(p_14586_ -> {
+    protected static Optional<Dynamic<?>> createUUIDFromString(Dynamic<?> pDynamic, String pUuidKey) {
+        return pDynamic.get(pUuidKey).result().flatMap(p_14586_ -> {
             String s = p_14586_.asString(null);
             if (s != null) {
                 try {
                     UUID uuid = UUID.fromString(s);
-                    return createUUIDTag(p_14588_, uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
+                    return createUUIDTag(pDynamic, uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
                 } catch (IllegalArgumentException illegalargumentexception) {
                 }
             }
@@ -58,17 +58,17 @@ public abstract class AbstractUUIDFix extends DataFix {
         });
     }
 
-    protected static Optional<Dynamic<?>> createUUIDFromML(Dynamic<?> p_14579_) {
-        return createUUIDFromLongs(p_14579_, "M", "L");
+    protected static Optional<Dynamic<?>> createUUIDFromML(Dynamic<?> pDynamic) {
+        return createUUIDFromLongs(pDynamic, "M", "L");
     }
 
-    protected static Optional<Dynamic<?>> createUUIDFromLongs(Dynamic<?> p_14622_, String p_14623_, String p_14624_) {
-        long i = p_14622_.get(p_14623_).asLong(0L);
-        long j = p_14622_.get(p_14624_).asLong(0L);
-        return i != 0L && j != 0L ? createUUIDTag(p_14622_, i, j) : Optional.empty();
+    protected static Optional<Dynamic<?>> createUUIDFromLongs(Dynamic<?> pDynamic, String pMostKey, String pLeastKey) {
+        long i = pDynamic.get(pMostKey).asLong(0L);
+        long j = pDynamic.get(pLeastKey).asLong(0L);
+        return i != 0L && j != 0L ? createUUIDTag(pDynamic, i, j) : Optional.empty();
     }
 
-    protected static Optional<Dynamic<?>> createUUIDTag(Dynamic<?> p_14581_, long p_14582_, long p_14583_) {
-        return Optional.of(p_14581_.createIntList(Arrays.stream(new int[]{(int)(p_14582_ >> 32), (int)p_14582_, (int)(p_14583_ >> 32), (int)p_14583_})));
+    protected static Optional<Dynamic<?>> createUUIDTag(Dynamic<?> pDynamic, long pMost, long pLeast) {
+        return Optional.of(pDynamic.createIntList(Arrays.stream(new int[]{(int)(pMost >> 32), (int)pMost, (int)(pLeast >> 32), (int)pLeast})));
     }
 }

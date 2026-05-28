@@ -16,8 +16,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class GuiSpriteManager extends TextureAtlasHolder {
     private static final Set<MetadataSectionType<?>> METADATA_SECTIONS = Set.of(AnimationMetadataSection.TYPE, GuiMetadataSection.TYPE);
 
-    public GuiSpriteManager(TextureManager p_299556_) {
-        super(p_299556_, ResourceLocation.withDefaultNamespace("textures/atlas/gui.png"), ResourceLocation.withDefaultNamespace("gui"), METADATA_SECTIONS);
+    public GuiSpriteManager(TextureManager pTextureManager) {
+        super(pTextureManager, ResourceLocation.withDefaultNamespace("textures/atlas/gui.png"), ResourceLocation.withDefaultNamespace("gui"), METADATA_SECTIONS);
     }
 
     @Override
@@ -25,11 +25,11 @@ public class GuiSpriteManager extends TextureAtlasHolder {
         return super.getSprite(p_298308_);
     }
 
-    public GuiSpriteScaling getSpriteScaling(TextureAtlasSprite p_298924_) {
-        return this.getMetadata(p_298924_).scaling();
+    public GuiSpriteScaling getSpriteScaling(TextureAtlasSprite pSprite) {
+        return this.getMetadata(pSprite).scaling();
     }
 
-    private GuiMetadataSection getMetadata(TextureAtlasSprite p_299594_) {
-        return p_299594_.contents().metadata().getSection(GuiMetadataSection.TYPE).orElse(GuiMetadataSection.DEFAULT);
+    private GuiMetadataSection getMetadata(TextureAtlasSprite pSprite) {
+        return pSprite.contents().metadata().getSection(GuiMetadataSection.TYPE).orElse(GuiMetadataSection.DEFAULT);
     }
 }

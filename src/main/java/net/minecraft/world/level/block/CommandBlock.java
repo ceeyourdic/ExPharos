@@ -47,10 +47,10 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
         return CODEC;
     }
 
-    public CommandBlock(boolean p_153081_, BlockBehaviour.Properties p_153080_) {
-        super(p_153080_);
+    public CommandBlock(boolean pAutomatic, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(CONDITIONAL, Boolean.valueOf(false)));
-        this.automatic = p_153081_;
+        this.automatic = pAutomatic;
     }
 
     @Override
@@ -69,17 +69,17 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
         }
     }
 
-    private void setPoweredAndUpdate(Level p_365801_, BlockPos p_368914_, CommandBlockEntity p_368404_, boolean p_362448_) {
-        boolean flag = p_368404_.isPowered();
-        if (p_362448_ != flag) {
-            p_368404_.setPowered(p_362448_);
-            if (p_362448_) {
-                if (p_368404_.isAutomatic() || p_368404_.getMode() == CommandBlockEntity.Mode.SEQUENCE) {
+    private void setPoweredAndUpdate(Level pLevel, BlockPos pPos, CommandBlockEntity pBlockEntity, boolean pPowered) {
+        boolean flag = pBlockEntity.isPowered();
+        if (pPowered != flag) {
+            pBlockEntity.setPowered(pPowered);
+            if (pPowered) {
+                if (pBlockEntity.isAutomatic() || pBlockEntity.getMode() == CommandBlockEntity.Mode.SEQUENCE) {
                     return;
                 }
 
-                p_368404_.markConditionMet();
-                p_365801_.scheduleTick(p_368914_, this, 1);
+                pBlockEntity.markConditionMet();
+                pLevel.scheduleTick(pPos, this, 1);
             }
         }
     }
@@ -114,14 +114,14 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
         }
     }
 
-    private void execute(BlockState p_51832_, ServerLevel p_369285_, BlockPos p_51834_, BaseCommandBlock p_51835_, boolean p_51836_) {
-        if (p_51836_) {
-            p_51835_.performCommand(p_369285_);
+    private void execute(BlockState pState, ServerLevel pLevel, BlockPos pPos, BaseCommandBlock pLogic, boolean pCanTrigger) {
+        if (pCanTrigger) {
+            pLogic.performCommand(pLevel);
         } else {
-            p_51835_.setSuccessCount(0);
+            pLogic.setSuccessCount(0);
         }
 
-        executeChain(p_369285_, p_51834_, p_51832_.getValue(FACING));
+        executeChain(pLevel, pPos, pState.getValue(FACING));
     }
 
     @Override
@@ -136,63 +136,63 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
     }
 
     @Override
-    protected boolean hasAnalogOutputSignal(BlockState p_51814_) {
+    protected boolean hasAnalogOutputSignal(BlockState pState) {
         return true;
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState p_51821_, Level p_51822_, BlockPos p_51823_) {
-        BlockEntity blockentity = p_51822_.getBlockEntity(p_51823_);
+    protected int getAnalogOutputSignal(BlockState pBlockState, Level pLevel, BlockPos pPos) {
+        BlockEntity blockentity = pLevel.getBlockEntity(pPos);
         return blockentity instanceof CommandBlockEntity ? ((CommandBlockEntity)blockentity).getCommandBlock().getSuccessCount() : 0;
     }
 
     @Override
-    public void setPlacedBy(Level p_51804_, BlockPos p_51805_, BlockState p_51806_, LivingEntity p_51807_, ItemStack p_51808_) {
-        if (p_51804_.getBlockEntity(p_51805_) instanceof CommandBlockEntity commandblockentity) {
+    public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, LivingEntity pPlacer, ItemStack pStack) {
+        if (pLevel.getBlockEntity(pPos) instanceof CommandBlockEntity commandblockentity) {
             BaseCommandBlock $$8 = commandblockentity.getCommandBlock();
-            if (p_51804_ instanceof ServerLevel serverlevel) {
-                if (!p_51808_.has(DataComponents.BLOCK_ENTITY_DATA)) {
+            if (pLevel instanceof ServerLevel serverlevel) {
+                if (!pStack.has(DataComponents.BLOCK_ENTITY_DATA)) {
                     $$8.setTrackOutput(serverlevel.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK));
                     commandblockentity.setAutomatic(this.automatic);
                 }
 
-                boolean flag = p_51804_.hasNeighborSignal(p_51805_);
-                this.setPoweredAndUpdate(p_51804_, p_51805_, commandblockentity, flag);
+                boolean flag = pLevel.hasNeighborSignal(pPos);
+                this.setPoweredAndUpdate(pLevel, pPos, commandblockentity, flag);
             }
         }
     }
 
     @Override
-    protected BlockState rotate(BlockState p_51848_, Rotation p_51849_) {
-        return p_51848_.setValue(FACING, p_51849_.rotate(p_51848_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_51845_, Mirror p_51846_) {
-        return p_51845_.rotate(p_51846_.getRotation(p_51845_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_51851_) {
-        p_51851_.add(FACING, CONDITIONAL);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, CONDITIONAL);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_51800_) {
-        return this.defaultBlockState().setValue(FACING, p_51800_.getNearestLookingDirection().getOpposite());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.defaultBlockState().setValue(FACING, pContext.getNearestLookingDirection().getOpposite());
     }
 
-    private static void executeChain(ServerLevel p_365531_, BlockPos p_51811_, Direction p_51812_) {
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = p_51811_.mutable();
-        GameRules gamerules = p_365531_.getGameRules();
+    private static void executeChain(ServerLevel pLevel, BlockPos pPos, Direction pDirection) {
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.mutable();
+        GameRules gamerules = pLevel.getGameRules();
         int i = gamerules.getInt(GameRules.RULE_MAX_COMMAND_CHAIN_LENGTH);
 
         while (i-- > 0) {
-            blockpos$mutableblockpos.move(p_51812_);
-            BlockState blockstate = p_365531_.getBlockState(blockpos$mutableblockpos);
+            blockpos$mutableblockpos.move(pDirection);
+            BlockState blockstate = pLevel.getBlockState(blockpos$mutableblockpos);
             Block block = blockstate.getBlock();
             if (!blockstate.is(Blocks.CHAIN_COMMAND_BLOCK)
-                || !(p_365531_.getBlockEntity(blockpos$mutableblockpos) instanceof CommandBlockEntity commandblockentity)
+                || !(pLevel.getBlockEntity(blockpos$mutableblockpos) instanceof CommandBlockEntity commandblockentity)
                 || commandblockentity.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
                 break;
             }
@@ -200,17 +200,17 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
             if (commandblockentity.isPowered() || commandblockentity.isAutomatic()) {
                 BaseCommandBlock basecommandblock = commandblockentity.getCommandBlock();
                 if (commandblockentity.markConditionMet()) {
-                    if (!basecommandblock.performCommand(p_365531_)) {
+                    if (!basecommandblock.performCommand(pLevel)) {
                         break;
                     }
 
-                    p_365531_.updateNeighbourForOutputSignal(blockpos$mutableblockpos, block);
+                    pLevel.updateNeighbourForOutputSignal(blockpos$mutableblockpos, block);
                 } else if (commandblockentity.isConditional()) {
                     basecommandblock.setSuccessCount(0);
                 }
             }
 
-            p_51812_ = blockstate.getValue(FACING);
+            pDirection = blockstate.getValue(FACING);
         }
 
         if (i <= 0) {

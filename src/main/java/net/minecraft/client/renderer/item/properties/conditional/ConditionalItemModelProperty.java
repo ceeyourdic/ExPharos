@@ -11,7 +11,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface ConditionalItemModelProperty {
-    boolean get(ItemStack p_377867_, @Nullable ClientLevel p_377453_, @Nullable LivingEntity p_377577_, int p_378696_, ItemDisplayContext p_377698_);
+    boolean get(ItemStack pStack, @Nullable ClientLevel pLevel, @Nullable LivingEntity pEntity, int pSeed, ItemDisplayContext pDisplayContext);
 
     MapCodec<? extends ConditionalItemModelProperty> type();
 }

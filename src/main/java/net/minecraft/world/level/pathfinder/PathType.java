@@ -30,8 +30,8 @@ public enum PathType {
 
     private final float malus;
 
-    private PathType(final float p_332471_) {
-        this.malus = p_332471_;
+    private PathType(final float pMalus) {
+        this.malus = pMalus;
     }
 
     public float getMalus() {

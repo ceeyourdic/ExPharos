@@ -116,7 +116,7 @@ public class Chicken extends Animal {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_28262_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.CHICKEN_HURT;
     }
 
@@ -126,7 +126,7 @@ public class Chicken extends Animal {
     }
 
     @Override
-    protected void playStepSound(BlockPos p_28254_, BlockState p_28255_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(SoundEvents.CHICKEN_STEP, 0.15F, 1.0F);
     }
 
@@ -136,8 +136,8 @@ public class Chicken extends Animal {
     }
 
     @Override
-    public boolean isFood(ItemStack p_28271_) {
-        return p_28271_.is(ItemTags.CHICKEN_FOOD);
+    public boolean isFood(ItemStack pStack) {
+        return pStack.is(ItemTags.CHICKEN_FOOD);
     }
 
     @Override
@@ -146,23 +146,23 @@ public class Chicken extends Animal {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_28243_) {
-        super.readAdditionalSaveData(p_28243_);
-        this.isChickenJockey = p_28243_.getBoolean("IsChickenJockey");
-        if (p_28243_.contains("EggLayTime")) {
-            this.eggTime = p_28243_.getInt("EggLayTime");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.isChickenJockey = pCompound.getBoolean("IsChickenJockey");
+        if (pCompound.contains("EggLayTime")) {
+            this.eggTime = pCompound.getInt("EggLayTime");
         }
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_28257_) {
-        super.addAdditionalSaveData(p_28257_);
-        p_28257_.putBoolean("IsChickenJockey", this.isChickenJockey);
-        p_28257_.putInt("EggLayTime", this.eggTime);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("IsChickenJockey", this.isChickenJockey);
+        pCompound.putInt("EggLayTime", this.eggTime);
     }
 
     @Override
-    public boolean removeWhenFarAway(double p_28266_) {
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
         return this.isChickenJockey();
     }
 
@@ -178,7 +178,7 @@ public class Chicken extends Animal {
         return this.isChickenJockey;
     }
 
-    public void setChickenJockey(boolean p_28274_) {
-        this.isChickenJockey = p_28274_;
+    public void setChickenJockey(boolean pIsChickenJockey) {
+        this.isChickenJockey = pIsChickenJockey;
     }
 }

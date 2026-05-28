@@ -45,16 +45,16 @@ public class DecoratedPotRenderer implements BlockEntityRenderer<DecoratedPotBlo
     private final ModelPart bottom;
     private static final float WOBBLE_AMPLITUDE = 0.125F;
 
-    public DecoratedPotRenderer(BlockEntityRendererProvider.Context p_272872_) {
-        this(p_272872_.getModelSet());
+    public DecoratedPotRenderer(BlockEntityRendererProvider.Context pContext) {
+        this(pContext.getModelSet());
     }
 
-    public DecoratedPotRenderer(EntityModelSet p_376368_) {
-        ModelPart modelpart = p_376368_.bakeLayer(ModelLayers.DECORATED_POT_BASE);
+    public DecoratedPotRenderer(EntityModelSet pModelSet) {
+        ModelPart modelpart = pModelSet.bakeLayer(ModelLayers.DECORATED_POT_BASE);
         this.neck = modelpart.getChild("neck");
         this.top = modelpart.getChild("top");
         this.bottom = modelpart.getChild("bottom");
-        ModelPart modelpart1 = p_376368_.bakeLayer(ModelLayers.DECORATED_POT_SIDES);
+        ModelPart modelpart1 = pModelSet.bakeLayer(ModelLayers.DECORATED_POT_SIDES);
         this.frontSide = modelpart1.getChild("front");
         this.backSide = modelpart1.getChild("back");
         this.leftSide = modelpart1.getChild("left");
@@ -94,9 +94,9 @@ public class DecoratedPotRenderer implements BlockEntityRenderer<DecoratedPotBlo
         return LayerDefinition.create(meshdefinition, 16, 16);
     }
 
-    private static Material getSideMaterial(Optional<Item> p_344130_) {
-        if (p_344130_.isPresent()) {
-            Material material = Sheets.getDecoratedPotMaterial(DecoratedPotPatterns.getPatternFromItem(p_344130_.get()));
+    private static Material getSideMaterial(Optional<Item> pItem) {
+        if (pItem.isPresent()) {
+            Material material = Sheets.getDecoratedPotMaterial(DecoratedPotPatterns.getPatternFromItem(pItem.get()));
             if (material != null) {
                 return material;
             }
@@ -134,22 +134,22 @@ public class DecoratedPotRenderer implements BlockEntityRenderer<DecoratedPotBlo
         p_273455_.popPose();
     }
 
-    public void renderInHand(PoseStack p_376090_, MultiBufferSource p_378049_, int p_376175_, int p_377059_, PotDecorations p_375435_) {
-        this.render(p_376090_, p_378049_, p_376175_, p_377059_, p_375435_);
+    public void renderInHand(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay, PotDecorations pDecorations) {
+        this.render(pPoseStack, pBufferSource, pPackedLight, pPackedOverlay, pDecorations);
     }
 
-    private void render(PoseStack p_375797_, MultiBufferSource p_375609_, int p_376933_, int p_376356_, PotDecorations p_376443_) {
-        VertexConsumer vertexconsumer = Sheets.DECORATED_POT_BASE.buffer(p_375609_, RenderType::entitySolid);
-        this.neck.render(p_375797_, vertexconsumer, p_376933_, p_376356_);
-        this.top.render(p_375797_, vertexconsumer, p_376933_, p_376356_);
-        this.bottom.render(p_375797_, vertexconsumer, p_376933_, p_376356_);
-        this.renderSide(this.frontSide, p_375797_, p_375609_, p_376933_, p_376356_, getSideMaterial(p_376443_.front()));
-        this.renderSide(this.backSide, p_375797_, p_375609_, p_376933_, p_376356_, getSideMaterial(p_376443_.back()));
-        this.renderSide(this.leftSide, p_375797_, p_375609_, p_376933_, p_376356_, getSideMaterial(p_376443_.left()));
-        this.renderSide(this.rightSide, p_375797_, p_375609_, p_376933_, p_376356_, getSideMaterial(p_376443_.right()));
+    private void render(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay, PotDecorations pDecorations) {
+        VertexConsumer vertexconsumer = Sheets.DECORATED_POT_BASE.buffer(pBufferSource, RenderType::entitySolid);
+        this.neck.render(pPoseStack, vertexconsumer, pPackedLight, pPackedOverlay);
+        this.top.render(pPoseStack, vertexconsumer, pPackedLight, pPackedOverlay);
+        this.bottom.render(pPoseStack, vertexconsumer, pPackedLight, pPackedOverlay);
+        this.renderSide(this.frontSide, pPoseStack, pBufferSource, pPackedLight, pPackedOverlay, getSideMaterial(pDecorations.front()));
+        this.renderSide(this.backSide, pPoseStack, pBufferSource, pPackedLight, pPackedOverlay, getSideMaterial(pDecorations.back()));
+        this.renderSide(this.leftSide, pPoseStack, pBufferSource, pPackedLight, pPackedOverlay, getSideMaterial(pDecorations.left()));
+        this.renderSide(this.rightSide, pPoseStack, pBufferSource, pPackedLight, pPackedOverlay, getSideMaterial(pDecorations.right()));
     }
 
-    private void renderSide(ModelPart p_273495_, PoseStack p_272899_, MultiBufferSource p_273582_, int p_273242_, int p_273108_, Material p_273173_) {
-        p_273495_.render(p_272899_, p_273173_.buffer(p_273582_, RenderType::entitySolid), p_273242_, p_273108_);
+    private void renderSide(ModelPart pModelPart, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, int pPackedOverlay, Material pMaterial) {
+        pModelPart.render(pPoseStack, pMaterial.buffer(pBuffer, RenderType::entitySolid), pPackedLight, pPackedOverlay);
     }
 }

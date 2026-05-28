@@ -13,12 +13,12 @@ public record ClientboundPlayerInfoRemovePacket(List<UUID> profileIds) implement
         ClientboundPlayerInfoRemovePacket::write, ClientboundPlayerInfoRemovePacket::new
     );
 
-    private ClientboundPlayerInfoRemovePacket(FriendlyByteBuf p_248744_) {
-        this(p_248744_.readList(UUIDUtil.STREAM_CODEC));
+    private ClientboundPlayerInfoRemovePacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readList(UUIDUtil.STREAM_CODEC));
     }
 
-    private void write(FriendlyByteBuf p_249263_) {
-        p_249263_.writeCollection(this.profileIds, UUIDUtil.STREAM_CODEC);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeCollection(this.profileIds, UUIDUtil.STREAM_CODEC);
     }
 
     @Override

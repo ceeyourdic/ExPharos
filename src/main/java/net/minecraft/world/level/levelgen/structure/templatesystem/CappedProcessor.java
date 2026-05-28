@@ -24,9 +24,9 @@ public class CappedProcessor extends StructureProcessor {
     private final StructureProcessor delegate;
     private final IntProvider limit;
 
-    public CappedProcessor(StructureProcessor p_277972_, IntProvider p_277402_) {
-        this.delegate = p_277972_;
-        this.limit = p_277402_;
+    public CappedProcessor(StructureProcessor pDelegate, IntProvider pLimit) {
+        this.delegate = pDelegate;
+        this.limit = pLimit;
     }
 
     @Override

@@ -15,24 +15,24 @@ public abstract class CompositeLootItemCondition implements LootItemCondition {
     protected final List<LootItemCondition> terms;
     private final Predicate<LootContext> composedPredicate;
 
-    protected CompositeLootItemCondition(List<LootItemCondition> p_299430_, Predicate<LootContext> p_286771_) {
-        this.terms = p_299430_;
-        this.composedPredicate = p_286771_;
+    protected CompositeLootItemCondition(List<LootItemCondition> pTerms, Predicate<LootContext> pComposedPredicate) {
+        this.terms = pTerms;
+        this.composedPredicate = pComposedPredicate;
     }
 
-    protected static <T extends CompositeLootItemCondition> MapCodec<T> createCodec(Function<List<LootItemCondition>, T> p_297590_) {
+    protected static <T extends CompositeLootItemCondition> MapCodec<T> createCodec(Function<List<LootItemCondition>, T> pFactory) {
         return RecordCodecBuilder.mapCodec(
             p_342025_ -> p_342025_.group(LootItemCondition.DIRECT_CODEC.listOf().fieldOf("terms").forGetter(p_297812_ -> p_297812_.terms))
-                    .apply(p_342025_, p_297590_)
+                    .apply(p_342025_, pFactory)
         );
     }
 
-    protected static <T extends CompositeLootItemCondition> Codec<T> createInlineCodec(Function<List<LootItemCondition>, T> p_298800_) {
-        return LootItemCondition.DIRECT_CODEC.listOf().xmap(p_298800_, p_300100_ -> p_300100_.terms);
+    protected static <T extends CompositeLootItemCondition> Codec<T> createInlineCodec(Function<List<LootItemCondition>, T> pFactory) {
+        return LootItemCondition.DIRECT_CODEC.listOf().xmap(pFactory, p_300100_ -> p_300100_.terms);
     }
 
-    public final boolean test(LootContext p_286298_) {
-        return this.composedPredicate.test(p_286298_);
+    public final boolean test(LootContext pContext) {
+        return this.composedPredicate.test(pContext);
     }
 
     @Override
@@ -47,14 +47,14 @@ public abstract class CompositeLootItemCondition implements LootItemCondition {
     public abstract static class Builder implements LootItemCondition.Builder {
         private final ImmutableList.Builder<LootItemCondition> terms = ImmutableList.builder();
 
-        protected Builder(LootItemCondition.Builder... p_286619_) {
-            for (LootItemCondition.Builder lootitemcondition$builder : p_286619_) {
+        protected Builder(LootItemCondition.Builder... pConditions) {
+            for (LootItemCondition.Builder lootitemcondition$builder : pConditions) {
                 this.terms.add(lootitemcondition$builder.build());
             }
         }
 
-        public void addTerm(LootItemCondition.Builder p_286677_) {
-            this.terms.add(p_286677_.build());
+        public void addTerm(LootItemCondition.Builder pCondition) {
+            this.terms.add(pCondition.build());
         }
 
         @Override
@@ -62,6 +62,6 @@ public abstract class CompositeLootItemCondition implements LootItemCondition {
             return this.create(this.terms.build());
         }
 
-        protected abstract LootItemCondition create(List<LootItemCondition> p_300168_);
+        protected abstract LootItemCondition create(List<LootItemCondition> pConditions);
     }
 }

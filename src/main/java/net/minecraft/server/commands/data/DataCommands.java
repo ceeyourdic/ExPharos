@@ -60,7 +60,7 @@ public class DataCommands {
         .map(p_139410_ -> p_139410_.apply("source"))
         .collect(ImmutableList.toImmutableList());
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_139366_) {
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> literalargumentbuilder = Commands.literal("data").requires(p_139381_ -> p_139381_.hasPermission(2));
 
         for (DataCommands.DataProvider datacommands$dataprovider : TARGET_PROVIDERS) {
@@ -188,30 +188,30 @@ public class DataCommands {
                 );
         }
 
-        p_139366_.register(literalargumentbuilder);
+        pDispatcher.register(literalargumentbuilder);
     }
 
-    private static String getAsText(Tag p_265255_) throws CommandSyntaxException {
-        if (p_265255_.getType().isValue()) {
-            return p_265255_.getAsString();
+    private static String getAsText(Tag pTag) throws CommandSyntaxException {
+        if (pTag.getType().isValue()) {
+            return pTag.getAsString();
         } else {
-            throw ERROR_EXPECTED_VALUE.create(p_265255_);
+            throw ERROR_EXPECTED_VALUE.create(pTag);
         }
     }
 
-    private static List<Tag> stringifyTagList(List<Tag> p_288980_, DataCommands.StringProcessor p_289012_) throws CommandSyntaxException {
-        List<Tag> list = new ArrayList<>(p_288980_.size());
+    private static List<Tag> stringifyTagList(List<Tag> pTagList, DataCommands.StringProcessor pProcessor) throws CommandSyntaxException {
+        List<Tag> list = new ArrayList<>(pTagList.size());
 
-        for (Tag tag : p_288980_) {
+        for (Tag tag : pTagList) {
             String s = getAsText(tag);
-            list.add(StringTag.valueOf(p_289012_.process(s)));
+            list.add(StringTag.valueOf(pProcessor.process(s)));
         }
 
         return list;
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> decorateModification(
-        BiConsumer<ArgumentBuilder<CommandSourceStack, ?>, DataCommands.DataManipulatorDecorator> p_139404_
+        BiConsumer<ArgumentBuilder<CommandSourceStack, ?>, DataCommands.DataManipulatorDecorator> pDecorator
     ) {
         LiteralArgumentBuilder<CommandSourceStack> literalargumentbuilder = Commands.literal("modify");
 
@@ -222,7 +222,7 @@ public class DataCommands {
                     ArgumentBuilder<CommandSourceStack, ?> argumentbuilder = Commands.argument("targetPath", NbtPathArgument.nbtPath());
 
                     for (DataCommands.DataProvider datacommands$dataprovider1 : SOURCE_PROVIDERS) {
-                        p_139404_.accept(
+                        pDecorator.accept(
                             argumentbuilder,
                             p_142807_ -> datacommands$dataprovider1.wrap(
                                     Commands.literal("from"),
@@ -244,7 +244,7 @@ public class DataCommands {
                                             )
                                 )
                         );
-                        p_139404_.accept(
+                        pDecorator.accept(
                             argumentbuilder,
                             p_264836_ -> datacommands$dataprovider1.wrap(
                                     Commands.literal("string"),
@@ -305,7 +305,7 @@ public class DataCommands {
                         );
                     }
 
-                    p_139404_.accept(
+                    pDecorator.accept(
                         argumentbuilder,
                         p_142799_ -> Commands.literal("value").then(Commands.argument("value", NbtTagArgument.nbtTag()).executes(p_142803_ -> {
                                 List<Tag> list = Collections.singletonList(NbtTagArgument.getNbtTag(p_142803_, "value"));
@@ -320,71 +320,71 @@ public class DataCommands {
         return literalargumentbuilder;
     }
 
-    private static String validatedSubstring(String p_288976_, int p_288968_, int p_289018_) throws CommandSyntaxException {
-        if (p_288968_ >= 0 && p_289018_ <= p_288976_.length() && p_288968_ <= p_289018_) {
-            return p_288976_.substring(p_288968_, p_289018_);
+    private static String validatedSubstring(String pSource, int pStart, int pEnd) throws CommandSyntaxException {
+        if (pStart >= 0 && pEnd <= pSource.length() && pStart <= pEnd) {
+            return pSource.substring(pStart, pEnd);
         } else {
-            throw ERROR_INVALID_SUBSTRING.create(p_288968_, p_289018_);
+            throw ERROR_INVALID_SUBSTRING.create(pStart, pEnd);
         }
     }
 
-    private static String substring(String p_287625_, int p_287772_, int p_287598_) throws CommandSyntaxException {
-        int i = p_287625_.length();
-        int j = getOffset(p_287772_, i);
-        int k = getOffset(p_287598_, i);
-        return validatedSubstring(p_287625_, j, k);
+    private static String substring(String pSource, int pStart, int pEnd) throws CommandSyntaxException {
+        int i = pSource.length();
+        int j = getOffset(pStart, i);
+        int k = getOffset(pEnd, i);
+        return validatedSubstring(pSource, j, k);
     }
 
-    private static String substring(String p_287744_, int p_287741_) throws CommandSyntaxException {
-        int i = p_287744_.length();
-        return validatedSubstring(p_287744_, getOffset(p_287741_, i), i);
+    private static String substring(String pSource, int pStart) throws CommandSyntaxException {
+        int i = pSource.length();
+        return validatedSubstring(pSource, getOffset(pStart, i), i);
     }
 
-    private static int getOffset(int p_287638_, int p_287600_) {
-        return p_287638_ >= 0 ? p_287638_ : p_287600_ + p_287638_;
+    private static int getOffset(int pIndex, int pLength) {
+        return pIndex >= 0 ? pIndex : pLength + pIndex;
     }
 
-    private static List<Tag> getSingletonSource(CommandContext<CommandSourceStack> p_265108_, DataCommands.DataProvider p_265370_) throws CommandSyntaxException {
-        DataAccessor dataaccessor = p_265370_.access(p_265108_);
+    private static List<Tag> getSingletonSource(CommandContext<CommandSourceStack> pContext, DataCommands.DataProvider pDataProvider) throws CommandSyntaxException {
+        DataAccessor dataaccessor = pDataProvider.access(pContext);
         return Collections.singletonList(dataaccessor.getData());
     }
 
-    private static List<Tag> resolveSourcePath(CommandContext<CommandSourceStack> p_265468_, DataCommands.DataProvider p_265670_) throws CommandSyntaxException {
-        DataAccessor dataaccessor = p_265670_.access(p_265468_);
-        NbtPathArgument.NbtPath nbtpathargument$nbtpath = NbtPathArgument.getPath(p_265468_, "sourcePath");
+    private static List<Tag> resolveSourcePath(CommandContext<CommandSourceStack> pContext, DataCommands.DataProvider pDataProvider) throws CommandSyntaxException {
+        DataAccessor dataaccessor = pDataProvider.access(pContext);
+        NbtPathArgument.NbtPath nbtpathargument$nbtpath = NbtPathArgument.getPath(pContext, "sourcePath");
         return nbtpathargument$nbtpath.get(dataaccessor.getData());
     }
 
     private static int manipulateData(
-        CommandContext<CommandSourceStack> p_139376_, DataCommands.DataProvider p_139377_, DataCommands.DataManipulator p_139378_, List<Tag> p_139379_
+        CommandContext<CommandSourceStack> pSource, DataCommands.DataProvider pDataProvider, DataCommands.DataManipulator pDataManipulator, List<Tag> pTags
     ) throws CommandSyntaxException {
-        DataAccessor dataaccessor = p_139377_.access(p_139376_);
-        NbtPathArgument.NbtPath nbtpathargument$nbtpath = NbtPathArgument.getPath(p_139376_, "targetPath");
+        DataAccessor dataaccessor = pDataProvider.access(pSource);
+        NbtPathArgument.NbtPath nbtpathargument$nbtpath = NbtPathArgument.getPath(pSource, "targetPath");
         CompoundTag compoundtag = dataaccessor.getData();
-        int i = p_139378_.modify(p_139376_, compoundtag, nbtpathargument$nbtpath, p_139379_);
+        int i = pDataManipulator.modify(pSource, compoundtag, nbtpathargument$nbtpath, pTags);
         if (i == 0) {
             throw ERROR_MERGE_UNCHANGED.create();
         } else {
             dataaccessor.setData(compoundtag);
-            p_139376_.getSource().sendSuccess(() -> dataaccessor.getModifiedSuccess(), true);
+            pSource.getSource().sendSuccess(() -> dataaccessor.getModifiedSuccess(), true);
             return i;
         }
     }
 
-    private static int removeData(CommandSourceStack p_139386_, DataAccessor p_139387_, NbtPathArgument.NbtPath p_139388_) throws CommandSyntaxException {
-        CompoundTag compoundtag = p_139387_.getData();
-        int i = p_139388_.remove(compoundtag);
+    private static int removeData(CommandSourceStack pSource, DataAccessor pAccessor, NbtPathArgument.NbtPath pPath) throws CommandSyntaxException {
+        CompoundTag compoundtag = pAccessor.getData();
+        int i = pPath.remove(compoundtag);
         if (i == 0) {
             throw ERROR_MERGE_UNCHANGED.create();
         } else {
-            p_139387_.setData(compoundtag);
-            p_139386_.sendSuccess(() -> p_139387_.getModifiedSuccess(), true);
+            pAccessor.setData(compoundtag);
+            pSource.sendSuccess(() -> pAccessor.getModifiedSuccess(), true);
             return i;
         }
     }
 
-    public static Tag getSingleTag(NbtPathArgument.NbtPath p_139399_, DataAccessor p_139400_) throws CommandSyntaxException {
-        Collection<Tag> collection = p_139399_.get(p_139400_.getData());
+    public static Tag getSingleTag(NbtPathArgument.NbtPath pPath, DataAccessor pAccessor) throws CommandSyntaxException {
+        Collection<Tag> collection = pPath.get(pAccessor.getData());
         Iterator<Tag> iterator = collection.iterator();
         Tag tag = iterator.next();
         if (iterator.hasNext()) {
@@ -394,8 +394,8 @@ public class DataCommands {
         }
     }
 
-    private static int getData(CommandSourceStack p_139444_, DataAccessor p_139445_, NbtPathArgument.NbtPath p_139446_) throws CommandSyntaxException {
-        Tag tag = getSingleTag(p_139446_, p_139445_);
+    private static int getData(CommandSourceStack pSource, DataAccessor pAccessor, NbtPathArgument.NbtPath pPath) throws CommandSyntaxException {
+        Tag tag = getSingleTag(pPath, pAccessor);
         int i;
         if (tag instanceof NumericTag) {
             i = Mth.floor(((NumericTag)tag).getAsDouble());
@@ -405,44 +405,44 @@ public class DataCommands {
             i = ((CompoundTag)tag).size();
         } else {
             if (!(tag instanceof StringTag)) {
-                throw ERROR_GET_NON_EXISTENT.create(p_139446_.toString());
+                throw ERROR_GET_NON_EXISTENT.create(pPath.toString());
             }
 
             i = tag.getAsString().length();
         }
 
-        p_139444_.sendSuccess(() -> p_139445_.getPrintSuccess(tag), false);
+        pSource.sendSuccess(() -> pAccessor.getPrintSuccess(tag), false);
         return i;
     }
 
-    private static int getNumeric(CommandSourceStack p_139390_, DataAccessor p_139391_, NbtPathArgument.NbtPath p_139392_, double p_139393_) throws CommandSyntaxException {
-        Tag tag = getSingleTag(p_139392_, p_139391_);
+    private static int getNumeric(CommandSourceStack pSource, DataAccessor pAccessor, NbtPathArgument.NbtPath pPath, double pScale) throws CommandSyntaxException {
+        Tag tag = getSingleTag(pPath, pAccessor);
         if (!(tag instanceof NumericTag)) {
-            throw ERROR_GET_NOT_NUMBER.create(p_139392_.toString());
+            throw ERROR_GET_NOT_NUMBER.create(pPath.toString());
         } else {
-            int i = Mth.floor(((NumericTag)tag).getAsDouble() * p_139393_);
-            p_139390_.sendSuccess(() -> p_139391_.getPrintSuccess(p_139392_, p_139393_, i), false);
+            int i = Mth.floor(((NumericTag)tag).getAsDouble() * pScale);
+            pSource.sendSuccess(() -> pAccessor.getPrintSuccess(pPath, pScale, i), false);
             return i;
         }
     }
 
-    private static int getData(CommandSourceStack p_139383_, DataAccessor p_139384_) throws CommandSyntaxException {
-        CompoundTag compoundtag = p_139384_.getData();
-        p_139383_.sendSuccess(() -> p_139384_.getPrintSuccess(compoundtag), false);
+    private static int getData(CommandSourceStack pSource, DataAccessor pAccessor) throws CommandSyntaxException {
+        CompoundTag compoundtag = pAccessor.getData();
+        pSource.sendSuccess(() -> pAccessor.getPrintSuccess(compoundtag), false);
         return 1;
     }
 
-    private static int mergeData(CommandSourceStack p_139395_, DataAccessor p_139396_, CompoundTag p_139397_) throws CommandSyntaxException {
-        CompoundTag compoundtag = p_139396_.getData();
-        if (NbtPathArgument.NbtPath.isTooDeep(p_139397_, 0)) {
+    private static int mergeData(CommandSourceStack pSource, DataAccessor pAccessor, CompoundTag pNbt) throws CommandSyntaxException {
+        CompoundTag compoundtag = pAccessor.getData();
+        if (NbtPathArgument.NbtPath.isTooDeep(pNbt, 0)) {
             throw NbtPathArgument.ERROR_DATA_TOO_DEEP.create();
         } else {
-            CompoundTag compoundtag1 = compoundtag.copy().merge(p_139397_);
+            CompoundTag compoundtag1 = compoundtag.copy().merge(pNbt);
             if (compoundtag.equals(compoundtag1)) {
                 throw ERROR_MERGE_UNCHANGED.create();
             } else {
-                p_139396_.setData(compoundtag1);
-                p_139395_.sendSuccess(() -> p_139396_.getModifiedSuccess(), true);
+                pAccessor.setData(compoundtag1);
+                pSource.sendSuccess(() -> pAccessor.getModifiedSuccess(), true);
                 return 1;
             }
         }
@@ -450,25 +450,25 @@ public class DataCommands {
 
     @FunctionalInterface
     interface DataManipulator {
-        int modify(CommandContext<CommandSourceStack> p_139496_, CompoundTag p_139497_, NbtPathArgument.NbtPath p_139498_, List<Tag> p_139499_) throws CommandSyntaxException;
+        int modify(CommandContext<CommandSourceStack> pContext, CompoundTag pNbt, NbtPathArgument.NbtPath pNbtPath, List<Tag> pTags) throws CommandSyntaxException;
     }
 
     @FunctionalInterface
     interface DataManipulatorDecorator {
-        ArgumentBuilder<CommandSourceStack, ?> create(DataCommands.DataManipulator p_139501_);
+        ArgumentBuilder<CommandSourceStack, ?> create(DataCommands.DataManipulator pDataManipulator);
     }
 
     public interface DataProvider {
-        DataAccessor access(CommandContext<CommandSourceStack> p_139504_) throws CommandSyntaxException;
+        DataAccessor access(CommandContext<CommandSourceStack> pContext) throws CommandSyntaxException;
 
         ArgumentBuilder<CommandSourceStack, ?> wrap(
-            ArgumentBuilder<CommandSourceStack, ?> p_139502_,
-            Function<ArgumentBuilder<CommandSourceStack, ?>, ArgumentBuilder<CommandSourceStack, ?>> p_139503_
+            ArgumentBuilder<CommandSourceStack, ?> pBuilder,
+            Function<ArgumentBuilder<CommandSourceStack, ?>, ArgumentBuilder<CommandSourceStack, ?>> pAction
         );
     }
 
     @FunctionalInterface
     interface StringProcessor {
-        String process(String p_289006_) throws CommandSyntaxException;
+        String process(String pInput) throws CommandSyntaxException;
     }
 }

@@ -37,16 +37,16 @@ public class SoulFireBlock extends BaseFireBlock {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_56655_, LevelReader p_56656_, BlockPos p_56657_) {
-        return canSurviveOnBlock(p_56656_.getBlockState(p_56657_.below()));
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        return canSurviveOnBlock(pLevel.getBlockState(pPos.below()));
     }
 
-    public static boolean canSurviveOnBlock(BlockState p_154651_) {
-        return p_154651_.is(BlockTags.SOUL_FIRE_BASE_BLOCKS);
+    public static boolean canSurviveOnBlock(BlockState pState) {
+        return pState.is(BlockTags.SOUL_FIRE_BASE_BLOCKS);
     }
 
     @Override
-    protected boolean canBurn(BlockState p_56668_) {
+    protected boolean canBurn(BlockState pState) {
         return true;
     }
 }

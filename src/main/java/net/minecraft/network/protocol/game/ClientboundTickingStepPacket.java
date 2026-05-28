@@ -11,16 +11,16 @@ public record ClientboundTickingStepPacket(int tickSteps) implements Packet<Clie
         ClientboundTickingStepPacket::write, ClientboundTickingStepPacket::new
     );
 
-    private ClientboundTickingStepPacket(FriendlyByteBuf p_311037_) {
-        this(p_311037_.readVarInt());
+    private ClientboundTickingStepPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readVarInt());
     }
 
-    public static ClientboundTickingStepPacket from(TickRateManager p_312211_) {
-        return new ClientboundTickingStepPacket(p_312211_.frozenTicksToRun());
+    public static ClientboundTickingStepPacket from(TickRateManager pTickRateManager) {
+        return new ClientboundTickingStepPacket(pTickRateManager.frozenTicksToRun());
     }
 
-    private void write(FriendlyByteBuf p_311017_) {
-        p_311017_.writeVarInt(this.tickSteps);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.tickSteps);
     }
 
     @Override

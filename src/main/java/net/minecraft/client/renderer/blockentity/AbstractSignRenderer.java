@@ -23,22 +23,23 @@ import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.CustomColors;
+import net.optifine.shaders.Shaders;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class AbstractSignRenderer implements BlockEntityRenderer<SignBlockEntity> {
     private static final int BLACK_TEXT_OUTLINE_COLOR = -988212;
     private static final int OUTLINE_RENDER_DISTANCE = Mth.square(16);
     private final Font font;
+    private static double textRenderDistanceSq = 4096.0;
 
-    public AbstractSignRenderer(BlockEntityRendererProvider.Context p_377237_) {
-        this.font = p_377237_.getFont();
+    public AbstractSignRenderer(BlockEntityRendererProvider.Context pContext) {
+        this.font = pContext.getFont();
     }
 
-    protected abstract Model getSignModel(BlockState p_378255_, WoodType p_376054_);
+    protected abstract Model getSignModel(BlockState pState, WoodType pWoodType);
 
-    protected abstract Material getSignMaterial(WoodType p_376937_);
+    protected abstract Material getSignMaterial(WoodType pWoodType);
 
     protected abstract float getSignModelRenderScale();
 
@@ -46,7 +47,7 @@ public abstract class AbstractSignRenderer implements BlockEntityRenderer<SignBl
 
     protected abstract Vec3 getTextOffset();
 
-    protected abstract void translateSign(PoseStack p_377787_, float p_378640_, BlockState p_376264_);
+    protected abstract void translateSign(PoseStack pPoseStack, float pYRot, BlockState pState);
 
     public void render(SignBlockEntity p_375644_, float p_376234_, PoseStack p_377246_, MultiBufferSource p_378186_, int p_378621_, int p_376297_) {
         BlockState blockstate = p_375644_.getBlockState();
@@ -56,102 +57,108 @@ public abstract class AbstractSignRenderer implements BlockEntityRenderer<SignBl
     }
 
     private void renderSignWithText(
-        SignBlockEntity p_375839_,
-        PoseStack p_376878_,
-        MultiBufferSource p_378051_,
-        int p_375958_,
-        int p_375909_,
-        BlockState p_376590_,
-        SignBlock p_376023_,
-        WoodType p_375949_,
-        Model p_377521_
+        SignBlockEntity pBlockEntity,
+        PoseStack pPoseStack,
+        MultiBufferSource pBufferSource,
+        int pPackedLight,
+        int pPackedOverlay,
+        BlockState pState,
+        SignBlock pSign,
+        WoodType pWoodType,
+        Model pModel
     ) {
-        p_376878_.pushPose();
-        this.translateSign(p_376878_, -p_376023_.getYRotationDegrees(p_376590_), p_376590_);
-        this.renderSign(p_376878_, p_378051_, p_375958_, p_375909_, p_375949_, p_377521_);
-        this.renderSignText(p_375839_.getBlockPos(), p_375839_.getFrontText(), p_376878_, p_378051_, p_375958_, p_375839_.getTextLineHeight(), p_375839_.getMaxTextLineWidth(), true);
-        this.renderSignText(p_375839_.getBlockPos(), p_375839_.getBackText(), p_376878_, p_378051_, p_375958_, p_375839_.getTextLineHeight(), p_375839_.getMaxTextLineWidth(), false);
-        p_376878_.popPose();
+        pPoseStack.pushPose();
+        this.translateSign(pPoseStack, -pSign.getYRotationDegrees(pState), pState);
+        this.renderSign(pPoseStack, pBufferSource, pPackedLight, pPackedOverlay, pWoodType, pModel);
+        this.renderSignText(pBlockEntity.getBlockPos(), pBlockEntity.getFrontText(), pPoseStack, pBufferSource, pPackedLight, pBlockEntity.getTextLineHeight(), pBlockEntity.getMaxTextLineWidth(), true);
+        this.renderSignText(pBlockEntity.getBlockPos(), pBlockEntity.getBackText(), pPoseStack, pBufferSource, pPackedLight, pBlockEntity.getTextLineHeight(), pBlockEntity.getMaxTextLineWidth(), false);
+        pPoseStack.popPose();
     }
 
-    protected void renderSign(PoseStack p_378035_, MultiBufferSource p_378542_, int p_377671_, int p_376670_, WoodType p_375855_, Model p_375450_) {
-        p_378035_.pushPose();
+    protected void renderSign(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay, WoodType pWoodType, Model pModel) {
+        pPoseStack.pushPose();
         float f = this.getSignModelRenderScale();
-        p_378035_.scale(f, -f, -f);
-        Material material = this.getSignMaterial(p_375855_);
-        VertexConsumer vertexconsumer = material.buffer(p_378542_, p_375450_::renderType);
-        p_375450_.renderToBuffer(p_378035_, vertexconsumer, p_377671_, p_376670_);
-        p_378035_.popPose();
+        pPoseStack.scale(f, -f, -f);
+        Material material = this.getSignMaterial(pWoodType);
+        VertexConsumer vertexconsumer = material.buffer(pBufferSource, pModel::renderType);
+        pModel.renderToBuffer(pPoseStack, vertexconsumer, pPackedLight, pPackedOverlay);
+        pPoseStack.popPose();
     }
 
     private void renderSignText(
-        BlockPos p_375961_,
-        SignText p_378476_,
-        PoseStack p_376276_,
-        MultiBufferSource p_378832_,
-        int p_378087_,
-        int p_375648_,
-        int p_378485_,
-        boolean p_377200_
+        BlockPos pPos,
+        SignText pText,
+        PoseStack pPoseStack,
+        MultiBufferSource pBufferSource,
+        int pPackedLight,
+        int pLineHeight,
+        int pMaxLineWidth,
+        boolean pIsFront
     ) {
-        p_376276_.pushPose();
-        this.translateSignText(p_376276_, p_377200_, this.getTextOffset());
-        int i = getDarkColor(p_378476_);
-        int j = 4 * p_375648_ / 2;
-        FormattedCharSequence[] aformattedcharsequence = p_378476_.getRenderMessages(Minecraft.getInstance().isTextFilteringEnabled(), p_378315_ -> {
-            List<FormattedCharSequence> list = this.font.split(p_378315_, p_378485_);
-            return list.isEmpty() ? FormattedCharSequence.EMPTY : list.get(0);
-        });
-        int k;
-        boolean flag;
-        int l;
-        if (p_378476_.hasGlowingText()) {
-            k = p_378476_.getColor().getTextColor();
-            flag = isOutlineVisible(p_375961_, k);
-            l = 15728880;
-        } else {
-            k = i;
-            flag = false;
-            l = p_378087_;
-        }
+        if (isRenderText(pPos)) {
+            pPoseStack.pushPose();
+            this.translateSignText(pPoseStack, pIsFront, this.getTextOffset());
+            int i = getDarkColor(pText);
+            int j = 4 * pLineHeight / 2;
+            FormattedCharSequence[] aformattedcharsequence = pText.getRenderMessages(Minecraft.getInstance().isTextFilteringEnabled(), compIn -> {
+                List<FormattedCharSequence> list = this.font.split(compIn, pMaxLineWidth);
+                return list.isEmpty() ? FormattedCharSequence.EMPTY : list.get(0);
+            });
+            int k;
+            boolean flag;
+            int l;
+            if (pText.hasGlowingText()) {
+                k = pText.getColor().getTextColor();
+                if (Config.isCustomColors()) {
+                    k = CustomColors.getSignTextColor(k);
+                }
 
-        for (int i1 = 0; i1 < 4; i1++) {
-            FormattedCharSequence formattedcharsequence = aformattedcharsequence[i1];
-            float f = (float)(-this.font.width(formattedcharsequence) / 2);
-            if (flag) {
-                this.font.drawInBatch8xOutline(formattedcharsequence, f, (float)(i1 * p_375648_ - j), k, i, p_376276_.last().pose(), p_378832_, l);
+                flag = isOutlineVisible(pPos, k);
+                l = 15728880;
             } else {
-                this.font
-                    .drawInBatch(
-                        formattedcharsequence,
-                        f,
-                        (float)(i1 * p_375648_ - j),
-                        k,
-                        false,
-                        p_376276_.last().pose(),
-                        p_378832_,
-                        Font.DisplayMode.POLYGON_OFFSET,
-                        0,
-                        l
-                    );
+                k = i;
+                flag = false;
+                l = pPackedLight;
             }
-        }
 
-        p_376276_.popPose();
+            for (int i1 = 0; i1 < 4; i1++) {
+                FormattedCharSequence formattedcharsequence = aformattedcharsequence[i1];
+                float f = (float)(-this.font.width(formattedcharsequence) / 2);
+                if (flag) {
+                    this.font.drawInBatch8xOutline(formattedcharsequence, f, (float)(i1 * pLineHeight - j), k, i, pPoseStack.last().pose(), pBufferSource, l);
+                } else {
+                    this.font
+                        .drawInBatch(
+                            formattedcharsequence,
+                            f,
+                            (float)(i1 * pLineHeight - j),
+                            k,
+                            false,
+                            pPoseStack.last().pose(),
+                            pBufferSource,
+                            Font.DisplayMode.POLYGON_OFFSET,
+                            0,
+                            l
+                        );
+                }
+            }
+
+            pPoseStack.popPose();
+        }
     }
 
-    private void translateSignText(PoseStack p_377496_, boolean p_376226_, Vec3 p_377669_) {
-        if (!p_376226_) {
-            p_377496_.mulPose(Axis.YP.rotationDegrees(180.0F));
+    private void translateSignText(PoseStack pPoseStack, boolean pIsFront, Vec3 pOffset) {
+        if (!pIsFront) {
+            pPoseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
         }
 
         float f = 0.015625F * this.getSignTextRenderScale();
-        p_377496_.translate(p_377669_);
-        p_377496_.scale(f, -f, f);
+        pPoseStack.translate(pOffset);
+        pPoseStack.scale(f, -f, f);
     }
 
-    private static boolean isOutlineVisible(BlockPos p_376971_, int p_378481_) {
-        if (p_378481_ == DyeColor.BLACK.getTextColor()) {
+    private static boolean isOutlineVisible(BlockPos pPos, int pColor) {
+        if (pColor == DyeColor.BLACK.getTextColor()) {
             return true;
         } else {
             Minecraft minecraft = Minecraft.getInstance();
@@ -160,14 +167,18 @@ public abstract class AbstractSignRenderer implements BlockEntityRenderer<SignBl
                 return true;
             } else {
                 Entity entity = minecraft.getCameraEntity();
-                return entity != null && entity.distanceToSqr(Vec3.atCenterOf(p_376971_)) < (double)OUTLINE_RENDER_DISTANCE;
+                return entity != null && entity.distanceToSqr(Vec3.atCenterOf(pPos)) < (double)OUTLINE_RENDER_DISTANCE;
             }
         }
     }
 
-    public static int getDarkColor(SignText p_376682_) {
-        int i = p_376682_.getColor().getTextColor();
-        if (i == DyeColor.BLACK.getTextColor() && p_376682_.hasGlowingText()) {
+    public static int getDarkColor(SignText pText) {
+        int i = pText.getColor().getTextColor();
+        if (Config.isCustomColors()) {
+            i = CustomColors.getSignTextColor(i);
+        }
+
+        if (i == DyeColor.BLACK.getTextColor() && pText.hasGlowingText()) {
             return -988212;
         } else {
             double d0 = 0.4;
@@ -176,5 +187,28 @@ public abstract class AbstractSignRenderer implements BlockEntityRenderer<SignBl
             int l = (int)((double)ARGB.blue(i) * 0.4);
             return ARGB.color(0, j, k, l);
         }
+    }
+
+    private static boolean isRenderText(BlockPos tileEntityPos) {
+        if (Shaders.isShadowPass) {
+            return false;
+        } else {
+            if (!Config.zoomMode) {
+                Entity entity = Minecraft.getInstance().getCameraEntity();
+                double d0 = entity.distanceToSqr((double)tileEntityPos.getX(), (double)tileEntityPos.getY(), (double)tileEntityPos.getZ());
+                if (d0 > textRenderDistanceSq) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    public static void updateTextRenderDistance() {
+        Minecraft minecraft = Minecraft.getInstance();
+        double d0 = (double)Config.limit(minecraft.options.fov().get(), 1, 120);
+        double d1 = Math.max(1.5 * (double)minecraft.getWindow().getScreenHeight() / d0, 16.0);
+        textRenderDistanceSq = d1 * d1;
     }
 }

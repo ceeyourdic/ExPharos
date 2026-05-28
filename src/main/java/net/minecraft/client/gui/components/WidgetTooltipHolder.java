@@ -21,12 +21,12 @@ public class WidgetTooltipHolder {
     private long displayStartTime;
     private boolean wasDisplayed;
 
-    public void setDelay(Duration p_334379_) {
-        this.delay = p_334379_;
+    public void setDelay(Duration pDelay) {
+        this.delay = pDelay;
     }
 
-    public void set(@Nullable Tooltip p_327883_) {
-        this.tooltip = p_327883_;
+    public void set(@Nullable Tooltip pTooltip) {
+        this.tooltip = pTooltip;
     }
 
     @Nullable
@@ -34,11 +34,11 @@ public class WidgetTooltipHolder {
         return this.tooltip;
     }
 
-    public void refreshTooltipForNextRenderPass(boolean p_330612_, boolean p_330175_, ScreenRectangle p_331953_) {
+    public void refreshTooltipForNextRenderPass(boolean pHovering, boolean pFocused, ScreenRectangle pScreenRectangle) {
         if (this.tooltip == null) {
             this.wasDisplayed = false;
         } else {
-            boolean flag = p_330612_ || p_330175_ && Minecraft.getInstance().getLastInputType().isKeyboard();
+            boolean flag = pHovering || pFocused && Minecraft.getInstance().getLastInputType().isKeyboard();
             if (flag != this.wasDisplayed) {
                 if (flag) {
                     this.displayStartTime = Util.getMillis();
@@ -50,21 +50,21 @@ public class WidgetTooltipHolder {
             if (flag && Util.getMillis() - this.displayStartTime > this.delay.toMillis()) {
                 Screen screen = Minecraft.getInstance().screen;
                 if (screen != null) {
-                    screen.setTooltipForNextRenderPass(this.tooltip, this.createTooltipPositioner(p_331953_, p_330612_, p_330175_), p_330175_);
+                    screen.setTooltipForNextRenderPass(this.tooltip, this.createTooltipPositioner(pScreenRectangle, pHovering, pFocused), pFocused);
                 }
             }
         }
     }
 
-    private ClientTooltipPositioner createTooltipPositioner(ScreenRectangle p_328060_, boolean p_329268_, boolean p_336280_) {
-        return (ClientTooltipPositioner)(!p_329268_ && p_336280_ && Minecraft.getInstance().getLastInputType().isKeyboard()
-            ? new BelowOrAboveWidgetTooltipPositioner(p_328060_)
-            : new MenuTooltipPositioner(p_328060_));
+    private ClientTooltipPositioner createTooltipPositioner(ScreenRectangle pScreenRectangle, boolean pHovering, boolean pFocused) {
+        return (ClientTooltipPositioner)(!pHovering && pFocused && Minecraft.getInstance().getLastInputType().isKeyboard()
+            ? new BelowOrAboveWidgetTooltipPositioner(pScreenRectangle)
+            : new MenuTooltipPositioner(pScreenRectangle));
     }
 
-    public void updateNarration(NarrationElementOutput p_329365_) {
+    public void updateNarration(NarrationElementOutput pOutput) {
         if (this.tooltip != null) {
-            this.tooltip.updateNarration(p_329365_);
+            this.tooltip.updateNarration(pOutput);
         }
     }
 }

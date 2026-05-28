@@ -57,8 +57,8 @@ public class HangingSignRenderer extends AbstractSignRenderer {
         );
     }
 
-    public static Model createSignModel(EntityModelSet p_378530_, WoodType p_378120_, HangingSignRenderer.AttachmentType p_377170_) {
-        return new Model.Simple(p_378530_.bakeLayer(ModelLayers.createHangingSignModelName(p_378120_, p_377170_)), RenderType::entityCutoutNoCull);
+    public static Model createSignModel(EntityModelSet pModelSet, WoodType pWoodType, HangingSignRenderer.AttachmentType pAttachmentType) {
+        return new Model.Simple(pModelSet.bakeLayer(ModelLayers.createHangingSignModelName(pWoodType, pAttachmentType)), RenderType::entityCutoutNoCull);
     }
 
     @Override
@@ -71,10 +71,10 @@ public class HangingSignRenderer extends AbstractSignRenderer {
         return 0.9F;
     }
 
-    private static void translateBase(PoseStack p_376581_, float p_378078_) {
-        p_376581_.translate(0.5, 0.9375, 0.5);
-        p_376581_.mulPose(Axis.YP.rotationDegrees(p_378078_));
-        p_376581_.translate(0.0F, -0.3125F, 0.0F);
+    private static void translateBase(PoseStack pPoseStack, float pYRot) {
+        pPoseStack.translate(0.5, 0.9375, 0.5);
+        pPoseStack.mulPose(Axis.YP.rotationDegrees(pYRot));
+        pPoseStack.translate(0.0F, -0.3125F, 0.0F);
     }
 
     @Override
@@ -98,24 +98,24 @@ public class HangingSignRenderer extends AbstractSignRenderer {
         return TEXT_OFFSET;
     }
 
-    public static void renderInHand(PoseStack p_375796_, MultiBufferSource p_376333_, int p_378561_, int p_377654_, Model p_375942_, Material p_375645_) {
-        p_375796_.pushPose();
-        translateBase(p_375796_, 0.0F);
-        p_375796_.scale(1.0F, -1.0F, -1.0F);
-        VertexConsumer vertexconsumer = p_375645_.buffer(p_376333_, p_375942_::renderType);
-        p_375942_.renderToBuffer(p_375796_, vertexconsumer, p_378561_, p_377654_);
-        p_375796_.popPose();
+    public static void renderInHand(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay, Model pModel, Material pMaterial) {
+        pPoseStack.pushPose();
+        translateBase(pPoseStack, 0.0F);
+        pPoseStack.scale(1.0F, -1.0F, -1.0F);
+        VertexConsumer vertexconsumer = pMaterial.buffer(pBufferSource, pModel::renderType);
+        pModel.renderToBuffer(pPoseStack, vertexconsumer, pPackedLight, pPackedOverlay);
+        pPoseStack.popPose();
     }
 
-    public static LayerDefinition createHangingSignLayer(HangingSignRenderer.AttachmentType p_375619_) {
+    public static LayerDefinition createHangingSignLayer(HangingSignRenderer.AttachmentType pAttachmentType) {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
         partdefinition.addOrReplaceChild("board", CubeListBuilder.create().texOffs(0, 12).addBox(-7.0F, 0.0F, -1.0F, 14.0F, 10.0F, 2.0F), PartPose.ZERO);
-        if (p_375619_ == HangingSignRenderer.AttachmentType.WALL) {
+        if (pAttachmentType == HangingSignRenderer.AttachmentType.WALL) {
             partdefinition.addOrReplaceChild("plank", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0F, -6.0F, -2.0F, 16.0F, 2.0F, 4.0F), PartPose.ZERO);
         }
 
-        if (p_375619_ == HangingSignRenderer.AttachmentType.WALL || p_375619_ == HangingSignRenderer.AttachmentType.CEILING) {
+        if (pAttachmentType == HangingSignRenderer.AttachmentType.WALL || pAttachmentType == HangingSignRenderer.AttachmentType.CEILING) {
             PartDefinition partdefinition1 = partdefinition.addOrReplaceChild("normalChains", CubeListBuilder.create(), PartPose.ZERO);
             partdefinition1.addOrReplaceChild(
                 "chainL1",
@@ -139,7 +139,7 @@ public class HangingSignRenderer extends AbstractSignRenderer {
             );
         }
 
-        if (p_375619_ == HangingSignRenderer.AttachmentType.CEILING_MIDDLE) {
+        if (pAttachmentType == HangingSignRenderer.AttachmentType.CEILING_MIDDLE) {
             partdefinition.addOrReplaceChild(
                 "vChains", CubeListBuilder.create().texOffs(14, 6).addBox(-6.0F, -6.0F, 0.0F, 12.0F, 6.0F, 0.0F), PartPose.ZERO
             );
@@ -156,13 +156,13 @@ public class HangingSignRenderer extends AbstractSignRenderer {
 
         private final String name;
 
-        private AttachmentType(final String p_375617_) {
-            this.name = p_375617_;
+        private AttachmentType(final String pName) {
+            this.name = pName;
         }
 
-        public static HangingSignRenderer.AttachmentType byBlockState(BlockState p_376849_) {
-            if (p_376849_.getBlock() instanceof CeilingHangingSignBlock) {
-                return p_376849_.getValue(BlockStateProperties.ATTACHED) ? CEILING_MIDDLE : CEILING;
+        public static HangingSignRenderer.AttachmentType byBlockState(BlockState pBlockState) {
+            if (pBlockState.getBlock() instanceof CeilingHangingSignBlock) {
+                return pBlockState.getValue(BlockStateProperties.ATTACHED) ? CEILING_MIDDLE : CEILING;
             } else {
                 return WALL;
             }

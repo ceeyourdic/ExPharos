@@ -23,15 +23,15 @@ public class WitchModel extends EntityModel<WitchRenderState> implements HeadedM
     private final ModelPart leftLeg;
     private final ModelPart arms;
 
-    public WitchModel(ModelPart p_171055_) {
-        super(p_171055_);
-        this.head = p_171055_.getChild("head");
+    public WitchModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
         this.hat = this.head.getChild("hat");
         this.hatRim = this.hat.getChild("hat_rim");
         this.nose = this.head.getChild("nose");
-        this.rightLeg = p_171055_.getChild("right_leg");
-        this.leftLeg = p_171055_.getChild("left_leg");
-        this.arms = p_171055_.getChild("arms");
+        this.rightLeg = pRoot.getChild("right_leg");
+        this.leftLeg = pRoot.getChild("left_leg");
+        this.arms = pRoot.getChild("arms");
     }
 
     public static LayerDefinition createBodyLayer() {

@@ -37,13 +37,13 @@ public class RedstoneWallTorchBlock extends RedstoneTorchBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_55781_, BlockGetter p_55782_, BlockPos p_55783_, CollisionContext p_55784_) {
-        return WallTorchBlock.getShape(p_55781_);
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return WallTorchBlock.getShape(pState);
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_55762_, LevelReader p_55763_, BlockPos p_55764_) {
-        return WallTorchBlock.canSurvive(p_55763_, p_55764_, p_55762_.getValue(FACING));
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        return WallTorchBlock.canSurvive(pLevel, pPos, pState.getValue(FACING));
     }
 
     @Override
@@ -62,8 +62,8 @@ public class RedstoneWallTorchBlock extends RedstoneTorchBlock {
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_55746_) {
-        BlockState blockstate = Blocks.WALL_TORCH.getStateForPlacement(p_55746_);
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockState blockstate = Blocks.WALL_TORCH.getStateForPlacement(pContext);
         return blockstate == null ? null : this.defaultBlockState().setValue(FACING, blockstate.getValue(FACING));
     }
 
@@ -80,29 +80,29 @@ public class RedstoneWallTorchBlock extends RedstoneTorchBlock {
     }
 
     @Override
-    protected boolean hasNeighborSignal(Level p_55748_, BlockPos p_55749_, BlockState p_55750_) {
-        Direction direction = p_55750_.getValue(FACING).getOpposite();
-        return p_55748_.hasSignal(p_55749_.relative(direction), direction);
+    protected boolean hasNeighborSignal(Level pLevel, BlockPos pPos, BlockState pState) {
+        Direction direction = pState.getValue(FACING).getOpposite();
+        return pLevel.hasSignal(pPos.relative(direction), direction);
     }
 
     @Override
-    protected int getSignal(BlockState p_55752_, BlockGetter p_55753_, BlockPos p_55754_, Direction p_55755_) {
-        return p_55752_.getValue(LIT) && p_55752_.getValue(FACING) != p_55755_ ? 15 : 0;
+    protected int getSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
+        return pBlockState.getValue(LIT) && pBlockState.getValue(FACING) != pSide ? 15 : 0;
     }
 
     @Override
-    protected BlockState rotate(BlockState p_55769_, Rotation p_55770_) {
-        return p_55769_.setValue(FACING, p_55770_.rotate(p_55769_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_55766_, Mirror p_55767_) {
-        return p_55766_.rotate(p_55767_.getRotation(p_55766_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_55779_) {
-        p_55779_.add(FACING, LIT);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, LIT);
     }
 
     @Nullable

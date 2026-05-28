@@ -13,9 +13,9 @@ import net.minecraft.world.level.block.state.BlockState;
 public abstract class AbstractBannerBlock extends BaseEntityBlock {
     private final DyeColor color;
 
-    protected AbstractBannerBlock(DyeColor p_48659_, BlockBehaviour.Properties p_48660_) {
-        super(p_48660_);
-        this.color = p_48659_;
+    protected AbstractBannerBlock(DyeColor pColor, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.color = pColor;
     }
 
     @Override

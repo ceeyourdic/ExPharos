@@ -26,8 +26,8 @@ public class Score implements ReadOnlyScoreInfo {
         return this.value;
     }
 
-    public void value(int p_313056_) {
-        this.value = p_313056_;
+    public void value(int pValue) {
+        this.value = pValue;
     }
 
     @Override
@@ -35,8 +35,8 @@ public class Score implements ReadOnlyScoreInfo {
         return this.locked;
     }
 
-    public void setLocked(boolean p_83399_) {
-        this.locked = p_83399_;
+    public void setLocked(boolean pLocked) {
+        this.locked = pLocked;
     }
 
     @Nullable
@@ -44,8 +44,8 @@ public class Score implements ReadOnlyScoreInfo {
         return this.display;
     }
 
-    public void display(@Nullable Component p_312952_) {
-        this.display = p_312952_;
+    public void display(@Nullable Component pDisplay) {
+        this.display = pDisplay;
     }
 
     @Nullable
@@ -54,38 +54,38 @@ public class Score implements ReadOnlyScoreInfo {
         return this.numberFormat;
     }
 
-    public void numberFormat(@Nullable NumberFormat p_310093_) {
-        this.numberFormat = p_310093_;
+    public void numberFormat(@Nullable NumberFormat pNumberFormat) {
+        this.numberFormat = pNumberFormat;
     }
 
-    public CompoundTag write(HolderLookup.Provider p_334001_) {
+    public CompoundTag write(HolderLookup.Provider pLevelRegistry) {
         CompoundTag compoundtag = new CompoundTag();
         compoundtag.putInt("Score", this.value);
         compoundtag.putBoolean("Locked", this.locked);
         if (this.display != null) {
-            compoundtag.putString("display", Component.Serializer.toJson(this.display, p_334001_));
+            compoundtag.putString("display", Component.Serializer.toJson(this.display, pLevelRegistry));
         }
 
         if (this.numberFormat != null) {
             NumberFormatTypes.CODEC
-                .encodeStart(p_334001_.createSerializationContext(NbtOps.INSTANCE), this.numberFormat)
+                .encodeStart(pLevelRegistry.createSerializationContext(NbtOps.INSTANCE), this.numberFormat)
                 .ifSuccess(p_309357_ -> compoundtag.put("format", p_309357_));
         }
 
         return compoundtag;
     }
 
-    public static Score read(CompoundTag p_313199_, HolderLookup.Provider p_329343_) {
+    public static Score read(CompoundTag pTag, HolderLookup.Provider pLevelRegistry) {
         Score score = new Score();
-        score.value = p_313199_.getInt("Score");
-        score.locked = p_313199_.getBoolean("Locked");
-        if (p_313199_.contains("display", 8)) {
-            score.display = Component.Serializer.fromJson(p_313199_.getString("display"), p_329343_);
+        score.value = pTag.getInt("Score");
+        score.locked = pTag.getBoolean("Locked");
+        if (pTag.contains("display", 8)) {
+            score.display = Component.Serializer.fromJson(pTag.getString("display"), pLevelRegistry);
         }
 
-        if (p_313199_.contains("format", 10)) {
+        if (pTag.contains("format", 10)) {
             NumberFormatTypes.CODEC
-                .parse(p_329343_.createSerializationContext(NbtOps.INSTANCE), p_313199_.get("format"))
+                .parse(pLevelRegistry.createSerializationContext(NbtOps.INSTANCE), pTag.get("format"))
                 .ifSuccess(p_309359_ -> score.numberFormat = p_309359_);
         }
 

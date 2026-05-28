@@ -13,8 +13,8 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class EmptyLootItem extends LootPoolSingletonContainer {
     public static final MapCodec<EmptyLootItem> CODEC = RecordCodecBuilder.mapCodec(p_299697_ -> singletonFields(p_299697_).apply(p_299697_, EmptyLootItem::new));
 
-    private EmptyLootItem(int p_79519_, int p_79520_, List<LootItemCondition> p_300401_, List<LootItemFunction> p_300438_) {
-        super(p_79519_, p_79520_, p_300401_, p_300438_);
+    private EmptyLootItem(int pWeight, int pQuality, List<LootItemCondition> pConditions, List<LootItemFunction> pFunctions) {
+        super(pWeight, pQuality, pConditions, pFunctions);
     }
 
     @Override

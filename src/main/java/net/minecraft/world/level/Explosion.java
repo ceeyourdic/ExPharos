@@ -10,13 +10,13 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
 
 public interface Explosion {
-    static DamageSource getDefaultDamageSource(Level p_309890_, @Nullable Entity p_311046_) {
-        return p_309890_.damageSources().explosion(p_311046_, getIndirectSourceEntity(p_311046_));
+    static DamageSource getDefaultDamageSource(Level pLevel, @Nullable Entity pSource) {
+        return pLevel.damageSources().explosion(pSource, getIndirectSourceEntity(pSource));
     }
 
     @Nullable
-    static LivingEntity getIndirectSourceEntity(@Nullable Entity p_362403_) {
-        return switch (p_362403_) {
+    static LivingEntity getIndirectSourceEntity(@Nullable Entity pSource) {
+        return switch (pSource) {
             case PrimedTnt primedtnt -> primedtnt.getOwner();
             case LivingEntity livingentity -> livingentity;
             case Projectile projectile when projectile.getOwner() instanceof LivingEntity livingentity1 -> livingentity1;
@@ -50,8 +50,8 @@ public interface Explosion {
 
         private final boolean shouldAffectBlocklikeEntities;
 
-        private BlockInteraction(final boolean p_367015_) {
-            this.shouldAffectBlocklikeEntities = p_367015_;
+        private BlockInteraction(final boolean pShouldAffectBlocklikeEntities) {
+            this.shouldAffectBlocklikeEntities = pShouldAffectBlocklikeEntities;
         }
 
         public boolean shouldAffectBlocklikeEntities() {

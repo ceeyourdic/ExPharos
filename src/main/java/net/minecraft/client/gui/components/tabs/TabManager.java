@@ -20,32 +20,32 @@ public class TabManager {
     @Nullable
     private ScreenRectangle tabArea;
 
-    public TabManager(Consumer<AbstractWidget> p_268279_, Consumer<AbstractWidget> p_268196_) {
-        this.addWidget = p_268279_;
-        this.removeWidget = p_268196_;
+    public TabManager(Consumer<AbstractWidget> pAddWidget, Consumer<AbstractWidget> pRemoveWidget) {
+        this.addWidget = pAddWidget;
+        this.removeWidget = pRemoveWidget;
     }
 
-    public void setTabArea(ScreenRectangle p_268042_) {
-        this.tabArea = p_268042_;
+    public void setTabArea(ScreenRectangle pTabArea) {
+        this.tabArea = pTabArea;
         Tab tab = this.getCurrentTab();
         if (tab != null) {
-            tab.doLayout(p_268042_);
+            tab.doLayout(pTabArea);
         }
     }
 
-    public void setCurrentTab(Tab p_276109_, boolean p_276120_) {
-        if (!Objects.equals(this.currentTab, p_276109_)) {
+    public void setCurrentTab(Tab pTab, boolean pPlayClickSound) {
+        if (!Objects.equals(this.currentTab, pTab)) {
             if (this.currentTab != null) {
                 this.currentTab.visitChildren(this.removeWidget);
             }
 
-            this.currentTab = p_276109_;
-            p_276109_.visitChildren(this.addWidget);
+            this.currentTab = pTab;
+            pTab.visitChildren(this.addWidget);
             if (this.tabArea != null) {
-                p_276109_.doLayout(this.tabArea);
+                pTab.doLayout(this.tabArea);
             }
 
-            if (p_276120_) {
+            if (pPlayClickSound) {
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             }
         }

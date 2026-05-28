@@ -81,22 +81,22 @@ public interface StructurePieceType {
     StructurePieceType NETHER_FOSSIL = setTemplatePieceId(NetherFossilPieces.NetherFossilPiece::new, "NeFos");
     StructurePieceType JIGSAW = setFullContextPieceId(PoolElementStructurePiece::new, "jigsaw");
 
-    StructurePiece load(StructurePieceSerializationContext p_210161_, CompoundTag p_210162_);
+    StructurePiece load(StructurePieceSerializationContext pContext, CompoundTag pTag);
 
-    private static StructurePieceType setFullContextPieceId(StructurePieceType p_210159_, String p_210160_) {
-        return Registry.register(BuiltInRegistries.STRUCTURE_PIECE, p_210160_.toLowerCase(Locale.ROOT), p_210159_);
+    private static StructurePieceType setFullContextPieceId(StructurePieceType pPieceType, String pPieceId) {
+        return Registry.register(BuiltInRegistries.STRUCTURE_PIECE, pPieceId.toLowerCase(Locale.ROOT), pPieceType);
     }
 
-    private static StructurePieceType setPieceId(StructurePieceType.ContextlessType p_210153_, String p_210154_) {
-        return setFullContextPieceId(p_210153_, p_210154_);
+    private static StructurePieceType setPieceId(StructurePieceType.ContextlessType pType, String pKey) {
+        return setFullContextPieceId(pType, pKey);
     }
 
-    private static StructurePieceType setTemplatePieceId(StructurePieceType.StructureTemplateType p_210156_, String p_210157_) {
-        return setFullContextPieceId(p_210156_, p_210157_);
+    private static StructurePieceType setTemplatePieceId(StructurePieceType.StructureTemplateType pTemplateType, String pPieceId) {
+        return setFullContextPieceId(pTemplateType, pPieceId);
     }
 
     public interface ContextlessType extends StructurePieceType {
-        StructurePiece load(CompoundTag p_210167_);
+        StructurePiece load(CompoundTag pTag);
 
         @Override
         default StructurePiece load(StructurePieceSerializationContext p_210164_, CompoundTag p_210165_) {
@@ -105,7 +105,7 @@ public interface StructurePieceType {
     }
 
     public interface StructureTemplateType extends StructurePieceType {
-        StructurePiece load(StructureTemplateManager p_226963_, CompoundTag p_226964_);
+        StructurePiece load(StructureTemplateManager pStructureTemplateManager, CompoundTag pTag);
 
         @Override
         default StructurePiece load(StructurePieceSerializationContext p_210169_, CompoundTag p_210170_) {

@@ -12,22 +12,22 @@ import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 
 public class PoolAliasBindings {
-    public static MapCodec<? extends PoolAliasBinding> bootstrap(Registry<MapCodec<? extends PoolAliasBinding>> p_311587_) {
-        Registry.register(p_311587_, "random", Random.CODEC);
-        Registry.register(p_311587_, "random_group", RandomGroup.CODEC);
-        return Registry.register(p_311587_, "direct", Direct.CODEC);
+    public static MapCodec<? extends PoolAliasBinding> bootstrap(Registry<MapCodec<? extends PoolAliasBinding>> pRegistry) {
+        Registry.register(pRegistry, "random", Random.CODEC);
+        Registry.register(pRegistry, "random_group", RandomGroup.CODEC);
+        return Registry.register(pRegistry, "direct", Direct.CODEC);
     }
 
-    public static void registerTargetsAsPools(BootstrapContext<StructureTemplatePool> p_330797_, Holder<StructureTemplatePool> p_311163_, List<PoolAliasBinding> p_310821_) {
-        p_310821_.stream()
+    public static void registerTargetsAsPools(BootstrapContext<StructureTemplatePool> pContext, Holder<StructureTemplatePool> pPool, List<PoolAliasBinding> pPoolAliasBindings) {
+        pPoolAliasBindings.stream()
             .flatMap(PoolAliasBinding::allTargets)
             .map(p_312426_ -> p_312426_.location().getPath())
             .forEach(
                 p_327483_ -> Pools.register(
-                        p_330797_,
+                        pContext,
                         p_327483_,
                         new StructureTemplatePool(
-                            p_311163_, List.of(Pair.of(StructurePoolElement.single(p_327483_), 1)), StructureTemplatePool.Projection.RIGID
+                            pPool, List.of(Pair.of(StructurePoolElement.single(p_327483_), 1)), StructureTemplatePool.Projection.RIGID
                         )
                     )
             );

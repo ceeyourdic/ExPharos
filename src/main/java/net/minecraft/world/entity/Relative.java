@@ -25,33 +25,33 @@ public enum Relative {
     private final int bit;
 
     @SafeVarargs
-    public static Set<Relative> union(Set<Relative>... p_360861_) {
+    public static Set<Relative> union(Set<Relative>... pSets) {
         HashSet<Relative> hashset = new HashSet<>();
 
-        for (Set<Relative> set : p_360861_) {
+        for (Set<Relative> set : pSets) {
             hashset.addAll(set);
         }
 
         return hashset;
     }
 
-    private Relative(final int p_367418_) {
-        this.bit = p_367418_;
+    private Relative(final int pBit) {
+        this.bit = pBit;
     }
 
     private int getMask() {
         return 1 << this.bit;
     }
 
-    private boolean isSet(int p_364108_) {
-        return (p_364108_ & this.getMask()) == this.getMask();
+    private boolean isSet(int pData) {
+        return (pData & this.getMask()) == this.getMask();
     }
 
-    public static Set<Relative> unpack(int p_366469_) {
+    public static Set<Relative> unpack(int pData) {
         Set<Relative> set = EnumSet.noneOf(Relative.class);
 
         for (Relative relative : values()) {
-            if (relative.isSet(p_366469_)) {
+            if (relative.isSet(pData)) {
                 set.add(relative);
             }
         }
@@ -59,10 +59,10 @@ public enum Relative {
         return set;
     }
 
-    public static int pack(Set<Relative> p_370231_) {
+    public static int pack(Set<Relative> pRelatives) {
         int i = 0;
 
-        for (Relative relative : p_370231_) {
+        for (Relative relative : pRelatives) {
             i |= relative.getMask();
         }
 

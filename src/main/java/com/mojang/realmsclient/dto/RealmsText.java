@@ -19,13 +19,13 @@ public class RealmsText {
     @Nullable
     private final String[] args;
 
-    private RealmsText(String p_275727_, @Nullable String[] p_311738_) {
-        this.translationKey = p_275727_;
-        this.args = p_311738_;
+    private RealmsText(String pTranslationKey, @Nullable String[] pArgs) {
+        this.translationKey = pTranslationKey;
+        this.args = pArgs;
     }
 
-    public Component createComponent(Component p_275681_) {
-        return Objects.requireNonNullElse(this.createComponent(), p_275681_);
+    public Component createComponent(Component pDefaultValue) {
+        return Objects.requireNonNullElse(this.createComponent(), pDefaultValue);
     }
 
     @Nullable
@@ -37,9 +37,9 @@ public class RealmsText {
         }
     }
 
-    public static RealmsText parse(JsonObject p_275381_) {
-        String s = JsonUtils.getRequiredString("translationKey", p_275381_);
-        JsonElement jsonelement = p_275381_.get("args");
+    public static RealmsText parse(JsonObject pJson) {
+        String s = JsonUtils.getRequiredString("translationKey", pJson);
+        JsonElement jsonelement = pJson.get("args");
         String[] astring;
         if (jsonelement != null && !jsonelement.isJsonNull()) {
             JsonArray jsonarray = jsonelement.getAsJsonArray();

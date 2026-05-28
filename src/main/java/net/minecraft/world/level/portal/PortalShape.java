@@ -38,79 +38,79 @@ public class PortalShape {
     private final int height;
     private final int width;
 
-    private PortalShape(Direction.Axis p_77697_, int p_361774_, Direction p_367618_, BlockPos p_77696_, int p_370026_, int p_368760_) {
-        this.axis = p_77697_;
-        this.numPortalBlocks = p_361774_;
-        this.rightDir = p_367618_;
-        this.bottomLeft = p_77696_;
-        this.width = p_370026_;
-        this.height = p_368760_;
+    private PortalShape(Direction.Axis pAxis, int pNumPortalBlocks, Direction pRightDir, BlockPos pBottomLeft, int pWidth, int pHeight) {
+        this.axis = pAxis;
+        this.numPortalBlocks = pNumPortalBlocks;
+        this.rightDir = pRightDir;
+        this.bottomLeft = pBottomLeft;
+        this.width = pWidth;
+        this.height = pHeight;
     }
 
-    public static Optional<PortalShape> findEmptyPortalShape(LevelAccessor p_77709_, BlockPos p_77710_, Direction.Axis p_77711_) {
-        return findPortalShape(p_77709_, p_77710_, p_77727_ -> p_77727_.isValid() && p_77727_.numPortalBlocks == 0, p_77711_);
+    public static Optional<PortalShape> findEmptyPortalShape(LevelAccessor pLevel, BlockPos pBottomLeft, Direction.Axis pAxis) {
+        return findPortalShape(pLevel, pBottomLeft, p_77727_ -> p_77727_.isValid() && p_77727_.numPortalBlocks == 0, pAxis);
     }
 
-    public static Optional<PortalShape> findPortalShape(LevelAccessor p_77713_, BlockPos p_77714_, Predicate<PortalShape> p_77715_, Direction.Axis p_77716_) {
-        Optional<PortalShape> optional = Optional.of(findAnyShape(p_77713_, p_77714_, p_77716_)).filter(p_77715_);
+    public static Optional<PortalShape> findPortalShape(LevelAccessor pLevel, BlockPos pBottomLeft, Predicate<PortalShape> pPredicate, Direction.Axis pAxis) {
+        Optional<PortalShape> optional = Optional.of(findAnyShape(pLevel, pBottomLeft, pAxis)).filter(pPredicate);
         if (optional.isPresent()) {
             return optional;
         } else {
-            Direction.Axis direction$axis = p_77716_ == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
-            return Optional.of(findAnyShape(p_77713_, p_77714_, direction$axis)).filter(p_77715_);
+            Direction.Axis direction$axis = pAxis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
+            return Optional.of(findAnyShape(pLevel, pBottomLeft, direction$axis)).filter(pPredicate);
         }
     }
 
-    public static PortalShape findAnyShape(BlockGetter p_362003_, BlockPos p_369293_, Direction.Axis p_363410_) {
-        Direction direction = p_363410_ == Direction.Axis.X ? Direction.WEST : Direction.SOUTH;
-        BlockPos blockpos = calculateBottomLeft(p_362003_, direction, p_369293_);
+    public static PortalShape findAnyShape(BlockGetter pLevel, BlockPos pBottomLeft, Direction.Axis pAxis) {
+        Direction direction = pAxis == Direction.Axis.X ? Direction.WEST : Direction.SOUTH;
+        BlockPos blockpos = calculateBottomLeft(pLevel, direction, pBottomLeft);
         if (blockpos == null) {
-            return new PortalShape(p_363410_, 0, direction, p_369293_, 0, 0);
+            return new PortalShape(pAxis, 0, direction, pBottomLeft, 0, 0);
         } else {
-            int i = calculateWidth(p_362003_, blockpos, direction);
+            int i = calculateWidth(pLevel, blockpos, direction);
             if (i == 0) {
-                return new PortalShape(p_363410_, 0, direction, blockpos, 0, 0);
+                return new PortalShape(pAxis, 0, direction, blockpos, 0, 0);
             } else {
                 MutableInt mutableint = new MutableInt();
-                int j = calculateHeight(p_362003_, blockpos, direction, i, mutableint);
-                return new PortalShape(p_363410_, mutableint.getValue(), direction, blockpos, i, j);
+                int j = calculateHeight(pLevel, blockpos, direction, i, mutableint);
+                return new PortalShape(pAxis, mutableint.getValue(), direction, blockpos, i, j);
             }
         }
     }
 
     @Nullable
-    private static BlockPos calculateBottomLeft(BlockGetter p_366894_, Direction p_361188_, BlockPos p_77734_) {
-        int i = Math.max(p_366894_.getMinY(), p_77734_.getY() - 21);
+    private static BlockPos calculateBottomLeft(BlockGetter pLevel, Direction pDirection, BlockPos pPos) {
+        int i = Math.max(pLevel.getMinY(), pPos.getY() - 21);
 
-        while (p_77734_.getY() > i && isEmpty(p_366894_.getBlockState(p_77734_.below()))) {
-            p_77734_ = p_77734_.below();
+        while (pPos.getY() > i && isEmpty(pLevel.getBlockState(pPos.below()))) {
+            pPos = pPos.below();
         }
 
-        Direction direction = p_361188_.getOpposite();
-        int j = getDistanceUntilEdgeAboveFrame(p_366894_, p_77734_, direction) - 1;
-        return j < 0 ? null : p_77734_.relative(direction, j);
+        Direction direction = pDirection.getOpposite();
+        int j = getDistanceUntilEdgeAboveFrame(pLevel, pPos, direction) - 1;
+        return j < 0 ? null : pPos.relative(direction, j);
     }
 
-    private static int calculateWidth(BlockGetter p_362377_, BlockPos p_369982_, Direction p_367434_) {
-        int i = getDistanceUntilEdgeAboveFrame(p_362377_, p_369982_, p_367434_);
+    private static int calculateWidth(BlockGetter pLevel, BlockPos pBottomLeft, Direction pDirection) {
+        int i = getDistanceUntilEdgeAboveFrame(pLevel, pBottomLeft, pDirection);
         return i >= 2 && i <= 21 ? i : 0;
     }
 
-    private static int getDistanceUntilEdgeAboveFrame(BlockGetter p_366562_, BlockPos p_77736_, Direction p_77737_) {
+    private static int getDistanceUntilEdgeAboveFrame(BlockGetter pLevel, BlockPos pPos, Direction pDirection) {
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
         for (int i = 0; i <= 21; i++) {
-            blockpos$mutableblockpos.set(p_77736_).move(p_77737_, i);
-            BlockState blockstate = p_366562_.getBlockState(blockpos$mutableblockpos);
+            blockpos$mutableblockpos.set(pPos).move(pDirection, i);
+            BlockState blockstate = pLevel.getBlockState(blockpos$mutableblockpos);
             if (!isEmpty(blockstate)) {
-                if (FRAME.test(blockstate, p_366562_, blockpos$mutableblockpos)) {
+                if (FRAME.test(blockstate, pLevel, blockpos$mutableblockpos)) {
                     return i;
                 }
                 break;
             }
 
-            BlockState blockstate1 = p_366562_.getBlockState(blockpos$mutableblockpos.move(Direction.DOWN));
-            if (!FRAME.test(blockstate1, p_366562_, blockpos$mutableblockpos)) {
+            BlockState blockstate1 = pLevel.getBlockState(blockpos$mutableblockpos.move(Direction.DOWN));
+            if (!FRAME.test(blockstate1, pLevel, blockpos$mutableblockpos)) {
                 break;
             }
         }
@@ -118,18 +118,18 @@ public class PortalShape {
         return 0;
     }
 
-    private static int calculateHeight(BlockGetter p_366874_, BlockPos p_367382_, Direction p_369713_, int p_364755_, MutableInt p_366395_) {
+    private static int calculateHeight(BlockGetter pLevel, BlockPos pPos, Direction pDirection, int pWidth, MutableInt pPortalBlocks) {
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-        int i = getDistanceUntilTop(p_366874_, p_367382_, p_369713_, blockpos$mutableblockpos, p_364755_, p_366395_);
-        return i >= 3 && i <= 21 && hasTopFrame(p_366874_, p_367382_, p_369713_, blockpos$mutableblockpos, p_364755_, i) ? i : 0;
+        int i = getDistanceUntilTop(pLevel, pPos, pDirection, blockpos$mutableblockpos, pWidth, pPortalBlocks);
+        return i >= 3 && i <= 21 && hasTopFrame(pLevel, pPos, pDirection, blockpos$mutableblockpos, pWidth, i) ? i : 0;
     }
 
     private static boolean hasTopFrame(
-        BlockGetter p_360937_, BlockPos p_362624_, Direction p_365783_, BlockPos.MutableBlockPos p_77731_, int p_77732_, int p_369385_
+        BlockGetter pLevel, BlockPos pPos, Direction pDirection, BlockPos.MutableBlockPos pCheckPos, int pWidth, int pDistanceUntilTop
     ) {
-        for (int i = 0; i < p_77732_; i++) {
-            BlockPos.MutableBlockPos blockpos$mutableblockpos = p_77731_.set(p_362624_).move(Direction.UP, p_369385_).move(p_365783_, i);
-            if (!FRAME.test(p_360937_.getBlockState(blockpos$mutableblockpos), p_360937_, blockpos$mutableblockpos)) {
+        for (int i = 0; i < pWidth; i++) {
+            BlockPos.MutableBlockPos blockpos$mutableblockpos = pCheckPos.set(pPos).move(Direction.UP, pDistanceUntilTop).move(pDirection, i);
+            if (!FRAME.test(pLevel.getBlockState(blockpos$mutableblockpos), pLevel, blockpos$mutableblockpos)) {
                 return false;
             }
         }
@@ -138,28 +138,28 @@ public class PortalShape {
     }
 
     private static int getDistanceUntilTop(
-        BlockGetter p_366399_, BlockPos p_367032_, Direction p_362252_, BlockPos.MutableBlockPos p_77729_, int p_361664_, MutableInt p_363201_
+        BlockGetter pLevel, BlockPos pPos, Direction pDirection, BlockPos.MutableBlockPos pCheckPos, int pWidth, MutableInt pPortalBlocks
     ) {
         for (int i = 0; i < 21; i++) {
-            p_77729_.set(p_367032_).move(Direction.UP, i).move(p_362252_, -1);
-            if (!FRAME.test(p_366399_.getBlockState(p_77729_), p_366399_, p_77729_)) {
+            pCheckPos.set(pPos).move(Direction.UP, i).move(pDirection, -1);
+            if (!FRAME.test(pLevel.getBlockState(pCheckPos), pLevel, pCheckPos)) {
                 return i;
             }
 
-            p_77729_.set(p_367032_).move(Direction.UP, i).move(p_362252_, p_361664_);
-            if (!FRAME.test(p_366399_.getBlockState(p_77729_), p_366399_, p_77729_)) {
+            pCheckPos.set(pPos).move(Direction.UP, i).move(pDirection, pWidth);
+            if (!FRAME.test(pLevel.getBlockState(pCheckPos), pLevel, pCheckPos)) {
                 return i;
             }
 
-            for (int j = 0; j < p_361664_; j++) {
-                p_77729_.set(p_367032_).move(Direction.UP, i).move(p_362252_, j);
-                BlockState blockstate = p_366399_.getBlockState(p_77729_);
+            for (int j = 0; j < pWidth; j++) {
+                pCheckPos.set(pPos).move(Direction.UP, i).move(pDirection, j);
+                BlockState blockstate = pLevel.getBlockState(pCheckPos);
                 if (!isEmpty(blockstate)) {
                     return i;
                 }
 
                 if (blockstate.is(Blocks.NETHER_PORTAL)) {
-                    p_363201_.increment();
+                    pPortalBlocks.increment();
                 }
             }
         }
@@ -167,32 +167,32 @@ public class PortalShape {
         return 21;
     }
 
-    private static boolean isEmpty(BlockState p_77718_) {
-        return p_77718_.isAir() || p_77718_.is(BlockTags.FIRE) || p_77718_.is(Blocks.NETHER_PORTAL);
+    private static boolean isEmpty(BlockState pState) {
+        return pState.isAir() || pState.is(BlockTags.FIRE) || pState.is(Blocks.NETHER_PORTAL);
     }
 
     public boolean isValid() {
         return this.width >= 2 && this.width <= 21 && this.height >= 3 && this.height <= 21;
     }
 
-    public void createPortalBlocks(LevelAccessor p_366077_) {
+    public void createPortalBlocks(LevelAccessor pLevel) {
         BlockState blockstate = Blocks.NETHER_PORTAL.defaultBlockState().setValue(NetherPortalBlock.AXIS, this.axis);
         BlockPos.betweenClosed(this.bottomLeft, this.bottomLeft.relative(Direction.UP, this.height - 1).relative(this.rightDir, this.width - 1))
-            .forEach(p_360642_ -> p_366077_.setBlock(p_360642_, blockstate, 18));
+            .forEach(p_360642_ -> pLevel.setBlock(p_360642_, blockstate, 18));
     }
 
     public boolean isComplete() {
         return this.isValid() && this.numPortalBlocks == this.width * this.height;
     }
 
-    public static Vec3 getRelativePosition(BlockUtil.FoundRectangle p_77739_, Direction.Axis p_77740_, Vec3 p_77741_, EntityDimensions p_77742_) {
-        double d0 = (double)p_77739_.axis1Size - (double)p_77742_.width();
-        double d1 = (double)p_77739_.axis2Size - (double)p_77742_.height();
-        BlockPos blockpos = p_77739_.minCorner;
+    public static Vec3 getRelativePosition(BlockUtil.FoundRectangle pFoundRectangle, Direction.Axis pAxis, Vec3 pPos, EntityDimensions pEntityDimensions) {
+        double d0 = (double)pFoundRectangle.axis1Size - (double)pEntityDimensions.width();
+        double d1 = (double)pFoundRectangle.axis2Size - (double)pEntityDimensions.height();
+        BlockPos blockpos = pFoundRectangle.minCorner;
         double d2;
         if (d0 > 0.0) {
-            double d3 = (double)blockpos.get(p_77740_) + (double)p_77742_.width() / 2.0;
-            d2 = Mth.clamp(Mth.inverseLerp(p_77741_.get(p_77740_) - d3, 0.0, d0), 0.0, 1.0);
+            double d3 = (double)blockpos.get(pAxis) + (double)pEntityDimensions.width() / 2.0;
+            d2 = Mth.clamp(Mth.inverseLerp(pPos.get(pAxis) - d3, 0.0, d0), 0.0, 1.0);
         } else {
             d2 = 0.5;
         }
@@ -200,30 +200,30 @@ public class PortalShape {
         double d5;
         if (d1 > 0.0) {
             Direction.Axis direction$axis = Direction.Axis.Y;
-            d5 = Mth.clamp(Mth.inverseLerp(p_77741_.get(direction$axis) - (double)blockpos.get(direction$axis), 0.0, d1), 0.0, 1.0);
+            d5 = Mth.clamp(Mth.inverseLerp(pPos.get(direction$axis) - (double)blockpos.get(direction$axis), 0.0, d1), 0.0, 1.0);
         } else {
             d5 = 0.0;
         }
 
-        Direction.Axis direction$axis1 = p_77740_ == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
-        double d4 = p_77741_.get(direction$axis1) - ((double)blockpos.get(direction$axis1) + 0.5);
+        Direction.Axis direction$axis1 = pAxis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
+        double d4 = pPos.get(direction$axis1) - ((double)blockpos.get(direction$axis1) + 0.5);
         return new Vec3(d2, d5, d4);
     }
 
-    public static Vec3 findCollisionFreePosition(Vec3 p_260315_, ServerLevel p_259704_, Entity p_259626_, EntityDimensions p_259816_) {
-        if (!(p_259816_.width() > 4.0F) && !(p_259816_.height() > 4.0F)) {
-            double d0 = (double)p_259816_.height() / 2.0;
-            Vec3 vec3 = p_260315_.add(0.0, d0, 0.0);
+    public static Vec3 findCollisionFreePosition(Vec3 pPos, ServerLevel pLevel, Entity pEntity, EntityDimensions pDimensions) {
+        if (!(pDimensions.width() > 4.0F) && !(pDimensions.height() > 4.0F)) {
+            double d0 = (double)pDimensions.height() / 2.0;
+            Vec3 vec3 = pPos.add(0.0, d0, 0.0);
             VoxelShape voxelshape = Shapes.create(
-                AABB.ofSize(vec3, (double)p_259816_.width(), 0.0, (double)p_259816_.width()).expandTowards(0.0, 1.0, 0.0).inflate(1.0E-6)
+                AABB.ofSize(vec3, (double)pDimensions.width(), 0.0, (double)pDimensions.width()).expandTowards(0.0, 1.0, 0.0).inflate(1.0E-6)
             );
-            Optional<Vec3> optional = p_259704_.findFreePosition(
-                p_259626_, voxelshape, vec3, (double)p_259816_.width(), (double)p_259816_.height(), (double)p_259816_.width()
+            Optional<Vec3> optional = pLevel.findFreePosition(
+                pEntity, voxelshape, vec3, (double)pDimensions.width(), (double)pDimensions.height(), (double)pDimensions.width()
             );
             Optional<Vec3> optional1 = optional.map(p_259019_ -> p_259019_.subtract(0.0, d0, 0.0));
-            return optional1.orElse(p_260315_);
+            return optional1.orElse(pPos);
         } else {
-            return p_260315_;
+            return pPos;
         }
     }
 }

@@ -10,8 +10,8 @@ import javax.annotation.Nullable;
 public class InvalidLockComponentFix extends DataComponentRemainderFix {
     private static final Optional<String> INVALID_LOCK_CUSTOM_NAME = Optional.of("\"\"");
 
-    public InvalidLockComponentFix(Schema p_376929_) {
-        super(p_376929_, "InvalidLockComponentPredicateFix", "minecraft:lock");
+    public InvalidLockComponentFix(Schema pOutputSchema) {
+        super(pOutputSchema, "InvalidLockComponentPredicateFix", "minecraft:lock");
     }
 
     @Nullable
@@ -21,18 +21,18 @@ public class InvalidLockComponentFix extends DataComponentRemainderFix {
     }
 
     @Nullable
-    public static <T> Dynamic<T> fixLock(Dynamic<T> p_376516_) {
-        return isBrokenLock(p_376516_) ? null : p_376516_;
+    public static <T> Dynamic<T> fixLock(Dynamic<T> pTag) {
+        return isBrokenLock(pTag) ? null : pTag;
     }
 
-    private static <T> boolean isBrokenLock(Dynamic<T> p_375919_) {
+    private static <T> boolean isBrokenLock(Dynamic<T> pTag) {
         return isMapWithOneField(
-            p_375919_, "components", p_378206_ -> isMapWithOneField(p_378206_, "minecraft:custom_name", p_377439_ -> p_377439_.asString().result().equals(INVALID_LOCK_CUSTOM_NAME))
+            pTag, "components", p_378206_ -> isMapWithOneField(p_378206_, "minecraft:custom_name", p_377439_ -> p_377439_.asString().result().equals(INVALID_LOCK_CUSTOM_NAME))
         );
     }
 
-    private static <T> boolean isMapWithOneField(Dynamic<T> p_378567_, String p_378713_, Predicate<Dynamic<T>> p_378445_) {
-        Optional<Map<Dynamic<T>, Dynamic<T>>> optional = p_378567_.getMapValues().result();
-        return !optional.isEmpty() && optional.get().size() == 1 ? p_378567_.get(p_378713_).result().filter(p_378445_).isPresent() : false;
+    private static <T> boolean isMapWithOneField(Dynamic<T> pTag, String pKey, Predicate<Dynamic<T>> pPredicate) {
+        Optional<Map<Dynamic<T>, Dynamic<T>>> optional = pTag.getMapValues().result();
+        return !optional.isEmpty() && optional.get().size() == 1 ? pTag.get(pKey).result().filter(pPredicate).isPresent() : false;
     }
 }

@@ -36,8 +36,8 @@ public class CraftingRecipeBookComponent extends RecipeBookComponent<AbstractCra
         new RecipeBookComponent.TabInfo(Items.REDSTONE, RecipeBookCategories.CRAFTING_REDSTONE)
     );
 
-    public CraftingRecipeBookComponent(AbstractCraftingMenu p_361849_) {
-        super(p_361849_, TABS);
+    public CraftingRecipeBookComponent(AbstractCraftingMenu pMenu) {
+        super(pMenu, TABS);
     }
 
     @Override
@@ -45,12 +45,12 @@ public class CraftingRecipeBookComponent extends RecipeBookComponent<AbstractCra
         return this.menu.getResultSlot() == p_365848_ || this.menu.getInputGridSlots().contains(p_365848_);
     }
 
-    private boolean canDisplay(RecipeDisplay p_365142_) {
+    private boolean canDisplay(RecipeDisplay pRecipeDisplay) {
         int i = this.menu.getGridWidth();
         int j = this.menu.getGridHeight();
-        Objects.requireNonNull(p_365142_);
+        Objects.requireNonNull(pRecipeDisplay);
 
-        return switch (p_365142_) {
+        return switch (pRecipeDisplay) {
             case ShapedCraftingRecipeDisplay shapedcraftingrecipedisplay -> i >= shapedcraftingrecipedisplay.width()
             && j >= shapedcraftingrecipedisplay.height();
             case ShapelessCraftingRecipeDisplay shapelesscraftingrecipedisplay -> i * j >= shapelesscraftingrecipedisplay.ingredients().size();

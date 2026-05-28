@@ -33,31 +33,31 @@ public class PlayerChunkSender {
     private int unacknowledgedBatches;
     private int maxUnacknowledgedBatches = 1;
 
-    public PlayerChunkSender(boolean p_300389_) {
-        this.memoryConnection = p_300389_;
+    public PlayerChunkSender(boolean pMemoryConnection) {
+        this.memoryConnection = pMemoryConnection;
     }
 
-    public void markChunkPendingToSend(LevelChunk p_298187_) {
-        this.pendingChunks.add(p_298187_.getPos().toLong());
+    public void markChunkPendingToSend(LevelChunk pChunk) {
+        this.pendingChunks.add(pChunk.getPos().toLong());
     }
 
-    public void dropChunk(ServerPlayer p_298166_, ChunkPos p_300687_) {
-        if (!this.pendingChunks.remove(p_300687_.toLong()) && p_298166_.isAlive()) {
-            p_298166_.connection.send(new ClientboundForgetLevelChunkPacket(p_300687_));
+    public void dropChunk(ServerPlayer pPlayer, ChunkPos pChunkPos) {
+        if (!this.pendingChunks.remove(pChunkPos.toLong()) && pPlayer.isAlive()) {
+            pPlayer.connection.send(new ClientboundForgetLevelChunkPacket(pChunkPos));
         }
     }
 
-    public void sendNextChunks(ServerPlayer p_297274_) {
+    public void sendNextChunks(ServerPlayer pPlayer) {
         if (this.unacknowledgedBatches < this.maxUnacknowledgedBatches) {
             float f = Math.max(1.0F, this.desiredChunksPerTick);
             this.batchQuota = Math.min(this.batchQuota + this.desiredChunksPerTick, f);
             if (!(this.batchQuota < 1.0F)) {
                 if (!this.pendingChunks.isEmpty()) {
-                    ServerLevel serverlevel = p_297274_.serverLevel();
+                    ServerLevel serverlevel = pPlayer.serverLevel();
                     ChunkMap chunkmap = serverlevel.getChunkSource().chunkMap;
-                    List<LevelChunk> list = this.collectChunksToSend(chunkmap, p_297274_.chunkPosition());
+                    List<LevelChunk> list = this.collectChunksToSend(chunkmap, pPlayer.chunkPosition());
                     if (!list.isEmpty()) {
-                        ServerGamePacketListenerImpl servergamepacketlistenerimpl = p_297274_.connection;
+                        ServerGamePacketListenerImpl servergamepacketlistenerimpl = pPlayer.connection;
                         this.unacknowledgedBatches++;
                         servergamepacketlistenerimpl.send(ClientboundChunkBatchStartPacket.INSTANCE);
 
@@ -73,30 +73,30 @@ public class PlayerChunkSender {
         }
     }
 
-    private static void sendChunk(ServerGamePacketListenerImpl p_299748_, ServerLevel p_298120_, LevelChunk p_297712_) {
-        p_299748_.send(new ClientboundLevelChunkWithLightPacket(p_297712_, p_298120_.getLightEngine(), null, null));
-        ChunkPos chunkpos = p_297712_.getPos();
-        DebugPackets.sendPoiPacketsForChunk(p_298120_, chunkpos);
+    private static void sendChunk(ServerGamePacketListenerImpl pPacketListener, ServerLevel pLevel, LevelChunk pChunk) {
+        pPacketListener.send(new ClientboundLevelChunkWithLightPacket(pChunk, pLevel.getLightEngine(), null, null));
+        ChunkPos chunkpos = pChunk.getPos();
+        DebugPackets.sendPoiPacketsForChunk(pLevel, chunkpos);
     }
 
-    private List<LevelChunk> collectChunksToSend(ChunkMap p_298180_, ChunkPos p_298514_) {
+    private List<LevelChunk> collectChunksToSend(ChunkMap pChunkMap, ChunkPos pChunkPos) {
         int i = Mth.floor(this.batchQuota);
         List<LevelChunk> list;
         if (!this.memoryConnection && this.pendingChunks.size() > i) {
             list = this.pendingChunks
                 .stream()
-                .collect(Comparators.least(i, Comparator.comparingInt(p_298514_::distanceSquared)))
+                .collect(Comparators.least(i, Comparator.comparingInt(pChunkPos::distanceSquared)))
                 .stream()
                 .mapToLong(Long::longValue)
-                .mapToObj(p_298180_::getChunkToSend)
+                .mapToObj(pChunkMap::getChunkToSend)
                 .filter(Objects::nonNull)
                 .toList();
         } else {
             list = this.pendingChunks
                 .longStream()
-                .mapToObj(p_298180_::getChunkToSend)
+                .mapToObj(pChunkMap::getChunkToSend)
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt(p_299102_ -> p_298514_.distanceSquared(p_299102_.getPos())))
+                .sorted(Comparator.comparingInt(p_299102_ -> pChunkPos.distanceSquared(p_299102_.getPos())))
                 .toList();
         }
 
@@ -107,9 +107,9 @@ public class PlayerChunkSender {
         return list;
     }
 
-    public void onChunkBatchReceivedByClient(float p_298238_) {
+    public void onChunkBatchReceivedByClient(float pDesiredBatchSize) {
         this.unacknowledgedBatches--;
-        this.desiredChunksPerTick = Double.isNaN((double)p_298238_) ? 0.01F : Mth.clamp(p_298238_, 0.01F, 64.0F);
+        this.desiredChunksPerTick = Double.isNaN((double)pDesiredBatchSize) ? 0.01F : Mth.clamp(pDesiredBatchSize, 0.01F, 64.0F);
         if (this.unacknowledgedBatches == 0) {
             this.batchQuota = 1.0F;
         }
@@ -117,7 +117,7 @@ public class PlayerChunkSender {
         this.maxUnacknowledgedBatches = 10;
     }
 
-    public boolean isPending(long p_299869_) {
-        return this.pendingChunks.contains(p_299869_);
+    public boolean isPending(long pChunkPos) {
+        return this.pendingChunks.contains(pChunkPos);
     }
 }

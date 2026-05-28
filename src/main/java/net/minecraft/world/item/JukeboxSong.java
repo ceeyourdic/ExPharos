@@ -47,12 +47,12 @@ public record JukeboxSong(Holder<SoundEvent> soundEvent, Component description, 
         return Mth.ceil(this.lengthInSeconds * 20.0F);
     }
 
-    public boolean hasFinished(long p_344100_) {
-        return p_344100_ >= (long)(this.lengthInTicks() + 20);
+    public boolean hasFinished(long pTicksSinceSongStarted) {
+        return pTicksSinceSongStarted >= (long)(this.lengthInTicks() + 20);
     }
 
-    public static Optional<Holder<JukeboxSong>> fromStack(HolderLookup.Provider p_343009_, ItemStack p_342597_) {
-        JukeboxPlayable jukeboxplayable = p_342597_.get(DataComponents.JUKEBOX_PLAYABLE);
-        return jukeboxplayable != null ? jukeboxplayable.song().unwrap(p_343009_) : Optional.empty();
+    public static Optional<Holder<JukeboxSong>> fromStack(HolderLookup.Provider pRegistries, ItemStack pStack) {
+        JukeboxPlayable jukeboxplayable = pStack.get(DataComponents.JUKEBOX_PLAYABLE);
+        return jukeboxplayable != null ? jukeboxplayable.song().unwrap(pRegistries) : Optional.empty();
     }
 }

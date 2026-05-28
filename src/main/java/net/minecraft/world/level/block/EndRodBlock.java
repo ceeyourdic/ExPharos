@@ -25,9 +25,9 @@ public class EndRodBlock extends RodBlock {
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_53087_) {
-        Direction direction = p_53087_.getClickedFace();
-        BlockState blockstate = p_53087_.getLevel().getBlockState(p_53087_.getClickedPos().relative(direction.getOpposite()));
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        Direction direction = pContext.getClickedFace();
+        BlockState blockstate = pContext.getLevel().getBlockState(pContext.getClickedPos().relative(direction.getOpposite()));
         return blockstate.is(this) && blockstate.getValue(FACING) == direction
             ? this.defaultBlockState().setValue(FACING, direction.getOpposite())
             : this.defaultBlockState().setValue(FACING, direction);
@@ -54,7 +54,7 @@ public class EndRodBlock extends RodBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_53105_) {
-        p_53105_.add(FACING);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING);
     }
 }

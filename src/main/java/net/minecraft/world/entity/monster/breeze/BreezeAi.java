@@ -55,22 +55,22 @@ public class BreezeAi {
     );
     private static final int TICKS_TO_REMEMBER_SEEN_TARGET = 100;
 
-    protected static Brain<?> makeBrain(Breeze p_342303_, Brain<Breeze> p_311919_) {
-        initCoreActivity(p_311919_);
-        initIdleActivity(p_311919_);
-        initFightActivity(p_342303_, p_311919_);
-        p_311919_.setCoreActivities(Set.of(Activity.CORE));
-        p_311919_.setDefaultActivity(Activity.FIGHT);
-        p_311919_.useDefaultActivity();
-        return p_311919_;
+    protected static Brain<?> makeBrain(Breeze pBreeze, Brain<Breeze> pBrain) {
+        initCoreActivity(pBrain);
+        initIdleActivity(pBrain);
+        initFightActivity(pBreeze, pBrain);
+        pBrain.setCoreActivities(Set.of(Activity.CORE));
+        pBrain.setDefaultActivity(Activity.FIGHT);
+        pBrain.useDefaultActivity();
+        return pBrain;
     }
 
-    private static void initCoreActivity(Brain<Breeze> p_312238_) {
-        p_312238_.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim<>(0.8F), new LookAtTargetSink(45, 90)));
+    private static void initCoreActivity(Brain<Breeze> pBrain) {
+        pBrain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim<>(0.8F), new LookAtTargetSink(45, 90)));
     }
 
-    private static void initIdleActivity(Brain<Breeze> p_335718_) {
-        p_335718_.addActivity(
+    private static void initIdleActivity(Brain<Breeze> pBrain) {
+        pBrain.addActivity(
             Activity.IDLE,
             ImmutableList.of(
                 Pair.of(0, StartAttacking.create((p_369589_, p_312068_) -> p_312068_.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
@@ -81,11 +81,11 @@ public class BreezeAi {
         );
     }
 
-    private static void initFightActivity(Breeze p_344626_, Brain<Breeze> p_310469_) {
-        p_310469_.addActivityWithConditions(
+    private static void initFightActivity(Breeze pBreeze, Brain<Breeze> pBrain) {
+        pBrain.addActivityWithConditions(
             Activity.FIGHT,
             ImmutableList.of(
-                Pair.of(0, StopAttackingIfTargetInvalid.create(Sensor.wasEntityAttackableLastNTicks(p_344626_, 100).negate()::test)),
+                Pair.of(0, StopAttackingIfTargetInvalid.create(Sensor.wasEntityAttackableLastNTicks(pBreeze, 100).negate()::test)),
                 Pair.of(1, new Shoot()),
                 Pair.of(2, new LongJump()),
                 Pair.of(3, new ShootWhenStuck()),
@@ -95,8 +95,8 @@ public class BreezeAi {
         );
     }
 
-    static void updateActivity(Breeze p_331608_) {
-        p_331608_.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.IDLE));
+    static void updateActivity(Breeze pBreeze) {
+        pBreeze.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.IDLE));
     }
 
     public static class SlideToTargetSink extends MoveToTargetSink {

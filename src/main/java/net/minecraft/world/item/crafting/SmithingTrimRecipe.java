@@ -29,25 +29,25 @@ public class SmithingTrimRecipe implements SmithingRecipe {
     @Nullable
     private PlacementInfo placementInfo;
 
-    public SmithingTrimRecipe(Optional<Ingredient> p_369733_, Optional<Ingredient> p_361422_, Optional<Ingredient> p_368814_) {
-        this.template = p_369733_;
-        this.base = p_361422_;
-        this.addition = p_368814_;
+    public SmithingTrimRecipe(Optional<Ingredient> pTemplate, Optional<Ingredient> pBase, Optional<Ingredient> pAddition) {
+        this.template = pTemplate;
+        this.base = pBase;
+        this.addition = pAddition;
     }
 
     public ItemStack assemble(SmithingRecipeInput p_344440_, HolderLookup.Provider p_330268_) {
         return applyTrim(p_330268_, p_344440_.base(), p_344440_.addition(), p_344440_.template());
     }
 
-    public static ItemStack applyTrim(HolderLookup.Provider p_369231_, ItemStack p_368958_, ItemStack p_366218_, ItemStack p_368590_) {
-        Optional<Holder.Reference<TrimMaterial>> optional = TrimMaterials.getFromIngredient(p_369231_, p_366218_);
-        Optional<Holder.Reference<TrimPattern>> optional1 = TrimPatterns.getFromTemplate(p_369231_, p_368590_);
+    public static ItemStack applyTrim(HolderLookup.Provider pRegistries, ItemStack pBase, ItemStack pAddition, ItemStack pTemplate) {
+        Optional<Holder.Reference<TrimMaterial>> optional = TrimMaterials.getFromIngredient(pRegistries, pAddition);
+        Optional<Holder.Reference<TrimPattern>> optional1 = TrimPatterns.getFromTemplate(pRegistries, pTemplate);
         if (optional.isPresent() && optional1.isPresent()) {
-            ArmorTrim armortrim = p_368958_.get(DataComponents.TRIM);
+            ArmorTrim armortrim = pBase.get(DataComponents.TRIM);
             if (armortrim != null && armortrim.hasPatternAndMaterial(optional1.get(), optional.get())) {
                 return ItemStack.EMPTY;
             } else {
-                ItemStack itemstack = p_368958_.copyWithCount(1);
+                ItemStack itemstack = pBase.copyWithCount(1);
                 itemstack.set(DataComponents.TRIM, new ArmorTrim(optional.get(), optional1.get()));
                 return itemstack;
             }

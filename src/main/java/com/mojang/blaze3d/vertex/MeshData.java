@@ -4,33 +4,38 @@ import it.unimi.dsi.fastutil.ints.IntConsumer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import javax.annotation.Nullable;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.render.MultiTextureBuilder;
+import net.optifine.render.MultiTextureData;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 
-@OnlyIn(Dist.CLIENT)
 public class MeshData implements AutoCloseable {
     private final ByteBufferBuilder.Result vertexBuffer;
     @Nullable
     private ByteBufferBuilder.Result indexBuffer;
     private final MeshData.DrawState drawState;
+    private MultiTextureData multiTextureData;
 
-    public MeshData(ByteBufferBuilder.Result p_345436_, MeshData.DrawState p_343210_) {
-        this.vertexBuffer = p_345436_;
-        this.drawState = p_343210_;
+    public MeshData(ByteBufferBuilder.Result pVertexBuffer, MeshData.DrawState pDrawState) {
+        this(pVertexBuffer, pDrawState, null);
     }
 
-    private static Vector3f[] unpackQuadCentroids(ByteBuffer p_342486_, int p_344467_, VertexFormat p_342165_) {
-        int i = p_342165_.getOffset(VertexFormatElement.POSITION);
+    public MeshData(ByteBufferBuilder.Result vertexBufferIn, MeshData.DrawState drawStateIn, MultiTextureData multiTextureDataIn) {
+        this.vertexBuffer = vertexBufferIn;
+        this.drawState = drawStateIn;
+        this.multiTextureData = multiTextureDataIn;
+    }
+
+    private static Vector3f[] unpackQuadCentroids(ByteBuffer pByteBuffer, int pVertexCount, VertexFormat pFormat) {
+        int i = pFormat.getOffset(VertexFormatElement.POSITION);
         if (i == -1) {
             throw new IllegalArgumentException("Cannot identify quad centers with no position element");
         } else {
-            FloatBuffer floatbuffer = p_342486_.asFloatBuffer();
-            int j = p_342165_.getVertexSize() / 4;
+            FloatBuffer floatbuffer = pByteBuffer.asFloatBuffer();
+            int j = pFormat.getVertexSize() / 4;
             int k = j * 4;
-            int l = p_344467_ / 4;
+            int l = pVertexCount / 4;
             Vector3f[] avector3f = new Vector3f[l];
 
             for (int i1 = 0; i1 < l; i1++) {
@@ -63,13 +68,13 @@ public class MeshData implements AutoCloseable {
     }
 
     @Nullable
-    public MeshData.SortState sortQuads(ByteBufferBuilder p_344832_, VertexSorting p_343251_) {
+    public MeshData.SortState sortQuads(ByteBufferBuilder pBufferBuilder, VertexSorting pSorting) {
         if (this.drawState.mode() != VertexFormat.Mode.QUADS) {
             return null;
         } else {
             Vector3f[] avector3f = unpackQuadCentroids(this.vertexBuffer.byteBuffer(), this.drawState.vertexCount(), this.drawState.format());
-            MeshData.SortState meshdata$sortstate = new MeshData.SortState(avector3f, this.drawState.indexType());
-            this.indexBuffer = meshdata$sortstate.buildSortedIndexBuffer(p_344832_, p_343251_);
+            MeshData.SortState meshdata$sortstate = new MeshData.SortState(avector3f, this.drawState.indexType(), this.multiTextureData);
+            this.indexBuffer = meshdata$sortstate.buildSortedIndexBuffer(pBufferBuilder, pSorting);
             return meshdata$sortstate;
         }
     }
@@ -82,16 +87,30 @@ public class MeshData implements AutoCloseable {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public static record DrawState(VertexFormat format, int vertexCount, int indexCount, VertexFormat.Mode mode, VertexFormat.IndexType indexType) {
+    public MultiTextureData getMultiTextureData() {
+        return this.multiTextureData;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public static record SortState(Vector3f[] centroids, VertexFormat.IndexType indexType) {
+    @Override
+    public String toString() {
+        return "vertexBuffer: (" + this.vertexBuffer + "), indexBuffer: (" + this.indexBuffer + "), drawState: (" + this.drawState + ")";
+    }
+
+    public static record DrawState(VertexFormat format, int vertexCount, int indexCount, VertexFormat.Mode mode, VertexFormat.IndexType indexType) {
+        public int getVertexBufferSize() {
+            return this.vertexCount * this.format.getVertexSize();
+        }
+    }
+
+    public static record SortState(Vector3f[] centroids, VertexFormat.IndexType indexType, MultiTextureData multiTextureData) {
+        public SortState(Vector3f[] centroids, VertexFormat.IndexType indexType) {
+            this(centroids, indexType, null);
+        }
+
         @Nullable
-        public ByteBufferBuilder.Result buildSortedIndexBuffer(ByteBufferBuilder p_342323_, VertexSorting p_342363_) {
-            int[] aint = p_342363_.sort(this.centroids);
-            long i = p_342323_.reserve(aint.length * 6 * this.indexType.bytes);
+        public ByteBufferBuilder.Result buildSortedIndexBuffer(ByteBufferBuilder pBufferBuilder, VertexSorting pSorting) {
+            int[] aint = pSorting.sort(this.centroids);
+            long i = pBufferBuilder.reserve(aint.length * 6 * this.indexType.bytes);
             IntConsumer intconsumer = this.indexWriter(i, this.indexType);
 
             for (int j : aint) {
@@ -103,15 +122,20 @@ public class MeshData implements AutoCloseable {
                 intconsumer.accept(j * 4 + 0);
             }
 
-            return p_342323_.build();
+            if (this.multiTextureData != null) {
+                MultiTextureBuilder multitexturebuilder = pBufferBuilder.getBufferBuilderCache().getMultiTextureBuilder();
+                this.multiTextureData.prepareSort(multitexturebuilder, aint);
+            }
+
+            return pBufferBuilder.build();
         }
 
-        private IntConsumer indexWriter(long p_342999_, VertexFormat.IndexType p_343431_) {
-            MutableLong mutablelong = new MutableLong(p_342999_);
+        private IntConsumer indexWriter(long pIndex, VertexFormat.IndexType pType) {
+            MutableLong mutablelong = new MutableLong(pIndex);
 
-            return switch (p_343431_) {
-                case SHORT -> p_344551_ -> MemoryUtil.memPutShort(mutablelong.getAndAdd(2L), (short)p_344551_);
-                case INT -> p_342795_ -> MemoryUtil.memPutInt(mutablelong.getAndAdd(4L), p_342795_);
+            return switch (pType) {
+                case SHORT -> valIn -> MemoryUtil.memPutShort(mutablelong.getAndAdd(2L), (short)valIn);
+                case INT -> valIn -> MemoryUtil.memPutInt(mutablelong.getAndAdd(4L), valIn);
             };
         }
     }

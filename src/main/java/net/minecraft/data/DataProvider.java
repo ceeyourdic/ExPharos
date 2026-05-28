@@ -36,43 +36,43 @@ public interface DataProvider {
     Comparator<String> KEY_COMPARATOR = Comparator.comparingInt(FIXED_ORDER_FIELDS).thenComparing(p_236077_ -> (String)p_236077_);
     Logger LOGGER = LogUtils.getLogger();
 
-    CompletableFuture<?> run(CachedOutput p_236071_);
+    CompletableFuture<?> run(CachedOutput pOutput);
 
     String getName();
 
-    static <T> CompletableFuture<?> saveAll(CachedOutput p_369703_, Codec<T> p_369384_, PackOutput.PathProvider p_366772_, Map<ResourceLocation, T> p_364004_) {
-        return saveAll(p_369703_, p_369384_, p_366772_::json, p_364004_);
+    static <T> CompletableFuture<?> saveAll(CachedOutput pOutput, Codec<T> pCodec, PackOutput.PathProvider pPathProvider, Map<ResourceLocation, T> pEntries) {
+        return saveAll(pOutput, pCodec, pPathProvider::json, pEntries);
     }
 
-    static <T, E> CompletableFuture<?> saveAll(CachedOutput p_378522_, Codec<E> p_375923_, Function<T, Path> p_378335_, Map<T, E> p_378562_) {
-        return saveAll(p_378522_, p_374749_ -> p_375923_.encodeStart(JsonOps.INSTANCE, (E)p_374749_).getOrThrow(), p_378335_, p_378562_);
+    static <T, E> CompletableFuture<?> saveAll(CachedOutput pOutput, Codec<E> pCodec, Function<T, Path> pPathGetter, Map<T, E> pEntries) {
+        return saveAll(pOutput, p_374749_ -> pCodec.encodeStart(JsonOps.INSTANCE, (E)p_374749_).getOrThrow(), pPathGetter, pEntries);
     }
 
-    static <T, E> CompletableFuture<?> saveAll(CachedOutput p_376020_, Function<E, JsonElement> p_377735_, Function<T, Path> p_375746_, Map<T, E> p_378110_) {
-        return CompletableFuture.allOf(p_378110_.entrySet().stream().map(p_374753_ -> {
-            Path path = p_375746_.apply(p_374753_.getKey());
-            JsonElement jsonelement = p_377735_.apply(p_374753_.getValue());
-            return saveStable(p_376020_, jsonelement, path);
+    static <T, E> CompletableFuture<?> saveAll(CachedOutput pOutput, Function<E, JsonElement> pSerializer, Function<T, Path> pPathGetter, Map<T, E> pEntries) {
+        return CompletableFuture.allOf(pEntries.entrySet().stream().map(p_374753_ -> {
+            Path path = pPathGetter.apply(p_374753_.getKey());
+            JsonElement jsonelement = pSerializer.apply(p_374753_.getValue());
+            return saveStable(pOutput, jsonelement, path);
         }).toArray(CompletableFuture[]::new));
     }
 
-    static <T> CompletableFuture<?> saveStable(CachedOutput p_300299_, HolderLookup.Provider p_330662_, Codec<T> p_297797_, T p_300766_, Path p_299101_) {
-        RegistryOps<JsonElement> registryops = p_330662_.createSerializationContext(JsonOps.INSTANCE);
-        return saveStable(p_300299_, registryops, p_297797_, p_300766_, p_299101_);
+    static <T> CompletableFuture<?> saveStable(CachedOutput pOutput, HolderLookup.Provider pRegistries, Codec<T> pCodec, T pValue, Path pPath) {
+        RegistryOps<JsonElement> registryops = pRegistries.createSerializationContext(JsonOps.INSTANCE);
+        return saveStable(pOutput, registryops, pCodec, pValue, pPath);
     }
 
-    static <T> CompletableFuture<?> saveStable(CachedOutput p_364924_, Codec<T> p_367616_, T p_369344_, Path p_369481_) {
-        return saveStable(p_364924_, JsonOps.INSTANCE, p_367616_, p_369344_, p_369481_);
+    static <T> CompletableFuture<?> saveStable(CachedOutput pOutput, Codec<T> pCodec, T pValue, Path pPath) {
+        return saveStable(pOutput, JsonOps.INSTANCE, pCodec, pValue, pPath);
     }
 
     private static <T> CompletableFuture<?> saveStable(
-        CachedOutput p_366662_, DynamicOps<JsonElement> p_369056_, Codec<T> p_365700_, T p_360791_, Path p_368062_
+        CachedOutput pOutput, DynamicOps<JsonElement> pOps, Codec<T> pCodec, T pValue, Path pPath
     ) {
-        JsonElement jsonelement = p_365700_.encodeStart(p_369056_, p_360791_).getOrThrow();
-        return saveStable(p_366662_, jsonelement, p_368062_);
+        JsonElement jsonelement = pCodec.encodeStart(pOps, pValue).getOrThrow();
+        return saveStable(pOutput, jsonelement, pPath);
     }
 
-    static CompletableFuture<?> saveStable(CachedOutput p_253653_, JsonElement p_254542_, Path p_254467_) {
+    static CompletableFuture<?> saveStable(CachedOutput pOutput, JsonElement pJson, Path pPath) {
         return CompletableFuture.runAsync(() -> {
             try {
                 ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
@@ -81,18 +81,18 @@ public interface DataProvider {
                 try (JsonWriter jsonwriter = new JsonWriter(new OutputStreamWriter(hashingoutputstream, StandardCharsets.UTF_8))) {
                     jsonwriter.setSerializeNulls(false);
                     jsonwriter.setIndent("  ");
-                    GsonHelper.writeValue(jsonwriter, p_254542_, KEY_COMPARATOR);
+                    GsonHelper.writeValue(jsonwriter, pJson, KEY_COMPARATOR);
                 }
 
-                p_253653_.writeIfNeeded(p_254467_, bytearrayoutputstream.toByteArray(), hashingoutputstream.hash());
+                pOutput.writeIfNeeded(pPath, bytearrayoutputstream.toByteArray(), hashingoutputstream.hash());
             } catch (IOException ioexception) {
-                LOGGER.error("Failed to save file to {}", p_254467_, ioexception);
+                LOGGER.error("Failed to save file to {}", pPath, ioexception);
             }
         }, Util.backgroundExecutor().forName("saveStable"));
     }
 
     @FunctionalInterface
     public interface Factory<T extends DataProvider> {
-        T create(PackOutput p_253851_);
+        T create(PackOutput pOutput);
     }
 }

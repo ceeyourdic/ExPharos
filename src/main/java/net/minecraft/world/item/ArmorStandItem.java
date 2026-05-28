@@ -24,32 +24,32 @@ public class ArmorStandItem extends Item {
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext p_40510_) {
-        Direction direction = p_40510_.getClickedFace();
+    public InteractionResult useOn(UseOnContext pContext) {
+        Direction direction = pContext.getClickedFace();
         if (direction == Direction.DOWN) {
             return InteractionResult.FAIL;
         } else {
-            Level level = p_40510_.getLevel();
-            BlockPlaceContext blockplacecontext = new BlockPlaceContext(p_40510_);
+            Level level = pContext.getLevel();
+            BlockPlaceContext blockplacecontext = new BlockPlaceContext(pContext);
             BlockPos blockpos = blockplacecontext.getClickedPos();
-            ItemStack itemstack = p_40510_.getItemInHand();
+            ItemStack itemstack = pContext.getItemInHand();
             Vec3 vec3 = Vec3.atBottomCenterOf(blockpos);
             AABB aabb = EntityType.ARMOR_STAND.getDimensions().makeBoundingBox(vec3.x(), vec3.y(), vec3.z());
             if (level.noCollision(null, aabb) && level.getEntities(null, aabb).isEmpty()) {
                 if (level instanceof ServerLevel serverlevel) {
-                    Consumer<ArmorStand> consumer = EntityType.createDefaultStackConfig(serverlevel, itemstack, p_40510_.getPlayer());
+                    Consumer<ArmorStand> consumer = EntityType.createDefaultStackConfig(serverlevel, itemstack, pContext.getPlayer());
                     ArmorStand armorstand = EntityType.ARMOR_STAND.create(serverlevel, consumer, blockpos, EntitySpawnReason.SPAWN_ITEM_USE, true, true);
                     if (armorstand == null) {
                         return InteractionResult.FAIL;
                     }
 
-                    float f = (float)Mth.floor((Mth.wrapDegrees(p_40510_.getRotation() - 180.0F) + 22.5F) / 45.0F) * 45.0F;
+                    float f = (float)Mth.floor((Mth.wrapDegrees(pContext.getRotation() - 180.0F) + 22.5F) / 45.0F) * 45.0F;
                     armorstand.moveTo(armorstand.getX(), armorstand.getY(), armorstand.getZ(), f, 0.0F);
                     serverlevel.addFreshEntityWithPassengers(armorstand);
                     level.playSound(
                         null, armorstand.getX(), armorstand.getY(), armorstand.getZ(), SoundEvents.ARMOR_STAND_PLACE, SoundSource.BLOCKS, 0.75F, 0.8F
                     );
-                    armorstand.gameEvent(GameEvent.ENTITY_PLACE, p_40510_.getPlayer());
+                    armorstand.gameEvent(GameEvent.ENTITY_PLACE, pContext.getPlayer());
                 }
 
                 itemstack.shrink(1);

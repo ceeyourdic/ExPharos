@@ -29,7 +29,7 @@ public class Cod extends AbstractSchoolingFish {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_28281_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.COD_HURT;
     }
 

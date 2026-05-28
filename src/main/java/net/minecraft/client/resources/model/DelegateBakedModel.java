@@ -15,8 +15,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public abstract class DelegateBakedModel implements BakedModel {
     protected final BakedModel parent;
 
-    public DelegateBakedModel(BakedModel p_361213_) {
-        this.parent = p_361213_;
+    public DelegateBakedModel(BakedModel pParent) {
+        this.parent = pParent;
     }
 
     @Override

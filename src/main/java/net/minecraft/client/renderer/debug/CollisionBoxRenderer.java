@@ -20,8 +20,8 @@ public class CollisionBoxRenderer implements DebugRenderer.SimpleDebugRenderer {
     private double lastUpdateTime = Double.MIN_VALUE;
     private List<VoxelShape> shapes = Collections.emptyList();
 
-    public CollisionBoxRenderer(Minecraft p_113404_) {
-        this.minecraft = p_113404_;
+    public CollisionBoxRenderer(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
     @Override

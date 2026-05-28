@@ -16,11 +16,11 @@ public class HurtBySensor extends Sensor<LivingEntity> {
     }
 
     @Override
-    protected void doTick(ServerLevel p_26670_, LivingEntity p_26671_) {
-        Brain<?> brain = p_26671_.getBrain();
-        DamageSource damagesource = p_26671_.getLastDamageSource();
+    protected void doTick(ServerLevel pLevel, LivingEntity pEntity) {
+        Brain<?> brain = pEntity.getBrain();
+        DamageSource damagesource = pEntity.getLastDamageSource();
         if (damagesource != null) {
-            brain.setMemory(MemoryModuleType.HURT_BY, p_26671_.getLastDamageSource());
+            brain.setMemory(MemoryModuleType.HURT_BY, pEntity.getLastDamageSource());
             Entity entity = damagesource.getEntity();
             if (entity instanceof LivingEntity) {
                 brain.setMemory(MemoryModuleType.HURT_BY_ENTITY, (LivingEntity)entity);
@@ -30,7 +30,7 @@ public class HurtBySensor extends Sensor<LivingEntity> {
         }
 
         brain.getMemory(MemoryModuleType.HURT_BY_ENTITY).ifPresent(p_375080_ -> {
-            if (!p_375080_.isAlive() || p_375080_.level() != p_26670_) {
+            if (!p_375080_.isAlive() || p_375080_.level() != pLevel) {
                 brain.eraseMemory(MemoryModuleType.HURT_BY_ENTITY);
             }
         });

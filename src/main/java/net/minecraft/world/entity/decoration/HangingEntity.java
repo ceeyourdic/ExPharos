@@ -27,15 +27,15 @@ public abstract class HangingEntity extends BlockAttachedEntity {
         super(p_31703_, p_31704_);
     }
 
-    protected HangingEntity(EntityType<? extends HangingEntity> p_31706_, Level p_31707_, BlockPos p_31708_) {
-        this(p_31706_, p_31707_);
-        this.pos = p_31708_;
+    protected HangingEntity(EntityType<? extends HangingEntity> pEntityType, Level pLevel, BlockPos pPos) {
+        this(pEntityType, pLevel);
+        this.pos = pPos;
     }
 
-    protected void setDirection(Direction p_31728_) {
-        Objects.requireNonNull(p_31728_);
-        Validate.isTrue(p_31728_.getAxis().isHorizontal());
-        this.direction = p_31728_;
+    protected void setDirection(Direction pFacingDirection) {
+        Objects.requireNonNull(pFacingDirection);
+        Validate.isTrue(pFacingDirection.getAxis().isHorizontal());
+        this.direction = pFacingDirection;
         this.setYRot((float)(this.direction.get2DDataValue() * 90));
         this.yRotO = this.getYRot();
         this.recalculateBoundingBox();
@@ -51,7 +51,7 @@ public abstract class HangingEntity extends BlockAttachedEntity {
         }
     }
 
-    protected abstract AABB calculateBoundingBox(BlockPos p_342672_, Direction p_343089_);
+    protected abstract AABB calculateBoundingBox(BlockPos pPos, Direction pDirection);
 
     @Override
     public boolean survives() {
@@ -92,9 +92,9 @@ public abstract class HangingEntity extends BlockAttachedEntity {
     }
 
     @Override
-    public float rotate(Rotation p_31727_) {
+    public float rotate(Rotation pTransformRotation) {
         if (this.direction.getAxis() != Direction.Axis.Y) {
-            switch (p_31727_) {
+            switch (pTransformRotation) {
                 case CLOCKWISE_180:
                     this.direction = this.direction.getOpposite();
                     break;
@@ -108,7 +108,7 @@ public abstract class HangingEntity extends BlockAttachedEntity {
 
         float f = Mth.wrapDegrees(this.getYRot());
 
-        return switch (p_31727_) {
+        return switch (pTransformRotation) {
             case CLOCKWISE_180 -> f + 180.0F;
             case COUNTERCLOCKWISE_90 -> f + 90.0F;
             case CLOCKWISE_90 -> f + 270.0F;
@@ -117,7 +117,7 @@ public abstract class HangingEntity extends BlockAttachedEntity {
     }
 
     @Override
-    public float mirror(Mirror p_31725_) {
-        return this.rotate(p_31725_.getRotation(this.direction));
+    public float mirror(Mirror pTransformMirror) {
+        return this.rotate(pTransformMirror.getRotation(this.direction));
     }
 }

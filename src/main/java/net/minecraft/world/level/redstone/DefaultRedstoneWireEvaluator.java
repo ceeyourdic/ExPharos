@@ -35,8 +35,8 @@ public class DefaultRedstoneWireEvaluator extends RedstoneWireEvaluator {
         }
     }
 
-    private int calculateTargetStrength(Level p_360831_, BlockPos p_367575_) {
-        int i = this.getBlockSignal(p_360831_, p_367575_);
-        return i == 15 ? i : Math.max(i, this.getIncomingWireSignal(p_360831_, p_367575_));
+    private int calculateTargetStrength(Level pLevel, BlockPos pPos) {
+        int i = this.getBlockSignal(pLevel, pPos);
+        return i == 15 ? i : Math.max(i, this.getIncomingWireSignal(pLevel, pPos));
     }
 }

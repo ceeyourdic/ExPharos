@@ -12,30 +12,30 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ProtoChunk;
 
 public record ChunkStep(ChunkStatus targetStatus, ChunkDependencies directDependencies, ChunkDependencies accumulatedDependencies, int blockStateWriteRadius, ChunkStatusTask task) {
-    public int getAccumulatedRadiusOf(ChunkStatus p_345141_) {
-        return p_345141_ == this.targetStatus ? 0 : this.accumulatedDependencies.getRadiusOf(p_345141_);
+    public int getAccumulatedRadiusOf(ChunkStatus pStatus) {
+        return pStatus == this.targetStatus ? 0 : this.accumulatedDependencies.getRadiusOf(pStatus);
     }
 
-    public CompletableFuture<ChunkAccess> apply(WorldGenContext p_344687_, StaticCache2D<GenerationChunkHolder> p_343159_, ChunkAccess p_344017_) {
-        if (p_344017_.getPersistedStatus().isBefore(this.targetStatus)) {
+    public CompletableFuture<ChunkAccess> apply(WorldGenContext pWorldGenContext, StaticCache2D<GenerationChunkHolder> pCache, ChunkAccess pChunk) {
+        if (pChunk.getPersistedStatus().isBefore(this.targetStatus)) {
             ProfiledDuration profiledduration = JvmProfiler.INSTANCE
-                .onChunkGenerate(p_344017_.getPos(), p_344687_.level().dimension(), this.targetStatus.getName());
-            return this.task.doWork(p_344687_, this, p_343159_, p_344017_).thenApply(p_345132_ -> this.completeChunkGeneration(p_345132_, profiledduration));
+                .onChunkGenerate(pChunk.getPos(), pWorldGenContext.level().dimension(), this.targetStatus.getName());
+            return this.task.doWork(pWorldGenContext, this, pCache, pChunk).thenApply(p_345132_ -> this.completeChunkGeneration(p_345132_, profiledduration));
         } else {
-            return this.task.doWork(p_344687_, this, p_343159_, p_344017_);
+            return this.task.doWork(pWorldGenContext, this, pCache, pChunk);
         }
     }
 
-    private ChunkAccess completeChunkGeneration(ChunkAccess p_342706_, @Nullable ProfiledDuration p_343538_) {
-        if (p_342706_ instanceof ProtoChunk protochunk && protochunk.getPersistedStatus().isBefore(this.targetStatus)) {
+    private ChunkAccess completeChunkGeneration(ChunkAccess pChunk, @Nullable ProfiledDuration pDuration) {
+        if (pChunk instanceof ProtoChunk protochunk && protochunk.getPersistedStatus().isBefore(this.targetStatus)) {
             protochunk.setPersistedStatus(this.targetStatus);
         }
 
-        if (p_343538_ != null) {
-            p_343538_.finish(true);
+        if (pDuration != null) {
+            pDuration.finish(true);
         }
 
-        return p_342706_;
+        return pChunk;
     }
 
     public static class Builder {
@@ -46,52 +46,52 @@ public record ChunkStep(ChunkStatus targetStatus, ChunkDependencies directDepend
         private int blockStateWriteRadius = -1;
         private ChunkStatusTask task = ChunkStatusTasks::passThrough;
 
-        protected Builder(ChunkStatus p_342893_) {
-            if (p_342893_.getParent() != p_342893_) {
-                throw new IllegalArgumentException("Not starting with the first status: " + p_342893_);
+        protected Builder(ChunkStatus pStatus) {
+            if (pStatus.getParent() != pStatus) {
+                throw new IllegalArgumentException("Not starting with the first status: " + pStatus);
             } else {
-                this.status = p_342893_;
+                this.status = pStatus;
                 this.parent = null;
                 this.directDependenciesByRadius = new ChunkStatus[0];
             }
         }
 
-        protected Builder(ChunkStatus p_343422_, ChunkStep p_345214_) {
-            if (p_345214_.targetStatus.getIndex() != p_343422_.getIndex() - 1) {
-                throw new IllegalArgumentException("Out of order status: " + p_343422_);
+        protected Builder(ChunkStatus pStatus, ChunkStep pParent) {
+            if (pParent.targetStatus.getIndex() != pStatus.getIndex() - 1) {
+                throw new IllegalArgumentException("Out of order status: " + pStatus);
             } else {
-                this.status = p_343422_;
-                this.parent = p_345214_;
-                this.directDependenciesByRadius = new ChunkStatus[]{p_345214_.targetStatus};
+                this.status = pStatus;
+                this.parent = pParent;
+                this.directDependenciesByRadius = new ChunkStatus[]{pParent.targetStatus};
             }
         }
 
-        public ChunkStep.Builder addRequirement(ChunkStatus p_345438_, int p_342711_) {
-            if (p_345438_.isOrAfter(this.status)) {
-                throw new IllegalArgumentException("Status " + p_345438_ + " can not be required by " + this.status);
+        public ChunkStep.Builder addRequirement(ChunkStatus pStatus, int pRadius) {
+            if (pStatus.isOrAfter(this.status)) {
+                throw new IllegalArgumentException("Status " + pStatus + " can not be required by " + this.status);
             } else {
                 ChunkStatus[] achunkstatus = this.directDependenciesByRadius;
-                int i = p_342711_ + 1;
+                int i = pRadius + 1;
                 if (i > achunkstatus.length) {
                     this.directDependenciesByRadius = new ChunkStatus[i];
-                    Arrays.fill(this.directDependenciesByRadius, p_345438_);
+                    Arrays.fill(this.directDependenciesByRadius, pStatus);
                 }
 
                 for (int j = 0; j < Math.min(i, achunkstatus.length); j++) {
-                    this.directDependenciesByRadius[j] = ChunkStatus.max(achunkstatus[j], p_345438_);
+                    this.directDependenciesByRadius[j] = ChunkStatus.max(achunkstatus[j], pStatus);
                 }
 
                 return this;
             }
         }
 
-        public ChunkStep.Builder blockStateWriteRadius(int p_343879_) {
-            this.blockStateWriteRadius = p_343879_;
+        public ChunkStep.Builder blockStateWriteRadius(int pBlockStateWriteRadius) {
+            this.blockStateWriteRadius = pBlockStateWriteRadius;
             return this;
         }
 
-        public ChunkStep.Builder setTask(ChunkStatusTask p_342761_) {
-            this.task = p_342761_;
+        public ChunkStep.Builder setTask(ChunkStatusTask pTask) {
+            this.task = pTask;
             return this;
         }
 
@@ -128,9 +128,9 @@ public record ChunkStep(ChunkStatus targetStatus, ChunkDependencies directDepend
             }
         }
 
-        private int getRadiusOfParent(ChunkStatus p_344180_) {
+        private int getRadiusOfParent(ChunkStatus pStatus) {
             for (int i = this.directDependenciesByRadius.length - 1; i >= 0; i--) {
-                if (this.directDependenciesByRadius[i].isOrAfter(p_344180_)) {
+                if (this.directDependenciesByRadius[i].isOrAfter(pStatus)) {
                     return i;
                 }
             }

@@ -22,9 +22,9 @@ public class Husk extends Zombie {
     }
 
     public static boolean checkHuskSpawnRules(
-        EntityType<Husk> p_218997_, ServerLevelAccessor p_218998_, EntitySpawnReason p_364340_, BlockPos p_219000_, RandomSource p_219001_
+        EntityType<Husk> pEntityType, ServerLevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return checkMonsterSpawnRules(p_218997_, p_218998_, p_364340_, p_219000_, p_219001_) && (EntitySpawnReason.isSpawner(p_364340_) || p_218998_.canSeeSky(p_219000_));
+        return checkMonsterSpawnRules(pEntityType, pLevel, pSpawnReason, pPos, pRandom) && (EntitySpawnReason.isSpawner(pSpawnReason) || pLevel.canSeeSky(pPos));
     }
 
     @Override
@@ -38,7 +38,7 @@ public class Husk extends Zombie {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_32903_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.HUSK_HURT;
     }
 

@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer.block.model;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.math.Transformation;
 import javax.annotation.Nullable;
 import net.minecraft.client.renderer.FaceInfo;
@@ -9,15 +10,16 @@ import net.minecraft.core.BlockMath;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.model.ForgeFaceData;
+import net.optifine.Config;
+import net.optifine.model.BlockModelUtils;
+import net.optifine.reflect.Reflector;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-@OnlyIn(Dist.CLIENT)
 public class FaceBakery {
     public static final int VERTEX_INT_SIZE = 8;
     private static final float RESCALE_22_5 = 1.0F / (float)Math.cos((float) (Math.PI / 8)) - 1.0F;
@@ -27,49 +29,67 @@ public class FaceBakery {
     public static final int UV_INDEX = 4;
 
     public static BakedQuad bakeQuad(
-        Vector3f p_253895_,
-        Vector3f p_253976_,
-        BlockElementFace p_111603_,
-        TextureAtlasSprite p_111604_,
-        Direction p_111605_,
-        ModelState p_111606_,
-        @Nullable BlockElementRotation p_111607_,
-        boolean p_111608_,
-        int p_364904_
+        Vector3f pPosFrom,
+        Vector3f pPosTo,
+        BlockElementFace pFace,
+        TextureAtlasSprite pSprite,
+        Direction pFacing,
+        ModelState pTransform,
+        @Nullable BlockElementRotation pRotation,
+        boolean pShade,
+        int pLightEmission
     ) {
-        BlockFaceUV blockfaceuv = p_111603_.uv();
-        if (p_111606_.isUvLocked()) {
-            blockfaceuv = recomputeUVs(p_111603_.uv(), p_111605_, p_111606_.getRotation());
+        BlockFaceUV blockfaceuv = pFace.uv();
+        if (pTransform.isUvLocked()) {
+            blockfaceuv = recomputeUVs(pFace.uv(), pFacing, pTransform.getRotation());
         }
 
         float[] afloat = new float[blockfaceuv.uvs.length];
         System.arraycopy(blockfaceuv.uvs, 0, afloat, 0, afloat.length);
-        float f = p_111604_.uvShrinkRatio();
+        float f = pSprite.uvShrinkRatio();
         float f1 = (blockfaceuv.uvs[0] + blockfaceuv.uvs[0] + blockfaceuv.uvs[2] + blockfaceuv.uvs[2]) / 4.0F;
         float f2 = (blockfaceuv.uvs[1] + blockfaceuv.uvs[1] + blockfaceuv.uvs[3] + blockfaceuv.uvs[3]) / 4.0F;
         blockfaceuv.uvs[0] = Mth.lerp(f, blockfaceuv.uvs[0], f1);
         blockfaceuv.uvs[2] = Mth.lerp(f, blockfaceuv.uvs[2], f1);
         blockfaceuv.uvs[1] = Mth.lerp(f, blockfaceuv.uvs[1], f2);
         blockfaceuv.uvs[3] = Mth.lerp(f, blockfaceuv.uvs[3], f2);
-        int[] aint = makeVertices(blockfaceuv, p_111604_, p_111605_, setupShape(p_253895_, p_253976_), p_111606_.getRotation(), p_111607_);
+        int[] aint = makeVertices(blockfaceuv, pSprite, pFacing, setupShape(pPosFrom, pPosTo), pTransform.getRotation(), pRotation);
         Direction direction = calculateFacing(aint);
         System.arraycopy(afloat, 0, blockfaceuv.uvs, 0, afloat.length);
-        if (p_111607_ == null) {
+        if (pRotation == null) {
             recalculateWinding(aint, direction);
         }
 
-        return new BakedQuad(aint, p_111603_.tintIndex(), direction, p_111604_, p_111608_, p_364904_);
+        if (Reflector.ForgeBlockElementFace_data.exists()) {
+            ForgeFaceData forgefacedata = (ForgeFaceData)Reflector.call(pFace, Reflector.ForgeBlockElementFace_data);
+            BakedQuad bakedquad = new BakedQuad(aint, pFace.tintIndex(), direction, pSprite, pShade, pLightEmission, forgefacedata.ambientOcclusion());
+            if (!ForgeFaceData.DEFAULT.equals(forgefacedata)) {
+                Object object = Reflector.QuadTransformers_applyingLightmap.call(forgefacedata.blockLight(), forgefacedata.skyLight());
+                if (object != null) {
+                    Reflector.call(object, Reflector.IQuadTransformer_processInPlace, bakedquad);
+                }
+
+                Object object1 = Reflector.QuadTransformers_applyingColor.call(forgefacedata.color());
+                if (object1 != null) {
+                    Reflector.call(object1, Reflector.IQuadTransformer_processInPlace, bakedquad);
+                }
+            }
+
+            return bakedquad;
+        } else {
+            return new BakedQuad(aint, pFace.tintIndex(), direction, pSprite, pShade, pLightEmission);
+        }
     }
 
-    public static BlockFaceUV recomputeUVs(BlockFaceUV p_111582_, Direction p_111583_, Transformation p_111584_) {
-        Matrix4f matrix4f = BlockMath.getUVLockTransform(p_111584_, p_111583_).getMatrix();
-        float f = p_111582_.getU(p_111582_.getReverseIndex(0));
-        float f1 = p_111582_.getV(p_111582_.getReverseIndex(0));
+    public static BlockFaceUV recomputeUVs(BlockFaceUV pUv, Direction pFacing, Transformation pRotation) {
+        Matrix4f matrix4f = BlockMath.getUVLockTransform(pRotation, pFacing).getMatrix();
+        float f = pUv.getU(pUv.getReverseIndex(0));
+        float f1 = pUv.getV(pUv.getReverseIndex(0));
         Vector4f vector4f = matrix4f.transform(new Vector4f(f / 16.0F, f1 / 16.0F, 0.0F, 1.0F));
         float f2 = 16.0F * vector4f.x();
         float f3 = 16.0F * vector4f.y();
-        float f4 = p_111582_.getU(p_111582_.getReverseIndex(2));
-        float f5 = p_111582_.getV(p_111582_.getReverseIndex(2));
+        float f4 = pUv.getU(pUv.getReverseIndex(2));
+        float f5 = pUv.getV(pUv.getReverseIndex(2));
         Vector4f vector4f1 = matrix4f.transform(new Vector4f(f4 / 16.0F, f5 / 16.0F, 0.0F, 1.0F));
         float f6 = 16.0F * vector4f1.x();
         float f7 = 16.0F * vector4f1.y();
@@ -93,7 +113,7 @@ public class FaceBakery {
             f11 = f3;
         }
 
-        float f12 = (float)Math.toRadians((double)p_111582_.rotation);
+        float f12 = (float)Math.toRadians((double)pUv.rotation);
         Matrix3f matrix3f = new Matrix3f(matrix4f);
         Vector3f vector3f = matrix3f.transform(new Vector3f(Mth.cos(f12), Mth.sin(f12), 0.0F));
         int i = Math.floorMod(-((int)Math.round(Math.toDegrees(Math.atan2((double)vector3f.y(), (double)vector3f.x())) / 90.0)) * 90, 360);
@@ -101,67 +121,70 @@ public class FaceBakery {
     }
 
     private static int[] makeVertices(
-        BlockFaceUV p_111574_,
-        TextureAtlasSprite p_111575_,
-        Direction p_111576_,
-        float[] p_111577_,
-        Transformation p_111578_,
-        @Nullable BlockElementRotation p_111579_
+        BlockFaceUV pUvs,
+        TextureAtlasSprite pSprite,
+        Direction pOrientation,
+        float[] pPosDiv16,
+        Transformation pTransformation,
+        @Nullable BlockElementRotation pPartRotation
     ) {
-        int[] aint = new int[32];
+        int i = Config.isShaders() ? DefaultVertexFormat.BLOCK_SHADERS_SIZE : DefaultVertexFormat.BLOCK_VANILLA_SIZE;
+        int[] aint = new int[i];
 
-        for (int i = 0; i < 4; i++) {
-            bakeVertex(aint, i, p_111576_, p_111574_, p_111577_, p_111575_, p_111578_, p_111579_);
+        for (int j = 0; j < 4; j++) {
+            bakeVertex(aint, j, pOrientation, pUvs, pPosDiv16, pSprite, pTransformation, pPartRotation);
         }
 
         return aint;
     }
 
-    private static float[] setupShape(Vector3f p_254153_, Vector3f p_253934_) {
+    private static float[] setupShape(Vector3f pMin, Vector3f pMax) {
         float[] afloat = new float[Direction.values().length];
-        afloat[FaceInfo.Constants.MIN_X] = p_254153_.x() / 16.0F;
-        afloat[FaceInfo.Constants.MIN_Y] = p_254153_.y() / 16.0F;
-        afloat[FaceInfo.Constants.MIN_Z] = p_254153_.z() / 16.0F;
-        afloat[FaceInfo.Constants.MAX_X] = p_253934_.x() / 16.0F;
-        afloat[FaceInfo.Constants.MAX_Y] = p_253934_.y() / 16.0F;
-        afloat[FaceInfo.Constants.MAX_Z] = p_253934_.z() / 16.0F;
+        afloat[FaceInfo.Constants.MIN_X] = pMin.x() / 16.0F;
+        afloat[FaceInfo.Constants.MIN_Y] = pMin.y() / 16.0F;
+        afloat[FaceInfo.Constants.MIN_Z] = pMin.z() / 16.0F;
+        afloat[FaceInfo.Constants.MAX_X] = pMax.x() / 16.0F;
+        afloat[FaceInfo.Constants.MAX_Y] = pMax.y() / 16.0F;
+        afloat[FaceInfo.Constants.MAX_Z] = pMax.z() / 16.0F;
         return afloat;
     }
 
     private static void bakeVertex(
-        int[] p_111621_,
-        int p_111622_,
-        Direction p_111623_,
-        BlockFaceUV p_111624_,
-        float[] p_111625_,
-        TextureAtlasSprite p_111626_,
-        Transformation p_111627_,
-        @Nullable BlockElementRotation p_111628_
+        int[] pVertexData,
+        int pVertexIndex,
+        Direction pFacing,
+        BlockFaceUV pBlockFaceUV,
+        float[] pPosDiv16,
+        TextureAtlasSprite pSprite,
+        Transformation pTransformation,
+        @Nullable BlockElementRotation pPartRotation
     ) {
-        FaceInfo.VertexInfo faceinfo$vertexinfo = FaceInfo.fromFacing(p_111623_).getVertexInfo(p_111622_);
+        FaceInfo.VertexInfo faceinfo$vertexinfo = FaceInfo.fromFacing(pFacing).getVertexInfo(pVertexIndex);
         Vector3f vector3f = new Vector3f(
-            p_111625_[faceinfo$vertexinfo.xFace], p_111625_[faceinfo$vertexinfo.yFace], p_111625_[faceinfo$vertexinfo.zFace]
+            pPosDiv16[faceinfo$vertexinfo.xFace], pPosDiv16[faceinfo$vertexinfo.yFace], pPosDiv16[faceinfo$vertexinfo.zFace]
         );
-        applyElementRotation(vector3f, p_111628_);
-        applyModelRotation(vector3f, p_111627_);
-        fillVertex(p_111621_, p_111622_, vector3f, p_111626_, p_111624_);
+        applyElementRotation(vector3f, pPartRotation);
+        applyModelRotation(vector3f, pTransformation);
+        BlockModelUtils.snapVertexPosition(vector3f);
+        fillVertex(pVertexData, pVertexIndex, vector3f, pSprite, pBlockFaceUV);
     }
 
-    private static void fillVertex(int[] p_111615_, int p_111616_, Vector3f p_254291_, TextureAtlasSprite p_111618_, BlockFaceUV p_111619_) {
-        int i = p_111616_ * 8;
-        p_111615_[i] = Float.floatToRawIntBits(p_254291_.x());
-        p_111615_[i + 1] = Float.floatToRawIntBits(p_254291_.y());
-        p_111615_[i + 2] = Float.floatToRawIntBits(p_254291_.z());
-        p_111615_[i + 3] = -1;
-        p_111615_[i + 4] = Float.floatToRawIntBits(p_111618_.getU(p_111619_.getU(p_111616_) / 16.0F));
-        p_111615_[i + 4 + 1] = Float.floatToRawIntBits(p_111618_.getV(p_111619_.getV(p_111616_) / 16.0F));
+    private static void fillVertex(int[] pVertexData, int pVertexIndex, Vector3f pVector, TextureAtlasSprite pSprite, BlockFaceUV pBlockFaceUV) {
+        int i = pVertexData.length / 4;
+        int j = pVertexIndex * i;
+        pVertexData[j] = Float.floatToRawIntBits(pVector.x());
+        pVertexData[j + 1] = Float.floatToRawIntBits(pVector.y());
+        pVertexData[j + 2] = Float.floatToRawIntBits(pVector.z());
+        pVertexData[j + 3] = -1;
+        pVertexData[j + 4] = Float.floatToRawIntBits(pSprite.getU(pBlockFaceUV.getU(pVertexIndex) / 16.0F));
+        pVertexData[j + 4 + 1] = Float.floatToRawIntBits(pSprite.getV(pBlockFaceUV.getV(pVertexIndex) / 16.0F));
     }
 
-    private static void applyElementRotation(Vector3f p_254412_, @Nullable BlockElementRotation p_254150_) {
-        if (p_254150_ != null) {
+    private static void applyElementRotation(Vector3f pVec, @Nullable BlockElementRotation pPartRotation) {
+        if (pPartRotation != null) {
             Vector3f vector3f;
             Vector3f vector3f1;
-            switch (p_254150_.axis()) {
+            switch (pPartRotation.axis()) {
                 case X:
                     vector3f = new Vector3f(1.0F, 0.0F, 0.0F);
                     vector3f1 = new Vector3f(0.0F, 1.0F, 1.0F);
@@ -178,9 +201,9 @@ public class FaceBakery {
                     throw new IllegalArgumentException("There are only 3 axes");
             }
 
-            Quaternionf quaternionf = new Quaternionf().rotationAxis(p_254150_.angle() * (float) (Math.PI / 180.0), vector3f);
-            if (p_254150_.rescale()) {
-                if (Math.abs(p_254150_.angle()) == 22.5F) {
+            Quaternionf quaternionf = new Quaternionf().rotationAxis(pPartRotation.angle() * (float) (Math.PI / 180.0), vector3f);
+            if (pPartRotation.rescale()) {
+                if (Math.abs(pPartRotation.angle()) == 22.5F) {
                     vector3f1.mul(RESCALE_22_5);
                 } else {
                     vector3f1.mul(RESCALE_45);
@@ -191,26 +214,28 @@ public class FaceBakery {
                 vector3f1.set(1.0F, 1.0F, 1.0F);
             }
 
-            rotateVertexBy(p_254412_, new Vector3f(p_254150_.origin()), new Matrix4f().rotation(quaternionf), vector3f1);
+            rotateVertexBy(pVec, new Vector3f(pPartRotation.origin()), new Matrix4f().rotation(quaternionf), vector3f1);
         }
     }
 
-    private static void applyModelRotation(Vector3f p_254561_, Transformation p_253793_) {
-        if (p_253793_ != Transformation.identity()) {
-            rotateVertexBy(p_254561_, new Vector3f(0.5F, 0.5F, 0.5F), p_253793_.getMatrix(), new Vector3f(1.0F, 1.0F, 1.0F));
+    private static void applyModelRotation(Vector3f pPos, Transformation pTransform) {
+        if (pTransform != Transformation.identity()) {
+            rotateVertexBy(pPos, new Vector3f(0.5F, 0.5F, 0.5F), pTransform.getMatrix(), new Vector3f(1.0F, 1.0F, 1.0F));
         }
     }
 
-    private static void rotateVertexBy(Vector3f p_253804_, Vector3f p_253835_, Matrix4f p_253730_, Vector3f p_254056_) {
-        Vector4f vector4f = p_253730_.transform(new Vector4f(p_253804_.x() - p_253835_.x(), p_253804_.y() - p_253835_.y(), p_253804_.z() - p_253835_.z(), 1.0F));
-        vector4f.mul(new Vector4f(p_254056_, 1.0F));
-        p_253804_.set(vector4f.x() + p_253835_.x(), vector4f.y() + p_253835_.y(), vector4f.z() + p_253835_.z());
+    private static void rotateVertexBy(Vector3f pPos, Vector3f pOrigin, Matrix4f pTransform, Vector3f pScale) {
+        Vector4f vector4f = pTransform.transform(new Vector4f(pPos.x() - pOrigin.x(), pPos.y() - pOrigin.y(), pPos.z() - pOrigin.z(), 1.0F));
+        vector4f.mul(new Vector4f(pScale, 1.0F));
+        pPos.set(vector4f.x() + pOrigin.x(), vector4f.y() + pOrigin.y(), vector4f.z() + pOrigin.z());
     }
 
-    private static Direction calculateFacing(int[] p_111613_) {
-        Vector3f vector3f = new Vector3f(Float.intBitsToFloat(p_111613_[0]), Float.intBitsToFloat(p_111613_[1]), Float.intBitsToFloat(p_111613_[2]));
-        Vector3f vector3f1 = new Vector3f(Float.intBitsToFloat(p_111613_[8]), Float.intBitsToFloat(p_111613_[9]), Float.intBitsToFloat(p_111613_[10]));
-        Vector3f vector3f2 = new Vector3f(Float.intBitsToFloat(p_111613_[16]), Float.intBitsToFloat(p_111613_[17]), Float.intBitsToFloat(p_111613_[18]));
+    public static Direction calculateFacing(int[] pFaceData) {
+        int i = pFaceData.length / 4;
+        int j = i * 2;
+        Vector3f vector3f = new Vector3f(Float.intBitsToFloat(pFaceData[0]), Float.intBitsToFloat(pFaceData[1]), Float.intBitsToFloat(pFaceData[2]));
+        Vector3f vector3f1 = new Vector3f(Float.intBitsToFloat(pFaceData[i]), Float.intBitsToFloat(pFaceData[i + 1]), Float.intBitsToFloat(pFaceData[i + 2]));
+        Vector3f vector3f2 = new Vector3f(Float.intBitsToFloat(pFaceData[j]), Float.intBitsToFloat(pFaceData[j + 1]), Float.intBitsToFloat(pFaceData[j + 2]));
         Vector3f vector3f3 = new Vector3f(vector3f).sub(vector3f1);
         Vector3f vector3f4 = new Vector3f(vector3f2).sub(vector3f1);
         Vector3f vector3f5 = new Vector3f(vector3f4).cross(vector3f3).normalize();
@@ -234,9 +259,9 @@ public class FaceBakery {
         }
     }
 
-    private static void recalculateWinding(int[] p_111631_, Direction p_111632_) {
-        int[] aint = new int[p_111631_.length];
-        System.arraycopy(p_111631_, 0, aint, 0, p_111631_.length);
+    private static void recalculateWinding(int[] pVertices, Direction pDirection) {
+        int[] aint = new int[pVertices.length];
+        System.arraycopy(pVertices, 0, aint, 0, pVertices.length);
         float[] afloat = new float[Direction.values().length];
         afloat[FaceInfo.Constants.MIN_X] = 999.0F;
         afloat[FaceInfo.Constants.MIN_Y] = 999.0F;
@@ -244,12 +269,13 @@ public class FaceBakery {
         afloat[FaceInfo.Constants.MAX_X] = -999.0F;
         afloat[FaceInfo.Constants.MAX_Y] = -999.0F;
         afloat[FaceInfo.Constants.MAX_Z] = -999.0F;
+        int i = pVertices.length / 4;
 
-        for (int i = 0; i < 4; i++) {
-            int j = 8 * i;
-            float f = Float.intBitsToFloat(aint[j]);
-            float f1 = Float.intBitsToFloat(aint[j + 1]);
-            float f2 = Float.intBitsToFloat(aint[j + 2]);
+        for (int j = 0; j < 4; j++) {
+            int k = i * j;
+            float f = Float.intBitsToFloat(aint[k]);
+            float f1 = Float.intBitsToFloat(aint[k + 1]);
+            float f2 = Float.intBitsToFloat(aint[k + 2]);
             if (f < afloat[FaceInfo.Constants.MIN_X]) {
                 afloat[FaceInfo.Constants.MIN_X] = f;
             }
@@ -275,26 +301,26 @@ public class FaceBakery {
             }
         }
 
-        FaceInfo faceinfo = FaceInfo.fromFacing(p_111632_);
+        FaceInfo faceinfo = FaceInfo.fromFacing(pDirection);
 
-        for (int i1 = 0; i1 < 4; i1++) {
-            int j1 = 8 * i1;
-            FaceInfo.VertexInfo faceinfo$vertexinfo = faceinfo.getVertexInfo(i1);
+        for (int j1 = 0; j1 < 4; j1++) {
+            int k1 = i * j1;
+            FaceInfo.VertexInfo faceinfo$vertexinfo = faceinfo.getVertexInfo(j1);
             float f8 = afloat[faceinfo$vertexinfo.xFace];
             float f3 = afloat[faceinfo$vertexinfo.yFace];
             float f4 = afloat[faceinfo$vertexinfo.zFace];
-            p_111631_[j1] = Float.floatToRawIntBits(f8);
-            p_111631_[j1 + 1] = Float.floatToRawIntBits(f3);
-            p_111631_[j1 + 2] = Float.floatToRawIntBits(f4);
+            pVertices[k1] = Float.floatToRawIntBits(f8);
+            pVertices[k1 + 1] = Float.floatToRawIntBits(f3);
+            pVertices[k1 + 2] = Float.floatToRawIntBits(f4);
 
-            for (int k = 0; k < 4; k++) {
-                int l = 8 * k;
-                float f5 = Float.intBitsToFloat(aint[l]);
-                float f6 = Float.intBitsToFloat(aint[l + 1]);
-                float f7 = Float.intBitsToFloat(aint[l + 2]);
+            for (int l = 0; l < 4; l++) {
+                int i1 = i * l;
+                float f5 = Float.intBitsToFloat(aint[i1]);
+                float f6 = Float.intBitsToFloat(aint[i1 + 1]);
+                float f7 = Float.intBitsToFloat(aint[i1 + 2]);
                 if (Mth.equal(f8, f5) && Mth.equal(f3, f6) && Mth.equal(f4, f7)) {
-                    p_111631_[j1 + 4] = aint[l + 4];
-                    p_111631_[j1 + 4 + 1] = aint[l + 4 + 1];
+                    pVertices[k1 + 4] = aint[i1 + 4];
+                    pVertices[k1 + 4 + 1] = aint[i1 + 4 + 1];
                 }
             }
         }

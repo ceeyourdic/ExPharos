@@ -15,9 +15,9 @@ import net.minecraft.util.datafix.schemas.NamespacedSchema;
 public abstract class SimplestEntityRenameFix extends DataFix {
     private final String name;
 
-    public SimplestEntityRenameFix(String p_16911_, Schema p_16912_, boolean p_16913_) {
-        super(p_16912_, p_16913_);
-        this.name = p_16911_;
+    public SimplestEntityRenameFix(String pName, Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
+        this.name = pName;
     }
 
     @Override
@@ -43,5 +43,5 @@ public abstract class SimplestEntityRenameFix extends DataFix {
         }
     }
 
-    protected abstract String rename(String p_16930_);
+    protected abstract String rename(String pName);
 }

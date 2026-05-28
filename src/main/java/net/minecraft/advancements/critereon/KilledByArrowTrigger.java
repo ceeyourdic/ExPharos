@@ -28,16 +28,16 @@ public class KilledByArrowTrigger extends SimpleCriterionTrigger<KilledByArrowTr
         return KilledByArrowTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_365402_, Collection<Entity> p_364982_, @Nullable ItemStack p_367008_) {
+    public void trigger(ServerPlayer pPlayer, Collection<Entity> pVictims, @Nullable ItemStack pFiredFromWeapon) {
         List<LootContext> list = Lists.newArrayList();
         Set<EntityType<?>> set = Sets.newHashSet();
 
-        for (Entity entity : p_364982_) {
+        for (Entity entity : pVictims) {
             set.add(entity.getType());
-            list.add(EntityPredicate.createContext(p_365402_, entity));
+            list.add(EntityPredicate.createContext(pPlayer, entity));
         }
 
-        this.trigger(p_365402_, p_363274_ -> p_363274_.matches(list, set.size(), p_367008_));
+        this.trigger(pPlayer, p_363274_ -> p_363274_.matches(list, set.size(), pFiredFromWeapon));
     }
 
     public static record TriggerInstance(
@@ -55,31 +55,31 @@ public class KilledByArrowTrigger extends SimpleCriterionTrigger<KilledByArrowTr
                     .apply(p_363742_, KilledByArrowTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<KilledByArrowTrigger.TriggerInstance> crossbowKilled(HolderGetter<Item> p_363971_, EntityPredicate.Builder... p_360903_) {
+        public static Criterion<KilledByArrowTrigger.TriggerInstance> crossbowKilled(HolderGetter<Item> pItemRegistry, EntityPredicate.Builder... pVictims) {
             return CriteriaTriggers.KILLED_BY_ARROW
                 .createCriterion(
                     new KilledByArrowTrigger.TriggerInstance(
                         Optional.empty(),
-                        EntityPredicate.wrap(p_360903_),
+                        EntityPredicate.wrap(pVictims),
                         MinMaxBounds.Ints.ANY,
-                        Optional.of(ItemPredicate.Builder.item().of(p_363971_, Items.CROSSBOW).build())
+                        Optional.of(ItemPredicate.Builder.item().of(pItemRegistry, Items.CROSSBOW).build())
                     )
                 );
         }
 
-        public static Criterion<KilledByArrowTrigger.TriggerInstance> crossbowKilled(HolderGetter<Item> p_368687_, MinMaxBounds.Ints p_363327_) {
+        public static Criterion<KilledByArrowTrigger.TriggerInstance> crossbowKilled(HolderGetter<Item> pItemRegistry, MinMaxBounds.Ints pUniqueEntityTypes) {
             return CriteriaTriggers.KILLED_BY_ARROW
                 .createCriterion(
                     new KilledByArrowTrigger.TriggerInstance(
-                        Optional.empty(), List.of(), p_363327_, Optional.of(ItemPredicate.Builder.item().of(p_368687_, Items.CROSSBOW).build())
+                        Optional.empty(), List.of(), pUniqueEntityTypes, Optional.of(ItemPredicate.Builder.item().of(pItemRegistry, Items.CROSSBOW).build())
                     )
                 );
         }
 
-        public boolean matches(Collection<LootContext> p_367924_, int p_369717_, @Nullable ItemStack p_366570_) {
-            if (!this.firedFromWeapon.isPresent() || p_366570_ != null && this.firedFromWeapon.get().test(p_366570_)) {
+        public boolean matches(Collection<LootContext> pContext, int pUniqueEntityTypes, @Nullable ItemStack pFiredFromWeapon) {
+            if (!this.firedFromWeapon.isPresent() || pFiredFromWeapon != null && this.firedFromWeapon.get().test(pFiredFromWeapon)) {
                 if (!this.victims.isEmpty()) {
-                    List<LootContext> list = Lists.newArrayList(p_367924_);
+                    List<LootContext> list = Lists.newArrayList(pContext);
 
                     for (ContextAwarePredicate contextawarepredicate : this.victims) {
                         boolean flag = false;
@@ -100,7 +100,7 @@ public class KilledByArrowTrigger extends SimpleCriterionTrigger<KilledByArrowTr
                     }
                 }
 
-                return this.uniqueEntityTypes.matches(p_369717_);
+                return this.uniqueEntityTypes.matches(pUniqueEntityTypes);
             } else {
                 return false;
             }

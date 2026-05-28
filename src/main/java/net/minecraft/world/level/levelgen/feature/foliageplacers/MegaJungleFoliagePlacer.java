@@ -17,9 +17,9 @@ public class MegaJungleFoliagePlacer extends FoliagePlacer {
     );
     protected final int height;
 
-    public MegaJungleFoliagePlacer(IntProvider p_161454_, IntProvider p_161455_, int p_161456_) {
-        super(p_161454_, p_161455_);
-        this.height = p_161456_;
+    public MegaJungleFoliagePlacer(IntProvider pRadius, IntProvider pOffset, int pHeight) {
+        super(pRadius, pOffset);
+        this.height = pHeight;
     }
 
     @Override

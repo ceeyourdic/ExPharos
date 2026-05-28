@@ -8,13 +8,13 @@ import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.status.ChunkStep;
 
 public interface GeneratingChunkMap {
-    GenerationChunkHolder acquireGeneration(long p_343344_);
+    GenerationChunkHolder acquireGeneration(long pChunkPos);
 
-    void releaseGeneration(GenerationChunkHolder p_344409_);
+    void releaseGeneration(GenerationChunkHolder pChunk);
 
-    CompletableFuture<ChunkAccess> applyStep(GenerationChunkHolder p_344300_, ChunkStep p_343131_, StaticCache2D<GenerationChunkHolder> p_343029_);
+    CompletableFuture<ChunkAccess> applyStep(GenerationChunkHolder pChunk, ChunkStep pStep, StaticCache2D<GenerationChunkHolder> pCache);
 
-    ChunkGenerationTask scheduleGenerationTask(ChunkStatus p_345220_, ChunkPos p_342114_);
+    ChunkGenerationTask scheduleGenerationTask(ChunkStatus pTargetStatus, ChunkPos pPos);
 
     void runGenerationTasks();
 }

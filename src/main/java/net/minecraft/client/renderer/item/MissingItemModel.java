@@ -14,8 +14,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class MissingItemModel implements ItemModel {
     private final BakedModel model;
 
-    public MissingItemModel(BakedModel p_378250_) {
-        this.model = p_378250_;
+    public MissingItemModel(BakedModel pModel) {
+        this.model = pModel;
     }
 
     @Override

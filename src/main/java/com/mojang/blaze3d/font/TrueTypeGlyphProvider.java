@@ -32,22 +32,22 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
         TrueTypeGlyphProvider.GlyphEntry[]::new, TrueTypeGlyphProvider.GlyphEntry[][]::new
     );
 
-    public TrueTypeGlyphProvider(ByteBuffer p_83846_, FT_Face p_330978_, float p_83848_, float p_83849_, float p_83850_, float p_83851_, String p_83852_) {
-        this.fontMemory = p_83846_;
-        this.face = p_330978_;
-        this.oversample = p_83849_;
+    public TrueTypeGlyphProvider(ByteBuffer pFontMemory, FT_Face pFace, float pSize, float pOversample, float pShiftX, float pShiftY, String pSkip) {
+        this.fontMemory = pFontMemory;
+        this.face = pFace;
+        this.oversample = pOversample;
         IntSet intset = new IntArraySet();
-        p_83852_.codePoints().forEach(intset::add);
-        int i = Math.round(p_83848_ * p_83849_);
-        FreeType.FT_Set_Pixel_Sizes(p_330978_, i, i);
-        float f = p_83850_ * p_83849_;
-        float f1 = -p_83851_ * p_83849_;
+        pSkip.codePoints().forEach(intset::add);
+        int i = Math.round(pSize * pOversample);
+        FreeType.FT_Set_Pixel_Sizes(pFace, i, i);
+        float f = pShiftX * pOversample;
+        float f1 = -pShiftY * pOversample;
 
         try (MemoryStack memorystack = MemoryStack.stackPush()) {
             FT_Vector ft_vector = FreeTypeUtil.setVector(FT_Vector.malloc(memorystack), f, f1);
-            FreeType.FT_Set_Transform(p_330978_, null, ft_vector);
+            FreeType.FT_Set_Transform(pFace, null, ft_vector);
             IntBuffer intbuffer = memorystack.mallocInt(1);
-            int j = (int)FreeType.FT_Get_First_Char(p_330978_, intbuffer);
+            int j = (int)FreeType.FT_Get_First_Char(pFace, intbuffer);
 
             while (true) {
                 int k = intbuffer.get(0);
@@ -59,7 +59,7 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
                     this.glyphs.put(j, new TrueTypeGlyphProvider.GlyphEntry(k));
                 }
 
-                j = (int)FreeType.FT_Get_Next_Char(p_330978_, (long)j, intbuffer);
+                j = (int)FreeType.FT_Get_Next_Char(pFace, (long)j, intbuffer);
             }
         }
     }
@@ -71,15 +71,15 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
         return truetypeglyphprovider$glyphentry != null ? this.getOrLoadGlyphInfo(p_231116_, truetypeglyphprovider$glyphentry) : null;
     }
 
-    private GlyphInfo getOrLoadGlyphInfo(int p_369372_, TrueTypeGlyphProvider.GlyphEntry p_364388_) {
-        GlyphInfo glyphinfo = p_364388_.glyph;
+    private GlyphInfo getOrLoadGlyphInfo(int pCharacter, TrueTypeGlyphProvider.GlyphEntry pGlyphEntry) {
+        GlyphInfo glyphinfo = pGlyphEntry.glyph;
         if (glyphinfo == null) {
             FT_Face ft_face = this.validateFontOpen();
             synchronized (ft_face) {
-                glyphinfo = p_364388_.glyph;
+                glyphinfo = pGlyphEntry.glyph;
                 if (glyphinfo == null) {
-                    glyphinfo = this.loadGlyph(p_369372_, ft_face, p_364388_.index);
-                    p_364388_.glyph = glyphinfo;
+                    glyphinfo = this.loadGlyph(pCharacter, ft_face, pGlyphEntry.index);
+                    pGlyphEntry.glyph = glyphinfo;
                 }
             }
         }
@@ -87,15 +87,15 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
         return glyphinfo;
     }
 
-    private GlyphInfo loadGlyph(int p_362561_, FT_Face p_369907_, int p_362974_) {
-        int i = FreeType.FT_Load_Glyph(p_369907_, p_362974_, 4194312);
+    private GlyphInfo loadGlyph(int pCharacter, FT_Face pFace, int pIndex) {
+        int i = FreeType.FT_Load_Glyph(pFace, pIndex, 4194312);
         if (i != 0) {
-            FreeTypeUtil.assertError(i, String.format(Locale.ROOT, "Loading glyph U+%06X", p_362561_));
+            FreeTypeUtil.assertError(i, String.format(Locale.ROOT, "Loading glyph U+%06X", pCharacter));
         }
 
-        FT_GlyphSlot ft_glyphslot = p_369907_.glyph();
+        FT_GlyphSlot ft_glyphslot = pFace.glyph();
         if (ft_glyphslot == null) {
-            throw new NullPointerException(String.format(Locale.ROOT, "Glyph U+%06X not initialized", p_362561_));
+            throw new NullPointerException(String.format(Locale.ROOT, "Glyph U+%06X not initialized", pCharacter));
         } else {
             float f = FreeTypeUtil.x(ft_glyphslot.advance());
             FT_Bitmap ft_bitmap = ft_glyphslot.bitmap();
@@ -103,7 +103,7 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
             int k = ft_glyphslot.bitmap_top();
             int l = ft_bitmap.width();
             int i1 = ft_bitmap.rows();
-            return (GlyphInfo)(l > 0 && i1 > 0 ? new TrueTypeGlyphProvider.Glyph((float)j, (float)k, l, i1, f, p_362974_) : (GlyphInfo.SpaceGlyphInfo)() -> f / this.oversample);
+            return (GlyphInfo)(l > 0 && i1 > 0 ? new TrueTypeGlyphProvider.Glyph((float)j, (float)k, l, i1, f, pIndex) : (GlyphInfo.SpaceGlyphInfo)() -> f / this.oversample);
         }
     }
 
@@ -143,13 +143,13 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
         private final float advance;
         final int index;
 
-        Glyph(final float p_83886_, final float p_83887_, final int p_83882_, final int p_83883_, final float p_331469_, final int p_83884_) {
-            this.width = p_83882_;
-            this.height = p_83883_;
-            this.advance = p_331469_ / TrueTypeGlyphProvider.this.oversample;
-            this.bearingX = p_83886_ / TrueTypeGlyphProvider.this.oversample;
-            this.bearingY = p_83887_ / TrueTypeGlyphProvider.this.oversample;
-            this.index = p_83884_;
+        Glyph(final float pBearingX, final float pBearingY, final int pWidth, final int pHeight, final float pAdvance, final int pIndex) {
+            this.width = pWidth;
+            this.height = pHeight;
+            this.advance = pAdvance / TrueTypeGlyphProvider.this.oversample;
+            this.bearingX = pBearingX / TrueTypeGlyphProvider.this.oversample;
+            this.bearingY = pBearingY / TrueTypeGlyphProvider.this.oversample;
+            this.index = pIndex;
         }
 
         @Override
@@ -210,8 +210,8 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
         @Nullable
         volatile GlyphInfo glyph;
 
-        GlyphEntry(int p_362332_) {
-            this.index = p_362332_;
+        GlyphEntry(int pIndex) {
+            this.index = pIndex;
         }
     }
 }

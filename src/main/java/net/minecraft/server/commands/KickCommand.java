@@ -16,8 +16,8 @@ public class KickCommand {
     private static final SimpleCommandExceptionType ERROR_KICKING_OWNER = new SimpleCommandExceptionType(Component.translatable("commands.kick.owner.failed"));
     private static final SimpleCommandExceptionType ERROR_SINGLEPLAYER = new SimpleCommandExceptionType(Component.translatable("commands.kick.singleplayer.failed"));
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_137796_) {
-        p_137796_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("kick")
                 .requires(p_137800_ -> p_137800_.hasPermission(3))
                 .then(
@@ -39,16 +39,16 @@ public class KickCommand {
         );
     }
 
-    private static int kickPlayers(CommandSourceStack p_137802_, Collection<ServerPlayer> p_137803_, Component p_137804_) throws CommandSyntaxException {
-        if (!p_137802_.getServer().isPublished()) {
+    private static int kickPlayers(CommandSourceStack pSource, Collection<ServerPlayer> pPlayers, Component pReason) throws CommandSyntaxException {
+        if (!pSource.getServer().isPublished()) {
             throw ERROR_SINGLEPLAYER.create();
         } else {
             int i = 0;
 
-            for (ServerPlayer serverplayer : p_137803_) {
-                if (!p_137802_.getServer().isSingleplayerOwner(serverplayer.getGameProfile())) {
-                    serverplayer.connection.disconnect(p_137804_);
-                    p_137802_.sendSuccess(() -> Component.translatable("commands.kick.success", serverplayer.getDisplayName(), p_137804_), true);
+            for (ServerPlayer serverplayer : pPlayers) {
+                if (!pSource.getServer().isSingleplayerOwner(serverplayer.getGameProfile())) {
+                    serverplayer.connection.disconnect(pReason);
+                    pSource.sendSuccess(() -> Component.translatable("commands.kick.success", serverplayer.getDisplayName(), pReason), true);
                     i++;
                 }
             }

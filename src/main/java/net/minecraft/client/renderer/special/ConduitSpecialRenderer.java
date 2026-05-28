@@ -17,8 +17,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class ConduitSpecialRenderer implements NoDataSpecialModelRenderer {
     private final ModelPart model;
 
-    public ConduitSpecialRenderer(ModelPart p_377637_) {
-        this.model = p_377637_;
+    public ConduitSpecialRenderer(ModelPart pModel) {
+        this.model = pModel;
     }
 
     @Override

@@ -11,14 +11,14 @@ public class SingleKeyCache<K, V> {
     @Nullable
     private V cachedValue;
 
-    public SingleKeyCache(Function<K, V> p_270132_) {
-        this.computeValue = p_270132_;
+    public SingleKeyCache(Function<K, V> pComputeValue) {
+        this.computeValue = pComputeValue;
     }
 
-    public V getValue(K p_270953_) {
-        if (this.cachedValue == null || !Objects.equals(this.cacheKey, p_270953_)) {
-            this.cachedValue = this.computeValue.apply(p_270953_);
-            this.cacheKey = p_270953_;
+    public V getValue(K pCacheKey) {
+        if (this.cachedValue == null || !Objects.equals(this.cacheKey, pCacheKey)) {
+            this.cachedValue = this.computeValue.apply(pCacheKey);
+            this.cacheKey = pCacheKey;
         }
 
         return this.cachedValue;

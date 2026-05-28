@@ -35,15 +35,15 @@ public record LocationCheck(Optional<LocationPredicate> predicate, BlockPos offs
         return LootItemConditions.LOCATION_CHECK;
     }
 
-    public boolean test(LootContext p_81731_) {
-        Vec3 vec3 = p_81731_.getOptionalParameter(LootContextParams.ORIGIN);
+    public boolean test(LootContext pContext) {
+        Vec3 vec3 = pContext.getOptionalParameter(LootContextParams.ORIGIN);
         return vec3 != null
             && (
                 this.predicate.isEmpty()
                     || this.predicate
                         .get()
                         .matches(
-                            p_81731_.getLevel(),
+                            pContext.getLevel(),
                             vec3.x() + (double)this.offset.getX(),
                             vec3.y() + (double)this.offset.getY(),
                             vec3.z() + (double)this.offset.getZ()
@@ -56,11 +56,11 @@ public record LocationCheck(Optional<LocationPredicate> predicate, BlockPos offs
         return Set.of(LootContextParams.ORIGIN);
     }
 
-    public static LootItemCondition.Builder checkLocation(LocationPredicate.Builder p_81726_) {
-        return () -> new LocationCheck(Optional.of(p_81726_.build()), BlockPos.ZERO);
+    public static LootItemCondition.Builder checkLocation(LocationPredicate.Builder pLocationPredicateBuilder) {
+        return () -> new LocationCheck(Optional.of(pLocationPredicateBuilder.build()), BlockPos.ZERO);
     }
 
-    public static LootItemCondition.Builder checkLocation(LocationPredicate.Builder p_81728_, BlockPos p_81729_) {
-        return () -> new LocationCheck(Optional.of(p_81728_.build()), p_81729_);
+    public static LootItemCondition.Builder checkLocation(LocationPredicate.Builder pLocationPredicateBuilder, BlockPos pOffset) {
+        return () -> new LocationCheck(Optional.of(pLocationPredicateBuilder.build()), pOffset);
     }
 }

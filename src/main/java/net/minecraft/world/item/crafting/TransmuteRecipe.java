@@ -29,12 +29,12 @@ public class TransmuteRecipe implements CraftingRecipe {
     @Nullable
     private PlacementInfo placementInfo;
 
-    public TransmuteRecipe(String p_365892_, CraftingBookCategory p_365216_, Ingredient p_361778_, Ingredient p_366676_, Holder<Item> p_368172_) {
-        this.group = p_365892_;
-        this.category = p_365216_;
-        this.input = p_361778_;
-        this.material = p_366676_;
-        this.result = p_368172_;
+    public TransmuteRecipe(String pGroup, CraftingBookCategory pCategory, Ingredient pInput, Ingredient pMaterial, Holder<Item> pResult) {
+        this.group = pGroup;
+        this.category = pCategory;
+        this.input = pInput;
+        this.material = pMaterial;
+        this.result = pResult;
     }
 
     public boolean matches(CraftingInput p_362474_, Level p_361244_) {

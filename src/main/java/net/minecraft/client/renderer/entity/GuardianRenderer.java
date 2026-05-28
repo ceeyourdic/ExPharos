@@ -33,20 +33,20 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianRenderState,
         this(p_174159_, 0.5F, ModelLayers.GUARDIAN);
     }
 
-    protected GuardianRenderer(EntityRendererProvider.Context p_174161_, float p_174162_, ModelLayerLocation p_174163_) {
-        super(p_174161_, new GuardianModel(p_174161_.bakeLayer(p_174163_)), p_174162_);
+    protected GuardianRenderer(EntityRendererProvider.Context pContext, float pShadowRadius, ModelLayerLocation pLayer) {
+        super(pContext, new GuardianModel(pContext.bakeLayer(pLayer)), pShadowRadius);
     }
 
-    public boolean shouldRender(Guardian p_114836_, Frustum p_114837_, double p_114838_, double p_114839_, double p_114840_) {
-        if (super.shouldRender(p_114836_, p_114837_, p_114838_, p_114839_, p_114840_)) {
+    public boolean shouldRender(Guardian pLivingEntity, Frustum pCamera, double pCamX, double pCamY, double pCamZ) {
+        if (super.shouldRender(pLivingEntity, pCamera, pCamX, pCamY, pCamZ)) {
             return true;
         } else {
-            if (p_114836_.hasActiveAttackTarget()) {
-                LivingEntity livingentity = p_114836_.getActiveAttackTarget();
+            if (pLivingEntity.hasActiveAttackTarget()) {
+                LivingEntity livingentity = pLivingEntity.getActiveAttackTarget();
                 if (livingentity != null) {
                     Vec3 vec3 = this.getPosition(livingentity, (double)livingentity.getBbHeight() * 0.5, 1.0F);
-                    Vec3 vec31 = this.getPosition(p_114836_, (double)p_114836_.getEyeHeight(), 1.0F);
-                    return p_114837_.isVisible(new AABB(vec31.x, vec31.y, vec31.z, vec3.x, vec3.y, vec3.z));
+                    Vec3 vec31 = this.getPosition(pLivingEntity, (double)pLivingEntity.getEyeHeight(), 1.0F);
+                    return pCamera.isVisible(new AABB(vec31.x, vec31.y, vec31.z, vec3.x, vec3.y, vec3.z));
                 }
             }
 
@@ -54,10 +54,10 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianRenderState,
         }
     }
 
-    private Vec3 getPosition(LivingEntity p_114803_, double p_114804_, float p_114805_) {
-        double d0 = Mth.lerp((double)p_114805_, p_114803_.xOld, p_114803_.getX());
-        double d1 = Mth.lerp((double)p_114805_, p_114803_.yOld, p_114803_.getY()) + p_114804_;
-        double d2 = Mth.lerp((double)p_114805_, p_114803_.zOld, p_114803_.getZ());
+    private Vec3 getPosition(LivingEntity pLivingEntity, double pYOffset, float pPartialTick) {
+        double d0 = Mth.lerp((double)pPartialTick, pLivingEntity.xOld, pLivingEntity.getX());
+        double d1 = Mth.lerp((double)pPartialTick, pLivingEntity.yOld, pLivingEntity.getY()) + pYOffset;
+        double d2 = Mth.lerp((double)pPartialTick, pLivingEntity.zOld, pLivingEntity.getZ());
         return new Vec3(d0, d1, d2);
     }
 
@@ -73,15 +73,15 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianRenderState,
         }
     }
 
-    private static void renderBeam(PoseStack p_362984_, VertexConsumer p_361642_, Vec3 p_364612_, float p_368702_, float p_364900_, float p_363883_) {
-        float f = (float)(p_364612_.length() + 1.0);
-        p_364612_ = p_364612_.normalize();
-        float f1 = (float)Math.acos(p_364612_.y);
-        float f2 = (float) (Math.PI / 2) - (float)Math.atan2(p_364612_.z, p_364612_.x);
-        p_362984_.mulPose(Axis.YP.rotationDegrees(f2 * (180.0F / (float)Math.PI)));
-        p_362984_.mulPose(Axis.XP.rotationDegrees(f1 * (180.0F / (float)Math.PI)));
-        float f3 = p_368702_ * 0.05F * -1.5F;
-        float f4 = p_364900_ * p_364900_;
+    private static void renderBeam(PoseStack pPoseStack, VertexConsumer pBuffer, Vec3 pBeamVector, float pAttackTime, float pScale, float pAnimationTime) {
+        float f = (float)(pBeamVector.length() + 1.0);
+        pBeamVector = pBeamVector.normalize();
+        float f1 = (float)Math.acos(pBeamVector.y);
+        float f2 = (float) (Math.PI / 2) - (float)Math.atan2(pBeamVector.z, pBeamVector.x);
+        pPoseStack.mulPose(Axis.YP.rotationDegrees(f2 * (180.0F / (float)Math.PI)));
+        pPoseStack.mulPose(Axis.XP.rotationDegrees(f1 * (180.0F / (float)Math.PI)));
+        float f3 = pAttackTime * 0.05F * -1.5F;
+        float f4 = pScale * pScale;
         int i = 64 + (int)(f4 * 191.0F);
         int j = 32 + (int)(f4 * 191.0F);
         int k = 128 - (int)(f4 * 64.0F);
@@ -105,42 +105,42 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianRenderState,
         float f22 = Mth.sin(f3 + (float) (Math.PI * 3.0 / 2.0)) * 0.2F;
         float f23 = 0.0F;
         float f24 = 0.4999F;
-        float f25 = -1.0F + p_363883_;
+        float f25 = -1.0F + pAnimationTime;
         float f26 = f25 + f * 2.5F;
-        PoseStack.Pose posestack$pose = p_362984_.last();
-        vertex(p_361642_, posestack$pose, f15, f, f16, i, j, k, 0.4999F, f26);
-        vertex(p_361642_, posestack$pose, f15, 0.0F, f16, i, j, k, 0.4999F, f25);
-        vertex(p_361642_, posestack$pose, f17, 0.0F, f18, i, j, k, 0.0F, f25);
-        vertex(p_361642_, posestack$pose, f17, f, f18, i, j, k, 0.0F, f26);
-        vertex(p_361642_, posestack$pose, f19, f, f20, i, j, k, 0.4999F, f26);
-        vertex(p_361642_, posestack$pose, f19, 0.0F, f20, i, j, k, 0.4999F, f25);
-        vertex(p_361642_, posestack$pose, f21, 0.0F, f22, i, j, k, 0.0F, f25);
-        vertex(p_361642_, posestack$pose, f21, f, f22, i, j, k, 0.0F, f26);
-        float f27 = Mth.floor(p_368702_) % 2 == 0 ? 0.5F : 0.0F;
-        vertex(p_361642_, posestack$pose, f7, f, f8, i, j, k, 0.5F, f27 + 0.5F);
-        vertex(p_361642_, posestack$pose, f9, f, f10, i, j, k, 1.0F, f27 + 0.5F);
-        vertex(p_361642_, posestack$pose, f13, f, f14, i, j, k, 1.0F, f27);
-        vertex(p_361642_, posestack$pose, f11, f, f12, i, j, k, 0.5F, f27);
+        PoseStack.Pose posestack$pose = pPoseStack.last();
+        vertex(pBuffer, posestack$pose, f15, f, f16, i, j, k, 0.4999F, f26);
+        vertex(pBuffer, posestack$pose, f15, 0.0F, f16, i, j, k, 0.4999F, f25);
+        vertex(pBuffer, posestack$pose, f17, 0.0F, f18, i, j, k, 0.0F, f25);
+        vertex(pBuffer, posestack$pose, f17, f, f18, i, j, k, 0.0F, f26);
+        vertex(pBuffer, posestack$pose, f19, f, f20, i, j, k, 0.4999F, f26);
+        vertex(pBuffer, posestack$pose, f19, 0.0F, f20, i, j, k, 0.4999F, f25);
+        vertex(pBuffer, posestack$pose, f21, 0.0F, f22, i, j, k, 0.0F, f25);
+        vertex(pBuffer, posestack$pose, f21, f, f22, i, j, k, 0.0F, f26);
+        float f27 = Mth.floor(pAttackTime) % 2 == 0 ? 0.5F : 0.0F;
+        vertex(pBuffer, posestack$pose, f7, f, f8, i, j, k, 0.5F, f27 + 0.5F);
+        vertex(pBuffer, posestack$pose, f9, f, f10, i, j, k, 1.0F, f27 + 0.5F);
+        vertex(pBuffer, posestack$pose, f13, f, f14, i, j, k, 1.0F, f27);
+        vertex(pBuffer, posestack$pose, f11, f, f12, i, j, k, 0.5F, f27);
     }
 
     private static void vertex(
-        VertexConsumer p_253637_,
-        PoseStack.Pose p_334069_,
-        float p_253994_,
-        float p_254492_,
-        float p_254474_,
-        int p_254080_,
-        int p_253655_,
-        int p_254133_,
-        float p_254233_,
-        float p_253939_
+        VertexConsumer pConsumer,
+        PoseStack.Pose pPose,
+        float pX,
+        float pY,
+        float pZ,
+        int pRed,
+        int pGreen,
+        int pBlue,
+        float pU,
+        float pV
     ) {
-        p_253637_.addVertex(p_334069_, p_253994_, p_254492_, p_254474_)
-            .setColor(p_254080_, p_253655_, p_254133_, 255)
-            .setUv(p_254233_, p_253939_)
+        pConsumer.addVertex(pPose, pX, pY, pZ)
+            .setColor(pRed, pGreen, pBlue, 255)
+            .setUv(pU, pV)
             .setOverlay(OverlayTexture.NO_OVERLAY)
             .setLight(15728880)
-            .setNormal(p_334069_, 0.0F, 1.0F, 0.0F);
+            .setNormal(pPose, 0.0F, 1.0F, 0.0F);
     }
 
     public ResourceLocation getTextureLocation(GuardianRenderState p_361264_) {
@@ -176,8 +176,8 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianRenderState,
     }
 
     @Nullable
-    private static Entity getEntityToLookAt(Guardian p_369397_) {
+    private static Entity getEntityToLookAt(Guardian pGuardian) {
         Entity entity = Minecraft.getInstance().getCameraEntity();
-        return (Entity)(p_369397_.hasActiveAttackTarget() ? p_369397_.getActiveAttackTarget() : entity);
+        return (Entity)(pGuardian.hasActiveAttackTarget() ? pGuardian.getActiveAttackTarget() : entity);
     }
 }

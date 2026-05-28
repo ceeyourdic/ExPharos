@@ -19,18 +19,18 @@ public class HeaderAndFooterLayout implements Layout {
     private int headerHeight;
     private int footerHeight;
 
-    public HeaderAndFooterLayout(Screen p_270234_) {
-        this(p_270234_, 33);
+    public HeaderAndFooterLayout(Screen pScreen) {
+        this(pScreen, 33);
     }
 
-    public HeaderAndFooterLayout(Screen p_270404_, int p_270984_) {
-        this(p_270404_, p_270984_, p_270984_);
+    public HeaderAndFooterLayout(Screen pScreen, int pHeight) {
+        this(pScreen, pHeight, pHeight);
     }
 
-    public HeaderAndFooterLayout(Screen p_270083_, int p_270134_, int p_270996_) {
-        this.screen = p_270083_;
-        this.headerHeight = p_270134_;
-        this.footerHeight = p_270996_;
+    public HeaderAndFooterLayout(Screen pScreen, int pHeaderHeight, int pFooterHeight) {
+        this.screen = pScreen;
+        this.headerHeight = pHeaderHeight;
+        this.footerHeight = pFooterHeight;
         this.headerFrame.defaultChildLayoutSetting().align(0.5F, 0.5F);
         this.footerFrame.defaultChildLayoutSetting().align(0.5F, 0.5F);
     }
@@ -67,12 +67,12 @@ public class HeaderAndFooterLayout implements Layout {
         return this.footerHeight;
     }
 
-    public void setFooterHeight(int p_270260_) {
-        this.footerHeight = p_270260_;
+    public void setFooterHeight(int pFooterHeight) {
+        this.footerHeight = pFooterHeight;
     }
 
-    public void setHeaderHeight(int p_270135_) {
-        this.headerHeight = p_270135_;
+    public void setHeaderHeight(int pHeaderHeight) {
+        this.headerHeight = pHeaderHeight;
     }
 
     public int getHeaderHeight() {
@@ -109,31 +109,31 @@ public class HeaderAndFooterLayout implements Layout {
         this.contentsFrame.setPosition(0, Math.min(k, l));
     }
 
-    public <T extends LayoutElement> T addToHeader(T p_270636_) {
-        return this.headerFrame.addChild(p_270636_);
+    public <T extends LayoutElement> T addToHeader(T pChild) {
+        return this.headerFrame.addChild(pChild);
     }
 
-    public <T extends LayoutElement> T addToHeader(T p_270870_, Consumer<LayoutSettings> p_300314_) {
-        return this.headerFrame.addChild(p_270870_, p_300314_);
+    public <T extends LayoutElement> T addToHeader(T pChild, Consumer<LayoutSettings> pLayoutSettingsFactory) {
+        return this.headerFrame.addChild(pChild, pLayoutSettingsFactory);
     }
 
-    public void addTitleHeader(Component p_330651_, Font p_331722_) {
-        this.headerFrame.addChild(new StringWidget(p_330651_, p_331722_));
+    public void addTitleHeader(Component pMessage, Font pFont) {
+        this.headerFrame.addChild(new StringWidget(pMessage, pFont));
     }
 
-    public <T extends LayoutElement> T addToFooter(T p_270951_) {
-        return this.footerFrame.addChild(p_270951_);
+    public <T extends LayoutElement> T addToFooter(T pChild) {
+        return this.footerFrame.addChild(pChild);
     }
 
-    public <T extends LayoutElement> T addToFooter(T p_270362_, Consumer<LayoutSettings> p_301265_) {
-        return this.footerFrame.addChild(p_270362_, p_301265_);
+    public <T extends LayoutElement> T addToFooter(T pChild, Consumer<LayoutSettings> pLayoutSettingsFactory) {
+        return this.footerFrame.addChild(pChild, pLayoutSettingsFactory);
     }
 
-    public <T extends LayoutElement> T addToContents(T p_270895_) {
-        return this.contentsFrame.addChild(p_270895_);
+    public <T extends LayoutElement> T addToContents(T pChild) {
+        return this.contentsFrame.addChild(pChild);
     }
 
-    public <T extends LayoutElement> T addToContents(T p_270611_, Consumer<LayoutSettings> p_299569_) {
-        return this.contentsFrame.addChild(p_270611_, p_299569_);
+    public <T extends LayoutElement> T addToContents(T pChild, Consumer<LayoutSettings> pLayoutSettingFactory) {
+        return this.contentsFrame.addChild(pChild, pLayoutSettingFactory);
     }
 }

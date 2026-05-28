@@ -19,14 +19,14 @@ public class HasSturdyFacePredicate implements BlockPredicate {
                 .apply(p_198327_, HasSturdyFacePredicate::new)
     );
 
-    public HasSturdyFacePredicate(Vec3i p_198320_, Direction p_198321_) {
-        this.offset = p_198320_;
-        this.direction = p_198321_;
+    public HasSturdyFacePredicate(Vec3i pOffset, Direction pDirection) {
+        this.offset = pOffset;
+        this.direction = pDirection;
     }
 
-    public boolean test(WorldGenLevel p_198324_, BlockPos p_198325_) {
-        BlockPos blockpos = p_198325_.offset(this.offset);
-        return p_198324_.getBlockState(blockpos).isFaceSturdy(p_198324_, blockpos, this.direction);
+    public boolean test(WorldGenLevel pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.offset(this.offset);
+        return pLevel.getBlockState(blockpos).isFaceSturdy(pLevel, blockpos, this.direction);
     }
 
     @Override

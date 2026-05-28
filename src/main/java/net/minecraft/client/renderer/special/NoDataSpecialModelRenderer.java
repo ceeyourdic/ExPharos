@@ -27,5 +27,5 @@ public interface NoDataSpecialModelRenderer extends SpecialModelRenderer<Void> {
         this.render(p_377834_, p_378650_, p_378478_, p_378005_, p_376839_, p_375776_);
     }
 
-    void render(ItemDisplayContext p_376384_, PoseStack p_377457_, MultiBufferSource p_378580_, int p_375653_, int p_376500_, boolean p_376690_);
+    void render(ItemDisplayContext pDisplayContext, PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay, boolean pHasFoilType);
 }

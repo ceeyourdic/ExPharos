@@ -18,12 +18,12 @@ public class SpectralArrow extends AbstractArrow {
         super(p_37411_, p_37412_);
     }
 
-    public SpectralArrow(Level p_37414_, LivingEntity p_311904_, ItemStack p_309799_, @Nullable ItemStack p_342763_) {
-        super(EntityType.SPECTRAL_ARROW, p_311904_, p_37414_, p_309799_, p_342763_);
+    public SpectralArrow(Level pLevel, LivingEntity pOwner, ItemStack pPickupItemStack, @Nullable ItemStack pFiredFromWeapon) {
+        super(EntityType.SPECTRAL_ARROW, pOwner, pLevel, pPickupItemStack, pFiredFromWeapon);
     }
 
-    public SpectralArrow(Level p_37419_, double p_309976_, double p_310894_, double p_309922_, ItemStack p_311719_, @Nullable ItemStack p_343959_) {
-        super(EntityType.SPECTRAL_ARROW, p_309976_, p_310894_, p_309922_, p_37419_, p_311719_, p_343959_);
+    public SpectralArrow(Level pLevel, double pX, double pY, double pZ, ItemStack pPickupItemStack, @Nullable ItemStack pFiredFromWeapon) {
+        super(EntityType.SPECTRAL_ARROW, pX, pY, pZ, pLevel, pPickupItemStack, pFiredFromWeapon);
     }
 
     @Override
@@ -35,24 +35,24 @@ public class SpectralArrow extends AbstractArrow {
     }
 
     @Override
-    protected void doPostHurtEffects(LivingEntity p_37422_) {
-        super.doPostHurtEffects(p_37422_);
+    protected void doPostHurtEffects(LivingEntity pLiving) {
+        super.doPostHurtEffects(pLiving);
         MobEffectInstance mobeffectinstance = new MobEffectInstance(MobEffects.GLOWING, this.duration, 0);
-        p_37422_.addEffect(mobeffectinstance, this.getEffectSource());
+        pLiving.addEffect(mobeffectinstance, this.getEffectSource());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_37424_) {
-        super.readAdditionalSaveData(p_37424_);
-        if (p_37424_.contains("Duration")) {
-            this.duration = p_37424_.getInt("Duration");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("Duration")) {
+            this.duration = pCompound.getInt("Duration");
         }
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_37426_) {
-        super.addAdditionalSaveData(p_37426_);
-        p_37426_.putInt("Duration", this.duration);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("Duration", this.duration);
     }
 
     @Override

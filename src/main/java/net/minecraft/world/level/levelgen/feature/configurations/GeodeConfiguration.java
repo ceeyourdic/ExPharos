@@ -44,32 +44,32 @@ public class GeodeConfiguration implements FeatureConfiguration {
     public final int invalidBlocksThreshold;
 
     public GeodeConfiguration(
-        GeodeBlockSettings p_160828_,
-        GeodeLayerSettings p_160829_,
-        GeodeCrackSettings p_160830_,
-        double p_160831_,
-        double p_160832_,
-        boolean p_160833_,
-        IntProvider p_160834_,
-        IntProvider p_160835_,
-        IntProvider p_160836_,
-        int p_160837_,
-        int p_160838_,
-        double p_160839_,
-        int p_160840_
+        GeodeBlockSettings pGeodeBlockSettings,
+        GeodeLayerSettings pGeodeLayerSettings,
+        GeodeCrackSettings pGeodeCrackSettings,
+        double pUsePotentialPlacementsChance,
+        double pUseAlternateLayer0Chance,
+        boolean pPlacementsRequireLayer0Alternate,
+        IntProvider pOuterWallDistance,
+        IntProvider pDistributionPoints,
+        IntProvider pPointOffset,
+        int pMinGenOffset,
+        int pMaxGenOffset,
+        double pNoiseMultiplier,
+        int pInvalidBlocksThreshold
     ) {
-        this.geodeBlockSettings = p_160828_;
-        this.geodeLayerSettings = p_160829_;
-        this.geodeCrackSettings = p_160830_;
-        this.usePotentialPlacementsChance = p_160831_;
-        this.useAlternateLayer0Chance = p_160832_;
-        this.placementsRequireLayer0Alternate = p_160833_;
-        this.outerWallDistance = p_160834_;
-        this.distributionPoints = p_160835_;
-        this.pointOffset = p_160836_;
-        this.minGenOffset = p_160837_;
-        this.maxGenOffset = p_160838_;
-        this.noiseMultiplier = p_160839_;
-        this.invalidBlocksThreshold = p_160840_;
+        this.geodeBlockSettings = pGeodeBlockSettings;
+        this.geodeLayerSettings = pGeodeLayerSettings;
+        this.geodeCrackSettings = pGeodeCrackSettings;
+        this.usePotentialPlacementsChance = pUsePotentialPlacementsChance;
+        this.useAlternateLayer0Chance = pUseAlternateLayer0Chance;
+        this.placementsRequireLayer0Alternate = pPlacementsRequireLayer0Alternate;
+        this.outerWallDistance = pOuterWallDistance;
+        this.distributionPoints = pDistributionPoints;
+        this.pointOffset = pPointOffset;
+        this.minGenOffset = pMinGenOffset;
+        this.maxGenOffset = pMaxGenOffset;
+        this.noiseMultiplier = pNoiseMultiplier;
+        this.invalidBlocksThreshold = pInvalidBlocksThreshold;
     }
 }

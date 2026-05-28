@@ -19,28 +19,28 @@ public record DistancePredicate(
                 .apply(p_325201_, DistancePredicate::new)
     );
 
-    public static DistancePredicate horizontal(MinMaxBounds.Doubles p_148837_) {
+    public static DistancePredicate horizontal(MinMaxBounds.Doubles pHorizontal) {
         return new DistancePredicate(
-            MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, p_148837_, MinMaxBounds.Doubles.ANY
+            MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, pHorizontal, MinMaxBounds.Doubles.ANY
         );
     }
 
-    public static DistancePredicate vertical(MinMaxBounds.Doubles p_148839_) {
+    public static DistancePredicate vertical(MinMaxBounds.Doubles pVertical) {
         return new DistancePredicate(
-            MinMaxBounds.Doubles.ANY, p_148839_, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY
+            MinMaxBounds.Doubles.ANY, pVertical, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY
         );
     }
 
-    public static DistancePredicate absolute(MinMaxBounds.Doubles p_148841_) {
+    public static DistancePredicate absolute(MinMaxBounds.Doubles pAbsolute) {
         return new DistancePredicate(
-            MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, p_148841_
+            MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, pAbsolute
         );
     }
 
-    public boolean matches(double p_26256_, double p_26257_, double p_26258_, double p_26259_, double p_26260_, double p_26261_) {
-        float f = (float)(p_26256_ - p_26259_);
-        float f1 = (float)(p_26257_ - p_26260_);
-        float f2 = (float)(p_26258_ - p_26261_);
+    public boolean matches(double pX1, double pY1, double pZ1, double pX2, double pY2, double pZ2) {
+        float f = (float)(pX1 - pX2);
+        float f1 = (float)(pY1 - pY2);
+        float f2 = (float)(pZ1 - pZ2);
         if (!this.x.matches((double)Mth.abs(f))
             || !this.y.matches((double)Mth.abs(f1))
             || !this.z.matches((double)Mth.abs(f2))) {

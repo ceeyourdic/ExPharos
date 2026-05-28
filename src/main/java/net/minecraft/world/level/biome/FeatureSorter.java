@@ -25,7 +25,7 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 public class FeatureSorter {
-    public static <T> List<FeatureSorter.StepFeatureData> buildFeaturesPerStep(List<T> p_220604_, Function<T, List<HolderSet<PlacedFeature>>> p_220605_, boolean p_220606_) {
+    public static <T> List<FeatureSorter.StepFeatureData> buildFeaturesPerStep(List<T> pFeatureSetSources, Function<T, List<HolderSet<PlacedFeature>>> pToFeatueSetFunction, boolean pNotRecursiveFlag) {
         Object2IntMap<PlacedFeature> object2intmap = new Object2IntOpenHashMap<>();
         MutableInt mutableint = new MutableInt(0);
 
@@ -36,9 +36,9 @@ public class FeatureSorter {
         Map<FeatureData, Set<FeatureData>> map = new TreeMap<>(comparator);
         int i = 0;
 
-        for (T t : p_220604_) {
+        for (T t : pFeatureSetSources) {
             List<FeatureData> list = Lists.newArrayList();
-            List<HolderSet<PlacedFeature>> list1 = p_220605_.apply(t);
+            List<HolderSet<PlacedFeature>> list1 = pToFeatueSetFunction.apply(t);
             i = Math.max(i, list1.size());
 
             for (int j = 0; j < list1.size(); j++) {
@@ -66,11 +66,11 @@ public class FeatureSorter {
             }
 
             if (!set.contains(featuresorter$1featuredata) && Graph.depthFirstSearch(map, set, set1, list2::add, featuresorter$1featuredata)) {
-                if (!p_220606_) {
+                if (!pNotRecursiveFlag) {
                     throw new IllegalStateException("Feature order cycle found");
                 }
 
-                List<T> list3 = new ArrayList<>(p_220604_);
+                List<T> list3 = new ArrayList<>(pFeatureSetSources);
 
                 int j1;
                 do {
@@ -82,7 +82,7 @@ public class FeatureSorter {
                         listiterator.remove();
 
                         try {
-                            buildFeaturesPerStep(list3, p_220605_, false);
+                            buildFeaturesPerStep(list3, pToFeatueSetFunction, false);
                         } catch (IllegalStateException illegalstateexception) {
                             continue;
                         }
@@ -111,8 +111,8 @@ public class FeatureSorter {
     }
 
     public static record StepFeatureData(List<PlacedFeature> features, ToIntFunction<PlacedFeature> indexMapping) {
-        StepFeatureData(List<PlacedFeature> p_220627_) {
-            this(p_220627_, Util.createIndexIdentityLookup(p_220627_));
+        StepFeatureData(List<PlacedFeature> pFeatures) {
+            this(pFeatures, Util.createIndexIdentityLookup(pFeatures));
         }
     }
 }

@@ -9,8 +9,8 @@ import net.minecraft.world.item.Instrument;
 import net.minecraft.world.item.Instruments;
 
 public class InstrumentTagsProvider extends TagsProvider<Instrument> {
-    public InstrumentTagsProvider(PackOutput p_256418_, CompletableFuture<HolderLookup.Provider> p_256038_) {
-        super(p_256418_, Registries.INSTRUMENT, p_256038_);
+    public InstrumentTagsProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pProvider) {
+        super(pOutput, Registries.INSTRUMENT, pProvider);
     }
 
     @Override

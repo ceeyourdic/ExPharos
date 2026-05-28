@@ -13,35 +13,40 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.world.level.Level;
 
 public final class PatchedDataComponentMap implements DataComponentMap {
     private final DataComponentMap prototype;
     private Reference2ObjectMap<DataComponentType<?>, Optional<?>> patch;
     private boolean copyOnWrite;
+    private CompoundTag tag;
 
-    public PatchedDataComponentMap(DataComponentMap p_331141_) {
-        this(p_331141_, Reference2ObjectMaps.emptyMap(), true);
+    public PatchedDataComponentMap(DataComponentMap pPrototype) {
+        this(pPrototype, Reference2ObjectMaps.emptyMap(), true);
     }
 
-    private PatchedDataComponentMap(DataComponentMap p_335089_, Reference2ObjectMap<DataComponentType<?>, Optional<?>> p_333211_, boolean p_334948_) {
-        this.prototype = p_335089_;
-        this.patch = p_333211_;
-        this.copyOnWrite = p_334948_;
+    private PatchedDataComponentMap(DataComponentMap pPrototype, Reference2ObjectMap<DataComponentType<?>, Optional<?>> pPatch, boolean pCopyOnWtite) {
+        this.prototype = pPrototype;
+        this.patch = pPatch;
+        this.copyOnWrite = pCopyOnWtite;
     }
 
-    public static PatchedDataComponentMap fromPatch(DataComponentMap p_334311_, DataComponentPatch p_332061_) {
-        if (isPatchSanitized(p_334311_, p_332061_.map)) {
-            return new PatchedDataComponentMap(p_334311_, p_332061_.map, true);
+    public static PatchedDataComponentMap fromPatch(DataComponentMap pPrototype, DataComponentPatch pPatch) {
+        if (isPatchSanitized(pPrototype, pPatch.map)) {
+            return new PatchedDataComponentMap(pPrototype, pPatch.map, true);
         } else {
-            PatchedDataComponentMap patcheddatacomponentmap = new PatchedDataComponentMap(p_334311_);
-            patcheddatacomponentmap.applyPatch(p_332061_);
+            PatchedDataComponentMap patcheddatacomponentmap = new PatchedDataComponentMap(pPrototype);
+            patcheddatacomponentmap.applyPatch(pPatch);
             return patcheddatacomponentmap;
         }
     }
 
-    private static boolean isPatchSanitized(DataComponentMap p_331971_, Reference2ObjectMap<DataComponentType<?>, Optional<?>> p_332857_) {
-        for (Entry<DataComponentType<?>, Optional<?>> entry : Reference2ObjectMaps.fastIterable(p_332857_)) {
-            Object object = p_331971_.get(entry.getKey());
+    private static boolean isPatchSanitized(DataComponentMap pPrototype, Reference2ObjectMap<DataComponentType<?>, Optional<?>> pMap) {
+        for (Entry<DataComponentType<?>, Optional<?>> entry : Reference2ObjectMaps.fastIterable(pMap)) {
+            Object object = pPrototype.get(entry.getKey());
             Optional<?> optional = entry.getValue();
             if (optional.isPresent() && optional.get().equals(object)) {
                 return false;
@@ -62,65 +67,66 @@ public final class PatchedDataComponentMap implements DataComponentMap {
         return (T)(optional != null ? optional.orElse(null) : this.prototype.get(p_331525_));
     }
 
-    public boolean hasNonDefault(DataComponentType<?> p_376646_) {
-        return this.patch.containsKey(p_376646_);
+    public boolean hasNonDefault(DataComponentType<?> pComponent) {
+        return this.patch.containsKey(pComponent);
     }
 
     @Nullable
-    public <T> T set(DataComponentType<? super T> p_334181_, @Nullable T p_328828_) {
+    public <T> T set(DataComponentType<? super T> pComponent, @Nullable T pValue) {
         this.ensureMapOwnership();
-        T t = this.prototype.get((DataComponentType<? extends T>)p_334181_);
+        T t = this.prototype.get((DataComponentType<? extends T>)pComponent);
         Optional<T> optional;
-        if (Objects.equals(p_328828_, t)) {
-            optional = (Optional<T>)this.patch.remove(p_334181_);
+        if (Objects.equals(pValue, t)) {
+            optional = (Optional<T>)this.patch.remove(pComponent);
         } else {
-            optional = (Optional<T>)this.patch.put(p_334181_, Optional.ofNullable(p_328828_));
+            optional = (Optional<T>)this.patch.put(pComponent, Optional.ofNullable(pValue));
         }
 
+        this.markDirty();
         return optional != null ? optional.orElse(t) : t;
     }
 
     @Nullable
-    public <T> T remove(DataComponentType<? extends T> p_331496_) {
+    public <T> T remove(DataComponentType<? extends T> pComponent) {
         this.ensureMapOwnership();
-        T t = this.prototype.get(p_331496_);
+        T t = this.prototype.get(pComponent);
         Optional<? extends T> optional;
         if (t != null) {
-            optional = (Optional<? extends T>)this.patch.put(p_331496_, Optional.empty());
+            optional = (Optional<? extends T>)this.patch.put(pComponent, Optional.empty());
         } else {
-            optional = (Optional<? extends T>)this.patch.remove(p_331496_);
+            optional = (Optional<? extends T>)this.patch.remove(pComponent);
         }
 
         return (T)(optional != null ? optional.orElse(null) : t);
     }
 
-    public void applyPatch(DataComponentPatch p_329626_) {
+    public void applyPatch(DataComponentPatch pPatch) {
         this.ensureMapOwnership();
 
-        for (Entry<DataComponentType<?>, Optional<?>> entry : Reference2ObjectMaps.fastIterable(p_329626_.map)) {
+        for (Entry<DataComponentType<?>, Optional<?>> entry : Reference2ObjectMaps.fastIterable(pPatch.map)) {
             this.applyPatch(entry.getKey(), entry.getValue());
         }
     }
 
-    private void applyPatch(DataComponentType<?> p_327856_, Optional<?> p_331456_) {
-        Object object = this.prototype.get(p_327856_);
-        if (p_331456_.isPresent()) {
-            if (p_331456_.get().equals(object)) {
-                this.patch.remove(p_327856_);
+    private void applyPatch(DataComponentType<?> pComponent, Optional<?> pValue) {
+        Object object = this.prototype.get(pComponent);
+        if (pValue.isPresent()) {
+            if (pValue.get().equals(object)) {
+                this.patch.remove(pComponent);
             } else {
-                this.patch.put(p_327856_, p_331456_);
+                this.patch.put(pComponent, pValue);
             }
         } else if (object != null) {
-            this.patch.put(p_327856_, Optional.empty());
+            this.patch.put(pComponent, Optional.empty());
         } else {
-            this.patch.remove(p_327856_);
+            this.patch.remove(pComponent);
         }
     }
 
-    public void restorePatch(DataComponentPatch p_331119_) {
+    public void restorePatch(DataComponentPatch pPatch) {
         this.ensureMapOwnership();
         this.patch.clear();
-        this.patch.putAll(p_331119_.map);
+        this.patch.putAll(pPatch.map);
     }
 
     public void clearPatch() {
@@ -128,8 +134,8 @@ public final class PatchedDataComponentMap implements DataComponentMap {
         this.patch.clear();
     }
 
-    public void setAll(DataComponentMap p_336067_) {
-        for (TypedDataComponent<?> typeddatacomponent : p_336067_) {
+    public void setAll(DataComponentMap pMap) {
+        for (TypedDataComponent<?> typeddatacomponent : pMap) {
             typeddatacomponent.applyTo(this);
         }
     }
@@ -224,11 +230,11 @@ public final class PatchedDataComponentMap implements DataComponentMap {
     }
 
     @Override
-    public boolean equals(Object p_335823_) {
-        if (this == p_335823_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            if (p_335823_ instanceof PatchedDataComponentMap patcheddatacomponentmap
+            if (pOther instanceof PatchedDataComponentMap patcheddatacomponentmap
                 && this.prototype.equals(patcheddatacomponentmap.prototype)
                 && this.patch.equals(patcheddatacomponentmap.patch)) {
                 return true;
@@ -246,5 +252,21 @@ public final class PatchedDataComponentMap implements DataComponentMap {
     @Override
     public String toString() {
         return "{" + this.stream().map(TypedDataComponent::toString).collect(Collectors.joining(", ")) + "}";
+    }
+
+    public CompoundTag getTag() {
+        if (this.tag == null) {
+            Level level = Minecraft.getInstance().level;
+            if (level != null) {
+                DataComponentPatch datacomponentpatch = this.asPatch();
+                this.tag = (CompoundTag)DataComponentPatch.CODEC.encodeStart(level.registryAccess().createSerializationContext(NbtOps.INSTANCE), datacomponentpatch).getOrThrow();
+            }
+        }
+
+        return this.tag;
+    }
+
+    private void markDirty() {
+        this.tag = null;
     }
 }

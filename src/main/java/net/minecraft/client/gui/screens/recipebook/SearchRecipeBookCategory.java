@@ -16,8 +16,8 @@ public enum SearchRecipeBookCategory implements ExtendedRecipeBookCategory {
 
     private final List<RecipeBookCategory> includedCategories;
 
-    private SearchRecipeBookCategory(final RecipeBookCategory... p_368173_) {
-        this.includedCategories = List.of(p_368173_);
+    private SearchRecipeBookCategory(final RecipeBookCategory... pIncludedCategories) {
+        this.includedCategories = List.of(pIncludedCategories);
     }
 
     public List<RecipeBookCategory> includedCategories() {

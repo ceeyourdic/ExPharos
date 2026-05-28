@@ -1,11 +1,16 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.authlib.minecraft.BanDetails;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.logging.LogUtils;
+import cn.lazymoon.ingameui.splash.ArcaneMainMenuScreen;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.gui.screens.RealmsNotificationsScreen;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
+import java.util.function.ObjIntConsumer;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -38,11 +43,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.reflect.Reflector;
+import net.optifine.reflect.ReflectorForge;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class TitleScreen extends Screen {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Component TITLE = Component.translatable("narrator.screen.title");
@@ -58,19 +62,20 @@ public class TitleScreen extends Screen {
     private boolean fading;
     private long fadeInStart;
     private final LogoRenderer logoRenderer;
+    private Screen modUpdateNotification;
 
     public TitleScreen() {
         this(false);
     }
 
-    public TitleScreen(boolean p_96733_) {
-        this(p_96733_, null);
+    public TitleScreen(boolean pFading) {
+        this(pFading, null);
     }
 
-    public TitleScreen(boolean p_265779_, @Nullable LogoRenderer p_265067_) {
+    public TitleScreen(boolean pFading, @Nullable LogoRenderer pLogoRenderer) {
         super(TITLE);
-        this.fading = p_265779_;
-        this.logoRenderer = Objects.requireNonNullElseGet(p_265067_, () -> new LogoRenderer(false));
+        this.fading = pFading;
+        this.logoRenderer = Objects.requireNonNullElseGet(pLogoRenderer, () -> new LogoRenderer(false));
     }
 
     private boolean realmsNotificationsEnabled() {
@@ -84,11 +89,11 @@ public class TitleScreen extends Screen {
         }
     }
 
-    public static void registerTextures(TextureManager p_378459_) {
-        p_378459_.registerForNextReload(LogoRenderer.MINECRAFT_LOGO);
-        p_378459_.registerForNextReload(LogoRenderer.MINECRAFT_EDITION);
-        p_378459_.registerForNextReload(PanoramaRenderer.PANORAMA_OVERLAY);
-        CUBE_MAP.registerTextures(p_378459_);
+    public static void registerTextures(TextureManager pTextureManager) {
+        pTextureManager.registerForNextReload(LogoRenderer.MINECRAFT_LOGO);
+        pTextureManager.registerForNextReload(LogoRenderer.MINECRAFT_EDITION);
+        pTextureManager.registerForNextReload(PanoramaRenderer.PANORAMA_OVERLAY);
+        CUBE_MAP.registerTextures(pTextureManager);
     }
 
     @Override
@@ -103,44 +108,63 @@ public class TitleScreen extends Screen {
 
     @Override
     protected void init() {
+        // Arcane mixin port: replace the vanilla title screen with the client's custom main menu.
+        if (this.arcane$replaceMenu()) {
+            return;
+        }
+
         if (this.splash == null) {
             this.splash = this.minecraft.getSplashManager().getSplash();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date());
+            int i = calendar.get(5);
+            int j = calendar.get(2) + 1;
+            if (i == 8 && j == 4) {
+                this.splash = new SplashRenderer("Happy birthday, OptiFine!");
+            }
+
+            if (i == 14 && j == 8) {
+                this.splash = new SplashRenderer("Happy birthday, sp614x!");
+            }
         }
 
-        int i = this.font.width(COPYRIGHT_TEXT);
-        int j = this.width - i - 2;
-        int k = 24;
-        int l = this.height / 4 + 48;
+        int i1 = this.font.width(COPYRIGHT_TEXT);
+        int j1 = this.width - i1 - 2;
+        int k1 = 24;
+        int k = this.height / 4 + 48;
+        Button button = null;
         if (this.minecraft.isDemo()) {
-            l = this.createDemoMenuOptions(l, 24);
+            k = this.createDemoMenuOptions(k, 24);
         } else {
-            l = this.createNormalMenuOptions(l, 24);
+            k = this.createNormalMenuOptions(k, 24);
+            if (Reflector.ModListScreen_Constructor.exists()) {
+                button = ReflectorForge.makeButtonMods(this, k, 24);
+                this.addRenderableWidget(button);
+            }
         }
 
-        l = this.createTestWorldButton(l, 24);
+        k = this.createTestWorldButton(k, 24);
         SpriteIconButton spriteiconbutton = this.addRenderableWidget(
-            CommonButtons.language(
-                20, p_340809_ -> this.minecraft.setScreen(new LanguageSelectScreen(this, this.minecraft.options, this.minecraft.getLanguageManager())), true
-            )
+            CommonButtons.language(20, btnIn -> this.minecraft.setScreen(new LanguageSelectScreen(this, this.minecraft.options, this.minecraft.getLanguageManager())), true)
         );
-        int i1 = this.width / 2 - 124;
-        l += 36;
-        spriteiconbutton.setPosition(i1, l);
+        int l = this.width / 2 - 124;
+        k += 36;
+        spriteiconbutton.setPosition(l, k);
         this.addRenderableWidget(
-            Button.builder(Component.translatable("menu.options"), p_340808_ -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options)))
-                .bounds(this.width / 2 - 100, l, 98, 20)
+            Button.builder(Component.translatable("menu.options"), btnIn -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options)))
+                .bounds(this.width / 2 - 100, k, 98, 20)
                 .build()
         );
         this.addRenderableWidget(
-            Button.builder(Component.translatable("menu.quit"), p_280831_ -> this.minecraft.stop()).bounds(this.width / 2 + 2, l, 98, 20).build()
+            Button.builder(Component.translatable("menu.quit"), btnIn -> this.minecraft.stop()).bounds(this.width / 2 + 2, k, 98, 20).build()
         );
         SpriteIconButton spriteiconbutton1 = this.addRenderableWidget(
-            CommonButtons.accessibility(20, p_340810_ -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), true)
+            CommonButtons.accessibility(20, btnIn -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), true)
         );
-        spriteiconbutton1.setPosition(this.width / 2 + 104, l);
+        spriteiconbutton1.setPosition(this.width / 2 + 104, k);
         this.addRenderableWidget(
             new PlainTextButton(
-                j, this.height - 10, i, 10, COPYRIGHT_TEXT, p_280834_ -> this.minecraft.setScreen(new CreditsAndAttributionScreen(this)), this.font
+                j1, this.height - 10, i1, 10, COPYRIGHT_TEXT, btnIn -> this.minecraft.setScreen(new CreditsAndAttributionScreen(this)), this.font
             )
         );
         if (this.realmsNotificationsScreen == null) {
@@ -150,42 +174,54 @@ public class TitleScreen extends Screen {
         if (this.realmsNotificationsEnabled()) {
             this.realmsNotificationsScreen.init(this.minecraft, this.width, this.height);
         }
+
+        if (Reflector.TitleScreenModUpdateIndicator_init.exists()) {
+            this.modUpdateNotification = (Screen)Reflector.call(Reflector.TitleScreenModUpdateIndicator_init, this, button);
+        }
     }
 
-    private int createTestWorldButton(int p_368793_, int p_361481_) {
+    private boolean arcane$replaceMenu() {
+        this.minecraft.setScreen(new ArcaneMainMenuScreen());
+        return true;
+    }
+
+    private int createTestWorldButton(int pY, int pRowHeight) {
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             this.addRenderableWidget(
-                Button.builder(Component.literal("Create Test World"), p_357674_ -> CreateWorldScreen.testWorld(this.minecraft, this))
-                    .bounds(this.width / 2 - 100, p_368793_ += p_361481_, 200, 20)
+                Button.builder(Component.literal("Create Test World"), p_348940_1_ -> CreateWorldScreen.testWorld(this.minecraft, this))
+                    .bounds(this.width / 2 - 100, pY += pRowHeight, 200, 20)
                     .build()
             );
         }
 
-        return p_368793_;
+        return pY;
     }
 
-    private int createNormalMenuOptions(int p_96764_, int p_96765_) {
+    private int createNormalMenuOptions(int pY, int pRowHeight) {
         this.addRenderableWidget(
-            Button.builder(Component.translatable("menu.singleplayer"), p_280832_ -> this.minecraft.setScreen(new SelectWorldScreen(this)))
-                .bounds(this.width / 2 - 100, p_96764_, 200, 20)
+            Button.builder(Component.translatable("menu.singleplayer"), btnIn -> this.minecraft.setScreen(new SelectWorldScreen(this)))
+                .bounds(this.width / 2 - 100, pY, 200, 20)
                 .build()
         );
         Component component = this.getMultiplayerDisabledReason();
         boolean flag = component == null;
         Tooltip tooltip = component != null ? Tooltip.create(component) : null;
         int i;
-        this.addRenderableWidget(Button.builder(Component.translatable("menu.multiplayer"), p_280833_ -> {
+        this.addRenderableWidget(Button.builder(Component.translatable("menu.multiplayer"), btnIn -> {
             Screen screen = (Screen)(this.minecraft.options.skipMultiplayerWarning ? new JoinMultiplayerScreen(this) : new SafetyScreen(this));
             this.minecraft.setScreen(screen);
-        }).bounds(this.width / 2 - 100, i = p_96764_ + p_96765_, 200, 20).tooltip(tooltip).build()).active = flag;
+        }).bounds(this.width / 2 - 100, i = pY + pRowHeight, 200, 20).tooltip(tooltip).build()).active = flag;
+        boolean flag1 = Reflector.ModListScreen_Constructor.exists();
+        int j = flag1 ? this.width / 2 + 2 : this.width / 2 - 100;
+        int k = flag1 ? 98 : 200;
         this.addRenderableWidget(
-                Button.builder(Component.translatable("menu.online"), p_325369_ -> this.minecraft.setScreen(new RealmsMainScreen(this)))
-                    .bounds(this.width / 2 - 100, p_96764_ = i + p_96765_, 200, 20)
+                Button.builder(Component.translatable("menu.online"), btnIn -> this.minecraft.setScreen(new RealmsMainScreen(this)))
+                    .bounds(j, pY = i + pRowHeight, k, 20)
                     .tooltip(tooltip)
                     .build()
             )
             .active = flag;
-        return p_96764_;
+        return pY;
     }
 
     @Nullable
@@ -206,20 +242,20 @@ public class TitleScreen extends Screen {
         }
     }
 
-    private int createDemoMenuOptions(int p_96773_, int p_96774_) {
+    private int createDemoMenuOptions(int pY, int pRowHeight) {
         boolean flag = this.checkDemoWorldPresence();
-        this.addRenderableWidget(Button.builder(Component.translatable("menu.playdemo"), p_325371_ -> {
+        this.addRenderableWidget(Button.builder(Component.translatable("menu.playdemo"), btnIn -> {
             if (flag) {
                 this.minecraft.createWorldOpenFlows().openWorld("Demo_World", () -> this.minecraft.setScreen(this));
             } else {
                 this.minecraft.createWorldOpenFlows().createFreshLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, WorldOptions.DEMO_OPTIONS, WorldPresets::createNormalWorldDimensions, this);
             }
-        }).bounds(this.width / 2 - 100, p_96773_, 200, 20).build());
+        }).bounds(this.width / 2 - 100, pY, 200, 20).build());
         int i;
         this.resetDemoButton = this.addRenderableWidget(
             Button.builder(
                     Component.translatable("menu.resetdemo"),
-                    p_308197_ -> {
+                    btnIn -> {
                         LevelStorageSource levelstoragesource = this.minecraft.getLevelSource();
 
                         try (LevelStorageSource.LevelStorageAccess levelstoragesource$levelstorageaccess = levelstoragesource.createAccess("Demo_World")) {
@@ -235,13 +271,13 @@ public class TitleScreen extends Screen {
                                         )
                                     );
                             }
-                        } catch (IOException ioexception) {
+                        } catch (IOException ioexception1) {
                             SystemToast.onWorldAccessFailure(this.minecraft, "Demo_World");
-                            LOGGER.warn("Failed to access demo world", (Throwable)ioexception);
+                            LOGGER.warn("Failed to access demo world", (Throwable)ioexception1);
                         }
                     }
                 )
-                .bounds(this.width / 2 - 100, i = p_96773_ + p_96774_, 200, 20)
+                .bounds(this.width / 2 - 100, i = pY + pRowHeight, 200, 20)
                 .build()
         );
         this.resetDemoButton.active = flag;
@@ -256,9 +292,9 @@ public class TitleScreen extends Screen {
             }
 
             return flag;
-        } catch (IOException ioexception) {
+        } catch (IOException ioexception1) {
             SystemToast.onWorldAccessFailure(this.minecraft, "Demo_World");
-            LOGGER.warn("Failed to read demo world data", (Throwable)ioexception);
+            LOGGER.warn("Failed to read demo world data", (Throwable)ioexception1);
             return false;
         }
     }
@@ -270,6 +306,7 @@ public class TitleScreen extends Screen {
         }
 
         float f = 1.0F;
+        GlStateManager._disableDepthTest();
         if (this.fading) {
             float f1 = (float)(Util.getMillis() - this.fadeInStart) / 2000.0F;
             if (f1 > 1.0F) {
@@ -289,6 +326,10 @@ public class TitleScreen extends Screen {
         if ((i & -67108864) != 0) {
             super.render(p_282860_, p_281753_, p_283539_, p_282628_);
             this.logoRenderer.renderLogo(p_282860_, this.width, f);
+            if (Reflector.ForgeHooksClient_renderMainMenu.exists()) {
+                Reflector.callVoid(Reflector.ForgeHooksClient_renderMainMenu, this, p_282860_, this.font, this.width, this.height, i);
+            }
+
             if (this.splash != null && !this.minecraft.options.hideSplashTexts().get()) {
                 this.splash.render(p_282860_, this.width, this.font, i);
             }
@@ -304,17 +345,38 @@ public class TitleScreen extends Screen {
                 s = s + I18n.get("menu.modded");
             }
 
-            p_282860_.drawString(this.font, s, 2, this.height - 10, 16777215 | i);
+            if (Reflector.BrandingControl.exists()) {
+                if (Reflector.BrandingControl_forEachLine.exists()) {
+                    ObjIntConsumer<String> objintconsumer = (brd, brdline) -> p_282860_.drawString(
+                            this.font, brd, 2, this.height - (10 + brdline * (9 + 1)), 16777215 | i
+                        );
+                    Reflector.call(Reflector.BrandingControl_forEachLine, true, true, objintconsumer);
+                }
+
+                if (Reflector.BrandingControl_forEachAboveCopyrightLine.exists()) {
+                    ObjIntConsumer<String> objintconsumer1 = (brd, brdline) -> p_282860_.drawString(
+                            this.font, brd, this.width - this.font.width(brd), this.height - (10 + (brdline + 1) * (9 + 1)), 16777215 | i
+                        );
+                    Reflector.call(Reflector.BrandingControl_forEachAboveCopyrightLine, objintconsumer1);
+                }
+            } else {
+                p_282860_.drawString(this.font, s, 2, this.height - 10, 16777215 | i);
+            }
+
             if (this.realmsNotificationsEnabled() && f >= 1.0F) {
                 this.realmsNotificationsScreen.render(p_282860_, p_281753_, p_283539_, p_282628_);
             }
         }
+
+        if (this.modUpdateNotification != null && f >= 1.0F) {
+            this.modUpdateNotification.render(p_282860_, p_281753_, p_283539_, p_282628_);
+        }
     }
 
-    private void fadeWidgets(float p_335005_) {
+    private void fadeWidgets(float pAlpha) {
         for (GuiEventListener guieventlistener : this.children()) {
             if (guieventlistener instanceof AbstractWidget abstractwidget) {
-                abstractwidget.setAlpha(p_335005_);
+                abstractwidget.setAlpha(pAlpha);
             }
         }
     }
@@ -329,8 +391,8 @@ public class TitleScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double p_96735_, double p_96736_, int p_96737_) {
-        return super.mouseClicked(p_96735_, p_96736_, p_96737_) ? true : this.realmsNotificationsEnabled() && this.realmsNotificationsScreen.mouseClicked(p_96735_, p_96736_, p_96737_);
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+        return super.mouseClicked(pMouseX, pMouseY, pButton) ? true : this.realmsNotificationsEnabled() && this.realmsNotificationsScreen.mouseClicked(pMouseX, pMouseY, pButton);
     }
 
     @Override
@@ -348,13 +410,13 @@ public class TitleScreen extends Screen {
         }
     }
 
-    private void confirmDemo(boolean p_96778_) {
-        if (p_96778_) {
+    private void confirmDemo(boolean pConfirmed) {
+        if (pConfirmed) {
             try (LevelStorageSource.LevelStorageAccess levelstoragesource$levelstorageaccess = this.minecraft.getLevelSource().createAccess("Demo_World")) {
                 levelstoragesource$levelstorageaccess.deleteLevel();
-            } catch (IOException ioexception) {
+            } catch (IOException ioexception1) {
                 SystemToast.onWorldDeleteFailure(this.minecraft, "Demo_World");
-                LOGGER.warn("Failed to delete demo world", (Throwable)ioexception);
+                LOGGER.warn("Failed to delete demo world", (Throwable)ioexception1);
             }
         }
 

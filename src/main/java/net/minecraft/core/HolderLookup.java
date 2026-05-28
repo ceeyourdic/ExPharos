@@ -34,18 +34,18 @@ public interface HolderLookup<T> extends HolderGetter<T> {
         }
 
         @Override
-        <T> Optional<? extends HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> p_256285_);
+        <T> Optional<? extends HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> pRegistryKey);
 
-        default <T> HolderLookup.RegistryLookup<T> lookupOrThrow(ResourceKey<? extends Registry<? extends T>> p_255957_) {
-            return this.lookup(p_255957_).orElseThrow(() -> new IllegalStateException("Registry " + p_255957_.location() + " not found"));
+        default <T> HolderLookup.RegistryLookup<T> lookupOrThrow(ResourceKey<? extends Registry<? extends T>> pRegistryKey) {
+            return this.lookup(pRegistryKey).orElseThrow(() -> new IllegalStateException("Registry " + pRegistryKey.location() + " not found"));
         }
 
-        default <V> RegistryOps<V> createSerializationContext(DynamicOps<V> p_330698_) {
-            return RegistryOps.create(p_330698_, this);
+        default <V> RegistryOps<V> createSerializationContext(DynamicOps<V> pOps) {
+            return RegistryOps.create(pOps, this);
         }
 
-        static HolderLookup.Provider create(Stream<HolderLookup.RegistryLookup<?>> p_256054_) {
-            final Map<ResourceKey<? extends Registry<?>>, HolderLookup.RegistryLookup<?>> map = p_256054_.collect(
+        static HolderLookup.Provider create(Stream<HolderLookup.RegistryLookup<?>> pLookupStream) {
+            final Map<ResourceKey<? extends Registry<?>>, HolderLookup.RegistryLookup<?>> map = pLookupStream.collect(
                 Collectors.toUnmodifiableMap(HolderLookup.RegistryLookup::key, p_256335_ -> p_256335_)
             );
             return new HolderLookup.Provider() {
@@ -71,11 +71,11 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 
         Lifecycle registryLifecycle();
 
-        default HolderLookup.RegistryLookup<T> filterFeatures(FeatureFlagSet p_249397_) {
-            return FeatureElement.FILTERED_REGISTRIES.contains(this.key()) ? this.filterElements(p_250240_ -> ((FeatureElement)p_250240_).isEnabled(p_249397_)) : this;
+        default HolderLookup.RegistryLookup<T> filterFeatures(FeatureFlagSet pEnabledFeatures) {
+            return FeatureElement.FILTERED_REGISTRIES.contains(this.key()) ? this.filterElements(p_250240_ -> ((FeatureElement)p_250240_).isEnabled(pEnabledFeatures)) : this;
         }
 
-        default HolderLookup.RegistryLookup<T> filterElements(final Predicate<T> p_334671_) {
+        default HolderLookup.RegistryLookup<T> filterElements(final Predicate<T> pPredicate) {
             return new HolderLookup.RegistryLookup.Delegate<T>() {
                 @Override
                 public HolderLookup.RegistryLookup<T> parent() {
@@ -84,12 +84,12 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 
                 @Override
                 public Optional<Holder.Reference<T>> get(ResourceKey<T> p_330384_) {
-                    return this.parent().get(p_330384_).filter(p_330697_ -> p_334671_.test(p_330697_.value()));
+                    return this.parent().get(p_330384_).filter(p_330697_ -> pPredicate.test(p_330697_.value()));
                 }
 
                 @Override
                 public Stream<Holder.Reference<T>> listElements() {
-                    return this.parent().listElements().filter(p_331718_ -> p_334671_.test(p_331718_.value()));
+                    return this.parent().listElements().filter(p_331718_ -> pPredicate.test(p_331718_.value()));
                 }
             };
         }

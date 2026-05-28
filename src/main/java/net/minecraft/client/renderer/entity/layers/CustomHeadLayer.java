@@ -25,14 +25,14 @@ public class CustomHeadLayer<S extends LivingEntityRenderState, M extends Entity
     private final CustomHeadLayer.Transforms transforms;
     private final Function<SkullBlock.Type, SkullModelBase> skullModels;
 
-    public CustomHeadLayer(RenderLayerParent<S, M> p_234822_, EntityModelSet p_234823_) {
-        this(p_234822_, p_234823_, CustomHeadLayer.Transforms.DEFAULT);
+    public CustomHeadLayer(RenderLayerParent<S, M> pRenderer, EntityModelSet pModelSet) {
+        this(pRenderer, pModelSet, CustomHeadLayer.Transforms.DEFAULT);
     }
 
-    public CustomHeadLayer(RenderLayerParent<S, M> p_234829_, EntityModelSet p_234830_, CustomHeadLayer.Transforms p_377766_) {
-        super(p_234829_);
-        this.transforms = p_377766_;
-        this.skullModels = Util.memoize(p_378228_ -> SkullBlockRenderer.createModel(p_234830_, p_378228_));
+    public CustomHeadLayer(RenderLayerParent<S, M> pRenderer, EntityModelSet pModelSet, CustomHeadLayer.Transforms pTransforms) {
+        super(pRenderer);
+        this.transforms = pTransforms;
+        this.skullModels = Util.memoize(p_378228_ -> SkullBlockRenderer.createModel(pModelSet, p_378228_));
     }
 
     public void render(PoseStack p_116731_, MultiBufferSource p_116732_, int p_116733_, S p_363423_, float p_116735_, float p_116736_) {
@@ -59,10 +59,10 @@ public class CustomHeadLayer<S extends LivingEntityRenderState, M extends Entity
         }
     }
 
-    public static void translateToHead(PoseStack p_174484_, CustomHeadLayer.Transforms p_366424_) {
-        p_174484_.translate(0.0F, -0.25F + p_366424_.yOffset(), 0.0F);
-        p_174484_.mulPose(Axis.YP.rotationDegrees(180.0F));
-        p_174484_.scale(0.625F, -0.625F, -0.625F);
+    public static void translateToHead(PoseStack pPoseStack, CustomHeadLayer.Transforms pTransforms) {
+        pPoseStack.translate(0.0F, -0.25F + pTransforms.yOffset(), 0.0F);
+        pPoseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+        pPoseStack.scale(0.625F, -0.625F, -0.625F);
     }
 
     @OnlyIn(Dist.CLIENT)

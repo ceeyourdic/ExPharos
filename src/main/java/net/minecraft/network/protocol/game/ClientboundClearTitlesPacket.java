@@ -11,16 +11,16 @@ public class ClientboundClearTitlesPacket implements Packet<ClientGamePacketList
     );
     private final boolean resetTimes;
 
-    public ClientboundClearTitlesPacket(boolean p_178781_) {
-        this.resetTimes = p_178781_;
+    public ClientboundClearTitlesPacket(boolean pResetTimes) {
+        this.resetTimes = pResetTimes;
     }
 
-    private ClientboundClearTitlesPacket(FriendlyByteBuf p_178779_) {
-        this.resetTimes = p_178779_.readBoolean();
+    private ClientboundClearTitlesPacket(FriendlyByteBuf pBuffer) {
+        this.resetTimes = pBuffer.readBoolean();
     }
 
-    private void write(FriendlyByteBuf p_178783_) {
-        p_178783_.writeBoolean(this.resetTimes);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeBoolean(this.resetTimes);
     }
 
     @Override

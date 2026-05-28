@@ -21,8 +21,8 @@ public class JUnitLikeTestReporter implements TestReporter {
     private final Stopwatch stopwatch;
     private final File destination;
 
-    public JUnitLikeTestReporter(File p_177664_) throws ParserConfigurationException {
-        this.destination = p_177664_;
+    public JUnitLikeTestReporter(File pDestination) throws ParserConfigurationException {
+        this.destination = pDestination;
         this.document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         this.testSuite = this.document.createElement("testsuite");
         Element element = this.document.createElement("testsuite");
@@ -32,11 +32,11 @@ public class JUnitLikeTestReporter implements TestReporter {
         this.stopwatch = Stopwatch.createStarted();
     }
 
-    private Element createTestCase(GameTestInfo p_177671_, String p_177672_) {
+    private Element createTestCase(GameTestInfo pTestInfo, String pName) {
         Element element = this.document.createElement("testcase");
-        element.setAttribute("name", p_177672_);
-        element.setAttribute("classname", p_177671_.getStructureName());
-        element.setAttribute("time", String.valueOf((double)p_177671_.getRunTime() / 1000.0));
+        element.setAttribute("name", pName);
+        element.setAttribute("classname", pTestInfo.getStructureName());
+        element.setAttribute("time", String.valueOf((double)pTestInfo.getRunTime() / 1000.0));
         this.testSuite.appendChild(element);
         return element;
     }
@@ -69,11 +69,11 @@ public class JUnitLikeTestReporter implements TestReporter {
         }
     }
 
-    public void save(File p_177667_) throws TransformerException {
+    public void save(File pDestination) throws TransformerException {
         TransformerFactory transformerfactory = TransformerFactory.newInstance();
         Transformer transformer = transformerfactory.newTransformer();
         DOMSource domsource = new DOMSource(this.document);
-        StreamResult streamresult = new StreamResult(p_177667_);
+        StreamResult streamresult = new StreamResult(pDestination);
         transformer.transform(domsource, streamresult);
     }
 }

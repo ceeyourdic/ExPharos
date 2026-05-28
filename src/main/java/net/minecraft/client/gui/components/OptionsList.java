@@ -14,40 +14,37 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.OptionsSubScreen;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry> {
     private static final int BIG_BUTTON_WIDTH = 310;
     private static final int DEFAULT_ITEM_HEIGHT = 25;
     private final OptionsSubScreen screen;
 
-    public OptionsList(Minecraft p_94465_, int p_94466_, OptionsSubScreen p_342734_) {
-        super(p_94465_, p_94466_, p_342734_.layout.getContentHeight(), p_342734_.layout.getHeaderHeight(), 25);
+    public OptionsList(Minecraft pMinecraft, int pWidth, OptionsSubScreen pScreen) {
+        super(pMinecraft, pWidth, pScreen.layout.getContentHeight(), pScreen.layout.getHeaderHeight(), 25);
         this.centerListVertically = false;
-        this.screen = p_342734_;
+        this.screen = pScreen;
     }
 
-    public void addBig(OptionInstance<?> p_232529_) {
-        this.addEntry(OptionsList.OptionEntry.big(this.minecraft.options, p_232529_, this.screen));
+    public void addBig(OptionInstance<?> pOption) {
+        this.addEntry(OptionsList.OptionEntry.big(this.minecraft.options, pOption, this.screen));
     }
 
-    public void addSmall(OptionInstance<?>... p_232534_) {
-        for (int i = 0; i < p_232534_.length; i += 2) {
-            OptionInstance<?> optioninstance = i < p_232534_.length - 1 ? p_232534_[i + 1] : null;
-            this.addEntry(OptionsList.OptionEntry.small(this.minecraft.options, p_232534_[i], optioninstance, this.screen));
+    public void addSmall(OptionInstance<?>... pOptions) {
+        for (int i = 0; i < pOptions.length; i += 2) {
+            OptionInstance<?> optioninstance = i < pOptions.length - 1 ? pOptions[i + 1] : null;
+            this.addEntry(OptionsList.OptionEntry.small(this.minecraft.options, pOptions[i], optioninstance, this.screen));
         }
     }
 
-    public void addSmall(List<AbstractWidget> p_334237_) {
-        for (int i = 0; i < p_334237_.size(); i += 2) {
-            this.addSmall(p_334237_.get(i), i < p_334237_.size() - 1 ? p_334237_.get(i + 1) : null);
+    public void addSmall(List<AbstractWidget> pOptions) {
+        for (int i = 0; i < pOptions.size(); i += 2) {
+            this.addSmall(pOptions.get(i), i < pOptions.size() - 1 ? pOptions.get(i + 1) : null);
         }
     }
 
-    public void addSmall(AbstractWidget p_330860_, @Nullable AbstractWidget p_333864_) {
-        this.addEntry(OptionsList.Entry.small(p_330860_, p_333864_, this.screen));
+    public void addSmall(AbstractWidget pLeftOption, @Nullable AbstractWidget pRightOption) {
+        this.addEntry(OptionsList.Entry.small(pLeftOption, pRightOption, this.screen));
     }
 
     @Override
@@ -56,10 +53,10 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
     }
 
     @Nullable
-    public AbstractWidget findOption(OptionInstance<?> p_232536_) {
+    public AbstractWidget findOption(OptionInstance<?> pOption) {
         for (OptionsList.Entry optionslist$entry : this.children()) {
             if (optionslist$entry instanceof OptionsList.OptionEntry optionslist$optionentry) {
-                AbstractWidget abstractwidget = optionslist$optionentry.options.get(p_232536_);
+                AbstractWidget abstractwidget = optionslist$optionentry.options.get(pOption);
                 if (abstractwidget != null) {
                     return abstractwidget;
                 }
@@ -83,10 +80,10 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
         }
     }
 
-    public Optional<GuiEventListener> getMouseOver(double p_94481_, double p_94482_) {
+    public Optional<GuiEventListener> getMouseOver(double pMouseX, double pMouseY) {
         for (OptionsList.Entry optionslist$entry : this.children()) {
             for (GuiEventListener guieventlistener : optionslist$entry.children()) {
-                if (guieventlistener.isMouseOver(p_94481_, p_94482_)) {
+                if (guieventlistener.isMouseOver(pMouseX, pMouseY)) {
                     return Optional.of(guieventlistener);
                 }
             }
@@ -95,25 +92,24 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
         return Optional.empty();
     }
 
-    @OnlyIn(Dist.CLIENT)
     protected static class Entry extends ContainerObjectSelectionList.Entry<OptionsList.Entry> {
         private final List<AbstractWidget> children;
         private final Screen screen;
         private static final int X_OFFSET = 160;
 
-        Entry(List<AbstractWidget> p_328739_, Screen p_332963_) {
-            this.children = ImmutableList.copyOf(p_328739_);
-            this.screen = p_332963_;
+        Entry(List<AbstractWidget> pChildren, Screen pScreen) {
+            this.children = ImmutableList.copyOf(pChildren);
+            this.screen = pScreen;
         }
 
-        public static OptionsList.Entry big(List<AbstractWidget> p_331607_, Screen p_332678_) {
-            return new OptionsList.Entry(p_331607_, p_332678_);
+        public static OptionsList.Entry big(List<AbstractWidget> pOptions, Screen pScreen) {
+            return new OptionsList.Entry(pOptions, pScreen);
         }
 
-        public static OptionsList.Entry small(AbstractWidget p_332778_, @Nullable AbstractWidget p_330638_, Screen p_328012_) {
-            return p_330638_ == null
-                ? new OptionsList.Entry(ImmutableList.of(p_332778_), p_328012_)
-                : new OptionsList.Entry(ImmutableList.of(p_332778_, p_330638_), p_328012_);
+        public static OptionsList.Entry small(AbstractWidget pLeftOption, @Nullable AbstractWidget pRightOption, Screen pScreen) {
+            return pRightOption == null
+                ? new OptionsList.Entry(ImmutableList.of(pLeftOption), pScreen)
+                : new OptionsList.Entry(ImmutableList.of(pLeftOption, pRightOption), pScreen);
         }
 
         @Override
@@ -134,6 +130,10 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 
             for (AbstractWidget abstractwidget : this.children) {
                 abstractwidget.setPosition(j + i, p_94498_);
+                if (abstractwidget.getWidth() == 200) {
+                    abstractwidget.setPosition(this.screen.width / 2 - abstractwidget.getWidth() / 2, p_94498_);
+                }
+
                 abstractwidget.render(p_281311_, p_94502_, p_94503_, p_94505_);
                 i += 160;
             }
@@ -150,26 +150,25 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     protected static class OptionEntry extends OptionsList.Entry {
         final Map<OptionInstance<?>, AbstractWidget> options;
 
-        private OptionEntry(Map<OptionInstance<?>, AbstractWidget> p_331348_, OptionsSubScreen p_345262_) {
-            super(ImmutableList.copyOf(p_331348_.values()), p_345262_);
-            this.options = p_331348_;
+        private OptionEntry(Map<OptionInstance<?>, AbstractWidget> pOptions, OptionsSubScreen pScreen) {
+            super(ImmutableList.copyOf(pOptions.values()), pScreen);
+            this.options = pOptions;
         }
 
-        public static OptionsList.OptionEntry big(Options p_335438_, OptionInstance<?> p_329713_, OptionsSubScreen p_342690_) {
-            return new OptionsList.OptionEntry(ImmutableMap.of(p_329713_, p_329713_.createButton(p_335438_, 0, 0, 310)), p_342690_);
+        public static OptionsList.OptionEntry big(Options pOptions, OptionInstance<?> pOption, OptionsSubScreen pScreen) {
+            return new OptionsList.OptionEntry(ImmutableMap.of(pOption, pOption.createButton(pOptions, 0, 0, 310)), pScreen);
         }
 
         public static OptionsList.OptionEntry small(
-            Options p_330617_, OptionInstance<?> p_330233_, @Nullable OptionInstance<?> p_331704_, OptionsSubScreen p_342280_
+            Options pOptions, OptionInstance<?> pLeftOption, @Nullable OptionInstance<?> pRightOption, OptionsSubScreen pScreen
         ) {
-            AbstractWidget abstractwidget = p_330233_.createButton(p_330617_);
-            return p_331704_ == null
-                ? new OptionsList.OptionEntry(ImmutableMap.of(p_330233_, abstractwidget), p_342280_)
-                : new OptionsList.OptionEntry(ImmutableMap.of(p_330233_, abstractwidget, p_331704_, p_331704_.createButton(p_330617_)), p_342280_);
+            AbstractWidget abstractwidget = pLeftOption.createButton(pOptions);
+            return pRightOption == null
+                ? new OptionsList.OptionEntry(ImmutableMap.of(pLeftOption, abstractwidget), pScreen)
+                : new OptionsList.OptionEntry(ImmutableMap.of(pLeftOption, abstractwidget, pRightOption, pRightOption.createButton(pOptions)), pScreen);
         }
     }
 }

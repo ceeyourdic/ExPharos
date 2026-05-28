@@ -7,8 +7,8 @@ public abstract class OptionalDispenseItemBehavior extends DefaultDispenseItemBe
         return this.success;
     }
 
-    public void setSuccess(boolean p_123574_) {
-        this.success = p_123574_;
+    public void setSuccess(boolean pSuccess) {
+        this.success = pSuccess;
     }
 
     @Override

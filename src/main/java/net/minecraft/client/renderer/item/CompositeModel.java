@@ -17,8 +17,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class CompositeModel implements ItemModel {
     private final List<ItemModel> models;
 
-    public CompositeModel(List<ItemModel> p_377689_) {
-        this.models = p_377689_;
+    public CompositeModel(List<ItemModel> pModels) {
+        this.models = pModels;
     }
 
     @Override

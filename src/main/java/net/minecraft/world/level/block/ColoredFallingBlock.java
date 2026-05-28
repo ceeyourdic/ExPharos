@@ -21,9 +21,9 @@ public class ColoredFallingBlock extends FallingBlock {
         return CODEC;
     }
 
-    public ColoredFallingBlock(ColorRGBA p_310631_, BlockBehaviour.Properties p_312848_) {
-        super(p_312848_);
-        this.dustColor = p_310631_;
+    public ColoredFallingBlock(ColorRGBA pDustColor, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.dustColor = pDustColor;
     }
 
     @Override

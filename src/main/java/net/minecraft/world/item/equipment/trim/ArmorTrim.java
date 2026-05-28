@@ -38,12 +38,12 @@ public record ArmorTrim(Holder<TrimMaterial> material, Holder<TrimPattern> patte
     private static final Component UPGRADE_TITLE = Component.translatable(Util.makeDescriptionId("item", ResourceLocation.withDefaultNamespace("smithing_template.upgrade")))
         .withStyle(ChatFormatting.GRAY);
 
-    public ArmorTrim(Holder<TrimMaterial> p_366497_, Holder<TrimPattern> p_360935_) {
-        this(p_366497_, p_360935_, true);
+    public ArmorTrim(Holder<TrimMaterial> pMaterial, Holder<TrimPattern> pPattern) {
+        this(pMaterial, pPattern, true);
     }
 
-    public boolean hasPatternAndMaterial(Holder<TrimPattern> p_366890_, Holder<TrimMaterial> p_361281_) {
-        return p_366890_.equals(this.pattern) && p_361281_.equals(this.material);
+    public boolean hasPatternAndMaterial(Holder<TrimPattern> pPattern, Holder<TrimMaterial> pMaterial) {
+        return pPattern.equals(this.pattern) && pMaterial.equals(this.material);
     }
 
     @Override
@@ -55,7 +55,7 @@ public record ArmorTrim(Holder<TrimMaterial> material, Holder<TrimPattern> patte
         }
     }
 
-    public ArmorTrim withTooltip(boolean p_362973_) {
-        return new ArmorTrim(this.material, this.pattern, p_362973_);
+    public ArmorTrim withTooltip(boolean pShowInTooltip) {
+        return new ArmorTrim(this.material, this.pattern, pShowInTooltip);
     }
 }

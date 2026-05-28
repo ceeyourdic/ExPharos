@@ -13,29 +13,29 @@ public class V2842 extends NamespacedSchema {
     }
 
     @Override
-    public void registerTypes(Schema p_185243_, Map<String, Supplier<TypeTemplate>> p_185244_, Map<String, Supplier<TypeTemplate>> p_185245_) {
-        super.registerTypes(p_185243_, p_185244_, p_185245_);
-        p_185243_.registerType(
+    public void registerTypes(Schema pSchema, Map<String, Supplier<TypeTemplate>> pEntityTypes, Map<String, Supplier<TypeTemplate>> pBlockEntityTypes) {
+        super.registerTypes(pSchema, pEntityTypes, pBlockEntityTypes);
+        pSchema.registerType(
             false,
             References.CHUNK,
             () -> DSL.optionalFields(
                     "entities",
-                    DSL.list(References.ENTITY_TREE.in(p_185243_)),
+                    DSL.list(References.ENTITY_TREE.in(pSchema)),
                     "block_entities",
-                    DSL.list(DSL.or(References.BLOCK_ENTITY.in(p_185243_), DSL.remainder())),
+                    DSL.list(DSL.or(References.BLOCK_ENTITY.in(pSchema), DSL.remainder())),
                     "block_ticks",
-                    DSL.list(DSL.fields("i", References.BLOCK_NAME.in(p_185243_))),
+                    DSL.list(DSL.fields("i", References.BLOCK_NAME.in(pSchema))),
                     "sections",
                     DSL.list(
                         DSL.optionalFields(
                             "biomes",
-                            DSL.optionalFields("palette", DSL.list(References.BIOME.in(p_185243_))),
+                            DSL.optionalFields("palette", DSL.list(References.BIOME.in(pSchema))),
                             "block_states",
-                            DSL.optionalFields("palette", DSL.list(References.BLOCK_STATE.in(p_185243_)))
+                            DSL.optionalFields("palette", DSL.list(References.BLOCK_STATE.in(pSchema)))
                         )
                     ),
                     "structures",
-                    DSL.optionalFields("starts", DSL.compoundList(References.STRUCTURE_FEATURE.in(p_185243_)))
+                    DSL.optionalFields("starts", DSL.compoundList(References.STRUCTURE_FEATURE.in(pSchema)))
                 )
         );
     }

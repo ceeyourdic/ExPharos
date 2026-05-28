@@ -16,8 +16,8 @@ public class TargetingConditions {
     @Nullable
     private TargetingConditions.Selector selector;
 
-    private TargetingConditions(boolean p_148351_) {
-        this.isCombat = p_148351_;
+    private TargetingConditions(boolean pIsCombat) {
+        this.isCombat = pIsCombat;
     }
 
     public static TargetingConditions forCombat() {
@@ -37,8 +37,8 @@ public class TargetingConditions {
         return targetingconditions;
     }
 
-    public TargetingConditions range(double p_26884_) {
-        this.range = p_26884_;
+    public TargetingConditions range(double pDistance) {
+        this.range = pDistance;
         return this;
     }
 
@@ -52,38 +52,38 @@ public class TargetingConditions {
         return this;
     }
 
-    public TargetingConditions selector(@Nullable TargetingConditions.Selector p_362620_) {
-        this.selector = p_362620_;
+    public TargetingConditions selector(@Nullable TargetingConditions.Selector pSelector) {
+        this.selector = pSelector;
         return this;
     }
 
-    public boolean test(ServerLevel p_364974_, @Nullable LivingEntity p_26886_, LivingEntity p_26887_) {
-        if (p_26886_ == p_26887_) {
+    public boolean test(ServerLevel pLevel, @Nullable LivingEntity pEntity, LivingEntity pTarget) {
+        if (pEntity == pTarget) {
             return false;
-        } else if (!p_26887_.canBeSeenByAnyone()) {
+        } else if (!pTarget.canBeSeenByAnyone()) {
             return false;
-        } else if (this.selector != null && !this.selector.test(p_26887_, p_364974_)) {
+        } else if (this.selector != null && !this.selector.test(pTarget, pLevel)) {
             return false;
         } else {
-            if (p_26886_ == null) {
-                if (this.isCombat && (!p_26887_.canBeSeenAsEnemy() || p_364974_.getDifficulty() == Difficulty.PEACEFUL)) {
+            if (pEntity == null) {
+                if (this.isCombat && (!pTarget.canBeSeenAsEnemy() || pLevel.getDifficulty() == Difficulty.PEACEFUL)) {
                     return false;
                 }
             } else {
-                if (this.isCombat && (!p_26886_.canAttack(p_26887_) || !p_26886_.canAttackType(p_26887_.getType()) || p_26886_.isAlliedTo(p_26887_))) {
+                if (this.isCombat && (!pEntity.canAttack(pTarget) || !pEntity.canAttackType(pTarget.getType()) || pEntity.isAlliedTo(pTarget))) {
                     return false;
                 }
 
                 if (this.range > 0.0) {
-                    double d0 = this.testInvisible ? p_26887_.getVisibilityPercent(p_26886_) : 1.0;
+                    double d0 = this.testInvisible ? pTarget.getVisibilityPercent(pEntity) : 1.0;
                     double d1 = Math.max(this.range * d0, 2.0);
-                    double d2 = p_26886_.distanceToSqr(p_26887_.getX(), p_26887_.getY(), p_26887_.getZ());
+                    double d2 = pEntity.distanceToSqr(pTarget.getX(), pTarget.getY(), pTarget.getZ());
                     if (d2 > d1 * d1) {
                         return false;
                     }
                 }
 
-                if (this.checkLineOfSight && p_26886_ instanceof Mob mob && !mob.getSensing().hasLineOfSight(p_26887_)) {
+                if (this.checkLineOfSight && pEntity instanceof Mob mob && !mob.getSensing().hasLineOfSight(pTarget)) {
                     return false;
                 }
             }
@@ -94,6 +94,6 @@ public class TargetingConditions {
 
     @FunctionalInterface
     public interface Selector {
-        boolean test(LivingEntity p_362515_, ServerLevel p_363831_);
+        boolean test(LivingEntity pEntity, ServerLevel pLevel);
     }
 }

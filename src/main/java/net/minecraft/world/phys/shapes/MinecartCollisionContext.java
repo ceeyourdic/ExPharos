@@ -14,14 +14,14 @@ public class MinecartCollisionContext extends EntityCollisionContext {
     @Nullable
     private BlockPos slopeIgnore;
 
-    protected MinecartCollisionContext(AbstractMinecart p_364249_, boolean p_363030_) {
-        super(p_364249_, p_363030_);
-        this.setupContext(p_364249_);
+    protected MinecartCollisionContext(AbstractMinecart pMinecart, boolean pCanStandOnFluid) {
+        super(pMinecart, pCanStandOnFluid);
+        this.setupContext(pMinecart);
     }
 
-    private void setupContext(AbstractMinecart p_363529_) {
-        BlockPos blockpos = p_363529_.getCurrentBlockPosOrRailBelow();
-        BlockState blockstate = p_363529_.level().getBlockState(blockpos);
+    private void setupContext(AbstractMinecart pMinecart) {
+        BlockPos blockpos = pMinecart.getCurrentBlockPosOrRailBelow();
+        BlockState blockstate = pMinecart.level().getBlockState(blockpos);
         boolean flag = BaseRailBlock.isRail(blockstate);
         if (flag) {
             this.ingoreBelow = blockpos.below();

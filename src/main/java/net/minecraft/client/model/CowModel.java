@@ -16,8 +16,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class CowModel extends QuadrupedModel<LivingEntityRenderState> {
     public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(false, 10.0F, 4.0F, Set.of("head"));
 
-    public CowModel(ModelPart p_170515_) {
-        super(p_170515_);
+    public CowModel(ModelPart pRoot) {
+        super(pRoot);
     }
 
     public static LayerDefinition createBodyLayer() {

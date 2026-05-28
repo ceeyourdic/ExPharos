@@ -56,25 +56,25 @@ public record JukeboxPlayable(EitherHolder<JukeboxSong> song, boolean showInTool
         }
     }
 
-    public JukeboxPlayable withTooltip(boolean p_343241_) {
-        return new JukeboxPlayable(this.song, p_343241_);
+    public JukeboxPlayable withTooltip(boolean pShowInTooltip) {
+        return new JukeboxPlayable(this.song, pShowInTooltip);
     }
 
-    public static InteractionResult tryInsertIntoJukebox(Level p_342790_, BlockPos p_344904_, ItemStack p_345065_, Player p_342036_) {
-        JukeboxPlayable jukeboxplayable = p_345065_.get(DataComponents.JUKEBOX_PLAYABLE);
+    public static InteractionResult tryInsertIntoJukebox(Level pLevel, BlockPos pPos, ItemStack pStack, Player pPlayer) {
+        JukeboxPlayable jukeboxplayable = pStack.get(DataComponents.JUKEBOX_PLAYABLE);
         if (jukeboxplayable == null) {
             return InteractionResult.TRY_WITH_EMPTY_HAND;
         } else {
-            BlockState blockstate = p_342790_.getBlockState(p_344904_);
+            BlockState blockstate = pLevel.getBlockState(pPos);
             if (blockstate.is(Blocks.JUKEBOX) && !blockstate.getValue(JukeboxBlock.HAS_RECORD)) {
-                if (!p_342790_.isClientSide) {
-                    ItemStack itemstack = p_345065_.consumeAndReturn(1, p_342036_);
-                    if (p_342790_.getBlockEntity(p_344904_) instanceof JukeboxBlockEntity jukeboxblockentity) {
+                if (!pLevel.isClientSide) {
+                    ItemStack itemstack = pStack.consumeAndReturn(1, pPlayer);
+                    if (pLevel.getBlockEntity(pPos) instanceof JukeboxBlockEntity jukeboxblockentity) {
                         jukeboxblockentity.setTheItem(itemstack);
-                        p_342790_.gameEvent(GameEvent.BLOCK_CHANGE, p_344904_, GameEvent.Context.of(p_342036_, blockstate));
+                        pLevel.gameEvent(GameEvent.BLOCK_CHANGE, pPos, GameEvent.Context.of(pPlayer, blockstate));
                     }
 
-                    p_342036_.awardStat(Stats.PLAY_RECORD);
+                    pPlayer.awardStat(Stats.PLAY_RECORD);
                 }
 
                 return InteractionResult.SUCCESS;

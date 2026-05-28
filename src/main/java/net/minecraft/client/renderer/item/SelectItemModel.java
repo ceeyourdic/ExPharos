@@ -25,9 +25,9 @@ public class SelectItemModel<T> implements ItemModel {
     private final SelectItemModelProperty<T> property;
     private final Object2ObjectMap<T, ItemModel> models;
 
-    public SelectItemModel(SelectItemModelProperty<T> p_377510_, Object2ObjectMap<T, ItemModel> p_377016_) {
-        this.property = p_377510_;
-        this.models = p_377016_;
+    public SelectItemModel(SelectItemModelProperty<T> pProperty, Object2ObjectMap<T, ItemModel> pModels) {
+        this.property = pProperty;
+        this.models = pModels;
     }
 
     @Override
@@ -49,10 +49,10 @@ public class SelectItemModel<T> implements ItemModel {
 
     @OnlyIn(Dist.CLIENT)
     public static record SwitchCase<T>(List<T> values, ItemModel.Unbaked model) {
-        public static <T> Codec<SelectItemModel.SwitchCase<T>> codec(Codec<T> p_378608_) {
+        public static <T> Codec<SelectItemModel.SwitchCase<T>> codec(Codec<T> pCodec) {
             return RecordCodecBuilder.create(
                 p_377942_ -> p_377942_.group(
-                            ExtraCodecs.nonEmptyList(ExtraCodecs.compactListCodec(p_378608_)).fieldOf("when").forGetter(SelectItemModel.SwitchCase::values),
+                            ExtraCodecs.nonEmptyList(ExtraCodecs.compactListCodec(pCodec)).fieldOf("when").forGetter(SelectItemModel.SwitchCase::values),
                             ItemModels.CODEC.fieldOf("model").forGetter(SelectItemModel.SwitchCase::model)
                         )
                         .apply(p_377942_, SelectItemModel.SwitchCase::new)
@@ -93,25 +93,25 @@ public class SelectItemModel<T> implements ItemModel {
         public static final MapCodec<SelectItemModel.UnbakedSwitch<?, ?>> MAP_CODEC = SelectItemModelProperties.CODEC
             .dispatchMap("property", p_377103_ -> p_377103_.property().type(), SelectItemModelProperty.Type::switchCodec);
 
-        public ItemModel bake(ItemModel.BakingContext p_378637_, ItemModel p_378738_) {
+        public ItemModel bake(ItemModel.BakingContext pBakingContext, ItemModel pModel) {
             Object2ObjectMap<T, ItemModel> object2objectmap = new Object2ObjectOpenHashMap<>();
 
             for (SelectItemModel.SwitchCase<T> switchcase : this.cases) {
                 ItemModel.Unbaked itemmodel$unbaked = switchcase.model;
-                ItemModel itemmodel = itemmodel$unbaked.bake(p_378637_);
+                ItemModel itemmodel = itemmodel$unbaked.bake(pBakingContext);
 
                 for (T t : switchcase.values) {
                     object2objectmap.put(t, itemmodel);
                 }
             }
 
-            object2objectmap.defaultReturnValue(p_378738_);
+            object2objectmap.defaultReturnValue(pModel);
             return new SelectItemModel<>(this.property, object2objectmap);
         }
 
-        public void resolveDependencies(ResolvableModel.Resolver p_378532_) {
+        public void resolveDependencies(ResolvableModel.Resolver pResolver) {
             for (SelectItemModel.SwitchCase<?> switchcase : this.cases) {
-                switchcase.model.resolveDependencies(p_378532_);
+                switchcase.model.resolveDependencies(pResolver);
             }
         }
     }

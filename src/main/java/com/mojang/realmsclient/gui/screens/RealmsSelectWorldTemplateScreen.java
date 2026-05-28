@@ -65,27 +65,27 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
     @Nullable
     List<TextRenderingUtils.Line> noTemplatesMessage;
 
-    public RealmsSelectWorldTemplateScreen(Component p_167481_, Consumer<WorldTemplate> p_167482_, RealmsServer.WorldType p_167483_) {
-        this(p_167481_, p_167482_, p_167483_, null);
+    public RealmsSelectWorldTemplateScreen(Component pTitle, Consumer<WorldTemplate> pCallback, RealmsServer.WorldType pWorldType) {
+        this(pTitle, pCallback, pWorldType, null);
     }
 
     public RealmsSelectWorldTemplateScreen(
-        Component p_167485_, Consumer<WorldTemplate> p_167486_, RealmsServer.WorldType p_167487_, @Nullable WorldTemplatePaginatedList p_167488_
+        Component pTitle, Consumer<WorldTemplate> pCallback, RealmsServer.WorldType pWorldType, @Nullable WorldTemplatePaginatedList pWorldTemplatePaginatedList
     ) {
-        super(p_167485_);
-        this.callback = p_167486_;
-        this.worldType = p_167487_;
-        if (p_167488_ == null) {
+        super(pTitle);
+        this.callback = pCallback;
+        this.worldType = pWorldType;
+        if (pWorldTemplatePaginatedList == null) {
             this.worldTemplateList = new RealmsSelectWorldTemplateScreen.WorldTemplateList();
             this.fetchTemplatesAsync(new WorldTemplatePaginatedList(10));
         } else {
-            this.worldTemplateList = new RealmsSelectWorldTemplateScreen.WorldTemplateList(Lists.newArrayList(p_167488_.templates));
-            this.fetchTemplatesAsync(p_167488_);
+            this.worldTemplateList = new RealmsSelectWorldTemplateScreen.WorldTemplateList(Lists.newArrayList(pWorldTemplatePaginatedList.templates));
+            this.fetchTemplatesAsync(pWorldTemplatePaginatedList);
         }
     }
 
-    public void setWarning(Component... p_89683_) {
-        this.warning = p_89683_;
+    public void setWarning(Component... pWarning) {
+        this.warning = pWarning;
     }
 
     @Override
@@ -151,11 +151,11 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
         }
     }
 
-    private void fetchTemplatesAsync(final WorldTemplatePaginatedList p_89654_) {
+    private void fetchTemplatesAsync(final WorldTemplatePaginatedList pOutput) {
         (new Thread("realms-template-fetcher") {
                 @Override
                 public void run() {
-                    WorldTemplatePaginatedList worldtemplatepaginatedlist = p_89654_;
+                    WorldTemplatePaginatedList worldtemplatepaginatedlist = pOutput;
                     RealmsClient realmsclient = RealmsClient.create();
 
                     while (worldtemplatepaginatedlist != null) {
@@ -204,9 +204,9 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
             .start();
     }
 
-    Either<WorldTemplatePaginatedList, Exception> fetchTemplates(WorldTemplatePaginatedList p_89656_, RealmsClient p_89657_) {
+    Either<WorldTemplatePaginatedList, Exception> fetchTemplates(WorldTemplatePaginatedList pTemplates, RealmsClient pRealmsClient) {
         try {
-            return Either.left(p_89657_.fetchWorldTemplates(p_89656_.page + 1, p_89656_.size, this.worldType));
+            return Either.left(pRealmsClient.fetchWorldTemplates(pTemplates.page + 1, pTemplates.size, this.worldType));
         } catch (RealmsServiceException realmsserviceexception) {
             return Either.right(realmsserviceexception);
         }
@@ -228,17 +228,17 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
         }
     }
 
-    private void renderMultilineMessage(GuiGraphics p_282398_, int p_282163_, int p_282021_, List<TextRenderingUtils.Line> p_282203_) {
-        for (int i = 0; i < p_282203_.size(); i++) {
-            TextRenderingUtils.Line textrenderingutils$line = p_282203_.get(i);
+    private void renderMultilineMessage(GuiGraphics pGuiGraphics, int pX, int pY, List<TextRenderingUtils.Line> pLines) {
+        for (int i = 0; i < pLines.size(); i++) {
+            TextRenderingUtils.Line textrenderingutils$line = pLines.get(i);
             int j = row(4 + i);
             int k = textrenderingutils$line.segments.stream().mapToInt(p_280748_ -> this.font.width(p_280748_.renderedText())).sum();
             int l = this.width / 2 - k / 2;
 
             for (TextRenderingUtils.LineSegment textrenderingutils$linesegment : textrenderingutils$line.segments) {
                 int i1 = textrenderingutils$linesegment.isLink() ? 3368635 : -1;
-                int j1 = p_282398_.drawString(this.font, textrenderingutils$linesegment.renderedText(), l, j, i1);
-                if (textrenderingutils$linesegment.isLink() && p_282163_ > l && p_282163_ < j1 && p_282021_ > j - 3 && p_282021_ < j + 8) {
+                int j1 = pGuiGraphics.drawString(this.font, textrenderingutils$linesegment.renderedText(), l, j, i1);
+                if (textrenderingutils$linesegment.isLink() && pX > l && pX < j1 && pY > j - 3 && pY < j + 8) {
                     this.setTooltipForNextRenderPass(Component.literal(textrenderingutils$linesegment.getLinkUrl()));
                     this.currentLink = textrenderingutils$linesegment.getLinkUrl();
                 }
@@ -269,18 +269,18 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
         @Nullable
         private ImageButton trailerButton;
 
-        public Entry(final WorldTemplate p_89753_) {
-            this.template = p_89753_;
-            if (!p_89753_.link.isBlank()) {
+        public Entry(final WorldTemplate pTemplate) {
+            this.template = pTemplate;
+            if (!pTemplate.link.isBlank()) {
                 this.websiteButton = new ImageButton(
-                    15, 15, WEBSITE_LINK_SPRITES, ConfirmLinkScreen.confirmLink(RealmsSelectWorldTemplateScreen.this, p_89753_.link), PUBLISHER_LINK_TOOLTIP
+                    15, 15, WEBSITE_LINK_SPRITES, ConfirmLinkScreen.confirmLink(RealmsSelectWorldTemplateScreen.this, pTemplate.link), PUBLISHER_LINK_TOOLTIP
                 );
                 this.websiteButton.setTooltip(Tooltip.create(PUBLISHER_LINK_TOOLTIP));
             }
 
-            if (!p_89753_.trailer.isBlank()) {
+            if (!pTemplate.trailer.isBlank()) {
                 this.trailerButton = new ImageButton(
-                    15, 15, TRAILER_LINK_SPRITES, ConfirmLinkScreen.confirmLink(RealmsSelectWorldTemplateScreen.this, p_89753_.trailer), TRAILER_LINK_TOOLTIP
+                    15, 15, TRAILER_LINK_SPRITES, ConfirmLinkScreen.confirmLink(RealmsSelectWorldTemplateScreen.this, pTemplate.trailer), TRAILER_LINK_TOOLTIP
                 );
                 this.trailerButton.setTooltip(Tooltip.create(TRAILER_LINK_TOOLTIP));
             }
@@ -372,13 +372,13 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
             this(Collections.emptyList());
         }
 
-        public WorldTemplateList(final Iterable<WorldTemplate> p_89795_) {
+        public WorldTemplateList(final Iterable<WorldTemplate> pTemplates) {
             super(Minecraft.getInstance(), RealmsSelectWorldTemplateScreen.this.width, RealmsSelectWorldTemplateScreen.this.height - 33 - RealmsSelectWorldTemplateScreen.this.getHeaderHeight(), RealmsSelectWorldTemplateScreen.this.getHeaderHeight(), 46);
-            p_89795_.forEach(this::addEntry);
+            pTemplates.forEach(this::addEntry);
         }
 
-        public void addEntry(WorldTemplate p_89805_) {
-            this.addEntry(RealmsSelectWorldTemplateScreen.this.new Entry(p_89805_));
+        public void addEntry(WorldTemplate pTemplate) {
+            this.addEntry(RealmsSelectWorldTemplateScreen.this.new Entry(pTemplate));
         }
 
         @Override

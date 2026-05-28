@@ -23,12 +23,12 @@ public interface CommonLevelAccessor extends EntityGetter, LevelReader, LevelSim
     }
 
     @Override
-    default boolean isUnobstructed(@Nullable Entity p_45828_, VoxelShape p_45829_) {
-        return EntityGetter.super.isUnobstructed(p_45828_, p_45829_);
+    default boolean isUnobstructed(@Nullable Entity pEntity, VoxelShape pShape) {
+        return EntityGetter.super.isUnobstructed(pEntity, pShape);
     }
 
     @Override
-    default BlockPos getHeightmapPos(Heightmap.Types p_45831_, BlockPos p_45832_) {
-        return LevelReader.super.getHeightmapPos(p_45831_, p_45832_);
+    default BlockPos getHeightmapPos(Heightmap.Types pHeightmapType, BlockPos pPos) {
+        return LevelReader.super.getHeightmapPos(pHeightmapType, pPos);
     }
 }

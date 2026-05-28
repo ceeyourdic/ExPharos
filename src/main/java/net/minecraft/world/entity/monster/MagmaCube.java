@@ -29,15 +29,15 @@ public class MagmaCube extends Slime {
     }
 
     public static boolean checkMagmaCubeSpawnRules(
-        EntityType<MagmaCube> p_219003_, LevelAccessor p_219004_, EntitySpawnReason p_363910_, BlockPos p_219006_, RandomSource p_219007_
+        EntityType<MagmaCube> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return p_219004_.getDifficulty() != Difficulty.PEACEFUL;
+        return pLevel.getDifficulty() != Difficulty.PEACEFUL;
     }
 
     @Override
-    public void setSize(int p_32972_, boolean p_32973_) {
-        super.setSize(p_32972_, p_32973_);
-        this.getAttribute(Attributes.ARMOR).setBaseValue((double)(p_32972_ * 3));
+    public void setSize(int pSize, boolean pResetHealth) {
+        super.setSize(pSize, pResetHealth);
+        this.getAttribute(Attributes.ARMOR).setBaseValue((double)(pSize * 3));
     }
 
     @Override
@@ -95,7 +95,7 @@ public class MagmaCube extends Slime {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_32992_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return this.isTiny() ? SoundEvents.MAGMA_CUBE_HURT_SMALL : SoundEvents.MAGMA_CUBE_HURT;
     }
 

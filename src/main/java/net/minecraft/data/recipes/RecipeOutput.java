@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.crafting.Recipe;
 
 public interface RecipeOutput {
-    void accept(ResourceKey<Recipe<?>> p_367162_, Recipe<?> p_360758_, @Nullable AdvancementHolder p_361155_);
+    void accept(ResourceKey<Recipe<?>> pKey, Recipe<?> pRecipe, @Nullable AdvancementHolder pAdvancement);
 
     Advancement.Builder advancement();
 

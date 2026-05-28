@@ -19,17 +19,17 @@ public class SequenceFunction implements LootItemFunction {
     private final List<LootItemFunction> functions;
     private final BiFunction<ItemStack, LootContext, ItemStack> compositeFunction;
 
-    private SequenceFunction(List<LootItemFunction> p_297875_) {
-        this.functions = p_297875_;
-        this.compositeFunction = LootItemFunctions.compose(p_297875_);
+    private SequenceFunction(List<LootItemFunction> pFunctions) {
+        this.functions = pFunctions;
+        this.compositeFunction = LootItemFunctions.compose(pFunctions);
     }
 
-    public static SequenceFunction of(List<LootItemFunction> p_299752_) {
-        return new SequenceFunction(List.copyOf(p_299752_));
+    public static SequenceFunction of(List<LootItemFunction> pFunctions) {
+        return new SequenceFunction(List.copyOf(pFunctions));
     }
 
-    public ItemStack apply(ItemStack p_300658_, LootContext p_298148_) {
-        return this.compositeFunction.apply(p_300658_, p_298148_);
+    public ItemStack apply(ItemStack pStack, LootContext pContext) {
+        return this.compositeFunction.apply(pStack, pContext);
     }
 
     @Override

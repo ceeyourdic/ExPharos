@@ -31,9 +31,9 @@ import net.minecraft.world.phys.HitResult;
 public class BucketItem extends Item implements DispensibleContainerItem {
     private final Fluid content;
 
-    public BucketItem(Fluid p_40689_, Item.Properties p_40690_) {
-        super(p_40690_);
-        this.content = p_40689_;
+    public BucketItem(Fluid pContent, Item.Properties pProperties) {
+        super(pProperties);
+        this.content = pContent;
     }
 
     @Override
@@ -87,8 +87,8 @@ public class BucketItem extends Item implements DispensibleContainerItem {
         }
     }
 
-    public static ItemStack getEmptySuccessItem(ItemStack p_40700_, Player p_40701_) {
-        return !p_40701_.hasInfiniteMaterials() ? new ItemStack(Items.BUCKET) : p_40700_;
+    public static ItemStack getEmptySuccessItem(ItemStack pBucketStack, Player pPlayer) {
+        return !pPlayer.hasInfiniteMaterials() ? new ItemStack(Items.BUCKET) : pBucketStack;
     }
 
     @Override
@@ -164,9 +164,9 @@ public class BucketItem extends Item implements DispensibleContainerItem {
         }
     }
 
-    protected void playEmptySound(@Nullable Player p_40696_, LevelAccessor p_40697_, BlockPos p_40698_) {
+    protected void playEmptySound(@Nullable Player pPlayer, LevelAccessor pLevel, BlockPos pPos) {
         SoundEvent soundevent = this.content.is(FluidTags.LAVA) ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY;
-        p_40697_.playSound(p_40696_, p_40698_, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
-        p_40697_.gameEvent(p_40696_, GameEvent.FLUID_PLACE, p_40698_);
+        pLevel.playSound(pPlayer, pPos, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+        pLevel.gameEvent(pPlayer, GameEvent.FLUID_PLACE, pPos);
     }
 }

@@ -64,11 +64,11 @@ import org.slf4j.Logger;
 public class Main {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    @SuppressForbidden(
-        reason = "System.out needed before bootstrap"
-    )
+//    @SuppressForbidden(
+//        a = "System.out needed before bootstrap"
+//    )
     @DontObfuscate
-    public static void main(String[] p_129699_) {
+    public static void main(String[] pArgs) {
         SharedConstants.tryDetectVersion();
         OptionParser optionparser = new OptionParser();
         OptionSpec<Void> optionspec = optionparser.accepts("nogui");
@@ -89,7 +89,7 @@ public class Main {
         OptionSpec<String> optionspec15 = optionparser.nonOptions();
 
         try {
-            OptionSet optionset = optionparser.parse(p_129699_);
+            OptionSet optionset = optionparser.parse(pArgs);
             if (optionset.has(optionspec8)) {
                 optionparser.printHelpOn(System.err);
                 return;
@@ -284,44 +284,44 @@ public class Main {
         }
     }
 
-    private static void writePidFile(Path p_270192_) {
+    private static void writePidFile(Path pPath) {
         try {
             long i = ProcessHandle.current().pid();
-            Files.writeString(p_270192_, Long.toString(i));
+            Files.writeString(pPath, Long.toString(i));
         } catch (IOException ioexception) {
             throw new UncheckedIOException(ioexception);
         }
     }
 
     private static WorldLoader.InitConfig loadOrCreateConfig(
-        DedicatedServerProperties p_248563_, @Nullable Dynamic<?> p_310940_, boolean p_249093_, PackRepository p_251069_
+        DedicatedServerProperties pDedicatedServerProperties, @Nullable Dynamic<?> pDynamic, boolean pSafeMode, PackRepository pPackRepository
     ) {
         boolean flag;
         WorldDataConfiguration worlddataconfiguration;
-        if (p_310940_ != null) {
-            WorldDataConfiguration worlddataconfiguration1 = LevelStorageSource.readDataConfig(p_310940_);
+        if (pDynamic != null) {
+            WorldDataConfiguration worlddataconfiguration1 = LevelStorageSource.readDataConfig(pDynamic);
             flag = false;
             worlddataconfiguration = worlddataconfiguration1;
         } else {
             flag = true;
-            worlddataconfiguration = new WorldDataConfiguration(p_248563_.initialDataPackConfiguration, FeatureFlags.DEFAULT_FLAGS);
+            worlddataconfiguration = new WorldDataConfiguration(pDedicatedServerProperties.initialDataPackConfiguration, FeatureFlags.DEFAULT_FLAGS);
         }
 
-        WorldLoader.PackConfig worldloader$packconfig = new WorldLoader.PackConfig(p_251069_, worlddataconfiguration, p_249093_, flag);
-        return new WorldLoader.InitConfig(worldloader$packconfig, Commands.CommandSelection.DEDICATED, p_248563_.functionPermissionLevel);
+        WorldLoader.PackConfig worldloader$packconfig = new WorldLoader.PackConfig(pPackRepository, worlddataconfiguration, pSafeMode, flag);
+        return new WorldLoader.InitConfig(worldloader$packconfig, Commands.CommandSelection.DEDICATED, pDedicatedServerProperties.functionPermissionLevel);
     }
 
     private static void forceUpgrade(
-        LevelStorageSource.LevelStorageAccess p_195489_,
-        DataFixer p_195490_,
-        boolean p_195491_,
-        BooleanSupplier p_195492_,
-        RegistryAccess p_332212_,
-        boolean p_331291_
+        LevelStorageSource.LevelStorageAccess pLevelStorage,
+        DataFixer pDataFixer,
+        boolean pEraseCache,
+        BooleanSupplier pShouldContinue,
+        RegistryAccess pRegistryAccess,
+        boolean pRecreateRegionFiles
     ) {
         LOGGER.info("Forcing world upgrade!");
 
-        try (WorldUpgrader worldupgrader = new WorldUpgrader(p_195489_, p_195490_, p_332212_, p_195491_, p_331291_)) {
+        try (WorldUpgrader worldupgrader = new WorldUpgrader(pLevelStorage, pDataFixer, pRegistryAccess, pEraseCache, pRecreateRegionFiles)) {
             Component component = null;
 
             while (!worldupgrader.isFinished()) {
@@ -337,7 +337,7 @@ public class Main {
                     LOGGER.info("{}% completed ({} / {} chunks)...", Mth.floor((float)j / (float)i * 100.0F), j, i);
                 }
 
-                if (!p_195492_.getAsBoolean()) {
+                if (!pShouldContinue.getAsBoolean()) {
                     worldupgrader.cancel();
                 } else {
                     try {

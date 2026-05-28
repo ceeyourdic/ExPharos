@@ -14,17 +14,17 @@ public class SingleValuePalette<T> implements Palette<T> {
     private T value;
     private final PaletteResize<T> resizeHandler;
 
-    public SingleValuePalette(IdMap<T> p_188207_, PaletteResize<T> p_188208_, List<T> p_188209_) {
-        this.registry = p_188207_;
-        this.resizeHandler = p_188208_;
-        if (p_188209_.size() > 0) {
-            Validate.isTrue(p_188209_.size() <= 1, "Can't initialize SingleValuePalette with %d values.", (long)p_188209_.size());
-            this.value = p_188209_.get(0);
+    public SingleValuePalette(IdMap<T> pRegistry, PaletteResize<T> pResizeHandler, List<T> pValue) {
+        this.registry = pRegistry;
+        this.resizeHandler = pResizeHandler;
+        if (pValue.size() > 0) {
+            Validate.isTrue(pValue.size() <= 1, "Can't initialize SingleValuePalette with %d values.", (long)pValue.size());
+            this.value = pValue.get(0);
         }
     }
 
-    public static <A> Palette<A> create(int p_188214_, IdMap<A> p_188215_, PaletteResize<A> p_188216_, List<A> p_188217_) {
-        return new SingleValuePalette<>(p_188215_, p_188216_, p_188217_);
+    public static <A> Palette<A> create(int pBits, IdMap<A> pRegistry, PaletteResize<A> pResizeHandler, List<A> pValue) {
+        return new SingleValuePalette<>(pRegistry, pResizeHandler, pValue);
     }
 
     @Override

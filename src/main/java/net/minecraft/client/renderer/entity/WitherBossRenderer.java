@@ -22,7 +22,7 @@ public class WitherBossRenderer extends MobRenderer<WitherBoss, WitherRenderStat
         this.addLayer(new WitherArmorLayer(this, p_174445_.getModelSet()));
     }
 
-    protected int getBlockLightLevel(WitherBoss p_116443_, BlockPos p_116444_) {
+    protected int getBlockLightLevel(WitherBoss pEntity, BlockPos pPos) {
         return 15;
     }
 

@@ -17,9 +17,9 @@ public class LimitCount extends LootItemConditionalFunction {
     );
     private final IntRange limiter;
 
-    private LimitCount(List<LootItemCondition> p_298546_, IntRange p_165214_) {
-        super(p_298546_);
-        this.limiter = p_165214_;
+    private LimitCount(List<LootItemCondition> pConditions, IntRange pLimiter) {
+        super(pConditions);
+        this.limiter = pLimiter;
     }
 
     @Override
@@ -33,13 +33,13 @@ public class LimitCount extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_80644_, LootContext p_80645_) {
-        int i = this.limiter.clamp(p_80645_, p_80644_.getCount());
-        p_80644_.setCount(i);
-        return p_80644_;
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        int i = this.limiter.clamp(pContext, pStack.getCount());
+        pStack.setCount(i);
+        return pStack;
     }
 
-    public static LootItemConditionalFunction.Builder<?> limitCount(IntRange p_165216_) {
-        return simpleBuilder(p_297105_ -> new LimitCount(p_297105_, p_165216_));
+    public static LootItemConditionalFunction.Builder<?> limitCount(IntRange pCountLimit) {
+        return simpleBuilder(p_297105_ -> new LimitCount(p_297105_, pCountLimit));
     }
 }

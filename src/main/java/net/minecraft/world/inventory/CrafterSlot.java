@@ -6,9 +6,9 @@ import net.minecraft.world.item.ItemStack;
 public class CrafterSlot extends Slot {
     private final CrafterMenu menu;
 
-    public CrafterSlot(Container p_311610_, int p_312176_, int p_310849_, int p_312973_, CrafterMenu p_310976_) {
-        super(p_311610_, p_312176_, p_310849_, p_312973_);
-        this.menu = p_310976_;
+    public CrafterSlot(Container pContainer, int pSlot, int pX, int pY, CrafterMenu pMenu) {
+        super(pContainer, pSlot, pX, pY);
+        this.menu = pMenu;
     }
 
     @Override

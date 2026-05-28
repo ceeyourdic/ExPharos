@@ -10,33 +10,38 @@ public class BlockHitResult extends HitResult {
     private final boolean inside;
     private final boolean worldBorderHit;
 
-    public static BlockHitResult miss(Vec3 p_82427_, Direction p_82428_, BlockPos p_82429_) {
-        return new BlockHitResult(true, p_82427_, p_82428_, p_82429_, false, false);
+    public static BlockHitResult miss(Vec3 pLocation, Direction pDirection, BlockPos pBlockPos) {
+        return new BlockHitResult(true, pLocation, pDirection, pBlockPos, false, false);
     }
 
-    public BlockHitResult(Vec3 p_82415_, Direction p_82416_, BlockPos p_82417_, boolean p_82418_) {
-        this(false, p_82415_, p_82416_, p_82417_, p_82418_, false);
+    // Arcane mixin port: Yarn factory name for official miss().
+    public static BlockHitResult createMissed(Vec3 pLocation, Direction pDirection, BlockPos pBlockPos) {
+        return miss(pLocation, pDirection, pBlockPos);
     }
 
-    public BlockHitResult(Vec3 p_82421_, Direction p_82422_, BlockPos p_82423_, boolean p_82420_, boolean p_82424_) {
-        this(false, p_82421_, p_82422_, p_82423_, p_82420_, p_82424_);
+    public BlockHitResult(Vec3 pLocation, Direction pDirection, BlockPos pBlockPos, boolean pInside) {
+        this(false, pLocation, pDirection, pBlockPos, pInside, false);
     }
 
-    private BlockHitResult(boolean p_365324_, Vec3 p_368815_, Direction p_362228_, BlockPos p_363068_, boolean p_368127_, boolean p_363891_) {
-        super(p_368815_);
-        this.miss = p_365324_;
-        this.direction = p_362228_;
-        this.blockPos = p_363068_;
-        this.inside = p_368127_;
-        this.worldBorderHit = p_363891_;
+    public BlockHitResult(Vec3 pLocation, Direction pDirection, BlockPos pBlockPos, boolean pInside, boolean pWorldBorderHit) {
+        this(false, pLocation, pDirection, pBlockPos, pInside, pWorldBorderHit);
     }
 
-    public BlockHitResult withDirection(Direction p_82433_) {
-        return new BlockHitResult(this.miss, this.location, p_82433_, this.blockPos, this.inside, this.worldBorderHit);
+    private BlockHitResult(boolean pMiss, Vec3 pLocation, Direction pDirection, BlockPos pBlockPos, boolean pInside, boolean pWorldBorderHit) {
+        super(pLocation);
+        this.miss = pMiss;
+        this.direction = pDirection;
+        this.blockPos = pBlockPos;
+        this.inside = pInside;
+        this.worldBorderHit = pWorldBorderHit;
     }
 
-    public BlockHitResult withPosition(BlockPos p_82431_) {
-        return new BlockHitResult(this.miss, this.location, this.direction, p_82431_, this.inside, this.worldBorderHit);
+    public BlockHitResult withDirection(Direction pNewFace) {
+        return new BlockHitResult(this.miss, this.location, pNewFace, this.blockPos, this.inside, this.worldBorderHit);
+    }
+
+    public BlockHitResult withPosition(BlockPos pPos) {
+        return new BlockHitResult(this.miss, this.location, this.direction, pPos, this.inside, this.worldBorderHit);
     }
 
     public BlockHitResult hitBorder() {
@@ -49,6 +54,21 @@ public class BlockHitResult extends HitResult {
 
     public Direction getDirection() {
         return this.direction;
+    }
+
+    // Arcane mixin port: Yarn names this getSide(); official uses getDirection().
+    public Direction getSide() {
+        return this.getDirection();
+    }
+
+    // Arcane mixin port: Yarn-style alias for official getBlockPos().
+    public BlockPos blockPosition() {
+        return this.getBlockPos();
+    }
+
+    // Arcane mixin port: Yarn accessor name for hit location.
+    public Vec3 position() {
+        return this.getLocation();
     }
 
     @Override

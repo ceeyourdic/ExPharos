@@ -19,15 +19,16 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.entity.model.CustomEntityModels;
+import net.optifine.entity.model.CustomStaticModels;
+import net.optifine.util.ArrayUtils;
 
-@OnlyIn(Dist.CLIENT)
 public class ShieldSpecialRenderer implements SpecialModelRenderer<DataComponentMap> {
-    private final ShieldModel model;
+    private ShieldModel model;
+    private boolean modelUpdated;
 
-    public ShieldSpecialRenderer(ShieldModel p_375550_) {
-        this.model = p_375550_;
+    public ShieldSpecialRenderer(ShieldModel pModel) {
+        this.model = pModel;
     }
 
     @Nullable
@@ -44,6 +45,11 @@ public class ShieldSpecialRenderer implements SpecialModelRenderer<DataComponent
         int p_377055_,
         boolean p_378267_
     ) {
+        if (CustomEntityModels.isActive() && !this.modelUpdated) {
+            this.model = ArrayUtils.firstNonNull(CustomStaticModels.getShieldModel(), this.model);
+            this.modelUpdated = true;
+        }
+
         BannerPatternLayers bannerpatternlayers = p_378203_ != null
             ? p_378203_.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY)
             : BannerPatternLayers.EMPTY;
@@ -76,7 +82,6 @@ public class ShieldSpecialRenderer implements SpecialModelRenderer<DataComponent
         p_378600_.popPose();
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static record Unbaked() implements SpecialModelRenderer.Unbaked {
         public static final ShieldSpecialRenderer.Unbaked INSTANCE = new ShieldSpecialRenderer.Unbaked();
         public static final MapCodec<ShieldSpecialRenderer.Unbaked> MAP_CODEC = MapCodec.unit(INSTANCE);

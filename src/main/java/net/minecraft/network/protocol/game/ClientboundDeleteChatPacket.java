@@ -11,12 +11,12 @@ public record ClientboundDeleteChatPacket(MessageSignature.Packed messageSignatu
         ClientboundDeleteChatPacket::write, ClientboundDeleteChatPacket::new
     );
 
-    private ClientboundDeleteChatPacket(FriendlyByteBuf p_241415_) {
-        this(MessageSignature.Packed.read(p_241415_));
+    private ClientboundDeleteChatPacket(FriendlyByteBuf pBuffer) {
+        this(MessageSignature.Packed.read(pBuffer));
     }
 
-    private void write(FriendlyByteBuf p_241358_) {
-        MessageSignature.Packed.write(p_241358_, this.messageSignature);
+    private void write(FriendlyByteBuf pBuffer) {
+        MessageSignature.Packed.write(pBuffer, this.messageSignature);
     }
 
     @Override

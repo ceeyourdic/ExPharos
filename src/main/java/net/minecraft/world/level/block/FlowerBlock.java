@@ -32,22 +32,22 @@ public class FlowerBlock extends BushBlock implements SuspiciousEffectHolder {
         return CODEC;
     }
 
-    public FlowerBlock(Holder<MobEffect> p_334860_, float p_331000_, BlockBehaviour.Properties p_309749_) {
-        this(makeEffectList(p_334860_, p_331000_), p_309749_);
+    public FlowerBlock(Holder<MobEffect> pEffect, float pSeconds, BlockBehaviour.Properties pProperties) {
+        this(makeEffectList(pEffect, pSeconds), pProperties);
     }
 
-    public FlowerBlock(SuspiciousStewEffects p_330616_, BlockBehaviour.Properties p_53514_) {
-        super(p_53514_);
-        this.suspiciousStewEffects = p_330616_;
+    public FlowerBlock(SuspiciousStewEffects pSuspiciousStewEffects, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.suspiciousStewEffects = pSuspiciousStewEffects;
     }
 
-    protected static SuspiciousStewEffects makeEffectList(Holder<MobEffect> p_335138_, float p_330663_) {
-        return new SuspiciousStewEffects(List.of(new SuspiciousStewEffects.Entry(p_335138_, Mth.floor(p_330663_ * 20.0F))));
+    protected static SuspiciousStewEffects makeEffectList(Holder<MobEffect> pEffect, float pSeconds) {
+        return new SuspiciousStewEffects(List.of(new SuspiciousStewEffects.Entry(pEffect, Mth.floor(pSeconds * 20.0F))));
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_53517_, BlockGetter p_53518_, BlockPos p_53519_, CollisionContext p_53520_) {
-        Vec3 vec3 = p_53517_.getOffset(p_53519_);
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        Vec3 vec3 = pState.getOffset(pPos);
         return SHAPE.move(vec3.x, vec3.y, vec3.z);
     }
 

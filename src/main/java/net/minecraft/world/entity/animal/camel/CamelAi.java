@@ -62,24 +62,24 @@ public class CamelAi {
         MemoryModuleType.NEAREST_VISIBLE_ADULT
     );
 
-    protected static void initMemories(Camel p_249638_, RandomSource p_250704_) {
+    protected static void initMemories(Camel pCamel, RandomSource pRandom) {
     }
 
     public static Brain.Provider<Camel> brainProvider() {
         return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
     }
 
-    protected static Brain<?> makeBrain(Brain<Camel> p_249515_) {
-        initCoreActivity(p_249515_);
-        initIdleActivity(p_249515_);
-        p_249515_.setCoreActivities(ImmutableSet.of(Activity.CORE));
-        p_249515_.setDefaultActivity(Activity.IDLE);
-        p_249515_.useDefaultActivity();
-        return p_249515_;
+    protected static Brain<?> makeBrain(Brain<Camel> pBrain) {
+        initCoreActivity(pBrain);
+        initIdleActivity(pBrain);
+        pBrain.setCoreActivities(ImmutableSet.of(Activity.CORE));
+        pBrain.setDefaultActivity(Activity.IDLE);
+        pBrain.useDefaultActivity();
+        return pBrain;
     }
 
-    private static void initCoreActivity(Brain<Camel> p_249998_) {
-        p_249998_.addActivity(
+    private static void initCoreActivity(Brain<Camel> pBrain) {
+        pBrain.addActivity(
             Activity.CORE,
             0,
             ImmutableList.of(
@@ -93,8 +93,8 @@ public class CamelAi {
         );
     }
 
-    private static void initIdleActivity(Brain<Camel> p_252342_) {
-        p_252342_.addActivity(
+    private static void initIdleActivity(Brain<Camel> pBrain) {
+        pBrain.addActivity(
             Activity.IDLE,
             ImmutableList.of(
                 Pair.of(0, SetEntityLookTargetSometimes.create(EntityType.PLAYER, 6.0F, UniformInt.of(30, 60))),
@@ -125,8 +125,8 @@ public class CamelAi {
         );
     }
 
-    public static void updateActivity(Camel p_250703_) {
-        p_250703_.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.IDLE));
+    public static void updateActivity(Camel pCamel) {
+        pCamel.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.IDLE));
     }
 
     public static Predicate<ItemStack> getTemptations() {
@@ -147,9 +147,9 @@ public class CamelAi {
     public static class RandomSitting extends Behavior<Camel> {
         private final int minimalPoseTicks;
 
-        public RandomSitting(int p_251207_) {
+        public RandomSitting(int pMinimalPoseSeconds) {
             super(ImmutableMap.of());
-            this.minimalPoseTicks = p_251207_ * 20;
+            this.minimalPoseTicks = pMinimalPoseSeconds * 20;
         }
 
         protected boolean checkExtraStartConditions(ServerLevel p_249520_, Camel p_250322_) {

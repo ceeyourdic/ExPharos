@@ -33,47 +33,47 @@ public final class BundleContents implements TooltipComponent {
     final Fraction weight;
     final int selectedItem;
 
-    BundleContents(List<ItemStack> p_331924_, Fraction p_333046_, int p_368623_) {
-        this.items = p_331924_;
-        this.weight = p_333046_;
-        this.selectedItem = p_368623_;
+    BundleContents(List<ItemStack> pItems, Fraction pWeight, int pSelectedItem) {
+        this.items = pItems;
+        this.weight = pWeight;
+        this.selectedItem = pSelectedItem;
     }
 
-    private static DataResult<BundleContents> checkAndCreate(List<ItemStack> p_361886_) {
+    private static DataResult<BundleContents> checkAndCreate(List<ItemStack> pItems) {
         try {
-            Fraction fraction = computeContentWeight(p_361886_);
-            return DataResult.success(new BundleContents(p_361886_, fraction, -1));
+            Fraction fraction = computeContentWeight(pItems);
+            return DataResult.success(new BundleContents(pItems, fraction, -1));
         } catch (ArithmeticException arithmeticexception) {
             return DataResult.error(() -> "Excessive total bundle weight");
         }
     }
 
-    public BundleContents(List<ItemStack> p_334686_) {
-        this(p_334686_, computeContentWeight(p_334686_), -1);
+    public BundleContents(List<ItemStack> pItems) {
+        this(pItems, computeContentWeight(pItems), -1);
     }
 
-    private static Fraction computeContentWeight(List<ItemStack> p_336274_) {
+    private static Fraction computeContentWeight(List<ItemStack> pContent) {
         Fraction fraction = Fraction.ZERO;
 
-        for (ItemStack itemstack : p_336274_) {
+        for (ItemStack itemstack : pContent) {
             fraction = fraction.add(getWeight(itemstack).multiplyBy(Fraction.getFraction(itemstack.getCount(), 1)));
         }
 
         return fraction;
     }
 
-    static Fraction getWeight(ItemStack p_334916_) {
-        BundleContents bundlecontents = p_334916_.get(DataComponents.BUNDLE_CONTENTS);
+    static Fraction getWeight(ItemStack pStack) {
+        BundleContents bundlecontents = pStack.get(DataComponents.BUNDLE_CONTENTS);
         if (bundlecontents != null) {
             return BUNDLE_IN_BUNDLE_WEIGHT.add(bundlecontents.weight());
         } else {
-            List<BeehiveBlockEntity.Occupant> list = p_334916_.getOrDefault(DataComponents.BEES, List.of());
-            return !list.isEmpty() ? Fraction.ONE : Fraction.getFraction(1, p_334916_.getMaxStackSize());
+            List<BeehiveBlockEntity.Occupant> list = pStack.getOrDefault(DataComponents.BEES, List.of());
+            return !list.isEmpty() ? Fraction.ONE : Fraction.getFraction(1, pStack.getMaxStackSize());
         }
     }
 
-    public static boolean canItemBeInBundle(ItemStack p_369421_) {
-        return !p_369421_.isEmpty() && p_369421_.getItem().canFitInsideContainerItems();
+    public static boolean canItemBeInBundle(ItemStack pStack) {
+        return !pStack.isEmpty() && pStack.getItem().canFitInsideContainerItems();
     }
 
     public int getNumberOfItemsToShow() {
@@ -84,8 +84,8 @@ public final class BundleContents implements TooltipComponent {
         return Math.min(i, j - l);
     }
 
-    public ItemStack getItemUnsafe(int p_329557_) {
-        return this.items.get(p_329557_);
+    public ItemStack getItemUnsafe(int pIndex) {
+        return this.items.get(pIndex);
     }
 
     public Stream<ItemStack> itemCopyStream() {
@@ -121,11 +121,11 @@ public final class BundleContents implements TooltipComponent {
     }
 
     @Override
-    public boolean equals(Object p_330764_) {
-        if (this == p_330764_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            return !(p_330764_ instanceof BundleContents bundlecontents)
+            return !(pOther instanceof BundleContents bundlecontents)
                 ? false
                 : this.weight.equals(bundlecontents.weight) && ItemStack.listMatches(this.items, bundlecontents.items);
         }
@@ -146,10 +146,10 @@ public final class BundleContents implements TooltipComponent {
         private Fraction weight;
         private int selectedItem;
 
-        public Mutable(BundleContents p_333063_) {
-            this.items = new ArrayList<>(p_333063_.items);
-            this.weight = p_333063_.weight;
-            this.selectedItem = p_333063_.selectedItem;
+        public Mutable(BundleContents pContents) {
+            this.items = new ArrayList<>(pContents.items);
+            this.weight = pContents.weight;
+            this.selectedItem = pContents.selectedItem;
         }
 
         public BundleContents.Mutable clearItems() {
@@ -159,12 +159,12 @@ public final class BundleContents implements TooltipComponent {
             return this;
         }
 
-        private int findStackIndex(ItemStack p_328563_) {
-            if (!p_328563_.isStackable()) {
+        private int findStackIndex(ItemStack pStack) {
+            if (!pStack.isStackable()) {
                 return -1;
             } else {
                 for (int i = 0; i < this.items.size(); i++) {
-                    if (ItemStack.isSameItemSameComponents(this.items.get(i), p_328563_)) {
+                    if (ItemStack.isSameItemSameComponents(this.items.get(i), pStack)) {
                         return i;
                     }
                 }
@@ -173,28 +173,28 @@ public final class BundleContents implements TooltipComponent {
             }
         }
 
-        private int getMaxAmountToAdd(ItemStack p_335684_) {
+        private int getMaxAmountToAdd(ItemStack pStack) {
             Fraction fraction = Fraction.ONE.subtract(this.weight);
-            return Math.max(fraction.divideBy(BundleContents.getWeight(p_335684_)).intValue(), 0);
+            return Math.max(fraction.divideBy(BundleContents.getWeight(pStack)).intValue(), 0);
         }
 
-        public int tryInsert(ItemStack p_333873_) {
-            if (!BundleContents.canItemBeInBundle(p_333873_)) {
+        public int tryInsert(ItemStack pStack) {
+            if (!BundleContents.canItemBeInBundle(pStack)) {
                 return 0;
             } else {
-                int i = Math.min(p_333873_.getCount(), this.getMaxAmountToAdd(p_333873_));
+                int i = Math.min(pStack.getCount(), this.getMaxAmountToAdd(pStack));
                 if (i == 0) {
                     return 0;
                 } else {
-                    this.weight = this.weight.add(BundleContents.getWeight(p_333873_).multiplyBy(Fraction.getFraction(i, 1)));
-                    int j = this.findStackIndex(p_333873_);
+                    this.weight = this.weight.add(BundleContents.getWeight(pStack).multiplyBy(Fraction.getFraction(i, 1)));
+                    int j = this.findStackIndex(pStack);
                     if (j != -1) {
                         ItemStack itemstack = this.items.remove(j);
                         ItemStack itemstack1 = itemstack.copyWithCount(itemstack.getCount() + i);
-                        p_333873_.shrink(i);
+                        pStack.shrink(i);
                         this.items.add(0, itemstack1);
                     } else {
-                        this.items.add(0, p_333873_.split(i));
+                        this.items.add(0, pStack.split(i));
                     }
 
                     return i;
@@ -202,14 +202,14 @@ public final class BundleContents implements TooltipComponent {
             }
         }
 
-        public int tryTransfer(Slot p_333053_, Player p_329130_) {
-            ItemStack itemstack = p_333053_.getItem();
+        public int tryTransfer(Slot pSlot, Player pPlayer) {
+            ItemStack itemstack = pSlot.getItem();
             int i = this.getMaxAmountToAdd(itemstack);
-            return BundleContents.canItemBeInBundle(itemstack) ? this.tryInsert(p_333053_.safeTake(itemstack.getCount(), i, p_329130_)) : 0;
+            return BundleContents.canItemBeInBundle(itemstack) ? this.tryInsert(pSlot.safeTake(itemstack.getCount(), i, pPlayer)) : 0;
         }
 
-        public void toggleSelectedItem(int p_366167_) {
-            this.selectedItem = this.selectedItem != p_366167_ && p_366167_ < this.items.size() ? p_366167_ : -1;
+        public void toggleSelectedItem(int pSelectedItem) {
+            this.selectedItem = this.selectedItem != pSelectedItem && pSelectedItem < this.items.size() ? pSelectedItem : -1;
         }
 
         @Nullable

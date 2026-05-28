@@ -12,31 +12,31 @@ public class TrialSpawnerDetectionParticle extends TextureSheetParticle {
     private static final int BASE_LIFETIME = 8;
 
     protected TrialSpawnerDetectionParticle(
-        ClientLevel p_310929_,
-        double p_311438_,
-        double p_312516_,
-        double p_312471_,
-        double p_311930_,
-        double p_310570_,
-        double p_311049_,
-        float p_311264_,
-        SpriteSet p_313038_
+        ClientLevel pLevel,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed,
+        float pSizeMultiplier,
+        SpriteSet pSprites
     ) {
-        super(p_310929_, p_311438_, p_312516_, p_312471_, 0.0, 0.0, 0.0);
-        this.sprites = p_313038_;
+        super(pLevel, pX, pY, pZ, 0.0, 0.0, 0.0);
+        this.sprites = pSprites;
         this.friction = 0.96F;
         this.gravity = -0.1F;
         this.speedUpWhenYMotionIsBlocked = true;
         this.xd *= 0.0;
         this.yd *= 0.9;
         this.zd *= 0.0;
-        this.xd += p_311930_;
-        this.yd += p_310570_;
-        this.zd += p_311049_;
-        this.quadSize *= 0.75F * p_311264_;
-        this.lifetime = (int)(8.0F / Mth.randomBetween(this.random, 0.5F, 1.0F) * p_311264_);
+        this.xd += pXSpeed;
+        this.yd += pYSpeed;
+        this.zd += pZSpeed;
+        this.quadSize *= 0.75F * pSizeMultiplier;
+        this.lifetime = (int)(8.0F / Mth.randomBetween(this.random, 0.5F, 1.0F) * pSizeMultiplier);
         this.lifetime = Math.max(this.lifetime, 1);
-        this.setSpriteFromAge(p_313038_);
+        this.setSpriteFromAge(pSprites);
         this.hasPhysics = true;
     }
 
@@ -70,8 +70,8 @@ public class TrialSpawnerDetectionParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public Provider(SpriteSet p_311649_) {
-            this.sprites = p_311649_;
+        public Provider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(

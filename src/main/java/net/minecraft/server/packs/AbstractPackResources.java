@@ -19,8 +19,8 @@ public abstract class AbstractPackResources implements PackResources {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final PackLocationInfo location;
 
-    protected AbstractPackResources(PackLocationInfo p_332936_) {
-        this.location = p_332936_;
+    protected AbstractPackResources(PackLocationInfo pLocation) {
+        this.location = pLocation;
     }
 
     @Nullable
@@ -40,20 +40,20 @@ public abstract class AbstractPackResources implements PackResources {
     }
 
     @Nullable
-    public static <T> T getMetadataFromStream(MetadataSectionType<T> p_375667_, InputStream p_10216_) {
+    public static <T> T getMetadataFromStream(MetadataSectionType<T> pType, InputStream pStream) {
         JsonObject jsonobject;
-        try (BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(p_10216_, StandardCharsets.UTF_8))) {
+        try (BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(pStream, StandardCharsets.UTF_8))) {
             jsonobject = GsonHelper.parse(bufferedreader);
         } catch (Exception exception) {
-            LOGGER.error("Couldn't load {} metadata", p_375667_.name(), exception);
+            LOGGER.error("Couldn't load {} metadata", pType.name(), exception);
             return null;
         }
 
-        return !jsonobject.has(p_375667_.name())
+        return !jsonobject.has(pType.name())
             ? null
-            : p_375667_.codec()
-                .parse(JsonOps.INSTANCE, jsonobject.get(p_375667_.name()))
-                .ifError(p_377647_ -> LOGGER.error("Couldn't load {} metadata: {}", p_375667_.name(), p_377647_))
+            : pType.codec()
+                .parse(JsonOps.INSTANCE, jsonobject.get(pType.name()))
+                .ifError(p_377647_ -> LOGGER.error("Couldn't load {} metadata: {}", pType.name(), p_377647_))
                 .result()
                 .orElse(null);
     }

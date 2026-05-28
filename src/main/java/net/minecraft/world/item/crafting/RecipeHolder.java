@@ -11,11 +11,11 @@ public record RecipeHolder<T extends Recipe<?>>(ResourceKey<Recipe<?>> id, T val
     );
 
     @Override
-    public boolean equals(Object p_298053_) {
-        if (this == p_298053_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            if (p_298053_ instanceof RecipeHolder<?> recipeholder && this.id == recipeholder.id) {
+            if (pOther instanceof RecipeHolder<?> recipeholder && this.id == recipeholder.id) {
                 return true;
             }
 

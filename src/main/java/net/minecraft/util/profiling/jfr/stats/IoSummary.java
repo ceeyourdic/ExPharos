@@ -10,10 +10,10 @@ public final class IoSummary<T> {
     private final List<Pair<T, IoSummary.CountAndSize>> largestSizeContributors;
     private final Duration recordingDuration;
 
-    public IoSummary(Duration p_336341_, List<Pair<T, IoSummary.CountAndSize>> p_328382_) {
-        this.recordingDuration = p_336341_;
-        this.totalCountAndSize = p_328382_.stream().map(Pair::getSecond).reduce(new IoSummary.CountAndSize(0L, 0L), IoSummary.CountAndSize::add);
-        this.largestSizeContributors = p_328382_.stream().sorted(Comparator.comparing(Pair::getSecond, IoSummary.CountAndSize.SIZE_THEN_COUNT)).limit(10L).toList();
+    public IoSummary(Duration pRecordingDuration, List<Pair<T, IoSummary.CountAndSize>> pEntries) {
+        this.recordingDuration = pRecordingDuration;
+        this.totalCountAndSize = pEntries.stream().map(Pair::getSecond).reduce(new IoSummary.CountAndSize(0L, 0L), IoSummary.CountAndSize::add);
+        this.largestSizeContributors = pEntries.stream().sorted(Comparator.comparing(Pair::getSecond, IoSummary.CountAndSize.SIZE_THEN_COUNT)).limit(10L).toList();
     }
 
     public double getCountsPerSecond() {
@@ -41,8 +41,8 @@ public final class IoSummary<T> {
             .thenComparing(IoSummary.CountAndSize::totalCount)
             .reversed();
 
-        IoSummary.CountAndSize add(IoSummary.CountAndSize p_335537_) {
-            return new IoSummary.CountAndSize(this.totalCount + p_335537_.totalCount, this.totalSize + p_335537_.totalSize);
+        IoSummary.CountAndSize add(IoSummary.CountAndSize pCountAndSize) {
+            return new IoSummary.CountAndSize(this.totalCount + pCountAndSize.totalCount, this.totalSize + pCountAndSize.totalSize);
         }
 
         public float averageSize() {

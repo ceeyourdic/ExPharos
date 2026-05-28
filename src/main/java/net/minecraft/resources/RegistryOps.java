@@ -18,41 +18,41 @@ import net.minecraft.util.ExtraCodecs;
 public class RegistryOps<T> extends DelegatingOps<T> {
     private final RegistryOps.RegistryInfoLookup lookupProvider;
 
-    public static <T> RegistryOps<T> create(DynamicOps<T> p_256342_, HolderLookup.Provider p_255950_) {
-        return create(p_256342_, new RegistryOps.HolderLookupAdapter(p_255950_));
+    public static <T> RegistryOps<T> create(DynamicOps<T> pDelegate, HolderLookup.Provider pRegistries) {
+        return create(pDelegate, new RegistryOps.HolderLookupAdapter(pRegistries));
     }
 
-    public static <T> RegistryOps<T> create(DynamicOps<T> p_256278_, RegistryOps.RegistryInfoLookup p_256479_) {
-        return new RegistryOps<>(p_256278_, p_256479_);
+    public static <T> RegistryOps<T> create(DynamicOps<T> pDelegate, RegistryOps.RegistryInfoLookup pLookupProvider) {
+        return new RegistryOps<>(pDelegate, pLookupProvider);
     }
 
-    public static <T> Dynamic<T> injectRegistryContext(Dynamic<T> p_331489_, HolderLookup.Provider p_331408_) {
-        return new Dynamic<>(p_331408_.createSerializationContext(p_331489_.getOps()), p_331489_.getValue());
+    public static <T> Dynamic<T> injectRegistryContext(Dynamic<T> pDynamic, HolderLookup.Provider pRegistries) {
+        return new Dynamic<>(pRegistries.createSerializationContext(pDynamic.getOps()), pDynamic.getValue());
     }
 
-    private RegistryOps(DynamicOps<T> p_256313_, RegistryOps.RegistryInfoLookup p_255799_) {
-        super(p_256313_);
-        this.lookupProvider = p_255799_;
+    private RegistryOps(DynamicOps<T> pDelegate, RegistryOps.RegistryInfoLookup pLookupProvider) {
+        super(pDelegate);
+        this.lookupProvider = pLookupProvider;
     }
 
-    public <U> RegistryOps<U> withParent(DynamicOps<U> p_332969_) {
-        return (RegistryOps<U>)(p_332969_ == this.delegate ? this : new RegistryOps<>(p_332969_, this.lookupProvider));
+    public <U> RegistryOps<U> withParent(DynamicOps<U> pOps) {
+        return (RegistryOps<U>)(pOps == this.delegate ? this : new RegistryOps<>(pOps, this.lookupProvider));
     }
 
-    public <E> Optional<HolderOwner<E>> owner(ResourceKey<? extends Registry<? extends E>> p_255757_) {
-        return this.lookupProvider.lookup(p_255757_).map(RegistryOps.RegistryInfo::owner);
+    public <E> Optional<HolderOwner<E>> owner(ResourceKey<? extends Registry<? extends E>> pRegistryKey) {
+        return this.lookupProvider.lookup(pRegistryKey).map(RegistryOps.RegistryInfo::owner);
     }
 
-    public <E> Optional<HolderGetter<E>> getter(ResourceKey<? extends Registry<? extends E>> p_256031_) {
-        return this.lookupProvider.lookup(p_256031_).map(RegistryOps.RegistryInfo::getter);
+    public <E> Optional<HolderGetter<E>> getter(ResourceKey<? extends Registry<? extends E>> pRegistryKey) {
+        return this.lookupProvider.lookup(pRegistryKey).map(RegistryOps.RegistryInfo::getter);
     }
 
     @Override
-    public boolean equals(Object p_332753_) {
-        if (this == p_332753_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
-        } else if (p_332753_ != null && this.getClass() == p_332753_.getClass()) {
-            RegistryOps<?> registryops = (RegistryOps<?>)p_332753_;
+        } else if (pOther != null && this.getClass() == pOther.getClass()) {
+            RegistryOps<?> registryops = (RegistryOps<?>)pOther;
             return this.delegate.equals(registryops.delegate) && this.lookupProvider.equals(registryops.lookupProvider);
         } else {
             return false;
@@ -64,27 +64,27 @@ public class RegistryOps<T> extends DelegatingOps<T> {
         return this.delegate.hashCode() * 31 + this.lookupProvider.hashCode();
     }
 
-    public static <E, O> RecordCodecBuilder<O, HolderGetter<E>> retrieveGetter(ResourceKey<? extends Registry<? extends E>> p_206833_) {
+    public static <E, O> RecordCodecBuilder<O, HolderGetter<E>> retrieveGetter(ResourceKey<? extends Registry<? extends E>> pRegistryOps) {
         return ExtraCodecs.retrieveContext(
                 p_274811_ -> p_274811_ instanceof RegistryOps<?> registryops
                         ? registryops.lookupProvider
-                            .lookup(p_206833_)
+                            .lookup(pRegistryOps)
                             .map(p_255527_ -> DataResult.success(p_255527_.getter(), p_255527_.elementsLifecycle()))
-                            .orElseGet(() -> DataResult.error(() -> "Unknown registry: " + p_206833_))
+                            .orElseGet(() -> DataResult.error(() -> "Unknown registry: " + pRegistryOps))
                         : DataResult.error(() -> "Not a registry ops")
             )
             .forGetter(p_255526_ -> null);
     }
 
-    public static <E, O> RecordCodecBuilder<O, Holder.Reference<E>> retrieveElement(ResourceKey<E> p_256347_) {
-        ResourceKey<? extends Registry<E>> resourcekey = ResourceKey.createRegistryKey(p_256347_.registry());
+    public static <E, O> RecordCodecBuilder<O, Holder.Reference<E>> retrieveElement(ResourceKey<E> pKey) {
+        ResourceKey<? extends Registry<E>> resourcekey = ResourceKey.createRegistryKey(pKey.registry());
         return ExtraCodecs.retrieveContext(
                 p_274808_ -> p_274808_ instanceof RegistryOps<?> registryops
                         ? registryops.lookupProvider
                             .lookup(resourcekey)
-                            .flatMap(p_255518_ -> p_255518_.getter().get(p_256347_))
+                            .flatMap(p_255518_ -> p_255518_.getter().get(pKey))
                             .map(DataResult::success)
-                            .orElseGet(() -> DataResult.error(() -> "Can't find value: " + p_256347_))
+                            .orElseGet(() -> DataResult.error(() -> "Can't find value: " + pKey))
                         : DataResult.error(() -> "Not a registry ops")
             )
             .forGetter(p_255524_ -> null);
@@ -94,8 +94,8 @@ public class RegistryOps<T> extends DelegatingOps<T> {
         private final HolderLookup.Provider lookupProvider;
         private final Map<ResourceKey<? extends Registry<?>>, Optional<? extends RegistryOps.RegistryInfo<?>>> lookups = new ConcurrentHashMap<>();
 
-        public HolderLookupAdapter(HolderLookup.Provider p_335468_) {
-            this.lookupProvider = p_335468_;
+        public HolderLookupAdapter(HolderLookup.Provider pLookupProvider) {
+            this.lookupProvider = pLookupProvider;
         }
 
         @Override
@@ -103,16 +103,16 @@ public class RegistryOps<T> extends DelegatingOps<T> {
             return (Optional<RegistryOps.RegistryInfo<E>>)this.lookups.computeIfAbsent(p_330389_, this::createLookup);
         }
 
-        private Optional<RegistryOps.RegistryInfo<Object>> createLookup(ResourceKey<? extends Registry<?>> p_335602_) {
-            return this.lookupProvider.lookup(p_335602_).map(RegistryOps.RegistryInfo::fromRegistryLookup);
+        private Optional<RegistryOps.RegistryInfo<Object>> createLookup(ResourceKey<? extends Registry<?>> pRegistryKey) {
+            return this.lookupProvider.lookup(pRegistryKey).map(RegistryOps.RegistryInfo::fromRegistryLookup);
         }
 
         @Override
-        public boolean equals(Object p_330775_) {
-            if (this == p_330775_) {
+        public boolean equals(Object pOther) {
+            if (this == pOther) {
                 return true;
             } else {
-                if (p_330775_ instanceof RegistryOps.HolderLookupAdapter registryops$holderlookupadapter
+                if (pOther instanceof RegistryOps.HolderLookupAdapter registryops$holderlookupadapter
                     && this.lookupProvider.equals(registryops$holderlookupadapter.lookupProvider)) {
                     return true;
                 }
@@ -128,12 +128,12 @@ public class RegistryOps<T> extends DelegatingOps<T> {
     }
 
     public static record RegistryInfo<T>(HolderOwner<T> owner, HolderGetter<T> getter, Lifecycle elementsLifecycle) {
-        public static <T> RegistryOps.RegistryInfo<T> fromRegistryLookup(HolderLookup.RegistryLookup<T> p_329148_) {
-            return new RegistryOps.RegistryInfo<>(p_329148_, p_329148_, p_329148_.registryLifecycle());
+        public static <T> RegistryOps.RegistryInfo<T> fromRegistryLookup(HolderLookup.RegistryLookup<T> pRegistryLookup) {
+            return new RegistryOps.RegistryInfo<>(pRegistryLookup, pRegistryLookup, pRegistryLookup.registryLifecycle());
         }
     }
 
     public interface RegistryInfoLookup {
-        <T> Optional<RegistryOps.RegistryInfo<T>> lookup(ResourceKey<? extends Registry<? extends T>> p_256623_);
+        <T> Optional<RegistryOps.RegistryInfo<T>> lookup(ResourceKey<? extends Registry<? extends T>> pRegistryKey);
     }
 }

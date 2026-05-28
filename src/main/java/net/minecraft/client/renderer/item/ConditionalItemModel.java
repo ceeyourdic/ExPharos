@@ -20,10 +20,10 @@ public class ConditionalItemModel implements ItemModel {
     private final ItemModel onTrue;
     private final ItemModel onFalse;
 
-    public ConditionalItemModel(ConditionalItemModelProperty p_376982_, ItemModel p_377974_, ItemModel p_378783_) {
-        this.property = p_376982_;
-        this.onTrue = p_377974_;
-        this.onFalse = p_378783_;
+    public ConditionalItemModel(ConditionalItemModelProperty pProperty, ItemModel pOnTrue, ItemModel pOnFalse) {
+        this.property = pProperty;
+        this.onTrue = pOnTrue;
+        this.onFalse = pOnFalse;
     }
 
     @Override

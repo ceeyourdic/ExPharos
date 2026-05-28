@@ -66,8 +66,8 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
         }
     };
 
-    public BrewingStandBlockEntity(BlockPos p_155283_, BlockState p_155284_) {
-        super(BlockEntityType.BREWING_STAND, p_155283_, p_155284_);
+    public BrewingStandBlockEntity(BlockPos pPos, BlockState pState) {
+        super(BlockEntityType.BREWING_STAND, pPos, pState);
     }
 
     @Override
@@ -90,39 +90,39 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
         this.items = p_332629_;
     }
 
-    public static void serverTick(Level p_155286_, BlockPos p_155287_, BlockState p_155288_, BrewingStandBlockEntity p_155289_) {
-        ItemStack itemstack = p_155289_.items.get(4);
-        if (p_155289_.fuel <= 0 && itemstack.is(ItemTags.BREWING_FUEL)) {
-            p_155289_.fuel = 20;
+    public static void serverTick(Level pLevel, BlockPos pPos, BlockState pState, BrewingStandBlockEntity pBlockEntity) {
+        ItemStack itemstack = pBlockEntity.items.get(4);
+        if (pBlockEntity.fuel <= 0 && itemstack.is(ItemTags.BREWING_FUEL)) {
+            pBlockEntity.fuel = 20;
             itemstack.shrink(1);
-            setChanged(p_155286_, p_155287_, p_155288_);
+            setChanged(pLevel, pPos, pState);
         }
 
-        boolean flag = isBrewable(p_155286_.potionBrewing(), p_155289_.items);
-        boolean flag1 = p_155289_.brewTime > 0;
-        ItemStack itemstack1 = p_155289_.items.get(3);
+        boolean flag = isBrewable(pLevel.potionBrewing(), pBlockEntity.items);
+        boolean flag1 = pBlockEntity.brewTime > 0;
+        ItemStack itemstack1 = pBlockEntity.items.get(3);
         if (flag1) {
-            p_155289_.brewTime--;
-            boolean flag2 = p_155289_.brewTime == 0;
+            pBlockEntity.brewTime--;
+            boolean flag2 = pBlockEntity.brewTime == 0;
             if (flag2 && flag) {
-                doBrew(p_155286_, p_155287_, p_155289_.items);
-            } else if (!flag || !itemstack1.is(p_155289_.ingredient)) {
-                p_155289_.brewTime = 0;
+                doBrew(pLevel, pPos, pBlockEntity.items);
+            } else if (!flag || !itemstack1.is(pBlockEntity.ingredient)) {
+                pBlockEntity.brewTime = 0;
             }
 
-            setChanged(p_155286_, p_155287_, p_155288_);
-        } else if (flag && p_155289_.fuel > 0) {
-            p_155289_.fuel--;
-            p_155289_.brewTime = 400;
-            p_155289_.ingredient = itemstack1.getItem();
-            setChanged(p_155286_, p_155287_, p_155288_);
+            setChanged(pLevel, pPos, pState);
+        } else if (flag && pBlockEntity.fuel > 0) {
+            pBlockEntity.fuel--;
+            pBlockEntity.brewTime = 400;
+            pBlockEntity.ingredient = itemstack1.getItem();
+            setChanged(pLevel, pPos, pState);
         }
 
-        boolean[] aboolean = p_155289_.getPotionBits();
-        if (!Arrays.equals(aboolean, p_155289_.lastPotionCount)) {
-            p_155289_.lastPotionCount = aboolean;
-            BlockState blockstate = p_155288_;
-            if (!(p_155288_.getBlock() instanceof BrewingStandBlock)) {
+        boolean[] aboolean = pBlockEntity.getPotionBits();
+        if (!Arrays.equals(aboolean, pBlockEntity.lastPotionCount)) {
+            pBlockEntity.lastPotionCount = aboolean;
+            BlockState blockstate = pState;
+            if (!(pState.getBlock() instanceof BrewingStandBlock)) {
                 return;
             }
 
@@ -130,7 +130,7 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
                 blockstate = blockstate.setValue(BrewingStandBlock.HAS_BOTTLE[i], Boolean.valueOf(aboolean[i]));
             }
 
-            p_155286_.setBlock(p_155287_, blockstate, 2);
+            pLevel.setBlock(pPos, blockstate, 2);
         }
     }
 
@@ -146,16 +146,16 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
         return aboolean;
     }
 
-    private static boolean isBrewable(PotionBrewing p_336227_, NonNullList<ItemStack> p_155295_) {
-        ItemStack itemstack = p_155295_.get(3);
+    private static boolean isBrewable(PotionBrewing pPotionBrewing, NonNullList<ItemStack> pItems) {
+        ItemStack itemstack = pItems.get(3);
         if (itemstack.isEmpty()) {
             return false;
-        } else if (!p_336227_.isIngredient(itemstack)) {
+        } else if (!pPotionBrewing.isIngredient(itemstack)) {
             return false;
         } else {
             for (int i = 0; i < 3; i++) {
-                ItemStack itemstack1 = p_155295_.get(i);
-                if (!itemstack1.isEmpty() && p_336227_.hasMix(itemstack1, itemstack)) {
+                ItemStack itemstack1 = pItems.get(i);
+                if (!itemstack1.isEmpty() && pPotionBrewing.hasMix(itemstack1, itemstack)) {
                     return true;
                 }
             }
@@ -164,12 +164,12 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
         }
     }
 
-    private static void doBrew(Level p_155291_, BlockPos p_155292_, NonNullList<ItemStack> p_155293_) {
-        ItemStack itemstack = p_155293_.get(3);
-        PotionBrewing potionbrewing = p_155291_.potionBrewing();
+    private static void doBrew(Level pLevel, BlockPos pPos, NonNullList<ItemStack> pItems) {
+        ItemStack itemstack = pItems.get(3);
+        PotionBrewing potionbrewing = pLevel.potionBrewing();
 
         for (int i = 0; i < 3; i++) {
-            p_155293_.set(i, potionbrewing.mix(itemstack, p_155293_.get(i)));
+            pItems.set(i, potionbrewing.mix(itemstack, pItems.get(i)));
         }
 
         itemstack.shrink(1);
@@ -178,12 +178,12 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
             if (itemstack.isEmpty()) {
                 itemstack = itemstack1;
             } else {
-                Containers.dropItemStack(p_155291_, (double)p_155292_.getX(), (double)p_155292_.getY(), (double)p_155292_.getZ(), itemstack1);
+                Containers.dropItemStack(pLevel, (double)pPos.getX(), (double)pPos.getY(), (double)pPos.getZ(), itemstack1);
             }
         }
 
-        p_155293_.set(3, itemstack);
-        p_155291_.levelEvent(1035, p_155292_, 0);
+        pItems.set(3, itemstack);
+        pLevel.levelEvent(1035, pPos, 0);
     }
 
     @Override
@@ -208,44 +208,44 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
     }
 
     @Override
-    public boolean canPlaceItem(int p_59017_, ItemStack p_59018_) {
-        if (p_59017_ == 3) {
+    public boolean canPlaceItem(int pIndex, ItemStack pStack) {
+        if (pIndex == 3) {
             PotionBrewing potionbrewing = this.level != null ? this.level.potionBrewing() : PotionBrewing.EMPTY;
-            return potionbrewing.isIngredient(p_59018_);
+            return potionbrewing.isIngredient(pStack);
         } else {
-            return p_59017_ == 4
-                ? p_59018_.is(ItemTags.BREWING_FUEL)
+            return pIndex == 4
+                ? pStack.is(ItemTags.BREWING_FUEL)
                 : (
-                        p_59018_.is(Items.POTION)
-                            || p_59018_.is(Items.SPLASH_POTION)
-                            || p_59018_.is(Items.LINGERING_POTION)
-                            || p_59018_.is(Items.GLASS_BOTTLE)
+                        pStack.is(Items.POTION)
+                            || pStack.is(Items.SPLASH_POTION)
+                            || pStack.is(Items.LINGERING_POTION)
+                            || pStack.is(Items.GLASS_BOTTLE)
                     )
-                    && this.getItem(p_59017_).isEmpty();
+                    && this.getItem(pIndex).isEmpty();
         }
     }
 
     @Override
-    public int[] getSlotsForFace(Direction p_59010_) {
-        if (p_59010_ == Direction.UP) {
+    public int[] getSlotsForFace(Direction pSide) {
+        if (pSide == Direction.UP) {
             return SLOTS_FOR_UP;
         } else {
-            return p_59010_ == Direction.DOWN ? SLOTS_FOR_DOWN : SLOTS_FOR_SIDES;
+            return pSide == Direction.DOWN ? SLOTS_FOR_DOWN : SLOTS_FOR_SIDES;
         }
     }
 
     @Override
-    public boolean canPlaceItemThroughFace(int p_58996_, ItemStack p_58997_, @Nullable Direction p_58998_) {
-        return this.canPlaceItem(p_58996_, p_58997_);
+    public boolean canPlaceItemThroughFace(int pIndex, ItemStack pItemStack, @Nullable Direction pDirection) {
+        return this.canPlaceItem(pIndex, pItemStack);
     }
 
     @Override
-    public boolean canTakeItemThroughFace(int p_59020_, ItemStack p_59021_, Direction p_59022_) {
-        return p_59020_ == 3 ? p_59021_.is(Items.GLASS_BOTTLE) : true;
+    public boolean canTakeItemThroughFace(int pIndex, ItemStack pStack, Direction pDirection) {
+        return pIndex == 3 ? pStack.is(Items.GLASS_BOTTLE) : true;
     }
 
     @Override
-    protected AbstractContainerMenu createMenu(int p_58990_, Inventory p_58991_) {
-        return new BrewingStandMenu(p_58990_, p_58991_, this, this.dataAccess);
+    protected AbstractContainerMenu createMenu(int pId, Inventory pPlayer) {
+        return new BrewingStandMenu(pId, pPlayer, this, this.dataAccess);
     }
 }

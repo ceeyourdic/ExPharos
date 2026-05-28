@@ -37,19 +37,19 @@ public enum DataFixTypes {
     public static final Set<TypeReference> TYPES_FOR_LEVEL_LIST;
     private final TypeReference type;
 
-    private DataFixTypes(final TypeReference p_14503_) {
-        this.type = p_14503_;
+    private DataFixTypes(final TypeReference pType) {
+        this.type = pType;
     }
 
     static int currentVersion() {
         return SharedConstants.getCurrentVersion().getDataVersion().getVersion();
     }
 
-    public <A> Codec<A> wrapCodec(final Codec<A> p_300412_, final DataFixer p_297748_, final int p_299395_) {
+    public <A> Codec<A> wrapCodec(final Codec<A> pCodec, final DataFixer pDataFixer, final int pDataVersion) {
         return new Codec<A>() {
             @Override
             public <T> DataResult<T> encode(A p_299356_, DynamicOps<T> p_298710_, T p_298085_) {
-                return p_300412_.encode(p_299356_, p_298710_, p_298085_)
+                return pCodec.encode(p_299356_, p_298710_, p_298085_)
                     .flatMap(
                         p_299755_ -> p_298710_.mergeToMap((T)p_299755_, p_298710_.createString("DataVersion"), p_298710_.createInt(DataFixTypes.currentVersion()))
                     );
@@ -57,28 +57,28 @@ public enum DataFixTypes {
 
             @Override
             public <T> DataResult<Pair<A, T>> decode(DynamicOps<T> p_300000_, T p_300871_) {
-                int i = p_300000_.get(p_300871_, "DataVersion").flatMap(p_300000_::getNumberValue).map(Number::intValue).result().orElse(p_299395_);
+                int i = p_300000_.get(p_300871_, "DataVersion").flatMap(p_300000_::getNumberValue).map(Number::intValue).result().orElse(pDataVersion);
                 Dynamic<T> dynamic = new Dynamic<>(p_300000_, p_300000_.remove(p_300871_, "DataVersion"));
-                Dynamic<T> dynamic1 = DataFixTypes.this.updateToCurrentVersion(p_297748_, dynamic, i);
-                return p_300412_.decode(dynamic1);
+                Dynamic<T> dynamic1 = DataFixTypes.this.updateToCurrentVersion(pDataFixer, dynamic, i);
+                return pCodec.decode(dynamic1);
             }
         };
     }
 
-    public <T> Dynamic<T> update(DataFixer p_265388_, Dynamic<T> p_265179_, int p_265372_, int p_265168_) {
-        return p_265388_.update(this.type, p_265179_, p_265372_, p_265168_);
+    public <T> Dynamic<T> update(DataFixer pFixer, Dynamic<T> pInput, int pVersion, int pNewVersion) {
+        return pFixer.update(this.type, pInput, pVersion, pNewVersion);
     }
 
-    public <T> Dynamic<T> updateToCurrentVersion(DataFixer p_265085_, Dynamic<T> p_265237_, int p_265099_) {
-        return this.update(p_265085_, p_265237_, p_265099_, currentVersion());
+    public <T> Dynamic<T> updateToCurrentVersion(DataFixer pFixer, Dynamic<T> pInput, int pVersion) {
+        return this.update(pFixer, pInput, pVersion, currentVersion());
     }
 
-    public CompoundTag update(DataFixer p_265128_, CompoundTag p_265422_, int p_265549_, int p_265304_) {
-        return (CompoundTag)this.update(p_265128_, new Dynamic<>(NbtOps.INSTANCE, p_265422_), p_265549_, p_265304_).getValue();
+    public CompoundTag update(DataFixer pFixer, CompoundTag pTag, int pVersion, int pNewVersion) {
+        return (CompoundTag)this.update(pFixer, new Dynamic<>(NbtOps.INSTANCE, pTag), pVersion, pNewVersion).getValue();
     }
 
-    public CompoundTag updateToCurrentVersion(DataFixer p_265583_, CompoundTag p_265401_, int p_265111_) {
-        return this.update(p_265583_, p_265401_, p_265111_, currentVersion());
+    public CompoundTag updateToCurrentVersion(DataFixer pFixer, CompoundTag pTag, int pVersion) {
+        return this.update(pFixer, pTag, pVersion, currentVersion());
     }
 
     static {

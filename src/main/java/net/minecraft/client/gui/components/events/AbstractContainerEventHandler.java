@@ -16,8 +16,8 @@ public abstract class AbstractContainerEventHandler implements ContainerEventHan
     }
 
     @Override
-    public final void setDragging(boolean p_94681_) {
-        this.isDragging = p_94681_;
+    public final void setDragging(boolean pDragging) {
+        this.isDragging = pDragging;
     }
 
     @Nullable
@@ -27,15 +27,15 @@ public abstract class AbstractContainerEventHandler implements ContainerEventHan
     }
 
     @Override
-    public void setFocused(@Nullable GuiEventListener p_94677_) {
+    public void setFocused(@Nullable GuiEventListener pListener) {
         if (this.focused != null) {
             this.focused.setFocused(false);
         }
 
-        if (p_94677_ != null) {
-            p_94677_.setFocused(true);
+        if (pListener != null) {
+            pListener.setFocused(true);
         }
 
-        this.focused = p_94677_;
+        this.focused = pListener;
     }
 }

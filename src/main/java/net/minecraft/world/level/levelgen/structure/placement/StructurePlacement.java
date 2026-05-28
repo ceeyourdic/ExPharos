@@ -32,9 +32,9 @@ public abstract class StructurePlacement {
     private final Optional<StructurePlacement.ExclusionZone> exclusionZone;
 
     protected static <S extends StructurePlacement> P5<Mu<S>, Vec3i, StructurePlacement.FrequencyReductionMethod, Float, Integer, Optional<StructurePlacement.ExclusionZone>> placementCodec(
-        Instance<S> p_227042_
+        Instance<S> pInstance
     ) {
-        return p_227042_.group(
+        return pInstance.group(
             Vec3i.offsetCodec(16).optionalFieldOf("locate_offset", Vec3i.ZERO).forGetter(StructurePlacement::locateOffset),
             StructurePlacement.FrequencyReductionMethod.CODEC
                 .optionalFieldOf("frequency_reduction_method", StructurePlacement.FrequencyReductionMethod.DEFAULT)
@@ -46,17 +46,17 @@ public abstract class StructurePlacement {
     }
 
     protected StructurePlacement(
-        Vec3i p_227028_,
-        StructurePlacement.FrequencyReductionMethod p_227029_,
-        float p_227030_,
-        int p_227031_,
-        Optional<StructurePlacement.ExclusionZone> p_227032_
+        Vec3i pLocateOffset,
+        StructurePlacement.FrequencyReductionMethod pFrequencyReductionMethod,
+        float pFrequency,
+        int pSalt,
+        Optional<StructurePlacement.ExclusionZone> pExclusionZone
     ) {
-        this.locateOffset = p_227028_;
-        this.frequencyReductionMethod = p_227029_;
-        this.frequency = p_227030_;
-        this.salt = p_227031_;
-        this.exclusionZone = p_227032_;
+        this.locateOffset = pLocateOffset;
+        this.frequencyReductionMethod = pFrequencyReductionMethod;
+        this.frequency = pFrequency;
+        this.salt = pSalt;
+        this.exclusionZone = pExclusionZone;
     }
 
     protected Vec3i locateOffset() {
@@ -79,53 +79,53 @@ public abstract class StructurePlacement {
         return this.exclusionZone;
     }
 
-    public boolean isStructureChunk(ChunkGeneratorStructureState p_256635_, int p_255959_, int p_256065_) {
-        return this.isPlacementChunk(p_256635_, p_255959_, p_256065_)
-            && this.applyAdditionalChunkRestrictions(p_255959_, p_256065_, p_256635_.getLevelSeed())
-            && this.applyInteractionsWithOtherStructures(p_256635_, p_255959_, p_256065_);
+    public boolean isStructureChunk(ChunkGeneratorStructureState pStructureState, int pX, int pZ) {
+        return this.isPlacementChunk(pStructureState, pX, pZ)
+            && this.applyAdditionalChunkRestrictions(pX, pZ, pStructureState.getLevelSeed())
+            && this.applyInteractionsWithOtherStructures(pStructureState, pX, pZ);
     }
 
-    public boolean applyAdditionalChunkRestrictions(int p_330491_, int p_330207_, long p_334851_) {
-        return !(this.frequency < 1.0F) || this.frequencyReductionMethod.shouldGenerate(p_334851_, this.salt, p_330491_, p_330207_, this.frequency);
+    public boolean applyAdditionalChunkRestrictions(int pRegionX, int pRegionZ, long pLevelSeed) {
+        return !(this.frequency < 1.0F) || this.frequencyReductionMethod.shouldGenerate(pLevelSeed, this.salt, pRegionX, pRegionZ, this.frequency);
     }
 
-    public boolean applyInteractionsWithOtherStructures(ChunkGeneratorStructureState p_332649_, int p_327790_, int p_329174_) {
-        return !this.exclusionZone.isPresent() || !this.exclusionZone.get().isPlacementForbidden(p_332649_, p_327790_, p_329174_);
+    public boolean applyInteractionsWithOtherStructures(ChunkGeneratorStructureState pStructureState, int pX, int pZ) {
+        return !this.exclusionZone.isPresent() || !this.exclusionZone.get().isPlacementForbidden(pStructureState, pX, pZ);
     }
 
-    protected abstract boolean isPlacementChunk(ChunkGeneratorStructureState p_256034_, int p_227046_, int p_227047_);
+    protected abstract boolean isPlacementChunk(ChunkGeneratorStructureState pStructureState, int pX, int pZ);
 
-    public BlockPos getLocatePos(ChunkPos p_227040_) {
-        return new BlockPos(p_227040_.getMinBlockX(), 0, p_227040_.getMinBlockZ()).offset(this.locateOffset());
+    public BlockPos getLocatePos(ChunkPos pChunkPos) {
+        return new BlockPos(pChunkPos.getMinBlockX(), 0, pChunkPos.getMinBlockZ()).offset(this.locateOffset());
     }
 
     public abstract StructurePlacementType<?> type();
 
-    private static boolean probabilityReducer(long p_227034_, int p_227035_, int p_227036_, int p_227037_, float p_227038_) {
+    private static boolean probabilityReducer(long pLevelSeed, int pRegionX, int pRegionZ, int pSalt, float pProbability) {
         WorldgenRandom worldgenrandom = new WorldgenRandom(new LegacyRandomSource(0L));
-        worldgenrandom.setLargeFeatureWithSalt(p_227034_, p_227035_, p_227036_, p_227037_);
-        return worldgenrandom.nextFloat() < p_227038_;
+        worldgenrandom.setLargeFeatureWithSalt(pLevelSeed, pRegionX, pRegionZ, pSalt);
+        return worldgenrandom.nextFloat() < pProbability;
     }
 
-    private static boolean legacyProbabilityReducerWithDouble(long p_227049_, int p_227050_, int p_227051_, int p_227052_, float p_227053_) {
+    private static boolean legacyProbabilityReducerWithDouble(long pBaseSeed, int pSalt, int pChunkX, int pChunkZ, float pProbability) {
         WorldgenRandom worldgenrandom = new WorldgenRandom(new LegacyRandomSource(0L));
-        worldgenrandom.setLargeFeatureSeed(p_227049_, p_227051_, p_227052_);
-        return worldgenrandom.nextDouble() < (double)p_227053_;
+        worldgenrandom.setLargeFeatureSeed(pBaseSeed, pChunkX, pChunkZ);
+        return worldgenrandom.nextDouble() < (double)pProbability;
     }
 
-    private static boolean legacyArbitrarySaltProbabilityReducer(long p_227061_, int p_227062_, int p_227063_, int p_227064_, float p_227065_) {
+    private static boolean legacyArbitrarySaltProbabilityReducer(long pLevelSeed, int pSalt, int pRegionX, int pRegionZ, float pProbability) {
         WorldgenRandom worldgenrandom = new WorldgenRandom(new LegacyRandomSource(0L));
-        worldgenrandom.setLargeFeatureWithSalt(p_227061_, p_227063_, p_227064_, 10387320);
-        return worldgenrandom.nextFloat() < p_227065_;
+        worldgenrandom.setLargeFeatureWithSalt(pLevelSeed, pRegionX, pRegionZ, 10387320);
+        return worldgenrandom.nextFloat() < pProbability;
     }
 
-    private static boolean legacyPillagerOutpostReducer(long p_227067_, int p_227068_, int p_227069_, int p_227070_, float p_227071_) {
-        int i = p_227069_ >> 4;
-        int j = p_227070_ >> 4;
+    private static boolean legacyPillagerOutpostReducer(long pLevelSeed, int pSalt, int pRegionX, int pRegionZ, float pProbability) {
+        int i = pRegionX >> 4;
+        int j = pRegionZ >> 4;
         WorldgenRandom worldgenrandom = new WorldgenRandom(new LegacyRandomSource(0L));
-        worldgenrandom.setSeed((long)(i ^ j << 4) ^ p_227067_);
+        worldgenrandom.setSeed((long)(i ^ j << 4) ^ pLevelSeed);
         worldgenrandom.nextInt();
-        return worldgenrandom.nextInt((int)(1.0F / p_227071_)) == 0;
+        return worldgenrandom.nextInt((int)(1.0F / pProbability)) == 0;
     }
 
     @Deprecated
@@ -140,14 +140,14 @@ public abstract class StructurePlacement {
                     .apply(p_259015_, StructurePlacement.ExclusionZone::new)
         );
 
-        boolean isPlacementForbidden(ChunkGeneratorStructureState p_255745_, int p_255634_, int p_255892_) {
-            return p_255745_.hasStructureChunkInRange(this.otherSet, p_255634_, p_255892_, this.chunkCount);
+        boolean isPlacementForbidden(ChunkGeneratorStructureState pStructureState, int pX, int pZ) {
+            return pStructureState.hasStructureChunkInRange(this.otherSet, pX, pZ, this.chunkCount);
         }
     }
 
     @FunctionalInterface
     public interface FrequencyReducer {
-        boolean shouldGenerate(long p_227099_, int p_227100_, int p_227101_, int p_227102_, float p_227103_);
+        boolean shouldGenerate(long pLevelSeed, int pSalt, int pRegionX, int pRegionZ, float pProbability);
     }
 
     public static enum FrequencyReductionMethod implements StringRepresentable {
@@ -162,13 +162,13 @@ public abstract class StructurePlacement {
         private final String name;
         private final StructurePlacement.FrequencyReducer reducer;
 
-        private FrequencyReductionMethod(final String p_227116_, final StructurePlacement.FrequencyReducer p_227117_) {
-            this.name = p_227116_;
-            this.reducer = p_227117_;
+        private FrequencyReductionMethod(final String pName, final StructurePlacement.FrequencyReducer pReducer) {
+            this.name = pName;
+            this.reducer = pReducer;
         }
 
-        public boolean shouldGenerate(long p_227120_, int p_227121_, int p_227122_, int p_227123_, float p_227124_) {
-            return this.reducer.shouldGenerate(p_227120_, p_227121_, p_227122_, p_227123_, p_227124_);
+        public boolean shouldGenerate(long pLevelSeed, int pSalt, int pRegionX, int pRegionZ, float pProbability) {
+            return this.reducer.shouldGenerate(pLevelSeed, pSalt, pRegionX, pRegionZ, pProbability);
         }
 
         @Override

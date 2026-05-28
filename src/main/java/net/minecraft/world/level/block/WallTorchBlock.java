@@ -54,32 +54,32 @@ public class WallTorchBlock extends TorchBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_58152_, BlockGetter p_58153_, BlockPos p_58154_, CollisionContext p_58155_) {
-        return getShape(p_58152_);
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return getShape(pState);
     }
 
-    public static VoxelShape getShape(BlockState p_58157_) {
-        return AABBS.get(p_58157_.getValue(FACING));
+    public static VoxelShape getShape(BlockState pState) {
+        return AABBS.get(pState.getValue(FACING));
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_58133_, LevelReader p_58134_, BlockPos p_58135_) {
-        return canSurvive(p_58134_, p_58135_, p_58133_.getValue(FACING));
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        return canSurvive(pLevel, pPos, pState.getValue(FACING));
     }
 
-    public static boolean canSurvive(LevelReader p_328236_, BlockPos p_331554_, Direction p_330599_) {
-        BlockPos blockpos = p_331554_.relative(p_330599_.getOpposite());
-        BlockState blockstate = p_328236_.getBlockState(blockpos);
-        return blockstate.isFaceSturdy(p_328236_, blockpos, p_330599_);
+    public static boolean canSurvive(LevelReader pLevel, BlockPos pPos, Direction pFacing) {
+        BlockPos blockpos = pPos.relative(pFacing.getOpposite());
+        BlockState blockstate = pLevel.getBlockState(blockpos);
+        return blockstate.isFaceSturdy(pLevel, blockpos, pFacing);
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_58126_) {
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
         BlockState blockstate = this.defaultBlockState();
-        LevelReader levelreader = p_58126_.getLevel();
-        BlockPos blockpos = p_58126_.getClickedPos();
-        Direction[] adirection = p_58126_.getNearestLookingDirections();
+        LevelReader levelreader = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
+        Direction[] adirection = pContext.getNearestLookingDirections();
 
         for (Direction direction : adirection) {
             if (direction.getAxis().isHorizontal()) {
@@ -124,17 +124,17 @@ public class WallTorchBlock extends TorchBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState p_58140_, Rotation p_58141_) {
-        return p_58140_.setValue(FACING, p_58141_.rotate(p_58140_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_58137_, Mirror p_58138_) {
-        return p_58137_.rotate(p_58138_.getRotation(p_58137_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_58150_) {
-        p_58150_.add(FACING);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING);
     }
 }

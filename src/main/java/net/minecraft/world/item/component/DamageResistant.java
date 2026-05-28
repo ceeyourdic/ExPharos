@@ -19,7 +19,7 @@ public record DamageResistant(TagKey<DamageType> types) {
         TagKey.streamCodec(Registries.DAMAGE_TYPE), DamageResistant::types, DamageResistant::new
     );
 
-    public boolean isResistantTo(DamageSource p_364525_) {
-        return p_364525_.is(this.types);
+    public boolean isResistantTo(DamageSource pDamageSource) {
+        return pDamageSource.is(this.types);
     }
 }

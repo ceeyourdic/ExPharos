@@ -105,12 +105,12 @@ public class EnderDragon extends Mob implements Enemy {
         this.phaseManager = new EnderDragonPhaseManager(this);
     }
 
-    public void setDragonFight(EndDragonFight p_287736_) {
-        this.dragonFight = p_287736_;
+    public void setDragonFight(EndDragonFight pDragonFight) {
+        this.dragonFight = pDragonFight;
     }
 
-    public void setFightOrigin(BlockPos p_287665_) {
-        this.fightOrigin = p_287665_;
+    public void setFightOrigin(BlockPos pFightOrigin) {
+        this.fightOrigin = pFightOrigin;
     }
 
     public BlockPos getFightOrigin() {
@@ -355,8 +355,8 @@ public class EnderDragon extends Mob implements Enemy {
         }
     }
 
-    private void tickPart(EnderDragonPart p_31116_, double p_31117_, double p_31118_, double p_31119_) {
-        p_31116_.setPos(this.getX() + p_31117_, this.getY() + p_31118_, this.getZ() + p_31119_);
+    private void tickPart(EnderDragonPart pPart, double pOffsetX, double pOffsetY, double pOffsetZ) {
+        pPart.setPos(this.getX() + pOffsetX, this.getY() + pOffsetY, this.getZ() + pOffsetZ);
     }
 
     private float getHeadYOffset() {
@@ -395,11 +395,11 @@ public class EnderDragon extends Mob implements Enemy {
         }
     }
 
-    private void knockBack(ServerLevel p_343522_, List<Entity> p_31132_) {
+    private void knockBack(ServerLevel pLevel, List<Entity> pTargets) {
         double d0 = (this.body.getBoundingBox().minX + this.body.getBoundingBox().maxX) / 2.0;
         double d1 = (this.body.getBoundingBox().minZ + this.body.getBoundingBox().maxZ) / 2.0;
 
-        for (Entity entity : p_31132_) {
+        for (Entity entity : pTargets) {
             if (entity instanceof LivingEntity) {
                 LivingEntity livingentity = (LivingEntity)entity;
                 double d2 = entity.getX() - d0;
@@ -408,34 +408,34 @@ public class EnderDragon extends Mob implements Enemy {
                 entity.push(d2 / d4 * 4.0, 0.2F, d3 / d4 * 4.0);
                 if (!this.phaseManager.getCurrentPhase().isSitting() && livingentity.getLastHurtByMobTimestamp() < entity.tickCount - 2) {
                     DamageSource damagesource = this.damageSources().mobAttack(this);
-                    entity.hurtServer(p_343522_, damagesource, 5.0F);
-                    EnchantmentHelper.doPostAttackEffects(p_343522_, entity, damagesource);
+                    entity.hurtServer(pLevel, damagesource, 5.0F);
+                    EnchantmentHelper.doPostAttackEffects(pLevel, entity, damagesource);
                 }
             }
         }
     }
 
-    private void hurt(ServerLevel p_366619_, List<Entity> p_361288_) {
-        for (Entity entity : p_361288_) {
+    private void hurt(ServerLevel pLevel, List<Entity> pEntities) {
+        for (Entity entity : pEntities) {
             if (entity instanceof LivingEntity) {
                 DamageSource damagesource = this.damageSources().mobAttack(this);
-                entity.hurtServer(p_366619_, damagesource, 10.0F);
-                EnchantmentHelper.doPostAttackEffects(p_366619_, entity, damagesource);
+                entity.hurtServer(pLevel, damagesource, 10.0F);
+                EnchantmentHelper.doPostAttackEffects(pLevel, entity, damagesource);
             }
         }
     }
 
-    private float rotWrap(double p_31165_) {
-        return (float)Mth.wrapDegrees(p_31165_);
+    private float rotWrap(double pAngle) {
+        return (float)Mth.wrapDegrees(pAngle);
     }
 
-    private boolean checkWalls(ServerLevel p_363273_, AABB p_31140_) {
-        int i = Mth.floor(p_31140_.minX);
-        int j = Mth.floor(p_31140_.minY);
-        int k = Mth.floor(p_31140_.minZ);
-        int l = Mth.floor(p_31140_.maxX);
-        int i1 = Mth.floor(p_31140_.maxY);
-        int j1 = Mth.floor(p_31140_.maxZ);
+    private boolean checkWalls(ServerLevel pLevel, AABB pBox) {
+        int i = Mth.floor(pBox.minX);
+        int j = Mth.floor(pBox.minY);
+        int k = Mth.floor(pBox.minZ);
+        int l = Mth.floor(pBox.maxX);
+        int i1 = Mth.floor(pBox.maxY);
+        int j1 = Mth.floor(pBox.maxZ);
         boolean flag = false;
         boolean flag1 = false;
 
@@ -443,10 +443,10 @@ public class EnderDragon extends Mob implements Enemy {
             for (int l1 = j; l1 <= i1; l1++) {
                 for (int i2 = k; i2 <= j1; i2++) {
                     BlockPos blockpos = new BlockPos(k1, l1, i2);
-                    BlockState blockstate = p_363273_.getBlockState(blockpos);
+                    BlockState blockstate = pLevel.getBlockState(blockpos);
                     if (!blockstate.isAir() && !blockstate.is(BlockTags.DRAGON_TRANSPARENT)) {
-                        if (p_363273_.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && !blockstate.is(BlockTags.DRAGON_IMMUNE)) {
-                            flag1 = p_363273_.removeBlock(blockpos, false) || flag1;
+                        if (pLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && !blockstate.is(BlockTags.DRAGON_IMMUNE)) {
+                            flag1 = pLevel.removeBlock(blockpos, false) || flag1;
                         } else {
                             flag = true;
                         }
@@ -459,27 +459,27 @@ public class EnderDragon extends Mob implements Enemy {
             BlockPos blockpos1 = new BlockPos(
                 i + this.random.nextInt(l - i + 1), j + this.random.nextInt(i1 - j + 1), k + this.random.nextInt(j1 - k + 1)
             );
-            p_363273_.levelEvent(2008, blockpos1, 0);
+            pLevel.levelEvent(2008, blockpos1, 0);
         }
 
         return flag;
     }
 
-    public boolean hurt(ServerLevel p_363622_, EnderDragonPart p_361953_, DamageSource p_369686_, float p_362736_) {
+    public boolean hurt(ServerLevel pLevel, EnderDragonPart pPart, DamageSource pDamageSource, float pAmount) {
         if (this.phaseManager.getCurrentPhase().getPhase() == EnderDragonPhase.DYING) {
             return false;
         } else {
-            p_362736_ = this.phaseManager.getCurrentPhase().onHurt(p_369686_, p_362736_);
-            if (p_361953_ != this.head) {
-                p_362736_ = p_362736_ / 4.0F + Math.min(p_362736_, 1.0F);
+            pAmount = this.phaseManager.getCurrentPhase().onHurt(pDamageSource, pAmount);
+            if (pPart != this.head) {
+                pAmount = pAmount / 4.0F + Math.min(pAmount, 1.0F);
             }
 
-            if (p_362736_ < 0.01F) {
+            if (pAmount < 0.01F) {
                 return false;
             } else {
-                if (p_369686_.getEntity() instanceof Player || p_369686_.is(DamageTypeTags.ALWAYS_HURTS_ENDER_DRAGONS)) {
+                if (pDamageSource.getEntity() instanceof Player || pDamageSource.is(DamageTypeTags.ALWAYS_HURTS_ENDER_DRAGONS)) {
                     float f = this.getHealth();
-                    this.reallyHurt(p_363622_, p_369686_, p_362736_);
+                    this.reallyHurt(pLevel, pDamageSource, pAmount);
                     if (this.isDeadOrDying() && !this.phaseManager.getCurrentPhase().isSitting()) {
                         this.setHealth(1.0F);
                         this.phaseManager.setPhase(EnderDragonPhase.DYING);
@@ -504,8 +504,8 @@ public class EnderDragon extends Mob implements Enemy {
         return this.hurt(p_364327_, this.body, p_363284_, p_360908_);
     }
 
-    protected void reallyHurt(ServerLevel p_360975_, DamageSource p_31162_, float p_31163_) {
-        super.hurtServer(p_360975_, p_31162_, p_31163_);
+    protected void reallyHurt(ServerLevel pLevel, DamageSource pDamageSource, float pAmount) {
+        super.hurtServer(pLevel, pDamageSource, pAmount);
     }
 
     @Override
@@ -623,10 +623,10 @@ public class EnderDragon extends Mob implements Enemy {
         return this.findClosestNode(this.getX(), this.getY(), this.getZ());
     }
 
-    public int findClosestNode(double p_31171_, double p_31172_, double p_31173_) {
+    public int findClosestNode(double pX, double pY, double pZ) {
         float f = 10000.0F;
         int i = 0;
-        Node node = new Node(Mth.floor(p_31171_), Mth.floor(p_31172_), Mth.floor(p_31173_));
+        Node node = new Node(Mth.floor(pX), Mth.floor(pY), Mth.floor(pZ));
         int j = 0;
         if (this.dragonFight == null || this.dragonFight.getCrystalsAlive() == 0) {
             j = 12;
@@ -646,7 +646,7 @@ public class EnderDragon extends Mob implements Enemy {
     }
 
     @Nullable
-    public Path findPath(int p_31105_, int p_31106_, @Nullable Node p_31107_) {
+    public Path findPath(int pStartIndex, int pFinishIndex, @Nullable Node pAndThen) {
         for (int i = 0; i < 24; i++) {
             Node node = this.nodes[i];
             node.closed = false;
@@ -657,8 +657,8 @@ public class EnderDragon extends Mob implements Enemy {
             node.heapIdx = -1;
         }
 
-        Node node4 = this.nodes[p_31105_];
-        Node node5 = this.nodes[p_31106_];
+        Node node4 = this.nodes[pStartIndex];
+        Node node5 = this.nodes[pFinishIndex];
         node4.g = 0.0F;
         node4.h = node4.distanceTo(node5);
         node4.f = node4.h;
@@ -673,9 +673,9 @@ public class EnderDragon extends Mob implements Enemy {
         while (!this.openSet.isEmpty()) {
             Node node2 = this.openSet.pop();
             if (node2.equals(node5)) {
-                if (p_31107_ != null) {
-                    p_31107_.cameFrom = node5;
-                    node5 = p_31107_;
+                if (pAndThen != null) {
+                    pAndThen.cameFrom = node5;
+                    node5 = pAndThen;
                 }
 
                 return this.reconstructPath(node4, node5);
@@ -719,45 +719,45 @@ public class EnderDragon extends Mob implements Enemy {
         if (node1 == node4) {
             return null;
         } else {
-            LOGGER.debug("Failed to find path from {} to {}", p_31105_, p_31106_);
-            if (p_31107_ != null) {
-                p_31107_.cameFrom = node1;
-                node1 = p_31107_;
+            LOGGER.debug("Failed to find path from {} to {}", pStartIndex, pFinishIndex);
+            if (pAndThen != null) {
+                pAndThen.cameFrom = node1;
+                node1 = pAndThen;
             }
 
             return this.reconstructPath(node4, node1);
         }
     }
 
-    private Path reconstructPath(Node p_31129_, Node p_31130_) {
+    private Path reconstructPath(Node pStart, Node pFinish) {
         List<Node> list = Lists.newArrayList();
-        Node node = p_31130_;
-        list.add(0, p_31130_);
+        Node node = pFinish;
+        list.add(0, pFinish);
 
         while (node.cameFrom != null) {
             node = node.cameFrom;
             list.add(0, node);
         }
 
-        return new Path(list, new BlockPos(p_31130_.x, p_31130_.y, p_31130_.z), true);
+        return new Path(list, new BlockPos(pFinish.x, pFinish.y, pFinish.z), true);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_31144_) {
-        super.addAdditionalSaveData(p_31144_);
-        p_31144_.putInt("DragonPhase", this.phaseManager.getCurrentPhase().getPhase().getId());
-        p_31144_.putInt("DragonDeathTime", this.dragonDeathTime);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("DragonPhase", this.phaseManager.getCurrentPhase().getPhase().getId());
+        pCompound.putInt("DragonDeathTime", this.dragonDeathTime);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_31134_) {
-        super.readAdditionalSaveData(p_31134_);
-        if (p_31134_.contains("DragonPhase")) {
-            this.phaseManager.setPhase(EnderDragonPhase.getById(p_31134_.getInt("DragonPhase")));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("DragonPhase")) {
+            this.phaseManager.setPhase(EnderDragonPhase.getById(pCompound.getInt("DragonPhase")));
         }
 
-        if (p_31134_.contains("DragonDeathTime")) {
-            this.dragonDeathTime = p_31134_.getInt("DragonDeathTime");
+        if (pCompound.contains("DragonDeathTime")) {
+            this.dragonDeathTime = pCompound.getInt("DragonDeathTime");
         }
     }
 
@@ -785,7 +785,7 @@ public class EnderDragon extends Mob implements Enemy {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_31154_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.ENDER_DRAGON_HURT;
     }
 
@@ -794,7 +794,7 @@ public class EnderDragon extends Mob implements Enemy {
         return 5.0F;
     }
 
-    public Vec3 getHeadLookVector(float p_31175_) {
+    public Vec3 getHeadLookVector(float pPartialTicks) {
         DragonPhaseInstance dragonphaseinstance = this.phaseManager.getCurrentPhase();
         EnderDragonPhase<? extends DragonPhaseInstance> enderdragonphase = dragonphaseinstance.getPhase();
         Vec3 vec3;
@@ -805,43 +805,43 @@ public class EnderDragon extends Mob implements Enemy {
             float f3 = this.getXRot();
             float f4 = 1.5F;
             this.setXRot(-f2 * 1.5F * 5.0F);
-            vec3 = this.getViewVector(p_31175_);
+            vec3 = this.getViewVector(pPartialTicks);
             this.setXRot(f3);
         } else if (dragonphaseinstance.isSitting()) {
             float f = this.getXRot();
             float f1 = 1.5F;
             this.setXRot(-45.0F);
-            vec3 = this.getViewVector(p_31175_);
+            vec3 = this.getViewVector(pPartialTicks);
             this.setXRot(f);
         } else {
-            vec3 = this.getViewVector(p_31175_);
+            vec3 = this.getViewVector(pPartialTicks);
         }
 
         return vec3;
     }
 
-    public void onCrystalDestroyed(ServerLevel p_365946_, EndCrystal p_31125_, BlockPos p_31126_, DamageSource p_31127_) {
+    public void onCrystalDestroyed(ServerLevel pLevel, EndCrystal pCrystal, BlockPos pPos, DamageSource pDamageSource) {
         Player player;
-        if (p_31127_.getEntity() instanceof Player) {
-            player = (Player)p_31127_.getEntity();
+        if (pDamageSource.getEntity() instanceof Player) {
+            player = (Player)pDamageSource.getEntity();
         } else {
-            player = p_365946_.getNearestPlayer(CRYSTAL_DESTROY_TARGETING, (double)p_31126_.getX(), (double)p_31126_.getY(), (double)p_31126_.getZ());
+            player = pLevel.getNearestPlayer(CRYSTAL_DESTROY_TARGETING, (double)pPos.getX(), (double)pPos.getY(), (double)pPos.getZ());
         }
 
-        if (p_31125_ == this.nearestCrystal) {
-            this.hurt(p_365946_, this.head, this.damageSources().explosion(p_31125_, player), 10.0F);
+        if (pCrystal == this.nearestCrystal) {
+            this.hurt(pLevel, this.head, this.damageSources().explosion(pCrystal, player), 10.0F);
         }
 
-        this.phaseManager.getCurrentPhase().onCrystalDestroyed(p_31125_, p_31126_, p_31127_, player);
+        this.phaseManager.getCurrentPhase().onCrystalDestroyed(pCrystal, pPos, pDamageSource, player);
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_31136_) {
-        if (DATA_PHASE.equals(p_31136_) && this.level().isClientSide) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        if (DATA_PHASE.equals(pKey) && this.level().isClientSide) {
             this.phaseManager.setPhase(EnderDragonPhase.getById(this.getEntityData().get(DATA_PHASE)));
         }
 
-        super.onSyncedDataUpdated(p_31136_);
+        super.onSyncedDataUpdated(pKey);
     }
 
     public EnderDragonPhaseManager getPhaseManager() {
@@ -859,7 +859,7 @@ public class EnderDragon extends Mob implements Enemy {
     }
 
     @Override
-    protected boolean canRide(Entity p_31169_) {
+    protected boolean canRide(Entity pEntity) {
         return false;
     }
 

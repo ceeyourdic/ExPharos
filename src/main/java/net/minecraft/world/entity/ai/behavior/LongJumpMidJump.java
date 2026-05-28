@@ -15,10 +15,10 @@ public class LongJumpMidJump extends Behavior<Mob> {
     private final UniformInt timeBetweenLongJumps;
     private final SoundEvent landingSound;
 
-    public LongJumpMidJump(UniformInt p_147596_, SoundEvent p_147597_) {
+    public LongJumpMidJump(UniformInt pTimeBetweenLongJumps, SoundEvent pLandingSound) {
         super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryStatus.VALUE_PRESENT), 100);
-        this.timeBetweenLongJumps = p_147596_;
-        this.landingSound = p_147597_;
+        this.timeBetweenLongJumps = pTimeBetweenLongJumps;
+        this.landingSound = pLandingSound;
     }
 
     protected boolean canStillUse(ServerLevel p_147603_, Mob p_147604_, long p_147605_) {

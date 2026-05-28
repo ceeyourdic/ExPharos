@@ -83,16 +83,16 @@ public class LightningRodBlock extends RodBlock implements SimpleWaterloggedBloc
         return p_153748_.getValue(POWERED) && p_153748_.getValue(FACING) == p_153751_ ? 15 : 0;
     }
 
-    public void onLightningStrike(BlockState p_153761_, Level p_153762_, BlockPos p_153763_) {
-        p_153762_.setBlock(p_153763_, p_153761_.setValue(POWERED, Boolean.valueOf(true)), 3);
-        this.updateNeighbours(p_153761_, p_153762_, p_153763_);
-        p_153762_.scheduleTick(p_153763_, this, 8);
-        p_153762_.levelEvent(3002, p_153763_, p_153761_.getValue(FACING).getAxis().ordinal());
+    public void onLightningStrike(BlockState pState, Level pLevel, BlockPos pPos) {
+        pLevel.setBlock(pPos, pState.setValue(POWERED, Boolean.valueOf(true)), 3);
+        this.updateNeighbours(pState, pLevel, pPos);
+        pLevel.scheduleTick(pPos, this, 8);
+        pLevel.levelEvent(3002, pPos, pState.getValue(FACING).getAxis().ordinal());
     }
 
-    private void updateNeighbours(BlockState p_153765_, Level p_153766_, BlockPos p_153767_) {
-        Direction direction = p_153765_.getValue(FACING).getOpposite();
-        p_153766_.updateNeighborsAt(p_153767_.relative(direction), this, ExperimentalRedstoneUtils.initialOrientation(p_153766_, direction, null));
+    private void updateNeighbours(BlockState pState, Level pLevel, BlockPos pPos) {
+        Direction direction = pState.getValue(FACING).getOpposite();
+        pLevel.updateNeighborsAt(pPos.relative(direction), this, ExperimentalRedstoneUtils.initialOrientation(pLevel, direction, null));
     }
 
     @Override

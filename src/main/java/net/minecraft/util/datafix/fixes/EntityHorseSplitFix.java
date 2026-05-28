@@ -10,8 +10,8 @@ import java.util.Objects;
 import net.minecraft.Util;
 
 public class EntityHorseSplitFix extends EntityRenameFix {
-    public EntityHorseSplitFix(Schema p_15447_, boolean p_15448_) {
-        super("EntityHorseSplitFix", p_15447_, p_15448_);
+    public EntityHorseSplitFix(Schema pOutputSchema, boolean pChangesType) {
+        super("EntityHorseSplitFix", pOutputSchema, pChangesType);
     }
 
     @Override

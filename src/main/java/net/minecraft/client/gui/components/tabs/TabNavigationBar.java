@@ -40,26 +40,26 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
     private final ImmutableList<Tab> tabs;
     private final ImmutableList<TabButton> tabButtons;
 
-    TabNavigationBar(int p_275379_, TabManager p_275624_, Iterable<Tab> p_275279_) {
-        this.width = p_275379_;
-        this.tabManager = p_275624_;
-        this.tabs = ImmutableList.copyOf(p_275279_);
+    TabNavigationBar(int pWidth, TabManager pTabManager, Iterable<Tab> pTabs) {
+        this.width = pWidth;
+        this.tabManager = pTabManager;
+        this.tabs = ImmutableList.copyOf(pTabs);
         this.layout.defaultCellSetting().alignHorizontallyCenter();
         ImmutableList.Builder<TabButton> builder = ImmutableList.builder();
 
-        for (Tab tab : p_275279_) {
-            builder.add(this.layout.addChild(new TabButton(p_275624_, tab, 0, 24)));
+        for (Tab tab : pTabs) {
+            builder.add(this.layout.addChild(new TabButton(pTabManager, tab, 0, 24)));
         }
 
         this.tabButtons = builder.build();
     }
 
-    public static TabNavigationBar.Builder builder(TabManager p_268126_, int p_268070_) {
-        return new TabNavigationBar.Builder(p_268126_, p_268070_);
+    public static TabNavigationBar.Builder builder(TabManager pTabManager, int pWidth) {
+        return new TabNavigationBar.Builder(pTabManager, pWidth);
     }
 
-    public void setWidth(int p_268094_) {
-        this.width = p_268094_;
+    public void setWidth(int pWidth) {
+        this.width = pWidth;
     }
 
     @Override
@@ -121,11 +121,11 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
         }
     }
 
-    protected void narrateListElementPosition(NarrationElementOutput p_275386_, TabButton p_275397_) {
+    protected void narrateListElementPosition(NarrationElementOutput pNarrationElementOutput, TabButton pTabButton) {
         if (this.tabs.size() > 1) {
-            int i = this.tabButtons.indexOf(p_275397_);
+            int i = this.tabButtons.indexOf(pTabButton);
             if (i != -1) {
-                p_275386_.add(NarratedElementType.POSITION, Component.translatable("narrator.position.tab", i + 1, this.tabs.size()));
+                pNarrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.tab", i + 1, this.tabs.size()));
             }
         }
     }
@@ -172,17 +172,17 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
         this.layout.setY(0);
     }
 
-    public void selectTab(int p_276107_, boolean p_276125_) {
+    public void selectTab(int pIndex, boolean pPlayClickSound) {
         if (this.isFocused()) {
-            this.setFocused(this.tabButtons.get(p_276107_));
+            this.setFocused(this.tabButtons.get(pIndex));
         } else {
-            this.tabManager.setCurrentTab(this.tabs.get(p_276107_), p_276125_);
+            this.tabManager.setCurrentTab(this.tabs.get(pIndex), pPlayClickSound);
         }
     }
 
-    public boolean keyPressed(int p_270495_) {
+    public boolean keyPressed(int pKeycode) {
         if (Screen.hasControlDown()) {
-            int i = this.getNextTabIndex(p_270495_);
+            int i = this.getNextTabIndex(pKeycode);
             if (i != -1) {
                 this.selectTab(Mth.clamp(i, 0, this.tabs.size() - 1), true);
                 return true;
@@ -192,11 +192,11 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
         return false;
     }
 
-    private int getNextTabIndex(int p_270508_) {
-        if (p_270508_ >= 49 && p_270508_ <= 57) {
-            return p_270508_ - 49;
+    private int getNextTabIndex(int pKeycode) {
+        if (pKeycode >= 49 && pKeycode <= 57) {
+            return pKeycode - 49;
         } else {
-            if (p_270508_ == 258) {
+            if (pKeycode == 258) {
                 int i = this.currentTabIndex();
                 if (i != -1) {
                     int j = Screen.hasShiftDown() ? i - 1 : i + 1;
@@ -226,13 +226,13 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
         private final TabManager tabManager;
         private final List<Tab> tabs = new ArrayList<>();
 
-        Builder(TabManager p_268334_, int p_267986_) {
-            this.tabManager = p_268334_;
-            this.width = p_267986_;
+        Builder(TabManager pTabManager, int pWidth) {
+            this.tabManager = pTabManager;
+            this.width = pWidth;
         }
 
-        public TabNavigationBar.Builder addTabs(Tab... p_268144_) {
-            Collections.addAll(this.tabs, p_268144_);
+        public TabNavigationBar.Builder addTabs(Tab... pTabs) {
+            Collections.addAll(this.tabs, pTabs);
             return this;
         }
 

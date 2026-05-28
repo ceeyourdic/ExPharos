@@ -44,13 +44,13 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
         super(p_37027_, p_37028_);
     }
 
-    public FireworkRocketEntity(Level p_37030_, double p_37031_, double p_37032_, double p_37033_, ItemStack p_37034_) {
-        super(EntityType.FIREWORK_ROCKET, p_37030_);
+    public FireworkRocketEntity(Level pLevel, double pX, double pY, double pZ, ItemStack pStack) {
+        super(EntityType.FIREWORK_ROCKET, pLevel);
         this.life = 0;
-        this.setPos(p_37031_, p_37032_, p_37033_);
-        this.entityData.set(DATA_ID_FIREWORKS_ITEM, p_37034_.copy());
+        this.setPos(pX, pY, pZ);
+        this.entityData.set(DATA_ID_FIREWORKS_ITEM, pStack.copy());
         int i = 1;
-        Fireworks fireworks = p_37034_.get(DataComponents.FIREWORKS);
+        Fireworks fireworks = pStack.get(DataComponents.FIREWORKS);
         if (fireworks != null) {
             i += fireworks.flightDuration();
         }
@@ -59,25 +59,25 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
         this.lifetime = 10 * i + this.random.nextInt(6) + this.random.nextInt(7);
     }
 
-    public FireworkRocketEntity(Level p_37036_, @Nullable Entity p_37037_, double p_37038_, double p_37039_, double p_37040_, ItemStack p_37041_) {
-        this(p_37036_, p_37038_, p_37039_, p_37040_, p_37041_);
-        this.setOwner(p_37037_);
+    public FireworkRocketEntity(Level pLevel, @Nullable Entity pShooter, double pX, double pY, double pZ, ItemStack pStack) {
+        this(pLevel, pX, pY, pZ, pStack);
+        this.setOwner(pShooter);
     }
 
-    public FireworkRocketEntity(Level p_37058_, ItemStack p_37059_, LivingEntity p_37060_) {
-        this(p_37058_, p_37060_, p_37060_.getX(), p_37060_.getY(), p_37060_.getZ(), p_37059_);
-        this.entityData.set(DATA_ATTACHED_TO_TARGET, OptionalInt.of(p_37060_.getId()));
-        this.attachedToEntity = p_37060_;
+    public FireworkRocketEntity(Level pLevel, ItemStack pStack, LivingEntity pShooter) {
+        this(pLevel, pShooter, pShooter.getX(), pShooter.getY(), pShooter.getZ(), pStack);
+        this.entityData.set(DATA_ATTACHED_TO_TARGET, OptionalInt.of(pShooter.getId()));
+        this.attachedToEntity = pShooter;
     }
 
-    public FireworkRocketEntity(Level p_37043_, ItemStack p_37044_, double p_37045_, double p_37046_, double p_37047_, boolean p_37048_) {
-        this(p_37043_, p_37045_, p_37046_, p_37047_, p_37044_);
-        this.entityData.set(DATA_SHOT_AT_ANGLE, p_37048_);
+    public FireworkRocketEntity(Level pLevel, ItemStack pStack, double pX, double pY, double pZ, boolean pShotAtAngle) {
+        this(pLevel, pX, pY, pZ, pStack);
+        this.entityData.set(DATA_SHOT_AT_ANGLE, pShotAtAngle);
     }
 
-    public FireworkRocketEntity(Level p_37050_, ItemStack p_37051_, Entity p_37052_, double p_37053_, double p_37054_, double p_37055_, boolean p_37056_) {
-        this(p_37050_, p_37051_, p_37053_, p_37054_, p_37055_, p_37056_);
-        this.setOwner(p_37052_);
+    public FireworkRocketEntity(Level pLevel, ItemStack pStack, Entity pShooter, double pX, double pY, double pZ, boolean pShotAtAngle) {
+        this(pLevel, pStack, pX, pY, pZ, pShotAtAngle);
+        this.setOwner(pShooter);
     }
 
     @Override
@@ -88,13 +88,13 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
     }
 
     @Override
-    public boolean shouldRenderAtSqrDistance(double p_37065_) {
-        return p_37065_ < 4096.0 && !this.isAttachedToEntity();
+    public boolean shouldRenderAtSqrDistance(double pDistance) {
+        return pDistance < 4096.0 && !this.isAttachedToEntity();
     }
 
     @Override
-    public boolean shouldRender(double p_37083_, double p_37084_, double p_37085_) {
-        return super.shouldRender(p_37083_, p_37084_, p_37085_) && !this.isAttachedToEntity();
+    public boolean shouldRender(double pX, double pY, double pZ) {
+        return super.shouldRender(pX, pY, pZ) && !this.isAttachedToEntity();
     }
 
     @Override
@@ -178,16 +178,16 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
         }
     }
 
-    private void explode(ServerLevel p_361825_) {
-        p_361825_.broadcastEntityEvent(this, (byte)17);
+    private void explode(ServerLevel pLevel) {
+        pLevel.broadcastEntityEvent(this, (byte)17);
         this.gameEvent(GameEvent.EXPLODE, this.getOwner());
-        this.dealExplosionDamage(p_361825_);
+        this.dealExplosionDamage(pLevel);
         this.discard();
     }
 
     @Override
-    protected void onHitEntity(EntityHitResult p_37071_) {
-        super.onHitEntity(p_37071_);
+    protected void onHitEntity(EntityHitResult pResult) {
+        super.onHitEntity(pResult);
         if (this.level() instanceof ServerLevel serverlevel) {
             this.explode(serverlevel);
         }
@@ -208,7 +208,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
         return !this.getExplosions().isEmpty();
     }
 
-    private void dealExplosionDamage(ServerLevel p_364659_) {
+    private void dealExplosionDamage(ServerLevel pLevel) {
         float f = 0.0F;
         List<FireworkExplosion> list = this.getExplosions();
         if (!list.isEmpty()) {
@@ -217,7 +217,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
         if (f > 0.0F) {
             if (this.attachedToEntity != null) {
-                this.attachedToEntity.hurtServer(p_364659_, this.damageSources().fireworks(this, this.getOwner()), 5.0F + (float)(list.size() * 2));
+                this.attachedToEntity.hurtServer(pLevel, this.damageSources().fireworks(this, this.getOwner()), 5.0F + (float)(list.size() * 2));
             }
 
             double d0 = 5.0;
@@ -238,7 +238,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
                     if (flag) {
                         float f1 = f * (float)Math.sqrt((5.0 - (double)this.distanceTo(livingentity)) / 5.0);
-                        livingentity.hurtServer(p_364659_, this.damageSources().fireworks(this, this.getOwner()), f1);
+                        livingentity.hurtServer(pLevel, this.damageSources().fireworks(this, this.getOwner()), f1);
                     }
                 }
             }
@@ -264,28 +264,28 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_37075_) {
-        super.addAdditionalSaveData(p_37075_);
-        p_37075_.putInt("Life", this.life);
-        p_37075_.putInt("LifeTime", this.lifetime);
-        p_37075_.put("FireworksItem", this.getItem().save(this.registryAccess()));
-        p_37075_.putBoolean("ShotAtAngle", this.entityData.get(DATA_SHOT_AT_ANGLE));
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("Life", this.life);
+        pCompound.putInt("LifeTime", this.lifetime);
+        pCompound.put("FireworksItem", this.getItem().save(this.registryAccess()));
+        pCompound.putBoolean("ShotAtAngle", this.entityData.get(DATA_SHOT_AT_ANGLE));
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_37073_) {
-        super.readAdditionalSaveData(p_37073_);
-        this.life = p_37073_.getInt("Life");
-        this.lifetime = p_37073_.getInt("LifeTime");
-        if (p_37073_.contains("FireworksItem", 10)) {
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.life = pCompound.getInt("Life");
+        this.lifetime = pCompound.getInt("LifeTime");
+        if (pCompound.contains("FireworksItem", 10)) {
             this.entityData
-                .set(DATA_ID_FIREWORKS_ITEM, ItemStack.parse(this.registryAccess(), p_37073_.getCompound("FireworksItem")).orElseGet(FireworkRocketEntity::getDefaultItem));
+                .set(DATA_ID_FIREWORKS_ITEM, ItemStack.parse(this.registryAccess(), pCompound.getCompound("FireworksItem")).orElseGet(FireworkRocketEntity::getDefaultItem));
         } else {
             this.entityData.set(DATA_ID_FIREWORKS_ITEM, getDefaultItem());
         }
 
-        if (p_37073_.contains("ShotAtAngle")) {
-            this.entityData.set(DATA_SHOT_AT_ANGLE, p_37073_.getBoolean("ShotAtAngle"));
+        if (pCompound.contains("ShotAtAngle")) {
+            this.entityData.set(DATA_SHOT_AT_ANGLE, pCompound.getBoolean("ShotAtAngle"));
         }
     }
 

@@ -124,18 +124,18 @@ public class TracyZoneFiller implements ProfilerFiller {
         private final Plot plot;
         private int value;
 
-        PlotAndValue(String p_366532_) {
-            this.plot = TracyClient.createPlot(p_366532_);
+        PlotAndValue(String pName) {
+            this.plot = TracyClient.createPlot(pName);
             this.value = 0;
         }
 
-        void set(int p_362550_) {
-            this.value = p_362550_;
-            this.plot.setValue((double)p_362550_);
+        void set(int pValue) {
+            this.value = pValue;
+            this.plot.setValue((double)pValue);
         }
 
-        void add(int p_365380_) {
-            this.set(this.value + p_365380_);
+        void add(int pValue) {
+            this.set(this.value + pValue);
         }
     }
 }

@@ -34,9 +34,9 @@ public class ShareToLanScreen extends Screen {
     @Nullable
     private EditBox portEdit;
 
-    public ShareToLanScreen(Screen p_96650_) {
+    public ShareToLanScreen(Screen pLastScreen) {
         super(Component.translatable("lanServer.title"));
-        this.lastScreen = p_96650_;
+        this.lastScreen = pLastScreen;
     }
 
     @Override
@@ -93,13 +93,13 @@ public class ShareToLanScreen extends Screen {
     }
 
     @Nullable
-    private Component tryParsePort(String p_259426_) {
-        if (p_259426_.isBlank()) {
+    private Component tryParsePort(String pPort) {
+        if (pPort.isBlank()) {
             this.port = HttpUtil.getAvailablePort();
             return null;
         } else {
             try {
-                this.port = Integer.parseInt(p_259426_);
+                this.port = Integer.parseInt(pPort);
                 if (this.port < 1024 || this.port > 65535) {
                     return INVALID_PORT;
                 } else {

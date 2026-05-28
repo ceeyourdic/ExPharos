@@ -15,47 +15,47 @@ public class CommandStorage {
     private final Map<String, CommandStorage.Container> namespaces = Maps.newHashMap();
     private final DimensionDataStorage storage;
 
-    public CommandStorage(DimensionDataStorage p_78035_) {
-        this.storage = p_78035_;
+    public CommandStorage(DimensionDataStorage pStorage) {
+        this.storage = pStorage;
     }
 
-    private CommandStorage.Container newStorage(String p_164836_) {
+    private CommandStorage.Container newStorage(String pNamespace) {
         CommandStorage.Container commandstorage$container = new CommandStorage.Container();
-        this.namespaces.put(p_164836_, commandstorage$container);
+        this.namespaces.put(pNamespace, commandstorage$container);
         return commandstorage$container;
     }
 
-    private SavedData.Factory<CommandStorage.Container> factory(String p_300877_) {
+    private SavedData.Factory<CommandStorage.Container> factory(String pNamespace) {
         return new SavedData.Factory<>(
-            () -> this.newStorage(p_300877_), (p_164844_, p_334591_) -> this.newStorage(p_300877_).load(p_164844_), DataFixTypes.SAVED_DATA_COMMAND_STORAGE
+            () -> this.newStorage(pNamespace), (p_164844_, p_334591_) -> this.newStorage(pNamespace).load(p_164844_), DataFixTypes.SAVED_DATA_COMMAND_STORAGE
         );
     }
 
-    public CompoundTag get(ResourceLocation p_78045_) {
-        String s = p_78045_.getNamespace();
+    public CompoundTag get(ResourceLocation pId) {
+        String s = pId.getNamespace();
         CommandStorage.Container commandstorage$container = this.storage.get(this.factory(s), createId(s));
-        return commandstorage$container != null ? commandstorage$container.get(p_78045_.getPath()) : new CompoundTag();
+        return commandstorage$container != null ? commandstorage$container.get(pId.getPath()) : new CompoundTag();
     }
 
-    public void set(ResourceLocation p_78047_, CompoundTag p_78048_) {
-        String s = p_78047_.getNamespace();
-        this.storage.computeIfAbsent(this.factory(s), createId(s)).put(p_78047_.getPath(), p_78048_);
+    public void set(ResourceLocation pId, CompoundTag pNbt) {
+        String s = pId.getNamespace();
+        this.storage.computeIfAbsent(this.factory(s), createId(s)).put(pId.getPath(), pNbt);
     }
 
     public Stream<ResourceLocation> keys() {
         return this.namespaces.entrySet().stream().flatMap(p_164841_ -> p_164841_.getValue().getKeys(p_164841_.getKey()));
     }
 
-    private static String createId(String p_78038_) {
-        return "command_storage_" + p_78038_;
+    private static String createId(String pNamespace) {
+        return "command_storage_" + pNamespace;
     }
 
     static class Container extends SavedData {
         private static final String TAG_CONTENTS = "contents";
         private final Map<String, CompoundTag> storage = Maps.newHashMap();
 
-        CommandStorage.Container load(CompoundTag p_164850_) {
-            CompoundTag compoundtag = p_164850_.getCompound("contents");
+        CommandStorage.Container load(CompoundTag pCompoundTag) {
+            CompoundTag compoundtag = pCompoundTag.getCompound("contents");
 
             for (String s : compoundtag.getAllKeys()) {
                 this.storage.put(s, compoundtag.getCompound(s));
@@ -72,23 +72,23 @@ public class CommandStorage {
             return p_78075_;
         }
 
-        public CompoundTag get(String p_78059_) {
-            CompoundTag compoundtag = this.storage.get(p_78059_);
+        public CompoundTag get(String pId) {
+            CompoundTag compoundtag = this.storage.get(pId);
             return compoundtag != null ? compoundtag : new CompoundTag();
         }
 
-        public void put(String p_78064_, CompoundTag p_78065_) {
-            if (p_78065_.isEmpty()) {
-                this.storage.remove(p_78064_);
+        public void put(String pId, CompoundTag pNbt) {
+            if (pNbt.isEmpty()) {
+                this.storage.remove(pId);
             } else {
-                this.storage.put(p_78064_, p_78065_);
+                this.storage.put(pId, pNbt);
             }
 
             this.setDirty();
         }
 
-        public Stream<ResourceLocation> getKeys(String p_78073_) {
-            return this.storage.keySet().stream().map(p_341970_ -> ResourceLocation.fromNamespaceAndPath(p_78073_, p_341970_));
+        public Stream<ResourceLocation> getKeys(String pNamespace) {
+            return this.storage.keySet().stream().map(p_341970_ -> ResourceLocation.fromNamespaceAndPath(pNamespace, p_341970_));
         }
     }
 }

@@ -9,7 +9,7 @@ import net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 public class DismountOrSkipMounting {
-    public static <E extends LivingEntity> BehaviorControl<E> create(int p_259945_, BiPredicate<E, Entity> p_259837_) {
+    public static <E extends LivingEntity> BehaviorControl<E> create(int pMaxDistanceFromVehicle, BiPredicate<E, Entity> pShouldStopRiding) {
         return BehaviorBuilder.create(
             p_259780_ -> p_259780_.group(p_259780_.registered(MemoryModuleType.RIDE_TARGET)).apply(p_259780_, p_259326_ -> (p_259287_, p_259246_, p_259462_) -> {
                         Entity entity = p_259246_.getVehicle();
@@ -18,7 +18,7 @@ public class DismountOrSkipMounting {
                             return false;
                         } else {
                             Entity entity2 = entity == null ? entity1 : entity;
-                            if (isVehicleValid(p_259246_, entity2, p_259945_) && !p_259837_.test(p_259246_, entity2)) {
+                            if (isVehicleValid(p_259246_, entity2, pMaxDistanceFromVehicle) && !pShouldStopRiding.test(p_259246_, entity2)) {
                                 return false;
                             } else {
                                 p_259246_.stopRiding();
@@ -30,7 +30,7 @@ public class DismountOrSkipMounting {
         );
     }
 
-    private static boolean isVehicleValid(LivingEntity p_259293_, Entity p_260023_, int p_259048_) {
-        return p_260023_.isAlive() && p_260023_.closerThan(p_259293_, (double)p_259048_) && p_260023_.level() == p_259293_.level();
+    private static boolean isVehicleValid(LivingEntity pEntity, Entity pVehicle, int pDistance) {
+        return pVehicle.isAlive() && pVehicle.closerThan(pEntity, (double)pDistance) && pVehicle.level() == pEntity.level();
     }
 }

@@ -21,17 +21,17 @@ public class GameConfig {
     public final GameConfig.QuickPlayData quickPlay;
 
     public GameConfig(
-        GameConfig.UserData p_279448_,
-        DisplayData p_279368_,
-        GameConfig.FolderData p_279174_,
-        GameConfig.GameData p_279138_,
-        GameConfig.QuickPlayData p_279425_
+        GameConfig.UserData pUser,
+        DisplayData pDisplay,
+        GameConfig.FolderData pLocation,
+        GameConfig.GameData pGame,
+        GameConfig.QuickPlayData pQuickPlay
     ) {
-        this.user = p_279448_;
-        this.display = p_279368_;
-        this.location = p_279174_;
-        this.game = p_279138_;
-        this.quickPlay = p_279425_;
+        this.user = pUser;
+        this.display = pDisplay;
+        this.location = pLocation;
+        this.game = pGame;
+        this.quickPlay = pQuickPlay;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -42,11 +42,11 @@ public class GameConfig {
         @Nullable
         public final String assetIndex;
 
-        public FolderData(File p_101921_, File p_101922_, File p_101923_, @Nullable String p_101924_) {
-            this.gameDirectory = p_101921_;
-            this.resourcePackDirectory = p_101922_;
-            this.assetDirectory = p_101923_;
-            this.assetIndex = p_101924_;
+        public FolderData(File pGameDirectory, File pResourcePackDirectory, File pAssetDirectory, @Nullable String pAssetIndex) {
+            this.gameDirectory = pGameDirectory;
+            this.resourcePackDirectory = pResourcePackDirectory;
+            this.assetDirectory = pAssetDirectory;
+            this.assetIndex = pAssetIndex;
         }
 
         public Path getExternalAssetSource() {
@@ -63,13 +63,13 @@ public class GameConfig {
         public final boolean disableChat;
         public final boolean captureTracyImages;
 
-        public GameData(boolean p_101932_, String p_101933_, String p_101934_, boolean p_101935_, boolean p_101936_, boolean p_370094_) {
-            this.demo = p_101932_;
-            this.launchVersion = p_101933_;
-            this.versionType = p_101934_;
-            this.disableMultiplayer = p_101935_;
-            this.disableChat = p_101936_;
-            this.captureTracyImages = p_370094_;
+        public GameData(boolean pDemo, String pLaunchVersion, String pVersionType, boolean pDisableMultiplayer, boolean pDisableChat, boolean pCaptureTracyImages) {
+            this.demo = pDemo;
+            this.launchVersion = pLaunchVersion;
+            this.versionType = pVersionType;
+            this.disableMultiplayer = pDisableMultiplayer;
+            this.disableChat = pDisableChat;
+            this.captureTracyImages = pCaptureTracyImages;
         }
     }
 
@@ -87,11 +87,11 @@ public class GameConfig {
         public final PropertyMap profileProperties;
         public final Proxy proxy;
 
-        public UserData(User p_101947_, PropertyMap p_101948_, PropertyMap p_101949_, Proxy p_101950_) {
-            this.user = p_101947_;
-            this.userProperties = p_101948_;
-            this.profileProperties = p_101949_;
-            this.proxy = p_101950_;
+        public UserData(User pUser, PropertyMap pUserProperties, PropertyMap pProfileProperties, Proxy pProxy) {
+            this.user = pUser;
+            this.userProperties = pUserProperties;
+            this.profileProperties = pProfileProperties;
+            this.proxy = pProxy;
         }
     }
 }

@@ -28,25 +28,25 @@ public class SlotArgument implements ArgumentType<Integer> {
         return new SlotArgument();
     }
 
-    public static int getSlot(CommandContext<CommandSourceStack> p_111280_, String p_111281_) {
-        return p_111280_.getArgument(p_111281_, Integer.class);
+    public static int getSlot(CommandContext<CommandSourceStack> pContext, String pName) {
+        return pContext.getArgument(pName, Integer.class);
     }
 
-    public Integer parse(StringReader p_111278_) throws CommandSyntaxException {
-        String s = ParserUtils.readWhile(p_111278_, p_325605_ -> p_325605_ != ' ');
+    public Integer parse(StringReader pReader) throws CommandSyntaxException {
+        String s = ParserUtils.readWhile(pReader, p_325605_ -> p_325605_ != ' ');
         SlotRange slotrange = SlotRanges.nameToIds(s);
         if (slotrange == null) {
-            throw ERROR_UNKNOWN_SLOT.createWithContext(p_111278_, s);
+            throw ERROR_UNKNOWN_SLOT.createWithContext(pReader, s);
         } else if (slotrange.size() != 1) {
-            throw ERROR_ONLY_SINGLE_SLOT_ALLOWED.createWithContext(p_111278_, s);
+            throw ERROR_ONLY_SINGLE_SLOT_ALLOWED.createWithContext(pReader, s);
         } else {
             return slotrange.slots().getInt(0);
         }
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_111288_, SuggestionsBuilder p_111289_) {
-        return SharedSuggestionProvider.suggest(SlotRanges.singleSlotNames(), p_111289_);
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> pContext, SuggestionsBuilder pBuilder) {
+        return SharedSuggestionProvider.suggest(SlotRanges.singleSlotNames(), pBuilder);
     }
 
     @Override

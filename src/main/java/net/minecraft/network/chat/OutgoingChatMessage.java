@@ -5,12 +5,12 @@ import net.minecraft.server.level.ServerPlayer;
 public interface OutgoingChatMessage {
     Component content();
 
-    void sendToPlayer(ServerPlayer p_250979_, boolean p_249307_, ChatType.Bound p_252281_);
+    void sendToPlayer(ServerPlayer pPlayer, boolean pFiltered, ChatType.Bound pBoundType);
 
-    static OutgoingChatMessage create(PlayerChatMessage p_249173_) {
-        return (OutgoingChatMessage)(p_249173_.isSystem()
-            ? new OutgoingChatMessage.Disguised(p_249173_.decoratedContent())
-            : new OutgoingChatMessage.Player(p_249173_));
+    static OutgoingChatMessage create(PlayerChatMessage pMessage) {
+        return (OutgoingChatMessage)(pMessage.isSystem()
+            ? new OutgoingChatMessage.Disguised(pMessage.decoratedContent())
+            : new OutgoingChatMessage.Player(pMessage));
     }
 
     public static record Disguised(Component content) implements OutgoingChatMessage {

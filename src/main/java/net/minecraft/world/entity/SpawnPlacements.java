@@ -48,33 +48,33 @@ public class SpawnPlacements {
     private static final Map<EntityType<?>, SpawnPlacements.Data> DATA_BY_TYPE = Maps.newHashMap();
 
     private static <T extends Mob> void register(
-        EntityType<T> p_21755_, SpawnPlacementType p_331557_, Heightmap.Types p_21757_, SpawnPlacements.SpawnPredicate<T> p_21758_
+        EntityType<T> pEntityType, SpawnPlacementType pSpawnPlacementType, Heightmap.Types pHeightmapType, SpawnPlacements.SpawnPredicate<T> pPredicate
     ) {
-        SpawnPlacements.Data spawnplacements$data = DATA_BY_TYPE.put(p_21755_, new SpawnPlacements.Data(p_21757_, p_331557_, p_21758_));
+        SpawnPlacements.Data spawnplacements$data = DATA_BY_TYPE.put(pEntityType, new SpawnPlacements.Data(pHeightmapType, pSpawnPlacementType, pPredicate));
         if (spawnplacements$data != null) {
-            throw new IllegalStateException("Duplicate registration for type " + BuiltInRegistries.ENTITY_TYPE.getKey(p_21755_));
+            throw new IllegalStateException("Duplicate registration for type " + BuiltInRegistries.ENTITY_TYPE.getKey(pEntityType));
         }
     }
 
-    public static SpawnPlacementType getPlacementType(EntityType<?> p_21753_) {
-        SpawnPlacements.Data spawnplacements$data = DATA_BY_TYPE.get(p_21753_);
+    public static SpawnPlacementType getPlacementType(EntityType<?> pEntityType) {
+        SpawnPlacements.Data spawnplacements$data = DATA_BY_TYPE.get(pEntityType);
         return spawnplacements$data == null ? SpawnPlacementTypes.NO_RESTRICTIONS : spawnplacements$data.placement;
     }
 
-    public static boolean isSpawnPositionOk(EntityType<?> p_331487_, LevelReader p_329941_, BlockPos p_327899_) {
-        return getPlacementType(p_331487_).isSpawnPositionOk(p_329941_, p_327899_, p_331487_);
+    public static boolean isSpawnPositionOk(EntityType<?> pEntityType, LevelReader pLevel, BlockPos pPos) {
+        return getPlacementType(pEntityType).isSpawnPositionOk(pLevel, pPos, pEntityType);
     }
 
-    public static Heightmap.Types getHeightmapType(@Nullable EntityType<?> p_21766_) {
-        SpawnPlacements.Data spawnplacements$data = DATA_BY_TYPE.get(p_21766_);
+    public static Heightmap.Types getHeightmapType(@Nullable EntityType<?> pEntityType) {
+        SpawnPlacements.Data spawnplacements$data = DATA_BY_TYPE.get(pEntityType);
         return spawnplacements$data == null ? Heightmap.Types.MOTION_BLOCKING_NO_LEAVES : spawnplacements$data.heightMap;
     }
 
     public static <T extends Entity> boolean checkSpawnRules(
-        EntityType<T> p_217075_, ServerLevelAccessor p_217076_, EntitySpawnReason p_369208_, BlockPos p_217078_, RandomSource p_217079_
+        EntityType<T> pEntityType, ServerLevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        SpawnPlacements.Data spawnplacements$data = DATA_BY_TYPE.get(p_217075_);
-        return spawnplacements$data == null || spawnplacements$data.predicate.test((EntityType)p_217075_, p_217076_, p_369208_, p_217078_, p_217079_);
+        SpawnPlacements.Data spawnplacements$data = DATA_BY_TYPE.get(pEntityType);
+        return spawnplacements$data == null || spawnplacements$data.predicate.test((EntityType)pEntityType, pLevel, pSpawnReason, pPos, pRandom);
     }
 
     static {
@@ -162,6 +162,6 @@ public class SpawnPlacements {
 
     @FunctionalInterface
     public interface SpawnPredicate<T extends Entity> {
-        boolean test(EntityType<T> p_217081_, ServerLevelAccessor p_217082_, EntitySpawnReason p_365908_, BlockPos p_217084_, RandomSource p_217085_);
+        boolean test(EntityType<T> pEntityType, ServerLevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom);
     }
 }

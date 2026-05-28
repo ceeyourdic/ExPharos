@@ -9,11 +9,11 @@ public record GameTestClearMarkersDebugPayload() implements CustomPacketPayload 
     );
     public static final CustomPacketPayload.Type<GameTestClearMarkersDebugPayload> TYPE = CustomPacketPayload.createType("debug/game_test_clear");
 
-    private GameTestClearMarkersDebugPayload(FriendlyByteBuf p_300529_) {
+    private GameTestClearMarkersDebugPayload(FriendlyByteBuf pBuffer) {
         this();
     }
 
-    private void write(FriendlyByteBuf p_301353_) {
+    private void write(FriendlyByteBuf pBuffer) {
     }
 
     @Override

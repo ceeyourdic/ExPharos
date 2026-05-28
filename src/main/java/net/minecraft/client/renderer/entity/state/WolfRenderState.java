@@ -22,8 +22,8 @@ public class WolfRenderState extends LivingEntityRenderState {
     public DyeColor collarColor;
     public ItemStack bodyArmorItem = ItemStack.EMPTY;
 
-    public float getBodyRollAngle(float p_362171_) {
-        float f = (this.shakeAnim + p_362171_) / 1.8F;
+    public float getBodyRollAngle(float pAngle) {
+        float f = (this.shakeAnim + pAngle) / 1.8F;
         if (f < 0.0F) {
             f = 0.0F;
         } else if (f > 1.0F) {

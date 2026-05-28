@@ -35,13 +35,13 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
         }
     }
 
-    private static boolean spaceForTree(WorldGenLevel p_160236_, RootSystemConfiguration p_160237_, BlockPos p_160238_) {
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = p_160238_.mutable();
+    private static boolean spaceForTree(WorldGenLevel pLevel, RootSystemConfiguration pConfig, BlockPos pPos) {
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.mutable();
 
-        for (int i = 1; i <= p_160237_.requiredVerticalSpaceForTree; i++) {
+        for (int i = 1; i <= pConfig.requiredVerticalSpaceForTree; i++) {
             blockpos$mutableblockpos.move(Direction.UP);
-            BlockState blockstate = p_160236_.getBlockState(blockpos$mutableblockpos);
-            if (!isAllowedTreeSpace(blockstate, i, p_160237_.allowedVerticalWaterForTree)) {
+            BlockState blockstate = pLevel.getBlockState(blockpos$mutableblockpos);
+            if (!isAllowedTreeSpace(blockstate, i, pConfig.allowedVerticalWaterForTree)) {
                 return false;
             }
         }
@@ -49,33 +49,33 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
         return true;
     }
 
-    private static boolean isAllowedTreeSpace(BlockState p_160253_, int p_160254_, int p_160255_) {
-        if (p_160253_.isAir()) {
+    private static boolean isAllowedTreeSpace(BlockState pState, int pY, int pAllowedVerticalWater) {
+        if (pState.isAir()) {
             return true;
         } else {
-            int i = p_160254_ + 1;
-            return i <= p_160255_ && p_160253_.getFluidState().is(FluidTags.WATER);
+            int i = pY + 1;
+            return i <= pAllowedVerticalWater && pState.getFluidState().is(FluidTags.WATER);
         }
     }
 
     private static boolean placeDirtAndTree(
-        WorldGenLevel p_225203_,
-        ChunkGenerator p_225204_,
-        RootSystemConfiguration p_225205_,
-        RandomSource p_225206_,
-        BlockPos.MutableBlockPos p_225207_,
-        BlockPos p_225208_
+        WorldGenLevel pLevel,
+        ChunkGenerator pChunkGenerator,
+        RootSystemConfiguration pConfig,
+        RandomSource pRandom,
+        BlockPos.MutableBlockPos pMutablePos,
+        BlockPos pBasePos
     ) {
-        for (int i = 0; i < p_225205_.rootColumnMaxHeight; i++) {
-            p_225207_.move(Direction.UP);
-            if (p_225205_.allowedTreePosition.test(p_225203_, p_225207_) && spaceForTree(p_225203_, p_225205_, p_225207_)) {
-                BlockPos blockpos = p_225207_.below();
-                if (p_225203_.getFluidState(blockpos).is(FluidTags.LAVA) || !p_225203_.getBlockState(blockpos).isSolid()) {
+        for (int i = 0; i < pConfig.rootColumnMaxHeight; i++) {
+            pMutablePos.move(Direction.UP);
+            if (pConfig.allowedTreePosition.test(pLevel, pMutablePos) && spaceForTree(pLevel, pConfig, pMutablePos)) {
+                BlockPos blockpos = pMutablePos.below();
+                if (pLevel.getFluidState(blockpos).is(FluidTags.LAVA) || !pLevel.getBlockState(blockpos).isSolid()) {
                     return false;
                 }
 
-                if (p_225205_.treeFeature.value().place(p_225203_, p_225204_, p_225206_, p_225207_)) {
-                    placeDirt(p_225208_, p_225208_.getY() + i, p_225203_, p_225205_, p_225206_);
+                if (pConfig.treeFeature.value().place(pLevel, pChunkGenerator, pRandom, pMutablePos)) {
+                    placeDirt(pBasePos, pBasePos.getY() + i, pLevel, pConfig, pRandom);
                     return true;
                 }
             }
@@ -84,50 +84,50 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
         return false;
     }
 
-    private static void placeDirt(BlockPos p_225223_, int p_225224_, WorldGenLevel p_225225_, RootSystemConfiguration p_225226_, RandomSource p_225227_) {
-        int i = p_225223_.getX();
-        int j = p_225223_.getZ();
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = p_225223_.mutable();
+    private static void placeDirt(BlockPos pPos, int pMaxY, WorldGenLevel pLevel, RootSystemConfiguration pConfig, RandomSource pRandom) {
+        int i = pPos.getX();
+        int j = pPos.getZ();
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.mutable();
 
-        for (int k = p_225223_.getY(); k < p_225224_; k++) {
-            placeRootedDirt(p_225225_, p_225226_, p_225227_, i, j, blockpos$mutableblockpos.set(i, k, j));
+        for (int k = pPos.getY(); k < pMaxY; k++) {
+            placeRootedDirt(pLevel, pConfig, pRandom, i, j, blockpos$mutableblockpos.set(i, k, j));
         }
     }
 
     private static void placeRootedDirt(
-        WorldGenLevel p_225210_, RootSystemConfiguration p_225211_, RandomSource p_225212_, int p_225213_, int p_225214_, BlockPos.MutableBlockPos p_225215_
+        WorldGenLevel pLevel, RootSystemConfiguration pConfig, RandomSource pRandom, int pX, int pZ, BlockPos.MutableBlockPos pPos
     ) {
-        int i = p_225211_.rootRadius;
-        Predicate<BlockState> predicate = p_204762_ -> p_204762_.is(p_225211_.rootReplaceable);
+        int i = pConfig.rootRadius;
+        Predicate<BlockState> predicate = p_204762_ -> p_204762_.is(pConfig.rootReplaceable);
 
-        for (int j = 0; j < p_225211_.rootPlacementAttempts; j++) {
-            p_225215_.setWithOffset(p_225215_, p_225212_.nextInt(i) - p_225212_.nextInt(i), 0, p_225212_.nextInt(i) - p_225212_.nextInt(i));
-            if (predicate.test(p_225210_.getBlockState(p_225215_))) {
-                p_225210_.setBlock(p_225215_, p_225211_.rootStateProvider.getState(p_225212_, p_225215_), 2);
+        for (int j = 0; j < pConfig.rootPlacementAttempts; j++) {
+            pPos.setWithOffset(pPos, pRandom.nextInt(i) - pRandom.nextInt(i), 0, pRandom.nextInt(i) - pRandom.nextInt(i));
+            if (predicate.test(pLevel.getBlockState(pPos))) {
+                pLevel.setBlock(pPos, pConfig.rootStateProvider.getState(pRandom, pPos), 2);
             }
 
-            p_225215_.setX(p_225213_);
-            p_225215_.setZ(p_225214_);
+            pPos.setX(pX);
+            pPos.setZ(pZ);
         }
     }
 
     private static void placeRoots(
-        WorldGenLevel p_225217_, RootSystemConfiguration p_225218_, RandomSource p_225219_, BlockPos p_225220_, BlockPos.MutableBlockPos p_225221_
+        WorldGenLevel pLevel, RootSystemConfiguration pConfig, RandomSource pRandom, BlockPos pBasePos, BlockPos.MutableBlockPos pMutablePos
     ) {
-        int i = p_225218_.hangingRootRadius;
-        int j = p_225218_.hangingRootsVerticalSpan;
+        int i = pConfig.hangingRootRadius;
+        int j = pConfig.hangingRootsVerticalSpan;
 
-        for (int k = 0; k < p_225218_.hangingRootPlacementAttempts; k++) {
-            p_225221_.setWithOffset(
-                p_225220_,
-                p_225219_.nextInt(i) - p_225219_.nextInt(i),
-                p_225219_.nextInt(j) - p_225219_.nextInt(j),
-                p_225219_.nextInt(i) - p_225219_.nextInt(i)
+        for (int k = 0; k < pConfig.hangingRootPlacementAttempts; k++) {
+            pMutablePos.setWithOffset(
+                pBasePos,
+                pRandom.nextInt(i) - pRandom.nextInt(i),
+                pRandom.nextInt(j) - pRandom.nextInt(j),
+                pRandom.nextInt(i) - pRandom.nextInt(i)
             );
-            if (p_225217_.isEmptyBlock(p_225221_)) {
-                BlockState blockstate = p_225218_.hangingRootStateProvider.getState(p_225219_, p_225221_);
-                if (blockstate.canSurvive(p_225217_, p_225221_) && p_225217_.getBlockState(p_225221_.above()).isFaceSturdy(p_225217_, p_225221_, Direction.DOWN)) {
-                    p_225217_.setBlock(p_225221_, blockstate, 2);
+            if (pLevel.isEmptyBlock(pMutablePos)) {
+                BlockState blockstate = pConfig.hangingRootStateProvider.getState(pRandom, pMutablePos);
+                if (blockstate.canSurvive(pLevel, pMutablePos) && pLevel.getBlockState(pMutablePos.above()).isFaceSturdy(pLevel, pMutablePos, Direction.DOWN)) {
+                    pLevel.setBlock(pMutablePos, blockstate, 2);
                 }
             }
         }

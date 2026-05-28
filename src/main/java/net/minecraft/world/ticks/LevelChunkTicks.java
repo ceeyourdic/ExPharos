@@ -28,16 +28,16 @@ public class LevelChunkTicks<T> implements SerializableTickContainer<T>, TickCon
     public LevelChunkTicks() {
     }
 
-    public LevelChunkTicks(List<SavedTick<T>> p_193169_) {
-        this.pendingTicks = p_193169_;
+    public LevelChunkTicks(List<SavedTick<T>> pPendingTicks) {
+        this.pendingTicks = pPendingTicks;
 
-        for (SavedTick<T> savedtick : p_193169_) {
+        for (SavedTick<T> savedtick : pPendingTicks) {
             this.ticksPerPosition.add(ScheduledTick.probe(savedtick.type(), savedtick.pos()));
         }
     }
 
-    public void setOnTickAdded(@Nullable BiConsumer<LevelChunkTicks<T>, ScheduledTick<T>> p_193182_) {
-        this.onTickAdded = p_193182_;
+    public void setOnTickAdded(@Nullable BiConsumer<LevelChunkTicks<T>, ScheduledTick<T>> pOnTickAdded) {
+        this.onTickAdded = pOnTickAdded;
     }
 
     @Nullable
@@ -62,10 +62,10 @@ public class LevelChunkTicks<T> implements SerializableTickContainer<T>, TickCon
         }
     }
 
-    private void scheduleUnchecked(ScheduledTick<T> p_193194_) {
-        this.tickQueue.add(p_193194_);
+    private void scheduleUnchecked(ScheduledTick<T> pTick) {
+        this.tickQueue.add(pTick);
         if (this.onTickAdded != null) {
-            this.onTickAdded.accept(this, p_193194_);
+            this.onTickAdded.accept(this, pTick);
         }
     }
 
@@ -74,12 +74,12 @@ public class LevelChunkTicks<T> implements SerializableTickContainer<T>, TickCon
         return this.ticksPerPosition.contains(ScheduledTick.probe(p_193180_, p_193179_));
     }
 
-    public void removeIf(Predicate<ScheduledTick<T>> p_193184_) {
+    public void removeIf(Predicate<ScheduledTick<T>> pPredicate) {
         Iterator<ScheduledTick<T>> iterator = this.tickQueue.iterator();
 
         while (iterator.hasNext()) {
             ScheduledTick<T> scheduledtick = iterator.next();
-            if (p_193184_.test(scheduledtick)) {
+            if (pPredicate.test(scheduledtick)) {
                 iterator.remove();
                 this.ticksPerPosition.remove(scheduledtick);
             }
@@ -109,29 +109,29 @@ public class LevelChunkTicks<T> implements SerializableTickContainer<T>, TickCon
         return list;
     }
 
-    public ListTag save(long p_193174_, Function<T, String> p_193175_) {
+    public ListTag save(long pGametime, Function<T, String> pIdGetter) {
         ListTag listtag = new ListTag();
 
-        for (SavedTick<T> savedtick : this.pack(p_193174_)) {
-            listtag.add(savedtick.save(p_193175_));
+        for (SavedTick<T> savedtick : this.pack(pGametime)) {
+            listtag.add(savedtick.save(pIdGetter));
         }
 
         return listtag;
     }
 
-    public void unpack(long p_193172_) {
+    public void unpack(long pGameTime) {
         if (this.pendingTicks != null) {
             int i = -this.pendingTicks.size();
 
             for (SavedTick<T> savedtick : this.pendingTicks) {
-                this.scheduleUnchecked(savedtick.unpack(p_193172_, (long)(i++)));
+                this.scheduleUnchecked(savedtick.unpack(pGameTime, (long)(i++)));
             }
         }
 
         this.pendingTicks = null;
     }
 
-    public static <T> LevelChunkTicks<T> load(ListTag p_193186_, Function<String, Optional<T>> p_193187_, ChunkPos p_193188_) {
-        return new LevelChunkTicks<>(SavedTick.loadTickList(p_193186_, p_193187_, p_193188_));
+    public static <T> LevelChunkTicks<T> load(ListTag pTag, Function<String, Optional<T>> pIsParser, ChunkPos pPos) {
+        return new LevelChunkTicks<>(SavedTick.loadTickList(pTag, pIsParser, pPos));
     }
 }

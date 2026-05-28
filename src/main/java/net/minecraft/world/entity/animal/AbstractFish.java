@@ -47,7 +47,7 @@ public abstract class AbstractFish extends WaterAnimal implements Bucketable {
     }
 
     @Override
-    public boolean removeWhenFarAway(double p_27492_) {
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
         return !this.fromBucket() && !this.hasCustomName();
     }
 
@@ -73,15 +73,15 @@ public abstract class AbstractFish extends WaterAnimal implements Bucketable {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_27485_) {
-        super.addAdditionalSaveData(p_27485_);
-        p_27485_.putBoolean("FromBucket", this.fromBucket());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("FromBucket", this.fromBucket());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_27465_) {
-        super.readAdditionalSaveData(p_27465_);
-        this.setFromBucket(p_27465_.getBoolean("FromBucket"));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setFromBucket(pCompound.getBoolean("FromBucket"));
     }
 
     @Override
@@ -93,21 +93,21 @@ public abstract class AbstractFish extends WaterAnimal implements Bucketable {
     }
 
     @Override
-    protected PathNavigation createNavigation(Level p_27480_) {
-        return new WaterBoundPathNavigation(this, p_27480_);
+    protected PathNavigation createNavigation(Level pLevel) {
+        return new WaterBoundPathNavigation(this, pLevel);
     }
 
     @Override
-    public void travel(Vec3 p_27490_) {
+    public void travel(Vec3 pTravelVector) {
         if (this.isControlledByLocalInstance() && this.isInWater()) {
-            this.moveRelative(0.01F, p_27490_);
+            this.moveRelative(0.01F, pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9));
             if (this.getTarget() == null) {
                 this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.005, 0.0));
             }
         } else {
-            super.travel(p_27490_);
+            super.travel(pTravelVector);
         }
     }
 
@@ -127,8 +127,8 @@ public abstract class AbstractFish extends WaterAnimal implements Bucketable {
     }
 
     @Override
-    protected InteractionResult mobInteract(Player p_27477_, InteractionHand p_27478_) {
-        return Bucketable.bucketMobPickup(p_27477_, p_27478_, this).orElse(super.mobInteract(p_27477_, p_27478_));
+    protected InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        return Bucketable.bucketMobPickup(pPlayer, pHand, this).orElse(super.mobInteract(pPlayer, pHand));
     }
 
     @Override
@@ -158,15 +158,15 @@ public abstract class AbstractFish extends WaterAnimal implements Bucketable {
     }
 
     @Override
-    protected void playStepSound(BlockPos p_27482_, BlockState p_27483_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
     }
 
     static class FishMoveControl extends MoveControl {
         private final AbstractFish fish;
 
-        FishMoveControl(AbstractFish p_27501_) {
-            super(p_27501_);
-            this.fish = p_27501_;
+        FishMoveControl(AbstractFish pFish) {
+            super(pFish);
+            this.fish = pFish;
         }
 
         @Override
@@ -200,9 +200,9 @@ public abstract class AbstractFish extends WaterAnimal implements Bucketable {
     static class FishSwimGoal extends RandomSwimmingGoal {
         private final AbstractFish fish;
 
-        public FishSwimGoal(AbstractFish p_27505_) {
-            super(p_27505_, 1.0, 40);
-            this.fish = p_27505_;
+        public FishSwimGoal(AbstractFish pFish) {
+            super(pFish, 1.0, 40);
+            this.fish = pFish;
         }
 
         @Override

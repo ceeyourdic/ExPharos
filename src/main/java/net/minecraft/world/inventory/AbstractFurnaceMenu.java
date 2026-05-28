@@ -36,40 +36,40 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
     private final RecipeBookType recipeBookType;
 
     protected AbstractFurnaceMenu(
-        MenuType<?> p_38960_,
-        RecipeType<? extends AbstractCookingRecipe> p_38961_,
-        ResourceKey<RecipePropertySet> p_360708_,
-        RecipeBookType p_38962_,
-        int p_38963_,
-        Inventory p_38964_
+        MenuType<?> pMenuType,
+        RecipeType<? extends AbstractCookingRecipe> pRecipeType,
+        ResourceKey<RecipePropertySet> pAcceptedInputs,
+        RecipeBookType pRecipeBookType,
+        int pContainerId,
+        Inventory pInventory
     ) {
-        this(p_38960_, p_38961_, p_360708_, p_38962_, p_38963_, p_38964_, new SimpleContainer(3), new SimpleContainerData(4));
+        this(pMenuType, pRecipeType, pAcceptedInputs, pRecipeBookType, pContainerId, pInventory, new SimpleContainer(3), new SimpleContainerData(4));
     }
 
     protected AbstractFurnaceMenu(
-        MenuType<?> p_38966_,
-        RecipeType<? extends AbstractCookingRecipe> p_38967_,
-        ResourceKey<RecipePropertySet> p_365963_,
-        RecipeBookType p_38968_,
-        int p_38969_,
-        Inventory p_38970_,
-        Container p_38971_,
-        ContainerData p_38972_
+        MenuType<?> pMenuType,
+        RecipeType<? extends AbstractCookingRecipe> pRecipeType,
+        ResourceKey<RecipePropertySet> pAcceptedInputs,
+        RecipeBookType pRecipeBookType,
+        int pContainerId,
+        Inventory pInventory,
+        Container pContainer,
+        ContainerData pData
     ) {
-        super(p_38966_, p_38969_);
-        this.recipeType = p_38967_;
-        this.recipeBookType = p_38968_;
-        checkContainerSize(p_38971_, 3);
-        checkContainerDataCount(p_38972_, 4);
-        this.container = p_38971_;
-        this.data = p_38972_;
-        this.level = p_38970_.player.level();
-        this.acceptedInputs = this.level.recipeAccess().propertySet(p_365963_);
-        this.addSlot(new Slot(p_38971_, 0, 56, 17));
-        this.addSlot(new FurnaceFuelSlot(this, p_38971_, 1, 56, 53));
-        this.addSlot(new FurnaceResultSlot(p_38970_.player, p_38971_, 2, 116, 35));
-        this.addStandardInventorySlots(p_38970_, 8, 84);
-        this.addDataSlots(p_38972_);
+        super(pMenuType, pContainerId);
+        this.recipeType = pRecipeType;
+        this.recipeBookType = pRecipeBookType;
+        checkContainerSize(pContainer, 3);
+        checkContainerDataCount(pData, 4);
+        this.container = pContainer;
+        this.data = pData;
+        this.level = pInventory.player.level();
+        this.acceptedInputs = this.level.recipeAccess().propertySet(pAcceptedInputs);
+        this.addSlot(new Slot(pContainer, 0, 56, 17));
+        this.addSlot(new FurnaceFuelSlot(this, pContainer, 1, 56, 53));
+        this.addSlot(new FurnaceResultSlot(pInventory.player, pContainer, 2, 116, 35));
+        this.addStandardInventorySlots(pInventory, 8, 84);
+        this.addDataSlots(pData);
     }
 
     @Override
@@ -84,24 +84,24 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
     }
 
     @Override
-    public boolean stillValid(Player p_38974_) {
-        return this.container.stillValid(p_38974_);
+    public boolean stillValid(Player pPlayer) {
+        return this.container.stillValid(pPlayer);
     }
 
     @Override
-    public ItemStack quickMoveStack(Player p_38986_, int p_38987_) {
+    public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(p_38987_);
+        Slot slot = this.slots.get(pIndex);
         if (slot != null && slot.hasItem()) {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
-            if (p_38987_ == 2) {
+            if (pIndex == 2) {
                 if (!this.moveItemStackTo(itemstack1, 3, 39, true)) {
                     return ItemStack.EMPTY;
                 }
 
                 slot.onQuickCraft(itemstack1, itemstack);
-            } else if (p_38987_ != 1 && p_38987_ != 0) {
+            } else if (pIndex != 1 && pIndex != 0) {
                 if (this.canSmelt(itemstack1)) {
                     if (!this.moveItemStackTo(itemstack1, 0, 1, false)) {
                         return ItemStack.EMPTY;
@@ -110,11 +110,11 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
                     if (!this.moveItemStackTo(itemstack1, 1, 2, false)) {
                         return ItemStack.EMPTY;
                     }
-                } else if (p_38987_ >= 3 && p_38987_ < 30) {
+                } else if (pIndex >= 3 && pIndex < 30) {
                     if (!this.moveItemStackTo(itemstack1, 30, 39, false)) {
                         return ItemStack.EMPTY;
                     }
-                } else if (p_38987_ >= 30 && p_38987_ < 39 && !this.moveItemStackTo(itemstack1, 3, 30, false)) {
+                } else if (pIndex >= 30 && pIndex < 39 && !this.moveItemStackTo(itemstack1, 3, 30, false)) {
                     return ItemStack.EMPTY;
                 }
             } else if (!this.moveItemStackTo(itemstack1, 3, 39, false)) {
@@ -131,18 +131,18 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
                 return ItemStack.EMPTY;
             }
 
-            slot.onTake(p_38986_, itemstack1);
+            slot.onTake(pPlayer, itemstack1);
         }
 
         return itemstack;
     }
 
-    protected boolean canSmelt(ItemStack p_38978_) {
-        return this.acceptedInputs.test(p_38978_);
+    protected boolean canSmelt(ItemStack pStack) {
+        return this.acceptedInputs.test(pStack);
     }
 
-    protected boolean isFuel(ItemStack p_38989_) {
-        return this.level.fuelValues().isFuel(p_38989_);
+    protected boolean isFuel(ItemStack pStack) {
+        return this.level.fuelValues().isFuel(pStack);
     }
 
     public float getBurnProgress() {

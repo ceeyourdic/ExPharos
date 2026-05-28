@@ -15,15 +15,15 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class GiantMobRenderer extends MobRenderer<Giant, ZombieRenderState, HumanoidModel<ZombieRenderState>> {
     private static final ResourceLocation ZOMBIE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/zombie/zombie.png");
 
-    public GiantMobRenderer(EntityRendererProvider.Context p_174131_, float p_174132_) {
-        super(p_174131_, new GiantZombieModel(p_174131_.bakeLayer(ModelLayers.GIANT)), 0.5F * p_174132_);
+    public GiantMobRenderer(EntityRendererProvider.Context pContext, float pScale) {
+        super(pContext, new GiantZombieModel(pContext.bakeLayer(ModelLayers.GIANT)), 0.5F * pScale);
         this.addLayer(new ItemInHandLayer<>(this));
         this.addLayer(
             new HumanoidArmorLayer<>(
                 this,
-                new GiantZombieModel(p_174131_.bakeLayer(ModelLayers.GIANT_INNER_ARMOR)),
-                new GiantZombieModel(p_174131_.bakeLayer(ModelLayers.GIANT_OUTER_ARMOR)),
-                p_174131_.getEquipmentRenderer()
+                new GiantZombieModel(pContext.bakeLayer(ModelLayers.GIANT_INNER_ARMOR)),
+                new GiantZombieModel(pContext.bakeLayer(ModelLayers.GIANT_OUTER_ARMOR)),
+                pContext.getEquipmentRenderer()
             )
         );
     }

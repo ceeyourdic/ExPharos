@@ -38,24 +38,24 @@ public class InventoryMenu extends AbstractCraftingMenu {
     public final boolean active;
     private final Player owner;
 
-    public InventoryMenu(Inventory p_39706_, boolean p_39707_, final Player p_39708_) {
+    public InventoryMenu(Inventory pPlayerInventory, boolean pActive, final Player pOwner) {
         super(null, 0, 2, 2);
-        this.active = p_39707_;
-        this.owner = p_39708_;
-        this.addResultSlot(p_39708_, 154, 28);
+        this.active = pActive;
+        this.owner = pOwner;
+        this.addResultSlot(pOwner, 154, 28);
         this.addCraftingGridSlots(98, 18);
 
         for (int i = 0; i < 4; i++) {
             EquipmentSlot equipmentslot = SLOT_IDS[i];
             ResourceLocation resourcelocation = TEXTURE_EMPTY_SLOTS.get(equipmentslot);
-            this.addSlot(new ArmorSlot(p_39706_, p_39708_, equipmentslot, 39 - i, 8, 8 + i * 18, resourcelocation));
+            this.addSlot(new ArmorSlot(pPlayerInventory, pOwner, equipmentslot, 39 - i, 8, 8 + i * 18, resourcelocation));
         }
 
-        this.addStandardInventorySlots(p_39706_, 8, 84);
-        this.addSlot(new Slot(p_39706_, 40, 77, 62) {
+        this.addStandardInventorySlots(pPlayerInventory, 8, 84);
+        this.addSlot(new Slot(pPlayerInventory, 40, 77, 62) {
             @Override
             public void setByPlayer(ItemStack p_270969_, ItemStack p_299540_) {
-                p_39708_.onEquipItem(EquipmentSlot.OFFHAND, p_299540_, p_270969_);
+                pOwner.onEquipItem(EquipmentSlot.OFFHAND, p_299540_, p_270969_);
                 super.setByPlayer(p_270969_, p_299540_);
             }
 
@@ -66,50 +66,50 @@ public class InventoryMenu extends AbstractCraftingMenu {
         });
     }
 
-    public static boolean isHotbarSlot(int p_150593_) {
-        return p_150593_ >= 36 && p_150593_ < 45 || p_150593_ == 45;
+    public static boolean isHotbarSlot(int pIndex) {
+        return pIndex >= 36 && pIndex < 45 || pIndex == 45;
     }
 
     @Override
-    public void slotsChanged(Container p_39710_) {
+    public void slotsChanged(Container pInventory) {
         if (this.owner.level() instanceof ServerLevel serverlevel) {
             CraftingMenu.slotChangedCraftingGrid(this, serverlevel, this.owner, this.craftSlots, this.resultSlots, null);
         }
     }
 
     @Override
-    public void removed(Player p_39721_) {
-        super.removed(p_39721_);
+    public void removed(Player pPlayer) {
+        super.removed(pPlayer);
         this.resultSlots.clearContent();
-        if (!p_39721_.level().isClientSide) {
-            this.clearContainer(p_39721_, this.craftSlots);
+        if (!pPlayer.level().isClientSide) {
+            this.clearContainer(pPlayer, this.craftSlots);
         }
     }
 
     @Override
-    public boolean stillValid(Player p_39712_) {
+    public boolean stillValid(Player pPlayer) {
         return true;
     }
 
     @Override
-    public ItemStack quickMoveStack(Player p_39723_, int p_39724_) {
+    public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(p_39724_);
+        Slot slot = this.slots.get(pIndex);
         if (slot.hasItem()) {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
-            EquipmentSlot equipmentslot = p_39723_.getEquipmentSlotForItem(itemstack);
-            if (p_39724_ == 0) {
+            EquipmentSlot equipmentslot = pPlayer.getEquipmentSlotForItem(itemstack);
+            if (pIndex == 0) {
                 if (!this.moveItemStackTo(itemstack1, 9, 45, true)) {
                     return ItemStack.EMPTY;
                 }
 
                 slot.onQuickCraft(itemstack1, itemstack);
-            } else if (p_39724_ >= 1 && p_39724_ < 5) {
+            } else if (pIndex >= 1 && pIndex < 5) {
                 if (!this.moveItemStackTo(itemstack1, 9, 45, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (p_39724_ >= 5 && p_39724_ < 9) {
+            } else if (pIndex >= 5 && pIndex < 9) {
                 if (!this.moveItemStackTo(itemstack1, 9, 45, false)) {
                     return ItemStack.EMPTY;
                 }
@@ -122,11 +122,11 @@ public class InventoryMenu extends AbstractCraftingMenu {
                 if (!this.moveItemStackTo(itemstack1, 45, 46, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (p_39724_ >= 9 && p_39724_ < 36) {
+            } else if (pIndex >= 9 && pIndex < 36) {
                 if (!this.moveItemStackTo(itemstack1, 36, 45, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (p_39724_ >= 36 && p_39724_ < 45) {
+            } else if (pIndex >= 36 && pIndex < 45) {
                 if (!this.moveItemStackTo(itemstack1, 9, 36, false)) {
                     return ItemStack.EMPTY;
                 }
@@ -144,9 +144,9 @@ public class InventoryMenu extends AbstractCraftingMenu {
                 return ItemStack.EMPTY;
             }
 
-            slot.onTake(p_39723_, itemstack1);
-            if (p_39724_ == 0) {
-                p_39723_.drop(itemstack1, false);
+            slot.onTake(pPlayer, itemstack1);
+            if (pIndex == 0) {
+                pPlayer.drop(itemstack1, false);
             }
         }
 
@@ -154,8 +154,8 @@ public class InventoryMenu extends AbstractCraftingMenu {
     }
 
     @Override
-    public boolean canTakeItemForPickAll(ItemStack p_39716_, Slot p_39717_) {
-        return p_39717_.container != this.resultSlots && super.canTakeItemForPickAll(p_39716_, p_39717_);
+    public boolean canTakeItemForPickAll(ItemStack pStack, Slot pSlot) {
+        return pSlot.container != this.resultSlots && super.canTakeItemForPickAll(pStack, pSlot);
     }
 
     @Override

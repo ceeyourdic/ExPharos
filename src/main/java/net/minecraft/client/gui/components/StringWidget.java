@@ -14,12 +14,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class StringWidget extends AbstractStringWidget {
     private float alignX = 0.5F;
 
-    public StringWidget(Component p_268211_, Font p_267963_) {
-        this(0, 0, p_267963_.width(p_268211_.getVisualOrderText()), 9, p_268211_, p_267963_);
+    public StringWidget(Component pMessage, Font pFont) {
+        this(0, 0, pFont.width(pMessage.getVisualOrderText()), 9, pMessage, pFont);
     }
 
-    public StringWidget(int p_268183_, int p_268082_, Component p_268069_, Font p_268121_) {
-        this(0, 0, p_268183_, p_268082_, p_268069_, p_268121_);
+    public StringWidget(int pWidth, int pHeight, Component pMessage, Font pFont) {
+        this(0, 0, pWidth, pHeight, pMessage, pFont);
     }
 
     public StringWidget(int p_268199_, int p_268137_, int p_268178_, int p_268169_, Component p_268285_, Font p_268047_) {
@@ -32,8 +32,8 @@ public class StringWidget extends AbstractStringWidget {
         return this;
     }
 
-    private StringWidget horizontalAlignment(float p_267947_) {
-        this.alignX = p_267947_;
+    private StringWidget horizontalAlignment(float pHorizontalAlignment) {
+        this.alignX = pHorizontalAlignment;
         return this;
     }
 
@@ -61,9 +61,9 @@ public class StringWidget extends AbstractStringWidget {
         p_281367_.drawString(font, formattedcharsequence, k, l, this.getColor());
     }
 
-    private FormattedCharSequence clipText(Component p_301164_, int p_298237_) {
+    private FormattedCharSequence clipText(Component pMessage, int pWidth) {
         Font font = this.getFont();
-        FormattedText formattedtext = font.substrByWidth(p_301164_, p_298237_ - font.width(CommonComponents.ELLIPSIS));
+        FormattedText formattedtext = font.substrByWidth(pMessage, pWidth - font.width(CommonComponents.ELLIPSIS));
         return Language.getInstance().getVisualOrder(FormattedText.composite(formattedtext, CommonComponents.ELLIPSIS));
     }
 }

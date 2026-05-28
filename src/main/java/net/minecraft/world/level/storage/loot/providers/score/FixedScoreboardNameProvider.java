@@ -15,8 +15,8 @@ public record FixedScoreboardNameProvider(String name) implements ScoreboardName
                 .apply(p_300953_, FixedScoreboardNameProvider::new)
     );
 
-    public static ScoreboardNameProvider forName(String p_165847_) {
-        return new FixedScoreboardNameProvider(p_165847_);
+    public static ScoreboardNameProvider forName(String pName) {
+        return new FixedScoreboardNameProvider(pName);
     }
 
     @Override

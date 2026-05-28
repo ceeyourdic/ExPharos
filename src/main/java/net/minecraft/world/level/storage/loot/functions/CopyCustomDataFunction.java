@@ -40,10 +40,10 @@ public class CopyCustomDataFunction extends LootItemConditionalFunction {
     private final NbtProvider source;
     private final List<CopyCustomDataFunction.CopyOperation> operations;
 
-    CopyCustomDataFunction(List<LootItemCondition> p_330573_, NbtProvider p_334617_, List<CopyCustomDataFunction.CopyOperation> p_334520_) {
-        super(p_330573_);
-        this.source = p_334617_;
-        this.operations = List.copyOf(p_334520_);
+    CopyCustomDataFunction(List<LootItemCondition> pConditions, NbtProvider pSource, List<CopyCustomDataFunction.CopyOperation> pOperations) {
+        super(pConditions);
+        this.source = pSource;
+        this.operations = List.copyOf(pOperations);
     }
 
     @Override
@@ -81,28 +81,28 @@ public class CopyCustomDataFunction extends LootItemConditionalFunction {
     }
 
     @Deprecated
-    public static CopyCustomDataFunction.Builder copyData(NbtProvider p_335021_) {
-        return new CopyCustomDataFunction.Builder(p_335021_);
+    public static CopyCustomDataFunction.Builder copyData(NbtProvider pSource) {
+        return new CopyCustomDataFunction.Builder(pSource);
     }
 
-    public static CopyCustomDataFunction.Builder copyData(LootContext.EntityTarget p_329362_) {
-        return new CopyCustomDataFunction.Builder(ContextNbtProvider.forContextEntity(p_329362_));
+    public static CopyCustomDataFunction.Builder copyData(LootContext.EntityTarget pTarget) {
+        return new CopyCustomDataFunction.Builder(ContextNbtProvider.forContextEntity(pTarget));
     }
 
     public static class Builder extends LootItemConditionalFunction.Builder<CopyCustomDataFunction.Builder> {
         private final NbtProvider source;
         private final List<CopyCustomDataFunction.CopyOperation> ops = Lists.newArrayList();
 
-        Builder(NbtProvider p_328406_) {
-            this.source = p_328406_;
+        Builder(NbtProvider pSource) {
+            this.source = pSource;
         }
 
-        public CopyCustomDataFunction.Builder copy(String p_331311_, String p_335916_, CopyCustomDataFunction.MergeStrategy p_332655_) {
+        public CopyCustomDataFunction.Builder copy(String pSourceKey, String pDestinationKey, CopyCustomDataFunction.MergeStrategy pMergeStrategy) {
             try {
                 this.ops
                     .add(
                         new CopyCustomDataFunction.CopyOperation(
-                            NbtPathArgument.NbtPath.of(p_331311_), NbtPathArgument.NbtPath.of(p_335916_), p_332655_
+                            NbtPathArgument.NbtPath.of(pSourceKey), NbtPathArgument.NbtPath.of(pDestinationKey), pMergeStrategy
                         )
                     );
                 return this;
@@ -111,8 +111,8 @@ public class CopyCustomDataFunction extends LootItemConditionalFunction {
             }
         }
 
-        public CopyCustomDataFunction.Builder copy(String p_333187_, String p_327847_) {
-            return this.copy(p_333187_, p_327847_, CopyCustomDataFunction.MergeStrategy.REPLACE);
+        public CopyCustomDataFunction.Builder copy(String pSourceKey, String pDestinationKey) {
+            return this.copy(pSourceKey, pDestinationKey, CopyCustomDataFunction.MergeStrategy.REPLACE);
         }
 
         protected CopyCustomDataFunction.Builder getThis() {
@@ -135,11 +135,11 @@ public class CopyCustomDataFunction extends LootItemConditionalFunction {
                     .apply(p_333172_, CopyCustomDataFunction.CopyOperation::new)
         );
 
-        public void apply(Supplier<Tag> p_328581_, Tag p_331330_) {
+        public void apply(Supplier<Tag> pSourceTag, Tag pTag) {
             try {
-                List<Tag> list = this.sourcePath.get(p_331330_);
+                List<Tag> list = this.sourcePath.get(pTag);
                 if (!list.isEmpty()) {
-                    this.op.merge(p_328581_.get(), this.targetPath, list);
+                    this.op.merge(pSourceTag.get(), this.targetPath, list);
                 }
             } catch (CommandSyntaxException commandsyntaxexception) {
             }
@@ -183,10 +183,10 @@ public class CopyCustomDataFunction extends LootItemConditionalFunction {
         public static final Codec<CopyCustomDataFunction.MergeStrategy> CODEC = StringRepresentable.fromEnum(CopyCustomDataFunction.MergeStrategy::values);
         private final String name;
 
-        public abstract void merge(Tag p_335447_, NbtPathArgument.NbtPath p_334662_, List<Tag> p_335924_) throws CommandSyntaxException;
+        public abstract void merge(Tag pTag, NbtPathArgument.NbtPath pPath, List<Tag> pCurrentData) throws CommandSyntaxException;
 
-        MergeStrategy(final String p_328833_) {
-            this.name = p_328833_;
+        MergeStrategy(final String pName) {
+            this.name = pName;
         }
 
         @Override

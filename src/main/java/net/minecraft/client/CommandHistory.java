@@ -21,8 +21,8 @@ public class CommandHistory {
     private final Path commandsPath;
     private final ArrayListDeque<String> lastCommands = new ArrayListDeque<>(50);
 
-    public CommandHistory(Path p_298502_) {
-        this.commandsPath = p_298502_.resolve("command_history.txt");
+    public CommandHistory(Path pPath) {
+        this.commandsPath = pPath.resolve("command_history.txt");
         if (Files.exists(this.commandsPath)) {
             try (BufferedReader bufferedreader = Files.newBufferedReader(this.commandsPath, Charsets.UTF_8)) {
                 this.lastCommands.addAll(bufferedreader.lines().toList());
@@ -32,13 +32,13 @@ public class CommandHistory {
         }
     }
 
-    public void addCommand(String p_298813_) {
-        if (!p_298813_.equals(this.lastCommands.peekLast())) {
+    public void addCommand(String pCommand) {
+        if (!pCommand.equals(this.lastCommands.peekLast())) {
             if (this.lastCommands.size() >= 50) {
                 this.lastCommands.removeFirst();
             }
 
-            this.lastCommands.addLast(p_298813_);
+            this.lastCommands.addLast(pCommand);
             this.save();
         }
     }

@@ -10,12 +10,12 @@ public record ClientboundSetSimulationDistancePacket(int simulationDistance) imp
         ClientboundSetSimulationDistancePacket::write, ClientboundSetSimulationDistancePacket::new
     );
 
-    private ClientboundSetSimulationDistancePacket(FriendlyByteBuf p_195800_) {
-        this(p_195800_.readVarInt());
+    private ClientboundSetSimulationDistancePacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readVarInt());
     }
 
-    private void write(FriendlyByteBuf p_195802_) {
-        p_195802_.writeVarInt(this.simulationDistance);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.simulationDistance);
     }
 
     @Override

@@ -46,9 +46,9 @@ public class EnchantingTableBlock extends BaseEntityBlock {
         super(p_333403_);
     }
 
-    public static boolean isValidBookShelf(Level p_328191_, BlockPos p_328702_, BlockPos p_336071_) {
-        return p_328191_.getBlockState(p_328702_.offset(p_336071_)).is(BlockTags.ENCHANTMENT_POWER_PROVIDER)
-            && p_328191_.getBlockState(p_328702_.offset(p_336071_.getX() / 2, p_336071_.getY(), p_336071_.getZ() / 2)).is(BlockTags.ENCHANTMENT_POWER_TRANSMITTER);
+    public static boolean isValidBookShelf(Level pLevel, BlockPos pEnchantingTablePos, BlockPos pBookshelfPos) {
+        return pLevel.getBlockState(pEnchantingTablePos.offset(pBookshelfPos)).is(BlockTags.ENCHANTMENT_POWER_PROVIDER)
+            && pLevel.getBlockState(pEnchantingTablePos.offset(pBookshelfPos.getX() / 2, pBookshelfPos.getY(), pBookshelfPos.getZ() / 2)).is(BlockTags.ENCHANTMENT_POWER_TRANSMITTER);
     }
 
     @Override

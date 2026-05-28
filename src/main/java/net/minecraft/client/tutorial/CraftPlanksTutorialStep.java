@@ -25,8 +25,8 @@ public class CraftPlanksTutorialStep implements TutorialStepInstance {
     private TutorialToast toast;
     private int timeWaiting;
 
-    public CraftPlanksTutorialStep(Tutorial p_120467_) {
-        this.tutorial = p_120467_;
+    public CraftPlanksTutorialStep(Tutorial pTutorial) {
+        this.tutorial = pTutorial;
     }
 
     @Override
@@ -67,15 +67,15 @@ public class CraftPlanksTutorialStep implements TutorialStepInstance {
     }
 
     @Override
-    public void onGetItem(ItemStack p_120470_) {
-        if (p_120470_.is(ItemTags.PLANKS)) {
+    public void onGetItem(ItemStack pStack) {
+        if (pStack.is(ItemTags.PLANKS)) {
             this.tutorial.setStep(TutorialSteps.NONE);
         }
     }
 
-    public static boolean hasCraftedPlanksPreviously(LocalPlayer p_205663_, TagKey<Item> p_205664_) {
-        for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(p_205664_)) {
-            if (p_205663_.getStats().getValue(Stats.ITEM_CRAFTED.get(holder.value())) > 0) {
+    public static boolean hasCraftedPlanksPreviously(LocalPlayer pPlayer, TagKey<Item> pItems) {
+        for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(pItems)) {
+            if (pPlayer.getStats().getValue(Stats.ITEM_CRAFTED.get(holder.value())) > 0) {
                 return true;
             }
         }

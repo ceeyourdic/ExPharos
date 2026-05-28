@@ -21,29 +21,29 @@ public class CreeperModel extends EntityModel<CreeperRenderState> {
     private final ModelPart leftFrontLeg;
     private static final int Y_OFFSET = 6;
 
-    public CreeperModel(ModelPart p_170524_) {
-        super(p_170524_);
-        this.head = p_170524_.getChild("head");
-        this.leftHindLeg = p_170524_.getChild("right_hind_leg");
-        this.rightHindLeg = p_170524_.getChild("left_hind_leg");
-        this.leftFrontLeg = p_170524_.getChild("right_front_leg");
-        this.rightFrontLeg = p_170524_.getChild("left_front_leg");
+    public CreeperModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
+        this.leftHindLeg = pRoot.getChild("right_hind_leg");
+        this.rightHindLeg = pRoot.getChild("left_hind_leg");
+        this.leftFrontLeg = pRoot.getChild("right_front_leg");
+        this.rightFrontLeg = pRoot.getChild("left_front_leg");
     }
 
-    public static LayerDefinition createBodyLayer(CubeDeformation p_170526_) {
+    public static LayerDefinition createBodyLayer(CubeDeformation pCubeDeformation) {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
         partdefinition.addOrReplaceChild(
             "head",
-            CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, p_170526_),
+            CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, pCubeDeformation),
             PartPose.offset(0.0F, 6.0F, 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "body",
-            CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, p_170526_),
+            CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, pCubeDeformation),
             PartPose.offset(0.0F, 6.0F, 0.0F)
         );
-        CubeListBuilder cubelistbuilder = CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, p_170526_);
+        CubeListBuilder cubelistbuilder = CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, pCubeDeformation);
         partdefinition.addOrReplaceChild("right_hind_leg", cubelistbuilder, PartPose.offset(-2.0F, 18.0F, 4.0F));
         partdefinition.addOrReplaceChild("left_hind_leg", cubelistbuilder, PartPose.offset(2.0F, 18.0F, 4.0F));
         partdefinition.addOrReplaceChild("right_front_leg", cubelistbuilder, PartPose.offset(-2.0F, 18.0F, -4.0F));

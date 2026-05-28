@@ -46,8 +46,8 @@ public class DatapackStructureReport implements DataProvider {
     );
     static final Codec<ResourceKey<? extends Registry<?>>> REGISTRY_KEY_CODEC = ResourceLocation.CODEC.xmap(ResourceKey::createRegistryKey, ResourceKey::location);
 
-    public DatapackStructureReport(PackOutput p_366731_) {
-        this.output = p_366731_;
+    public DatapackStructureReport(PackOutput pOutput) {
+        this.output = pOutput;
     }
 
     @Override
@@ -65,13 +65,13 @@ public class DatapackStructureReport implements DataProvider {
     }
 
     private void putIfNotPresent(
-        Map<ResourceKey<? extends Registry<?>>, DatapackStructureReport.Entry> p_367377_,
-        ResourceKey<? extends Registry<?>> p_360807_,
-        DatapackStructureReport.Entry p_367029_
+        Map<ResourceKey<? extends Registry<?>>, DatapackStructureReport.Entry> pMap,
+        ResourceKey<? extends Registry<?>> pRegistryKey,
+        DatapackStructureReport.Entry pEntry
     ) {
-        DatapackStructureReport.Entry datapackstructurereport$entry = p_367377_.putIfAbsent(p_360807_, p_367029_);
+        DatapackStructureReport.Entry datapackstructurereport$entry = pMap.putIfAbsent(pRegistryKey, pEntry);
         if (datapackstructurereport$entry != null) {
-            throw new IllegalStateException("Duplicate entry for key " + p_360807_.location());
+            throw new IllegalStateException("Duplicate entry for key " + pRegistryKey.location());
         }
     }
 
@@ -113,8 +113,8 @@ public class DatapackStructureReport implements DataProvider {
         public static final Codec<DatapackStructureReport.Format> CODEC = StringRepresentable.fromEnum(DatapackStructureReport.Format::values);
         private final String name;
 
-        private Format(final String p_363444_) {
-            this.name = p_363444_;
+        private Format(final String pName) {
+            this.name = pName;
         }
 
         @Override

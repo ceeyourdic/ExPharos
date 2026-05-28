@@ -16,8 +16,8 @@ public class WeighedSoundEvents implements Weighted<Sound> {
     @Nullable
     private final Component subtitle;
 
-    public WeighedSoundEvents(ResourceLocation p_120446_, @Nullable String p_120447_) {
-        this.subtitle = p_120447_ == null ? null : Component.translatable(p_120447_);
+    public WeighedSoundEvents(ResourceLocation pLocation, @Nullable String pSubtitleKey) {
+        this.subtitle = pSubtitleKey == null ? null : Component.translatable(pSubtitleKey);
     }
 
     @Override
@@ -49,8 +49,8 @@ public class WeighedSoundEvents implements Weighted<Sound> {
         }
     }
 
-    public void addSound(Weighted<Sound> p_120452_) {
-        this.list.add(p_120452_);
+    public void addSound(Weighted<Sound> pAccessor) {
+        this.list.add(pAccessor);
     }
 
     @Nullable
@@ -59,9 +59,9 @@ public class WeighedSoundEvents implements Weighted<Sound> {
     }
 
     @Override
-    public void preloadIfRequired(SoundEngine p_120450_) {
+    public void preloadIfRequired(SoundEngine pEngine) {
         for (Weighted<Sound> weighted : this.list) {
-            weighted.preloadIfRequired(p_120450_);
+            weighted.preloadIfRequired(pEngine);
         }
     }
 }

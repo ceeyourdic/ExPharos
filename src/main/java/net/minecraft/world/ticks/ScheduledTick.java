@@ -35,8 +35,8 @@ public record ScheduledTick<T>(T type, BlockPos pos, long triggerTick, TickPrior
         }
     };
 
-    public ScheduledTick(T p_193383_, BlockPos p_193384_, long p_193385_, long p_193386_) {
-        this(p_193383_, p_193384_, p_193385_, TickPriority.NORMAL, p_193386_);
+    public ScheduledTick(T pType, BlockPos pPos, long pTriggerTick, long pSubTickOrder) {
+        this(pType, pPos, pTriggerTick, TickPriority.NORMAL, pSubTickOrder);
     }
 
     public ScheduledTick(T type, BlockPos pos, long triggerTick, TickPriority priority, long subTickOrder) {
@@ -48,11 +48,11 @@ public record ScheduledTick<T>(T type, BlockPos pos, long triggerTick, TickPrior
         this.subTickOrder = subTickOrder;
     }
 
-    public static <T> ScheduledTick<T> probe(T p_193398_, BlockPos p_193399_) {
-        return new ScheduledTick<>(p_193398_, p_193399_, 0L, TickPriority.NORMAL, 0L);
+    public static <T> ScheduledTick<T> probe(T pType, BlockPos pPos) {
+        return new ScheduledTick<>(pType, pPos, 0L, TickPriority.NORMAL, 0L);
     }
 
-    public SavedTick<T> toSavedTick(long p_360893_) {
-        return new SavedTick<>(this.type, this.pos, (int)(this.triggerTick - p_360893_), this.priority);
+    public SavedTick<T> toSavedTick(long pGametime) {
+        return new SavedTick<>(this.type, this.pos, (int)(this.triggerTick - pGametime), this.priority);
     }
 }

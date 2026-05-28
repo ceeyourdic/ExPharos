@@ -34,13 +34,13 @@ public record SavedTick<T>(T type, BlockPos pos, int delay, TickPriority priorit
         }
     };
 
-    public static <T> List<SavedTick<T>> loadTickList(ListTag p_193351_, Function<String, Optional<T>> p_193352_, ChunkPos p_193353_) {
-        List<SavedTick<T>> list = new ArrayList<>(p_193351_.size());
-        long i = p_193353_.toLong();
+    public static <T> List<SavedTick<T>> loadTickList(ListTag pTickList, Function<String, Optional<T>> pIdParser, ChunkPos pChunkPos) {
+        List<SavedTick<T>> list = new ArrayList<>(pTickList.size());
+        long i = pChunkPos.toLong();
 
-        for (int j = 0; j < p_193351_.size(); j++) {
-            CompoundTag compoundtag = p_193351_.getCompound(j);
-            loadTick(compoundtag, p_193352_).ifPresent(p_360704_ -> {
+        for (int j = 0; j < pTickList.size(); j++) {
+            CompoundTag compoundtag = pTickList.getCompound(j);
+            loadTick(compoundtag, pIdParser).ifPresent(p_360704_ -> {
                 if (ChunkPos.asLong(p_360704_.pos()) == i) {
                     list.add((SavedTick<T>)p_360704_);
                 }
@@ -50,33 +50,33 @@ public record SavedTick<T>(T type, BlockPos pos, int delay, TickPriority priorit
         return list;
     }
 
-    public static <T> Optional<SavedTick<T>> loadTick(CompoundTag p_210670_, Function<String, Optional<T>> p_210671_) {
-        return p_210671_.apply(p_210670_.getString("i")).map(p_210668_ -> {
-            BlockPos blockpos = new BlockPos(p_210670_.getInt("x"), p_210670_.getInt("y"), p_210670_.getInt("z"));
-            return new SavedTick<>((T)p_210668_, blockpos, p_210670_.getInt("t"), TickPriority.byValue(p_210670_.getInt("p")));
+    public static <T> Optional<SavedTick<T>> loadTick(CompoundTag pTag, Function<String, Optional<T>> pIdParser) {
+        return pIdParser.apply(pTag.getString("i")).map(p_210668_ -> {
+            BlockPos blockpos = new BlockPos(pTag.getInt("x"), pTag.getInt("y"), pTag.getInt("z"));
+            return new SavedTick<>((T)p_210668_, blockpos, pTag.getInt("t"), TickPriority.byValue(pTag.getInt("p")));
         });
     }
 
-    private static CompoundTag saveTick(String p_193339_, BlockPos p_193340_, int p_193341_, TickPriority p_193342_) {
+    private static CompoundTag saveTick(String pId, BlockPos pPos, int pDelay, TickPriority pPriority) {
         CompoundTag compoundtag = new CompoundTag();
-        compoundtag.putString("i", p_193339_);
-        compoundtag.putInt("x", p_193340_.getX());
-        compoundtag.putInt("y", p_193340_.getY());
-        compoundtag.putInt("z", p_193340_.getZ());
-        compoundtag.putInt("t", p_193341_);
-        compoundtag.putInt("p", p_193342_.getValue());
+        compoundtag.putString("i", pId);
+        compoundtag.putInt("x", pPos.getX());
+        compoundtag.putInt("y", pPos.getY());
+        compoundtag.putInt("z", pPos.getZ());
+        compoundtag.putInt("t", pDelay);
+        compoundtag.putInt("p", pPriority.getValue());
         return compoundtag;
     }
 
-    public CompoundTag save(Function<T, String> p_193344_) {
-        return saveTick(p_193344_.apply(this.type), this.pos, this.delay, this.priority);
+    public CompoundTag save(Function<T, String> pIdGetter) {
+        return saveTick(pIdGetter.apply(this.type), this.pos, this.delay, this.priority);
     }
 
-    public ScheduledTick<T> unpack(long p_193329_, long p_193330_) {
-        return new ScheduledTick<>(this.type, this.pos, p_193329_ + (long)this.delay, this.priority, p_193330_);
+    public ScheduledTick<T> unpack(long pGameTime, long pSubTickOrder) {
+        return new ScheduledTick<>(this.type, this.pos, pGameTime + (long)this.delay, this.priority, pSubTickOrder);
     }
 
-    public static <T> SavedTick<T> probe(T p_193336_, BlockPos p_193337_) {
-        return new SavedTick<>(p_193336_, p_193337_, 0, TickPriority.NORMAL);
+    public static <T> SavedTick<T> probe(T pType, BlockPos pPos) {
+        return new SavedTick<>(pType, pPos, 0, TickPriority.NORMAL);
     }
 }

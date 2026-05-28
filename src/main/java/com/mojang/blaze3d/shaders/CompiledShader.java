@@ -16,21 +16,21 @@ public class CompiledShader implements AutoCloseable {
     private final ResourceLocation id;
     private int shaderId;
 
-    private CompiledShader(int p_364418_, ResourceLocation p_364186_) {
-        this.id = p_364186_;
-        this.shaderId = p_364418_;
+    private CompiledShader(int pShaderId, ResourceLocation pId) {
+        this.id = pId;
+        this.shaderId = pShaderId;
     }
 
-    public static CompiledShader compile(ResourceLocation p_362900_, CompiledShader.Type p_366604_, String p_368771_) throws ShaderManager.CompilationException {
+    public static CompiledShader compile(ResourceLocation pShaderId, CompiledShader.Type pType, String pSource) throws ShaderManager.CompilationException {
         RenderSystem.assertOnRenderThread();
-        int i = GlStateManager.glCreateShader(p_366604_.glType());
-        GlStateManager.glShaderSource(i, p_368771_);
+        int i = GlStateManager.glCreateShader(pType.glType());
+        GlStateManager.glShaderSource(i, pSource);
         GlStateManager.glCompileShader(i);
         if (GlStateManager.glGetShaderi(i, 35713) == 0) {
             String s = StringUtils.trim(GlStateManager.glGetShaderInfoLog(i, 32768));
-            throw new ShaderManager.CompilationException("Couldn't compile " + p_366604_.getName() + " shader (" + p_362900_ + ") : " + s);
+            throw new ShaderManager.CompilationException("Couldn't compile " + pType.getName() + " shader (" + pShaderId + ") : " + s);
         } else {
-            return new CompiledShader(i, p_362900_);
+            return new CompiledShader(i, pShaderId);
         }
     }
 
@@ -63,16 +63,16 @@ public class CompiledShader implements AutoCloseable {
         private final String extension;
         private final int glType;
 
-        private Type(final String p_367309_, final String p_366768_, final int p_365015_) {
-            this.name = p_367309_;
-            this.extension = p_366768_;
-            this.glType = p_365015_;
+        private Type(final String pName, final String pExtension, final int pGlType) {
+            this.name = pName;
+            this.extension = pExtension;
+            this.glType = pGlType;
         }
 
         @Nullable
-        public static CompiledShader.Type byLocation(ResourceLocation p_369144_) {
+        public static CompiledShader.Type byLocation(ResourceLocation pLocation) {
             for (CompiledShader.Type compiledshader$type : TYPES) {
-                if (p_369144_.getPath().endsWith(compiledshader$type.extension)) {
+                if (pLocation.getPath().endsWith(compiledshader$type.extension)) {
                     return compiledshader$type;
                 }
             }

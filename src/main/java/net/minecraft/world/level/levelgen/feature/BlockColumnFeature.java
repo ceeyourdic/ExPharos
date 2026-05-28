@@ -58,17 +58,17 @@ public class BlockColumnFeature extends Feature<BlockColumnConfiguration> {
         }
     }
 
-    private static void truncate(int[] p_190793_, int p_190794_, int p_190795_, boolean p_190796_) {
-        int i = p_190794_ - p_190795_;
-        int j = p_190796_ ? 1 : -1;
-        int k = p_190796_ ? 0 : p_190793_.length - 1;
-        int l = p_190796_ ? p_190793_.length : -1;
+    private static void truncate(int[] pLayerHeights, int pTotalHeight, int pCurrentHeight, boolean pPrioritizeTip) {
+        int i = pTotalHeight - pCurrentHeight;
+        int j = pPrioritizeTip ? 1 : -1;
+        int k = pPrioritizeTip ? 0 : pLayerHeights.length - 1;
+        int l = pPrioritizeTip ? pLayerHeights.length : -1;
 
         for (int i1 = k; i1 != l && i > 0; i1 += j) {
-            int j1 = p_190793_[i1];
+            int j1 = pLayerHeights[i1];
             int k1 = Math.min(j1, i);
             i -= k1;
-            p_190793_[i1] -= k1;
+            pLayerHeights[i1] -= k1;
         }
     }
 }

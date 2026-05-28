@@ -36,10 +36,10 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
         this.items = createTeamEntries(minecraft, minecraft.level.getScoreboard());
     }
 
-    private static List<SpectatorMenuItem> createTeamEntries(Minecraft p_260258_, Scoreboard p_259249_) {
-        return p_259249_.getPlayerTeams()
+    private static List<SpectatorMenuItem> createTeamEntries(Minecraft pMinecraft, Scoreboard pScoreboard) {
+        return pScoreboard.getPlayerTeams()
             .stream()
-            .flatMap(p_260025_ -> TeleportToTeamMenuCategory.TeamSelectionItem.create(p_260258_, p_260025_).stream())
+            .flatMap(p_260025_ -> TeleportToTeamMenuCategory.TeamSelectionItem.create(pMinecraft, p_260025_).stream())
             .toList();
     }
 
@@ -54,8 +54,8 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
     }
 
     @Override
-    public void selectItem(SpectatorMenu p_101886_) {
-        p_101886_.selectCategory(this);
+    public void selectItem(SpectatorMenu pMenu) {
+        pMenu.selectCategory(this);
     }
 
     @Override
@@ -79,17 +79,17 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
         private final Supplier<PlayerSkin> iconSkin;
         private final List<PlayerInfo> players;
 
-        private TeamSelectionItem(PlayerTeam p_259176_, List<PlayerInfo> p_259231_, Supplier<PlayerSkin> p_300864_) {
-            this.team = p_259176_;
-            this.players = p_259231_;
-            this.iconSkin = p_300864_;
+        private TeamSelectionItem(PlayerTeam pTeam, List<PlayerInfo> pPlayers, Supplier<PlayerSkin> pIconSkin) {
+            this.team = pTeam;
+            this.players = pPlayers;
+            this.iconSkin = pIconSkin;
         }
 
-        public static Optional<SpectatorMenuItem> create(Minecraft p_260048_, PlayerTeam p_259058_) {
+        public static Optional<SpectatorMenuItem> create(Minecraft pMinecraft, PlayerTeam pTeam) {
             List<PlayerInfo> list = new ArrayList<>();
 
-            for (String s : p_259058_.getPlayers()) {
-                PlayerInfo playerinfo = p_260048_.getConnection().getPlayerInfo(s);
+            for (String s : pTeam.getPlayers()) {
+                PlayerInfo playerinfo = pMinecraft.getConnection().getPlayerInfo(s);
                 if (playerinfo != null && playerinfo.getGameMode() != GameType.SPECTATOR) {
                     list.add(playerinfo);
                 }
@@ -99,14 +99,14 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
                 return Optional.empty();
             } else {
                 GameProfile gameprofile = list.get(RandomSource.create().nextInt(list.size())).getProfile();
-                Supplier<PlayerSkin> supplier = p_260048_.getSkinManager().lookupInsecure(gameprofile);
-                return Optional.of(new TeleportToTeamMenuCategory.TeamSelectionItem(p_259058_, list, supplier));
+                Supplier<PlayerSkin> supplier = pMinecraft.getSkinManager().lookupInsecure(gameprofile);
+                return Optional.of(new TeleportToTeamMenuCategory.TeamSelectionItem(pTeam, list, supplier));
             }
         }
 
         @Override
-        public void selectItem(SpectatorMenu p_101902_) {
-            p_101902_.selectCategory(new TeleportToPlayerMenuCategory(this.players));
+        public void selectItem(SpectatorMenu pMenu) {
+            pMenu.selectCategory(new TeleportToPlayerMenuCategory(this.players));
         }
 
         @Override

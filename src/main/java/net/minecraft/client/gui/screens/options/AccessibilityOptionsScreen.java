@@ -19,40 +19,40 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class AccessibilityOptionsScreen extends OptionsSubScreen {
     public static final Component TITLE = Component.translatable("options.accessibility.title");
 
-    private static OptionInstance<?>[] options(Options p_343652_) {
+    private static OptionInstance<?>[] options(Options pOptions) {
         return new OptionInstance[]{
-            p_343652_.narrator(),
-            p_343652_.showSubtitles(),
-            p_343652_.highContrast(),
-            p_343652_.autoJump(),
-            p_343652_.menuBackgroundBlurriness(),
-            p_343652_.textBackgroundOpacity(),
-            p_343652_.backgroundForChatOnly(),
-            p_343652_.chatOpacity(),
-            p_343652_.chatLineSpacing(),
-            p_343652_.chatDelay(),
-            p_343652_.notificationDisplayTime(),
-            p_343652_.bobView(),
-            p_343652_.toggleCrouch(),
-            p_343652_.toggleSprint(),
-            p_343652_.screenEffectScale(),
-            p_343652_.fovEffectScale(),
-            p_343652_.darknessEffectScale(),
-            p_343652_.damageTiltStrength(),
-            p_343652_.glintSpeed(),
-            p_343652_.glintStrength(),
-            p_343652_.hideLightningFlash(),
-            p_343652_.darkMojangStudiosBackground(),
-            p_343652_.panoramaSpeed(),
-            p_343652_.hideSplashTexts(),
-            p_343652_.narratorHotkey(),
-            p_343652_.rotateWithMinecart(),
-            p_343652_.highContrastBlockOutline()
+            pOptions.narrator(),
+            pOptions.showSubtitles(),
+            pOptions.highContrast(),
+            pOptions.autoJump(),
+            pOptions.menuBackgroundBlurriness(),
+            pOptions.textBackgroundOpacity(),
+            pOptions.backgroundForChatOnly(),
+            pOptions.chatOpacity(),
+            pOptions.chatLineSpacing(),
+            pOptions.chatDelay(),
+            pOptions.notificationDisplayTime(),
+            pOptions.bobView(),
+            pOptions.toggleCrouch(),
+            pOptions.toggleSprint(),
+            pOptions.screenEffectScale(),
+            pOptions.fovEffectScale(),
+            pOptions.darknessEffectScale(),
+            pOptions.damageTiltStrength(),
+            pOptions.glintSpeed(),
+            pOptions.glintStrength(),
+            pOptions.hideLightningFlash(),
+            pOptions.darkMojangStudiosBackground(),
+            pOptions.panoramaSpeed(),
+            pOptions.hideSplashTexts(),
+            pOptions.narratorHotkey(),
+            pOptions.rotateWithMinecart(),
+            pOptions.highContrastBlockOutline()
         };
     }
 
-    public AccessibilityOptionsScreen(Screen p_343335_, Options p_343534_) {
-        super(p_343335_, p_343534_, TITLE);
+    public AccessibilityOptionsScreen(Screen pLastScreen, Options pOptions) {
+        super(pLastScreen, pOptions, TITLE);
     }
 
     @Override

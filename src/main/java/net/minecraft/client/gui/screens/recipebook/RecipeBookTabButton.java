@@ -21,20 +21,20 @@ public class RecipeBookTabButton extends StateSwitchingButton {
     private static final float ANIMATION_TIME = 15.0F;
     private float animationTime;
 
-    public RecipeBookTabButton(RecipeBookComponent.TabInfo p_368060_) {
+    public RecipeBookTabButton(RecipeBookComponent.TabInfo pTabInfo) {
         super(0, 0, 35, 27, false);
-        this.tabInfo = p_368060_;
+        this.tabInfo = pTabInfo;
         this.initTextureValues(SPRITES);
     }
 
-    public void startAnimation(ClientRecipeBook p_370091_, boolean p_361650_) {
-        RecipeCollection.CraftableStatus recipecollection$craftablestatus = p_361650_
+    public void startAnimation(ClientRecipeBook pRecipeBook, boolean pIsFiltering) {
+        RecipeCollection.CraftableStatus recipecollection$craftablestatus = pIsFiltering
             ? RecipeCollection.CraftableStatus.CRAFTABLE
             : RecipeCollection.CraftableStatus.ANY;
 
-        for (RecipeCollection recipecollection : p_370091_.getCollection(this.tabInfo.category())) {
+        for (RecipeCollection recipecollection : pRecipeBook.getCollection(this.tabInfo.category())) {
             for (RecipeDisplayEntry recipedisplayentry : recipecollection.getSelectedRecipes(recipecollection$craftablestatus)) {
-                if (p_370091_.willHighlight(recipedisplayentry.id())) {
+                if (pRecipeBook.willHighlight(recipedisplayentry.id())) {
                     this.animationTime = 15.0F;
                     return;
                 }
@@ -68,13 +68,13 @@ public class RecipeBookTabButton extends StateSwitchingButton {
         }
     }
 
-    private void renderIcon(GuiGraphics p_281802_) {
+    private void renderIcon(GuiGraphics pGuiGraphics) {
         int i = this.isStateTriggered ? -2 : 0;
         if (this.tabInfo.secondaryIcon().isPresent()) {
-            p_281802_.renderFakeItem(this.tabInfo.primaryIcon(), this.getX() + 3 + i, this.getY() + 5);
-            p_281802_.renderFakeItem(this.tabInfo.secondaryIcon().get(), this.getX() + 14 + i, this.getY() + 5);
+            pGuiGraphics.renderFakeItem(this.tabInfo.primaryIcon(), this.getX() + 3 + i, this.getY() + 5);
+            pGuiGraphics.renderFakeItem(this.tabInfo.secondaryIcon().get(), this.getX() + 14 + i, this.getY() + 5);
         } else {
-            p_281802_.renderFakeItem(this.tabInfo.primaryIcon(), this.getX() + 9 + i, this.getY() + 5);
+            pGuiGraphics.renderFakeItem(this.tabInfo.primaryIcon(), this.getX() + 9 + i, this.getY() + 5);
         }
     }
 
@@ -82,8 +82,8 @@ public class RecipeBookTabButton extends StateSwitchingButton {
         return this.tabInfo.category();
     }
 
-    public boolean updateVisibility(ClientRecipeBook p_100450_) {
-        List<RecipeCollection> list = p_100450_.getCollection(this.tabInfo.category());
+    public boolean updateVisibility(ClientRecipeBook pRecipeBook) {
+        List<RecipeCollection> list = pRecipeBook.getCollection(this.tabInfo.category());
         this.visible = false;
 
         for (RecipeCollection recipecollection : list) {

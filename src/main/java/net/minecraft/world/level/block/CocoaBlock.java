@@ -58,8 +58,8 @@ public class CocoaBlock extends HorizontalDirectionalBlock implements Bonemealab
     }
 
     @Override
-    protected boolean isRandomlyTicking(BlockState p_51780_) {
-        return p_51780_.getValue(AGE) < 2;
+    protected boolean isRandomlyTicking(BlockState pState) {
+        return pState.getValue(AGE) < 2;
     }
 
     @Override
@@ -73,15 +73,15 @@ public class CocoaBlock extends HorizontalDirectionalBlock implements Bonemealab
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_51767_, LevelReader p_51768_, BlockPos p_51769_) {
-        BlockState blockstate = p_51768_.getBlockState(p_51769_.relative(p_51767_.getValue(FACING)));
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos.relative(pState.getValue(FACING)));
         return blockstate.is(BlockTags.JUNGLE_LOGS);
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_51787_, BlockGetter p_51788_, BlockPos p_51789_, CollisionContext p_51790_) {
-        int i = p_51787_.getValue(AGE);
-        switch ((Direction)p_51787_.getValue(FACING)) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        int i = pState.getValue(AGE);
+        switch ((Direction)pState.getValue(FACING)) {
             case SOUTH:
                 return SOUTH_AABB[i];
             case NORTH:
@@ -96,12 +96,12 @@ public class CocoaBlock extends HorizontalDirectionalBlock implements Bonemealab
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_51750_) {
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
         BlockState blockstate = this.defaultBlockState();
-        LevelReader levelreader = p_51750_.getLevel();
-        BlockPos blockpos = p_51750_.getClickedPos();
+        LevelReader levelreader = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
 
-        for (Direction direction : p_51750_.getNearestLookingDirections()) {
+        for (Direction direction : pContext.getNearestLookingDirections()) {
             if (direction.getAxis().isHorizontal()) {
                 blockstate = blockstate.setValue(FACING, direction);
                 if (blockstate.canSurvive(levelreader, blockpos)) {
@@ -145,8 +145,8 @@ public class CocoaBlock extends HorizontalDirectionalBlock implements Bonemealab
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_51778_) {
-        p_51778_.add(FACING, AGE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, AGE);
     }
 
     @Override

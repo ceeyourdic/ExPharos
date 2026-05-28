@@ -25,27 +25,27 @@ public class OperationArgument implements ArgumentType<OperationArgument.Operati
         return new OperationArgument();
     }
 
-    public static OperationArgument.Operation getOperation(CommandContext<CommandSourceStack> p_103276_, String p_103277_) {
-        return p_103276_.getArgument(p_103277_, OperationArgument.Operation.class);
+    public static OperationArgument.Operation getOperation(CommandContext<CommandSourceStack> pContext, String pName) {
+        return pContext.getArgument(pName, OperationArgument.Operation.class);
     }
 
-    public OperationArgument.Operation parse(StringReader p_103274_) throws CommandSyntaxException {
-        if (!p_103274_.canRead()) {
-            throw ERROR_INVALID_OPERATION.createWithContext(p_103274_);
+    public OperationArgument.Operation parse(StringReader pReader) throws CommandSyntaxException {
+        if (!pReader.canRead()) {
+            throw ERROR_INVALID_OPERATION.createWithContext(pReader);
         } else {
-            int i = p_103274_.getCursor();
+            int i = pReader.getCursor();
 
-            while (p_103274_.canRead() && p_103274_.peek() != ' ') {
-                p_103274_.skip();
+            while (pReader.canRead() && pReader.peek() != ' ') {
+                pReader.skip();
             }
 
-            return getOperation(p_103274_.getString().substring(i, p_103274_.getCursor()));
+            return getOperation(pReader.getString().substring(i, pReader.getCursor()));
         }
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_103302_, SuggestionsBuilder p_103303_) {
-        return SharedSuggestionProvider.suggest(new String[]{"=", "+=", "-=", "*=", "/=", "%=", "<", ">", "><"}, p_103303_);
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> pContext, SuggestionsBuilder pBuilder) {
+        return SharedSuggestionProvider.suggest(new String[]{"=", "+=", "-=", "*=", "/=", "%=", "<", ">", "><"}, pBuilder);
     }
 
     @Override
@@ -53,16 +53,16 @@ public class OperationArgument implements ArgumentType<OperationArgument.Operati
         return EXAMPLES;
     }
 
-    private static OperationArgument.Operation getOperation(String p_103282_) throws CommandSyntaxException {
-        return (p_103282_.equals("><") ? (p_308356_, p_308357_) -> {
+    private static OperationArgument.Operation getOperation(String pName) throws CommandSyntaxException {
+        return (pName.equals("><") ? (p_308356_, p_308357_) -> {
             int i = p_308356_.get();
             p_308356_.set(p_308357_.get());
             p_308357_.set(i);
-        } : getSimpleOperation(p_103282_));
+        } : getSimpleOperation(pName));
     }
 
-    private static OperationArgument.SimpleOperation getSimpleOperation(String p_103287_) throws CommandSyntaxException {
-        return switch (p_103287_) {
+    private static OperationArgument.SimpleOperation getSimpleOperation(String pName) throws CommandSyntaxException {
+        return switch (pName) {
             case "=" -> (p_103298_, p_103299_) -> p_103299_;
             case "+=" -> Integer::sum;
             case "-=" -> (p_103292_, p_103293_) -> p_103292_ - p_103293_;
@@ -89,12 +89,12 @@ public class OperationArgument implements ArgumentType<OperationArgument.Operati
 
     @FunctionalInterface
     public interface Operation {
-        void apply(ScoreAccess p_310471_, ScoreAccess p_312233_) throws CommandSyntaxException;
+        void apply(ScoreAccess pTargetScore, ScoreAccess pSourceScore) throws CommandSyntaxException;
     }
 
     @FunctionalInterface
     interface SimpleOperation extends OperationArgument.Operation {
-        int apply(int p_103309_, int p_103310_) throws CommandSyntaxException;
+        int apply(int pTargetScore, int pSourceScore) throws CommandSyntaxException;
 
         @Override
         default void apply(ScoreAccess p_311079_, ScoreAccess p_311087_) throws CommandSyntaxException {

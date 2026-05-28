@@ -10,8 +10,8 @@ public class BlockStateMatchTest extends RuleTest {
         .xmap(BlockStateMatchTest::new, p_74099_ -> p_74099_.blockState);
     private final BlockState blockState;
 
-    public BlockStateMatchTest(BlockState p_74093_) {
-        this.blockState = p_74093_;
+    public BlockStateMatchTest(BlockState pBlockState) {
+        this.blockState = pBlockState;
     }
 
     @Override

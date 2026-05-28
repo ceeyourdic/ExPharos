@@ -14,7 +14,7 @@ public record SimpleBlockConfiguration(BlockStateProvider toPlace, boolean sched
                 .apply(p_375355_, SimpleBlockConfiguration::new)
     );
 
-    public SimpleBlockConfiguration(BlockStateProvider p_161155_) {
-        this(p_161155_, false);
+    public SimpleBlockConfiguration(BlockStateProvider pToPlace) {
+        this(pToPlace, false);
     }
 }

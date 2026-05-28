@@ -94,7 +94,7 @@ public abstract class ContainerObjectSelectionList<E extends ContainerObjectSele
     }
 
     @Override
-    protected boolean isSelectedItem(int p_94019_) {
+    protected boolean isSelectedItem(int pIndex) {
         return false;
     }
 
@@ -129,8 +129,8 @@ public abstract class ContainerObjectSelectionList<E extends ContainerObjectSele
         }
 
         @Override
-        public void setDragging(boolean p_94028_) {
-            this.dragging = p_94028_;
+        public void setDragging(boolean pDragging) {
+            this.dragging = pDragging;
         }
 
         @Override
@@ -139,16 +139,16 @@ public abstract class ContainerObjectSelectionList<E extends ContainerObjectSele
         }
 
         @Override
-        public void setFocused(@Nullable GuiEventListener p_94024_) {
+        public void setFocused(@Nullable GuiEventListener pListener) {
             if (this.focused != null) {
                 this.focused.setFocused(false);
             }
 
-            if (p_94024_ != null) {
-                p_94024_.setFocused(true);
+            if (pListener != null) {
+                pListener.setFocused(true);
             }
 
-            this.focused = p_94024_;
+            this.focused = pListener;
         }
 
         @Nullable
@@ -158,11 +158,11 @@ public abstract class ContainerObjectSelectionList<E extends ContainerObjectSele
         }
 
         @Nullable
-        public ComponentPath focusPathAtIndex(FocusNavigationEvent p_265435_, int p_265432_) {
+        public ComponentPath focusPathAtIndex(FocusNavigationEvent pEvent, int pIndex) {
             if (this.children().isEmpty()) {
                 return null;
             } else {
-                ComponentPath componentpath = this.children().get(Math.min(p_265432_, this.children().size() - 1)).nextFocusPath(p_265435_);
+                ComponentPath componentpath = this.children().get(Math.min(pIndex, this.children().size() - 1)).nextFocusPath(pEvent);
                 return ComponentPath.path(this, componentpath);
             }
         }
@@ -196,7 +196,7 @@ public abstract class ContainerObjectSelectionList<E extends ContainerObjectSele
 
         public abstract List<? extends NarratableEntry> narratables();
 
-        void updateNarration(NarrationElementOutput p_168855_) {
+        void updateNarration(NarrationElementOutput pNarrationElementOutput) {
             List<? extends NarratableEntry> list = this.narratables();
             Screen.NarratableSearchResult screen$narratablesearchresult = Screen.findNarratableWidget(list, this.lastNarratable);
             if (screen$narratablesearchresult != null) {
@@ -205,16 +205,16 @@ public abstract class ContainerObjectSelectionList<E extends ContainerObjectSele
                 }
 
                 if (list.size() > 1) {
-                    p_168855_.add(
+                    pNarrationElementOutput.add(
                         NarratedElementType.POSITION,
                         Component.translatable("narrator.position.object_list", screen$narratablesearchresult.index + 1, list.size())
                     );
                     if (screen$narratablesearchresult.priority == NarratableEntry.NarrationPriority.FOCUSED) {
-                        p_168855_.add(NarratedElementType.USAGE, Component.translatable("narration.component_list.usage"));
+                        pNarrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.component_list.usage"));
                     }
                 }
 
-                screen$narratablesearchresult.entry.updateNarration(p_168855_.nest());
+                screen$narratablesearchresult.entry.updateNarration(pNarrationElementOutput.nest());
             }
         }
     }

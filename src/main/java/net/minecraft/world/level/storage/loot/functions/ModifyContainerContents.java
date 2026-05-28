@@ -25,10 +25,10 @@ public class ModifyContainerContents extends LootItemConditionalFunction {
     private final ContainerComponentManipulator<?> component;
     private final LootItemFunction modifier;
 
-    private ModifyContainerContents(List<LootItemCondition> p_329722_, ContainerComponentManipulator<?> p_330185_, LootItemFunction p_330905_) {
-        super(p_329722_);
-        this.component = p_330185_;
-        this.modifier = p_330905_;
+    private ModifyContainerContents(List<LootItemCondition> pConditions, ContainerComponentManipulator<?> pComponents, LootItemFunction pModifier) {
+        super(pConditions);
+        this.component = pComponents;
+        this.modifier = pModifier;
     }
 
     @Override

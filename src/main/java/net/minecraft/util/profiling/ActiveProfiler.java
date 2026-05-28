@@ -18,7 +18,13 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.profiling.metrics.MetricCategory;
+import net.optifine.Config;
+import net.optifine.Lagometer;
+import net.optifine.reflect.Reflector;
+import net.optifine.reflect.ReflectorClass;
+import net.optifine.reflect.ReflectorField;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
@@ -38,17 +44,30 @@ public class ActiveProfiler implements ProfileCollector {
     private ActiveProfiler.PathEntry currentEntry;
     private final boolean warn;
     private final Set<Pair<String, MetricCategory>> chartedPaths = new ObjectArraySet<>();
+    private boolean clientProfiler = false;
+    private boolean lagometerActive = false;
+    private static final String SCHEDULED_EXECUTABLES = "scheduledExecutables";
+    private static final String TICK = "tick";
+    private static final String SOUND = "sound";
+    private static final int HASH_SCHEDULED_EXECUTABLES = "scheduledExecutables".hashCode();
+    private static final int HASH_TICK = "tick".hashCode();
+    private static final int HASH_SOUND = "sound".hashCode();
+    private static final ReflectorClass MINECRAFT = new ReflectorClass(Minecraft.class);
+    private static final ReflectorField Minecraft_timeTracker = new ReflectorField(MINECRAFT, ContinuousProfiler.class);
 
-    public ActiveProfiler(LongSupplier p_18383_, IntSupplier p_18384_, boolean p_18385_) {
-        this.startTimeNano = p_18383_.getAsLong();
-        this.getRealTime = p_18383_;
-        this.startTimeTicks = p_18384_.getAsInt();
-        this.getTickTime = p_18384_;
-        this.warn = p_18385_;
+    public ActiveProfiler(LongSupplier pStartTimeNano, IntSupplier pStartTimeTicks, boolean pWarn) {
+        this.startTimeNano = pStartTimeNano.getAsLong();
+        this.getRealTime = pStartTimeNano;
+        this.startTimeTicks = pStartTimeTicks.getAsInt();
+        this.getTickTime = pStartTimeTicks;
+        this.warn = pWarn;
     }
 
     @Override
     public void startTick() {
+        ContinuousProfiler continuousprofiler = (ContinuousProfiler)Reflector.getFieldValue(Minecraft.getInstance(), Minecraft_timeTracker);
+        this.clientProfiler = continuousprofiler != null && continuousprofiler.getFiller() == this;
+        this.lagometerActive = this.clientProfiler && Lagometer.isActive();
         if (this.started) {
             LOGGER.error("Profiler tick already started - missing endTick()?");
         } else {
@@ -76,15 +95,25 @@ public class ActiveProfiler implements ProfileCollector {
     }
 
     @Override
-    public void push(String p_18390_) {
+    public void push(String pName) {
+        if (this.lagometerActive) {
+            int i = pName.hashCode();
+            if (i == HASH_SCHEDULED_EXECUTABLES && pName.equals("scheduledExecutables")) {
+                Lagometer.timerScheduledExecutables.start();
+            } else if (i == HASH_TICK && pName.equals("tick") && Config.isMinecraftThread()) {
+                Lagometer.timerScheduledExecutables.end();
+                Lagometer.timerTick.start();
+            }
+        }
+
         if (!this.started) {
-            LOGGER.error("Cannot push '{}' to profiler if profiler tick hasn't started - missing startTick()?", p_18390_);
+            LOGGER.error("Cannot push '{}' to profiler if profiler tick hasn't started - missing startTick()?", pName);
         } else {
             if (!this.path.isEmpty()) {
                 this.path = this.path + "\u001e";
             }
 
-            this.path = this.path + p_18390_;
+            this.path = this.path + pName;
             this.paths.add(this.path);
             this.startTimes.add(Util.getNanos());
             this.currentEntry = null;
@@ -92,8 +121,8 @@ public class ActiveProfiler implements ProfileCollector {
     }
 
     @Override
-    public void push(Supplier<String> p_18392_) {
-        this.push(p_18392_.get());
+    public void push(Supplier<String> pNameSupplier) {
+        this.push(pNameSupplier.get());
     }
 
     @Override
@@ -113,6 +142,8 @@ public class ActiveProfiler implements ProfileCollector {
             this.paths.remove(this.paths.size() - 1);
             long k = i - j;
             ActiveProfiler.PathEntry activeprofiler$pathentry = this.getCurrentEntry();
+            activeprofiler$pathentry.accumulatedDuration = (activeprofiler$pathentry.accumulatedDuration * 49L + k) / 50L;
+            activeprofiler$pathentry.count = 1L;
             activeprofiler$pathentry.accumulatedDuration += k;
             activeprofiler$pathentry.count++;
             activeprofiler$pathentry.maxDuration = Math.max(activeprofiler$pathentry.maxDuration, k);
@@ -131,20 +162,27 @@ public class ActiveProfiler implements ProfileCollector {
     }
 
     @Override
-    public void popPush(String p_18395_) {
+    public void popPush(String pName) {
+        if (this.lagometerActive) {
+            int i = pName.hashCode();
+            if (i == HASH_SOUND && pName.equals("sound")) {
+                Lagometer.timerTick.end();
+            }
+        }
+
         this.pop();
-        this.push(p_18395_);
+        this.push(pName);
     }
 
     @Override
-    public void popPush(Supplier<String> p_18397_) {
+    public void popPush(Supplier<String> pNameSupplier) {
         this.pop();
-        this.push(p_18397_);
+        this.push(pNameSupplier);
     }
 
     private ActiveProfiler.PathEntry getCurrentEntry() {
         if (this.currentEntry == null) {
-            this.currentEntry = this.entries.computeIfAbsent(this.path, p_18405_ -> new ActiveProfiler.PathEntry());
+            this.currentEntry = this.entries.computeIfAbsent(this.path, keyIn -> new ActiveProfiler.PathEntry());
         }
 
         return this.currentEntry;

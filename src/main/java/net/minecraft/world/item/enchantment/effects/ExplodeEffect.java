@@ -79,11 +79,11 @@ public record ExplodeEffect(
     }
 
     @Nullable
-    private DamageSource getDamageSource(Entity p_343933_, Vec3 p_345099_) {
+    private DamageSource getDamageSource(Entity pEntity, Vec3 pPos) {
         if (this.damageType.isEmpty()) {
             return null;
         } else {
-            return this.attributeToUser ? new DamageSource(this.damageType.get(), p_343933_) : new DamageSource(this.damageType.get(), p_345099_);
+            return this.attributeToUser ? new DamageSource(this.damageType.get(), pEntity) : new DamageSource(this.damageType.get(), pPos);
         }
     }
 

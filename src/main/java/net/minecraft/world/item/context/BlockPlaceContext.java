@@ -14,12 +14,12 @@ public class BlockPlaceContext extends UseOnContext {
     private final BlockPos relativePos;
     protected boolean replaceClicked = true;
 
-    public BlockPlaceContext(Player p_43631_, InteractionHand p_43632_, ItemStack p_43633_, BlockHitResult p_43634_) {
-        this(p_43631_.level(), p_43631_, p_43632_, p_43633_, p_43634_);
+    public BlockPlaceContext(Player pPlayer, InteractionHand pHand, ItemStack pItemStack, BlockHitResult pHitResult) {
+        this(pPlayer.level(), pPlayer, pHand, pItemStack, pHitResult);
     }
 
-    public BlockPlaceContext(UseOnContext p_43636_) {
-        this(p_43636_.getLevel(), p_43636_.getPlayer(), p_43636_.getHand(), p_43636_.getItemInHand(), p_43636_.getHitResult());
+    public BlockPlaceContext(UseOnContext pContext) {
+        this(pContext.getLevel(), pContext.getPlayer(), pContext.getHand(), pContext.getItemInHand(), pContext.getHitResult());
     }
 
     protected BlockPlaceContext(Level p_43638_, @Nullable Player p_43639_, InteractionHand p_43640_, ItemStack p_43641_, BlockHitResult p_43642_) {
@@ -28,20 +28,20 @@ public class BlockPlaceContext extends UseOnContext {
         this.replaceClicked = p_43638_.getBlockState(p_43642_.getBlockPos()).canBeReplaced(this);
     }
 
-    public static BlockPlaceContext at(BlockPlaceContext p_43645_, BlockPos p_43646_, Direction p_43647_) {
+    public static BlockPlaceContext at(BlockPlaceContext pContext, BlockPos pPos, Direction pDirection) {
         return new BlockPlaceContext(
-            p_43645_.getLevel(),
-            p_43645_.getPlayer(),
-            p_43645_.getHand(),
-            p_43645_.getItemInHand(),
+            pContext.getLevel(),
+            pContext.getPlayer(),
+            pContext.getHand(),
+            pContext.getItemInHand(),
             new BlockHitResult(
                 new Vec3(
-                    (double)p_43646_.getX() + 0.5 + (double)p_43647_.getStepX() * 0.5,
-                    (double)p_43646_.getY() + 0.5 + (double)p_43647_.getStepY() * 0.5,
-                    (double)p_43646_.getZ() + 0.5 + (double)p_43647_.getStepZ() * 0.5
+                    (double)pPos.getX() + 0.5 + (double)pDirection.getStepX() * 0.5,
+                    (double)pPos.getY() + 0.5 + (double)pDirection.getStepY() * 0.5,
+                    (double)pPos.getZ() + 0.5 + (double)pDirection.getStepZ() * 0.5
                 ),
-                p_43647_,
-                p_43646_,
+                pDirection,
+                pPos,
                 false
             )
         );

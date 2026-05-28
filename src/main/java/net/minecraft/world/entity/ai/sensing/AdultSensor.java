@@ -19,9 +19,9 @@ public class AdultSensor extends Sensor<AgeableMob> {
         p_148249_.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).ifPresent(p_186145_ -> this.setNearestVisibleAdult(p_148249_, p_186145_));
     }
 
-    private void setNearestVisibleAdult(AgeableMob p_186141_, NearestVisibleLivingEntities p_186142_) {
-        Optional<AgeableMob> optional = p_186142_.findClosest(p_359100_ -> p_359100_.getType() == p_186141_.getType() && !p_359100_.isBaby())
+    private void setNearestVisibleAdult(AgeableMob pMob, NearestVisibleLivingEntities pNearbyEntities) {
+        Optional<AgeableMob> optional = pNearbyEntities.findClosest(p_359100_ -> p_359100_.getType() == pMob.getType() && !p_359100_.isBaby())
             .map(AgeableMob.class::cast);
-        p_186141_.getBrain().setMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT, optional);
+        pMob.getBrain().setMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT, optional);
     }
 }

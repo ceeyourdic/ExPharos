@@ -4,19 +4,18 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.decoration.PaintingVariant;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.util.TextureUtils;
 
-@OnlyIn(Dist.CLIENT)
 public class PaintingTextureManager extends TextureAtlasHolder {
     private static final ResourceLocation BACK_SPRITE_LOCATION = ResourceLocation.withDefaultNamespace("back");
 
-    public PaintingTextureManager(TextureManager p_118802_) {
-        super(p_118802_, ResourceLocation.withDefaultNamespace("textures/atlas/paintings.png"), ResourceLocation.withDefaultNamespace("paintings"));
+    public PaintingTextureManager(TextureManager pTextureManager) {
+        super(pTextureManager, ResourceLocation.withDefaultNamespace("textures/atlas/paintings.png"), ResourceLocation.withDefaultNamespace("paintings"));
     }
 
-    public TextureAtlasSprite get(PaintingVariant p_235034_) {
-        return this.getSprite(p_235034_.assetId());
+    public TextureAtlasSprite get(PaintingVariant pPaintingVariant) {
+        TextureAtlasSprite textureatlassprite = this.getSprite(pPaintingVariant.assetId());
+        return TextureUtils.getCustomSprite(textureatlassprite);
     }
 
     public TextureAtlasSprite getBackSprite() {

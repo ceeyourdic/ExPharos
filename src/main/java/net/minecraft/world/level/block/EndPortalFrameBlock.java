@@ -42,43 +42,43 @@ public class EndPortalFrameBlock extends Block {
     }
 
     @Override
-    protected boolean useShapeForLightOcclusion(BlockState p_53079_) {
+    protected boolean useShapeForLightOcclusion(BlockState pState) {
         return true;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_53073_, BlockGetter p_53074_, BlockPos p_53075_, CollisionContext p_53076_) {
-        return p_53073_.getValue(HAS_EYE) ? FULL_SHAPE : BASE_SHAPE;
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return pState.getValue(HAS_EYE) ? FULL_SHAPE : BASE_SHAPE;
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_53052_) {
-        return this.defaultBlockState().setValue(FACING, p_53052_.getHorizontalDirection().getOpposite()).setValue(HAS_EYE, Boolean.valueOf(false));
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite()).setValue(HAS_EYE, Boolean.valueOf(false));
     }
 
     @Override
-    protected boolean hasAnalogOutputSignal(BlockState p_53054_) {
+    protected boolean hasAnalogOutputSignal(BlockState pState) {
         return true;
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState p_53061_, Level p_53062_, BlockPos p_53063_) {
-        return p_53061_.getValue(HAS_EYE) ? 15 : 0;
+    protected int getAnalogOutputSignal(BlockState pBlockState, Level pLevel, BlockPos pPos) {
+        return pBlockState.getValue(HAS_EYE) ? 15 : 0;
     }
 
     @Override
-    protected BlockState rotate(BlockState p_53068_, Rotation p_53069_) {
-        return p_53068_.setValue(FACING, p_53069_.rotate(p_53068_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_53065_, Mirror p_53066_) {
-        return p_53065_.rotate(p_53066_.getRotation(p_53065_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_53071_) {
-        p_53071_.add(FACING, HAS_EYE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, HAS_EYE);
     }
 
     public static BlockPattern getOrCreatePortalShape() {

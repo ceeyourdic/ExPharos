@@ -9,14 +9,14 @@ public abstract class SectionTracker extends DynamicGraphMinFixedPoint {
     }
 
     @Override
-    protected void checkNeighborsAfterUpdate(long p_8280_, int p_8281_, boolean p_8282_) {
-        if (!p_8282_ || p_8281_ < this.levelCount - 2) {
+    protected void checkNeighborsAfterUpdate(long pPos, int pLevel, boolean pIsDecreasing) {
+        if (!pIsDecreasing || pLevel < this.levelCount - 2) {
             for (int i = -1; i <= 1; i++) {
                 for (int j = -1; j <= 1; j++) {
                     for (int k = -1; k <= 1; k++) {
-                        long l = SectionPos.offset(p_8280_, i, j, k);
-                        if (l != p_8280_) {
-                            this.checkNeighbor(p_8280_, l, p_8281_, p_8282_);
+                        long l = SectionPos.offset(pPos, i, j, k);
+                        if (l != pPos) {
+                            this.checkNeighbor(pPos, l, pLevel, pIsDecreasing);
                         }
                     }
                 }
@@ -25,19 +25,19 @@ public abstract class SectionTracker extends DynamicGraphMinFixedPoint {
     }
 
     @Override
-    protected int getComputedLevel(long p_8284_, long p_8285_, int p_8286_) {
-        int i = p_8286_;
+    protected int getComputedLevel(long pPos, long pExcludedSourcePos, int pLevel) {
+        int i = pLevel;
 
         for (int j = -1; j <= 1; j++) {
             for (int k = -1; k <= 1; k++) {
                 for (int l = -1; l <= 1; l++) {
-                    long i1 = SectionPos.offset(p_8284_, j, k, l);
-                    if (i1 == p_8284_) {
+                    long i1 = SectionPos.offset(pPos, j, k, l);
+                    if (i1 == pPos) {
                         i1 = Long.MAX_VALUE;
                     }
 
-                    if (i1 != p_8285_) {
-                        int j1 = this.computeLevelFromNeighbor(i1, p_8284_, this.getLevel(i1));
+                    if (i1 != pExcludedSourcePos) {
+                        int j1 = this.computeLevelFromNeighbor(i1, pPos, this.getLevel(i1));
                         if (i > j1) {
                             i = j1;
                         }
@@ -54,13 +54,13 @@ public abstract class SectionTracker extends DynamicGraphMinFixedPoint {
     }
 
     @Override
-    protected int computeLevelFromNeighbor(long p_8293_, long p_8294_, int p_8295_) {
-        return this.isSource(p_8293_) ? this.getLevelFromSource(p_8294_) : p_8295_ + 1;
+    protected int computeLevelFromNeighbor(long pStartPos, long pEndPos, int pStartLevel) {
+        return this.isSource(pStartPos) ? this.getLevelFromSource(pEndPos) : pStartLevel + 1;
     }
 
-    protected abstract int getLevelFromSource(long p_8287_);
+    protected abstract int getLevelFromSource(long pPos);
 
-    public void update(long p_8289_, int p_8290_, boolean p_8291_) {
-        this.checkEdge(Long.MAX_VALUE, p_8289_, p_8290_, p_8291_);
+    public void update(long pPos, int pLevel, boolean pIsDecreasing) {
+        this.checkEdge(Long.MAX_VALUE, pPos, pLevel, pIsDecreasing);
     }
 }

@@ -38,18 +38,18 @@ public class PlayerItemInHandLayer<S extends PlayerRenderState, M extends Entity
         }
     }
 
-    private void renderItemHeldToEye(ItemStackRenderState p_376803_, HumanoidArm p_378038_, PoseStack p_376706_, MultiBufferSource p_376578_, int p_376343_) {
-        p_376706_.pushPose();
-        this.getParentModel().root().translateAndRotate(p_376706_);
+    private void renderItemHeldToEye(ItemStackRenderState pRenderState, HumanoidArm pArm, PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight) {
+        pPoseStack.pushPose();
+        this.getParentModel().root().translateAndRotate(pPoseStack);
         ModelPart modelpart = this.getParentModel().getHead();
         float f = modelpart.xRot;
         modelpart.xRot = Mth.clamp(modelpart.xRot, (float) (-Math.PI / 6), (float) (Math.PI / 2));
-        modelpart.translateAndRotate(p_376706_);
+        modelpart.translateAndRotate(pPoseStack);
         modelpart.xRot = f;
-        CustomHeadLayer.translateToHead(p_376706_, CustomHeadLayer.Transforms.DEFAULT);
-        boolean flag = p_378038_ == HumanoidArm.LEFT;
-        p_376706_.translate((flag ? -2.5F : 2.5F) / 16.0F, -0.0625F, 0.0F);
-        p_376803_.render(p_376706_, p_376578_, p_376343_, OverlayTexture.NO_OVERLAY);
-        p_376706_.popPose();
+        CustomHeadLayer.translateToHead(pPoseStack, CustomHeadLayer.Transforms.DEFAULT);
+        boolean flag = pArm == HumanoidArm.LEFT;
+        pPoseStack.translate((flag ? -2.5F : 2.5F) / 16.0F, -0.0625F, 0.0F);
+        pRenderState.render(pPoseStack, pBufferSource, pPackedLight, OverlayTexture.NO_OVERLAY);
+        pPoseStack.popPose();
     }
 }

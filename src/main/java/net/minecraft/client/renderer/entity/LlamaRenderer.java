@@ -16,9 +16,9 @@ public class LlamaRenderer extends AgeableMobRenderer<Llama, LlamaRenderState, L
     private static final ResourceLocation BROWN = ResourceLocation.withDefaultNamespace("textures/entity/llama/brown.png");
     private static final ResourceLocation GRAY = ResourceLocation.withDefaultNamespace("textures/entity/llama/gray.png");
 
-    public LlamaRenderer(EntityRendererProvider.Context p_174293_, ModelLayerLocation p_174294_, ModelLayerLocation p_361682_) {
-        super(p_174293_, new LlamaModel(p_174293_.bakeLayer(p_174294_)), new LlamaModel(p_174293_.bakeLayer(p_361682_)), 0.7F);
-        this.addLayer(new LlamaDecorLayer(this, p_174293_.getModelSet(), p_174293_.getEquipmentRenderer()));
+    public LlamaRenderer(EntityRendererProvider.Context pContext, ModelLayerLocation pAdultModel, ModelLayerLocation pBabyModel) {
+        super(pContext, new LlamaModel(pContext.bakeLayer(pAdultModel)), new LlamaModel(pContext.bakeLayer(pBabyModel)), 0.7F);
+        this.addLayer(new LlamaDecorLayer(this, pContext.getModelSet(), pContext.getEquipmentRenderer()));
     }
 
     public ResourceLocation getTextureLocation(LlamaRenderState p_366123_) {

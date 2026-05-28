@@ -24,8 +24,8 @@ public class KeyBindsScreen extends OptionsSubScreen {
     private KeyBindsList keyBindsList;
     private Button resetButton;
 
-    public KeyBindsScreen(Screen p_344695_, Options p_342647_) {
-        super(p_344695_, p_342647_, TITLE);
+    public KeyBindsScreen(Screen pLastScreen, Options pOptions) {
+        super(pLastScreen, pOptions, TITLE);
     }
 
     @Override

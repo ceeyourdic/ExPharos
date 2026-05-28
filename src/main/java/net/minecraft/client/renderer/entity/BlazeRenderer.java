@@ -17,7 +17,7 @@ public class BlazeRenderer extends MobRenderer<Blaze, LivingEntityRenderState, B
         super(p_173933_, new BlazeModel(p_173933_.bakeLayer(ModelLayers.BLAZE)), 0.5F);
     }
 
-    protected int getBlockLightLevel(Blaze p_113910_, BlockPos p_113911_) {
+    protected int getBlockLightLevel(Blaze pEntity, BlockPos pPos) {
         return 15;
     }
 

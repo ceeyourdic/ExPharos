@@ -31,8 +31,8 @@ public class ItemStackCustomNameToOverrideComponentFix extends DataFix {
         "filled_map.village_taiga"
     );
 
-    public ItemStackCustomNameToOverrideComponentFix(Schema p_328761_) {
-        super(p_328761_, false);
+    public ItemStackCustomNameToOverrideComponentFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override
@@ -61,17 +61,17 @@ public class ItemStackCustomNameToOverrideComponentFix extends DataFix {
         );
     }
 
-    private static <T> Dynamic<T> fixMap(Dynamic<T> p_331719_) {
-        return fixCustomName(p_331719_, MAP_NAMES::contains);
+    private static <T> Dynamic<T> fixMap(Dynamic<T> pData) {
+        return fixCustomName(pData, MAP_NAMES::contains);
     }
 
-    private static <T> Dynamic<T> fixBanner(Dynamic<T> p_328946_) {
-        return fixCustomName(p_328946_, p_329571_ -> p_329571_.equals("block.minecraft.ominous_banner"));
+    private static <T> Dynamic<T> fixBanner(Dynamic<T> pData) {
+        return fixCustomName(pData, p_329571_ -> p_329571_.equals("block.minecraft.ominous_banner"));
     }
 
-    private static <T> Dynamic<T> fixCustomName(Dynamic<T> p_335170_, Predicate<String> p_334171_) {
-        OptionalDynamic<T> optionaldynamic = p_335170_.get("minecraft:custom_name");
-        Optional<String> optional = optionaldynamic.asString().result().flatMap(ComponentDataFixUtils::extractTranslationString).filter(p_334171_);
-        return optional.isPresent() ? p_335170_.renameField("minecraft:custom_name", "minecraft:item_name") : p_335170_;
+    private static <T> Dynamic<T> fixCustomName(Dynamic<T> pData, Predicate<String> pShouldFix) {
+        OptionalDynamic<T> optionaldynamic = pData.get("minecraft:custom_name");
+        Optional<String> optional = optionaldynamic.asString().result().flatMap(ComponentDataFixUtils::extractTranslationString).filter(pShouldFix);
+        return optional.isPresent() ? pData.renameField("minecraft:custom_name", "minecraft:item_name") : pData;
     }
 }

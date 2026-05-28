@@ -16,8 +16,8 @@ import net.minecraft.resources.ResourceLocation;
 public class RegistryDumpReport implements DataProvider {
     private final PackOutput output;
 
-    public RegistryDumpReport(PackOutput p_249862_) {
-        this.output = p_249862_;
+    public RegistryDumpReport(PackOutput pOutput) {
+        this.output = pOutput;
     }
 
     @Override
@@ -30,19 +30,19 @@ public class RegistryDumpReport implements DataProvider {
         return DataProvider.saveStable(p_253743_, jsonobject, path);
     }
 
-    private static <T> JsonElement dumpRegistry(Registry<T> p_124059_) {
+    private static <T> JsonElement dumpRegistry(Registry<T> pRegistry) {
         JsonObject jsonobject = new JsonObject();
-        if (p_124059_ instanceof DefaultedRegistry) {
-            ResourceLocation resourcelocation = ((DefaultedRegistry)p_124059_).getDefaultKey();
+        if (pRegistry instanceof DefaultedRegistry) {
+            ResourceLocation resourcelocation = ((DefaultedRegistry)pRegistry).getDefaultKey();
             jsonobject.addProperty("default", resourcelocation.toString());
         }
 
-        int i = ((Registry)BuiltInRegistries.REGISTRY).getId(p_124059_);
+        int i = ((Registry)BuiltInRegistries.REGISTRY).getId(pRegistry);
         jsonobject.addProperty("protocol_id", i);
         JsonObject jsonobject1 = new JsonObject();
-        p_124059_.listElements().forEach(p_211092_ -> {
+        pRegistry.listElements().forEach(p_211092_ -> {
             T t = p_211092_.value();
-            int j = p_124059_.getId(t);
+            int j = pRegistry.getId(t);
             JsonObject jsonobject2 = new JsonObject();
             jsonobject2.addProperty("protocol_id", j);
             jsonobject1.add(p_211092_.key().location().toString(), jsonobject2);

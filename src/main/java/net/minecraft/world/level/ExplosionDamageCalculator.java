@@ -8,27 +8,27 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 
 public class ExplosionDamageCalculator {
-    public Optional<Float> getBlockExplosionResistance(Explosion p_46099_, BlockGetter p_46100_, BlockPos p_46101_, BlockState p_46102_, FluidState p_46103_) {
-        return p_46102_.isAir() && p_46103_.isEmpty() ? Optional.empty() : Optional.of(Math.max(p_46102_.getBlock().getExplosionResistance(), p_46103_.getExplosionResistance()));
+    public Optional<Float> getBlockExplosionResistance(Explosion pExplosion, BlockGetter pReader, BlockPos pPos, BlockState pState, FluidState pFluid) {
+        return pState.isAir() && pFluid.isEmpty() ? Optional.empty() : Optional.of(Math.max(pState.getBlock().getExplosionResistance(), pFluid.getExplosionResistance()));
     }
 
-    public boolean shouldBlockExplode(Explosion p_46094_, BlockGetter p_46095_, BlockPos p_46096_, BlockState p_46097_, float p_46098_) {
+    public boolean shouldBlockExplode(Explosion pExplosion, BlockGetter pReader, BlockPos pPos, BlockState pState, float pPower) {
         return true;
     }
 
-    public boolean shouldDamageEntity(Explosion p_312772_, Entity p_311132_) {
+    public boolean shouldDamageEntity(Explosion pExplosion, Entity pEntity) {
         return true;
     }
 
-    public float getKnockbackMultiplier(Entity p_330296_) {
+    public float getKnockbackMultiplier(Entity pEntity) {
         return 1.0F;
     }
 
-    public float getEntityDamageAmount(Explosion p_310428_, Entity p_310135_, float p_365084_) {
-        float f = p_310428_.radius() * 2.0F;
-        Vec3 vec3 = p_310428_.center();
-        double d0 = Math.sqrt(p_310135_.distanceToSqr(vec3)) / (double)f;
-        double d1 = (1.0 - d0) * (double)p_365084_;
+    public float getEntityDamageAmount(Explosion pExplosion, Entity pEntity, float pSeenPercent) {
+        float f = pExplosion.radius() * 2.0F;
+        Vec3 vec3 = pExplosion.center();
+        double d0 = Math.sqrt(pEntity.distanceToSqr(vec3)) / (double)f;
+        double d1 = (1.0 - d0) * (double)pSeenPercent;
         return (float)((d1 * d1 + d1) / 2.0 * 7.0 * (double)f + 1.0);
     }
 }

@@ -56,8 +56,8 @@ public class AnvilBlock extends FallingBlock {
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_48781_) {
-        return this.defaultBlockState().setValue(FACING, p_48781_.getHorizontalDirection().getClockWise());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getClockWise());
     }
 
     @Override
@@ -72,21 +72,21 @@ public class AnvilBlock extends FallingBlock {
 
     @Nullable
     @Override
-    protected MenuProvider getMenuProvider(BlockState p_48821_, Level p_48822_, BlockPos p_48823_) {
+    protected MenuProvider getMenuProvider(BlockState pState, Level pLevel, BlockPos pPos) {
         return new SimpleMenuProvider(
-            (p_48785_, p_48786_, p_48787_) -> new AnvilMenu(p_48785_, p_48786_, ContainerLevelAccess.create(p_48822_, p_48823_)), CONTAINER_TITLE
+            (p_48785_, p_48786_, p_48787_) -> new AnvilMenu(p_48785_, p_48786_, ContainerLevelAccess.create(pLevel, pPos)), CONTAINER_TITLE
         );
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_48816_, BlockGetter p_48817_, BlockPos p_48818_, CollisionContext p_48819_) {
-        Direction direction = p_48816_.getValue(FACING);
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        Direction direction = pState.getValue(FACING);
         return direction.getAxis() == Direction.Axis.X ? X_AXIS_AABB : Z_AXIS_AABB;
     }
 
     @Override
-    protected void falling(FallingBlockEntity p_48779_) {
-        p_48779_.setHurtsEntities(2.0F, 40);
+    protected void falling(FallingBlockEntity pFallingEntity) {
+        pFallingEntity.setHurtsEntities(2.0F, 40);
     }
 
     @Override
@@ -109,22 +109,22 @@ public class AnvilBlock extends FallingBlock {
     }
 
     @Nullable
-    public static BlockState damage(BlockState p_48825_) {
-        if (p_48825_.is(Blocks.ANVIL)) {
-            return Blocks.CHIPPED_ANVIL.defaultBlockState().setValue(FACING, p_48825_.getValue(FACING));
+    public static BlockState damage(BlockState pState) {
+        if (pState.is(Blocks.ANVIL)) {
+            return Blocks.CHIPPED_ANVIL.defaultBlockState().setValue(FACING, pState.getValue(FACING));
         } else {
-            return p_48825_.is(Blocks.CHIPPED_ANVIL) ? Blocks.DAMAGED_ANVIL.defaultBlockState().setValue(FACING, p_48825_.getValue(FACING)) : null;
+            return pState.is(Blocks.CHIPPED_ANVIL) ? Blocks.DAMAGED_ANVIL.defaultBlockState().setValue(FACING, pState.getValue(FACING)) : null;
         }
     }
 
     @Override
-    protected BlockState rotate(BlockState p_48811_, Rotation p_48812_) {
-        return p_48811_.setValue(FACING, p_48812_.rotate(p_48811_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRot) {
+        return pState.setValue(FACING, pRot.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_48814_) {
-        p_48814_.add(FACING);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class AnvilBlock extends FallingBlock {
     }
 
     @Override
-    public int getDustColor(BlockState p_48827_, BlockGetter p_48828_, BlockPos p_48829_) {
-        return p_48827_.getMapColor(p_48828_, p_48829_).col;
+    public int getDustColor(BlockState pState, BlockGetter pReader, BlockPos pPos) {
+        return pState.getMapColor(pReader, pPos).col;
     }
 }

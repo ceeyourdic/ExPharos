@@ -15,8 +15,8 @@ public class ProtectedBlockProcessor extends StructureProcessor {
         .xmap(ProtectedBlockProcessor::new, p_205053_ -> p_205053_.cannotReplace)
         .fieldOf("value");
 
-    public ProtectedBlockProcessor(TagKey<Block> p_205051_) {
-        this.cannotReplace = p_205051_;
+    public ProtectedBlockProcessor(TagKey<Block> pCannotReplace) {
+        this.cannotReplace = pCannotReplace;
     }
 
     @Nullable

@@ -10,12 +10,12 @@ public record ClientboundPongResponsePacket(long time) implements Packet<ClientP
         ClientboundPongResponsePacket::write, ClientboundPongResponsePacket::new
     );
 
-    private ClientboundPongResponsePacket(FriendlyByteBuf p_334575_) {
-        this(p_334575_.readLong());
+    private ClientboundPongResponsePacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readLong());
     }
 
-    private void write(FriendlyByteBuf p_335126_) {
-        p_335126_.writeLong(this.time);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeLong(this.time);
     }
 
     @Override

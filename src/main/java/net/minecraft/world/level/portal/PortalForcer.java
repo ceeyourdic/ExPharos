@@ -35,23 +35,23 @@ public class PortalForcer {
     private static final int NOTHING_FOUND = -1;
     private final ServerLevel level;
 
-    public PortalForcer(ServerLevel p_77650_) {
-        this.level = p_77650_;
+    public PortalForcer(ServerLevel pLevel) {
+        this.level = pLevel;
     }
 
-    public Optional<BlockPos> findClosestPortalPosition(BlockPos p_345495_, boolean p_345384_, WorldBorder p_344228_) {
+    public Optional<BlockPos> findClosestPortalPosition(BlockPos pExitPos, boolean pIsNether, WorldBorder pWorldBorder) {
         PoiManager poimanager = this.level.getPoiManager();
-        int i = p_345384_ ? 16 : 128;
-        poimanager.ensureLoadedAndValid(this.level, p_345495_, i);
-        return poimanager.getInSquare(p_230634_ -> p_230634_.is(PoiTypes.NETHER_PORTAL), p_345495_, i, PoiManager.Occupancy.ANY)
+        int i = pIsNether ? 16 : 128;
+        poimanager.ensureLoadedAndValid(this.level, pExitPos, i);
+        return poimanager.getInSquare(p_230634_ -> p_230634_.is(PoiTypes.NETHER_PORTAL), pExitPos, i, PoiManager.Occupancy.ANY)
             .map(PoiRecord::getPos)
-            .filter(p_344228_::isWithinBounds)
+            .filter(pWorldBorder::isWithinBounds)
             .filter(p_341965_ -> this.level.getBlockState(p_341965_).hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
-            .min(Comparator.<BlockPos>comparingDouble(p_341964_ -> p_341964_.distSqr(p_345495_)).thenComparingInt(Vec3i::getY));
+            .min(Comparator.<BlockPos>comparingDouble(p_341964_ -> p_341964_.distSqr(pExitPos)).thenComparingInt(Vec3i::getY));
     }
 
-    public Optional<BlockUtil.FoundRectangle> createPortal(BlockPos p_77667_, Direction.Axis p_77668_) {
-        Direction direction = Direction.get(Direction.AxisDirection.POSITIVE, p_77668_);
+    public Optional<BlockUtil.FoundRectangle> createPortal(BlockPos pPos, Direction.Axis pAxis) {
+        Direction direction = Direction.get(Direction.AxisDirection.POSITIVE, pAxis);
         double d0 = -1.0;
         BlockPos blockpos = null;
         double d1 = -1.0;
@@ -59,9 +59,9 @@ public class PortalForcer {
         WorldBorder worldborder = this.level.getWorldBorder();
         int i = Math.min(this.level.getMaxY(), this.level.getMinY() + this.level.getLogicalHeight() - 1);
         int j = 1;
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = p_77667_.mutable();
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.mutable();
 
-        for (BlockPos.MutableBlockPos blockpos$mutableblockpos1 : BlockPos.spiralAround(p_77667_, 16, Direction.EAST, Direction.SOUTH)) {
+        for (BlockPos.MutableBlockPos blockpos$mutableblockpos1 : BlockPos.spiralAround(pPos, 16, Direction.EAST, Direction.SOUTH)) {
             int k = Math.min(
                 i, this.level.getHeight(Heightmap.Types.MOTION_BLOCKING, blockpos$mutableblockpos1.getX(), blockpos$mutableblockpos1.getZ())
             );
@@ -82,7 +82,7 @@ public class PortalForcer {
                             if (j1 <= 0 || j1 >= 3) {
                                 blockpos$mutableblockpos1.setY(l);
                                 if (this.canHostFrame(blockpos$mutableblockpos1, blockpos$mutableblockpos, direction, 0)) {
-                                    double d2 = p_77667_.distSqr(blockpos$mutableblockpos1);
+                                    double d2 = pPos.distSqr(blockpos$mutableblockpos1);
                                     if (this.canHostFrame(blockpos$mutableblockpos1, blockpos$mutableblockpos, direction, -1)
                                         && this.canHostFrame(blockpos$mutableblockpos1, blockpos$mutableblockpos, direction, 1)
                                         && (d0 == -1.0 || d0 > d2)) {
@@ -115,9 +115,9 @@ public class PortalForcer {
             }
 
             blockpos = new BlockPos(
-                    p_77667_.getX() - direction.getStepX() * 1,
-                    Mth.clamp(p_77667_.getY(), k1, i2),
-                    p_77667_.getZ() - direction.getStepZ() * 1
+                    pPos.getX() - direction.getStepX() * 1,
+                    Mth.clamp(pPos.getY(), k1, i2),
+                    pPos.getZ() - direction.getStepZ() * 1
                 )
                 .immutable();
             blockpos = worldborder.clampToBounds(blockpos);
@@ -145,7 +145,7 @@ public class PortalForcer {
             }
         }
 
-        BlockState blockstate = Blocks.NETHER_PORTAL.defaultBlockState().setValue(NetherPortalBlock.AXIS, p_77668_);
+        BlockState blockstate = Blocks.NETHER_PORTAL.defaultBlockState().setValue(NetherPortalBlock.AXIS, pAxis);
 
         for (int k2 = 0; k2 < 2; k2++) {
             for (int l2 = 0; l2 < 3; l2++) {
@@ -157,24 +157,24 @@ public class PortalForcer {
         return Optional.of(new BlockUtil.FoundRectangle(blockpos.immutable(), 2, 3));
     }
 
-    private boolean canPortalReplaceBlock(BlockPos.MutableBlockPos p_248971_) {
-        BlockState blockstate = this.level.getBlockState(p_248971_);
+    private boolean canPortalReplaceBlock(BlockPos.MutableBlockPos pPos) {
+        BlockState blockstate = this.level.getBlockState(pPos);
         return blockstate.canBeReplaced() && blockstate.getFluidState().isEmpty();
     }
 
-    private boolean canHostFrame(BlockPos p_77662_, BlockPos.MutableBlockPos p_77663_, Direction p_77664_, int p_77665_) {
-        Direction direction = p_77664_.getClockWise();
+    private boolean canHostFrame(BlockPos pOriginalPos, BlockPos.MutableBlockPos pOffsetPos, Direction pDirection, int pOffsetScale) {
+        Direction direction = pDirection.getClockWise();
 
         for (int i = -1; i < 3; i++) {
             for (int j = -1; j < 4; j++) {
-                p_77663_.setWithOffset(
-                    p_77662_, p_77664_.getStepX() * i + direction.getStepX() * p_77665_, j, p_77664_.getStepZ() * i + direction.getStepZ() * p_77665_
+                pOffsetPos.setWithOffset(
+                    pOriginalPos, pDirection.getStepX() * i + direction.getStepX() * pOffsetScale, j, pDirection.getStepZ() * i + direction.getStepZ() * pOffsetScale
                 );
-                if (j < 0 && !this.level.getBlockState(p_77663_).isSolid()) {
+                if (j < 0 && !this.level.getBlockState(pOffsetPos).isSolid()) {
                     return false;
                 }
 
-                if (j >= 0 && !this.canPortalReplaceBlock(p_77663_)) {
+                if (j >= 0 && !this.canPortalReplaceBlock(pOffsetPos)) {
                     return false;
                 }
             }

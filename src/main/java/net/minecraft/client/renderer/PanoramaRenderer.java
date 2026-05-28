@@ -14,22 +14,22 @@ public class PanoramaRenderer {
     private final CubeMap cubeMap;
     private float spin;
 
-    public PanoramaRenderer(CubeMap p_110002_) {
-        this.cubeMap = p_110002_;
+    public PanoramaRenderer(CubeMap pCubeMap) {
+        this.cubeMap = pCubeMap;
         this.minecraft = Minecraft.getInstance();
     }
 
-    public void render(GuiGraphics p_331913_, int p_332706_, int p_333201_, float p_110004_, float p_110005_) {
+    public void render(GuiGraphics pGuiGraphics, int pWidth, int pHeight, float pFade, float pPartialTick) {
         float f = this.minecraft.getDeltaTracker().getRealtimeDeltaTicks();
         float f1 = (float)((double)f * this.minecraft.options.panoramaSpeed().get());
         this.spin = wrap(this.spin + f1 * 0.1F, 360.0F);
-        p_331913_.flush();
-        this.cubeMap.render(this.minecraft, 10.0F, -this.spin, p_110004_);
-        p_331913_.flush();
-        p_331913_.blit(RenderType::guiTextured, PANORAMA_OVERLAY, 0, 0, 0.0F, 0.0F, p_332706_, p_333201_, 16, 128, 16, 128, ARGB.white(p_110004_));
+        pGuiGraphics.flush();
+        this.cubeMap.render(this.minecraft, 10.0F, -this.spin, pFade);
+        pGuiGraphics.flush();
+        pGuiGraphics.blit(RenderType::guiTextured, PANORAMA_OVERLAY, 0, 0, 0.0F, 0.0F, pWidth, pHeight, 16, 128, 16, 128, ARGB.white(pFade));
     }
 
-    private static float wrap(float p_249058_, float p_249548_) {
-        return p_249058_ > p_249548_ ? p_249058_ - p_249548_ : p_249058_;
+    private static float wrap(float pValue, float pMax) {
+        return pValue > pMax ? pValue - pMax : pValue;
     }
 }

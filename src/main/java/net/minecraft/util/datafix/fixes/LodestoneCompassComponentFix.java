@@ -5,8 +5,8 @@ import com.mojang.serialization.Dynamic;
 import java.util.Optional;
 
 public class LodestoneCompassComponentFix extends DataComponentRemainderFix {
-    public LodestoneCompassComponentFix(Schema p_332355_) {
-        super(p_332355_, "LodestoneCompassComponentFix", "minecraft:lodestone_target", "minecraft:lodestone_tracker");
+    public LodestoneCompassComponentFix(Schema pOutputSchema) {
+        super(pOutputSchema, "LodestoneCompassComponentFix", "minecraft:lodestone_target", "minecraft:lodestone_tracker");
     }
 
     @Override

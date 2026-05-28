@@ -18,8 +18,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class DecoratedPotSpecialRenderer implements SpecialModelRenderer<PotDecorations> {
     private final DecoratedPotRenderer decoratedPotRenderer;
 
-    public DecoratedPotSpecialRenderer(DecoratedPotRenderer p_377806_) {
-        this.decoratedPotRenderer = p_377806_;
+    public DecoratedPotSpecialRenderer(DecoratedPotRenderer pDecoratedPotRenderer) {
+        this.decoratedPotRenderer = pDecoratedPotRenderer;
     }
 
     @Nullable

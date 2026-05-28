@@ -88,16 +88,16 @@ public class GolemRandomStrollInVillageGoal extends RandomStrollGoal {
     }
 
     @Nullable
-    private BlockPos getRandomPoiWithinSection(SectionPos p_25408_) {
+    private BlockPos getRandomPoiWithinSection(SectionPos pSectionPos) {
         ServerLevel serverlevel = (ServerLevel)this.mob.level();
         PoiManager poimanager = serverlevel.getPoiManager();
-        List<BlockPos> list = poimanager.getInRange(p_217747_ -> true, p_25408_.center(), 8, PoiManager.Occupancy.IS_OCCUPIED)
+        List<BlockPos> list = poimanager.getInRange(p_217747_ -> true, pSectionPos.center(), 8, PoiManager.Occupancy.IS_OCCUPIED)
             .map(PoiRecord::getPos)
             .collect(Collectors.toList());
         return list.isEmpty() ? null : list.get(serverlevel.random.nextInt(list.size()));
     }
 
-    private boolean doesVillagerWantGolem(Villager p_25406_) {
-        return p_25406_.wantsToSpawnGolem(this.mob.level().getGameTime());
+    private boolean doesVillagerWantGolem(Villager pVillager) {
+        return pVillager.wantsToSpawnGolem(this.mob.level().getGameTime());
     }
 }

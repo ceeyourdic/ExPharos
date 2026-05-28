@@ -26,9 +26,9 @@ public class SelectWorldScreen extends Screen {
     protected EditBox searchBox;
     private WorldSelectionList list;
 
-    public SelectWorldScreen(Screen p_101338_) {
+    public SelectWorldScreen(Screen pLastScreen) {
         super(Component.translatable("selectWorld.title"));
-        this.lastScreen = p_101338_;
+        this.lastScreen = pLastScreen;
     }
 
     @Override
@@ -96,19 +96,19 @@ public class SelectWorldScreen extends Screen {
         p_282382_.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
     }
 
-    public void updateButtonStatus(@Nullable LevelSummary p_309997_) {
-        if (p_309997_ == null) {
+    public void updateButtonStatus(@Nullable LevelSummary pLevelSummary) {
+        if (pLevelSummary == null) {
             this.selectButton.setMessage(LevelSummary.PLAY_WORLD);
             this.selectButton.active = false;
             this.renameButton.active = false;
             this.copyButton.active = false;
             this.deleteButton.active = false;
         } else {
-            this.selectButton.setMessage(p_309997_.primaryActionMessage());
-            this.selectButton.active = p_309997_.primaryActionActive();
-            this.renameButton.active = p_309997_.canEdit();
-            this.copyButton.active = p_309997_.canRecreate();
-            this.deleteButton.active = p_309997_.canDelete();
+            this.selectButton.setMessage(pLevelSummary.primaryActionMessage());
+            this.selectButton.active = pLevelSummary.primaryActionActive();
+            this.renameButton.active = pLevelSummary.canEdit();
+            this.copyButton.active = pLevelSummary.canRecreate();
+            this.deleteButton.active = pLevelSummary.canDelete();
         }
     }
 

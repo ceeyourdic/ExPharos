@@ -29,16 +29,16 @@ public enum EquipmentSlot implements StringRepresentable {
     private final int id;
     private final String name;
 
-    private EquipmentSlot(final EquipmentSlot.Type p_342397_, final int p_343935_, final int p_343943_, final int p_345166_, final String p_345481_) {
-        this.type = p_342397_;
-        this.index = p_343935_;
-        this.countLimit = p_343943_;
-        this.id = p_345166_;
-        this.name = p_345481_;
+    private EquipmentSlot(final EquipmentSlot.Type pType, final int pIndex, final int pCountLimit, final int pId, final String pName) {
+        this.type = pType;
+        this.index = pIndex;
+        this.countLimit = pCountLimit;
+        this.id = pId;
+        this.name = pName;
     }
 
-    private EquipmentSlot(final EquipmentSlot.Type p_20739_, final int p_20740_, final int p_20741_, final String p_20742_) {
-        this(p_20739_, p_20740_, 0, p_20741_, p_20742_);
+    private EquipmentSlot(final EquipmentSlot.Type pType, final int pIndex, final int pFilterFlag, final String pName) {
+        this(pType, pIndex, 0, pFilterFlag, pName);
     }
 
     public EquipmentSlot.Type getType() {
@@ -49,20 +49,20 @@ public enum EquipmentSlot implements StringRepresentable {
         return this.index;
     }
 
-    public int getIndex(int p_147069_) {
-        return p_147069_ + this.index;
+    public int getIndex(int pBaseIndex) {
+        return pBaseIndex + this.index;
     }
 
-    public ItemStack limit(ItemStack p_343527_) {
-        return this.countLimit > 0 ? p_343527_.split(this.countLimit) : p_343527_;
+    public ItemStack limit(ItemStack pStack) {
+        return this.countLimit > 0 ? pStack.split(this.countLimit) : pStack;
     }
 
     public int getId() {
         return this.id;
     }
 
-    public int getFilterBit(int p_367101_) {
-        return this.id + p_367101_;
+    public int getFilterBit(int pOffset) {
+        return this.id + pOffset;
     }
 
     public String getName() {
@@ -78,12 +78,12 @@ public enum EquipmentSlot implements StringRepresentable {
         return this.name;
     }
 
-    public static EquipmentSlot byName(String p_20748_) {
-        EquipmentSlot equipmentslot = CODEC.byName(p_20748_);
+    public static EquipmentSlot byName(String pTargetName) {
+        EquipmentSlot equipmentslot = CODEC.byName(pTargetName);
         if (equipmentslot != null) {
             return equipmentslot;
         } else {
-            throw new IllegalArgumentException("Invalid slot '" + p_20748_ + "'");
+            throw new IllegalArgumentException("Invalid slot '" + pTargetName + "'");
         }
     }
 

@@ -10,7 +10,7 @@ public interface StrictQueue<T extends Runnable> {
     @Nullable
     Runnable pop();
 
-    boolean push(T p_365336_);
+    boolean push(T pTask);
 
     boolean isEmpty();
 
@@ -20,10 +20,10 @@ public interface StrictQueue<T extends Runnable> {
         private final Queue<Runnable>[] queues;
         private final AtomicInteger size = new AtomicInteger();
 
-        public FixedPriorityQueue(int p_18773_) {
-            this.queues = new Queue[p_18773_];
+        public FixedPriorityQueue(int pSize) {
+            this.queues = new Queue[pSize];
 
-            for (int i = 0; i < p_18773_; i++) {
+            for (int i = 0; i < pSize; i++) {
                 this.queues[i] = Queues.newConcurrentLinkedQueue();
             }
         }
@@ -69,8 +69,8 @@ public interface StrictQueue<T extends Runnable> {
     public static final class QueueStrictQueue implements StrictQueue<Runnable> {
         private final Queue<Runnable> queue;
 
-        public QueueStrictQueue(Queue<Runnable> p_18792_) {
-            this.queue = p_18792_;
+        public QueueStrictQueue(Queue<Runnable> pQueue) {
+            this.queue = pQueue;
         }
 
         @Nullable

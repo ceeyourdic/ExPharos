@@ -23,14 +23,14 @@ public class SpikeConfiguration implements FeatureConfiguration {
     @Nullable
     private final BlockPos crystalBeamTarget;
 
-    public SpikeConfiguration(boolean p_68105_, List<SpikeFeature.EndSpike> p_68106_, @Nullable BlockPos p_68107_) {
-        this(p_68105_, p_68106_, Optional.ofNullable(p_68107_));
+    public SpikeConfiguration(boolean pCrystalInvulnerable, List<SpikeFeature.EndSpike> pSpikes, @Nullable BlockPos pCrystalBeamTarget) {
+        this(pCrystalInvulnerable, pSpikes, Optional.ofNullable(pCrystalBeamTarget));
     }
 
-    private SpikeConfiguration(boolean p_68109_, List<SpikeFeature.EndSpike> p_68110_, Optional<BlockPos> p_68111_) {
-        this.crystalInvulnerable = p_68109_;
-        this.spikes = p_68110_;
-        this.crystalBeamTarget = p_68111_.orElse(null);
+    private SpikeConfiguration(boolean pCrystalInvulnerable, List<SpikeFeature.EndSpike> pSpikes, Optional<BlockPos> pCrystalBeamTarget) {
+        this.crystalInvulnerable = pCrystalInvulnerable;
+        this.spikes = pSpikes;
+        this.crystalBeamTarget = pCrystalBeamTarget.orElse(null);
     }
 
     public boolean isCrystalInvulnerable() {

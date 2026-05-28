@@ -19,12 +19,12 @@ public class Snowball extends ThrowableItemProjectile {
         super(p_37391_, p_37392_);
     }
 
-    public Snowball(Level p_37399_, LivingEntity p_37400_, ItemStack p_366946_) {
-        super(EntityType.SNOWBALL, p_37400_, p_37399_, p_366946_);
+    public Snowball(Level pLevel, LivingEntity pOwner, ItemStack pItem) {
+        super(EntityType.SNOWBALL, pOwner, pLevel, pItem);
     }
 
-    public Snowball(Level p_37394_, double p_37395_, double p_37396_, double p_37397_, ItemStack p_361215_) {
-        super(EntityType.SNOWBALL, p_37395_, p_37396_, p_37397_, p_37394_, p_361215_);
+    public Snowball(Level pLevel, double pX, double pY, double pZ, ItemStack pItem) {
+        super(EntityType.SNOWBALL, pX, pY, pZ, pLevel, pItem);
     }
 
     @Override
@@ -49,16 +49,16 @@ public class Snowball extends ThrowableItemProjectile {
     }
 
     @Override
-    protected void onHitEntity(EntityHitResult p_37404_) {
-        super.onHitEntity(p_37404_);
-        Entity entity = p_37404_.getEntity();
+    protected void onHitEntity(EntityHitResult pResult) {
+        super.onHitEntity(pResult);
+        Entity entity = pResult.getEntity();
         int i = entity instanceof Blaze ? 3 : 0;
         entity.hurt(this.damageSources().thrown(this, this.getOwner()), (float)i);
     }
 
     @Override
-    protected void onHit(HitResult p_37406_) {
-        super.onHit(p_37406_);
+    protected void onHit(HitResult pResult) {
+        super.onHit(pResult);
         if (!this.level().isClientSide) {
             this.level().broadcastEntityEvent(this, (byte)3);
             this.discard();

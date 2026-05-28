@@ -26,9 +26,9 @@ public class WeatheringCopperTrapDoorBlock extends TrapDoorBlock implements Weat
         return CODEC;
     }
 
-    protected WeatheringCopperTrapDoorBlock(BlockSetType p_310902_, WeatheringCopper.WeatherState p_310376_, BlockBehaviour.Properties p_311219_) {
-        super(p_310902_, p_311219_);
-        this.weatherState = p_310376_;
+    protected WeatheringCopperTrapDoorBlock(BlockSetType pType, WeatheringCopper.WeatherState pWeatherState, BlockBehaviour.Properties pProperties) {
+        super(pType, pProperties);
+        this.weatherState = pWeatherState;
     }
 
     @Override

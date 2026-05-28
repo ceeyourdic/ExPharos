@@ -38,8 +38,8 @@ public class ParrotRenderer extends MobRenderer<Parrot, ParrotRenderState, Parro
         p_366002_.pose = ParrotModel.getPose(p_363999_);
     }
 
-    public static ResourceLocation getVariantTexture(Parrot.Variant p_262577_) {
-        return switch (p_262577_) {
+    public static ResourceLocation getVariantTexture(Parrot.Variant pVariant) {
+        return switch (pVariant) {
             case RED_BLUE -> RED_BLUE;
             case BLUE -> BLUE;
             case GREEN -> GREEN;

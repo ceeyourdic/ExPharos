@@ -46,7 +46,7 @@ public class WitherSkeleton extends AbstractSkeleton {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_34195_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.WITHER_SKELETON_HURT;
     }
 
@@ -118,7 +118,7 @@ public class WitherSkeleton extends AbstractSkeleton {
     }
 
     @Override
-    public boolean canBeAffected(MobEffectInstance p_34192_) {
-        return p_34192_.is(MobEffects.WITHER) ? false : super.canBeAffected(p_34192_);
+    public boolean canBeAffected(MobEffectInstance pPotioneffect) {
+        return pPotioneffect.is(MobEffects.WITHER) ? false : super.canBeAffected(pPotioneffect);
     }
 }

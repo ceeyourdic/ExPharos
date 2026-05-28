@@ -218,23 +218,23 @@ public class ModelTemplates {
     );
     public static final ModelTemplate FLAT_HANDHELD_MACE_ITEM = createItem("handheld_mace", TextureSlot.LAYER0);
 
-    private static ModelTemplate create(TextureSlot... p_375982_) {
-        return new ModelTemplate(Optional.empty(), Optional.empty(), p_375982_);
+    private static ModelTemplate create(TextureSlot... pRequiredSlots) {
+        return new ModelTemplate(Optional.empty(), Optional.empty(), pRequiredSlots);
     }
 
-    private static ModelTemplate create(String p_378022_, TextureSlot... p_377561_) {
-        return new ModelTemplate(Optional.of(ResourceLocation.withDefaultNamespace("block/" + p_378022_)), Optional.empty(), p_377561_);
+    private static ModelTemplate create(String pName, TextureSlot... pRequiredSlots) {
+        return new ModelTemplate(Optional.of(ResourceLocation.withDefaultNamespace("block/" + pName)), Optional.empty(), pRequiredSlots);
     }
 
-    private static ModelTemplate createItem(String p_378751_, TextureSlot... p_377825_) {
-        return new ModelTemplate(Optional.of(ResourceLocation.withDefaultNamespace("item/" + p_378751_)), Optional.empty(), p_377825_);
+    private static ModelTemplate createItem(String pName, TextureSlot... pRequiredSlots) {
+        return new ModelTemplate(Optional.of(ResourceLocation.withDefaultNamespace("item/" + pName)), Optional.empty(), pRequiredSlots);
     }
 
-    private static ModelTemplate createItem(String p_378296_, String p_376935_, TextureSlot... p_378333_) {
-        return new ModelTemplate(Optional.of(ResourceLocation.withDefaultNamespace("item/" + p_378296_)), Optional.of(p_376935_), p_378333_);
+    private static ModelTemplate createItem(String pName, String pSuffix, TextureSlot... pRequiredSlots) {
+        return new ModelTemplate(Optional.of(ResourceLocation.withDefaultNamespace("item/" + pName)), Optional.of(pSuffix), pRequiredSlots);
     }
 
-    private static ModelTemplate create(String p_376051_, String p_377115_, TextureSlot... p_376137_) {
-        return new ModelTemplate(Optional.of(ResourceLocation.withDefaultNamespace("block/" + p_376051_)), Optional.of(p_377115_), p_376137_);
+    private static ModelTemplate create(String pName, String pSuffix, TextureSlot... pRequiredSlots) {
+        return new ModelTemplate(Optional.of(ResourceLocation.withDefaultNamespace("block/" + pName)), Optional.of(pSuffix), pRequiredSlots);
     }
 }

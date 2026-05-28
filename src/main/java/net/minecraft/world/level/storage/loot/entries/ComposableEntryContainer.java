@@ -9,15 +9,15 @@ interface ComposableEntryContainer {
     ComposableEntryContainer ALWAYS_FALSE = (p_79418_, p_79419_) -> false;
     ComposableEntryContainer ALWAYS_TRUE = (p_79409_, p_79410_) -> true;
 
-    boolean expand(LootContext p_79426_, Consumer<LootPoolEntry> p_79427_);
+    boolean expand(LootContext pLootContext, Consumer<LootPoolEntry> pEntryConsumer);
 
-    default ComposableEntryContainer and(ComposableEntryContainer p_79412_) {
-        Objects.requireNonNull(p_79412_);
-        return (p_79424_, p_79425_) -> this.expand(p_79424_, p_79425_) && p_79412_.expand(p_79424_, p_79425_);
+    default ComposableEntryContainer and(ComposableEntryContainer pEntry) {
+        Objects.requireNonNull(pEntry);
+        return (p_79424_, p_79425_) -> this.expand(p_79424_, p_79425_) && pEntry.expand(p_79424_, p_79425_);
     }
 
-    default ComposableEntryContainer or(ComposableEntryContainer p_79421_) {
-        Objects.requireNonNull(p_79421_);
-        return (p_79415_, p_79416_) -> this.expand(p_79415_, p_79416_) || p_79421_.expand(p_79415_, p_79416_);
+    default ComposableEntryContainer or(ComposableEntryContainer pEntry) {
+        Objects.requireNonNull(pEntry);
+        return (p_79415_, p_79416_) -> this.expand(p_79415_, p_79416_) || pEntry.expand(p_79415_, p_79416_);
     }
 }

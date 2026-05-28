@@ -22,8 +22,8 @@ public class ToastManager {
     private final BitSet occupiedSlots = new BitSet(5);
     private final Deque<Toast> queued = Queues.newArrayDeque();
 
-    public ToastManager(Minecraft p_363951_) {
-        this.minecraft = p_363951_;
+    public ToastManager(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
     public void update() {
@@ -51,24 +51,24 @@ public class ToastManager {
         }
     }
 
-    public void render(GuiGraphics p_366590_) {
+    public void render(GuiGraphics pGuiGraphics) {
         if (!this.minecraft.options.hideGui) {
-            int i = p_366590_.guiWidth();
+            int i = pGuiGraphics.guiWidth();
 
             for (ToastManager.ToastInstance<?> toastinstance : this.visibleToasts) {
-                toastinstance.render(p_366590_, i);
+                toastinstance.render(pGuiGraphics, i);
             }
         }
     }
 
-    private int findFreeSlotsIndex(int p_366194_) {
-        if (this.freeSlotCount() >= p_366194_) {
+    private int findFreeSlotsIndex(int pSlots) {
+        if (this.freeSlotCount() >= pSlots) {
             int i = 0;
 
             for (int j = 0; j < 5; j++) {
                 if (this.occupiedSlots.get(j)) {
                     i = 0;
-                } else if (++i == p_366194_) {
+                } else if (++i == pSlots) {
                     return j + 1 - i;
                 }
             }
@@ -82,17 +82,17 @@ public class ToastManager {
     }
 
     @Nullable
-    public <T extends Toast> T getToast(Class<? extends T> p_368822_, Object p_361635_) {
+    public <T extends Toast> T getToast(Class<? extends T> pToastClass, Object pToken) {
         for (ToastManager.ToastInstance<?> toastinstance : this.visibleToasts) {
             if (toastinstance != null
-                && p_368822_.isAssignableFrom(toastinstance.getToast().getClass())
-                && toastinstance.getToast().getToken().equals(p_361635_)) {
+                && pToastClass.isAssignableFrom(toastinstance.getToast().getClass())
+                && toastinstance.getToast().getToken().equals(pToken)) {
                 return (T)toastinstance.getToast();
             }
         }
 
         for (Toast toast : this.queued) {
-            if (p_368822_.isAssignableFrom(toast.getClass()) && toast.getToken().equals(p_361635_)) {
+            if (pToastClass.isAssignableFrom(toast.getClass()) && toast.getToken().equals(pToken)) {
                 return (T)toast;
             }
         }
@@ -106,8 +106,8 @@ public class ToastManager {
         this.queued.clear();
     }
 
-    public void addToast(Toast p_360768_) {
-        this.queued.add(p_360768_);
+    public void addToast(Toast pToast) {
+        this.queued.add(pToast);
     }
 
     public Minecraft getMinecraft() {
@@ -131,10 +131,10 @@ public class ToastManager {
         private float visiblePortion;
         private boolean hasFinishedRendering;
 
-        ToastInstance(final T p_369780_, final int p_370007_, final int p_366058_) {
-            this.toast = p_369780_;
-            this.firstSlotIndex = p_370007_;
-            this.occupiedSlotCount = p_366058_;
+        ToastInstance(final T pToast, final int pFirstSlotIndex, final int pOccupiedSlotCount) {
+            this.toast = pToast;
+            this.firstSlotIndex = pFirstSlotIndex;
+            this.occupiedSlotCount = pOccupiedSlotCount;
         }
 
         public T getToast() {
@@ -145,8 +145,8 @@ public class ToastManager {
             return this.hasFinishedRendering;
         }
 
-        private void calculateVisiblePortion(long p_367026_) {
-            float f = Mth.clamp((float)(p_367026_ - this.animationStartTime) / 600.0F, 0.0F, 1.0F);
+        private void calculateVisiblePortion(long pVisibilityTime) {
+            float f = Mth.clamp((float)(pVisibilityTime - this.animationStartTime) / 600.0F, 0.0F, 1.0F);
             f *= f;
             if (this.visibility == Toast.Visibility.HIDE) {
                 this.visiblePortion = 1.0F - f;
@@ -179,11 +179,11 @@ public class ToastManager {
             this.hasFinishedRendering = this.visibility == Toast.Visibility.HIDE && i - this.animationStartTime > 600L;
         }
 
-        public void render(GuiGraphics p_369740_, int p_366638_) {
-            p_369740_.pose().pushPose();
-            p_369740_.pose().translate((float)p_366638_ - (float)this.toast.width() * this.visiblePortion, (float)(this.firstSlotIndex * 32), 800.0F);
-            this.toast.render(p_369740_, ToastManager.this.minecraft.font, this.fullyVisibleFor);
-            p_369740_.pose().popPose();
+        public void render(GuiGraphics pGuiGraphics, int pGuiWidth) {
+            pGuiGraphics.pose().pushPose();
+            pGuiGraphics.pose().translate((float)pGuiWidth - (float)this.toast.width() * this.visiblePortion, (float)(this.firstSlotIndex * 32), 800.0F);
+            this.toast.render(pGuiGraphics, ToastManager.this.minecraft.font, this.fullyVisibleFor);
+            pGuiGraphics.pose().popPose();
         }
     }
 }

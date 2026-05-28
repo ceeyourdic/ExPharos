@@ -17,11 +17,11 @@ public class LootParams {
     private final Map<ResourceLocation, LootParams.DynamicDrop> dynamicDrops;
     private final float luck;
 
-    public LootParams(ServerLevel p_287766_, ContextMap p_364711_, Map<ResourceLocation, LootParams.DynamicDrop> p_287705_, float p_287671_) {
-        this.level = p_287766_;
-        this.params = p_364711_;
-        this.dynamicDrops = p_287705_;
-        this.luck = p_287671_;
+    public LootParams(ServerLevel pLevel, ContextMap pParams, Map<ResourceLocation, LootParams.DynamicDrop> pDynamicDrops, float pLuck) {
+        this.level = pLevel;
+        this.params = pParams;
+        this.dynamicDrops = pDynamicDrops;
+        this.luck = pLuck;
     }
 
     public ServerLevel getLevel() {
@@ -32,10 +32,10 @@ public class LootParams {
         return this.params;
     }
 
-    public void addDynamicDrops(ResourceLocation p_287768_, Consumer<ItemStack> p_287711_) {
-        LootParams.DynamicDrop lootparams$dynamicdrop = this.dynamicDrops.get(p_287768_);
+    public void addDynamicDrops(ResourceLocation pLocation, Consumer<ItemStack> pConsumer) {
+        LootParams.DynamicDrop lootparams$dynamicdrop = this.dynamicDrops.get(pLocation);
         if (lootparams$dynamicdrop != null) {
-            lootparams$dynamicdrop.add(p_287711_);
+            lootparams$dynamicdrop.add(pConsumer);
         }
     }
 
@@ -49,35 +49,35 @@ public class LootParams {
         private final Map<ResourceLocation, LootParams.DynamicDrop> dynamicDrops = Maps.newHashMap();
         private float luck;
 
-        public Builder(ServerLevel p_287594_) {
-            this.level = p_287594_;
+        public Builder(ServerLevel pLevel) {
+            this.level = pLevel;
         }
 
         public ServerLevel getLevel() {
             return this.level;
         }
 
-        public <T> LootParams.Builder withParameter(ContextKey<T> p_363960_, T p_287606_) {
-            this.params.withParameter(p_363960_, p_287606_);
+        public <T> LootParams.Builder withParameter(ContextKey<T> pParamater, T pValue) {
+            this.params.withParameter(pParamater, pValue);
             return this;
         }
 
-        public <T> LootParams.Builder withOptionalParameter(ContextKey<T> p_369471_, @Nullable T p_287630_) {
-            this.params.withOptionalParameter(p_369471_, p_287630_);
+        public <T> LootParams.Builder withOptionalParameter(ContextKey<T> pParameter, @Nullable T pValue) {
+            this.params.withOptionalParameter(pParameter, pValue);
             return this;
         }
 
-        public <T> T getParameter(ContextKey<T> p_365868_) {
-            return this.params.getParameter(p_365868_);
+        public <T> T getParameter(ContextKey<T> pParameter) {
+            return this.params.getParameter(pParameter);
         }
 
         @Nullable
-        public <T> T getOptionalParameter(ContextKey<T> p_361118_) {
-            return this.params.getOptionalParameter(p_361118_);
+        public <T> T getOptionalParameter(ContextKey<T> pParameter) {
+            return this.params.getOptionalParameter(pParameter);
         }
 
-        public LootParams.Builder withDynamicDrop(ResourceLocation p_287734_, LootParams.DynamicDrop p_287724_) {
-            LootParams.DynamicDrop lootparams$dynamicdrop = this.dynamicDrops.put(p_287734_, p_287724_);
+        public LootParams.Builder withDynamicDrop(ResourceLocation pName, LootParams.DynamicDrop pDynamicDrop) {
+            LootParams.DynamicDrop lootparams$dynamicdrop = this.dynamicDrops.put(pName, pDynamicDrop);
             if (lootparams$dynamicdrop != null) {
                 throw new IllegalStateException("Duplicated dynamic drop '" + this.dynamicDrops + "'");
             } else {
@@ -85,19 +85,19 @@ public class LootParams {
             }
         }
 
-        public LootParams.Builder withLuck(float p_287703_) {
-            this.luck = p_287703_;
+        public LootParams.Builder withLuck(float pLuck) {
+            this.luck = pLuck;
             return this;
         }
 
-        public LootParams create(ContextKeySet p_367827_) {
-            ContextMap contextmap = this.params.create(p_367827_);
+        public LootParams create(ContextKeySet pContextKeySet) {
+            ContextMap contextmap = this.params.create(pContextKeySet);
             return new LootParams(this.level, contextmap, this.dynamicDrops, this.luck);
         }
     }
 
     @FunctionalInterface
     public interface DynamicDrop {
-        void add(Consumer<ItemStack> p_287584_);
+        void add(Consumer<ItemStack> pOutput);
     }
 }

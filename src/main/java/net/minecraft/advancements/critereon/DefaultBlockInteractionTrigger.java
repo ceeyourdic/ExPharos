@@ -19,16 +19,16 @@ public class DefaultBlockInteractionTrigger extends SimpleCriterionTrigger<Defau
         return DefaultBlockInteractionTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_328009_, BlockPos p_332070_) {
-        ServerLevel serverlevel = p_328009_.serverLevel();
-        BlockState blockstate = serverlevel.getBlockState(p_332070_);
+    public void trigger(ServerPlayer pPlayer, BlockPos pPos) {
+        ServerLevel serverlevel = pPlayer.serverLevel();
+        BlockState blockstate = serverlevel.getBlockState(pPos);
         LootParams lootparams = new LootParams.Builder(serverlevel)
-            .withParameter(LootContextParams.ORIGIN, p_332070_.getCenter())
-            .withParameter(LootContextParams.THIS_ENTITY, p_328009_)
+            .withParameter(LootContextParams.ORIGIN, pPos.getCenter())
+            .withParameter(LootContextParams.THIS_ENTITY, pPlayer)
             .withParameter(LootContextParams.BLOCK_STATE, blockstate)
             .create(LootContextParamSets.BLOCK_USE);
         LootContext lootcontext = new LootContext.Builder(lootparams).create(Optional.empty());
-        this.trigger(p_328009_, p_335442_ -> p_335442_.matches(lootcontext));
+        this.trigger(pPlayer, p_335442_ -> p_335442_.matches(lootcontext));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ContextAwarePredicate> location)
@@ -41,8 +41,8 @@ public class DefaultBlockInteractionTrigger extends SimpleCriterionTrigger<Defau
                     .apply(p_330508_, DefaultBlockInteractionTrigger.TriggerInstance::new)
         );
 
-        public boolean matches(LootContext p_336077_) {
-            return this.location.isEmpty() || this.location.get().matches(p_336077_);
+        public boolean matches(LootContext pContext) {
+            return this.location.isEmpty() || this.location.get().matches(pContext);
         }
 
         @Override

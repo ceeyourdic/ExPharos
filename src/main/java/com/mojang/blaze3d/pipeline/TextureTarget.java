@@ -6,9 +6,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class TextureTarget extends RenderTarget {
-    public TextureTarget(int p_166213_, int p_166214_, boolean p_166215_) {
-        super(p_166215_);
+    public TextureTarget(int pWidth, int pHeight, boolean pUseDepth) {
+        super(pUseDepth);
         RenderSystem.assertOnRenderThreadOrInit();
-        this.resize(p_166213_, p_166214_);
+        this.resize(pWidth, pHeight);
     }
 }

@@ -20,10 +20,10 @@ public class PageButton extends Button {
     private final boolean isForward;
     private final boolean playTurnSound;
 
-    public PageButton(int p_99225_, int p_99226_, boolean p_99227_, Button.OnPress p_99228_, boolean p_99229_) {
-        super(p_99225_, p_99226_, 23, 13, CommonComponents.EMPTY, p_99228_, DEFAULT_NARRATION);
-        this.isForward = p_99227_;
-        this.playTurnSound = p_99229_;
+    public PageButton(int pX, int pY, boolean pIsForward, Button.OnPress pOnPress, boolean pPlayTurnSound) {
+        super(pX, pY, 23, 13, CommonComponents.EMPTY, pOnPress, DEFAULT_NARRATION);
+        this.isForward = pIsForward;
+        this.playTurnSound = pPlayTurnSound;
     }
 
     @Override
@@ -39,9 +39,9 @@ public class PageButton extends Button {
     }
 
     @Override
-    public void playDownSound(SoundManager p_99231_) {
+    public void playDownSound(SoundManager pHandler) {
         if (this.playTurnSound) {
-            p_99231_.play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F));
+            pHandler.play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F));
         }
     }
 }

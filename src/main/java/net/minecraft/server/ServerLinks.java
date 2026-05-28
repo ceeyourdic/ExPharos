@@ -24,8 +24,8 @@ public record ServerLinks(List<ServerLinks.Entry> entries) {
         return this.entries.isEmpty();
     }
 
-    public Optional<ServerLinks.Entry> findKnownType(ServerLinks.KnownLinkType p_345340_) {
-        return this.entries.stream().filter(p_344406_ -> p_344406_.type.map(p_344429_ -> p_344429_ == p_345340_, p_343563_ -> false)).findFirst();
+    public Optional<ServerLinks.Entry> findKnownType(ServerLinks.KnownLinkType pType) {
+        return this.entries.stream().filter(p_344406_ -> p_344406_.type.map(p_344429_ -> p_344429_ == pType, p_343563_ -> false)).findFirst();
     }
 
     public List<ServerLinks.UntrustedEntry> untrust() {
@@ -33,12 +33,12 @@ public record ServerLinks(List<ServerLinks.Entry> entries) {
     }
 
     public static record Entry(Either<ServerLinks.KnownLinkType, Component> type, URI link) {
-        public static ServerLinks.Entry knownType(ServerLinks.KnownLinkType p_344933_, URI p_343801_) {
-            return new ServerLinks.Entry(Either.left(p_344933_), p_343801_);
+        public static ServerLinks.Entry knownType(ServerLinks.KnownLinkType pType, URI pLink) {
+            return new ServerLinks.Entry(Either.left(pType), pLink);
         }
 
-        public static ServerLinks.Entry custom(Component p_343423_, URI p_343780_) {
-            return new ServerLinks.Entry(Either.right(p_343423_), p_343780_);
+        public static ServerLinks.Entry custom(Component pType, URI pLink) {
+            return new ServerLinks.Entry(Either.right(pType), pLink);
         }
 
         public Component displayName() {
@@ -65,17 +65,17 @@ public record ServerLinks(List<ServerLinks.Entry> entries) {
         private final int id;
         private final String name;
 
-        private KnownLinkType(final int p_342655_, final String p_343354_) {
-            this.id = p_342655_;
-            this.name = p_343354_;
+        private KnownLinkType(final int pId, final String pName) {
+            this.id = pId;
+            this.name = pName;
         }
 
         private Component displayName() {
             return Component.translatable("known_server_link." + this.name);
         }
 
-        public ServerLinks.Entry create(URI p_344425_) {
-            return ServerLinks.Entry.knownType(this, p_344425_);
+        public ServerLinks.Entry create(URI pUri) {
+            return ServerLinks.Entry.knownType(this, pUri);
         }
     }
 

@@ -50,18 +50,18 @@ public class SpectatorMenu {
     private int selectedSlot = -1;
     int page;
 
-    public SpectatorMenu(SpectatorMenuListener p_101785_) {
+    public SpectatorMenu(SpectatorMenuListener pListener) {
         this.category = new RootSpectatorMenuCategory();
-        this.listener = p_101785_;
+        this.listener = pListener;
     }
 
-    public SpectatorMenuItem getItem(int p_101788_) {
-        int i = p_101788_ + this.page * 6;
-        if (this.page > 0 && p_101788_ == 0) {
+    public SpectatorMenuItem getItem(int pIndex) {
+        int i = pIndex + this.page * 6;
+        if (this.page > 0 && pIndex == 0) {
             return SCROLL_LEFT;
-        } else if (p_101788_ == 7) {
+        } else if (pIndex == 7) {
             return i < this.category.getItems().size() ? SCROLL_RIGHT_ENABLED : SCROLL_RIGHT_DISABLED;
-        } else if (p_101788_ == 8) {
+        } else if (pIndex == 8) {
             return CLOSE_ITEM;
         } else {
             return i >= 0 && i < this.category.getItems().size() ? MoreObjects.firstNonNull(this.category.getItems().get(i), EMPTY_SLOT) : EMPTY_SLOT;
@@ -86,13 +86,13 @@ public class SpectatorMenu {
         return this.category;
     }
 
-    public void selectSlot(int p_101798_) {
-        SpectatorMenuItem spectatormenuitem = this.getItem(p_101798_);
+    public void selectSlot(int pSlot) {
+        SpectatorMenuItem spectatormenuitem = this.getItem(pSlot);
         if (spectatormenuitem != EMPTY_SLOT) {
-            if (this.selectedSlot == p_101798_ && spectatormenuitem.isEnabled()) {
+            if (this.selectedSlot == pSlot && spectatormenuitem.isEnabled()) {
                 spectatormenuitem.selectItem(this);
             } else {
-                this.selectedSlot = p_101798_;
+                this.selectedSlot = pSlot;
             }
         }
     }
@@ -105,8 +105,8 @@ public class SpectatorMenu {
         return this.selectedSlot;
     }
 
-    public void selectCategory(SpectatorMenuCategory p_101795_) {
-        this.category = p_101795_;
+    public void selectCategory(SpectatorMenuCategory pCategory) {
+        this.category = pCategory;
         this.selectedSlot = -1;
         this.page = 0;
     }
@@ -118,8 +118,8 @@ public class SpectatorMenu {
     @OnlyIn(Dist.CLIENT)
     static class CloseSpectatorItem implements SpectatorMenuItem {
         @Override
-        public void selectItem(SpectatorMenu p_101823_) {
-            p_101823_.exit();
+        public void selectItem(SpectatorMenu pMenu) {
+            pMenu.exit();
         }
 
         @Override
@@ -143,14 +143,14 @@ public class SpectatorMenu {
         private final int direction;
         private final boolean enabled;
 
-        public ScrollMenuItem(int p_101829_, boolean p_101830_) {
-            this.direction = p_101829_;
-            this.enabled = p_101830_;
+        public ScrollMenuItem(int pDirection, boolean pEnabled) {
+            this.direction = pDirection;
+            this.enabled = pEnabled;
         }
 
         @Override
-        public void selectItem(SpectatorMenu p_101836_) {
-            p_101836_.page = p_101836_.page + this.direction;
+        public void selectItem(SpectatorMenu pMenu) {
+            pMenu.page = pMenu.page + this.direction;
         }
 
         @Override

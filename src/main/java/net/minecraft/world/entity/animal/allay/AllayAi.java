@@ -48,17 +48,17 @@ public class AllayAi {
     private static final int DISTANCE_TO_WANTED_ITEM = 32;
     private static final int GIVE_ITEM_TIMEOUT_DURATION = 20;
 
-    protected static Brain<?> makeBrain(Brain<Allay> p_218420_) {
-        initCoreActivity(p_218420_);
-        initIdleActivity(p_218420_);
-        p_218420_.setCoreActivities(ImmutableSet.of(Activity.CORE));
-        p_218420_.setDefaultActivity(Activity.IDLE);
-        p_218420_.useDefaultActivity();
-        return p_218420_;
+    protected static Brain<?> makeBrain(Brain<Allay> pBrain) {
+        initCoreActivity(pBrain);
+        initIdleActivity(pBrain);
+        pBrain.setCoreActivities(ImmutableSet.of(Activity.CORE));
+        pBrain.setDefaultActivity(Activity.IDLE);
+        pBrain.useDefaultActivity();
+        return pBrain;
     }
 
-    private static void initCoreActivity(Brain<Allay> p_218426_) {
-        p_218426_.addActivity(
+    private static void initCoreActivity(Brain<Allay> pBrain) {
+        pBrain.addActivity(
             Activity.CORE,
             0,
             ImmutableList.of(
@@ -72,8 +72,8 @@ public class AllayAi {
         );
     }
 
-    private static void initIdleActivity(Brain<Allay> p_218432_) {
-        p_218432_.addActivityWithConditions(
+    private static void initIdleActivity(Brain<Allay> pBrain) {
+        pBrain.addActivityWithConditions(
             Activity.IDLE,
             ImmutableList.of(
                 Pair.of(0, GoToWantedItem.create(p_218428_ -> true, 1.75F, true, 32)),
@@ -95,13 +95,13 @@ public class AllayAi {
         );
     }
 
-    public static void updateActivity(Allay p_218422_) {
-        p_218422_.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.IDLE));
+    public static void updateActivity(Allay pAllay) {
+        pAllay.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.IDLE));
     }
 
-    public static void hearNoteblock(LivingEntity p_218417_, BlockPos p_218418_) {
-        Brain<?> brain = p_218417_.getBrain();
-        GlobalPos globalpos = GlobalPos.of(p_218417_.level().dimension(), p_218418_);
+    public static void hearNoteblock(LivingEntity pEntity, BlockPos pPos) {
+        Brain<?> brain = pEntity.getBrain();
+        GlobalPos globalpos = GlobalPos.of(pEntity.level().dimension(), pPos);
         Optional<GlobalPos> optional = brain.getMemory(MemoryModuleType.LIKED_NOTEBLOCK_POSITION);
         if (optional.isEmpty()) {
             brain.setMemory(MemoryModuleType.LIKED_NOTEBLOCK_POSITION, globalpos);
@@ -111,46 +111,46 @@ public class AllayAi {
         }
     }
 
-    private static Optional<PositionTracker> getItemDepositPosition(LivingEntity p_218424_) {
-        Brain<?> brain = p_218424_.getBrain();
+    private static Optional<PositionTracker> getItemDepositPosition(LivingEntity pEntity) {
+        Brain<?> brain = pEntity.getBrain();
         Optional<GlobalPos> optional = brain.getMemory(MemoryModuleType.LIKED_NOTEBLOCK_POSITION);
         if (optional.isPresent()) {
             GlobalPos globalpos = optional.get();
-            if (shouldDepositItemsAtLikedNoteblock(p_218424_, brain, globalpos)) {
+            if (shouldDepositItemsAtLikedNoteblock(pEntity, brain, globalpos)) {
                 return Optional.of(new BlockPosTracker(globalpos.pos().above()));
             }
 
             brain.eraseMemory(MemoryModuleType.LIKED_NOTEBLOCK_POSITION);
         }
 
-        return getLikedPlayerPositionTracker(p_218424_);
+        return getLikedPlayerPositionTracker(pEntity);
     }
 
-    private static boolean hasWantedItem(LivingEntity p_273346_) {
-        Brain<?> brain = p_273346_.getBrain();
+    private static boolean hasWantedItem(LivingEntity pEntity) {
+        Brain<?> brain = pEntity.getBrain();
         return brain.hasMemoryValue(MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM);
     }
 
-    private static boolean shouldDepositItemsAtLikedNoteblock(LivingEntity p_218413_, Brain<?> p_218414_, GlobalPos p_218415_) {
-        Optional<Integer> optional = p_218414_.getMemory(MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS);
-        Level level = p_218413_.level();
-        return p_218415_.isCloseEnough(level.dimension(), p_218413_.blockPosition(), 1024)
-            && level.getBlockState(p_218415_.pos()).is(Blocks.NOTE_BLOCK)
+    private static boolean shouldDepositItemsAtLikedNoteblock(LivingEntity pEntity, Brain<?> pBrain, GlobalPos pPos) {
+        Optional<Integer> optional = pBrain.getMemory(MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS);
+        Level level = pEntity.level();
+        return pPos.isCloseEnough(level.dimension(), pEntity.blockPosition(), 1024)
+            && level.getBlockState(pPos.pos()).is(Blocks.NOTE_BLOCK)
             && optional.isPresent();
     }
 
-    private static Optional<PositionTracker> getLikedPlayerPositionTracker(LivingEntity p_218430_) {
-        return getLikedPlayer(p_218430_).map(p_218409_ -> new EntityTracker(p_218409_, true));
+    private static Optional<PositionTracker> getLikedPlayerPositionTracker(LivingEntity pEntity) {
+        return getLikedPlayer(pEntity).map(p_218409_ -> new EntityTracker(p_218409_, true));
     }
 
-    public static Optional<ServerPlayer> getLikedPlayer(LivingEntity p_218411_) {
-        Level level = p_218411_.level();
+    public static Optional<ServerPlayer> getLikedPlayer(LivingEntity pEntity) {
+        Level level = pEntity.level();
         if (!level.isClientSide() && level instanceof ServerLevel serverlevel) {
-            Optional<UUID> optional = p_218411_.getBrain().getMemory(MemoryModuleType.LIKED_PLAYER);
+            Optional<UUID> optional = pEntity.getBrain().getMemory(MemoryModuleType.LIKED_PLAYER);
             if (optional.isPresent()) {
                 if (serverlevel.getEntity(optional.get()) instanceof ServerPlayer serverplayer
                     && (serverplayer.gameMode.isSurvival() || serverplayer.gameMode.isCreative())
-                    && serverplayer.closerThan(p_218411_, 64.0)) {
+                    && serverplayer.closerThan(pEntity, 64.0)) {
                     return Optional.of(serverplayer);
                 }
 

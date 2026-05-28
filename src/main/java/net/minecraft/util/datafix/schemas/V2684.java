@@ -13,18 +13,18 @@ public class V2684 extends NamespacedSchema {
     }
 
     @Override
-    public void registerTypes(Schema p_216760_, Map<String, Supplier<TypeTemplate>> p_216761_, Map<String, Supplier<TypeTemplate>> p_216762_) {
-        super.registerTypes(p_216760_, p_216761_, p_216762_);
-        p_216760_.registerType(false, References.GAME_EVENT_NAME, () -> DSL.constType(namespacedString()));
+    public void registerTypes(Schema pSchema, Map<String, Supplier<TypeTemplate>> pEntityTypes, Map<String, Supplier<TypeTemplate>> pBlockEntityTypes) {
+        super.registerTypes(pSchema, pEntityTypes, pBlockEntityTypes);
+        pSchema.registerType(false, References.GAME_EVENT_NAME, () -> DSL.constType(namespacedString()));
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_145859_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_145859_);
-        p_145859_.register(
+    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(pSchema);
+        pSchema.register(
             map,
             "minecraft:sculk_sensor",
-            () -> DSL.optionalFields("listener", DSL.optionalFields("event", DSL.optionalFields("game_event", References.GAME_EVENT_NAME.in(p_145859_))))
+            () -> DSL.optionalFields("listener", DSL.optionalFields("event", DSL.optionalFields("game_event", References.GAME_EVENT_NAME.in(pSchema))))
         );
         return map;
     }

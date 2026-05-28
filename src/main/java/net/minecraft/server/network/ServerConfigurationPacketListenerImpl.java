@@ -166,10 +166,10 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
         }
     }
 
-    private void finishCurrentTask(ConfigurationTask.Type p_297864_) {
+    private void finishCurrentTask(ConfigurationTask.Type pTaskType) {
         ConfigurationTask.Type configurationtask$type = this.currentTask != null ? this.currentTask.type() : null;
-        if (!p_297864_.equals(configurationtask$type)) {
-            throw new IllegalStateException("Unexpected request for task finish, current task: " + configurationtask$type + ", requested: " + p_297864_);
+        if (!pTaskType.equals(configurationtask$type)) {
+            throw new IllegalStateException("Unexpected request for task finish, current task: " + configurationtask$type + ", requested: " + pTaskType);
         } else {
             this.currentTask = null;
             this.startNextTask();

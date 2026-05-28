@@ -52,8 +52,8 @@ public class BannerPatternFormatFix extends NamedEntityFix {
         Map.entry("pig", "minecraft:piglin")
     );
 
-    public BannerPatternFormatFix(Schema p_331151_) {
-        super(p_331151_, false, "BannerPatternFormatFix", References.BLOCK_ENTITY, "minecraft:banner");
+    public BannerPatternFormatFix(Schema pOutputSchema) {
+        super(pOutputSchema, false, "BannerPatternFormatFix", References.BLOCK_ENTITY, "minecraft:banner");
     }
 
     @Override
@@ -61,26 +61,26 @@ public class BannerPatternFormatFix extends NamedEntityFix {
         return p_332978_.update(DSL.remainderFinder(), BannerPatternFormatFix::fixTag);
     }
 
-    private static Dynamic<?> fixTag(Dynamic<?> p_329398_) {
-        return p_329398_.renameAndFixField(
+    private static Dynamic<?> fixTag(Dynamic<?> pTag) {
+        return pTag.renameAndFixField(
             "Patterns", "patterns", p_330184_ -> p_330184_.createList(p_330184_.asStream().map(BannerPatternFormatFix::fixLayer))
         );
     }
 
-    private static Dynamic<?> fixLayer(Dynamic<?> p_333413_) {
-        p_333413_ = p_333413_.renameAndFixField(
+    private static Dynamic<?> fixLayer(Dynamic<?> pTag) {
+        pTag = pTag.renameAndFixField(
             "Pattern",
             "pattern",
             p_328292_ -> DataFixUtils.orElse(
                     p_328292_.asString().map(p_331883_ -> PATTERN_ID_MAP.getOrDefault(p_331883_, p_331883_)).map(p_328292_::createString).result(), p_328292_
                 )
         );
-        p_333413_ = p_333413_.set("color", p_333413_.createString(fixColor(p_333413_.get("Color").asInt(0))));
-        return p_333413_.remove("Color");
+        pTag = pTag.set("color", pTag.createString(fixColor(pTag.get("Color").asInt(0))));
+        return pTag.remove("Color");
     }
 
-    public static String fixColor(int p_328642_) {
-        return switch (p_328642_) {
+    public static String fixColor(int pColor) {
+        return switch (pColor) {
             case 1 -> "orange";
             case 2 -> "magenta";
             case 3 -> "light_blue";

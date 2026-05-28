@@ -4,21 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface ErrorCollector<S> {
-    void store(int p_334236_, SuggestionSupplier<S> p_329361_, Object p_331748_);
+    void store(int pCursor, SuggestionSupplier<S> pSuggestions, Object pReason);
 
-    default void store(int p_330627_, Object p_332187_) {
-        this.store(p_330627_, SuggestionSupplier.empty(), p_332187_);
+    default void store(int pCursor, Object pReason) {
+        this.store(pCursor, SuggestionSupplier.empty(), pReason);
     }
 
-    void finish(int p_334270_);
+    void finish(int pCursor);
 
     public static class LongestOnly<S> implements ErrorCollector<S> {
         private final List<ErrorEntry<S>> entries = new ArrayList<>();
         private int lastCursor = -1;
 
-        private void discardErrorsFromShorterParse(int p_331637_) {
-            if (p_331637_ > this.lastCursor) {
-                this.lastCursor = p_331637_;
+        private void discardErrorsFromShorterParse(int pCursor) {
+            if (pCursor > this.lastCursor) {
+                this.lastCursor = pCursor;
                 this.entries.clear();
             }
         }

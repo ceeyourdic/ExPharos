@@ -11,9 +11,9 @@ public class RealmsNewsManager {
     private boolean hasUnreadNews;
     private String newsLink;
 
-    public RealmsNewsManager(RealmsPersistence p_239304_) {
-        this.newsLocalStorage = p_239304_;
-        RealmsPersistence.RealmsPersistenceData realmspersistence$realmspersistencedata = p_239304_.read();
+    public RealmsNewsManager(RealmsPersistence pNewsLocalStorage) {
+        this.newsLocalStorage = pNewsLocalStorage;
+        RealmsPersistence.RealmsPersistenceData realmspersistence$realmspersistencedata = pNewsLocalStorage.read();
         this.hasUnreadNews = realmspersistence$realmspersistencedata.hasUnreadNews;
         this.newsLink = realmspersistence$realmspersistencedata.newsLink;
     }
@@ -26,17 +26,17 @@ public class RealmsNewsManager {
         return this.newsLink;
     }
 
-    public void updateUnreadNews(RealmsNews p_239191_) {
-        RealmsPersistence.RealmsPersistenceData realmspersistence$realmspersistencedata = this.updateNewsStorage(p_239191_);
+    public void updateUnreadNews(RealmsNews pRealmsNews) {
+        RealmsPersistence.RealmsPersistenceData realmspersistence$realmspersistencedata = this.updateNewsStorage(pRealmsNews);
         this.hasUnreadNews = realmspersistence$realmspersistencedata.hasUnreadNews;
         this.newsLink = realmspersistence$realmspersistencedata.newsLink;
     }
 
-    private RealmsPersistence.RealmsPersistenceData updateNewsStorage(RealmsNews p_240153_) {
+    private RealmsPersistence.RealmsPersistenceData updateNewsStorage(RealmsNews pRealmsNews) {
         RealmsPersistence.RealmsPersistenceData realmspersistence$realmspersistencedata = this.newsLocalStorage.read();
-        if (p_240153_.newsLink != null && !p_240153_.newsLink.equals(realmspersistence$realmspersistencedata.newsLink)) {
+        if (pRealmsNews.newsLink != null && !pRealmsNews.newsLink.equals(realmspersistence$realmspersistencedata.newsLink)) {
             RealmsPersistence.RealmsPersistenceData realmspersistence$realmspersistencedata1 = new RealmsPersistence.RealmsPersistenceData();
-            realmspersistence$realmspersistencedata1.newsLink = p_240153_.newsLink;
+            realmspersistence$realmspersistencedata1.newsLink = pRealmsNews.newsLink;
             realmspersistence$realmspersistencedata1.hasUnreadNews = true;
             this.newsLocalStorage.save(realmspersistence$realmspersistencedata1);
             return realmspersistence$realmspersistencedata1;

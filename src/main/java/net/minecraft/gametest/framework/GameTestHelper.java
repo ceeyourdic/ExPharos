@@ -69,22 +69,22 @@ public class GameTestHelper {
     private final GameTestInfo testInfo;
     private boolean finalCheckAdded;
 
-    public GameTestHelper(GameTestInfo p_127597_) {
-        this.testInfo = p_127597_;
+    public GameTestHelper(GameTestInfo pTestInfo) {
+        this.testInfo = pTestInfo;
     }
 
     public ServerLevel getLevel() {
         return this.testInfo.getLevel();
     }
 
-    public BlockState getBlockState(BlockPos p_177233_) {
-        return this.getLevel().getBlockState(this.absolutePos(p_177233_));
+    public BlockState getBlockState(BlockPos pPos) {
+        return this.getLevel().getBlockState(this.absolutePos(pPos));
     }
 
-    public <T extends BlockEntity> T getBlockEntity(BlockPos p_177348_) {
-        BlockEntity blockentity = this.getLevel().getBlockEntity(this.absolutePos(p_177348_));
+    public <T extends BlockEntity> T getBlockEntity(BlockPos pPos) {
+        BlockEntity blockentity = this.getLevel().getBlockEntity(this.absolutePos(pPos));
         if (blockentity == null) {
-            throw new GameTestAssertPosException("Missing block entity", this.absolutePos(p_177348_), p_177348_, this.testInfo.getTick());
+            throw new GameTestAssertPosException("Missing block entity", this.absolutePos(pPos), pPos, this.testInfo.getTick());
         } else {
             return (T)blockentity;
         }
@@ -94,81 +94,81 @@ public class GameTestHelper {
         this.killAllEntitiesOfClass(Entity.class);
     }
 
-    public void killAllEntitiesOfClass(Class p_289538_) {
+    public void killAllEntitiesOfClass(Class pEntityClass) {
         AABB aabb = this.getBounds();
-        List<Entity> list = this.getLevel().getEntitiesOfClass(p_289538_, aabb.inflate(1.0), p_177131_ -> !(p_177131_ instanceof Player));
+        List<Entity> list = this.getLevel().getEntitiesOfClass(pEntityClass, aabb.inflate(1.0), p_177131_ -> !(p_177131_ instanceof Player));
         list.forEach(p_358470_ -> p_358470_.kill(this.getLevel()));
     }
 
-    public ItemEntity spawnItem(Item p_329778_, Vec3 p_334689_) {
+    public ItemEntity spawnItem(Item pItem, Vec3 pPos) {
         ServerLevel serverlevel = this.getLevel();
-        Vec3 vec3 = this.absoluteVec(p_334689_);
-        ItemEntity itementity = new ItemEntity(serverlevel, vec3.x, vec3.y, vec3.z, new ItemStack(p_329778_, 1));
+        Vec3 vec3 = this.absoluteVec(pPos);
+        ItemEntity itementity = new ItemEntity(serverlevel, vec3.x, vec3.y, vec3.z, new ItemStack(pItem, 1));
         itementity.setDeltaMovement(0.0, 0.0, 0.0);
         serverlevel.addFreshEntity(itementity);
         return itementity;
     }
 
-    public ItemEntity spawnItem(Item p_177190_, float p_177191_, float p_177192_, float p_177193_) {
-        return this.spawnItem(p_177190_, new Vec3((double)p_177191_, (double)p_177192_, (double)p_177193_));
+    public ItemEntity spawnItem(Item pItem, float pX, float pY, float pZ) {
+        return this.spawnItem(pItem, new Vec3((double)pX, (double)pY, (double)pZ));
     }
 
-    public ItemEntity spawnItem(Item p_251435_, BlockPos p_250287_) {
-        return this.spawnItem(p_251435_, (float)p_250287_.getX(), (float)p_250287_.getY(), (float)p_250287_.getZ());
+    public ItemEntity spawnItem(Item pItem, BlockPos pPos) {
+        return this.spawnItem(pItem, (float)pPos.getX(), (float)pPos.getY(), (float)pPos.getZ());
     }
 
-    public <E extends Entity> E spawn(EntityType<E> p_177177_, BlockPos p_177178_) {
-        return this.spawn(p_177177_, Vec3.atBottomCenterOf(p_177178_));
+    public <E extends Entity> E spawn(EntityType<E> pType, BlockPos pPos) {
+        return this.spawn(pType, Vec3.atBottomCenterOf(pPos));
     }
 
-    public <E extends Entity> E spawn(EntityType<E> p_177174_, Vec3 p_177175_) {
+    public <E extends Entity> E spawn(EntityType<E> pType, Vec3 pPos) {
         ServerLevel serverlevel = this.getLevel();
-        E e = p_177174_.create(serverlevel, EntitySpawnReason.STRUCTURE);
+        E e = pType.create(serverlevel, EntitySpawnReason.STRUCTURE);
         if (e == null) {
-            throw new NullPointerException("Failed to create entity " + p_177174_.builtInRegistryHolder().key().location());
+            throw new NullPointerException("Failed to create entity " + pType.builtInRegistryHolder().key().location());
         } else {
             if (e instanceof Mob mob) {
                 mob.setPersistenceRequired();
             }
 
-            Vec3 vec3 = this.absoluteVec(p_177175_);
+            Vec3 vec3 = this.absoluteVec(pPos);
             e.moveTo(vec3.x, vec3.y, vec3.z, e.getYRot(), e.getXRot());
             serverlevel.addFreshEntity(e);
             return e;
         }
     }
 
-    public void hurt(Entity p_369429_, DamageSource p_367525_, float p_361355_) {
-        p_369429_.hurtServer(this.getLevel(), p_367525_, p_361355_);
+    public void hurt(Entity pEntity, DamageSource pDamageSource, float pAmount) {
+        pEntity.hurtServer(this.getLevel(), pDamageSource, pAmount);
     }
 
-    public void kill(Entity p_364190_) {
-        p_364190_.kill(this.getLevel());
+    public void kill(Entity pEntity) {
+        pEntity.kill(this.getLevel());
     }
 
-    public <E extends Entity> E findOneEntity(EntityType<E> p_333077_) {
-        return this.findClosestEntity(p_333077_, 0, 0, 0, 2.147483647E9);
+    public <E extends Entity> E findOneEntity(EntityType<E> pType) {
+        return this.findClosestEntity(pType, 0, 0, 0, 2.147483647E9);
     }
 
-    public <E extends Entity> E findClosestEntity(EntityType<E> p_335109_, int p_329434_, int p_334603_, int p_333149_, double p_331586_) {
-        List<E> list = this.findEntities(p_335109_, p_329434_, p_334603_, p_333149_, p_331586_);
+    public <E extends Entity> E findClosestEntity(EntityType<E> pType, int pX, int pY, int pZ, double pRadius) {
+        List<E> list = this.findEntities(pType, pX, pY, pZ, pRadius);
         if (list.isEmpty()) {
-            throw new GameTestAssertException("Expected " + p_335109_.toShortString() + " to exist around " + p_329434_ + "," + p_334603_ + "," + p_333149_);
+            throw new GameTestAssertException("Expected " + pType.toShortString() + " to exist around " + pX + "," + pY + "," + pZ);
         } else if (list.size() > 1) {
             throw new GameTestAssertException(
                 "Expected only one "
-                    + p_335109_.toShortString()
+                    + pType.toShortString()
                     + " to exist around "
-                    + p_329434_
+                    + pX
                     + ","
-                    + p_334603_
+                    + pY
                     + ","
-                    + p_333149_
+                    + pZ
                     + ", but found "
                     + list.size()
             );
         } else {
-            Vec3 vec3 = this.absoluteVec(new Vec3((double)p_329434_, (double)p_334603_, (double)p_333149_));
+            Vec3 vec3 = this.absoluteVec(new Vec3((double)pX, (double)pY, (double)pZ));
             list.sort((p_325933_, p_325934_) -> {
                 double d0 = p_325933_.position().distanceTo(vec3);
                 double d1 = p_325934_.position().distanceTo(vec3);
@@ -178,114 +178,114 @@ public class GameTestHelper {
         }
     }
 
-    public <E extends Entity> List<E> findEntities(EntityType<E> p_327745_, int p_330471_, int p_329385_, int p_328777_, double p_336258_) {
-        return this.findEntities(p_327745_, Vec3.atBottomCenterOf(new BlockPos(p_330471_, p_329385_, p_328777_)), p_336258_);
+    public <E extends Entity> List<E> findEntities(EntityType<E> pType, int pX, int pY, int pZ, double pRadius) {
+        return this.findEntities(pType, Vec3.atBottomCenterOf(new BlockPos(pX, pY, pZ)), pRadius);
     }
 
-    public <E extends Entity> List<E> findEntities(EntityType<E> p_327849_, Vec3 p_331515_, double p_330795_) {
+    public <E extends Entity> List<E> findEntities(EntityType<E> pType, Vec3 pPos, double pRadius) {
         ServerLevel serverlevel = this.getLevel();
-        Vec3 vec3 = this.absoluteVec(p_331515_);
+        Vec3 vec3 = this.absoluteVec(pPos);
         AABB aabb = this.testInfo.getStructureBounds();
-        AABB aabb1 = new AABB(vec3.add(-p_330795_, -p_330795_, -p_330795_), vec3.add(p_330795_, p_330795_, p_330795_));
-        return serverlevel.getEntities(p_327849_, aabb, p_325936_ -> p_325936_.getBoundingBox().intersects(aabb1) && p_325936_.isAlive());
+        AABB aabb1 = new AABB(vec3.add(-pRadius, -pRadius, -pRadius), vec3.add(pRadius, pRadius, pRadius));
+        return serverlevel.getEntities(pType, aabb, p_325936_ -> p_325936_.getBoundingBox().intersects(aabb1) && p_325936_.isAlive());
     }
 
-    public <E extends Entity> E spawn(EntityType<E> p_177169_, int p_177170_, int p_177171_, int p_177172_) {
-        return this.spawn(p_177169_, new BlockPos(p_177170_, p_177171_, p_177172_));
+    public <E extends Entity> E spawn(EntityType<E> pType, int pX, int pY, int pZ) {
+        return this.spawn(pType, new BlockPos(pX, pY, pZ));
     }
 
-    public <E extends Entity> E spawn(EntityType<E> p_177164_, float p_177165_, float p_177166_, float p_177167_) {
-        return this.spawn(p_177164_, new Vec3((double)p_177165_, (double)p_177166_, (double)p_177167_));
+    public <E extends Entity> E spawn(EntityType<E> pType, float pX, float pY, float pZ) {
+        return this.spawn(pType, new Vec3((double)pX, (double)pY, (double)pZ));
     }
 
-    public <E extends Mob> E spawnWithNoFreeWill(EntityType<E> p_177330_, BlockPos p_177331_) {
-        E e = (E)this.spawn(p_177330_, p_177331_);
+    public <E extends Mob> E spawnWithNoFreeWill(EntityType<E> pType, BlockPos pPos) {
+        E e = (E)this.spawn(pType, pPos);
         e.removeFreeWill();
         return e;
     }
 
-    public <E extends Mob> E spawnWithNoFreeWill(EntityType<E> p_177322_, int p_177323_, int p_177324_, int p_177325_) {
-        return this.spawnWithNoFreeWill(p_177322_, new BlockPos(p_177323_, p_177324_, p_177325_));
+    public <E extends Mob> E spawnWithNoFreeWill(EntityType<E> pType, int pX, int pY, int pZ) {
+        return this.spawnWithNoFreeWill(pType, new BlockPos(pX, pY, pZ));
     }
 
-    public <E extends Mob> E spawnWithNoFreeWill(EntityType<E> p_177327_, Vec3 p_177328_) {
-        E e = (E)this.spawn(p_177327_, p_177328_);
+    public <E extends Mob> E spawnWithNoFreeWill(EntityType<E> pType, Vec3 pPos) {
+        E e = (E)this.spawn(pType, pPos);
         e.removeFreeWill();
         return e;
     }
 
-    public <E extends Mob> E spawnWithNoFreeWill(EntityType<E> p_177317_, float p_177318_, float p_177319_, float p_177320_) {
-        return this.spawnWithNoFreeWill(p_177317_, new Vec3((double)p_177318_, (double)p_177319_, (double)p_177320_));
+    public <E extends Mob> E spawnWithNoFreeWill(EntityType<E> pType, float pX, float pY, float pZ) {
+        return this.spawnWithNoFreeWill(pType, new Vec3((double)pX, (double)pY, (double)pZ));
     }
 
-    public void moveTo(Mob p_335410_, float p_330841_, float p_334132_, float p_332530_) {
-        Vec3 vec3 = this.absoluteVec(new Vec3((double)p_330841_, (double)p_334132_, (double)p_332530_));
-        p_335410_.moveTo(vec3.x, vec3.y, vec3.z, p_335410_.getYRot(), p_335410_.getXRot());
+    public void moveTo(Mob pMob, float pX, float pY, float pZ) {
+        Vec3 vec3 = this.absoluteVec(new Vec3((double)pX, (double)pY, (double)pZ));
+        pMob.moveTo(vec3.x, vec3.y, vec3.z, pMob.getYRot(), pMob.getXRot());
     }
 
-    public GameTestSequence walkTo(Mob p_177186_, BlockPos p_177187_, float p_177188_) {
+    public GameTestSequence walkTo(Mob pMob, BlockPos pPos, float pSpeed) {
         return this.startSequence().thenExecuteAfter(2, () -> {
-            Path path = p_177186_.getNavigation().createPath(this.absolutePos(p_177187_), 0);
-            p_177186_.getNavigation().moveTo(path, (double)p_177188_);
+            Path path = pMob.getNavigation().createPath(this.absolutePos(pPos), 0);
+            pMob.getNavigation().moveTo(path, (double)pSpeed);
         });
     }
 
-    public void pressButton(int p_177104_, int p_177105_, int p_177106_) {
-        this.pressButton(new BlockPos(p_177104_, p_177105_, p_177106_));
+    public void pressButton(int pX, int pY, int pZ) {
+        this.pressButton(new BlockPos(pX, pY, pZ));
     }
 
-    public void pressButton(BlockPos p_177386_) {
-        this.assertBlockState(p_177386_, p_177212_ -> p_177212_.is(BlockTags.BUTTONS), () -> "Expected button");
-        BlockPos blockpos = this.absolutePos(p_177386_);
+    public void pressButton(BlockPos pPos) {
+        this.assertBlockState(pPos, p_177212_ -> p_177212_.is(BlockTags.BUTTONS), () -> "Expected button");
+        BlockPos blockpos = this.absolutePos(pPos);
         BlockState blockstate = this.getLevel().getBlockState(blockpos);
         ButtonBlock buttonblock = (ButtonBlock)blockstate.getBlock();
         buttonblock.press(blockstate, this.getLevel(), blockpos, null);
     }
 
-    public void useBlock(BlockPos p_177409_) {
-        this.useBlock(p_177409_, this.makeMockPlayer(GameType.CREATIVE));
+    public void useBlock(BlockPos pPos) {
+        this.useBlock(pPos, this.makeMockPlayer(GameType.CREATIVE));
     }
 
-    public void useBlock(BlockPos p_250131_, Player p_251507_) {
-        BlockPos blockpos = this.absolutePos(p_250131_);
-        this.useBlock(p_250131_, p_251507_, new BlockHitResult(Vec3.atCenterOf(blockpos), Direction.NORTH, blockpos, true));
+    public void useBlock(BlockPos pPos, Player pPlayer) {
+        BlockPos blockpos = this.absolutePos(pPos);
+        this.useBlock(pPos, pPlayer, new BlockHitResult(Vec3.atCenterOf(blockpos), Direction.NORTH, blockpos, true));
     }
 
-    public void useBlock(BlockPos p_262023_, Player p_261901_, BlockHitResult p_262040_) {
-        BlockPos blockpos = this.absolutePos(p_262023_);
+    public void useBlock(BlockPos pPos, Player pPlayer, BlockHitResult pResult) {
+        BlockPos blockpos = this.absolutePos(pPos);
         BlockState blockstate = this.getLevel().getBlockState(blockpos);
         InteractionHand interactionhand = InteractionHand.MAIN_HAND;
-        InteractionResult interactionresult = blockstate.useItemOn(p_261901_.getItemInHand(interactionhand), this.getLevel(), p_261901_, interactionhand, p_262040_);
+        InteractionResult interactionresult = blockstate.useItemOn(pPlayer.getItemInHand(interactionhand), this.getLevel(), pPlayer, interactionhand, pResult);
         if (!interactionresult.consumesAction()) {
             if (!(interactionresult instanceof InteractionResult.TryEmptyHandInteraction)
-                || !blockstate.useWithoutItem(this.getLevel(), p_261901_, p_262040_).consumesAction()) {
-                UseOnContext useoncontext = new UseOnContext(p_261901_, interactionhand, p_262040_);
-                p_261901_.getItemInHand(interactionhand).useOn(useoncontext);
+                || !blockstate.useWithoutItem(this.getLevel(), pPlayer, pResult).consumesAction()) {
+                UseOnContext useoncontext = new UseOnContext(pPlayer, interactionhand, pResult);
+                pPlayer.getItemInHand(interactionhand).useOn(useoncontext);
             }
         }
     }
 
-    public LivingEntity makeAboutToDrown(LivingEntity p_177184_) {
-        p_177184_.setAirSupply(0);
-        p_177184_.setHealth(0.25F);
-        return p_177184_;
+    public LivingEntity makeAboutToDrown(LivingEntity pEntity) {
+        pEntity.setAirSupply(0);
+        pEntity.setHealth(0.25F);
+        return pEntity;
     }
 
-    public LivingEntity withLowHealth(LivingEntity p_286794_) {
-        p_286794_.setHealth(0.25F);
-        return p_286794_;
+    public LivingEntity withLowHealth(LivingEntity pEntity) {
+        pEntity.setHealth(0.25F);
+        return pEntity;
     }
 
-    public Player makeMockPlayer(final GameType p_333981_) {
+    public Player makeMockPlayer(final GameType pGameType) {
         return new Player(this.getLevel(), BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-player")) {
             @Override
             public boolean isSpectator() {
-                return p_333981_ == GameType.SPECTATOR;
+                return pGameType == GameType.SPECTATOR;
             }
 
             @Override
             public boolean isCreative() {
-                return p_333981_.isCreative();
+                return pGameType.isCreative();
             }
 
             @Override
@@ -319,487 +319,487 @@ public class GameTestHelper {
         return serverplayer;
     }
 
-    public void pullLever(int p_177303_, int p_177304_, int p_177305_) {
-        this.pullLever(new BlockPos(p_177303_, p_177304_, p_177305_));
+    public void pullLever(int pX, int pY, int pZ) {
+        this.pullLever(new BlockPos(pX, pY, pZ));
     }
 
-    public void pullLever(BlockPos p_177422_) {
-        this.assertBlockPresent(Blocks.LEVER, p_177422_);
-        BlockPos blockpos = this.absolutePos(p_177422_);
+    public void pullLever(BlockPos pPos) {
+        this.assertBlockPresent(Blocks.LEVER, pPos);
+        BlockPos blockpos = this.absolutePos(pPos);
         BlockState blockstate = this.getLevel().getBlockState(blockpos);
         LeverBlock leverblock = (LeverBlock)blockstate.getBlock();
         leverblock.pull(blockstate, this.getLevel(), blockpos, null);
     }
 
-    public void pulseRedstone(BlockPos p_177235_, long p_177236_) {
-        this.setBlock(p_177235_, Blocks.REDSTONE_BLOCK);
-        this.runAfterDelay(p_177236_, () -> this.setBlock(p_177235_, Blocks.AIR));
+    public void pulseRedstone(BlockPos pPos, long pDelay) {
+        this.setBlock(pPos, Blocks.REDSTONE_BLOCK);
+        this.runAfterDelay(pDelay, () -> this.setBlock(pPos, Blocks.AIR));
     }
 
-    public void destroyBlock(BlockPos p_177435_) {
-        this.getLevel().destroyBlock(this.absolutePos(p_177435_), false, null);
+    public void destroyBlock(BlockPos pPos) {
+        this.getLevel().destroyBlock(this.absolutePos(pPos), false, null);
     }
 
-    public void setBlock(int p_177108_, int p_177109_, int p_177110_, Block p_177111_) {
-        this.setBlock(new BlockPos(p_177108_, p_177109_, p_177110_), p_177111_);
+    public void setBlock(int pX, int pY, int pZ, Block pBlock) {
+        this.setBlock(new BlockPos(pX, pY, pZ), pBlock);
     }
 
-    public void setBlock(int p_177113_, int p_177114_, int p_177115_, BlockState p_177116_) {
-        this.setBlock(new BlockPos(p_177113_, p_177114_, p_177115_), p_177116_);
+    public void setBlock(int pX, int pY, int pZ, BlockState pState) {
+        this.setBlock(new BlockPos(pX, pY, pZ), pState);
     }
 
-    public void setBlock(BlockPos p_177246_, Block p_177247_) {
-        this.setBlock(p_177246_, p_177247_.defaultBlockState());
+    public void setBlock(BlockPos pPos, Block pBlock) {
+        this.setBlock(pPos, pBlock.defaultBlockState());
     }
 
-    public void setBlock(BlockPos p_177253_, BlockState p_177254_) {
-        this.getLevel().setBlock(this.absolutePos(p_177253_), p_177254_, 3);
+    public void setBlock(BlockPos pPos, BlockState pState) {
+        this.getLevel().setBlock(this.absolutePos(pPos), pState, 3);
     }
 
     public void setNight() {
         this.setDayTime(13000);
     }
 
-    public void setDayTime(int p_177102_) {
-        this.getLevel().setDayTime((long)p_177102_);
+    public void setDayTime(int pTime) {
+        this.getLevel().setDayTime((long)pTime);
     }
 
-    public void assertBlockPresent(Block p_177204_, int p_177205_, int p_177206_, int p_177207_) {
-        this.assertBlockPresent(p_177204_, new BlockPos(p_177205_, p_177206_, p_177207_));
+    public void assertBlockPresent(Block pBlock, int pX, int pY, int pZ) {
+        this.assertBlockPresent(pBlock, new BlockPos(pX, pY, pZ));
     }
 
-    public void assertBlockPresent(Block p_177209_, BlockPos p_177210_) {
-        BlockState blockstate = this.getBlockState(p_177210_);
+    public void assertBlockPresent(Block pBlock, BlockPos pPos) {
+        BlockState blockstate = this.getBlockState(pPos);
         this.assertBlock(
-            p_177210_,
-            p_177216_ -> blockstate.is(p_177209_),
-            "Expected " + p_177209_.getName().getString() + ", got " + blockstate.getBlock().getName().getString()
+            pPos,
+            p_177216_ -> blockstate.is(pBlock),
+            "Expected " + pBlock.getName().getString() + ", got " + blockstate.getBlock().getName().getString()
         );
     }
 
-    public void assertBlockNotPresent(Block p_177337_, int p_177338_, int p_177339_, int p_177340_) {
-        this.assertBlockNotPresent(p_177337_, new BlockPos(p_177338_, p_177339_, p_177340_));
+    public void assertBlockNotPresent(Block pBlock, int pX, int pY, int pZ) {
+        this.assertBlockNotPresent(pBlock, new BlockPos(pX, pY, pZ));
     }
 
-    public void assertBlockNotPresent(Block p_177342_, BlockPos p_177343_) {
-        this.assertBlock(p_177343_, p_177251_ -> !this.getBlockState(p_177343_).is(p_177342_), "Did not expect " + p_177342_.getName().getString());
+    public void assertBlockNotPresent(Block pBlock, BlockPos pPos) {
+        this.assertBlock(pPos, p_177251_ -> !this.getBlockState(pPos).is(pBlock), "Did not expect " + pBlock.getName().getString());
     }
 
-    public void succeedWhenBlockPresent(Block p_177378_, int p_177379_, int p_177380_, int p_177381_) {
-        this.succeedWhenBlockPresent(p_177378_, new BlockPos(p_177379_, p_177380_, p_177381_));
+    public void succeedWhenBlockPresent(Block pBlock, int pX, int pY, int pZ) {
+        this.succeedWhenBlockPresent(pBlock, new BlockPos(pX, pY, pZ));
     }
 
-    public void succeedWhenBlockPresent(Block p_177383_, BlockPos p_177384_) {
-        this.succeedWhen(() -> this.assertBlockPresent(p_177383_, p_177384_));
+    public void succeedWhenBlockPresent(Block pBlock, BlockPos pPos) {
+        this.succeedWhen(() -> this.assertBlockPresent(pBlock, pPos));
     }
 
-    public void assertBlock(BlockPos p_177272_, Predicate<Block> p_177273_, String p_177274_) {
-        this.assertBlock(p_177272_, p_177273_, () -> p_177274_);
+    public void assertBlock(BlockPos pPos, Predicate<Block> pPredicate, String pExceptionMessage) {
+        this.assertBlock(pPos, pPredicate, () -> pExceptionMessage);
     }
 
-    public void assertBlock(BlockPos p_177276_, Predicate<Block> p_177277_, Supplier<String> p_177278_) {
-        this.assertBlockState(p_177276_, p_177296_ -> p_177277_.test(p_177296_.getBlock()), p_177278_);
+    public void assertBlock(BlockPos pPos, Predicate<Block> pPredicate, Supplier<String> pExceptionMessage) {
+        this.assertBlockState(pPos, p_177296_ -> pPredicate.test(p_177296_.getBlock()), pExceptionMessage);
     }
 
-    public <T extends Comparable<T>> void assertBlockProperty(BlockPos p_177256_, Property<T> p_177257_, T p_177258_) {
-        BlockState blockstate = this.getBlockState(p_177256_);
-        boolean flag = blockstate.hasProperty(p_177257_);
-        if (!flag || !blockstate.<T>getValue(p_177257_).equals(p_177258_)) {
-            String s = flag ? "was " + blockstate.getValue(p_177257_) : "property " + p_177257_.getName() + " is missing";
-            String s1 = String.format(Locale.ROOT, "Expected property %s to be %s, %s", p_177257_.getName(), p_177258_, s);
-            throw new GameTestAssertPosException(s1, this.absolutePos(p_177256_), p_177256_, this.testInfo.getTick());
+    public <T extends Comparable<T>> void assertBlockProperty(BlockPos pPos, Property<T> pProperty, T pValue) {
+        BlockState blockstate = this.getBlockState(pPos);
+        boolean flag = blockstate.hasProperty(pProperty);
+        if (!flag || !blockstate.<T>getValue(pProperty).equals(pValue)) {
+            String s = flag ? "was " + blockstate.getValue(pProperty) : "property " + pProperty.getName() + " is missing";
+            String s1 = String.format(Locale.ROOT, "Expected property %s to be %s, %s", pProperty.getName(), pValue, s);
+            throw new GameTestAssertPosException(s1, this.absolutePos(pPos), pPos, this.testInfo.getTick());
         }
     }
 
-    public <T extends Comparable<T>> void assertBlockProperty(BlockPos p_177260_, Property<T> p_177261_, Predicate<T> p_177262_, String p_177263_) {
-        this.assertBlockState(p_177260_, p_277264_ -> {
-            if (!p_277264_.hasProperty(p_177261_)) {
+    public <T extends Comparable<T>> void assertBlockProperty(BlockPos pPos, Property<T> pProperty, Predicate<T> pPredicate, String pExceptionMessage) {
+        this.assertBlockState(pPos, p_277264_ -> {
+            if (!p_277264_.hasProperty(pProperty)) {
                 return false;
             } else {
-                T t = p_277264_.getValue(p_177261_);
-                return p_177262_.test(t);
+                T t = p_277264_.getValue(pProperty);
+                return pPredicate.test(t);
             }
-        }, () -> p_177263_);
+        }, () -> pExceptionMessage);
     }
 
-    public void assertBlockState(BlockPos p_177358_, Predicate<BlockState> p_177359_, Supplier<String> p_177360_) {
-        BlockState blockstate = this.getBlockState(p_177358_);
-        if (!p_177359_.test(blockstate)) {
-            throw new GameTestAssertPosException(p_177360_.get(), this.absolutePos(p_177358_), p_177358_, this.testInfo.getTick());
+    public void assertBlockState(BlockPos pPos, Predicate<BlockState> pPredicate, Supplier<String> pExceptionMessage) {
+        BlockState blockstate = this.getBlockState(pPos);
+        if (!pPredicate.test(blockstate)) {
+            throw new GameTestAssertPosException(pExceptionMessage.get(), this.absolutePos(pPos), pPos, this.testInfo.getTick());
         }
     }
 
-    public <T extends BlockEntity> void assertBlockEntityData(BlockPos p_345406_, Predicate<T> p_342583_, Supplier<String> p_343096_) {
-        T t = this.getBlockEntity(p_345406_);
-        if (!p_342583_.test(t)) {
-            throw new GameTestAssertPosException(p_343096_.get(), this.absolutePos(p_345406_), p_345406_, this.testInfo.getTick());
+    public <T extends BlockEntity> void assertBlockEntityData(BlockPos pPos, Predicate<T> pPredicate, Supplier<String> pExceptionMessage) {
+        T t = this.getBlockEntity(pPos);
+        if (!pPredicate.test(t)) {
+            throw new GameTestAssertPosException(pExceptionMessage.get(), this.absolutePos(pPos), pPos, this.testInfo.getTick());
         }
     }
 
-    public void assertRedstoneSignal(BlockPos p_289644_, Direction p_289642_, IntPredicate p_289645_, Supplier<String> p_289684_) {
-        BlockPos blockpos = this.absolutePos(p_289644_);
+    public void assertRedstoneSignal(BlockPos pPos, Direction pDirection, IntPredicate pSignalStrengthPredicate, Supplier<String> pExceptionMessage) {
+        BlockPos blockpos = this.absolutePos(pPos);
         ServerLevel serverlevel = this.getLevel();
         BlockState blockstate = serverlevel.getBlockState(blockpos);
-        int i = blockstate.getSignal(serverlevel, blockpos, p_289642_);
-        if (!p_289645_.test(i)) {
-            throw new GameTestAssertPosException(p_289684_.get(), blockpos, p_289644_, this.testInfo.getTick());
+        int i = blockstate.getSignal(serverlevel, blockpos, pDirection);
+        if (!pSignalStrengthPredicate.test(i)) {
+            throw new GameTestAssertPosException(pExceptionMessage.get(), blockpos, pPos, this.testInfo.getTick());
         }
     }
 
-    public void assertEntityPresent(EntityType<?> p_177157_) {
-        List<? extends Entity> list = this.getLevel().getEntities(p_177157_, this.getBounds(), Entity::isAlive);
+    public void assertEntityPresent(EntityType<?> pType) {
+        List<? extends Entity> list = this.getLevel().getEntities(pType, this.getBounds(), Entity::isAlive);
         if (list.isEmpty()) {
-            throw new GameTestAssertException("Expected " + p_177157_.toShortString() + " to exist");
+            throw new GameTestAssertException("Expected " + pType.toShortString() + " to exist");
         }
     }
 
-    public void assertEntityPresent(EntityType<?> p_177370_, int p_177371_, int p_177372_, int p_177373_) {
-        this.assertEntityPresent(p_177370_, new BlockPos(p_177371_, p_177372_, p_177373_));
+    public void assertEntityPresent(EntityType<?> pType, int pX, int pY, int pZ) {
+        this.assertEntityPresent(pType, new BlockPos(pX, pY, pZ));
     }
 
-    public void assertEntityPresent(EntityType<?> p_177375_, BlockPos p_177376_) {
-        BlockPos blockpos = this.absolutePos(p_177376_);
-        List<? extends Entity> list = this.getLevel().getEntities(p_177375_, new AABB(blockpos), Entity::isAlive);
+    public void assertEntityPresent(EntityType<?> pType, BlockPos pPos) {
+        BlockPos blockpos = this.absolutePos(pPos);
+        List<? extends Entity> list = this.getLevel().getEntities(pType, new AABB(blockpos), Entity::isAlive);
         if (list.isEmpty()) {
-            throw new GameTestAssertPosException("Expected " + p_177375_.toShortString(), blockpos, p_177376_, this.testInfo.getTick());
+            throw new GameTestAssertPosException("Expected " + pType.toShortString(), blockpos, pPos, this.testInfo.getTick());
         }
     }
 
-    public void assertEntityPresent(EntityType<?> p_252010_, AABB p_367168_) {
-        AABB aabb = this.absoluteAABB(p_367168_);
-        List<? extends Entity> list = this.getLevel().getEntities(p_252010_, aabb, Entity::isAlive);
+    public void assertEntityPresent(EntityType<?> pType, AABB pBox) {
+        AABB aabb = this.absoluteAABB(pBox);
+        List<? extends Entity> list = this.getLevel().getEntities(pType, aabb, Entity::isAlive);
         if (list.isEmpty()) {
             throw new GameTestAssertPosException(
-                "Expected " + p_252010_.toShortString(), BlockPos.containing(aabb.getCenter()), BlockPos.containing(p_367168_.getCenter()), this.testInfo.getTick()
+                "Expected " + pType.toShortString(), BlockPos.containing(aabb.getCenter()), BlockPos.containing(pBox.getCenter()), this.testInfo.getTick()
             );
         }
     }
 
-    public void assertEntitiesPresent(EntityType<?> p_313026_, int p_310037_) {
-        List<? extends Entity> list = this.getLevel().getEntities(p_313026_, this.getBounds(), Entity::isAlive);
-        if (list.size() != p_310037_) {
-            throw new GameTestAssertException("Expected " + p_310037_ + " of type " + p_313026_.toShortString() + " to exist, found " + list.size());
+    public void assertEntitiesPresent(EntityType<?> pEntityType, int pCount) {
+        List<? extends Entity> list = this.getLevel().getEntities(pEntityType, this.getBounds(), Entity::isAlive);
+        if (list.size() != pCount) {
+            throw new GameTestAssertException("Expected " + pCount + " of type " + pEntityType.toShortString() + " to exist, found " + list.size());
         }
     }
 
-    public void assertEntitiesPresent(EntityType<?> p_239372_, BlockPos p_239373_, int p_239374_, double p_239375_) {
-        BlockPos blockpos = this.absolutePos(p_239373_);
-        List<? extends Entity> list = this.getEntities((EntityType<? extends Entity>)p_239372_, p_239373_, p_239375_);
-        if (list.size() != p_239374_) {
+    public void assertEntitiesPresent(EntityType<?> pEntityType, BlockPos pPos, int pCount, double pRadius) {
+        BlockPos blockpos = this.absolutePos(pPos);
+        List<? extends Entity> list = this.getEntities((EntityType<? extends Entity>)pEntityType, pPos, pRadius);
+        if (list.size() != pCount) {
             throw new GameTestAssertPosException(
-                "Expected " + p_239374_ + " entities of type " + p_239372_.toShortString() + ", actual number of entities found=" + list.size(),
+                "Expected " + pCount + " entities of type " + pEntityType.toShortString() + ", actual number of entities found=" + list.size(),
                 blockpos,
-                p_239373_,
+                pPos,
                 this.testInfo.getTick()
             );
         }
     }
 
-    public void assertEntityPresent(EntityType<?> p_177180_, BlockPos p_177181_, double p_177182_) {
-        List<? extends Entity> list = this.getEntities((EntityType<? extends Entity>)p_177180_, p_177181_, p_177182_);
+    public void assertEntityPresent(EntityType<?> pType, BlockPos pPos, double pExpansionAmount) {
+        List<? extends Entity> list = this.getEntities((EntityType<? extends Entity>)pType, pPos, pExpansionAmount);
         if (list.isEmpty()) {
-            BlockPos blockpos = this.absolutePos(p_177181_);
-            throw new GameTestAssertPosException("Expected " + p_177180_.toShortString(), blockpos, p_177181_, this.testInfo.getTick());
+            BlockPos blockpos = this.absolutePos(pPos);
+            throw new GameTestAssertPosException("Expected " + pType.toShortString(), blockpos, pPos, this.testInfo.getTick());
         }
     }
 
-    public <T extends Entity> List<T> getEntities(EntityType<T> p_238400_, BlockPos p_238401_, double p_238402_) {
-        BlockPos blockpos = this.absolutePos(p_238401_);
-        return this.getLevel().getEntities(p_238400_, new AABB(blockpos).inflate(p_238402_), Entity::isAlive);
+    public <T extends Entity> List<T> getEntities(EntityType<T> pEntityType, BlockPos pPos, double pRadius) {
+        BlockPos blockpos = this.absolutePos(pPos);
+        return this.getLevel().getEntities(pEntityType, new AABB(blockpos).inflate(pRadius), Entity::isAlive);
     }
 
-    public <T extends Entity> List<T> getEntities(EntityType<T> p_330219_) {
-        return this.getLevel().getEntities(p_330219_, this.getBounds(), Entity::isAlive);
+    public <T extends Entity> List<T> getEntities(EntityType<T> pEntityType) {
+        return this.getLevel().getEntities(pEntityType, this.getBounds(), Entity::isAlive);
     }
 
-    public void assertEntityInstancePresent(Entity p_177133_, int p_177134_, int p_177135_, int p_177136_) {
-        this.assertEntityInstancePresent(p_177133_, new BlockPos(p_177134_, p_177135_, p_177136_));
+    public void assertEntityInstancePresent(Entity pEntity, int pX, int pY, int pZ) {
+        this.assertEntityInstancePresent(pEntity, new BlockPos(pX, pY, pZ));
     }
 
-    public void assertEntityInstancePresent(Entity p_177141_, BlockPos p_177142_) {
-        BlockPos blockpos = this.absolutePos(p_177142_);
-        List<? extends Entity> list = this.getLevel().getEntities(p_177141_.getType(), new AABB(blockpos), Entity::isAlive);
+    public void assertEntityInstancePresent(Entity pEntity, BlockPos pPos) {
+        BlockPos blockpos = this.absolutePos(pPos);
+        List<? extends Entity> list = this.getLevel().getEntities(pEntity.getType(), new AABB(blockpos), Entity::isAlive);
         list.stream()
-            .filter(p_177139_ -> p_177139_ == p_177141_)
+            .filter(p_177139_ -> p_177139_ == pEntity)
             .findFirst()
-            .orElseThrow(() -> new GameTestAssertPosException("Expected " + p_177141_.getType().toShortString(), blockpos, p_177142_, this.testInfo.getTick()));
+            .orElseThrow(() -> new GameTestAssertPosException("Expected " + pEntity.getType().toShortString(), blockpos, pPos, this.testInfo.getTick()));
     }
 
-    public void assertItemEntityCountIs(Item p_177199_, BlockPos p_177200_, double p_177201_, int p_177202_) {
-        BlockPos blockpos = this.absolutePos(p_177200_);
-        List<ItemEntity> list = this.getLevel().getEntities(EntityType.ITEM, new AABB(blockpos).inflate(p_177201_), Entity::isAlive);
+    public void assertItemEntityCountIs(Item pItem, BlockPos pPos, double pExpansionAmount, int pCount) {
+        BlockPos blockpos = this.absolutePos(pPos);
+        List<ItemEntity> list = this.getLevel().getEntities(EntityType.ITEM, new AABB(blockpos).inflate(pExpansionAmount), Entity::isAlive);
         int i = 0;
 
         for (ItemEntity itementity : list) {
             ItemStack itemstack = itementity.getItem();
-            if (itemstack.is(p_177199_)) {
+            if (itemstack.is(pItem)) {
                 i += itemstack.getCount();
             }
         }
 
-        if (i != p_177202_) {
+        if (i != pCount) {
             throw new GameTestAssertPosException(
-                "Expected " + p_177202_ + " " + p_177199_.getName().getString() + " items to exist (found " + i + ")",
+                "Expected " + pCount + " " + pItem.getName().getString() + " items to exist (found " + i + ")",
                 blockpos,
-                p_177200_,
+                pPos,
                 this.testInfo.getTick()
             );
         }
     }
 
-    public void assertItemEntityPresent(Item p_177195_, BlockPos p_177196_, double p_177197_) {
-        BlockPos blockpos = this.absolutePos(p_177196_);
+    public void assertItemEntityPresent(Item pItem, BlockPos pPos, double pExpansionAmount) {
+        BlockPos blockpos = this.absolutePos(pPos);
 
-        for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, new AABB(blockpos).inflate(p_177197_), Entity::isAlive)) {
+        for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, new AABB(blockpos).inflate(pExpansionAmount), Entity::isAlive)) {
             ItemEntity itementity = (ItemEntity)entity;
-            if (itementity.getItem().getItem().equals(p_177195_)) {
+            if (itementity.getItem().getItem().equals(pItem)) {
                 return;
             }
         }
 
-        throw new GameTestAssertPosException("Expected " + p_177195_.getName().getString() + " item", blockpos, p_177196_, this.testInfo.getTick());
+        throw new GameTestAssertPosException("Expected " + pItem.getName().getString() + " item", blockpos, pPos, this.testInfo.getTick());
     }
 
-    public void assertItemEntityNotPresent(Item p_236779_, BlockPos p_236780_, double p_236781_) {
-        BlockPos blockpos = this.absolutePos(p_236780_);
+    public void assertItemEntityNotPresent(Item pItem, BlockPos pPos, double pRadius) {
+        BlockPos blockpos = this.absolutePos(pPos);
 
-        for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, new AABB(blockpos).inflate(p_236781_), Entity::isAlive)) {
+        for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, new AABB(blockpos).inflate(pRadius), Entity::isAlive)) {
             ItemEntity itementity = (ItemEntity)entity;
-            if (itementity.getItem().getItem().equals(p_236779_)) {
+            if (itementity.getItem().getItem().equals(pItem)) {
                 throw new GameTestAssertPosException(
-                    "Did not expect " + p_236779_.getName().getString() + " item", blockpos, p_236780_, this.testInfo.getTick()
+                    "Did not expect " + pItem.getName().getString() + " item", blockpos, pPos, this.testInfo.getTick()
                 );
             }
         }
     }
 
-    public void assertItemEntityPresent(Item p_310630_) {
+    public void assertItemEntityPresent(Item pItem) {
         for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, this.getBounds(), Entity::isAlive)) {
             ItemEntity itementity = (ItemEntity)entity;
-            if (itementity.getItem().getItem().equals(p_310630_)) {
+            if (itementity.getItem().getItem().equals(pItem)) {
                 return;
             }
         }
 
-        throw new GameTestAssertException("Expected " + p_310630_.getName().getString() + " item");
+        throw new GameTestAssertException("Expected " + pItem.getName().getString() + " item");
     }
 
-    public void assertItemEntityNotPresent(Item p_312600_) {
+    public void assertItemEntityNotPresent(Item pItem) {
         for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, this.getBounds(), Entity::isAlive)) {
             ItemEntity itementity = (ItemEntity)entity;
-            if (itementity.getItem().getItem().equals(p_312600_)) {
-                throw new GameTestAssertException("Did not expect " + p_312600_.getName().getString() + " item");
+            if (itementity.getItem().getItem().equals(pItem)) {
+                throw new GameTestAssertException("Did not expect " + pItem.getName().getString() + " item");
             }
         }
     }
 
-    public void assertEntityNotPresent(EntityType<?> p_177310_) {
-        List<? extends Entity> list = this.getLevel().getEntities(p_177310_, this.getBounds(), Entity::isAlive);
+    public void assertEntityNotPresent(EntityType<?> pType) {
+        List<? extends Entity> list = this.getLevel().getEntities(pType, this.getBounds(), Entity::isAlive);
         if (!list.isEmpty()) {
-            throw new GameTestAssertException("Did not expect " + p_177310_.toShortString() + " to exist");
+            throw new GameTestAssertException("Did not expect " + pType.toShortString() + " to exist");
         }
     }
 
-    public void assertEntityNotPresent(EntityType<?> p_177398_, int p_177399_, int p_177400_, int p_177401_) {
-        this.assertEntityNotPresent(p_177398_, new BlockPos(p_177399_, p_177400_, p_177401_));
+    public void assertEntityNotPresent(EntityType<?> pType, int pX, int pY, int pZ) {
+        this.assertEntityNotPresent(pType, new BlockPos(pX, pY, pZ));
     }
 
-    public void assertEntityNotPresent(EntityType<?> p_177403_, BlockPos p_177404_) {
-        BlockPos blockpos = this.absolutePos(p_177404_);
-        List<? extends Entity> list = this.getLevel().getEntities(p_177403_, new AABB(blockpos), Entity::isAlive);
+    public void assertEntityNotPresent(EntityType<?> pType, BlockPos pPos) {
+        BlockPos blockpos = this.absolutePos(pPos);
+        List<? extends Entity> list = this.getLevel().getEntities(pType, new AABB(blockpos), Entity::isAlive);
         if (!list.isEmpty()) {
-            throw new GameTestAssertPosException("Did not expect " + p_177403_.toShortString(), blockpos, p_177404_, this.testInfo.getTick());
+            throw new GameTestAssertPosException("Did not expect " + pType.toShortString(), blockpos, pPos, this.testInfo.getTick());
         }
     }
 
-    public void assertEntityNotPresent(EntityType<?> p_328558_, AABB p_361757_) {
-        AABB aabb = this.absoluteAABB(p_361757_);
-        List<? extends Entity> list = this.getLevel().getEntities(p_328558_, aabb, Entity::isAlive);
+    public void assertEntityNotPresent(EntityType<?> pType, AABB pBox) {
+        AABB aabb = this.absoluteAABB(pBox);
+        List<? extends Entity> list = this.getLevel().getEntities(pType, aabb, Entity::isAlive);
         if (!list.isEmpty()) {
             throw new GameTestAssertPosException(
-                "Did not expect " + p_328558_.toShortString(),
+                "Did not expect " + pType.toShortString(),
                 BlockPos.containing(aabb.getCenter()),
-                BlockPos.containing(p_361757_.getCenter()),
+                BlockPos.containing(pBox.getCenter()),
                 this.testInfo.getTick()
             );
         }
     }
 
-    public void assertEntityTouching(EntityType<?> p_177159_, double p_177160_, double p_177161_, double p_177162_) {
-        Vec3 vec3 = new Vec3(p_177160_, p_177161_, p_177162_);
+    public void assertEntityTouching(EntityType<?> pType, double pX, double pY, double pZ) {
+        Vec3 vec3 = new Vec3(pX, pY, pZ);
         Vec3 vec31 = this.absoluteVec(vec3);
         Predicate<? super Entity> predicate = p_177346_ -> p_177346_.getBoundingBox().intersects(vec31, vec31);
-        List<? extends Entity> list = this.getLevel().getEntities(p_177159_, this.getBounds(), predicate);
+        List<? extends Entity> list = this.getLevel().getEntities(pType, this.getBounds(), predicate);
         if (list.isEmpty()) {
-            throw new GameTestAssertException("Expected " + p_177159_.toShortString() + " to touch " + vec31 + " (relative " + vec3 + ")");
+            throw new GameTestAssertException("Expected " + pType.toShortString() + " to touch " + vec31 + " (relative " + vec3 + ")");
         }
     }
 
-    public void assertEntityNotTouching(EntityType<?> p_177312_, double p_177313_, double p_177314_, double p_177315_) {
-        Vec3 vec3 = new Vec3(p_177313_, p_177314_, p_177315_);
+    public void assertEntityNotTouching(EntityType<?> pType, double pX, double pY, double pZ) {
+        Vec3 vec3 = new Vec3(pX, pY, pZ);
         Vec3 vec31 = this.absoluteVec(vec3);
         Predicate<? super Entity> predicate = p_177231_ -> !p_177231_.getBoundingBox().intersects(vec31, vec31);
-        List<? extends Entity> list = this.getLevel().getEntities(p_177312_, this.getBounds(), predicate);
+        List<? extends Entity> list = this.getLevel().getEntities(pType, this.getBounds(), predicate);
         if (list.isEmpty()) {
-            throw new GameTestAssertException("Did not expect " + p_177312_.toShortString() + " to touch " + vec31 + " (relative " + vec3 + ")");
+            throw new GameTestAssertException("Did not expect " + pType.toShortString() + " to touch " + vec31 + " (relative " + vec3 + ")");
         }
     }
 
-    public <E extends Entity, T> void assertEntityData(BlockPos p_362770_, EntityType<E> p_363965_, Predicate<E> p_367551_) {
-        BlockPos blockpos = this.absolutePos(p_362770_);
-        List<E> list = this.getLevel().getEntities(p_363965_, new AABB(blockpos), Entity::isAlive);
+    public <E extends Entity, T> void assertEntityData(BlockPos pPos, EntityType<E> pType, Predicate<E> pPredicate) {
+        BlockPos blockpos = this.absolutePos(pPos);
+        List<E> list = this.getLevel().getEntities(pType, new AABB(blockpos), Entity::isAlive);
         if (list.isEmpty()) {
-            throw new GameTestAssertPosException("Expected " + p_363965_.toShortString(), blockpos, p_362770_, this.testInfo.getTick());
+            throw new GameTestAssertPosException("Expected " + pType.toShortString(), blockpos, pPos, this.testInfo.getTick());
         } else {
             for (E e : list) {
-                if (!p_367551_.test(e)) {
+                if (!pPredicate.test(e)) {
                     throw new GameTestAssertException("Test failed for entity " + e);
                 }
             }
         }
     }
 
-    public <E extends Entity, T> void assertEntityData(BlockPos p_177238_, EntityType<E> p_177239_, Function<? super E, T> p_177240_, @Nullable T p_177241_) {
-        BlockPos blockpos = this.absolutePos(p_177238_);
-        List<E> list = this.getLevel().getEntities(p_177239_, new AABB(blockpos), Entity::isAlive);
+    public <E extends Entity, T> void assertEntityData(BlockPos pPos, EntityType<E> pType, Function<? super E, T> pEntityDataGetter, @Nullable T pTestEntityData) {
+        BlockPos blockpos = this.absolutePos(pPos);
+        List<E> list = this.getLevel().getEntities(pType, new AABB(blockpos), Entity::isAlive);
         if (list.isEmpty()) {
-            throw new GameTestAssertPosException("Expected " + p_177239_.toShortString(), blockpos, p_177238_, this.testInfo.getTick());
+            throw new GameTestAssertPosException("Expected " + pType.toShortString(), blockpos, pPos, this.testInfo.getTick());
         } else {
             for (E e : list) {
-                T t = p_177240_.apply(e);
-                if (!Objects.equals(t, p_177241_)) {
-                    throw new GameTestAssertException("Expected entity data to be: " + p_177241_ + ", but was: " + t);
+                T t = pEntityDataGetter.apply(e);
+                if (!Objects.equals(t, pTestEntityData)) {
+                    throw new GameTestAssertException("Expected entity data to be: " + pTestEntityData + ", but was: " + t);
                 }
             }
         }
     }
 
-    public <E extends LivingEntity> void assertEntityIsHolding(BlockPos p_263501_, EntityType<E> p_263510_, Item p_263517_) {
-        BlockPos blockpos = this.absolutePos(p_263501_);
-        List<E> list = this.getLevel().getEntities(p_263510_, new AABB(blockpos), Entity::isAlive);
+    public <E extends LivingEntity> void assertEntityIsHolding(BlockPos pPos, EntityType<E> pEntityType, Item pItem) {
+        BlockPos blockpos = this.absolutePos(pPos);
+        List<E> list = this.getLevel().getEntities(pEntityType, new AABB(blockpos), Entity::isAlive);
         if (list.isEmpty()) {
-            throw new GameTestAssertPosException("Expected entity of type: " + p_263510_, blockpos, p_263501_, this.getTick());
+            throw new GameTestAssertPosException("Expected entity of type: " + pEntityType, blockpos, pPos, this.getTick());
         } else {
             for (E e : list) {
-                if (e.isHolding(p_263517_)) {
+                if (e.isHolding(pItem)) {
                     return;
                 }
             }
 
-            throw new GameTestAssertPosException("Entity should be holding: " + p_263517_, blockpos, p_263501_, this.getTick());
+            throw new GameTestAssertPosException("Entity should be holding: " + pItem, blockpos, pPos, this.getTick());
         }
     }
 
-    public <E extends Entity & InventoryCarrier> void assertEntityInventoryContains(BlockPos p_263495_, EntityType<E> p_263521_, Item p_263502_) {
-        BlockPos blockpos = this.absolutePos(p_263495_);
-        List<E> list = this.getLevel().getEntities(p_263521_, new AABB(blockpos), p_263479_ -> p_263479_.isAlive());
+    public <E extends Entity & InventoryCarrier> void assertEntityInventoryContains(BlockPos pPos, EntityType<E> pEntityType, Item pItem) {
+        BlockPos blockpos = this.absolutePos(pPos);
+        List<E> list = this.getLevel().getEntities(pEntityType, new AABB(blockpos), p_263479_ -> p_263479_.isAlive());
         if (list.isEmpty()) {
-            throw new GameTestAssertPosException("Expected " + p_263521_.toShortString() + " to exist", blockpos, p_263495_, this.getTick());
+            throw new GameTestAssertPosException("Expected " + pEntityType.toShortString() + " to exist", blockpos, pPos, this.getTick());
         } else {
             for (E e : list) {
-                if (e.getInventory().hasAnyMatching(p_263481_ -> p_263481_.is(p_263502_))) {
+                if (e.getInventory().hasAnyMatching(p_263481_ -> p_263481_.is(pItem))) {
                     return;
                 }
             }
 
-            throw new GameTestAssertPosException("Entity inventory should contain: " + p_263502_, blockpos, p_263495_, this.getTick());
+            throw new GameTestAssertPosException("Entity inventory should contain: " + pItem, blockpos, pPos, this.getTick());
         }
     }
 
-    public void assertContainerEmpty(BlockPos p_177441_) {
-        BlockPos blockpos = this.absolutePos(p_177441_);
+    public void assertContainerEmpty(BlockPos pPos) {
+        BlockPos blockpos = this.absolutePos(pPos);
         BlockEntity blockentity = this.getLevel().getBlockEntity(blockpos);
         if (blockentity instanceof BaseContainerBlockEntity && !((BaseContainerBlockEntity)blockentity).isEmpty()) {
             throw new GameTestAssertException("Container should be empty");
         }
     }
 
-    public void assertContainerContains(BlockPos p_177243_, Item p_177244_) {
-        BlockPos blockpos = this.absolutePos(p_177243_);
+    public void assertContainerContains(BlockPos pPos, Item pItem) {
+        BlockPos blockpos = this.absolutePos(pPos);
         BlockEntity blockentity = this.getLevel().getBlockEntity(blockpos);
         if (!(blockentity instanceof BaseContainerBlockEntity)) {
             ResourceLocation resourcelocation = blockentity != null ? BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockentity.getType()) : null;
-            throw new GameTestAssertException("Expected a container at " + p_177243_ + ", found " + resourcelocation);
-        } else if (((BaseContainerBlockEntity)blockentity).countItem(p_177244_) != 1) {
-            throw new GameTestAssertException("Container should contain: " + p_177244_);
+            throw new GameTestAssertException("Expected a container at " + pPos + ", found " + resourcelocation);
+        } else if (((BaseContainerBlockEntity)blockentity).countItem(pItem) != 1) {
+            throw new GameTestAssertException("Container should contain: " + pItem);
         }
     }
 
-    public void assertSameBlockStates(BoundingBox p_177225_, BlockPos p_177226_) {
-        BlockPos.betweenClosedStream(p_177225_)
+    public void assertSameBlockStates(BoundingBox pBoundingBox, BlockPos pPos) {
+        BlockPos.betweenClosedStream(pBoundingBox)
             .forEach(
                 p_177267_ -> {
-                    BlockPos blockpos = p_177226_.offset(
-                        p_177267_.getX() - p_177225_.minX(),
-                        p_177267_.getY() - p_177225_.minY(),
-                        p_177267_.getZ() - p_177225_.minZ()
+                    BlockPos blockpos = pPos.offset(
+                        p_177267_.getX() - pBoundingBox.minX(),
+                        p_177267_.getY() - pBoundingBox.minY(),
+                        p_177267_.getZ() - pBoundingBox.minZ()
                     );
                     this.assertSameBlockState(p_177267_, blockpos);
                 }
             );
     }
 
-    public void assertSameBlockState(BlockPos p_177269_, BlockPos p_177270_) {
-        BlockState blockstate = this.getBlockState(p_177269_);
-        BlockState blockstate1 = this.getBlockState(p_177270_);
+    public void assertSameBlockState(BlockPos pTestPos, BlockPos pComparisonPos) {
+        BlockState blockstate = this.getBlockState(pTestPos);
+        BlockState blockstate1 = this.getBlockState(pComparisonPos);
         if (blockstate != blockstate1) {
-            this.fail("Incorrect state. Expected " + blockstate1 + ", got " + blockstate, p_177269_);
+            this.fail("Incorrect state. Expected " + blockstate1 + ", got " + blockstate, pTestPos);
         }
     }
 
-    public void assertAtTickTimeContainerContains(long p_177124_, BlockPos p_177125_, Item p_177126_) {
-        this.runAtTickTime(p_177124_, () -> this.assertContainerContains(p_177125_, p_177126_));
+    public void assertAtTickTimeContainerContains(long pTickTime, BlockPos pPos, Item pItem) {
+        this.runAtTickTime(pTickTime, () -> this.assertContainerContains(pPos, pItem));
     }
 
-    public void assertAtTickTimeContainerEmpty(long p_177121_, BlockPos p_177122_) {
-        this.runAtTickTime(p_177121_, () -> this.assertContainerEmpty(p_177122_));
+    public void assertAtTickTimeContainerEmpty(long pTickTime, BlockPos pPos) {
+        this.runAtTickTime(pTickTime, () -> this.assertContainerEmpty(pPos));
     }
 
-    public <E extends Entity, T> void succeedWhenEntityData(BlockPos p_177350_, EntityType<E> p_177351_, Function<E, T> p_177352_, T p_177353_) {
-        this.succeedWhen(() -> this.assertEntityData(p_177350_, p_177351_, p_177352_, p_177353_));
+    public <E extends Entity, T> void succeedWhenEntityData(BlockPos pPos, EntityType<E> pType, Function<E, T> pEntityDataGetter, T pTestEntityData) {
+        this.succeedWhen(() -> this.assertEntityData(pPos, pType, pEntityDataGetter, pTestEntityData));
     }
 
-    public void assertEntityPosition(Entity p_344935_, AABB p_345349_, String p_345231_) {
-        if (!p_345349_.contains(this.relativeVec(p_344935_.position()))) {
-            this.fail(p_345231_);
+    public void assertEntityPosition(Entity pEntity, AABB pBox, String pExceptionMessage) {
+        if (!pBox.contains(this.relativeVec(pEntity.position()))) {
+            this.fail(pExceptionMessage);
         }
     }
 
-    public <E extends Entity> void assertEntityProperty(E p_177153_, Predicate<E> p_177154_, String p_177155_) {
-        if (!p_177154_.test(p_177153_)) {
-            throw new GameTestAssertException("Entity " + p_177153_ + " failed " + p_177155_ + " test");
+    public <E extends Entity> void assertEntityProperty(E pEntity, Predicate<E> pPredicate, String pName) {
+        if (!pPredicate.test(pEntity)) {
+            throw new GameTestAssertException("Entity " + pEntity + " failed " + pName + " test");
         }
     }
 
-    public <E extends Entity, T> void assertEntityProperty(E p_177148_, Function<E, T> p_177149_, String p_177150_, T p_177151_) {
-        T t = p_177149_.apply(p_177148_);
-        if (!t.equals(p_177151_)) {
-            throw new GameTestAssertException("Entity " + p_177148_ + " value " + p_177150_ + "=" + t + " is not equal to expected " + p_177151_);
+    public <E extends Entity, T> void assertEntityProperty(E pEntity, Function<E, T> pEntityPropertyGetter, String pValueName, T pTestEntityProperty) {
+        T t = pEntityPropertyGetter.apply(pEntity);
+        if (!t.equals(pTestEntityProperty)) {
+            throw new GameTestAssertException("Entity " + pEntity + " value " + pValueName + "=" + t + " is not equal to expected " + pTestEntityProperty);
         }
     }
 
-    public void assertLivingEntityHasMobEffect(LivingEntity p_300128_, Holder<MobEffect> p_331754_, int p_298143_) {
-        MobEffectInstance mobeffectinstance = p_300128_.getEffect(p_331754_);
-        if (mobeffectinstance == null || mobeffectinstance.getAmplifier() != p_298143_) {
-            int i = p_298143_ + 1;
-            throw new GameTestAssertException("Entity " + p_300128_ + " failed has " + p_331754_.value().getDescriptionId() + " x " + i + " test");
+    public void assertLivingEntityHasMobEffect(LivingEntity pEntity, Holder<MobEffect> pEffect, int pAmplifier) {
+        MobEffectInstance mobeffectinstance = pEntity.getEffect(pEffect);
+        if (mobeffectinstance == null || mobeffectinstance.getAmplifier() != pAmplifier) {
+            int i = pAmplifier + 1;
+            throw new GameTestAssertException("Entity " + pEntity + " failed has " + pEffect.value().getDescriptionId() + " x " + i + " test");
         }
     }
 
-    public void succeedWhenEntityPresent(EntityType<?> p_177414_, int p_177415_, int p_177416_, int p_177417_) {
-        this.succeedWhenEntityPresent(p_177414_, new BlockPos(p_177415_, p_177416_, p_177417_));
+    public void succeedWhenEntityPresent(EntityType<?> pType, int pX, int pY, int pZ) {
+        this.succeedWhenEntityPresent(pType, new BlockPos(pX, pY, pZ));
     }
 
-    public void succeedWhenEntityPresent(EntityType<?> p_177419_, BlockPos p_177420_) {
-        this.succeedWhen(() -> this.assertEntityPresent(p_177419_, p_177420_));
+    public void succeedWhenEntityPresent(EntityType<?> pType, BlockPos pPos) {
+        this.succeedWhen(() -> this.assertEntityPresent(pType, pPos));
     }
 
-    public void succeedWhenEntityNotPresent(EntityType<?> p_177427_, int p_177428_, int p_177429_, int p_177430_) {
-        this.succeedWhenEntityNotPresent(p_177427_, new BlockPos(p_177428_, p_177429_, p_177430_));
+    public void succeedWhenEntityNotPresent(EntityType<?> pType, int pX, int pY, int pZ) {
+        this.succeedWhenEntityNotPresent(pType, new BlockPos(pX, pY, pZ));
     }
 
-    public void succeedWhenEntityNotPresent(EntityType<?> p_177432_, BlockPos p_177433_) {
-        this.succeedWhen(() -> this.assertEntityNotPresent(p_177432_, p_177433_));
+    public void succeedWhenEntityNotPresent(EntityType<?> pType, BlockPos pPos) {
+        this.succeedWhen(() -> this.assertEntityNotPresent(pType, pPos));
     }
 
     public void succeed() {
@@ -814,37 +814,37 @@ public class GameTestHelper {
         }
     }
 
-    public void succeedIf(Runnable p_177280_) {
+    public void succeedIf(Runnable pCriterion) {
         this.ensureSingleFinalCheck();
-        this.testInfo.createSequence().thenWaitUntil(0L, p_177280_).thenSucceed();
+        this.testInfo.createSequence().thenWaitUntil(0L, pCriterion).thenSucceed();
     }
 
-    public void succeedWhen(Runnable p_177362_) {
+    public void succeedWhen(Runnable pCriterion) {
         this.ensureSingleFinalCheck();
-        this.testInfo.createSequence().thenWaitUntil(p_177362_).thenSucceed();
+        this.testInfo.createSequence().thenWaitUntil(pCriterion).thenSucceed();
     }
 
-    public void succeedOnTickWhen(int p_177118_, Runnable p_177119_) {
+    public void succeedOnTickWhen(int pTick, Runnable pCriterion) {
         this.ensureSingleFinalCheck();
-        this.testInfo.createSequence().thenWaitUntil((long)p_177118_, p_177119_).thenSucceed();
+        this.testInfo.createSequence().thenWaitUntil((long)pTick, pCriterion).thenSucceed();
     }
 
-    public void runAtTickTime(long p_177128_, Runnable p_177129_) {
-        this.testInfo.setRunAtTickTime(p_177128_, p_177129_);
+    public void runAtTickTime(long pTickTime, Runnable pTask) {
+        this.testInfo.setRunAtTickTime(pTickTime, pTask);
     }
 
-    public void runAfterDelay(long p_177307_, Runnable p_177308_) {
-        this.runAtTickTime(this.testInfo.getTick() + p_177307_, p_177308_);
+    public void runAfterDelay(long pDelay, Runnable pTask) {
+        this.runAtTickTime(this.testInfo.getTick() + pDelay, pTask);
     }
 
-    public void randomTick(BlockPos p_177447_) {
-        BlockPos blockpos = this.absolutePos(p_177447_);
+    public void randomTick(BlockPos pPos) {
+        BlockPos blockpos = this.absolutePos(pPos);
         ServerLevel serverlevel = this.getLevel();
         serverlevel.getBlockState(blockpos).randomTick(serverlevel, blockpos, serverlevel.random);
     }
 
-    public void tickPrecipitation(BlockPos p_311105_) {
-        BlockPos blockpos = this.absolutePos(p_311105_);
+    public void tickPrecipitation(BlockPos pPos) {
+        BlockPos blockpos = this.absolutePos(pPos);
         ServerLevel serverlevel = this.getLevel();
         serverlevel.tickPrecipitation(blockpos);
     }
@@ -862,90 +862,90 @@ public class GameTestHelper {
         }
     }
 
-    public int getHeight(Heightmap.Types p_236775_, int p_236776_, int p_236777_) {
-        BlockPos blockpos = this.absolutePos(new BlockPos(p_236776_, 0, p_236777_));
-        return this.relativePos(this.getLevel().getHeightmapPos(p_236775_, blockpos)).getY();
+    public int getHeight(Heightmap.Types pHeightmapType, int pX, int pZ) {
+        BlockPos blockpos = this.absolutePos(new BlockPos(pX, 0, pZ));
+        return this.relativePos(this.getLevel().getHeightmapPos(pHeightmapType, blockpos)).getY();
     }
 
-    public void fail(String p_177290_, BlockPos p_177291_) {
-        throw new GameTestAssertPosException(p_177290_, this.absolutePos(p_177291_), p_177291_, this.getTick());
+    public void fail(String pExceptionMessage, BlockPos pPos) {
+        throw new GameTestAssertPosException(pExceptionMessage, this.absolutePos(pPos), pPos, this.getTick());
     }
 
-    public void fail(String p_177287_, Entity p_177288_) {
-        throw new GameTestAssertPosException(p_177287_, p_177288_.blockPosition(), this.relativePos(p_177288_.blockPosition()), this.getTick());
+    public void fail(String pExceptionMessage, Entity pEntity) {
+        throw new GameTestAssertPosException(pExceptionMessage, pEntity.blockPosition(), this.relativePos(pEntity.blockPosition()), this.getTick());
     }
 
-    public void fail(String p_177285_) {
-        throw new GameTestAssertException(p_177285_);
+    public void fail(String pExceptionMessage) {
+        throw new GameTestAssertException(pExceptionMessage);
     }
 
-    public void failIf(Runnable p_177393_) {
-        this.testInfo.createSequence().thenWaitUntil(p_177393_).thenFail(() -> new GameTestAssertException("Fail conditions met"));
+    public void failIf(Runnable pCriterion) {
+        this.testInfo.createSequence().thenWaitUntil(pCriterion).thenFail(() -> new GameTestAssertException("Fail conditions met"));
     }
 
-    public void failIfEver(Runnable p_177411_) {
+    public void failIfEver(Runnable pCriterion) {
         LongStream.range(this.testInfo.getTick(), (long)this.testInfo.getTimeoutTicks())
-            .forEach(p_177365_ -> this.testInfo.setRunAtTickTime(p_177365_, p_177411_::run));
+            .forEach(p_177365_ -> this.testInfo.setRunAtTickTime(p_177365_, pCriterion::run));
     }
 
     public GameTestSequence startSequence() {
         return this.testInfo.createSequence();
     }
 
-    public BlockPos absolutePos(BlockPos p_177450_) {
+    public BlockPos absolutePos(BlockPos pPos) {
         BlockPos blockpos = this.testInfo.getTestOrigin();
-        BlockPos blockpos1 = blockpos.offset(p_177450_);
+        BlockPos blockpos1 = blockpos.offset(pPos);
         return StructureTemplate.transform(blockpos1, Mirror.NONE, this.testInfo.getRotation(), blockpos);
     }
 
-    public BlockPos relativePos(BlockPos p_177453_) {
+    public BlockPos relativePos(BlockPos pPos) {
         BlockPos blockpos = this.testInfo.getTestOrigin();
         Rotation rotation = this.testInfo.getRotation().getRotated(Rotation.CLOCKWISE_180);
-        BlockPos blockpos1 = StructureTemplate.transform(p_177453_, Mirror.NONE, rotation, blockpos);
+        BlockPos blockpos1 = StructureTemplate.transform(pPos, Mirror.NONE, rotation, blockpos);
         return blockpos1.subtract(blockpos);
     }
 
-    public AABB absoluteAABB(AABB p_369302_) {
-        Vec3 vec3 = this.absoluteVec(p_369302_.getMinPosition());
-        Vec3 vec31 = this.absoluteVec(p_369302_.getMaxPosition());
+    public AABB absoluteAABB(AABB pAabb) {
+        Vec3 vec3 = this.absoluteVec(pAabb.getMinPosition());
+        Vec3 vec31 = this.absoluteVec(pAabb.getMaxPosition());
         return new AABB(vec3, vec31);
     }
 
-    public AABB relativeAABB(AABB p_369720_) {
-        Vec3 vec3 = this.relativeVec(p_369720_.getMinPosition());
-        Vec3 vec31 = this.relativeVec(p_369720_.getMaxPosition());
+    public AABB relativeAABB(AABB pAabb) {
+        Vec3 vec3 = this.relativeVec(pAabb.getMinPosition());
+        Vec3 vec31 = this.relativeVec(pAabb.getMaxPosition());
         return new AABB(vec3, vec31);
     }
 
-    public Vec3 absoluteVec(Vec3 p_177228_) {
+    public Vec3 absoluteVec(Vec3 pRelativeVec3) {
         Vec3 vec3 = Vec3.atLowerCornerOf(this.testInfo.getTestOrigin());
-        return StructureTemplate.transform(vec3.add(p_177228_), Mirror.NONE, this.testInfo.getRotation(), this.testInfo.getTestOrigin());
+        return StructureTemplate.transform(vec3.add(pRelativeVec3), Mirror.NONE, this.testInfo.getRotation(), this.testInfo.getTestOrigin());
     }
 
-    public Vec3 relativeVec(Vec3 p_251543_) {
+    public Vec3 relativeVec(Vec3 pAbsoluteVec3) {
         Vec3 vec3 = Vec3.atLowerCornerOf(this.testInfo.getTestOrigin());
-        return StructureTemplate.transform(p_251543_.subtract(vec3), Mirror.NONE, this.testInfo.getRotation(), this.testInfo.getTestOrigin());
+        return StructureTemplate.transform(pAbsoluteVec3.subtract(vec3), Mirror.NONE, this.testInfo.getRotation(), this.testInfo.getTestOrigin());
     }
 
     public Rotation getTestRotation() {
         return this.testInfo.getRotation();
     }
 
-    public void assertTrue(boolean p_249380_, String p_248720_) {
-        if (!p_249380_) {
-            throw new GameTestAssertException(p_248720_);
+    public void assertTrue(boolean pCondition, String pFailureMessage) {
+        if (!pCondition) {
+            throw new GameTestAssertException(pFailureMessage);
         }
     }
 
-    public <N> void assertValueEqual(N p_328559_, N p_332683_, String p_336245_) {
-        if (!p_328559_.equals(p_332683_)) {
-            throw new GameTestAssertException("Expected " + p_336245_ + " to be " + p_332683_ + ", but was " + p_328559_);
+    public <N> void assertValueEqual(N pActual, N pExpected, String pValueName) {
+        if (!pActual.equals(pExpected)) {
+            throw new GameTestAssertException("Expected " + pValueName + " to be " + pExpected + ", but was " + pActual);
         }
     }
 
-    public void assertFalse(boolean p_277974_, String p_277933_) {
-        if (p_277974_) {
-            throw new GameTestAssertException(p_277933_);
+    public void assertFalse(boolean pCondition, String pFailureMessage) {
+        if (pCondition) {
+            throw new GameTestAssertException(pFailureMessage);
         }
     }
 
@@ -969,29 +969,29 @@ public class GameTestHelper {
         }
     }
 
-    public void forEveryBlockInStructure(Consumer<BlockPos> p_177293_) {
+    public void forEveryBlockInStructure(Consumer<BlockPos> pConsumer) {
         AABB aabb = this.getRelativeBounds().contract(1.0, 1.0, 1.0);
-        BlockPos.MutableBlockPos.betweenClosedStream(aabb).forEach(p_177293_);
+        BlockPos.MutableBlockPos.betweenClosedStream(aabb).forEach(pConsumer);
     }
 
-    public void onEachTick(Runnable p_177424_) {
+    public void onEachTick(Runnable pTask) {
         LongStream.range(this.testInfo.getTick(), (long)this.testInfo.getTimeoutTicks())
-            .forEach(p_177283_ -> this.testInfo.setRunAtTickTime(p_177283_, p_177424_::run));
+            .forEach(p_177283_ -> this.testInfo.setRunAtTickTime(p_177283_, pTask::run));
     }
 
-    public void placeAt(Player p_261595_, ItemStack p_262007_, BlockPos p_261973_, Direction p_262008_) {
-        BlockPos blockpos = this.absolutePos(p_261973_.relative(p_262008_));
-        BlockHitResult blockhitresult = new BlockHitResult(Vec3.atCenterOf(blockpos), p_262008_, blockpos, false);
-        UseOnContext useoncontext = new UseOnContext(p_261595_, InteractionHand.MAIN_HAND, blockhitresult);
-        p_262007_.useOn(useoncontext);
+    public void placeAt(Player pPlayer, ItemStack pStack, BlockPos pPos, Direction pDirection) {
+        BlockPos blockpos = this.absolutePos(pPos.relative(pDirection));
+        BlockHitResult blockhitresult = new BlockHitResult(Vec3.atCenterOf(blockpos), pDirection, blockpos, false);
+        UseOnContext useoncontext = new UseOnContext(pPlayer, InteractionHand.MAIN_HAND, blockhitresult);
+        pStack.useOn(useoncontext);
     }
 
-    public void setBiome(ResourceKey<Biome> p_312755_) {
+    public void setBiome(ResourceKey<Biome> pBiome) {
         AABB aabb = this.getBounds();
         BlockPos blockpos = BlockPos.containing(aabb.minX, aabb.minY, aabb.minZ);
         BlockPos blockpos1 = BlockPos.containing(aabb.maxX, aabb.maxY, aabb.maxZ);
         Either<Integer, CommandSyntaxException> either = FillBiomeCommand.fill(
-            this.getLevel(), blockpos, blockpos1, this.getLevel().registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(p_312755_)
+            this.getLevel(), blockpos, blockpos1, this.getLevel().registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(pBiome)
         );
         if (either.right().isPresent()) {
             this.fail("Failed to set biome for test");

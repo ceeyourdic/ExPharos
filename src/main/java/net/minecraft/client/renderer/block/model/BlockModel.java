@@ -50,24 +50,24 @@ public class BlockModel implements UnbakedModel {
     @Nullable
     private final ResourceLocation parentLocation;
 
-    public static BlockModel fromStream(Reader p_111462_) {
-        return GsonHelper.fromJson(GSON, p_111462_, BlockModel.class);
+    public static BlockModel fromStream(Reader pReader) {
+        return GsonHelper.fromJson(GSON, pReader, BlockModel.class);
     }
 
     public BlockModel(
-        @Nullable ResourceLocation p_273263_,
-        List<BlockElement> p_272668_,
-        TextureSlots.Data p_378442_,
-        @Nullable Boolean p_272676_,
-        @Nullable UnbakedModel.GuiLight p_378719_,
-        @Nullable ItemTransforms p_273480_
+        @Nullable ResourceLocation pParentLocation,
+        List<BlockElement> pElements,
+        TextureSlots.Data pTextureSlots,
+        @Nullable Boolean pHasAmbientOcclusion,
+        @Nullable UnbakedModel.GuiLight pGuiLight,
+        @Nullable ItemTransforms pTransforms
     ) {
-        this.elements = p_272668_;
-        this.hasAmbientOcclusion = p_272676_;
-        this.guiLight = p_378719_;
-        this.textureSlots = p_378442_;
-        this.parentLocation = p_273263_;
-        this.transforms = p_273480_;
+        this.elements = pElements;
+        this.hasAmbientOcclusion = pHasAmbientOcclusion;
+        this.guiLight = pGuiLight;
+        this.textureSlots = pTextureSlots;
+        this.parentLocation = pParentLocation;
+        this.transforms = pTransforms;
     }
 
     @Nullable
@@ -129,16 +129,16 @@ public class BlockModel implements UnbakedModel {
 
     @OnlyIn(Dist.CLIENT)
     public static class Deserializer implements JsonDeserializer<BlockModel> {
-        public BlockModel deserialize(JsonElement p_111498_, Type p_111499_, JsonDeserializationContext p_111500_) throws JsonParseException {
-            JsonObject jsonobject = p_111498_.getAsJsonObject();
-            List<BlockElement> list = this.getElements(p_111500_, jsonobject);
+        public BlockModel deserialize(JsonElement pJson, Type pType, JsonDeserializationContext pContext) throws JsonParseException {
+            JsonObject jsonobject = pJson.getAsJsonObject();
+            List<BlockElement> list = this.getElements(pContext, jsonobject);
             String s = this.getParentName(jsonobject);
             TextureSlots.Data textureslots$data = this.getTextureMap(jsonobject);
             Boolean obool = this.getAmbientOcclusion(jsonobject);
             ItemTransforms itemtransforms = null;
             if (jsonobject.has("display")) {
                 JsonObject jsonobject1 = GsonHelper.getAsJsonObject(jsonobject, "display");
-                itemtransforms = p_111500_.deserialize(jsonobject1, ItemTransforms.class);
+                itemtransforms = pContext.deserialize(jsonobject1, ItemTransforms.class);
             }
 
             UnbakedModel.GuiLight unbakedmodel$guilight = null;
@@ -150,32 +150,32 @@ public class BlockModel implements UnbakedModel {
             return new BlockModel(resourcelocation, list, textureslots$data, obool, unbakedmodel$guilight, itemtransforms);
         }
 
-        private TextureSlots.Data getTextureMap(JsonObject p_111510_) {
-            if (p_111510_.has("textures")) {
-                JsonObject jsonobject = GsonHelper.getAsJsonObject(p_111510_, "textures");
+        private TextureSlots.Data getTextureMap(JsonObject pJson) {
+            if (pJson.has("textures")) {
+                JsonObject jsonobject = GsonHelper.getAsJsonObject(pJson, "textures");
                 return TextureSlots.parseTextureMap(jsonobject, TextureAtlas.LOCATION_BLOCKS);
             } else {
                 return TextureSlots.Data.EMPTY;
             }
         }
 
-        private String getParentName(JsonObject p_111512_) {
-            return GsonHelper.getAsString(p_111512_, "parent", "");
+        private String getParentName(JsonObject pJson) {
+            return GsonHelper.getAsString(pJson, "parent", "");
         }
 
         @Nullable
-        protected Boolean getAmbientOcclusion(JsonObject p_273052_) {
-            return p_273052_.has("ambientocclusion") ? GsonHelper.getAsBoolean(p_273052_, "ambientocclusion") : null;
+        protected Boolean getAmbientOcclusion(JsonObject pJson) {
+            return pJson.has("ambientocclusion") ? GsonHelper.getAsBoolean(pJson, "ambientocclusion") : null;
         }
 
-        protected List<BlockElement> getElements(JsonDeserializationContext p_111507_, JsonObject p_111508_) {
-            if (!p_111508_.has("elements")) {
+        protected List<BlockElement> getElements(JsonDeserializationContext pContext, JsonObject pJson) {
+            if (!pJson.has("elements")) {
                 return List.of();
             } else {
                 List<BlockElement> list = new ArrayList<>();
 
-                for (JsonElement jsonelement : GsonHelper.getAsJsonArray(p_111508_, "elements")) {
-                    list.add(p_111507_.deserialize(jsonelement, BlockElement.class));
+                for (JsonElement jsonelement : GsonHelper.getAsJsonArray(pJson, "elements")) {
+                    list.add(pContext.deserialize(jsonelement, BlockElement.class));
                 }
 
                 return list;

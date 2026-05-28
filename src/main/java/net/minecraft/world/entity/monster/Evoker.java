@@ -79,8 +79,8 @@ public class Evoker extends SpellcasterIllager {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_32642_) {
-        super.readAdditionalSaveData(p_32642_);
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
     }
 
     @Override
@@ -89,8 +89,8 @@ public class Evoker extends SpellcasterIllager {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_32646_) {
-        super.addAdditionalSaveData(p_32646_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
     }
 
     @Override
@@ -119,12 +119,12 @@ public class Evoker extends SpellcasterIllager {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_32654_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.EVOKER_HURT;
     }
 
-    void setWololoTarget(@Nullable Sheep p_32635_) {
-        this.wololoTarget = p_32635_;
+    void setWololoTarget(@Nullable Sheep pWololoTarget) {
+        this.wololoTarget = pWololoTarget;
     }
 
     @Nullable
@@ -181,8 +181,8 @@ public class Evoker extends SpellcasterIllager {
             }
         }
 
-        private void createSpellEntity(double p_32673_, double p_32674_, double p_32675_, double p_32676_, float p_32677_, int p_32678_) {
-            BlockPos blockpos = BlockPos.containing(p_32673_, p_32676_, p_32674_);
+        private void createSpellEntity(double pX, double pZ, double pMinY, double pMaxY, float pYRot, int pWarmupDelay) {
+            BlockPos blockpos = BlockPos.containing(pX, pMaxY, pZ);
             boolean flag = false;
             double d0 = 0.0;
 
@@ -203,13 +203,13 @@ public class Evoker extends SpellcasterIllager {
                 }
 
                 blockpos = blockpos.below();
-            } while (blockpos.getY() >= Mth.floor(p_32675_) - 1);
+            } while (blockpos.getY() >= Mth.floor(pMinY) - 1);
 
             if (flag) {
                 Evoker.this.level()
-                    .addFreshEntity(new EvokerFangs(Evoker.this.level(), p_32673_, (double)blockpos.getY() + d0, p_32674_, p_32677_, p_32678_, Evoker.this));
+                    .addFreshEntity(new EvokerFangs(Evoker.this.level(), pX, (double)blockpos.getY() + d0, pZ, pYRot, pWarmupDelay, Evoker.this));
                 Evoker.this.level()
-                    .gameEvent(GameEvent.ENTITY_PLACE, new Vec3(p_32673_, (double)blockpos.getY() + d0, p_32674_), GameEvent.Context.of(Evoker.this));
+                    .gameEvent(GameEvent.ENTITY_PLACE, new Vec3(pX, (double)blockpos.getY() + d0, pZ), GameEvent.Context.of(Evoker.this));
             }
         }
 

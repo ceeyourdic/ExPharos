@@ -46,7 +46,7 @@ public class ElderGuardian extends Guardian {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_32468_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return this.isInWaterOrBubble() ? SoundEvents.ELDER_GUARDIAN_HURT : SoundEvents.ELDER_GUARDIAN_HURT_LAND;
     }
 

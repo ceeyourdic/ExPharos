@@ -13,9 +13,9 @@ public class V3808 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_331576_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_331576_);
-        p_331576_.register(map, "minecraft:horse", p_332056_ -> DSL.optionalFields("SaddleItem", References.ITEM_STACK.in(p_331576_), V100.equipment(p_331576_)));
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
+        pSchema.register(map, "minecraft:horse", p_332056_ -> DSL.optionalFields("SaddleItem", References.ITEM_STACK.in(pSchema), V100.equipment(pSchema)));
         return map;
     }
 }

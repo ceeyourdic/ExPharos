@@ -40,7 +40,7 @@ public class LivingEntityRenderState extends EntityRenderState {
     @Nullable
     public ResolvableProfile wornHeadProfile;
 
-    public boolean hasPose(Pose p_361696_) {
-        return this.pose == p_361696_;
+    public boolean hasPose(Pose pPose) {
+        return this.pose == pPose;
     }
 }

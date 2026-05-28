@@ -21,12 +21,11 @@ import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.shaders.Shaders;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-@OnlyIn(Dist.CLIENT)
 public class EnderDragonRenderer extends EntityRenderer<EnderDragon, EnderDragonRenderState> {
     public static final ResourceLocation CRYSTAL_BEAM_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/end_crystal/end_crystal_beam.png");
     private static final ResourceLocation DRAGON_EXPLODING_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/enderdragon/dragon_exploding.png");
@@ -60,15 +59,28 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon, EnderDragon
             int i = ARGB.color(Mth.floor(f2 * 255.0F), -1);
             VertexConsumer vertexconsumer = p_114203_.getBuffer(RenderType.dragonExplosionAlpha(DRAGON_EXPLODING_LOCATION));
             this.model.renderToBuffer(p_114202_, vertexconsumer, p_114204_, OverlayTexture.NO_OVERLAY, i);
-            VertexConsumer vertexconsumer1 = p_114203_.getBuffer(DECAL);
+            RenderType rendertype = RenderType.entityDecal(DRAGON_LOCATION);
+            VertexConsumer vertexconsumer1 = p_114203_.getBuffer(rendertype);
             this.model.renderToBuffer(p_114202_, vertexconsumer1, p_114204_, OverlayTexture.pack(0.0F, p_361915_.hasRedOverlay));
         } else {
-            VertexConsumer vertexconsumer2 = p_114203_.getBuffer(RENDER_TYPE);
+            RenderType rendertype1 = RenderType.entityCutoutNoCull(DRAGON_LOCATION);
+            VertexConsumer vertexconsumer2 = p_114203_.getBuffer(rendertype1);
             this.model.renderToBuffer(p_114202_, vertexconsumer2, p_114204_, OverlayTexture.pack(0.0F, p_361915_.hasRedOverlay));
         }
 
-        VertexConsumer vertexconsumer3 = p_114203_.getBuffer(EYES);
+        RenderType rendertype2 = RenderType.eyes(DRAGON_EYES_LOCATION);
+        VertexConsumer vertexconsumer3 = p_114203_.getBuffer(rendertype2);
+        if (Config.isShaders()) {
+            Shaders.beginSpiderEyes();
+        }
+
+        Config.getRenderGlobal().renderOverlayEyes = true;
         this.model.renderToBuffer(p_114202_, vertexconsumer3, p_114204_, OverlayTexture.NO_OVERLAY);
+        Config.getRenderGlobal().renderOverlayEyes = false;
+        if (Config.isShaders()) {
+            Shaders.endSpiderEyes();
+        }
+
         if (p_361915_.deathTime > 0.0F) {
             float f3 = p_361915_.deathTime / 200.0F;
             p_114202_.pushPose();
@@ -94,9 +106,9 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon, EnderDragon
         super.render(p_361915_, p_114202_, p_114203_, p_114204_);
     }
 
-    private static void renderRays(PoseStack p_345439_, float p_344944_, VertexConsumer p_344181_) {
-        p_345439_.pushPose();
-        float f = Math.min(p_344944_ > 0.8F ? (p_344944_ - 0.8F) / 0.2F : 0.0F, 1.0F);
+    private static void renderRays(PoseStack pPoseStack, float pDragonDeathCompletion, VertexConsumer pBuffer) {
+        pPoseStack.pushPose();
+        float f = Math.min(pDragonDeathCompletion > 0.8F ? (pDragonDeathCompletion - 0.8F) / 0.2F : 0.0F, 1.0F);
         int i = ARGB.colorFromFloat(1.0F - f, 1.0F, 1.0F, 1.0F);
         int j = 16711935;
         RandomSource randomsource = RandomSource.create(432L);
@@ -105,7 +117,7 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon, EnderDragon
         Vector3f vector3f2 = new Vector3f();
         Vector3f vector3f3 = new Vector3f();
         Quaternionf quaternionf = new Quaternionf();
-        int k = Mth.floor((p_344944_ + p_344944_ * p_344944_) / 2.0F * 60.0F);
+        int k = Mth.floor((pDragonDeathCompletion + pDragonDeathCompletion * pDragonDeathCompletion) / 2.0F * 60.0F);
 
         for (int l = 0; l < k; l++) {
             quaternionf.rotationXYZ(
@@ -116,46 +128,47 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon, EnderDragon
                 .rotateXYZ(
                     randomsource.nextFloat() * (float) (Math.PI * 2),
                     randomsource.nextFloat() * (float) (Math.PI * 2),
-                    randomsource.nextFloat() * (float) (Math.PI * 2) + p_344944_ * (float) (Math.PI / 2)
+                    randomsource.nextFloat() * (float) (Math.PI * 2) + pDragonDeathCompletion * (float) (Math.PI / 2)
                 );
-            p_345439_.mulPose(quaternionf);
+            pPoseStack.mulPose(quaternionf);
             float f1 = randomsource.nextFloat() * 20.0F + 5.0F + f * 10.0F;
             float f2 = randomsource.nextFloat() * 2.0F + 1.0F + f * 2.0F;
             vector3f1.set(-HALF_SQRT_3 * f2, f1, -0.5F * f2);
             vector3f2.set(HALF_SQRT_3 * f2, f1, -0.5F * f2);
             vector3f3.set(0.0F, f1, f2);
-            PoseStack.Pose posestack$pose = p_345439_.last();
-            p_344181_.addVertex(posestack$pose, vector3f).setColor(i);
-            p_344181_.addVertex(posestack$pose, vector3f1).setColor(16711935);
-            p_344181_.addVertex(posestack$pose, vector3f2).setColor(16711935);
-            p_344181_.addVertex(posestack$pose, vector3f).setColor(i);
-            p_344181_.addVertex(posestack$pose, vector3f2).setColor(16711935);
-            p_344181_.addVertex(posestack$pose, vector3f3).setColor(16711935);
-            p_344181_.addVertex(posestack$pose, vector3f).setColor(i);
-            p_344181_.addVertex(posestack$pose, vector3f3).setColor(16711935);
-            p_344181_.addVertex(posestack$pose, vector3f1).setColor(16711935);
+            PoseStack.Pose posestack$pose = pPoseStack.last();
+            pBuffer.addVertex(posestack$pose, vector3f).setColor(i);
+            pBuffer.addVertex(posestack$pose, vector3f1).setColor(16711935);
+            pBuffer.addVertex(posestack$pose, vector3f2).setColor(16711935);
+            pBuffer.addVertex(posestack$pose, vector3f).setColor(i);
+            pBuffer.addVertex(posestack$pose, vector3f2).setColor(16711935);
+            pBuffer.addVertex(posestack$pose, vector3f3).setColor(16711935);
+            pBuffer.addVertex(posestack$pose, vector3f).setColor(i);
+            pBuffer.addVertex(posestack$pose, vector3f3).setColor(16711935);
+            pBuffer.addVertex(posestack$pose, vector3f1).setColor(16711935);
         }
 
-        p_345439_.popPose();
+        pPoseStack.popPose();
     }
 
     public static void renderCrystalBeams(
-        float p_114188_, float p_114189_, float p_114190_, float p_114191_, PoseStack p_114193_, MultiBufferSource p_114194_, int p_114192_
+        float pOffsetX, float pOffsetY, float pOffsetZ, float pAgeInTicks, PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight
     ) {
-        float f = Mth.sqrt(p_114188_ * p_114188_ + p_114190_ * p_114190_);
-        float f1 = Mth.sqrt(p_114188_ * p_114188_ + p_114189_ * p_114189_ + p_114190_ * p_114190_);
-        p_114193_.pushPose();
-        p_114193_.translate(0.0F, 2.0F, 0.0F);
-        p_114193_.mulPose(Axis.YP.rotation((float)(-Math.atan2((double)p_114190_, (double)p_114188_)) - (float) (Math.PI / 2)));
-        p_114193_.mulPose(Axis.XP.rotation((float)(-Math.atan2((double)f, (double)p_114189_)) - (float) (Math.PI / 2)));
-        VertexConsumer vertexconsumer = p_114194_.getBuffer(BEAM);
-        float f2 = 0.0F - p_114191_ * 0.01F;
-        float f3 = f1 / 32.0F - p_114191_ * 0.01F;
+        float f = Mth.sqrt(pOffsetX * pOffsetX + pOffsetZ * pOffsetZ);
+        float f1 = Mth.sqrt(pOffsetX * pOffsetX + pOffsetY * pOffsetY + pOffsetZ * pOffsetZ);
+        pPoseStack.pushPose();
+        pPoseStack.translate(0.0F, 2.0F, 0.0F);
+        pPoseStack.mulPose(Axis.YP.rotation((float)(-Math.atan2((double)pOffsetZ, (double)pOffsetX)) - (float) (Math.PI / 2)));
+        pPoseStack.mulPose(Axis.XP.rotation((float)(-Math.atan2((double)f, (double)pOffsetY)) - (float) (Math.PI / 2)));
+        RenderType rendertype = RenderType.entitySmoothCutout(CRYSTAL_BEAM_LOCATION);
+        VertexConsumer vertexconsumer = pBufferSource.getBuffer(rendertype);
+        float f2 = 0.0F - pAgeInTicks * 0.01F;
+        float f3 = f1 / 32.0F - pAgeInTicks * 0.01F;
         int i = 8;
         float f4 = 0.0F;
         float f5 = 0.75F;
         float f6 = 0.0F;
-        PoseStack.Pose posestack$pose = p_114193_.last();
+        PoseStack.Pose posestack$pose = pPoseStack.last();
 
         for (int j = 1; j <= 8; j++) {
             float f7 = Mth.sin((float)j * (float) (Math.PI * 2) / 8.0F) * 0.75F;
@@ -165,32 +178,32 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon, EnderDragon
                 .setColor(-16777216)
                 .setUv(f6, f2)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
-                .setLight(p_114192_)
+                .setLight(pPackedLight)
                 .setNormal(posestack$pose, 0.0F, -1.0F, 0.0F);
             vertexconsumer.addVertex(posestack$pose, f4, f5, f1)
                 .setColor(-1)
                 .setUv(f6, f3)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
-                .setLight(p_114192_)
+                .setLight(pPackedLight)
                 .setNormal(posestack$pose, 0.0F, -1.0F, 0.0F);
             vertexconsumer.addVertex(posestack$pose, f7, f8, f1)
                 .setColor(-1)
                 .setUv(f9, f3)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
-                .setLight(p_114192_)
+                .setLight(pPackedLight)
                 .setNormal(posestack$pose, 0.0F, -1.0F, 0.0F);
             vertexconsumer.addVertex(posestack$pose, f7 * 0.2F, f8 * 0.2F, 0.0F)
                 .setColor(-16777216)
                 .setUv(f9, f2)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
-                .setLight(p_114192_)
+                .setLight(pPackedLight)
                 .setNormal(posestack$pose, 0.0F, -1.0F, 0.0F);
             f4 = f7;
             f5 = f8;
             f6 = f9;
         }
 
-        p_114193_.popPose();
+        pPoseStack.popPose();
     }
 
     public EnderDragonRenderState createRenderState() {

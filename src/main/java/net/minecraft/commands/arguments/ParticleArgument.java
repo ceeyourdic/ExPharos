@@ -34,20 +34,20 @@ public class ParticleArgument implements ArgumentType<ParticleOptions> {
     );
     private final HolderLookup.Provider registries;
 
-    public ParticleArgument(CommandBuildContext p_249844_) {
-        this.registries = p_249844_;
+    public ParticleArgument(CommandBuildContext pBuildContext) {
+        this.registries = pBuildContext;
     }
 
-    public static ParticleArgument particle(CommandBuildContext p_251304_) {
-        return new ParticleArgument(p_251304_);
+    public static ParticleArgument particle(CommandBuildContext pBuildContext) {
+        return new ParticleArgument(pBuildContext);
     }
 
-    public static ParticleOptions getParticle(CommandContext<CommandSourceStack> p_103938_, String p_103939_) {
-        return p_103938_.getArgument(p_103939_, ParticleOptions.class);
+    public static ParticleOptions getParticle(CommandContext<CommandSourceStack> pContext, String pName) {
+        return pContext.getArgument(pName, ParticleOptions.class);
     }
 
-    public ParticleOptions parse(StringReader p_103933_) throws CommandSyntaxException {
-        return readParticle(p_103933_, this.registries);
+    public ParticleOptions parse(StringReader pReader) throws CommandSyntaxException {
+        return readParticle(pReader, this.registries);
     }
 
     @Override
@@ -55,31 +55,31 @@ public class ParticleArgument implements ArgumentType<ParticleOptions> {
         return EXAMPLES;
     }
 
-    public static ParticleOptions readParticle(StringReader p_249275_, HolderLookup.Provider p_333534_) throws CommandSyntaxException {
-        ParticleType<?> particletype = readParticleType(p_249275_, p_333534_.lookupOrThrow(Registries.PARTICLE_TYPE));
-        return readParticle(p_249275_, (ParticleType<ParticleOptions>)particletype, p_333534_);
+    public static ParticleOptions readParticle(StringReader pReader, HolderLookup.Provider pRegistries) throws CommandSyntaxException {
+        ParticleType<?> particletype = readParticleType(pReader, pRegistries.lookupOrThrow(Registries.PARTICLE_TYPE));
+        return readParticle(pReader, (ParticleType<ParticleOptions>)particletype, pRegistries);
     }
 
-    private static ParticleType<?> readParticleType(StringReader p_249621_, HolderLookup<ParticleType<?>> p_248983_) throws CommandSyntaxException {
-        ResourceLocation resourcelocation = ResourceLocation.read(p_249621_);
+    private static ParticleType<?> readParticleType(StringReader pReader, HolderLookup<ParticleType<?>> pParticleTypeLookup) throws CommandSyntaxException {
+        ResourceLocation resourcelocation = ResourceLocation.read(pReader);
         ResourceKey<ParticleType<?>> resourcekey = ResourceKey.create(Registries.PARTICLE_TYPE, resourcelocation);
-        return p_248983_.get(resourcekey).orElseThrow(() -> ERROR_UNKNOWN_PARTICLE.createWithContext(p_249621_, resourcelocation)).value();
+        return pParticleTypeLookup.get(resourcekey).orElseThrow(() -> ERROR_UNKNOWN_PARTICLE.createWithContext(pReader, resourcelocation)).value();
     }
 
-    private static <T extends ParticleOptions> T readParticle(StringReader p_103935_, ParticleType<T> p_103936_, HolderLookup.Provider p_329867_) throws CommandSyntaxException {
+    private static <T extends ParticleOptions> T readParticle(StringReader pReader, ParticleType<T> pParticleType, HolderLookup.Provider pRegistries) throws CommandSyntaxException {
         CompoundTag compoundtag;
-        if (p_103935_.canRead() && p_103935_.peek() == '{') {
-            compoundtag = new TagParser(p_103935_).readStruct();
+        if (pReader.canRead() && pReader.peek() == '{') {
+            compoundtag = new TagParser(pReader).readStruct();
         } else {
             compoundtag = new CompoundTag();
         }
 
-        return p_103936_.codec().codec().parse(p_329867_.createSerializationContext(NbtOps.INSTANCE), compoundtag).getOrThrow(ERROR_INVALID_OPTIONS::create);
+        return pParticleType.codec().codec().parse(pRegistries.createSerializationContext(NbtOps.INSTANCE), compoundtag).getOrThrow(ERROR_INVALID_OPTIONS::create);
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_103948_, SuggestionsBuilder p_103949_) {
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> pContext, SuggestionsBuilder pBuilder) {
         HolderLookup.RegistryLookup<ParticleType<?>> registrylookup = this.registries.lookupOrThrow(Registries.PARTICLE_TYPE);
-        return SharedSuggestionProvider.suggestResource(registrylookup.listElementIds().map(ResourceKey::location), p_103949_);
+        return SharedSuggestionProvider.suggestResource(registrylookup.listElementIds().map(ResourceKey::location), pBuilder);
     }
 }

@@ -11,12 +11,12 @@ public class UserWhiteList extends StoredUserList<GameProfile, UserWhiteListEntr
     }
 
     @Override
-    protected StoredUserEntry<GameProfile> createEntry(JsonObject p_11452_) {
-        return new UserWhiteListEntry(p_11452_);
+    protected StoredUserEntry<GameProfile> createEntry(JsonObject pEntryData) {
+        return new UserWhiteListEntry(pEntryData);
     }
 
-    public boolean isWhiteListed(GameProfile p_11454_) {
-        return this.contains(p_11454_);
+    public boolean isWhiteListed(GameProfile pProfile) {
+        return this.contains(pProfile);
     }
 
     @Override
@@ -24,7 +24,7 @@ public class UserWhiteList extends StoredUserList<GameProfile, UserWhiteListEntr
         return this.getEntries().stream().map(StoredUserEntry::getUser).filter(Objects::nonNull).map(GameProfile::getName).toArray(String[]::new);
     }
 
-    protected String getKeyForUser(GameProfile p_11458_) {
-        return p_11458_.getId().toString();
+    protected String getKeyForUser(GameProfile pObj) {
+        return pObj.getId().toString();
     }
 }

@@ -11,8 +11,8 @@ public class SimpleStateProvider extends BlockStateProvider {
         .xmap(SimpleStateProvider::new, p_68804_ -> p_68804_.state);
     private final BlockState state;
 
-    protected SimpleStateProvider(BlockState p_68801_) {
-        this.state = p_68801_;
+    protected SimpleStateProvider(BlockState pState) {
+        this.state = pState;
     }
 
     @Override

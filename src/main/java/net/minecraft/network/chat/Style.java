@@ -41,58 +41,58 @@ public class Style {
     final ResourceLocation font;
 
     private static Style create(
-        Optional<TextColor> p_237258_,
-        Optional<Integer> p_237259_,
-        Optional<Boolean> p_237260_,
-        Optional<Boolean> p_237261_,
-        Optional<Boolean> p_237262_,
-        Optional<Boolean> p_237263_,
-        Optional<Boolean> p_237264_,
-        Optional<ClickEvent> p_237265_,
-        Optional<HoverEvent> p_311416_,
-        Optional<String> p_312643_,
-        Optional<ResourceLocation> p_377285_
+        Optional<TextColor> pColor,
+        Optional<Integer> pShadowColor,
+        Optional<Boolean> pBold,
+        Optional<Boolean> pItalic,
+        Optional<Boolean> pUnderlined,
+        Optional<Boolean> pStrikethrough,
+        Optional<Boolean> pObfuscated,
+        Optional<ClickEvent> pClickEvent,
+        Optional<HoverEvent> pHoverEvent,
+        Optional<String> pInsertion,
+        Optional<ResourceLocation> pFont
     ) {
         Style style = new Style(
-            p_237258_.orElse(null),
-            p_237259_.orElse(null),
-            p_237260_.orElse(null),
-            p_237261_.orElse(null),
-            p_237262_.orElse(null),
-            p_237263_.orElse(null),
-            p_237264_.orElse(null),
-            p_237265_.orElse(null),
-            p_311416_.orElse(null),
-            p_312643_.orElse(null),
-            p_377285_.orElse(null)
+            pColor.orElse(null),
+            pShadowColor.orElse(null),
+            pBold.orElse(null),
+            pItalic.orElse(null),
+            pUnderlined.orElse(null),
+            pStrikethrough.orElse(null),
+            pObfuscated.orElse(null),
+            pClickEvent.orElse(null),
+            pHoverEvent.orElse(null),
+            pInsertion.orElse(null),
+            pFont.orElse(null)
         );
         return style.equals(EMPTY) ? EMPTY : style;
     }
 
     private Style(
-        @Nullable TextColor p_131113_,
-        @Nullable Integer p_377243_,
-        @Nullable Boolean p_131114_,
-        @Nullable Boolean p_131115_,
-        @Nullable Boolean p_131116_,
-        @Nullable Boolean p_131117_,
-        @Nullable Boolean p_131118_,
-        @Nullable ClickEvent p_131119_,
-        @Nullable HoverEvent p_131120_,
-        @Nullable String p_131121_,
-        @Nullable ResourceLocation p_131122_
+        @Nullable TextColor pColor,
+        @Nullable Integer pShadowColor,
+        @Nullable Boolean pBold,
+        @Nullable Boolean pItalic,
+        @Nullable Boolean pUnderlined,
+        @Nullable Boolean pStrikethrough,
+        @Nullable Boolean pObfuscated,
+        @Nullable ClickEvent pClickEvent,
+        @Nullable HoverEvent pHoverEvent,
+        @Nullable String pInsertion,
+        @Nullable ResourceLocation pFont
     ) {
-        this.color = p_131113_;
-        this.shadowColor = p_377243_;
-        this.bold = p_131114_;
-        this.italic = p_131115_;
-        this.underlined = p_131116_;
-        this.strikethrough = p_131117_;
-        this.obfuscated = p_131118_;
-        this.clickEvent = p_131119_;
-        this.hoverEvent = p_131120_;
-        this.insertion = p_131121_;
-        this.font = p_131122_;
+        this.color = pColor;
+        this.shadowColor = pShadowColor;
+        this.bold = pBold;
+        this.italic = pItalic;
+        this.underlined = pUnderlined;
+        this.strikethrough = pStrikethrough;
+        this.obfuscated = pObfuscated;
+        this.clickEvent = pClickEvent;
+        this.hoverEvent = pHoverEvent;
+        this.insertion = pInsertion;
+        this.font = pFont;
     }
 
     @Nullable
@@ -148,16 +148,16 @@ public class Style {
         return this.font != null ? this.font : DEFAULT_FONT;
     }
 
-    private static <T> Style checkEmptyAfterChange(Style p_310345_, @Nullable T p_309931_, @Nullable T p_310845_) {
-        return p_309931_ != null && p_310845_ == null && p_310345_.equals(EMPTY) ? EMPTY : p_310345_;
+    private static <T> Style checkEmptyAfterChange(Style pStyle, @Nullable T pOldValue, @Nullable T pNewValue) {
+        return pOldValue != null && pNewValue == null && pStyle.equals(EMPTY) ? EMPTY : pStyle;
     }
 
-    public Style withColor(@Nullable TextColor p_131149_) {
-        return Objects.equals(this.color, p_131149_)
+    public Style withColor(@Nullable TextColor pColor) {
+        return Objects.equals(this.color, pColor)
             ? this
             : checkEmptyAfterChange(
                 new Style(
-                    p_131149_,
+                    pColor,
                     this.shadowColor,
                     this.bold,
                     this.italic,
@@ -170,23 +170,23 @@ public class Style {
                     this.font
                 ),
                 this.color,
-                p_131149_
+                pColor
             );
     }
 
-    public Style withColor(@Nullable ChatFormatting p_131141_) {
-        return this.withColor(p_131141_ != null ? TextColor.fromLegacyFormat(p_131141_) : null);
+    public Style withColor(@Nullable ChatFormatting pFormatting) {
+        return this.withColor(pFormatting != null ? TextColor.fromLegacyFormat(pFormatting) : null);
     }
 
-    public Style withColor(int p_178521_) {
-        return this.withColor(TextColor.fromRgb(p_178521_));
+    public Style withColor(int pColor) {
+        return this.withColor(TextColor.fromRgb(pColor));
     }
 
-    public Style withShadowColor(int p_378316_) {
+    public Style withShadowColor(int pColor) {
         return checkEmptyAfterChange(
             new Style(
                 this.color,
-                p_378316_,
+                pColor,
                 this.bold,
                 this.italic,
                 this.underlined,
@@ -198,18 +198,18 @@ public class Style {
                 this.font
             ),
             this.shadowColor,
-            p_378316_
+            pColor
         );
     }
 
-    public Style withBold(@Nullable Boolean p_131137_) {
-        return Objects.equals(this.bold, p_131137_)
+    public Style withBold(@Nullable Boolean pBold) {
+        return Objects.equals(this.bold, pBold)
             ? this
             : checkEmptyAfterChange(
                 new Style(
                     this.color,
                     this.shadowColor,
-                    p_131137_,
+                    pBold,
                     this.italic,
                     this.underlined,
                     this.strikethrough,
@@ -220,19 +220,19 @@ public class Style {
                     this.font
                 ),
                 this.bold,
-                p_131137_
+                pBold
             );
     }
 
-    public Style withItalic(@Nullable Boolean p_131156_) {
-        return Objects.equals(this.italic, p_131156_)
+    public Style withItalic(@Nullable Boolean pItalic) {
+        return Objects.equals(this.italic, pItalic)
             ? this
             : checkEmptyAfterChange(
                 new Style(
                     this.color,
                     this.shadowColor,
                     this.bold,
-                    p_131156_,
+                    pItalic,
                     this.underlined,
                     this.strikethrough,
                     this.obfuscated,
@@ -242,12 +242,12 @@ public class Style {
                     this.font
                 ),
                 this.italic,
-                p_131156_
+                pItalic
             );
     }
 
-    public Style withUnderlined(@Nullable Boolean p_131163_) {
-        return Objects.equals(this.underlined, p_131163_)
+    public Style withUnderlined(@Nullable Boolean pUnderlined) {
+        return Objects.equals(this.underlined, pUnderlined)
             ? this
             : checkEmptyAfterChange(
                 new Style(
@@ -255,7 +255,7 @@ public class Style {
                     this.shadowColor,
                     this.bold,
                     this.italic,
-                    p_131163_,
+                    pUnderlined,
                     this.strikethrough,
                     this.obfuscated,
                     this.clickEvent,
@@ -264,12 +264,12 @@ public class Style {
                     this.font
                 ),
                 this.underlined,
-                p_131163_
+                pUnderlined
             );
     }
 
-    public Style withStrikethrough(@Nullable Boolean p_178523_) {
-        return Objects.equals(this.strikethrough, p_178523_)
+    public Style withStrikethrough(@Nullable Boolean pStrikethrough) {
+        return Objects.equals(this.strikethrough, pStrikethrough)
             ? this
             : checkEmptyAfterChange(
                 new Style(
@@ -278,7 +278,7 @@ public class Style {
                     this.bold,
                     this.italic,
                     this.underlined,
-                    p_178523_,
+                    pStrikethrough,
                     this.obfuscated,
                     this.clickEvent,
                     this.hoverEvent,
@@ -286,12 +286,12 @@ public class Style {
                     this.font
                 ),
                 this.strikethrough,
-                p_178523_
+                pStrikethrough
             );
     }
 
-    public Style withObfuscated(@Nullable Boolean p_178525_) {
-        return Objects.equals(this.obfuscated, p_178525_)
+    public Style withObfuscated(@Nullable Boolean pObfuscated) {
+        return Objects.equals(this.obfuscated, pObfuscated)
             ? this
             : checkEmptyAfterChange(
                 new Style(
@@ -301,19 +301,19 @@ public class Style {
                     this.italic,
                     this.underlined,
                     this.strikethrough,
-                    p_178525_,
+                    pObfuscated,
                     this.clickEvent,
                     this.hoverEvent,
                     this.insertion,
                     this.font
                 ),
                 this.obfuscated,
-                p_178525_
+                pObfuscated
             );
     }
 
-    public Style withClickEvent(@Nullable ClickEvent p_131143_) {
-        return Objects.equals(this.clickEvent, p_131143_)
+    public Style withClickEvent(@Nullable ClickEvent pClickEvent) {
+        return Objects.equals(this.clickEvent, pClickEvent)
             ? this
             : checkEmptyAfterChange(
                 new Style(
@@ -324,18 +324,18 @@ public class Style {
                     this.underlined,
                     this.strikethrough,
                     this.obfuscated,
-                    p_131143_,
+                    pClickEvent,
                     this.hoverEvent,
                     this.insertion,
                     this.font
                 ),
                 this.clickEvent,
-                p_131143_
+                pClickEvent
             );
     }
 
-    public Style withHoverEvent(@Nullable HoverEvent p_131145_) {
-        return Objects.equals(this.hoverEvent, p_131145_)
+    public Style withHoverEvent(@Nullable HoverEvent pHoverEvent) {
+        return Objects.equals(this.hoverEvent, pHoverEvent)
             ? this
             : checkEmptyAfterChange(
                 new Style(
@@ -347,17 +347,17 @@ public class Style {
                     this.strikethrough,
                     this.obfuscated,
                     this.clickEvent,
-                    p_131145_,
+                    pHoverEvent,
                     this.insertion,
                     this.font
                 ),
                 this.hoverEvent,
-                p_131145_
+                pHoverEvent
             );
     }
 
-    public Style withInsertion(@Nullable String p_131139_) {
-        return Objects.equals(this.insertion, p_131139_)
+    public Style withInsertion(@Nullable String pInsertion) {
+        return Objects.equals(this.insertion, pInsertion)
             ? this
             : checkEmptyAfterChange(
                 new Style(
@@ -370,16 +370,16 @@ public class Style {
                     this.obfuscated,
                     this.clickEvent,
                     this.hoverEvent,
-                    p_131139_,
+                    pInsertion,
                     this.font
                 ),
                 this.insertion,
-                p_131139_
+                pInsertion
             );
     }
 
-    public Style withFont(@Nullable ResourceLocation p_131151_) {
-        return Objects.equals(this.font, p_131151_)
+    public Style withFont(@Nullable ResourceLocation pFontId) {
+        return Objects.equals(this.font, pFontId)
             ? this
             : checkEmptyAfterChange(
                 new Style(
@@ -393,21 +393,21 @@ public class Style {
                     this.clickEvent,
                     this.hoverEvent,
                     this.insertion,
-                    p_131151_
+                    pFontId
                 ),
                 this.font,
-                p_131151_
+                pFontId
             );
     }
 
-    public Style applyFormat(ChatFormatting p_131158_) {
+    public Style applyFormat(ChatFormatting pFormatting) {
         TextColor textcolor = this.color;
         Boolean obool = this.bold;
         Boolean obool1 = this.italic;
         Boolean obool2 = this.strikethrough;
         Boolean obool3 = this.underlined;
         Boolean obool4 = this.obfuscated;
-        switch (p_131158_) {
+        switch (pFormatting) {
             case OBFUSCATED:
                 obool4 = true;
                 break;
@@ -426,20 +426,20 @@ public class Style {
             case RESET:
                 return EMPTY;
             default:
-                textcolor = TextColor.fromLegacyFormat(p_131158_);
+                textcolor = TextColor.fromLegacyFormat(pFormatting);
         }
 
         return new Style(textcolor, this.shadowColor, obool, obool1, obool3, obool2, obool4, this.clickEvent, this.hoverEvent, this.insertion, this.font);
     }
 
-    public Style applyLegacyFormat(ChatFormatting p_131165_) {
+    public Style applyLegacyFormat(ChatFormatting pFormatting) {
         TextColor textcolor = this.color;
         Boolean obool = this.bold;
         Boolean obool1 = this.italic;
         Boolean obool2 = this.strikethrough;
         Boolean obool3 = this.underlined;
         Boolean obool4 = this.obfuscated;
-        switch (p_131165_) {
+        switch (pFormatting) {
             case OBFUSCATED:
                 obool4 = true;
                 break;
@@ -463,13 +463,13 @@ public class Style {
                 obool2 = false;
                 obool3 = false;
                 obool1 = false;
-                textcolor = TextColor.fromLegacyFormat(p_131165_);
+                textcolor = TextColor.fromLegacyFormat(pFormatting);
         }
 
         return new Style(textcolor, this.shadowColor, obool, obool1, obool3, obool2, obool4, this.clickEvent, this.hoverEvent, this.insertion, this.font);
     }
 
-    public Style applyFormats(ChatFormatting... p_131153_) {
+    public Style applyFormats(ChatFormatting... pFormats) {
         TextColor textcolor = this.color;
         Boolean obool = this.bold;
         Boolean obool1 = this.italic;
@@ -477,7 +477,7 @@ public class Style {
         Boolean obool3 = this.underlined;
         Boolean obool4 = this.obfuscated;
 
-        for (ChatFormatting chatformatting : p_131153_) {
+        for (ChatFormatting chatformatting : pFormats) {
             switch (chatformatting) {
                 case OBFUSCATED:
                     obool4 = true;
@@ -504,24 +504,24 @@ public class Style {
         return new Style(textcolor, this.shadowColor, obool, obool1, obool3, obool2, obool4, this.clickEvent, this.hoverEvent, this.insertion, this.font);
     }
 
-    public Style applyTo(Style p_131147_) {
+    public Style applyTo(Style pStyle) {
         if (this == EMPTY) {
-            return p_131147_;
+            return pStyle;
         } else {
-            return p_131147_ == EMPTY
+            return pStyle == EMPTY
                 ? this
                 : new Style(
-                    this.color != null ? this.color : p_131147_.color,
-                    this.shadowColor != null ? this.shadowColor : p_131147_.shadowColor,
-                    this.bold != null ? this.bold : p_131147_.bold,
-                    this.italic != null ? this.italic : p_131147_.italic,
-                    this.underlined != null ? this.underlined : p_131147_.underlined,
-                    this.strikethrough != null ? this.strikethrough : p_131147_.strikethrough,
-                    this.obfuscated != null ? this.obfuscated : p_131147_.obfuscated,
-                    this.clickEvent != null ? this.clickEvent : p_131147_.clickEvent,
-                    this.hoverEvent != null ? this.hoverEvent : p_131147_.hoverEvent,
-                    this.insertion != null ? this.insertion : p_131147_.insertion,
-                    this.font != null ? this.font : p_131147_.font
+                    this.color != null ? this.color : pStyle.color,
+                    this.shadowColor != null ? this.shadowColor : pStyle.shadowColor,
+                    this.bold != null ? this.bold : pStyle.bold,
+                    this.italic != null ? this.italic : pStyle.italic,
+                    this.underlined != null ? this.underlined : pStyle.underlined,
+                    this.strikethrough != null ? this.strikethrough : pStyle.strikethrough,
+                    this.obfuscated != null ? this.obfuscated : pStyle.obfuscated,
+                    this.clickEvent != null ? this.clickEvent : pStyle.clickEvent,
+                    this.hoverEvent != null ? this.hoverEvent : pStyle.hoverEvent,
+                    this.insertion != null ? this.insertion : pStyle.insertion,
+                    this.font != null ? this.font : pStyle.font
                 );
         }
     }
@@ -579,11 +579,11 @@ public class Style {
     }
 
     @Override
-    public boolean equals(Object p_131175_) {
-        if (this == p_131175_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            return !(p_131175_ instanceof Style style)
+            return !(pOther instanceof Style style)
                 ? false
                 : this.bold == style.bold
                     && Objects.equals(this.getColor(), style.getColor())

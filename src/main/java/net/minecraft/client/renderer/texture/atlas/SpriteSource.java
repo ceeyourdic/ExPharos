@@ -14,19 +14,19 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public interface SpriteSource {
     FileToIdConverter TEXTURE_ID_CONVERTER = new FileToIdConverter("textures", ".png");
 
-    void run(ResourceManager p_261770_, SpriteSource.Output p_261757_);
+    void run(ResourceManager pResourceManager, SpriteSource.Output pOutput);
 
     SpriteSourceType type();
 
     @OnlyIn(Dist.CLIENT)
     public interface Output {
-        default void add(ResourceLocation p_261841_, Resource p_261651_) {
-            this.add(p_261841_, p_296307_ -> p_296307_.loadSprite(p_261841_, p_261651_));
+        default void add(ResourceLocation pLocation, Resource pResource) {
+            this.add(pLocation, p_296307_ -> p_296307_.loadSprite(pLocation, pResource));
         }
 
-        void add(ResourceLocation p_261821_, SpriteSource.SpriteSupplier p_261760_);
+        void add(ResourceLocation pLocation, SpriteSource.SpriteSupplier pSprite);
 
-        void removeAll(Predicate<ResourceLocation> p_261532_);
+        void removeAll(Predicate<ResourceLocation> pPredicate);
     }
 
     @OnlyIn(Dist.CLIENT)

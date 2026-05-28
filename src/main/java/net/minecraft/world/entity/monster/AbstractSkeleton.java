@@ -89,7 +89,7 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
     }
 
     @Override
-    protected void playStepSound(BlockPos p_32159_, BlockState p_32160_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(this.getStepSound(), 0.15F, 1.0F);
     }
 
@@ -185,13 +185,13 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
     }
 
     @Override
-    public void performRangedAttack(LivingEntity p_32141_, float p_32142_) {
+    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
         ItemStack itemstack = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
         ItemStack itemstack1 = this.getProjectile(itemstack);
-        AbstractArrow abstractarrow = this.getArrow(itemstack1, p_32142_, itemstack);
-        double d0 = p_32141_.getX() - this.getX();
-        double d1 = p_32141_.getY(0.3333333333333333) - abstractarrow.getY();
-        double d2 = p_32141_.getZ() - this.getZ();
+        AbstractArrow abstractarrow = this.getArrow(itemstack1, pDistanceFactor, itemstack);
+        double d0 = pTarget.getX() - this.getX();
+        double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
+        double d2 = pTarget.getZ() - this.getZ();
         double d3 = Math.sqrt(d0 * d0 + d2 * d2);
         if (this.level() instanceof ServerLevel serverlevel) {
             Projectile.spawnProjectileUsingShoot(abstractarrow, serverlevel, itemstack1, d0, d1 + d3 * 0.2F, d2, 1.6F, (float)(14 - serverlevel.getDifficulty().getId() * 4));
@@ -200,8 +200,8 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
     }
 
-    protected AbstractArrow getArrow(ItemStack p_32156_, float p_32157_, @Nullable ItemStack p_343583_) {
-        return ProjectileUtil.getMobArrow(this, p_32156_, p_32157_, p_343583_);
+    protected AbstractArrow getArrow(ItemStack pArrow, float pVelocity, @Nullable ItemStack pWeapon) {
+        return ProjectileUtil.getMobArrow(this, pArrow, pVelocity, pWeapon);
     }
 
     @Override
@@ -215,14 +215,14 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_32152_) {
-        super.readAdditionalSaveData(p_32152_);
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
         this.reassessWeaponGoal();
     }
 
     @Override
-    public void setItemSlot(EquipmentSlot p_32138_, ItemStack p_32139_) {
-        super.setItemSlot(p_32138_, p_32139_);
+    public void setItemSlot(EquipmentSlot pSlot, ItemStack pStack) {
+        super.setItemSlot(pSlot, pStack);
         if (!this.level().isClientSide) {
             this.reassessWeaponGoal();
         }

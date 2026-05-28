@@ -34,15 +34,15 @@ public class FolderRepositorySource implements RepositorySource {
     private final PackSource packSource;
     private final DirectoryValidator validator;
 
-    public FolderRepositorySource(Path p_251796_, PackType p_251664_, PackSource p_250854_, DirectoryValidator p_300828_) {
-        this.folder = p_251796_;
-        this.packType = p_251664_;
-        this.packSource = p_250854_;
-        this.validator = p_300828_;
+    public FolderRepositorySource(Path pFolder, PackType pPackType, PackSource pPackSource, DirectoryValidator pValidator) {
+        this.folder = pFolder;
+        this.packType = pPackType;
+        this.packSource = pPackSource;
+        this.validator = pValidator;
     }
 
-    private static String nameFromPath(Path p_248745_) {
-        return p_248745_.getFileName().toString();
+    private static String nameFromPath(Path pPath) {
+        return pPath.getFileName().toString();
     }
 
     @Override
@@ -61,15 +61,15 @@ public class FolderRepositorySource implements RepositorySource {
         }
     }
 
-    private PackLocationInfo createDiscoveredFilePackInfo(Path p_328477_) {
-        String s = nameFromPath(p_328477_);
+    private PackLocationInfo createDiscoveredFilePackInfo(Path pPath) {
+        String s = nameFromPath(pPath);
         return new PackLocationInfo("file/" + s, Component.literal(s), this.packSource, Optional.empty());
     }
 
-    public static void discoverPacks(Path p_248794_, DirectoryValidator p_299329_, BiConsumer<Path, Pack.ResourcesSupplier> p_248580_) throws IOException {
-        FolderRepositorySource.FolderPackDetector folderrepositorysource$folderpackdetector = new FolderRepositorySource.FolderPackDetector(p_299329_);
+    public static void discoverPacks(Path pFolder, DirectoryValidator pValidator, BiConsumer<Path, Pack.ResourcesSupplier> pOutput) throws IOException {
+        FolderRepositorySource.FolderPackDetector folderrepositorysource$folderpackdetector = new FolderRepositorySource.FolderPackDetector(pValidator);
 
-        try (DirectoryStream<Path> directorystream = Files.newDirectoryStream(p_248794_)) {
+        try (DirectoryStream<Path> directorystream = Files.newDirectoryStream(pFolder)) {
             for (Path path : directorystream) {
                 try {
                     List<ForbiddenSymlinkInfo> list = new ArrayList<>();
@@ -77,7 +77,7 @@ public class FolderRepositorySource implements RepositorySource {
                     if (!list.isEmpty()) {
                         LOGGER.warn("Ignoring potential pack entry: {}", ContentValidationException.getMessage(path, list));
                     } else if (pack$resourcessupplier != null) {
-                        p_248580_.accept(path, pack$resourcessupplier);
+                        pOutput.accept(path, pack$resourcessupplier);
                     } else {
                         LOGGER.info("Found non-pack entry '{}', ignoring", path);
                     }

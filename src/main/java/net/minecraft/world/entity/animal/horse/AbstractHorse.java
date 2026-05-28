@@ -181,16 +181,16 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         p_334643_.define(DATA_ID_FLAGS, (byte)0);
     }
 
-    protected boolean getFlag(int p_30648_) {
-        return (this.entityData.get(DATA_ID_FLAGS) & p_30648_) != 0;
+    protected boolean getFlag(int pFlagId) {
+        return (this.entityData.get(DATA_ID_FLAGS) & pFlagId) != 0;
     }
 
-    protected void setFlag(int p_30598_, boolean p_30599_) {
+    protected void setFlag(int pFlagId, boolean pValue) {
         byte b0 = this.entityData.get(DATA_ID_FLAGS);
-        if (p_30599_) {
-            this.entityData.set(DATA_ID_FLAGS, (byte)(b0 | p_30598_));
+        if (pValue) {
+            this.entityData.set(DATA_ID_FLAGS, (byte)(b0 | pFlagId));
         } else {
-            this.entityData.set(DATA_ID_FLAGS, (byte)(b0 & ~p_30598_));
+            this.entityData.set(DATA_ID_FLAGS, (byte)(b0 & ~pFlagId));
         }
     }
 
@@ -204,20 +204,20 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         return this.owner;
     }
 
-    public void setOwnerUUID(@Nullable UUID p_30587_) {
-        this.owner = p_30587_;
+    public void setOwnerUUID(@Nullable UUID pUuid) {
+        this.owner = pUuid;
     }
 
     public boolean isJumping() {
         return this.isJumping;
     }
 
-    public void setTamed(boolean p_30652_) {
-        this.setFlag(2, p_30652_);
+    public void setTamed(boolean pTamed) {
+        this.setFlag(2, pTamed);
     }
 
-    public void setIsJumping(boolean p_30656_) {
-        this.isJumping = p_30656_;
+    public void setIsJumping(boolean pJumping) {
+        this.isJumping = pJumping;
     }
 
     @Override
@@ -241,8 +241,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         return this.getFlag(8);
     }
 
-    public void setBred(boolean p_30658_) {
-        this.setFlag(8, p_30658_);
+    public void setBred(boolean pBreeding) {
+        this.setFlag(8, pBreeding);
     }
 
     @Override
@@ -255,9 +255,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         this.inventory.setItem(0, p_343290_);
     }
 
-    public void equipBodyArmor(Player p_335804_, ItemStack p_327797_) {
-        if (this.isEquippableInSlot(p_327797_, EquipmentSlot.BODY)) {
-            this.setBodyArmorItem(p_327797_.consumeAndReturn(1, p_335804_));
+    public void equipBodyArmor(Player pPlayer, ItemStack pStack) {
+        if (this.isEquippableInSlot(pStack, EquipmentSlot.BODY)) {
+            this.setBodyArmorItem(pStack.consumeAndReturn(1, pPlayer));
         }
     }
 
@@ -275,12 +275,12 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         return this.temper;
     }
 
-    public void setTemper(int p_30650_) {
-        this.temper = p_30650_;
+    public void setTemper(int pTemper) {
+        this.temper = pTemper;
     }
 
-    public int modifyTemper(int p_30654_) {
-        int i = Mth.clamp(this.getTemper() + p_30654_, 0, this.getMaxTemper());
+    public int modifyTemper(int pAddedTemper) {
+        int i = Mth.clamp(this.getTemper() + pAddedTemper, 0, this.getMaxTemper());
         this.setTemper(i);
         return i;
     }
@@ -336,8 +336,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         return getInventorySize(this.getInventoryColumns());
     }
 
-    public static int getInventorySize(int p_345108_) {
-        return p_345108_ * 3 + 1;
+    public static int getInventorySize(int pColumns) {
+        return pColumns * 3 + 1;
     }
 
     protected void createInventory() {
@@ -366,7 +366,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
     }
 
     @Override
-    public void containerChanged(Container p_30548_) {
+    public void containerChanged(Container pInvBasic) {
         boolean flag = this.isSaddled();
         this.syncSaddleToClients();
         if (this.tickCount > 20 && !flag && this.isSaddled()) {
@@ -399,10 +399,10 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
     }
 
     @Override
-    protected void playStepSound(BlockPos p_30584_, BlockState p_30585_) {
-        if (!p_30585_.liquid()) {
-            BlockState blockstate = this.level().getBlockState(p_30584_.above());
-            SoundType soundtype = p_30585_.getSoundType();
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
+        if (!pBlock.liquid()) {
+            BlockState blockstate = this.level().getBlockState(pPos.above());
+            SoundType soundtype = pBlock.getSoundType();
             if (blockstate.is(Blocks.SNOW)) {
                 soundtype = blockstate.getSoundType();
             }
@@ -422,16 +422,16 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         }
     }
 
-    private boolean isWoodSoundType(SoundType p_278280_) {
-        return p_278280_ == SoundType.WOOD
-            || p_278280_ == SoundType.NETHER_WOOD
-            || p_278280_ == SoundType.STEM
-            || p_278280_ == SoundType.CHERRY_WOOD
-            || p_278280_ == SoundType.BAMBOO_WOOD;
+    private boolean isWoodSoundType(SoundType pSoundType) {
+        return pSoundType == SoundType.WOOD
+            || pSoundType == SoundType.NETHER_WOOD
+            || pSoundType == SoundType.STEM
+            || pSoundType == SoundType.CHERRY_WOOD
+            || pSoundType == SoundType.BAMBOO_WOOD;
     }
 
-    protected void playGallopSound(SoundType p_30560_) {
-        this.playSound(SoundEvents.HORSE_GALLOP, p_30560_.getVolume() * 0.15F, p_30560_.getPitch());
+    protected void playGallopSound(SoundType pSoundType) {
+        this.playSound(SoundEvents.HORSE_GALLOP, pSoundType.getVolume() * 0.15F, pSoundType.getPitch());
     }
 
     public static AttributeSupplier.Builder createBaseHorseAttributes() {
@@ -470,50 +470,50 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         }
     }
 
-    public InteractionResult fedFood(Player p_30581_, ItemStack p_30582_) {
-        boolean flag = this.handleEating(p_30581_, p_30582_);
+    public InteractionResult fedFood(Player pPlayer, ItemStack pStack) {
+        boolean flag = this.handleEating(pPlayer, pStack);
         if (flag) {
-            p_30582_.consume(1, p_30581_);
+            pStack.consume(1, pPlayer);
         }
 
         return (InteractionResult)(!flag && !this.level().isClientSide ? InteractionResult.PASS : InteractionResult.SUCCESS_SERVER);
     }
 
-    protected boolean handleEating(Player p_30593_, ItemStack p_30594_) {
+    protected boolean handleEating(Player pPlayer, ItemStack pStack) {
         boolean flag = false;
         float f = 0.0F;
         int i = 0;
         int j = 0;
-        if (p_30594_.is(Items.WHEAT)) {
+        if (pStack.is(Items.WHEAT)) {
             f = 2.0F;
             i = 20;
             j = 3;
-        } else if (p_30594_.is(Items.SUGAR)) {
+        } else if (pStack.is(Items.SUGAR)) {
             f = 1.0F;
             i = 30;
             j = 3;
-        } else if (p_30594_.is(Blocks.HAY_BLOCK.asItem())) {
+        } else if (pStack.is(Blocks.HAY_BLOCK.asItem())) {
             f = 20.0F;
             i = 180;
-        } else if (p_30594_.is(Items.APPLE)) {
+        } else if (pStack.is(Items.APPLE)) {
             f = 3.0F;
             i = 60;
             j = 3;
-        } else if (p_30594_.is(Items.GOLDEN_CARROT)) {
+        } else if (pStack.is(Items.GOLDEN_CARROT)) {
             f = 4.0F;
             i = 60;
             j = 5;
             if (!this.level().isClientSide && this.isTamed() && this.getAge() == 0 && !this.isInLove()) {
                 flag = true;
-                this.setInLove(p_30593_);
+                this.setInLove(pPlayer);
             }
-        } else if (p_30594_.is(Items.GOLDEN_APPLE) || p_30594_.is(Items.ENCHANTED_GOLDEN_APPLE)) {
+        } else if (pStack.is(Items.GOLDEN_APPLE) || pStack.is(Items.ENCHANTED_GOLDEN_APPLE)) {
             f = 10.0F;
             i = 240;
             j = 10;
             if (!this.level().isClientSide && this.isTamed() && this.getAge() == 0 && !this.isInLove()) {
                 flag = true;
-                this.setInLove(p_30593_);
+                this.setInLove(pPlayer);
             }
         }
 
@@ -543,13 +543,13 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         return flag;
     }
 
-    protected void doPlayerRide(Player p_30634_) {
+    protected void doPlayerRide(Player pPlayer) {
         this.setEating(false);
         this.setStanding(false);
         if (!this.level().isClientSide) {
-            p_30634_.setYRot(this.getYRot());
-            p_30634_.setXRot(this.getXRot());
-            p_30634_.startRiding(this);
+            pPlayer.setYRot(this.getYRot());
+            pPlayer.setXRot(this.getXRot());
+            pPlayer.startRiding(this);
         }
     }
 
@@ -559,8 +559,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
     }
 
     @Override
-    public boolean isFood(ItemStack p_30644_) {
-        return p_30644_.is(ItemTags.HORSE_FOOD);
+    public boolean isFood(ItemStack pStack) {
+        return pStack.is(ItemTags.HORSE_FOOD);
     }
 
     private void moveTail() {
@@ -611,9 +611,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         }
     }
 
-    protected void followMommy(ServerLevel p_369753_) {
+    protected void followMommy(ServerLevel pLevel) {
         if (this.isBred() && this.isBaby() && !this.isEating()) {
-            LivingEntity livingentity = p_369753_.getNearestEntity(
+            LivingEntity livingentity = pLevel.getNearestEntity(
                 AbstractHorse.class, MOMMY_TARGETING, this, this.getX(), this.getY(), this.getZ(), this.getBoundingBox().inflate(16.0)
             );
             if (livingentity != null && this.distanceToSqr(livingentity) > 4.0) {
@@ -726,16 +726,16 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         }
     }
 
-    public void setEating(boolean p_30662_) {
-        this.setFlag(16, p_30662_);
+    public void setEating(boolean pEating) {
+        this.setFlag(16, pEating);
     }
 
-    public void setStanding(boolean p_30666_) {
-        if (p_30666_) {
+    public void setStanding(boolean pStanding) {
+        if (pStanding) {
             this.setEating(false);
         }
 
-        this.setFlag(32, p_30666_);
+        this.setFlag(32, pStanding);
     }
 
     @Nullable
@@ -757,11 +757,11 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         }
     }
 
-    public boolean tameWithName(Player p_30638_) {
-        this.setOwnerUUID(p_30638_.getUUID());
+    public boolean tameWithName(Player pPlayer) {
+        this.setOwnerUUID(pPlayer.getUUID());
         this.setTamed(true);
-        if (p_30638_ instanceof ServerPlayer) {
-            CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer)p_30638_, this);
+        if (pPlayer instanceof ServerPlayer) {
+            CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer)pPlayer, this);
         }
 
         this.level().broadcastEntityEvent(this, (byte)7);
@@ -790,8 +790,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         }
     }
 
-    protected Vec2 getRiddenRotation(LivingEntity p_275502_) {
-        return new Vec2(p_275502_.getXRot() * 0.5F, p_275502_.getYRot());
+    protected Vec2 getRiddenRotation(LivingEntity pEntity) {
+        return new Vec2(pEntity.getXRot() * 0.5F, pEntity.getYRot());
     }
 
     @Override
@@ -814,16 +814,16 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED);
     }
 
-    protected void executeRidersJump(float p_248808_, Vec3 p_275435_) {
-        double d0 = (double)this.getJumpPower(p_248808_);
+    protected void executeRidersJump(float pPlayerJumpPendingScale, Vec3 pTravelVector) {
+        double d0 = (double)this.getJumpPower(pPlayerJumpPendingScale);
         Vec3 vec3 = this.getDeltaMovement();
         this.setDeltaMovement(vec3.x, d0, vec3.z);
         this.setIsJumping(true);
         this.hasImpulse = true;
-        if (p_275435_.z > 0.0) {
+        if (pTravelVector.z > 0.0) {
             float f = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
             float f1 = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
-            this.setDeltaMovement(this.getDeltaMovement().add((double)(-0.4F * f * p_248808_), 0.0, (double)(0.4F * f1 * p_248808_)));
+            this.setDeltaMovement(this.getDeltaMovement().add((double)(-0.4F * f * pPlayerJumpPendingScale), 0.0, (double)(0.4F * f1 * pPlayerJumpPendingScale)));
         }
     }
 
@@ -832,33 +832,33 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_30589_) {
-        super.addAdditionalSaveData(p_30589_);
-        p_30589_.putBoolean("EatingHaystack", this.isEating());
-        p_30589_.putBoolean("Bred", this.isBred());
-        p_30589_.putInt("Temper", this.getTemper());
-        p_30589_.putBoolean("Tame", this.isTamed());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("EatingHaystack", this.isEating());
+        pCompound.putBoolean("Bred", this.isBred());
+        pCompound.putInt("Temper", this.getTemper());
+        pCompound.putBoolean("Tame", this.isTamed());
         if (this.getOwnerUUID() != null) {
-            p_30589_.putUUID("Owner", this.getOwnerUUID());
+            pCompound.putUUID("Owner", this.getOwnerUUID());
         }
 
         if (!this.inventory.getItem(0).isEmpty()) {
-            p_30589_.put("SaddleItem", this.inventory.getItem(0).save(this.registryAccess()));
+            pCompound.put("SaddleItem", this.inventory.getItem(0).save(this.registryAccess()));
         }
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_30565_) {
-        super.readAdditionalSaveData(p_30565_);
-        this.setEating(p_30565_.getBoolean("EatingHaystack"));
-        this.setBred(p_30565_.getBoolean("Bred"));
-        this.setTemper(p_30565_.getInt("Temper"));
-        this.setTamed(p_30565_.getBoolean("Tame"));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setEating(pCompound.getBoolean("EatingHaystack"));
+        this.setBred(pCompound.getBoolean("Bred"));
+        this.setTemper(pCompound.getInt("Temper"));
+        this.setTamed(pCompound.getBoolean("Tame"));
         UUID uuid;
-        if (p_30565_.hasUUID("Owner")) {
-            uuid = p_30565_.getUUID("Owner");
+        if (pCompound.hasUUID("Owner")) {
+            uuid = pCompound.getUUID("Owner");
         } else {
-            String s = p_30565_.getString("Owner");
+            String s = pCompound.getString("Owner");
             uuid = OldUsersConverter.convertMobOwnerIfNecessary(this.getServer(), s);
         }
 
@@ -866,8 +866,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
             this.setOwnerUUID(uuid);
         }
 
-        if (p_30565_.contains("SaddleItem", 10)) {
-            ItemStack itemstack = ItemStack.parse(this.registryAccess(), p_30565_.getCompound("SaddleItem")).orElse(ItemStack.EMPTY);
+        if (pCompound.contains("SaddleItem", 10)) {
+            ItemStack itemstack = ItemStack.parse(this.registryAccess(), pCompound.getCompound("SaddleItem")).orElse(ItemStack.EMPTY);
             if (itemstack.is(Items.SADDLE)) {
                 this.inventory.setItem(0, itemstack);
             }
@@ -877,7 +877,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
     }
 
     @Override
-    public boolean canMate(Animal p_30553_) {
+    public boolean canMate(Animal pOtherAnimal) {
         return false;
     }
 
@@ -891,66 +891,66 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         return null;
     }
 
-    protected void setOffspringAttributes(AgeableMob p_149509_, AbstractHorse p_149510_) {
-        this.setOffspringAttribute(p_149509_, p_149510_, Attributes.MAX_HEALTH, (double)MIN_HEALTH, (double)MAX_HEALTH);
-        this.setOffspringAttribute(p_149509_, p_149510_, Attributes.JUMP_STRENGTH, (double)MIN_JUMP_STRENGTH, (double)MAX_JUMP_STRENGTH);
-        this.setOffspringAttribute(p_149509_, p_149510_, Attributes.MOVEMENT_SPEED, (double)MIN_MOVEMENT_SPEED, (double)MAX_MOVEMENT_SPEED);
+    protected void setOffspringAttributes(AgeableMob pParent, AbstractHorse pChild) {
+        this.setOffspringAttribute(pParent, pChild, Attributes.MAX_HEALTH, (double)MIN_HEALTH, (double)MAX_HEALTH);
+        this.setOffspringAttribute(pParent, pChild, Attributes.JUMP_STRENGTH, (double)MIN_JUMP_STRENGTH, (double)MAX_JUMP_STRENGTH);
+        this.setOffspringAttribute(pParent, pChild, Attributes.MOVEMENT_SPEED, (double)MIN_MOVEMENT_SPEED, (double)MAX_MOVEMENT_SPEED);
     }
 
-    private void setOffspringAttribute(AgeableMob p_273163_, AbstractHorse p_273784_, Holder<Attribute> p_330057_, double p_272663_, double p_273405_) {
-        double d0 = createOffspringAttribute(this.getAttributeBaseValue(p_330057_), p_273163_.getAttributeBaseValue(p_330057_), p_272663_, p_273405_, this.random);
-        p_273784_.getAttribute(p_330057_).setBaseValue(d0);
+    private void setOffspringAttribute(AgeableMob pParent, AbstractHorse pChild, Holder<Attribute> pAttribute, double pMin, double pMax) {
+        double d0 = createOffspringAttribute(this.getAttributeBaseValue(pAttribute), pParent.getAttributeBaseValue(pAttribute), pMin, pMax, this.random);
+        pChild.getAttribute(pAttribute).setBaseValue(d0);
     }
 
-    static double createOffspringAttribute(double p_272685_, double p_273709_, double p_273376_, double p_273030_, RandomSource p_272743_) {
-        if (p_273030_ <= p_273376_) {
+    static double createOffspringAttribute(double pValue1, double pValue2, double pMin, double pMax, RandomSource pRandom) {
+        if (pMax <= pMin) {
             throw new IllegalArgumentException("Incorrect range for an attribute");
         } else {
-            p_272685_ = Mth.clamp(p_272685_, p_273376_, p_273030_);
-            p_273709_ = Mth.clamp(p_273709_, p_273376_, p_273030_);
-            double d0 = 0.15 * (p_273030_ - p_273376_);
-            double d1 = Math.abs(p_272685_ - p_273709_) + d0 * 2.0;
-            double d2 = (p_272685_ + p_273709_) / 2.0;
-            double d3 = (p_272743_.nextDouble() + p_272743_.nextDouble() + p_272743_.nextDouble()) / 3.0 - 0.5;
+            pValue1 = Mth.clamp(pValue1, pMin, pMax);
+            pValue2 = Mth.clamp(pValue2, pMin, pMax);
+            double d0 = 0.15 * (pMax - pMin);
+            double d1 = Math.abs(pValue1 - pValue2) + d0 * 2.0;
+            double d2 = (pValue1 + pValue2) / 2.0;
+            double d3 = (pRandom.nextDouble() + pRandom.nextDouble() + pRandom.nextDouble()) / 3.0 - 0.5;
             double d4 = d2 + d1 * d3;
-            if (d4 > p_273030_) {
-                double d6 = d4 - p_273030_;
-                return p_273030_ - d6;
-            } else if (d4 < p_273376_) {
-                double d5 = p_273376_ - d4;
-                return p_273376_ + d5;
+            if (d4 > pMax) {
+                double d6 = d4 - pMax;
+                return pMax - d6;
+            } else if (d4 < pMin) {
+                double d5 = pMin - d4;
+                return pMin + d5;
             } else {
                 return d4;
             }
         }
     }
 
-    public float getEatAnim(float p_30664_) {
-        return Mth.lerp(p_30664_, this.eatAnimO, this.eatAnim);
+    public float getEatAnim(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.eatAnimO, this.eatAnim);
     }
 
-    public float getStandAnim(float p_30668_) {
-        return Mth.lerp(p_30668_, this.standAnimO, this.standAnim);
+    public float getStandAnim(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.standAnimO, this.standAnim);
     }
 
-    public float getMouthAnim(float p_30534_) {
-        return Mth.lerp(p_30534_, this.mouthAnimO, this.mouthAnim);
+    public float getMouthAnim(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.mouthAnimO, this.mouthAnim);
     }
 
     @Override
-    public void onPlayerJump(int p_30591_) {
+    public void onPlayerJump(int pJumpPower) {
         if (this.isSaddled()) {
-            if (p_30591_ < 0) {
-                p_30591_ = 0;
+            if (pJumpPower < 0) {
+                pJumpPower = 0;
             } else {
                 this.allowStandSliding = true;
                 this.standIfPossible();
             }
 
-            if (p_30591_ >= 90) {
+            if (pJumpPower >= 90) {
                 this.playerJumpPendingScale = 1.0F;
             } else {
-                this.playerJumpPendingScale = 0.4F + 0.4F * (float)p_30591_ / 90.0F;
+                this.playerJumpPendingScale = 0.4F + 0.4F * (float)pJumpPower / 90.0F;
             }
         }
     }
@@ -961,7 +961,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
     }
 
     @Override
-    public void handleStartJump(int p_30574_) {
+    public void handleStartJump(int pJumpPower) {
         this.allowStandSliding = true;
         this.standIfPossible();
         this.playJumpSound();
@@ -971,8 +971,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
     public void handleStopJump() {
     }
 
-    protected void spawnTamingParticles(boolean p_30670_) {
-        ParticleOptions particleoptions = p_30670_ ? ParticleTypes.HEART : ParticleTypes.SMOKE;
+    protected void spawnTamingParticles(boolean pTamed) {
+        ParticleOptions particleoptions = pTamed ? ParticleTypes.HEART : ParticleTypes.SMOKE;
 
         for (int i = 0; i < 7; i++) {
             double d0 = this.random.nextGaussian() * 0.02;
@@ -1001,16 +1001,16 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         }
     }
 
-    protected static float generateMaxHealth(IntUnaryOperator p_272695_) {
-        return 15.0F + (float)p_272695_.applyAsInt(8) + (float)p_272695_.applyAsInt(9);
+    protected static float generateMaxHealth(IntUnaryOperator pOperator) {
+        return 15.0F + (float)pOperator.applyAsInt(8) + (float)pOperator.applyAsInt(9);
     }
 
-    protected static double generateJumpStrength(DoubleSupplier p_272718_) {
-        return 0.4F + p_272718_.getAsDouble() * 0.2 + p_272718_.getAsDouble() * 0.2 + p_272718_.getAsDouble() * 0.2;
+    protected static double generateJumpStrength(DoubleSupplier pSupplier) {
+        return 0.4F + pSupplier.getAsDouble() * 0.2 + pSupplier.getAsDouble() * 0.2 + pSupplier.getAsDouble() * 0.2;
     }
 
-    protected static double generateSpeed(DoubleSupplier p_273691_) {
-        return (0.45F + p_273691_.getAsDouble() * 0.3 + p_273691_.getAsDouble() * 0.3 + p_273691_.getAsDouble() * 0.3) * 0.25;
+    protected static double generateSpeed(DoubleSupplier pSupplier) {
+        return (0.45F + pSupplier.getAsDouble() * 0.3 + pSupplier.getAsDouble() * 0.3 + pSupplier.getAsDouble() * 0.3) * 0.25;
     }
 
     @Override
@@ -1059,13 +1059,13 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
     }
 
     @Nullable
-    private Vec3 getDismountLocationInDirection(Vec3 p_30562_, LivingEntity p_30563_) {
-        double d0 = this.getX() + p_30562_.x;
+    private Vec3 getDismountLocationInDirection(Vec3 pDirection, LivingEntity pPassenger) {
+        double d0 = this.getX() + pDirection.x;
         double d1 = this.getBoundingBox().minY;
-        double d2 = this.getZ() + p_30562_.z;
+        double d2 = this.getZ() + pDirection.z;
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
-        for (Pose pose : p_30563_.getDismountPoses()) {
+        for (Pose pose : pPassenger.getDismountPoses()) {
             blockpos$mutableblockpos.set(d0, d1, d2);
             double d3 = this.getBoundingBox().maxY + 0.75;
 
@@ -1076,10 +1076,10 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
                 }
 
                 if (DismountHelper.isBlockFloorValid(d4)) {
-                    AABB aabb = p_30563_.getLocalBoundsForPose(pose);
+                    AABB aabb = pPassenger.getLocalBoundsForPose(pose);
                     Vec3 vec3 = new Vec3(d0, (double)blockpos$mutableblockpos.getY() + d4, d2);
-                    if (DismountHelper.canDismountTo(this.level(), p_30563_, aabb.move(vec3))) {
-                        p_30563_.setPose(pose);
+                    if (DismountHelper.canDismountTo(this.level(), pPassenger, aabb.move(vec3))) {
+                        pPassenger.setPose(pose);
                         return vec3;
                     }
                 }
@@ -1092,23 +1092,23 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
     }
 
     @Override
-    public Vec3 getDismountLocationForPassenger(LivingEntity p_30576_) {
+    public Vec3 getDismountLocationForPassenger(LivingEntity pLivingEntity) {
         Vec3 vec3 = getCollisionHorizontalEscapeVector(
-            (double)this.getBbWidth(), (double)p_30576_.getBbWidth(), this.getYRot() + (p_30576_.getMainArm() == HumanoidArm.RIGHT ? 90.0F : -90.0F)
+            (double)this.getBbWidth(), (double)pLivingEntity.getBbWidth(), this.getYRot() + (pLivingEntity.getMainArm() == HumanoidArm.RIGHT ? 90.0F : -90.0F)
         );
-        Vec3 vec31 = this.getDismountLocationInDirection(vec3, p_30576_);
+        Vec3 vec31 = this.getDismountLocationInDirection(vec3, pLivingEntity);
         if (vec31 != null) {
             return vec31;
         } else {
             Vec3 vec32 = getCollisionHorizontalEscapeVector(
-                (double)this.getBbWidth(), (double)p_30576_.getBbWidth(), this.getYRot() + (p_30576_.getMainArm() == HumanoidArm.LEFT ? 90.0F : -90.0F)
+                (double)this.getBbWidth(), (double)pLivingEntity.getBbWidth(), this.getYRot() + (pLivingEntity.getMainArm() == HumanoidArm.LEFT ? 90.0F : -90.0F)
             );
-            Vec3 vec33 = this.getDismountLocationInDirection(vec32, p_30576_);
+            Vec3 vec33 = this.getDismountLocationInDirection(vec32, pLivingEntity);
             return vec33 != null ? vec33 : this.position();
         }
     }
 
-    protected void randomizeAttributes(RandomSource p_218804_) {
+    protected void randomizeAttributes(RandomSource pRandom) {
     }
 
     @Nullable
@@ -1122,8 +1122,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
         return super.finalizeSpawn(p_30555_, p_30556_, p_365113_, p_30558_);
     }
 
-    public boolean hasInventoryChanged(Container p_149512_) {
-        return this.inventory != p_149512_;
+    public boolean hasInventoryChanged(Container pInventory) {
+        return this.inventory != pInventory;
     }
 
     public int getAmbientStandInterval() {

@@ -15,22 +15,22 @@ public class StatType<T> implements Iterable<Stat<T>> {
     private final Component displayName;
     private final StreamCodec<RegistryFriendlyByteBuf, Stat<T>> streamCodec;
 
-    public StatType(Registry<T> p_12892_, Component p_300913_) {
-        this.registry = p_12892_;
-        this.displayName = p_300913_;
-        this.streamCodec = ByteBufCodecs.registry(p_12892_.key()).map(this::get, Stat::getValue);
+    public StatType(Registry<T> pRegistry, Component pDisplayName) {
+        this.registry = pRegistry;
+        this.displayName = pDisplayName;
+        this.streamCodec = ByteBufCodecs.registry(pRegistry.key()).map(this::get, Stat::getValue);
     }
 
     public StreamCodec<RegistryFriendlyByteBuf, Stat<T>> streamCodec() {
         return this.streamCodec;
     }
 
-    public boolean contains(T p_12898_) {
-        return this.map.containsKey(p_12898_);
+    public boolean contains(T pValue) {
+        return this.map.containsKey(pValue);
     }
 
-    public Stat<T> get(T p_12900_, StatFormatter p_12901_) {
-        return this.map.computeIfAbsent(p_12900_, p_12896_ -> new Stat<>(this, (T)p_12896_, p_12901_));
+    public Stat<T> get(T pValue, StatFormatter pFormatter) {
+        return this.map.computeIfAbsent(pValue, p_12896_ -> new Stat<>(this, (T)p_12896_, pFormatter));
     }
 
     public Registry<T> getRegistry() {
@@ -42,8 +42,8 @@ public class StatType<T> implements Iterable<Stat<T>> {
         return this.map.values().iterator();
     }
 
-    public Stat<T> get(T p_12903_) {
-        return this.get(p_12903_, StatFormatter.DEFAULT);
+    public Stat<T> get(T pValue) {
+        return this.get(pValue, StatFormatter.DEFAULT);
     }
 
     public Component getDisplayName() {

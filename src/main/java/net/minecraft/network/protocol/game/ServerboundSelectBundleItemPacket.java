@@ -10,13 +10,13 @@ public record ServerboundSelectBundleItemPacket(int slotId, int selectedItemInde
         ServerboundSelectBundleItemPacket::write, ServerboundSelectBundleItemPacket::new
     );
 
-    private ServerboundSelectBundleItemPacket(FriendlyByteBuf p_361056_) {
-        this(p_361056_.readVarInt(), p_361056_.readVarInt());
+    private ServerboundSelectBundleItemPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readVarInt(), pBuffer.readVarInt());
     }
 
-    private void write(FriendlyByteBuf p_364570_) {
-        p_364570_.writeVarInt(this.slotId);
-        p_364570_.writeVarInt(this.selectedItemIndex);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.slotId);
+        pBuffer.writeVarInt(this.selectedItemIndex);
     }
 
     @Override

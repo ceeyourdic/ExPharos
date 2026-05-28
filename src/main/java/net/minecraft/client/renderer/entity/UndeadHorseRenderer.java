@@ -15,9 +15,9 @@ public class UndeadHorseRenderer extends AbstractHorseRenderer<AbstractHorse, Eq
     private static final ResourceLocation SKELETON_TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/horse/horse_skeleton.png");
     private final ResourceLocation texture;
 
-    public UndeadHorseRenderer(EntityRendererProvider.Context p_174432_, ModelLayerLocation p_174433_, ModelLayerLocation p_365284_, boolean p_364432_) {
-        super(p_174432_, new HorseModel(p_174432_.bakeLayer(p_174433_)), new HorseModel(p_174432_.bakeLayer(p_365284_)));
-        this.texture = p_364432_ ? SKELETON_TEXTURE : ZOMBIE_TEXTURE;
+    public UndeadHorseRenderer(EntityRendererProvider.Context pContext, ModelLayerLocation pAdultModelLayer, ModelLayerLocation pBabyModelLayer, boolean pSkeletonHorse) {
+        super(pContext, new HorseModel(pContext.bakeLayer(pAdultModelLayer)), new HorseModel(pContext.bakeLayer(pBabyModelLayer)));
+        this.texture = pSkeletonHorse ? SKELETON_TEXTURE : ZOMBIE_TEXTURE;
     }
 
     public ResourceLocation getTextureLocation(EquineRenderState p_369447_) {

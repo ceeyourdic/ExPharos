@@ -41,9 +41,9 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
     private CompletableFuture<Suggestions> pendingSuggestionsFuture;
     private final Set<String> customCompletionSuggestions = new HashSet<>();
 
-    public ClientSuggestionProvider(ClientPacketListener p_105165_, Minecraft p_105166_) {
-        this.connection = p_105165_;
-        this.minecraft = p_105166_;
+    public ClientSuggestionProvider(ClientPacketListener pConnection, Minecraft pMinecraft) {
+        this.connection = pConnection;
+        this.minecraft = pMinecraft;
     }
 
     @Override
@@ -86,9 +86,9 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
     }
 
     @Override
-    public boolean hasPermission(int p_105178_) {
+    public boolean hasPermission(int pLevel) {
         LocalPlayer localplayer = this.minecraft.player;
-        return localplayer != null ? localplayer.hasPermissions(p_105178_) : p_105178_ == 0;
+        return localplayer != null ? localplayer.hasPermissions(pLevel) : pLevel == 0;
     }
 
     @Override
@@ -116,12 +116,12 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
         return this.pendingSuggestionsFuture;
     }
 
-    private static String prettyPrint(double p_105168_) {
-        return String.format(Locale.ROOT, "%.2f", p_105168_);
+    private static String prettyPrint(double pDoubleValue) {
+        return String.format(Locale.ROOT, "%.2f", pDoubleValue);
     }
 
-    private static String prettyPrint(int p_105170_) {
-        return Integer.toString(p_105170_);
+    private static String prettyPrint(int pIntValue) {
+        return Integer.toString(pIntValue);
     }
 
     @Override
@@ -165,25 +165,25 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
         return this.connection.enabledFeatures();
     }
 
-    public void completeCustomSuggestions(int p_105172_, Suggestions p_105173_) {
-        if (p_105172_ == this.pendingSuggestionsId) {
-            this.pendingSuggestionsFuture.complete(p_105173_);
+    public void completeCustomSuggestions(int pTransaction, Suggestions pResult) {
+        if (pTransaction == this.pendingSuggestionsId) {
+            this.pendingSuggestionsFuture.complete(pResult);
             this.pendingSuggestionsFuture = null;
             this.pendingSuggestionsId = -1;
         }
     }
 
-    public void modifyCustomCompletions(ClientboundCustomChatCompletionsPacket.Action p_240810_, List<String> p_240765_) {
-        switch (p_240810_) {
+    public void modifyCustomCompletions(ClientboundCustomChatCompletionsPacket.Action pAction, List<String> pEntries) {
+        switch (pAction) {
             case ADD:
-                this.customCompletionSuggestions.addAll(p_240765_);
+                this.customCompletionSuggestions.addAll(pEntries);
                 break;
             case REMOVE:
-                p_240765_.forEach(this.customCompletionSuggestions::remove);
+                pEntries.forEach(this.customCompletionSuggestions::remove);
                 break;
             case SET:
                 this.customCompletionSuggestions.clear();
-                this.customCompletionSuggestions.addAll(p_240765_);
+                this.customCompletionSuggestions.addAll(pEntries);
         }
     }
 }

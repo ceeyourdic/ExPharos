@@ -26,21 +26,21 @@ public class LogoRenderer {
     private final boolean showEasterEgg = (double)RandomSource.create().nextFloat() < 1.0E-4;
     private final boolean keepLogoThroughFade;
 
-    public LogoRenderer(boolean p_265300_) {
-        this.keepLogoThroughFade = p_265300_;
+    public LogoRenderer(boolean pKeepLogoThroughFade) {
+        this.keepLogoThroughFade = pKeepLogoThroughFade;
     }
 
-    public void renderLogo(GuiGraphics p_282217_, int p_283270_, float p_282051_) {
-        this.renderLogo(p_282217_, p_283270_, p_282051_, 30);
+    public void renderLogo(GuiGraphics pGuiGraphics, int pScreenWidth, float pTransparency) {
+        this.renderLogo(pGuiGraphics, pScreenWidth, pTransparency, 30);
     }
 
-    public void renderLogo(GuiGraphics p_281856_, int p_281512_, float p_281290_, int p_282296_) {
-        int i = p_281512_ / 2 - 128;
-        float f = this.keepLogoThroughFade ? 1.0F : p_281290_;
+    public void renderLogo(GuiGraphics pGuiGraphics, int pScreenWidth, float pTransparency, int pHeight) {
+        int i = pScreenWidth / 2 - 128;
+        float f = this.keepLogoThroughFade ? 1.0F : pTransparency;
         int j = ARGB.white(f);
-        p_281856_.blit(RenderType::guiTextured, this.showEasterEgg ? EASTER_EGG_LOGO : MINECRAFT_LOGO, i, p_282296_, 0.0F, 0.0F, 256, 44, 256, 64, j);
-        int k = p_281512_ / 2 - 64;
-        int l = p_282296_ + 44 - 7;
-        p_281856_.blit(RenderType::guiTextured, MINECRAFT_EDITION, k, l, 0.0F, 0.0F, 128, 14, 128, 16, j);
+        pGuiGraphics.blit(RenderType::guiTextured, this.showEasterEgg ? EASTER_EGG_LOGO : MINECRAFT_LOGO, i, pHeight, 0.0F, 0.0F, 256, 44, 256, 64, j);
+        int k = pScreenWidth / 2 - 64;
+        int l = pHeight + 44 - 7;
+        pGuiGraphics.blit(RenderType::guiTextured, MINECRAFT_EDITION, k, l, 0.0F, 0.0F, 128, 14, 128, 16, j);
     }
 }

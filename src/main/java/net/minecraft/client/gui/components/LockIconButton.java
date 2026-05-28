@@ -13,8 +13,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class LockIconButton extends Button {
     private boolean locked;
 
-    public LockIconButton(int p_94299_, int p_94300_, Button.OnPress p_94301_) {
-        super(p_94299_, p_94300_, 20, 20, Component.translatable("narrator.button.difficulty_lock"), p_94301_, DEFAULT_NARRATION);
+    public LockIconButton(int pX, int pY, Button.OnPress pOnPress) {
+        super(pX, pY, 20, 20, Component.translatable("narrator.button.difficulty_lock"), pOnPress, DEFAULT_NARRATION);
     }
 
     @Override
@@ -29,8 +29,8 @@ public class LockIconButton extends Button {
         return this.locked;
     }
 
-    public void setLocked(boolean p_94310_) {
-        this.locked = p_94310_;
+    public void setLocked(boolean pLocked) {
+        this.locked = pLocked;
     }
 
     @Override
@@ -58,8 +58,8 @@ public class LockIconButton extends Button {
 
         final ResourceLocation sprite;
 
-        private Icon(final ResourceLocation p_301150_) {
-            this.sprite = p_301150_;
+        private Icon(final ResourceLocation pSprite) {
+            this.sprite = pSprite;
         }
     }
 }

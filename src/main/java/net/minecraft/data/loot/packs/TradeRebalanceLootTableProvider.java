@@ -9,9 +9,9 @@ import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 
 public class TradeRebalanceLootTableProvider {
-    public static LootTableProvider create(PackOutput p_299647_, CompletableFuture<HolderLookup.Provider> p_328544_) {
+    public static LootTableProvider create(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pRegistries) {
         return new LootTableProvider(
-            p_299647_, Set.of(), List.of(new LootTableProvider.SubProviderEntry(TradeRebalanceChestLoot::new, LootContextParamSets.CHEST)), p_328544_
+            pOutput, Set.of(), List.of(new LootTableProvider.SubProviderEntry(TradeRebalanceChestLoot::new, LootContextParamSets.CHEST)), pRegistries
         );
     }
 }

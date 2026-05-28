@@ -44,11 +44,11 @@ public class WaterBoundPathNavigation extends PathNavigation {
     }
 
     @Override
-    public boolean isStableDestination(BlockPos p_26608_) {
-        return !this.level.getBlockState(p_26608_).isSolidRender();
+    public boolean isStableDestination(BlockPos pPos) {
+        return !this.level.getBlockState(pPos).isSolidRender();
     }
 
     @Override
-    public void setCanFloat(boolean p_26612_) {
+    public void setCanFloat(boolean pCanSwim) {
     }
 }

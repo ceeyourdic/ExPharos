@@ -25,9 +25,9 @@ public class Time extends NeedleDirectionHelper implements RangeSelectItemModelP
     private final RandomSource randomSource = RandomSource.create();
     private final NeedleDirectionHelper.Wobbler wobbler;
 
-    public Time(boolean p_378592_, Time.TimeSource p_376677_) {
-        super(p_378592_);
-        this.source = p_376677_;
+    public Time(boolean pWobble, Time.TimeSource pSource) {
+        super(pWobble);
+        this.source = pSource;
         this.wobbler = this.newWobbler(0.9F);
     }
 
@@ -71,8 +71,8 @@ public class Time extends NeedleDirectionHelper implements RangeSelectItemModelP
         public static final Codec<Time.TimeSource> CODEC = StringRepresentable.fromEnum(Time.TimeSource::values);
         private final String name;
 
-        TimeSource(final String p_376225_) {
-            this.name = p_376225_;
+        TimeSource(final String pName) {
+            this.name = pName;
         }
 
         @Override
@@ -80,6 +80,6 @@ public class Time extends NeedleDirectionHelper implements RangeSelectItemModelP
             return this.name;
         }
 
-        abstract float get(ClientLevel p_375860_, ItemStack p_378077_, Entity p_378735_, RandomSource p_377827_);
+        abstract float get(ClientLevel pLevel, ItemStack pStack, Entity pEntity, RandomSource pRandom);
     }
 }

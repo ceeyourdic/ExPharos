@@ -21,18 +21,18 @@ public class LongJumpToPreferredBlock<E extends Mob> extends LongJumpToRandomPos
     private boolean currentlyWantingPreferredOnes;
 
     public LongJumpToPreferredBlock(
-        UniformInt p_250024_,
-        int p_249524_,
-        int p_250434_,
-        float p_252307_,
-        Function<E, SoundEvent> p_248661_,
-        TagKey<Block> p_251760_,
-        float p_249002_,
-        BiPredicate<E, BlockPos> p_251818_
+        UniformInt pTimeBetweenLongJumps,
+        int pMaxLongJumpHeight,
+        int pMaxLongJumpWidth,
+        float pMaxJumpVelocity,
+        Function<E, SoundEvent> pGetJumpSound,
+        TagKey<Block> pPreferredBlockTag,
+        float pPreferredBlocksChance,
+        BiPredicate<E, BlockPos> pAcceptableLandingSpot
     ) {
-        super(p_250024_, p_249524_, p_250434_, p_252307_, p_248661_, p_251818_);
-        this.preferredBlockTag = p_251760_;
-        this.preferredBlocksChance = p_249002_;
+        super(pTimeBetweenLongJumps, pMaxLongJumpHeight, pMaxLongJumpWidth, pMaxJumpVelocity, pGetJumpSound, pAcceptableLandingSpot);
+        this.preferredBlockTag = pPreferredBlockTag;
+        this.preferredBlocksChance = pPreferredBlocksChance;
     }
 
     @Override

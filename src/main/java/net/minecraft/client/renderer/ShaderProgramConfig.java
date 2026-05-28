@@ -49,12 +49,12 @@ public record ShaderProgramConfig(
             )
             .validate(ShaderProgramConfig.Uniform::validate);
 
-        private static DataResult<ShaderProgramConfig.Uniform> validate(ShaderProgramConfig.Uniform p_368433_) {
-            int i = p_368433_.count;
-            int j = p_368433_.values.size();
+        private static DataResult<ShaderProgramConfig.Uniform> validate(ShaderProgramConfig.Uniform pUniform) {
+            int i = pUniform.count;
+            int j = pUniform.values.size();
             return j != i && j > 1
                 ? DataResult.error(() -> "Invalid amount of uniform values specified (expected " + i + ", found " + j + ")")
-                : DataResult.success(p_368433_);
+                : DataResult.success(pUniform);
         }
     }
 }

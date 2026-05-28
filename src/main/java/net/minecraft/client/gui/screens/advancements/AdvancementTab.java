@@ -40,18 +40,18 @@ public class AdvancementTab {
     private boolean centered;
 
     public AdvancementTab(
-        Minecraft p_97145_, AdvancementsScreen p_97146_, AdvancementTabType p_97147_, int p_97148_, AdvancementNode p_297568_, DisplayInfo p_97150_
+        Minecraft pMinecraft, AdvancementsScreen pScreen, AdvancementTabType pType, int pIndex, AdvancementNode pRootNode, DisplayInfo pDisplay
     ) {
-        this.minecraft = p_97145_;
-        this.screen = p_97146_;
-        this.type = p_97147_;
-        this.index = p_97148_;
-        this.rootNode = p_297568_;
-        this.display = p_97150_;
-        this.icon = p_97150_.getIcon();
-        this.title = p_97150_.getTitle();
-        this.root = new AdvancementWidget(this, p_97145_, p_297568_, p_97150_);
-        this.addWidget(this.root, p_297568_.holder());
+        this.minecraft = pMinecraft;
+        this.screen = pScreen;
+        this.type = pType;
+        this.index = pIndex;
+        this.rootNode = pRootNode;
+        this.display = pDisplay;
+        this.icon = pDisplay.getIcon();
+        this.title = pDisplay.getTitle();
+        this.root = new AdvancementWidget(this, pMinecraft, pRootNode, pDisplay);
+        this.addWidget(this.root, pRootNode.holder());
     }
 
     public AdvancementTabType getType() {
@@ -74,24 +74,24 @@ public class AdvancementTab {
         return this.display;
     }
 
-    public void drawTab(GuiGraphics p_282671_, int p_282721_, int p_282964_, boolean p_283052_) {
-        this.type.draw(p_282671_, p_282721_, p_282964_, p_283052_, this.index);
+    public void drawTab(GuiGraphics pGuiGraphics, int pOffsetX, int pOffsetY, boolean pIsSelected) {
+        this.type.draw(pGuiGraphics, pOffsetX, pOffsetY, pIsSelected, this.index);
     }
 
-    public void drawIcon(GuiGraphics p_282895_, int p_283419_, int p_283293_) {
-        this.type.drawIcon(p_282895_, p_283419_, p_283293_, this.index, this.icon);
+    public void drawIcon(GuiGraphics pGuiGraphics, int pOffsetX, int pOffsetY) {
+        this.type.drawIcon(pGuiGraphics, pOffsetX, pOffsetY, this.index, this.icon);
     }
 
-    public void drawContents(GuiGraphics p_282728_, int p_282962_, int p_281511_) {
+    public void drawContents(GuiGraphics pGuiGraphics, int pX, int pY) {
         if (!this.centered) {
             this.scrollX = (double)(117 - (this.maxX + this.minX) / 2);
             this.scrollY = (double)(56 - (this.maxY + this.minY) / 2);
             this.centered = true;
         }
 
-        p_282728_.enableScissor(p_282962_, p_281511_, p_282962_ + 234, p_281511_ + 113);
-        p_282728_.pose().pushPose();
-        p_282728_.pose().translate((float)p_282962_, (float)p_281511_, 0.0F);
+        pGuiGraphics.enableScissor(pX, pY, pX + 234, pY + 113);
+        pGuiGraphics.pose().pushPose();
+        pGuiGraphics.pose().translate((float)pX, (float)pY, 0.0F);
         ResourceLocation resourcelocation = this.display.getBackground().orElse(TextureManager.INTENTIONAL_MISSING_TEXTURE);
         int i = Mth.floor(this.scrollX);
         int j = Mth.floor(this.scrollY);
@@ -100,35 +100,35 @@ public class AdvancementTab {
 
         for (int i1 = -1; i1 <= 15; i1++) {
             for (int j1 = -1; j1 <= 8; j1++) {
-                p_282728_.blit(RenderType::guiTextured, resourcelocation, k + 16 * i1, l + 16 * j1, 0.0F, 0.0F, 16, 16, 16, 16);
+                pGuiGraphics.blit(RenderType::guiTextured, resourcelocation, k + 16 * i1, l + 16 * j1, 0.0F, 0.0F, 16, 16, 16, 16);
             }
         }
 
-        this.root.drawConnectivity(p_282728_, i, j, true);
-        this.root.drawConnectivity(p_282728_, i, j, false);
-        this.root.draw(p_282728_, i, j);
-        p_282728_.pose().popPose();
-        p_282728_.disableScissor();
+        this.root.drawConnectivity(pGuiGraphics, i, j, true);
+        this.root.drawConnectivity(pGuiGraphics, i, j, false);
+        this.root.draw(pGuiGraphics, i, j);
+        pGuiGraphics.pose().popPose();
+        pGuiGraphics.disableScissor();
     }
 
-    public void drawTooltips(GuiGraphics p_282892_, int p_283658_, int p_282602_, int p_282652_, int p_283595_) {
-        p_282892_.pose().pushPose();
-        p_282892_.pose().translate(0.0F, 0.0F, -200.0F);
-        p_282892_.fill(0, 0, 234, 113, Mth.floor(this.fade * 255.0F) << 24);
+    public void drawTooltips(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, int pWidth, int pHeight) {
+        pGuiGraphics.pose().pushPose();
+        pGuiGraphics.pose().translate(0.0F, 0.0F, -200.0F);
+        pGuiGraphics.fill(0, 0, 234, 113, Mth.floor(this.fade * 255.0F) << 24);
         boolean flag = false;
         int i = Mth.floor(this.scrollX);
         int j = Mth.floor(this.scrollY);
-        if (p_283658_ > 0 && p_283658_ < 234 && p_282602_ > 0 && p_282602_ < 113) {
+        if (pMouseX > 0 && pMouseX < 234 && pMouseY > 0 && pMouseY < 113) {
             for (AdvancementWidget advancementwidget : this.widgets.values()) {
-                if (advancementwidget.isMouseOver(i, j, p_283658_, p_282602_)) {
+                if (advancementwidget.isMouseOver(i, j, pMouseX, pMouseY)) {
                     flag = true;
-                    advancementwidget.drawHover(p_282892_, i, j, this.fade, p_282652_, p_283595_);
+                    advancementwidget.drawHover(pGuiGraphics, i, j, this.fade, pWidth, pHeight);
                     break;
                 }
             }
         }
 
-        p_282892_.pose().popPose();
+        pGuiGraphics.pose().popPose();
         if (flag) {
             this.fade = Mth.clamp(this.fade + 0.02F, 0.0F, 0.3F);
         } else {
@@ -136,51 +136,51 @@ public class AdvancementTab {
         }
     }
 
-    public boolean isMouseOver(int p_97155_, int p_97156_, double p_97157_, double p_97158_) {
-        return this.type.isMouseOver(p_97155_, p_97156_, this.index, p_97157_, p_97158_);
+    public boolean isMouseOver(int pOffsetX, int pOffsetY, double pMouseX, double pMouseY) {
+        return this.type.isMouseOver(pOffsetX, pOffsetY, this.index, pMouseX, pMouseY);
     }
 
     @Nullable
-    public static AdvancementTab create(Minecraft p_97171_, AdvancementsScreen p_97172_, int p_97173_, AdvancementNode p_299876_) {
-        Optional<DisplayInfo> optional = p_299876_.advancement().display();
+    public static AdvancementTab create(Minecraft pMinecraft, AdvancementsScreen pScreen, int pIndex, AdvancementNode pRootNode) {
+        Optional<DisplayInfo> optional = pRootNode.advancement().display();
         if (optional.isEmpty()) {
             return null;
         } else {
             for (AdvancementTabType advancementtabtype : AdvancementTabType.values()) {
-                if (p_97173_ < advancementtabtype.getMax()) {
-                    return new AdvancementTab(p_97171_, p_97172_, advancementtabtype, p_97173_, p_299876_, optional.get());
+                if (pIndex < advancementtabtype.getMax()) {
+                    return new AdvancementTab(pMinecraft, pScreen, advancementtabtype, pIndex, pRootNode, optional.get());
                 }
 
-                p_97173_ -= advancementtabtype.getMax();
+                pIndex -= advancementtabtype.getMax();
             }
 
             return null;
         }
     }
 
-    public void scroll(double p_97152_, double p_97153_) {
+    public void scroll(double pDragX, double pDragY) {
         if (this.maxX - this.minX > 234) {
-            this.scrollX = Mth.clamp(this.scrollX + p_97152_, (double)(-(this.maxX - 234)), 0.0);
+            this.scrollX = Mth.clamp(this.scrollX + pDragX, (double)(-(this.maxX - 234)), 0.0);
         }
 
         if (this.maxY - this.minY > 113) {
-            this.scrollY = Mth.clamp(this.scrollY + p_97153_, (double)(-(this.maxY - 113)), 0.0);
+            this.scrollY = Mth.clamp(this.scrollY + pDragY, (double)(-(this.maxY - 113)), 0.0);
         }
     }
 
-    public void addAdvancement(AdvancementNode p_297831_) {
-        Optional<DisplayInfo> optional = p_297831_.advancement().display();
+    public void addAdvancement(AdvancementNode pNode) {
+        Optional<DisplayInfo> optional = pNode.advancement().display();
         if (!optional.isEmpty()) {
-            AdvancementWidget advancementwidget = new AdvancementWidget(this, this.minecraft, p_297831_, optional.get());
-            this.addWidget(advancementwidget, p_297831_.holder());
+            AdvancementWidget advancementwidget = new AdvancementWidget(this, this.minecraft, pNode, optional.get());
+            this.addWidget(advancementwidget, pNode.holder());
         }
     }
 
-    private void addWidget(AdvancementWidget p_97176_, AdvancementHolder p_298201_) {
-        this.widgets.put(p_298201_, p_97176_);
-        int i = p_97176_.getX();
+    private void addWidget(AdvancementWidget pWidget, AdvancementHolder pAdvancement) {
+        this.widgets.put(pAdvancement, pWidget);
+        int i = pWidget.getX();
         int j = i + 28;
-        int k = p_97176_.getY();
+        int k = pWidget.getY();
         int l = k + 27;
         this.minX = Math.min(this.minX, i);
         this.maxX = Math.max(this.maxX, j);
@@ -193,8 +193,8 @@ public class AdvancementTab {
     }
 
     @Nullable
-    public AdvancementWidget getWidget(AdvancementHolder p_300472_) {
-        return this.widgets.get(p_300472_);
+    public AdvancementWidget getWidget(AdvancementHolder pAdvancement) {
+        return this.widgets.get(pAdvancement);
     }
 
     public AdvancementsScreen getScreen() {

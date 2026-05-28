@@ -4,8 +4,8 @@ public class FeatureFlag {
     final FeatureFlagUniverse universe;
     final long mask;
 
-    FeatureFlag(FeatureFlagUniverse p_249115_, int p_251067_) {
-        this.universe = p_249115_;
-        this.mask = 1L << p_251067_;
+    FeatureFlag(FeatureFlagUniverse pUniverse, int pMaskBit) {
+        this.universe = pUniverse;
+        this.mask = 1L << pMaskBit;
     }
 }

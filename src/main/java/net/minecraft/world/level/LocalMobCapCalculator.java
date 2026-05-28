@@ -16,24 +16,24 @@ public class LocalMobCapCalculator {
     private final Map<ServerPlayer, LocalMobCapCalculator.MobCounts> playerMobCounts = Maps.newHashMap();
     private final ChunkMap chunkMap;
 
-    public LocalMobCapCalculator(ChunkMap p_186501_) {
-        this.chunkMap = p_186501_;
+    public LocalMobCapCalculator(ChunkMap pChunkMap) {
+        this.chunkMap = pChunkMap;
     }
 
-    private List<ServerPlayer> getPlayersNear(ChunkPos p_186508_) {
-        return this.playersNearChunk.computeIfAbsent(p_186508_.toLong(), p_186511_ -> this.chunkMap.getPlayersCloseForSpawning(p_186508_));
+    private List<ServerPlayer> getPlayersNear(ChunkPos pPos) {
+        return this.playersNearChunk.computeIfAbsent(pPos.toLong(), p_186511_ -> this.chunkMap.getPlayersCloseForSpawning(pPos));
     }
 
-    public void addMob(ChunkPos p_186513_, MobCategory p_186514_) {
-        for (ServerPlayer serverplayer : this.getPlayersNear(p_186513_)) {
-            this.playerMobCounts.computeIfAbsent(serverplayer, p_186503_ -> new LocalMobCapCalculator.MobCounts()).add(p_186514_);
+    public void addMob(ChunkPos pPos, MobCategory pCategory) {
+        for (ServerPlayer serverplayer : this.getPlayersNear(pPos)) {
+            this.playerMobCounts.computeIfAbsent(serverplayer, p_186503_ -> new LocalMobCapCalculator.MobCounts()).add(pCategory);
         }
     }
 
-    public boolean canSpawn(MobCategory p_186505_, ChunkPos p_186506_) {
-        for (ServerPlayer serverplayer : this.getPlayersNear(p_186506_)) {
+    public boolean canSpawn(MobCategory pCategory, ChunkPos pPos) {
+        for (ServerPlayer serverplayer : this.getPlayersNear(pPos)) {
             LocalMobCapCalculator.MobCounts localmobcapcalculator$mobcounts = this.playerMobCounts.get(serverplayer);
-            if (localmobcapcalculator$mobcounts == null || localmobcapcalculator$mobcounts.canSpawn(p_186505_)) {
+            if (localmobcapcalculator$mobcounts == null || localmobcapcalculator$mobcounts.canSpawn(pCategory)) {
                 return true;
             }
         }
@@ -44,12 +44,12 @@ public class LocalMobCapCalculator {
     static class MobCounts {
         private final Object2IntMap<MobCategory> counts = new Object2IntOpenHashMap<>(MobCategory.values().length);
 
-        public void add(MobCategory p_186518_) {
-            this.counts.computeInt(p_186518_, (p_186520_, p_186521_) -> p_186521_ == null ? 1 : p_186521_ + 1);
+        public void add(MobCategory pCategory) {
+            this.counts.computeInt(pCategory, (p_186520_, p_186521_) -> p_186521_ == null ? 1 : p_186521_ + 1);
         }
 
-        public boolean canSpawn(MobCategory p_186523_) {
-            return this.counts.getOrDefault(p_186523_, 0) < p_186523_.getMaxInstancesPerChunk();
+        public boolean canSpawn(MobCategory pCategory) {
+            return this.counts.getOrDefault(pCategory, 0) < pCategory.getMaxInstancesPerChunk();
         }
     }
 }

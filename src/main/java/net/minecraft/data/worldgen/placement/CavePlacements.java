@@ -47,8 +47,8 @@ public class CavePlacements {
     public static final ResourceKey<PlacedFeature> SCULK_PATCH_ANCIENT_CITY = PlacementUtils.createKey("sculk_patch_ancient_city");
     public static final ResourceKey<PlacedFeature> SCULK_VEIN = PlacementUtils.createKey("sculk_vein");
 
-    public static void bootstrap(BootstrapContext<PlacedFeature> p_328522_) {
-        HolderGetter<ConfiguredFeature<?, ?>> holdergetter = p_328522_.lookup(Registries.CONFIGURED_FEATURE);
+    public static void bootstrap(BootstrapContext<PlacedFeature> pContext) {
+        HolderGetter<ConfiguredFeature<?, ?>> holdergetter = pContext.lookup(Registries.CONFIGURED_FEATURE);
         Holder<ConfiguredFeature<?, ?>> holder = holdergetter.getOrThrow(CaveFeatures.MONSTER_ROOM);
         Holder<ConfiguredFeature<?, ?>> holder1 = holdergetter.getOrThrow(CaveFeatures.FOSSIL_COAL);
         Holder<ConfiguredFeature<?, ?>> holder2 = holdergetter.getOrThrow(CaveFeatures.FOSSIL_DIAMONDS);
@@ -69,7 +69,7 @@ public class CavePlacements {
         Holder<ConfiguredFeature<?, ?>> holder17 = holdergetter.getOrThrow(CaveFeatures.SCULK_PATCH_ANCIENT_CITY);
         Holder<ConfiguredFeature<?, ?>> holder18 = holdergetter.getOrThrow(CaveFeatures.SCULK_VEIN);
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             MONSTER_ROOM,
             holder,
             CountPlacement.of(10),
@@ -78,7 +78,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             MONSTER_ROOM_DEEP,
             holder,
             CountPlacement.of(4),
@@ -87,7 +87,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             FOSSIL_UPPER,
             holder1,
             RarityFilter.onAverageOnceEvery(64),
@@ -96,7 +96,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             FOSSIL_LOWER,
             holder2,
             RarityFilter.onAverageOnceEvery(64),
@@ -105,7 +105,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             DRIPSTONE_CLUSTER,
             holder3,
             CountPlacement.of(UniformInt.of(48, 96)),
@@ -114,7 +114,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             LARGE_DRIPSTONE,
             holder4,
             CountPlacement.of(UniformInt.of(10, 48)),
@@ -123,7 +123,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             POINTED_DRIPSTONE,
             holder5,
             CountPlacement.of(UniformInt.of(192, 256)),
@@ -134,7 +134,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             UNDERWATER_MAGMA,
             holder6,
             CountPlacement.of(UniformInt.of(44, 52)),
@@ -144,7 +144,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             GLOW_LICHEN,
             holder7,
             CountPlacement.of(UniformInt.of(104, 157)),
@@ -154,7 +154,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             ROOTED_AZALEA_TREE,
             holder8,
             CountPlacement.of(UniformInt.of(1, 2)),
@@ -165,7 +165,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             CAVE_VINES,
             holder9,
             CountPlacement.of(188),
@@ -176,7 +176,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             LUSH_CAVES_VEGETATION,
             holder10,
             CountPlacement.of(125),
@@ -187,7 +187,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             LUSH_CAVES_CLAY,
             holder11,
             CountPlacement.of(62),
@@ -198,7 +198,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             LUSH_CAVES_CEILING_VEGETATION,
             holder12,
             CountPlacement.of(125),
@@ -209,7 +209,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             SPORE_BLOSSOM,
             holder13,
             CountPlacement.of(25),
@@ -220,10 +220,10 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_, CLASSIC_VINES, holder14, CountPlacement.of(256), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome()
+            pContext, CLASSIC_VINES, holder14, CountPlacement.of(256), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             AMETHYST_GEODE,
             holder15,
             RarityFilter.onAverageOnceEvery(24),
@@ -232,7 +232,7 @@ public class CavePlacements {
             BiomeFilter.biome()
         );
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             SCULK_PATCH_DEEP_DARK,
             holder16,
             CountPlacement.of(ConstantInt.of(256)),
@@ -240,9 +240,9 @@ public class CavePlacements {
             PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
             BiomeFilter.biome()
         );
-        PlacementUtils.register(p_328522_, SCULK_PATCH_ANCIENT_CITY, holder17);
+        PlacementUtils.register(pContext, SCULK_PATCH_ANCIENT_CITY, holder17);
         PlacementUtils.register(
-            p_328522_,
+            pContext,
             SCULK_VEIN,
             holder18,
             CountPlacement.of(UniformInt.of(204, 250)),

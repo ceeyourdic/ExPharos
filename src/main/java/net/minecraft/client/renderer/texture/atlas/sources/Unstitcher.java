@@ -42,11 +42,11 @@ public class Unstitcher implements SpriteSource {
     private final double xDivisor;
     private final double yDivisor;
 
-    public Unstitcher(ResourceLocation p_261679_, List<Unstitcher.Region> p_261974_, double p_262181_, double p_261631_) {
-        this.resource = p_261679_;
-        this.regions = p_261974_;
-        this.xDivisor = p_262181_;
-        this.yDivisor = p_261631_;
+    public Unstitcher(ResourceLocation pResource, List<Unstitcher.Region> pRegions, double pXDivisor, double pYDivisor) {
+        this.resource = pResource;
+        this.regions = pRegions;
+        this.xDivisor = pXDivisor;
+        this.yDivisor = pYDivisor;
     }
 
     @Override
@@ -92,11 +92,11 @@ public class Unstitcher implements SpriteSource {
         private final double xDivisor;
         private final double yDivisor;
 
-        RegionInstance(LazyLoadedImage p_266678_, Unstitcher.Region p_267197_, double p_266911_, double p_266789_) {
-            this.image = p_266678_;
-            this.region = p_267197_;
-            this.xDivisor = p_266911_;
-            this.yDivisor = p_266789_;
+        RegionInstance(LazyLoadedImage pImage, Unstitcher.Region pRegion, double pXDivisor, double pYDivisor) {
+            this.image = pImage;
+            this.region = pRegion;
+            this.xDivisor = pXDivisor;
+            this.yDivisor = pYDivisor;
         }
 
         public SpriteContents apply(SpriteResourceLoader p_297928_) {

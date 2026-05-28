@@ -17,7 +17,7 @@ public class TagTypes {
         LongArrayTag.TYPE
     };
 
-    public static TagType<?> getType(int p_129398_) {
-        return p_129398_ >= 0 && p_129398_ < TYPES.length ? TYPES[p_129398_] : TagType.createInvalid(p_129398_);
+    public static TagType<?> getType(int pId) {
+        return pId >= 0 && pId < TYPES.length ? TYPES[pId] : TagType.createInvalid(pId);
     }
 }

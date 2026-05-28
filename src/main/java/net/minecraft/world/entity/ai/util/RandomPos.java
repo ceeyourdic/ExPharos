@@ -15,22 +15,22 @@ import net.minecraft.world.phys.Vec3;
 public class RandomPos {
     private static final int RANDOM_POS_ATTEMPTS = 10;
 
-    public static BlockPos generateRandomDirection(RandomSource p_217852_, int p_217853_, int p_217854_) {
-        int i = p_217852_.nextInt(2 * p_217853_ + 1) - p_217853_;
-        int j = p_217852_.nextInt(2 * p_217854_ + 1) - p_217854_;
-        int k = p_217852_.nextInt(2 * p_217853_ + 1) - p_217853_;
+    public static BlockPos generateRandomDirection(RandomSource pRandom, int pHorizontalDistance, int pVerticalDistance) {
+        int i = pRandom.nextInt(2 * pHorizontalDistance + 1) - pHorizontalDistance;
+        int j = pRandom.nextInt(2 * pVerticalDistance + 1) - pVerticalDistance;
+        int k = pRandom.nextInt(2 * pHorizontalDistance + 1) - pHorizontalDistance;
         return new BlockPos(i, j, k);
     }
 
     @Nullable
-    public static BlockPos generateRandomDirectionWithinRadians(RandomSource p_217856_, int p_217857_, int p_217858_, int p_217859_, double p_217860_, double p_217861_, double p_217862_) {
-        double d0 = Mth.atan2(p_217861_, p_217860_) - (float) (Math.PI / 2);
-        double d1 = d0 + (double)(2.0F * p_217856_.nextFloat() - 1.0F) * p_217862_;
-        double d2 = Math.sqrt(p_217856_.nextDouble()) * (double)Mth.SQRT_OF_TWO * (double)p_217857_;
+    public static BlockPos generateRandomDirectionWithinRadians(RandomSource pRandom, int pMaxHorizontalDifference, int pYRange, int pY, double pX, double pZ, double pMaxAngleDelta) {
+        double d0 = Mth.atan2(pZ, pX) - (float) (Math.PI / 2);
+        double d1 = d0 + (double)(2.0F * pRandom.nextFloat() - 1.0F) * pMaxAngleDelta;
+        double d2 = Math.sqrt(pRandom.nextDouble()) * (double)Mth.SQRT_OF_TWO * (double)pMaxHorizontalDifference;
         double d3 = -d2 * Math.sin(d1);
         double d4 = d2 * Math.cos(d1);
-        if (!(Math.abs(d3) > (double)p_217857_) && !(Math.abs(d4) > (double)p_217857_)) {
-            int i = p_217856_.nextInt(2 * p_217858_ + 1) - p_217858_ + p_217859_;
+        if (!(Math.abs(d3) > (double)pMaxHorizontalDifference) && !(Math.abs(d4) > (double)pMaxHorizontalDifference)) {
+            int i = pRandom.nextInt(2 * pYRange + 1) - pYRange + pY;
             return BlockPos.containing(d3, (double)i, d4);
         } else {
             return null;
@@ -38,13 +38,13 @@ public class RandomPos {
     }
 
     @VisibleForTesting
-    public static BlockPos moveUpOutOfSolid(BlockPos p_148546_, int p_148547_, Predicate<BlockPos> p_148548_) {
-        if (!p_148548_.test(p_148546_)) {
-            return p_148546_;
+    public static BlockPos moveUpOutOfSolid(BlockPos pPos, int pMaxY, Predicate<BlockPos> pPosPredicate) {
+        if (!pPosPredicate.test(pPos)) {
+            return pPos;
         } else {
-            BlockPos.MutableBlockPos blockpos$mutableblockpos = p_148546_.mutable().move(Direction.UP);
+            BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.mutable().move(Direction.UP);
 
-            while (blockpos$mutableblockpos.getY() <= p_148547_ && p_148548_.test(blockpos$mutableblockpos)) {
+            while (blockpos$mutableblockpos.getY() <= pMaxY && pPosPredicate.test(blockpos$mutableblockpos)) {
                 blockpos$mutableblockpos.move(Direction.UP);
             }
 
@@ -53,23 +53,23 @@ public class RandomPos {
     }
 
     @VisibleForTesting
-    public static BlockPos moveUpToAboveSolid(BlockPos p_26948_, int p_26949_, int p_26950_, Predicate<BlockPos> p_26951_) {
-        if (p_26949_ < 0) {
-            throw new IllegalArgumentException("aboveSolidAmount was " + p_26949_ + ", expected >= 0");
-        } else if (!p_26951_.test(p_26948_)) {
-            return p_26948_;
+    public static BlockPos moveUpToAboveSolid(BlockPos pPos, int pAboveSolidAmount, int pMaxY, Predicate<BlockPos> pPosPredicate) {
+        if (pAboveSolidAmount < 0) {
+            throw new IllegalArgumentException("aboveSolidAmount was " + pAboveSolidAmount + ", expected >= 0");
+        } else if (!pPosPredicate.test(pPos)) {
+            return pPos;
         } else {
-            BlockPos.MutableBlockPos blockpos$mutableblockpos = p_26948_.mutable().move(Direction.UP);
+            BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.mutable().move(Direction.UP);
 
-            while (blockpos$mutableblockpos.getY() <= p_26950_ && p_26951_.test(blockpos$mutableblockpos)) {
+            while (blockpos$mutableblockpos.getY() <= pMaxY && pPosPredicate.test(blockpos$mutableblockpos)) {
                 blockpos$mutableblockpos.move(Direction.UP);
             }
 
             int i = blockpos$mutableblockpos.getY();
 
-            while (blockpos$mutableblockpos.getY() <= p_26950_ && blockpos$mutableblockpos.getY() - i < p_26949_) {
+            while (blockpos$mutableblockpos.getY() <= pMaxY && blockpos$mutableblockpos.getY() - i < pAboveSolidAmount) {
                 blockpos$mutableblockpos.move(Direction.UP);
-                if (p_26951_.test(blockpos$mutableblockpos)) {
+                if (pPosPredicate.test(blockpos$mutableblockpos)) {
                     blockpos$mutableblockpos.move(Direction.DOWN);
                     break;
                 }
@@ -80,19 +80,19 @@ public class RandomPos {
     }
 
     @Nullable
-    public static Vec3 generateRandomPos(PathfinderMob p_148543_, Supplier<BlockPos> p_148544_) {
-        return generateRandomPos(p_148544_, p_148543_::getWalkTargetValue);
+    public static Vec3 generateRandomPos(PathfinderMob pMob, Supplier<BlockPos> pPosSupplier) {
+        return generateRandomPos(pPosSupplier, pMob::getWalkTargetValue);
     }
 
     @Nullable
-    public static Vec3 generateRandomPos(Supplier<BlockPos> p_148562_, ToDoubleFunction<BlockPos> p_148563_) {
+    public static Vec3 generateRandomPos(Supplier<BlockPos> pPosSupplier, ToDoubleFunction<BlockPos> pToDoubleFunction) {
         double d0 = Double.NEGATIVE_INFINITY;
         BlockPos blockpos = null;
 
         for (int i = 0; i < 10; i++) {
-            BlockPos blockpos1 = p_148562_.get();
+            BlockPos blockpos1 = pPosSupplier.get();
             if (blockpos1 != null) {
-                double d1 = p_148563_.applyAsDouble(blockpos1);
+                double d1 = pToDoubleFunction.applyAsDouble(blockpos1);
                 if (d1 > d0) {
                     d0 = d1;
                     blockpos = blockpos1;
@@ -103,24 +103,24 @@ public class RandomPos {
         return blockpos != null ? Vec3.atBottomCenterOf(blockpos) : null;
     }
 
-    public static BlockPos generateRandomPosTowardDirection(PathfinderMob p_217864_, int p_217865_, RandomSource p_217866_, BlockPos p_217867_) {
-        int i = p_217867_.getX();
-        int j = p_217867_.getZ();
-        if (p_217864_.hasRestriction() && p_217865_ > 1) {
-            BlockPos blockpos = p_217864_.getRestrictCenter();
-            if (p_217864_.getX() > (double)blockpos.getX()) {
-                i -= p_217866_.nextInt(p_217865_ / 2);
+    public static BlockPos generateRandomPosTowardDirection(PathfinderMob pMob, int pRange, RandomSource pRandom, BlockPos pPos) {
+        int i = pPos.getX();
+        int j = pPos.getZ();
+        if (pMob.hasRestriction() && pRange > 1) {
+            BlockPos blockpos = pMob.getRestrictCenter();
+            if (pMob.getX() > (double)blockpos.getX()) {
+                i -= pRandom.nextInt(pRange / 2);
             } else {
-                i += p_217866_.nextInt(p_217865_ / 2);
+                i += pRandom.nextInt(pRange / 2);
             }
 
-            if (p_217864_.getZ() > (double)blockpos.getZ()) {
-                j -= p_217866_.nextInt(p_217865_ / 2);
+            if (pMob.getZ() > (double)blockpos.getZ()) {
+                j -= pRandom.nextInt(pRange / 2);
             } else {
-                j += p_217866_.nextInt(p_217865_ / 2);
+                j += pRandom.nextInt(pRange / 2);
             }
         }
 
-        return BlockPos.containing((double)i + p_217864_.getX(), (double)p_217867_.getY() + p_217864_.getY(), (double)j + p_217864_.getZ());
+        return BlockPos.containing((double)i + pMob.getX(), (double)pPos.getY() + pMob.getY(), (double)j + pMob.getZ());
     }
 }

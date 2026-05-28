@@ -16,12 +16,12 @@ public class ResourceLocationArgument implements ArgumentType<ResourceLocation> 
         return new ResourceLocationArgument();
     }
 
-    public static ResourceLocation getId(CommandContext<CommandSourceStack> p_107012_, String p_107013_) {
-        return p_107012_.getArgument(p_107013_, ResourceLocation.class);
+    public static ResourceLocation getId(CommandContext<CommandSourceStack> pContext, String pName) {
+        return pContext.getArgument(pName, ResourceLocation.class);
     }
 
-    public ResourceLocation parse(StringReader p_106986_) throws CommandSyntaxException {
-        return ResourceLocation.read(p_106986_);
+    public ResourceLocation parse(StringReader pReader) throws CommandSyntaxException {
+        return ResourceLocation.read(pReader);
     }
 
     @Override

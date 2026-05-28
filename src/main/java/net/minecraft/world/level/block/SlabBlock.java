@@ -46,18 +46,18 @@ public class SlabBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected boolean useShapeForLightOcclusion(BlockState p_56395_) {
-        return p_56395_.getValue(TYPE) != SlabType.DOUBLE;
+    protected boolean useShapeForLightOcclusion(BlockState pState) {
+        return pState.getValue(TYPE) != SlabType.DOUBLE;
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_56388_) {
-        p_56388_.add(TYPE, WATERLOGGED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(TYPE, WATERLOGGED);
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_56390_, BlockGetter p_56391_, BlockPos p_56392_, CollisionContext p_56393_) {
-        SlabType slabtype = p_56390_.getValue(TYPE);
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        SlabType slabtype = pState.getValue(TYPE);
         switch (slabtype) {
             case DOUBLE:
                 return Shapes.block();
@@ -70,32 +70,32 @@ public class SlabBlock extends Block implements SimpleWaterloggedBlock {
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_56361_) {
-        BlockPos blockpos = p_56361_.getClickedPos();
-        BlockState blockstate = p_56361_.getLevel().getBlockState(blockpos);
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockPos blockpos = pContext.getClickedPos();
+        BlockState blockstate = pContext.getLevel().getBlockState(blockpos);
         if (blockstate.is(this)) {
             return blockstate.setValue(TYPE, SlabType.DOUBLE).setValue(WATERLOGGED, Boolean.valueOf(false));
         } else {
-            FluidState fluidstate = p_56361_.getLevel().getFluidState(blockpos);
+            FluidState fluidstate = pContext.getLevel().getFluidState(blockpos);
             BlockState blockstate1 = this.defaultBlockState()
                 .setValue(TYPE, SlabType.BOTTOM)
                 .setValue(WATERLOGGED, Boolean.valueOf(fluidstate.getType() == Fluids.WATER));
-            Direction direction = p_56361_.getClickedFace();
-            return direction != Direction.DOWN && (direction == Direction.UP || !(p_56361_.getClickLocation().y - (double)blockpos.getY() > 0.5))
+            Direction direction = pContext.getClickedFace();
+            return direction != Direction.DOWN && (direction == Direction.UP || !(pContext.getClickLocation().y - (double)blockpos.getY() > 0.5))
                 ? blockstate1
                 : blockstate1.setValue(TYPE, SlabType.TOP);
         }
     }
 
     @Override
-    protected boolean canBeReplaced(BlockState p_56373_, BlockPlaceContext p_56374_) {
-        ItemStack itemstack = p_56374_.getItemInHand();
-        SlabType slabtype = p_56373_.getValue(TYPE);
+    protected boolean canBeReplaced(BlockState pState, BlockPlaceContext pUseContext) {
+        ItemStack itemstack = pUseContext.getItemInHand();
+        SlabType slabtype = pState.getValue(TYPE);
         if (slabtype == SlabType.DOUBLE || !itemstack.is(this.asItem())) {
             return false;
-        } else if (p_56374_.replacingClickedOnBlock()) {
-            boolean flag = p_56374_.getClickLocation().y - (double)p_56374_.getClickedPos().getY() > 0.5;
-            Direction direction = p_56374_.getClickedFace();
+        } else if (pUseContext.replacingClickedOnBlock()) {
+            boolean flag = pUseContext.getClickLocation().y - (double)pUseContext.getClickedPos().getY() > 0.5;
+            Direction direction = pUseContext.getClickedFace();
             return slabtype == SlabType.BOTTOM
                 ? direction == Direction.UP || flag && direction.getAxis().isHorizontal()
                 : direction == Direction.DOWN || !flag && direction.getAxis().isHorizontal();
@@ -105,13 +105,13 @@ public class SlabBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected FluidState getFluidState(BlockState p_56397_) {
-        return p_56397_.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(p_56397_);
+    protected FluidState getFluidState(BlockState pState) {
+        return pState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(pState);
     }
 
     @Override
-    public boolean placeLiquid(LevelAccessor p_56368_, BlockPos p_56369_, BlockState p_56370_, FluidState p_56371_) {
-        return p_56370_.getValue(TYPE) != SlabType.DOUBLE ? SimpleWaterloggedBlock.super.placeLiquid(p_56368_, p_56369_, p_56370_, p_56371_) : false;
+    public boolean placeLiquid(LevelAccessor pLevel, BlockPos pPos, BlockState pState, FluidState pFluidState) {
+        return pState.getValue(TYPE) != SlabType.DOUBLE ? SimpleWaterloggedBlock.super.placeLiquid(pLevel, pPos, pState, pFluidState) : false;
     }
 
     @Override

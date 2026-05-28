@@ -26,55 +26,55 @@ public record TeleportTransition(
     public static final TeleportTransition.PostTeleportTransition PLACE_PORTAL_TICKET = TeleportTransition::placePortalTicket;
 
     public TeleportTransition(
-        ServerLevel p_367673_, Vec3 p_361950_, Vec3 p_369034_, float p_365740_, float p_364147_, TeleportTransition.PostTeleportTransition p_368988_
+        ServerLevel pNewLevel, Vec3 pPosition, Vec3 pDeltaMovement, float pYRot, float pXRot, TeleportTransition.PostTeleportTransition pPostTeleportTransition
     ) {
-        this(p_367673_, p_361950_, p_369034_, p_365740_, p_364147_, Set.of(), p_368988_);
+        this(pNewLevel, pPosition, pDeltaMovement, pYRot, pXRot, Set.of(), pPostTeleportTransition);
     }
 
     public TeleportTransition(
-        ServerLevel p_366139_,
-        Vec3 p_369335_,
-        Vec3 p_364793_,
-        float p_366788_,
-        float p_367305_,
-        Set<Relative> p_369752_,
-        TeleportTransition.PostTeleportTransition p_360762_
+        ServerLevel pNewLevel,
+        Vec3 pPosition,
+        Vec3 pDeltaMovement,
+        float pYRot,
+        float pXRot,
+        Set<Relative> pRelatives,
+        TeleportTransition.PostTeleportTransition pPostTeleportTransition
     ) {
-        this(p_366139_, p_369335_, p_364793_, p_366788_, p_367305_, false, false, p_369752_, p_360762_);
+        this(pNewLevel, pPosition, pDeltaMovement, pYRot, pXRot, false, false, pRelatives, pPostTeleportTransition);
     }
 
-    public TeleportTransition(ServerLevel p_364895_, Entity p_366539_, TeleportTransition.PostTeleportTransition p_360857_) {
-        this(p_364895_, findAdjustedSharedSpawnPos(p_364895_, p_366539_), Vec3.ZERO, 0.0F, 0.0F, false, false, Set.of(), p_360857_);
+    public TeleportTransition(ServerLevel pLevel, Entity pEntity, TeleportTransition.PostTeleportTransition pPostTeleportTransition) {
+        this(pLevel, findAdjustedSharedSpawnPos(pLevel, pEntity), Vec3.ZERO, 0.0F, 0.0F, false, false, Set.of(), pPostTeleportTransition);
     }
 
-    private static void playPortalSound(Entity p_361275_) {
-        if (p_361275_ instanceof ServerPlayer serverplayer) {
+    private static void playPortalSound(Entity pEntity) {
+        if (pEntity instanceof ServerPlayer serverplayer) {
             serverplayer.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
         }
     }
 
-    private static void placePortalTicket(Entity p_369312_) {
-        p_369312_.placePortalTicket(BlockPos.containing(p_369312_.position()));
+    private static void placePortalTicket(Entity pEntity) {
+        pEntity.placePortalTicket(BlockPos.containing(pEntity.position()));
     }
 
-    public static TeleportTransition missingRespawnBlock(ServerLevel p_369648_, Entity p_361289_, TeleportTransition.PostTeleportTransition p_360765_) {
-        return new TeleportTransition(p_369648_, findAdjustedSharedSpawnPos(p_369648_, p_361289_), Vec3.ZERO, 0.0F, 0.0F, true, false, Set.of(), p_360765_);
+    public static TeleportTransition missingRespawnBlock(ServerLevel pLevel, Entity pEntity, TeleportTransition.PostTeleportTransition pPostTeleportTransition) {
+        return new TeleportTransition(pLevel, findAdjustedSharedSpawnPos(pLevel, pEntity), Vec3.ZERO, 0.0F, 0.0F, true, false, Set.of(), pPostTeleportTransition);
     }
 
-    private static Vec3 findAdjustedSharedSpawnPos(ServerLevel p_369125_, Entity p_366828_) {
-        return p_366828_.adjustSpawnLocation(p_369125_, p_369125_.getSharedSpawnPos()).getBottomCenter();
+    private static Vec3 findAdjustedSharedSpawnPos(ServerLevel pLevel, Entity pEntity) {
+        return pEntity.adjustSpawnLocation(pLevel, pLevel.getSharedSpawnPos()).getBottomCenter();
     }
 
-    public TeleportTransition withRotation(float p_365894_, float p_364460_) {
+    public TeleportTransition withRotation(float pYRot, float pXRot) {
         return new TeleportTransition(
-            this.newLevel(), this.position(), this.deltaMovement(), p_365894_, p_364460_, this.missingRespawnBlock(), this.asPassenger(), this.relatives(), this.postTeleportTransition()
+            this.newLevel(), this.position(), this.deltaMovement(), pYRot, pXRot, this.missingRespawnBlock(), this.asPassenger(), this.relatives(), this.postTeleportTransition()
         );
     }
 
-    public TeleportTransition withPosition(Vec3 p_364591_) {
+    public TeleportTransition withPosition(Vec3 pPosition) {
         return new TeleportTransition(
             this.newLevel(),
-            p_364591_,
+            pPosition,
             this.deltaMovement(),
             this.yRot(),
             this.xRot(),
@@ -101,12 +101,12 @@ public record TeleportTransition(
 
     @FunctionalInterface
     public interface PostTeleportTransition {
-        void onTransition(Entity p_360712_);
+        void onTransition(Entity pEntity);
 
-        default TeleportTransition.PostTeleportTransition then(TeleportTransition.PostTeleportTransition p_368257_) {
+        default TeleportTransition.PostTeleportTransition then(TeleportTransition.PostTeleportTransition pPostTeleportTransition) {
             return p_362346_ -> {
                 this.onTransition(p_362346_);
-                p_368257_.onTransition(p_362346_);
+                pPostTeleportTransition.onTransition(p_362346_);
             };
         }
     }

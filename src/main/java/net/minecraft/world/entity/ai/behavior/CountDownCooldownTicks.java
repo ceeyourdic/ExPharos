@@ -10,13 +10,13 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 public class CountDownCooldownTicks extends Behavior<LivingEntity> {
     private final MemoryModuleType<Integer> cooldownTicks;
 
-    public CountDownCooldownTicks(MemoryModuleType<Integer> p_147462_) {
-        super(ImmutableMap.of(p_147462_, MemoryStatus.VALUE_PRESENT));
-        this.cooldownTicks = p_147462_;
+    public CountDownCooldownTicks(MemoryModuleType<Integer> pCooldownTicks) {
+        super(ImmutableMap.of(pCooldownTicks, MemoryStatus.VALUE_PRESENT));
+        this.cooldownTicks = pCooldownTicks;
     }
 
-    private Optional<Integer> getCooldownTickMemory(LivingEntity p_147466_) {
-        return p_147466_.getBrain().getMemory(this.cooldownTicks);
+    private Optional<Integer> getCooldownTickMemory(LivingEntity pEntity) {
+        return pEntity.getBrain().getMemory(this.cooldownTicks);
     }
 
     @Override

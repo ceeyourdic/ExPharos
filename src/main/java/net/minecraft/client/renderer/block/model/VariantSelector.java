@@ -19,14 +19,14 @@ public class VariantSelector {
     private static final Splitter COMMA_SPLITTER = Splitter.on(',');
     private static final Splitter EQUAL_SPLITTER = Splitter.on('=').limit(2);
 
-    public static <O, S extends StateHolder<O, S>> Predicate<StateHolder<O, S>> predicate(StateDefinition<O, S> p_365883_, String p_368935_) {
+    public static <O, S extends StateHolder<O, S>> Predicate<StateHolder<O, S>> predicate(StateDefinition<O, S> pStateDefinition, String pValue) {
         Map<Property<?>, Comparable<?>> map = new HashMap<>();
 
-        for (String s : COMMA_SPLITTER.split(p_368935_)) {
+        for (String s : COMMA_SPLITTER.split(pValue)) {
             Iterator<String> iterator = EQUAL_SPLITTER.split(s).iterator();
             if (iterator.hasNext()) {
                 String s1 = iterator.next();
-                Property<?> property = p_365883_.getProperty(s1);
+                Property<?> property = pStateDefinition.getProperty(s1);
                 if (property != null && iterator.hasNext()) {
                     String s2 = iterator.next();
                     Comparable<?> comparable = getValueHelper(property, s2);
@@ -53,7 +53,7 @@ public class VariantSelector {
     }
 
     @Nullable
-    private static <T extends Comparable<T>> T getValueHelper(Property<T> p_365874_, String p_369794_) {
-        return p_365874_.getValue(p_369794_).orElse(null);
+    private static <T extends Comparable<T>> T getValueHelper(Property<T> pProperty, String pValue) {
+        return pProperty.getValue(pValue).orElse(null);
     }
 }

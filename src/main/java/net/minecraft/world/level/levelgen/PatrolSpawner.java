@@ -97,23 +97,23 @@ public class PatrolSpawner implements CustomSpawner {
         }
     }
 
-    private boolean spawnPatrolMember(ServerLevel p_224533_, BlockPos p_224534_, RandomSource p_224535_, boolean p_224536_) {
-        BlockState blockstate = p_224533_.getBlockState(p_224534_);
-        if (!NaturalSpawner.isValidEmptySpawnBlock(p_224533_, p_224534_, blockstate, blockstate.getFluidState(), EntityType.PILLAGER)) {
+    private boolean spawnPatrolMember(ServerLevel pLevel, BlockPos pPos, RandomSource pRandom, boolean pLeader) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
+        if (!NaturalSpawner.isValidEmptySpawnBlock(pLevel, pPos, blockstate, blockstate.getFluidState(), EntityType.PILLAGER)) {
             return false;
-        } else if (!PatrollingMonster.checkPatrollingMonsterSpawnRules(EntityType.PILLAGER, p_224533_, EntitySpawnReason.PATROL, p_224534_, p_224535_)) {
+        } else if (!PatrollingMonster.checkPatrollingMonsterSpawnRules(EntityType.PILLAGER, pLevel, EntitySpawnReason.PATROL, pPos, pRandom)) {
             return false;
         } else {
-            PatrollingMonster patrollingmonster = EntityType.PILLAGER.create(p_224533_, EntitySpawnReason.PATROL);
+            PatrollingMonster patrollingmonster = EntityType.PILLAGER.create(pLevel, EntitySpawnReason.PATROL);
             if (patrollingmonster != null) {
-                if (p_224536_) {
+                if (pLeader) {
                     patrollingmonster.setPatrolLeader(true);
                     patrollingmonster.findPatrolTarget();
                 }
 
-                patrollingmonster.setPos((double)p_224534_.getX(), (double)p_224534_.getY(), (double)p_224534_.getZ());
-                patrollingmonster.finalizeSpawn(p_224533_, p_224533_.getCurrentDifficultyAt(p_224534_), EntitySpawnReason.PATROL, null);
-                p_224533_.addFreshEntityWithPassengers(patrollingmonster);
+                patrollingmonster.setPos((double)pPos.getX(), (double)pPos.getY(), (double)pPos.getZ());
+                patrollingmonster.finalizeSpawn(pLevel, pLevel.getCurrentDifficultyAt(pPos), EntitySpawnReason.PATROL, null);
+                pLevel.addFreshEntityWithPassengers(patrollingmonster);
                 return true;
             } else {
                 return false;

@@ -46,12 +46,12 @@ public class AnvilMenu extends ItemCombinerMenu {
     private static final int RESULT_SLOT_X_PLACEMENT = 134;
     private static final int SLOT_Y_PLACEMENT = 47;
 
-    public AnvilMenu(int p_39005_, Inventory p_39006_) {
-        this(p_39005_, p_39006_, ContainerLevelAccess.NULL);
+    public AnvilMenu(int pContainerId, Inventory pPlayerInventory) {
+        this(pContainerId, pPlayerInventory, ContainerLevelAccess.NULL);
     }
 
-    public AnvilMenu(int p_39008_, Inventory p_39009_, ContainerLevelAccess p_39010_) {
-        super(MenuType.ANVIL, p_39008_, p_39009_, p_39010_, createInputSlotDefinitions());
+    public AnvilMenu(int pContainerId, Inventory pPlayerInventory, ContainerLevelAccess pAccess) {
+        super(MenuType.ANVIL, pContainerId, pPlayerInventory, pAccess, createInputSlotDefinitions());
         this.addDataSlot(this.cost);
     }
 
@@ -270,12 +270,12 @@ public class AnvilMenu extends ItemCombinerMenu {
         }
     }
 
-    public static int calculateIncreasedRepairCost(int p_39026_) {
-        return (int)Math.min((long)p_39026_ * 2L + 1L, 2147483647L);
+    public static int calculateIncreasedRepairCost(int pOldRepairCost) {
+        return (int)Math.min((long)pOldRepairCost * 2L + 1L, 2147483647L);
     }
 
-    public boolean setItemName(String p_288970_) {
-        String s = validateName(p_288970_);
+    public boolean setItemName(String pItemName) {
+        String s = validateName(pItemName);
         if (s != null && !s.equals(this.itemName)) {
             this.itemName = s;
             if (this.getSlot(2).hasItem()) {
@@ -295,8 +295,8 @@ public class AnvilMenu extends ItemCombinerMenu {
     }
 
     @Nullable
-    private static String validateName(String p_288995_) {
-        String s = StringUtil.filterText(p_288995_);
+    private static String validateName(String pItemName) {
+        String s = StringUtil.filterText(pItemName);
         return s.length() <= 50 ? s : null;
     }
 

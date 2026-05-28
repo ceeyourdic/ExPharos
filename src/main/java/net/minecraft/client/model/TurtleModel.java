@@ -19,9 +19,9 @@ public class TurtleModel extends QuadrupedModel<TurtleRenderState> {
     public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(true, 120.0F, 0.0F, 9.0F, 6.0F, 120.0F, Set.of("head"));
     private final ModelPart eggBelly;
 
-    public TurtleModel(ModelPart p_171042_) {
-        super(p_171042_);
-        this.eggBelly = p_171042_.getChild("egg_belly");
+    public TurtleModel(ModelPart pRoot) {
+        super(pRoot);
+        this.eggBelly = pRoot.getChild("egg_belly");
     }
 
     public static LayerDefinition createBodyLayer() {

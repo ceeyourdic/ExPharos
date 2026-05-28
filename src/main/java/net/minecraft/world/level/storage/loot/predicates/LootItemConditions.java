@@ -28,7 +28,7 @@ public class LootItemConditions {
     public static final LootItemConditionType VALUE_CHECK = register("value_check", ValueCheckCondition.CODEC);
     public static final LootItemConditionType ENCHANTMENT_ACTIVE_CHECK = register("enchantment_active_check", EnchantmentActiveCheck.CODEC);
 
-    private static LootItemConditionType register(String p_81832_, MapCodec<? extends LootItemCondition> p_331746_) {
-        return Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, ResourceLocation.withDefaultNamespace(p_81832_), new LootItemConditionType(p_331746_));
+    private static LootItemConditionType register(String pName, MapCodec<? extends LootItemCondition> pCodec) {
+        return Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, ResourceLocation.withDefaultNamespace(pName), new LootItemConditionType(pCodec));
     }
 }

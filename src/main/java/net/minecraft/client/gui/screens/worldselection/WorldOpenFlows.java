@@ -72,29 +72,29 @@ public class WorldOpenFlows {
     private final Minecraft minecraft;
     private final LevelStorageSource levelSource;
 
-    public WorldOpenFlows(Minecraft p_233093_, LevelStorageSource p_233094_) {
-        this.minecraft = p_233093_;
-        this.levelSource = p_233094_;
+    public WorldOpenFlows(Minecraft pMinecraft, LevelStorageSource pLevelSource) {
+        this.minecraft = pMinecraft;
+        this.levelSource = pLevelSource;
     }
 
     public void createFreshLevel(
-        String p_233158_, LevelSettings p_233159_, WorldOptions p_249243_, Function<HolderLookup.Provider, WorldDimensions> p_249252_, Screen p_310233_
+        String pLevelName, LevelSettings pLevelSettings, WorldOptions pWorldOptions, Function<HolderLookup.Provider, WorldDimensions> pDimensionGetter, Screen pLastScreen
     ) {
         this.minecraft.forceSetScreen(new GenericMessageScreen(Component.translatable("selectWorld.data_read")));
-        LevelStorageSource.LevelStorageAccess levelstoragesource$levelstorageaccess = this.createWorldAccess(p_233158_);
+        LevelStorageSource.LevelStorageAccess levelstoragesource$levelstorageaccess = this.createWorldAccess(pLevelName);
         if (levelstoragesource$levelstorageaccess != null) {
             PackRepository packrepository = ServerPacksSource.createPackRepository(levelstoragesource$levelstorageaccess);
-            WorldDataConfiguration worlddataconfiguration = p_233159_.getDataConfiguration();
+            WorldDataConfiguration worlddataconfiguration = pLevelSettings.getDataConfiguration();
 
             try {
                 WorldLoader.PackConfig worldloader$packconfig = new WorldLoader.PackConfig(packrepository, worlddataconfiguration, false, false);
                 WorldStem worldstem = this.loadWorldDataBlocking(
                     worldloader$packconfig,
                     p_357764_ -> {
-                        WorldDimensions.Complete worlddimensions$complete = p_249252_.apply(p_357764_.datapackWorldgen())
+                        WorldDimensions.Complete worlddimensions$complete = pDimensionGetter.apply(p_357764_.datapackWorldgen())
                             .bake(p_357764_.datapackDimensions().lookupOrThrow(Registries.LEVEL_STEM));
                         return new WorldLoader.DataLoadOutput<>(
-                            new PrimaryLevelData(p_233159_, p_249243_, worlddimensions$complete.specialWorldProperty(), worlddimensions$complete.lifecycle()),
+                            new PrimaryLevelData(pLevelSettings, pWorldOptions, worlddimensions$complete.specialWorldProperty(), worlddimensions$complete.lifecycle()),
                             worlddimensions$complete.dimensionsRegistryAccess()
                         );
                     },
@@ -104,18 +104,18 @@ public class WorldOpenFlows {
             } catch (Exception exception) {
                 LOGGER.warn("Failed to load datapacks, can't proceed with server load", (Throwable)exception);
                 levelstoragesource$levelstorageaccess.safeClose();
-                this.minecraft.setScreen(p_310233_);
+                this.minecraft.setScreen(pLastScreen);
             }
         }
     }
 
     @Nullable
-    private LevelStorageSource.LevelStorageAccess createWorldAccess(String p_233156_) {
+    private LevelStorageSource.LevelStorageAccess createWorldAccess(String pLevelName) {
         try {
-            return this.levelSource.validateAndCreateAccess(p_233156_);
+            return this.levelSource.validateAndCreateAccess(pLevelName);
         } catch (IOException ioexception) {
-            LOGGER.warn("Failed to read level {} data", p_233156_, ioexception);
-            SystemToast.onWorldAccessFailure(this.minecraft, p_233156_);
+            LOGGER.warn("Failed to read level {} data", pLevelName, ioexception);
+            SystemToast.onWorldAccessFailure(this.minecraft, pLevelName);
             this.minecraft.setScreen(null);
             return null;
         } catch (ContentValidationException contentvalidationexception) {
@@ -126,30 +126,30 @@ public class WorldOpenFlows {
     }
 
     public void createLevelFromExistingSettings(
-        LevelStorageSource.LevelStorageAccess p_250919_,
-        ReloadableServerResources p_248897_,
-        LayeredRegistryAccess<RegistryLayer> p_250801_,
-        WorldData p_251654_
+        LevelStorageSource.LevelStorageAccess pLevelStorage,
+        ReloadableServerResources pResources,
+        LayeredRegistryAccess<RegistryLayer> pRegistries,
+        WorldData pWorldData
     ) {
-        PackRepository packrepository = ServerPacksSource.createPackRepository(p_250919_);
-        CloseableResourceManager closeableresourcemanager = new WorldLoader.PackConfig(packrepository, p_251654_.getDataConfiguration(), false, false)
+        PackRepository packrepository = ServerPacksSource.createPackRepository(pLevelStorage);
+        CloseableResourceManager closeableresourcemanager = new WorldLoader.PackConfig(packrepository, pWorldData.getDataConfiguration(), false, false)
             .createResourceManager()
             .getSecond();
-        this.minecraft.doWorldLoad(p_250919_, packrepository, new WorldStem(closeableresourcemanager, p_248897_, p_250801_, p_251654_), true);
+        this.minecraft.doWorldLoad(pLevelStorage, packrepository, new WorldStem(closeableresourcemanager, pResources, pRegistries, pWorldData), true);
     }
 
-    public WorldStem loadWorldStem(Dynamic<?> p_312184_, boolean p_233124_, PackRepository p_233125_) throws Exception {
-        WorldLoader.PackConfig worldloader$packconfig = LevelStorageSource.getPackConfig(p_312184_, p_233125_, p_233124_);
+    public WorldStem loadWorldStem(Dynamic<?> pDynamic, boolean pSafeMode, PackRepository pPackRepository) throws Exception {
+        WorldLoader.PackConfig worldloader$packconfig = LevelStorageSource.getPackConfig(pDynamic, pPackRepository, pSafeMode);
         return this.loadWorldDataBlocking(worldloader$packconfig, p_357756_ -> {
             Registry<LevelStem> registry = p_357756_.datapackDimensions().lookupOrThrow(Registries.LEVEL_STEM);
-            LevelDataAndDimensions leveldataanddimensions = LevelStorageSource.getLevelDataAndDimensions(p_312184_, p_357756_.dataConfiguration(), registry, p_357756_.datapackWorldgen());
+            LevelDataAndDimensions leveldataanddimensions = LevelStorageSource.getLevelDataAndDimensions(pDynamic, p_357756_.dataConfiguration(), registry, p_357756_.datapackWorldgen());
             return new WorldLoader.DataLoadOutput<>(leveldataanddimensions.worldData(), leveldataanddimensions.dimensions().dimensionsRegistryAccess());
         }, WorldStem::new);
     }
 
-    public Pair<LevelSettings, WorldCreationContext> recreateWorldData(LevelStorageSource.LevelStorageAccess p_249540_) throws Exception {
-        PackRepository packrepository = ServerPacksSource.createPackRepository(p_249540_);
-        Dynamic<?> dynamic = p_249540_.getDataTag();
+    public Pair<LevelSettings, WorldCreationContext> recreateWorldData(LevelStorageSource.LevelStorageAccess pLevelStorage) throws Exception {
+        PackRepository packrepository = ServerPacksSource.createPackRepository(pLevelStorage);
+        Dynamic<?> dynamic = pLevelStorage.getDataTag();
         WorldLoader.PackConfig worldloader$packconfig = LevelStorageSource.getPackConfig(dynamic, packrepository, false);
 
         @OnlyIn(Dist.CLIENT)
@@ -190,17 +190,17 @@ public class WorldOpenFlows {
         );
     }
 
-    private <D, R> R loadWorldDataBlocking(WorldLoader.PackConfig p_250997_, WorldLoader.WorldDataSupplier<D> p_251759_, WorldLoader.ResultFactory<D, R> p_249635_) throws Exception {
-        WorldLoader.InitConfig worldloader$initconfig = new WorldLoader.InitConfig(p_250997_, Commands.CommandSelection.INTEGRATED, 2);
-        CompletableFuture<R> completablefuture = WorldLoader.load(worldloader$initconfig, p_251759_, p_249635_, Util.backgroundExecutor(), this.minecraft);
+    private <D, R> R loadWorldDataBlocking(WorldLoader.PackConfig pPackConfig, WorldLoader.WorldDataSupplier<D> pWorldDataSupplier, WorldLoader.ResultFactory<D, R> pResultFactory) throws Exception {
+        WorldLoader.InitConfig worldloader$initconfig = new WorldLoader.InitConfig(pPackConfig, Commands.CommandSelection.INTEGRATED, 2);
+        CompletableFuture<R> completablefuture = WorldLoader.load(worldloader$initconfig, pWorldDataSupplier, pResultFactory, Util.backgroundExecutor(), this.minecraft);
         this.minecraft.managedBlock(completablefuture::isDone);
         return completablefuture.get();
     }
 
-    private void askForBackup(LevelStorageSource.LevelStorageAccess p_312560_, boolean p_233143_, Runnable p_233144_, Runnable p_312163_) {
+    private void askForBackup(LevelStorageSource.LevelStorageAccess pLevelStorage, boolean pCustomized, Runnable pLoadLevel, Runnable pOnCancel) {
         Component component;
         Component component1;
-        if (p_233143_) {
+        if (pCustomized) {
             component = Component.translatable("selectWorld.backupQuestion.customized");
             component1 = Component.translatable("selectWorld.backupWarning.customized");
         } else {
@@ -208,27 +208,27 @@ public class WorldOpenFlows {
             component1 = Component.translatable("selectWorld.backupWarning.experimental");
         }
 
-        this.minecraft.setScreen(new BackupConfirmScreen(p_312163_, (p_308273_, p_308274_) -> {
+        this.minecraft.setScreen(new BackupConfirmScreen(pOnCancel, (p_308273_, p_308274_) -> {
             if (p_308273_) {
-                EditWorldScreen.makeBackupAndShowToast(p_312560_);
+                EditWorldScreen.makeBackupAndShowToast(pLevelStorage);
             }
 
-            p_233144_.run();
+            pLoadLevel.run();
         }, component, component1, false));
     }
 
-    public static void confirmWorldCreation(Minecraft p_270593_, CreateWorldScreen p_270733_, Lifecycle p_270539_, Runnable p_270158_, boolean p_270709_) {
+    public static void confirmWorldCreation(Minecraft pMinecraft, CreateWorldScreen pScreen, Lifecycle pLifecycle, Runnable pLoadWorld, boolean pSkipWarnings) {
         BooleanConsumer booleanconsumer = p_233154_ -> {
             if (p_233154_) {
-                p_270158_.run();
+                pLoadWorld.run();
             } else {
-                p_270593_.setScreen(p_270733_);
+                pMinecraft.setScreen(pScreen);
             }
         };
-        if (p_270709_ || p_270539_ == Lifecycle.stable()) {
-            p_270158_.run();
-        } else if (p_270539_ == Lifecycle.experimental()) {
-            p_270593_.setScreen(
+        if (pSkipWarnings || pLifecycle == Lifecycle.stable()) {
+            pLoadWorld.run();
+        } else if (pLifecycle == Lifecycle.experimental()) {
+            pMinecraft.setScreen(
                 new ConfirmScreen(
                     booleanconsumer,
                     Component.translatable("selectWorld.warning.experimental.title"),
@@ -236,7 +236,7 @@ public class WorldOpenFlows {
                 )
             );
         } else {
-            p_270593_.setScreen(
+            pMinecraft.setScreen(
                 new ConfirmScreen(
                     booleanconsumer,
                     Component.translatable("selectWorld.warning.deprecated.title"),
@@ -246,60 +246,60 @@ public class WorldOpenFlows {
         }
     }
 
-    public void openWorld(String p_332907_, Runnable p_332472_) {
+    public void openWorld(String pWorldName, Runnable pOnFail) {
         this.minecraft.forceSetScreen(new GenericMessageScreen(Component.translatable("selectWorld.data_read")));
-        LevelStorageSource.LevelStorageAccess levelstoragesource$levelstorageaccess = this.createWorldAccess(p_332907_);
+        LevelStorageSource.LevelStorageAccess levelstoragesource$levelstorageaccess = this.createWorldAccess(pWorldName);
         if (levelstoragesource$levelstorageaccess != null) {
-            this.openWorldLoadLevelData(levelstoragesource$levelstorageaccess, p_332472_);
+            this.openWorldLoadLevelData(levelstoragesource$levelstorageaccess, pOnFail);
         }
     }
 
-    private void openWorldLoadLevelData(LevelStorageSource.LevelStorageAccess p_330142_, Runnable p_335478_) {
+    private void openWorldLoadLevelData(LevelStorageSource.LevelStorageAccess pLevelStorage, Runnable pOnFail) {
         this.minecraft.forceSetScreen(new GenericMessageScreen(Component.translatable("selectWorld.data_read")));
 
         Dynamic<?> dynamic;
         LevelSummary levelsummary;
         try {
-            dynamic = p_330142_.getDataTag();
-            levelsummary = p_330142_.getSummary(dynamic);
+            dynamic = pLevelStorage.getDataTag();
+            levelsummary = pLevelStorage.getSummary(dynamic);
         } catch (NbtException | ReportedNbtException | IOException ioexception) {
             this.minecraft.setScreen(new RecoverWorldDataScreen(this.minecraft, p_325454_ -> {
                 if (p_325454_) {
-                    this.openWorldLoadLevelData(p_330142_, p_335478_);
+                    this.openWorldLoadLevelData(pLevelStorage, pOnFail);
                 } else {
-                    p_330142_.safeClose();
-                    p_335478_.run();
+                    pLevelStorage.safeClose();
+                    pOnFail.run();
                 }
-            }, p_330142_));
+            }, pLevelStorage));
             return;
         } catch (OutOfMemoryError outofmemoryerror1) {
             MemoryReserve.release();
-            String s = "Ran out of memory trying to read level data of world folder \"" + p_330142_.getLevelId() + "\"";
+            String s = "Ran out of memory trying to read level data of world folder \"" + pLevelStorage.getLevelId() + "\"";
             LOGGER.error(LogUtils.FATAL_MARKER, s);
             OutOfMemoryError outofmemoryerror = new OutOfMemoryError("Ran out of memory reading level data");
             outofmemoryerror.initCause(outofmemoryerror1);
             CrashReport crashreport = CrashReport.forThrowable(outofmemoryerror, s);
             CrashReportCategory crashreportcategory = crashreport.addCategory("World details");
-            crashreportcategory.setDetail("World folder", p_330142_.getLevelId());
+            crashreportcategory.setDetail("World folder", pLevelStorage.getLevelId());
             throw new ReportedException(crashreport);
         }
 
-        this.openWorldCheckVersionCompatibility(p_330142_, levelsummary, dynamic, p_335478_);
+        this.openWorldCheckVersionCompatibility(pLevelStorage, levelsummary, dynamic, pOnFail);
     }
 
-    private void openWorldCheckVersionCompatibility(LevelStorageSource.LevelStorageAccess p_335405_, LevelSummary p_331961_, Dynamic<?> p_333467_, Runnable p_328023_) {
-        if (!p_331961_.isCompatible()) {
-            p_335405_.safeClose();
+    private void openWorldCheckVersionCompatibility(LevelStorageSource.LevelStorageAccess pLevelStorage, LevelSummary pLevelSummary, Dynamic<?> pLevelData, Runnable pOnFail) {
+        if (!pLevelSummary.isCompatible()) {
+            pLevelStorage.safeClose();
             this.minecraft
                 .setScreen(
                     new AlertScreen(
-                        p_328023_,
+                        pOnFail,
                         Component.translatable("selectWorld.incompatible.title").withColor(-65536),
-                        Component.translatable("selectWorld.incompatible.description", p_331961_.getWorldVersionName())
+                        Component.translatable("selectWorld.incompatible.description", pLevelSummary.getWorldVersionName())
                     )
                 );
         } else {
-            LevelSummary.BackupStatus levelsummary$backupstatus = p_331961_.backupStatus();
+            LevelSummary.BackupStatus levelsummary$backupstatus = pLevelSummary.backupStatus();
             if (levelsummary$backupstatus.shouldBackup()) {
                 String s = "selectWorld.backupQuestion." + levelsummary$backupstatus.getTranslationKey();
                 String s1 = "selectWorld.backupWarning." + levelsummary$backupstatus.getTranslationKey();
@@ -308,47 +308,47 @@ public class WorldOpenFlows {
                     mutablecomponent.withColor(-2142128);
                 }
 
-                Component component = Component.translatable(s1, p_331961_.getWorldVersionName(), SharedConstants.getCurrentVersion().getName());
+                Component component = Component.translatable(s1, pLevelSummary.getWorldVersionName(), SharedConstants.getCurrentVersion().getName());
                 this.minecraft.setScreen(new BackupConfirmScreen(() -> {
-                    p_335405_.safeClose();
-                    p_328023_.run();
+                    pLevelStorage.safeClose();
+                    pOnFail.run();
                 }, (p_325458_, p_325459_) -> {
                     if (p_325458_) {
-                        EditWorldScreen.makeBackupAndShowToast(p_335405_);
+                        EditWorldScreen.makeBackupAndShowToast(pLevelStorage);
                     }
 
-                    this.openWorldLoadLevelStem(p_335405_, p_333467_, false, p_328023_);
+                    this.openWorldLoadLevelStem(pLevelStorage, pLevelData, false, pOnFail);
                 }, mutablecomponent, component, false));
             } else {
-                this.openWorldLoadLevelStem(p_335405_, p_333467_, false, p_328023_);
+                this.openWorldLoadLevelStem(pLevelStorage, pLevelData, false, pOnFail);
             }
         }
     }
 
-    private void openWorldLoadLevelStem(LevelStorageSource.LevelStorageAccess p_333651_, Dynamic<?> p_332568_, boolean p_334192_, Runnable p_332843_) {
+    private void openWorldLoadLevelStem(LevelStorageSource.LevelStorageAccess pLevelStorage, Dynamic<?> pLevelData, boolean pSafeMode, Runnable pOnFail) {
         this.minecraft.forceSetScreen(new GenericMessageScreen(Component.translatable("selectWorld.resource_load")));
-        PackRepository packrepository = ServerPacksSource.createPackRepository(p_333651_);
+        PackRepository packrepository = ServerPacksSource.createPackRepository(pLevelStorage);
 
         WorldStem worldstem;
         try {
-            worldstem = this.loadWorldStem(p_332568_, p_334192_, packrepository);
+            worldstem = this.loadWorldStem(pLevelData, pSafeMode, packrepository);
 
             for (LevelStem levelstem : worldstem.registries().compositeAccess().lookupOrThrow(Registries.LEVEL_STEM)) {
                 levelstem.generator().validate();
             }
         } catch (Exception exception) {
             LOGGER.warn("Failed to load level data or datapacks, can't proceed with server load", (Throwable)exception);
-            if (!p_334192_) {
+            if (!pSafeMode) {
                 this.minecraft.setScreen(new DatapackLoadFailureScreen(() -> {
-                    p_333651_.safeClose();
-                    p_332843_.run();
-                }, () -> this.openWorldLoadLevelStem(p_333651_, p_332568_, true, p_332843_)));
+                    pLevelStorage.safeClose();
+                    pOnFail.run();
+                }, () -> this.openWorldLoadLevelStem(pLevelStorage, pLevelData, true, pOnFail)));
             } else {
-                p_333651_.safeClose();
+                pLevelStorage.safeClose();
                 this.minecraft
                     .setScreen(
                         new AlertScreen(
-                            p_332843_,
+                            pOnFail,
                             Component.translatable("datapackFailure.safeMode.failed.title"),
                             Component.translatable("datapackFailure.safeMode.failed.description"),
                             CommonComponents.GUI_BACK,
@@ -360,37 +360,37 @@ public class WorldOpenFlows {
             return;
         }
 
-        this.openWorldCheckWorldStemCompatibility(p_333651_, worldstem, packrepository, p_332843_);
+        this.openWorldCheckWorldStemCompatibility(pLevelStorage, worldstem, packrepository, pOnFail);
     }
 
-    private void openWorldCheckWorldStemCompatibility(LevelStorageSource.LevelStorageAccess p_329946_, WorldStem p_331923_, PackRepository p_329592_, Runnable p_331882_) {
-        WorldData worlddata = p_331923_.worldData();
+    private void openWorldCheckWorldStemCompatibility(LevelStorageSource.LevelStorageAccess pLevelStorage, WorldStem pWorldStem, PackRepository pPackRepository, Runnable pOnFail) {
+        WorldData worlddata = pWorldStem.worldData();
         boolean flag = worlddata.worldGenOptions().isOldCustomizedWorld();
         boolean flag1 = worlddata.worldGenSettingsLifecycle() != Lifecycle.stable();
         if (!flag && !flag1) {
-            this.openWorldLoadBundledResourcePack(p_329946_, p_331923_, p_329592_, p_331882_);
+            this.openWorldLoadBundledResourcePack(pLevelStorage, pWorldStem, pPackRepository, pOnFail);
         } else {
-            this.askForBackup(p_329946_, flag, () -> this.openWorldLoadBundledResourcePack(p_329946_, p_331923_, p_329592_, p_331882_), () -> {
-                p_331923_.close();
-                p_329946_.safeClose();
-                p_331882_.run();
+            this.askForBackup(pLevelStorage, flag, () -> this.openWorldLoadBundledResourcePack(pLevelStorage, pWorldStem, pPackRepository, pOnFail), () -> {
+                pWorldStem.close();
+                pLevelStorage.safeClose();
+                pOnFail.run();
             });
         }
     }
 
-    private void openWorldLoadBundledResourcePack(LevelStorageSource.LevelStorageAccess p_332203_, WorldStem p_333813_, PackRepository p_328830_, Runnable p_331357_) {
+    private void openWorldLoadBundledResourcePack(LevelStorageSource.LevelStorageAccess pLevelStorage, WorldStem pWorldStem, PackRepository pPackRepository, Runnable pOnFail) {
         DownloadedPackSource downloadedpacksource = this.minecraft.getDownloadedPackSource();
-        this.loadBundledResourcePack(downloadedpacksource, p_332203_).thenApply(p_233177_ -> true).exceptionallyComposeAsync(p_233183_ -> {
+        this.loadBundledResourcePack(downloadedpacksource, pLevelStorage).thenApply(p_233177_ -> true).exceptionallyComposeAsync(p_233183_ -> {
             LOGGER.warn("Failed to load pack: ", p_233183_);
             return this.promptBundledPackLoadFailure();
         }, this.minecraft).thenAcceptAsync(p_325451_ -> {
             if (p_325451_) {
-                this.openWorldCheckDiskSpace(p_332203_, p_333813_, downloadedpacksource, p_328830_, p_331357_);
+                this.openWorldCheckDiskSpace(pLevelStorage, pWorldStem, downloadedpacksource, pPackRepository, pOnFail);
             } else {
                 downloadedpacksource.popAll();
-                p_333813_.close();
-                p_332203_.safeClose();
-                p_331357_.run();
+                pWorldStem.close();
+                pLevelStorage.safeClose();
+                pOnFail.run();
             }
         }, this.minecraft).exceptionally(p_233175_ -> {
             this.minecraft.delayCrash(CrashReport.forThrowable(p_233175_, "Load world"));
@@ -399,20 +399,20 @@ public class WorldOpenFlows {
     }
 
     private void openWorldCheckDiskSpace(
-        LevelStorageSource.LevelStorageAccess p_332115_, WorldStem p_329606_, DownloadedPackSource p_331698_, PackRepository p_334521_, Runnable p_330770_
+        LevelStorageSource.LevelStorageAccess pLevelStorage, WorldStem pWorldStem, DownloadedPackSource pPackSource, PackRepository pPackRepository, Runnable pOnFail
     ) {
-        if (p_332115_.checkForLowDiskSpace()) {
+        if (pLevelStorage.checkForLowDiskSpace()) {
             this.minecraft
                 .setScreen(
                     new ConfirmScreen(
                         p_325469_ -> {
                             if (p_325469_) {
-                                this.openWorldDoLoad(p_332115_, p_329606_, p_334521_);
+                                this.openWorldDoLoad(pLevelStorage, pWorldStem, pPackRepository);
                             } else {
-                                p_331698_.popAll();
-                                p_329606_.close();
-                                p_332115_.safeClose();
-                                p_330770_.run();
+                                pPackSource.popAll();
+                                pWorldStem.close();
+                                pLevelStorage.safeClose();
+                                pOnFail.run();
                             }
                         },
                         Component.translatable("selectWorld.warning.lowDiskSpace.title").withStyle(ChatFormatting.RED),
@@ -422,20 +422,20 @@ public class WorldOpenFlows {
                     )
                 );
         } else {
-            this.openWorldDoLoad(p_332115_, p_329606_, p_334521_);
+            this.openWorldDoLoad(pLevelStorage, pWorldStem, pPackRepository);
         }
     }
 
-    private void openWorldDoLoad(LevelStorageSource.LevelStorageAccess p_329495_, WorldStem p_329186_, PackRepository p_331916_) {
-        this.minecraft.doWorldLoad(p_329495_, p_331916_, p_329186_, false);
+    private void openWorldDoLoad(LevelStorageSource.LevelStorageAccess pLevelStorage, WorldStem pWorldStem, PackRepository pPackRepository) {
+        this.minecraft.doWorldLoad(pLevelStorage, pPackRepository, pWorldStem, false);
     }
 
-    private CompletableFuture<Void> loadBundledResourcePack(DownloadedPackSource p_312230_, LevelStorageSource.LevelStorageAccess p_310544_) {
-        Path path = p_310544_.getLevelPath(LevelResource.MAP_RESOURCE_FILE);
+    private CompletableFuture<Void> loadBundledResourcePack(DownloadedPackSource pPackSource, LevelStorageSource.LevelStorageAccess pLevel) {
+        Path path = pLevel.getLevelPath(LevelResource.MAP_RESOURCE_FILE);
         if (Files.exists(path) && !Files.isDirectory(path)) {
-            p_312230_.configureForLocalWorld();
-            CompletableFuture<Void> completablefuture = p_312230_.waitForPackFeedback(WORLD_PACK_ID);
-            p_312230_.pushLocalPack(WORLD_PACK_ID, path);
+            pPackSource.configureForLocalWorld();
+            CompletableFuture<Void> completablefuture = pPackSource.waitForPackFeedback(WORLD_PACK_ID);
+            pPackSource.pushLocalPack(WORLD_PACK_ID, path);
             return completablefuture;
         } else {
             return CompletableFuture.completedFuture(null);

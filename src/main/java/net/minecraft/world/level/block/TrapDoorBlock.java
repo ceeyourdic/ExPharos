@@ -59,9 +59,9 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
         return CODEC;
     }
 
-    protected TrapDoorBlock(BlockSetType p_272964_, BlockBehaviour.Properties p_273079_) {
-        super(p_273079_.sound(p_272964_.soundType()));
-        this.type = p_272964_;
+    protected TrapDoorBlock(BlockSetType pType, BlockBehaviour.Properties pProperties) {
+        super(pProperties.sound(pType.soundType()));
+        this.type = pType;
         this.registerDefaultState(
             this.stateDefinition
                 .any()
@@ -74,11 +74,11 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_57563_, BlockGetter p_57564_, BlockPos p_57565_, CollisionContext p_57566_) {
-        if (!p_57563_.getValue(OPEN)) {
-            return p_57563_.getValue(HALF) == Half.TOP ? TOP_AABB : BOTTOM_AABB;
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        if (!pState.getValue(OPEN)) {
+            return pState.getValue(HALF) == Half.TOP ? TOP_AABB : BOTTOM_AABB;
         } else {
-            switch ((Direction)p_57563_.getValue(FACING)) {
+            switch ((Direction)pState.getValue(FACING)) {
                 case NORTH:
                 default:
                     return NORTH_OPEN_AABB;
@@ -125,26 +125,26 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
         super.onExplosionHit(p_312876_, p_365086_, p_312697_, p_312889_, p_312223_);
     }
 
-    private void toggle(BlockState p_311901_, Level p_312039_, BlockPos p_310194_, @Nullable Player p_312003_) {
-        BlockState blockstate = p_311901_.cycle(OPEN);
-        p_312039_.setBlock(p_310194_, blockstate, 2);
+    private void toggle(BlockState pState, Level pLevel, BlockPos pPos, @Nullable Player pPlayer) {
+        BlockState blockstate = pState.cycle(OPEN);
+        pLevel.setBlock(pPos, blockstate, 2);
         if (blockstate.getValue(WATERLOGGED)) {
-            p_312039_.scheduleTick(p_310194_, Fluids.WATER, Fluids.WATER.getTickDelay(p_312039_));
+            pLevel.scheduleTick(pPos, Fluids.WATER, Fluids.WATER.getTickDelay(pLevel));
         }
 
-        this.playSound(p_312003_, p_312039_, p_310194_, blockstate.getValue(OPEN));
+        this.playSound(pPlayer, pLevel, pPos, blockstate.getValue(OPEN));
     }
 
-    protected void playSound(@Nullable Player p_57528_, Level p_57529_, BlockPos p_57530_, boolean p_57531_) {
-        p_57529_.playSound(
-            p_57528_,
-            p_57530_,
-            p_57531_ ? this.type.trapdoorOpen() : this.type.trapdoorClose(),
+    protected void playSound(@Nullable Player pPlayer, Level pLevel, BlockPos pPos, boolean pIsOpened) {
+        pLevel.playSound(
+            pPlayer,
+            pPos,
+            pIsOpened ? this.type.trapdoorOpen() : this.type.trapdoorClose(),
             SoundSource.BLOCKS,
             1.0F,
-            p_57529_.getRandom().nextFloat() * 0.1F + 0.9F
+            pLevel.getRandom().nextFloat() * 0.1F + 0.9F
         );
-        p_57529_.gameEvent(p_57528_, p_57531_ ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, p_57530_);
+        pLevel.gameEvent(pPlayer, pIsOpened ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, pPos);
     }
 
     @Override
@@ -166,18 +166,18 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_57533_) {
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
         BlockState blockstate = this.defaultBlockState();
-        FluidState fluidstate = p_57533_.getLevel().getFluidState(p_57533_.getClickedPos());
-        Direction direction = p_57533_.getClickedFace();
-        if (!p_57533_.replacingClickedOnBlock() && direction.getAxis().isHorizontal()) {
+        FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
+        Direction direction = pContext.getClickedFace();
+        if (!pContext.replacingClickedOnBlock() && direction.getAxis().isHorizontal()) {
             blockstate = blockstate.setValue(FACING, direction)
-                .setValue(HALF, p_57533_.getClickLocation().y - (double)p_57533_.getClickedPos().getY() > 0.5 ? Half.TOP : Half.BOTTOM);
+                .setValue(HALF, pContext.getClickLocation().y - (double)pContext.getClickedPos().getY() > 0.5 ? Half.TOP : Half.BOTTOM);
         } else {
-            blockstate = blockstate.setValue(FACING, p_57533_.getHorizontalDirection().getOpposite()).setValue(HALF, direction == Direction.UP ? Half.BOTTOM : Half.TOP);
+            blockstate = blockstate.setValue(FACING, pContext.getHorizontalDirection().getOpposite()).setValue(HALF, direction == Direction.UP ? Half.BOTTOM : Half.TOP);
         }
 
-        if (p_57533_.getLevel().hasNeighborSignal(p_57533_.getClickedPos())) {
+        if (pContext.getLevel().hasNeighborSignal(pContext.getClickedPos())) {
             blockstate = blockstate.setValue(OPEN, Boolean.valueOf(true)).setValue(POWERED, Boolean.valueOf(true));
         }
 
@@ -185,13 +185,13 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_57561_) {
-        p_57561_.add(FACING, OPEN, HALF, POWERED, WATERLOGGED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, OPEN, HALF, POWERED, WATERLOGGED);
     }
 
     @Override
-    protected FluidState getFluidState(BlockState p_57568_) {
-        return p_57568_.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(p_57568_);
+    protected FluidState getFluidState(BlockState pState) {
+        return pState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(pState);
     }
 
     @Override

@@ -70,13 +70,13 @@ public record FoodProperties(int nutrition, float saturation, boolean canAlwaysE
         private float saturationModifier;
         private boolean canAlwaysEat;
 
-        public FoodProperties.Builder nutrition(int p_38761_) {
-            this.nutrition = p_38761_;
+        public FoodProperties.Builder nutrition(int pNutrition) {
+            this.nutrition = pNutrition;
             return this;
         }
 
-        public FoodProperties.Builder saturationModifier(float p_38759_) {
-            this.saturationModifier = p_38759_;
+        public FoodProperties.Builder saturationModifier(float pSaturationModifier) {
+            this.saturationModifier = pSaturationModifier;
             return this;
         }
 

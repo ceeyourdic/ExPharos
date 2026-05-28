@@ -18,9 +18,9 @@ public class TpsDebugChart extends AbstractDebugChart {
     private static final int OTHER_COLOR = -10547572;
     private final Supplier<Float> msptSupplier;
 
-    public TpsDebugChart(Font p_298557_, SampleStorage p_332350_, Supplier<Float> p_309657_) {
-        super(p_298557_, p_332350_);
-        this.msptSupplier = p_309657_;
+    public TpsDebugChart(Font pFont, SampleStorage pSampleStorage, Supplier<Float> pMsptSupplier) {
+        super(pFont, pSampleStorage);
+        this.msptSupplier = pMsptSupplier;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class TpsDebugChart extends AbstractDebugChart {
         return this.getSampleColor(toMilliseconds((double)p_300761_), (double)f, -16711936, (double)f * 1.125, -256, (double)f * 1.25, -65536);
     }
 
-    private static double toMilliseconds(double p_300655_) {
-        return p_300655_ / 1000000.0;
+    private static double toMilliseconds(double pValue) {
+        return pValue / 1000000.0;
     }
 }

@@ -21,8 +21,8 @@ import net.minecraft.world.entity.player.Player;
 public class ExperienceCommand {
     private static final SimpleCommandExceptionType ERROR_SET_POINTS_INVALID = new SimpleCommandExceptionType(Component.translatable("commands.experience.set.points.invalid"));
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_137307_) {
-        LiteralCommandNode<CommandSourceStack> literalcommandnode = p_137307_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        LiteralCommandNode<CommandSourceStack> literalcommandnode = pDispatcher.register(
             Commands.literal("experience")
                 .requires(p_137324_ -> p_137324_.hasPermission(2))
                 .then(
@@ -126,41 +126,41 @@ public class ExperienceCommand {
                         )
                 )
         );
-        p_137307_.register(Commands.literal("xp").requires(p_137311_ -> p_137311_.hasPermission(2)).redirect(literalcommandnode));
+        pDispatcher.register(Commands.literal("xp").requires(p_137311_ -> p_137311_.hasPermission(2)).redirect(literalcommandnode));
     }
 
-    private static int queryExperience(CommandSourceStack p_137313_, ServerPlayer p_137314_, ExperienceCommand.Type p_137315_) {
-        int i = p_137315_.query.applyAsInt(p_137314_);
-        p_137313_.sendSuccess(() -> Component.translatable("commands.experience.query." + p_137315_.name, p_137314_.getDisplayName(), i), false);
+    private static int queryExperience(CommandSourceStack pSource, ServerPlayer pPlayer, ExperienceCommand.Type pType) {
+        int i = pType.query.applyAsInt(pPlayer);
+        pSource.sendSuccess(() -> Component.translatable("commands.experience.query." + pType.name, pPlayer.getDisplayName(), i), false);
         return i;
     }
 
-    private static int addExperience(CommandSourceStack p_137317_, Collection<? extends ServerPlayer> p_137318_, int p_137319_, ExperienceCommand.Type p_137320_) {
-        for (ServerPlayer serverplayer : p_137318_) {
-            p_137320_.add.accept(serverplayer, p_137319_);
+    private static int addExperience(CommandSourceStack pSource, Collection<? extends ServerPlayer> pTargets, int pAmount, ExperienceCommand.Type pType) {
+        for (ServerPlayer serverplayer : pTargets) {
+            pType.add.accept(serverplayer, pAmount);
         }
 
-        if (p_137318_.size() == 1) {
-            p_137317_.sendSuccess(
+        if (pTargets.size() == 1) {
+            pSource.sendSuccess(
                 () -> Component.translatable(
-                        "commands.experience.add." + p_137320_.name + ".success.single", p_137319_, p_137318_.iterator().next().getDisplayName()
+                        "commands.experience.add." + pType.name + ".success.single", pAmount, pTargets.iterator().next().getDisplayName()
                     ),
                 true
             );
         } else {
-            p_137317_.sendSuccess(
-                () -> Component.translatable("commands.experience.add." + p_137320_.name + ".success.multiple", p_137319_, p_137318_.size()), true
+            pSource.sendSuccess(
+                () -> Component.translatable("commands.experience.add." + pType.name + ".success.multiple", pAmount, pTargets.size()), true
             );
         }
 
-        return p_137318_.size();
+        return pTargets.size();
     }
 
-    private static int setExperience(CommandSourceStack p_137326_, Collection<? extends ServerPlayer> p_137327_, int p_137328_, ExperienceCommand.Type p_137329_) throws CommandSyntaxException {
+    private static int setExperience(CommandSourceStack pSource, Collection<? extends ServerPlayer> pTargets, int pAmount, ExperienceCommand.Type pType) throws CommandSyntaxException {
         int i = 0;
 
-        for (ServerPlayer serverplayer : p_137327_) {
-            if (p_137329_.set.test(serverplayer, p_137328_)) {
+        for (ServerPlayer serverplayer : pTargets) {
+            if (pType.set.test(serverplayer, pAmount)) {
                 i++;
             }
         }
@@ -168,20 +168,20 @@ public class ExperienceCommand {
         if (i == 0) {
             throw ERROR_SET_POINTS_INVALID.create();
         } else {
-            if (p_137327_.size() == 1) {
-                p_137326_.sendSuccess(
+            if (pTargets.size() == 1) {
+                pSource.sendSuccess(
                     () -> Component.translatable(
-                            "commands.experience.set." + p_137329_.name + ".success.single", p_137328_, p_137327_.iterator().next().getDisplayName()
+                            "commands.experience.set." + pType.name + ".success.single", pAmount, pTargets.iterator().next().getDisplayName()
                         ),
                     true
                 );
             } else {
-                p_137326_.sendSuccess(
-                    () -> Component.translatable("commands.experience.set." + p_137329_.name + ".success.multiple", p_137328_, p_137327_.size()), true
+                pSource.sendSuccess(
+                    () -> Component.translatable("commands.experience.set." + pType.name + ".success.multiple", pAmount, pTargets.size()), true
                 );
             }
 
-            return p_137327_.size();
+            return pTargets.size();
         }
     }
 
@@ -205,15 +205,15 @@ public class ExperienceCommand {
         final ToIntFunction<ServerPlayer> query;
 
         private Type(
-            final String p_137353_,
-            final BiConsumer<ServerPlayer, Integer> p_137354_,
-            final BiPredicate<ServerPlayer, Integer> p_137355_,
-            final ToIntFunction<ServerPlayer> p_137356_
+            final String pName,
+            final BiConsumer<ServerPlayer, Integer> pAdd,
+            final BiPredicate<ServerPlayer, Integer> pSet,
+            final ToIntFunction<ServerPlayer> pQuery
         ) {
-            this.add = p_137354_;
-            this.name = p_137353_;
-            this.set = p_137355_;
-            this.query = p_137356_;
+            this.add = pAdd;
+            this.name = pName;
+            this.set = pSet;
+            this.query = pQuery;
         }
     }
 }

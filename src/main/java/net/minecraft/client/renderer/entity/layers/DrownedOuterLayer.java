@@ -17,10 +17,10 @@ public class DrownedOuterLayer extends RenderLayer<ZombieRenderState, DrownedMod
     private final DrownedModel model;
     private final DrownedModel babyModel;
 
-    public DrownedOuterLayer(RenderLayerParent<ZombieRenderState, DrownedModel> p_174490_, EntityModelSet p_174491_) {
-        super(p_174490_);
-        this.model = new DrownedModel(p_174491_.bakeLayer(ModelLayers.DROWNED_OUTER_LAYER));
-        this.babyModel = new DrownedModel(p_174491_.bakeLayer(ModelLayers.DROWNED_BABY_OUTER_LAYER));
+    public DrownedOuterLayer(RenderLayerParent<ZombieRenderState, DrownedModel> pRenderer, EntityModelSet pModelSet) {
+        super(pRenderer);
+        this.model = new DrownedModel(pModelSet.bakeLayer(ModelLayers.DROWNED_OUTER_LAYER));
+        this.babyModel = new DrownedModel(pModelSet.bakeLayer(ModelLayers.DROWNED_BABY_OUTER_LAYER));
     }
 
     public void render(PoseStack p_116924_, MultiBufferSource p_116925_, int p_116926_, ZombieRenderState p_369850_, float p_116928_, float p_116929_) {

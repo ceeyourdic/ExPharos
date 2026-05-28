@@ -13,8 +13,8 @@ public class AlterGroundDecorator extends TreeDecorator {
         .xmap(AlterGroundDecorator::new, p_69327_ -> p_69327_.provider);
     private final BlockStateProvider provider;
 
-    public AlterGroundDecorator(BlockStateProvider p_69306_) {
-        this.provider = p_69306_;
+    public AlterGroundDecorator(BlockStateProvider pProvider) {
+        this.provider = pProvider;
     }
 
     @Override
@@ -56,25 +56,25 @@ public class AlterGroundDecorator extends TreeDecorator {
         }
     }
 
-    private void placeCircle(TreeDecorator.Context p_225971_, BlockPos p_225972_) {
+    private void placeCircle(TreeDecorator.Context pContext, BlockPos pPos) {
         for (int i = -2; i <= 2; i++) {
             for (int j = -2; j <= 2; j++) {
                 if (Math.abs(i) != 2 || Math.abs(j) != 2) {
-                    this.placeBlockAt(p_225971_, p_225972_.offset(i, 0, j));
+                    this.placeBlockAt(pContext, pPos.offset(i, 0, j));
                 }
             }
         }
     }
 
-    private void placeBlockAt(TreeDecorator.Context p_225974_, BlockPos p_225975_) {
+    private void placeBlockAt(TreeDecorator.Context pContext, BlockPos pPos) {
         for (int i = 2; i >= -3; i--) {
-            BlockPos blockpos = p_225975_.above(i);
-            if (Feature.isGrassOrDirt(p_225974_.level(), blockpos)) {
-                p_225974_.setBlock(blockpos, this.provider.getState(p_225974_.random(), p_225975_));
+            BlockPos blockpos = pPos.above(i);
+            if (Feature.isGrassOrDirt(pContext.level(), blockpos)) {
+                pContext.setBlock(blockpos, this.provider.getState(pContext.random(), pPos));
                 break;
             }
 
-            if (!p_225974_.isAir(blockpos) && i < 0) {
+            if (!pContext.isAir(blockpos) && i < 0) {
                 break;
             }
         }

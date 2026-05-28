@@ -36,21 +36,21 @@ public enum BlockModelRotation implements ModelState {
     private final OctahedralGroup actualRotation;
     private final int index;
 
-    private static int getIndex(int p_119160_, int p_119161_) {
-        return p_119160_ * 360 + p_119161_;
+    private static int getIndex(int pX, int pY) {
+        return pX * 360 + pY;
     }
 
-    private BlockModelRotation(final int p_119151_, final int p_119152_) {
-        this.index = getIndex(p_119151_, p_119152_);
+    private BlockModelRotation(final int pX, final int pY) {
+        this.index = getIndex(pX, pY);
         Quaternionf quaternionf = new Quaternionf()
-            .rotateYXZ((float)(-p_119152_) * (float) (Math.PI / 180.0), (float)(-p_119151_) * (float) (Math.PI / 180.0), 0.0F);
+            .rotateYXZ((float)(-pY) * (float) (Math.PI / 180.0), (float)(-pX) * (float) (Math.PI / 180.0), 0.0F);
         OctahedralGroup octahedralgroup = OctahedralGroup.IDENTITY;
 
-        for (int i = 0; i < p_119152_; i += 90) {
+        for (int i = 0; i < pY; i += 90) {
             octahedralgroup = octahedralgroup.compose(OctahedralGroup.ROT_90_Y_NEG);
         }
 
-        for (int j = 0; j < p_119151_; j += 90) {
+        for (int j = 0; j < pX; j += 90) {
             octahedralgroup = octahedralgroup.compose(OctahedralGroup.ROT_90_X_NEG);
         }
 
@@ -63,8 +63,8 @@ public enum BlockModelRotation implements ModelState {
         return this.transformation;
     }
 
-    public static BlockModelRotation by(int p_119154_, int p_119155_) {
-        return BY_INDEX.get(getIndex(Mth.positiveModulo(p_119154_, 360), Mth.positiveModulo(p_119155_, 360)));
+    public static BlockModelRotation by(int pX, int pY) {
+        return BY_INDEX.get(getIndex(Mth.positiveModulo(pX, 360), Mth.positiveModulo(pY, 360)));
     }
 
     public OctahedralGroup actualRotation() {

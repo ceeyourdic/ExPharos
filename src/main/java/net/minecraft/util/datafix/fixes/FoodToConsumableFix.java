@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class FoodToConsumableFix extends DataFix {
-    public FoodToConsumableFix(Schema p_365602_) {
-        super(p_365602_, true);
+    public FoodToConsumableFix(Schema pOutputSchema) {
+        super(pOutputSchema, true);
     }
 
     @Override

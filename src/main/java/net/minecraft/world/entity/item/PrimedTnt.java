@@ -56,16 +56,16 @@ public class PrimedTnt extends Entity implements TraceableEntity {
         this.blocksBuilding = true;
     }
 
-    public PrimedTnt(Level p_32079_, double p_32080_, double p_32081_, double p_32082_, @Nullable LivingEntity p_32083_) {
-        this(EntityType.TNT, p_32079_);
-        this.setPos(p_32080_, p_32081_, p_32082_);
-        double d0 = p_32079_.random.nextDouble() * (float) (Math.PI * 2);
+    public PrimedTnt(Level pLevel, double pX, double pY, double pZ, @Nullable LivingEntity pOwner) {
+        this(EntityType.TNT, pLevel);
+        this.setPos(pX, pY, pZ);
+        double d0 = pLevel.random.nextDouble() * (float) (Math.PI * 2);
         this.setDeltaMovement(-Math.sin(d0) * 0.02, 0.2F, -Math.cos(d0) * 0.02);
         this.setFuse(80);
-        this.xo = p_32080_;
-        this.yo = p_32081_;
-        this.zo = p_32082_;
-        this.owner = p_32083_;
+        this.xo = pX;
+        this.yo = pY;
+        this.zo = pZ;
+        this.owner = pOwner;
     }
 
     @Override
@@ -131,23 +131,23 @@ public class PrimedTnt extends Entity implements TraceableEntity {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag p_32097_) {
-        p_32097_.putShort("fuse", (short)this.getFuse());
-        p_32097_.put("block_state", NbtUtils.writeBlockState(this.getBlockState()));
+    protected void addAdditionalSaveData(CompoundTag pCompound) {
+        pCompound.putShort("fuse", (short)this.getFuse());
+        pCompound.put("block_state", NbtUtils.writeBlockState(this.getBlockState()));
         if (this.explosionPower != 4.0F) {
-            p_32097_.putFloat("explosion_power", this.explosionPower);
+            pCompound.putFloat("explosion_power", this.explosionPower);
         }
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag p_32091_) {
-        this.setFuse(p_32091_.getShort("fuse"));
-        if (p_32091_.contains("block_state", 10)) {
-            this.setBlockState(NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), p_32091_.getCompound("block_state")));
+    protected void readAdditionalSaveData(CompoundTag pCompound) {
+        this.setFuse(pCompound.getShort("fuse"));
+        if (pCompound.contains("block_state", 10)) {
+            this.setBlockState(NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), pCompound.getCompound("block_state")));
         }
 
-        if (p_32091_.contains("explosion_power", 99)) {
-            this.explosionPower = Mth.clamp(p_32091_.getFloat("explosion_power"), 0.0F, 128.0F);
+        if (pCompound.contains("explosion_power", 99)) {
+            this.explosionPower = Mth.clamp(pCompound.getFloat("explosion_power"), 0.0F, 128.0F);
         }
     }
 
@@ -164,24 +164,24 @@ public class PrimedTnt extends Entity implements TraceableEntity {
         }
     }
 
-    public void setFuse(int p_32086_) {
-        this.entityData.set(DATA_FUSE_ID, p_32086_);
+    public void setFuse(int pLife) {
+        this.entityData.set(DATA_FUSE_ID, pLife);
     }
 
     public int getFuse() {
         return this.entityData.get(DATA_FUSE_ID);
     }
 
-    public void setBlockState(BlockState p_311725_) {
-        this.entityData.set(DATA_BLOCK_STATE_ID, p_311725_);
+    public void setBlockState(BlockState pBlockState) {
+        this.entityData.set(DATA_BLOCK_STATE_ID, pBlockState);
     }
 
     public BlockState getBlockState() {
         return this.entityData.get(DATA_BLOCK_STATE_ID);
     }
 
-    private void setUsedPortal(boolean p_342933_) {
-        this.usedPortal = p_342933_;
+    private void setUsedPortal(boolean pUsedPortal) {
+        this.usedPortal = pUsedPortal;
     }
 
     @Nullable

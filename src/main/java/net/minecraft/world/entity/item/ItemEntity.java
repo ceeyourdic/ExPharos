@@ -56,25 +56,25 @@ public class ItemEntity extends Entity implements TraceableEntity {
         this.setYRot(this.random.nextFloat() * 360.0F);
     }
 
-    public ItemEntity(Level p_32001_, double p_32002_, double p_32003_, double p_32004_, ItemStack p_32005_) {
-        this(p_32001_, p_32002_, p_32003_, p_32004_, p_32005_, p_32001_.random.nextDouble() * 0.2 - 0.1, 0.2, p_32001_.random.nextDouble() * 0.2 - 0.1);
+    public ItemEntity(Level pLevel, double pPosX, double pPosY, double pPosZ, ItemStack pItemStack) {
+        this(pLevel, pPosX, pPosY, pPosZ, pItemStack, pLevel.random.nextDouble() * 0.2 - 0.1, 0.2, pLevel.random.nextDouble() * 0.2 - 0.1);
     }
 
     public ItemEntity(
-        Level p_149663_, double p_149664_, double p_149665_, double p_149666_, ItemStack p_149667_, double p_149668_, double p_149669_, double p_149670_
+        Level pLevel, double pPosX, double pPosY, double pPosZ, ItemStack pItemStack, double pDeltaX, double pDeltaY, double pDeltaZ
     ) {
-        this(EntityType.ITEM, p_149663_);
-        this.setPos(p_149664_, p_149665_, p_149666_);
-        this.setDeltaMovement(p_149668_, p_149669_, p_149670_);
-        this.setItem(p_149667_);
+        this(EntityType.ITEM, pLevel);
+        this.setPos(pPosX, pPosY, pPosZ);
+        this.setDeltaMovement(pDeltaX, pDeltaY, pDeltaZ);
+        this.setItem(pItemStack);
     }
 
-    private ItemEntity(ItemEntity p_31994_) {
-        super(p_31994_.getType(), p_31994_.level());
-        this.setItem(p_31994_.getItem().copy());
-        this.copyPosition(p_31994_);
-        this.age = p_31994_.age;
-        this.bobOffs = p_31994_.bobOffs;
+    private ItemEntity(ItemEntity pOther) {
+        super(pOther.getType(), pOther.level());
+        this.setItem(pOther.getItem().copy());
+        this.copyPosition(pOther);
+        this.age = pOther.age;
+        this.bobOffs = pOther.bobOffs;
     }
 
     @Override
@@ -205,9 +205,9 @@ public class ItemEntity extends Entity implements TraceableEntity {
         this.setFluidMovement(0.95F);
     }
 
-    private void setFluidMovement(double p_360732_) {
+    private void setFluidMovement(double pMultiplier) {
         Vec3 vec3 = this.getDeltaMovement();
-        this.setDeltaMovement(vec3.x * p_360732_, vec3.y + (double)(vec3.y < 0.06F ? 5.0E-4F : 0.0F), vec3.z * p_360732_);
+        this.setDeltaMovement(vec3.x * pMultiplier, vec3.y + (double)(vec3.y < 0.06F ? 5.0E-4F : 0.0F), vec3.z * pMultiplier);
     }
 
     private void mergeWithNeighbours() {
@@ -229,40 +229,40 @@ public class ItemEntity extends Entity implements TraceableEntity {
         return this.isAlive() && this.pickupDelay != 32767 && this.age != -32768 && this.age < 6000 && itemstack.getCount() < itemstack.getMaxStackSize();
     }
 
-    private void tryToMerge(ItemEntity p_32016_) {
+    private void tryToMerge(ItemEntity pItemEntity) {
         ItemStack itemstack = this.getItem();
-        ItemStack itemstack1 = p_32016_.getItem();
-        if (Objects.equals(this.target, p_32016_.target) && areMergable(itemstack, itemstack1)) {
+        ItemStack itemstack1 = pItemEntity.getItem();
+        if (Objects.equals(this.target, pItemEntity.target) && areMergable(itemstack, itemstack1)) {
             if (itemstack1.getCount() < itemstack.getCount()) {
-                merge(this, itemstack, p_32016_, itemstack1);
+                merge(this, itemstack, pItemEntity, itemstack1);
             } else {
-                merge(p_32016_, itemstack1, this, itemstack);
+                merge(pItemEntity, itemstack1, this, itemstack);
             }
         }
     }
 
-    public static boolean areMergable(ItemStack p_32027_, ItemStack p_32028_) {
-        return p_32028_.getCount() + p_32027_.getCount() > p_32028_.getMaxStackSize() ? false : ItemStack.isSameItemSameComponents(p_32027_, p_32028_);
+    public static boolean areMergable(ItemStack pDestinationStack, ItemStack pOriginStack) {
+        return pOriginStack.getCount() + pDestinationStack.getCount() > pOriginStack.getMaxStackSize() ? false : ItemStack.isSameItemSameComponents(pDestinationStack, pOriginStack);
     }
 
-    public static ItemStack merge(ItemStack p_32030_, ItemStack p_32031_, int p_32032_) {
-        int i = Math.min(Math.min(p_32030_.getMaxStackSize(), p_32032_) - p_32030_.getCount(), p_32031_.getCount());
-        ItemStack itemstack = p_32030_.copyWithCount(p_32030_.getCount() + i);
-        p_32031_.shrink(i);
+    public static ItemStack merge(ItemStack pDestinationStack, ItemStack pOriginStack, int pAmount) {
+        int i = Math.min(Math.min(pDestinationStack.getMaxStackSize(), pAmount) - pDestinationStack.getCount(), pOriginStack.getCount());
+        ItemStack itemstack = pDestinationStack.copyWithCount(pDestinationStack.getCount() + i);
+        pOriginStack.shrink(i);
         return itemstack;
     }
 
-    private static void merge(ItemEntity p_32023_, ItemStack p_32024_, ItemStack p_32025_) {
-        ItemStack itemstack = merge(p_32024_, p_32025_, 64);
-        p_32023_.setItem(itemstack);
+    private static void merge(ItemEntity pDestinationEntity, ItemStack pDestinationStack, ItemStack pOriginStack) {
+        ItemStack itemstack = merge(pDestinationStack, pOriginStack, 64);
+        pDestinationEntity.setItem(itemstack);
     }
 
-    private static void merge(ItemEntity p_32018_, ItemStack p_32019_, ItemEntity p_32020_, ItemStack p_32021_) {
-        merge(p_32018_, p_32019_, p_32021_);
-        p_32018_.pickupDelay = Math.max(p_32018_.pickupDelay, p_32020_.pickupDelay);
-        p_32018_.age = Math.min(p_32018_.age, p_32020_.age);
-        if (p_32021_.isEmpty()) {
-            p_32020_.discard();
+    private static void merge(ItemEntity pDestinationEntity, ItemStack pDestinationStack, ItemEntity pOriginEntity, ItemStack pOriginStack) {
+        merge(pDestinationEntity, pDestinationStack, pOriginStack);
+        pDestinationEntity.pickupDelay = Math.max(pDestinationEntity.pickupDelay, pOriginEntity.pickupDelay);
+        pDestinationEntity.age = Math.min(pDestinationEntity.age, pOriginEntity.age);
+        if (pOriginStack.isEmpty()) {
+            pOriginEntity.discard();
         }
     }
 
@@ -308,42 +308,42 @@ public class ItemEntity extends Entity implements TraceableEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_32050_) {
-        p_32050_.putShort("Health", (short)this.health);
-        p_32050_.putShort("Age", (short)this.age);
-        p_32050_.putShort("PickupDelay", (short)this.pickupDelay);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        pCompound.putShort("Health", (short)this.health);
+        pCompound.putShort("Age", (short)this.age);
+        pCompound.putShort("PickupDelay", (short)this.pickupDelay);
         if (this.thrower != null) {
-            p_32050_.putUUID("Thrower", this.thrower);
+            pCompound.putUUID("Thrower", this.thrower);
         }
 
         if (this.target != null) {
-            p_32050_.putUUID("Owner", this.target);
+            pCompound.putUUID("Owner", this.target);
         }
 
         if (!this.getItem().isEmpty()) {
-            p_32050_.put("Item", this.getItem().save(this.registryAccess()));
+            pCompound.put("Item", this.getItem().save(this.registryAccess()));
         }
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_32034_) {
-        this.health = p_32034_.getShort("Health");
-        this.age = p_32034_.getShort("Age");
-        if (p_32034_.contains("PickupDelay")) {
-            this.pickupDelay = p_32034_.getShort("PickupDelay");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        this.health = pCompound.getShort("Health");
+        this.age = pCompound.getShort("Age");
+        if (pCompound.contains("PickupDelay")) {
+            this.pickupDelay = pCompound.getShort("PickupDelay");
         }
 
-        if (p_32034_.hasUUID("Owner")) {
-            this.target = p_32034_.getUUID("Owner");
+        if (pCompound.hasUUID("Owner")) {
+            this.target = pCompound.getUUID("Owner");
         }
 
-        if (p_32034_.hasUUID("Thrower")) {
-            this.thrower = p_32034_.getUUID("Thrower");
+        if (pCompound.hasUUID("Thrower")) {
+            this.thrower = pCompound.getUUID("Thrower");
             this.cachedThrower = null;
         }
 
-        if (p_32034_.contains("Item", 10)) {
-            CompoundTag compoundtag = p_32034_.getCompound("Item");
+        if (pCompound.contains("Item", 10)) {
+            CompoundTag compoundtag = pCompound.getCompound("Item");
             this.setItem(ItemStack.parse(this.registryAccess(), compoundtag).orElse(ItemStack.EMPTY));
         } else {
             this.setItem(ItemStack.EMPTY);
@@ -355,20 +355,20 @@ public class ItemEntity extends Entity implements TraceableEntity {
     }
 
     @Override
-    public void playerTouch(Player p_32040_) {
+    public void playerTouch(Player pEntity) {
         if (!this.level().isClientSide) {
             ItemStack itemstack = this.getItem();
             Item item = itemstack.getItem();
             int i = itemstack.getCount();
-            if (this.pickupDelay == 0 && (this.target == null || this.target.equals(p_32040_.getUUID())) && p_32040_.getInventory().add(itemstack)) {
-                p_32040_.take(this, i);
+            if (this.pickupDelay == 0 && (this.target == null || this.target.equals(pEntity.getUUID())) && pEntity.getInventory().add(itemstack)) {
+                pEntity.take(this, i);
                 if (itemstack.isEmpty()) {
                     this.discard();
                     itemstack.setCount(i);
                 }
 
-                p_32040_.awardStat(Stats.ITEM_PICKED_UP.get(item), i);
-                p_32040_.onItemPickup(this);
+                pEntity.awardStat(Stats.ITEM_PICKED_UP.get(item), i);
+                pEntity.onItemPickup(this);
             }
         }
     }
@@ -399,25 +399,25 @@ public class ItemEntity extends Entity implements TraceableEntity {
         return this.getEntityData().get(DATA_ITEM);
     }
 
-    public void setItem(ItemStack p_32046_) {
-        this.getEntityData().set(DATA_ITEM, p_32046_);
+    public void setItem(ItemStack pStack) {
+        this.getEntityData().set(DATA_ITEM, pStack);
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_32036_) {
-        super.onSyncedDataUpdated(p_32036_);
-        if (DATA_ITEM.equals(p_32036_)) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        super.onSyncedDataUpdated(pKey);
+        if (DATA_ITEM.equals(pKey)) {
             this.getItem().setEntityRepresentation(this);
         }
     }
 
-    public void setTarget(@Nullable UUID p_266724_) {
-        this.target = p_266724_;
+    public void setTarget(@Nullable UUID pTarget) {
+        this.target = pTarget;
     }
 
-    public void setThrower(Entity p_310166_) {
-        this.thrower = p_310166_.getUUID();
-        this.cachedThrower = p_310166_;
+    public void setThrower(Entity pThrower) {
+        this.thrower = pThrower.getUUID();
+        this.cachedThrower = pThrower;
     }
 
     public int getAge() {
@@ -436,8 +436,8 @@ public class ItemEntity extends Entity implements TraceableEntity {
         this.pickupDelay = 32767;
     }
 
-    public void setPickUpDelay(int p_32011_) {
-        this.pickupDelay = p_32011_;
+    public void setPickUpDelay(int pPickupDelay) {
+        this.pickupDelay = pPickupDelay;
     }
 
     public boolean hasPickUpDelay() {
@@ -457,8 +457,8 @@ public class ItemEntity extends Entity implements TraceableEntity {
         this.age = 5999;
     }
 
-    public static float getSpin(float p_32009_, float p_369793_) {
-        return p_32009_ / 20.0F + p_369793_;
+    public static float getSpin(float pAge, float pBobOffset) {
+        return pAge / 20.0F + pBobOffset;
     }
 
     public ItemEntity copy() {

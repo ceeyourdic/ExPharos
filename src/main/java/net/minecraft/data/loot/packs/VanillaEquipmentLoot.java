@@ -95,20 +95,20 @@ public record VanillaEquipmentLoot(HolderLookup.Provider registries) implements 
         );
     }
 
-    public static LootTable.Builder trialChamberEquipment(Item p_342256_, Item p_345109_, ArmorTrim p_363383_, HolderLookup.RegistryLookup<Enchantment> p_343180_) {
+    public static LootTable.Builder trialChamberEquipment(Item pHelmetItem, Item pChestplateItem, ArmorTrim pTrim, HolderLookup.RegistryLookup<Enchantment> pEnchantmentRegistry) {
         return LootTable.lootTable()
             .withPool(
                 LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1.0F))
                     .when(LootItemRandomChanceCondition.randomChance(0.5F))
                     .add(
-                        LootItem.lootTableItem(p_342256_)
-                            .apply(SetComponentsFunction.setComponent(DataComponents.TRIM, p_363383_))
+                        LootItem.lootTableItem(pHelmetItem)
+                            .apply(SetComponentsFunction.setComponent(DataComponents.TRIM, pTrim))
                             .apply(
                                 new SetEnchantmentsFunction.Builder()
-                                    .withEnchantment(p_343180_.getOrThrow(Enchantments.PROTECTION), ConstantValue.exactly(4.0F))
-                                    .withEnchantment(p_343180_.getOrThrow(Enchantments.PROJECTILE_PROTECTION), ConstantValue.exactly(4.0F))
-                                    .withEnchantment(p_343180_.getOrThrow(Enchantments.FIRE_PROTECTION), ConstantValue.exactly(4.0F))
+                                    .withEnchantment(pEnchantmentRegistry.getOrThrow(Enchantments.PROTECTION), ConstantValue.exactly(4.0F))
+                                    .withEnchantment(pEnchantmentRegistry.getOrThrow(Enchantments.PROJECTILE_PROTECTION), ConstantValue.exactly(4.0F))
+                                    .withEnchantment(pEnchantmentRegistry.getOrThrow(Enchantments.FIRE_PROTECTION), ConstantValue.exactly(4.0F))
                             )
                     )
             )
@@ -117,13 +117,13 @@ public record VanillaEquipmentLoot(HolderLookup.Provider registries) implements 
                     .setRolls(ConstantValue.exactly(1.0F))
                     .when(LootItemRandomChanceCondition.randomChance(0.5F))
                     .add(
-                        LootItem.lootTableItem(p_345109_)
-                            .apply(SetComponentsFunction.setComponent(DataComponents.TRIM, p_363383_))
+                        LootItem.lootTableItem(pChestplateItem)
+                            .apply(SetComponentsFunction.setComponent(DataComponents.TRIM, pTrim))
                             .apply(
                                 new SetEnchantmentsFunction.Builder()
-                                    .withEnchantment(p_343180_.getOrThrow(Enchantments.PROTECTION), ConstantValue.exactly(4.0F))
-                                    .withEnchantment(p_343180_.getOrThrow(Enchantments.PROJECTILE_PROTECTION), ConstantValue.exactly(4.0F))
-                                    .withEnchantment(p_343180_.getOrThrow(Enchantments.FIRE_PROTECTION), ConstantValue.exactly(4.0F))
+                                    .withEnchantment(pEnchantmentRegistry.getOrThrow(Enchantments.PROTECTION), ConstantValue.exactly(4.0F))
+                                    .withEnchantment(pEnchantmentRegistry.getOrThrow(Enchantments.PROJECTILE_PROTECTION), ConstantValue.exactly(4.0F))
+                                    .withEnchantment(pEnchantmentRegistry.getOrThrow(Enchantments.FIRE_PROTECTION), ConstantValue.exactly(4.0F))
                             )
                     )
             );

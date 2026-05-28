@@ -18,8 +18,8 @@ public class LightDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
     private final Minecraft minecraft;
     private static final int MAX_RENDER_DIST = 10;
 
-    public LightDebugRenderer(Minecraft p_113585_) {
-        this.minecraft = p_113585_;
+    public LightDebugRenderer(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
     @Override

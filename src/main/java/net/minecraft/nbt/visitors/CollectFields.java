@@ -14,12 +14,12 @@ public class CollectFields extends CollectToTag {
     private final Set<TagType<?>> wantedTypes;
     private final Deque<FieldTree> stack = new ArrayDeque<>();
 
-    public CollectFields(FieldSelector... p_202496_) {
-        this.fieldsToGetCount = p_202496_.length;
+    public CollectFields(FieldSelector... pSelectors) {
+        this.fieldsToGetCount = pSelectors.length;
         Builder<TagType<?>> builder = ImmutableSet.builder();
         FieldTree fieldtree = FieldTree.createRoot();
 
-        for (FieldSelector fieldselector : p_202496_) {
+        for (FieldSelector fieldselector : pSelectors) {
             fieldtree.addEntry(fieldselector);
             builder.add(fieldselector.type());
         }

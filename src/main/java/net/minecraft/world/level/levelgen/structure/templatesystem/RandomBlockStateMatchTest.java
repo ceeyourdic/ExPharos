@@ -18,9 +18,9 @@ public class RandomBlockStateMatchTest extends RuleTest {
     private final BlockState blockState;
     private final float probability;
 
-    public RandomBlockStateMatchTest(BlockState p_74280_, float p_74281_) {
-        this.blockState = p_74280_;
-        this.probability = p_74281_;
+    public RandomBlockStateMatchTest(BlockState pBlockState, float pProbability) {
+        this.blockState = pBlockState;
+        this.probability = pProbability;
     }
 
     @Override

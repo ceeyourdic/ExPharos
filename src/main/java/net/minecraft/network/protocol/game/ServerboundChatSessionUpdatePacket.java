@@ -11,12 +11,12 @@ public record ServerboundChatSessionUpdatePacket(RemoteChatSession.Data chatSess
         ServerboundChatSessionUpdatePacket::write, ServerboundChatSessionUpdatePacket::new
     );
 
-    private ServerboundChatSessionUpdatePacket(FriendlyByteBuf p_254010_) {
-        this(RemoteChatSession.Data.read(p_254010_));
+    private ServerboundChatSessionUpdatePacket(FriendlyByteBuf pBuffer) {
+        this(RemoteChatSession.Data.read(pBuffer));
     }
 
-    private void write(FriendlyByteBuf p_253690_) {
-        RemoteChatSession.Data.write(p_253690_, this.chatSession);
+    private void write(FriendlyByteBuf pBuffer) {
+        RemoteChatSession.Data.write(pBuffer, this.chatSession);
     }
 
     @Override

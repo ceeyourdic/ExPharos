@@ -10,31 +10,30 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.entity.state.SaddleableRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class SaddleLayer<S extends LivingEntityRenderState & SaddleableRenderState, M extends EntityModel<? super S>> extends RenderLayer<S, M> {
-    private final ResourceLocation textureLocation;
-    private final M adultModel;
-    private final M babyModel;
+    public ResourceLocation textureLocation;
+    public M adultModel;
+    public M babyModel;
+    public ResourceLocation textureLocationBaby;
 
-    public SaddleLayer(RenderLayerParent<S, M> p_363699_, M p_364536_, M p_367998_, ResourceLocation p_369712_) {
-        super(p_363699_);
-        this.adultModel = p_364536_;
-        this.babyModel = p_367998_;
-        this.textureLocation = p_369712_;
+    public SaddleLayer(RenderLayerParent<S, M> pRenderer, M pAdultModel, M pBabyModel, ResourceLocation pTextureLocation) {
+        super(pRenderer);
+        this.adultModel = pAdultModel;
+        this.babyModel = pBabyModel;
+        this.textureLocation = pTextureLocation;
+        this.textureLocationBaby = this.textureLocation;
     }
 
-    public SaddleLayer(RenderLayerParent<S, M> p_117390_, M p_117391_, ResourceLocation p_117392_) {
-        this(p_117390_, p_117391_, p_117391_, p_117392_);
+    public SaddleLayer(RenderLayerParent<S, M> pRenderer, M pModel, ResourceLocation pTextureLocation) {
+        this(pRenderer, pModel, pModel, pTextureLocation);
     }
 
     public void render(PoseStack p_117394_, MultiBufferSource p_117395_, int p_117396_, S p_367847_, float p_117398_, float p_117399_) {
         if (p_367847_.isSaddled()) {
             M m = p_367847_.isBaby ? this.babyModel : this.adultModel;
             m.setupAnim(p_367847_);
-            VertexConsumer vertexconsumer = p_117395_.getBuffer(RenderType.entityCutoutNoCull(this.textureLocation));
+            VertexConsumer vertexconsumer = p_117395_.getBuffer(RenderType.entityCutoutNoCull(p_367847_.isBaby ? this.textureLocationBaby : this.textureLocation));
             m.renderToBuffer(p_117394_, vertexconsumer, p_117396_, OverlayTexture.NO_OVERLAY);
         }
     }

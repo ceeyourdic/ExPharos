@@ -52,8 +52,8 @@ public class ItemStackEnchantmentNamesFix extends DataFix {
         p_16075_.put(71, "minecraft:vanishing_curse");
     });
 
-    public ItemStackEnchantmentNamesFix(Schema p_16065_, boolean p_16066_) {
-        super(p_16065_, p_16066_);
+    public ItemStackEnchantmentNamesFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
     }
 
     @Override
@@ -67,19 +67,19 @@ public class ItemStackEnchantmentNamesFix extends DataFix {
         );
     }
 
-    private Dynamic<?> fixTag(Dynamic<?> p_16073_) {
-        Optional<? extends Dynamic<?>> optional = p_16073_.get("ench")
+    private Dynamic<?> fixTag(Dynamic<?> pTag) {
+        Optional<? extends Dynamic<?>> optional = pTag.get("ench")
             .asStreamOpt()
             .map(
                 p_16081_ -> p_16081_.map(p_145425_ -> p_145425_.set("id", p_145425_.createString(MAP.getOrDefault(p_145425_.get("id").asInt(0), "null"))))
             )
-            .map(p_16073_::createList)
+            .map(pTag::createList)
             .result();
         if (optional.isPresent()) {
-            p_16073_ = p_16073_.remove("ench").set("Enchantments", (Dynamic<?>)optional.get());
+            pTag = pTag.remove("ench").set("Enchantments", (Dynamic<?>)optional.get());
         }
 
-        return p_16073_.update(
+        return pTag.update(
             "StoredEnchantments",
             p_326597_ -> DataFixUtils.orElse(
                     p_326597_.asStreamOpt()

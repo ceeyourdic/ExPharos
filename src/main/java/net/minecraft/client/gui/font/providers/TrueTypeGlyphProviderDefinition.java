@@ -51,13 +51,13 @@ public record TrueTypeGlyphProviderDefinition(
         return Either.left(this::load);
     }
 
-    private GlyphProvider load(ResourceManager p_286229_) throws IOException {
+    private GlyphProvider load(ResourceManager pResourceManager) throws IOException {
         FT_Face ft_face = null;
         ByteBuffer bytebuffer = null;
 
         try {
             TrueTypeGlyphProvider truetypeglyphprovider;
-            try (InputStream inputstream = p_286229_.open(this.location.withPrefix("font/"))) {
+            try (InputStream inputstream = pResourceManager.open(this.location.withPrefix("font/"))) {
                 bytebuffer = TextureUtil.readResource(inputstream);
                 bytebuffer.flip();
                 synchronized (FreeTypeUtil.LIBRARY_LOCK) {

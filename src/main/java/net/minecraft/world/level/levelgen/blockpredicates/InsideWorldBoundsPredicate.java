@@ -14,12 +14,12 @@ public class InsideWorldBoundsPredicate implements BlockPredicate {
     );
     private final Vec3i offset;
 
-    public InsideWorldBoundsPredicate(Vec3i p_190467_) {
-        this.offset = p_190467_;
+    public InsideWorldBoundsPredicate(Vec3i pOffset) {
+        this.offset = pOffset;
     }
 
-    public boolean test(WorldGenLevel p_190470_, BlockPos p_190471_) {
-        return !p_190470_.isOutsideBuildHeight(p_190471_.offset(this.offset));
+    public boolean test(WorldGenLevel pLevel, BlockPos pPos) {
+        return !pLevel.isOutsideBuildHeight(pPos.offset(this.offset));
     }
 
     @Override

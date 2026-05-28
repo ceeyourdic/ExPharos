@@ -9,8 +9,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public abstract class AbstractHorseRenderer<T extends AbstractHorse, S extends EquineRenderState, M extends EntityModel<? super S>>
     extends AgeableMobRenderer<T, S, M> {
-    public AbstractHorseRenderer(EntityRendererProvider.Context p_173906_, M p_367626_, M p_364695_) {
-        super(p_173906_, p_367626_, p_364695_, 0.75F);
+    public AbstractHorseRenderer(EntityRendererProvider.Context pContext, M pAdultModel, M pBabyModel) {
+        super(pContext, pAdultModel, pBabyModel, 0.75F);
     }
 
     public void extractRenderState(T p_361889_, S p_361124_, float p_366226_) {

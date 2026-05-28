@@ -13,25 +13,25 @@ public class V3689 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_310273_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_310273_);
-        p_310273_.register(map, "minecraft:breeze", () -> V100.equipment(p_310273_));
-        p_310273_.registerSimple(map, "minecraft:wind_charge");
-        p_310273_.registerSimple(map, "minecraft:breeze_wind_charge");
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
+        pSchema.register(map, "minecraft:breeze", () -> V100.equipment(pSchema));
+        pSchema.registerSimple(map, "minecraft:wind_charge");
+        pSchema.registerSimple(map, "minecraft:breeze_wind_charge");
         return map;
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_309732_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_309732_);
-        p_309732_.register(
+    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(pSchema);
+        pSchema.register(
             map,
             "minecraft:trial_spawner",
             () -> DSL.optionalFields(
                     "spawn_potentials",
-                    DSL.list(DSL.fields("data", DSL.fields("entity", References.ENTITY_TREE.in(p_309732_)))),
+                    DSL.list(DSL.fields("data", DSL.fields("entity", References.ENTITY_TREE.in(pSchema)))),
                     "spawn_data",
-                    DSL.fields("entity", References.ENTITY_TREE.in(p_309732_))
+                    DSL.fields("entity", References.ENTITY_TREE.in(pSchema))
                 )
         );
         return map;

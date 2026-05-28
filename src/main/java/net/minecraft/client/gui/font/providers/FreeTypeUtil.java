@@ -29,34 +29,34 @@ public class FreeTypeUtil {
         }
     }
 
-    public static void assertError(int p_328560_, String p_336278_) {
-        if (p_328560_ != 0) {
-            throw new IllegalStateException("FreeType error: " + describeError(p_328560_) + " (" + p_336278_ + ")");
+    public static void assertError(int pErrorId, String pAction) {
+        if (pErrorId != 0) {
+            throw new IllegalStateException("FreeType error: " + describeError(pErrorId) + " (" + pAction + ")");
         }
     }
 
-    public static boolean checkError(int p_333415_, String p_334613_) {
-        if (p_333415_ != 0) {
-            LOGGER.error("FreeType error: {} ({})", describeError(p_333415_), p_334613_);
+    public static boolean checkError(int pErrorId, String pAction) {
+        if (pErrorId != 0) {
+            LOGGER.error("FreeType error: {} ({})", describeError(pErrorId), pAction);
             return true;
         } else {
             return false;
         }
     }
 
-    private static String describeError(int p_328820_) {
-        String s = FreeType.FT_Error_String(p_328820_);
-        return s != null ? s : "Unrecognized error: 0x" + Integer.toHexString(p_328820_);
+    private static String describeError(int pErrorId) {
+        String s = FreeType.FT_Error_String(pErrorId);
+        return s != null ? s : "Unrecognized error: 0x" + Integer.toHexString(pErrorId);
     }
 
-    public static FT_Vector setVector(FT_Vector p_332923_, float p_329595_, float p_330314_) {
-        long i = (long)Math.round(p_329595_ * 64.0F);
-        long j = (long)Math.round(p_330314_ * 64.0F);
-        return p_332923_.set(i, j);
+    public static FT_Vector setVector(FT_Vector pVector, float pX, float pY) {
+        long i = (long)Math.round(pX * 64.0F);
+        long j = (long)Math.round(pY * 64.0F);
+        return pVector.set(i, j);
     }
 
-    public static float x(FT_Vector p_334185_) {
-        return (float)p_334185_.x() / 64.0F;
+    public static float x(FT_Vector pVector) {
+        return (float)pVector.x() / 64.0F;
     }
 
     public static void destroy() {

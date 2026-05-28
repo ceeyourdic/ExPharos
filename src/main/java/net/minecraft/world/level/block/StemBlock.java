@@ -59,22 +59,22 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
         return CODEC;
     }
 
-    protected StemBlock(ResourceKey<Block> p_310213_, ResourceKey<Block> p_312966_, ResourceKey<Item> p_312034_, BlockBehaviour.Properties p_154730_) {
-        super(p_154730_);
-        this.fruit = p_310213_;
-        this.attachedStem = p_312966_;
-        this.seed = p_312034_;
+    protected StemBlock(ResourceKey<Block> pFruit, ResourceKey<Block> pAttachedStem, ResourceKey<Item> pSeed, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.fruit = pFruit;
+        this.attachedStem = pAttachedStem;
+        this.seed = pSeed;
         this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)));
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_57047_, BlockGetter p_57048_, BlockPos p_57049_, CollisionContext p_57050_) {
-        return SHAPE_BY_AGE[p_57047_.getValue(AGE)];
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return SHAPE_BY_AGE[pState.getValue(AGE)];
     }
 
     @Override
-    protected boolean mayPlaceOn(BlockState p_57053_, BlockGetter p_57054_, BlockPos p_57055_) {
-        return p_57053_.is(Blocks.FARMLAND);
+    protected boolean mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return pState.is(Blocks.FARMLAND);
     }
 
     @Override
@@ -130,7 +130,7 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_57040_) {
-        p_57040_.add(AGE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(AGE);
     }
 }

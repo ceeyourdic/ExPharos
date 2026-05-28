@@ -88,7 +88,7 @@ public class SonicBoom extends Behavior<Warden> {
         setCooldown(p_217733_, 40);
     }
 
-    public static void setCooldown(LivingEntity p_217699_, int p_217700_) {
-        p_217699_.getBrain().setMemoryWithExpiry(MemoryModuleType.SONIC_BOOM_COOLDOWN, Unit.INSTANCE, (long)p_217700_);
+    public static void setCooldown(LivingEntity pEntity, int pCooldown) {
+        pEntity.getBrain().setMemoryWithExpiry(MemoryModuleType.SONIC_BOOM_COOLDOWN, Unit.INSTANCE, (long)pCooldown);
     }
 }

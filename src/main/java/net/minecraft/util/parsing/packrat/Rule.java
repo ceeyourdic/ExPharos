@@ -3,24 +3,24 @@ package net.minecraft.util.parsing.packrat;
 import java.util.Optional;
 
 public interface Rule<S, T> {
-    Optional<T> parse(ParseState<S> p_335539_);
+    Optional<T> parse(ParseState<S> pParseState);
 
-    static <S, T> Rule<S, T> fromTerm(Term<S> p_334127_, Rule.RuleAction<S, T> p_334890_) {
-        return new Rule.WrappedTerm<>(p_334890_, p_334127_);
+    static <S, T> Rule<S, T> fromTerm(Term<S> pChild, Rule.RuleAction<S, T> pAction) {
+        return new Rule.WrappedTerm<>(pAction, pChild);
     }
 
-    static <S, T> Rule<S, T> fromTerm(Term<S> p_336211_, Rule.SimpleRuleAction<T> p_332994_) {
-        return new Rule.WrappedTerm<>((p_331302_, p_331658_) -> Optional.of(p_332994_.run(p_331658_)), p_336211_);
+    static <S, T> Rule<S, T> fromTerm(Term<S> pChild, Rule.SimpleRuleAction<T> pAction) {
+        return new Rule.WrappedTerm<>((p_331302_, p_331658_) -> Optional.of(pAction.run(p_331658_)), pChild);
     }
 
     @FunctionalInterface
     public interface RuleAction<S, T> {
-        Optional<T> run(ParseState<S> p_332162_, Scope p_335135_);
+        Optional<T> run(ParseState<S> pParseState, Scope pScope);
     }
 
     @FunctionalInterface
     public interface SimpleRuleAction<T> {
-        T run(Scope p_332535_);
+        T run(Scope pScope);
     }
 
     public static record WrappedTerm<S, T>(Rule.RuleAction<S, T> action, Term<S> child) implements Rule<S, T> {

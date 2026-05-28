@@ -37,23 +37,23 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
     }
 
     @Override
-    public ItemStack getItem(int p_38218_) {
-        return this.getChestVehicleItem(p_38218_);
+    public ItemStack getItem(int pIndex) {
+        return this.getChestVehicleItem(pIndex);
     }
 
     @Override
-    public ItemStack removeItem(int p_38220_, int p_38221_) {
-        return this.removeChestVehicleItem(p_38220_, p_38221_);
+    public ItemStack removeItem(int pIndex, int pCount) {
+        return this.removeChestVehicleItem(pIndex, pCount);
     }
 
     @Override
-    public ItemStack removeItemNoUpdate(int p_38244_) {
-        return this.removeChestVehicleItemNoUpdate(p_38244_);
+    public ItemStack removeItemNoUpdate(int pIndex) {
+        return this.removeChestVehicleItemNoUpdate(pIndex);
     }
 
     @Override
-    public void setItem(int p_38225_, ItemStack p_38226_) {
-        this.setChestVehicleItem(p_38225_, p_38226_);
+    public void setItem(int pIndex, ItemStack pStack) {
+        this.setChestVehicleItem(pIndex, pStack);
     }
 
     @Override
@@ -66,8 +66,8 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
     }
 
     @Override
-    public boolean stillValid(Player p_38230_) {
-        return this.isChestVehicleStillValid(p_38230_);
+    public boolean stillValid(Player pPlayer) {
+        return this.isChestVehicleStillValid(pPlayer);
     }
 
     @Override
@@ -80,20 +80,20 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag p_38248_) {
-        super.addAdditionalSaveData(p_38248_);
-        this.addChestVehicleSaveData(p_38248_, this.registryAccess());
+    protected void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addChestVehicleSaveData(pCompound, this.registryAccess());
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag p_38235_) {
-        super.readAdditionalSaveData(p_38235_);
-        this.readChestVehicleSaveData(p_38235_, this.registryAccess());
+    protected void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readChestVehicleSaveData(pCompound, this.registryAccess());
     }
 
     @Override
-    public InteractionResult interact(Player p_38232_, InteractionHand p_38233_) {
-        return this.interactWithContainerVehicle(p_38232_);
+    public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
+        return this.interactWithContainerVehicle(pPlayer);
     }
 
     @Override
@@ -116,9 +116,9 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
         this.clearChestVehicleContent();
     }
 
-    public void setLootTable(ResourceKey<LootTable> p_331998_, long p_329252_) {
-        this.lootTable = p_331998_;
-        this.lootTableSeed = p_329252_;
+    public void setLootTable(ResourceKey<LootTable> pLootTable, long pSeed) {
+        this.lootTable = pLootTable;
+        this.lootTableSeed = pSeed;
     }
 
     @Nullable
@@ -132,7 +132,7 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
         }
     }
 
-    protected abstract AbstractContainerMenu createMenu(int p_38222_, Inventory p_38223_);
+    protected abstract AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory);
 
     @Nullable
     @Override

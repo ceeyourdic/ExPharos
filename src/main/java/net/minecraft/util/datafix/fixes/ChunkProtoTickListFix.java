@@ -31,8 +31,8 @@ public class ChunkProtoTickListFix extends DataFix {
         "minecraft:bubble_column", "minecraft:kelp", "minecraft:kelp_plant", "minecraft:seagrass", "minecraft:tall_seagrass"
     );
 
-    public ChunkProtoTickListFix(Schema p_184988_) {
-        super(p_184988_, false);
+    public ChunkProtoTickListFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override
@@ -126,71 +126,71 @@ public class ChunkProtoTickListFix extends DataFix {
     }
 
     private Dynamic<?> makeTickList(
-        Dynamic<?> p_185037_,
-        Int2ObjectMap<Supplier<ChunkProtoTickListFix.PoorMansPalettedContainer>> p_185038_,
-        byte p_185039_,
-        int p_185040_,
-        int p_185041_,
-        String p_185042_,
-        Function<Dynamic<?>, String> p_185043_
+        Dynamic<?> pData,
+        Int2ObjectMap<Supplier<ChunkProtoTickListFix.PoorMansPalettedContainer>> pPalette,
+        byte pY,
+        int pX,
+        int pZ,
+        String pName,
+        Function<Dynamic<?>, String> pIdGetter
     ) {
         Stream<Dynamic<?>> stream = Stream.empty();
-        List<? extends Dynamic<?>> list = p_185037_.get(p_185042_).asList(Function.identity());
+        List<? extends Dynamic<?>> list = pData.get(pName).asList(Function.identity());
 
         for (int i = 0; i < list.size(); i++) {
-            int j = i + p_185039_;
-            Supplier<ChunkProtoTickListFix.PoorMansPalettedContainer> supplier = p_185038_.get(j);
+            int j = i + pY;
+            Supplier<ChunkProtoTickListFix.PoorMansPalettedContainer> supplier = pPalette.get(j);
             Stream<? extends Dynamic<?>> stream1 = list.get(i)
                 .asStream()
                 .mapToInt(p_185074_ -> p_185074_.asShort((short)-1))
                 .filter(p_184993_ -> p_184993_ > 0)
-                .mapToObj(p_185059_ -> this.createTick(p_185037_, supplier, p_185040_, j, p_185041_, p_185059_, p_185043_));
+                .mapToObj(p_185059_ -> this.createTick(pData, supplier, pX, j, pZ, p_185059_, pIdGetter));
             stream = Stream.concat(stream, stream1);
         }
 
-        return p_185037_.createList(stream);
+        return pData.createList(stream);
     }
 
-    private static String getBlock(@Nullable Dynamic<?> p_185032_) {
-        return p_185032_ != null ? p_185032_.get("Name").asString("minecraft:air") : "minecraft:air";
+    private static String getBlock(@Nullable Dynamic<?> pData) {
+        return pData != null ? pData.get("Name").asString("minecraft:air") : "minecraft:air";
     }
 
-    private static String getLiquid(@Nullable Dynamic<?> p_185069_) {
-        if (p_185069_ == null) {
+    private static String getLiquid(@Nullable Dynamic<?> pData) {
+        if (pData == null) {
             return "minecraft:empty";
         } else {
-            String s = p_185069_.get("Name").asString("");
+            String s = pData.get("Name").asString("");
             if ("minecraft:water".equals(s)) {
-                return p_185069_.get("Properties").get("level").asInt(0) == 0 ? "minecraft:water" : "minecraft:flowing_water";
+                return pData.get("Properties").get("level").asInt(0) == 0 ? "minecraft:water" : "minecraft:flowing_water";
             } else if ("minecraft:lava".equals(s)) {
-                return p_185069_.get("Properties").get("level").asInt(0) == 0 ? "minecraft:lava" : "minecraft:flowing_lava";
+                return pData.get("Properties").get("level").asInt(0) == 0 ? "minecraft:lava" : "minecraft:flowing_lava";
             } else {
-                return !ALWAYS_WATERLOGGED.contains(s) && !p_185069_.get("Properties").get("waterlogged").asBoolean(false) ? "minecraft:empty" : "minecraft:water";
+                return !ALWAYS_WATERLOGGED.contains(s) && !pData.get("Properties").get("waterlogged").asBoolean(false) ? "minecraft:empty" : "minecraft:water";
             }
         }
     }
 
     private Dynamic<?> createTick(
-        Dynamic<?> p_185045_,
-        @Nullable Supplier<ChunkProtoTickListFix.PoorMansPalettedContainer> p_185046_,
-        int p_185047_,
-        int p_185048_,
-        int p_185049_,
-        int p_185050_,
-        Function<Dynamic<?>, String> p_185051_
+        Dynamic<?> pData,
+        @Nullable Supplier<ChunkProtoTickListFix.PoorMansPalettedContainer> pPalette,
+        int pX,
+        int pY,
+        int pZ,
+        int pIndex,
+        Function<Dynamic<?>, String> pIdGetter
     ) {
-        int i = p_185050_ & 15;
-        int j = p_185050_ >>> 4 & 15;
-        int k = p_185050_ >>> 8 & 15;
-        String s = p_185051_.apply(p_185046_ != null ? p_185046_.get().get(i, j, k) : null);
-        return p_185045_.createMap(
+        int i = pIndex & 15;
+        int j = pIndex >>> 4 & 15;
+        int k = pIndex >>> 8 & 15;
+        String s = pIdGetter.apply(pPalette != null ? pPalette.get().get(i, j, k) : null);
+        return pData.createMap(
             ImmutableMap.<Dynamic<?>, Dynamic<?>>builder()
-                .put(p_185045_.createString("i"), p_185045_.createString(s))
-                .put(p_185045_.createString("x"), p_185045_.createInt(p_185047_ * 16 + i))
-                .put(p_185045_.createString("y"), p_185045_.createInt(p_185048_ * 16 + j))
-                .put(p_185045_.createString("z"), p_185045_.createInt(p_185049_ * 16 + k))
-                .put(p_185045_.createString("t"), p_185045_.createInt(0))
-                .put(p_185045_.createString("p"), p_185045_.createInt(0))
+                .put(pData.createString("i"), pData.createString(s))
+                .put(pData.createString("x"), pData.createInt(pX * 16 + i))
+                .put(pData.createString("y"), pData.createInt(pY * 16 + j))
+                .put(pData.createString("z"), pData.createInt(pZ * 16 + k))
+                .put(pData.createString("t"), pData.createInt(0))
+                .put(pData.createString("p"), pData.createInt(0))
                 .build()
         );
     }
@@ -203,23 +203,23 @@ public class ChunkProtoTickListFix extends DataFix {
         private final long mask;
         private final int valuesPerLong;
 
-        public PoorMansPalettedContainer(List<? extends Dynamic<?>> p_185087_, long[] p_185088_) {
-            this.palette = p_185087_;
-            this.data = p_185088_;
-            this.bits = Math.max(4, ChunkHeightAndBiomeFix.ceillog2(p_185087_.size()));
+        public PoorMansPalettedContainer(List<? extends Dynamic<?>> pPalette, long[] pData) {
+            this.palette = pPalette;
+            this.data = pData;
+            this.bits = Math.max(4, ChunkHeightAndBiomeFix.ceillog2(pPalette.size()));
             this.mask = (1L << this.bits) - 1L;
             this.valuesPerLong = (char)(64 / this.bits);
         }
 
         @Nullable
-        public Dynamic<?> get(int p_185091_, int p_185092_, int p_185093_) {
+        public Dynamic<?> get(int pX, int pY, int pZ) {
             int i = this.palette.size();
             if (i < 1) {
                 return null;
             } else if (i == 1) {
                 return (Dynamic<?>)this.palette.get(0);
             } else {
-                int j = this.getIndex(p_185091_, p_185092_, p_185093_);
+                int j = this.getIndex(pX, pY, pZ);
                 int k = j / this.valuesPerLong;
                 if (k >= 0 && k < this.data.length) {
                     long l = this.data[k];
@@ -232,8 +232,8 @@ public class ChunkProtoTickListFix extends DataFix {
             }
         }
 
-        private int getIndex(int p_185096_, int p_185097_, int p_185098_) {
-            return (p_185097_ << 4 | p_185098_) << 4 | p_185096_;
+        private int getIndex(int pX, int pY, int pZ) {
+            return (pY << 4 | pZ) << 4 | pX;
         }
 
         public List<? extends Dynamic<?>> palette() {

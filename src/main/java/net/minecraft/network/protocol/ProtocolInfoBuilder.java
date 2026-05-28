@@ -20,38 +20,38 @@ public class ProtocolInfoBuilder<T extends PacketListener, B extends ByteBuf> {
     @Nullable
     private BundlerInfo bundlerInfo;
 
-    public ProtocolInfoBuilder(ConnectionProtocol p_334175_, PacketFlow p_335651_) {
-        this.protocol = p_334175_;
-        this.flow = p_335651_;
+    public ProtocolInfoBuilder(ConnectionProtocol pProtocol, PacketFlow pFlow) {
+        this.protocol = pProtocol;
+        this.flow = pFlow;
     }
 
-    public <P extends Packet<? super T>> ProtocolInfoBuilder<T, B> addPacket(PacketType<P> p_335373_, StreamCodec<? super B, P> p_333531_) {
-        this.codecs.add(new ProtocolInfoBuilder.CodecEntry<>(p_335373_, p_333531_));
+    public <P extends Packet<? super T>> ProtocolInfoBuilder<T, B> addPacket(PacketType<P> pType, StreamCodec<? super B, P> pSerializer) {
+        this.codecs.add(new ProtocolInfoBuilder.CodecEntry<>(pType, pSerializer));
         return this;
     }
 
     public <P extends BundlePacket<? super T>, D extends BundleDelimiterPacket<? super T>> ProtocolInfoBuilder<T, B> withBundlePacket(
-        PacketType<P> p_336277_, Function<Iterable<Packet<? super T>>, P> p_331716_, D p_328432_
+        PacketType<P> pType, Function<Iterable<Packet<? super T>>, P> pBundler, D pPacket
     ) {
-        StreamCodec<ByteBuf, D> streamcodec = StreamCodec.unit(p_328432_);
-        PacketType<D> packettype = (PacketType)p_328432_.type();
+        StreamCodec<ByteBuf, D> streamcodec = StreamCodec.unit(pPacket);
+        PacketType<D> packettype = (PacketType)pPacket.type();
         this.codecs.add(new ProtocolInfoBuilder.CodecEntry<>(packettype, streamcodec));
-        this.bundlerInfo = BundlerInfo.createForPacket(p_336277_, p_331716_, p_328432_);
+        this.bundlerInfo = BundlerInfo.createForPacket(pType, pBundler, pPacket);
         return this;
     }
 
-    StreamCodec<ByteBuf, Packet<? super T>> buildPacketCodec(Function<ByteBuf, B> p_331741_, List<ProtocolInfoBuilder.CodecEntry<T, ?, B>> p_329135_) {
+    StreamCodec<ByteBuf, Packet<? super T>> buildPacketCodec(Function<ByteBuf, B> pBufferFactory, List<ProtocolInfoBuilder.CodecEntry<T, ?, B>> pCodecs) {
         ProtocolCodecBuilder<ByteBuf, T> protocolcodecbuilder = new ProtocolCodecBuilder<>(this.flow);
 
-        for (ProtocolInfoBuilder.CodecEntry<T, ?, B> codecentry : p_329135_) {
-            codecentry.addToBuilder(protocolcodecbuilder, p_331741_);
+        for (ProtocolInfoBuilder.CodecEntry<T, ?, B> codecentry : pCodecs) {
+            codecentry.addToBuilder(protocolcodecbuilder, pBufferFactory);
         }
 
         return protocolcodecbuilder.build();
     }
 
-    public ProtocolInfo<T> build(Function<ByteBuf, B> p_336320_) {
-        return new ProtocolInfoBuilder.Implementation<>(this.protocol, this.flow, this.buildPacketCodec(p_336320_, this.codecs), this.bundlerInfo);
+    public ProtocolInfo<T> build(Function<ByteBuf, B> pBufferFactory) {
+        return new ProtocolInfoBuilder.Implementation<>(this.protocol, this.flow, this.buildPacketCodec(pBufferFactory, this.codecs), this.bundlerInfo);
     }
 
     public ProtocolInfo.Unbound<T, B> buildUnbound() {
@@ -86,31 +86,31 @@ public class ProtocolInfoBuilder<T extends PacketListener, B extends ByteBuf> {
     }
 
     private static <L extends PacketListener, B extends ByteBuf> ProtocolInfo.Unbound<L, B> protocol(
-        ConnectionProtocol p_330235_, PacketFlow p_335045_, Consumer<ProtocolInfoBuilder<L, B>> p_329753_
+        ConnectionProtocol pProtocol, PacketFlow pFlow, Consumer<ProtocolInfoBuilder<L, B>> pSetup
     ) {
-        ProtocolInfoBuilder<L, B> protocolinfobuilder = new ProtocolInfoBuilder<>(p_330235_, p_335045_);
-        p_329753_.accept(protocolinfobuilder);
+        ProtocolInfoBuilder<L, B> protocolinfobuilder = new ProtocolInfoBuilder<>(pProtocol, pFlow);
+        pSetup.accept(protocolinfobuilder);
         return protocolinfobuilder.buildUnbound();
     }
 
     public static <T extends ServerboundPacketListener, B extends ByteBuf> ProtocolInfo.Unbound<T, B> serverboundProtocol(
-        ConnectionProtocol p_331618_, Consumer<ProtocolInfoBuilder<T, B>> p_330318_
+        ConnectionProtocol pProtocol, Consumer<ProtocolInfoBuilder<T, B>> pSetup
     ) {
-        return protocol(p_331618_, PacketFlow.SERVERBOUND, p_330318_);
+        return protocol(pProtocol, PacketFlow.SERVERBOUND, pSetup);
     }
 
     public static <T extends ClientboundPacketListener, B extends ByteBuf> ProtocolInfo.Unbound<T, B> clientboundProtocol(
-        ConnectionProtocol p_329688_, Consumer<ProtocolInfoBuilder<T, B>> p_332900_
+        ConnectionProtocol pProtocol, Consumer<ProtocolInfoBuilder<T, B>> pSetup
     ) {
-        return protocol(p_329688_, PacketFlow.CLIENTBOUND, p_332900_);
+        return protocol(pProtocol, PacketFlow.CLIENTBOUND, pSetup);
     }
 
     static record CodecEntry<T extends PacketListener, P extends Packet<? super T>, B extends ByteBuf>(
         PacketType<P> type, StreamCodec<? super B, P> serializer
     ) {
-        public void addToBuilder(ProtocolCodecBuilder<ByteBuf, T> p_328095_, Function<ByteBuf, B> p_333803_) {
-            StreamCodec<ByteBuf, P> streamcodec = this.serializer.mapStream(p_333803_);
-            p_328095_.add(this.type, streamcodec);
+        public void addToBuilder(ProtocolCodecBuilder<ByteBuf, T> pCodecBuilder, Function<ByteBuf, B> pBufferFactory) {
+            StreamCodec<ByteBuf, P> streamcodec = this.serializer.mapStream(pBufferFactory);
+            pCodecBuilder.add(this.type, streamcodec);
         }
     }
 

@@ -21,8 +21,8 @@ public record ClientboundPlayerPositionPacket(int id, PositionMoveRotation chang
         ClientboundPlayerPositionPacket::new
     );
 
-    public static ClientboundPlayerPositionPacket of(int p_366169_, PositionMoveRotation p_369222_, Set<Relative> p_365305_) {
-        return new ClientboundPlayerPositionPacket(p_366169_, p_369222_, p_365305_);
+    public static ClientboundPlayerPositionPacket of(int pId, PositionMoveRotation pPositionMoveRotation, Set<Relative> pRelativeArguments) {
+        return new ClientboundPlayerPositionPacket(pId, pPositionMoveRotation, pRelativeArguments);
     }
 
     @Override
@@ -30,7 +30,7 @@ public record ClientboundPlayerPositionPacket(int id, PositionMoveRotation chang
         return GamePacketTypes.CLIENTBOUND_PLAYER_POSITION;
     }
 
-    public void handle(ClientGamePacketListener p_132817_) {
-        p_132817_.handleMovePlayer(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleMovePlayer(this);
     }
 }

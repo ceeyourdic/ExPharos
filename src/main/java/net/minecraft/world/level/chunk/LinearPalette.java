@@ -14,32 +14,32 @@ public class LinearPalette<T> implements Palette<T> {
     private final int bits;
     private int size;
 
-    private LinearPalette(IdMap<T> p_188015_, int p_188016_, PaletteResize<T> p_188017_, List<T> p_188018_) {
-        this.registry = p_188015_;
-        this.values = (T[])(new Object[1 << p_188016_]);
-        this.bits = p_188016_;
-        this.resizeHandler = p_188017_;
+    private LinearPalette(IdMap<T> pRegistry, int pBits, PaletteResize<T> pResizeHandler, List<T> pValues) {
+        this.registry = pRegistry;
+        this.values = (T[])(new Object[1 << pBits]);
+        this.bits = pBits;
+        this.resizeHandler = pResizeHandler;
         Validate.isTrue(
-            p_188018_.size() <= this.values.length, "Can't initialize LinearPalette of size %d with %d entries", this.values.length, p_188018_.size()
+            pValues.size() <= this.values.length, "Can't initialize LinearPalette of size %d with %d entries", this.values.length, pValues.size()
         );
 
-        for (int i = 0; i < p_188018_.size(); i++) {
-            this.values[i] = p_188018_.get(i);
+        for (int i = 0; i < pValues.size(); i++) {
+            this.values[i] = pValues.get(i);
         }
 
-        this.size = p_188018_.size();
+        this.size = pValues.size();
     }
 
-    private LinearPalette(IdMap<T> p_199921_, T[] p_199922_, PaletteResize<T> p_199923_, int p_199924_, int p_199925_) {
-        this.registry = p_199921_;
-        this.values = p_199922_;
-        this.resizeHandler = p_199923_;
-        this.bits = p_199924_;
-        this.size = p_199925_;
+    private LinearPalette(IdMap<T> pRegistry, T[] pValues, PaletteResize<T> pResizeHandler, int pBits, int pSize) {
+        this.registry = pRegistry;
+        this.values = pValues;
+        this.resizeHandler = pResizeHandler;
+        this.bits = pBits;
+        this.size = pSize;
     }
 
-    public static <A> Palette<A> create(int p_188020_, IdMap<A> p_188021_, PaletteResize<A> p_188022_, List<A> p_188023_) {
-        return new LinearPalette<>(p_188021_, p_188020_, p_188022_, p_188023_);
+    public static <A> Palette<A> create(int pBits, IdMap<A> pRegistry, PaletteResize<A> pResizeHandler, List<A> pValues) {
+        return new LinearPalette<>(pRegistry, pBits, pResizeHandler, pValues);
     }
 
     @Override

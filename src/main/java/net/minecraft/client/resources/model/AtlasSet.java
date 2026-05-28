@@ -19,16 +19,16 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class AtlasSet implements AutoCloseable {
     private final Map<ResourceLocation, AtlasSet.AtlasEntry> atlases;
 
-    public AtlasSet(Map<ResourceLocation, ResourceLocation> p_249969_, TextureManager p_252059_) {
-        this.atlases = p_249969_.entrySet().stream().collect(Collectors.toMap(Entry::getKey, p_261403_ -> {
+    public AtlasSet(Map<ResourceLocation, ResourceLocation> pAtlasMap, TextureManager pTextureManager) {
+        this.atlases = pAtlasMap.entrySet().stream().collect(Collectors.toMap(Entry::getKey, p_261403_ -> {
             TextureAtlas textureatlas = new TextureAtlas(p_261403_.getKey());
-            p_252059_.register(p_261403_.getKey(), textureatlas);
+            pTextureManager.register(p_261403_.getKey(), textureatlas);
             return new AtlasSet.AtlasEntry(textureatlas, p_261403_.getValue());
         }));
     }
 
-    public TextureAtlas getAtlas(ResourceLocation p_250828_) {
-        return this.atlases.get(p_250828_).atlas();
+    public TextureAtlas getAtlas(ResourceLocation pLocation) {
+        return this.atlases.get(pLocation).atlas();
     }
 
     @Override
@@ -37,7 +37,7 @@ public class AtlasSet implements AutoCloseable {
         this.atlases.clear();
     }
 
-    public Map<ResourceLocation, CompletableFuture<AtlasSet.StitchResult>> scheduleLoad(ResourceManager p_249256_, int p_251059_, Executor p_250751_) {
+    public Map<ResourceLocation, CompletableFuture<AtlasSet.StitchResult>> scheduleLoad(ResourceManager pResourceManager, int pMipLevel, Executor pExecutor) {
         return this.atlases
             .entrySet()
             .stream()
@@ -47,7 +47,7 @@ public class AtlasSet implements AutoCloseable {
                     p_261401_ -> {
                         AtlasSet.AtlasEntry atlasset$atlasentry = p_261401_.getValue();
                         return SpriteLoader.create(atlasset$atlasentry.atlas)
-                            .loadAndStitch(p_249256_, atlasset$atlasentry.atlasInfoLocation, p_251059_, p_250751_)
+                            .loadAndStitch(pResourceManager, atlasset$atlasentry.atlasInfoLocation, pMipLevel, pExecutor)
                             .thenApply(p_250418_ -> new AtlasSet.StitchResult(atlasset$atlasentry.atlas, p_250418_));
                     }
                 )
@@ -67,14 +67,14 @@ public class AtlasSet implements AutoCloseable {
         private final TextureAtlas atlas;
         private final SpriteLoader.Preparations preparations;
 
-        public StitchResult(TextureAtlas p_250381_, SpriteLoader.Preparations p_251137_) {
-            this.atlas = p_250381_;
-            this.preparations = p_251137_;
+        public StitchResult(TextureAtlas pAtlas, SpriteLoader.Preparations pPreperations) {
+            this.atlas = pAtlas;
+            this.preparations = pPreperations;
         }
 
         @Nullable
-        public TextureAtlasSprite getSprite(ResourceLocation p_249039_) {
-            return this.preparations.regions().get(p_249039_);
+        public TextureAtlasSprite getSprite(ResourceLocation pLocation) {
+            return this.preparations.regions().get(pLocation);
         }
 
         public TextureAtlasSprite missing() {

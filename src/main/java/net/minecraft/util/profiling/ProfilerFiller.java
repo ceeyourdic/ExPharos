@@ -10,54 +10,54 @@ public interface ProfilerFiller {
 
     void endTick();
 
-    void push(String p_18581_);
+    void push(String pName);
 
-    void push(Supplier<String> p_18582_);
+    void push(Supplier<String> pNameSupplier);
 
     void pop();
 
-    void popPush(String p_18583_);
+    void popPush(String pName);
 
-    void popPush(Supplier<String> p_18584_);
+    void popPush(Supplier<String> pNameSupplier);
 
-    default void addZoneText(String p_363858_) {
+    default void addZoneText(String pText) {
     }
 
-    default void addZoneValue(long p_366219_) {
+    default void addZoneValue(long pValue) {
     }
 
-    default void setZoneColor(int p_364754_) {
+    default void setZoneColor(int pColor) {
     }
 
-    default Zone zone(String p_361931_) {
-        this.push(p_361931_);
+    default Zone zone(String pName) {
+        this.push(pName);
         return new Zone(this);
     }
 
-    default Zone zone(Supplier<String> p_366899_) {
-        this.push(p_366899_);
+    default Zone zone(Supplier<String> pName) {
+        this.push(pName);
         return new Zone(this);
     }
 
-    void markForCharting(MetricCategory p_145959_);
+    void markForCharting(MetricCategory pCategory);
 
-    default void incrementCounter(String p_18585_) {
-        this.incrementCounter(p_18585_, 1);
+    default void incrementCounter(String pEntryId) {
+        this.incrementCounter(pEntryId, 1);
     }
 
-    void incrementCounter(String p_185258_, int p_185259_);
+    void incrementCounter(String pCounterName, int pIncrement);
 
-    default void incrementCounter(Supplier<String> p_18586_) {
-        this.incrementCounter(p_18586_, 1);
+    default void incrementCounter(Supplier<String> pEntryIdSupplier) {
+        this.incrementCounter(pEntryIdSupplier, 1);
     }
 
-    void incrementCounter(Supplier<String> p_185260_, int p_185261_);
+    void incrementCounter(Supplier<String> pCounterNameSupplier, int pIncrement);
 
-    static ProfilerFiller combine(ProfilerFiller p_369473_, ProfilerFiller p_362839_) {
-        if (p_369473_ == InactiveProfiler.INSTANCE) {
-            return p_362839_;
+    static ProfilerFiller combine(ProfilerFiller pFirst, ProfilerFiller pSecond) {
+        if (pFirst == InactiveProfiler.INSTANCE) {
+            return pSecond;
         } else {
-            return (ProfilerFiller)(p_362839_ == InactiveProfiler.INSTANCE ? p_369473_ : new ProfilerFiller.CombinedProfileFiller(p_369473_, p_362839_));
+            return (ProfilerFiller)(pSecond == InactiveProfiler.INSTANCE ? pFirst : new ProfilerFiller.CombinedProfileFiller(pFirst, pSecond));
         }
     }
 
@@ -65,9 +65,9 @@ public interface ProfilerFiller {
         private final ProfilerFiller first;
         private final ProfilerFiller second;
 
-        public CombinedProfileFiller(ProfilerFiller p_361593_, ProfilerFiller p_363992_) {
-            this.first = p_361593_;
-            this.second = p_363992_;
+        public CombinedProfileFiller(ProfilerFiller pFirst, ProfilerFiller pSecond) {
+            this.first = pFirst;
+            this.second = pSecond;
         }
 
         @Override

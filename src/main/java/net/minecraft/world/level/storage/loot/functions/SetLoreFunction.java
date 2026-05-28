@@ -34,11 +34,11 @@ public class SetLoreFunction extends LootItemConditionalFunction {
     private final ListOperation mode;
     private final Optional<LootContext.EntityTarget> resolutionContext;
 
-    public SetLoreFunction(List<LootItemCondition> p_81085_, List<Component> p_300257_, ListOperation p_333397_, Optional<LootContext.EntityTarget> p_301400_) {
-        super(p_81085_);
-        this.lore = List.copyOf(p_300257_);
-        this.mode = p_333397_;
-        this.resolutionContext = p_301400_;
+    public SetLoreFunction(List<LootItemCondition> pConditions, List<Component> pLore, ListOperation pMode, Optional<LootContext.EntityTarget> pResolutionContext) {
+        super(pConditions);
+        this.lore = List.copyOf(pLore);
+        this.mode = pMode;
+        this.resolutionContext = pResolutionContext;
     }
 
     @Override
@@ -52,18 +52,18 @@ public class SetLoreFunction extends LootItemConditionalFunction {
     }
 
     @Override
-    public ItemStack run(ItemStack p_81089_, LootContext p_81090_) {
-        p_81089_.update(DataComponents.LORE, ItemLore.EMPTY, p_327614_ -> new ItemLore(this.updateLore(p_327614_, p_81090_)));
-        return p_81089_;
+    public ItemStack run(ItemStack pStack, LootContext pContext) {
+        pStack.update(DataComponents.LORE, ItemLore.EMPTY, p_327614_ -> new ItemLore(this.updateLore(p_327614_, pContext)));
+        return pStack;
     }
 
-    private List<Component> updateLore(@Nullable ItemLore p_329508_, LootContext p_335535_) {
-        if (p_329508_ == null && this.lore.isEmpty()) {
+    private List<Component> updateLore(@Nullable ItemLore pItemLore, LootContext pContext) {
+        if (pItemLore == null && this.lore.isEmpty()) {
             return List.of();
         } else {
-            UnaryOperator<Component> unaryoperator = SetNameFunction.createResolver(p_335535_, this.resolutionContext.orElse(null));
+            UnaryOperator<Component> unaryoperator = SetNameFunction.createResolver(pContext, this.resolutionContext.orElse(null));
             List<Component> list = this.lore.stream().map(unaryoperator).toList();
-            return this.mode.apply(p_329508_.lines(), list, 256);
+            return this.mode.apply(pItemLore.lines(), list, 256);
         }
     }
 
@@ -76,18 +76,18 @@ public class SetLoreFunction extends LootItemConditionalFunction {
         private final ImmutableList.Builder<Component> lore = ImmutableList.builder();
         private ListOperation mode = ListOperation.Append.INSTANCE;
 
-        public SetLoreFunction.Builder setMode(ListOperation p_333307_) {
-            this.mode = p_333307_;
+        public SetLoreFunction.Builder setMode(ListOperation pMode) {
+            this.mode = pMode;
             return this;
         }
 
-        public SetLoreFunction.Builder setResolutionContext(LootContext.EntityTarget p_165450_) {
-            this.resolutionContext = Optional.of(p_165450_);
+        public SetLoreFunction.Builder setResolutionContext(LootContext.EntityTarget pResolutionContext) {
+            this.resolutionContext = Optional.of(pResolutionContext);
             return this;
         }
 
-        public SetLoreFunction.Builder addLine(Component p_165452_) {
-            this.lore.add(p_165452_);
+        public SetLoreFunction.Builder addLine(Component pLine) {
+            this.lore.add(pLine);
             return this;
         }
 

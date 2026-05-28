@@ -22,9 +22,9 @@ public enum CraftingBookCategory implements StringRepresentable {
     private final String name;
     private final int id;
 
-    private CraftingBookCategory(final String p_249346_, final int p_331077_) {
-        this.name = p_249346_;
-        this.id = p_331077_;
+    private CraftingBookCategory(final String pName, final int pId) {
+        this.name = pName;
+        this.id = pId;
     }
 
     @Override

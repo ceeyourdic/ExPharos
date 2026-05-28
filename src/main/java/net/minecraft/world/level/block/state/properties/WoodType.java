@@ -32,13 +32,13 @@ public record WoodType(String name, BlockSetType setType, SoundType soundType, S
         new WoodType("bamboo", BlockSetType.BAMBOO, SoundType.BAMBOO_WOOD, SoundType.BAMBOO_WOOD_HANGING_SIGN, SoundEvents.BAMBOO_WOOD_FENCE_GATE_CLOSE, SoundEvents.BAMBOO_WOOD_FENCE_GATE_OPEN)
     );
 
-    public WoodType(String p_273766_, BlockSetType p_273104_) {
-        this(p_273766_, p_273104_, SoundType.WOOD, SoundType.HANGING_SIGN, SoundEvents.FENCE_GATE_CLOSE, SoundEvents.FENCE_GATE_OPEN);
+    public WoodType(String pName, BlockSetType pSetType) {
+        this(pName, pSetType, SoundType.WOOD, SoundType.HANGING_SIGN, SoundEvents.FENCE_GATE_CLOSE, SoundEvents.FENCE_GATE_OPEN);
     }
 
-    private static WoodType register(WoodType p_61845_) {
-        TYPES.put(p_61845_.name(), p_61845_);
-        return p_61845_;
+    private static WoodType register(WoodType pWoodType) {
+        TYPES.put(pWoodType.name(), pWoodType);
+        return pWoodType;
     }
 
     public static Stream<WoodType> values() {

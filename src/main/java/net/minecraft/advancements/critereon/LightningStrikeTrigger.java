@@ -19,10 +19,10 @@ public class LightningStrikeTrigger extends SimpleCriterionTrigger<LightningStri
         return LightningStrikeTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_153392_, LightningBolt p_153393_, List<Entity> p_153394_) {
-        List<LootContext> list = p_153394_.stream().map(p_153390_ -> EntityPredicate.createContext(p_153392_, p_153390_)).collect(Collectors.toList());
-        LootContext lootcontext = EntityPredicate.createContext(p_153392_, p_153393_);
-        this.trigger(p_153392_, p_153402_ -> p_153402_.matches(lootcontext, list));
+    public void trigger(ServerPlayer pPlayer, LightningBolt pLightning, List<Entity> pNearbyEntities) {
+        List<LootContext> list = pNearbyEntities.stream().map(p_153390_ -> EntityPredicate.createContext(pPlayer, p_153390_)).collect(Collectors.toList());
+        LootContext lootcontext = EntityPredicate.createContext(pPlayer, pLightning);
+        this.trigger(pPlayer, p_153402_ -> p_153402_.matches(lootcontext, list));
     }
 
     public static record TriggerInstance(
@@ -37,17 +37,17 @@ public class LightningStrikeTrigger extends SimpleCriterionTrigger<LightningStri
                     .apply(p_325228_, LightningStrikeTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<LightningStrikeTrigger.TriggerInstance> lightningStrike(Optional<EntityPredicate> p_301310_, Optional<EntityPredicate> p_299336_) {
+        public static Criterion<LightningStrikeTrigger.TriggerInstance> lightningStrike(Optional<EntityPredicate> pLightning, Optional<EntityPredicate> pBystander) {
             return CriteriaTriggers.LIGHTNING_STRIKE
                 .createCriterion(
-                    new LightningStrikeTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(p_301310_), EntityPredicate.wrap(p_299336_))
+                    new LightningStrikeTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(pLightning), EntityPredicate.wrap(pBystander))
                 );
         }
 
-        public boolean matches(LootContext p_153419_, List<LootContext> p_153420_) {
-            return this.lightning.isPresent() && !this.lightning.get().matches(p_153419_)
+        public boolean matches(LootContext pPlayerContext, List<LootContext> pEntityContexts) {
+            return this.lightning.isPresent() && !this.lightning.get().matches(pPlayerContext)
                 ? false
-                : !this.bystander.isPresent() || !p_153420_.stream().noneMatch(this.bystander.get()::matches);
+                : !this.bystander.isPresent() || !pEntityContexts.stream().noneMatch(this.bystander.get()::matches);
         }
 
         @Override

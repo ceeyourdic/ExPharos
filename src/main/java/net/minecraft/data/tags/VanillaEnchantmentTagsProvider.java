@@ -8,8 +8,8 @@ import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 public class VanillaEnchantmentTagsProvider extends EnchantmentTagsProvider {
-    public VanillaEnchantmentTagsProvider(PackOutput p_335915_, CompletableFuture<HolderLookup.Provider> p_330302_) {
-        super(p_335915_, p_330302_);
+    public VanillaEnchantmentTagsProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pLookupProvider) {
+        super(pOutput, pLookupProvider);
     }
 
     @Override

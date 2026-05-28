@@ -22,12 +22,12 @@ public class PackRepository {
     private Map<String, Pack> available = ImmutableMap.of();
     private List<Pack> selected = ImmutableList.of();
 
-    public PackRepository(RepositorySource... p_251886_) {
-        this.sources = ImmutableSet.copyOf(p_251886_);
+    public PackRepository(RepositorySource... pSources) {
+        this.sources = ImmutableSet.copyOf(pSources);
     }
 
-    public static String displayPackList(Collection<Pack> p_331712_) {
-        return p_331712_.stream()
+    public static String displayPackList(Collection<Pack> pPacks) {
+        return pPacks.stream()
             .map(p_326476_ -> p_326476_.getId() + (p_326476_.getCompatibility().isCompatible() ? "" : " (incompatible)"))
             .collect(Collectors.joining(", "));
     }
@@ -53,12 +53,12 @@ public class PackRepository {
         return !this.selected.equals(list);
     }
 
-    public void setSelected(Collection<String> p_10510_) {
-        this.selected = this.rebuildSelected(p_10510_);
+    public void setSelected(Collection<String> pIds) {
+        this.selected = this.rebuildSelected(pIds);
     }
 
-    public boolean addPack(String p_276042_) {
-        Pack pack = this.available.get(p_276042_);
+    public boolean addPack(String pId) {
+        Pack pack = this.available.get(pId);
         if (pack != null && !this.selected.contains(pack)) {
             List<Pack> list = Lists.newArrayList(this.selected);
             list.add(pack);
@@ -69,8 +69,8 @@ public class PackRepository {
         }
     }
 
-    public boolean removePack(String p_276065_) {
-        Pack pack = this.available.get(p_276065_);
+    public boolean removePack(String pId) {
+        Pack pack = this.available.get(pId);
         if (pack != null && this.selected.contains(pack)) {
             List<Pack> list = Lists.newArrayList(this.selected);
             list.remove(pack);
@@ -81,8 +81,8 @@ public class PackRepository {
         }
     }
 
-    private List<Pack> rebuildSelected(Collection<String> p_10518_) {
-        List<Pack> list = this.getAvailablePacks(p_10518_).collect(Util.toMutableList());
+    private List<Pack> rebuildSelected(Collection<String> pIds) {
+        List<Pack> list = this.getAvailablePacks(pIds).collect(Util.toMutableList());
 
         for (Pack pack : this.available.values()) {
             if (pack.isRequired() && !list.contains(pack)) {
@@ -93,8 +93,8 @@ public class PackRepository {
         return ImmutableList.copyOf(list);
     }
 
-    private Stream<Pack> getAvailablePacks(Collection<String> p_10521_) {
-        return p_10521_.stream().map(this.available::get).filter(Objects::nonNull);
+    private Stream<Pack> getAvailablePacks(Collection<String> pIds) {
+        return pIds.stream().map(this.available::get).filter(Objects::nonNull);
     }
 
     public Collection<String> getAvailableIds() {
@@ -118,12 +118,12 @@ public class PackRepository {
     }
 
     @Nullable
-    public Pack getPack(String p_10508_) {
-        return this.available.get(p_10508_);
+    public Pack getPack(String pId) {
+        return this.available.get(pId);
     }
 
-    public boolean isAvailable(String p_10516_) {
-        return this.available.containsKey(p_10516_);
+    public boolean isAvailable(String pId) {
+        return this.available.containsKey(pId);
     }
 
     public List<PackResources> openAllSelected() {

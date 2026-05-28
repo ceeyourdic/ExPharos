@@ -120,11 +120,11 @@ public interface EnchantmentEffectComponents {
         "trident_spin_attack_strength", p_343362_ -> p_343362_.persistent(EnchantmentValueEffect.CODEC)
     );
 
-    static DataComponentType<?> bootstrap(Registry<DataComponentType<?>> p_342462_) {
+    static DataComponentType<?> bootstrap(Registry<DataComponentType<?>> pRegistry) {
         return DAMAGE_PROTECTION;
     }
 
-    private static <T> DataComponentType<T> register(String p_342959_, UnaryOperator<DataComponentType.Builder<T>> p_345175_) {
-        return Registry.register(BuiltInRegistries.ENCHANTMENT_EFFECT_COMPONENT_TYPE, p_342959_, p_345175_.apply(DataComponentType.builder()).build());
+    private static <T> DataComponentType<T> register(String pName, UnaryOperator<DataComponentType.Builder<T>> pOperator) {
+        return Registry.register(BuiltInRegistries.ENCHANTMENT_EFFECT_COMPONENT_TYPE, pName, pOperator.apply(DataComponentType.builder()).build());
     }
 }

@@ -9,11 +9,11 @@ public class TheEndPortalBlockEntity extends BlockEntity {
         super(p_155855_, p_155856_, p_155857_);
     }
 
-    public TheEndPortalBlockEntity(BlockPos p_155859_, BlockState p_155860_) {
-        this(BlockEntityType.END_PORTAL, p_155859_, p_155860_);
+    public TheEndPortalBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        this(BlockEntityType.END_PORTAL, pPos, pBlockState);
     }
 
-    public boolean shouldRenderFace(Direction p_59980_) {
-        return p_59980_.getAxis() == Direction.Axis.Y;
+    public boolean shouldRenderFace(Direction pFace) {
+        return pFace.getAxis() == Direction.Axis.Y;
     }
 }

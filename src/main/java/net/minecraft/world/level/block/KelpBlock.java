@@ -32,8 +32,8 @@ public class KelpBlock extends GrowingPlantHeadBlock implements LiquidBlockConta
     }
 
     @Override
-    protected boolean canGrowInto(BlockState p_54321_) {
-        return p_54321_.is(Blocks.WATER);
+    protected boolean canGrowInto(BlockState pState) {
+        return pState.is(Blocks.WATER);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class KelpBlock extends GrowingPlantHeadBlock implements LiquidBlockConta
     }
 
     @Override
-    public boolean placeLiquid(LevelAccessor p_54309_, BlockPos p_54310_, BlockState p_54311_, FluidState p_54312_) {
+    public boolean placeLiquid(LevelAccessor pLevel, BlockPos pPos, BlockState pState, FluidState pFluidState) {
         return false;
     }
 
@@ -63,13 +63,13 @@ public class KelpBlock extends GrowingPlantHeadBlock implements LiquidBlockConta
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_54302_) {
-        FluidState fluidstate = p_54302_.getLevel().getFluidState(p_54302_.getClickedPos());
-        return fluidstate.is(FluidTags.WATER) && fluidstate.getAmount() == 8 ? super.getStateForPlacement(p_54302_) : null;
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
+        return fluidstate.is(FluidTags.WATER) && fluidstate.getAmount() == 8 ? super.getStateForPlacement(pContext) : null;
     }
 
     @Override
-    protected FluidState getFluidState(BlockState p_54319_) {
+    protected FluidState getFluidState(BlockState pState) {
         return Fluids.WATER.getSource(false);
     }
 }

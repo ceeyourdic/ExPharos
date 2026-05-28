@@ -7,8 +7,8 @@ import com.mojang.serialization.Dynamic;
 import java.util.Optional;
 
 public class PlayerHeadBlockProfileFix extends NamedEntityFix {
-    public PlayerHeadBlockProfileFix(Schema p_334849_) {
-        super(p_334849_, false, "PlayerHeadBlockProfileFix", References.BLOCK_ENTITY, "minecraft:skull");
+    public PlayerHeadBlockProfileFix(Schema pOutputSchema) {
+        super(pOutputSchema, false, "PlayerHeadBlockProfileFix", References.BLOCK_ENTITY, "minecraft:skull");
     }
 
     @Override
@@ -16,15 +16,15 @@ public class PlayerHeadBlockProfileFix extends NamedEntityFix {
         return p_332910_.update(DSL.remainderFinder(), this::fix);
     }
 
-    private <T> Dynamic<T> fix(Dynamic<T> p_332985_) {
-        Optional<Dynamic<T>> optional = p_332985_.get("SkullOwner").result();
-        Optional<Dynamic<T>> optional1 = p_332985_.get("ExtraType").result();
+    private <T> Dynamic<T> fix(Dynamic<T> pTag) {
+        Optional<Dynamic<T>> optional = pTag.get("SkullOwner").result();
+        Optional<Dynamic<T>> optional1 = pTag.get("ExtraType").result();
         Optional<Dynamic<T>> optional2 = optional.or(() -> optional1);
         if (optional2.isEmpty()) {
-            return p_332985_;
+            return pTag;
         } else {
-            p_332985_ = p_332985_.remove("SkullOwner").remove("ExtraType");
-            return p_332985_.set("profile", ItemStackComponentizationFix.fixProfile(optional2.get()));
+            pTag = pTag.remove("SkullOwner").remove("ExtraType");
+            return pTag.set("profile", ItemStackComponentizationFix.fixProfile(optional2.get()));
         }
     }
 }

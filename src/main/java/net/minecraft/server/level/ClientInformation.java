@@ -18,30 +18,30 @@ public record ClientInformation(
 ) {
     public static final int MAX_LANGUAGE_LENGTH = 16;
 
-    public ClientInformation(FriendlyByteBuf p_300049_) {
+    public ClientInformation(FriendlyByteBuf pBuffer) {
         this(
-            p_300049_.readUtf(16),
-            p_300049_.readByte(),
-            p_300049_.readEnum(ChatVisiblity.class),
-            p_300049_.readBoolean(),
-            p_300049_.readUnsignedByte(),
-            p_300049_.readEnum(HumanoidArm.class),
-            p_300049_.readBoolean(),
-            p_300049_.readBoolean(),
-            p_300049_.readEnum(ParticleStatus.class)
+            pBuffer.readUtf(16),
+            pBuffer.readByte(),
+            pBuffer.readEnum(ChatVisiblity.class),
+            pBuffer.readBoolean(),
+            pBuffer.readUnsignedByte(),
+            pBuffer.readEnum(HumanoidArm.class),
+            pBuffer.readBoolean(),
+            pBuffer.readBoolean(),
+            pBuffer.readEnum(ParticleStatus.class)
         );
     }
 
-    public void write(FriendlyByteBuf p_297289_) {
-        p_297289_.writeUtf(this.language);
-        p_297289_.writeByte(this.viewDistance);
-        p_297289_.writeEnum(this.chatVisibility);
-        p_297289_.writeBoolean(this.chatColors);
-        p_297289_.writeByte(this.modelCustomisation);
-        p_297289_.writeEnum(this.mainHand);
-        p_297289_.writeBoolean(this.textFilteringEnabled);
-        p_297289_.writeBoolean(this.allowsListing);
-        p_297289_.writeEnum(this.particleStatus);
+    public void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeUtf(this.language);
+        pBuffer.writeByte(this.viewDistance);
+        pBuffer.writeEnum(this.chatVisibility);
+        pBuffer.writeBoolean(this.chatColors);
+        pBuffer.writeByte(this.modelCustomisation);
+        pBuffer.writeEnum(this.mainHand);
+        pBuffer.writeBoolean(this.textFilteringEnabled);
+        pBuffer.writeBoolean(this.allowsListing);
+        pBuffer.writeEnum(this.particleStatus);
     }
 
     public static ClientInformation createDefault() {

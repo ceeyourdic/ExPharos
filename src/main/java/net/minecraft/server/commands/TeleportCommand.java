@@ -33,8 +33,8 @@ import net.minecraft.world.phys.Vec3;
 public class TeleportCommand {
     private static final SimpleCommandExceptionType INVALID_POSITION = new SimpleCommandExceptionType(Component.translatable("commands.teleport.invalidPosition"));
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_139009_) {
-        LiteralCommandNode<CommandSourceStack> literalcommandnode = p_139009_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        LiteralCommandNode<CommandSourceStack> literalcommandnode = pDispatcher.register(
             Commands.literal("teleport")
                 .requires(p_139039_ -> p_139039_.hasPermission(2))
                 .then(
@@ -150,61 +150,61 @@ public class TeleportCommand {
                         )
                 )
         );
-        p_139009_.register(Commands.literal("tp").requires(p_139013_ -> p_139013_.hasPermission(2)).redirect(literalcommandnode));
+        pDispatcher.register(Commands.literal("tp").requires(p_139013_ -> p_139013_.hasPermission(2)).redirect(literalcommandnode));
     }
 
-    private static int teleportToEntity(CommandSourceStack p_139033_, Collection<? extends Entity> p_139034_, Entity p_139035_) throws CommandSyntaxException {
-        for (Entity entity : p_139034_) {
+    private static int teleportToEntity(CommandSourceStack pSource, Collection<? extends Entity> pTargets, Entity pDestination) throws CommandSyntaxException {
+        for (Entity entity : pTargets) {
             performTeleport(
-                p_139033_,
+                pSource,
                 entity,
-                (ServerLevel)p_139035_.level(),
-                p_139035_.getX(),
-                p_139035_.getY(),
-                p_139035_.getZ(),
+                (ServerLevel)pDestination.level(),
+                pDestination.getX(),
+                pDestination.getY(),
+                pDestination.getZ(),
                 EnumSet.noneOf(Relative.class),
-                p_139035_.getYRot(),
-                p_139035_.getXRot(),
+                pDestination.getYRot(),
+                pDestination.getXRot(),
                 null
             );
         }
 
-        if (p_139034_.size() == 1) {
-            p_139033_.sendSuccess(
-                () -> Component.translatable("commands.teleport.success.entity.single", p_139034_.iterator().next().getDisplayName(), p_139035_.getDisplayName()), true
+        if (pTargets.size() == 1) {
+            pSource.sendSuccess(
+                () -> Component.translatable("commands.teleport.success.entity.single", pTargets.iterator().next().getDisplayName(), pDestination.getDisplayName()), true
             );
         } else {
-            p_139033_.sendSuccess(() -> Component.translatable("commands.teleport.success.entity.multiple", p_139034_.size(), p_139035_.getDisplayName()), true);
+            pSource.sendSuccess(() -> Component.translatable("commands.teleport.success.entity.multiple", pTargets.size(), pDestination.getDisplayName()), true);
         }
 
-        return p_139034_.size();
+        return pTargets.size();
     }
 
     private static int teleportToPos(
-        CommandSourceStack p_139026_,
-        Collection<? extends Entity> p_139027_,
-        ServerLevel p_139028_,
-        Coordinates p_139029_,
-        @Nullable Coordinates p_139030_,
-        @Nullable LookAt p_362958_
+        CommandSourceStack pSource,
+        Collection<? extends Entity> pTargets,
+        ServerLevel pLevel,
+        Coordinates pPosition,
+        @Nullable Coordinates pRotation,
+        @Nullable LookAt pLookAt
     ) throws CommandSyntaxException {
-        Vec3 vec3 = p_139029_.getPosition(p_139026_);
-        Vec2 vec2 = p_139030_ == null ? null : p_139030_.getRotation(p_139026_);
+        Vec3 vec3 = pPosition.getPosition(pSource);
+        Vec2 vec2 = pRotation == null ? null : pRotation.getRotation(pSource);
 
-        for (Entity entity : p_139027_) {
-            Set<Relative> set = getRelatives(p_139029_, p_139030_, entity.level().dimension() == p_139028_.dimension());
+        for (Entity entity : pTargets) {
+            Set<Relative> set = getRelatives(pPosition, pRotation, entity.level().dimension() == pLevel.dimension());
             if (vec2 == null) {
-                performTeleport(p_139026_, entity, p_139028_, vec3.x, vec3.y, vec3.z, set, entity.getYRot(), entity.getXRot(), p_362958_);
+                performTeleport(pSource, entity, pLevel, vec3.x, vec3.y, vec3.z, set, entity.getYRot(), entity.getXRot(), pLookAt);
             } else {
-                performTeleport(p_139026_, entity, p_139028_, vec3.x, vec3.y, vec3.z, set, vec2.y, vec2.x, p_362958_);
+                performTeleport(pSource, entity, pLevel, vec3.x, vec3.y, vec3.z, set, vec2.y, vec2.x, pLookAt);
             }
         }
 
-        if (p_139027_.size() == 1) {
-            p_139026_.sendSuccess(
+        if (pTargets.size() == 1) {
+            pSource.sendSuccess(
                 () -> Component.translatable(
                         "commands.teleport.success.location.single",
-                        p_139027_.iterator().next().getDisplayName(),
+                        pTargets.iterator().next().getDisplayName(),
                         formatDouble(vec3.x),
                         formatDouble(vec3.y),
                         formatDouble(vec3.z)
@@ -212,10 +212,10 @@ public class TeleportCommand {
                 true
             );
         } else {
-            p_139026_.sendSuccess(
+            pSource.sendSuccess(
                 () -> Component.translatable(
                         "commands.teleport.success.location.multiple",
-                        p_139027_.size(),
+                        pTargets.size(),
                         formatDouble(vec3.x),
                         formatDouble(vec3.y),
                         formatDouble(vec3.z)
@@ -224,81 +224,81 @@ public class TeleportCommand {
             );
         }
 
-        return p_139027_.size();
+        return pTargets.size();
     }
 
-    private static Set<Relative> getRelatives(Coordinates p_362667_, @Nullable Coordinates p_361212_, boolean p_361629_) {
+    private static Set<Relative> getRelatives(Coordinates pPosition, @Nullable Coordinates pRotation, boolean pAbsolute) {
         Set<Relative> set = EnumSet.noneOf(Relative.class);
-        if (p_362667_.isXRelative()) {
+        if (pPosition.isXRelative()) {
             set.add(Relative.DELTA_X);
-            if (p_361629_) {
+            if (pAbsolute) {
                 set.add(Relative.X);
             }
         }
 
-        if (p_362667_.isYRelative()) {
+        if (pPosition.isYRelative()) {
             set.add(Relative.DELTA_Y);
-            if (p_361629_) {
+            if (pAbsolute) {
                 set.add(Relative.Y);
             }
         }
 
-        if (p_362667_.isZRelative()) {
+        if (pPosition.isZRelative()) {
             set.add(Relative.DELTA_Z);
-            if (p_361629_) {
+            if (pAbsolute) {
                 set.add(Relative.Z);
             }
         }
 
-        if (p_361212_ == null || p_361212_.isXRelative()) {
+        if (pRotation == null || pRotation.isXRelative()) {
             set.add(Relative.X_ROT);
         }
 
-        if (p_361212_ == null || p_361212_.isYRelative()) {
+        if (pRotation == null || pRotation.isYRelative()) {
             set.add(Relative.Y_ROT);
         }
 
         return set;
     }
 
-    private static String formatDouble(double p_142776_) {
-        return String.format(Locale.ROOT, "%f", p_142776_);
+    private static String formatDouble(double pValue) {
+        return String.format(Locale.ROOT, "%f", pValue);
     }
 
     private static void performTeleport(
-        CommandSourceStack p_139015_,
-        Entity p_139016_,
-        ServerLevel p_139017_,
-        double p_139018_,
-        double p_139019_,
-        double p_139020_,
-        Set<Relative> p_139021_,
-        float p_139022_,
-        float p_139023_,
-        @Nullable LookAt p_365991_
+        CommandSourceStack pSource,
+        Entity pTarget,
+        ServerLevel pLevel,
+        double pX,
+        double pY,
+        double pZ,
+        Set<Relative> pRelatives,
+        float pYRot,
+        float pXRot,
+        @Nullable LookAt pLookAt
     ) throws CommandSyntaxException {
-        BlockPos blockpos = BlockPos.containing(p_139018_, p_139019_, p_139020_);
+        BlockPos blockpos = BlockPos.containing(pX, pY, pZ);
         if (!Level.isInSpawnableBounds(blockpos)) {
             throw INVALID_POSITION.create();
         } else {
-            double d0 = p_139021_.contains(Relative.X) ? p_139018_ - p_139016_.getX() : p_139018_;
-            double d1 = p_139021_.contains(Relative.Y) ? p_139019_ - p_139016_.getY() : p_139019_;
-            double d2 = p_139021_.contains(Relative.Z) ? p_139020_ - p_139016_.getZ() : p_139020_;
-            float f = p_139021_.contains(Relative.Y_ROT) ? p_139022_ - p_139016_.getYRot() : p_139022_;
-            float f1 = p_139021_.contains(Relative.X_ROT) ? p_139023_ - p_139016_.getXRot() : p_139023_;
+            double d0 = pRelatives.contains(Relative.X) ? pX - pTarget.getX() : pX;
+            double d1 = pRelatives.contains(Relative.Y) ? pY - pTarget.getY() : pY;
+            double d2 = pRelatives.contains(Relative.Z) ? pZ - pTarget.getZ() : pZ;
+            float f = pRelatives.contains(Relative.Y_ROT) ? pYRot - pTarget.getYRot() : pYRot;
+            float f1 = pRelatives.contains(Relative.X_ROT) ? pXRot - pTarget.getXRot() : pXRot;
             float f2 = Mth.wrapDegrees(f);
             float f3 = Mth.wrapDegrees(f1);
-            if (p_139016_.teleportTo(p_139017_, d0, d1, d2, p_139021_, f2, f3, true)) {
-                if (p_365991_ != null) {
-                    p_365991_.perform(p_139015_, p_139016_);
+            if (pTarget.teleportTo(pLevel, d0, d1, d2, pRelatives, f2, f3, true)) {
+                if (pLookAt != null) {
+                    pLookAt.perform(pSource, pTarget);
                 }
 
-                if (!(p_139016_ instanceof LivingEntity livingentity) || !livingentity.isFallFlying()) {
-                    p_139016_.setDeltaMovement(p_139016_.getDeltaMovement().multiply(1.0, 0.0, 1.0));
-                    p_139016_.setOnGround(true);
+                if (!(pTarget instanceof LivingEntity livingentity) || !livingentity.isFallFlying()) {
+                    pTarget.setDeltaMovement(pTarget.getDeltaMovement().multiply(1.0, 0.0, 1.0));
+                    pTarget.setOnGround(true);
                 }
 
-                if (p_139016_ instanceof PathfinderMob pathfindermob) {
+                if (pTarget instanceof PathfinderMob pathfindermob) {
                     pathfindermob.getNavigation().stop();
                 }
             }

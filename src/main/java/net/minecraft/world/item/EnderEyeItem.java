@@ -32,9 +32,9 @@ public class EnderEyeItem extends Item {
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext p_41182_) {
-        Level level = p_41182_.getLevel();
-        BlockPos blockpos = p_41182_.getClickedPos();
+    public InteractionResult useOn(UseOnContext pContext) {
+        Level level = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
         BlockState blockstate = level.getBlockState(blockpos);
         if (!blockstate.is(Blocks.END_PORTAL_FRAME) || blockstate.getValue(EndPortalFrameBlock.HAS_EYE)) {
             return InteractionResult.PASS;
@@ -45,7 +45,7 @@ public class EnderEyeItem extends Item {
             Block.pushEntitiesUp(blockstate, blockstate1, level, blockpos);
             level.setBlock(blockpos, blockstate1, 2);
             level.updateNeighbourForOutputSignal(blockpos, Blocks.END_PORTAL_FRAME);
-            p_41182_.getItemInHand().shrink(1);
+            pContext.getItemInHand().shrink(1);
             level.levelEvent(1503, blockpos, 0);
             BlockPattern.BlockPatternMatch blockpattern$blockpatternmatch = EndPortalFrameBlock.getOrCreatePortalShape().find(level, blockpos);
             if (blockpattern$blockpatternmatch != null) {

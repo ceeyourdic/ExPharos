@@ -16,41 +16,41 @@ public class ResultSlot extends Slot {
     private final Player player;
     private int removeCount;
 
-    public ResultSlot(Player p_40166_, CraftingContainer p_40167_, Container p_40168_, int p_40169_, int p_40170_, int p_40171_) {
-        super(p_40168_, p_40169_, p_40170_, p_40171_);
-        this.player = p_40166_;
-        this.craftSlots = p_40167_;
+    public ResultSlot(Player pPlayer, CraftingContainer pCraftSlots, Container pContainer, int pSlot, int pXPosition, int pYPosition) {
+        super(pContainer, pSlot, pXPosition, pYPosition);
+        this.player = pPlayer;
+        this.craftSlots = pCraftSlots;
     }
 
     @Override
-    public boolean mayPlace(ItemStack p_40178_) {
+    public boolean mayPlace(ItemStack pStack) {
         return false;
     }
 
     @Override
-    public ItemStack remove(int p_40173_) {
+    public ItemStack remove(int pAmount) {
         if (this.hasItem()) {
-            this.removeCount = this.removeCount + Math.min(p_40173_, this.getItem().getCount());
+            this.removeCount = this.removeCount + Math.min(pAmount, this.getItem().getCount());
         }
 
-        return super.remove(p_40173_);
+        return super.remove(pAmount);
     }
 
     @Override
-    protected void onQuickCraft(ItemStack p_40180_, int p_40181_) {
-        this.removeCount += p_40181_;
-        this.checkTakeAchievements(p_40180_);
+    protected void onQuickCraft(ItemStack pStack, int pAmount) {
+        this.removeCount += pAmount;
+        this.checkTakeAchievements(pStack);
     }
 
     @Override
-    protected void onSwapCraft(int p_40183_) {
-        this.removeCount += p_40183_;
+    protected void onSwapCraft(int pNumItemsCrafted) {
+        this.removeCount += pNumItemsCrafted;
     }
 
     @Override
-    protected void checkTakeAchievements(ItemStack p_40185_) {
+    protected void checkTakeAchievements(ItemStack pStack) {
         if (this.removeCount > 0) {
-            p_40185_.onCraftedBy(this.player.level(), this.player, this.removeCount);
+            pStack.onCraftedBy(this.player.level(), this.player, this.removeCount);
         }
 
         if (this.container instanceof RecipeCraftingHolder recipecraftingholder) {
@@ -60,23 +60,23 @@ public class ResultSlot extends Slot {
         this.removeCount = 0;
     }
 
-    private static NonNullList<ItemStack> copyAllInputItems(CraftingInput p_369634_) {
-        NonNullList<ItemStack> nonnulllist = NonNullList.withSize(p_369634_.size(), ItemStack.EMPTY);
+    private static NonNullList<ItemStack> copyAllInputItems(CraftingInput pInput) {
+        NonNullList<ItemStack> nonnulllist = NonNullList.withSize(pInput.size(), ItemStack.EMPTY);
 
         for (int i = 0; i < nonnulllist.size(); i++) {
-            nonnulllist.set(i, p_369634_.getItem(i));
+            nonnulllist.set(i, pInput.getItem(i));
         }
 
         return nonnulllist;
     }
 
-    private NonNullList<ItemStack> getRemainingItems(CraftingInput p_366682_, Level p_367548_) {
-        return p_367548_ instanceof ServerLevel serverlevel
+    private NonNullList<ItemStack> getRemainingItems(CraftingInput pInput, Level pLevel) {
+        return pLevel instanceof ServerLevel serverlevel
             ? serverlevel.recipeAccess()
-                .getRecipeFor(RecipeType.CRAFTING, p_366682_, serverlevel)
-                .map(p_369657_ -> p_369657_.value().getRemainingItems(p_366682_))
-                .orElseGet(() -> copyAllInputItems(p_366682_))
-            : CraftingRecipe.defaultCraftingReminder(p_366682_);
+                .getRecipeFor(RecipeType.CRAFTING, pInput, serverlevel)
+                .map(p_369657_ -> p_369657_.value().getRemainingItems(pInput))
+                .orElseGet(() -> copyAllInputItems(pInput))
+            : CraftingRecipe.defaultCraftingReminder(pInput);
     }
 
     @Override

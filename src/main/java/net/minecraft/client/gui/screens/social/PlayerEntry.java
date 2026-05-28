@@ -82,22 +82,22 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
     public static final int PLAYER_STATUS_COLOR = ARGB.color(140, 255, 255, 255);
 
     public PlayerEntry(
-        Minecraft p_243293_, SocialInteractionsScreen p_243214_, UUID p_243288_, String p_243311_, Supplier<PlayerSkin> p_243309_, boolean p_243297_
+        Minecraft pMinecraft, SocialInteractionsScreen pSocialInteractionsScreen, UUID pId, String pPlayerName, Supplier<PlayerSkin> pSkinGetter, boolean pPlayerReportable
     ) {
-        this.minecraft = p_243293_;
-        this.id = p_243288_;
-        this.playerName = p_243311_;
-        this.skinGetter = p_243309_;
-        ReportingContext reportingcontext = p_243293_.getReportingContext();
+        this.minecraft = pMinecraft;
+        this.id = pId;
+        this.playerName = pPlayerName;
+        this.skinGetter = pSkinGetter;
+        ReportingContext reportingcontext = pMinecraft.getReportingContext();
         this.reportingEnabled = reportingcontext.sender().isEnabled();
-        this.chatReportable = p_243297_;
-        this.hasDraftReport = reportingcontext.hasDraftReportFor(p_243288_);
-        Component component = Component.translatable("gui.socialInteractions.narration.hide", p_243311_);
-        Component component1 = Component.translatable("gui.socialInteractions.narration.show", p_243311_);
-        PlayerSocialManager playersocialmanager = p_243293_.getPlayerSocialManager();
-        boolean flag = p_243293_.getChatStatus().isChatAllowed(p_243293_.isLocalServer());
-        boolean flag1 = !p_243293_.player.getUUID().equals(p_243288_);
-        if (flag1 && flag && !playersocialmanager.isBlocked(p_243288_)) {
+        this.chatReportable = pPlayerReportable;
+        this.hasDraftReport = reportingcontext.hasDraftReportFor(pId);
+        Component component = Component.translatable("gui.socialInteractions.narration.hide", pPlayerName);
+        Component component1 = Component.translatable("gui.socialInteractions.narration.show", pPlayerName);
+        PlayerSocialManager playersocialmanager = pMinecraft.getPlayerSocialManager();
+        boolean flag = pMinecraft.getChatStatus().isChatAllowed(pMinecraft.isLocalServer());
+        boolean flag1 = !pMinecraft.player.getUUID().equals(pId);
+        if (flag1 && flag && !playersocialmanager.isBlocked(pId)) {
             this.reportButton = new ImageButton(
                 0,
                 0,
@@ -105,7 +105,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
                 20,
                 REPORT_BUTTON_SPRITES,
                 p_238875_ -> reportingcontext.draftReportHandled(
-                        p_243293_, p_243214_, () -> p_243293_.setScreen(new ReportPlayerScreen(p_243214_, reportingcontext, this)), false
+                        pMinecraft, pSocialInteractionsScreen, () -> pMinecraft.setScreen(new ReportPlayerScreen(pSocialInteractionsScreen, reportingcontext, this)), false
                     ),
                 Component.translatable("gui.socialInteractions.report")
             ) {
@@ -118,8 +118,8 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
             this.reportButton.setTooltip(this.createReportButtonTooltip());
             this.reportButton.setTooltipDelay(TOOLTIP_DELAY);
             this.hideButton = new ImageButton(0, 0, 20, 20, MUTE_BUTTON_SPRITES, p_100612_ -> {
-                playersocialmanager.hidePlayer(p_243288_);
-                this.onHiddenOrShown(true, Component.translatable("gui.socialInteractions.hidden_in_chat", p_243311_));
+                playersocialmanager.hidePlayer(pId);
+                this.onHiddenOrShown(true, Component.translatable("gui.socialInteractions.hidden_in_chat", pPlayerName));
             }, Component.translatable("gui.socialInteractions.hide")) {
                 @Override
                 protected MutableComponent createNarrationMessage() {
@@ -129,8 +129,8 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
             this.hideButton.setTooltip(Tooltip.create(HIDE_TEXT_TOOLTIP, component));
             this.hideButton.setTooltipDelay(TOOLTIP_DELAY);
             this.showButton = new ImageButton(0, 0, 20, 20, UNMUTE_BUTTON_SPRITES, p_170074_ -> {
-                playersocialmanager.showPlayer(p_243288_);
-                this.onHiddenOrShown(false, Component.translatable("gui.socialInteractions.shown_in_chat", p_243311_));
+                playersocialmanager.showPlayer(pId);
+                this.onHiddenOrShown(false, Component.translatable("gui.socialInteractions.shown_in_chat", pPlayerName));
             }, Component.translatable("gui.socialInteractions.show")) {
                 @Override
                 protected MutableComponent createNarrationMessage() {
@@ -230,16 +230,16 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
         return this.skinGetter;
     }
 
-    public void setRemoved(boolean p_100620_) {
-        this.isRemoved = p_100620_;
+    public void setRemoved(boolean pIsRemoved) {
+        this.isRemoved = pIsRemoved;
     }
 
     public boolean isRemoved() {
         return this.isRemoved;
     }
 
-    public void setHasRecentMessages(boolean p_240771_) {
-        this.hasRecentMessages = p_240771_;
+    public void setHasRecentMessages(boolean pHasRecentMessages) {
+        this.hasRecentMessages = pHasRecentMessages;
     }
 
     public boolean hasRecentMessages() {
@@ -250,23 +250,23 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
         return this.chatReportable;
     }
 
-    private void onHiddenOrShown(boolean p_100597_, Component p_100598_) {
-        this.updateHideAndShowButton(p_100597_);
-        this.minecraft.gui.getChat().addMessage(p_100598_);
-        this.minecraft.getNarrator().sayNow(p_100598_);
+    private void onHiddenOrShown(boolean pVisible, Component pMessage) {
+        this.updateHideAndShowButton(pVisible);
+        this.minecraft.gui.getChat().addMessage(pMessage);
+        this.minecraft.getNarrator().sayNow(pMessage);
     }
 
-    private void updateHideAndShowButton(boolean p_262638_) {
-        this.showButton.visible = p_262638_;
-        this.hideButton.visible = !p_262638_;
-        this.children.set(0, p_262638_ ? this.showButton : this.hideButton);
+    private void updateHideAndShowButton(boolean pVisible) {
+        this.showButton.visible = pVisible;
+        this.hideButton.visible = !pVisible;
+        this.children.set(0, pVisible ? this.showButton : this.hideButton);
     }
 
-    MutableComponent getEntryNarationMessage(MutableComponent p_100595_) {
+    MutableComponent getEntryNarationMessage(MutableComponent pComponent) {
         Component component = this.getStatusComponent();
         return component == CommonComponents.EMPTY
-            ? Component.literal(this.playerName).append(", ").append(p_100595_)
-            : Component.literal(this.playerName).append(", ").append(component).append(", ").append(p_100595_);
+            ? Component.literal(this.playerName).append(", ").append(pComponent)
+            : Component.literal(this.playerName).append(", ").append(component).append(", ").append(pComponent);
     }
 
     private Component getStatusComponent() {

@@ -20,9 +20,9 @@ import org.apache.commons.lang3.StringUtils;
 public class SkinReport extends Report {
     final Supplier<PlayerSkin> skinGetter;
 
-    SkinReport(UUID p_298927_, Instant p_300791_, UUID p_298854_, Supplier<PlayerSkin> p_299618_) {
-        super(p_298927_, p_300791_, p_298854_);
-        this.skinGetter = p_299618_;
+    SkinReport(UUID pReportId, Instant pCreated, UUID pReportedProfileId, Supplier<PlayerSkin> pSkinGetter) {
+        super(pReportId, pCreated, pReportedProfileId);
+        this.skinGetter = pSkinGetter;
     }
 
     public Supplier<PlayerSkin> getSkinGetter() {
@@ -44,12 +44,12 @@ public class SkinReport extends Report {
 
     @OnlyIn(Dist.CLIENT)
     public static class Builder extends Report.Builder<SkinReport> {
-        public Builder(SkinReport p_297260_, AbuseReportLimits p_298411_) {
-            super(p_297260_, p_298411_);
+        public Builder(SkinReport pReport, AbuseReportLimits pLimits) {
+            super(pReport, pLimits);
         }
 
-        public Builder(UUID p_301218_, Supplier<PlayerSkin> p_298052_, AbuseReportLimits p_299174_) {
-            super(new SkinReport(UUID.randomUUID(), Instant.now(), p_301218_, p_298052_), p_299174_);
+        public Builder(UUID pReportedPlayerId, Supplier<PlayerSkin> pSkinGetter, AbuseReportLimits pLimits) {
+            super(new SkinReport(UUID.randomUUID(), Instant.now(), pReportedPlayerId, pSkinGetter), pLimits);
         }
 
         @Override

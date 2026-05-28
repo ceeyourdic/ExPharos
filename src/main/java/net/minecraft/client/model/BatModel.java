@@ -22,10 +22,10 @@ public class BatModel extends EntityModel<BatRenderState> {
     private final ModelPart leftWingTip;
     private final ModelPart feet;
 
-    public BatModel(ModelPart p_170427_) {
-        super(p_170427_, RenderType::entityCutout);
-        this.body = p_170427_.getChild("body");
-        this.head = p_170427_.getChild("head");
+    public BatModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entityCutout);
+        this.body = pRoot.getChild("body");
+        this.head = pRoot.getChild("head");
         this.rightWing = this.body.getChild("right_wing");
         this.rightWingTip = this.rightWing.getChild("right_wing_tip");
         this.leftWing = this.body.getChild("left_wing");
@@ -78,7 +78,7 @@ public class BatModel extends EntityModel<BatRenderState> {
         this.animate(p_361483_.restAnimationState, BatAnimation.BAT_RESTING, p_361483_.ageInTicks, 1.0F);
     }
 
-    private void applyHeadRotation(float p_310053_) {
-        this.head.yRot = p_310053_ * (float) (Math.PI / 180.0);
+    private void applyHeadRotation(float pHeadRotation) {
+        this.head.yRot = pHeadRotation * (float) (Math.PI / 180.0);
     }
 }

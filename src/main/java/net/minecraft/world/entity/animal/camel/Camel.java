@@ -293,8 +293,8 @@ public class Camel extends AbstractHorse {
         return this.entityData.get(DASH);
     }
 
-    public void setDashing(boolean p_251380_) {
-        this.entityData.set(DASH, p_251380_);
+    public void setDashing(boolean pDashing) {
+        this.entityData.set(DASH, pDashing);
     }
 
     @Override
@@ -481,10 +481,10 @@ public class Camel extends AbstractHorse {
         return this.isBaby() ? 0.45F : 1.0F;
     }
 
-    private double getBodyAnchorAnimationYOffset(boolean p_249228_, float p_251763_, EntityDimensions p_301064_, float p_299749_) {
-        double d0 = (double)(p_301064_.height() - 0.375F * p_299749_);
-        float f = p_299749_ * 1.43F;
-        float f1 = f - p_299749_ * 0.2F;
+    private double getBodyAnchorAnimationYOffset(boolean pFirstPassenger, float pPartialTick, EntityDimensions pDimensions, float pScale) {
+        double d0 = (double)(pDimensions.height() - 0.375F * pScale);
+        float f = pScale * 1.43F;
+        float f1 = f - pScale * 0.2F;
         float f2 = f - f1;
         boolean flag = this.isInPoseTransition();
         boolean flag1 = this.isCamelSitting();
@@ -494,13 +494,13 @@ public class Camel extends AbstractHorse {
             float f3;
             if (flag1) {
                 j = 28;
-                f3 = p_249228_ ? 0.5F : 0.1F;
+                f3 = pFirstPassenger ? 0.5F : 0.1F;
             } else {
-                j = p_249228_ ? 24 : 32;
-                f3 = p_249228_ ? 0.6F : 0.35F;
+                j = pFirstPassenger ? 24 : 32;
+                f3 = pFirstPassenger ? 0.6F : 0.35F;
             }
 
-            float f4 = Mth.clamp((float)this.getPoseTime() + p_251763_, 0.0F, (float)i);
+            float f4 = Mth.clamp((float)this.getPoseTime() + pPartialTick, 0.0F, (float)i);
             boolean flag2 = f4 < (float)j;
             float f5 = flag2 ? f4 / (float)j : (f4 - (float)j) / (float)(i - j);
             float f6 = f - f3 * f1;
@@ -581,12 +581,12 @@ public class Camel extends AbstractHorse {
     }
 
     @VisibleForTesting
-    public void resetLastPoseChangeTick(long p_248642_) {
-        this.entityData.set(LAST_POSE_CHANGE_TICK, p_248642_);
+    public void resetLastPoseChangeTick(long pLastPoseChangeTick) {
+        this.entityData.set(LAST_POSE_CHANGE_TICK, pLastPoseChangeTick);
     }
 
-    private void resetLastPoseChangeTickToFullStand(long p_265447_) {
-        this.resetLastPoseChangeTick(Math.max(0L, p_265447_ - 52L - 1L));
+    private void resetLastPoseChangeTickToFullStand(long pLastPoseChangedTick) {
+        this.resetLastPoseChangeTick(Math.max(0L, pLastPoseChangedTick - 52L - 1L));
     }
 
     public long getPoseTime() {
@@ -625,8 +625,8 @@ public class Camel extends AbstractHorse {
     }
 
     class CamelBodyRotationControl extends BodyRotationControl {
-        public CamelBodyRotationControl(final Camel p_248635_) {
-            super(p_248635_);
+        public CamelBodyRotationControl(final Camel pCamel) {
+            super(pCamel);
         }
 
         @Override

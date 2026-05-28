@@ -70,8 +70,8 @@ public class Library {
         this.defaultDeviceName = getDefaultDeviceName();
     }
 
-    public void init(@Nullable String p_231085_, boolean p_231086_) {
-        this.currentDevice = openDeviceOrFallback(p_231085_);
+    public void init(@Nullable String pDeviceSpecifier, boolean pEnableHrtf) {
+        this.currentDevice = openDeviceOrFallback(pDeviceSpecifier);
         this.supportsDisconnections = false;
         ALCCapabilities alccapabilities = ALC.createCapabilities(this.currentDevice);
         if (OpenAlUtil.checkALCError(this.currentDevice, "Get capabilities")) {
@@ -79,7 +79,7 @@ public class Library {
         } else if (!alccapabilities.OpenALC11) {
             throw new IllegalStateException("OpenAL 1.1 not supported");
         } else {
-            this.setHrtf(alccapabilities.ALC_SOFT_HRTF && p_231086_);
+            this.setHrtf(alccapabilities.ALC_SOFT_HRTF && pEnableHrtf);
 
             try (MemoryStack memorystack = MemoryStack.stackPush()) {
                 IntBuffer intbuffer = memorystack.callocInt(3).put(6554).put(1).put(0).flip();
@@ -113,11 +113,11 @@ public class Library {
         }
     }
 
-    private void setHrtf(boolean p_242278_) {
+    private void setHrtf(boolean pEnableHrtf) {
         int i = ALC10.alcGetInteger(this.currentDevice, 6548);
         if (i > 0) {
             try (MemoryStack memorystack = MemoryStack.stackPush()) {
-                IntBuffer intbuffer = memorystack.callocInt(10).put(6546).put(p_242278_ ? 1 : 0).put(6550).put(0).put(0).flip();
+                IntBuffer intbuffer = memorystack.callocInt(10).put(6546).put(pEnableHrtf ? 1 : 0).put(6550).put(0).put(0).flip();
                 if (!SOFTHRTF.alcResetDeviceSOFT(this.currentDevice, intbuffer)) {
                     LOGGER.warn("Failed to reset device: {}", ALC10.alcGetString(this.currentDevice, ALC10.alcGetError(this.currentDevice)));
                 }
@@ -189,10 +189,10 @@ public class Library {
         }
     }
 
-    private static long openDeviceOrFallback(@Nullable String p_193473_) {
+    private static long openDeviceOrFallback(@Nullable String pDeviceSpecifier) {
         OptionalLong optionallong = OptionalLong.empty();
-        if (p_193473_ != null) {
-            optionallong = tryOpenDevice(p_193473_);
+        if (pDeviceSpecifier != null) {
+            optionallong = tryOpenDevice(pDeviceSpecifier);
         }
 
         if (optionallong.isEmpty()) {
@@ -210,8 +210,8 @@ public class Library {
         }
     }
 
-    private static OptionalLong tryOpenDevice(@Nullable String p_193476_) {
-        long i = ALC10.alcOpenDevice(p_193476_);
+    private static OptionalLong tryOpenDevice(@Nullable String pDeviceSpecifier) {
+        long i = ALC10.alcOpenDevice(pDeviceSpecifier);
         return i != 0L && !OpenAlUtil.checkALCError(i, "Open device") ? OptionalLong.of(i) : OptionalLong.empty();
     }
 
@@ -229,12 +229,12 @@ public class Library {
     }
 
     @Nullable
-    public Channel acquireChannel(Library.Pool p_83698_) {
-        return (p_83698_ == Library.Pool.STREAMING ? this.streamingChannels : this.staticChannels).acquire();
+    public Channel acquireChannel(Library.Pool pPool) {
+        return (pPool == Library.Pool.STREAMING ? this.streamingChannels : this.staticChannels).acquire();
     }
 
-    public void releaseChannel(Channel p_83696_) {
-        if (!this.staticChannels.release(p_83696_) && !this.streamingChannels.release(p_83696_)) {
+    public void releaseChannel(Channel pChannel) {
+        if (!this.staticChannels.release(pChannel) && !this.streamingChannels.release(pChannel)) {
             throw new IllegalStateException("Tried to release unknown channel");
         }
     }
@@ -259,7 +259,7 @@ public class Library {
         @Nullable
         Channel acquire();
 
-        boolean release(Channel p_83712_);
+        boolean release(Channel pChannel);
 
         void cleanup();
 
@@ -273,8 +273,8 @@ public class Library {
         private final int limit;
         private final Set<Channel> activeChannels = Sets.newIdentityHashSet();
 
-        public CountingChannelPool(int p_83716_) {
-            this.limit = p_83716_;
+        public CountingChannelPool(int pLimit) {
+            this.limit = pLimit;
         }
 
         @Nullable

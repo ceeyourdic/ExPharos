@@ -21,15 +21,15 @@ public class RavagerModel extends EntityModel<RavagerRenderState> {
     private final ModelPart leftFrontLeg;
     private final ModelPart neck;
 
-    public RavagerModel(ModelPart p_170889_) {
-        super(p_170889_);
-        this.neck = p_170889_.getChild("neck");
+    public RavagerModel(ModelPart pRoot) {
+        super(pRoot);
+        this.neck = pRoot.getChild("neck");
         this.head = this.neck.getChild("head");
         this.mouth = this.head.getChild("mouth");
-        this.rightHindLeg = p_170889_.getChild("right_hind_leg");
-        this.leftHindLeg = p_170889_.getChild("left_hind_leg");
-        this.rightFrontLeg = p_170889_.getChild("right_front_leg");
-        this.leftFrontLeg = p_170889_.getChild("left_front_leg");
+        this.rightHindLeg = pRoot.getChild("right_hind_leg");
+        this.leftHindLeg = pRoot.getChild("left_hind_leg");
+        this.rightFrontLeg = pRoot.getChild("right_front_leg");
+        this.leftFrontLeg = pRoot.getChild("left_front_leg");
     }
 
     public static LayerDefinition createBodyLayer() {

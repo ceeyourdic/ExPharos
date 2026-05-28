@@ -42,18 +42,18 @@ public class OptimizeWorldScreen extends Screen {
 
     @Nullable
     public static OptimizeWorldScreen create(
-        Minecraft p_101316_, BooleanConsumer p_101317_, DataFixer p_101318_, LevelStorageSource.LevelStorageAccess p_101319_, boolean p_101320_
+        Minecraft pMinecraft, BooleanConsumer pCallback, DataFixer pDataFixer, LevelStorageSource.LevelStorageAccess pLevelStorage, boolean pEraseCache
     ) {
         try {
-            WorldOpenFlows worldopenflows = p_101316_.createWorldOpenFlows();
-            PackRepository packrepository = ServerPacksSource.createPackRepository(p_101319_);
+            WorldOpenFlows worldopenflows = pMinecraft.createWorldOpenFlows();
+            PackRepository packrepository = ServerPacksSource.createPackRepository(pLevelStorage);
 
             OptimizeWorldScreen optimizeworldscreen;
-            try (WorldStem worldstem = worldopenflows.loadWorldStem(p_101319_.getDataTag(), false, packrepository)) {
+            try (WorldStem worldstem = worldopenflows.loadWorldStem(pLevelStorage.getDataTag(), false, packrepository)) {
                 WorldData worlddata = worldstem.worldData();
                 RegistryAccess.Frozen registryaccess$frozen = worldstem.registries().compositeAccess();
-                p_101319_.saveDataTag(registryaccess$frozen, worlddata);
-                optimizeworldscreen = new OptimizeWorldScreen(p_101317_, p_101318_, p_101319_, worlddata.getLevelSettings(), p_101320_, registryaccess$frozen);
+                pLevelStorage.saveDataTag(registryaccess$frozen, worlddata);
+                optimizeworldscreen = new OptimizeWorldScreen(pCallback, pDataFixer, pLevelStorage, worlddata.getLevelSettings(), pEraseCache, registryaccess$frozen);
             }
 
             return optimizeworldscreen;
@@ -64,16 +64,16 @@ public class OptimizeWorldScreen extends Screen {
     }
 
     private OptimizeWorldScreen(
-        BooleanConsumer p_251295_,
-        DataFixer p_250489_,
-        LevelStorageSource.LevelStorageAccess p_248781_,
-        LevelSettings p_251180_,
-        boolean p_250358_,
-        RegistryAccess p_327796_
+        BooleanConsumer pCallback,
+        DataFixer pDataFixer,
+        LevelStorageSource.LevelStorageAccess pLevelStorage,
+        LevelSettings pLevelSettings,
+        boolean pEraseCache,
+        RegistryAccess pRegistryAccess
     ) {
-        super(Component.translatable("optimizeWorld.title", p_251180_.levelName()));
-        this.callback = p_251295_;
-        this.upgrader = new WorldUpgrader(p_248781_, p_250489_, p_327796_, p_250358_, false);
+        super(Component.translatable("optimizeWorld.title", pLevelSettings.levelName()));
+        this.callback = pCallback;
+        this.upgrader = new WorldUpgrader(pLevelStorage, pDataFixer, pRegistryAccess, pEraseCache, false);
     }
 
     @Override

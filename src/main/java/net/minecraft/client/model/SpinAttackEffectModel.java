@@ -24,8 +24,8 @@ public class SpinAttackEffectModel extends EntityModel<PlayerRenderState> {
         }
     }
 
-    private static String boxName(int p_361822_) {
-        return "box" + p_361822_;
+    private static String boxName(int pIndex) {
+        return "box" + pIndex;
     }
 
     public static LayerDefinition createLayer() {

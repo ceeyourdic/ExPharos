@@ -26,14 +26,14 @@ public class FilePackResources extends AbstractPackResources {
     private final FilePackResources.SharedZipFileAccess zipFileAccess;
     private final String prefix;
 
-    FilePackResources(PackLocationInfo p_332104_, FilePackResources.SharedZipFileAccess p_298373_, String p_256076_) {
-        super(p_332104_);
-        this.zipFileAccess = p_298373_;
-        this.prefix = p_256076_;
+    FilePackResources(PackLocationInfo pLocation, FilePackResources.SharedZipFileAccess pZipFileAccess, String pPrefix) {
+        super(pLocation);
+        this.zipFileAccess = pZipFileAccess;
+        this.prefix = pPrefix;
     }
 
-    private static String getPathFromLocation(PackType p_250585_, ResourceLocation p_251470_) {
-        return String.format(Locale.ROOT, "%s/%s/%s", p_250585_.getDirectory(), p_251470_.getNamespace(), p_251470_.getPath());
+    private static String getPathFromLocation(PackType pPackType, ResourceLocation pLocation) {
+        return String.format(Locale.ROOT, "%s/%s/%s", pPackType.getDirectory(), pLocation.getNamespace(), pLocation.getPath());
     }
 
     @Nullable
@@ -47,30 +47,30 @@ public class FilePackResources extends AbstractPackResources {
         return this.getResource(getPathFromLocation(p_249605_, p_252147_));
     }
 
-    private String addPrefix(String p_299206_) {
-        return this.prefix.isEmpty() ? p_299206_ : this.prefix + "/" + p_299206_;
+    private String addPrefix(String pResourcePath) {
+        return this.prefix.isEmpty() ? pResourcePath : this.prefix + "/" + pResourcePath;
     }
 
     @Nullable
-    private IoSupplier<InputStream> getResource(String p_251795_) {
+    private IoSupplier<InputStream> getResource(String pResourcePath) {
         ZipFile zipfile = this.zipFileAccess.getOrCreateZipFile();
         if (zipfile == null) {
             return null;
         } else {
-            ZipEntry zipentry = zipfile.getEntry(this.addPrefix(p_251795_));
+            ZipEntry zipentry = zipfile.getEntry(this.addPrefix(pResourcePath));
             return zipentry == null ? null : IoSupplier.create(zipfile, zipentry);
         }
     }
 
     @Override
-    public Set<String> getNamespaces(PackType p_10238_) {
+    public Set<String> getNamespaces(PackType pType) {
         ZipFile zipfile = this.zipFileAccess.getOrCreateZipFile();
         if (zipfile == null) {
             return Set.of();
         } else {
             Enumeration<? extends ZipEntry> enumeration = zipfile.entries();
             Set<String> set = Sets.newHashSet();
-            String s = this.addPrefix(p_10238_.getDirectory() + "/");
+            String s = this.addPrefix(pType.getDirectory() + "/");
 
             while (enumeration.hasMoreElements()) {
                 ZipEntry zipentry = enumeration.nextElement();
@@ -90,13 +90,13 @@ public class FilePackResources extends AbstractPackResources {
     }
 
     @VisibleForTesting
-    public static String extractNamespace(String p_298682_, String p_300360_) {
-        if (!p_300360_.startsWith(p_298682_)) {
+    public static String extractNamespace(String pDirectory, String pName) {
+        if (!pName.startsWith(pDirectory)) {
             return "";
         } else {
-            int i = p_298682_.length();
-            int j = p_300360_.indexOf(47, i);
-            return j == -1 ? p_300360_.substring(i) : p_300360_.substring(i, j);
+            int i = pDirectory.length();
+            int j = pName.indexOf(47, i);
+            return j == -1 ? pName.substring(i) : pName.substring(i, j);
         }
     }
 
@@ -131,15 +131,19 @@ public class FilePackResources extends AbstractPackResources {
         }
     }
 
+    public File getFile() {
+        return this.zipFileAccess.file;
+    }
+
     public static class FileResourcesSupplier implements Pack.ResourcesSupplier {
         private final File content;
 
-        public FileResourcesSupplier(Path p_301133_) {
-            this(p_301133_.toFile());
+        public FileResourcesSupplier(Path pContent) {
+            this(pContent.toFile());
         }
 
-        public FileResourcesSupplier(File p_299311_) {
-            this.content = p_299311_;
+        public FileResourcesSupplier(File pContent) {
+            this.content = pContent;
         }
 
         @Override
@@ -173,8 +177,8 @@ public class FilePackResources extends AbstractPackResources {
         private ZipFile zipFile;
         private boolean failedToLoad;
 
-        SharedZipFileAccess(File p_300196_) {
-            this.file = p_300196_;
+        SharedZipFileAccess(File pFile) {
+            this.file = pFile;
         }
 
         @Nullable

@@ -28,23 +28,23 @@ public class ColorArgument implements ArgumentType<ChatFormatting> {
         return new ColorArgument();
     }
 
-    public static ChatFormatting getColor(CommandContext<CommandSourceStack> p_85467_, String p_85468_) {
-        return p_85467_.getArgument(p_85468_, ChatFormatting.class);
+    public static ChatFormatting getColor(CommandContext<CommandSourceStack> pContext, String pName) {
+        return pContext.getArgument(pName, ChatFormatting.class);
     }
 
-    public ChatFormatting parse(StringReader p_85465_) throws CommandSyntaxException {
-        String s = p_85465_.readUnquotedString();
+    public ChatFormatting parse(StringReader pReader) throws CommandSyntaxException {
+        String s = pReader.readUnquotedString();
         ChatFormatting chatformatting = ChatFormatting.getByName(s);
         if (chatformatting != null && !chatformatting.isFormat()) {
             return chatformatting;
         } else {
-            throw ERROR_INVALID_VALUE.createWithContext(p_85465_, s);
+            throw ERROR_INVALID_VALUE.createWithContext(pReader, s);
         }
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_85473_, SuggestionsBuilder p_85474_) {
-        return SharedSuggestionProvider.suggest(ChatFormatting.getNames(true, false), p_85474_);
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> pContext, SuggestionsBuilder pBuilder) {
+        return SharedSuggestionProvider.suggest(ChatFormatting.getNames(true, false), pBuilder);
     }
 
     @Override

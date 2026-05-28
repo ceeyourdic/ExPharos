@@ -67,7 +67,7 @@ public class Blaze extends Monster {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_32235_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.BLAZE_HURT;
     }
 
@@ -142,9 +142,9 @@ public class Blaze extends Monster {
         return (this.entityData.get(DATA_FLAGS_ID) & 1) != 0;
     }
 
-    void setCharged(boolean p_32241_) {
+    void setCharged(boolean pCharged) {
         byte b0 = this.entityData.get(DATA_FLAGS_ID);
-        if (p_32241_) {
+        if (pCharged) {
             b0 = (byte)(b0 | 1);
         } else {
             b0 = (byte)(b0 & -2);
@@ -159,8 +159,8 @@ public class Blaze extends Monster {
         private int attackTime;
         private int lastSeen;
 
-        public BlazeAttackGoal(Blaze p_32247_) {
-            this.blaze = p_32247_;
+        public BlazeAttackGoal(Blaze pBlaze) {
+            this.blaze = pBlaze;
             this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
         }
 

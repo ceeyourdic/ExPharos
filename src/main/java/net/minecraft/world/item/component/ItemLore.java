@@ -25,8 +25,8 @@ public record ItemLore(List<Component> lines, List<Component> styledLines) imple
         .apply(ByteBufCodecs.list(256))
         .map(ItemLore::new, ItemLore::lines);
 
-    public ItemLore(List<Component> p_330285_) {
-        this(p_330285_, Lists.transform(p_330285_, p_329096_ -> ComponentUtils.mergeStyles(p_329096_.copy(), LORE_STYLE)));
+    public ItemLore(List<Component> pLines) {
+        this(pLines, Lists.transform(pLines, p_329096_ -> ComponentUtils.mergeStyles(p_329096_.copy(), LORE_STYLE)));
     }
 
     public ItemLore(List<Component> lines, List<Component> styledLines) {
@@ -38,8 +38,8 @@ public record ItemLore(List<Component> lines, List<Component> styledLines) imple
         }
     }
 
-    public ItemLore withLineAdded(Component p_328621_) {
-        return new ItemLore(Util.copyAndAdd(this.lines, p_328621_));
+    public ItemLore withLineAdded(Component pLines) {
+        return new ItemLore(Util.copyAndAdd(this.lines, pLines));
     }
 
     @Override

@@ -1,16 +1,15 @@
 package com.mojang.blaze3d.platform;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.util.VideoModeComparator;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWVidMode.Buffer;
 
-@OnlyIn(Dist.CLIENT)
 public final class Monitor {
     private final long monitor;
     private final List<VideoMode> videoModes;
@@ -18,8 +17,8 @@ public final class Monitor {
     private int x;
     private int y;
 
-    public Monitor(long p_84942_) {
-        this.monitor = p_84942_;
+    public Monitor(long pMonitor) {
+        this.monitor = pMonitor;
         this.videoModes = Lists.newArrayList();
         this.refreshVideoModes();
     }
@@ -27,27 +26,43 @@ public final class Monitor {
     public void refreshVideoModes() {
         this.videoModes.clear();
         Buffer buffer = GLFW.glfwGetVideoModes(this.monitor);
+        GLFWVidMode glfwvidmode = GLFW.glfwGetVideoMode(this.monitor);
+        VideoMode videomode = new VideoMode(glfwvidmode);
+        List<VideoMode> list = new ArrayList<>();
 
         for (int i = buffer.limit() - 1; i >= 0; i--) {
             buffer.position(i);
-            VideoMode videomode = new VideoMode(buffer);
-            if (videomode.getRedBits() >= 8 && videomode.getGreenBits() >= 8 && videomode.getBlueBits() >= 8) {
-                this.videoModes.add(videomode);
+            VideoMode videomode1 = new VideoMode(buffer);
+            if (videomode1.getRedBits() >= 8 && videomode1.getGreenBits() >= 8 && videomode1.getBlueBits() >= 8) {
+                if (videomode1.getRefreshRate() < videomode.getRefreshRate()) {
+                    list.add(videomode1);
+                } else {
+                    this.videoModes.add(videomode1);
+                }
             }
         }
 
+        list.sort(new VideoModeComparator().reversed());
+
+        for (VideoMode videomode2 : list) {
+            if (getVideoMode(this.videoModes, videomode2.getWidth(), videomode2.getHeight()) == null) {
+                this.videoModes.add(videomode2);
+            }
+        }
+
+        this.videoModes.sort(new VideoModeComparator());
         int[] aint = new int[1];
         int[] aint1 = new int[1];
         GLFW.glfwGetMonitorPos(this.monitor, aint, aint1);
         this.x = aint[0];
         this.y = aint1[0];
-        GLFWVidMode glfwvidmode = GLFW.glfwGetVideoMode(this.monitor);
-        this.currentMode = new VideoMode(glfwvidmode);
+        GLFWVidMode glfwvidmode1 = GLFW.glfwGetVideoMode(this.monitor);
+        this.currentMode = new VideoMode(glfwvidmode1);
     }
 
-    public VideoMode getPreferredVidMode(Optional<VideoMode> p_84949_) {
-        if (p_84949_.isPresent()) {
-            VideoMode videomode = p_84949_.get();
+    public VideoMode getPreferredVidMode(Optional<VideoMode> pVideoMode) {
+        if (pVideoMode.isPresent()) {
+            VideoMode videomode = pVideoMode.get();
 
             for (VideoMode videomode1 : this.videoModes) {
                 if (videomode1.equals(videomode)) {
@@ -59,8 +74,8 @@ public final class Monitor {
         return this.getCurrentMode();
     }
 
-    public int getVideoModeIndex(VideoMode p_84947_) {
-        return this.videoModes.indexOf(p_84947_);
+    public int getVideoModeIndex(VideoMode pVideoMode) {
+        return this.videoModes.indexOf(pVideoMode);
     }
 
     public VideoMode getCurrentMode() {
@@ -75,8 +90,8 @@ public final class Monitor {
         return this.y;
     }
 
-    public VideoMode getMode(int p_84945_) {
-        return this.videoModes.get(p_84945_);
+    public VideoMode getMode(int pIndex) {
+        return this.videoModes.get(pIndex);
     }
 
     public int getModeCount() {
@@ -90,5 +105,15 @@ public final class Monitor {
     @Override
     public String toString() {
         return String.format(Locale.ROOT, "Monitor[%s %sx%s %s]", this.monitor, this.x, this.y, this.currentMode);
+    }
+
+    public static VideoMode getVideoMode(List<VideoMode> list, int width, int height) {
+        for (VideoMode videomode : list) {
+            if (videomode.getWidth() == width && videomode.getHeight() == height) {
+                return videomode;
+            }
+        }
+
+        return null;
     }
 }

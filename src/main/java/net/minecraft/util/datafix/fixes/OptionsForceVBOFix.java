@@ -8,8 +8,8 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.serialization.Dynamic;
 
 public class OptionsForceVBOFix extends DataFix {
-    public OptionsForceVBOFix(Schema p_16620_, boolean p_16621_) {
-        super(p_16620_, p_16621_);
+    public OptionsForceVBOFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
     }
 
     @Override

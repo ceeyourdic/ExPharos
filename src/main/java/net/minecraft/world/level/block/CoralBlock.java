@@ -25,9 +25,9 @@ public class CoralBlock extends Block {
     );
     private final Block deadBlock;
 
-    public CoralBlock(Block p_52130_, BlockBehaviour.Properties p_52131_) {
-        super(p_52131_);
-        this.deadBlock = p_52130_;
+    public CoralBlock(Block pDeadBlock, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.deadBlock = pDeadBlock;
     }
 
     @Override
@@ -60,9 +60,9 @@ public class CoralBlock extends Block {
         return super.updateShape(p_52143_, p_368798_, p_364000_, p_52147_, p_52144_, p_52148_, p_52145_, p_367221_);
     }
 
-    protected boolean scanForWater(BlockGetter p_52135_, BlockPos p_52136_) {
+    protected boolean scanForWater(BlockGetter pLevel, BlockPos pPos) {
         for (Direction direction : Direction.values()) {
-            FluidState fluidstate = p_52135_.getFluidState(p_52136_.relative(direction));
+            FluidState fluidstate = pLevel.getFluidState(pPos.relative(direction));
             if (fluidstate.is(FluidTags.WATER)) {
                 return true;
             }
@@ -73,9 +73,9 @@ public class CoralBlock extends Block {
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_52133_) {
-        if (!this.scanForWater(p_52133_.getLevel(), p_52133_.getClickedPos())) {
-            p_52133_.getLevel().scheduleTick(p_52133_.getClickedPos(), this, 60 + p_52133_.getLevel().getRandom().nextInt(40));
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        if (!this.scanForWater(pContext.getLevel(), pContext.getClickedPos())) {
+            pContext.getLevel().scheduleTick(pContext.getClickedPos(), this, 60 + pContext.getLevel().getRandom().nextInt(40));
         }
 
         return this.defaultBlockState();

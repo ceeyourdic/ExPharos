@@ -112,13 +112,13 @@ public class GameModeSwitcherScreen extends Screen {
         switchToHoveredGameMode(this.minecraft, this.currentlyHovered);
     }
 
-    private static void switchToHoveredGameMode(Minecraft p_281340_, GameModeSwitcherScreen.GameModeIcon p_281358_) {
-        if (p_281340_.gameMode != null && p_281340_.player != null) {
+    private static void switchToHoveredGameMode(Minecraft pMinecraft, GameModeSwitcherScreen.GameModeIcon pGameModeIcon) {
+        if (pMinecraft.gameMode != null && pMinecraft.player != null) {
             GameModeSwitcherScreen.GameModeIcon gamemodeswitcherscreen$gamemodeicon = GameModeSwitcherScreen.GameModeIcon.getFromGameType(
-                p_281340_.gameMode.getPlayerMode()
+                pMinecraft.gameMode.getPlayerMode()
             );
-            if (p_281340_.player.hasPermissions(2) && p_281358_ != gamemodeswitcherscreen$gamemodeicon) {
-                p_281340_.player.connection.sendUnsignedCommand(p_281358_.getCommand());
+            if (pMinecraft.player.hasPermissions(2) && pGameModeIcon != gamemodeswitcherscreen$gamemodeicon) {
+                pMinecraft.player.connection.sendUnsignedCommand(pGameModeIcon.getCommand());
             }
         }
     }
@@ -134,13 +134,13 @@ public class GameModeSwitcherScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int p_97553_, int p_97554_, int p_97555_) {
-        if (p_97553_ == 293) {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (pKeyCode == 293) {
             this.setFirstMousePos = false;
             this.currentlyHovered = this.currentlyHovered.getNext();
             return true;
         } else {
-            return super.keyPressed(p_97553_, p_97554_, p_97555_);
+            return super.keyPressed(pKeyCode, pScanCode, pModifiers);
         }
     }
 
@@ -163,14 +163,14 @@ public class GameModeSwitcherScreen extends Screen {
         final String command;
         final ItemStack renderStack;
 
-        private GameModeIcon(final Component p_97594_, final String p_97595_, final ItemStack p_97596_) {
-            this.name = p_97594_;
-            this.command = p_97595_;
-            this.renderStack = p_97596_;
+        private GameModeIcon(final Component pName, final String pCommand, final ItemStack pRenderStack) {
+            this.name = pName;
+            this.command = pCommand;
+            this.renderStack = pRenderStack;
         }
 
-        void drawIcon(GuiGraphics p_282609_, int p_283301_, int p_281692_) {
-            p_282609_.renderItem(this.renderStack, p_283301_, p_281692_);
+        void drawIcon(GuiGraphics pGuiGraphics, int pX, int pY) {
+            pGuiGraphics.renderItem(this.renderStack, pX, pY);
         }
 
         Component getName() {
@@ -190,8 +190,8 @@ public class GameModeSwitcherScreen extends Screen {
             };
         }
 
-        static GameModeSwitcherScreen.GameModeIcon getFromGameType(GameType p_283307_) {
-            return switch (p_283307_) {
+        static GameModeSwitcherScreen.GameModeIcon getFromGameType(GameType pGameType) {
+            return switch (pGameType) {
                 case SPECTATOR -> SPECTATOR;
                 case SURVIVAL -> SURVIVAL;
                 case CREATIVE -> CREATIVE;
@@ -205,9 +205,9 @@ public class GameModeSwitcherScreen extends Screen {
         final GameModeSwitcherScreen.GameModeIcon icon;
         private boolean isSelected;
 
-        public GameModeSlot(GameModeSwitcherScreen.GameModeIcon p_97627_, int p_97628_, int p_97629_) {
-            super(p_97628_, p_97629_, 26, 26, p_97627_.getName());
-            this.icon = p_97627_;
+        public GameModeSlot(GameModeSwitcherScreen.GameModeIcon pIcon, int pX, int pY) {
+            super(pX, pY, 26, 26, pIcon.getName());
+            this.icon = pIcon;
         }
 
         @Override
@@ -229,16 +229,16 @@ public class GameModeSwitcherScreen extends Screen {
             return super.isHoveredOrFocused() || this.isSelected;
         }
 
-        public void setSelected(boolean p_97644_) {
-            this.isSelected = p_97644_;
+        public void setSelected(boolean pIsSelected) {
+            this.isSelected = pIsSelected;
         }
 
-        private void drawSlot(GuiGraphics p_281786_) {
-            p_281786_.blitSprite(RenderType::guiTextured, GameModeSwitcherScreen.SLOT_SPRITE, this.getX(), this.getY(), 26, 26);
+        private void drawSlot(GuiGraphics pGuiGraphics) {
+            pGuiGraphics.blitSprite(RenderType::guiTextured, GameModeSwitcherScreen.SLOT_SPRITE, this.getX(), this.getY(), 26, 26);
         }
 
-        private void drawSelection(GuiGraphics p_281820_) {
-            p_281820_.blitSprite(RenderType::guiTextured, GameModeSwitcherScreen.SELECTION_SPRITE, this.getX(), this.getY(), 26, 26);
+        private void drawSelection(GuiGraphics pGuiGraphics) {
+            pGuiGraphics.blitSprite(RenderType::guiTextured, GameModeSwitcherScreen.SELECTION_SPRITE, this.getX(), this.getY(), 26, 26);
         }
     }
 }

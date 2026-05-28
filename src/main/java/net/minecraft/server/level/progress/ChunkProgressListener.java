@@ -5,15 +5,15 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 public interface ChunkProgressListener {
-    void updateSpawnPos(ChunkPos p_9617_);
+    void updateSpawnPos(ChunkPos pCenter);
 
-    void onStatusChange(ChunkPos p_9618_, @Nullable ChunkStatus p_328329_);
+    void onStatusChange(ChunkPos pChunkPos, @Nullable ChunkStatus pChunkStatus);
 
     void start();
 
     void stop();
 
-    static int calculateDiameter(int p_329991_) {
-        return 2 * p_329991_ + 1;
+    static int calculateDiameter(int pRadius) {
+        return 2 * pRadius + 1;
     }
 }

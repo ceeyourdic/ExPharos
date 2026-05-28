@@ -13,10 +13,10 @@ public class V2688 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_145881_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_145881_);
-        p_145881_.register(map, "minecraft:glow_squid", () -> V100.equipment(p_145881_));
-        p_145881_.register(map, "minecraft:glow_item_frame", p_264877_ -> DSL.optionalFields("Item", References.ITEM_STACK.in(p_145881_)));
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
+        pSchema.register(map, "minecraft:glow_squid", () -> V100.equipment(pSchema));
+        pSchema.register(map, "minecraft:glow_item_frame", p_264877_ -> DSL.optionalFields("Item", References.ITEM_STACK.in(pSchema)));
         return map;
     }
 }

@@ -19,11 +19,11 @@ public record ClientboundEntityPositionSyncPacket(int id, PositionMoveRotation v
         ClientboundEntityPositionSyncPacket::new
     );
 
-    public static ClientboundEntityPositionSyncPacket of(Entity p_365521_) {
+    public static ClientboundEntityPositionSyncPacket of(Entity pEntity) {
         return new ClientboundEntityPositionSyncPacket(
-            p_365521_.getId(),
-            new PositionMoveRotation(p_365521_.trackingPosition(), p_365521_.getDeltaMovement(), p_365521_.getYRot(), p_365521_.getXRot()),
-            p_365521_.onGround()
+            pEntity.getId(),
+            new PositionMoveRotation(pEntity.trackingPosition(), pEntity.getDeltaMovement(), pEntity.getYRot(), pEntity.getXRot()),
+            pEntity.onGround()
         );
     }
 

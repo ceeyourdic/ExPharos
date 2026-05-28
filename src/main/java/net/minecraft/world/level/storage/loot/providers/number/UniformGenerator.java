@@ -23,8 +23,8 @@ public record UniformGenerator(NumberProvider min, NumberProvider max) implement
         return NumberProviders.UNIFORM;
     }
 
-    public static UniformGenerator between(float p_165781_, float p_165782_) {
-        return new UniformGenerator(ConstantValue.exactly(p_165781_), ConstantValue.exactly(p_165782_));
+    public static UniformGenerator between(float pMin, float pMax) {
+        return new UniformGenerator(ConstantValue.exactly(pMin), ConstantValue.exactly(pMax));
     }
 
     @Override

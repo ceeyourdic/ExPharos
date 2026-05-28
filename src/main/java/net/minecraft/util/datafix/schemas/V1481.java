@@ -11,9 +11,9 @@ public class V1481 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_17715_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_17715_);
-        p_17715_.registerSimple(map, "minecraft:conduit");
+    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(pSchema);
+        pSchema.registerSimple(map, "minecraft:conduit");
         return map;
     }
 }

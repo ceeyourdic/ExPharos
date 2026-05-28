@@ -13,25 +13,25 @@ public class TrailParticle extends TextureSheetParticle {
     private final Vec3 target;
 
     TrailParticle(
-        ClientLevel p_368897_,
-        double p_365643_,
-        double p_367323_,
-        double p_365378_,
-        double p_369758_,
-        double p_361767_,
-        double p_368109_,
-        Vec3 p_369945_,
-        int p_367065_
+        ClientLevel pLevel,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed,
+        Vec3 pTarget,
+        int pColor
     ) {
-        super(p_368897_, p_365643_, p_367323_, p_365378_, p_369758_, p_361767_, p_368109_);
-        p_367065_ = ARGB.scaleRGB(
-            p_367065_, 0.875F + this.random.nextFloat() * 0.25F, 0.875F + this.random.nextFloat() * 0.25F, 0.875F + this.random.nextFloat() * 0.25F
+        super(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
+        pColor = ARGB.scaleRGB(
+            pColor, 0.875F + this.random.nextFloat() * 0.25F, 0.875F + this.random.nextFloat() * 0.25F, 0.875F + this.random.nextFloat() * 0.25F
         );
-        this.rCol = (float)ARGB.red(p_367065_) / 255.0F;
-        this.gCol = (float)ARGB.green(p_367065_) / 255.0F;
-        this.bCol = (float)ARGB.blue(p_367065_) / 255.0F;
+        this.rCol = (float)ARGB.red(pColor) / 255.0F;
+        this.gCol = (float)ARGB.green(pColor) / 255.0F;
+        this.bCol = (float)ARGB.blue(pColor) / 255.0F;
         this.quadSize = 0.26F;
-        this.target = p_369945_;
+        this.target = pTarget;
     }
 
     @Override
@@ -64,8 +64,8 @@ public class TrailParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<TrailParticleOption> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_363729_) {
-            this.sprite = p_363729_;
+        public Provider(SpriteSet pSprite) {
+            this.sprite = pSprite;
         }
 
         public Particle createParticle(

@@ -11,28 +11,28 @@ public record UseRemainder(ItemStack convertInto) {
         ItemStack.STREAM_CODEC, UseRemainder::convertInto, UseRemainder::new
     );
 
-    public ItemStack convertIntoRemainder(ItemStack p_361599_, int p_362849_, boolean p_365138_, UseRemainder.OnExtraCreatedRemainder p_363866_) {
-        if (p_365138_) {
-            return p_361599_;
-        } else if (p_361599_.getCount() >= p_362849_) {
-            return p_361599_;
+    public ItemStack convertIntoRemainder(ItemStack pStack, int pCount, boolean pHasInfiniteMaterials, UseRemainder.OnExtraCreatedRemainder pOnExtraCreated) {
+        if (pHasInfiniteMaterials) {
+            return pStack;
+        } else if (pStack.getCount() >= pCount) {
+            return pStack;
         } else {
             ItemStack itemstack = this.convertInto.copy();
-            if (p_361599_.isEmpty()) {
+            if (pStack.isEmpty()) {
                 return itemstack;
             } else {
-                p_363866_.apply(itemstack);
-                return p_361599_;
+                pOnExtraCreated.apply(itemstack);
+                return pStack;
             }
         }
     }
 
     @Override
-    public boolean equals(Object p_361701_) {
-        if (this == p_361701_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
-        } else if (p_361701_ != null && this.getClass() == p_361701_.getClass()) {
-            UseRemainder useremainder = (UseRemainder)p_361701_;
+        } else if (pOther != null && this.getClass() == pOther.getClass()) {
+            UseRemainder useremainder = (UseRemainder)pOther;
             return ItemStack.matches(this.convertInto, useremainder.convertInto);
         } else {
             return false;
@@ -46,6 +46,6 @@ public record UseRemainder(ItemStack convertInto) {
 
     @FunctionalInterface
     public interface OnExtraCreatedRemainder {
-        void apply(ItemStack p_369045_);
+        void apply(ItemStack pStack);
     }
 }

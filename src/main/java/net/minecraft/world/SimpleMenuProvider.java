@@ -10,9 +10,9 @@ public final class SimpleMenuProvider implements MenuProvider {
     private final Component title;
     private final MenuConstructor menuConstructor;
 
-    public SimpleMenuProvider(MenuConstructor p_19202_, Component p_19203_) {
-        this.menuConstructor = p_19202_;
-        this.title = p_19203_;
+    public SimpleMenuProvider(MenuConstructor pMenuConstructor, Component pTitle) {
+        this.menuConstructor = pMenuConstructor;
+        this.title = pTitle;
     }
 
     @Override

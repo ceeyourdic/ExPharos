@@ -26,14 +26,14 @@ public class ServerAdvancementManager extends SimpleJsonResourceReloadListener<A
     private AdvancementTree tree = new AdvancementTree();
     private final HolderLookup.Provider registries;
 
-    public ServerAdvancementManager(HolderLookup.Provider p_336198_) {
-        super(p_336198_, Advancement.CODEC, Registries.ADVANCEMENT);
-        this.registries = p_336198_;
+    public ServerAdvancementManager(HolderLookup.Provider pRegistries) {
+        super(pRegistries, Advancement.CODEC, Registries.ADVANCEMENT);
+        this.registries = pRegistries;
     }
 
-    protected void apply(Map<ResourceLocation, Advancement> p_136034_, ResourceManager p_136035_, ProfilerFiller p_136036_) {
+    protected void apply(Map<ResourceLocation, Advancement> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         Builder<ResourceLocation, AdvancementHolder> builder = ImmutableMap.builder();
-        p_136034_.forEach((p_358541_, p_358542_) -> {
+        pObject.forEach((p_358541_, p_358542_) -> {
             this.validate(p_358541_, p_358542_);
             builder.put(p_358541_, new AdvancementHolder(p_358541_, p_358542_));
         });
@@ -50,15 +50,15 @@ public class ServerAdvancementManager extends SimpleJsonResourceReloadListener<A
         this.tree = advancementtree;
     }
 
-    private void validate(ResourceLocation p_309906_, Advancement p_310937_) {
+    private void validate(ResourceLocation pLocation, Advancement pAdvancement) {
         ProblemReporter.Collector problemreporter$collector = new ProblemReporter.Collector();
-        p_310937_.validate(problemreporter$collector, this.registries);
-        problemreporter$collector.getReport().ifPresent(p_341121_ -> LOGGER.warn("Found validation problems in advancement {}: \n{}", p_309906_, p_341121_));
+        pAdvancement.validate(problemreporter$collector, this.registries);
+        problemreporter$collector.getReport().ifPresent(p_341121_ -> LOGGER.warn("Found validation problems in advancement {}: \n{}", pLocation, p_341121_));
     }
 
     @Nullable
-    public AdvancementHolder get(ResourceLocation p_299615_) {
-        return this.advancements.get(p_299615_);
+    public AdvancementHolder get(ResourceLocation pLocation) {
+        return this.advancements.get(pLocation);
     }
 
     public AdvancementTree tree() {

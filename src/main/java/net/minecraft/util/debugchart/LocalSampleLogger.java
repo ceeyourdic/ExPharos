@@ -6,8 +6,8 @@ public class LocalSampleLogger extends AbstractSampleLogger implements SampleSto
     private int start;
     private int size;
 
-    public LocalSampleLogger(int p_334158_) {
-        this(p_334158_, new long[p_334158_]);
+    public LocalSampleLogger(int pSize) {
+        this(pSize, new long[pSize]);
     }
 
     public LocalSampleLogger(int p_330975_, long[] p_333573_) {
@@ -55,8 +55,8 @@ public class LocalSampleLogger extends AbstractSampleLogger implements SampleSto
         }
     }
 
-    private int wrapIndex(int p_330672_) {
-        return p_330672_ % 240;
+    private int wrapIndex(int pIndex) {
+        return pIndex % 240;
     }
 
     @Override

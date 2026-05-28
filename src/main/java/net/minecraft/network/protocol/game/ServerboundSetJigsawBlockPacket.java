@@ -22,45 +22,45 @@ public class ServerboundSetJigsawBlockPacket implements Packet<ServerGamePacketL
     private final int placementPriority;
 
     public ServerboundSetJigsawBlockPacket(
-        BlockPos p_134573_,
-        ResourceLocation p_134574_,
-        ResourceLocation p_134575_,
-        ResourceLocation p_134576_,
-        String p_134577_,
-        JigsawBlockEntity.JointType p_134578_,
-        int p_309767_,
-        int p_310524_
+        BlockPos pPos,
+        ResourceLocation pName,
+        ResourceLocation pTarget,
+        ResourceLocation pPool,
+        String pFinalState,
+        JigsawBlockEntity.JointType pJoint,
+        int pSelectionPriority,
+        int pPlacementPriority
     ) {
-        this.pos = p_134573_;
-        this.name = p_134574_;
-        this.target = p_134575_;
-        this.pool = p_134576_;
-        this.finalState = p_134577_;
-        this.joint = p_134578_;
-        this.selectionPriority = p_309767_;
-        this.placementPriority = p_310524_;
+        this.pos = pPos;
+        this.name = pName;
+        this.target = pTarget;
+        this.pool = pPool;
+        this.finalState = pFinalState;
+        this.joint = pJoint;
+        this.selectionPriority = pSelectionPriority;
+        this.placementPriority = pPlacementPriority;
     }
 
-    private ServerboundSetJigsawBlockPacket(FriendlyByteBuf p_179766_) {
-        this.pos = p_179766_.readBlockPos();
-        this.name = p_179766_.readResourceLocation();
-        this.target = p_179766_.readResourceLocation();
-        this.pool = p_179766_.readResourceLocation();
-        this.finalState = p_179766_.readUtf();
-        this.joint = JigsawBlockEntity.JointType.CODEC.byName(p_179766_.readUtf(), JigsawBlockEntity.JointType.ALIGNED);
-        this.selectionPriority = p_179766_.readVarInt();
-        this.placementPriority = p_179766_.readVarInt();
+    private ServerboundSetJigsawBlockPacket(FriendlyByteBuf pBuffer) {
+        this.pos = pBuffer.readBlockPos();
+        this.name = pBuffer.readResourceLocation();
+        this.target = pBuffer.readResourceLocation();
+        this.pool = pBuffer.readResourceLocation();
+        this.finalState = pBuffer.readUtf();
+        this.joint = JigsawBlockEntity.JointType.CODEC.byName(pBuffer.readUtf(), JigsawBlockEntity.JointType.ALIGNED);
+        this.selectionPriority = pBuffer.readVarInt();
+        this.placementPriority = pBuffer.readVarInt();
     }
 
-    private void write(FriendlyByteBuf p_134587_) {
-        p_134587_.writeBlockPos(this.pos);
-        p_134587_.writeResourceLocation(this.name);
-        p_134587_.writeResourceLocation(this.target);
-        p_134587_.writeResourceLocation(this.pool);
-        p_134587_.writeUtf(this.finalState);
-        p_134587_.writeUtf(this.joint.getSerializedName());
-        p_134587_.writeVarInt(this.selectionPriority);
-        p_134587_.writeVarInt(this.placementPriority);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeBlockPos(this.pos);
+        pBuffer.writeResourceLocation(this.name);
+        pBuffer.writeResourceLocation(this.target);
+        pBuffer.writeResourceLocation(this.pool);
+        pBuffer.writeUtf(this.finalState);
+        pBuffer.writeUtf(this.joint.getSerializedName());
+        pBuffer.writeVarInt(this.selectionPriority);
+        pBuffer.writeVarInt(this.placementPriority);
     }
 
     @Override
@@ -68,8 +68,8 @@ public class ServerboundSetJigsawBlockPacket implements Packet<ServerGamePacketL
         return GamePacketTypes.SERVERBOUND_SET_JIGSAW_BLOCK;
     }
 
-    public void handle(ServerGamePacketListener p_134584_) {
-        p_134584_.handleSetJigsawBlock(this);
+    public void handle(ServerGamePacketListener pHandler) {
+        pHandler.handleSetJigsawBlock(this);
     }
 
     public BlockPos getPos() {

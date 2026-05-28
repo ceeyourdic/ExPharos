@@ -28,8 +28,8 @@ public class AllayModel extends EntityModel<AllayRenderState> implements ArmedMo
     private static final float MAX_HAND_HOLDING_ITEM_X_ROT_RAD = -1.134464F;
     private static final float MIN_HAND_HOLDING_ITEM_X_ROT_RAD = (float) (-Math.PI / 3);
 
-    public AllayModel(ModelPart p_233312_) {
-        super(p_233312_.getChild("root"), RenderType::entityTranslucent);
+    public AllayModel(ModelPart pRoot) {
+        super(pRoot.getChild("root"), RenderType::entityTranslucent);
     }
 
     public static LayerDefinition createBodyLayer() {

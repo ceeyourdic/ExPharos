@@ -7,5 +7,5 @@ import net.minecraft.server.level.ServerPlayer;
 public interface ChatDecorator {
     ChatDecorator PLAIN = (p_296388_, p_296389_) -> p_296389_;
 
-    Component decorate(@Nullable ServerPlayer p_236962_, Component p_236963_);
+    Component decorate(@Nullable ServerPlayer pPlayer, Component pMessage);
 }

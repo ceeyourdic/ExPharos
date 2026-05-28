@@ -95,90 +95,90 @@ public class PaintingRenderer extends EntityRenderer<Painting, PaintingRenderSta
     }
 
     private void renderPainting(
-        PoseStack p_115559_,
-        VertexConsumer p_115560_,
-        int[] p_366629_,
-        int p_115562_,
-        int p_115563_,
-        TextureAtlasSprite p_115564_,
-        TextureAtlasSprite p_115565_
+        PoseStack pPoseStack,
+        VertexConsumer pBuffer,
+        int[] pLightCoords,
+        int pWidth,
+        int pHeight,
+        TextureAtlasSprite pFrontSprite,
+        TextureAtlasSprite pBackSprite
     ) {
-        PoseStack.Pose posestack$pose = p_115559_.last();
-        float f = (float)(-p_115562_) / 2.0F;
-        float f1 = (float)(-p_115563_) / 2.0F;
+        PoseStack.Pose posestack$pose = pPoseStack.last();
+        float f = (float)(-pWidth) / 2.0F;
+        float f1 = (float)(-pHeight) / 2.0F;
         float f2 = 0.03125F;
-        float f3 = p_115565_.getU0();
-        float f4 = p_115565_.getU1();
-        float f5 = p_115565_.getV0();
-        float f6 = p_115565_.getV1();
-        float f7 = p_115565_.getU0();
-        float f8 = p_115565_.getU1();
-        float f9 = p_115565_.getV0();
-        float f10 = p_115565_.getV(0.0625F);
-        float f11 = p_115565_.getU0();
-        float f12 = p_115565_.getU(0.0625F);
-        float f13 = p_115565_.getV0();
-        float f14 = p_115565_.getV1();
-        double d0 = 1.0 / (double)p_115562_;
-        double d1 = 1.0 / (double)p_115563_;
+        float f3 = pBackSprite.getU0();
+        float f4 = pBackSprite.getU1();
+        float f5 = pBackSprite.getV0();
+        float f6 = pBackSprite.getV1();
+        float f7 = pBackSprite.getU0();
+        float f8 = pBackSprite.getU1();
+        float f9 = pBackSprite.getV0();
+        float f10 = pBackSprite.getV(0.0625F);
+        float f11 = pBackSprite.getU0();
+        float f12 = pBackSprite.getU(0.0625F);
+        float f13 = pBackSprite.getV0();
+        float f14 = pBackSprite.getV1();
+        double d0 = 1.0 / (double)pWidth;
+        double d1 = 1.0 / (double)pHeight;
 
-        for (int i = 0; i < p_115562_; i++) {
-            for (int j = 0; j < p_115563_; j++) {
+        for (int i = 0; i < pWidth; i++) {
+            for (int j = 0; j < pHeight; j++) {
                 float f15 = f + (float)(i + 1);
                 float f16 = f + (float)i;
                 float f17 = f1 + (float)(j + 1);
                 float f18 = f1 + (float)j;
-                int k = p_366629_[i + j * p_115562_];
-                float f19 = p_115564_.getU((float)(d0 * (double)(p_115562_ - i)));
-                float f20 = p_115564_.getU((float)(d0 * (double)(p_115562_ - (i + 1))));
-                float f21 = p_115564_.getV((float)(d1 * (double)(p_115563_ - j)));
-                float f22 = p_115564_.getV((float)(d1 * (double)(p_115563_ - (j + 1))));
-                this.vertex(posestack$pose, p_115560_, f15, f18, f20, f21, -0.03125F, 0, 0, -1, k);
-                this.vertex(posestack$pose, p_115560_, f16, f18, f19, f21, -0.03125F, 0, 0, -1, k);
-                this.vertex(posestack$pose, p_115560_, f16, f17, f19, f22, -0.03125F, 0, 0, -1, k);
-                this.vertex(posestack$pose, p_115560_, f15, f17, f20, f22, -0.03125F, 0, 0, -1, k);
-                this.vertex(posestack$pose, p_115560_, f15, f17, f4, f5, 0.03125F, 0, 0, 1, k);
-                this.vertex(posestack$pose, p_115560_, f16, f17, f3, f5, 0.03125F, 0, 0, 1, k);
-                this.vertex(posestack$pose, p_115560_, f16, f18, f3, f6, 0.03125F, 0, 0, 1, k);
-                this.vertex(posestack$pose, p_115560_, f15, f18, f4, f6, 0.03125F, 0, 0, 1, k);
-                this.vertex(posestack$pose, p_115560_, f15, f17, f7, f9, -0.03125F, 0, 1, 0, k);
-                this.vertex(posestack$pose, p_115560_, f16, f17, f8, f9, -0.03125F, 0, 1, 0, k);
-                this.vertex(posestack$pose, p_115560_, f16, f17, f8, f10, 0.03125F, 0, 1, 0, k);
-                this.vertex(posestack$pose, p_115560_, f15, f17, f7, f10, 0.03125F, 0, 1, 0, k);
-                this.vertex(posestack$pose, p_115560_, f15, f18, f7, f9, 0.03125F, 0, -1, 0, k);
-                this.vertex(posestack$pose, p_115560_, f16, f18, f8, f9, 0.03125F, 0, -1, 0, k);
-                this.vertex(posestack$pose, p_115560_, f16, f18, f8, f10, -0.03125F, 0, -1, 0, k);
-                this.vertex(posestack$pose, p_115560_, f15, f18, f7, f10, -0.03125F, 0, -1, 0, k);
-                this.vertex(posestack$pose, p_115560_, f15, f17, f12, f13, 0.03125F, -1, 0, 0, k);
-                this.vertex(posestack$pose, p_115560_, f15, f18, f12, f14, 0.03125F, -1, 0, 0, k);
-                this.vertex(posestack$pose, p_115560_, f15, f18, f11, f14, -0.03125F, -1, 0, 0, k);
-                this.vertex(posestack$pose, p_115560_, f15, f17, f11, f13, -0.03125F, -1, 0, 0, k);
-                this.vertex(posestack$pose, p_115560_, f16, f17, f12, f13, -0.03125F, 1, 0, 0, k);
-                this.vertex(posestack$pose, p_115560_, f16, f18, f12, f14, -0.03125F, 1, 0, 0, k);
-                this.vertex(posestack$pose, p_115560_, f16, f18, f11, f14, 0.03125F, 1, 0, 0, k);
-                this.vertex(posestack$pose, p_115560_, f16, f17, f11, f13, 0.03125F, 1, 0, 0, k);
+                int k = pLightCoords[i + j * pWidth];
+                float f19 = pFrontSprite.getU((float)(d0 * (double)(pWidth - i)));
+                float f20 = pFrontSprite.getU((float)(d0 * (double)(pWidth - (i + 1))));
+                float f21 = pFrontSprite.getV((float)(d1 * (double)(pHeight - j)));
+                float f22 = pFrontSprite.getV((float)(d1 * (double)(pHeight - (j + 1))));
+                this.vertex(posestack$pose, pBuffer, f15, f18, f20, f21, -0.03125F, 0, 0, -1, k);
+                this.vertex(posestack$pose, pBuffer, f16, f18, f19, f21, -0.03125F, 0, 0, -1, k);
+                this.vertex(posestack$pose, pBuffer, f16, f17, f19, f22, -0.03125F, 0, 0, -1, k);
+                this.vertex(posestack$pose, pBuffer, f15, f17, f20, f22, -0.03125F, 0, 0, -1, k);
+                this.vertex(posestack$pose, pBuffer, f15, f17, f4, f5, 0.03125F, 0, 0, 1, k);
+                this.vertex(posestack$pose, pBuffer, f16, f17, f3, f5, 0.03125F, 0, 0, 1, k);
+                this.vertex(posestack$pose, pBuffer, f16, f18, f3, f6, 0.03125F, 0, 0, 1, k);
+                this.vertex(posestack$pose, pBuffer, f15, f18, f4, f6, 0.03125F, 0, 0, 1, k);
+                this.vertex(posestack$pose, pBuffer, f15, f17, f7, f9, -0.03125F, 0, 1, 0, k);
+                this.vertex(posestack$pose, pBuffer, f16, f17, f8, f9, -0.03125F, 0, 1, 0, k);
+                this.vertex(posestack$pose, pBuffer, f16, f17, f8, f10, 0.03125F, 0, 1, 0, k);
+                this.vertex(posestack$pose, pBuffer, f15, f17, f7, f10, 0.03125F, 0, 1, 0, k);
+                this.vertex(posestack$pose, pBuffer, f15, f18, f7, f9, 0.03125F, 0, -1, 0, k);
+                this.vertex(posestack$pose, pBuffer, f16, f18, f8, f9, 0.03125F, 0, -1, 0, k);
+                this.vertex(posestack$pose, pBuffer, f16, f18, f8, f10, -0.03125F, 0, -1, 0, k);
+                this.vertex(posestack$pose, pBuffer, f15, f18, f7, f10, -0.03125F, 0, -1, 0, k);
+                this.vertex(posestack$pose, pBuffer, f15, f17, f12, f13, 0.03125F, -1, 0, 0, k);
+                this.vertex(posestack$pose, pBuffer, f15, f18, f12, f14, 0.03125F, -1, 0, 0, k);
+                this.vertex(posestack$pose, pBuffer, f15, f18, f11, f14, -0.03125F, -1, 0, 0, k);
+                this.vertex(posestack$pose, pBuffer, f15, f17, f11, f13, -0.03125F, -1, 0, 0, k);
+                this.vertex(posestack$pose, pBuffer, f16, f17, f12, f13, -0.03125F, 1, 0, 0, k);
+                this.vertex(posestack$pose, pBuffer, f16, f18, f12, f14, -0.03125F, 1, 0, 0, k);
+                this.vertex(posestack$pose, pBuffer, f16, f18, f11, f14, 0.03125F, 1, 0, 0, k);
+                this.vertex(posestack$pose, pBuffer, f16, f17, f11, f13, 0.03125F, 1, 0, 0, k);
             }
         }
     }
 
     private void vertex(
-        PoseStack.Pose p_329838_,
-        VertexConsumer p_254114_,
-        float p_254164_,
-        float p_254459_,
-        float p_254183_,
-        float p_253615_,
-        float p_254448_,
-        int p_253660_,
-        int p_254342_,
-        int p_253757_,
-        int p_254101_
+        PoseStack.Pose pPose,
+        VertexConsumer pConsumer,
+        float pX,
+        float pY,
+        float pU,
+        float pV,
+        float pZ,
+        int pNormalX,
+        int pNormalY,
+        int pNormalZ,
+        int pPackedLight
     ) {
-        p_254114_.addVertex(p_329838_, p_254164_, p_254459_, p_254448_)
+        pConsumer.addVertex(pPose, pX, pY, pZ)
             .setColor(-1)
-            .setUv(p_254183_, p_253615_)
+            .setUv(pU, pV)
             .setOverlay(OverlayTexture.NO_OVERLAY)
-            .setLight(p_254101_)
-            .setNormal(p_329838_, (float)p_253660_, (float)p_254342_, (float)p_253757_);
+            .setLight(pPackedLight)
+            .setNormal(pPose, (float)pNormalX, (float)pNormalY, (float)pNormalZ);
     }
 }

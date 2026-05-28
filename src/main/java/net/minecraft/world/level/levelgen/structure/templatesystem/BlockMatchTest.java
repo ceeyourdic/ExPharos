@@ -13,8 +13,8 @@ public class BlockMatchTest extends RuleTest {
         .xmap(BlockMatchTest::new, p_74073_ -> p_74073_.block);
     private final Block block;
 
-    public BlockMatchTest(Block p_74067_) {
-        this.block = p_74067_;
+    public BlockMatchTest(Block pBlock) {
+        this.block = pBlock;
     }
 
     @Override

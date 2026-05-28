@@ -15,23 +15,23 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 
 public interface Spawner {
-    void setEntityId(EntityType<?> p_312533_, RandomSource p_311601_);
+    void setEntityId(EntityType<?> pEntityType, RandomSource pRandom);
 
-    static void appendHoverText(ItemStack p_311346_, List<Component> p_309883_, String p_310819_) {
-        Component component = getSpawnEntityDisplayName(p_311346_, p_310819_);
+    static void appendHoverText(ItemStack pStack, List<Component> pTooltipLines, String pSpawnDataKey) {
+        Component component = getSpawnEntityDisplayName(pStack, pSpawnDataKey);
         if (component != null) {
-            p_309883_.add(component);
+            pTooltipLines.add(component);
         } else {
-            p_309883_.add(CommonComponents.EMPTY);
-            p_309883_.add(Component.translatable("block.minecraft.spawner.desc1").withStyle(ChatFormatting.GRAY));
-            p_309883_.add(CommonComponents.space().append(Component.translatable("block.minecraft.spawner.desc2").withStyle(ChatFormatting.BLUE)));
+            pTooltipLines.add(CommonComponents.EMPTY);
+            pTooltipLines.add(Component.translatable("block.minecraft.spawner.desc1").withStyle(ChatFormatting.GRAY));
+            pTooltipLines.add(CommonComponents.space().append(Component.translatable("block.minecraft.spawner.desc2").withStyle(ChatFormatting.BLUE)));
         }
     }
 
     @Nullable
-    static Component getSpawnEntityDisplayName(ItemStack p_312162_, String p_309907_) {
-        CompoundTag compoundtag = p_312162_.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).getUnsafe();
-        ResourceLocation resourcelocation = getEntityKey(compoundtag, p_309907_);
+    static Component getSpawnEntityDisplayName(ItemStack pStack, String pSpawnDataKey) {
+        CompoundTag compoundtag = pStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).getUnsafe();
+        ResourceLocation resourcelocation = getEntityKey(compoundtag, pSpawnDataKey);
         return resourcelocation != null
             ? BuiltInRegistries.ENTITY_TYPE
                 .getOptional(resourcelocation)
@@ -41,9 +41,9 @@ public interface Spawner {
     }
 
     @Nullable
-    private static ResourceLocation getEntityKey(CompoundTag p_313110_, String p_312914_) {
-        if (p_313110_.contains(p_312914_, 10)) {
-            String s = p_313110_.getCompound(p_312914_).getCompound("entity").getString("id");
+    private static ResourceLocation getEntityKey(CompoundTag pTag, String pSpawnDataKey) {
+        if (pTag.contains(pSpawnDataKey, 10)) {
+            String s = pTag.getCompound(pSpawnDataKey).getCompound("entity").getString("id");
             return ResourceLocation.tryParse(s);
         } else {
             return null;

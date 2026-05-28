@@ -15,8 +15,8 @@ public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurability
         return ItemDurabilityTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_43670_, ItemStack p_43671_, int p_43672_) {
-        this.trigger(p_43670_, p_43676_ -> p_43676_.matches(p_43671_, p_43672_));
+    public void trigger(ServerPlayer pPlayer, ItemStack pItem, int pNewDurability) {
+        this.trigger(pPlayer, p_43676_ -> p_43676_.matches(pItem, pNewDurability));
     }
 
     public static record TriggerInstance(
@@ -36,21 +36,21 @@ public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurability
                     .apply(p_325220_, ItemDurabilityTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<ItemDurabilityTrigger.TriggerInstance> changedDurability(Optional<ItemPredicate> p_300870_, MinMaxBounds.Ints p_151288_) {
-            return changedDurability(Optional.empty(), p_300870_, p_151288_);
+        public static Criterion<ItemDurabilityTrigger.TriggerInstance> changedDurability(Optional<ItemPredicate> pItem, MinMaxBounds.Ints pDurability) {
+            return changedDurability(Optional.empty(), pItem, pDurability);
         }
 
         public static Criterion<ItemDurabilityTrigger.TriggerInstance> changedDurability(
-            Optional<ContextAwarePredicate> p_299530_, Optional<ItemPredicate> p_300893_, MinMaxBounds.Ints p_286730_
+            Optional<ContextAwarePredicate> pPlayer, Optional<ItemPredicate> pItem, MinMaxBounds.Ints pDurability
         ) {
-            return CriteriaTriggers.ITEM_DURABILITY_CHANGED.createCriterion(new ItemDurabilityTrigger.TriggerInstance(p_299530_, p_300893_, p_286730_, MinMaxBounds.Ints.ANY));
+            return CriteriaTriggers.ITEM_DURABILITY_CHANGED.createCriterion(new ItemDurabilityTrigger.TriggerInstance(pPlayer, pItem, pDurability, MinMaxBounds.Ints.ANY));
         }
 
-        public boolean matches(ItemStack p_43699_, int p_43700_) {
-            if (this.item.isPresent() && !this.item.get().test(p_43699_)) {
+        public boolean matches(ItemStack pItem, int pDurability) {
+            if (this.item.isPresent() && !this.item.get().test(pItem)) {
                 return false;
             } else {
-                return !this.durability.matches(p_43699_.getMaxDamage() - p_43700_) ? false : this.delta.matches(p_43699_.getDamageValue() - p_43700_);
+                return !this.durability.matches(pItem.getMaxDamage() - pDurability) ? false : this.delta.matches(pItem.getDamageValue() - pDurability);
             }
         }
 

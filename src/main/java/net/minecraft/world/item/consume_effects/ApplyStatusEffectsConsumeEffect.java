@@ -29,16 +29,16 @@ public record ApplyStatusEffectsConsumeEffect(List<MobEffectInstance> effects, f
         ApplyStatusEffectsConsumeEffect::new
     );
 
-    public ApplyStatusEffectsConsumeEffect(MobEffectInstance p_367512_, float p_363703_) {
-        this(List.of(p_367512_), p_363703_);
+    public ApplyStatusEffectsConsumeEffect(MobEffectInstance pEffect, float pProbability) {
+        this(List.of(pEffect), pProbability);
     }
 
-    public ApplyStatusEffectsConsumeEffect(List<MobEffectInstance> p_369033_) {
-        this(p_369033_, 1.0F);
+    public ApplyStatusEffectsConsumeEffect(List<MobEffectInstance> pEffects) {
+        this(pEffects, 1.0F);
     }
 
-    public ApplyStatusEffectsConsumeEffect(MobEffectInstance p_365277_) {
-        this(p_365277_, 1.0F);
+    public ApplyStatusEffectsConsumeEffect(MobEffectInstance pEffect) {
+        this(pEffect, 1.0F);
     }
 
     @Override

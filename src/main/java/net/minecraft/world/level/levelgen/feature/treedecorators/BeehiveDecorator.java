@@ -26,8 +26,8 @@ public class BeehiveDecorator extends TreeDecorator {
         .toArray(Direction[]::new);
     private final float probability;
 
-    public BeehiveDecorator(float p_69958_) {
-        this.probability = p_69958_;
+    public BeehiveDecorator(float pProbability) {
+        this.probability = pProbability;
     }
 
     @Override

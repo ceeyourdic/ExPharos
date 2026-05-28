@@ -17,10 +17,10 @@ public enum AngerLevel {
     private final SoundEvent ambientSound;
     private final SoundEvent listeningSound;
 
-    private AngerLevel(final int p_219223_, final SoundEvent p_219224_, final SoundEvent p_219225_) {
-        this.minimumAnger = p_219223_;
-        this.ambientSound = p_219224_;
-        this.listeningSound = p_219225_;
+    private AngerLevel(final int pMinimumAnger, final SoundEvent pAmbientSound, final SoundEvent pListeningSound) {
+        this.minimumAnger = pMinimumAnger;
+        this.ambientSound = pAmbientSound;
+        this.listeningSound = pListeningSound;
     }
 
     public int getMinimumAnger() {
@@ -35,9 +35,9 @@ public enum AngerLevel {
         return this.listeningSound;
     }
 
-    public static AngerLevel byAnger(int p_219228_) {
+    public static AngerLevel byAnger(int pAnger) {
         for (AngerLevel angerlevel : SORTED_LEVELS) {
-            if (p_219228_ >= angerlevel.minimumAnger) {
+            if (pAnger >= angerlevel.minimumAnger) {
                 return angerlevel;
             }
         }

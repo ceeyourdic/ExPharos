@@ -22,9 +22,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class SnowGolemHeadLayer extends RenderLayer<SnowGolemRenderState, SnowGolemModel> {
     private final BlockRenderDispatcher blockRenderer;
 
-    public SnowGolemHeadLayer(RenderLayerParent<SnowGolemRenderState, SnowGolemModel> p_234871_, BlockRenderDispatcher p_234872_) {
-        super(p_234871_);
-        this.blockRenderer = p_234872_;
+    public SnowGolemHeadLayer(RenderLayerParent<SnowGolemRenderState, SnowGolemModel> pRenderer, BlockRenderDispatcher pBlockRenderer) {
+        super(pRenderer);
+        this.blockRenderer = pBlockRenderer;
     }
 
     public void render(PoseStack p_117483_, MultiBufferSource p_117484_, int p_117485_, SnowGolemRenderState p_376455_, float p_117487_, float p_117488_) {

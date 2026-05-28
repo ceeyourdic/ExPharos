@@ -15,18 +15,18 @@ public class PacketDecoder<T extends PacketListener> extends ByteToMessageDecode
     private static final Logger LOGGER = LogUtils.getLogger();
     private final ProtocolInfo<T> protocolInfo;
 
-    public PacketDecoder(ProtocolInfo<T> p_336253_) {
-        this.protocolInfo = p_336253_;
+    public PacketDecoder(ProtocolInfo<T> pProtocolInfo) {
+        this.protocolInfo = pProtocolInfo;
     }
 
     @Override
-    protected void decode(ChannelHandlerContext p_130535_, ByteBuf p_130536_, List<Object> p_130537_) throws Exception {
-        int i = p_130536_.readableBytes();
+    protected void decode(ChannelHandlerContext pContext, ByteBuf pIn, List<Object> pOut) throws Exception {
+        int i = pIn.readableBytes();
         if (i != 0) {
-            Packet<? super T> packet = this.protocolInfo.codec().decode(p_130536_);
+            Packet<? super T> packet = this.protocolInfo.codec().decode(pIn);
             PacketType<? extends Packet<? super T>> packettype = packet.type();
-            JvmProfiler.INSTANCE.onPacketReceived(this.protocolInfo.id(), packettype, p_130535_.channel().remoteAddress(), i);
-            if (p_130536_.readableBytes() > 0) {
+            JvmProfiler.INSTANCE.onPacketReceived(this.protocolInfo.id(), packettype, pContext.channel().remoteAddress(), i);
+            if (pIn.readableBytes() > 0) {
                 throw new IOException(
                     "Packet "
                         + this.protocolInfo.id().id()
@@ -35,19 +35,19 @@ public class PacketDecoder<T extends PacketListener> extends ByteToMessageDecode
                         + " ("
                         + packet.getClass().getSimpleName()
                         + ") was larger than I expected, found "
-                        + p_130536_.readableBytes()
+                        + pIn.readableBytes()
                         + " bytes extra whilst reading packet "
                         + packettype
                 );
             } else {
-                p_130537_.add(packet);
+                pOut.add(packet);
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug(
                         Connection.PACKET_RECEIVED_MARKER, " IN: [{}:{}] {} -> {} bytes", this.protocolInfo.id().id(), packettype, packet.getClass().getName(), i
                     );
                 }
 
-                ProtocolSwapHandler.handleInboundTerminalPacket(p_130535_, packet);
+                ProtocolSwapHandler.handleInboundTerminalPacket(pContext, packet);
             }
         }
     }

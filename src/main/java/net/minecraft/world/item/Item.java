@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import cn.lazymoon.features.module.impl.visual.OldHitting;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -92,24 +93,24 @@ public class Item implements FeatureElement, ItemLike {
     protected final String descriptionId;
     private final FeatureFlagSet requiredFeatures;
 
-    public static int getId(Item p_41394_) {
-        return p_41394_ == null ? 0 : BuiltInRegistries.ITEM.getId(p_41394_);
+    public static int getId(Item pItem) {
+        return pItem == null ? 0 : BuiltInRegistries.ITEM.getId(pItem);
     }
 
-    public static Item byId(int p_41446_) {
-        return BuiltInRegistries.ITEM.byId(p_41446_);
+    public static Item byId(int pId) {
+        return BuiltInRegistries.ITEM.byId(pId);
     }
 
     @Deprecated
-    public static Item byBlock(Block p_41440_) {
-        return BY_BLOCK.getOrDefault(p_41440_, Items.AIR);
+    public static Item byBlock(Block pBlock) {
+        return BY_BLOCK.getOrDefault(pBlock, Items.AIR);
     }
 
-    public Item(Item.Properties p_41383_) {
-        this.descriptionId = p_41383_.effectiveDescriptionId();
-        this.components = p_41383_.buildAndValidateComponents(Component.translatable(this.descriptionId), p_41383_.effectiveModel());
-        this.craftingRemainingItem = p_41383_.craftingRemainingItem;
-        this.requiredFeatures = p_41383_.requiredFeatures;
+    public Item(Item.Properties pProperties) {
+        this.descriptionId = pProperties.effectiveDescriptionId();
+        this.components = pProperties.buildAndValidateComponents(Component.translatable(this.descriptionId), pProperties.effectiveModel());
+        this.craftingRemainingItem = pProperties.craftingRemainingItem;
+        this.requiredFeatures = pProperties.requiredFeatures;
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             String s = this.getClass().getSimpleName();
             if (!s.endsWith("Item")) {
@@ -131,16 +132,16 @@ public class Item implements FeatureElement, ItemLike {
         return this.components.getOrDefault(DataComponents.MAX_STACK_SIZE, 1);
     }
 
-    public void onUseTick(Level p_41428_, LivingEntity p_41429_, ItemStack p_41430_, int p_41431_) {
+    public void onUseTick(Level pLevel, LivingEntity pLivingEntity, ItemStack pStack, int pRemainingUseDuration) {
     }
 
-    public void onDestroyed(ItemEntity p_150887_) {
+    public void onDestroyed(ItemEntity pItemEntity) {
     }
 
-    public void verifyComponentsAfterLoad(ItemStack p_336236_) {
+    public void verifyComponentsAfterLoad(ItemStack pStack) {
     }
 
-    public boolean canAttackBlock(BlockState p_41441_, Level p_41442_, BlockPos p_41443_, Player p_41444_) {
+    public boolean canAttackBlock(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer) {
         return true;
     }
 
@@ -149,88 +150,94 @@ public class Item implements FeatureElement, ItemLike {
         return this;
     }
 
-    public InteractionResult useOn(UseOnContext p_41427_) {
+    public InteractionResult useOn(UseOnContext pContext) {
         return InteractionResult.PASS;
     }
 
-    public float getDestroySpeed(ItemStack p_41425_, BlockState p_41426_) {
-        Tool tool = p_41425_.get(DataComponents.TOOL);
-        return tool != null ? tool.getMiningSpeed(p_41426_) : 1.0F;
+    public float getDestroySpeed(ItemStack pStack, BlockState pState) {
+        Tool tool = pStack.get(DataComponents.TOOL);
+        return tool != null ? tool.getMiningSpeed(pState) : 1.0F;
     }
 
-    public InteractionResult use(Level p_41432_, Player p_41433_, InteractionHand p_41434_) {
-        ItemStack itemstack = p_41433_.getItemInHand(p_41434_);
+    public InteractionResult use(Level pLevel, Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
+        // Arcane mixin port: OldHitting restores sword blocking as a use action.
+        if (OldHitting.blocking.get() && itemstack.getItem() instanceof SwordItem) {
+            pPlayer.startUsingItem(pHand);
+            return InteractionResult.CONSUME;
+        }
+
         Consumable consumable = itemstack.get(DataComponents.CONSUMABLE);
         if (consumable != null) {
-            return consumable.startConsuming(p_41433_, itemstack, p_41434_);
+            return consumable.startConsuming(pPlayer, itemstack, pHand);
         } else {
             Equippable equippable = itemstack.get(DataComponents.EQUIPPABLE);
-            return (InteractionResult)(equippable != null && equippable.swappable() ? equippable.swapWithEquipmentSlot(itemstack, p_41433_) : InteractionResult.PASS);
+            return (InteractionResult)(equippable != null && equippable.swappable() ? equippable.swapWithEquipmentSlot(itemstack, pPlayer) : InteractionResult.PASS);
         }
     }
 
-    public ItemStack finishUsingItem(ItemStack p_41409_, Level p_41410_, LivingEntity p_41411_) {
-        Consumable consumable = p_41409_.get(DataComponents.CONSUMABLE);
-        return consumable != null ? consumable.onConsume(p_41410_, p_41411_, p_41409_) : p_41409_;
+    public ItemStack finishUsingItem(ItemStack pStack, Level pLevel, LivingEntity pLivingEntity) {
+        Consumable consumable = pStack.get(DataComponents.CONSUMABLE);
+        return consumable != null ? consumable.onConsume(pLevel, pLivingEntity, pStack) : pStack;
     }
 
-    public boolean isBarVisible(ItemStack p_150899_) {
-        return p_150899_.isDamaged();
+    public boolean isBarVisible(ItemStack pStack) {
+        return pStack.isDamaged();
     }
 
-    public int getBarWidth(ItemStack p_150900_) {
-        return Mth.clamp(Math.round(13.0F - (float)p_150900_.getDamageValue() * 13.0F / (float)p_150900_.getMaxDamage()), 0, 13);
+    public int getBarWidth(ItemStack pStack) {
+        return Mth.clamp(Math.round(13.0F - (float)pStack.getDamageValue() * 13.0F / (float)pStack.getMaxDamage()), 0, 13);
     }
 
-    public int getBarColor(ItemStack p_150901_) {
-        int i = p_150901_.getMaxDamage();
-        float f = Math.max(0.0F, ((float)i - (float)p_150901_.getDamageValue()) / (float)i);
+    public int getBarColor(ItemStack pStack) {
+        int i = pStack.getMaxDamage();
+        float f = Math.max(0.0F, ((float)i - (float)pStack.getDamageValue()) / (float)i);
         return Mth.hsvToRgb(f / 3.0F, 1.0F, 1.0F);
     }
 
-    public boolean overrideStackedOnOther(ItemStack p_150888_, Slot p_150889_, ClickAction p_150890_, Player p_150891_) {
+    public boolean overrideStackedOnOther(ItemStack pStack, Slot pSlot, ClickAction pAction, Player pPlayer) {
         return false;
     }
 
-    public boolean overrideOtherStackedOnMe(ItemStack p_150892_, ItemStack p_150893_, Slot p_150894_, ClickAction p_150895_, Player p_150896_, SlotAccess p_150897_) {
+    public boolean overrideOtherStackedOnMe(ItemStack pStack, ItemStack pOther, Slot pSlot, ClickAction pAction, Player pPlayer, SlotAccess pAccess) {
         return false;
     }
 
-    public float getAttackDamageBonus(Entity p_345227_, float p_327880_, DamageSource p_342960_) {
+    public float getAttackDamageBonus(Entity pTarget, float pDamage, DamageSource pDamageSource) {
         return 0.0F;
     }
 
     @Nullable
-    public DamageSource getDamageSource(LivingEntity p_363041_) {
+    public DamageSource getDamageSource(LivingEntity pEntity) {
         return null;
     }
 
-    public boolean hurtEnemy(ItemStack p_41395_, LivingEntity p_41396_, LivingEntity p_41397_) {
+    public boolean hurtEnemy(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
         return false;
     }
 
-    public void postHurtEnemy(ItemStack p_343373_, LivingEntity p_342300_, LivingEntity p_344220_) {
+    public void postHurtEnemy(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
     }
 
-    public boolean mineBlock(ItemStack p_41416_, Level p_41417_, BlockState p_41418_, BlockPos p_41419_, LivingEntity p_41420_) {
-        Tool tool = p_41416_.get(DataComponents.TOOL);
+    public boolean mineBlock(ItemStack pStack, Level pLevel, BlockState pState, BlockPos pPos, LivingEntity pMiningEntity) {
+        Tool tool = pStack.get(DataComponents.TOOL);
         if (tool == null) {
             return false;
         } else {
-            if (!p_41417_.isClientSide && p_41418_.getDestroySpeed(p_41417_, p_41419_) != 0.0F && tool.damagePerBlock() > 0) {
-                p_41416_.hurtAndBreak(tool.damagePerBlock(), p_41420_, EquipmentSlot.MAINHAND);
+            if (!pLevel.isClientSide && pState.getDestroySpeed(pLevel, pPos) != 0.0F && tool.damagePerBlock() > 0) {
+                pStack.hurtAndBreak(tool.damagePerBlock(), pMiningEntity, EquipmentSlot.MAINHAND);
             }
 
             return true;
         }
     }
 
-    public boolean isCorrectToolForDrops(ItemStack p_332232_, BlockState p_41450_) {
-        Tool tool = p_332232_.get(DataComponents.TOOL);
-        return tool != null && tool.isCorrectForDrops(p_41450_);
+    public boolean isCorrectToolForDrops(ItemStack pStack, BlockState pState) {
+        Tool tool = pStack.get(DataComponents.TOOL);
+        return tool != null && tool.isCorrectForDrops(pState);
     }
 
-    public InteractionResult interactLivingEntity(ItemStack p_41398_, Player p_41399_, LivingEntity p_41400_, InteractionHand p_41401_) {
+    public InteractionResult interactLivingEntity(ItemStack pStack, Player pPlayer, LivingEntity pInteractionTarget, InteractionHand pUsedHand) {
         return InteractionResult.PASS;
     }
 
@@ -243,34 +250,44 @@ public class Item implements FeatureElement, ItemLike {
         return this.craftingRemainingItem == null ? ItemStack.EMPTY : new ItemStack(this.craftingRemainingItem);
     }
 
-    public void inventoryTick(ItemStack p_41404_, Level p_41405_, Entity p_41406_, int p_41407_, boolean p_41408_) {
+    public void inventoryTick(ItemStack pStack, Level pLevel, Entity pEntity, int pSlotId, boolean pIsSelected) {
     }
 
-    public void onCraftedBy(ItemStack p_41447_, Level p_41448_, Player p_41449_) {
-        this.onCraftedPostProcess(p_41447_, p_41448_);
+    public void onCraftedBy(ItemStack pStack, Level pLevel, Player pPlayer) {
+        this.onCraftedPostProcess(pStack, pLevel);
     }
 
-    public void onCraftedPostProcess(ItemStack p_312780_, Level p_312645_) {
+    public void onCraftedPostProcess(ItemStack pStack, Level pLevel) {
     }
 
-    public ItemUseAnimation getUseAnimation(ItemStack p_41452_) {
-        Consumable consumable = p_41452_.get(DataComponents.CONSUMABLE);
+    public ItemUseAnimation getUseAnimation(ItemStack pStack) {
+        // Arcane mixin port: OldHitting makes swords display the pre-1.9 block animation.
+        if (OldHitting.blocking.get() && pStack.getItem() instanceof SwordItem) {
+            return ItemUseAnimation.BLOCK;
+        }
+
+        Consumable consumable = pStack.get(DataComponents.CONSUMABLE);
         return consumable != null ? consumable.animation() : ItemUseAnimation.NONE;
     }
 
-    public int getUseDuration(ItemStack p_41454_, LivingEntity p_342054_) {
-        Consumable consumable = p_41454_.get(DataComponents.CONSUMABLE);
+    public int getUseDuration(ItemStack pStack, LivingEntity pEntity) {
+        // Arcane mixin port: OldHitting gives sword blocking the classic long use duration.
+        if (OldHitting.blocking.get() && pStack.getItem() instanceof SwordItem) {
+            return 72000;
+        }
+
+        Consumable consumable = pStack.get(DataComponents.CONSUMABLE);
         return consumable != null ? consumable.consumeTicks() : 0;
     }
 
-    public boolean releaseUsing(ItemStack p_41412_, Level p_41413_, LivingEntity p_41414_, int p_41415_) {
+    public boolean releaseUsing(ItemStack pStack, Level pLevel, LivingEntity pEntity, int pTimeLeft) {
         return false;
     }
 
-    public void appendHoverText(ItemStack p_41421_, Item.TooltipContext p_333372_, List<Component> p_41423_, TooltipFlag p_41424_) {
+    public void appendHoverText(ItemStack pStack, Item.TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pTooltipFlag) {
     }
 
-    public Optional<TooltipComponent> getTooltipImage(ItemStack p_150902_) {
+    public Optional<TooltipComponent> getTooltipImage(ItemStack pStack) {
         return Optional.empty();
     }
 
@@ -283,26 +300,31 @@ public class Item implements FeatureElement, ItemLike {
         return this.components.getOrDefault(DataComponents.ITEM_NAME, CommonComponents.EMPTY);
     }
 
-    public Component getName(ItemStack p_41458_) {
-        return p_41458_.getComponents().getOrDefault(DataComponents.ITEM_NAME, CommonComponents.EMPTY);
+    public Component getName(ItemStack pStack) {
+        return pStack.getComponents().getOrDefault(DataComponents.ITEM_NAME, CommonComponents.EMPTY);
     }
 
-    public boolean isFoil(ItemStack p_41453_) {
-        return p_41453_.isEnchanted();
+    public boolean isFoil(ItemStack pStack) {
+        return pStack.isEnchanted();
     }
 
-    protected static BlockHitResult getPlayerPOVHitResult(Level p_41436_, Player p_41437_, ClipContext.Fluid p_41438_) {
-        Vec3 vec3 = p_41437_.getEyePosition();
-        Vec3 vec31 = vec3.add(p_41437_.calculateViewVector(p_41437_.getXRot(), p_41437_.getYRot()).scale(p_41437_.blockInteractionRange()));
-        return p_41436_.clip(new ClipContext(vec3, vec31, ClipContext.Block.OUTLINE, p_41438_, p_41437_));
+    protected static BlockHitResult getPlayerPOVHitResult(Level pLevel, Player pPlayer, ClipContext.Fluid pFluidMode) {
+        Vec3 vec3 = pPlayer.getEyePosition();
+        Vec3 vec31 = vec3.add(pPlayer.calculateViewVector(pPlayer.getXRot(), pPlayer.getYRot()).scale(pPlayer.blockInteractionRange()));
+        return pLevel.clip(new ClipContext(vec3, vec31, ClipContext.Block.OUTLINE, pFluidMode, pPlayer));
     }
 
-    public boolean useOnRelease(ItemStack p_41464_) {
+    public boolean useOnRelease(ItemStack pStack) {
         return false;
     }
 
     public ItemStack getDefaultInstance() {
         return new ItemStack(this);
+    }
+
+    // Arcane mixin port: Yarn names this getDefaultStack(); official uses getDefaultInstance().
+    public ItemStack getDefaultStack() {
+        return this.getDefaultInstance();
     }
 
     public SoundEvent getBreakingSound() {
@@ -318,7 +340,7 @@ public class Item implements FeatureElement, ItemLike {
         return this.requiredFeatures;
     }
 
-    public boolean shouldPrintOpWarning(ItemStack p_377756_, @Nullable Player p_376409_) {
+    public boolean shouldPrintOpWarning(ItemStack pStack, @Nullable Player pPlayer) {
         return false;
     }
 
@@ -334,83 +356,83 @@ public class Item implements FeatureElement, ItemLike {
         private DependantName<Item, String> descriptionId = ITEM_DESCRIPTION_ID;
         private DependantName<Item, ResourceLocation> model = ResourceKey::location;
 
-        public Item.Properties food(FoodProperties p_41490_) {
-            return this.food(p_41490_, Consumables.DEFAULT_FOOD);
+        public Item.Properties food(FoodProperties pFood) {
+            return this.food(pFood, Consumables.DEFAULT_FOOD);
         }
 
-        public Item.Properties food(FoodProperties p_361365_, Consumable p_362417_) {
-            return this.component(DataComponents.FOOD, p_361365_).component(DataComponents.CONSUMABLE, p_362417_);
+        public Item.Properties food(FoodProperties pFood, Consumable pConsumable) {
+            return this.component(DataComponents.FOOD, pFood).component(DataComponents.CONSUMABLE, pConsumable);
         }
 
-        public Item.Properties usingConvertsTo(Item p_369209_) {
-            return this.component(DataComponents.USE_REMAINDER, new UseRemainder(new ItemStack(p_369209_)));
+        public Item.Properties usingConvertsTo(Item pUsingConvertsTo) {
+            return this.component(DataComponents.USE_REMAINDER, new UseRemainder(new ItemStack(pUsingConvertsTo)));
         }
 
-        public Item.Properties useCooldown(float p_365459_) {
-            return this.component(DataComponents.USE_COOLDOWN, new UseCooldown(p_365459_));
+        public Item.Properties useCooldown(float pUseCooldown) {
+            return this.component(DataComponents.USE_COOLDOWN, new UseCooldown(pUseCooldown));
         }
 
-        public Item.Properties stacksTo(int p_41488_) {
-            return this.component(DataComponents.MAX_STACK_SIZE, p_41488_);
+        public Item.Properties stacksTo(int pMaxStackSize) {
+            return this.component(DataComponents.MAX_STACK_SIZE, pMaxStackSize);
         }
 
-        public Item.Properties durability(int p_41504_) {
-            this.component(DataComponents.MAX_DAMAGE, p_41504_);
+        public Item.Properties durability(int pMaxDamage) {
+            this.component(DataComponents.MAX_DAMAGE, pMaxDamage);
             this.component(DataComponents.MAX_STACK_SIZE, 1);
             this.component(DataComponents.DAMAGE, 0);
             return this;
         }
 
-        public Item.Properties craftRemainder(Item p_41496_) {
-            this.craftingRemainingItem = p_41496_;
+        public Item.Properties craftRemainder(Item pCraftingRemainingItem) {
+            this.craftingRemainingItem = pCraftingRemainingItem;
             return this;
         }
 
-        public Item.Properties rarity(Rarity p_41498_) {
-            return this.component(DataComponents.RARITY, p_41498_);
+        public Item.Properties rarity(Rarity pRarity) {
+            return this.component(DataComponents.RARITY, pRarity);
         }
 
         public Item.Properties fireResistant() {
             return this.component(DataComponents.DAMAGE_RESISTANT, new DamageResistant(DamageTypeTags.IS_FIRE));
         }
 
-        public Item.Properties jukeboxPlayable(ResourceKey<JukeboxSong> p_342377_) {
-            return this.component(DataComponents.JUKEBOX_PLAYABLE, new JukeboxPlayable(new EitherHolder<>(p_342377_), true));
+        public Item.Properties jukeboxPlayable(ResourceKey<JukeboxSong> pSong) {
+            return this.component(DataComponents.JUKEBOX_PLAYABLE, new JukeboxPlayable(new EitherHolder<>(pSong), true));
         }
 
-        public Item.Properties enchantable(int p_362160_) {
-            return this.component(DataComponents.ENCHANTABLE, new Enchantable(p_362160_));
+        public Item.Properties enchantable(int pEnchantmentValue) {
+            return this.component(DataComponents.ENCHANTABLE, new Enchantable(pEnchantmentValue));
         }
 
-        public Item.Properties repairable(Item p_367070_) {
-            return this.component(DataComponents.REPAIRABLE, new Repairable(HolderSet.direct(p_367070_.builtInRegistryHolder())));
+        public Item.Properties repairable(Item pRepairItem) {
+            return this.component(DataComponents.REPAIRABLE, new Repairable(HolderSet.direct(pRepairItem.builtInRegistryHolder())));
         }
 
-        public Item.Properties repairable(TagKey<Item> p_367486_) {
+        public Item.Properties repairable(TagKey<Item> pRepairItems) {
             HolderGetter<Item> holdergetter = BuiltInRegistries.acquireBootstrapRegistrationLookup(BuiltInRegistries.ITEM);
-            return this.component(DataComponents.REPAIRABLE, new Repairable(holdergetter.getOrThrow(p_367486_)));
+            return this.component(DataComponents.REPAIRABLE, new Repairable(holdergetter.getOrThrow(pRepairItems)));
         }
 
-        public Item.Properties equippable(EquipmentSlot p_367739_) {
-            return this.component(DataComponents.EQUIPPABLE, Equippable.builder(p_367739_).build());
+        public Item.Properties equippable(EquipmentSlot pSlot) {
+            return this.component(DataComponents.EQUIPPABLE, Equippable.builder(pSlot).build());
         }
 
-        public Item.Properties equippableUnswappable(EquipmentSlot p_368340_) {
-            return this.component(DataComponents.EQUIPPABLE, Equippable.builder(p_368340_).setSwappable(false).build());
+        public Item.Properties equippableUnswappable(EquipmentSlot pSlot) {
+            return this.component(DataComponents.EQUIPPABLE, Equippable.builder(pSlot).setSwappable(false).build());
         }
 
-        public Item.Properties requiredFeatures(FeatureFlag... p_250948_) {
-            this.requiredFeatures = FeatureFlags.REGISTRY.subset(p_250948_);
+        public Item.Properties requiredFeatures(FeatureFlag... pRequiredFeatures) {
+            this.requiredFeatures = FeatureFlags.REGISTRY.subset(pRequiredFeatures);
             return this;
         }
 
-        public Item.Properties setId(ResourceKey<Item> p_365136_) {
-            this.id = p_365136_;
+        public Item.Properties setId(ResourceKey<Item> pId) {
+            this.id = pId;
             return this;
         }
 
-        public Item.Properties overrideDescription(String p_363112_) {
-            this.descriptionId = DependantName.fixed(p_363112_);
+        public Item.Properties overrideDescription(String pDescription) {
+            this.descriptionId = DependantName.fixed(pDescription);
             return this;
         }
 
@@ -432,19 +454,19 @@ public class Item implements FeatureElement, ItemLike {
             return this.model.get(Objects.requireNonNull(this.id, "Item id not set"));
         }
 
-        public <T> Item.Properties component(DataComponentType<T> p_333852_, T p_330859_) {
-            this.components.set(p_333852_, p_330859_);
+        public <T> Item.Properties component(DataComponentType<T> pComponent, T pValue) {
+            this.components.set(pComponent, pValue);
             return this;
         }
 
-        public Item.Properties attributes(ItemAttributeModifiers p_330293_) {
-            return this.component(DataComponents.ATTRIBUTE_MODIFIERS, p_330293_);
+        public Item.Properties attributes(ItemAttributeModifiers pAttributes) {
+            return this.component(DataComponents.ATTRIBUTE_MODIFIERS, pAttributes);
         }
 
-        DataComponentMap buildAndValidateComponents(Component p_361375_, ResourceLocation p_364540_) {
+        DataComponentMap buildAndValidateComponents(Component pItemName, ResourceLocation pItemModel) {
             DataComponentMap datacomponentmap = this.components
-                .set(DataComponents.ITEM_NAME, p_361375_)
-                .set(DataComponents.ITEM_MODEL, p_364540_)
+                .set(DataComponents.ITEM_NAME, pItemName)
+                .set(DataComponents.ITEM_MODEL, pItemModel)
                 .build();
             if (datacomponentmap.has(DataComponents.DAMAGE) && datacomponentmap.getOrDefault(DataComponents.MAX_STACK_SIZE, 1) > 1) {
                 throw new IllegalStateException("Item cannot have both durability and be stackable");
@@ -480,32 +502,32 @@ public class Item implements FeatureElement, ItemLike {
         float tickRate();
 
         @Nullable
-        MapItemSavedData mapData(MapId p_335695_);
+        MapItemSavedData mapData(MapId pMapId);
 
-        static Item.TooltipContext of(@Nullable final Level p_332083_) {
-            return p_332083_ == null ? EMPTY : new Item.TooltipContext() {
+        static Item.TooltipContext of(@Nullable final Level pLevel) {
+            return pLevel == null ? EMPTY : new Item.TooltipContext() {
                 @Override
                 public HolderLookup.Provider registries() {
-                    return p_332083_.registryAccess();
+                    return pLevel.registryAccess();
                 }
 
                 @Override
                 public float tickRate() {
-                    return p_332083_.tickRateManager().tickrate();
+                    return pLevel.tickRateManager().tickrate();
                 }
 
                 @Override
                 public MapItemSavedData mapData(MapId p_330171_) {
-                    return p_332083_.getMapData(p_330171_);
+                    return pLevel.getMapData(p_330171_);
                 }
             };
         }
 
-        static Item.TooltipContext of(final HolderLookup.Provider p_335652_) {
+        static Item.TooltipContext of(final HolderLookup.Provider pRegistries) {
             return new Item.TooltipContext() {
                 @Override
                 public HolderLookup.Provider registries() {
-                    return p_335652_;
+                    return pRegistries;
                 }
 
                 @Override

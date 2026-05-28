@@ -26,12 +26,12 @@ public class RealmsServerPlayerLists extends ValueObject {
     private static final Logger LOGGER = LogUtils.getLogger();
     public Map<Long, List<ProfileResult>> servers = Map.of();
 
-    public static RealmsServerPlayerLists parse(String p_87597_) {
+    public static RealmsServerPlayerLists parse(String pJson) {
         RealmsServerPlayerLists realmsserverplayerlists = new RealmsServerPlayerLists();
         Builder<Long, List<ProfileResult>> builder = ImmutableMap.builder();
 
         try {
-            JsonObject jsonobject = GsonHelper.parse(p_87597_);
+            JsonObject jsonobject = GsonHelper.parse(pJson);
             if (GsonHelper.isArrayNode(jsonobject, "lists")) {
                 for (JsonElement jsonelement : jsonobject.getAsJsonArray("lists")) {
                     JsonObject jsonobject1 = jsonelement.getAsJsonObject();
@@ -59,11 +59,11 @@ public class RealmsServerPlayerLists extends ValueObject {
         return realmsserverplayerlists;
     }
 
-    private static List<ProfileResult> parsePlayers(JsonArray p_342185_) {
-        List<ProfileResult> list = new ArrayList<>(p_342185_.size());
+    private static List<ProfileResult> parsePlayers(JsonArray pJson) {
+        List<ProfileResult> list = new ArrayList<>(pJson.size());
         MinecraftSessionService minecraftsessionservice = Minecraft.getInstance().getMinecraftSessionService();
 
-        for (JsonElement jsonelement : p_342185_) {
+        for (JsonElement jsonelement : pJson) {
             if (jsonelement.isJsonObject()) {
                 UUID uuid = JsonUtils.getUuidOr("playerId", jsonelement.getAsJsonObject(), null);
                 if (uuid != null && !Minecraft.getInstance().isLocalPlayer(uuid)) {
@@ -82,8 +82,8 @@ public class RealmsServerPlayerLists extends ValueObject {
         return list;
     }
 
-    public List<ProfileResult> getProfileResultsFor(long p_343284_) {
-        List<ProfileResult> list = this.servers.get(p_343284_);
+    public List<ProfileResult> getProfileResultsFor(long pIndex) {
+        List<ProfileResult> list = this.servers.get(pIndex);
         return list != null ? list : List.of();
     }
 }

@@ -14,17 +14,17 @@ public class StateSwitchingButton extends AbstractWidget {
     protected WidgetSprites sprites;
     protected boolean isStateTriggered;
 
-    public StateSwitchingButton(int p_94615_, int p_94616_, int p_94617_, int p_94618_, boolean p_94619_) {
-        super(p_94615_, p_94616_, p_94617_, p_94618_, CommonComponents.EMPTY);
-        this.isStateTriggered = p_94619_;
+    public StateSwitchingButton(int pX, int pY, int pWidth, int pHeight, boolean pInitialState) {
+        super(pX, pY, pWidth, pHeight, CommonComponents.EMPTY);
+        this.isStateTriggered = pInitialState;
     }
 
-    public void initTextureValues(WidgetSprites p_297788_) {
-        this.sprites = p_297788_;
+    public void initTextureValues(WidgetSprites pSprites) {
+        this.sprites = pSprites;
     }
 
-    public void setStateTriggered(boolean p_94636_) {
-        this.isStateTriggered = p_94636_;
+    public void setStateTriggered(boolean pTriggered) {
+        this.isStateTriggered = pTriggered;
     }
 
     public boolean isStateTriggered() {

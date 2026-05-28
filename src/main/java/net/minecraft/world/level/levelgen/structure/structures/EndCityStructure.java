@@ -27,10 +27,10 @@ public class EndCityStructure extends Structure {
             : Optional.of(new Structure.GenerationStub(blockpos, p_227538_ -> this.generatePieces(p_227538_, blockpos, rotation, p_227528_)));
     }
 
-    private void generatePieces(StructurePiecesBuilder p_227530_, BlockPos p_227531_, Rotation p_227532_, Structure.GenerationContext p_227533_) {
+    private void generatePieces(StructurePiecesBuilder pBuilder, BlockPos pStartPos, Rotation pRotation, Structure.GenerationContext pContext) {
         List<StructurePiece> list = Lists.newArrayList();
-        EndCityPieces.startHouseTower(p_227533_.structureTemplateManager(), p_227531_, p_227532_, list, p_227533_.random());
-        list.forEach(p_227530_::addPiece);
+        EndCityPieces.startHouseTower(pContext.structureTemplateManager(), pStartPos, pRotation, list, pContext.random());
+        list.forEach(pBuilder::addPiece);
     }
 
     @Override

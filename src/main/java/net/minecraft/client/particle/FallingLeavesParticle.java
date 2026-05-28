@@ -21,33 +21,33 @@ public class FallingLeavesParticle extends TextureSheetParticle {
     private double swirlPeriod;
 
     protected FallingLeavesParticle(
-        ClientLevel p_377646_,
-        double p_377442_,
-        double p_376050_,
-        double p_377918_,
-        SpriteSet p_376948_,
-        float p_378651_,
-        float p_376838_,
-        boolean p_378490_,
-        boolean p_376930_,
-        float p_376718_,
-        float p_378174_
+        ClientLevel pLevel,
+        double pX,
+        double pY,
+        double pZ,
+        SpriteSet pSprites,
+        float pGravityMultiplier,
+        float pWindBig,
+        boolean pSwirl,
+        boolean pFlowAway,
+        float pSize,
+        float pYSpeed
     ) {
-        super(p_377646_, p_377442_, p_376050_, p_377918_);
-        this.setSprite(p_376948_.get(this.random.nextInt(12), 12));
+        super(pLevel, pX, pY, pZ);
+        this.setSprite(pSprites.get(this.random.nextInt(12), 12));
         this.rotSpeed = (float)Math.toRadians(this.random.nextBoolean() ? -30.0 : 30.0);
         this.particleRandom = this.random.nextFloat();
         this.spinAcceleration = (float)Math.toRadians(this.random.nextBoolean() ? -5.0 : 5.0);
-        this.windBig = p_376838_;
-        this.swirl = p_378490_;
-        this.flowAway = p_376930_;
+        this.windBig = pWindBig;
+        this.swirl = pSwirl;
+        this.flowAway = pFlowAway;
         this.lifetime = 300;
-        this.gravity = p_378651_ * 1.2F * 0.0025F;
-        float f = p_376718_ * (this.random.nextBoolean() ? 0.05F : 0.075F);
+        this.gravity = pGravityMultiplier * 1.2F * 0.0025F;
+        float f = pSize * (this.random.nextBoolean() ? 0.05F : 0.075F);
         this.quadSize = f;
         this.setSize(f, f);
         this.friction = 1.0F;
-        this.yd = (double)(-p_378174_);
+        this.yd = (double)(-pYSpeed);
         this.xaFlowScale = Math.cos(Math.toRadians((double)(this.particleRandom * 60.0F))) * (double)this.windBig;
         this.zaFlowScale = Math.sin(Math.toRadians((double)(this.particleRandom * 60.0F))) * (double)this.windBig;
         this.swirlPeriod = Math.toRadians((double)(1000.0F + this.particleRandom * 3000.0F));
@@ -105,8 +105,8 @@ public class FallingLeavesParticle extends TextureSheetParticle {
     public static class CherryProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public CherryProvider(SpriteSet p_376778_) {
-            this.sprites = p_376778_;
+        public CherryProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(
@@ -127,8 +127,8 @@ public class FallingLeavesParticle extends TextureSheetParticle {
     public static class PaleOakProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public PaleOakProvider(SpriteSet p_378488_) {
-            this.sprites = p_378488_;
+        public PaleOakProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(

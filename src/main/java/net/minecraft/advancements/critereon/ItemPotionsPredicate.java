@@ -26,7 +26,7 @@ public record ItemPotionsPredicate(HolderSet<Potion> potions) implements SingleC
         return !optional.isEmpty() && this.potions.contains(optional.get());
     }
 
-    public static ItemSubPredicate potions(HolderSet<Potion> p_335554_) {
-        return new ItemPotionsPredicate(p_335554_);
+    public static ItemSubPredicate potions(HolderSet<Potion> pPotions) {
+        return new ItemPotionsPredicate(pPotions);
     }
 }

@@ -21,19 +21,19 @@ public class SmallFireball extends Fireball {
         super(p_37364_, p_37365_);
     }
 
-    public SmallFireball(Level p_37367_, LivingEntity p_342424_, Vec3 p_344527_) {
-        super(EntityType.SMALL_FIREBALL, p_342424_, p_344527_, p_37367_);
+    public SmallFireball(Level pLevel, LivingEntity pOwner, Vec3 pMovement) {
+        super(EntityType.SMALL_FIREBALL, pOwner, pMovement, pLevel);
     }
 
-    public SmallFireball(Level p_37375_, double p_37377_, double p_37378_, double p_37379_, Vec3 p_343728_) {
-        super(EntityType.SMALL_FIREBALL, p_37377_, p_37378_, p_37379_, p_343728_, p_37375_);
+    public SmallFireball(Level pLevel, double pX, double pY, double pZ, Vec3 pMovement) {
+        super(EntityType.SMALL_FIREBALL, pX, pY, pZ, pMovement, pLevel);
     }
 
     @Override
-    protected void onHitEntity(EntityHitResult p_37386_) {
-        super.onHitEntity(p_37386_);
+    protected void onHitEntity(EntityHitResult pResult) {
+        super.onHitEntity(pResult);
         if (this.level() instanceof ServerLevel serverlevel) {
-            Entity entity1 = p_37386_.getEntity();
+            Entity entity1 = pResult.getEntity();
             Entity $$4 = this.getOwner();
             int $$5 = entity1.getRemainingFireTicks();
             entity1.igniteForSeconds(5.0F);
@@ -61,8 +61,8 @@ public class SmallFireball extends Fireball {
     }
 
     @Override
-    protected void onHit(HitResult p_37388_) {
-        super.onHit(p_37388_);
+    protected void onHit(HitResult pResult) {
+        super.onHit(pResult);
         if (!this.level().isClientSide) {
             this.discard();
         }

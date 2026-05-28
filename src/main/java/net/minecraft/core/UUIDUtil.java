@@ -55,28 +55,28 @@ public final class UUIDUtil {
     private UUIDUtil() {
     }
 
-    public static UUID uuidFromIntArray(int[] p_235886_) {
-        return new UUID((long)p_235886_[0] << 32 | (long)p_235886_[1] & 4294967295L, (long)p_235886_[2] << 32 | (long)p_235886_[3] & 4294967295L);
+    public static UUID uuidFromIntArray(int[] pBits) {
+        return new UUID((long)pBits[0] << 32 | (long)pBits[1] & 4294967295L, (long)pBits[2] << 32 | (long)pBits[3] & 4294967295L);
     }
 
-    public static int[] uuidToIntArray(UUID p_235882_) {
-        long i = p_235882_.getMostSignificantBits();
-        long j = p_235882_.getLeastSignificantBits();
+    public static int[] uuidToIntArray(UUID pUuid) {
+        long i = pUuid.getMostSignificantBits();
+        long j = pUuid.getLeastSignificantBits();
         return leastMostToIntArray(i, j);
     }
 
-    private static int[] leastMostToIntArray(long p_235873_, long p_235874_) {
-        return new int[]{(int)(p_235873_ >> 32), (int)p_235873_, (int)(p_235874_ >> 32), (int)p_235874_};
+    private static int[] leastMostToIntArray(long pMost, long pLeast) {
+        return new int[]{(int)(pMost >> 32), (int)pMost, (int)(pLeast >> 32), (int)pLeast};
     }
 
-    public static byte[] uuidToByteArray(UUID p_241285_) {
+    public static byte[] uuidToByteArray(UUID pUuid) {
         byte[] abyte = new byte[16];
-        ByteBuffer.wrap(abyte).order(ByteOrder.BIG_ENDIAN).putLong(p_241285_.getMostSignificantBits()).putLong(p_241285_.getLeastSignificantBits());
+        ByteBuffer.wrap(abyte).order(ByteOrder.BIG_ENDIAN).putLong(pUuid.getMostSignificantBits()).putLong(pUuid.getLeastSignificantBits());
         return abyte;
     }
 
-    public static UUID readUUID(Dynamic<?> p_235878_) {
-        int[] aint = p_235878_.asIntStream().toArray();
+    public static UUID readUUID(Dynamic<?> pDynamic) {
+        int[] aint = pDynamic.asIntStream().toArray();
         if (aint.length != 4) {
             throw new IllegalArgumentException("Could not read UUID. Expected int-array of length 4, got " + aint.length + ".");
         } else {
@@ -84,12 +84,12 @@ public final class UUIDUtil {
         }
     }
 
-    public static UUID createOfflinePlayerUUID(String p_235880_) {
-        return UUID.nameUUIDFromBytes(("OfflinePlayer:" + p_235880_).getBytes(StandardCharsets.UTF_8));
+    public static UUID createOfflinePlayerUUID(String pUsername) {
+        return UUID.nameUUIDFromBytes(("OfflinePlayer:" + pUsername).getBytes(StandardCharsets.UTF_8));
     }
 
-    public static GameProfile createOfflineProfile(String p_309926_) {
-        UUID uuid = createOfflinePlayerUUID(p_309926_);
-        return new GameProfile(uuid, p_309926_);
+    public static GameProfile createOfflineProfile(String pUsername) {
+        UUID uuid = createOfflinePlayerUUID(pUsername);
+        return new GameProfile(uuid, pUsername);
     }
 }

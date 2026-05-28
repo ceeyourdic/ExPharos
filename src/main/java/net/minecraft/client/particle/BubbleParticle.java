@@ -47,21 +47,21 @@ public class BubbleParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_105793_) {
-            this.sprite = p_105793_;
+        public Provider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_105804_,
-            ClientLevel p_105805_,
-            double p_105806_,
-            double p_105807_,
-            double p_105808_,
-            double p_105809_,
-            double p_105810_,
-            double p_105811_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            BubbleParticle bubbleparticle = new BubbleParticle(p_105805_, p_105806_, p_105807_, p_105808_, p_105809_, p_105810_, p_105811_);
+            BubbleParticle bubbleparticle = new BubbleParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
             bubbleparticle.pickSprite(this.sprite);
             return bubbleparticle;
         }

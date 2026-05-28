@@ -8,105 +8,105 @@ import java.util.function.Supplier;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V100 extends Schema {
-    public V100(int p_17328_, Schema p_17329_) {
-        super(p_17328_, p_17329_);
+    public V100(int pVersionKey, Schema pParent) {
+        super(pVersionKey, pParent);
     }
 
-    protected static TypeTemplate equipment(Schema p_17331_) {
+    protected static TypeTemplate equipment(Schema pSchema) {
         return DSL.optionalFields(
             "ArmorItems",
-            DSL.list(References.ITEM_STACK.in(p_17331_)),
+            DSL.list(References.ITEM_STACK.in(pSchema)),
             "HandItems",
-            DSL.list(References.ITEM_STACK.in(p_17331_)),
+            DSL.list(References.ITEM_STACK.in(pSchema)),
             "body_armor_item",
-            References.ITEM_STACK.in(p_17331_)
+            References.ITEM_STACK.in(pSchema)
         );
     }
 
-    protected static void registerMob(Schema p_17336_, Map<String, Supplier<TypeTemplate>> p_17337_, String p_17338_) {
-        p_17336_.register(p_17337_, p_17338_, () -> equipment(p_17336_));
+    protected static void registerMob(Schema pSchema, Map<String, Supplier<TypeTemplate>> pMap, String pName) {
+        pSchema.register(pMap, pName, () -> equipment(pSchema));
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_17350_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_17350_);
-        registerMob(p_17350_, map, "ArmorStand");
-        registerMob(p_17350_, map, "Creeper");
-        registerMob(p_17350_, map, "Skeleton");
-        registerMob(p_17350_, map, "Spider");
-        registerMob(p_17350_, map, "Giant");
-        registerMob(p_17350_, map, "Zombie");
-        registerMob(p_17350_, map, "Slime");
-        registerMob(p_17350_, map, "Ghast");
-        registerMob(p_17350_, map, "PigZombie");
-        p_17350_.register(map, "Enderman", p_17348_ -> DSL.optionalFields("carried", References.BLOCK_NAME.in(p_17350_), equipment(p_17350_)));
-        registerMob(p_17350_, map, "CaveSpider");
-        registerMob(p_17350_, map, "Silverfish");
-        registerMob(p_17350_, map, "Blaze");
-        registerMob(p_17350_, map, "LavaSlime");
-        registerMob(p_17350_, map, "EnderDragon");
-        registerMob(p_17350_, map, "WitherBoss");
-        registerMob(p_17350_, map, "Bat");
-        registerMob(p_17350_, map, "Witch");
-        registerMob(p_17350_, map, "Endermite");
-        registerMob(p_17350_, map, "Guardian");
-        registerMob(p_17350_, map, "Pig");
-        registerMob(p_17350_, map, "Sheep");
-        registerMob(p_17350_, map, "Cow");
-        registerMob(p_17350_, map, "Chicken");
-        registerMob(p_17350_, map, "Squid");
-        registerMob(p_17350_, map, "Wolf");
-        registerMob(p_17350_, map, "MushroomCow");
-        registerMob(p_17350_, map, "SnowMan");
-        registerMob(p_17350_, map, "Ozelot");
-        registerMob(p_17350_, map, "VillagerGolem");
-        p_17350_.register(
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
+        registerMob(pSchema, map, "ArmorStand");
+        registerMob(pSchema, map, "Creeper");
+        registerMob(pSchema, map, "Skeleton");
+        registerMob(pSchema, map, "Spider");
+        registerMob(pSchema, map, "Giant");
+        registerMob(pSchema, map, "Zombie");
+        registerMob(pSchema, map, "Slime");
+        registerMob(pSchema, map, "Ghast");
+        registerMob(pSchema, map, "PigZombie");
+        pSchema.register(map, "Enderman", p_17348_ -> DSL.optionalFields("carried", References.BLOCK_NAME.in(pSchema), equipment(pSchema)));
+        registerMob(pSchema, map, "CaveSpider");
+        registerMob(pSchema, map, "Silverfish");
+        registerMob(pSchema, map, "Blaze");
+        registerMob(pSchema, map, "LavaSlime");
+        registerMob(pSchema, map, "EnderDragon");
+        registerMob(pSchema, map, "WitherBoss");
+        registerMob(pSchema, map, "Bat");
+        registerMob(pSchema, map, "Witch");
+        registerMob(pSchema, map, "Endermite");
+        registerMob(pSchema, map, "Guardian");
+        registerMob(pSchema, map, "Pig");
+        registerMob(pSchema, map, "Sheep");
+        registerMob(pSchema, map, "Cow");
+        registerMob(pSchema, map, "Chicken");
+        registerMob(pSchema, map, "Squid");
+        registerMob(pSchema, map, "Wolf");
+        registerMob(pSchema, map, "MushroomCow");
+        registerMob(pSchema, map, "SnowMan");
+        registerMob(pSchema, map, "Ozelot");
+        registerMob(pSchema, map, "VillagerGolem");
+        pSchema.register(
             map,
             "EntityHorse",
             p_17343_ -> DSL.optionalFields(
                     "Items",
-                    DSL.list(References.ITEM_STACK.in(p_17350_)),
+                    DSL.list(References.ITEM_STACK.in(pSchema)),
                     "ArmorItem",
-                    References.ITEM_STACK.in(p_17350_),
+                    References.ITEM_STACK.in(pSchema),
                     "SaddleItem",
-                    References.ITEM_STACK.in(p_17350_),
-                    equipment(p_17350_)
+                    References.ITEM_STACK.in(pSchema),
+                    equipment(pSchema)
                 )
         );
-        registerMob(p_17350_, map, "Rabbit");
-        p_17350_.register(
+        registerMob(pSchema, map, "Rabbit");
+        pSchema.register(
             map,
             "Villager",
             p_326678_ -> DSL.optionalFields(
                     "Inventory",
-                    DSL.list(References.ITEM_STACK.in(p_17350_)),
+                    DSL.list(References.ITEM_STACK.in(pSchema)),
                     "Offers",
-                    DSL.optionalFields("Recipes", DSL.list(References.VILLAGER_TRADE.in(p_17350_))),
-                    equipment(p_17350_)
+                    DSL.optionalFields("Recipes", DSL.list(References.VILLAGER_TRADE.in(pSchema))),
+                    equipment(pSchema)
                 )
         );
-        registerMob(p_17350_, map, "Shulker");
-        p_17350_.register(map, "AreaEffectCloud", p_326680_ -> DSL.optionalFields("Particle", References.PARTICLE.in(p_17350_)));
-        p_17350_.registerSimple(map, "ShulkerBullet");
+        registerMob(pSchema, map, "Shulker");
+        pSchema.register(map, "AreaEffectCloud", p_326680_ -> DSL.optionalFields("Particle", References.PARTICLE.in(pSchema)));
+        pSchema.registerSimple(map, "ShulkerBullet");
         return map;
     }
 
     @Override
-    public void registerTypes(Schema p_17352_, Map<String, Supplier<TypeTemplate>> p_17353_, Map<String, Supplier<TypeTemplate>> p_17354_) {
-        super.registerTypes(p_17352_, p_17353_, p_17354_);
-        p_17352_.registerType(
+    public void registerTypes(Schema pSchema, Map<String, Supplier<TypeTemplate>> pEntityTypes, Map<String, Supplier<TypeTemplate>> pBlockEntityTypes) {
+        super.registerTypes(pSchema, pEntityTypes, pBlockEntityTypes);
+        pSchema.registerType(
             false,
             References.STRUCTURE,
             () -> DSL.optionalFields(
                     "entities",
-                    DSL.list(DSL.optionalFields("nbt", References.ENTITY_TREE.in(p_17352_))),
+                    DSL.list(DSL.optionalFields("nbt", References.ENTITY_TREE.in(pSchema))),
                     "blocks",
-                    DSL.list(DSL.optionalFields("nbt", References.BLOCK_ENTITY.in(p_17352_))),
+                    DSL.list(DSL.optionalFields("nbt", References.BLOCK_ENTITY.in(pSchema))),
                     "palette",
-                    DSL.list(References.BLOCK_STATE.in(p_17352_))
+                    DSL.list(References.BLOCK_STATE.in(pSchema))
                 )
         );
-        p_17352_.registerType(false, References.BLOCK_STATE, DSL::remainder);
-        p_17352_.registerType(false, References.FLAT_BLOCK_STATE, DSL::remainder);
+        pSchema.registerType(false, References.BLOCK_STATE, DSL::remainder);
+        pSchema.registerType(false, References.FLAT_BLOCK_STATE, DSL::remainder);
     }
 }

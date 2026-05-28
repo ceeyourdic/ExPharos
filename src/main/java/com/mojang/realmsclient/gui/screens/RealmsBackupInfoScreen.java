@@ -25,10 +25,10 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
     final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
     private RealmsBackupInfoScreen.BackupInfoList backupInfoList;
 
-    public RealmsBackupInfoScreen(Screen p_88048_, Backup p_88049_) {
+    public RealmsBackupInfoScreen(Screen pLastScreen, Backup pBackup) {
         super(TITLE);
-        this.lastScreen = p_88048_;
-        this.backup = p_88049_;
+        this.lastScreen = pLastScreen;
+        this.backup = pBackup;
     }
 
     @Override
@@ -53,26 +53,26 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
         this.minecraft.setScreen(this.lastScreen);
     }
 
-    Component checkForSpecificMetadata(String p_88068_, String p_88069_) {
-        String s = p_88068_.toLowerCase(Locale.ROOT);
+    Component checkForSpecificMetadata(String pKey, String pValue) {
+        String s = pKey.toLowerCase(Locale.ROOT);
         if (s.contains("game") && s.contains("mode")) {
-            return this.gameModeMetadata(p_88069_);
+            return this.gameModeMetadata(pValue);
         } else {
-            return (Component)(s.contains("game") && s.contains("difficulty") ? this.gameDifficultyMetadata(p_88069_) : Component.literal(p_88069_));
+            return (Component)(s.contains("game") && s.contains("difficulty") ? this.gameDifficultyMetadata(pValue) : Component.literal(pValue));
         }
     }
 
-    private Component gameDifficultyMetadata(String p_88074_) {
+    private Component gameDifficultyMetadata(String pValue) {
         try {
-            return RealmsSlotOptionsScreen.DIFFICULTIES.get(Integer.parseInt(p_88074_)).getDisplayName();
+            return RealmsSlotOptionsScreen.DIFFICULTIES.get(Integer.parseInt(pValue)).getDisplayName();
         } catch (Exception exception) {
             return UNKNOWN;
         }
     }
 
-    private Component gameModeMetadata(String p_88076_) {
+    private Component gameModeMetadata(String pValue) {
         try {
-            return RealmsSlotOptionsScreen.GAME_MODES.get(Integer.parseInt(p_88076_)).getShortDisplayName();
+            return RealmsSlotOptionsScreen.GAME_MODES.get(Integer.parseInt(pValue)).getShortDisplayName();
         } catch (Exception exception) {
             return UNKNOWN;
         }
@@ -80,9 +80,9 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 
     @OnlyIn(Dist.CLIENT)
     class BackupInfoList extends ObjectSelectionList<RealmsBackupInfoScreen.BackupInfoListEntry> {
-        public BackupInfoList(final Minecraft p_88082_) {
+        public BackupInfoList(final Minecraft pMinecraft) {
             super(
-                p_88082_,
+                pMinecraft,
                 RealmsBackupInfoScreen.this.width,
                 RealmsBackupInfoScreen.this.layout.getContentHeight(),
                 RealmsBackupInfoScreen.this.layout.getHeaderHeight(),
@@ -112,9 +112,9 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
         private final String key;
         private final String value;
 
-        public BackupInfoListEntry(final String p_88091_, final String p_88092_) {
-            this.key = p_88091_;
-            this.value = p_88092_;
+        public BackupInfoListEntry(final String pKey, final String pValue) {
+            this.key = pKey;
+            this.value = pValue;
         }
 
         @Override
@@ -136,8 +136,8 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
             );
         }
 
-        private Component translateKey(String p_287652_) {
-            return switch (p_287652_) {
+        private Component translateKey(String pKey) {
+            return switch (pKey) {
                 case "template_name" -> TEMPLATE_NAME;
                 case "game_difficulty" -> GAME_DIFFICULTY;
                 case "name" -> NAME;

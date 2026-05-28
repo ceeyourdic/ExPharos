@@ -46,8 +46,8 @@ public class DebugCommand {
     static final SimpleCommandExceptionType NO_RECURSIVE_TRACES = new SimpleCommandExceptionType(Component.translatable("commands.debug.function.noRecursion"));
     static final SimpleCommandExceptionType NO_RETURN_RUN = new SimpleCommandExceptionType(Component.translatable("commands.debug.function.noReturnRun"));
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_136906_) {
-        p_136906_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("debug")
                 .requires(p_180073_ -> p_180073_.hasPermission(3))
                 .then(Commands.literal("start").executes(p_180069_ -> start(p_180069_.getSource())))
@@ -64,26 +64,26 @@ public class DebugCommand {
         );
     }
 
-    private static int start(CommandSourceStack p_136910_) throws CommandSyntaxException {
-        MinecraftServer minecraftserver = p_136910_.getServer();
+    private static int start(CommandSourceStack pSource) throws CommandSyntaxException {
+        MinecraftServer minecraftserver = pSource.getServer();
         if (minecraftserver.isTimeProfilerRunning()) {
             throw ERROR_ALREADY_RUNNING.create();
         } else {
             minecraftserver.startTimeProfiler();
-            p_136910_.sendSuccess(() -> Component.translatable("commands.debug.started"), true);
+            pSource.sendSuccess(() -> Component.translatable("commands.debug.started"), true);
             return 0;
         }
     }
 
-    private static int stop(CommandSourceStack p_136916_) throws CommandSyntaxException {
-        MinecraftServer minecraftserver = p_136916_.getServer();
+    private static int stop(CommandSourceStack pSource) throws CommandSyntaxException {
+        MinecraftServer minecraftserver = pSource.getServer();
         if (!minecraftserver.isTimeProfilerRunning()) {
             throw ERROR_NOT_RUNNING.create();
         } else {
             ProfileResults profileresults = minecraftserver.stopTimeProfiler();
             double d0 = (double)profileresults.getNanoDuration() / (double)TimeUtil.NANOSECONDS_PER_SECOND;
             double d1 = (double)profileresults.getTickDuration() / d0;
-            p_136916_.sendSuccess(
+            pSource.sendSuccess(
                 () -> Component.translatable(
                         "commands.debug.stopped", String.format(Locale.ROOT, "%.2f", d0), profileresults.getTickDuration(), String.format(Locale.ROOT, "%.2f", d1)
                     ),
@@ -163,17 +163,17 @@ public class DebugCommand {
         private int lastIndent;
         private boolean waitingForResult;
 
-        Tracer(PrintWriter p_180079_) {
-            this.output = p_180079_;
+        Tracer(PrintWriter pOutput) {
+            this.output = pOutput;
         }
 
-        private void indentAndSave(int p_180082_) {
-            this.printIndent(p_180082_);
-            this.lastIndent = p_180082_;
+        private void indentAndSave(int pIndent) {
+            this.printIndent(pIndent);
+            this.lastIndent = pIndent;
         }
 
-        private void printIndent(int p_180098_) {
-            for (int i = 0; i < p_180098_ + 1; i++) {
+        private void printIndent(int pIndent) {
+            for (int i = 0; i < pIndent + 1; i++) {
                 this.output.write("    ");
             }
         }

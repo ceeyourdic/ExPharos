@@ -22,17 +22,17 @@ public class GateBehavior<E extends LivingEntity> implements BehaviorControl<E> 
     private Behavior.Status status = Behavior.Status.STOPPED;
 
     public GateBehavior(
-        Map<MemoryModuleType<?>, MemoryStatus> p_22873_,
-        Set<MemoryModuleType<?>> p_22874_,
-        GateBehavior.OrderPolicy p_22875_,
-        GateBehavior.RunningPolicy p_22876_,
-        List<Pair<? extends BehaviorControl<? super E>, Integer>> p_22877_
+        Map<MemoryModuleType<?>, MemoryStatus> pEntryCondition,
+        Set<MemoryModuleType<?>> pExitErasedMemories,
+        GateBehavior.OrderPolicy pOrderPolicy,
+        GateBehavior.RunningPolicy pRunningPolicy,
+        List<Pair<? extends BehaviorControl<? super E>, Integer>> pDurations
     ) {
-        this.entryCondition = p_22873_;
-        this.exitErasedMemories = p_22874_;
-        this.orderPolicy = p_22875_;
-        this.runningPolicy = p_22876_;
-        p_22877_.forEach(p_258332_ -> this.behaviors.add((BehaviorControl<? super E>)p_258332_.getFirst(), p_258332_.getSecond()));
+        this.entryCondition = pEntryCondition;
+        this.exitErasedMemories = pExitErasedMemories;
+        this.orderPolicy = pOrderPolicy;
+        this.runningPolicy = pRunningPolicy;
+        pDurations.forEach(p_258332_ -> this.behaviors.add((BehaviorControl<? super E>)p_258332_.getFirst(), p_258332_.getSecond()));
     }
 
     @Override
@@ -40,11 +40,11 @@ public class GateBehavior<E extends LivingEntity> implements BehaviorControl<E> 
         return this.status;
     }
 
-    private boolean hasRequiredMemories(E p_259419_) {
+    private boolean hasRequiredMemories(E pEntity) {
         for (Entry<MemoryModuleType<?>, MemoryStatus> entry : this.entryCondition.entrySet()) {
             MemoryModuleType<?> memorymoduletype = entry.getKey();
             MemoryStatus memorystatus = entry.getValue();
-            if (!p_259419_.getBrain().checkMemory(memorymoduletype, memorystatus)) {
+            if (!pEntity.getBrain().checkMemory(memorymoduletype, memorystatus)) {
                 return false;
             }
         }
@@ -106,12 +106,12 @@ public class GateBehavior<E extends LivingEntity> implements BehaviorControl<E> 
 
         private final Consumer<ShufflingList<?>> consumer;
 
-        private OrderPolicy(final Consumer<ShufflingList<?>> p_22930_) {
-            this.consumer = p_22930_;
+        private OrderPolicy(final Consumer<ShufflingList<?>> pConsumer) {
+            this.consumer = pConsumer;
         }
 
-        public void apply(ShufflingList<?> p_147528_) {
-            this.consumer.accept(p_147528_);
+        public void apply(ShufflingList<?> pList) {
+            this.consumer.accept(pList);
         }
     }
 
@@ -133,7 +133,7 @@ public class GateBehavior<E extends LivingEntity> implements BehaviorControl<E> 
         };
 
         public abstract <E extends LivingEntity> void apply(
-            Stream<BehaviorControl<? super E>> p_147532_, ServerLevel p_147533_, E p_147534_, long p_147535_
+            Stream<BehaviorControl<? super E>> pBehaviors, ServerLevel pLevel, E pOwner, long pGameTime
         );
     }
 }

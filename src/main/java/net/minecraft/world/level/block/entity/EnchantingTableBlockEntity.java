@@ -29,8 +29,8 @@ public class EnchantingTableBlockEntity extends BlockEntity implements Nameable 
     @Nullable
     private Component name;
 
-    public EnchantingTableBlockEntity(BlockPos p_329912_, BlockState p_331662_) {
-        super(BlockEntityType.ENCHANTING_TABLE, p_329912_, p_331662_);
+    public EnchantingTableBlockEntity(BlockPos pPos, BlockState pState) {
+        super(BlockEntityType.ENCHANTING_TABLE, pPos, pState);
     }
 
     @Override
@@ -49,46 +49,46 @@ public class EnchantingTableBlockEntity extends BlockEntity implements Nameable 
         }
     }
 
-    public static void bookAnimationTick(Level p_334676_, BlockPos p_332815_, BlockState p_332072_, EnchantingTableBlockEntity p_333258_) {
-        p_333258_.oOpen = p_333258_.open;
-        p_333258_.oRot = p_333258_.rot;
-        Player player = p_334676_.getNearestPlayer(
-            (double)p_332815_.getX() + 0.5, (double)p_332815_.getY() + 0.5, (double)p_332815_.getZ() + 0.5, 3.0, false
+    public static void bookAnimationTick(Level pLevel, BlockPos pPos, BlockState pState, EnchantingTableBlockEntity pEnchantingTable) {
+        pEnchantingTable.oOpen = pEnchantingTable.open;
+        pEnchantingTable.oRot = pEnchantingTable.rot;
+        Player player = pLevel.getNearestPlayer(
+            (double)pPos.getX() + 0.5, (double)pPos.getY() + 0.5, (double)pPos.getZ() + 0.5, 3.0, false
         );
         if (player != null) {
-            double d0 = player.getX() - ((double)p_332815_.getX() + 0.5);
-            double d1 = player.getZ() - ((double)p_332815_.getZ() + 0.5);
-            p_333258_.tRot = (float)Mth.atan2(d1, d0);
-            p_333258_.open += 0.1F;
-            if (p_333258_.open < 0.5F || RANDOM.nextInt(40) == 0) {
-                float f1 = p_333258_.flipT;
+            double d0 = player.getX() - ((double)pPos.getX() + 0.5);
+            double d1 = player.getZ() - ((double)pPos.getZ() + 0.5);
+            pEnchantingTable.tRot = (float)Mth.atan2(d1, d0);
+            pEnchantingTable.open += 0.1F;
+            if (pEnchantingTable.open < 0.5F || RANDOM.nextInt(40) == 0) {
+                float f1 = pEnchantingTable.flipT;
 
                 do {
-                    p_333258_.flipT = p_333258_.flipT + (float)(RANDOM.nextInt(4) - RANDOM.nextInt(4));
-                } while (f1 == p_333258_.flipT);
+                    pEnchantingTable.flipT = pEnchantingTable.flipT + (float)(RANDOM.nextInt(4) - RANDOM.nextInt(4));
+                } while (f1 == pEnchantingTable.flipT);
             }
         } else {
-            p_333258_.tRot += 0.02F;
-            p_333258_.open -= 0.1F;
+            pEnchantingTable.tRot += 0.02F;
+            pEnchantingTable.open -= 0.1F;
         }
 
-        while (p_333258_.rot >= (float) Math.PI) {
-            p_333258_.rot -= (float) (Math.PI * 2);
+        while (pEnchantingTable.rot >= (float) Math.PI) {
+            pEnchantingTable.rot -= (float) (Math.PI * 2);
         }
 
-        while (p_333258_.rot < (float) -Math.PI) {
-            p_333258_.rot += (float) (Math.PI * 2);
+        while (pEnchantingTable.rot < (float) -Math.PI) {
+            pEnchantingTable.rot += (float) (Math.PI * 2);
         }
 
-        while (p_333258_.tRot >= (float) Math.PI) {
-            p_333258_.tRot -= (float) (Math.PI * 2);
+        while (pEnchantingTable.tRot >= (float) Math.PI) {
+            pEnchantingTable.tRot -= (float) (Math.PI * 2);
         }
 
-        while (p_333258_.tRot < (float) -Math.PI) {
-            p_333258_.tRot += (float) (Math.PI * 2);
+        while (pEnchantingTable.tRot < (float) -Math.PI) {
+            pEnchantingTable.tRot += (float) (Math.PI * 2);
         }
 
-        float f2 = p_333258_.tRot - p_333258_.rot;
+        float f2 = pEnchantingTable.tRot - pEnchantingTable.rot;
 
         while (f2 >= (float) Math.PI) {
             f2 -= (float) (Math.PI * 2);
@@ -98,15 +98,15 @@ public class EnchantingTableBlockEntity extends BlockEntity implements Nameable 
             f2 += (float) (Math.PI * 2);
         }
 
-        p_333258_.rot += f2 * 0.4F;
-        p_333258_.open = Mth.clamp(p_333258_.open, 0.0F, 1.0F);
-        p_333258_.time++;
-        p_333258_.oFlip = p_333258_.flip;
-        float f = (p_333258_.flipT - p_333258_.flip) * 0.4F;
+        pEnchantingTable.rot += f2 * 0.4F;
+        pEnchantingTable.open = Mth.clamp(pEnchantingTable.open, 0.0F, 1.0F);
+        pEnchantingTable.time++;
+        pEnchantingTable.oFlip = pEnchantingTable.flip;
+        float f = (pEnchantingTable.flipT - pEnchantingTable.flip) * 0.4F;
         float f3 = 0.2F;
         f = Mth.clamp(f, -0.2F, 0.2F);
-        p_333258_.flipA = p_333258_.flipA + (f - p_333258_.flipA) * 0.9F;
-        p_333258_.flip = p_333258_.flip + p_333258_.flipA;
+        pEnchantingTable.flipA = pEnchantingTable.flipA + (f - pEnchantingTable.flipA) * 0.9F;
+        pEnchantingTable.flip = pEnchantingTable.flip + pEnchantingTable.flipA;
     }
 
     @Override
@@ -114,8 +114,8 @@ public class EnchantingTableBlockEntity extends BlockEntity implements Nameable 
         return (Component)(this.name != null ? this.name : Component.translatable("container.enchant"));
     }
 
-    public void setCustomName(@Nullable Component p_330108_) {
-        this.name = p_330108_;
+    public void setCustomName(@Nullable Component pCustomName) {
+        this.name = pCustomName;
     }
 
     @Nullable

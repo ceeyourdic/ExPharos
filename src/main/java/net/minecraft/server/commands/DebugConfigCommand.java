@@ -20,8 +20,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 
 public class DebugConfigCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> p_299014_) {
-        p_299014_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("debugconfig")
                 .requires(p_299396_ -> p_299396_.hasPermission(3))
                 .then(
@@ -42,10 +42,10 @@ public class DebugConfigCommand {
         );
     }
 
-    private static Iterable<String> getUuidsInConfig(MinecraftServer p_299245_) {
+    private static Iterable<String> getUuidsInConfig(MinecraftServer pServer) {
         Set<String> set = new HashSet<>();
 
-        for (Connection connection : p_299245_.getConnection().getConnections()) {
+        for (Connection connection : pServer.getConnection().getConnections()) {
             if (connection.getPacketListener() instanceof ServerConfigurationPacketListenerImpl serverconfigurationpacketlistenerimpl) {
                 set.add(serverconfigurationpacketlistenerimpl.getOwner().getId().toString());
             }
@@ -54,25 +54,25 @@ public class DebugConfigCommand {
         return set;
     }
 
-    private static int config(CommandSourceStack p_297745_, ServerPlayer p_300074_) {
-        GameProfile gameprofile = p_300074_.getGameProfile();
-        p_300074_.connection.switchToConfig();
-        p_297745_.sendSuccess(() -> Component.literal("Switched player " + gameprofile.getName() + "(" + gameprofile.getId() + ") to config mode"), false);
+    private static int config(CommandSourceStack pSource, ServerPlayer pTarget) {
+        GameProfile gameprofile = pTarget.getGameProfile();
+        pTarget.connection.switchToConfig();
+        pSource.sendSuccess(() -> Component.literal("Switched player " + gameprofile.getName() + "(" + gameprofile.getId() + ") to config mode"), false);
         return 1;
     }
 
-    private static int unconfig(CommandSourceStack p_300627_, UUID p_299392_) {
-        for (Connection connection : p_300627_.getServer().getConnection().getConnections()) {
+    private static int unconfig(CommandSourceStack pSource, UUID pTarget) {
+        for (Connection connection : pSource.getServer().getConnection().getConnections()) {
             PacketListener packetlistener = connection.getPacketListener();
             if (packetlistener instanceof ServerConfigurationPacketListenerImpl) {
                 ServerConfigurationPacketListenerImpl serverconfigurationpacketlistenerimpl = (ServerConfigurationPacketListenerImpl)packetlistener;
-                if (serverconfigurationpacketlistenerimpl.getOwner().getId().equals(p_299392_)) {
+                if (serverconfigurationpacketlistenerimpl.getOwner().getId().equals(pTarget)) {
                     serverconfigurationpacketlistenerimpl.returnToWorld();
                 }
             }
         }
 
-        p_300627_.sendFailure(Component.literal("Can't find player to unconfig"));
+        pSource.sendFailure(Component.literal("Can't find player to unconfig"));
         return 0;
     }
 }

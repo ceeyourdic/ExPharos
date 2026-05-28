@@ -226,8 +226,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         return this.isDeadOrDying();
     }
 
-    private boolean canEat(ItemStack p_28598_) {
-        return p_28598_.has(DataComponents.FOOD) && this.getTarget() == null && this.onGround() && !this.isSleeping();
+    private boolean canEat(ItemStack pStack) {
+        return pStack.has(DataComponents.FOOD) && this.getTarget() == null && this.onGround() && !this.isSleeping();
     }
 
     @Override
@@ -298,8 +298,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         return fox;
     }
 
-    public static boolean checkFoxSpawnRules(EntityType<Fox> p_218176_, LevelAccessor p_218177_, EntitySpawnReason p_363927_, BlockPos p_218179_, RandomSource p_218180_) {
-        return p_218177_.getBlockState(p_218179_.below()).is(BlockTags.FOXES_SPAWNABLE_ON) && isBrightEnoughToSpawn(p_218177_, p_218179_);
+    public static boolean checkFoxSpawnRules(EntityType<Fox> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom) {
+        return pLevel.getBlockState(pPos.below()).is(BlockTags.FOXES_SPAWNABLE_ON) && isBrightEnoughToSpawn(pLevel, pPos);
     }
 
     @Nullable
@@ -372,17 +372,17 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         }
     }
 
-    void addTrustedUUID(@Nullable UUID p_28516_) {
+    void addTrustedUUID(@Nullable UUID pUuid) {
         if (this.entityData.get(DATA_TRUSTED_ID_0).isPresent()) {
-            this.entityData.set(DATA_TRUSTED_ID_1, Optional.ofNullable(p_28516_));
+            this.entityData.set(DATA_TRUSTED_ID_1, Optional.ofNullable(pUuid));
         } else {
-            this.entityData.set(DATA_TRUSTED_ID_0, Optional.ofNullable(p_28516_));
+            this.entityData.set(DATA_TRUSTED_ID_0, Optional.ofNullable(pUuid));
         }
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_28518_) {
-        super.addAdditionalSaveData(p_28518_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
         List<UUID> list = this.getTrustedUUIDs();
         ListTag listtag = new ListTag();
 
@@ -390,25 +390,25 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
             listtag.add(NbtUtils.createUUID(uuid));
         }
 
-        p_28518_.put("Trusted", listtag);
-        p_28518_.putBoolean("Sleeping", this.isSleeping());
-        p_28518_.putString("Type", this.getVariant().getSerializedName());
-        p_28518_.putBoolean("Sitting", this.isSitting());
-        p_28518_.putBoolean("Crouching", this.isCrouching());
+        pCompound.put("Trusted", listtag);
+        pCompound.putBoolean("Sleeping", this.isSleeping());
+        pCompound.putString("Type", this.getVariant().getSerializedName());
+        pCompound.putBoolean("Sitting", this.isSitting());
+        pCompound.putBoolean("Crouching", this.isCrouching());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_28493_) {
-        super.readAdditionalSaveData(p_28493_);
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
 
-        for (Tag tag : p_28493_.getList("Trusted", 11)) {
+        for (Tag tag : pCompound.getList("Trusted", 11)) {
             this.addTrustedUUID(NbtUtils.loadUUID(tag));
         }
 
-        this.setSleeping(p_28493_.getBoolean("Sleeping"));
-        this.setVariant(Fox.Variant.byName(p_28493_.getString("Type")));
-        this.setSitting(p_28493_.getBoolean("Sitting"));
-        this.setIsCrouching(p_28493_.getBoolean("Crouching"));
+        this.setSleeping(pCompound.getBoolean("Sleeping"));
+        this.setVariant(Fox.Variant.byName(pCompound.getString("Type")));
+        this.setSitting(pCompound.getBoolean("Sitting"));
+        this.setIsCrouching(pCompound.getBoolean("Crouching"));
         if (this.level() instanceof ServerLevel) {
             this.setTargetGoals();
         }
@@ -418,24 +418,24 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         return this.getFlag(1);
     }
 
-    public void setSitting(boolean p_28611_) {
-        this.setFlag(1, p_28611_);
+    public void setSitting(boolean pSitting) {
+        this.setFlag(1, pSitting);
     }
 
     public boolean isFaceplanted() {
         return this.getFlag(64);
     }
 
-    void setFaceplanted(boolean p_28619_) {
-        this.setFlag(64, p_28619_);
+    void setFaceplanted(boolean pFaceplanted) {
+        this.setFlag(64, pFaceplanted);
     }
 
     boolean isDefending() {
         return this.getFlag(128);
     }
 
-    void setDefending(boolean p_28623_) {
-        this.setFlag(128, p_28623_);
+    void setDefending(boolean pDefending) {
+        this.setFlag(128, pDefending);
     }
 
     @Override
@@ -443,20 +443,20 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         return this.getFlag(32);
     }
 
-    void setSleeping(boolean p_28627_) {
-        this.setFlag(32, p_28627_);
+    void setSleeping(boolean pSleeping) {
+        this.setFlag(32, pSleeping);
     }
 
-    private void setFlag(int p_28533_, boolean p_28534_) {
-        if (p_28534_) {
-            this.entityData.set(DATA_FLAGS_ID, (byte)(this.entityData.get(DATA_FLAGS_ID) | p_28533_));
+    private void setFlag(int pFlagId, boolean pValue) {
+        if (pValue) {
+            this.entityData.set(DATA_FLAGS_ID, (byte)(this.entityData.get(DATA_FLAGS_ID) | pFlagId));
         } else {
-            this.entityData.set(DATA_FLAGS_ID, (byte)(this.entityData.get(DATA_FLAGS_ID) & ~p_28533_));
+            this.entityData.set(DATA_FLAGS_ID, (byte)(this.entityData.get(DATA_FLAGS_ID) & ~pFlagId));
         }
     }
 
-    private boolean getFlag(int p_28609_) {
-        return (this.entityData.get(DATA_FLAGS_ID) & p_28609_) != 0;
+    private boolean getFlag(int pFlagId) {
+        return (this.entityData.get(DATA_FLAGS_ID) & pFlagId) != 0;
     }
 
     @Override
@@ -465,15 +465,15 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
     }
 
     @Override
-    public boolean canHoldItem(ItemStack p_28578_) {
+    public boolean canHoldItem(ItemStack pStack) {
         ItemStack itemstack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return itemstack.isEmpty() || this.ticksSinceEaten > 0 && p_28578_.has(DataComponents.FOOD) && !itemstack.has(DataComponents.FOOD);
+        return itemstack.isEmpty() || this.ticksSinceEaten > 0 && pStack.has(DataComponents.FOOD) && !itemstack.has(DataComponents.FOOD);
     }
 
-    private void spitOutItem(ItemStack p_28602_) {
-        if (!p_28602_.isEmpty() && !this.level().isClientSide) {
+    private void spitOutItem(ItemStack pStack) {
+        if (!pStack.isEmpty() && !this.level().isClientSide) {
             ItemEntity itementity = new ItemEntity(
-                this.level(), this.getX() + this.getLookAngle().x, this.getY() + 1.0, this.getZ() + this.getLookAngle().z, p_28602_
+                this.level(), this.getX() + this.getLookAngle().x, this.getY() + 1.0, this.getZ() + this.getLookAngle().z, pStack
             );
             itementity.setPickUpDelay(40);
             itementity.setThrower(this);
@@ -482,8 +482,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         }
     }
 
-    private void dropItemStack(ItemStack p_28606_) {
-        ItemEntity itementity = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), p_28606_);
+    private void dropItemStack(ItemStack pStack) {
+        ItemEntity itementity = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), pStack);
         this.level().addFreshEntity(itementity);
     }
 
@@ -545,21 +545,21 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
     }
 
     @Override
-    public boolean isFood(ItemStack p_28594_) {
-        return p_28594_.is(ItemTags.FOX_FOOD);
+    public boolean isFood(ItemStack pStack) {
+        return pStack.is(ItemTags.FOX_FOOD);
     }
 
     @Override
-    protected void onOffspringSpawnedFromEgg(Player p_28481_, Mob p_28482_) {
-        ((Fox)p_28482_).addTrustedUUID(p_28481_.getUUID());
+    protected void onOffspringSpawnedFromEgg(Player pPlayer, Mob pChild) {
+        ((Fox)pChild).addTrustedUUID(pPlayer.getUUID());
     }
 
     public boolean isPouncing() {
         return this.getFlag(16);
     }
 
-    public void setIsPouncing(boolean p_28613_) {
-        this.setFlag(16, p_28613_);
+    public void setIsPouncing(boolean pIsPouncing) {
+        this.setFlag(16, pIsPouncing);
     }
 
     public boolean isJumping() {
@@ -570,8 +570,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         return this.crouchAmount == 3.0F;
     }
 
-    public void setIsCrouching(boolean p_28615_) {
-        this.setFlag(4, p_28615_);
+    public void setIsCrouching(boolean pIsCrouching) {
+        this.setFlag(4, pIsCrouching);
     }
 
     @Override
@@ -579,29 +579,29 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         return this.getFlag(4);
     }
 
-    public void setIsInterested(boolean p_28617_) {
-        this.setFlag(8, p_28617_);
+    public void setIsInterested(boolean pIsInterested) {
+        this.setFlag(8, pIsInterested);
     }
 
     public boolean isInterested() {
         return this.getFlag(8);
     }
 
-    public float getHeadRollAngle(float p_28621_) {
-        return Mth.lerp(p_28621_, this.interestedAngleO, this.interestedAngle) * 0.11F * (float) Math.PI;
+    public float getHeadRollAngle(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.interestedAngleO, this.interestedAngle) * 0.11F * (float) Math.PI;
     }
 
-    public float getCrouchAmount(float p_28625_) {
-        return Mth.lerp(p_28625_, this.crouchAmountO, this.crouchAmount);
+    public float getCrouchAmount(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.crouchAmountO, this.crouchAmount);
     }
 
     @Override
-    public void setTarget(@Nullable LivingEntity p_28574_) {
-        if (this.isDefending() && p_28574_ == null) {
+    public void setTarget(@Nullable LivingEntity pLivingEntity) {
+        if (this.isDefending() && pLivingEntity == null) {
             this.setDefending(false);
         }
 
-        super.setTarget(p_28574_);
+        super.setTarget(pLivingEntity);
     }
 
     void wakeUp() {
@@ -650,7 +650,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 
     @Nullable
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_28548_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.FOX_HURT;
     }
 
@@ -660,8 +660,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         return SoundEvents.FOX_DEATH;
     }
 
-    boolean trusts(UUID p_28530_) {
-        return this.getTrustedUUIDs().contains(p_28530_);
+    boolean trusts(UUID pUuid) {
+        return this.getTrustedUUIDs().contains(pUuid);
     }
 
     @Override
@@ -675,9 +675,9 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         super.dropAllDeathLoot(p_343480_, p_28536_);
     }
 
-    public static boolean isPathClear(Fox p_28472_, LivingEntity p_28473_) {
-        double d0 = p_28473_.getZ() - p_28472_.getZ();
-        double d1 = p_28473_.getX() - p_28472_.getX();
+    public static boolean isPathClear(Fox pFox, LivingEntity pLivingEntity) {
+        double d0 = pLivingEntity.getZ() - pFox.getZ();
+        double d1 = pLivingEntity.getX() - pFox.getX();
         double d2 = d0 / d1;
         int i = 6;
 
@@ -686,8 +686,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
             double d4 = d2 == 0.0 ? d1 * (double)((float)j / 6.0F) : d3 / d2;
 
             for (int k = 1; k < 4; k++) {
-                if (!p_28472_.level()
-                    .getBlockState(BlockPos.containing(p_28472_.getX() + d4, p_28472_.getY() + (double)k, p_28472_.getZ() + d3))
+                if (!pFox.level()
+                    .getBlockState(BlockPos.containing(pFox.getX() + d4, pFox.getY() + (double)k, pFox.getZ() + d3))
                     .canBeReplaced()) {
                     return false;
                 }
@@ -710,9 +710,9 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         private int timestamp;
 
         public DefendTrustedTargetGoal(
-            final Class<LivingEntity> p_28634_, final boolean p_28635_, final boolean p_28636_, @Nullable final TargetingConditions.Selector p_363693_
+            final Class<LivingEntity> pTargetType, final boolean pMustSee, final boolean pMustReach, @Nullable final TargetingConditions.Selector pSelector
         ) {
-            super(Fox.this, p_28634_, 10, p_28635_, p_28636_, p_363693_);
+            super(Fox.this, pTargetType, 10, pMustSee, pMustReach, pSelector);
         }
 
         @Override
@@ -819,8 +819,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
     }
 
     class FoxBreedGoal extends BreedGoal {
-        public FoxBreedGoal(final double p_28668_) {
-            super(Fox.this, p_28668_);
+        public FoxBreedGoal(final double pSpeedModifier) {
+            super(Fox.this, pSpeedModifier);
         }
 
         @Override
@@ -881,8 +881,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         private static final int WAIT_TICKS = 40;
         protected int ticksWaited;
 
-        public FoxEatBerriesGoal(final double p_28675_, final int p_28676_, final int p_28677_) {
-            super(Fox.this, p_28675_, p_28676_, p_28677_);
+        public FoxEatBerriesGoal(final double pSpeedModifier, final int pSearchRange, final int pVerticalSearchRange) {
+            super(Fox.this, pSpeedModifier, pSearchRange, pVerticalSearchRange);
         }
 
         @Override
@@ -896,8 +896,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         }
 
         @Override
-        protected boolean isValidTarget(LevelReader p_28680_, BlockPos p_28681_) {
-            BlockState blockstate = p_28680_.getBlockState(p_28681_);
+        protected boolean isValidTarget(LevelReader pLevel, BlockPos pPos) {
+            BlockState blockstate = pLevel.getBlockState(pPos);
             return blockstate.is(Blocks.SWEET_BERRY_BUSH) && blockstate.getValue(SweetBerryBushBlock.AGE) >= 2 || CaveVines.hasGlowBerries(blockstate);
         }
 
@@ -927,13 +927,13 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
             }
         }
 
-        private void pickGlowBerry(BlockState p_148927_) {
-            CaveVines.use(Fox.this, p_148927_, Fox.this.level(), this.blockPos);
+        private void pickGlowBerry(BlockState pState) {
+            CaveVines.use(Fox.this, pState, Fox.this.level(), this.blockPos);
         }
 
-        private void pickSweetBerries(BlockState p_148929_) {
-            int i = p_148929_.getValue(SweetBerryBushBlock.AGE);
-            p_148929_.setValue(SweetBerryBushBlock.AGE, Integer.valueOf(1));
+        private void pickSweetBerries(BlockState pState) {
+            int i = pState.getValue(SweetBerryBushBlock.AGE);
+            pState.setValue(SweetBerryBushBlock.AGE, Integer.valueOf(1));
             int j = 1 + Fox.this.level().random.nextInt(2) + (i == 3 ? 1 : 0);
             ItemStack itemstack = Fox.this.getItemBySlot(EquipmentSlot.MAINHAND);
             if (itemstack.isEmpty()) {
@@ -946,7 +946,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
             }
 
             Fox.this.playSound(SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, 1.0F, 1.0F);
-            Fox.this.level().setBlock(this.blockPos, p_148929_.setValue(SweetBerryBushBlock.AGE, Integer.valueOf(1)), 2);
+            Fox.this.level().setBlock(this.blockPos, pState.setValue(SweetBerryBushBlock.AGE, Integer.valueOf(1)), 2);
             Fox.this.level().gameEvent(GameEvent.BLOCK_CHANGE, this.blockPos, GameEvent.Context.of(Fox.this));
         }
 
@@ -983,9 +983,9 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
     static class FoxFollowParentGoal extends FollowParentGoal {
         private final Fox fox;
 
-        public FoxFollowParentGoal(Fox p_28695_, double p_28697_) {
-            super(p_28695_, p_28697_);
-            this.fox = p_28695_;
+        public FoxFollowParentGoal(Fox pFox, double pSpeedModifier) {
+            super(pFox, pSpeedModifier);
+            this.fox = pFox;
         }
 
         @Override
@@ -1008,15 +1008,15 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
     public static class FoxGroupData extends AgeableMob.AgeableMobGroupData {
         public final Fox.Variant variant;
 
-        public FoxGroupData(Fox.Variant p_366131_) {
+        public FoxGroupData(Fox.Variant pVariant) {
             super(false);
-            this.variant = p_366131_;
+            this.variant = pVariant;
         }
     }
 
     class FoxLookAtPlayerGoal extends LookAtPlayerGoal {
-        public FoxLookAtPlayerGoal(final Mob p_28707_, final Class<? extends LivingEntity> p_28708_, final float p_28709_) {
-            super(p_28707_, p_28708_, p_28709_);
+        public FoxLookAtPlayerGoal(final Mob pMob, final Class<? extends LivingEntity> pLookAtType, final float pLookDistance) {
+            super(pMob, pLookAtType, pLookDistance);
         }
 
         @Override
@@ -1049,8 +1049,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
     }
 
     class FoxMeleeAttackGoal extends MeleeAttackGoal {
-        public FoxMeleeAttackGoal(final double p_28720_, final boolean p_28721_) {
-            super(Fox.this, p_28720_, p_28721_);
+        public FoxMeleeAttackGoal(final double pSpeedModifier, final boolean pFollowingTargetEvenIfNotSeen) {
+            super(Fox.this, pSpeedModifier, pFollowingTargetEvenIfNotSeen);
         }
 
         @Override
@@ -1088,8 +1088,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
     }
 
     class FoxPanicGoal extends PanicGoal {
-        public FoxPanicGoal(final double p_28734_) {
-            super(Fox.this, p_28734_);
+        public FoxPanicGoal(final double pSpeedModifier) {
+            super(Fox.this, pSpeedModifier);
         }
 
         @Override
@@ -1240,8 +1240,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
     }
 
     class FoxStrollThroughVillageGoal extends StrollThroughVillageGoal {
-        public FoxStrollThroughVillageGoal(final int p_28754_, final int p_28755_) {
-            super(Fox.this, p_28755_);
+        public FoxStrollThroughVillageGoal(final int pUnused32, final int pInterval) {
+            super(Fox.this, pInterval);
         }
 
         @Override
@@ -1334,8 +1334,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
     class SeekShelterGoal extends FleeSunGoal {
         private int interval = reducedTickDelay(100);
 
-        public SeekShelterGoal(final double p_28777_) {
-            super(Fox.this, p_28777_);
+        public SeekShelterGoal(final double pSpeedModifier) {
+            super(Fox.this, pSpeedModifier);
         }
 
         @Override
@@ -1477,9 +1477,9 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
         private final int id;
         private final String name;
 
-        private Variant(final int p_363982_, final String p_364032_) {
-            this.id = p_363982_;
-            this.name = p_364032_;
+        private Variant(final int pId, final String pName) {
+            this.id = pId;
+            this.name = pName;
         }
 
         @Override
@@ -1491,16 +1491,16 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
             return this.id;
         }
 
-        public static Fox.Variant byName(String p_361500_) {
-            return CODEC.byName(p_361500_, RED);
+        public static Fox.Variant byName(String pName) {
+            return CODEC.byName(pName, RED);
         }
 
-        public static Fox.Variant byId(int p_369301_) {
-            return BY_ID.apply(p_369301_);
+        public static Fox.Variant byId(int pId) {
+            return BY_ID.apply(pId);
         }
 
-        public static Fox.Variant byBiome(Holder<Biome> p_362553_) {
-            return p_362553_.is(BiomeTags.SPAWNS_SNOW_FOXES) ? SNOW : RED;
+        public static Fox.Variant byBiome(Holder<Biome> pBiome) {
+            return pBiome.is(BiomeTags.SPAWNS_SNOW_FOXES) ? SNOW : RED;
         }
     }
 }

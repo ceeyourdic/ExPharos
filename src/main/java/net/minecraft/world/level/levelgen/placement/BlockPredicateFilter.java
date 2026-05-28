@@ -14,12 +14,12 @@ public class BlockPredicateFilter extends PlacementFilter {
     );
     private final BlockPredicate predicate;
 
-    private BlockPredicateFilter(BlockPredicate p_191573_) {
-        this.predicate = p_191573_;
+    private BlockPredicateFilter(BlockPredicate pPredicate) {
+        this.predicate = pPredicate;
     }
 
-    public static BlockPredicateFilter forPredicate(BlockPredicate p_191577_) {
-        return new BlockPredicateFilter(p_191577_);
+    public static BlockPredicateFilter forPredicate(BlockPredicate pPredicate) {
+        return new BlockPredicateFilter(pPredicate);
     }
 
     @Override

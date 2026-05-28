@@ -73,55 +73,55 @@ public class ItemModelGenerators {
     private final ItemModelOutput itemModelOutput;
     private final BiConsumer<ResourceLocation, ModelInstance> modelOutput;
 
-    public ItemModelGenerators(ItemModelOutput p_375677_, BiConsumer<ResourceLocation, ModelInstance> p_377569_) {
-        this.itemModelOutput = p_375677_;
-        this.modelOutput = p_377569_;
+    public ItemModelGenerators(ItemModelOutput pItemModelOutput, BiConsumer<ResourceLocation, ModelInstance> pModelOutput) {
+        this.itemModelOutput = pItemModelOutput;
+        this.modelOutput = pModelOutput;
     }
 
-    private void declareCustomModelItem(Item p_376826_) {
-        this.itemModelOutput.accept(p_376826_, ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(p_376826_)));
+    private void declareCustomModelItem(Item pItem) {
+        this.itemModelOutput.accept(pItem, ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(pItem)));
     }
 
-    private ResourceLocation createFlatItemModel(Item p_378447_, ModelTemplate p_376080_) {
-        return p_376080_.create(ModelLocationUtils.getModelLocation(p_378447_), TextureMapping.layer0(p_378447_), this.modelOutput);
+    private ResourceLocation createFlatItemModel(Item pItem, ModelTemplate pModelTemplate) {
+        return pModelTemplate.create(ModelLocationUtils.getModelLocation(pItem), TextureMapping.layer0(pItem), this.modelOutput);
     }
 
-    private void generateFlatItem(Item p_377153_, ModelTemplate p_375452_) {
-        this.itemModelOutput.accept(p_377153_, ItemModelUtils.plainModel(this.createFlatItemModel(p_377153_, p_375452_)));
+    private void generateFlatItem(Item pItem, ModelTemplate pModelTemplate) {
+        this.itemModelOutput.accept(pItem, ItemModelUtils.plainModel(this.createFlatItemModel(pItem, pModelTemplate)));
     }
 
-    private ResourceLocation createFlatItemModel(Item p_376880_, String p_375748_, ModelTemplate p_375473_) {
-        return p_375473_.create(
-            ModelLocationUtils.getModelLocation(p_376880_, p_375748_), TextureMapping.layer0(TextureMapping.getItemTexture(p_376880_, p_375748_)), this.modelOutput
+    private ResourceLocation createFlatItemModel(Item pItem, String pSuffix, ModelTemplate pModelTemplate) {
+        return pModelTemplate.create(
+            ModelLocationUtils.getModelLocation(pItem, pSuffix), TextureMapping.layer0(TextureMapping.getItemTexture(pItem, pSuffix)), this.modelOutput
         );
     }
 
-    private ResourceLocation createFlatItemModel(Item p_376313_, Item p_376431_, ModelTemplate p_376494_) {
-        return p_376494_.create(ModelLocationUtils.getModelLocation(p_376313_), TextureMapping.layer0(p_376431_), this.modelOutput);
+    private ResourceLocation createFlatItemModel(Item pItem, Item pLayerZeroItem, ModelTemplate pModelTemplate) {
+        return pModelTemplate.create(ModelLocationUtils.getModelLocation(pItem), TextureMapping.layer0(pLayerZeroItem), this.modelOutput);
     }
 
-    private void generateFlatItem(Item p_376380_, Item p_377414_, ModelTemplate p_375715_) {
-        this.itemModelOutput.accept(p_376380_, ItemModelUtils.plainModel(this.createFlatItemModel(p_376380_, p_377414_, p_375715_)));
+    private void generateFlatItem(Item pItem, Item pLayerZeroItem, ModelTemplate pModelTemplate) {
+        this.itemModelOutput.accept(pItem, ItemModelUtils.plainModel(this.createFlatItemModel(pItem, pLayerZeroItem, pModelTemplate)));
     }
 
-    private void generateItemWithTintedOverlay(Item p_377767_, ItemTintSource p_376307_) {
-        this.generateItemWithTintedOverlay(p_377767_, "_overlay", p_376307_);
+    private void generateItemWithTintedOverlay(Item pItem, ItemTintSource pTintSource) {
+        this.generateItemWithTintedOverlay(pItem, "_overlay", pTintSource);
     }
 
-    private void generateItemWithTintedOverlay(Item p_376479_, String p_377630_, ItemTintSource p_375561_) {
-        ResourceLocation resourcelocation = this.generateLayeredItem(p_376479_, TextureMapping.getItemTexture(p_376479_), TextureMapping.getItemTexture(p_376479_, p_377630_));
-        this.itemModelOutput.accept(p_376479_, ItemModelUtils.tintedModel(resourcelocation, BLANK_LAYER, p_375561_));
+    private void generateItemWithTintedOverlay(Item pItem, String pSuffix, ItemTintSource pTintSource) {
+        ResourceLocation resourcelocation = this.generateLayeredItem(pItem, TextureMapping.getItemTexture(pItem), TextureMapping.getItemTexture(pItem, pSuffix));
+        this.itemModelOutput.accept(pItem, ItemModelUtils.tintedModel(resourcelocation, BLANK_LAYER, pTintSource));
     }
 
-    private List<RangeSelectItemModel.Entry> createCompassModels(Item p_378493_) {
+    private List<RangeSelectItemModel.Entry> createCompassModels(Item pItem) {
         List<RangeSelectItemModel.Entry> list = new ArrayList<>();
-        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(p_378493_, "_16", ModelTemplates.FLAT_ITEM));
+        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(pItem, "_16", ModelTemplates.FLAT_ITEM));
         list.add(ItemModelUtils.override(itemmodel$unbaked, 0.0F));
 
         for (int i = 1; i < 32; i++) {
             int j = Mth.positiveModulo(i - 16, 32);
             ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(
-                this.createFlatItemModel(p_378493_, String.format(Locale.ROOT, "_%02d", j), ModelTemplates.FLAT_ITEM)
+                this.createFlatItemModel(pItem, String.format(Locale.ROOT, "_%02d", j), ModelTemplates.FLAT_ITEM)
             );
             list.add(ItemModelUtils.override(itemmodel$unbaked1, (float)i - 0.5F));
         }
@@ -130,11 +130,11 @@ public class ItemModelGenerators {
         return list;
     }
 
-    private void generateStandardCompassItem(Item p_377729_) {
-        List<RangeSelectItemModel.Entry> list = this.createCompassModels(p_377729_);
+    private void generateStandardCompassItem(Item pItem) {
+        List<RangeSelectItemModel.Entry> list = this.createCompassModels(pItem);
         this.itemModelOutput
             .accept(
-                p_377729_,
+                pItem,
                 ItemModelUtils.conditional(
                     ItemModelUtils.hasComponent(DataComponents.LODESTONE_TRACKER),
                     ItemModelUtils.rangeSelect(new CompassAngle(true, CompassAngleState.CompassTarget.LODESTONE), 32.0F, list),
@@ -146,19 +146,19 @@ public class ItemModelGenerators {
             );
     }
 
-    private void generateRecoveryCompassItem(Item p_375879_) {
+    private void generateRecoveryCompassItem(Item pItem) {
         this.itemModelOutput
-            .accept(p_375879_, ItemModelUtils.rangeSelect(new CompassAngle(true, CompassAngleState.CompassTarget.RECOVERY), 32.0F, this.createCompassModels(p_375879_)));
+            .accept(pItem, ItemModelUtils.rangeSelect(new CompassAngle(true, CompassAngleState.CompassTarget.RECOVERY), 32.0F, this.createCompassModels(pItem)));
     }
 
-    private void generateClockItem(Item p_376265_) {
+    private void generateClockItem(Item pItem) {
         List<RangeSelectItemModel.Entry> list = new ArrayList<>();
-        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(p_376265_, "_00", ModelTemplates.FLAT_ITEM));
+        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(pItem, "_00", ModelTemplates.FLAT_ITEM));
         list.add(ItemModelUtils.override(itemmodel$unbaked, 0.0F));
 
         for (int i = 1; i < 64; i++) {
             ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(
-                this.createFlatItemModel(p_376265_, String.format(Locale.ROOT, "_%02d", i), ModelTemplates.FLAT_ITEM)
+                this.createFlatItemModel(pItem, String.format(Locale.ROOT, "_%02d", i), ModelTemplates.FLAT_ITEM)
             );
             list.add(ItemModelUtils.override(itemmodel$unbaked1, (float)i - 0.5F));
         }
@@ -166,7 +166,7 @@ public class ItemModelGenerators {
         list.add(ItemModelUtils.override(itemmodel$unbaked, 63.5F));
         this.itemModelOutput
             .accept(
-                p_376265_,
+                pItem,
                 ItemModelUtils.inOverworld(
                     ItemModelUtils.rangeSelect(new Time(true, Time.TimeSource.DAYTIME), 64.0F, list),
                     ItemModelUtils.rangeSelect(new Time(true, Time.TimeSource.RANDOM), 64.0F, list)
@@ -174,31 +174,31 @@ public class ItemModelGenerators {
             );
     }
 
-    private ResourceLocation generateLayeredItem(Item p_378743_, ResourceLocation p_377953_, ResourceLocation p_378692_) {
-        return ModelTemplates.TWO_LAYERED_ITEM.create(p_378743_, TextureMapping.layered(p_377953_, p_378692_), this.modelOutput);
+    private ResourceLocation generateLayeredItem(Item pItem, ResourceLocation pLayer0, ResourceLocation pLayer1) {
+        return ModelTemplates.TWO_LAYERED_ITEM.create(pItem, TextureMapping.layered(pLayer0, pLayer1), this.modelOutput);
     }
 
-    private ResourceLocation generateLayeredItem(ResourceLocation p_376036_, ResourceLocation p_375418_, ResourceLocation p_375468_) {
-        return ModelTemplates.TWO_LAYERED_ITEM.create(p_376036_, TextureMapping.layered(p_375418_, p_375468_), this.modelOutput);
+    private ResourceLocation generateLayeredItem(ResourceLocation pModelLocation, ResourceLocation pLayer0, ResourceLocation pLayer1) {
+        return ModelTemplates.TWO_LAYERED_ITEM.create(pModelLocation, TextureMapping.layered(pLayer0, pLayer1), this.modelOutput);
     }
 
-    private void generateLayeredItem(ResourceLocation p_377800_, ResourceLocation p_375633_, ResourceLocation p_378759_, ResourceLocation p_378764_) {
-        ModelTemplates.THREE_LAYERED_ITEM.create(p_377800_, TextureMapping.layered(p_375633_, p_378759_, p_378764_), this.modelOutput);
+    private void generateLayeredItem(ResourceLocation pModelLocation, ResourceLocation pLayer0, ResourceLocation pLayer1, ResourceLocation pLayer2) {
+        ModelTemplates.THREE_LAYERED_ITEM.create(pModelLocation, TextureMapping.layered(pLayer0, pLayer1, pLayer2), this.modelOutput);
     }
 
-    private void generateTrimmableItem(Item p_376312_, ResourceKey<EquipmentAsset> p_375739_, String p_376763_, boolean p_377962_) {
-        ResourceLocation resourcelocation = ModelLocationUtils.getModelLocation(p_376312_);
-        ResourceLocation resourcelocation1 = TextureMapping.getItemTexture(p_376312_);
-        ResourceLocation resourcelocation2 = TextureMapping.getItemTexture(p_376312_, "_overlay");
+    private void generateTrimmableItem(Item pItem, ResourceKey<EquipmentAsset> pKey, String pName, boolean pDyeable) {
+        ResourceLocation resourcelocation = ModelLocationUtils.getModelLocation(pItem);
+        ResourceLocation resourcelocation1 = TextureMapping.getItemTexture(pItem);
+        ResourceLocation resourcelocation2 = TextureMapping.getItemTexture(pItem, "_overlay");
         List<SelectItemModel.SwitchCase<ResourceKey<TrimMaterial>>> list = new ArrayList<>(TRIM_MATERIAL_MODELS.size());
 
         for (ItemModelGenerators.TrimMaterialData itemmodelgenerators$trimmaterialdata : TRIM_MATERIAL_MODELS) {
             ResourceLocation resourcelocation3 = resourcelocation.withSuffix("_" + itemmodelgenerators$trimmaterialdata.name() + "_trim");
             ResourceLocation resourcelocation4 = ResourceLocation.withDefaultNamespace(
-                "trims/items/" + p_376763_ + "_trim_" + itemmodelgenerators$trimmaterialdata.textureName(p_375739_)
+                "trims/items/" + pName + "_trim_" + itemmodelgenerators$trimmaterialdata.textureName(pKey)
             );
             ItemModel.Unbaked itemmodel$unbaked;
-            if (p_377962_) {
+            if (pDyeable) {
                 this.generateLayeredItem(resourcelocation3, resourcelocation1, resourcelocation2, resourcelocation4);
                 itemmodel$unbaked = ItemModelUtils.tintedModel(resourcelocation3, new Dye(-6265536));
             } else {
@@ -210,7 +210,7 @@ public class ItemModelGenerators {
         }
 
         ItemModel.Unbaked itemmodel$unbaked1;
-        if (p_377962_) {
+        if (pDyeable) {
             ModelTemplates.TWO_LAYERED_ITEM.create(resourcelocation, TextureMapping.layered(resourcelocation1, resourcelocation2), this.modelOutput);
             itemmodel$unbaked1 = ItemModelUtils.tintedModel(resourcelocation, new Dye(-6265536));
         } else {
@@ -218,37 +218,37 @@ public class ItemModelGenerators {
             itemmodel$unbaked1 = ItemModelUtils.plainModel(resourcelocation);
         }
 
-        this.itemModelOutput.accept(p_376312_, ItemModelUtils.select(new TrimMaterialProperty(), itemmodel$unbaked1, list));
+        this.itemModelOutput.accept(pItem, ItemModelUtils.select(new TrimMaterialProperty(), itemmodel$unbaked1, list));
     }
 
-    private void generateBundleModels(Item p_376224_) {
-        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(p_376224_, ModelTemplates.FLAT_ITEM));
-        ResourceLocation resourcelocation = this.generateBundleCoverModel(p_376224_, ModelTemplates.BUNDLE_OPEN_BACK_INVENTORY, "_open_back");
-        ResourceLocation resourcelocation1 = this.generateBundleCoverModel(p_376224_, ModelTemplates.BUNDLE_OPEN_FRONT_INVENTORY, "_open_front");
+    private void generateBundleModels(Item pBundleItem) {
+        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(pBundleItem, ModelTemplates.FLAT_ITEM));
+        ResourceLocation resourcelocation = this.generateBundleCoverModel(pBundleItem, ModelTemplates.BUNDLE_OPEN_BACK_INVENTORY, "_open_back");
+        ResourceLocation resourcelocation1 = this.generateBundleCoverModel(pBundleItem, ModelTemplates.BUNDLE_OPEN_FRONT_INVENTORY, "_open_front");
         ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.composite(
             ItemModelUtils.plainModel(resourcelocation), new BundleSelectedItemSpecialRenderer.Unbaked(), ItemModelUtils.plainModel(resourcelocation1)
         );
         ItemModel.Unbaked itemmodel$unbaked2 = ItemModelUtils.conditional(new BundleHasSelectedItem(), itemmodel$unbaked1, itemmodel$unbaked);
         this.itemModelOutput
             .accept(
-                p_376224_,
+                pBundleItem,
                 ItemModelUtils.select(new DisplayContext(), itemmodel$unbaked, ItemModelUtils.when(ItemDisplayContext.GUI, itemmodel$unbaked2))
             );
     }
 
-    private ResourceLocation generateBundleCoverModel(Item p_377759_, ModelTemplate p_377732_, String p_376771_) {
-        ResourceLocation resourcelocation = TextureMapping.getItemTexture(p_377759_, p_376771_);
-        return p_377732_.create(p_377759_, TextureMapping.layer0(resourcelocation), this.modelOutput);
+    private ResourceLocation generateBundleCoverModel(Item pBundleItem, ModelTemplate pModelTemplate, String pSuffix) {
+        ResourceLocation resourcelocation = TextureMapping.getItemTexture(pBundleItem, pSuffix);
+        return pModelTemplate.create(pBundleItem, TextureMapping.layer0(resourcelocation), this.modelOutput);
     }
 
-    private void generateBow(Item p_376089_) {
-        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(p_376089_));
-        ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(this.createFlatItemModel(p_376089_, "_pulling_0", ModelTemplates.BOW));
-        ItemModel.Unbaked itemmodel$unbaked2 = ItemModelUtils.plainModel(this.createFlatItemModel(p_376089_, "_pulling_1", ModelTemplates.BOW));
-        ItemModel.Unbaked itemmodel$unbaked3 = ItemModelUtils.plainModel(this.createFlatItemModel(p_376089_, "_pulling_2", ModelTemplates.BOW));
+    private void generateBow(Item pBowItem) {
+        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(pBowItem));
+        ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(this.createFlatItemModel(pBowItem, "_pulling_0", ModelTemplates.BOW));
+        ItemModel.Unbaked itemmodel$unbaked2 = ItemModelUtils.plainModel(this.createFlatItemModel(pBowItem, "_pulling_1", ModelTemplates.BOW));
+        ItemModel.Unbaked itemmodel$unbaked3 = ItemModelUtils.plainModel(this.createFlatItemModel(pBowItem, "_pulling_2", ModelTemplates.BOW));
         this.itemModelOutput
             .accept(
-                p_376089_,
+                pBowItem,
                 ItemModelUtils.conditional(
                     ItemModelUtils.isUsingItem(),
                     ItemModelUtils.rangeSelect(
@@ -263,16 +263,16 @@ public class ItemModelGenerators {
             );
     }
 
-    private void generateCrossbow(Item p_378673_) {
-        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(p_378673_));
-        ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(this.createFlatItemModel(p_378673_, "_pulling_0", ModelTemplates.CROSSBOW));
-        ItemModel.Unbaked itemmodel$unbaked2 = ItemModelUtils.plainModel(this.createFlatItemModel(p_378673_, "_pulling_1", ModelTemplates.CROSSBOW));
-        ItemModel.Unbaked itemmodel$unbaked3 = ItemModelUtils.plainModel(this.createFlatItemModel(p_378673_, "_pulling_2", ModelTemplates.CROSSBOW));
-        ItemModel.Unbaked itemmodel$unbaked4 = ItemModelUtils.plainModel(this.createFlatItemModel(p_378673_, "_arrow", ModelTemplates.CROSSBOW));
-        ItemModel.Unbaked itemmodel$unbaked5 = ItemModelUtils.plainModel(this.createFlatItemModel(p_378673_, "_firework", ModelTemplates.CROSSBOW));
+    private void generateCrossbow(Item pCrossbowItem) {
+        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(pCrossbowItem));
+        ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(this.createFlatItemModel(pCrossbowItem, "_pulling_0", ModelTemplates.CROSSBOW));
+        ItemModel.Unbaked itemmodel$unbaked2 = ItemModelUtils.plainModel(this.createFlatItemModel(pCrossbowItem, "_pulling_1", ModelTemplates.CROSSBOW));
+        ItemModel.Unbaked itemmodel$unbaked3 = ItemModelUtils.plainModel(this.createFlatItemModel(pCrossbowItem, "_pulling_2", ModelTemplates.CROSSBOW));
+        ItemModel.Unbaked itemmodel$unbaked4 = ItemModelUtils.plainModel(this.createFlatItemModel(pCrossbowItem, "_arrow", ModelTemplates.CROSSBOW));
+        ItemModel.Unbaked itemmodel$unbaked5 = ItemModelUtils.plainModel(this.createFlatItemModel(pCrossbowItem, "_firework", ModelTemplates.CROSSBOW));
         this.itemModelOutput
             .accept(
-                p_378673_,
+                pCrossbowItem,
                 ItemModelUtils.conditional(
                     ItemModelUtils.isUsingItem(),
                     ItemModelUtils.rangeSelect(
@@ -291,24 +291,24 @@ public class ItemModelGenerators {
             );
     }
 
-    private void generateBooleanDispatch(Item p_377310_, ConditionalItemModelProperty p_376519_, ItemModel.Unbaked p_376296_, ItemModel.Unbaked p_378712_) {
-        this.itemModelOutput.accept(p_377310_, ItemModelUtils.conditional(p_376519_, p_376296_, p_378712_));
+    private void generateBooleanDispatch(Item pItem, ConditionalItemModelProperty pProperty, ItemModel.Unbaked pTrueModel, ItemModel.Unbaked pFalseModel) {
+        this.itemModelOutput.accept(pItem, ItemModelUtils.conditional(pProperty, pTrueModel, pFalseModel));
     }
 
-    private void generateElytra(Item p_376521_) {
-        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(p_376521_, ModelTemplates.FLAT_ITEM));
-        ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(this.createFlatItemModel(p_376521_, "_broken", ModelTemplates.FLAT_ITEM));
-        this.generateBooleanDispatch(p_376521_, new Broken(), itemmodel$unbaked1, itemmodel$unbaked);
+    private void generateElytra(Item pElytraItem) {
+        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(pElytraItem, ModelTemplates.FLAT_ITEM));
+        ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(this.createFlatItemModel(pElytraItem, "_broken", ModelTemplates.FLAT_ITEM));
+        this.generateBooleanDispatch(pElytraItem, new Broken(), itemmodel$unbaked1, itemmodel$unbaked);
     }
 
-    private void generateBrush(Item p_376591_) {
-        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(p_376591_));
-        ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(p_376591_, "_brushing_0"));
-        ItemModel.Unbaked itemmodel$unbaked2 = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(p_376591_, "_brushing_1"));
-        ItemModel.Unbaked itemmodel$unbaked3 = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(p_376591_, "_brushing_2"));
+    private void generateBrush(Item pBrushItem) {
+        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(pBrushItem));
+        ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(pBrushItem, "_brushing_0"));
+        ItemModel.Unbaked itemmodel$unbaked2 = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(pBrushItem, "_brushing_1"));
+        ItemModel.Unbaked itemmodel$unbaked3 = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(pBrushItem, "_brushing_2"));
         this.itemModelOutput
             .accept(
-                p_376591_,
+                pBrushItem,
                 ItemModelUtils.rangeSelect(
                     new UseCycle(10.0F),
                     0.1F,
@@ -320,88 +320,88 @@ public class ItemModelGenerators {
             );
     }
 
-    private void generateFishingRod(Item p_377466_) {
-        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(p_377466_, ModelTemplates.FLAT_HANDHELD_ROD_ITEM));
-        ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(this.createFlatItemModel(p_377466_, "_cast", ModelTemplates.FLAT_HANDHELD_ROD_ITEM));
-        this.generateBooleanDispatch(p_377466_, new FishingRodCast(), itemmodel$unbaked1, itemmodel$unbaked);
+    private void generateFishingRod(Item pFishingRodItem) {
+        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(pFishingRodItem, ModelTemplates.FLAT_HANDHELD_ROD_ITEM));
+        ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(this.createFlatItemModel(pFishingRodItem, "_cast", ModelTemplates.FLAT_HANDHELD_ROD_ITEM));
+        this.generateBooleanDispatch(pFishingRodItem, new FishingRodCast(), itemmodel$unbaked1, itemmodel$unbaked);
     }
 
-    private void generateGoatHorn(Item p_378813_) {
-        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(p_378813_));
+    private void generateGoatHorn(Item pGoatHornItem) {
+        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(pGoatHornItem));
         ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(ModelLocationUtils.decorateItemModelLocation("tooting_goat_horn"));
-        this.generateBooleanDispatch(p_378813_, ItemModelUtils.isUsingItem(), itemmodel$unbaked1, itemmodel$unbaked);
+        this.generateBooleanDispatch(pGoatHornItem, ItemModelUtils.isUsingItem(), itemmodel$unbaked1, itemmodel$unbaked);
     }
 
-    private void generateShield(Item p_378111_) {
-        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(p_378111_), new ShieldSpecialRenderer.Unbaked());
+    private void generateShield(Item pShieldItem) {
+        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(pShieldItem), new ShieldSpecialRenderer.Unbaked());
         ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.specialModel(
-            ModelLocationUtils.getModelLocation(p_378111_, "_blocking"), new ShieldSpecialRenderer.Unbaked()
+            ModelLocationUtils.getModelLocation(pShieldItem, "_blocking"), new ShieldSpecialRenderer.Unbaked()
         );
-        this.generateBooleanDispatch(p_378111_, ItemModelUtils.isUsingItem(), itemmodel$unbaked1, itemmodel$unbaked);
+        this.generateBooleanDispatch(pShieldItem, ItemModelUtils.isUsingItem(), itemmodel$unbaked1, itemmodel$unbaked);
     }
 
-    private static ItemModel.Unbaked createFlatModelDispatch(ItemModel.Unbaked p_377503_, ItemModel.Unbaked p_377244_) {
+    private static ItemModel.Unbaked createFlatModelDispatch(ItemModel.Unbaked pItemModel, ItemModel.Unbaked pHoldingModel) {
         return ItemModelUtils.select(
             new DisplayContext(),
-            p_377244_,
-            ItemModelUtils.when(List.of(ItemDisplayContext.GUI, ItemDisplayContext.GROUND, ItemDisplayContext.FIXED), p_377503_)
+            pHoldingModel,
+            ItemModelUtils.when(List.of(ItemDisplayContext.GUI, ItemDisplayContext.GROUND, ItemDisplayContext.FIXED), pItemModel)
         );
     }
 
-    private void generateSpyglass(Item p_377890_) {
-        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(p_377890_, ModelTemplates.FLAT_ITEM));
-        ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(p_377890_, "_in_hand"));
-        this.itemModelOutput.accept(p_377890_, createFlatModelDispatch(itemmodel$unbaked, itemmodel$unbaked1));
+    private void generateSpyglass(Item pSpyglassItem) {
+        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(pSpyglassItem, ModelTemplates.FLAT_ITEM));
+        ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(pSpyglassItem, "_in_hand"));
+        this.itemModelOutput.accept(pSpyglassItem, createFlatModelDispatch(itemmodel$unbaked, itemmodel$unbaked1));
     }
 
-    private void generateTrident(Item p_376855_) {
-        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(p_376855_, ModelTemplates.FLAT_ITEM));
+    private void generateTrident(Item pTridentItem) {
+        ItemModel.Unbaked itemmodel$unbaked = ItemModelUtils.plainModel(this.createFlatItemModel(pTridentItem, ModelTemplates.FLAT_ITEM));
         ItemModel.Unbaked itemmodel$unbaked1 = ItemModelUtils.specialModel(
-            ModelLocationUtils.getModelLocation(p_376855_, "_in_hand"), new TridentSpecialRenderer.Unbaked()
+            ModelLocationUtils.getModelLocation(pTridentItem, "_in_hand"), new TridentSpecialRenderer.Unbaked()
         );
         ItemModel.Unbaked itemmodel$unbaked2 = ItemModelUtils.specialModel(
-            ModelLocationUtils.getModelLocation(p_376855_, "_throwing"), new TridentSpecialRenderer.Unbaked()
+            ModelLocationUtils.getModelLocation(pTridentItem, "_throwing"), new TridentSpecialRenderer.Unbaked()
         );
         ItemModel.Unbaked itemmodel$unbaked3 = ItemModelUtils.conditional(ItemModelUtils.isUsingItem(), itemmodel$unbaked2, itemmodel$unbaked1);
-        this.itemModelOutput.accept(p_376855_, createFlatModelDispatch(itemmodel$unbaked, itemmodel$unbaked3));
+        this.itemModelOutput.accept(pTridentItem, createFlatModelDispatch(itemmodel$unbaked, itemmodel$unbaked3));
     }
 
-    private void addPotionTint(Item p_376884_, ResourceLocation p_378272_) {
-        this.itemModelOutput.accept(p_376884_, ItemModelUtils.tintedModel(p_378272_, new Potion()));
+    private void addPotionTint(Item pPotionItem, ResourceLocation pModel) {
+        this.itemModelOutput.accept(pPotionItem, ItemModelUtils.tintedModel(pModel, new Potion()));
     }
 
-    private void generatePotion(Item p_375712_) {
-        ResourceLocation resourcelocation = this.generateLayeredItem(p_375712_, ModelLocationUtils.decorateItemModelLocation("potion_overlay"), ModelLocationUtils.getModelLocation(p_375712_));
-        this.addPotionTint(p_375712_, resourcelocation);
+    private void generatePotion(Item pPotionItem) {
+        ResourceLocation resourcelocation = this.generateLayeredItem(pPotionItem, ModelLocationUtils.decorateItemModelLocation("potion_overlay"), ModelLocationUtils.getModelLocation(pPotionItem));
+        this.addPotionTint(pPotionItem, resourcelocation);
     }
 
-    private void generateTippedArrow(Item p_377081_) {
+    private void generateTippedArrow(Item pArrowItem) {
         ResourceLocation resourcelocation = this.generateLayeredItem(
-            p_377081_, ModelLocationUtils.getModelLocation(p_377081_, "_head"), ModelLocationUtils.getModelLocation(p_377081_, "_base")
+            pArrowItem, ModelLocationUtils.getModelLocation(pArrowItem, "_head"), ModelLocationUtils.getModelLocation(pArrowItem, "_base")
         );
-        this.addPotionTint(p_377081_, resourcelocation);
+        this.addPotionTint(pArrowItem, resourcelocation);
     }
 
-    private void generateDyedItem(Item p_377413_, int p_378189_) {
-        ResourceLocation resourcelocation = this.createFlatItemModel(p_377413_, ModelTemplates.FLAT_ITEM);
-        this.itemModelOutput.accept(p_377413_, ItemModelUtils.tintedModel(resourcelocation, new Dye(p_378189_)));
+    private void generateDyedItem(Item pItem, int pColor) {
+        ResourceLocation resourcelocation = this.createFlatItemModel(pItem, ModelTemplates.FLAT_ITEM);
+        this.itemModelOutput.accept(pItem, ItemModelUtils.tintedModel(resourcelocation, new Dye(pColor)));
     }
 
-    private void generateSpawnEgg(Item p_375478_, int p_377010_, int p_375637_) {
+    private void generateSpawnEgg(Item pSpawnEggItem, int pPrimaryColor, int pSecondaryColor) {
         ResourceLocation resourcelocation = ModelLocationUtils.decorateItemModelLocation("template_spawn_egg");
         this.itemModelOutput
-            .accept(p_375478_, ItemModelUtils.tintedModel(resourcelocation, ItemModelUtils.constantTint(p_377010_), ItemModelUtils.constantTint(p_375637_)));
+            .accept(pSpawnEggItem, ItemModelUtils.tintedModel(resourcelocation, ItemModelUtils.constantTint(pPrimaryColor), ItemModelUtils.constantTint(pSecondaryColor)));
     }
 
-    private void generateWolfArmor(Item p_376926_) {
-        ResourceLocation resourcelocation = TextureMapping.getItemTexture(p_376926_);
-        ResourceLocation resourcelocation1 = TextureMapping.getItemTexture(p_376926_, "_overlay");
-        ResourceLocation resourcelocation2 = ModelTemplates.FLAT_ITEM.create(p_376926_, TextureMapping.layer0(resourcelocation), this.modelOutput);
-        ResourceLocation resourcelocation3 = ModelLocationUtils.getModelLocation(p_376926_, "_dyed");
+    private void generateWolfArmor(Item pArmorItem) {
+        ResourceLocation resourcelocation = TextureMapping.getItemTexture(pArmorItem);
+        ResourceLocation resourcelocation1 = TextureMapping.getItemTexture(pArmorItem, "_overlay");
+        ResourceLocation resourcelocation2 = ModelTemplates.FLAT_ITEM.create(pArmorItem, TextureMapping.layer0(resourcelocation), this.modelOutput);
+        ResourceLocation resourcelocation3 = ModelLocationUtils.getModelLocation(pArmorItem, "_dyed");
         ModelTemplates.TWO_LAYERED_ITEM.create(resourcelocation3, TextureMapping.layered(resourcelocation, resourcelocation1), this.modelOutput);
         this.itemModelOutput
             .accept(
-                p_376926_,
+                pArmorItem,
                 ItemModelUtils.conditional(
                     ItemModelUtils.hasComponent(DataComponents.DYED_COLOR),
                     ItemModelUtils.tintedModel(resourcelocation3, BLANK_LAYER, new Dye(0)),
@@ -856,8 +856,8 @@ public class ItemModelGenerators {
 
     @OnlyIn(Dist.CLIENT)
     static record TrimMaterialData(String name, ResourceKey<TrimMaterial> materialKey, Map<ResourceKey<EquipmentAsset>, String> overrideArmorMaterials) {
-        public String textureName(ResourceKey<EquipmentAsset> p_375927_) {
-            return this.overrideArmorMaterials.getOrDefault(p_375927_, this.name);
+        public String textureName(ResourceKey<EquipmentAsset> pKey) {
+            return this.overrideArmorMaterials.getOrDefault(pKey, this.name);
         }
     }
 }

@@ -43,30 +43,30 @@ public interface WeatheringCopper extends ChangeOverTimeBlock<WeatheringCopper.W
     );
     Supplier<BiMap<Block, Block>> PREVIOUS_BY_BLOCK = Suppliers.memoize(() -> NEXT_BY_BLOCK.get().inverse());
 
-    static Optional<Block> getPrevious(Block p_154891_) {
-        return Optional.ofNullable(PREVIOUS_BY_BLOCK.get().get(p_154891_));
+    static Optional<Block> getPrevious(Block pBlock) {
+        return Optional.ofNullable(PREVIOUS_BY_BLOCK.get().get(pBlock));
     }
 
-    static Block getFirst(Block p_154898_) {
-        Block block = p_154898_;
+    static Block getFirst(Block pBlock) {
+        Block block = pBlock;
 
-        for (Block block1 = PREVIOUS_BY_BLOCK.get().get(p_154898_); block1 != null; block1 = PREVIOUS_BY_BLOCK.get().get(block1)) {
+        for (Block block1 = PREVIOUS_BY_BLOCK.get().get(pBlock); block1 != null; block1 = PREVIOUS_BY_BLOCK.get().get(block1)) {
             block = block1;
         }
 
         return block;
     }
 
-    static Optional<BlockState> getPrevious(BlockState p_154900_) {
-        return getPrevious(p_154900_.getBlock()).map(p_154903_ -> p_154903_.withPropertiesOf(p_154900_));
+    static Optional<BlockState> getPrevious(BlockState pState) {
+        return getPrevious(pState.getBlock()).map(p_154903_ -> p_154903_.withPropertiesOf(pState));
     }
 
-    static Optional<Block> getNext(Block p_154905_) {
-        return Optional.ofNullable(NEXT_BY_BLOCK.get().get(p_154905_));
+    static Optional<Block> getNext(Block pBlock) {
+        return Optional.ofNullable(NEXT_BY_BLOCK.get().get(pBlock));
     }
 
-    static BlockState getFirst(BlockState p_154907_) {
-        return getFirst(p_154907_.getBlock()).withPropertiesOf(p_154907_);
+    static BlockState getFirst(BlockState pState) {
+        return getFirst(pState.getBlock()).withPropertiesOf(pState);
     }
 
     @Override
@@ -88,8 +88,8 @@ public interface WeatheringCopper extends ChangeOverTimeBlock<WeatheringCopper.W
         public static final Codec<WeatheringCopper.WeatherState> CODEC = StringRepresentable.fromEnum(WeatheringCopper.WeatherState::values);
         private final String name;
 
-        private WeatherState(final String p_309663_) {
-            this.name = p_309663_;
+        private WeatherState(final String pName) {
+            this.name = pName;
         }
 
         @Override

@@ -47,16 +47,16 @@ public class BreezeRenderer extends MobRenderer<Breeze, BreezeRenderState, Breez
         p_366825_.longJump.copyFrom(p_362838_.longJump);
     }
 
-    public static BreezeModel enable(BreezeModel p_328756_, ModelPart... p_332502_) {
-        p_328756_.head().visible = false;
-        p_328756_.eyes().visible = false;
-        p_328756_.rods().visible = false;
-        p_328756_.wind().visible = false;
+    public static BreezeModel enable(BreezeModel pModel, ModelPart... pParts) {
+        pModel.head().visible = false;
+        pModel.eyes().visible = false;
+        pModel.rods().visible = false;
+        pModel.wind().visible = false;
 
-        for (ModelPart modelpart : p_332502_) {
+        for (ModelPart modelpart : pParts) {
             modelpart.visible = true;
         }
 
-        return p_328756_;
+        return pModel;
     }
 }

@@ -35,10 +35,10 @@ public class ModelProvider implements DataProvider {
     private final PackOutput.PathProvider itemInfoPathProvider;
     private final PackOutput.PathProvider modelPathProvider;
 
-    public ModelProvider(PackOutput p_378149_) {
-        this.blockStatePathProvider = p_378149_.createPathProvider(PackOutput.Target.RESOURCE_PACK, "blockstates");
-        this.itemInfoPathProvider = p_378149_.createPathProvider(PackOutput.Target.RESOURCE_PACK, "items");
-        this.modelPathProvider = p_378149_.createPathProvider(PackOutput.Target.RESOURCE_PACK, "models");
+    public ModelProvider(PackOutput pOutput) {
+        this.blockStatePathProvider = pOutput.createPathProvider(PackOutput.Target.RESOURCE_PACK, "blockstates");
+        this.itemInfoPathProvider = pOutput.createPathProvider(PackOutput.Target.RESOURCE_PACK, "items");
+        this.modelPathProvider = pOutput.createPathProvider(PackOutput.Target.RESOURCE_PACK, "models");
     }
 
     @Override
@@ -57,8 +57,8 @@ public class ModelProvider implements DataProvider {
         );
     }
 
-    static <T> CompletableFuture<?> saveAll(CachedOutput p_378816_, Function<T, Path> p_377914_, Map<T, ? extends Supplier<JsonElement>> p_377836_) {
-        return DataProvider.saveAll(p_378816_, Supplier::get, p_377914_, p_377836_);
+    static <T> CompletableFuture<?> saveAll(CachedOutput pOutput, Function<T, Path> pPathGetter, Map<T, ? extends Supplier<JsonElement>> pEntries) {
+        return DataProvider.saveAll(pOutput, Supplier::get, pPathGetter, pEntries);
     }
 
     @Override
@@ -88,8 +88,8 @@ public class ModelProvider implements DataProvider {
             }
         }
 
-        public CompletableFuture<?> save(CachedOutput p_377986_, PackOutput.PathProvider p_377969_) {
-            return ModelProvider.saveAll(p_377986_, p_378541_ -> p_377969_.json(p_378541_.builtInRegistryHolder().key().location()), this.generators);
+        public CompletableFuture<?> save(CachedOutput pOutput, PackOutput.PathProvider pPathProvider) {
+            return ModelProvider.saveAll(pOutput, p_378541_ -> pPathProvider.json(p_378541_.builtInRegistryHolder().key().location()), this.generators);
         }
     }
 
@@ -103,10 +103,10 @@ public class ModelProvider implements DataProvider {
             this.register(p_376450_, new ClientItem(p_378513_, ClientItem.Properties.DEFAULT));
         }
 
-        private void register(Item p_378050_, ClientItem p_376323_) {
-            ClientItem clientitem = this.itemInfos.put(p_378050_, p_376323_);
+        private void register(Item pItem, ClientItem pClientItem) {
+            ClientItem clientitem = this.itemInfos.put(pItem, pClientItem);
             if (clientitem != null) {
-                throw new IllegalStateException("Duplicate item model definition for " + p_378050_);
+                throw new IllegalStateException("Duplicate item model definition for " + pItem);
             }
         }
 
@@ -142,9 +142,9 @@ public class ModelProvider implements DataProvider {
             }
         }
 
-        public CompletableFuture<?> save(CachedOutput p_378568_, PackOutput.PathProvider p_377933_) {
+        public CompletableFuture<?> save(CachedOutput pOutput, PackOutput.PathProvider pPathProvider) {
             return DataProvider.saveAll(
-                p_378568_, ClientItem.CODEC, p_377091_ -> p_377933_.json(p_377091_.builtInRegistryHolder().key().location()), this.itemInfos
+                pOutput, ClientItem.CODEC, p_377091_ -> pPathProvider.json(p_377091_.builtInRegistryHolder().key().location()), this.itemInfos
             );
         }
     }
@@ -160,8 +160,8 @@ public class ModelProvider implements DataProvider {
             }
         }
 
-        public CompletableFuture<?> save(CachedOutput p_377109_, PackOutput.PathProvider p_378055_) {
-            return ModelProvider.saveAll(p_377109_, p_378055_::json, this.models);
+        public CompletableFuture<?> save(CachedOutput pOutput, PackOutput.PathProvider pPathProvider) {
+            return ModelProvider.saveAll(pOutput, pPathProvider::json, this.models);
         }
     }
 }

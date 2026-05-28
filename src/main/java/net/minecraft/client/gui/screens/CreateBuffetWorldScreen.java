@@ -38,13 +38,13 @@ public class CreateBuffetWorldScreen extends Screen {
     Holder<Biome> biome;
     private Button doneButton;
 
-    public CreateBuffetWorldScreen(Screen p_232732_, WorldCreationContext p_232733_, Consumer<Holder<Biome>> p_232734_) {
+    public CreateBuffetWorldScreen(Screen pParent, WorldCreationContext pContext, Consumer<Holder<Biome>> pApplySettings) {
         super(Component.translatable("createWorld.customize.buffet.title"));
-        this.parent = p_232732_;
-        this.applySettings = p_232734_;
-        this.biomes = p_232733_.worldgenLoadContext().lookupOrThrow(Registries.BIOME);
+        this.parent = pParent;
+        this.applySettings = pApplySettings;
+        this.biomes = pContext.worldgenLoadContext().lookupOrThrow(Registries.BIOME);
         Holder<Biome> holder = this.biomes.get(Biomes.PLAINS).or(() -> this.biomes.listElements().findAny()).orElseThrow();
-        this.biome = p_232733_.selectedDimensions().overworld().getBiomeSource().possibleBiomes().stream().findFirst().orElse(holder);
+        this.biome = pContext.selectedDimensions().overworld().getBiomeSource().possibleBiomes().stream().findFirst().orElse(holder);
     }
 
     @Override
@@ -92,10 +92,10 @@ public class CreateBuffetWorldScreen extends Screen {
                 .forEach(p_203138_ -> this.addEntry(p_203138_));
         }
 
-        public void setSelected(@Nullable CreateBuffetWorldScreen.BiomeList.Entry p_95785_) {
-            super.setSelected(p_95785_);
-            if (p_95785_ != null) {
-                CreateBuffetWorldScreen.this.biome = p_95785_.biome;
+        public void setSelected(@Nullable CreateBuffetWorldScreen.BiomeList.Entry pEntry) {
+            super.setSelected(pEntry);
+            if (pEntry != null) {
+                CreateBuffetWorldScreen.this.biome = pEntry.biome;
             }
 
             CreateBuffetWorldScreen.this.updateButtonValidity();
@@ -106,9 +106,9 @@ public class CreateBuffetWorldScreen extends Screen {
             final Holder.Reference<Biome> biome;
             final Component name;
 
-            public Entry(final Holder.Reference<Biome> p_205392_) {
-                this.biome = p_205392_;
-                ResourceLocation resourcelocation = p_205392_.key().location();
+            public Entry(final Holder.Reference<Biome> pBiome) {
+                this.biome = pBiome;
+                ResourceLocation resourcelocation = pBiome.key().location();
                 String s = resourcelocation.toLanguageKey("biome");
                 if (Language.getInstance().has(s)) {
                     this.name = Component.translatable(s);
@@ -139,9 +139,9 @@ public class CreateBuffetWorldScreen extends Screen {
             }
 
             @Override
-            public boolean mouseClicked(double p_95798_, double p_95799_, int p_95800_) {
+            public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
                 BiomeList.this.setSelected(this);
-                return super.mouseClicked(p_95798_, p_95799_, p_95800_);
+                return super.mouseClicked(pMouseX, pMouseY, pButton);
             }
         }
     }

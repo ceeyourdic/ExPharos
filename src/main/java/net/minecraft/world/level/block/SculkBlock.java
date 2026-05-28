@@ -50,34 +50,34 @@ public class SculkBlock extends DropExperienceBlock implements SculkBehaviour {
         }
     }
 
-    private static int getDecayPenalty(SculkSpreader p_222080_, BlockPos p_222081_, BlockPos p_222082_, int p_222083_) {
-        int i = p_222080_.noGrowthRadius();
-        float f = Mth.square((float)Math.sqrt(p_222081_.distSqr(p_222082_)) - (float)i);
+    private static int getDecayPenalty(SculkSpreader pSpreader, BlockPos pCursorPos, BlockPos pRootPos, int pCharge) {
+        int i = pSpreader.noGrowthRadius();
+        float f = Mth.square((float)Math.sqrt(pCursorPos.distSqr(pRootPos)) - (float)i);
         int j = Mth.square(24 - i);
         float f1 = Math.min(1.0F, f / (float)j);
-        return Math.max(1, (int)((float)p_222083_ * f1 * 0.5F));
+        return Math.max(1, (int)((float)pCharge * f1 * 0.5F));
     }
 
-    private BlockState getRandomGrowthState(LevelAccessor p_222068_, BlockPos p_222069_, RandomSource p_222070_, boolean p_222071_) {
+    private BlockState getRandomGrowthState(LevelAccessor pLevel, BlockPos pPos, RandomSource pRandom, boolean pIsWorldGeneration) {
         BlockState blockstate;
-        if (p_222070_.nextInt(11) == 0) {
-            blockstate = Blocks.SCULK_SHRIEKER.defaultBlockState().setValue(SculkShriekerBlock.CAN_SUMMON, Boolean.valueOf(p_222071_));
+        if (pRandom.nextInt(11) == 0) {
+            blockstate = Blocks.SCULK_SHRIEKER.defaultBlockState().setValue(SculkShriekerBlock.CAN_SUMMON, Boolean.valueOf(pIsWorldGeneration));
         } else {
             blockstate = Blocks.SCULK_SENSOR.defaultBlockState();
         }
 
-        return blockstate.hasProperty(BlockStateProperties.WATERLOGGED) && !p_222068_.getFluidState(p_222069_).isEmpty()
+        return blockstate.hasProperty(BlockStateProperties.WATERLOGGED) && !pLevel.getFluidState(pPos).isEmpty()
             ? blockstate.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true))
             : blockstate;
     }
 
-    private static boolean canPlaceGrowth(LevelAccessor p_222065_, BlockPos p_222066_) {
-        BlockState blockstate = p_222065_.getBlockState(p_222066_.above());
+    private static boolean canPlaceGrowth(LevelAccessor pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos.above());
         if (blockstate.isAir() || blockstate.is(Blocks.WATER) && blockstate.getFluidState().is(Fluids.WATER)) {
             int i = 0;
 
-            for (BlockPos blockpos : BlockPos.betweenClosed(p_222066_.offset(-4, 0, -4), p_222066_.offset(4, 2, 4))) {
-                BlockState blockstate1 = p_222065_.getBlockState(blockpos);
+            for (BlockPos blockpos : BlockPos.betweenClosed(pPos.offset(-4, 0, -4), pPos.offset(4, 2, 4))) {
+                BlockState blockstate1 = pLevel.getBlockState(blockpos);
                 if (blockstate1.is(Blocks.SCULK_SENSOR) || blockstate1.is(Blocks.SCULK_SHRIEKER)) {
                     i++;
                 }

@@ -5,8 +5,8 @@ public record ChainModifiers(byte flags) {
     private static final byte FLAG_FORKED = 1;
     private static final byte FLAG_IS_RETURN = 2;
 
-    private ChainModifiers setFlag(byte p_312898_) {
-        int i = this.flags | p_312898_;
+    private ChainModifiers setFlag(byte pFlag) {
+        int i = this.flags | pFlag;
         return i != this.flags ? new ChainModifiers((byte)i) : this;
     }
 

@@ -22,12 +22,12 @@ public enum SpecialGlyphs implements GlyphInfo {
 
     final NativeImage image;
 
-    private static NativeImage generate(int p_232609_, int p_232610_, SpecialGlyphs.PixelProvider p_232611_) {
-        NativeImage nativeimage = new NativeImage(NativeImage.Format.RGBA, p_232609_, p_232610_, false);
+    private static NativeImage generate(int pWidth, int pHeight, SpecialGlyphs.PixelProvider pPixelProvider) {
+        NativeImage nativeimage = new NativeImage(NativeImage.Format.RGBA, pWidth, pHeight, false);
 
-        for (int i = 0; i < p_232610_; i++) {
-            for (int j = 0; j < p_232609_; j++) {
-                nativeimage.setPixel(j, i, p_232611_.getColor(j, i));
+        for (int i = 0; i < pHeight; i++) {
+            for (int j = 0; j < pWidth; j++) {
+                nativeimage.setPixel(j, i, pPixelProvider.getColor(j, i));
             }
         }
 
@@ -35,8 +35,8 @@ public enum SpecialGlyphs implements GlyphInfo {
         return nativeimage;
     }
 
-    private SpecialGlyphs(final Supplier<NativeImage> p_232604_) {
-        this.image = p_232604_.get();
+    private SpecialGlyphs(final Supplier<NativeImage> pImage) {
+        this.image = pImage.get();
     }
 
     @Override
@@ -77,6 +77,6 @@ public enum SpecialGlyphs implements GlyphInfo {
     @FunctionalInterface
     @OnlyIn(Dist.CLIENT)
     interface PixelProvider {
-        int getColor(int p_232635_, int p_232636_);
+        int getColor(int pX, int pY);
     }
 }

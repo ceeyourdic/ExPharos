@@ -51,13 +51,13 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected VoxelShape getBlockSupportShape(BlockState p_54456_, BlockGetter p_54457_, BlockPos p_54458_) {
+    protected VoxelShape getBlockSupportShape(BlockState pState, BlockGetter pReader, BlockPos pPos) {
         return Shapes.empty();
     }
 
     @Override
-    protected boolean isRandomlyTicking(BlockState p_54449_) {
-        return p_54449_.getValue(DISTANCE) == 7 && !p_54449_.getValue(PERSISTENT);
+    protected boolean isRandomlyTicking(BlockState pState) {
+        return pState.getValue(DISTANCE) == 7 && !pState.getValue(PERSISTENT);
     }
 
     @Override
@@ -68,8 +68,8 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
         }
     }
 
-    protected boolean decaying(BlockState p_221386_) {
-        return !p_221386_.getValue(PERSISTENT) && p_221386_.getValue(DISTANCE) == 7;
+    protected boolean decaying(BlockState pState) {
+        return !pState.getValue(PERSISTENT) && pState.getValue(DISTANCE) == 7;
     }
 
     @Override
@@ -105,30 +105,30 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
         return p_54440_;
     }
 
-    private static BlockState updateDistance(BlockState p_54436_, LevelAccessor p_54437_, BlockPos p_54438_) {
+    private static BlockState updateDistance(BlockState pState, LevelAccessor pLevel, BlockPos pPos) {
         int i = 7;
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
         for (Direction direction : Direction.values()) {
-            blockpos$mutableblockpos.setWithOffset(p_54438_, direction);
-            i = Math.min(i, getDistanceAt(p_54437_.getBlockState(blockpos$mutableblockpos)) + 1);
+            blockpos$mutableblockpos.setWithOffset(pPos, direction);
+            i = Math.min(i, getDistanceAt(pLevel.getBlockState(blockpos$mutableblockpos)) + 1);
             if (i == 1) {
                 break;
             }
         }
 
-        return p_54436_.setValue(DISTANCE, Integer.valueOf(i));
+        return pState.setValue(DISTANCE, Integer.valueOf(i));
     }
 
-    private static int getDistanceAt(BlockState p_54464_) {
-        return getOptionalDistanceAt(p_54464_).orElse(7);
+    private static int getDistanceAt(BlockState pNeighbor) {
+        return getOptionalDistanceAt(pNeighbor).orElse(7);
     }
 
-    public static OptionalInt getOptionalDistanceAt(BlockState p_277868_) {
-        if (p_277868_.is(BlockTags.LOGS)) {
+    public static OptionalInt getOptionalDistanceAt(BlockState pState) {
+        if (pState.is(BlockTags.LOGS)) {
             return OptionalInt.of(0);
         } else {
-            return p_277868_.hasProperty(DISTANCE) ? OptionalInt.of(p_277868_.getValue(DISTANCE)) : OptionalInt.empty();
+            return pState.hasProperty(DISTANCE) ? OptionalInt.of(pState.getValue(DISTANCE)) : OptionalInt.empty();
         }
     }
 
@@ -151,16 +151,16 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_54447_) {
-        p_54447_.add(DISTANCE, PERSISTENT, WATERLOGGED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(DISTANCE, PERSISTENT, WATERLOGGED);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_54424_) {
-        FluidState fluidstate = p_54424_.getLevel().getFluidState(p_54424_.getClickedPos());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
         BlockState blockstate = this.defaultBlockState()
             .setValue(PERSISTENT, Boolean.valueOf(true))
             .setValue(WATERLOGGED, Boolean.valueOf(fluidstate.getType() == Fluids.WATER));
-        return updateDistance(blockstate, p_54424_.getLevel(), p_54424_.getClickedPos());
+        return updateDistance(blockstate, pContext.getLevel(), pContext.getClickedPos());
     }
 }

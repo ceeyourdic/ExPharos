@@ -18,36 +18,36 @@ public abstract class LongRunningTask implements Runnable {
     private static final Logger LOGGER = LogUtils.getLogger();
     private boolean aborted = false;
 
-    protected static void pause(long p_167656_) {
+    protected static void pause(long pSeconds) {
         try {
-            Thread.sleep(p_167656_ * 1000L);
+            Thread.sleep(pSeconds * 1000L);
         } catch (InterruptedException interruptedexception) {
             Thread.currentThread().interrupt();
             LOGGER.error("", (Throwable)interruptedexception);
         }
     }
 
-    public static void setScreen(Screen p_90406_) {
+    public static void setScreen(Screen pScreen) {
         Minecraft minecraft = Minecraft.getInstance();
-        minecraft.execute(() -> minecraft.setScreen(p_90406_));
+        minecraft.execute(() -> minecraft.setScreen(pScreen));
     }
 
-    protected void error(Component p_90408_) {
+    protected void error(Component pMessage) {
         this.abortTask();
         Minecraft minecraft = Minecraft.getInstance();
-        minecraft.execute(() -> minecraft.setScreen(new RealmsGenericErrorScreen(p_90408_, new RealmsMainScreen(new TitleScreen()))));
+        minecraft.execute(() -> minecraft.setScreen(new RealmsGenericErrorScreen(pMessage, new RealmsMainScreen(new TitleScreen()))));
     }
 
-    protected void error(Exception p_299436_) {
-        if (p_299436_ instanceof RealmsServiceException realmsserviceexception) {
+    protected void error(Exception pException) {
+        if (pException instanceof RealmsServiceException realmsserviceexception) {
             this.error(realmsserviceexception.realmsError.errorMessage());
         } else {
-            this.error(Component.literal(p_299436_.getMessage()));
+            this.error(Component.literal(pException.getMessage()));
         }
     }
 
-    protected void error(RealmsServiceException p_298264_) {
-        this.error(p_298264_.realmsError.errorMessage());
+    protected void error(RealmsServiceException pException) {
+        this.error(pException.realmsError.errorMessage());
     }
 
     public abstract Component getTitle();

@@ -22,30 +22,30 @@ public class HolderSetCodec<E> implements Codec<HolderSet<E>> {
     private final Codec<List<Holder<E>>> homogenousListCodec;
     private final Codec<Either<TagKey<E>, List<Holder<E>>>> registryAwareCodec;
 
-    private static <E> Codec<List<Holder<E>>> homogenousList(Codec<Holder<E>> p_206668_, boolean p_206669_) {
-        Codec<List<Holder<E>>> codec = p_206668_.listOf().validate(ExtraCodecs.ensureHomogenous(Holder::kind));
-        return p_206669_ ? codec : ExtraCodecs.compactListCodec(p_206668_, codec);
+    private static <E> Codec<List<Holder<E>>> homogenousList(Codec<Holder<E>> pHolderCodec, boolean pDisallowInline) {
+        Codec<List<Holder<E>>> codec = pHolderCodec.listOf().validate(ExtraCodecs.ensureHomogenous(Holder::kind));
+        return pDisallowInline ? codec : ExtraCodecs.compactListCodec(pHolderCodec, codec);
     }
 
-    public static <E> Codec<HolderSet<E>> create(ResourceKey<? extends Registry<E>> p_206686_, Codec<Holder<E>> p_206687_, boolean p_206688_) {
-        return new HolderSetCodec<>(p_206686_, p_206687_, p_206688_);
+    public static <E> Codec<HolderSet<E>> create(ResourceKey<? extends Registry<E>> pRegistryKey, Codec<Holder<E>> pHolderCodec, boolean pDisallowInline) {
+        return new HolderSetCodec<>(pRegistryKey, pHolderCodec, pDisallowInline);
     }
 
-    private HolderSetCodec(ResourceKey<? extends Registry<E>> p_206660_, Codec<Holder<E>> p_206661_, boolean p_206662_) {
-        this.registryKey = p_206660_;
-        this.elementCodec = p_206661_;
-        this.homogenousListCodec = homogenousList(p_206661_, p_206662_);
-        this.registryAwareCodec = Codec.either(TagKey.hashedCodec(p_206660_), this.homogenousListCodec);
+    private HolderSetCodec(ResourceKey<? extends Registry<E>> pRegistryKey, Codec<Holder<E>> pElementCodec, boolean pDisallowInline) {
+        this.registryKey = pRegistryKey;
+        this.elementCodec = pElementCodec;
+        this.homogenousListCodec = homogenousList(pElementCodec, pDisallowInline);
+        this.registryAwareCodec = Codec.either(TagKey.hashedCodec(pRegistryKey), this.homogenousListCodec);
     }
 
     @Override
-    public <T> DataResult<Pair<HolderSet<E>, T>> decode(DynamicOps<T> p_206696_, T p_206697_) {
-        if (p_206696_ instanceof RegistryOps<T> registryops) {
+    public <T> DataResult<Pair<HolderSet<E>, T>> decode(DynamicOps<T> pOps, T pInput) {
+        if (pOps instanceof RegistryOps<T> registryops) {
             Optional<HolderGetter<E>> optional = registryops.getter(this.registryKey);
             if (optional.isPresent()) {
                 HolderGetter<E> holdergetter = optional.get();
                 return this.registryAwareCodec
-                    .decode(p_206696_, p_206697_)
+                    .decode(pOps, pInput)
                     .flatMap(
                         p_326147_ -> {
                             DataResult<HolderSet<E>> dataresult = p_326147_.getFirst()
@@ -59,32 +59,32 @@ public class HolderSetCodec<E> implements Codec<HolderSet<E>> {
             }
         }
 
-        return this.decodeWithoutRegistry(p_206696_, p_206697_);
+        return this.decodeWithoutRegistry(pOps, pInput);
     }
 
-    private static <E> DataResult<HolderSet<E>> lookupTag(HolderGetter<E> p_331398_, TagKey<E> p_328227_) {
-        return (DataResult)p_331398_.get(p_328227_)
+    private static <E> DataResult<HolderSet<E>> lookupTag(HolderGetter<E> pInput, TagKey<E> pTagKey) {
+        return (DataResult)pInput.get(pTagKey)
             .map(DataResult::success)
-            .orElseGet(() -> DataResult.error(() -> "Missing tag: '" + p_328227_.location() + "' in '" + p_328227_.registry().location() + "'"));
+            .orElseGet(() -> DataResult.error(() -> "Missing tag: '" + pTagKey.location() + "' in '" + pTagKey.registry().location() + "'"));
     }
 
-    public <T> DataResult<T> encode(HolderSet<E> p_206674_, DynamicOps<T> p_206675_, T p_206676_) {
-        if (p_206675_ instanceof RegistryOps<T> registryops) {
+    public <T> DataResult<T> encode(HolderSet<E> pInput, DynamicOps<T> pOps, T pPrefix) {
+        if (pOps instanceof RegistryOps<T> registryops) {
             Optional<HolderOwner<E>> optional = registryops.owner(this.registryKey);
             if (optional.isPresent()) {
-                if (!p_206674_.canSerializeIn(optional.get())) {
-                    return DataResult.error(() -> "HolderSet " + p_206674_ + " is not valid in current registry set");
+                if (!pInput.canSerializeIn(optional.get())) {
+                    return DataResult.error(() -> "HolderSet " + pInput + " is not valid in current registry set");
                 }
 
-                return this.registryAwareCodec.encode(p_206674_.unwrap().mapRight(List::copyOf), p_206675_, p_206676_);
+                return this.registryAwareCodec.encode(pInput.unwrap().mapRight(List::copyOf), pOps, pPrefix);
             }
         }
 
-        return this.encodeWithoutRegistry(p_206674_, p_206675_, p_206676_);
+        return this.encodeWithoutRegistry(pInput, pOps, pPrefix);
     }
 
-    private <T> DataResult<Pair<HolderSet<E>, T>> decodeWithoutRegistry(DynamicOps<T> p_206671_, T p_206672_) {
-        return this.elementCodec.listOf().decode(p_206671_, p_206672_).flatMap(p_206666_ -> {
+    private <T> DataResult<Pair<HolderSet<E>, T>> decodeWithoutRegistry(DynamicOps<T> pOps, T pInput) {
+        return this.elementCodec.listOf().decode(pOps, pInput).flatMap(p_206666_ -> {
             List<Holder.Direct<E>> list = new ArrayList<>();
 
             for (Holder<E> holder : p_206666_.getFirst()) {
@@ -99,7 +99,7 @@ public class HolderSetCodec<E> implements Codec<HolderSet<E>> {
         });
     }
 
-    private <T> DataResult<T> encodeWithoutRegistry(HolderSet<E> p_206690_, DynamicOps<T> p_206691_, T p_206692_) {
-        return this.homogenousListCodec.encode(p_206690_.stream().toList(), p_206691_, p_206692_);
+    private <T> DataResult<T> encodeWithoutRegistry(HolderSet<E> pInput, DynamicOps<T> pOps, T pPrefix) {
+        return this.homogenousListCodec.encode(pInput.stream().toList(), pOps, pPrefix);
     }
 }

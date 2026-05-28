@@ -22,14 +22,14 @@ public final class RegionFileStorage implements AutoCloseable {
     private final Path folder;
     private final boolean sync;
 
-    RegionFileStorage(RegionStorageInfo p_330451_, Path p_196954_, boolean p_196955_) {
-        this.folder = p_196954_;
-        this.sync = p_196955_;
-        this.info = p_330451_;
+    RegionFileStorage(RegionStorageInfo pInfo, Path pFolder, boolean pSync) {
+        this.folder = pFolder;
+        this.sync = pSync;
+        this.info = pInfo;
     }
 
-    private RegionFile getRegionFile(ChunkPos p_63712_) throws IOException {
-        long i = ChunkPos.asLong(p_63712_.getRegionX(), p_63712_.getRegionZ());
+    private RegionFile getRegionFile(ChunkPos pChunkPos) throws IOException {
+        long i = ChunkPos.asLong(pChunkPos.getRegionX(), pChunkPos.getRegionZ());
         RegionFile regionfile = this.regionCache.getAndMoveToFirst(i);
         if (regionfile != null) {
             return regionfile;
@@ -39,7 +39,7 @@ public final class RegionFileStorage implements AutoCloseable {
             }
 
             FileUtil.createDirectoriesSafe(this.folder);
-            Path path = this.folder.resolve("r." + p_63712_.getRegionX() + "." + p_63712_.getRegionZ() + ".mca");
+            Path path = this.folder.resolve("r." + pChunkPos.getRegionX() + "." + pChunkPos.getRegionZ() + ".mca");
             RegionFile regionfile1 = new RegionFile(this.info, path, this.folder, this.sync);
             this.regionCache.putAndMoveToFirst(i, regionfile1);
             return regionfile1;
@@ -47,11 +47,11 @@ public final class RegionFileStorage implements AutoCloseable {
     }
 
     @Nullable
-    public CompoundTag read(ChunkPos p_63707_) throws IOException {
-        RegionFile regionfile = this.getRegionFile(p_63707_);
+    public CompoundTag read(ChunkPos pChunkPos) throws IOException {
+        RegionFile regionfile = this.getRegionFile(pChunkPos);
 
         CompoundTag compoundtag;
-        try (DataInputStream datainputstream = regionfile.getChunkDataInputStream(p_63707_)) {
+        try (DataInputStream datainputstream = regionfile.getChunkDataInputStream(pChunkPos)) {
             if (datainputstream == null) {
                 return null;
             }
@@ -62,23 +62,23 @@ public final class RegionFileStorage implements AutoCloseable {
         return compoundtag;
     }
 
-    public void scanChunk(ChunkPos p_196957_, StreamTagVisitor p_196958_) throws IOException {
-        RegionFile regionfile = this.getRegionFile(p_196957_);
+    public void scanChunk(ChunkPos pChunkPos, StreamTagVisitor pVisitor) throws IOException {
+        RegionFile regionfile = this.getRegionFile(pChunkPos);
 
-        try (DataInputStream datainputstream = regionfile.getChunkDataInputStream(p_196957_)) {
+        try (DataInputStream datainputstream = regionfile.getChunkDataInputStream(pChunkPos)) {
             if (datainputstream != null) {
-                NbtIo.parse(datainputstream, p_196958_, NbtAccounter.unlimitedHeap());
+                NbtIo.parse(datainputstream, pVisitor, NbtAccounter.unlimitedHeap());
             }
         }
     }
 
-    protected void write(ChunkPos p_63709_, @Nullable CompoundTag p_63710_) throws IOException {
-        RegionFile regionfile = this.getRegionFile(p_63709_);
-        if (p_63710_ == null) {
-            regionfile.clear(p_63709_);
+    protected void write(ChunkPos pChunkPos, @Nullable CompoundTag pChunkData) throws IOException {
+        RegionFile regionfile = this.getRegionFile(pChunkPos);
+        if (pChunkData == null) {
+            regionfile.clear(pChunkPos);
         } else {
-            try (DataOutputStream dataoutputstream = regionfile.getChunkDataOutputStream(p_63709_)) {
-                NbtIo.write(p_63710_, dataoutputstream);
+            try (DataOutputStream dataoutputstream = regionfile.getChunkDataOutputStream(pChunkPos)) {
+                NbtIo.write(pChunkData, dataoutputstream);
             }
         }
     }

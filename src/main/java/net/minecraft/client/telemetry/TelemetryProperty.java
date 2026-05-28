@@ -70,43 +70,43 @@ public record TelemetryProperty<T>(String id, String exportKey, Codec<T> codec, 
     public static final TelemetryProperty<String> ADVANCEMENT_ID = string("advancement_id", "advancementId");
     public static final TelemetryProperty<Long> ADVANCEMENT_GAME_TIME = makeLong("advancement_game_time", "advancementGameTime");
 
-    public static <T> TelemetryProperty<T> create(String p_262052_, String p_261851_, Codec<T> p_261617_, TelemetryProperty.Exporter<T> p_261478_) {
-        return new TelemetryProperty<>(p_262052_, p_261851_, p_261617_, p_261478_);
+    public static <T> TelemetryProperty<T> create(String pId, String pExportKey, Codec<T> pCodec, TelemetryProperty.Exporter<T> pExporter) {
+        return new TelemetryProperty<>(pId, pExportKey, pCodec, pExporter);
     }
 
-    public static TelemetryProperty<Boolean> bool(String p_261605_, String p_262064_) {
-        return create(p_261605_, p_262064_, Codec.BOOL, TelemetryPropertyContainer::addProperty);
+    public static TelemetryProperty<Boolean> bool(String pId, String pExportKey) {
+        return create(pId, pExportKey, Codec.BOOL, TelemetryPropertyContainer::addProperty);
     }
 
-    public static TelemetryProperty<String> string(String p_261570_, String p_261611_) {
-        return create(p_261570_, p_261611_, Codec.STRING, TelemetryPropertyContainer::addProperty);
+    public static TelemetryProperty<String> string(String pId, String pExportKey) {
+        return create(pId, pExportKey, Codec.STRING, TelemetryPropertyContainer::addProperty);
     }
 
-    public static TelemetryProperty<Integer> integer(String p_262077_, String p_261580_) {
-        return create(p_262077_, p_261580_, Codec.INT, TelemetryPropertyContainer::addProperty);
+    public static TelemetryProperty<Integer> integer(String pId, String pExportKey) {
+        return create(pId, pExportKey, Codec.INT, TelemetryPropertyContainer::addProperty);
     }
 
-    public static TelemetryProperty<Long> makeLong(String p_286489_, String p_286616_) {
-        return create(p_286489_, p_286616_, Codec.LONG, TelemetryPropertyContainer::addProperty);
+    public static TelemetryProperty<Long> makeLong(String pId, String pExportKey) {
+        return create(pId, pExportKey, Codec.LONG, TelemetryPropertyContainer::addProperty);
     }
 
-    public static TelemetryProperty<UUID> uuid(String p_261558_, String p_261707_) {
-        return create(p_261558_, p_261707_, UUIDUtil.STRING_CODEC, (p_261704_, p_261590_, p_261975_) -> p_261704_.addProperty(p_261590_, p_261975_.toString()));
+    public static TelemetryProperty<UUID> uuid(String pId, String pExportKey) {
+        return create(pId, pExportKey, UUIDUtil.STRING_CODEC, (p_261704_, p_261590_, p_261975_) -> p_261704_.addProperty(p_261590_, p_261975_.toString()));
     }
 
-    public static TelemetryProperty<GameLoadTimesEvent.Measurement> gameLoadMeasurement(String p_286636_, String p_286769_) {
+    public static TelemetryProperty<GameLoadTimesEvent.Measurement> gameLoadMeasurement(String pId, String pExportKey) {
         return create(
-            p_286636_,
-            p_286769_,
+            pId,
+            pExportKey,
             GameLoadTimesEvent.Measurement.CODEC,
             (p_286179_, p_286180_, p_286181_) -> p_286179_.addProperty(p_286180_, p_286181_.millis())
         );
     }
 
-    public static TelemetryProperty<LongList> longSamples(String p_262055_, String p_261726_) {
+    public static TelemetryProperty<LongList> longSamples(String pId, String pExportKey) {
         return create(
-            p_262055_,
-            p_261726_,
+            pId,
+            pExportKey,
             Codec.LONG.listOf().xmap(LongArrayList::new, Function.identity()),
             (p_261674_, p_262049_, p_262118_) -> p_261674_.addProperty(
                     p_262049_, p_262118_.longStream().mapToObj(String::valueOf).collect(Collectors.joining(";"))
@@ -114,12 +114,12 @@ public record TelemetryProperty<T>(String id, String exportKey, Codec<T> codec, 
         );
     }
 
-    public void export(TelemetryPropertyMap p_262111_, TelemetryPropertyContainer p_262082_) {
-        T t = p_262111_.get(this);
+    public void export(TelemetryPropertyMap pPropertyMap, TelemetryPropertyContainer pContainer) {
+        T t = pPropertyMap.get(this);
         if (t != null) {
-            this.exporter.apply(p_262082_, this.exportKey, t);
+            this.exporter.apply(pContainer, this.exportKey, t);
         } else {
-            p_262082_.addNullProperty(this.exportKey);
+            pContainer.addNullProperty(this.exportKey);
         }
     }
 
@@ -134,7 +134,7 @@ public record TelemetryProperty<T>(String id, String exportKey, Codec<T> codec, 
 
     @OnlyIn(Dist.CLIENT)
     public interface Exporter<T> {
-        void apply(TelemetryPropertyContainer p_261934_, String p_261962_, T p_262012_);
+        void apply(TelemetryPropertyContainer pContainer, String pExportKey, T pValue);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -149,9 +149,9 @@ public record TelemetryProperty<T>(String id, String exportKey, Codec<T> codec, 
         private final String key;
         private final int id;
 
-        private GameMode(final String p_261661_, final int p_261545_) {
-            this.key = p_261661_;
-            this.id = p_261545_;
+        private GameMode(final String pKey, final int pId) {
+            this.key = pKey;
+            this.id = pId;
         }
 
         public int id() {
@@ -173,8 +173,8 @@ public record TelemetryProperty<T>(String id, String exportKey, Codec<T> codec, 
         public static final Codec<TelemetryProperty.ServerType> CODEC = StringRepresentable.fromEnum(TelemetryProperty.ServerType::values);
         private final String key;
 
-        private ServerType(final String p_261499_) {
-            this.key = p_261499_;
+        private ServerType(final String pKey) {
+            this.key = pKey;
         }
 
         @Override

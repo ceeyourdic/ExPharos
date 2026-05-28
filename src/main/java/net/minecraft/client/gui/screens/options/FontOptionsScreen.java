@@ -9,12 +9,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class FontOptionsScreen extends OptionsSubScreen {
-    private static OptionInstance<?>[] options(Options p_342475_) {
-        return new OptionInstance[]{p_342475_.forceUnicodeFont(), p_342475_.japaneseGlyphVariants()};
+    private static OptionInstance<?>[] options(Options pOptions) {
+        return new OptionInstance[]{pOptions.forceUnicodeFont(), pOptions.japaneseGlyphVariants()};
     }
 
-    public FontOptionsScreen(Screen p_345386_, Options p_343880_) {
-        super(p_345386_, p_343880_, Component.translatable("options.font.title"));
+    public FontOptionsScreen(Screen pLastScreen, Options pOptions) {
+        super(pLastScreen, pOptions, Component.translatable("options.font.title"));
     }
 
     @Override

@@ -29,10 +29,10 @@ public class MobBucketItem extends BucketItem {
     private final EntityType<? extends Mob> type;
     private final SoundEvent emptySound;
 
-    public MobBucketItem(EntityType<? extends Mob> p_151137_, Fluid p_151138_, SoundEvent p_151139_, Item.Properties p_151140_) {
-        super(p_151138_, p_151140_);
-        this.type = p_151137_;
-        this.emptySound = p_151139_;
+    public MobBucketItem(EntityType<? extends Mob> pType, Fluid pContent, SoundEvent pEmptySound, Item.Properties pProperties) {
+        super(pContent, pProperties);
+        this.type = pType;
+        this.emptySound = pEmptySound;
     }
 
     @Override
@@ -48,16 +48,16 @@ public class MobBucketItem extends BucketItem {
         p_151152_.playSound(p_151151_, p_151153_, this.emptySound, SoundSource.NEUTRAL, 1.0F, 1.0F);
     }
 
-    private void spawn(ServerLevel p_151142_, ItemStack p_151143_, BlockPos p_151144_) {
-        Mob mob = this.type.create(p_151142_, EntityType.createDefaultStackConfig(p_151142_, p_151143_, null), p_151144_, EntitySpawnReason.BUCKET, true, false);
+    private void spawn(ServerLevel pServerLevel, ItemStack pBucketedMobStack, BlockPos pPos) {
+        Mob mob = this.type.create(pServerLevel, EntityType.createDefaultStackConfig(pServerLevel, pBucketedMobStack, null), pPos, EntitySpawnReason.BUCKET, true, false);
         if (mob instanceof Bucketable bucketable) {
-            CustomData customdata = p_151143_.getOrDefault(DataComponents.BUCKET_ENTITY_DATA, CustomData.EMPTY);
+            CustomData customdata = pBucketedMobStack.getOrDefault(DataComponents.BUCKET_ENTITY_DATA, CustomData.EMPTY);
             bucketable.loadFromBucketTag(customdata.copyTag());
             bucketable.setFromBucket(true);
         }
 
         if (mob != null) {
-            p_151142_.addFreshEntityWithPassengers(mob);
+            pServerLevel.addFreshEntityWithPassengers(mob);
             mob.playAmbientSound();
         }
     }

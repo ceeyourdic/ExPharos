@@ -44,32 +44,32 @@ public class ChunkPalettedStorageFix extends DataFix {
     static final Logger LOGGER = LogUtils.getLogger();
     private static final int SIZE = 4096;
 
-    public ChunkPalettedStorageFix(Schema p_15058_, boolean p_15059_) {
-        super(p_15058_, p_15059_);
+    public ChunkPalettedStorageFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
     }
 
-    public static String getName(Dynamic<?> p_15065_) {
-        return p_15065_.get("Name").asString("");
+    public static String getName(Dynamic<?> pData) {
+        return pData.get("Name").asString("");
     }
 
-    public static String getProperty(Dynamic<?> p_15067_, String p_15068_) {
-        return p_15067_.get("Properties").get(p_15068_).asString("");
+    public static String getProperty(Dynamic<?> pData, String pKey) {
+        return pData.get("Properties").get(pKey).asString("");
     }
 
-    public static int idFor(CrudeIncrementalIntIdentityHashBiMap<Dynamic<?>> p_15062_, Dynamic<?> p_15063_) {
-        int i = p_15062_.getId(p_15063_);
+    public static int idFor(CrudeIncrementalIntIdentityHashBiMap<Dynamic<?>> pPalette, Dynamic<?> pData) {
+        int i = pPalette.getId(pData);
         if (i == -1) {
-            i = p_15062_.add(p_15063_);
+            i = pPalette.add(pData);
         }
 
         return i;
     }
 
-    private Dynamic<?> fix(Dynamic<?> p_15093_) {
-        Optional<? extends Dynamic<?>> optional = p_15093_.get("Level").result();
+    private Dynamic<?> fix(Dynamic<?> pDynamic) {
+        Optional<? extends Dynamic<?>> optional = pDynamic.get("Level").result();
         return optional.isPresent() && optional.get().get("Sections").asStreamOpt().result().isPresent()
-            ? p_15093_.set("Level", new ChunkPalettedStorageFix.UpgradeChunk((Dynamic<?>)optional.get()).write())
-            : p_15093_;
+            ? pDynamic.set("Level", new ChunkPalettedStorageFix.UpgradeChunk((Dynamic<?>)optional.get()).write())
+            : pDynamic;
     }
 
     @Override
@@ -79,27 +79,27 @@ public class ChunkPalettedStorageFix extends DataFix {
         return this.writeFixAndRead("ChunkPalettedStorageFix", type, type1, this::fix);
     }
 
-    public static int getSideMask(boolean p_15087_, boolean p_15088_, boolean p_15089_, boolean p_15090_) {
+    public static int getSideMask(boolean pWest, boolean pEast, boolean pNorth, boolean pSouth) {
         int i = 0;
-        if (p_15089_) {
-            if (p_15088_) {
+        if (pNorth) {
+            if (pEast) {
                 i |= 2;
-            } else if (p_15087_) {
+            } else if (pWest) {
                 i |= 128;
             } else {
                 i |= 1;
             }
-        } else if (p_15090_) {
-            if (p_15087_) {
+        } else if (pSouth) {
+            if (pWest) {
                 i |= 32;
-            } else if (p_15088_) {
+            } else if (pEast) {
                 i |= 8;
             } else {
                 i |= 16;
             }
-        } else if (p_15088_) {
+        } else if (pEast) {
             i |= 4;
-        } else if (p_15087_) {
+        } else if (pWest) {
             i |= 64;
         }
 
@@ -115,24 +115,24 @@ public class ChunkPalettedStorageFix extends DataFix {
             this.data = new byte[2048];
         }
 
-        public DataLayer(byte[] p_15132_) {
-            this.data = p_15132_;
-            if (p_15132_.length != 2048) {
-                throw new IllegalArgumentException("ChunkNibbleArrays should be 2048 bytes not: " + p_15132_.length);
+        public DataLayer(byte[] pData) {
+            this.data = pData;
+            if (pData.length != 2048) {
+                throw new IllegalArgumentException("ChunkNibbleArrays should be 2048 bytes not: " + pData.length);
             }
         }
 
-        public int get(int p_15136_, int p_15137_, int p_15138_) {
-            int i = this.getPosition(p_15137_ << 8 | p_15138_ << 4 | p_15136_);
-            return this.isFirst(p_15137_ << 8 | p_15138_ << 4 | p_15136_) ? this.data[i] & 15 : this.data[i] >> 4 & 15;
+        public int get(int pX, int pY, int pZ) {
+            int i = this.getPosition(pY << 8 | pZ << 4 | pX);
+            return this.isFirst(pY << 8 | pZ << 4 | pX) ? this.data[i] & 15 : this.data[i] >> 4 & 15;
         }
 
-        private boolean isFirst(int p_15134_) {
-            return (p_15134_ & 1) == 0;
+        private boolean isFirst(int pPackedPos) {
+            return (pPackedPos & 1) == 0;
         }
 
-        private int getPosition(int p_15140_) {
-            return p_15140_ >> 1;
+        private int getPosition(int pPackedPos) {
+            return pPackedPos >> 1;
         }
     }
 
@@ -147,9 +147,9 @@ public class ChunkPalettedStorageFix extends DataFix {
         private final ChunkPalettedStorageFix.Direction.Axis axis;
         private final ChunkPalettedStorageFix.Direction.AxisDirection axisDirection;
 
-        private Direction(final ChunkPalettedStorageFix.Direction.AxisDirection p_15154_, final ChunkPalettedStorageFix.Direction.Axis p_15155_) {
-            this.axis = p_15155_;
-            this.axisDirection = p_15154_;
+        private Direction(final ChunkPalettedStorageFix.Direction.AxisDirection pAxisDirection, final ChunkPalettedStorageFix.Direction.Axis pAxis) {
+            this.axis = pAxis;
+            this.axisDirection = pAxisDirection;
         }
 
         public ChunkPalettedStorageFix.Direction.AxisDirection getAxisDirection() {
@@ -172,8 +172,8 @@ public class ChunkPalettedStorageFix extends DataFix {
 
             private final int step;
 
-            private AxisDirection(final int p_15180_) {
-                this.step = p_15180_;
+            private AxisDirection(final int pStep) {
+                this.step = pStep;
             }
 
             public int getStep() {
@@ -279,339 +279,339 @@ public class ChunkPalettedStorageFix extends DataFix {
         private MappingConstants() {
         }
 
-        private static void mapSkull(Map<String, Dynamic<?>> p_364399_, int p_365434_, String p_368075_, String p_367880_) {
-            p_364399_.put(p_365434_ + "north", ExtraDataFixUtils.blockState("minecraft:" + p_368075_ + "_wall_" + p_367880_, Map.of("facing", "north")));
-            p_364399_.put(p_365434_ + "east", ExtraDataFixUtils.blockState("minecraft:" + p_368075_ + "_wall_" + p_367880_, Map.of("facing", "east")));
-            p_364399_.put(p_365434_ + "south", ExtraDataFixUtils.blockState("minecraft:" + p_368075_ + "_wall_" + p_367880_, Map.of("facing", "south")));
-            p_364399_.put(p_365434_ + "west", ExtraDataFixUtils.blockState("minecraft:" + p_368075_ + "_wall_" + p_367880_, Map.of("facing", "west")));
+        private static void mapSkull(Map<String, Dynamic<?>> pMap, int pId, String pSkullType, String pSuffix) {
+            pMap.put(pId + "north", ExtraDataFixUtils.blockState("minecraft:" + pSkullType + "_wall_" + pSuffix, Map.of("facing", "north")));
+            pMap.put(pId + "east", ExtraDataFixUtils.blockState("minecraft:" + pSkullType + "_wall_" + pSuffix, Map.of("facing", "east")));
+            pMap.put(pId + "south", ExtraDataFixUtils.blockState("minecraft:" + pSkullType + "_wall_" + pSuffix, Map.of("facing", "south")));
+            pMap.put(pId + "west", ExtraDataFixUtils.blockState("minecraft:" + pSkullType + "_wall_" + pSuffix, Map.of("facing", "west")));
 
             for (int i = 0; i < 16; i++) {
-                p_364399_.put(
-                    "" + p_365434_ + i, ExtraDataFixUtils.blockState("minecraft:" + p_368075_ + "_" + p_367880_, Map.of("rotation", String.valueOf(i)))
+                pMap.put(
+                    "" + pId + i, ExtraDataFixUtils.blockState("minecraft:" + pSkullType + "_" + pSuffix, Map.of("rotation", String.valueOf(i)))
                 );
             }
         }
 
-        private static void mapDoor(Map<String, Dynamic<?>> p_368492_, String p_362981_) {
-            String s = "minecraft:" + p_362981_;
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastlowerleftfalsefalse",
+        private static void mapDoor(Map<String, Dynamic<?>> pMap, String pDoorId) {
+            String s = "minecraft:" + pDoorId;
+            pMap.put(
+                "minecraft:" + pDoorId + "eastlowerleftfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "lower", "hinge", "left", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastlowerleftfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastlowerleftfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "lower", "hinge", "left", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastlowerlefttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastlowerlefttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "lower", "hinge", "left", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastlowerlefttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastlowerlefttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "lower", "hinge", "left", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastlowerrightfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastlowerrightfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "lower", "hinge", "right", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastlowerrightfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastlowerrightfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "lower", "hinge", "right", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastlowerrighttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastlowerrighttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "lower", "hinge", "right", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastlowerrighttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastlowerrighttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "lower", "hinge", "right", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastupperleftfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastupperleftfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "upper", "hinge", "left", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastupperleftfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastupperleftfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "upper", "hinge", "left", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastupperlefttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastupperlefttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "upper", "hinge", "left", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastupperlefttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastupperlefttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "upper", "hinge", "left", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastupperrightfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastupperrightfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "upper", "hinge", "right", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastupperrightfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastupperrightfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "upper", "hinge", "right", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastupperrighttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastupperrighttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "upper", "hinge", "right", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "eastupperrighttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "eastupperrighttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "east", "half", "upper", "hinge", "right", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northlowerleftfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "northlowerleftfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "lower", "hinge", "left", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northlowerleftfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "northlowerleftfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "lower", "hinge", "left", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northlowerlefttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "northlowerlefttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "lower", "hinge", "left", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northlowerlefttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "northlowerlefttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "lower", "hinge", "left", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northlowerrightfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "northlowerrightfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "lower", "hinge", "right", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northlowerrightfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "northlowerrightfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "lower", "hinge", "right", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northlowerrighttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "northlowerrighttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "lower", "hinge", "right", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northlowerrighttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "northlowerrighttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "lower", "hinge", "right", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northupperleftfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "northupperleftfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "upper", "hinge", "left", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northupperleftfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "northupperleftfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "upper", "hinge", "left", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northupperlefttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "northupperlefttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "upper", "hinge", "left", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northupperlefttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "northupperlefttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "upper", "hinge", "left", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northupperrightfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "northupperrightfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "upper", "hinge", "right", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northupperrightfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "northupperrightfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "upper", "hinge", "right", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northupperrighttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "northupperrighttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "upper", "hinge", "right", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "northupperrighttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "northupperrighttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "north", "half", "upper", "hinge", "right", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southlowerleftfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "southlowerleftfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "lower", "hinge", "left", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southlowerleftfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "southlowerleftfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "lower", "hinge", "left", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southlowerlefttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "southlowerlefttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "lower", "hinge", "left", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southlowerlefttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "southlowerlefttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "lower", "hinge", "left", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southlowerrightfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "southlowerrightfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "lower", "hinge", "right", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southlowerrightfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "southlowerrightfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "lower", "hinge", "right", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southlowerrighttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "southlowerrighttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "lower", "hinge", "right", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southlowerrighttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "southlowerrighttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "lower", "hinge", "right", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southupperleftfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "southupperleftfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "upper", "hinge", "left", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southupperleftfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "southupperleftfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "upper", "hinge", "left", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southupperlefttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "southupperlefttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "upper", "hinge", "left", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southupperlefttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "southupperlefttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "upper", "hinge", "left", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southupperrightfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "southupperrightfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "upper", "hinge", "right", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southupperrightfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "southupperrightfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "upper", "hinge", "right", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southupperrighttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "southupperrighttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "upper", "hinge", "right", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "southupperrighttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "southupperrighttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "south", "half", "upper", "hinge", "right", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westlowerleftfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "westlowerleftfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "lower", "hinge", "left", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westlowerleftfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "westlowerleftfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "lower", "hinge", "left", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westlowerlefttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "westlowerlefttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "lower", "hinge", "left", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westlowerlefttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "westlowerlefttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "lower", "hinge", "left", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westlowerrightfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "westlowerrightfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "lower", "hinge", "right", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westlowerrightfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "westlowerrightfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "lower", "hinge", "right", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westlowerrighttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "westlowerrighttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "lower", "hinge", "right", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westlowerrighttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "westlowerrighttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "lower", "hinge", "right", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westupperleftfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "westupperleftfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "upper", "hinge", "left", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westupperleftfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "westupperleftfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "upper", "hinge", "left", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westupperlefttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "westupperlefttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "upper", "hinge", "left", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westupperlefttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "westupperlefttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "upper", "hinge", "left", "open", "true", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westupperrightfalsefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "westupperrightfalsefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "upper", "hinge", "right", "open", "false", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westupperrightfalsetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "westupperrightfalsetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "upper", "hinge", "right", "open", "false", "powered", "true"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westupperrighttruefalse",
+            pMap.put(
+                "minecraft:" + pDoorId + "westupperrighttruefalse",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "upper", "hinge", "right", "open", "true", "powered", "false"))
             );
-            p_368492_.put(
-                "minecraft:" + p_362981_ + "westupperrighttruetrue",
+            pMap.put(
+                "minecraft:" + pDoorId + "westupperrighttruetrue",
                 ExtraDataFixUtils.blockState(s, Map.of("facing", "west", "half", "upper", "hinge", "right", "open", "true", "powered", "true"))
             );
         }
 
-        private static void addBeds(Map<String, Dynamic<?>> p_369009_, int p_366326_, String p_363252_) {
-            p_369009_.put(
-                "southfalsefoot" + p_366326_,
-                ExtraDataFixUtils.blockState("minecraft:" + p_363252_ + "_bed", Map.of("facing", "south", "occupied", "false", "part", "foot"))
+        private static void addBeds(Map<String, Dynamic<?>> pMap, int pId, String pBedColor) {
+            pMap.put(
+                "southfalsefoot" + pId,
+                ExtraDataFixUtils.blockState("minecraft:" + pBedColor + "_bed", Map.of("facing", "south", "occupied", "false", "part", "foot"))
             );
-            p_369009_.put(
-                "westfalsefoot" + p_366326_,
-                ExtraDataFixUtils.blockState("minecraft:" + p_363252_ + "_bed", Map.of("facing", "west", "occupied", "false", "part", "foot"))
+            pMap.put(
+                "westfalsefoot" + pId,
+                ExtraDataFixUtils.blockState("minecraft:" + pBedColor + "_bed", Map.of("facing", "west", "occupied", "false", "part", "foot"))
             );
-            p_369009_.put(
-                "northfalsefoot" + p_366326_,
-                ExtraDataFixUtils.blockState("minecraft:" + p_363252_ + "_bed", Map.of("facing", "north", "occupied", "false", "part", "foot"))
+            pMap.put(
+                "northfalsefoot" + pId,
+                ExtraDataFixUtils.blockState("minecraft:" + pBedColor + "_bed", Map.of("facing", "north", "occupied", "false", "part", "foot"))
             );
-            p_369009_.put(
-                "eastfalsefoot" + p_366326_,
-                ExtraDataFixUtils.blockState("minecraft:" + p_363252_ + "_bed", Map.of("facing", "east", "occupied", "false", "part", "foot"))
+            pMap.put(
+                "eastfalsefoot" + pId,
+                ExtraDataFixUtils.blockState("minecraft:" + pBedColor + "_bed", Map.of("facing", "east", "occupied", "false", "part", "foot"))
             );
-            p_369009_.put(
-                "southfalsehead" + p_366326_,
-                ExtraDataFixUtils.blockState("minecraft:" + p_363252_ + "_bed", Map.of("facing", "south", "occupied", "false", "part", "head"))
+            pMap.put(
+                "southfalsehead" + pId,
+                ExtraDataFixUtils.blockState("minecraft:" + pBedColor + "_bed", Map.of("facing", "south", "occupied", "false", "part", "head"))
             );
-            p_369009_.put(
-                "westfalsehead" + p_366326_,
-                ExtraDataFixUtils.blockState("minecraft:" + p_363252_ + "_bed", Map.of("facing", "west", "occupied", "false", "part", "head"))
+            pMap.put(
+                "westfalsehead" + pId,
+                ExtraDataFixUtils.blockState("minecraft:" + pBedColor + "_bed", Map.of("facing", "west", "occupied", "false", "part", "head"))
             );
-            p_369009_.put(
-                "northfalsehead" + p_366326_,
-                ExtraDataFixUtils.blockState("minecraft:" + p_363252_ + "_bed", Map.of("facing", "north", "occupied", "false", "part", "head"))
+            pMap.put(
+                "northfalsehead" + pId,
+                ExtraDataFixUtils.blockState("minecraft:" + pBedColor + "_bed", Map.of("facing", "north", "occupied", "false", "part", "head"))
             );
-            p_369009_.put(
-                "eastfalsehead" + p_366326_,
-                ExtraDataFixUtils.blockState("minecraft:" + p_363252_ + "_bed", Map.of("facing", "east", "occupied", "false", "part", "head"))
+            pMap.put(
+                "eastfalsehead" + pId,
+                ExtraDataFixUtils.blockState("minecraft:" + pBedColor + "_bed", Map.of("facing", "east", "occupied", "false", "part", "head"))
             );
-            p_369009_.put(
-                "southtruehead" + p_366326_,
-                ExtraDataFixUtils.blockState("minecraft:" + p_363252_ + "_bed", Map.of("facing", "south", "occupied", "true", "part", "head"))
+            pMap.put(
+                "southtruehead" + pId,
+                ExtraDataFixUtils.blockState("minecraft:" + pBedColor + "_bed", Map.of("facing", "south", "occupied", "true", "part", "head"))
             );
-            p_369009_.put(
-                "westtruehead" + p_366326_,
-                ExtraDataFixUtils.blockState("minecraft:" + p_363252_ + "_bed", Map.of("facing", "west", "occupied", "true", "part", "head"))
+            pMap.put(
+                "westtruehead" + pId,
+                ExtraDataFixUtils.blockState("minecraft:" + pBedColor + "_bed", Map.of("facing", "west", "occupied", "true", "part", "head"))
             );
-            p_369009_.put(
-                "northtruehead" + p_366326_,
-                ExtraDataFixUtils.blockState("minecraft:" + p_363252_ + "_bed", Map.of("facing", "north", "occupied", "true", "part", "head"))
+            pMap.put(
+                "northtruehead" + pId,
+                ExtraDataFixUtils.blockState("minecraft:" + pBedColor + "_bed", Map.of("facing", "north", "occupied", "true", "part", "head"))
             );
-            p_369009_.put(
-                "easttruehead" + p_366326_,
-                ExtraDataFixUtils.blockState("minecraft:" + p_363252_ + "_bed", Map.of("facing", "east", "occupied", "true", "part", "head"))
+            pMap.put(
+                "easttruehead" + pId,
+                ExtraDataFixUtils.blockState("minecraft:" + pBedColor + "_bed", Map.of("facing", "east", "occupied", "true", "part", "head"))
             );
         }
 
-        private static void addBanners(Map<String, Dynamic<?>> p_368021_, int p_361887_, String p_364451_) {
+        private static void addBanners(Map<String, Dynamic<?>> pMap, int pId, String pBannerColor) {
             for (int i = 0; i < 16; i++) {
-                p_368021_.put(i + "_" + p_361887_, ExtraDataFixUtils.blockState("minecraft:" + p_364451_ + "_banner", Map.of("rotation", String.valueOf(i))));
+                pMap.put(i + "_" + pId, ExtraDataFixUtils.blockState("minecraft:" + pBannerColor + "_banner", Map.of("rotation", String.valueOf(i))));
             }
 
-            p_368021_.put("north_" + p_361887_, ExtraDataFixUtils.blockState("minecraft:" + p_364451_ + "_wall_banner", Map.of("facing", "north")));
-            p_368021_.put("south_" + p_361887_, ExtraDataFixUtils.blockState("minecraft:" + p_364451_ + "_wall_banner", Map.of("facing", "south")));
-            p_368021_.put("west_" + p_361887_, ExtraDataFixUtils.blockState("minecraft:" + p_364451_ + "_wall_banner", Map.of("facing", "west")));
-            p_368021_.put("east_" + p_361887_, ExtraDataFixUtils.blockState("minecraft:" + p_364451_ + "_wall_banner", Map.of("facing", "east")));
+            pMap.put("north_" + pId, ExtraDataFixUtils.blockState("minecraft:" + pBannerColor + "_wall_banner", Map.of("facing", "north")));
+            pMap.put("south_" + pId, ExtraDataFixUtils.blockState("minecraft:" + pBannerColor + "_wall_banner", Map.of("facing", "south")));
+            pMap.put("west_" + pId, ExtraDataFixUtils.blockState("minecraft:" + pBannerColor + "_wall_banner", Map.of("facing", "west")));
+            pMap.put("east_" + pId, ExtraDataFixUtils.blockState("minecraft:" + pBannerColor + "_wall_banner", Map.of("facing", "east")));
         }
 
         static {
@@ -689,34 +689,34 @@ public class ChunkPalettedStorageFix extends DataFix {
         private final Set<Dynamic<?>> seen = Sets.newIdentityHashSet();
         private final int[] buffer = new int[4096];
 
-        public Section(Dynamic<?> p_15195_) {
+        public Section(Dynamic<?> pSection) {
             this.listTag = Lists.newArrayList();
-            this.section = p_15195_;
-            this.y = p_15195_.get("Y").asInt(0);
-            this.hasData = p_15195_.get("Blocks").result().isPresent();
+            this.section = pSection;
+            this.y = pSection.get("Y").asInt(0);
+            this.hasData = pSection.get("Blocks").result().isPresent();
         }
 
-        public Dynamic<?> getBlock(int p_15198_) {
-            if (p_15198_ >= 0 && p_15198_ <= 4095) {
-                Dynamic<?> dynamic = this.palette.byId(this.buffer[p_15198_]);
+        public Dynamic<?> getBlock(int pIndex) {
+            if (pIndex >= 0 && pIndex <= 4095) {
+                Dynamic<?> dynamic = this.palette.byId(this.buffer[pIndex]);
                 return dynamic == null ? ChunkPalettedStorageFix.MappingConstants.AIR : dynamic;
             } else {
                 return ChunkPalettedStorageFix.MappingConstants.AIR;
             }
         }
 
-        public void setBlock(int p_15203_, Dynamic<?> p_15204_) {
-            if (this.seen.add(p_15204_)) {
+        public void setBlock(int pIndex, Dynamic<?> pBlock) {
+            if (this.seen.add(pBlock)) {
                 this.listTag
-                    .add("%%FILTER_ME%%".equals(ChunkPalettedStorageFix.getName(p_15204_)) ? ChunkPalettedStorageFix.MappingConstants.AIR : p_15204_);
+                    .add("%%FILTER_ME%%".equals(ChunkPalettedStorageFix.getName(pBlock)) ? ChunkPalettedStorageFix.MappingConstants.AIR : pBlock);
             }
 
-            this.buffer[p_15203_] = ChunkPalettedStorageFix.idFor(this.palette, p_15204_);
+            this.buffer[pIndex] = ChunkPalettedStorageFix.idFor(this.palette, pBlock);
         }
 
-        public int upgrade(int p_15210_) {
+        public int upgrade(int pSides) {
             if (!this.hasData) {
-                return p_15210_;
+                return pSides;
             } else {
                 ByteBuffer bytebuffer = this.section.get("Blocks").asByteBufferOpt().result().get();
                 ChunkPalettedStorageFix.DataLayer chunkpalettedstoragefix$datalayer = this.section
@@ -751,25 +751,25 @@ public class ChunkPalettedStorageFix extends DataFix {
                         if (j1 == 0) {
                             this.update.add(i);
                         } else {
-                            p_15210_ |= j1;
+                            pSides |= j1;
                         }
                     }
 
                     this.setBlock(i, BlockStateData.getTag(i1));
                 }
 
-                return p_15210_;
+                return pSides;
             }
         }
 
-        private void addFix(int p_15200_, int p_15201_) {
-            IntList intlist = this.toFix.get(p_15200_);
+        private void addFix(int pIndex, int pValue) {
+            IntList intlist = this.toFix.get(pIndex);
             if (intlist == null) {
                 intlist = new IntArrayList();
-                this.toFix.put(p_15200_, intlist);
+                this.toFix.put(pIndex, intlist);
             }
 
-            intlist.add(p_15201_);
+            intlist.add(pValue);
         }
 
         public Dynamic<?> write() {
@@ -801,11 +801,11 @@ public class ChunkPalettedStorageFix extends DataFix {
         private final int z;
         private final Int2ObjectMap<Dynamic<?>> blockEntities = new Int2ObjectLinkedOpenHashMap<>(16);
 
-        public UpgradeChunk(Dynamic<?> p_15222_) {
-            this.level = p_15222_;
-            this.x = p_15222_.get("xPos").asInt(0) << 4;
-            this.z = p_15222_.get("zPos").asInt(0) << 4;
-            p_15222_.get("TileEntities")
+        public UpgradeChunk(Dynamic<?> pLevel) {
+            this.level = pLevel;
+            this.x = pLevel.get("xPos").asInt(0) << 4;
+            this.z = pLevel.get("zPos").asInt(0) << 4;
+            pLevel.get("TileEntities")
                 .asStreamOpt()
                 .ifSuccess(
                     p_15241_ -> p_15241_.forEach(
@@ -828,8 +828,8 @@ public class ChunkPalettedStorageFix extends DataFix {
                             }
                         )
                 );
-            boolean flag = p_15222_.get("convertedFromAlphaFormat").asBoolean(false);
-            p_15222_.get("Sections").asStreamOpt().ifSuccess(p_15235_ -> p_15235_.forEach(p_145226_ -> {
+            boolean flag = pLevel.get("convertedFromAlphaFormat").asBoolean(false);
+            pLevel.get("Sections").asStreamOpt().ifSuccess(p_15235_ -> p_15235_.forEach(p_145226_ -> {
                     ChunkPalettedStorageFix.Section chunkpalettedstoragefix$section1 = new ChunkPalettedStorageFix.Section((Dynamic<?>)p_145226_);
                     this.sides = chunkpalettedstoragefix$section1.upgrade(this.sides);
                     this.sections[chunkpalettedstoragefix$section1.y] = chunkpalettedstoragefix$section1;
@@ -1041,29 +1041,29 @@ public class ChunkPalettedStorageFix extends DataFix {
         }
 
         @Nullable
-        private Dynamic<?> getBlockEntity(int p_15237_) {
-            return this.blockEntities.get(p_15237_);
+        private Dynamic<?> getBlockEntity(int pIndex) {
+            return this.blockEntities.get(pIndex);
         }
 
         @Nullable
-        private Dynamic<?> removeBlockEntity(int p_15243_) {
-            return this.blockEntities.remove(p_15243_);
+        private Dynamic<?> removeBlockEntity(int pIndex) {
+            return this.blockEntities.remove(pIndex);
         }
 
-        public static int relative(int p_15227_, ChunkPalettedStorageFix.Direction p_15228_) {
+        public static int relative(int pData, ChunkPalettedStorageFix.Direction pDirection) {
             int l;
-            switch (p_15228_.getAxis()) {
+            switch (pDirection.getAxis()) {
                 case X:
-                    int k = (p_15227_ & 15) + p_15228_.getAxisDirection().getStep();
-                    l = k >= 0 && k <= 15 ? p_15227_ & -16 | k : -1;
+                    int k = (pData & 15) + pDirection.getAxisDirection().getStep();
+                    l = k >= 0 && k <= 15 ? pData & -16 | k : -1;
                     break;
                 case Y:
-                    int j = (p_15227_ >> 8) + p_15228_.getAxisDirection().getStep();
-                    l = j >= 0 && j <= 255 ? p_15227_ & 0xFF | j << 8 : -1;
+                    int j = (pData >> 8) + pDirection.getAxisDirection().getStep();
+                    l = j >= 0 && j <= 255 ? pData & 0xFF | j << 8 : -1;
                     break;
                 case Z:
-                    int i = (p_15227_ >> 4 & 15) + p_15228_.getAxisDirection().getStep();
-                    l = i >= 0 && i <= 15 ? p_15227_ & -241 | i << 4 : -1;
+                    int i = (pData >> 4 & 15) + pDirection.getAxisDirection().getStep();
+                    l = i >= 0 && i <= 15 ? pData & -241 | i << 4 : -1;
                     break;
                 default:
                     throw new MatchException(null, null);
@@ -1072,27 +1072,27 @@ public class ChunkPalettedStorageFix extends DataFix {
             return l;
         }
 
-        private void setBlock(int p_15230_, Dynamic<?> p_15231_) {
-            if (p_15230_ >= 0 && p_15230_ <= 65535) {
-                ChunkPalettedStorageFix.Section chunkpalettedstoragefix$section = this.getSection(p_15230_);
+        private void setBlock(int pIndex, Dynamic<?> pBlock) {
+            if (pIndex >= 0 && pIndex <= 65535) {
+                ChunkPalettedStorageFix.Section chunkpalettedstoragefix$section = this.getSection(pIndex);
                 if (chunkpalettedstoragefix$section != null) {
-                    chunkpalettedstoragefix$section.setBlock(p_15230_ & 4095, p_15231_);
+                    chunkpalettedstoragefix$section.setBlock(pIndex & 4095, pBlock);
                 }
             }
         }
 
         @Nullable
-        private ChunkPalettedStorageFix.Section getSection(int p_15245_) {
-            int i = p_15245_ >> 12;
+        private ChunkPalettedStorageFix.Section getSection(int pIndex) {
+            int i = pIndex >> 12;
             return i < this.sections.length ? this.sections[i] : null;
         }
 
-        public Dynamic<?> getBlock(int p_15225_) {
-            if (p_15225_ >= 0 && p_15225_ <= 65535) {
-                ChunkPalettedStorageFix.Section chunkpalettedstoragefix$section = this.getSection(p_15225_);
+        public Dynamic<?> getBlock(int pIndex) {
+            if (pIndex >= 0 && pIndex <= 65535) {
+                ChunkPalettedStorageFix.Section chunkpalettedstoragefix$section = this.getSection(pIndex);
                 return chunkpalettedstoragefix$section == null
                     ? ChunkPalettedStorageFix.MappingConstants.AIR
-                    : chunkpalettedstoragefix$section.getBlock(p_15225_ & 4095);
+                    : chunkpalettedstoragefix$section.getBlock(pIndex & 4095);
             } else {
                 return ChunkPalettedStorageFix.MappingConstants.AIR;
             }

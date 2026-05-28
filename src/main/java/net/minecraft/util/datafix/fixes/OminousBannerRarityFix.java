@@ -14,8 +14,8 @@ import net.minecraft.util.datafix.ComponentDataFixUtils;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class OminousBannerRarityFix extends DataFix {
-    public OminousBannerRarityFix(Schema p_362925_) {
-        super(p_362925_, false);
+    public OminousBannerRarityFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override
@@ -35,9 +35,9 @@ public class OminousBannerRarityFix extends DataFix {
         }));
     }
 
-    private Typed<?> fix(Typed<?> p_362105_, OpticFinder<?> p_363836_) {
-        return p_362105_.updateTyped(
-            p_363836_,
+    private Typed<?> fix(Typed<?> pData, OpticFinder<?> pComponentField) {
+        return pData.updateTyped(
+            pComponentField,
             p_368506_ -> p_368506_.update(
                     DSL.remainderFinder(),
                     p_364341_ -> {

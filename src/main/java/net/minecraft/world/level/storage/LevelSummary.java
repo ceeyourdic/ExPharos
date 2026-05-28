@@ -27,15 +27,15 @@ public class LevelSummary implements Comparable<LevelSummary> {
     private Component info;
 
     public LevelSummary(
-        LevelSettings p_251217_, LevelVersion p_249179_, String p_250462_, boolean p_252096_, boolean p_251054_, boolean p_252271_, Path p_252001_
+        LevelSettings pSettings, LevelVersion pLevelVersion, String pLevelId, boolean pRequiresManualConversion, boolean pLocked, boolean pExperimental, Path pIcon
     ) {
-        this.settings = p_251217_;
-        this.levelVersion = p_249179_;
-        this.levelId = p_250462_;
-        this.locked = p_251054_;
-        this.experimental = p_252271_;
-        this.icon = p_252001_;
-        this.requiresManualConversion = p_252096_;
+        this.settings = pSettings;
+        this.levelVersion = pLevelVersion;
+        this.levelId = pLevelId;
+        this.locked = pLocked;
+        this.experimental = pExperimental;
+        this.icon = pIcon;
+        this.requiresManualConversion = pRequiresManualConversion;
     }
 
     public String getLevelId() {
@@ -62,11 +62,11 @@ public class LevelSummary implements Comparable<LevelSummary> {
         return this.levelVersion.lastPlayed();
     }
 
-    public int compareTo(LevelSummary p_78360_) {
-        if (this.getLastPlayed() < p_78360_.getLastPlayed()) {
+    public int compareTo(LevelSummary pOther) {
+        if (this.getLastPlayed() < pOther.getLastPlayed()) {
             return 1;
         } else {
-            return this.getLastPlayed() > p_78360_.getLastPlayed() ? -1 : this.levelId.compareTo(p_78360_.levelId);
+            return this.getLastPlayed() > pOther.getLastPlayed() ? -1 : this.levelId.compareTo(pOther.levelId);
         }
     }
 
@@ -202,10 +202,10 @@ public class LevelSummary implements Comparable<LevelSummary> {
         private final boolean severe;
         private final String translationKey;
 
-        private BackupStatus(final boolean p_164928_, final boolean p_164929_, final String p_164930_) {
-            this.shouldBackup = p_164928_;
-            this.severe = p_164929_;
-            this.translationKey = p_164930_;
+        private BackupStatus(final boolean pShouldBackup, final boolean pSevere, final String pTranslationKey) {
+            this.shouldBackup = pShouldBackup;
+            this.severe = pSevere;
+            this.translationKey = pTranslationKey;
         }
 
         public boolean shouldBackup() {
@@ -226,9 +226,9 @@ public class LevelSummary implements Comparable<LevelSummary> {
         private static final Component RECOVER = Component.translatable("recover_world.button");
         private final long lastPlayed;
 
-        public CorruptedLevelSummary(String p_313183_, Path p_310684_, long p_312803_) {
-            super(null, null, p_313183_, false, false, false, p_310684_);
-            this.lastPlayed = p_312803_;
+        public CorruptedLevelSummary(String pLevelId, Path pIcon, long pLastPlayed) {
+            super(null, null, pLevelId, false, false, false, pIcon);
+            this.lastPlayed = pLastPlayed;
         }
 
         @Override
@@ -281,8 +281,8 @@ public class LevelSummary implements Comparable<LevelSummary> {
         private static final Component MORE_INFO_BUTTON = Component.translatable("symlink_warning.more_info");
         private static final Component INFO = Component.translatable("symlink_warning.title").withColor(-65536);
 
-        public SymlinkLevelSummary(String p_289942_, Path p_289953_) {
-            super(null, null, p_289942_, false, false, false, p_289953_);
+        public SymlinkLevelSummary(String pLevelId, Path pIcon) {
+            super(null, null, pLevelId, false, false, false, pIcon);
         }
 
         @Override

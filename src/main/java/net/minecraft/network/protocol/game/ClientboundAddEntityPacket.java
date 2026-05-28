@@ -34,100 +34,100 @@ public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListen
     private final byte yHeadRot;
     private final int data;
 
-    public ClientboundAddEntityPacket(Entity p_131481_, ServerEntity p_343528_) {
-        this(p_131481_, p_343528_, 0);
+    public ClientboundAddEntityPacket(Entity pEntity, ServerEntity pServerEntity) {
+        this(pEntity, pServerEntity, 0);
     }
 
-    public ClientboundAddEntityPacket(Entity p_131483_, ServerEntity p_342757_, int p_131484_) {
+    public ClientboundAddEntityPacket(Entity pEntity, ServerEntity pServerEntity, int pData) {
         this(
-            p_131483_.getId(),
-            p_131483_.getUUID(),
-            p_342757_.getPositionBase().x(),
-            p_342757_.getPositionBase().y(),
-            p_342757_.getPositionBase().z(),
-            p_342757_.getLastSentXRot(),
-            p_342757_.getLastSentYRot(),
-            p_131483_.getType(),
-            p_131484_,
-            p_342757_.getLastSentMovement(),
-            (double)p_342757_.getLastSentYHeadRot()
+            pEntity.getId(),
+            pEntity.getUUID(),
+            pServerEntity.getPositionBase().x(),
+            pServerEntity.getPositionBase().y(),
+            pServerEntity.getPositionBase().z(),
+            pServerEntity.getLastSentXRot(),
+            pServerEntity.getLastSentYRot(),
+            pEntity.getType(),
+            pData,
+            pServerEntity.getLastSentMovement(),
+            (double)pServerEntity.getLastSentYHeadRot()
         );
     }
 
-    public ClientboundAddEntityPacket(Entity p_237558_, int p_237559_, BlockPos p_237560_) {
+    public ClientboundAddEntityPacket(Entity pEntity, int pData, BlockPos pPos) {
         this(
-            p_237558_.getId(),
-            p_237558_.getUUID(),
-            (double)p_237560_.getX(),
-            (double)p_237560_.getY(),
-            (double)p_237560_.getZ(),
-            p_237558_.getXRot(),
-            p_237558_.getYRot(),
-            p_237558_.getType(),
-            p_237559_,
-            p_237558_.getDeltaMovement(),
-            (double)p_237558_.getYHeadRot()
+            pEntity.getId(),
+            pEntity.getUUID(),
+            (double)pPos.getX(),
+            (double)pPos.getY(),
+            (double)pPos.getZ(),
+            pEntity.getXRot(),
+            pEntity.getYRot(),
+            pEntity.getType(),
+            pData,
+            pEntity.getDeltaMovement(),
+            (double)pEntity.getYHeadRot()
         );
     }
 
     public ClientboundAddEntityPacket(
-        int p_237546_,
-        UUID p_237547_,
-        double p_237548_,
-        double p_237549_,
-        double p_237550_,
-        float p_237551_,
-        float p_237552_,
-        EntityType<?> p_237553_,
-        int p_237554_,
-        Vec3 p_237555_,
-        double p_237556_
+        int pId,
+        UUID pUuid,
+        double pX,
+        double pY,
+        double pZ,
+        float pXRot,
+        float pYRot,
+        EntityType<?> pType,
+        int pData,
+        Vec3 pDeltaMovement,
+        double pYHeadRot
     ) {
-        this.id = p_237546_;
-        this.uuid = p_237547_;
-        this.x = p_237548_;
-        this.y = p_237549_;
-        this.z = p_237550_;
-        this.xRot = Mth.packDegrees(p_237551_);
-        this.yRot = Mth.packDegrees(p_237552_);
-        this.yHeadRot = Mth.packDegrees((float)p_237556_);
-        this.type = p_237553_;
-        this.data = p_237554_;
-        this.xa = (int)(Mth.clamp(p_237555_.x, -3.9, 3.9) * 8000.0);
-        this.ya = (int)(Mth.clamp(p_237555_.y, -3.9, 3.9) * 8000.0);
-        this.za = (int)(Mth.clamp(p_237555_.z, -3.9, 3.9) * 8000.0);
+        this.id = pId;
+        this.uuid = pUuid;
+        this.x = pX;
+        this.y = pY;
+        this.z = pZ;
+        this.xRot = Mth.packDegrees(pXRot);
+        this.yRot = Mth.packDegrees(pYRot);
+        this.yHeadRot = Mth.packDegrees((float)pYHeadRot);
+        this.type = pType;
+        this.data = pData;
+        this.xa = (int)(Mth.clamp(pDeltaMovement.x, -3.9, 3.9) * 8000.0);
+        this.ya = (int)(Mth.clamp(pDeltaMovement.y, -3.9, 3.9) * 8000.0);
+        this.za = (int)(Mth.clamp(pDeltaMovement.z, -3.9, 3.9) * 8000.0);
     }
 
-    private ClientboundAddEntityPacket(RegistryFriendlyByteBuf p_327810_) {
-        this.id = p_327810_.readVarInt();
-        this.uuid = p_327810_.readUUID();
-        this.type = ByteBufCodecs.registry(Registries.ENTITY_TYPE).decode(p_327810_);
-        this.x = p_327810_.readDouble();
-        this.y = p_327810_.readDouble();
-        this.z = p_327810_.readDouble();
-        this.xRot = p_327810_.readByte();
-        this.yRot = p_327810_.readByte();
-        this.yHeadRot = p_327810_.readByte();
-        this.data = p_327810_.readVarInt();
-        this.xa = p_327810_.readShort();
-        this.ya = p_327810_.readShort();
-        this.za = p_327810_.readShort();
+    private ClientboundAddEntityPacket(RegistryFriendlyByteBuf pBuffer) {
+        this.id = pBuffer.readVarInt();
+        this.uuid = pBuffer.readUUID();
+        this.type = ByteBufCodecs.registry(Registries.ENTITY_TYPE).decode(pBuffer);
+        this.x = pBuffer.readDouble();
+        this.y = pBuffer.readDouble();
+        this.z = pBuffer.readDouble();
+        this.xRot = pBuffer.readByte();
+        this.yRot = pBuffer.readByte();
+        this.yHeadRot = pBuffer.readByte();
+        this.data = pBuffer.readVarInt();
+        this.xa = pBuffer.readShort();
+        this.ya = pBuffer.readShort();
+        this.za = pBuffer.readShort();
     }
 
-    private void write(RegistryFriendlyByteBuf p_332393_) {
-        p_332393_.writeVarInt(this.id);
-        p_332393_.writeUUID(this.uuid);
-        ByteBufCodecs.registry(Registries.ENTITY_TYPE).encode(p_332393_, this.type);
-        p_332393_.writeDouble(this.x);
-        p_332393_.writeDouble(this.y);
-        p_332393_.writeDouble(this.z);
-        p_332393_.writeByte(this.xRot);
-        p_332393_.writeByte(this.yRot);
-        p_332393_.writeByte(this.yHeadRot);
-        p_332393_.writeVarInt(this.data);
-        p_332393_.writeShort(this.xa);
-        p_332393_.writeShort(this.ya);
-        p_332393_.writeShort(this.za);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.id);
+        pBuffer.writeUUID(this.uuid);
+        ByteBufCodecs.registry(Registries.ENTITY_TYPE).encode(pBuffer, this.type);
+        pBuffer.writeDouble(this.x);
+        pBuffer.writeDouble(this.y);
+        pBuffer.writeDouble(this.z);
+        pBuffer.writeByte(this.xRot);
+        pBuffer.writeByte(this.yRot);
+        pBuffer.writeByte(this.yHeadRot);
+        pBuffer.writeVarInt(this.data);
+        pBuffer.writeShort(this.xa);
+        pBuffer.writeShort(this.ya);
+        pBuffer.writeShort(this.za);
     }
 
     @Override
@@ -135,8 +135,8 @@ public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListen
         return GamePacketTypes.CLIENTBOUND_ADD_ENTITY;
     }
 
-    public void handle(ClientGamePacketListener p_131495_) {
-        p_131495_.handleAddEntity(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleAddEntity(this);
     }
 
     public int getId() {

@@ -114,7 +114,7 @@ public class CreakingModel extends EntityModel<CreakingRenderState> {
         this.animate(p_362230_.deathAnimationState, CreakingAnimation.CREAKING_DEATH, p_362230_.ageInTicks);
     }
 
-    public List<ModelPart> getHeadModelParts(CreakingRenderState p_363264_) {
-        return !p_363264_.eyesGlowing ? NO_PARTS : this.headParts;
+    public List<ModelPart> getHeadModelParts(CreakingRenderState pRenderState) {
+        return !pRenderState.eyesGlowing ? NO_PARTS : this.headParts;
     }
 }

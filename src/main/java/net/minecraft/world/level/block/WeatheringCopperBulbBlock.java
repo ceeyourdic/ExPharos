@@ -23,9 +23,9 @@ public class WeatheringCopperBulbBlock extends CopperBulbBlock implements Weathe
         return CODEC;
     }
 
-    public WeatheringCopperBulbBlock(WeatheringCopper.WeatherState p_309695_, BlockBehaviour.Properties p_311798_) {
-        super(p_311798_);
-        this.weatherState = p_309695_;
+    public WeatheringCopperBulbBlock(WeatheringCopper.WeatherState pWeatherState, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.weatherState = pWeatherState;
     }
 
     @Override

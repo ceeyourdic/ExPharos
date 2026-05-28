@@ -34,32 +34,32 @@ public abstract class TemplateStructurePiece extends StructurePiece {
     protected BlockPos templatePosition;
 
     public TemplateStructurePiece(
-        StructurePieceType p_226886_,
-        int p_226887_,
-        StructureTemplateManager p_226888_,
-        ResourceLocation p_226889_,
-        String p_226890_,
-        StructurePlaceSettings p_226891_,
-        BlockPos p_226892_
+        StructurePieceType pType,
+        int pGenDepth,
+        StructureTemplateManager pStructureTemplateManager,
+        ResourceLocation pLocation,
+        String pTemplateName,
+        StructurePlaceSettings pPlaceSettings,
+        BlockPos pTemplatePosition
     ) {
-        super(p_226886_, p_226887_, p_226888_.getOrCreate(p_226889_).getBoundingBox(p_226891_, p_226892_));
+        super(pType, pGenDepth, pStructureTemplateManager.getOrCreate(pLocation).getBoundingBox(pPlaceSettings, pTemplatePosition));
         this.setOrientation(Direction.NORTH);
-        this.templateName = p_226890_;
-        this.templatePosition = p_226892_;
-        this.template = p_226888_.getOrCreate(p_226889_);
-        this.placeSettings = p_226891_;
+        this.templateName = pTemplateName;
+        this.templatePosition = pTemplatePosition;
+        this.template = pStructureTemplateManager.getOrCreate(pLocation);
+        this.placeSettings = pPlaceSettings;
     }
 
     public TemplateStructurePiece(
-        StructurePieceType p_226894_, CompoundTag p_226895_, StructureTemplateManager p_226896_, Function<ResourceLocation, StructurePlaceSettings> p_226897_
+        StructurePieceType pType, CompoundTag pTag, StructureTemplateManager pStructureTemplateManager, Function<ResourceLocation, StructurePlaceSettings> pPlaceSettingsFactory
     ) {
-        super(p_226894_, p_226895_);
+        super(pType, pTag);
         this.setOrientation(Direction.NORTH);
-        this.templateName = p_226895_.getString("Template");
-        this.templatePosition = new BlockPos(p_226895_.getInt("TPX"), p_226895_.getInt("TPY"), p_226895_.getInt("TPZ"));
+        this.templateName = pTag.getString("Template");
+        this.templatePosition = new BlockPos(pTag.getInt("TPX"), pTag.getInt("TPY"), pTag.getInt("TPZ"));
         ResourceLocation resourcelocation = this.makeTemplateLocation();
-        this.template = p_226896_.getOrCreate(resourcelocation);
-        this.placeSettings = p_226897_.apply(resourcelocation);
+        this.template = pStructureTemplateManager.getOrCreate(resourcelocation);
+        this.placeSettings = pPlaceSettingsFactory.apply(resourcelocation);
         this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
     }
 
@@ -122,7 +122,7 @@ public abstract class TemplateStructurePiece extends StructurePiece {
         }
     }
 
-    protected abstract void handleDataMarker(String p_226906_, BlockPos p_226907_, ServerLevelAccessor p_226908_, RandomSource p_226909_, BoundingBox p_226910_);
+    protected abstract void handleDataMarker(String pName, BlockPos pPos, ServerLevelAccessor pLevel, RandomSource pRandom, BoundingBox pBox);
 
     @Deprecated
     @Override

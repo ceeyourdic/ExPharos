@@ -8,8 +8,8 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.serialization.Dynamic;
 
 public class ContainerBlockEntityLockPredicateFix extends DataFix {
-    public ContainerBlockEntityLockPredicateFix(Schema p_362539_) {
-        super(p_362539_, false);
+    public ContainerBlockEntityLockPredicateFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override
@@ -19,7 +19,7 @@ public class ContainerBlockEntityLockPredicateFix extends DataFix {
         );
     }
 
-    private static Typed<?> fixBlockEntity(Typed<?> p_363963_) {
-        return p_363963_.update(DSL.remainderFinder(), p_368586_ -> p_368586_.renameAndFixField("Lock", "lock", LockComponentPredicateFix::fixLock));
+    private static Typed<?> fixBlockEntity(Typed<?> pData) {
+        return pData.update(DSL.remainderFinder(), p_368586_ -> p_368586_.renameAndFixField("Lock", "lock", LockComponentPredicateFix::fixLock));
     }
 }

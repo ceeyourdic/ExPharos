@@ -9,8 +9,8 @@ import com.mojang.datafixers.types.Type;
 import com.mojang.serialization.Dynamic;
 
 public class StructureReferenceCountFix extends DataFix {
-    public StructureReferenceCountFix(Schema p_16961_, boolean p_16962_) {
-        super(p_16961_, p_16962_);
+    public StructureReferenceCountFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
     }
 
     @Override
@@ -21,8 +21,8 @@ public class StructureReferenceCountFix extends DataFix {
         );
     }
 
-    private static <T> Dynamic<T> setCountToAtLeastOne(Dynamic<T> p_16966_) {
-        return p_16966_.update(
+    private static <T> Dynamic<T> setCountToAtLeastOne(Dynamic<T> pDynamic) {
+        return pDynamic.update(
             "references", p_326645_ -> p_326645_.createInt(p_326645_.asNumber().map(Number::intValue).result().filter(p_145724_ -> p_145724_ > 0).orElse(1))
         );
     }

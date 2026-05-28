@@ -25,13 +25,13 @@ public class ListPoolElement extends StructurePoolElement {
     );
     private final List<StructurePoolElement> elements;
 
-    public ListPoolElement(List<StructurePoolElement> p_210363_, StructureTemplatePool.Projection p_210364_) {
-        super(p_210364_);
-        if (p_210363_.isEmpty()) {
+    public ListPoolElement(List<StructurePoolElement> pElements, StructureTemplatePool.Projection pProjection) {
+        super(pProjection);
+        if (pElements.isEmpty()) {
             throw new IllegalArgumentException("Elements are empty");
         } else {
-            this.elements = p_210363_;
-            this.setProjectionOnEachElement(p_210364_);
+            this.elements = pElements;
+            this.setProjectionOnEachElement(pProjection);
         }
     }
 
@@ -107,7 +107,7 @@ public class ListPoolElement extends StructurePoolElement {
         return "List[" + this.elements.stream().map(Object::toString).collect(Collectors.joining(", ")) + "]";
     }
 
-    private void setProjectionOnEachElement(StructureTemplatePool.Projection p_210407_) {
-        this.elements.forEach(p_210376_ -> p_210376_.setProjection(p_210407_));
+    private void setProjectionOnEachElement(StructureTemplatePool.Projection pProjection) {
+        this.elements.forEach(p_210376_ -> p_210376_.setProjection(pProjection));
     }
 }

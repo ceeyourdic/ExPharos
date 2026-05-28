@@ -130,8 +130,8 @@ public final class DataComponentPatch {
     private static final String REMOVED_PREFIX = "!";
     final Reference2ObjectMap<DataComponentType<?>, Optional<?>> map;
 
-    DataComponentPatch(Reference2ObjectMap<DataComponentType<?>, Optional<?>> p_329783_) {
-        this.map = p_329783_;
+    DataComponentPatch(Reference2ObjectMap<DataComponentType<?>, Optional<?>> pMap) {
+        this.map = pMap;
     }
 
     public static DataComponentPatch.Builder builder() {
@@ -139,8 +139,8 @@ public final class DataComponentPatch {
     }
 
     @Nullable
-    public <T> Optional<? extends T> get(DataComponentType<? extends T> p_330742_) {
-        return (Optional<? extends T>)this.map.get(p_330742_);
+    public <T> Optional<? extends T> get(DataComponentType<? extends T> pComponent) {
+        return (Optional<? extends T>)this.map.get(pComponent);
     }
 
     public Set<Entry<DataComponentType<?>, Optional<?>>> entrySet() {
@@ -151,12 +151,12 @@ public final class DataComponentPatch {
         return this.map.size();
     }
 
-    public DataComponentPatch forget(Predicate<DataComponentType<?>> p_333810_) {
+    public DataComponentPatch forget(Predicate<DataComponentType<?>> pPredicate) {
         if (this.isEmpty()) {
             return EMPTY;
         } else {
             Reference2ObjectMap<DataComponentType<?>, Optional<?>> reference2objectmap = new Reference2ObjectArrayMap<>(this.map);
-            reference2objectmap.keySet().removeIf(p_333810_);
+            reference2objectmap.keySet().removeIf(pPredicate);
             return reference2objectmap.isEmpty() ? EMPTY : new DataComponentPatch(reference2objectmap);
         }
     }
@@ -183,11 +183,11 @@ public final class DataComponentPatch {
     }
 
     @Override
-    public boolean equals(Object p_334345_) {
-        if (this == p_334345_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            if (p_334345_ instanceof DataComponentPatch datacomponentpatch && this.map.equals(datacomponentpatch.map)) {
+            if (pOther instanceof DataComponentPatch datacomponentpatch && this.map.equals(datacomponentpatch.map)) {
                 return true;
             }
 
@@ -205,12 +205,12 @@ public final class DataComponentPatch {
         return toString(this.map);
     }
 
-    static String toString(Reference2ObjectMap<DataComponentType<?>, Optional<?>> p_335670_) {
+    static String toString(Reference2ObjectMap<DataComponentType<?>, Optional<?>> pMap) {
         StringBuilder stringbuilder = new StringBuilder();
         stringbuilder.append('{');
         boolean flag = true;
 
-        for (Entry<DataComponentType<?>, Optional<?>> entry : Reference2ObjectMaps.fastIterable(p_335670_)) {
+        for (Entry<DataComponentType<?>, Optional<?>> entry : Reference2ObjectMaps.fastIterable(pMap)) {
             if (flag) {
                 flag = false;
             } else {
@@ -238,18 +238,18 @@ public final class DataComponentPatch {
         Builder() {
         }
 
-        public <T> DataComponentPatch.Builder set(DataComponentType<T> p_329935_, T p_331578_) {
-            this.map.put(p_329935_, Optional.of(p_331578_));
+        public <T> DataComponentPatch.Builder set(DataComponentType<T> pComponent, T pValue) {
+            this.map.put(pComponent, Optional.of(pValue));
             return this;
         }
 
-        public <T> DataComponentPatch.Builder remove(DataComponentType<T> p_329018_) {
-            this.map.put(p_329018_, Optional.empty());
+        public <T> DataComponentPatch.Builder remove(DataComponentType<T> pComponent) {
+            this.map.put(pComponent, Optional.empty());
             return this;
         }
 
-        public <T> DataComponentPatch.Builder set(TypedDataComponent<T> p_331095_) {
-            return this.set(p_331095_.type(), p_331095_.value());
+        public <T> DataComponentPatch.Builder set(TypedDataComponent<T> pComponent) {
+            return this.set(pComponent.type(), pComponent.value());
         }
 
         public DataComponentPatch build() {

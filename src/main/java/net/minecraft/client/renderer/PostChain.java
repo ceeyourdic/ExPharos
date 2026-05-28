@@ -31,46 +31,46 @@ public class PostChain {
     private final Map<ResourceLocation, PostChainConfig.InternalTarget> internalTargets;
     private final Set<ResourceLocation> externalTargets;
 
-    private PostChain(List<PostPass> p_368125_, Map<ResourceLocation, PostChainConfig.InternalTarget> p_365904_, Set<ResourceLocation> p_364283_) {
-        this.passes = p_368125_;
-        this.internalTargets = p_365904_;
-        this.externalTargets = p_364283_;
+    private PostChain(List<PostPass> pPasses, Map<ResourceLocation, PostChainConfig.InternalTarget> pInternalTargets, Set<ResourceLocation> pExternalTargets) {
+        this.passes = pPasses;
+        this.internalTargets = pInternalTargets;
+        this.externalTargets = pExternalTargets;
     }
 
-    public static PostChain load(PostChainConfig p_361031_, TextureManager p_110034_, ShaderManager p_364428_, Set<ResourceLocation> p_370027_) throws ShaderManager.CompilationException {
-        Stream<ResourceLocation> stream = p_361031_.passes()
+    public static PostChain load(PostChainConfig pConfig, TextureManager pTextureManager, ShaderManager pShaderManager, Set<ResourceLocation> pExternalTargets) throws ShaderManager.CompilationException {
+        Stream<ResourceLocation> stream = pConfig.passes()
             .stream()
             .flatMap(p_357873_ -> p_357873_.inputs().stream())
             .flatMap(p_357872_ -> p_357872_.referencedTargets().stream());
-        Set<ResourceLocation> set = stream.filter(p_357871_ -> !p_361031_.internalTargets().containsKey(p_357871_)).collect(Collectors.toSet());
-        Set<ResourceLocation> set1 = Sets.difference(set, p_370027_);
+        Set<ResourceLocation> set = stream.filter(p_357871_ -> !pConfig.internalTargets().containsKey(p_357871_)).collect(Collectors.toSet());
+        Set<ResourceLocation> set1 = Sets.difference(set, pExternalTargets);
         if (!set1.isEmpty()) {
             throw new ShaderManager.CompilationException("Referenced external targets are not available in this context: " + set1);
         } else {
             Builder<PostPass> builder = ImmutableList.builder();
 
-            for (PostChainConfig.Pass postchainconfig$pass : p_361031_.passes()) {
-                builder.add(createPass(p_110034_, p_364428_, postchainconfig$pass));
+            for (PostChainConfig.Pass postchainconfig$pass : pConfig.passes()) {
+                builder.add(createPass(pTextureManager, pShaderManager, postchainconfig$pass));
             }
 
-            return new PostChain(builder.build(), p_361031_.internalTargets(), set);
+            return new PostChain(builder.build(), pConfig.internalTargets(), set);
         }
     }
 
-    private static PostPass createPass(TextureManager p_366006_, ShaderManager p_365441_, PostChainConfig.Pass p_368358_) throws ShaderManager.CompilationException {
-        CompiledShaderProgram compiledshaderprogram = p_365441_.getProgramForLoading(p_368358_.program());
+    private static PostPass createPass(TextureManager pTextureManager, ShaderManager pShaderManager, PostChainConfig.Pass pPass) throws ShaderManager.CompilationException {
+        CompiledShaderProgram compiledshaderprogram = pShaderManager.getProgramForLoading(pPass.program());
 
-        for (PostChainConfig.Uniform postchainconfig$uniform : p_368358_.uniforms()) {
+        for (PostChainConfig.Uniform postchainconfig$uniform : pPass.uniforms()) {
             String s = postchainconfig$uniform.name();
             if (compiledshaderprogram.getUniform(s) == null) {
-                throw new ShaderManager.CompilationException("Uniform '" + s + "' does not exist for " + p_368358_.programId());
+                throw new ShaderManager.CompilationException("Uniform '" + s + "' does not exist for " + pPass.programId());
             }
         }
 
-        String s2 = p_368358_.programId().toString();
-        PostPass postpass = new PostPass(s2, compiledshaderprogram, p_368358_.outputTarget(), p_368358_.uniforms());
+        String s2 = pPass.programId().toString();
+        PostPass postpass = new PostPass(s2, compiledshaderprogram, pPass.outputTarget(), pPass.uniforms());
 
-        for (PostChainConfig.Input postchainconfig$input : p_368358_.inputs()) {
+        for (PostChainConfig.Input postchainconfig$input : pPass.inputs()) {
             switch (postchainconfig$input) {
                 case PostChainConfig.TextureInput texutre:
                     try {
@@ -79,7 +79,7 @@ public class PostChain {
                     int i = texutre.width();
                     int j = texutre.height();
                     boolean flag = texutre.bilinear();
-                    AbstractTexture abstracttexture = p_366006_.getTexture(resourcelocation.withPath(p_357869_ -> "textures/effect/" + p_357869_ + ".png"));
+                    AbstractTexture abstracttexture = pTextureManager.getTexture(resourcelocation.withPath(p_357869_ -> "textures/effect/" + p_357869_ + ".png"));
                     abstracttexture.setFilter(flag, false);
                     postpass.addInput(new PostPass.TextureInput(s3, abstracttexture, i, j));
                     continue;
@@ -105,12 +105,12 @@ public class PostChain {
         return postpass;
     }
 
-    public void addToFrame(FrameGraphBuilder p_362816_, int p_365028_, int p_368108_, PostChain.TargetBundle p_366403_) {
-        Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float)p_365028_, 0.0F, (float)p_368108_, 0.1F, 1000.0F);
+    public void addToFrame(FrameGraphBuilder pFrameGraphBuilder, int pWidth, int pHeight, PostChain.TargetBundle pTargetBundle) {
+        Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float)pWidth, 0.0F, (float)pHeight, 0.1F, 1000.0F);
         Map<ResourceLocation, ResourceHandle<RenderTarget>> map = new HashMap<>(this.internalTargets.size() + this.externalTargets.size());
 
         for (ResourceLocation resourcelocation : this.externalTargets) {
-            map.put(resourcelocation, p_366403_.getOrThrow(resourcelocation));
+            map.put(resourcelocation, pTargetBundle.getOrThrow(resourcelocation));
         }
 
         for (Entry<ResourceLocation, PostChainConfig.InternalTarget> entry : this.internalTargets.entrySet()) {
@@ -118,44 +118,44 @@ public class PostChain {
             Objects.requireNonNull(entry.getValue());
             RenderTargetDescriptor rendertargetdescriptor = switch (entry.getValue()) {
                 case PostChainConfig.FixedSizedTarget target -> new RenderTargetDescriptor(target.width(), target.height(), true);
-                case PostChainConfig.FullScreenTarget target -> new RenderTargetDescriptor(p_365028_, p_368108_, true);
+                case PostChainConfig.FullScreenTarget target -> new RenderTargetDescriptor(pWidth, pHeight, true);
                 default -> throw new MatchException(null, null);
             };
-            map.put(resourcelocation1, p_362816_.createInternal(resourcelocation1.toString(), rendertargetdescriptor));
+            map.put(resourcelocation1, pFrameGraphBuilder.createInternal(resourcelocation1.toString(), rendertargetdescriptor));
         }
 
         for (PostPass postpass : this.passes) {
-            postpass.addToFrame(p_362816_, map, matrix4f);
+            postpass.addToFrame(pFrameGraphBuilder, map, matrix4f);
         }
 
         for (ResourceLocation resourcelocation2 : this.externalTargets) {
-            p_366403_.replace(resourcelocation2, map.get(resourcelocation2));
+            pTargetBundle.replace(resourcelocation2, map.get(resourcelocation2));
         }
     }
 
     @Deprecated
-    public void process(RenderTarget p_367570_, GraphicsResourceAllocator p_362918_) {
+    public void process(RenderTarget pTarget, GraphicsResourceAllocator pGraphicsResourceAllocator) {
         FrameGraphBuilder framegraphbuilder = new FrameGraphBuilder();
-        PostChain.TargetBundle postchain$targetbundle = PostChain.TargetBundle.of(MAIN_TARGET_ID, framegraphbuilder.importExternal("main", p_367570_));
-        this.addToFrame(framegraphbuilder, p_367570_.width, p_367570_.height, postchain$targetbundle);
-        framegraphbuilder.execute(p_362918_);
+        PostChain.TargetBundle postchain$targetbundle = PostChain.TargetBundle.of(MAIN_TARGET_ID, framegraphbuilder.importExternal("main", pTarget));
+        this.addToFrame(framegraphbuilder, pTarget.width, pTarget.height, postchain$targetbundle);
+        framegraphbuilder.execute(pGraphicsResourceAllocator);
     }
 
-    public void setUniform(String p_327827_, float p_331223_) {
+    public void setUniform(String pName, float pBackgroundBlurriness) {
         for (PostPass postpass : this.passes) {
-            postpass.getShader().safeGetUniform(p_327827_).set(p_331223_);
+            postpass.getShader().safeGetUniform(pName).set(pBackgroundBlurriness);
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     public interface TargetBundle {
-        static PostChain.TargetBundle of(final ResourceLocation p_366117_, final ResourceHandle<RenderTarget> p_367685_) {
+        static PostChain.TargetBundle of(final ResourceLocation pId, final ResourceHandle<RenderTarget> pHandle) {
             return new PostChain.TargetBundle() {
-                private ResourceHandle<RenderTarget> handle = p_367685_;
+                private ResourceHandle<RenderTarget> handle = pHandle;
 
                 @Override
                 public void replace(ResourceLocation p_368607_, ResourceHandle<RenderTarget> p_369595_) {
-                    if (p_368607_.equals(p_366117_)) {
+                    if (p_368607_.equals(pId)) {
                         this.handle = p_369595_;
                     } else {
                         throw new IllegalArgumentException("No target with id " + p_368607_);
@@ -165,20 +165,20 @@ public class PostChain {
                 @Nullable
                 @Override
                 public ResourceHandle<RenderTarget> get(ResourceLocation p_364302_) {
-                    return p_364302_.equals(p_366117_) ? this.handle : null;
+                    return p_364302_.equals(pId) ? this.handle : null;
                 }
             };
         }
 
-        void replace(ResourceLocation p_369680_, ResourceHandle<RenderTarget> p_364990_);
+        void replace(ResourceLocation pId, ResourceHandle<RenderTarget> pHandle);
 
         @Nullable
-        ResourceHandle<RenderTarget> get(ResourceLocation p_365511_);
+        ResourceHandle<RenderTarget> get(ResourceLocation pId);
 
-        default ResourceHandle<RenderTarget> getOrThrow(ResourceLocation p_364229_) {
-            ResourceHandle<RenderTarget> resourcehandle = this.get(p_364229_);
+        default ResourceHandle<RenderTarget> getOrThrow(ResourceLocation pId) {
+            ResourceHandle<RenderTarget> resourcehandle = this.get(pId);
             if (resourcehandle == null) {
-                throw new IllegalArgumentException("Missing target with id " + p_364229_);
+                throw new IllegalArgumentException("Missing target with id " + pId);
             } else {
                 return resourcehandle;
             }

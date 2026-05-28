@@ -11,10 +11,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class LegacyStuffWrapper {
     @Deprecated
-    public static int[] getPixels(ResourceManager p_118727_, ResourceLocation p_118728_) throws IOException {
+    public static int[] getPixels(ResourceManager pManager, ResourceLocation pLocation) throws IOException {
         int[] aint;
         try (
-            InputStream inputstream = p_118727_.open(p_118728_);
+            InputStream inputstream = pManager.open(pLocation);
             NativeImage nativeimage = NativeImage.read(inputstream);
         ) {
             aint = nativeimage.makePixelArray();

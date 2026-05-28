@@ -2,9 +2,11 @@ package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
+import cn.lazymoon.ingameui.splash.ArcaneSplashRenderer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 import net.minecraft.Util;
@@ -21,10 +23,11 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.render.GlBlendState;
+import net.optifine.shaders.config.ShaderPackParser;
+import net.optifine.util.PropertiesOrdered;
 
-@OnlyIn(Dist.CLIENT)
 public class LoadingOverlay extends Overlay {
     public static final ResourceLocation MOJANG_STUDIOS_LOGO_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/title/mojangstudios.png");
     private static final int LOGO_BACKGROUND_COLOR = ARGB.color(255, 239, 50, 61);
@@ -45,24 +48,35 @@ public class LoadingOverlay extends Overlay {
     private float currentProgress;
     private long fadeOutStart = -1L;
     private long fadeInStart = -1L;
+    private int colorBackground = BRAND_BACKGROUND.getAsInt();
+    private int colorBar = BRAND_BACKGROUND.getAsInt();
+    private int colorOutline = 16777215;
+    private int colorProgress = 16777215;
+    private GlBlendState blendState = null;
+    private boolean fadeOut = false;
 
-    public LoadingOverlay(Minecraft p_96172_, ReloadInstance p_96173_, Consumer<Optional<Throwable>> p_96174_, boolean p_96175_) {
-        this.minecraft = p_96172_;
-        this.reload = p_96173_;
-        this.onFinish = p_96174_;
-        this.fadeIn = p_96175_;
+    public LoadingOverlay(Minecraft pMinecraft, ReloadInstance pReload, Consumer<Optional<Throwable>> pOnFinish, boolean pFadeIn) {
+        this.minecraft = pMinecraft;
+        this.reload = pReload;
+        this.onFinish = pOnFinish;
+        this.fadeIn = false;
     }
 
-    public static void registerTextures(TextureManager p_377842_) {
-        p_377842_.registerAndLoad(MOJANG_STUDIOS_LOGO_LOCATION, new LoadingOverlay.LogoTexture());
+    public static void registerTextures(TextureManager pTextureManager) {
+        pTextureManager.registerAndLoad(MOJANG_STUDIOS_LOGO_LOCATION, new LoadingOverlay.LogoTexture());
     }
 
-    private static int replaceAlpha(int p_169325_, int p_169326_) {
-        return p_169325_ & 16777215 | p_169326_ << 24;
+    private static int replaceAlpha(int pColor, int pAlpha) {
+        return pColor & 16777215 | pAlpha << 24;
     }
 
     @Override
     public void render(GuiGraphics p_281839_, int p_282704_, int p_283650_, float p_283394_) {
+        // Arcane mixin port: the old SplashOverlay overwrite drew the Arcane splash instead of the Mojang logo/progress bar.
+        if (this.arcane$renderSplash(p_281839_)) {
+            return;
+        }
+
         int i = p_281839_.guiWidth();
         int j = p_281839_.guiHeight();
         long k = Util.getMillis();
@@ -74,12 +88,13 @@ public class LoadingOverlay extends Overlay {
         float f1 = this.fadeInStart > -1L ? (float)(k - this.fadeInStart) / 500.0F : -1.0F;
         float f2;
         if (f >= 1.0F) {
+            this.fadeOut = true;
             if (this.minecraft.screen != null) {
                 this.minecraft.screen.render(p_281839_, 0, 0, p_283394_);
             }
 
             int l = Mth.ceil((1.0F - Mth.clamp(f - 1.0F, 0.0F, 1.0F)) * 255.0F);
-            p_281839_.fill(RenderType.guiOverlay(), 0, 0, i, j, replaceAlpha(BRAND_BACKGROUND.getAsInt(), l));
+            p_281839_.fill(RenderType.guiOverlay(), 0, 0, i, j, replaceAlpha(this.colorBackground, l));
             f2 = 1.0F - Mth.clamp(f - 1.0F, 0.0F, 1.0F);
         } else if (this.fadeIn) {
             if (this.minecraft.screen != null && f1 < 1.0F) {
@@ -87,10 +102,10 @@ public class LoadingOverlay extends Overlay {
             }
 
             int i2 = Mth.ceil(Mth.clamp((double)f1, 0.15, 1.0) * 255.0);
-            p_281839_.fill(RenderType.guiOverlay(), 0, 0, i, j, replaceAlpha(BRAND_BACKGROUND.getAsInt(), i2));
+            p_281839_.fill(RenderType.guiOverlay(), 0, 0, i, j, replaceAlpha(this.colorBackground, i2));
             f2 = Mth.clamp(f1, 0.0F, 1.0F);
         } else {
-            int j2 = BRAND_BACKGROUND.getAsInt();
+            int j2 = this.colorBackground;
             float f3 = (float)(j2 >> 16 & 0xFF) / 255.0F;
             float f4 = (float)(j2 >> 8 & 0xFF) / 255.0F;
             float f5 = (float)(j2 & 0xFF) / 255.0F;
@@ -99,20 +114,33 @@ public class LoadingOverlay extends Overlay {
             f2 = 1.0F;
         }
 
-        int k2 = (int)((double)p_281839_.guiWidth() * 0.5);
-        int l2 = (int)((double)p_281839_.guiHeight() * 0.5);
-        double d1 = Math.min((double)p_281839_.guiWidth() * 0.75, (double)p_281839_.guiHeight()) * 0.25;
-        int i1 = (int)(d1 * 0.5);
-        double d0 = d1 * 4.0;
-        int j1 = (int)(d0 * 0.5);
-        int k1 = ARGB.white(f2);
-        p_281839_.blit(p_357672_ -> RenderType.mojangLogo(), MOJANG_STUDIOS_LOGO_LOCATION, k2 - j1, l2 - i1, -0.0625F, 0.0F, j1, (int)d1, 120, 60, 120, 120, k1);
-        p_281839_.blit(p_357673_ -> RenderType.mojangLogo(), MOJANG_STUDIOS_LOGO_LOCATION, k2, l2 - i1, 0.0625F, 60.0F, j1, (int)d1, 120, 60, 120, 120, k1);
-        int l1 = (int)((double)p_281839_.guiHeight() * 0.8325);
-        float f6 = this.reload.getActualProgress();
-        this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + f6 * 0.050000012F, 0.0F, 1.0F);
-        if (f < 1.0F) {
-            this.drawProgressBar(p_281839_, i / 2 - j1, l1 - 5, i / 2 + j1, l1 + 5, 1.0F - Mth.clamp(f, 0.0F, 1.0F));
+        if (this.renderContents(p_281839_, f2)) {
+            int k2 = (int)((double)p_281839_.guiWidth() * 0.5);
+            int l2 = (int)((double)p_281839_.guiHeight() * 0.5);
+            double d1 = Math.min((double)p_281839_.guiWidth() * 0.75, (double)p_281839_.guiHeight()) * 0.25;
+            int i1 = (int)(d1 * 0.5);
+            double d0 = d1 * 4.0;
+            int j1 = (int)(d0 * 0.5);
+            int k1 = ARGB.white(f2);
+            boolean flag = true;
+            if (this.blendState != null) {
+                this.blendState.apply();
+                if (!this.blendState.isEnabled() && this.fadeOut) {
+                    flag = false;
+                }
+            }
+
+            if (flag) {
+                p_281839_.blit(locIn -> RenderType.mojangLogo(), MOJANG_STUDIOS_LOGO_LOCATION, k2 - j1, l2 - i1, -0.0625F, 0.0F, j1, (int)d1, 120, 60, 120, 120, k1);
+                p_281839_.blit(locIn -> RenderType.mojangLogo(), MOJANG_STUDIOS_LOGO_LOCATION, k2, l2 - i1, 0.0625F, 60.0F, j1, (int)d1, 120, 60, 120, 120, k1);
+            }
+
+            int l1 = (int)((double)p_281839_.guiHeight() * 0.8325);
+            float f6 = this.reload.getActualProgress();
+            this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + f6 * 0.050000012F, 0.0F, 1.0F);
+            if (f < 1.0F) {
+                this.drawProgressBar(p_281839_, i / 2 - j1, l1 - 5, i / 2 + j1, l1 + 5, 1.0F - Mth.clamp(f, 0.0F, 1.0F));
+            }
         }
 
         if (f >= 2.0F) {
@@ -120,6 +148,40 @@ public class LoadingOverlay extends Overlay {
         }
 
         if (this.fadeOutStart == -1L && this.reload.isDone() && (!this.fadeIn || f1 >= 2.0F)) {
+            this.fadeOutStart = Util.getMillis();
+
+            try {
+                this.reload.checkExceptions();
+                this.onFinish.accept(Optional.empty());
+            } catch (Throwable throwable1) {
+                this.onFinish.accept(Optional.of(throwable1));
+            }
+
+            if (this.minecraft.screen != null) {
+                this.minecraft.screen.init(this.minecraft, p_281839_.guiWidth(), p_281839_.guiHeight());
+            }
+        }
+    }
+
+    private boolean arcane$renderSplash(GuiGraphics pGuiGraphics) {
+        long arcaneNow = Util.getMillis();
+        if (this.fadeIn && this.fadeInStart == -1L) {
+            this.fadeInStart = arcaneNow;
+        }
+
+        float arcaneFadeOut = this.fadeOutStart > -1L ? (float)(arcaneNow - this.fadeOutStart) / 1000.0F : -1.0F;
+        float arcaneFadeIn = this.fadeInStart > -1L ? (float)(arcaneNow - this.fadeInStart) / 500.0F : -1.0F;
+        this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + this.reload.getActualProgress() * 0.050000012F, 0.0F, 1.0F);
+        ArcaneSplashRenderer.render(pGuiGraphics, this.currentProgress);
+
+        if (arcaneFadeOut >= 2.0F) {
+            ArcaneSplashRenderer.reset();
+            this.minecraft.setOverlay(null);
+        }
+
+        if (this.fadeOutStart == -1L && this.reload.isDone() && (!this.fadeIn || arcaneFadeIn >= 2.0F)) {
+            this.fadeOutStart = Util.getMillis();
+
             try {
                 this.reload.checkExceptions();
                 this.onFinish.accept(Optional.empty());
@@ -127,22 +189,38 @@ public class LoadingOverlay extends Overlay {
                 this.onFinish.accept(Optional.of(throwable));
             }
 
-            this.fadeOutStart = Util.getMillis();
             if (this.minecraft.screen != null) {
-                this.minecraft.screen.init(this.minecraft, p_281839_.guiWidth(), p_281839_.guiHeight());
+                this.minecraft.screen.init(this.minecraft, pGuiGraphics.guiWidth(), pGuiGraphics.guiHeight());
             }
         }
+
+        return true;
     }
 
-    private void drawProgressBar(GuiGraphics p_283125_, int p_96184_, int p_96185_, int p_96186_, int p_96187_, float p_96188_) {
-        int i = Mth.ceil((float)(p_96186_ - p_96184_ - 2) * this.currentProgress);
-        int j = Math.round(p_96188_ * 255.0F);
-        int k = ARGB.color(j, 255, 255, 255);
-        p_283125_.fill(p_96184_ + 2, p_96185_ + 2, p_96184_ + i, p_96187_ - 2, k);
-        p_283125_.fill(p_96184_ + 1, p_96185_, p_96186_ - 1, p_96185_ + 1, k);
-        p_283125_.fill(p_96184_ + 1, p_96187_, p_96186_ - 1, p_96187_ - 1, k);
-        p_283125_.fill(p_96184_, p_96185_, p_96184_ + 1, p_96187_, k);
-        p_283125_.fill(p_96186_, p_96185_, p_96186_ - 1, p_96187_, k);
+    private void drawProgressBar(GuiGraphics pGuiGraphics, int pMinX, int pMinY, int pMaxX, int pMaxY, float pPartialTick) {
+        int i = Mth.ceil((float)(pMaxX - pMinX - 2) * this.currentProgress);
+        int j = Math.round(pPartialTick * 255.0F);
+        if (this.colorBar != this.colorBackground) {
+            int k = this.colorBar >> 16 & 0xFF;
+            int l = this.colorBar >> 8 & 0xFF;
+            int i1 = this.colorBar & 0xFF;
+            int j1 = ARGB.color(j, k, l, i1);
+            pGuiGraphics.fill(pMinX, pMinY, pMaxX, pMaxY, j1);
+        }
+
+        int j2 = this.colorProgress >> 16 & 0xFF;
+        int k2 = this.colorProgress >> 8 & 0xFF;
+        int l2 = this.colorProgress & 0xFF;
+        int i3 = ARGB.color(j, j2, k2, l2);
+        pGuiGraphics.fill(pMinX + 2, pMinY + 2, pMinX + i, pMaxY - 2, i3);
+        int k1 = this.colorOutline >> 16 & 0xFF;
+        int l1 = this.colorOutline >> 8 & 0xFF;
+        int i2 = this.colorOutline & 0xFF;
+        i3 = ARGB.color(j, k1, l1, i2);
+        pGuiGraphics.fill(pMinX + 1, pMinY, pMaxX - 1, pMinY + 1, i3);
+        pGuiGraphics.fill(pMinX + 1, pMaxY, pMaxX - 1, pMaxY - 1, i3);
+        pGuiGraphics.fill(pMinX, pMinY, pMinX + 1, pMaxY, i3);
+        pGuiGraphics.fill(pMaxX, pMinY, pMaxX - 1, pMaxY, i3);
     }
 
     @Override
@@ -150,7 +228,78 @@ public class LoadingOverlay extends Overlay {
         return true;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    protected boolean renderContents(GuiGraphics gui, float alpha) {
+        return true;
+    }
+
+    public void update() {
+        this.colorBackground = BRAND_BACKGROUND.getAsInt();
+        this.colorBar = BRAND_BACKGROUND.getAsInt();
+        this.colorOutline = 16777215;
+        this.colorProgress = 16777215;
+        if (Config.isCustomColors()) {
+            try {
+                String s = "optifine/color.properties";
+                ResourceLocation resourcelocation = new ResourceLocation(s);
+                if (!Config.hasResource(resourcelocation)) {
+                    return;
+                }
+
+                InputStream inputstream = Config.getResourceStream(resourcelocation);
+                Config.dbg("Loading " + s);
+                Properties properties = new PropertiesOrdered();
+                properties.load(inputstream);
+                inputstream.close();
+                this.colorBackground = readColor(properties, "screen.loading", this.colorBackground);
+                this.colorOutline = readColor(properties, "screen.loading.outline", this.colorOutline);
+                this.colorBar = readColor(properties, "screen.loading.bar", this.colorBar);
+                this.colorProgress = readColor(properties, "screen.loading.progress", this.colorProgress);
+                this.blendState = ShaderPackParser.parseBlendState(properties.getProperty("screen.loading.blend"));
+            } catch (Exception exception) {
+                Config.warn(exception.getClass().getName() + ": " + exception.getMessage());
+            }
+        }
+    }
+
+    private static int readColor(Properties props, String name, int colDef) {
+        String s = props.getProperty(name);
+        if (s == null) {
+            return colDef;
+        } else {
+            s = s.trim();
+            int i = parseColor(s, colDef);
+            if (i < 0) {
+                Config.warn("Invalid color: " + name + " = " + s);
+                return i;
+            } else {
+                Config.dbg(name + " = " + s);
+                return i;
+            }
+        }
+    }
+
+    private static int parseColor(String str, int colDef) {
+        if (str == null) {
+            return colDef;
+        } else {
+            str = str.trim();
+
+            try {
+                return Integer.parseInt(str, 16) & 16777215;
+            } catch (NumberFormatException numberformatexception) {
+                return colDef;
+            }
+        }
+    }
+
+    public boolean isFadeOut() {
+        return this.fadeOut;
+    }
+
+    public static String getGuiChatText(ChatScreen guiChat) {
+        return guiChat.input.getValue();
+    }
+
     static class LogoTexture extends ReloadableTexture {
         public LogoTexture() {
             super(LoadingOverlay.MOJANG_STUDIOS_LOGO_LOCATION);
@@ -161,11 +310,17 @@ public class LoadingOverlay extends Overlay {
             ResourceProvider resourceprovider = Minecraft.getInstance().getVanillaPackResources().asProvider();
 
             TextureContents texturecontents;
-            try (InputStream inputstream = resourceprovider.open(LoadingOverlay.MOJANG_STUDIOS_LOGO_LOCATION)) {
+            try (InputStream inputstream = getLogoInputStream(resourceprovider)) {
                 texturecontents = new TextureContents(NativeImage.read(inputstream), new TextureMetadataSection(true, true));
             }
 
             return texturecontents;
+        }
+
+        private static InputStream getLogoInputStream(ResourceProvider resourceManager) throws IOException {
+            return resourceManager.getResource(LoadingOverlay.MOJANG_STUDIOS_LOGO_LOCATION).isPresent()
+                ? resourceManager.getResource(LoadingOverlay.MOJANG_STUDIOS_LOGO_LOCATION).get().open()
+                : resourceManager.open(LoadingOverlay.MOJANG_STUDIOS_LOGO_LOCATION);
         }
     }
 }

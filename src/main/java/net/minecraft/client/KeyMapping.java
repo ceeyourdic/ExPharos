@@ -42,17 +42,17 @@ public class KeyMapping implements Comparable<KeyMapping> {
     private boolean isDown;
     private int clickCount;
 
-    public static void click(InputConstants.Key p_90836_) {
-        KeyMapping keymapping = MAP.get(p_90836_);
+    public static void click(InputConstants.Key pKey) {
+        KeyMapping keymapping = MAP.get(pKey);
         if (keymapping != null) {
             keymapping.clickCount++;
         }
     }
 
-    public static void set(InputConstants.Key p_90838_, boolean p_90839_) {
-        KeyMapping keymapping = MAP.get(p_90838_);
+    public static void set(InputConstants.Key pKey, boolean pHeld) {
+        KeyMapping keymapping = MAP.get(pKey);
         if (keymapping != null) {
-            keymapping.setDown(p_90839_);
+            keymapping.setDown(pHeld);
         }
     }
 
@@ -86,18 +86,18 @@ public class KeyMapping implements Comparable<KeyMapping> {
         }
     }
 
-    public KeyMapping(String p_90821_, int p_90822_, String p_90823_) {
-        this(p_90821_, InputConstants.Type.KEYSYM, p_90822_, p_90823_);
+    public KeyMapping(String pName, int pKeyCode, String pCategory) {
+        this(pName, InputConstants.Type.KEYSYM, pKeyCode, pCategory);
     }
 
-    public KeyMapping(String p_90825_, InputConstants.Type p_90826_, int p_90827_, String p_90828_) {
-        this.name = p_90825_;
-        this.key = p_90826_.getOrCreate(p_90827_);
+    public KeyMapping(String pName, InputConstants.Type pType, int pKeyCode, String pCategory) {
+        this.name = pName;
+        this.key = pType.getOrCreate(pKeyCode);
         this.defaultKey = this.key;
-        this.category = p_90828_;
-        ALL.put(p_90825_, this);
+        this.category = pCategory;
+        ALL.put(pName, this);
         MAP.put(this.key, this);
-        CATEGORIES.add(p_90828_);
+        CATEGORIES.add(pCategory);
     }
 
     public boolean isDown() {
@@ -130,8 +130,8 @@ public class KeyMapping implements Comparable<KeyMapping> {
         return this.defaultKey;
     }
 
-    public void setKey(InputConstants.Key p_90849_) {
-        this.key = p_90849_;
+    public void setKey(InputConstants.Key pKey) {
+        this.key = pKey;
     }
 
     public int compareTo(KeyMapping p_90841_) {
@@ -140,27 +140,27 @@ public class KeyMapping implements Comparable<KeyMapping> {
             : CATEGORY_SORT_ORDER.get(this.category).compareTo(CATEGORY_SORT_ORDER.get(p_90841_.category));
     }
 
-    public static Supplier<Component> createNameSupplier(String p_90843_) {
-        KeyMapping keymapping = ALL.get(p_90843_);
-        return keymapping == null ? () -> Component.translatable(p_90843_) : keymapping::getTranslatedKeyMessage;
+    public static Supplier<Component> createNameSupplier(String pKey) {
+        KeyMapping keymapping = ALL.get(pKey);
+        return keymapping == null ? () -> Component.translatable(pKey) : keymapping::getTranslatedKeyMessage;
     }
 
-    public boolean same(KeyMapping p_90851_) {
-        return this.key.equals(p_90851_.key);
+    public boolean same(KeyMapping pBinding) {
+        return this.key.equals(pBinding.key);
     }
 
     public boolean isUnbound() {
         return this.key.equals(InputConstants.UNKNOWN);
     }
 
-    public boolean matches(int p_90833_, int p_90834_) {
-        return p_90833_ == InputConstants.UNKNOWN.getValue()
-            ? this.key.getType() == InputConstants.Type.SCANCODE && this.key.getValue() == p_90834_
-            : this.key.getType() == InputConstants.Type.KEYSYM && this.key.getValue() == p_90833_;
+    public boolean matches(int pKeysym, int pScancode) {
+        return pKeysym == InputConstants.UNKNOWN.getValue()
+            ? this.key.getType() == InputConstants.Type.SCANCODE && this.key.getValue() == pScancode
+            : this.key.getType() == InputConstants.Type.KEYSYM && this.key.getValue() == pKeysym;
     }
 
-    public boolean matchesMouse(int p_90831_) {
-        return this.key.getType() == InputConstants.Type.MOUSE && this.key.getValue() == p_90831_;
+    public boolean matchesMouse(int pKey) {
+        return this.key.getType() == InputConstants.Type.MOUSE && this.key.getValue() == pKey;
     }
 
     public Component getTranslatedKeyMessage() {
@@ -175,12 +175,12 @@ public class KeyMapping implements Comparable<KeyMapping> {
         return this.key.getName();
     }
 
-    public void setDown(boolean p_90846_) {
-        this.isDown = p_90846_;
+    public void setDown(boolean pValue) {
+        this.isDown = pValue;
     }
 
     @Nullable
-    public static KeyMapping get(String p_378660_) {
-        return ALL.get(p_378660_);
+    public static KeyMapping get(String pName) {
+        return ALL.get(pName);
     }
 }

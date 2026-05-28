@@ -20,8 +20,8 @@ public abstract class BushBlock extends Block {
     @Override
     protected abstract MapCodec<? extends BushBlock> codec();
 
-    protected boolean mayPlaceOn(BlockState p_51042_, BlockGetter p_51043_, BlockPos p_51044_) {
-        return p_51042_.is(BlockTags.DIRT) || p_51042_.is(Blocks.FARMLAND);
+    protected boolean mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return pState.is(BlockTags.DIRT) || pState.is(Blocks.FARMLAND);
     }
 
     @Override
@@ -41,9 +41,9 @@ public abstract class BushBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_51028_, LevelReader p_51029_, BlockPos p_51030_) {
-        BlockPos blockpos = p_51030_.below();
-        return this.mayPlaceOn(p_51029_.getBlockState(blockpos), p_51029_, blockpos);
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.below();
+        return this.mayPlaceOn(pLevel.getBlockState(blockpos), pLevel, blockpos);
     }
 
     @Override

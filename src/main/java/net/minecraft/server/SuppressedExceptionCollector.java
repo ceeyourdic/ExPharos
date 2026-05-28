@@ -15,17 +15,17 @@ public class SuppressedExceptionCollector {
         return System.currentTimeMillis();
     }
 
-    public synchronized void addEntry(String p_368067_, Throwable p_370087_) {
+    public synchronized void addEntry(String pId, Throwable pThrowable) {
         long i = currentTimeMs();
-        String s = p_370087_.getMessage();
-        this.latestEntries.add(new SuppressedExceptionCollector.LongEntry(i, p_368067_, (Class<? extends Throwable>)p_370087_.getClass(), s));
+        String s = pThrowable.getMessage();
+        this.latestEntries.add(new SuppressedExceptionCollector.LongEntry(i, pId, (Class<? extends Throwable>)pThrowable.getClass(), s));
 
         while (this.latestEntries.size() > 8) {
             this.latestEntries.remove();
         }
 
         SuppressedExceptionCollector.ShortEntry suppressedexceptioncollector$shortentry = new SuppressedExceptionCollector.ShortEntry(
-            p_368067_, (Class<? extends Throwable>)p_370087_.getClass()
+            pId, (Class<? extends Throwable>)pThrowable.getClass()
         );
         int j = this.entryCounts.getInt(suppressedexceptioncollector$shortentry);
         this.entryCounts.putAndMoveToFirst(suppressedexceptioncollector$shortentry, j + 1);

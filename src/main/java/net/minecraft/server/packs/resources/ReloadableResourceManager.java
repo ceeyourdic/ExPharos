@@ -11,10 +11,12 @@ import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
+import net.optifine.util.TextureUtils;
 import org.slf4j.Logger;
 
 public class ReloadableResourceManager implements ResourceManager, AutoCloseable {
@@ -23,9 +25,9 @@ public class ReloadableResourceManager implements ResourceManager, AutoCloseable
     private final List<PreparableReloadListener> listeners = Lists.newArrayList();
     private final PackType type;
 
-    public ReloadableResourceManager(PackType p_203820_) {
-        this.type = p_203820_;
-        this.resources = new MultiPackResourceManager(p_203820_, List.of());
+    public ReloadableResourceManager(PackType pType) {
+        this.type = pType;
+        this.resources = new MultiPackResourceManager(pType, List.of());
     }
 
     @Override
@@ -33,15 +35,19 @@ public class ReloadableResourceManager implements ResourceManager, AutoCloseable
         this.resources.close();
     }
 
-    public void registerReloadListener(PreparableReloadListener p_10714_) {
-        this.listeners.add(p_10714_);
+    public void registerReloadListener(PreparableReloadListener pListener) {
+        this.listeners.add(pListener);
     }
 
-    public ReloadInstance createReload(Executor p_143930_, Executor p_143931_, CompletableFuture<Unit> p_143932_, List<PackResources> p_143933_) {
-        LOGGER.info("Reloading ResourceManager: {}", LogUtils.defer(() -> p_143933_.stream().map(PackResources::packId).collect(Collectors.joining(", "))));
+    public ReloadInstance createReload(Executor pBackgroundExecutor, Executor pGameExecutor, CompletableFuture<Unit> pWaitingFor, List<PackResources> pResourcePacks) {
+        LOGGER.info("Reloading ResourceManager: {}", LogUtils.defer(() -> pResourcePacks.stream().map(PackResources::packId).collect(Collectors.joining(", "))));
         this.resources.close();
-        this.resources = new MultiPackResourceManager(this.type, p_143933_);
-        return SimpleReloadInstance.create(this.resources, this.listeners, p_143930_, p_143931_, p_143932_, LOGGER.isDebugEnabled());
+        this.resources = new MultiPackResourceManager(this.type, pResourcePacks);
+        if (Minecraft.getInstance().getResourceManager() == this) {
+            TextureUtils.resourcesPreReload(this);
+        }
+
+        return SimpleReloadInstance.create(this.resources, this.listeners, pBackgroundExecutor, pGameExecutor, pWaitingFor, LOGGER.isDebugEnabled());
     }
 
     @Override
@@ -72,5 +78,11 @@ public class ReloadableResourceManager implements ResourceManager, AutoCloseable
     @Override
     public Stream<PackResources> listPacks() {
         return this.resources.listPacks();
+    }
+
+    public void registerReloadListenerIfNotPresent(PreparableReloadListener listener) {
+        if (!this.listeners.contains(listener)) {
+            this.registerReloadListener(listener);
+        }
     }
 }

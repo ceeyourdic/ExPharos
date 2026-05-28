@@ -28,11 +28,11 @@ public class CrossedArmsItemLayer<S extends HoldingEntityRenderState, M extends 
         }
     }
 
-    protected void applyTranslation(S p_378379_, PoseStack p_378611_) {
-        this.getParentModel().translateToArms(p_378611_);
-        p_378611_.mulPose(Axis.XP.rotation(0.75F));
-        p_378611_.scale(1.07F, 1.07F, 1.07F);
-        p_378611_.translate(0.0F, 0.13F, -0.34F);
-        p_378611_.mulPose(Axis.XP.rotation((float) Math.PI));
+    protected void applyTranslation(S pRenderState, PoseStack pPoseStack) {
+        this.getParentModel().translateToArms(pPoseStack);
+        pPoseStack.mulPose(Axis.XP.rotation(0.75F));
+        pPoseStack.scale(1.07F, 1.07F, 1.07F);
+        pPoseStack.translate(0.0F, 0.13F, -0.34F);
+        pPoseStack.mulPose(Axis.XP.rotation((float) Math.PI));
     }
 }

@@ -17,12 +17,12 @@ public record BrainDebugPayload(BrainDebugPayload.BrainDump brainDump) implement
     );
     public static final CustomPacketPayload.Type<BrainDebugPayload> TYPE = CustomPacketPayload.createType("debug/brain");
 
-    private BrainDebugPayload(FriendlyByteBuf p_299558_) {
-        this(new BrainDebugPayload.BrainDump(p_299558_));
+    private BrainDebugPayload(FriendlyByteBuf pBuffer) {
+        this(new BrainDebugPayload.BrainDump(pBuffer));
     }
 
-    private void write(FriendlyByteBuf p_300305_) {
-        this.brainDump.write(p_300305_);
+    private void write(FriendlyByteBuf pBuffer) {
+        this.brainDump.write(pBuffer);
     }
 
     @Override
@@ -50,56 +50,56 @@ public record BrainDebugPayload(BrainDebugPayload.BrainDump brainDump) implement
         Set<BlockPos> pois,
         Set<BlockPos> potentialPois
     ) {
-        public BrainDump(FriendlyByteBuf p_298042_) {
+        public BrainDump(FriendlyByteBuf pBuffer) {
             this(
-                p_298042_.readUUID(),
-                p_298042_.readInt(),
-                p_298042_.readUtf(),
-                p_298042_.readUtf(),
-                p_298042_.readInt(),
-                p_298042_.readFloat(),
-                p_298042_.readFloat(),
-                p_298042_.readVec3(),
-                p_298042_.readUtf(),
-                p_298042_.readNullable(Path::createFromStream),
-                p_298042_.readBoolean(),
-                p_298042_.readInt(),
-                p_298042_.readList(FriendlyByteBuf::readUtf),
-                p_298042_.readList(FriendlyByteBuf::readUtf),
-                p_298042_.readList(FriendlyByteBuf::readUtf),
-                p_298042_.readList(FriendlyByteBuf::readUtf),
-                p_298042_.readCollection(HashSet::new, BlockPos.STREAM_CODEC),
-                p_298042_.readCollection(HashSet::new, BlockPos.STREAM_CODEC)
+                pBuffer.readUUID(),
+                pBuffer.readInt(),
+                pBuffer.readUtf(),
+                pBuffer.readUtf(),
+                pBuffer.readInt(),
+                pBuffer.readFloat(),
+                pBuffer.readFloat(),
+                pBuffer.readVec3(),
+                pBuffer.readUtf(),
+                pBuffer.readNullable(Path::createFromStream),
+                pBuffer.readBoolean(),
+                pBuffer.readInt(),
+                pBuffer.readList(FriendlyByteBuf::readUtf),
+                pBuffer.readList(FriendlyByteBuf::readUtf),
+                pBuffer.readList(FriendlyByteBuf::readUtf),
+                pBuffer.readList(FriendlyByteBuf::readUtf),
+                pBuffer.readCollection(HashSet::new, BlockPos.STREAM_CODEC),
+                pBuffer.readCollection(HashSet::new, BlockPos.STREAM_CODEC)
             );
         }
 
-        public void write(FriendlyByteBuf p_299431_) {
-            p_299431_.writeUUID(this.uuid);
-            p_299431_.writeInt(this.id);
-            p_299431_.writeUtf(this.name);
-            p_299431_.writeUtf(this.profession);
-            p_299431_.writeInt(this.xp);
-            p_299431_.writeFloat(this.health);
-            p_299431_.writeFloat(this.maxHealth);
-            p_299431_.writeVec3(this.pos);
-            p_299431_.writeUtf(this.inventory);
-            p_299431_.writeNullable(this.path, (p_297936_, p_301045_) -> p_301045_.writeToStream(p_297936_));
-            p_299431_.writeBoolean(this.wantsGolem);
-            p_299431_.writeInt(this.angerLevel);
-            p_299431_.writeCollection(this.activities, FriendlyByteBuf::writeUtf);
-            p_299431_.writeCollection(this.behaviors, FriendlyByteBuf::writeUtf);
-            p_299431_.writeCollection(this.memories, FriendlyByteBuf::writeUtf);
-            p_299431_.writeCollection(this.gossips, FriendlyByteBuf::writeUtf);
-            p_299431_.writeCollection(this.pois, BlockPos.STREAM_CODEC);
-            p_299431_.writeCollection(this.potentialPois, BlockPos.STREAM_CODEC);
+        public void write(FriendlyByteBuf pBuffer) {
+            pBuffer.writeUUID(this.uuid);
+            pBuffer.writeInt(this.id);
+            pBuffer.writeUtf(this.name);
+            pBuffer.writeUtf(this.profession);
+            pBuffer.writeInt(this.xp);
+            pBuffer.writeFloat(this.health);
+            pBuffer.writeFloat(this.maxHealth);
+            pBuffer.writeVec3(this.pos);
+            pBuffer.writeUtf(this.inventory);
+            pBuffer.writeNullable(this.path, (p_297936_, p_301045_) -> p_301045_.writeToStream(p_297936_));
+            pBuffer.writeBoolean(this.wantsGolem);
+            pBuffer.writeInt(this.angerLevel);
+            pBuffer.writeCollection(this.activities, FriendlyByteBuf::writeUtf);
+            pBuffer.writeCollection(this.behaviors, FriendlyByteBuf::writeUtf);
+            pBuffer.writeCollection(this.memories, FriendlyByteBuf::writeUtf);
+            pBuffer.writeCollection(this.gossips, FriendlyByteBuf::writeUtf);
+            pBuffer.writeCollection(this.pois, BlockPos.STREAM_CODEC);
+            pBuffer.writeCollection(this.potentialPois, BlockPos.STREAM_CODEC);
         }
 
-        public boolean hasPoi(BlockPos p_301193_) {
-            return this.pois.contains(p_301193_);
+        public boolean hasPoi(BlockPos pPos) {
+            return this.pois.contains(pPos);
         }
 
-        public boolean hasPotentialPoi(BlockPos p_300342_) {
-            return this.potentialPois.contains(p_300342_);
+        public boolean hasPotentialPoi(BlockPos pPos) {
+            return this.potentialPois.contains(pPos);
         }
     }
 }

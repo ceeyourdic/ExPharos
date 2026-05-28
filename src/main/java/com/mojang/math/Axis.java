@@ -11,14 +11,21 @@ public interface Axis {
     Axis YP = p_254103_ -> new Quaternionf().rotationY(p_254103_);
     Axis ZN = p_254110_ -> new Quaternionf().rotationZ(-p_254110_);
     Axis ZP = p_253997_ -> new Quaternionf().rotationZ(p_253997_);
+    // Arcane mixin port: Yarn-style verbose axis constants.
+    Axis NEGATIVE_X = XN;
+    Axis POSITIVE_X = XP;
+    Axis NEGATIVE_Y = YN;
+    Axis POSITIVE_Y = YP;
+    Axis NEGATIVE_Z = ZN;
+    Axis POSITIVE_Z = ZP;
 
-    static Axis of(Vector3f p_254398_) {
-        return p_254401_ -> new Quaternionf().rotationAxis(p_254401_, p_254398_);
+    static Axis of(Vector3f pAxis) {
+        return p_254401_ -> new Quaternionf().rotationAxis(p_254401_, pAxis);
     }
 
-    Quaternionf rotation(float p_254545_);
+    Quaternionf rotation(float pRadians);
 
-    default Quaternionf rotationDegrees(float p_253800_) {
-        return this.rotation(p_253800_ * (float) (Math.PI / 180.0));
+    default Quaternionf rotationDegrees(float pDegrees) {
+        return this.rotation(pDegrees * (float) (Math.PI / 180.0));
     }
 }

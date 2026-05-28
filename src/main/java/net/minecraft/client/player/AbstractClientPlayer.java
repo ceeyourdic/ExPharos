@@ -1,22 +1,30 @@
 package net.minecraft.client.player;
 
 import com.mojang.authlib.GameProfile;
+import cn.lazymoon.Client;
+import cn.lazymoon.features.module.impl.visual.Camera;
 import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.ShoulderRidingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ComputeFovModifierEvent;
+import net.optifine.Config;
+import net.optifine.RandomEntities;
+import net.optifine.player.CapeUtils;
+import net.optifine.player.PlayerConfigurations;
+import net.optifine.reflect.Reflector;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class AbstractClientPlayer extends Player {
     @Nullable
     private PlayerInfo playerInfo;
@@ -27,10 +35,28 @@ public abstract class AbstractClientPlayer extends Player {
     public final ClientLevel clientLevel;
     public float walkDistO;
     public float walkDist;
+    private ResourceLocation locationOfCape = null;
+    private long reloadCapeTimeMs = 0L;
+    private boolean elytraOfCape = false;
+    private String nameClear = null;
+    public ShoulderRidingEntity entityShoulderLeft;
+    public ShoulderRidingEntity entityShoulderRight;
+    public ShoulderRidingEntity lastAttachedEntity;
+    public float capeFlap;
+    public float capeLean;
+    public float capeLean2;
+    private static final ResourceLocation TEXTURE_ELYTRA = new ResourceLocation("textures/entity/elytra.png");
 
-    public AbstractClientPlayer(ClientLevel p_250460_, GameProfile p_249912_) {
-        super(p_250460_, p_250460_.getSharedSpawnPos(), p_250460_.getSharedSpawnAngle(), p_249912_);
-        this.clientLevel = p_250460_;
+    public AbstractClientPlayer(ClientLevel pClientLevel, GameProfile pGameProfile) {
+        super(pClientLevel, pClientLevel.getSharedSpawnPos(), pClientLevel.getSharedSpawnAngle(), pGameProfile);
+        this.clientLevel = pClientLevel;
+        this.nameClear = pGameProfile.getName();
+        if (this.nameClear != null && !this.nameClear.isEmpty()) {
+            this.nameClear = StringUtil.stripColor(this.nameClear);
+        }
+
+        CapeUtils.downloadCape(this);
+        PlayerConfigurations.getPlayerConfiguration(this);
     }
 
     @Override
@@ -59,10 +85,14 @@ public abstract class AbstractClientPlayer extends Player {
         this.walkDistO = this.walkDist;
         this.deltaMovementOnPreviousTick = this.getDeltaMovement();
         super.tick();
+        if (this.lastAttachedEntity != null) {
+            RandomEntities.checkEntityShoulder(this.lastAttachedEntity, true);
+            this.lastAttachedEntity = null;
+        }
     }
 
-    public Vec3 getDeltaMovementLerped(float p_272943_) {
-        return this.deltaMovementOnPreviousTick.lerp(this.getDeltaMovement(), (double)p_272943_);
+    public Vec3 getDeltaMovementLerped(float pPatialTick) {
+        return this.deltaMovementOnPreviousTick.lerp(this.getDeltaMovement(), (double)pPatialTick);
     }
 
     public PlayerSkin getSkin() {
@@ -70,7 +100,13 @@ public abstract class AbstractClientPlayer extends Player {
         return playerinfo == null ? DefaultPlayerSkin.get(this.getUUID()) : playerinfo.getSkin();
     }
 
-    public float getFieldOfViewModifier(boolean p_361176_, float p_362521_) {
+    public float getFieldOfViewModifier(boolean pIsFirstPerson, float pFovEffectScale) {
+        // Arcane mixin port: Camera.modifyFov can override the computed client-player FOV multiplier.
+        Camera arcaneCamera = Client.INSTANCE.getModuleManager().getModule(Camera.class);
+        if (arcaneCamera != null && arcaneCamera.isState() && Camera.modifyFov.get()) {
+            return Camera.fov.get().floatValue();
+        }
+
         float f = 1.0F;
         if (this.getAbilities().flying) {
             f *= 1.1F;
@@ -86,11 +122,80 @@ public abstract class AbstractClientPlayer extends Player {
             if (this.getUseItem().is(Items.BOW)) {
                 float f3 = Math.min((float)this.getTicksUsingItem() / 20.0F, 1.0F);
                 f *= 1.0F - Mth.square(f3) * 0.15F;
-            } else if (p_361176_ && this.isScoping()) {
+            } else if (pIsFirstPerson && this.isScoping()) {
                 return 0.1F;
             }
         }
 
-        return Mth.lerp(p_362521_, 1.0F, f);
+        if (Reflector.ForgeEventFactoryClient_fireFovModifierEvent.exists()) {
+            ComputeFovModifierEvent computefovmodifierevent = (ComputeFovModifierEvent)Reflector.ForgeEventFactoryClient_fireFovModifierEvent
+                .call(this, f, pFovEffectScale);
+            if (computefovmodifierevent != null) {
+                return computefovmodifierevent.getNewFovModifier();
+            }
+        }
+
+        return Mth.lerp(pFovEffectScale, 1.0F, f);
+    }
+
+    public String getNameClear() {
+        return this.nameClear;
+    }
+
+    public ResourceLocation getLocationOfCape() {
+        return this.locationOfCape;
+    }
+
+    public void setLocationOfCape(ResourceLocation locationOfCape) {
+        this.locationOfCape = locationOfCape;
+    }
+
+    public boolean hasElytraCape() {
+        ResourceLocation resourcelocation = this.getLocationCape();
+        if (resourcelocation == null) {
+            return false;
+        } else {
+            return resourcelocation == this.locationOfCape ? this.elytraOfCape : true;
+        }
+    }
+
+    public void setElytraOfCape(boolean elytraOfCape) {
+        this.elytraOfCape = elytraOfCape;
+    }
+
+    public boolean isElytraOfCape() {
+        return this.elytraOfCape;
+    }
+
+    public long getReloadCapeTimeMs() {
+        return this.reloadCapeTimeMs;
+    }
+
+    public void setReloadCapeTimeMs(long reloadCapeTimeMs) {
+        this.reloadCapeTimeMs = reloadCapeTimeMs;
+    }
+
+    @Nullable
+    public ResourceLocation getLocationCape() {
+        if (!Config.isShowCapes()) {
+            return null;
+        } else {
+            if (this.reloadCapeTimeMs != 0L && System.currentTimeMillis() > this.reloadCapeTimeMs) {
+                CapeUtils.reloadCape(this);
+                this.reloadCapeTimeMs = 0L;
+                PlayerConfigurations.setPlayerConfiguration(this.getNameClear(), null);
+            }
+
+            return this.locationOfCape != null ? this.locationOfCape : this.getSkin().capeTexture();
+        }
+    }
+
+    public ResourceLocation getLocationElytra() {
+        return this.hasElytraCape() ? this.locationOfCape : this.getSkin().elytraTexture();
+    }
+
+    public ResourceLocation getSkinTextureLocation() {
+        PlayerInfo playerinfo = this.getPlayerInfo();
+        return playerinfo == null ? DefaultPlayerSkin.get(this.getUUID()).texture() : playerinfo.getSkin().texture();
     }
 }

@@ -10,7 +10,7 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.monster.warden.Warden;
 
 public class Emerging<E extends Warden> extends Behavior<E> {
-    public Emerging(int p_217547_) {
+    public Emerging(int pDuration) {
         super(
             ImmutableMap.of(
                 MemoryModuleType.IS_EMERGING,
@@ -20,7 +20,7 @@ public class Emerging<E extends Warden> extends Behavior<E> {
                 MemoryModuleType.LOOK_TARGET,
                 MemoryStatus.REGISTERED
             ),
-            p_217547_
+            pDuration
         );
     }
 

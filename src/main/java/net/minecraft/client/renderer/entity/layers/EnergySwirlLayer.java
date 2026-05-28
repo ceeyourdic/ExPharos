@@ -29,9 +29,9 @@ public abstract class EnergySwirlLayer<S extends EntityRenderState, M extends En
         }
     }
 
-    protected abstract boolean isPowered(S p_367450_);
+    protected abstract boolean isPowered(S pRenderState);
 
-    protected abstract float xOffset(float p_116968_);
+    protected abstract float xOffset(float pTickCount);
 
     protected abstract ResourceLocation getTextureLocation();
 

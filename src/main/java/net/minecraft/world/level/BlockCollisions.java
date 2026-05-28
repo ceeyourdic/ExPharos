@@ -30,34 +30,34 @@ public class BlockCollisions<T> extends AbstractIterator<T> {
     private final BiFunction<BlockPos.MutableBlockPos, VoxelShape, T> resultProvider;
 
     public BlockCollisions(
-        CollisionGetter p_286817_, @Nullable Entity p_286246_, AABB p_286624_, boolean p_286354_, BiFunction<BlockPos.MutableBlockPos, VoxelShape, T> p_286303_
+        CollisionGetter pCollisionGetter, @Nullable Entity pEntity, AABB pBox, boolean pOnlySuffocatingBlocks, BiFunction<BlockPos.MutableBlockPos, VoxelShape, T> pResultProvider
     ) {
-        this(p_286817_, p_286246_ == null ? CollisionContext.empty() : CollisionContext.of(p_286246_), p_286624_, p_286354_, p_286303_);
+        this(pCollisionGetter, pEntity == null ? CollisionContext.empty() : CollisionContext.of(pEntity), pBox, pOnlySuffocatingBlocks, pResultProvider);
     }
 
     public BlockCollisions(
-        CollisionGetter p_367210_, CollisionContext p_366924_, AABB p_365384_, boolean p_365770_, BiFunction<BlockPos.MutableBlockPos, VoxelShape, T> p_361273_
+        CollisionGetter pCollisionGetter, CollisionContext pContext, AABB pBox, boolean pOnlySuffocatingBlocks, BiFunction<BlockPos.MutableBlockPos, VoxelShape, T> pResultProvider
     ) {
-        this.context = p_366924_;
+        this.context = pContext;
         this.pos = new BlockPos.MutableBlockPos();
-        this.entityShape = Shapes.create(p_365384_);
-        this.collisionGetter = p_367210_;
-        this.box = p_365384_;
-        this.onlySuffocatingBlocks = p_365770_;
-        this.resultProvider = p_361273_;
-        int i = Mth.floor(p_365384_.minX - 1.0E-7) - 1;
-        int j = Mth.floor(p_365384_.maxX + 1.0E-7) + 1;
-        int k = Mth.floor(p_365384_.minY - 1.0E-7) - 1;
-        int l = Mth.floor(p_365384_.maxY + 1.0E-7) + 1;
-        int i1 = Mth.floor(p_365384_.minZ - 1.0E-7) - 1;
-        int j1 = Mth.floor(p_365384_.maxZ + 1.0E-7) + 1;
+        this.entityShape = Shapes.create(pBox);
+        this.collisionGetter = pCollisionGetter;
+        this.box = pBox;
+        this.onlySuffocatingBlocks = pOnlySuffocatingBlocks;
+        this.resultProvider = pResultProvider;
+        int i = Mth.floor(pBox.minX - 1.0E-7) - 1;
+        int j = Mth.floor(pBox.maxX + 1.0E-7) + 1;
+        int k = Mth.floor(pBox.minY - 1.0E-7) - 1;
+        int l = Mth.floor(pBox.maxY + 1.0E-7) + 1;
+        int i1 = Mth.floor(pBox.minZ - 1.0E-7) - 1;
+        int j1 = Mth.floor(pBox.maxZ + 1.0E-7) + 1;
         this.cursor = new Cursor3D(i, k, i1, j, l, j1);
     }
 
     @Nullable
-    private BlockGetter getChunk(int p_186412_, int p_186413_) {
-        int i = SectionPos.blockToSectionCoord(p_186412_);
-        int j = SectionPos.blockToSectionCoord(p_186413_);
+    private BlockGetter getChunk(int pX, int pZ) {
+        int i = SectionPos.blockToSectionCoord(pX);
+        int j = SectionPos.blockToSectionCoord(pZ);
         long k = ChunkPos.asLong(i, j);
         if (this.cachedBlockGetter != null && this.cachedBlockGetterPos == k) {
             return this.cachedBlockGetter;

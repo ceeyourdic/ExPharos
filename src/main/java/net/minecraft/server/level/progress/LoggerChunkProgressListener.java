@@ -16,16 +16,16 @@ public class LoggerChunkProgressListener implements ChunkProgressListener {
     private long startTime;
     private long nextTickTime = Long.MAX_VALUE;
 
-    private LoggerChunkProgressListener(int p_9629_) {
-        this.maxCount = p_9629_;
+    private LoggerChunkProgressListener(int pMaxCount) {
+        this.maxCount = pMaxCount;
     }
 
-    public static LoggerChunkProgressListener createFromGameruleRadius(int p_331102_) {
-        return p_331102_ > 0 ? create(p_331102_ + 1) : createCompleted();
+    public static LoggerChunkProgressListener createFromGameruleRadius(int pRadius) {
+        return pRadius > 0 ? create(pRadius + 1) : createCompleted();
     }
 
-    public static LoggerChunkProgressListener create(int p_331415_) {
-        int i = ChunkProgressListener.calculateDiameter(p_331415_);
+    public static LoggerChunkProgressListener create(int pRadius) {
+        int i = ChunkProgressListener.calculateDiameter(pRadius);
         return new LoggerChunkProgressListener(i * i);
     }
 
@@ -34,7 +34,7 @@ public class LoggerChunkProgressListener implements ChunkProgressListener {
     }
 
     @Override
-    public void updateSpawnPos(ChunkPos p_9631_) {
+    public void updateSpawnPos(ChunkPos pCenter) {
         this.nextTickTime = Util.getMillis();
         this.startTime = this.nextTickTime;
     }

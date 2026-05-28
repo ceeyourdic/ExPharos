@@ -67,108 +67,108 @@ public record EntityPredicate(
     );
     public static final Codec<ContextAwarePredicate> ADVANCEMENT_CODEC = Codec.withAlternative(ContextAwarePredicate.CODEC, CODEC, EntityPredicate::wrap);
 
-    public static ContextAwarePredicate wrap(EntityPredicate.Builder p_298584_) {
-        return wrap(p_298584_.build());
+    public static ContextAwarePredicate wrap(EntityPredicate.Builder pBuilder) {
+        return wrap(pBuilder.build());
     }
 
-    public static Optional<ContextAwarePredicate> wrap(Optional<EntityPredicate> p_300980_) {
-        return p_300980_.map(EntityPredicate::wrap);
+    public static Optional<ContextAwarePredicate> wrap(Optional<EntityPredicate> pPredicate) {
+        return pPredicate.map(EntityPredicate::wrap);
     }
 
-    public static List<ContextAwarePredicate> wrap(EntityPredicate.Builder... p_299692_) {
-        return Stream.of(p_299692_).map(EntityPredicate::wrap).toList();
+    public static List<ContextAwarePredicate> wrap(EntityPredicate.Builder... pBuilders) {
+        return Stream.of(pBuilders).map(EntityPredicate::wrap).toList();
     }
 
-    public static ContextAwarePredicate wrap(EntityPredicate p_286570_) {
-        LootItemCondition lootitemcondition = LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, p_286570_).build();
+    public static ContextAwarePredicate wrap(EntityPredicate pPredicate) {
+        LootItemCondition lootitemcondition = LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, pPredicate).build();
         return new ContextAwarePredicate(List.of(lootitemcondition));
     }
 
-    public boolean matches(ServerPlayer p_36612_, @Nullable Entity p_36613_) {
-        return this.matches(p_36612_.serverLevel(), p_36612_.position(), p_36613_);
+    public boolean matches(ServerPlayer pPlayer, @Nullable Entity pEntity) {
+        return this.matches(pPlayer.serverLevel(), pPlayer.position(), pEntity);
     }
 
-    public boolean matches(ServerLevel p_36608_, @Nullable Vec3 p_36609_, @Nullable Entity p_36610_) {
-        if (p_36610_ == null) {
+    public boolean matches(ServerLevel pLevel, @Nullable Vec3 pPosition, @Nullable Entity pEntity) {
+        if (pEntity == null) {
             return false;
-        } else if (this.entityType.isPresent() && !this.entityType.get().matches(p_36610_.getType())) {
+        } else if (this.entityType.isPresent() && !this.entityType.get().matches(pEntity.getType())) {
             return false;
         } else {
-            if (p_36609_ == null) {
+            if (pPosition == null) {
                 if (this.distanceToPlayer.isPresent()) {
                     return false;
                 }
             } else if (this.distanceToPlayer.isPresent()
                 && !this.distanceToPlayer
                     .get()
-                    .matches(p_36609_.x, p_36609_.y, p_36609_.z, p_36610_.getX(), p_36610_.getY(), p_36610_.getZ())) {
+                    .matches(pPosition.x, pPosition.y, pPosition.z, pEntity.getX(), pEntity.getY(), pEntity.getZ())) {
                 return false;
             }
 
             if (this.movement.isPresent()) {
-                Vec3 vec3 = p_36610_.getKnownMovement();
+                Vec3 vec3 = pEntity.getKnownMovement();
                 Vec3 vec31 = vec3.scale(20.0);
-                if (!this.movement.get().matches(vec31.x, vec31.y, vec31.z, (double)p_36610_.fallDistance)) {
+                if (!this.movement.get().matches(vec31.x, vec31.y, vec31.z, (double)pEntity.fallDistance)) {
                     return false;
                 }
             }
 
             if (this.location.located.isPresent()
-                && !this.location.located.get().matches(p_36608_, p_36610_.getX(), p_36610_.getY(), p_36610_.getZ())) {
+                && !this.location.located.get().matches(pLevel, pEntity.getX(), pEntity.getY(), pEntity.getZ())) {
                 return false;
             } else {
                 if (this.location.steppingOn.isPresent()) {
-                    Vec3 vec32 = Vec3.atCenterOf(p_36610_.getOnPos());
-                    if (!this.location.steppingOn.get().matches(p_36608_, vec32.x(), vec32.y(), vec32.z())) {
+                    Vec3 vec32 = Vec3.atCenterOf(pEntity.getOnPos());
+                    if (!this.location.steppingOn.get().matches(pLevel, vec32.x(), vec32.y(), vec32.z())) {
                         return false;
                     }
                 }
 
                 if (this.location.affectsMovement.isPresent()) {
-                    Vec3 vec33 = Vec3.atCenterOf(p_36610_.getBlockPosBelowThatAffectsMyMovement());
-                    if (!this.location.affectsMovement.get().matches(p_36608_, vec33.x(), vec33.y(), vec33.z())) {
+                    Vec3 vec33 = Vec3.atCenterOf(pEntity.getBlockPosBelowThatAffectsMyMovement());
+                    if (!this.location.affectsMovement.get().matches(pLevel, vec33.x(), vec33.y(), vec33.z())) {
                         return false;
                     }
                 }
 
-                if (this.effects.isPresent() && !this.effects.get().matches(p_36610_)) {
+                if (this.effects.isPresent() && !this.effects.get().matches(pEntity)) {
                     return false;
-                } else if (this.flags.isPresent() && !this.flags.get().matches(p_36610_)) {
+                } else if (this.flags.isPresent() && !this.flags.get().matches(pEntity)) {
                     return false;
-                } else if (this.equipment.isPresent() && !this.equipment.get().matches(p_36610_)) {
+                } else if (this.equipment.isPresent() && !this.equipment.get().matches(pEntity)) {
                     return false;
-                } else if (this.subPredicate.isPresent() && !this.subPredicate.get().matches(p_36610_, p_36608_, p_36609_)) {
+                } else if (this.subPredicate.isPresent() && !this.subPredicate.get().matches(pEntity, pLevel, pPosition)) {
                     return false;
-                } else if (this.vehicle.isPresent() && !this.vehicle.get().matches(p_36608_, p_36609_, p_36610_.getVehicle())) {
+                } else if (this.vehicle.isPresent() && !this.vehicle.get().matches(pLevel, pPosition, pEntity.getVehicle())) {
                     return false;
                 } else if (this.passenger.isPresent()
-                    && p_36610_.getPassengers().stream().noneMatch(p_296124_ -> this.passenger.get().matches(p_36608_, p_36609_, p_296124_))) {
+                    && pEntity.getPassengers().stream().noneMatch(p_296124_ -> this.passenger.get().matches(pLevel, pPosition, p_296124_))) {
                     return false;
                 } else if (this.targetedEntity.isPresent()
-                    && !this.targetedEntity.get().matches(p_36608_, p_36609_, p_36610_ instanceof Mob ? ((Mob)p_36610_).getTarget() : null)) {
+                    && !this.targetedEntity.get().matches(pLevel, pPosition, pEntity instanceof Mob ? ((Mob)pEntity).getTarget() : null)) {
                     return false;
-                } else if (this.periodicTick.isPresent() && p_36610_.tickCount % this.periodicTick.get() != 0) {
+                } else if (this.periodicTick.isPresent() && pEntity.tickCount % this.periodicTick.get() != 0) {
                     return false;
                 } else {
                     if (this.team.isPresent()) {
-                        Team team = p_36610_.getTeam();
+                        Team team = pEntity.getTeam();
                         if (team == null || !this.team.get().equals(team.getName())) {
                             return false;
                         }
                     }
 
-                    return this.slots.isPresent() && !this.slots.get().matches(p_36610_)
+                    return this.slots.isPresent() && !this.slots.get().matches(pEntity)
                         ? false
-                        : !this.nbt.isPresent() || this.nbt.get().matches(p_36610_);
+                        : !this.nbt.isPresent() || this.nbt.get().matches(pEntity);
                 }
             }
         }
     }
 
-    public static LootContext createContext(ServerPlayer p_36617_, Entity p_36618_) {
-        LootParams lootparams = new LootParams.Builder(p_36617_.serverLevel())
-            .withParameter(LootContextParams.THIS_ENTITY, p_36618_)
-            .withParameter(LootContextParams.ORIGIN, p_36617_.position())
+    public static LootContext createContext(ServerPlayer pPlayer, Entity pEntity) {
+        LootParams lootparams = new LootParams.Builder(pPlayer.serverLevel())
+            .withParameter(LootContextParams.THIS_ENTITY, pEntity)
+            .withParameter(LootContextParams.ORIGIN, pPlayer.position())
             .create(LootContextParamSets.ADVANCEMENT_ENTITY);
         return new LootContext.Builder(lootparams).create(Optional.empty());
     }
@@ -196,103 +196,103 @@ public record EntityPredicate(
             return new EntityPredicate.Builder();
         }
 
-        public EntityPredicate.Builder of(HolderGetter<EntityType<?>> p_370143_, EntityType<?> p_36637_) {
-            this.entityType = Optional.of(EntityTypePredicate.of(p_370143_, p_36637_));
+        public EntityPredicate.Builder of(HolderGetter<EntityType<?>> pEntityTypeRegistry, EntityType<?> pEntityType) {
+            this.entityType = Optional.of(EntityTypePredicate.of(pEntityTypeRegistry, pEntityType));
             return this;
         }
 
-        public EntityPredicate.Builder of(HolderGetter<EntityType<?>> p_361882_, TagKey<EntityType<?>> p_204078_) {
-            this.entityType = Optional.of(EntityTypePredicate.of(p_361882_, p_204078_));
+        public EntityPredicate.Builder of(HolderGetter<EntityType<?>> pEntityTypeRegistry, TagKey<EntityType<?>> pEntityTypeTag) {
+            this.entityType = Optional.of(EntityTypePredicate.of(pEntityTypeRegistry, pEntityTypeTag));
             return this;
         }
 
-        public EntityPredicate.Builder entityType(EntityTypePredicate p_36647_) {
-            this.entityType = Optional.of(p_36647_);
+        public EntityPredicate.Builder entityType(EntityTypePredicate pEntityType) {
+            this.entityType = Optional.of(pEntityType);
             return this;
         }
 
-        public EntityPredicate.Builder distance(DistancePredicate p_36639_) {
-            this.distanceToPlayer = Optional.of(p_36639_);
+        public EntityPredicate.Builder distance(DistancePredicate pDistanceToPlayer) {
+            this.distanceToPlayer = Optional.of(pDistanceToPlayer);
             return this;
         }
 
-        public EntityPredicate.Builder moving(MovementPredicate p_342759_) {
-            this.movement = Optional.of(p_342759_);
+        public EntityPredicate.Builder moving(MovementPredicate pMovement) {
+            this.movement = Optional.of(pMovement);
             return this;
         }
 
-        public EntityPredicate.Builder located(LocationPredicate.Builder p_297650_) {
-            this.located = Optional.of(p_297650_.build());
+        public EntityPredicate.Builder located(LocationPredicate.Builder pLocation) {
+            this.located = Optional.of(pLocation.build());
             return this;
         }
 
-        public EntityPredicate.Builder steppingOn(LocationPredicate.Builder p_298486_) {
-            this.steppingOnLocation = Optional.of(p_298486_.build());
+        public EntityPredicate.Builder steppingOn(LocationPredicate.Builder pSteppingOnLocation) {
+            this.steppingOnLocation = Optional.of(pSteppingOnLocation.build());
             return this;
         }
 
-        public EntityPredicate.Builder movementAffectedBy(LocationPredicate.Builder p_344369_) {
-            this.movementAffectedBy = Optional.of(p_344369_.build());
+        public EntityPredicate.Builder movementAffectedBy(LocationPredicate.Builder pMovementAffectedBy) {
+            this.movementAffectedBy = Optional.of(pMovementAffectedBy.build());
             return this;
         }
 
-        public EntityPredicate.Builder effects(MobEffectsPredicate.Builder p_300139_) {
-            this.effects = p_300139_.build();
+        public EntityPredicate.Builder effects(MobEffectsPredicate.Builder pEffects) {
+            this.effects = pEffects.build();
             return this;
         }
 
-        public EntityPredicate.Builder nbt(NbtPredicate p_36655_) {
-            this.nbt = Optional.of(p_36655_);
+        public EntityPredicate.Builder nbt(NbtPredicate pNbt) {
+            this.nbt = Optional.of(pNbt);
             return this;
         }
 
-        public EntityPredicate.Builder flags(EntityFlagsPredicate.Builder p_300535_) {
-            this.flags = Optional.of(p_300535_.build());
+        public EntityPredicate.Builder flags(EntityFlagsPredicate.Builder pFlags) {
+            this.flags = Optional.of(pFlags.build());
             return this;
         }
 
-        public EntityPredicate.Builder equipment(EntityEquipmentPredicate.Builder p_297462_) {
-            this.equipment = Optional.of(p_297462_.build());
+        public EntityPredicate.Builder equipment(EntityEquipmentPredicate.Builder pEquipment) {
+            this.equipment = Optional.of(pEquipment.build());
             return this;
         }
 
-        public EntityPredicate.Builder equipment(EntityEquipmentPredicate p_36641_) {
-            this.equipment = Optional.of(p_36641_);
+        public EntityPredicate.Builder equipment(EntityEquipmentPredicate pEquipment) {
+            this.equipment = Optional.of(pEquipment);
             return this;
         }
 
-        public EntityPredicate.Builder subPredicate(EntitySubPredicate p_218801_) {
-            this.subPredicate = Optional.of(p_218801_);
+        public EntityPredicate.Builder subPredicate(EntitySubPredicate pSubPredicate) {
+            this.subPredicate = Optional.of(pSubPredicate);
             return this;
         }
 
-        public EntityPredicate.Builder periodicTick(int p_343808_) {
-            this.periodicTick = Optional.of(p_343808_);
+        public EntityPredicate.Builder periodicTick(int pPeriodicTick) {
+            this.periodicTick = Optional.of(pPeriodicTick);
             return this;
         }
 
-        public EntityPredicate.Builder vehicle(EntityPredicate.Builder p_300159_) {
-            this.vehicle = Optional.of(p_300159_.build());
+        public EntityPredicate.Builder vehicle(EntityPredicate.Builder pVehicle) {
+            this.vehicle = Optional.of(pVehicle.build());
             return this;
         }
 
-        public EntityPredicate.Builder passenger(EntityPredicate.Builder p_297891_) {
-            this.passenger = Optional.of(p_297891_.build());
+        public EntityPredicate.Builder passenger(EntityPredicate.Builder pPassenger) {
+            this.passenger = Optional.of(pPassenger.build());
             return this;
         }
 
-        public EntityPredicate.Builder targetedEntity(EntityPredicate.Builder p_298127_) {
-            this.targetedEntity = Optional.of(p_298127_.build());
+        public EntityPredicate.Builder targetedEntity(EntityPredicate.Builder pTargetedEntity) {
+            this.targetedEntity = Optional.of(pTargetedEntity.build());
             return this;
         }
 
-        public EntityPredicate.Builder team(String p_36659_) {
-            this.team = Optional.of(p_36659_);
+        public EntityPredicate.Builder team(String pTeam) {
+            this.team = Optional.of(pTeam);
             return this;
         }
 
-        public EntityPredicate.Builder slots(SlotsPredicate p_330666_) {
-            this.slots = Optional.of(p_330666_);
+        public EntityPredicate.Builder slots(SlotsPredicate pSlots) {
+            this.slots = Optional.of(pSlots);
             return this;
         }
 

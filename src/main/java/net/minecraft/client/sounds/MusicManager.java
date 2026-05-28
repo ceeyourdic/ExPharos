@@ -20,8 +20,8 @@ public class MusicManager {
     private float currentGain = 1.0F;
     private int nextSongDelay = 100;
 
-    public MusicManager(Minecraft p_120182_) {
-        this.minecraft = p_120182_;
+    public MusicManager(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
     public void tick() {
@@ -57,19 +57,19 @@ public class MusicManager {
         }
     }
 
-    public void startPlaying(MusicInfo p_377601_) {
-        this.currentMusic = SimpleSoundInstance.forMusic(p_377601_.music().getEvent().value());
+    public void startPlaying(MusicInfo pMusic) {
+        this.currentMusic = SimpleSoundInstance.forMusic(pMusic.music().getEvent().value());
         if (this.currentMusic.getSound() != SoundManager.EMPTY_SOUND) {
             this.minecraft.getSoundManager().play(this.currentMusic);
-            this.minecraft.getSoundManager().setVolume(this.currentMusic, p_377601_.volume());
+            this.minecraft.getSoundManager().setVolume(this.currentMusic, pMusic.volume());
         }
 
         this.nextSongDelay = Integer.MAX_VALUE;
-        this.currentGain = p_377601_.volume();
+        this.currentGain = pMusic.volume();
     }
 
-    public void stopPlaying(Music p_278295_) {
-        if (this.isPlayingMusic(p_278295_)) {
+    public void stopPlaying(Music pMusic) {
+        if (this.isPlayingMusic(pMusic)) {
             this.stopPlaying();
         }
     }
@@ -83,21 +83,21 @@ public class MusicManager {
         this.nextSongDelay += 100;
     }
 
-    private boolean fadePlaying(float p_375585_) {
+    private boolean fadePlaying(float pVolume) {
         if (this.currentMusic == null) {
             return false;
-        } else if (this.currentGain == p_375585_) {
+        } else if (this.currentGain == pVolume) {
             return true;
         } else {
-            if (this.currentGain < p_375585_) {
+            if (this.currentGain < pVolume) {
                 this.currentGain = this.currentGain + Mth.clamp(this.currentGain, 5.0E-4F, 0.005F);
-                if (this.currentGain > p_375585_) {
-                    this.currentGain = p_375585_;
+                if (this.currentGain > pVolume) {
+                    this.currentGain = pVolume;
                 }
             } else {
-                this.currentGain = 0.03F * p_375585_ + 0.97F * this.currentGain;
-                if (Math.abs(this.currentGain - p_375585_) < 1.0E-4F || this.currentGain < p_375585_) {
-                    this.currentGain = p_375585_;
+                this.currentGain = 0.03F * pVolume + 0.97F * this.currentGain;
+                if (Math.abs(this.currentGain - pVolume) < 1.0E-4F || this.currentGain < pVolume) {
+                    this.currentGain = pVolume;
                 }
             }
 
@@ -112,7 +112,7 @@ public class MusicManager {
         }
     }
 
-    public boolean isPlayingMusic(Music p_120188_) {
-        return this.currentMusic == null ? false : p_120188_.getEvent().value().location().equals(this.currentMusic.getLocation());
+    public boolean isPlayingMusic(Music pSelector) {
+        return this.currentMusic == null ? false : pSelector.getEvent().value().location().equals(this.currentMusic.getLocation());
     }
 }

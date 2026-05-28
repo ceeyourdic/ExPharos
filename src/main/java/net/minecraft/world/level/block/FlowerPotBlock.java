@@ -44,14 +44,14 @@ public class FlowerPotBlock extends Block {
         return CODEC;
     }
 
-    public FlowerPotBlock(Block p_53528_, BlockBehaviour.Properties p_53529_) {
-        super(p_53529_);
-        this.potted = p_53528_;
-        POTTED_BY_CONTENT.put(p_53528_, this);
+    public FlowerPotBlock(Block pPotted, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.potted = pPotted;
+        POTTED_BY_CONTENT.put(pPotted, this);
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_53556_, BlockGetter p_53557_, BlockPos p_53558_, CollisionContext p_53559_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
@@ -147,11 +147,11 @@ public class FlowerPotBlock extends Block {
         super.randomTick(p_377272_, p_377872_, p_375421_, p_376681_);
     }
 
-    public BlockState opposite(BlockState p_376074_) {
-        if (p_376074_.is(Blocks.POTTED_OPEN_EYEBLOSSOM)) {
+    public BlockState opposite(BlockState pState) {
+        if (pState.is(Blocks.POTTED_OPEN_EYEBLOSSOM)) {
             return Blocks.POTTED_CLOSED_EYEBLOSSOM.defaultBlockState();
         } else {
-            return p_376074_.is(Blocks.POTTED_CLOSED_EYEBLOSSOM) ? Blocks.POTTED_OPEN_EYEBLOSSOM.defaultBlockState() : p_376074_;
+            return pState.is(Blocks.POTTED_CLOSED_EYEBLOSSOM) ? Blocks.POTTED_OPEN_EYEBLOSSOM.defaultBlockState() : pState;
         }
     }
 }

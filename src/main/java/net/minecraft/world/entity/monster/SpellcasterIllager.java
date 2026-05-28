@@ -34,15 +34,15 @@ public abstract class SpellcasterIllager extends AbstractIllager {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_33732_) {
-        super.readAdditionalSaveData(p_33732_);
-        this.spellCastingTickCount = p_33732_.getInt("SpellTicks");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.spellCastingTickCount = pCompound.getInt("SpellTicks");
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_33734_) {
-        super.addAdditionalSaveData(p_33734_);
-        p_33734_.putInt("SpellTicks", this.spellCastingTickCount);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("SpellTicks", this.spellCastingTickCount);
     }
 
     @Override
@@ -58,9 +58,9 @@ public abstract class SpellcasterIllager extends AbstractIllager {
         return this.level().isClientSide ? this.entityData.get(DATA_SPELL_CASTING_ID) > 0 : this.spellCastingTickCount > 0;
     }
 
-    public void setIsCastingSpell(SpellcasterIllager.IllagerSpell p_33728_) {
-        this.currentSpell = p_33728_;
-        this.entityData.set(DATA_SPELL_CASTING_ID, (byte)p_33728_.id);
+    public void setIsCastingSpell(SpellcasterIllager.IllagerSpell pCurrentSpell) {
+        this.currentSpell = pCurrentSpell;
+        this.entityData.set(DATA_SPELL_CASTING_ID, (byte)pCurrentSpell.id);
     }
 
     protected SpellcasterIllager.IllagerSpell getCurrentSpell() {
@@ -131,13 +131,13 @@ public abstract class SpellcasterIllager extends AbstractIllager {
         final int id;
         final double[] spellColor;
 
-        private IllagerSpell(final int p_33754_, final double p_33755_, final double p_33756_, final double p_33757_) {
-            this.id = p_33754_;
-            this.spellColor = new double[]{p_33755_, p_33756_, p_33757_};
+        private IllagerSpell(final int pId, final double pRed, final double pGreen, final double pBlue) {
+            this.id = pId;
+            this.spellColor = new double[]{pRed, pGreen, pBlue};
         }
 
-        public static SpellcasterIllager.IllagerSpell byId(int p_33759_) {
-            return BY_ID.apply(p_33759_);
+        public static SpellcasterIllager.IllagerSpell byId(int pId) {
+            return BY_ID.apply(pId);
         }
     }
 

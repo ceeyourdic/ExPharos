@@ -211,36 +211,36 @@ public class GameRules {
     private final Map<GameRules.Key<?>, GameRules.Value<?>> rules;
     private final FeatureFlagSet enabledFeatures;
 
-    private static <T extends GameRules.Value<T>> GameRules.Key<T> register(String p_46190_, GameRules.Category p_46191_, GameRules.Type<T> p_46192_) {
-        GameRules.Key<T> key = new GameRules.Key<>(p_46190_, p_46191_);
-        GameRules.Type<?> type = GAME_RULE_TYPES.put(key, p_46192_);
+    private static <T extends GameRules.Value<T>> GameRules.Key<T> register(String pName, GameRules.Category pCategory, GameRules.Type<T> pType) {
+        GameRules.Key<T> key = new GameRules.Key<>(pName, pCategory);
+        GameRules.Type<?> type = GAME_RULE_TYPES.put(key, pType);
         if (type != null) {
-            throw new IllegalStateException("Duplicate game rule registration for " + p_46190_);
+            throw new IllegalStateException("Duplicate game rule registration for " + pName);
         } else {
             return key;
         }
     }
 
-    public GameRules(FeatureFlagSet p_363788_, DynamicLike<?> p_369354_) {
-        this(p_363788_);
-        this.loadFromTag(p_369354_);
+    public GameRules(FeatureFlagSet pEnabledFeatures, DynamicLike<?> pTag) {
+        this(pEnabledFeatures);
+        this.loadFromTag(pTag);
     }
 
-    public GameRules(FeatureFlagSet p_370215_) {
-        this(availableRules(p_370215_).collect(ImmutableMap.toImmutableMap(Entry::getKey, p_46210_ -> p_46210_.getValue().createRule())), p_370215_);
+    public GameRules(FeatureFlagSet pEnabledFeatures) {
+        this(availableRules(pEnabledFeatures).collect(ImmutableMap.toImmutableMap(Entry::getKey, p_46210_ -> p_46210_.getValue().createRule())), pEnabledFeatures);
     }
 
-    private static Stream<Entry<GameRules.Key<?>, GameRules.Type<?>>> availableRules(FeatureFlagSet p_367533_) {
-        return GAME_RULE_TYPES.entrySet().stream().filter(p_359947_ -> p_359947_.getValue().requiredFeatures.isSubsetOf(p_367533_));
+    private static Stream<Entry<GameRules.Key<?>, GameRules.Type<?>>> availableRules(FeatureFlagSet pEnabledFeatures) {
+        return GAME_RULE_TYPES.entrySet().stream().filter(p_359947_ -> p_359947_.getValue().requiredFeatures.isSubsetOf(pEnabledFeatures));
     }
 
-    private GameRules(Map<GameRules.Key<?>, GameRules.Value<?>> p_369817_, FeatureFlagSet p_361937_) {
-        this.rules = p_369817_;
-        this.enabledFeatures = p_361937_;
+    private GameRules(Map<GameRules.Key<?>, GameRules.Value<?>> pRules, FeatureFlagSet pEnabledFeatures) {
+        this.rules = pRules;
+        this.enabledFeatures = pEnabledFeatures;
     }
 
-    public <T extends GameRules.Value<T>> T getRule(GameRules.Key<T> p_46171_) {
-        T t = (T)this.rules.get(p_46171_);
+    public <T extends GameRules.Value<T>> T getRule(GameRules.Key<T> pKey) {
+        T t = (T)this.rules.get(pKey);
         if (t == null) {
             throw new IllegalArgumentException("Tried to access invalid game rule");
         } else {
@@ -254,86 +254,86 @@ public class GameRules {
         return compoundtag;
     }
 
-    private void loadFromTag(DynamicLike<?> p_46184_) {
-        this.rules.forEach((p_327232_, p_327233_) -> p_46184_.get(p_327232_.id).asString().ifSuccess(p_327233_::deserialize));
+    private void loadFromTag(DynamicLike<?> pDynamic) {
+        this.rules.forEach((p_327232_, p_327233_) -> pDynamic.get(p_327232_.id).asString().ifSuccess(p_327233_::deserialize));
     }
 
-    public GameRules copy(FeatureFlagSet p_366179_) {
+    public GameRules copy(FeatureFlagSet pEnabledFeatures) {
         return new GameRules(
-            availableRules(p_366179_)
+            availableRules(pEnabledFeatures)
                 .collect(
                     ImmutableMap.toImmutableMap(
                         Entry::getKey,
                         p_359951_ -> this.rules.containsKey(p_359951_.getKey()) ? this.rules.get(p_359951_.getKey()) : p_359951_.getValue().createRule()
                     )
                 ),
-            p_366179_
+            pEnabledFeatures
         );
     }
 
-    public void visitGameRuleTypes(GameRules.GameRuleTypeVisitor p_46165_) {
-        GAME_RULE_TYPES.forEach((p_359949_, p_359950_) -> this.callVisitorCap(p_46165_, (GameRules.Key<?>)p_359949_, (GameRules.Type<?>)p_359950_));
+    public void visitGameRuleTypes(GameRules.GameRuleTypeVisitor pVisitor) {
+        GAME_RULE_TYPES.forEach((p_359949_, p_359950_) -> this.callVisitorCap(pVisitor, (GameRules.Key<?>)p_359949_, (GameRules.Type<?>)p_359950_));
     }
 
-    private <T extends GameRules.Value<T>> void callVisitorCap(GameRules.GameRuleTypeVisitor p_46167_, GameRules.Key<?> p_46168_, GameRules.Type<?> p_46169_) {
-        if (p_46169_.requiredFeatures.isSubsetOf(this.enabledFeatures)) {
-            p_46167_.visit((Key)p_46168_, p_46169_);
-            p_46169_.callVisitor(p_46167_, (Key)p_46168_);
+    private <T extends GameRules.Value<T>> void callVisitorCap(GameRules.GameRuleTypeVisitor pVisitor, GameRules.Key<?> pKey, GameRules.Type<?> pType) {
+        if (pType.requiredFeatures.isSubsetOf(this.enabledFeatures)) {
+            pVisitor.visit((Key)pKey, pType);
+            pType.callVisitor(pVisitor, (Key)pKey);
         }
     }
 
-    public void assignFrom(GameRules p_46177_, @Nullable MinecraftServer p_46178_) {
-        p_46177_.rules.keySet().forEach(p_46182_ -> this.assignCap((GameRules.Key<?>)p_46182_, p_46177_, p_46178_));
+    public void assignFrom(GameRules pRules, @Nullable MinecraftServer pServer) {
+        pRules.rules.keySet().forEach(p_46182_ -> this.assignCap((GameRules.Key<?>)p_46182_, pRules, pServer));
     }
 
-    private <T extends GameRules.Value<T>> void assignCap(GameRules.Key<T> p_46173_, GameRules p_46174_, @Nullable MinecraftServer p_46175_) {
-        T t = p_46174_.getRule(p_46173_);
-        this.<T>getRule(p_46173_).setFrom(t, p_46175_);
+    private <T extends GameRules.Value<T>> void assignCap(GameRules.Key<T> pKey, GameRules pRules, @Nullable MinecraftServer pServer) {
+        T t = pRules.getRule(pKey);
+        this.<T>getRule(pKey).setFrom(t, pServer);
     }
 
-    public boolean getBoolean(GameRules.Key<GameRules.BooleanValue> p_46208_) {
-        return this.getRule(p_46208_).get();
+    public boolean getBoolean(GameRules.Key<GameRules.BooleanValue> pKey) {
+        return this.getRule(pKey).get();
     }
 
-    public int getInt(GameRules.Key<GameRules.IntegerValue> p_46216_) {
-        return this.getRule(p_46216_).get();
+    public int getInt(GameRules.Key<GameRules.IntegerValue> pKey) {
+        return this.getRule(pKey).get();
     }
 
     public static class BooleanValue extends GameRules.Value<GameRules.BooleanValue> {
         private boolean value;
 
-        static GameRules.Type<GameRules.BooleanValue> create(boolean p_46253_, BiConsumer<MinecraftServer, GameRules.BooleanValue> p_46254_) {
+        static GameRules.Type<GameRules.BooleanValue> create(boolean pDefaultValue, BiConsumer<MinecraftServer, GameRules.BooleanValue> pChangeListener) {
             return new GameRules.Type<>(
                 BoolArgumentType::bool,
-                p_46242_ -> new GameRules.BooleanValue(p_46242_, p_46253_),
-                p_46254_,
+                p_46242_ -> new GameRules.BooleanValue(p_46242_, pDefaultValue),
+                pChangeListener,
                 GameRules.GameRuleTypeVisitor::visitBoolean,
                 FeatureFlagSet.of()
             );
         }
 
-        static GameRules.Type<GameRules.BooleanValue> create(boolean p_46251_) {
-            return create(p_46251_, (p_46236_, p_46237_) -> {
+        static GameRules.Type<GameRules.BooleanValue> create(boolean pDefaultValue) {
+            return create(pDefaultValue, (p_46236_, p_46237_) -> {
             });
         }
 
-        public BooleanValue(GameRules.Type<GameRules.BooleanValue> p_46221_, boolean p_46222_) {
-            super(p_46221_);
-            this.value = p_46222_;
+        public BooleanValue(GameRules.Type<GameRules.BooleanValue> pType, boolean pValue) {
+            super(pType);
+            this.value = pValue;
         }
 
         @Override
-        protected void updateFromArgument(CommandContext<CommandSourceStack> p_46231_, String p_46232_) {
-            this.value = BoolArgumentType.getBool(p_46231_, p_46232_);
+        protected void updateFromArgument(CommandContext<CommandSourceStack> pContext, String pParamName) {
+            this.value = BoolArgumentType.getBool(pContext, pParamName);
         }
 
         public boolean get() {
             return this.value;
         }
 
-        public void set(boolean p_46247_, @Nullable MinecraftServer p_46248_) {
-            this.value = p_46247_;
-            this.onChanged(p_46248_);
+        public void set(boolean pValue, @Nullable MinecraftServer pServer) {
+            this.value = pValue;
+            this.onChanged(pServer);
         }
 
         @Override
@@ -342,8 +342,8 @@ public class GameRules {
         }
 
         @Override
-        protected void deserialize(String p_46234_) {
-            this.value = Boolean.parseBoolean(p_46234_);
+        protected void deserialize(String pValue) {
+            this.value = Boolean.parseBoolean(pValue);
         }
 
         @Override
@@ -359,9 +359,9 @@ public class GameRules {
             return new GameRules.BooleanValue(this.type, this.value);
         }
 
-        public void setFrom(GameRules.BooleanValue p_46225_, @Nullable MinecraftServer p_46226_) {
-            this.value = p_46225_.value;
-            this.onChanged(p_46226_);
+        public void setFrom(GameRules.BooleanValue pValue, @Nullable MinecraftServer pServer) {
+            this.value = pValue.value;
+            this.onChanged(pServer);
         }
     }
 
@@ -376,8 +376,8 @@ public class GameRules {
 
         private final String descriptionId;
 
-        private Category(final String p_46273_) {
-            this.descriptionId = p_46273_;
+        private Category(final String pDescriptionId) {
+            this.descriptionId = pDescriptionId;
         }
 
         public String getDescriptionId() {
@@ -386,63 +386,63 @@ public class GameRules {
     }
 
     public interface GameRuleTypeVisitor {
-        default <T extends GameRules.Value<T>> void visit(GameRules.Key<T> p_46278_, GameRules.Type<T> p_46279_) {
+        default <T extends GameRules.Value<T>> void visit(GameRules.Key<T> pKey, GameRules.Type<T> pType) {
         }
 
-        default void visitBoolean(GameRules.Key<GameRules.BooleanValue> p_46280_, GameRules.Type<GameRules.BooleanValue> p_46281_) {
+        default void visitBoolean(GameRules.Key<GameRules.BooleanValue> pKey, GameRules.Type<GameRules.BooleanValue> pType) {
         }
 
-        default void visitInteger(GameRules.Key<GameRules.IntegerValue> p_46282_, GameRules.Type<GameRules.IntegerValue> p_46283_) {
+        default void visitInteger(GameRules.Key<GameRules.IntegerValue> pKey, GameRules.Type<GameRules.IntegerValue> pType) {
         }
     }
 
     public static class IntegerValue extends GameRules.Value<GameRules.IntegerValue> {
         private int value;
 
-        private static GameRules.Type<GameRules.IntegerValue> create(int p_46295_, BiConsumer<MinecraftServer, GameRules.IntegerValue> p_46296_) {
+        private static GameRules.Type<GameRules.IntegerValue> create(int pDefaultValue, BiConsumer<MinecraftServer, GameRules.IntegerValue> pChangeListener) {
             return new GameRules.Type<>(
                 IntegerArgumentType::integer,
-                p_46293_ -> new GameRules.IntegerValue(p_46293_, p_46295_),
-                p_46296_,
+                p_46293_ -> new GameRules.IntegerValue(p_46293_, pDefaultValue),
+                pChangeListener,
                 GameRules.GameRuleTypeVisitor::visitInteger,
                 FeatureFlagSet.of()
             );
         }
 
         static GameRules.Type<GameRules.IntegerValue> create(
-            int p_332409_, int p_333284_, int p_329881_, FeatureFlagSet p_364744_, BiConsumer<MinecraftServer, GameRules.IntegerValue> p_334400_
+            int pDefaultValue, int pMin, int pMax, FeatureFlagSet pRequiredFeatures, BiConsumer<MinecraftServer, GameRules.IntegerValue> pChangeListener
         ) {
             return new GameRules.Type<>(
-                () -> IntegerArgumentType.integer(p_333284_, p_329881_),
-                p_327235_ -> new GameRules.IntegerValue(p_327235_, p_332409_),
-                p_334400_,
+                () -> IntegerArgumentType.integer(pMin, pMax),
+                p_327235_ -> new GameRules.IntegerValue(p_327235_, pDefaultValue),
+                pChangeListener,
                 GameRules.GameRuleTypeVisitor::visitInteger,
-                p_364744_
+                pRequiredFeatures
             );
         }
 
-        static GameRules.Type<GameRules.IntegerValue> create(int p_46313_) {
-            return create(p_46313_, (p_46309_, p_46310_) -> {
+        static GameRules.Type<GameRules.IntegerValue> create(int pDefaultValue) {
+            return create(pDefaultValue, (p_46309_, p_46310_) -> {
             });
         }
 
-        public IntegerValue(GameRules.Type<GameRules.IntegerValue> p_46286_, int p_46287_) {
-            super(p_46286_);
-            this.value = p_46287_;
+        public IntegerValue(GameRules.Type<GameRules.IntegerValue> pType, int pValue) {
+            super(pType);
+            this.value = pValue;
         }
 
         @Override
-        protected void updateFromArgument(CommandContext<CommandSourceStack> p_46304_, String p_46305_) {
-            this.value = IntegerArgumentType.getInteger(p_46304_, p_46305_);
+        protected void updateFromArgument(CommandContext<CommandSourceStack> pContext, String pParamName) {
+            this.value = IntegerArgumentType.getInteger(pContext, pParamName);
         }
 
         public int get() {
             return this.value;
         }
 
-        public void set(int p_151490_, @Nullable MinecraftServer p_151491_) {
-            this.value = p_151490_;
-            this.onChanged(p_151491_);
+        public void set(int pValue, @Nullable MinecraftServer pServer) {
+            this.value = pValue;
+            this.onChanged(pServer);
         }
 
         @Override
@@ -451,13 +451,13 @@ public class GameRules {
         }
 
         @Override
-        protected void deserialize(String p_46307_) {
-            this.value = safeParse(p_46307_);
+        protected void deserialize(String pValue) {
+            this.value = safeParse(pValue);
         }
 
-        public boolean tryDeserialize(String p_46315_) {
+        public boolean tryDeserialize(String pName) {
             try {
-                StringReader stringreader = new StringReader(p_46315_);
+                StringReader stringreader = new StringReader(pName);
                 this.value = (Integer)this.type.argument.get().parse(stringreader);
                 return !stringreader.canRead();
             } catch (CommandSyntaxException commandsyntaxexception) {
@@ -465,12 +465,12 @@ public class GameRules {
             }
         }
 
-        private static int safeParse(String p_46318_) {
-            if (!p_46318_.isEmpty()) {
+        private static int safeParse(String pStrValue) {
+            if (!pStrValue.isEmpty()) {
                 try {
-                    return Integer.parseInt(p_46318_);
+                    return Integer.parseInt(pStrValue);
                 } catch (NumberFormatException numberformatexception) {
-                    GameRules.LOGGER.warn("Failed to parse integer {}", p_46318_);
+                    GameRules.LOGGER.warn("Failed to parse integer {}", pStrValue);
                 }
             }
 
@@ -490,9 +490,9 @@ public class GameRules {
             return new GameRules.IntegerValue(this.type, this.value);
         }
 
-        public void setFrom(GameRules.IntegerValue p_46298_, @Nullable MinecraftServer p_46299_) {
-            this.value = p_46298_.value;
-            this.onChanged(p_46299_);
+        public void setFrom(GameRules.IntegerValue pValue, @Nullable MinecraftServer pServer) {
+            this.value = pValue.value;
+            this.onChanged(pServer);
         }
     }
 
@@ -500,9 +500,9 @@ public class GameRules {
         final String id;
         private final GameRules.Category category;
 
-        public Key(String p_46326_, GameRules.Category p_46327_) {
-            this.id = p_46326_;
-            this.category = p_46327_;
+        public Key(String pId, GameRules.Category pCategory) {
+            this.id = pId;
+            this.category = pCategory;
         }
 
         @Override
@@ -511,8 +511,8 @@ public class GameRules {
         }
 
         @Override
-        public boolean equals(Object p_46334_) {
-            return this == p_46334_ ? true : p_46334_ instanceof GameRules.Key && ((GameRules.Key)p_46334_).id.equals(this.id);
+        public boolean equals(Object pOther) {
+            return this == pOther ? true : pOther instanceof GameRules.Key && ((GameRules.Key)pOther).id.equals(this.id);
         }
 
         @Override
@@ -541,29 +541,29 @@ public class GameRules {
         final FeatureFlagSet requiredFeatures;
 
         Type(
-            Supplier<ArgumentType<?>> p_46342_,
-            Function<GameRules.Type<T>, T> p_46343_,
-            BiConsumer<MinecraftServer, T> p_46344_,
-            GameRules.VisitorCaller<T> p_46345_,
-            FeatureFlagSet p_363269_
+            Supplier<ArgumentType<?>> pArgument,
+            Function<GameRules.Type<T>, T> pConstructor,
+            BiConsumer<MinecraftServer, T> pCallback,
+            GameRules.VisitorCaller<T> pVisitorCaller,
+            FeatureFlagSet pRequiredFeature
         ) {
-            this.argument = p_46342_;
-            this.constructor = p_46343_;
-            this.callback = p_46344_;
-            this.visitorCaller = p_46345_;
-            this.requiredFeatures = p_363269_;
+            this.argument = pArgument;
+            this.constructor = pConstructor;
+            this.callback = pCallback;
+            this.visitorCaller = pVisitorCaller;
+            this.requiredFeatures = pRequiredFeature;
         }
 
-        public RequiredArgumentBuilder<CommandSourceStack, ?> createArgument(String p_46359_) {
-            return Commands.argument(p_46359_, this.argument.get());
+        public RequiredArgumentBuilder<CommandSourceStack, ?> createArgument(String pName) {
+            return Commands.argument(pName, this.argument.get());
         }
 
         public T createRule() {
             return this.constructor.apply(this);
         }
 
-        public void callVisitor(GameRules.GameRuleTypeVisitor p_46354_, GameRules.Key<T> p_46355_) {
-            this.visitorCaller.call(p_46354_, p_46355_, this);
+        public void callVisitor(GameRules.GameRuleTypeVisitor pVisitor, GameRules.Key<T> pKey) {
+            this.visitorCaller.call(pVisitor, pKey, this);
         }
 
         public FeatureFlagSet requiredFeatures() {
@@ -574,24 +574,24 @@ public class GameRules {
     public abstract static class Value<T extends GameRules.Value<T>> {
         protected final GameRules.Type<T> type;
 
-        public Value(GameRules.Type<T> p_46362_) {
-            this.type = p_46362_;
+        public Value(GameRules.Type<T> pType) {
+            this.type = pType;
         }
 
-        protected abstract void updateFromArgument(CommandContext<CommandSourceStack> p_46365_, String p_46366_);
+        protected abstract void updateFromArgument(CommandContext<CommandSourceStack> pContext, String pParamName);
 
-        public void setFromArgument(CommandContext<CommandSourceStack> p_46371_, String p_46372_) {
-            this.updateFromArgument(p_46371_, p_46372_);
-            this.onChanged(p_46371_.getSource().getServer());
+        public void setFromArgument(CommandContext<CommandSourceStack> pContext, String pParamName) {
+            this.updateFromArgument(pContext, pParamName);
+            this.onChanged(pContext.getSource().getServer());
         }
 
-        protected void onChanged(@Nullable MinecraftServer p_46369_) {
-            if (p_46369_ != null) {
-                this.type.callback.accept(p_46369_, this.getSelf());
+        protected void onChanged(@Nullable MinecraftServer pServer) {
+            if (pServer != null) {
+                this.type.callback.accept(pServer, this.getSelf());
             }
         }
 
-        protected abstract void deserialize(String p_46367_);
+        protected abstract void deserialize(String pValue);
 
         public abstract String serialize();
 
@@ -606,10 +606,10 @@ public class GameRules {
 
         protected abstract T copy();
 
-        public abstract void setFrom(T p_46363_, @Nullable MinecraftServer p_46364_);
+        public abstract void setFrom(T pValue, @Nullable MinecraftServer pServer);
     }
 
     interface VisitorCaller<T extends GameRules.Value<T>> {
-        void call(GameRules.GameRuleTypeVisitor p_46375_, GameRules.Key<T> p_46376_, GameRules.Type<T> p_46377_);
+        void call(GameRules.GameRuleTypeVisitor pVisitor, GameRules.Key<T> pKey, GameRules.Type<T> pType);
     }
 }

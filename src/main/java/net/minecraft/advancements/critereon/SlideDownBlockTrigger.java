@@ -19,8 +19,8 @@ public class SlideDownBlockTrigger extends SimpleCriterionTrigger<SlideDownBlock
         return SlideDownBlockTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_66979_, BlockState p_66980_) {
-        this.trigger(p_66979_, p_66986_ -> p_66986_.matches(p_66980_));
+    public void trigger(ServerPlayer pPlayer, BlockState pState) {
+        this.trigger(pPlayer, p_66986_ -> p_66986_.matches(pState));
     }
 
     public static record TriggerInstance(
@@ -36,25 +36,25 @@ public class SlideDownBlockTrigger extends SimpleCriterionTrigger<SlideDownBlock
             )
             .validate(SlideDownBlockTrigger.TriggerInstance::validate);
 
-        private static DataResult<SlideDownBlockTrigger.TriggerInstance> validate(SlideDownBlockTrigger.TriggerInstance p_312534_) {
-            return p_312534_.block
+        private static DataResult<SlideDownBlockTrigger.TriggerInstance> validate(SlideDownBlockTrigger.TriggerInstance pTriggerInstance) {
+            return pTriggerInstance.block
                 .<DataResult<SlideDownBlockTrigger.TriggerInstance>>flatMap(
-                    p_308148_ -> p_312534_.state
+                    p_308148_ -> pTriggerInstance.state
                             .<String>flatMap(p_308151_ -> p_308151_.checkState(((Block)p_308148_.value()).getStateDefinition()))
                             .map(p_308154_ -> DataResult.error(() -> "Block" + p_308148_ + " has no property " + p_308154_))
                 )
-                .orElseGet(() -> DataResult.success(p_312534_));
+                .orElseGet(() -> DataResult.success(pTriggerInstance));
         }
 
-        public static Criterion<SlideDownBlockTrigger.TriggerInstance> slidesDownBlock(Block p_67007_) {
+        public static Criterion<SlideDownBlockTrigger.TriggerInstance> slidesDownBlock(Block pBlock) {
             return CriteriaTriggers.HONEY_BLOCK_SLIDE
-                .createCriterion(new SlideDownBlockTrigger.TriggerInstance(Optional.empty(), Optional.of(p_67007_.builtInRegistryHolder()), Optional.empty()));
+                .createCriterion(new SlideDownBlockTrigger.TriggerInstance(Optional.empty(), Optional.of(pBlock.builtInRegistryHolder()), Optional.empty()));
         }
 
-        public boolean matches(BlockState p_67009_) {
-            return this.block.isPresent() && !p_67009_.is(this.block.get())
+        public boolean matches(BlockState pState) {
+            return this.block.isPresent() && !pState.is(this.block.get())
                 ? false
-                : !this.state.isPresent() || this.state.get().matches(p_67009_);
+                : !this.state.isPresent() || this.state.get().matches(pState);
         }
 
         @Override

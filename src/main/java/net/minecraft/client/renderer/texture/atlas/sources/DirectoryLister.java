@@ -26,9 +26,9 @@ public class DirectoryLister implements SpriteSource {
     private final String sourcePath;
     private final String idPrefix;
 
-    public DirectoryLister(String p_261886_, String p_261776_) {
-        this.sourcePath = p_261886_;
-        this.idPrefix = p_261776_;
+    public DirectoryLister(String pSourcePath, String pIdPrefix) {
+        this.sourcePath = pSourcePath;
+        this.idPrefix = pIdPrefix;
     }
 
     @Override

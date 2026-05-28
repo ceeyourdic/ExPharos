@@ -25,19 +25,19 @@ public class NoticeWithLinkScreen extends Screen {
     private final Runnable onClose;
     private final GridLayout layout = new GridLayout().rowSpacing(10);
 
-    public NoticeWithLinkScreen(Component p_300556_, Component p_297438_, URI p_342616_, Runnable p_311369_) {
-        super(p_300556_);
-        this.message = p_297438_;
-        this.uri = p_342616_;
-        this.onClose = p_311369_;
+    public NoticeWithLinkScreen(Component pTitle, Component pMessage, URI pUri, Runnable pOnClose) {
+        super(pTitle);
+        this.message = pMessage;
+        this.uri = pUri;
+        this.onClose = pOnClose;
     }
 
-    public static Screen createWorldSymlinkWarningScreen(Runnable p_309390_) {
-        return new NoticeWithLinkScreen(SYMLINK_WORLD_TITLE, SYMLINK_WORLD_MESSAGE_TEXT, CommonLinks.SYMLINK_HELP, p_309390_);
+    public static Screen createWorldSymlinkWarningScreen(Runnable pOnClose) {
+        return new NoticeWithLinkScreen(SYMLINK_WORLD_TITLE, SYMLINK_WORLD_MESSAGE_TEXT, CommonLinks.SYMLINK_HELP, pOnClose);
     }
 
-    public static Screen createPackSymlinkWarningScreen(Runnable p_310056_) {
-        return new NoticeWithLinkScreen(SYMLINK_PACK_TITLE, SYMLINK_PACK_MESSAGE_TEXT, CommonLinks.SYMLINK_HELP, p_310056_);
+    public static Screen createPackSymlinkWarningScreen(Runnable pOnClose) {
+        return new NoticeWithLinkScreen(SYMLINK_PACK_TITLE, SYMLINK_PACK_MESSAGE_TEXT, CommonLinks.SYMLINK_HELP, pOnClose);
     }
 
     @Override

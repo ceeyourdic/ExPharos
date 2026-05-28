@@ -2,6 +2,7 @@ package net.minecraft.util;
 
 import java.util.function.IntConsumer;
 import javax.annotation.Nullable;
+import net.optifine.util.ArrayCaches;
 import org.apache.commons.lang3.Validate;
 
 public class SimpleBitStorage implements BitStorage {
@@ -199,7 +200,7 @@ public class SimpleBitStorage implements BitStorage {
         0,
         5
     };
-    private final long[] data;
+    private long[] data;
     private final int bits;
     private final long mask;
     private final int size;
@@ -207,66 +208,68 @@ public class SimpleBitStorage implements BitStorage {
     private final int divideMul;
     private final int divideAdd;
     private final int divideShift;
+    private boolean dataFromCache = false;
+    private static ArrayCaches dataCaches = new ArrayCaches(new int[]{256, 342, 410, 456}, long.class, 256);
 
-    public SimpleBitStorage(int p_198164_, int p_198165_, int[] p_198166_) {
-        this(p_198164_, p_198165_);
-        int j = 0;
+    public SimpleBitStorage(int pBits, int pSize, int[] pData) {
+        this(pBits, pSize);
+        int i = 0;
 
-        int i;
-        for (i = 0; i <= p_198165_ - this.valuesPerLong; i += this.valuesPerLong) {
+        int j;
+        for (j = 0; j <= pSize - this.valuesPerLong; j += this.valuesPerLong) {
             long k = 0L;
 
             for (int i1 = this.valuesPerLong - 1; i1 >= 0; i1--) {
-                k <<= p_198164_;
-                k |= (long)p_198166_[i + i1] & this.mask;
+                k <<= pBits;
+                k |= (long)pData[j + i1] & this.mask;
             }
 
-            this.data[j++] = k;
+            this.data[i++] = k;
         }
 
-        int k1 = p_198165_ - i;
+        int k1 = pSize - j;
         if (k1 > 0) {
             long l = 0L;
 
             for (int j1 = k1 - 1; j1 >= 0; j1--) {
-                l <<= p_198164_;
-                l |= (long)p_198166_[i + j1] & this.mask;
+                l <<= pBits;
+                l |= (long)pData[j + j1] & this.mask;
             }
 
-            this.data[j] = l;
+            this.data[i] = l;
         }
     }
 
-    public SimpleBitStorage(int p_184717_, int p_184718_) {
-        this(p_184717_, p_184718_, (long[])null);
+    public SimpleBitStorage(int pBits, int pSize) {
+        this(pBits, pSize, (long[])null);
     }
 
-    public SimpleBitStorage(int p_184724_, int p_184725_, @Nullable long[] p_184726_) {
-        Validate.inclusiveBetween(1L, 32L, (long)p_184724_);
-        this.size = p_184725_;
-        this.bits = p_184724_;
-        this.mask = (1L << p_184724_) - 1L;
-        this.valuesPerLong = (char)(64 / p_184724_);
+    public SimpleBitStorage(int pBits, int pSize, @Nullable long[] pData) {
+        Validate.inclusiveBetween(1L, 32L, (long)pBits);
+        this.size = pSize;
+        this.bits = pBits;
+        this.mask = (1L << pBits) - 1L;
+        this.valuesPerLong = (char)(64 / pBits);
         int i = 3 * (this.valuesPerLong - 1);
         this.divideMul = MAGIC[i + 0];
         this.divideAdd = MAGIC[i + 1];
         this.divideShift = MAGIC[i + 2];
-        int j = (p_184725_ + this.valuesPerLong - 1) / this.valuesPerLong;
-        if (p_184726_ != null) {
-            if (p_184726_.length != j) {
-                throw new SimpleBitStorage.InitializationException("Invalid length given for storage, got: " + p_184726_.length + " but expected: " + j);
+        int j = (pSize + this.valuesPerLong - 1) / this.valuesPerLong;
+        if (pData != null) {
+            if (pData.length != j) {
+                throw new SimpleBitStorage.InitializationException("Invalid length given for storage, got: " + pData.length + " but expected: " + j);
             }
 
-            this.data = p_184726_;
+            this.data = pData;
         } else {
             this.data = new long[j];
         }
     }
 
-    private int cellIndex(int p_184740_) {
+    private int cellIndex(int pIndex) {
         long i = Integer.toUnsignedLong(this.divideMul);
         long j = Integer.toUnsignedLong(this.divideAdd);
-        return (int)((long)p_184740_ * i + j >> 32 >> this.divideShift);
+        return (int)((long)pIndex * i + j >> 32 >> this.divideShift);
     }
 
     @Override
@@ -359,12 +362,25 @@ public class SimpleBitStorage implements BitStorage {
 
     @Override
     public BitStorage copy() {
-        return new SimpleBitStorage(this.bits, this.size, (long[])this.data.clone());
+        long[] along = (long[])dataCaches.allocate(this.data.length);
+        System.arraycopy(this.data, 0, along, 0, this.data.length);
+        SimpleBitStorage simplebitstorage = new SimpleBitStorage(this.bits, this.size, along);
+        simplebitstorage.dataFromCache = true;
+        return simplebitstorage;
+    }
+
+    @Override
+    public void finish() {
+        if (this.dataFromCache) {
+            dataCaches.free(this.data);
+            this.data = null;
+            this.dataFromCache = false;
+        }
     }
 
     public static class InitializationException extends RuntimeException {
-        InitializationException(String p_184746_) {
-            super(p_184746_);
+        InitializationException(String pMessage) {
+            super(pMessage);
         }
     }
 }

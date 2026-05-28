@@ -14,11 +14,11 @@ public class ContainerScreen extends AbstractContainerScreen<ChestMenu> {
     private static final ResourceLocation CONTAINER_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
     private final int containerRows;
 
-    public ContainerScreen(ChestMenu p_98409_, Inventory p_98410_, Component p_98411_) {
-        super(p_98409_, p_98410_, p_98411_);
+    public ContainerScreen(ChestMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, pPlayerInventory, pTitle);
         int i = 222;
         int j = 114;
-        this.containerRows = p_98409_.getRowCount();
+        this.containerRows = pMenu.getRowCount();
         this.imageHeight = 114 + this.containerRows * 18;
         this.inventoryLabelY = this.imageHeight - 94;
     }

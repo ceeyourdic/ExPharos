@@ -18,14 +18,14 @@ import org.slf4j.Logger;
 public interface ListOperation {
     MapCodec<ListOperation> UNLIMITED_CODEC = codec(Integer.MAX_VALUE);
 
-    static MapCodec<ListOperation> codec(int p_334114_) {
+    static MapCodec<ListOperation> codec(int pMaxSize) {
         return ListOperation.Type.CODEC
             .<ListOperation>dispatchMap("mode", ListOperation::mode, p_328481_ -> p_328481_.mapCodec)
             .validate(p_336261_ -> {
                 if (p_336261_ instanceof ListOperation.ReplaceSection listoperation$replacesection && listoperation$replacesection.size().isPresent()) {
                     int i = listoperation$replacesection.size().get();
-                    if (i > p_334114_) {
-                        return DataResult.error(() -> "Size value too large: " + i + ", max size is " + p_334114_);
+                    if (i > pMaxSize) {
+                        return DataResult.error(() -> "Size value too large: " + i + ", max size is " + pMaxSize);
                     }
                 }
 
@@ -35,11 +35,11 @@ public interface ListOperation {
 
     ListOperation.Type mode();
 
-    default <T> List<T> apply(List<T> p_334598_, List<T> p_335380_) {
-        return this.apply(p_334598_, p_335380_, Integer.MAX_VALUE);
+    default <T> List<T> apply(List<T> pCurrentValue, List<T> pOperand) {
+        return this.apply(pCurrentValue, pOperand, Integer.MAX_VALUE);
     }
 
-    <T> List<T> apply(List<T> p_329737_, List<T> p_327893_, int p_332636_);
+    <T> List<T> apply(List<T> pCurrentValue, List<T> pOperand, int pMaxSize);
 
     public static class Append implements ListOperation {
         private static final Logger LOGGER = LogUtils.getLogger();
@@ -124,8 +124,8 @@ public interface ListOperation {
                     .apply(p_332380_, ListOperation.ReplaceSection::new)
         );
 
-        public ReplaceSection(int p_335251_) {
-            this(p_335251_, Optional.empty());
+        public ReplaceSection(int pOffset) {
+            this(pOffset, Optional.empty());
         }
 
         @Override
@@ -160,18 +160,18 @@ public interface ListOperation {
     }
 
     public static record StandAlone<T>(List<T> value, ListOperation operation) {
-        public static <T> Codec<ListOperation.StandAlone<T>> codec(Codec<T> p_333263_, int p_334839_) {
+        public static <T> Codec<ListOperation.StandAlone<T>> codec(Codec<T> pElementCodec, int pMaxSize) {
             return RecordCodecBuilder.create(
                 p_334562_ -> p_334562_.group(
-                            p_333263_.sizeLimitedListOf(p_334839_).fieldOf("values").forGetter(p_331378_ -> p_331378_.value),
-                            ListOperation.codec(p_334839_).forGetter(p_330703_ -> p_330703_.operation)
+                            pElementCodec.sizeLimitedListOf(pMaxSize).fieldOf("values").forGetter(p_331378_ -> p_331378_.value),
+                            ListOperation.codec(pMaxSize).forGetter(p_330703_ -> p_330703_.operation)
                         )
                         .apply(p_334562_, ListOperation.StandAlone::new)
             );
         }
 
-        public List<T> apply(List<T> p_334156_) {
-            return this.operation.apply(p_334156_, this.value);
+        public List<T> apply(List<T> pList) {
+            return this.operation.apply(pList, this.value);
         }
     }
 
@@ -185,9 +185,9 @@ public interface ListOperation {
         private final String id;
         final MapCodec<? extends ListOperation> mapCodec;
 
-        private Type(final String p_332297_, final MapCodec<? extends ListOperation> p_336238_) {
-            this.id = p_332297_;
-            this.mapCodec = p_336238_;
+        private Type(final String pId, final MapCodec<? extends ListOperation> pMapCodec) {
+            this.id = pId;
+            this.mapCodec = pMapCodec;
         }
 
         public MapCodec<? extends ListOperation> mapCodec() {

@@ -35,13 +35,13 @@ public record ItemFireworkExplosionPredicate(ItemFireworkExplosionPredicate.Fire
                     .apply(p_335267_, ItemFireworkExplosionPredicate.FireworkPredicate::new)
         );
 
-        public boolean test(FireworkExplosion p_330464_) {
-            if (this.shape.isPresent() && this.shape.get() != p_330464_.shape()) {
+        public boolean test(FireworkExplosion pExplosion) {
+            if (this.shape.isPresent() && this.shape.get() != pExplosion.shape()) {
                 return false;
             } else {
-                return this.twinkle.isPresent() && this.twinkle.get() != p_330464_.hasTwinkle()
+                return this.twinkle.isPresent() && this.twinkle.get() != pExplosion.hasTwinkle()
                     ? false
-                    : !this.trail.isPresent() || this.trail.get() == p_330464_.hasTrail();
+                    : !this.trail.isPresent() || this.trail.get() == pExplosion.hasTrail();
             }
         }
     }

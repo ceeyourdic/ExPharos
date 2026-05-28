@@ -197,8 +197,8 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
         return this.isLikedPlayer(p_376126_) || super.considersEntityAsAlly(p_376126_);
     }
 
-    private boolean isLikedPlayer(@Nullable Entity p_377947_) {
-        if (!(p_377947_ instanceof Player player)) {
+    private boolean isLikedPlayer(@Nullable Entity pEntity) {
+        if (!(pEntity instanceof Player player)) {
             return false;
         } else {
             Optional<UUID> optional = this.getBrain().getMemory(MemoryModuleType.LIKED_PLAYER);
@@ -347,13 +347,13 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
         }
     }
 
-    public void setJukeboxPlaying(BlockPos p_240102_, boolean p_240103_) {
-        if (p_240103_) {
+    public void setJukeboxPlaying(BlockPos pJukeboxPos, boolean pJukeboxPlaying) {
+        if (pJukeboxPlaying) {
             if (!this.isDancing()) {
-                this.jukeboxPos = p_240102_;
+                this.jukeboxPos = pJukeboxPos;
                 this.setDancing(true);
             }
-        } else if (p_240102_.equals(this.jukeboxPos) || this.jukeboxPos == null) {
+        } else if (pJukeboxPos.equals(this.jukeboxPos) || this.jukeboxPos == null) {
             this.jukeboxPos = null;
             this.setDancing(false);
         }
@@ -378,13 +378,13 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
             && this.allayConsidersItemEqual(itemstack, p_218387_);
     }
 
-    private boolean allayConsidersItemEqual(ItemStack p_252278_, ItemStack p_250405_) {
-        return ItemStack.isSameItem(p_252278_, p_250405_) && !this.hasNonMatchingPotion(p_252278_, p_250405_);
+    private boolean allayConsidersItemEqual(ItemStack pFirst, ItemStack pSecond) {
+        return ItemStack.isSameItem(pFirst, pSecond) && !this.hasNonMatchingPotion(pFirst, pSecond);
     }
 
-    private boolean hasNonMatchingPotion(ItemStack p_248762_, ItemStack p_250839_) {
-        PotionContents potioncontents = p_248762_.get(DataComponents.POTION_CONTENTS);
-        PotionContents potioncontents1 = p_250839_.get(DataComponents.POTION_CONTENTS);
+    private boolean hasNonMatchingPotion(ItemStack pFirst, ItemStack pSecond) {
+        PotionContents potioncontents = pFirst.get(DataComponents.POTION_CONTENTS);
+        PotionContents potioncontents1 = pSecond.get(DataComponents.POTION_CONTENTS);
         return !Objects.equals(potioncontents, potioncontents1);
     }
 
@@ -416,9 +416,9 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
         return this.entityData.get(DATA_DANCING);
     }
 
-    public void setDancing(boolean p_240178_) {
-        if (!this.level().isClientSide && this.isEffectiveAi() && (!p_240178_ || !this.isPanicking())) {
-            this.entityData.set(DATA_DANCING, p_240178_);
+    public void setDancing(boolean pDancing) {
+        if (!this.level().isClientSide && this.isEffectiveAi() && (!pDancing || !this.isPanicking())) {
+            this.entityData.set(DATA_DANCING, pDancing);
         }
     }
 
@@ -428,8 +428,8 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
             || !this.level().getBlockState(this.jukeboxPos).is(Blocks.JUKEBOX);
     }
 
-    public float getHoldingItemAnimationProgress(float p_218395_) {
-        return Mth.lerp(p_218395_, this.holdingItemAnimationTicks0, this.holdingItemAnimationTicks) / 5.0F;
+    public float getHoldingItemAnimationProgress(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.holdingItemAnimationTicks0, this.holdingItemAnimationTicks) / 5.0F;
     }
 
     public boolean isSpinning() {
@@ -437,8 +437,8 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
         return f < 15.0F;
     }
 
-    public float getSpinningProgress(float p_240057_) {
-        return Mth.lerp(p_240057_, this.spinningAnimationTicks0, this.spinningAnimationTicks) / 15.0F;
+    public float getSpinningProgress(float pPartialTick) {
+        return Mth.lerp(pPartialTick, this.spinningAnimationTicks0, this.spinningAnimationTicks) / 15.0F;
     }
 
     @Override
@@ -526,8 +526,8 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
         return this.entityData.get(DATA_CAN_DUPLICATE);
     }
 
-    private void removeInteractionItem(Player p_239359_, ItemStack p_239360_) {
-        p_239360_.consume(1, p_239359_);
+    private void removeInteractionItem(Player pPlayer, ItemStack pStack) {
+        pStack.consume(1, pPlayer);
     }
 
     @Override
@@ -567,9 +567,9 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
         private final PositionSource listenerSource;
         private final int listenerRadius;
 
-        public JukeboxListener(final PositionSource p_239448_, final int p_239449_) {
-            this.listenerSource = p_239448_;
-            this.listenerRadius = p_239449_;
+        public JukeboxListener(final PositionSource pListenerSource, final int pListenerRadius) {
+            this.listenerSource = pListenerSource;
+            this.listenerRadius = pListenerRadius;
         }
 
         @Override

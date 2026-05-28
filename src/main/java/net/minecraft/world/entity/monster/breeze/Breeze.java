@@ -164,13 +164,13 @@ public class Breeze extends Monster {
         }
     }
 
-    public void emitGroundParticles(int p_310885_) {
+    public void emitGroundParticles(int pCount) {
         if (!this.isPassenger()) {
             Vec3 vec3 = this.getBoundingBox().getCenter();
             Vec3 vec31 = new Vec3(vec3.x, this.position().y, vec3.z);
             BlockState blockstate = !this.getInBlockState().isAir() ? this.getInBlockState() : this.getBlockStateOn();
             if (blockstate.getRenderShape() != RenderShape.INVISIBLE) {
-                for (int i = 0; i < p_310885_; i++) {
+                for (int i = 0; i < pCount; i++) {
                     this.level()
                         .addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockstate), vec31.x, vec31.y, vec31.z, 0.0, 0.0, 0.0);
                 }
@@ -228,9 +228,9 @@ public class Breeze extends Monster {
             .map(p_332795_ -> (LivingEntity)p_332795_);
     }
 
-    public boolean withinInnerCircleRange(Vec3 p_311473_) {
+    public boolean withinInnerCircleRange(Vec3 pPos) {
         Vec3 vec3 = this.blockPosition().getCenter();
-        return p_311473_.closerThan(vec3, 4.0, 10.0);
+        return pPos.closerThan(vec3, 4.0, 10.0);
     }
 
     @Override

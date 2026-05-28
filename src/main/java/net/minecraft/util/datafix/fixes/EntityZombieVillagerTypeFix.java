@@ -9,29 +9,29 @@ import net.minecraft.util.RandomSource;
 public class EntityZombieVillagerTypeFix extends NamedEntityFix {
     private static final int PROFESSION_MAX = 6;
 
-    public EntityZombieVillagerTypeFix(Schema p_15806_, boolean p_15807_) {
-        super(p_15806_, p_15807_, "EntityZombieVillagerTypeFix", References.ENTITY, "Zombie");
+    public EntityZombieVillagerTypeFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType, "EntityZombieVillagerTypeFix", References.ENTITY, "Zombie");
     }
 
-    public Dynamic<?> fixTag(Dynamic<?> p_15813_) {
-        if (p_15813_.get("IsVillager").asBoolean(false)) {
-            if (p_15813_.get("ZombieType").result().isEmpty()) {
-                int i = this.getVillagerProfession(p_15813_.get("VillagerProfession").asInt(-1));
+    public Dynamic<?> fixTag(Dynamic<?> pTag) {
+        if (pTag.get("IsVillager").asBoolean(false)) {
+            if (pTag.get("ZombieType").result().isEmpty()) {
+                int i = this.getVillagerProfession(pTag.get("VillagerProfession").asInt(-1));
                 if (i == -1) {
                     i = this.getVillagerProfession(RandomSource.create().nextInt(6));
                 }
 
-                p_15813_ = p_15813_.set("ZombieType", p_15813_.createInt(i));
+                pTag = pTag.set("ZombieType", pTag.createInt(i));
             }
 
-            p_15813_ = p_15813_.remove("IsVillager");
+            pTag = pTag.remove("IsVillager");
         }
 
-        return p_15813_;
+        return pTag;
     }
 
-    private int getVillagerProfession(int p_15809_) {
-        return p_15809_ >= 0 && p_15809_ < 6 ? p_15809_ : -1;
+    private int getVillagerProfession(int pVillagerProfession) {
+        return pVillagerProfession >= 0 && pVillagerProfession < 6 ? pVillagerProfession : -1;
     }
 
     @Override

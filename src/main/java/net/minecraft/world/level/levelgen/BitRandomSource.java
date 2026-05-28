@@ -6,7 +6,7 @@ public interface BitRandomSource extends RandomSource {
     float FLOAT_MULTIPLIER = 5.9604645E-8F;
     double DOUBLE_MULTIPLIER = 1.110223E-16F;
 
-    int next(int p_188498_);
+    int next(int pSize);
 
     @Override
     default int nextInt() {

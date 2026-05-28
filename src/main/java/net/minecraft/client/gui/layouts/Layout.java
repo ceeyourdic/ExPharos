@@ -7,7 +7,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface Layout extends LayoutElement {
-    void visitChildren(Consumer<LayoutElement> p_270255_);
+    void visitChildren(Consumer<LayoutElement> pVisitor);
 
     @Override
     default void visitWidgets(Consumer<AbstractWidget> p_270962_) {

@@ -8,8 +8,8 @@ import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class DimensionTypes {
-    public static void bootstrap(BootstrapContext<DimensionType> p_333835_) {
-        p_333835_.register(
+    public static void bootstrap(BootstrapContext<DimensionType> pContext) {
+        pContext.register(
             BuiltinDimensionTypes.OVERWORLD,
             new DimensionType(
                 OptionalLong.empty(),
@@ -29,7 +29,7 @@ public class DimensionTypes {
                 new DimensionType.MonsterSettings(false, true, UniformInt.of(0, 7), 0)
             )
         );
-        p_333835_.register(
+        pContext.register(
             BuiltinDimensionTypes.NETHER,
             new DimensionType(
                 OptionalLong.of(18000L),
@@ -49,7 +49,7 @@ public class DimensionTypes {
                 new DimensionType.MonsterSettings(true, false, ConstantInt.of(7), 15)
             )
         );
-        p_333835_.register(
+        pContext.register(
             BuiltinDimensionTypes.END,
             new DimensionType(
                 OptionalLong.of(6000L),
@@ -69,7 +69,7 @@ public class DimensionTypes {
                 new DimensionType.MonsterSettings(false, true, UniformInt.of(0, 7), 0)
             )
         );
-        p_333835_.register(
+        pContext.register(
             BuiltinDimensionTypes.OVERWORLD_CAVES,
             new DimensionType(
                 OptionalLong.empty(),

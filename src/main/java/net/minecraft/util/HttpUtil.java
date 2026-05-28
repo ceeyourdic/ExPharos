@@ -34,26 +34,26 @@ public class HttpUtil {
     }
 
     public static Path downloadFile(
-        Path p_312337_,
-        URL p_309490_,
-        Map<String, String> p_311545_,
-        HashFunction p_312368_,
-        @Nullable HashCode p_309569_,
-        int p_312993_,
-        Proxy p_311636_,
-        HttpUtil.DownloadProgressListener p_310347_
+        Path pSaveFile,
+        URL pUrl,
+        Map<String, String> pRequestProperties,
+        HashFunction pHashFunction,
+        @Nullable HashCode pHash,
+        int pMaxSize,
+        Proxy pProxy,
+        HttpUtil.DownloadProgressListener pProgressListener
     ) {
         HttpURLConnection httpurlconnection = null;
         InputStream inputstream = null;
-        p_310347_.requestStart();
+        pProgressListener.requestStart();
         Path path;
-        if (p_309569_ != null) {
-            path = cachedFilePath(p_312337_, p_309569_);
+        if (pHash != null) {
+            path = cachedFilePath(pSaveFile, pHash);
 
             try {
-                if (checkExistingFile(path, p_312368_, p_309569_)) {
+                if (checkExistingFile(path, pHashFunction, pHash)) {
                     LOGGER.info("Returning cached file since actual hash matches requested");
-                    p_310347_.requestFinished(true);
+                    pProgressListener.requestFinished(true);
                     updateModificationTime(path);
                     return path;
                 }
@@ -65,7 +65,7 @@ public class HttpUtil {
                 LOGGER.warn("Existing file {} not found or had mismatched hash", path);
                 Files.deleteIfExists(path);
             } catch (IOException ioexception) {
-                p_310347_.requestFinished(false);
+                pProgressListener.requestFinished(false);
                 throw new UncheckedIOException("Failed to remove existing file " + path, ioexception);
             }
         } else {
@@ -74,43 +74,43 @@ public class HttpUtil {
 
         Path $$18;
         try {
-            httpurlconnection = (HttpURLConnection)p_309490_.openConnection(p_311636_);
+            httpurlconnection = (HttpURLConnection)pUrl.openConnection(pProxy);
             httpurlconnection.setInstanceFollowRedirects(true);
-            p_311545_.forEach(httpurlconnection::setRequestProperty);
+            pRequestProperties.forEach(httpurlconnection::setRequestProperty);
             inputstream = httpurlconnection.getInputStream();
             long i = httpurlconnection.getContentLengthLong();
             OptionalLong optionallong = i != -1L ? OptionalLong.of(i) : OptionalLong.empty();
-            FileUtil.createDirectoriesSafe(p_312337_);
-            p_310347_.downloadStart(optionallong);
-            if (optionallong.isPresent() && optionallong.getAsLong() > (long)p_312993_) {
-                throw new IOException("Filesize is bigger than maximum allowed (file is " + optionallong + ", limit is " + p_312993_ + ")");
+            FileUtil.createDirectoriesSafe(pSaveFile);
+            pProgressListener.downloadStart(optionallong);
+            if (optionallong.isPresent() && optionallong.getAsLong() > (long)pMaxSize) {
+                throw new IOException("Filesize is bigger than maximum allowed (file is " + optionallong + ", limit is " + pMaxSize + ")");
             }
 
             if (path == null) {
-                Path path3 = Files.createTempFile(p_312337_, "download", ".tmp");
+                Path path3 = Files.createTempFile(pSaveFile, "download", ".tmp");
 
                 try {
-                    HashCode hashcode1 = downloadAndHash(p_312368_, p_312993_, p_310347_, inputstream, path3);
-                    Path path2 = cachedFilePath(p_312337_, hashcode1);
-                    if (!checkExistingFile(path2, p_312368_, hashcode1)) {
+                    HashCode hashcode1 = downloadAndHash(pHashFunction, pMaxSize, pProgressListener, inputstream, path3);
+                    Path path2 = cachedFilePath(pSaveFile, hashcode1);
+                    if (!checkExistingFile(path2, pHashFunction, hashcode1)) {
                         Files.move(path3, path2, StandardCopyOption.REPLACE_EXISTING);
                     } else {
                         updateModificationTime(path2);
                     }
 
-                    p_310347_.requestFinished(true);
+                    pProgressListener.requestFinished(true);
                     return path2;
                 } finally {
                     Files.deleteIfExists(path3);
                 }
             }
 
-            HashCode hashcode = downloadAndHash(p_312368_, p_312993_, p_310347_, inputstream, path);
-            if (!hashcode.equals(p_309569_)) {
-                throw new IOException("Hash of downloaded file (" + hashcode + ") did not match requested (" + p_309569_ + ")");
+            HashCode hashcode = downloadAndHash(pHashFunction, pMaxSize, pProgressListener, inputstream, path);
+            if (!hashcode.equals(pHash)) {
+                throw new IOException("Hash of downloaded file (" + hashcode + ") did not match requested (" + pHash + ")");
             }
 
-            p_310347_.requestFinished(true);
+            pProgressListener.requestFinished(true);
             $$18 = path;
         } catch (Throwable throwable) {
             if (httpurlconnection != null) {
@@ -124,8 +124,8 @@ public class HttpUtil {
                 }
             }
 
-            p_310347_.requestFinished(false);
-            throw new IllegalStateException("Failed to download file " + p_309490_, throwable);
+            pProgressListener.requestFinished(false);
+            throw new IllegalStateException("Failed to download file " + pUrl, throwable);
         } finally {
             IOUtils.closeQuietly(inputstream);
         }
@@ -133,20 +133,20 @@ public class HttpUtil {
         return $$18;
     }
 
-    private static void updateModificationTime(Path p_311353_) {
+    private static void updateModificationTime(Path pPath) {
         try {
-            Files.setLastModifiedTime(p_311353_, FileTime.from(Instant.now()));
+            Files.setLastModifiedTime(pPath, FileTime.from(Instant.now()));
         } catch (IOException ioexception) {
-            LOGGER.warn("Failed to update modification time of {}", p_311353_, ioexception);
+            LOGGER.warn("Failed to update modification time of {}", pPath, ioexception);
         }
     }
 
-    private static HashCode hashFile(Path p_310985_, HashFunction p_312320_) throws IOException {
-        Hasher hasher = p_312320_.newHasher();
+    private static HashCode hashFile(Path pPath, HashFunction pHashFunction) throws IOException {
+        Hasher hasher = pHashFunction.newHasher();
 
         try (
             OutputStream outputstream = Funnels.asOutputStream(hasher);
-            InputStream inputstream = Files.newInputStream(p_310985_);
+            InputStream inputstream = Files.newInputStream(pPath);
         ) {
             inputstream.transferTo(outputstream);
         }
@@ -154,36 +154,36 @@ public class HttpUtil {
         return hasher.hash();
     }
 
-    private static boolean checkExistingFile(Path p_309713_, HashFunction p_311423_, HashCode p_312149_) throws IOException {
-        if (Files.exists(p_309713_)) {
-            HashCode hashcode = hashFile(p_309713_, p_311423_);
-            if (hashcode.equals(p_312149_)) {
+    private static boolean checkExistingFile(Path pPath, HashFunction pHashFunction, HashCode pExpectedHash) throws IOException {
+        if (Files.exists(pPath)) {
+            HashCode hashcode = hashFile(pPath, pHashFunction);
+            if (hashcode.equals(pExpectedHash)) {
                 return true;
             }
 
-            LOGGER.warn("Mismatched hash of file {}, expected {} but found {}", p_309713_, p_312149_, hashcode);
+            LOGGER.warn("Mismatched hash of file {}, expected {} but found {}", pPath, pExpectedHash, hashcode);
         }
 
         return false;
     }
 
-    private static Path cachedFilePath(Path p_310769_, HashCode p_311855_) {
-        return p_310769_.resolve(p_311855_.toString());
+    private static Path cachedFilePath(Path pPath, HashCode pHash) {
+        return pPath.resolve(pHash.toString());
     }
 
-    private static HashCode downloadAndHash(HashFunction p_312168_, int p_311506_, HttpUtil.DownloadProgressListener p_311732_, InputStream p_312120_, Path p_310124_) throws IOException {
+    private static HashCode downloadAndHash(HashFunction pHashFuntion, int pMaxSize, HttpUtil.DownloadProgressListener pProgressListener, InputStream pStream, Path pOutputPath) throws IOException {
         HashCode hashcode;
-        try (OutputStream outputstream = Files.newOutputStream(p_310124_, StandardOpenOption.CREATE)) {
-            Hasher hasher = p_312168_.newHasher();
+        try (OutputStream outputstream = Files.newOutputStream(pOutputPath, StandardOpenOption.CREATE)) {
+            Hasher hasher = pHashFuntion.newHasher();
             byte[] abyte = new byte[8196];
             long j = 0L;
 
             int i;
-            while ((i = p_312120_.read(abyte)) >= 0) {
+            while ((i = pStream.read(abyte)) >= 0) {
                 j += (long)i;
-                p_311732_.downloadedBytes(j);
-                if (j > (long)p_311506_) {
-                    throw new IOException("Filesize was bigger than maximum allowed (got >= " + j + ", limit was " + p_311506_ + ")");
+                pProgressListener.downloadedBytes(j);
+                if (j > (long)pMaxSize) {
+                    throw new IOException("Filesize was bigger than maximum allowed (got >= " + j + ", limit was " + pMaxSize + ")");
                 }
 
                 if (Thread.interrupted()) {
@@ -214,12 +214,12 @@ public class HttpUtil {
         }
     }
 
-    public static boolean isPortAvailable(int p_259872_) {
-        if (p_259872_ >= 0 && p_259872_ <= 65535) {
+    public static boolean isPortAvailable(int pPort) {
+        if (pPort >= 0 && pPort <= 65535) {
             try {
                 boolean flag;
-                try (ServerSocket serversocket = new ServerSocket(p_259872_)) {
-                    flag = serversocket.getLocalPort() == p_259872_;
+                try (ServerSocket serversocket = new ServerSocket(pPort)) {
+                    flag = serversocket.getLocalPort() == pPort;
                 }
 
                 return flag;
@@ -234,10 +234,10 @@ public class HttpUtil {
     public interface DownloadProgressListener {
         void requestStart();
 
-        void downloadStart(OptionalLong p_311723_);
+        void downloadStart(OptionalLong pTotalSize);
 
-        void downloadedBytes(long p_309797_);
+        void downloadedBytes(long pProgress);
 
-        void requestFinished(boolean p_311898_);
+        void requestFinished(boolean pSuccess);
     }
 }

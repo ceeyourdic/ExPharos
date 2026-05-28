@@ -9,5 +9,5 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface PackDownloader {
-    void download(Map<UUID, DownloadQueue.DownloadRequest> p_309957_, Consumer<DownloadQueue.BatchResult> p_310136_);
+    void download(Map<UUID, DownloadQueue.DownloadRequest> pPacks, Consumer<DownloadQueue.BatchResult> pResultConsumer);
 }

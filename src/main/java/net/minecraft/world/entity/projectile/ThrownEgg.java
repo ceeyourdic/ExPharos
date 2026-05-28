@@ -21,12 +21,12 @@ public class ThrownEgg extends ThrowableItemProjectile {
         super(p_37473_, p_37474_);
     }
 
-    public ThrownEgg(Level p_37476_, LivingEntity p_368678_, ItemStack p_365953_) {
-        super(EntityType.EGG, p_368678_, p_37476_, p_365953_);
+    public ThrownEgg(Level pLevel, LivingEntity pOwner, ItemStack pItem) {
+        super(EntityType.EGG, pOwner, pLevel, pItem);
     }
 
-    public ThrownEgg(Level p_37481_, double p_366951_, double p_367553_, double p_369744_, ItemStack p_362601_) {
-        super(EntityType.EGG, p_366951_, p_367553_, p_369744_, p_37481_, p_362601_);
+    public ThrownEgg(Level pLevel, double pX, double pY, double pZ, ItemStack pItem) {
+        super(EntityType.EGG, pX, pY, pZ, pLevel, pItem);
     }
 
     @Override
@@ -50,14 +50,14 @@ public class ThrownEgg extends ThrowableItemProjectile {
     }
 
     @Override
-    protected void onHitEntity(EntityHitResult p_37486_) {
-        super.onHitEntity(p_37486_);
-        p_37486_.getEntity().hurt(this.damageSources().thrown(this, this.getOwner()), 0.0F);
+    protected void onHitEntity(EntityHitResult pResult) {
+        super.onHitEntity(pResult);
+        pResult.getEntity().hurt(this.damageSources().thrown(this, this.getOwner()), 0.0F);
     }
 
     @Override
-    protected void onHit(HitResult p_37488_) {
-        super.onHit(p_37488_);
+    protected void onHit(HitResult pResult) {
+        super.onHit(pResult);
         if (!this.level().isClientSide) {
             if (this.random.nextInt(8) == 0) {
                 int i = 1;

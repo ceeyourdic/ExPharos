@@ -43,17 +43,17 @@ public class LongTag extends NumericTag {
     };
     private final long data;
 
-    LongTag(long p_128877_) {
-        this.data = p_128877_;
+    LongTag(long pData) {
+        this.data = pData;
     }
 
-    public static LongTag valueOf(long p_128883_) {
-        return p_128883_ >= -128L && p_128883_ <= 1024L ? LongTag.Cache.cache[(int)p_128883_ - -128] : new LongTag(p_128883_);
+    public static LongTag valueOf(long pData) {
+        return pData >= -128L && pData <= 1024L ? LongTag.Cache.cache[(int)pData - -128] : new LongTag(pData);
     }
 
     @Override
-    public void write(DataOutput p_128885_) throws IOException {
-        p_128885_.writeLong(this.data);
+    public void write(DataOutput pOutput) throws IOException {
+        pOutput.writeLong(this.data);
     }
 
     @Override
@@ -76,8 +76,8 @@ public class LongTag extends NumericTag {
     }
 
     @Override
-    public boolean equals(Object p_128894_) {
-        return this == p_128894_ ? true : p_128894_ instanceof LongTag && this.data == ((LongTag)p_128894_).data;
+    public boolean equals(Object pOther) {
+        return this == pOther ? true : pOther instanceof LongTag && this.data == ((LongTag)pOther).data;
     }
 
     @Override

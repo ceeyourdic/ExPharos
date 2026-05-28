@@ -32,7 +32,7 @@ public record UseDuration(boolean remaining) implements RangeSelectItemModelProp
         return MAP_CODEC;
     }
 
-    public static int useDuration(ItemStack p_375921_, LivingEntity p_375843_) {
-        return p_375921_.getUseDuration(p_375843_) - p_375843_.getUseItemRemainingTicks();
+    public static int useDuration(ItemStack pStack, LivingEntity pEntity) {
+        return pStack.getUseDuration(pEntity) - pEntity.getUseItemRemainingTicks();
     }
 }

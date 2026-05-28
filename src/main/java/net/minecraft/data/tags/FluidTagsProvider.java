@@ -9,8 +9,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
 public class FluidTagsProvider extends IntrinsicHolderTagsProvider<Fluid> {
-    public FluidTagsProvider(PackOutput p_255941_, CompletableFuture<HolderLookup.Provider> p_256600_) {
-        super(p_255941_, Registries.FLUID, p_256600_, p_256474_ -> p_256474_.builtInRegistryHolder().key());
+    public FluidTagsProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pProvider) {
+        super(pOutput, Registries.FLUID, pProvider, p_256474_ -> p_256474_.builtInRegistryHolder().key());
     }
 
     @Override

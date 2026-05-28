@@ -52,23 +52,23 @@ public class ChunkHolder extends GenerationChunkHolder {
     private CompletableFuture<?> saveSync = CompletableFuture.completedFuture(null);
 
     public ChunkHolder(
-        ChunkPos p_142986_,
-        int p_142987_,
-        LevelHeightAccessor p_142988_,
-        LevelLightEngine p_142989_,
-        ChunkHolder.LevelChangeListener p_142990_,
-        ChunkHolder.PlayerProvider p_142991_
+        ChunkPos pPos,
+        int pTicketLevel,
+        LevelHeightAccessor pLevelHeightAccessor,
+        LevelLightEngine pLightEngine,
+        ChunkHolder.LevelChangeListener pOnLevelChange,
+        ChunkHolder.PlayerProvider pPlayerProvider
     ) {
-        super(p_142986_);
-        this.levelHeightAccessor = p_142988_;
-        this.lightEngine = p_142989_;
-        this.onLevelChange = p_142990_;
-        this.playerProvider = p_142991_;
+        super(pPos);
+        this.levelHeightAccessor = pLevelHeightAccessor;
+        this.lightEngine = pLightEngine;
+        this.onLevelChange = pOnLevelChange;
+        this.playerProvider = pPlayerProvider;
         this.oldTicketLevel = ChunkLevel.MAX_LEVEL + 1;
         this.ticketLevel = this.oldTicketLevel;
         this.queueLevel = this.oldTicketLevel;
-        this.setTicketLevel(p_142987_);
-        this.changedBlocksPerSection = new ShortSet[p_142988_.getSectionsCount()];
+        this.setTicketLevel(pTicketLevel);
+        this.changedBlocksPerSection = new ShortSet[pLevelHeightAccessor.getSectionsCount()];
     }
 
     public CompletableFuture<ChunkResult<LevelChunk>> getTickingChunkFuture() {
@@ -97,11 +97,11 @@ public class ChunkHolder extends GenerationChunkHolder {
         return this.sendSync;
     }
 
-    public void addSendDependency(CompletableFuture<?> p_300440_) {
+    public void addSendDependency(CompletableFuture<?> pDependency) {
         if (this.sendSync.isDone()) {
-            this.sendSync = p_300440_;
+            this.sendSync = pDependency;
         } else {
-            this.sendSync = this.sendSync.thenCombine((CompletionStage<? extends Object>)p_300440_, (p_341205_, p_341206_) -> null);
+            this.sendSync = this.sendSync.thenCombine((CompletionStage<? extends Object>)pDependency, (p_341205_, p_341206_) -> null);
         }
     }
 
@@ -114,32 +114,32 @@ public class ChunkHolder extends GenerationChunkHolder {
     }
 
     @Override
-    protected void addSaveDependency(CompletableFuture<?> p_200418_) {
+    protected void addSaveDependency(CompletableFuture<?> pDependency) {
         if (this.saveSync.isDone()) {
-            this.saveSync = p_200418_;
+            this.saveSync = pDependency;
         } else {
-            this.saveSync = this.saveSync.thenCombine((CompletionStage<? extends Object>)p_200418_, (p_296561_, p_296562_) -> null);
+            this.saveSync = this.saveSync.thenCombine((CompletionStage<? extends Object>)pDependency, (p_296561_, p_296562_) -> null);
         }
     }
 
-    public boolean blockChanged(BlockPos p_140057_) {
+    public boolean blockChanged(BlockPos pPos) {
         LevelChunk levelchunk = this.getTickingChunk();
         if (levelchunk == null) {
             return false;
         } else {
             boolean flag = this.hasChangedSections;
-            int i = this.levelHeightAccessor.getSectionIndex(p_140057_.getY());
+            int i = this.levelHeightAccessor.getSectionIndex(pPos.getY());
             if (this.changedBlocksPerSection[i] == null) {
                 this.hasChangedSections = true;
                 this.changedBlocksPerSection[i] = new ShortOpenHashSet();
             }
 
-            this.changedBlocksPerSection[i].add(SectionPos.sectionRelativePos(p_140057_));
+            this.changedBlocksPerSection[i].add(SectionPos.sectionRelativePos(pPos));
             return !flag;
         }
     }
 
-    public boolean sectionLightChanged(LightLayer p_140037_, int p_140038_) {
+    public boolean sectionLightChanged(LightLayer pLightLayer, int pY) {
         ChunkAccess chunkaccess = this.getChunkIfPresent(ChunkStatus.INITIALIZE_LIGHT);
         if (chunkaccess == null) {
             return false;
@@ -151,9 +151,9 @@ public class ChunkHolder extends GenerationChunkHolder {
             } else {
                 int i = this.lightEngine.getMinLightSection();
                 int j = this.lightEngine.getMaxLightSection();
-                if (p_140038_ >= i && p_140038_ <= j) {
-                    BitSet bitset = p_140037_ == LightLayer.SKY ? this.skyChangedLightSectionFilter : this.blockChangedLightSectionFilter;
-                    int k = p_140038_ - i;
+                if (pY >= i && pY <= j) {
+                    BitSet bitset = pLightLayer == LightLayer.SKY ? this.skyChangedLightSectionFilter : this.blockChangedLightSectionFilter;
+                    int k = pY - i;
                     if (!bitset.get(k)) {
                         bitset.set(k);
                         return true;
@@ -171,14 +171,14 @@ public class ChunkHolder extends GenerationChunkHolder {
         return this.hasChangedSections || !this.skyChangedLightSectionFilter.isEmpty() || !this.blockChangedLightSectionFilter.isEmpty();
     }
 
-    public void broadcastChanges(LevelChunk p_140055_) {
+    public void broadcastChanges(LevelChunk pChunk) {
         if (this.hasChangesToBroadcast()) {
-            Level level = p_140055_.getLevel();
+            Level level = pChunk.getLevel();
             if (!this.skyChangedLightSectionFilter.isEmpty() || !this.blockChangedLightSectionFilter.isEmpty()) {
                 List<ServerPlayer> list = this.playerProvider.getPlayers(this.pos, true);
                 if (!list.isEmpty()) {
                     ClientboundLightUpdatePacket clientboundlightupdatepacket = new ClientboundLightUpdatePacket(
-                        p_140055_.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter
+                        pChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter
                     );
                     this.broadcast(list, clientboundlightupdatepacket);
                 }
@@ -196,14 +196,14 @@ public class ChunkHolder extends GenerationChunkHolder {
                         this.changedBlocksPerSection[j] = null;
                         if (!list1.isEmpty()) {
                             int i = this.levelHeightAccessor.getSectionYFromSectionIndex(j);
-                            SectionPos sectionpos = SectionPos.of(p_140055_.getPos(), i);
+                            SectionPos sectionpos = SectionPos.of(pChunk.getPos(), i);
                             if (shortset.size() == 1) {
                                 BlockPos blockpos = sectionpos.relativeToBlockPos(shortset.iterator().nextShort());
                                 BlockState blockstate = level.getBlockState(blockpos);
                                 this.broadcast(list1, new ClientboundBlockUpdatePacket(blockpos, blockstate));
                                 this.broadcastBlockEntityIfNeeded(list1, level, blockpos, blockstate);
                             } else {
-                                LevelChunkSection levelchunksection = p_140055_.getSection(j);
+                                LevelChunkSection levelchunksection = pChunk.getSection(j);
                                 ClientboundSectionBlocksUpdatePacket clientboundsectionblocksupdatepacket = new ClientboundSectionBlocksUpdatePacket(
                                     sectionpos, shortset, levelchunksection
                                 );
@@ -219,24 +219,24 @@ public class ChunkHolder extends GenerationChunkHolder {
         }
     }
 
-    private void broadcastBlockEntityIfNeeded(List<ServerPlayer> p_288982_, Level p_289011_, BlockPos p_288969_, BlockState p_288973_) {
-        if (p_288973_.hasBlockEntity()) {
-            this.broadcastBlockEntity(p_288982_, p_289011_, p_288969_);
+    private void broadcastBlockEntityIfNeeded(List<ServerPlayer> pPlayers, Level pLevel, BlockPos pPos, BlockState pState) {
+        if (pState.hasBlockEntity()) {
+            this.broadcastBlockEntity(pPlayers, pLevel, pPos);
         }
     }
 
-    private void broadcastBlockEntity(List<ServerPlayer> p_288988_, Level p_289005_, BlockPos p_288981_) {
-        BlockEntity blockentity = p_289005_.getBlockEntity(p_288981_);
+    private void broadcastBlockEntity(List<ServerPlayer> pPlayers, Level pLevel, BlockPos pPos) {
+        BlockEntity blockentity = pLevel.getBlockEntity(pPos);
         if (blockentity != null) {
             Packet<?> packet = blockentity.getUpdatePacket();
             if (packet != null) {
-                this.broadcast(p_288988_, packet);
+                this.broadcast(pPlayers, packet);
             }
         }
     }
 
-    private void broadcast(List<ServerPlayer> p_288998_, Packet<?> p_289013_) {
-        p_288998_.forEach(p_296560_ -> p_296560_.connection.send(p_289013_));
+    private void broadcast(List<ServerPlayer> pPlayers, Packet<?> pPacket) {
+        pPlayers.forEach(p_296560_ -> p_296560_.connection.send(pPacket));
     }
 
     @Override
@@ -249,36 +249,36 @@ public class ChunkHolder extends GenerationChunkHolder {
         return this.queueLevel;
     }
 
-    private void setQueueLevel(int p_140087_) {
-        this.queueLevel = p_140087_;
+    private void setQueueLevel(int pQueueLevel) {
+        this.queueLevel = pQueueLevel;
     }
 
-    public void setTicketLevel(int p_140028_) {
-        this.ticketLevel = p_140028_;
+    public void setTicketLevel(int pLevel) {
+        this.ticketLevel = pLevel;
     }
 
-    private void scheduleFullChunkPromotion(ChunkMap p_142999_, CompletableFuture<ChunkResult<LevelChunk>> p_143000_, Executor p_143001_, FullChunkStatus p_287621_) {
+    private void scheduleFullChunkPromotion(ChunkMap pChunkMap, CompletableFuture<ChunkResult<LevelChunk>> pFuture, Executor pExecutor, FullChunkStatus pFullChunkStatus) {
         this.pendingFullStateConfirmation.cancel(false);
         CompletableFuture<Void> completablefuture = new CompletableFuture<>();
-        completablefuture.thenRunAsync(() -> p_142999_.onFullChunkStatusChange(this.pos, p_287621_), p_143001_);
+        completablefuture.thenRunAsync(() -> pChunkMap.onFullChunkStatusChange(this.pos, pFullChunkStatus), pExecutor);
         this.pendingFullStateConfirmation = completablefuture;
-        p_143000_.thenAccept(p_326372_ -> p_326372_.ifSuccess(p_200424_ -> completablefuture.complete(null)));
+        pFuture.thenAccept(p_326372_ -> p_326372_.ifSuccess(p_200424_ -> completablefuture.complete(null)));
     }
 
-    private void demoteFullChunk(ChunkMap p_287599_, FullChunkStatus p_287649_) {
+    private void demoteFullChunk(ChunkMap pChunkMap, FullChunkStatus pFullChunkStatus) {
         this.pendingFullStateConfirmation.cancel(false);
-        p_287599_.onFullChunkStatusChange(this.pos, p_287649_);
+        pChunkMap.onFullChunkStatusChange(this.pos, pFullChunkStatus);
     }
 
-    protected void updateFutures(ChunkMap p_143004_, Executor p_143005_) {
+    protected void updateFutures(ChunkMap pChunkMap, Executor pExecutor) {
         FullChunkStatus fullchunkstatus = ChunkLevel.fullStatus(this.oldTicketLevel);
         FullChunkStatus fullchunkstatus1 = ChunkLevel.fullStatus(this.ticketLevel);
         boolean flag = fullchunkstatus.isOrAfter(FullChunkStatus.FULL);
         boolean flag1 = fullchunkstatus1.isOrAfter(FullChunkStatus.FULL);
         this.wasAccessibleSinceLastSave |= flag1;
         if (!flag && flag1) {
-            this.fullChunkFuture = p_143004_.prepareAccessibleChunk(this);
-            this.scheduleFullChunkPromotion(p_143004_, this.fullChunkFuture, p_143005_, FullChunkStatus.FULL);
+            this.fullChunkFuture = pChunkMap.prepareAccessibleChunk(this);
+            this.scheduleFullChunkPromotion(pChunkMap, this.fullChunkFuture, pExecutor, FullChunkStatus.FULL);
             this.addSaveDependency(this.fullChunkFuture);
         }
 
@@ -290,8 +290,8 @@ public class ChunkHolder extends GenerationChunkHolder {
         boolean flag2 = fullchunkstatus.isOrAfter(FullChunkStatus.BLOCK_TICKING);
         boolean flag3 = fullchunkstatus1.isOrAfter(FullChunkStatus.BLOCK_TICKING);
         if (!flag2 && flag3) {
-            this.tickingChunkFuture = p_143004_.prepareTickingChunk(this);
-            this.scheduleFullChunkPromotion(p_143004_, this.tickingChunkFuture, p_143005_, FullChunkStatus.BLOCK_TICKING);
+            this.tickingChunkFuture = pChunkMap.prepareTickingChunk(this);
+            this.scheduleFullChunkPromotion(pChunkMap, this.tickingChunkFuture, pExecutor, FullChunkStatus.BLOCK_TICKING);
             this.addSaveDependency(this.tickingChunkFuture);
         }
 
@@ -307,8 +307,8 @@ public class ChunkHolder extends GenerationChunkHolder {
                 throw (IllegalStateException)Util.pauseInIde(new IllegalStateException());
             }
 
-            this.entityTickingChunkFuture = p_143004_.prepareEntityTickingChunk(this);
-            this.scheduleFullChunkPromotion(p_143004_, this.entityTickingChunkFuture, p_143005_, FullChunkStatus.ENTITY_TICKING);
+            this.entityTickingChunkFuture = pChunkMap.prepareEntityTickingChunk(this);
+            this.scheduleFullChunkPromotion(pChunkMap, this.entityTickingChunkFuture, pExecutor, FullChunkStatus.ENTITY_TICKING);
             this.addSaveDependency(this.entityTickingChunkFuture);
         }
 
@@ -318,7 +318,7 @@ public class ChunkHolder extends GenerationChunkHolder {
         }
 
         if (!fullchunkstatus1.isOrAfter(fullchunkstatus)) {
-            this.demoteFullChunk(p_143004_, fullchunkstatus1);
+            this.demoteFullChunk(pChunkMap, fullchunkstatus1);
         }
 
         this.onLevelChange.onLevelChange(this.pos, this::getQueueLevel, this.ticketLevel, this::setQueueLevel);
@@ -335,10 +335,10 @@ public class ChunkHolder extends GenerationChunkHolder {
 
     @FunctionalInterface
     public interface LevelChangeListener {
-        void onLevelChange(ChunkPos p_140119_, IntSupplier p_140120_, int p_140121_, IntConsumer p_140122_);
+        void onLevelChange(ChunkPos pChunkPos, IntSupplier pQueueLevelGetter, int pTicketLevel, IntConsumer pQueueLevelSetter);
     }
 
     public interface PlayerProvider {
-        List<ServerPlayer> getPlayers(ChunkPos p_183717_, boolean p_183718_);
+        List<ServerPlayer> getPlayers(ChunkPos pPos, boolean pBoundaryOnly);
     }
 }

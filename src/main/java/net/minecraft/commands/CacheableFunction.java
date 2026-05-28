@@ -12,13 +12,13 @@ public class CacheableFunction {
     private boolean resolved;
     private Optional<CommandFunction<CommandSourceStack>> function = Optional.empty();
 
-    public CacheableFunction(ResourceLocation p_312073_) {
-        this.id = p_312073_;
+    public CacheableFunction(ResourceLocation pId) {
+        this.id = pId;
     }
 
-    public Optional<CommandFunction<CommandSourceStack>> get(ServerFunctionManager p_310125_) {
+    public Optional<CommandFunction<CommandSourceStack>> get(ServerFunctionManager pFunctionManager) {
         if (!this.resolved) {
-            this.function = p_310125_.get(this.id);
+            this.function = pFunctionManager.get(this.id);
             this.resolved = true;
         }
 
@@ -30,11 +30,11 @@ public class CacheableFunction {
     }
 
     @Override
-    public boolean equals(Object p_313210_) {
-        if (p_313210_ == this) {
+    public boolean equals(Object pOther) {
+        if (pOther == this) {
             return true;
         } else {
-            if (p_313210_ instanceof CacheableFunction cacheablefunction && this.getId().equals(cacheablefunction.getId())) {
+            if (pOther instanceof CacheableFunction cacheablefunction && this.getId().equals(cacheablefunction.getId())) {
                 return true;
             }
 

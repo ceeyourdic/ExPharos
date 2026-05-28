@@ -34,21 +34,21 @@ public class NetherFortressStructure extends Structure {
         return Optional.of(new Structure.GenerationStub(blockpos, p_228526_ -> generatePieces(p_228526_, p_228523_)));
     }
 
-    private static void generatePieces(StructurePiecesBuilder p_228528_, Structure.GenerationContext p_228529_) {
+    private static void generatePieces(StructurePiecesBuilder pBuilder, Structure.GenerationContext pContext) {
         NetherFortressPieces.StartPiece netherfortresspieces$startpiece = new NetherFortressPieces.StartPiece(
-            p_228529_.random(), p_228529_.chunkPos().getBlockX(2), p_228529_.chunkPos().getBlockZ(2)
+            pContext.random(), pContext.chunkPos().getBlockX(2), pContext.chunkPos().getBlockZ(2)
         );
-        p_228528_.addPiece(netherfortresspieces$startpiece);
-        netherfortresspieces$startpiece.addChildren(netherfortresspieces$startpiece, p_228528_, p_228529_.random());
+        pBuilder.addPiece(netherfortresspieces$startpiece);
+        netherfortresspieces$startpiece.addChildren(netherfortresspieces$startpiece, pBuilder, pContext.random());
         List<StructurePiece> list = netherfortresspieces$startpiece.pendingChildren;
 
         while (!list.isEmpty()) {
-            int i = p_228529_.random().nextInt(list.size());
+            int i = pContext.random().nextInt(list.size());
             StructurePiece structurepiece = list.remove(i);
-            structurepiece.addChildren(netherfortresspieces$startpiece, p_228528_, p_228529_.random());
+            structurepiece.addChildren(netherfortresspieces$startpiece, pBuilder, pContext.random());
         }
 
-        p_228528_.moveInsideHeights(p_228529_.random(), 48, 70);
+        pBuilder.moveInsideHeights(pContext.random(), 48, 70);
     }
 
     @Override

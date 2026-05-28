@@ -106,9 +106,9 @@ public class DesertWellFeature extends Feature<NoneFeatureConfiguration> {
         }
     }
 
-    private static void placeSusSand(WorldGenLevel p_278029_, BlockPos p_278082_) {
-        p_278029_.setBlock(p_278082_, Blocks.SUSPICIOUS_SAND.defaultBlockState(), 3);
-        p_278029_.getBlockEntity(p_278082_, BlockEntityType.BRUSHABLE_BLOCK)
-            .ifPresent(p_327464_ -> p_327464_.setLootTable(BuiltInLootTables.DESERT_WELL_ARCHAEOLOGY, p_278082_.asLong()));
+    private static void placeSusSand(WorldGenLevel pLevel, BlockPos pPos) {
+        pLevel.setBlock(pPos, Blocks.SUSPICIOUS_SAND.defaultBlockState(), 3);
+        pLevel.getBlockEntity(pPos, BlockEntityType.BRUSHABLE_BLOCK)
+            .ifPresent(p_327464_ -> p_327464_.setLootTable(BuiltInLootTables.DESERT_WELL_ARCHAEOLOGY, pPos.asLong()));
     }
 }

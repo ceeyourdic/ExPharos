@@ -90,10 +90,10 @@ public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
         return 15;
     }
 
-    protected float getThickness(RandomSource p_224871_) {
-        float f = p_224871_.nextFloat() * 2.0F + p_224871_.nextFloat();
-        if (p_224871_.nextInt(10) == 0) {
-            f *= p_224871_.nextFloat() * p_224871_.nextFloat() * 3.0F + 1.0F;
+    protected float getThickness(RandomSource pRandom) {
+        float f = pRandom.nextFloat() * 2.0F + pRandom.nextFloat();
+        if (pRandom.nextInt(10) == 0) {
+            f *= pRandom.nextFloat() * pRandom.nextFloat() * 3.0F + 1.0F;
         }
 
         return f;
@@ -104,135 +104,135 @@ public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
     }
 
     protected void createRoom(
-        CarvingContext p_190691_,
-        CaveCarverConfiguration p_190692_,
-        ChunkAccess p_190693_,
-        Function<BlockPos, Holder<Biome>> p_190694_,
-        Aquifer p_190695_,
-        double p_190696_,
-        double p_190697_,
-        double p_190698_,
-        float p_190699_,
-        double p_190700_,
-        CarvingMask p_190701_,
-        WorldCarver.CarveSkipChecker p_190702_
+        CarvingContext pContext,
+        CaveCarverConfiguration pConfig,
+        ChunkAccess pChunk,
+        Function<BlockPos, Holder<Biome>> pBiomeAccessor,
+        Aquifer pAquifer,
+        double pX,
+        double pY,
+        double pZ,
+        float pRadius,
+        double pHorizontalVerticalRatio,
+        CarvingMask pCarvingMask,
+        WorldCarver.CarveSkipChecker pSkipChecker
     ) {
-        double d0 = 1.5 + (double)(Mth.sin((float) (Math.PI / 2)) * p_190699_);
-        double d1 = d0 * p_190700_;
-        this.carveEllipsoid(p_190691_, p_190692_, p_190693_, p_190694_, p_190695_, p_190696_ + 1.0, p_190697_, p_190698_, d0, d1, p_190701_, p_190702_);
+        double d0 = 1.5 + (double)(Mth.sin((float) (Math.PI / 2)) * pRadius);
+        double d1 = d0 * pHorizontalVerticalRatio;
+        this.carveEllipsoid(pContext, pConfig, pChunk, pBiomeAccessor, pAquifer, pX + 1.0, pY, pZ, d0, d1, pCarvingMask, pSkipChecker);
     }
 
     protected void createTunnel(
-        CarvingContext p_190671_,
-        CaveCarverConfiguration p_190672_,
-        ChunkAccess p_190673_,
-        Function<BlockPos, Holder<Biome>> p_190674_,
-        long p_190675_,
-        Aquifer p_190676_,
-        double p_190677_,
-        double p_190678_,
-        double p_190679_,
-        double p_190680_,
-        double p_190681_,
-        float p_190682_,
-        float p_190683_,
-        float p_190684_,
-        int p_190685_,
-        int p_190686_,
-        double p_190687_,
-        CarvingMask p_190688_,
-        WorldCarver.CarveSkipChecker p_190689_
+        CarvingContext pContext,
+        CaveCarverConfiguration pConfig,
+        ChunkAccess pChunk,
+        Function<BlockPos, Holder<Biome>> pBiomeAccessor,
+        long pSeed,
+        Aquifer pAquifer,
+        double pX,
+        double pY,
+        double pZ,
+        double pHorizontalRadiusMultiplier,
+        double pVerticalRadiusMultiplier,
+        float pThickness,
+        float pYaw,
+        float pPitch,
+        int pBranchIndex,
+        int pBranchCount,
+        double pHorizontalVerticalRatio,
+        CarvingMask pCarvingMask,
+        WorldCarver.CarveSkipChecker pSkipChecker
     ) {
-        RandomSource randomsource = RandomSource.create(p_190675_);
-        int i = randomsource.nextInt(p_190686_ / 2) + p_190686_ / 4;
+        RandomSource randomsource = RandomSource.create(pSeed);
+        int i = randomsource.nextInt(pBranchCount / 2) + pBranchCount / 4;
         boolean flag = randomsource.nextInt(6) == 0;
         float f = 0.0F;
         float f1 = 0.0F;
 
-        for (int j = p_190685_; j < p_190686_; j++) {
-            double d0 = 1.5 + (double)(Mth.sin((float) Math.PI * (float)j / (float)p_190686_) * p_190682_);
-            double d1 = d0 * p_190687_;
-            float f2 = Mth.cos(p_190684_);
-            p_190677_ += (double)(Mth.cos(p_190683_) * f2);
-            p_190678_ += (double)Mth.sin(p_190684_);
-            p_190679_ += (double)(Mth.sin(p_190683_) * f2);
-            p_190684_ *= flag ? 0.92F : 0.7F;
-            p_190684_ += f1 * 0.1F;
-            p_190683_ += f * 0.1F;
+        for (int j = pBranchIndex; j < pBranchCount; j++) {
+            double d0 = 1.5 + (double)(Mth.sin((float) Math.PI * (float)j / (float)pBranchCount) * pThickness);
+            double d1 = d0 * pHorizontalVerticalRatio;
+            float f2 = Mth.cos(pPitch);
+            pX += (double)(Mth.cos(pYaw) * f2);
+            pY += (double)Mth.sin(pPitch);
+            pZ += (double)(Mth.sin(pYaw) * f2);
+            pPitch *= flag ? 0.92F : 0.7F;
+            pPitch += f1 * 0.1F;
+            pYaw += f * 0.1F;
             f1 *= 0.9F;
             f *= 0.75F;
             f1 += (randomsource.nextFloat() - randomsource.nextFloat()) * randomsource.nextFloat() * 2.0F;
             f += (randomsource.nextFloat() - randomsource.nextFloat()) * randomsource.nextFloat() * 4.0F;
-            if (j == i && p_190682_ > 1.0F) {
+            if (j == i && pThickness > 1.0F) {
                 this.createTunnel(
-                    p_190671_,
-                    p_190672_,
-                    p_190673_,
-                    p_190674_,
+                    pContext,
+                    pConfig,
+                    pChunk,
+                    pBiomeAccessor,
                     randomsource.nextLong(),
-                    p_190676_,
-                    p_190677_,
-                    p_190678_,
-                    p_190679_,
-                    p_190680_,
-                    p_190681_,
+                    pAquifer,
+                    pX,
+                    pY,
+                    pZ,
+                    pHorizontalRadiusMultiplier,
+                    pVerticalRadiusMultiplier,
                     randomsource.nextFloat() * 0.5F + 0.5F,
-                    p_190683_ - (float) (Math.PI / 2),
-                    p_190684_ / 3.0F,
+                    pYaw - (float) (Math.PI / 2),
+                    pPitch / 3.0F,
                     j,
-                    p_190686_,
+                    pBranchCount,
                     1.0,
-                    p_190688_,
-                    p_190689_
+                    pCarvingMask,
+                    pSkipChecker
                 );
                 this.createTunnel(
-                    p_190671_,
-                    p_190672_,
-                    p_190673_,
-                    p_190674_,
+                    pContext,
+                    pConfig,
+                    pChunk,
+                    pBiomeAccessor,
                     randomsource.nextLong(),
-                    p_190676_,
-                    p_190677_,
-                    p_190678_,
-                    p_190679_,
-                    p_190680_,
-                    p_190681_,
+                    pAquifer,
+                    pX,
+                    pY,
+                    pZ,
+                    pHorizontalRadiusMultiplier,
+                    pVerticalRadiusMultiplier,
                     randomsource.nextFloat() * 0.5F + 0.5F,
-                    p_190683_ + (float) (Math.PI / 2),
-                    p_190684_ / 3.0F,
+                    pYaw + (float) (Math.PI / 2),
+                    pPitch / 3.0F,
                     j,
-                    p_190686_,
+                    pBranchCount,
                     1.0,
-                    p_190688_,
-                    p_190689_
+                    pCarvingMask,
+                    pSkipChecker
                 );
                 return;
             }
 
             if (randomsource.nextInt(4) != 0) {
-                if (!canReach(p_190673_.getPos(), p_190677_, p_190679_, j, p_190686_, p_190682_)) {
+                if (!canReach(pChunk.getPos(), pX, pZ, j, pBranchCount, pThickness)) {
                     return;
                 }
 
                 this.carveEllipsoid(
-                    p_190671_,
-                    p_190672_,
-                    p_190673_,
-                    p_190674_,
-                    p_190676_,
-                    p_190677_,
-                    p_190678_,
-                    p_190679_,
-                    d0 * p_190680_,
-                    d1 * p_190681_,
-                    p_190688_,
-                    p_190689_
+                    pContext,
+                    pConfig,
+                    pChunk,
+                    pBiomeAccessor,
+                    pAquifer,
+                    pX,
+                    pY,
+                    pZ,
+                    d0 * pHorizontalRadiusMultiplier,
+                    d1 * pVerticalRadiusMultiplier,
+                    pCarvingMask,
+                    pSkipChecker
                 );
             }
         }
     }
 
-    private static boolean shouldSkip(double p_159196_, double p_159197_, double p_159198_, double p_159199_) {
-        return p_159197_ <= p_159199_ ? true : p_159196_ * p_159196_ + p_159197_ * p_159197_ + p_159198_ * p_159198_ >= 1.0;
+    private static boolean shouldSkip(double pRelative, double pRelativeY, double pRelativeZ, double pMinrelativeY) {
+        return pRelativeY <= pMinrelativeY ? true : pRelative * pRelative + pRelativeY * pRelativeY + pRelativeZ * pRelativeZ >= 1.0;
     }
 }

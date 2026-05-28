@@ -55,8 +55,8 @@ public class PlaceCommand {
         return SharedSuggestionProvider.suggestResource(structuretemplatemanager.listTemplates(), p_214553_);
     };
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_214548_) {
-        p_214548_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("place")
                 .requires(p_214560_ -> p_214560_.hasPermission(2))
                 .then(
@@ -229,52 +229,52 @@ public class PlaceCommand {
         );
     }
 
-    public static int placeFeature(CommandSourceStack p_214576_, Holder.Reference<ConfiguredFeature<?, ?>> p_248822_, BlockPos p_214578_) throws CommandSyntaxException {
-        ServerLevel serverlevel = p_214576_.getLevel();
-        ConfiguredFeature<?, ?> configuredfeature = p_248822_.value();
-        ChunkPos chunkpos = new ChunkPos(p_214578_);
+    public static int placeFeature(CommandSourceStack pSource, Holder.Reference<ConfiguredFeature<?, ?>> pFeature, BlockPos pPos) throws CommandSyntaxException {
+        ServerLevel serverlevel = pSource.getLevel();
+        ConfiguredFeature<?, ?> configuredfeature = pFeature.value();
+        ChunkPos chunkpos = new ChunkPos(pPos);
         checkLoaded(serverlevel, new ChunkPos(chunkpos.x - 1, chunkpos.z - 1), new ChunkPos(chunkpos.x + 1, chunkpos.z + 1));
-        if (!configuredfeature.place(serverlevel, serverlevel.getChunkSource().getGenerator(), serverlevel.getRandom(), p_214578_)) {
+        if (!configuredfeature.place(serverlevel, serverlevel.getChunkSource().getGenerator(), serverlevel.getRandom(), pPos)) {
             throw ERROR_FEATURE_FAILED.create();
         } else {
-            String s = p_248822_.key().location().toString();
-            p_214576_.sendSuccess(
-                () -> Component.translatable("commands.place.feature.success", s, p_214578_.getX(), p_214578_.getY(), p_214578_.getZ()), true
+            String s = pFeature.key().location().toString();
+            pSource.sendSuccess(
+                () -> Component.translatable("commands.place.feature.success", s, pPos.getX(), pPos.getY(), pPos.getZ()), true
             );
             return 1;
         }
     }
 
     public static int placeJigsaw(
-        CommandSourceStack p_214570_, Holder<StructureTemplatePool> p_214571_, ResourceLocation p_214572_, int p_214573_, BlockPos p_214574_
+        CommandSourceStack pSource, Holder<StructureTemplatePool> pTemplatePool, ResourceLocation pTarget, int pMaxDepth, BlockPos pPos
     ) throws CommandSyntaxException {
-        ServerLevel serverlevel = p_214570_.getLevel();
-        ChunkPos chunkpos = new ChunkPos(p_214574_);
+        ServerLevel serverlevel = pSource.getLevel();
+        ChunkPos chunkpos = new ChunkPos(pPos);
         checkLoaded(serverlevel, chunkpos, chunkpos);
-        if (!JigsawPlacement.generateJigsaw(serverlevel, p_214571_, p_214572_, p_214573_, p_214574_, false)) {
+        if (!JigsawPlacement.generateJigsaw(serverlevel, pTemplatePool, pTarget, pMaxDepth, pPos, false)) {
             throw ERROR_JIGSAW_FAILED.create();
         } else {
-            p_214570_.sendSuccess(
-                () -> Component.translatable("commands.place.jigsaw.success", p_214574_.getX(), p_214574_.getY(), p_214574_.getZ()), true
+            pSource.sendSuccess(
+                () -> Component.translatable("commands.place.jigsaw.success", pPos.getX(), pPos.getY(), pPos.getZ()), true
             );
             return 1;
         }
     }
 
-    public static int placeStructure(CommandSourceStack p_214588_, Holder.Reference<Structure> p_251799_, BlockPos p_214590_) throws CommandSyntaxException {
-        ServerLevel serverlevel = p_214588_.getLevel();
-        Structure structure = p_251799_.value();
+    public static int placeStructure(CommandSourceStack pSource, Holder.Reference<Structure> pStructure, BlockPos pPos) throws CommandSyntaxException {
+        ServerLevel serverlevel = pSource.getLevel();
+        Structure structure = pStructure.value();
         ChunkGenerator chunkgenerator = serverlevel.getChunkSource().getGenerator();
         StructureStart structurestart = structure.generate(
-            p_251799_,
+            pStructure,
             serverlevel.dimension(),
-            p_214588_.registryAccess(),
+            pSource.registryAccess(),
             chunkgenerator,
             chunkgenerator.getBiomeSource(),
             serverlevel.getChunkSource().randomState(),
             serverlevel.getStructureManager(),
             serverlevel.getSeed(),
-            new ChunkPos(p_214590_),
+            new ChunkPos(pPos),
             0,
             serverlevel,
             p_214580_ -> true
@@ -304,50 +304,50 @@ public class PlaceCommand {
                             p_374875_
                         )
                 );
-            String s = p_251799_.key().location().toString();
-            p_214588_.sendSuccess(
-                () -> Component.translatable("commands.place.structure.success", s, p_214590_.getX(), p_214590_.getY(), p_214590_.getZ()), true
+            String s = pStructure.key().location().toString();
+            pSource.sendSuccess(
+                () -> Component.translatable("commands.place.structure.success", s, pPos.getX(), pPos.getY(), pPos.getZ()), true
             );
             return 1;
         }
     }
 
     public static int placeTemplate(
-        CommandSourceStack p_214562_, ResourceLocation p_214563_, BlockPos p_214564_, Rotation p_214565_, Mirror p_214566_, float p_214567_, int p_214568_
+        CommandSourceStack pSource, ResourceLocation pTemplate, BlockPos pPos, Rotation pRotation, Mirror pMirror, float pIntegrity, int pSeed
     ) throws CommandSyntaxException {
-        ServerLevel serverlevel = p_214562_.getLevel();
+        ServerLevel serverlevel = pSource.getLevel();
         StructureTemplateManager structuretemplatemanager = serverlevel.getStructureManager();
 
         Optional<StructureTemplate> optional;
         try {
-            optional = structuretemplatemanager.get(p_214563_);
+            optional = structuretemplatemanager.get(pTemplate);
         } catch (ResourceLocationException resourcelocationexception) {
-            throw ERROR_TEMPLATE_INVALID.create(p_214563_);
+            throw ERROR_TEMPLATE_INVALID.create(pTemplate);
         }
 
         if (optional.isEmpty()) {
-            throw ERROR_TEMPLATE_INVALID.create(p_214563_);
+            throw ERROR_TEMPLATE_INVALID.create(pTemplate);
         } else {
             StructureTemplate structuretemplate = optional.get();
-            checkLoaded(serverlevel, new ChunkPos(p_214564_), new ChunkPos(p_214564_.offset(structuretemplate.getSize())));
-            StructurePlaceSettings structureplacesettings = new StructurePlaceSettings().setMirror(p_214566_).setRotation(p_214565_);
-            if (p_214567_ < 1.0F) {
-                structureplacesettings.clearProcessors().addProcessor(new BlockRotProcessor(p_214567_)).setRandom(StructureBlockEntity.createRandom((long)p_214568_));
+            checkLoaded(serverlevel, new ChunkPos(pPos), new ChunkPos(pPos.offset(structuretemplate.getSize())));
+            StructurePlaceSettings structureplacesettings = new StructurePlaceSettings().setMirror(pMirror).setRotation(pRotation);
+            if (pIntegrity < 1.0F) {
+                structureplacesettings.clearProcessors().addProcessor(new BlockRotProcessor(pIntegrity)).setRandom(StructureBlockEntity.createRandom((long)pSeed));
             }
 
             boolean flag = structuretemplate.placeInWorld(
-                serverlevel, p_214564_, p_214564_, structureplacesettings, StructureBlockEntity.createRandom((long)p_214568_), 2
+                serverlevel, pPos, pPos, structureplacesettings, StructureBlockEntity.createRandom((long)pSeed), 2
             );
             if (!flag) {
                 throw ERROR_TEMPLATE_FAILED.create();
             } else {
-                p_214562_.sendSuccess(
+                pSource.sendSuccess(
                     () -> Component.translatable(
                             "commands.place.template.success",
-                            Component.translationArg(p_214563_),
-                            p_214564_.getX(),
-                            p_214564_.getY(),
-                            p_214564_.getZ()
+                            Component.translationArg(pTemplate),
+                            pPos.getX(),
+                            pPos.getY(),
+                            pPos.getZ()
                         ),
                     true
                 );
@@ -356,8 +356,8 @@ public class PlaceCommand {
         }
     }
 
-    private static void checkLoaded(ServerLevel p_214544_, ChunkPos p_214545_, ChunkPos p_214546_) throws CommandSyntaxException {
-        if (ChunkPos.rangeClosed(p_214545_, p_214546_).filter(p_308780_ -> !p_214544_.isLoaded(p_308780_.getWorldPosition())).findAny().isPresent()) {
+    private static void checkLoaded(ServerLevel pLevel, ChunkPos pStart, ChunkPos pEnd) throws CommandSyntaxException {
+        if (ChunkPos.rangeClosed(pStart, pEnd).filter(p_308780_ -> !pLevel.isLoaded(p_308780_.getWorldPosition())).findAny().isPresent()) {
             throw BlockPosArgument.ERROR_NOT_LOADED.create();
         }
     }

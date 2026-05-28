@@ -27,9 +27,9 @@ public abstract class BlockAttachedEntity extends Entity {
         super(p_342082_, p_342394_);
     }
 
-    protected BlockAttachedEntity(EntityType<? extends BlockAttachedEntity> p_343768_, Level p_343896_, BlockPos p_344928_) {
-        this(p_343768_, p_343896_);
-        this.pos = p_344928_;
+    protected BlockAttachedEntity(EntityType<? extends BlockAttachedEntity> pEntityType, Level pLevel, BlockPos pPos) {
+        this(pEntityType, pLevel);
+        this.pos = pPos;
     }
 
     protected abstract void recalculateBoundingBox();
@@ -127,7 +127,7 @@ public abstract class BlockAttachedEntity extends Entity {
         }
     }
 
-    public abstract void dropItem(ServerLevel p_361705_, @Nullable Entity p_342668_);
+    public abstract void dropItem(ServerLevel pLevel, @Nullable Entity pEntity);
 
     @Override
     protected boolean repositionEntityAfterLoad() {

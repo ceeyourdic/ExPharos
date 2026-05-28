@@ -44,34 +44,34 @@ public final class ShapedRecipePattern {
     private final int ingredientCount;
     private final boolean symmetrical;
 
-    public ShapedRecipePattern(int p_309692_, int p_311724_, List<Optional<Ingredient>> p_361049_, Optional<ShapedRecipePattern.Data> p_310645_) {
-        this.width = p_309692_;
-        this.height = p_311724_;
-        this.ingredients = p_361049_;
-        this.data = p_310645_;
-        this.ingredientCount = (int)p_361049_.stream().flatMap(Optional::stream).count();
-        this.symmetrical = Util.isSymmetrical(p_309692_, p_311724_, p_361049_);
+    public ShapedRecipePattern(int pWidth, int pHeight, List<Optional<Ingredient>> pIngredients, Optional<ShapedRecipePattern.Data> pData) {
+        this.width = pWidth;
+        this.height = pHeight;
+        this.ingredients = pIngredients;
+        this.data = pData;
+        this.ingredientCount = (int)pIngredients.stream().flatMap(Optional::stream).count();
+        this.symmetrical = Util.isSymmetrical(pWidth, pHeight, pIngredients);
     }
 
-    private static ShapedRecipePattern createFromNetwork(Integer p_365396_, Integer p_361921_, List<Optional<Ingredient>> p_363051_) {
-        return new ShapedRecipePattern(p_365396_, p_361921_, p_363051_, Optional.empty());
+    private static ShapedRecipePattern createFromNetwork(Integer pWidth, Integer pHeight, List<Optional<Ingredient>> pIngredients) {
+        return new ShapedRecipePattern(pWidth, pHeight, pIngredients, Optional.empty());
     }
 
-    public static ShapedRecipePattern of(Map<Character, Ingredient> p_310983_, String... p_310430_) {
-        return of(p_310983_, List.of(p_310430_));
+    public static ShapedRecipePattern of(Map<Character, Ingredient> pKey, String... pPattern) {
+        return of(pKey, List.of(pPattern));
     }
 
-    public static ShapedRecipePattern of(Map<Character, Ingredient> p_313226_, List<String> p_310089_) {
-        ShapedRecipePattern.Data shapedrecipepattern$data = new ShapedRecipePattern.Data(p_313226_, p_310089_);
+    public static ShapedRecipePattern of(Map<Character, Ingredient> pKey, List<String> pPattern) {
+        ShapedRecipePattern.Data shapedrecipepattern$data = new ShapedRecipePattern.Data(pKey, pPattern);
         return unpack(shapedrecipepattern$data).getOrThrow();
     }
 
-    private static DataResult<ShapedRecipePattern> unpack(ShapedRecipePattern.Data p_312333_) {
-        String[] astring = shrink(p_312333_.pattern);
+    private static DataResult<ShapedRecipePattern> unpack(ShapedRecipePattern.Data pData) {
+        String[] astring = shrink(pData.pattern);
         int i = astring[0].length();
         int j = astring.length;
         List<Optional<Ingredient>> list = new ArrayList<>(i * j);
-        CharSet charset = new CharArraySet(p_312333_.key.keySet());
+        CharSet charset = new CharArraySet(pData.key.keySet());
 
         for (String s : astring) {
             for (int k = 0; k < s.length(); k++) {
@@ -80,7 +80,7 @@ public final class ShapedRecipePattern {
                 if (c0 == ' ') {
                     optional = Optional.empty();
                 } else {
-                    Ingredient ingredient = p_312333_.key.get(c0);
+                    Ingredient ingredient = pData.key.get(c0);
                     if (ingredient == null) {
                         return DataResult.error(() -> "Pattern references symbol '" + c0 + "' but it's not defined in the key");
                     }
@@ -95,18 +95,18 @@ public final class ShapedRecipePattern {
 
         return !charset.isEmpty()
             ? DataResult.error(() -> "Key defines symbols that aren't used in pattern: " + charset)
-            : DataResult.success(new ShapedRecipePattern(i, j, list, Optional.of(p_312333_)));
+            : DataResult.success(new ShapedRecipePattern(i, j, list, Optional.of(pData)));
     }
 
     @VisibleForTesting
-    static String[] shrink(List<String> p_311492_) {
+    static String[] shrink(List<String> pPattern) {
         int i = Integer.MAX_VALUE;
         int j = 0;
         int k = 0;
         int l = 0;
 
-        for (int i1 = 0; i1 < p_311492_.size(); i1++) {
-            String s = p_311492_.get(i1);
+        for (int i1 = 0; i1 < pPattern.size(); i1++) {
+            String s = pPattern.get(i1);
             i = Math.min(i, firstNonEmpty(s));
             int j1 = lastNonEmpty(s);
             j = Math.max(j, j1);
@@ -121,49 +121,49 @@ public final class ShapedRecipePattern {
             }
         }
 
-        if (p_311492_.size() == l) {
+        if (pPattern.size() == l) {
             return new String[0];
         } else {
-            String[] astring = new String[p_311492_.size() - l - k];
+            String[] astring = new String[pPattern.size() - l - k];
 
             for (int k1 = 0; k1 < astring.length; k1++) {
-                astring[k1] = p_311492_.get(k1 + k).substring(i, j + 1);
+                astring[k1] = pPattern.get(k1 + k).substring(i, j + 1);
             }
 
             return astring;
         }
     }
 
-    private static int firstNonEmpty(String p_309836_) {
+    private static int firstNonEmpty(String pRow) {
         int i = 0;
 
-        while (i < p_309836_.length() && p_309836_.charAt(i) == ' ') {
+        while (i < pRow.length() && pRow.charAt(i) == ' ') {
             i++;
         }
 
         return i;
     }
 
-    private static int lastNonEmpty(String p_312853_) {
-        int i = p_312853_.length() - 1;
+    private static int lastNonEmpty(String pRow) {
+        int i = pRow.length() - 1;
 
-        while (i >= 0 && p_312853_.charAt(i) == ' ') {
+        while (i >= 0 && pRow.charAt(i) == ' ') {
             i--;
         }
 
         return i;
     }
 
-    public boolean matches(CraftingInput p_343130_) {
-        if (p_343130_.ingredientCount() != this.ingredientCount) {
+    public boolean matches(CraftingInput pInput) {
+        if (pInput.ingredientCount() != this.ingredientCount) {
             return false;
         } else {
-            if (p_343130_.width() == this.width && p_343130_.height() == this.height) {
-                if (!this.symmetrical && this.matches(p_343130_, true)) {
+            if (pInput.width() == this.width && pInput.height() == this.height) {
+                if (!this.symmetrical && this.matches(pInput, true)) {
                     return true;
                 }
 
-                if (this.matches(p_343130_, false)) {
+                if (this.matches(pInput, false)) {
                     return true;
                 }
             }
@@ -172,17 +172,17 @@ public final class ShapedRecipePattern {
         }
     }
 
-    private boolean matches(CraftingInput p_345096_, boolean p_342488_) {
+    private boolean matches(CraftingInput pInput, boolean pSymmetrical) {
         for (int i = 0; i < this.height; i++) {
             for (int j = 0; j < this.width; j++) {
                 Optional<Ingredient> optional;
-                if (p_342488_) {
+                if (pSymmetrical) {
                     optional = this.ingredients.get(this.width - j - 1 + i * this.width);
                 } else {
                     optional = this.ingredients.get(j + i * this.width);
                 }
 
-                ItemStack itemstack = p_345096_.getItem(j, i);
+                ItemStack itemstack = pInput.getItem(j, i);
                 if (!Ingredient.testOptionalIngredient(optional, itemstack)) {
                     return false;
                 }

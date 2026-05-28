@@ -29,13 +29,13 @@ import net.minecraft.world.phys.Vec3;
 public class SculkCatalystBlockEntity extends BlockEntity implements GameEventListener.Provider<SculkCatalystBlockEntity.CatalystListener> {
     private final SculkCatalystBlockEntity.CatalystListener catalystListener;
 
-    public SculkCatalystBlockEntity(BlockPos p_222774_, BlockState p_222775_) {
-        super(BlockEntityType.SCULK_CATALYST, p_222774_, p_222775_);
-        this.catalystListener = new SculkCatalystBlockEntity.CatalystListener(p_222775_, new BlockPositionSource(p_222774_));
+    public SculkCatalystBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        super(BlockEntityType.SCULK_CATALYST, pPos, pBlockState);
+        this.catalystListener = new SculkCatalystBlockEntity.CatalystListener(pBlockState, new BlockPositionSource(pPos));
     }
 
-    public static void serverTick(Level p_222780_, BlockPos p_222781_, BlockState p_222782_, SculkCatalystBlockEntity p_222783_) {
-        p_222783_.catalystListener.getSculkSpreader().updateCursors(p_222780_, p_222781_, p_222780_.getRandom(), true);
+    public static void serverTick(Level pLevel, BlockPos pPos, BlockState pState, SculkCatalystBlockEntity pSculkCatalyst) {
+        pSculkCatalyst.catalystListener.getSculkSpreader().updateCursors(pLevel, pPos, pLevel.getRandom(), true);
     }
 
     @Override
@@ -60,9 +60,9 @@ public class SculkCatalystBlockEntity extends BlockEntity implements GameEventLi
         private final BlockState blockState;
         private final PositionSource positionSource;
 
-        public CatalystListener(BlockState p_283224_, PositionSource p_283095_) {
-            this.blockState = p_283224_;
-            this.positionSource = p_283095_;
+        public CatalystListener(BlockState pBlockState, PositionSource pPositionSource) {
+            this.blockState = pBlockState;
+            this.positionSource = pPositionSource;
             this.sculkSpreader = SculkSpreader.createLevelSpreader();
         }
 
@@ -109,27 +109,27 @@ public class SculkCatalystBlockEntity extends BlockEntity implements GameEventLi
             return this.sculkSpreader;
         }
 
-        private void bloom(ServerLevel p_281501_, BlockPos p_281448_, BlockState p_281966_, RandomSource p_283606_) {
-            p_281501_.setBlock(p_281448_, p_281966_.setValue(SculkCatalystBlock.PULSE, Boolean.valueOf(true)), 3);
-            p_281501_.scheduleTick(p_281448_, p_281966_.getBlock(), 8);
-            p_281501_.sendParticles(
+        private void bloom(ServerLevel pLevel, BlockPos pPos, BlockState pState, RandomSource pRandom) {
+            pLevel.setBlock(pPos, pState.setValue(SculkCatalystBlock.PULSE, Boolean.valueOf(true)), 3);
+            pLevel.scheduleTick(pPos, pState.getBlock(), 8);
+            pLevel.sendParticles(
                 ParticleTypes.SCULK_SOUL,
-                (double)p_281448_.getX() + 0.5,
-                (double)p_281448_.getY() + 1.15,
-                (double)p_281448_.getZ() + 0.5,
+                (double)pPos.getX() + 0.5,
+                (double)pPos.getY() + 1.15,
+                (double)pPos.getZ() + 0.5,
                 2,
                 0.2,
                 0.0,
                 0.2,
                 0.0
             );
-            p_281501_.playSound(null, p_281448_, SoundEvents.SCULK_CATALYST_BLOOM, SoundSource.BLOCKS, 2.0F, 0.6F + p_283606_.nextFloat() * 0.4F);
+            pLevel.playSound(null, pPos, SoundEvents.SCULK_CATALYST_BLOOM, SoundSource.BLOCKS, 2.0F, 0.6F + pRandom.nextFloat() * 0.4F);
         }
 
-        private void tryAwardItSpreadsAdvancement(Level p_281279_, LivingEntity p_281378_) {
-            if (p_281378_.getLastHurtByMob() instanceof ServerPlayer serverplayer) {
-                DamageSource damagesource = p_281378_.getLastDamageSource() == null ? p_281279_.damageSources().playerAttack(serverplayer) : p_281378_.getLastDamageSource();
-                CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.trigger(serverplayer, p_281378_, damagesource);
+        private void tryAwardItSpreadsAdvancement(Level pLevel, LivingEntity pEntity) {
+            if (pEntity.getLastHurtByMob() instanceof ServerPlayer serverplayer) {
+                DamageSource damagesource = pEntity.getLastDamageSource() == null ? pLevel.damageSources().playerAttack(serverplayer) : pEntity.getLastDamageSource();
+                CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.trigger(serverplayer, pEntity, damagesource);
             }
         }
     }

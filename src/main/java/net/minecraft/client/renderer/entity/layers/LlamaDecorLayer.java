@@ -23,11 +23,11 @@ public class LlamaDecorLayer extends RenderLayer<LlamaRenderState, LlamaModel> {
     private final LlamaModel babyModel;
     private final EquipmentLayerRenderer equipmentRenderer;
 
-    public LlamaDecorLayer(RenderLayerParent<LlamaRenderState, LlamaModel> p_174499_, EntityModelSet p_174500_, EquipmentLayerRenderer p_362060_) {
-        super(p_174499_);
-        this.equipmentRenderer = p_362060_;
-        this.adultModel = new LlamaModel(p_174500_.bakeLayer(ModelLayers.LLAMA_DECOR));
-        this.babyModel = new LlamaModel(p_174500_.bakeLayer(ModelLayers.LLAMA_BABY_DECOR));
+    public LlamaDecorLayer(RenderLayerParent<LlamaRenderState, LlamaModel> pRenderer, EntityModelSet pModels, EquipmentLayerRenderer pEquipmentRenderer) {
+        super(pRenderer);
+        this.equipmentRenderer = pEquipmentRenderer;
+        this.adultModel = new LlamaModel(pModels.bakeLayer(ModelLayers.LLAMA_DECOR));
+        this.babyModel = new LlamaModel(pModels.bakeLayer(ModelLayers.LLAMA_BABY_DECOR));
     }
 
     public void render(PoseStack p_364604_, MultiBufferSource p_363218_, int p_361586_, LlamaRenderState p_367324_, float p_364047_, float p_367997_) {
@@ -41,10 +41,10 @@ public class LlamaDecorLayer extends RenderLayer<LlamaRenderState, LlamaModel> {
     }
 
     private void renderEquipment(
-        PoseStack p_369436_, MultiBufferSource p_361687_, LlamaRenderState p_361805_, ItemStack p_360838_, ResourceKey<EquipmentAsset> p_377023_, int p_361245_
+        PoseStack pPoseStack, MultiBufferSource pBufferSource, LlamaRenderState pRenderState, ItemStack pStack, ResourceKey<EquipmentAsset> pEquipmentAsset, int pPackedLight
     ) {
-        LlamaModel llamamodel = p_361805_.isBaby ? this.babyModel : this.adultModel;
-        llamamodel.setupAnim(p_361805_);
-        this.equipmentRenderer.renderLayers(EquipmentClientInfo.LayerType.LLAMA_BODY, p_377023_, llamamodel, p_360838_, p_369436_, p_361687_, p_361245_);
+        LlamaModel llamamodel = pRenderState.isBaby ? this.babyModel : this.adultModel;
+        llamamodel.setupAnim(pRenderState);
+        this.equipmentRenderer.renderLayers(EquipmentClientInfo.LayerType.LLAMA_BODY, pEquipmentAsset, llamamodel, pStack, pPoseStack, pBufferSource, pPackedLight);
     }
 }

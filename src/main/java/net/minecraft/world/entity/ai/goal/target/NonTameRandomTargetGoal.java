@@ -8,9 +8,9 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 public class NonTameRandomTargetGoal<T extends LivingEntity> extends NearestAttackableTargetGoal<T> {
     private final TamableAnimal tamableMob;
 
-    public NonTameRandomTargetGoal(TamableAnimal p_26097_, Class<T> p_26098_, boolean p_26099_, @Nullable TargetingConditions.Selector p_361608_) {
-        super(p_26097_, p_26098_, 10, p_26099_, false, p_361608_);
-        this.tamableMob = p_26097_;
+    public NonTameRandomTargetGoal(TamableAnimal pTamableMob, Class<T> pTargetType, boolean pMustSee, @Nullable TargetingConditions.Selector pSelector) {
+        super(pTamableMob, pTargetType, 10, pMustSee, false, pSelector);
+        this.tamableMob = pTamableMob;
     }
 
     @Override

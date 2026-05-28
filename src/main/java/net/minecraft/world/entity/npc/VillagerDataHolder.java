@@ -5,7 +5,7 @@ import net.minecraft.world.entity.VariantHolder;
 public interface VillagerDataHolder extends VariantHolder<VillagerType> {
     VillagerData getVillagerData();
 
-    void setVillagerData(VillagerData p_150027_);
+    void setVillagerData(VillagerData pData);
 
     default VillagerType getVariant() {
         return this.getVillagerData().getType();

@@ -33,13 +33,13 @@ public class AttachedToLeavesDecorator extends TreeDecorator {
     protected final int requiredEmptyBlocks;
     protected final List<Direction> directions;
 
-    public AttachedToLeavesDecorator(float p_225988_, int p_225989_, int p_225990_, BlockStateProvider p_225991_, int p_225992_, List<Direction> p_225993_) {
-        this.probability = p_225988_;
-        this.exclusionRadiusXZ = p_225989_;
-        this.exclusionRadiusY = p_225990_;
-        this.blockProvider = p_225991_;
-        this.requiredEmptyBlocks = p_225992_;
-        this.directions = p_225993_;
+    public AttachedToLeavesDecorator(float pProbability, int pExclusionRadiusXZ, int pExclusionRadiusY, BlockStateProvider pBlockProvider, int pRequiredEmptyBlocks, List<Direction> pDirections) {
+        this.probability = pProbability;
+        this.exclusionRadiusXZ = pExclusionRadiusXZ;
+        this.exclusionRadiusY = pExclusionRadiusY;
+        this.blockProvider = pBlockProvider;
+        this.requiredEmptyBlocks = pRequiredEmptyBlocks;
+        this.directions = pDirections;
     }
 
     @Override
@@ -63,10 +63,10 @@ public class AttachedToLeavesDecorator extends TreeDecorator {
         }
     }
 
-    private boolean hasRequiredEmptyBlocks(TreeDecorator.Context p_226002_, BlockPos p_226003_, Direction p_226004_) {
+    private boolean hasRequiredEmptyBlocks(TreeDecorator.Context pContext, BlockPos pPos, Direction pDirection) {
         for (int i = 1; i <= this.requiredEmptyBlocks; i++) {
-            BlockPos blockpos = p_226003_.relative(p_226004_, i);
-            if (!p_226002_.isAir(blockpos)) {
+            BlockPos blockpos = pPos.relative(pDirection, i);
+            if (!pContext.isAir(blockpos)) {
                 return false;
             }
         }

@@ -13,12 +13,12 @@ public record ClientboundUpdateEnabledFeaturesPacket(Set<ResourceLocation> featu
         ClientboundUpdateEnabledFeaturesPacket::write, ClientboundUpdateEnabledFeaturesPacket::new
     );
 
-    private ClientboundUpdateEnabledFeaturesPacket(FriendlyByteBuf p_299340_) {
-        this(p_299340_.<ResourceLocation, Set<ResourceLocation>>readCollection(HashSet::new, FriendlyByteBuf::readResourceLocation));
+    private ClientboundUpdateEnabledFeaturesPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.<ResourceLocation, Set<ResourceLocation>>readCollection(HashSet::new, FriendlyByteBuf::readResourceLocation));
     }
 
-    private void write(FriendlyByteBuf p_297257_) {
-        p_297257_.writeCollection(this.features, FriendlyByteBuf::writeResourceLocation);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeCollection(this.features, FriendlyByteBuf::writeResourceLocation);
     }
 
     @Override

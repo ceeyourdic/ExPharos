@@ -21,11 +21,11 @@ public class Minecart extends AbstractMinecart {
     }
 
     @Override
-    public InteractionResult interact(Player p_38483_, InteractionHand p_38484_) {
-        if (!p_38483_.isSecondaryUseActive() && !this.isVehicle() && (this.level().isClientSide || p_38483_.startRiding(this))) {
+    public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
+        if (!pPlayer.isSecondaryUseActive() && !this.isVehicle() && (this.level().isClientSide || pPlayer.startRiding(this))) {
             this.playerRotationOffset = this.rotationOffset;
             if (!this.level().isClientSide) {
-                return (InteractionResult)(p_38483_.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS);
+                return (InteractionResult)(pPlayer.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS);
             } else {
                 return InteractionResult.SUCCESS;
             }
@@ -45,8 +45,8 @@ public class Minecart extends AbstractMinecart {
     }
 
     @Override
-    public void activateMinecart(int p_38478_, int p_38479_, int p_38480_, boolean p_38481_) {
-        if (p_38481_) {
+    public void activateMinecart(int pX, int pY, int pZ, boolean pReceivingPower) {
+        if (pReceivingPower) {
             if (this.isVehicle()) {
                 this.ejectPassengers();
             }

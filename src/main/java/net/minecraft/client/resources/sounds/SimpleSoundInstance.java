@@ -12,33 +12,33 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class SimpleSoundInstance extends AbstractSoundInstance {
-    public SimpleSoundInstance(SoundEvent p_235109_, SoundSource p_235110_, float p_235111_, float p_235112_, RandomSource p_235113_, BlockPos p_235114_) {
+    public SimpleSoundInstance(SoundEvent pSoundEvent, SoundSource pSource, float pVolume, float pPitch, RandomSource pRandom, BlockPos pEntity) {
         this(
-            p_235109_,
-            p_235110_,
-            p_235111_,
-            p_235112_,
-            p_235113_,
-            (double)p_235114_.getX() + 0.5,
-            (double)p_235114_.getY() + 0.5,
-            (double)p_235114_.getZ() + 0.5
+            pSoundEvent,
+            pSource,
+            pVolume,
+            pPitch,
+            pRandom,
+            (double)pEntity.getX() + 0.5,
+            (double)pEntity.getY() + 0.5,
+            (double)pEntity.getZ() + 0.5
         );
     }
 
-    public static SimpleSoundInstance forUI(SoundEvent p_119753_, float p_119754_) {
-        return forUI(p_119753_, p_119754_, 0.25F);
+    public static SimpleSoundInstance forUI(SoundEvent pSound, float pPitch) {
+        return forUI(pSound, pPitch, 0.25F);
     }
 
-    public static SimpleSoundInstance forUI(Holder<SoundEvent> p_263418_, float p_263405_) {
-        return forUI(p_263418_.value(), p_263405_);
+    public static SimpleSoundInstance forUI(Holder<SoundEvent> pSoundHolder, float pPitch) {
+        return forUI(pSoundHolder.value(), pPitch);
     }
 
-    public static SimpleSoundInstance forUI(SoundEvent p_119756_, float p_119757_, float p_119758_) {
+    public static SimpleSoundInstance forUI(SoundEvent pSound, float pPitch, float pVolume) {
         return new SimpleSoundInstance(
-            p_119756_.location(),
+            pSound.location(),
             SoundSource.MASTER,
-            p_119758_,
-            p_119757_,
+            pVolume,
+            pPitch,
             SoundInstance.createUnseededRandom(),
             false,
             0,
@@ -50,15 +50,15 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
         );
     }
 
-    public static SimpleSoundInstance forMusic(SoundEvent p_119746_) {
+    public static SimpleSoundInstance forMusic(SoundEvent pSound) {
         return new SimpleSoundInstance(
-            p_119746_.location(), SoundSource.MUSIC, 1.0F, 1.0F, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
+            pSound.location(), SoundSource.MUSIC, 1.0F, 1.0F, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
         );
     }
 
-    public static SimpleSoundInstance forJukeboxSong(SoundEvent p_249575_, Vec3 p_249600_) {
+    public static SimpleSoundInstance forJukeboxSong(SoundEvent pSound, Vec3 pPos) {
         return new SimpleSoundInstance(
-            p_249575_,
+            pSound,
             SoundSource.RECORDS,
             4.0F,
             1.0F,
@@ -66,18 +66,18 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
             false,
             0,
             SoundInstance.Attenuation.LINEAR,
-            p_249600_.x,
-            p_249600_.y,
-            p_249600_.z
+            pPos.x,
+            pPos.y,
+            pPos.z
         );
     }
 
-    public static SimpleSoundInstance forLocalAmbience(SoundEvent p_119767_, float p_119768_, float p_119769_) {
+    public static SimpleSoundInstance forLocalAmbience(SoundEvent pSound, float pVolume, float pPitch) {
         return new SimpleSoundInstance(
-            p_119767_.location(),
+            pSound.location(),
             SoundSource.AMBIENT,
-            p_119769_,
-            p_119768_,
+            pPitch,
+            pVolume,
             SoundInstance.createUnseededRandom(),
             false,
             0,
@@ -89,68 +89,68 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
         );
     }
 
-    public static SimpleSoundInstance forAmbientAddition(SoundEvent p_119760_) {
-        return forLocalAmbience(p_119760_, 1.0F, 1.0F);
+    public static SimpleSoundInstance forAmbientAddition(SoundEvent pSound) {
+        return forLocalAmbience(pSound, 1.0F, 1.0F);
     }
 
-    public static SimpleSoundInstance forAmbientMood(SoundEvent p_235128_, RandomSource p_235129_, double p_235130_, double p_235131_, double p_235132_) {
+    public static SimpleSoundInstance forAmbientMood(SoundEvent pSoundEvent, RandomSource pRandom, double pX, double pY, double pZ) {
         return new SimpleSoundInstance(
-            p_235128_, SoundSource.AMBIENT, 1.0F, 1.0F, p_235129_, false, 0, SoundInstance.Attenuation.LINEAR, p_235130_, p_235131_, p_235132_
+            pSoundEvent, SoundSource.AMBIENT, 1.0F, 1.0F, pRandom, false, 0, SoundInstance.Attenuation.LINEAR, pX, pY, pZ
         );
     }
 
     public SimpleSoundInstance(
-        SoundEvent p_235100_,
-        SoundSource p_235101_,
-        float p_235102_,
-        float p_235103_,
-        RandomSource p_235104_,
-        double p_235105_,
-        double p_235106_,
-        double p_235107_
+        SoundEvent pSoundEvent,
+        SoundSource pSource,
+        float pVolume,
+        float pPitch,
+        RandomSource pRandom,
+        double pX,
+        double pY,
+        double pZ
     ) {
-        this(p_235100_, p_235101_, p_235102_, p_235103_, p_235104_, false, 0, SoundInstance.Attenuation.LINEAR, p_235105_, p_235106_, p_235107_);
+        this(pSoundEvent, pSource, pVolume, pPitch, pRandom, false, 0, SoundInstance.Attenuation.LINEAR, pX, pY, pZ);
     }
 
     private SimpleSoundInstance(
-        SoundEvent p_235116_,
-        SoundSource p_235117_,
-        float p_235118_,
-        float p_235119_,
-        RandomSource p_235120_,
-        boolean p_235121_,
-        int p_235122_,
-        SoundInstance.Attenuation p_235123_,
-        double p_235124_,
-        double p_235125_,
-        double p_235126_
+        SoundEvent pSoundEvent,
+        SoundSource pSource,
+        float pVolume,
+        float pPitch,
+        RandomSource pRandom,
+        boolean pLooping,
+        int pDelay,
+        SoundInstance.Attenuation pAttenuation,
+        double pX,
+        double pY,
+        double pZ
     ) {
-        this(p_235116_.location(), p_235117_, p_235118_, p_235119_, p_235120_, p_235121_, p_235122_, p_235123_, p_235124_, p_235125_, p_235126_, false);
+        this(pSoundEvent.location(), pSource, pVolume, pPitch, pRandom, pLooping, pDelay, pAttenuation, pX, pY, pZ, false);
     }
 
     public SimpleSoundInstance(
-        ResourceLocation p_235087_,
-        SoundSource p_235088_,
-        float p_235089_,
-        float p_235090_,
-        RandomSource p_235091_,
-        boolean p_235092_,
-        int p_235093_,
-        SoundInstance.Attenuation p_235094_,
-        double p_235095_,
-        double p_235096_,
-        double p_235097_,
-        boolean p_235098_
+        ResourceLocation pLocation,
+        SoundSource pSource,
+        float pVolume,
+        float pPitch,
+        RandomSource pRandom,
+        boolean pLooping,
+        int pDelay,
+        SoundInstance.Attenuation pAttenuation,
+        double pX,
+        double pY,
+        double pZ,
+        boolean pRelative
     ) {
-        super(p_235087_, p_235088_, p_235091_);
-        this.volume = p_235089_;
-        this.pitch = p_235090_;
-        this.x = p_235095_;
-        this.y = p_235096_;
-        this.z = p_235097_;
-        this.looping = p_235092_;
-        this.delay = p_235093_;
-        this.attenuation = p_235094_;
-        this.relative = p_235098_;
+        super(pLocation, pSource, pRandom);
+        this.volume = pVolume;
+        this.pitch = pPitch;
+        this.x = pX;
+        this.y = pY;
+        this.z = pZ;
+        this.looping = pLooping;
+        this.delay = pDelay;
+        this.attenuation = pAttenuation;
+        this.relative = pRelative;
     }
 }

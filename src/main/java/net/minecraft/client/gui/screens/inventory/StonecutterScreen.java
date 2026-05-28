@@ -40,9 +40,9 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
     private int startIndex;
     private boolean displayRecipes;
 
-    public StonecutterScreen(StonecutterMenu p_99310_, Inventory p_99311_, Component p_99312_) {
-        super(p_99310_, p_99311_, p_99312_);
-        p_99310_.registerUpdateListener(this::containerChanged);
+    public StonecutterScreen(StonecutterMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, pPlayerInventory, pTitle);
+        pMenu.registerUpdateListener(this::containerChanged);
         this.titleLabelY--;
     }
 
@@ -89,41 +89,41 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
         }
     }
 
-    private void renderButtons(GuiGraphics p_282733_, int p_282136_, int p_282147_, int p_281987_, int p_281276_, int p_282688_) {
-        for (int i = this.startIndex; i < p_282688_ && i < this.menu.getNumberOfVisibleRecipes(); i++) {
+    private void renderButtons(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, int pX, int pY, int pLastVisibleElementIndex) {
+        for (int i = this.startIndex; i < pLastVisibleElementIndex && i < this.menu.getNumberOfVisibleRecipes(); i++) {
             int j = i - this.startIndex;
-            int k = p_281987_ + j % 4 * 16;
+            int k = pX + j % 4 * 16;
             int l = j / 4;
-            int i1 = p_281276_ + l * 18 + 2;
+            int i1 = pY + l * 18 + 2;
             ResourceLocation resourcelocation;
             if (i == this.menu.getSelectedRecipeIndex()) {
                 resourcelocation = RECIPE_SELECTED_SPRITE;
-            } else if (p_282136_ >= k && p_282147_ >= i1 && p_282136_ < k + 16 && p_282147_ < i1 + 18) {
+            } else if (pMouseX >= k && pMouseY >= i1 && pMouseX < k + 16 && pMouseY < i1 + 18) {
                 resourcelocation = RECIPE_HIGHLIGHTED_SPRITE;
             } else {
                 resourcelocation = RECIPE_SPRITE;
             }
 
-            p_282733_.blitSprite(RenderType::guiTextured, resourcelocation, k, i1 - 1, 16, 18);
+            pGuiGraphics.blitSprite(RenderType::guiTextured, resourcelocation, k, i1 - 1, 16, 18);
         }
     }
 
-    private void renderRecipes(GuiGraphics p_281999_, int p_282658_, int p_282563_, int p_283352_) {
+    private void renderRecipes(GuiGraphics pGuiGraphics, int pX, int pY, int pStartIndex) {
         SelectableRecipe.SingleInputSet<StonecutterRecipe> singleinputset = this.menu.getVisibleRecipes();
         ContextMap contextmap = SlotDisplayContext.fromLevel(this.minecraft.level);
 
-        for (int i = this.startIndex; i < p_283352_ && i < singleinputset.size(); i++) {
+        for (int i = this.startIndex; i < pStartIndex && i < singleinputset.size(); i++) {
             int j = i - this.startIndex;
-            int k = p_282658_ + j % 4 * 16;
+            int k = pX + j % 4 * 16;
             int l = j / 4;
-            int i1 = p_282563_ + l * 18 + 2;
+            int i1 = pY + l * 18 + 2;
             SlotDisplay slotdisplay = singleinputset.entries().get(i).recipe().optionDisplay();
-            p_281999_.renderItem(slotdisplay.resolveForFirstStack(contextmap), k, i1);
+            pGuiGraphics.renderItem(slotdisplay.resolveForFirstStack(contextmap), k, i1);
         }
     }
 
     @Override
-    public boolean mouseClicked(double p_99318_, double p_99319_, int p_99320_) {
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         this.scrolling = false;
         if (this.displayRecipes) {
             int i = this.leftPos + 52;
@@ -132,8 +132,8 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 
             for (int l = this.startIndex; l < k; l++) {
                 int i1 = l - this.startIndex;
-                double d0 = p_99318_ - (double)(i + i1 % 4 * 16);
-                double d1 = p_99319_ - (double)(j + i1 / 4 * 18);
+                double d0 = pMouseX - (double)(i + i1 % 4 * 16);
+                double d1 = pMouseY - (double)(j + i1 / 4 * 18);
                 if (d0 >= 0.0 && d1 >= 0.0 && d0 < 16.0 && d1 < 18.0 && this.menu.clickMenuButton(this.minecraft.player, l)) {
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, l);
@@ -143,25 +143,25 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 
             i = this.leftPos + 119;
             j = this.topPos + 9;
-            if (p_99318_ >= (double)i && p_99318_ < (double)(i + 12) && p_99319_ >= (double)j && p_99319_ < (double)(j + 54)) {
+            if (pMouseX >= (double)i && pMouseX < (double)(i + 12) && pMouseY >= (double)j && pMouseY < (double)(j + 54)) {
                 this.scrolling = true;
             }
         }
 
-        return super.mouseClicked(p_99318_, p_99319_, p_99320_);
+        return super.mouseClicked(pMouseX, pMouseY, pButton);
     }
 
     @Override
-    public boolean mouseDragged(double p_99322_, double p_99323_, int p_99324_, double p_99325_, double p_99326_) {
+    public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
         if (this.scrolling && this.isScrollBarActive()) {
             int i = this.topPos + 14;
             int j = i + 54;
-            this.scrollOffs = ((float)p_99323_ - (float)i - 7.5F) / ((float)(j - i) - 15.0F);
+            this.scrollOffs = ((float)pMouseY - (float)i - 7.5F) / ((float)(j - i) - 15.0F);
             this.scrollOffs = Mth.clamp(this.scrollOffs, 0.0F, 1.0F);
             this.startIndex = (int)((double)(this.scrollOffs * (float)this.getOffscreenRows()) + 0.5) * 4;
             return true;
         } else {
-            return super.mouseDragged(p_99322_, p_99323_, p_99324_, p_99325_, p_99326_);
+            return super.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY);
         }
     }
 

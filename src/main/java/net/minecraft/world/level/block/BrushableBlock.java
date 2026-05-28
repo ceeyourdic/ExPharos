@@ -47,11 +47,11 @@ public class BrushableBlock extends BaseEntityBlock implements Fallable {
         return CODEC;
     }
 
-    public BrushableBlock(Block p_277629_, SoundEvent p_278060_, SoundEvent p_277352_, BlockBehaviour.Properties p_277373_) {
-        super(p_277373_);
-        this.turnsInto = p_277629_;
-        this.brushSound = p_278060_;
-        this.brushCompletedSound = p_277352_;
+    public BrushableBlock(Block pTurnsInto, SoundEvent pBrushSound, SoundEvent pBrushCompletedSound, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.turnsInto = pTurnsInto;
+        this.brushSound = pBrushSound;
+        this.brushCompletedSound = pBrushCompletedSound;
         this.registerDefaultState(this.stateDefinition.any().setValue(DUSTED, Integer.valueOf(0)));
     }
 

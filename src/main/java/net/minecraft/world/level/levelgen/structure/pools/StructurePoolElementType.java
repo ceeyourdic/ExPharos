@@ -13,7 +13,7 @@ public interface StructurePoolElementType<P extends StructurePoolElement> {
 
     MapCodec<P> codec();
 
-    static <P extends StructurePoolElement> StructurePoolElementType<P> register(String p_210551_, MapCodec<P> p_327687_) {
-        return Registry.register(BuiltInRegistries.STRUCTURE_POOL_ELEMENT, p_210551_, () -> p_327687_);
+    static <P extends StructurePoolElement> StructurePoolElementType<P> register(String pName, MapCodec<P> pCodec) {
+        return Registry.register(BuiltInRegistries.STRUCTURE_POOL_ELEMENT, pName, () -> pCodec);
     }
 }

@@ -50,25 +50,25 @@ public enum ChatFormatting implements StringRepresentable {
     @Nullable
     private final Integer color;
 
-    private static String cleanName(String p_126663_) {
-        return p_126663_.toLowerCase(Locale.ROOT).replaceAll("[^a-z]", "");
+    private static String cleanName(String pString) {
+        return pString.toLowerCase(Locale.ROOT).replaceAll("[^a-z]", "");
     }
 
-    private ChatFormatting(final String p_126627_, final char p_126628_, final int p_126629_, @Nullable final Integer p_126630_) {
-        this(p_126627_, p_126628_, false, p_126629_, p_126630_);
+    private ChatFormatting(final String pName, final char pCode, final int pId, @Nullable final Integer pColor) {
+        this(pName, pCode, false, pId, pColor);
     }
 
-    private ChatFormatting(final String p_126634_, final char p_126635_, final boolean p_126636_) {
-        this(p_126634_, p_126635_, p_126636_, -1, null);
+    private ChatFormatting(final String pName, final char pCode, final boolean pIsFormat) {
+        this(pName, pCode, pIsFormat, -1, null);
     }
 
-    private ChatFormatting(final String p_126640_, final char p_126641_, final boolean p_126642_, final int p_126643_, @Nullable final Integer p_126644_) {
-        this.name = p_126640_;
-        this.code = p_126641_;
-        this.isFormat = p_126642_;
-        this.id = p_126643_;
-        this.color = p_126644_;
-        this.toString = "\u00a7" + p_126641_;
+    private ChatFormatting(final String pName, final char pCode, final boolean pIsFormat, final int pId, @Nullable final Integer pColor) {
+        this.name = pName;
+        this.code = pCode;
+        this.isFormat = pIsFormat;
+        this.id = pId;
+        this.color = pColor;
+        this.toString = "\u00a7" + pCode;
     }
 
     public char getChar() {
@@ -103,22 +103,22 @@ public enum ChatFormatting implements StringRepresentable {
 
     @Nullable
     @Contract("!null->!null;_->_")
-    public static String stripFormatting(@Nullable String p_126650_) {
-        return p_126650_ == null ? null : STRIP_FORMATTING_PATTERN.matcher(p_126650_).replaceAll("");
+    public static String stripFormatting(@Nullable String pText) {
+        return pText == null ? null : STRIP_FORMATTING_PATTERN.matcher(pText).replaceAll("");
     }
 
     @Nullable
-    public static ChatFormatting getByName(@Nullable String p_126658_) {
-        return p_126658_ == null ? null : FORMATTING_BY_NAME.get(cleanName(p_126658_));
+    public static ChatFormatting getByName(@Nullable String pFriendlyName) {
+        return pFriendlyName == null ? null : FORMATTING_BY_NAME.get(cleanName(pFriendlyName));
     }
 
     @Nullable
-    public static ChatFormatting getById(int p_126648_) {
-        if (p_126648_ < 0) {
+    public static ChatFormatting getById(int pIndex) {
+        if (pIndex < 0) {
             return RESET;
         } else {
             for (ChatFormatting chatformatting : values()) {
-                if (chatformatting.getId() == p_126648_) {
+                if (chatformatting.getId() == pIndex) {
                     return chatformatting;
                 }
             }
@@ -128,8 +128,8 @@ public enum ChatFormatting implements StringRepresentable {
     }
 
     @Nullable
-    public static ChatFormatting getByCode(char p_126646_) {
-        char c0 = Character.toLowerCase(p_126646_);
+    public static ChatFormatting getByCode(char pFormattingCode) {
+        char c0 = Character.toLowerCase(pFormattingCode);
 
         for (ChatFormatting chatformatting : values()) {
             if (chatformatting.code == c0) {
@@ -140,11 +140,11 @@ public enum ChatFormatting implements StringRepresentable {
         return null;
     }
 
-    public static Collection<String> getNames(boolean p_126654_, boolean p_126655_) {
+    public static Collection<String> getNames(boolean pGetColor, boolean pGetFancyStyling) {
         List<String> list = Lists.newArrayList();
 
         for (ChatFormatting chatformatting : values()) {
-            if ((!chatformatting.isColor() || p_126654_) && (!chatformatting.isFormat() || p_126655_)) {
+            if ((!chatformatting.isColor() || pGetColor) && (!chatformatting.isFormat() || pGetFancyStyling)) {
                 list.add(chatformatting.getName());
             }
         }

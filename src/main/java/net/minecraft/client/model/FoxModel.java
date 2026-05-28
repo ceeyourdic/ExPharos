@@ -29,14 +29,14 @@ public class FoxModel extends EntityModel<FoxRenderState> {
     private static final float LEG_POS = 17.5F;
     private float legMotionPos;
 
-    public FoxModel(ModelPart p_170566_) {
-        super(p_170566_);
-        this.head = p_170566_.getChild("head");
-        this.body = p_170566_.getChild("body");
-        this.rightHindLeg = p_170566_.getChild("right_hind_leg");
-        this.leftHindLeg = p_170566_.getChild("left_hind_leg");
-        this.rightFrontLeg = p_170566_.getChild("right_front_leg");
-        this.leftFrontLeg = p_170566_.getChild("left_front_leg");
+    public FoxModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
+        this.body = pRoot.getChild("body");
+        this.rightHindLeg = pRoot.getChild("right_hind_leg");
+        this.leftHindLeg = pRoot.getChild("left_hind_leg");
+        this.rightFrontLeg = pRoot.getChild("right_front_leg");
+        this.leftFrontLeg = pRoot.getChild("left_front_leg");
         this.tail = this.body.getChild("tail");
     }
 

@@ -15,21 +15,21 @@ public abstract class AbstractCraftingMenu extends RecipeBookMenu {
     protected final CraftingContainer craftSlots;
     protected final ResultContainer resultSlots = new ResultContainer();
 
-    public AbstractCraftingMenu(MenuType<?> p_366631_, int p_364244_, int p_366819_, int p_362264_) {
-        super(p_366631_, p_364244_);
-        this.width = p_366819_;
-        this.height = p_362264_;
-        this.craftSlots = new TransientCraftingContainer(this, p_366819_, p_362264_);
+    public AbstractCraftingMenu(MenuType<?> pMenuType, int pContainerId, int pWidth, int pHeight) {
+        super(pMenuType, pContainerId);
+        this.width = pWidth;
+        this.height = pHeight;
+        this.craftSlots = new TransientCraftingContainer(this, pWidth, pHeight);
     }
 
-    protected Slot addResultSlot(Player p_368097_, int p_367668_, int p_363802_) {
-        return this.addSlot(new ResultSlot(p_368097_, this.craftSlots, this.resultSlots, 0, p_367668_, p_363802_));
+    protected Slot addResultSlot(Player pPlayer, int pX, int pY) {
+        return this.addSlot(new ResultSlot(pPlayer, this.craftSlots, this.resultSlots, 0, pX, pY));
     }
 
-    protected void addCraftingGridSlots(int p_361557_, int p_366601_) {
+    protected void addCraftingGridSlots(int pX, int pY) {
         for (int i = 0; i < this.width; i++) {
             for (int j = 0; j < this.height; j++) {
-                this.addSlot(new Slot(this.craftSlots, j + i * this.width, p_361557_ + j * 18, p_366601_ + i * 18));
+                this.addSlot(new Slot(this.craftSlots, j + i * this.width, pX + j * 18, pY + i * 18));
             }
         }
     }
@@ -69,7 +69,7 @@ public abstract class AbstractCraftingMenu extends RecipeBookMenu {
     protected void beginPlacingRecipe() {
     }
 
-    protected void finishPlacingRecipe(ServerLevel p_365958_, RecipeHolder<CraftingRecipe> p_364067_) {
+    protected void finishPlacingRecipe(ServerLevel pLevel, RecipeHolder<CraftingRecipe> pRecipe) {
     }
 
     public abstract Slot getResultSlot();

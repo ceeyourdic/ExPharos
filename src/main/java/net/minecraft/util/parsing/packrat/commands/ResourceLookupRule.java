@@ -12,9 +12,9 @@ public abstract class ResourceLookupRule<C, V> implements Rule<StringReader, V>,
     private final Atom<ResourceLocation> idParser;
     protected final C context;
 
-    protected ResourceLookupRule(Atom<ResourceLocation> p_330644_, C p_330414_) {
-        this.idParser = p_330644_;
-        this.context = p_330414_;
+    protected ResourceLookupRule(Atom<ResourceLocation> pIdParser, C pContext) {
+        this.idParser = pIdParser;
+        this.context = pContext;
     }
 
     @Override
@@ -35,5 +35,5 @@ public abstract class ResourceLookupRule<C, V> implements Rule<StringReader, V>,
         }
     }
 
-    protected abstract V validateElement(ImmutableStringReader p_336199_, ResourceLocation p_330230_) throws Exception;
+    protected abstract V validateElement(ImmutableStringReader pReader, ResourceLocation pElementType) throws Exception;
 }

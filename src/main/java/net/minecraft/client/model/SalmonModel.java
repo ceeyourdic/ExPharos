@@ -21,9 +21,9 @@ public class SalmonModel extends EntityModel<SalmonRenderState> {
     private static final float Z_OFFSET = -7.2F;
     private final ModelPart bodyBack;
 
-    public SalmonModel(ModelPart p_170896_) {
-        super(p_170896_);
-        this.bodyBack = p_170896_.getChild("body_back");
+    public SalmonModel(ModelPart pRoot) {
+        super(pRoot);
+        this.bodyBack = pRoot.getChild("body_back");
     }
 
     public static LayerDefinition createBodyLayer() {

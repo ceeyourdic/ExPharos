@@ -63,8 +63,8 @@ public class Bogged extends AbstractSkeleton implements Shearable {
         return this.entityData.get(DATA_SHEARED);
     }
 
-    public void setSheared(boolean p_329679_) {
-        this.entityData.set(DATA_SHEARED, p_329679_);
+    public void setSheared(boolean pSheared) {
+        this.entityData.set(DATA_SHEARED, pSheared);
     }
 
     @Override
@@ -130,8 +130,8 @@ public class Bogged extends AbstractSkeleton implements Shearable {
         this.setSheared(true);
     }
 
-    private void spawnShearedMushrooms(ServerLevel p_362178_, ItemStack p_364629_) {
-        this.dropFromShearingLootTable(p_362178_, BuiltInLootTables.BOGGED_SHEAR, p_364629_, (p_375131_, p_375132_) -> this.spawnAtLocation(p_375131_, p_375132_, this.getBbHeight()));
+    private void spawnShearedMushrooms(ServerLevel pLevel, ItemStack pStack) {
+        this.dropFromShearingLootTable(pLevel, BuiltInLootTables.BOGGED_SHEAR, pStack, (p_375131_, p_375132_) -> this.spawnAtLocation(p_375131_, p_375132_, this.getBbHeight()));
     }
 
     @Override

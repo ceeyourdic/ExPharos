@@ -7,23 +7,23 @@ public interface DataComponentHolder {
     DataComponentMap getComponents();
 
     @Nullable
-    default <T> T get(DataComponentType<? extends T> p_331483_) {
-        return this.getComponents().get(p_331483_);
+    default <T> T get(DataComponentType<? extends T> pComponent) {
+        return this.getComponents().get(pComponent);
     }
 
-    default <T> Stream<T> getAllOfType(Class<? extends T> p_361858_) {
+    default <T> Stream<T> getAllOfType(Class<? extends T> pType) {
         return this.getComponents()
             .stream()
             .map(TypedDataComponent::value)
-            .filter(p_365228_ -> p_361858_.isAssignableFrom(p_365228_.getClass()))
+            .filter(p_365228_ -> pType.isAssignableFrom(p_365228_.getClass()))
             .map(p_365353_ -> (T)p_365353_);
     }
 
-    default <T> T getOrDefault(DataComponentType<? extends T> p_328483_, T p_333219_) {
-        return this.getComponents().getOrDefault(p_328483_, p_333219_);
+    default <T> T getOrDefault(DataComponentType<? extends T> pComponent, T pDefaultValue) {
+        return this.getComponents().getOrDefault(pComponent, pDefaultValue);
     }
 
-    default boolean has(DataComponentType<?> p_333597_) {
-        return this.getComponents().has(p_333597_);
+    default boolean has(DataComponentType<?> pComponent) {
+        return this.getComponents().has(pComponent);
     }
 }

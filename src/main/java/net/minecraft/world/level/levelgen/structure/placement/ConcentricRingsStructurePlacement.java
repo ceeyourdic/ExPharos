@@ -28,12 +28,12 @@ public class ConcentricRingsStructurePlacement extends StructurePlacement {
     private final HolderSet<Biome> preferredBiomes;
 
     private static P9<Mu<ConcentricRingsStructurePlacement>, Vec3i, StructurePlacement.FrequencyReductionMethod, Float, Integer, Optional<StructurePlacement.ExclusionZone>, Integer, Integer, Integer, HolderSet<Biome>> codec(
-        Instance<ConcentricRingsStructurePlacement> p_226997_
+        Instance<ConcentricRingsStructurePlacement> pInstance
     ) {
         P5<Mu<ConcentricRingsStructurePlacement>, Vec3i, StructurePlacement.FrequencyReductionMethod, Float, Integer, Optional<StructurePlacement.ExclusionZone>> p5 = placementCodec(
-            p_226997_
+            pInstance
         );
-        P4<Mu<ConcentricRingsStructurePlacement>, Integer, Integer, Integer, HolderSet<Biome>> p4 = p_226997_.group(
+        P4<Mu<ConcentricRingsStructurePlacement>, Integer, Integer, Integer, HolderSet<Biome>> p4 = pInstance.group(
             Codec.intRange(0, 1023).fieldOf("distance").forGetter(ConcentricRingsStructurePlacement::distance),
             Codec.intRange(0, 1023).fieldOf("spread").forGetter(ConcentricRingsStructurePlacement::spread),
             Codec.intRange(1, 4095).fieldOf("count").forGetter(ConcentricRingsStructurePlacement::count),
@@ -43,25 +43,25 @@ public class ConcentricRingsStructurePlacement extends StructurePlacement {
     }
 
     public ConcentricRingsStructurePlacement(
-        Vec3i p_226981_,
-        StructurePlacement.FrequencyReductionMethod p_226982_,
-        float p_226983_,
-        int p_226984_,
-        Optional<StructurePlacement.ExclusionZone> p_226985_,
-        int p_226986_,
-        int p_226987_,
-        int p_226988_,
-        HolderSet<Biome> p_226989_
+        Vec3i pLocateOffset,
+        StructurePlacement.FrequencyReductionMethod pFrequencyReductionMethod,
+        float pFrequency,
+        int pSalt,
+        Optional<StructurePlacement.ExclusionZone> pExclusionZone,
+        int pDistance,
+        int pSpread,
+        int pCount,
+        HolderSet<Biome> pPreferredBiomes
     ) {
-        super(p_226981_, p_226982_, p_226983_, p_226984_, p_226985_);
-        this.distance = p_226986_;
-        this.spread = p_226987_;
-        this.count = p_226988_;
-        this.preferredBiomes = p_226989_;
+        super(pLocateOffset, pFrequencyReductionMethod, pFrequency, pSalt, pExclusionZone);
+        this.distance = pDistance;
+        this.spread = pSpread;
+        this.count = pCount;
+        this.preferredBiomes = pPreferredBiomes;
     }
 
-    public ConcentricRingsStructurePlacement(int p_226976_, int p_226977_, int p_226978_, HolderSet<Biome> p_226979_) {
-        this(Vec3i.ZERO, StructurePlacement.FrequencyReductionMethod.DEFAULT, 1.0F, 0, Optional.empty(), p_226976_, p_226977_, p_226978_, p_226979_);
+    public ConcentricRingsStructurePlacement(int pDistance, int pSpread, int pCount, HolderSet<Biome> pPreferrredBiomes) {
+        this(Vec3i.ZERO, StructurePlacement.FrequencyReductionMethod.DEFAULT, 1.0F, 0, Optional.empty(), pDistance, pSpread, pCount, pPreferrredBiomes);
     }
 
     public int distance() {

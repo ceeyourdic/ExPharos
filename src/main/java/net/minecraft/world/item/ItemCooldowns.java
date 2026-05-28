@@ -14,16 +14,16 @@ public class ItemCooldowns {
     private final Map<ResourceLocation, ItemCooldowns.CooldownInstance> cooldowns = Maps.newHashMap();
     private int tickCount;
 
-    public boolean isOnCooldown(ItemStack p_369547_) {
-        return this.getCooldownPercent(p_369547_, 0.0F) > 0.0F;
+    public boolean isOnCooldown(ItemStack pStack) {
+        return this.getCooldownPercent(pStack, 0.0F) > 0.0F;
     }
 
-    public float getCooldownPercent(ItemStack p_366950_, float p_41523_) {
-        ResourceLocation resourcelocation = this.getCooldownGroup(p_366950_);
+    public float getCooldownPercent(ItemStack pStack, float pPartialTick) {
+        ResourceLocation resourcelocation = this.getCooldownGroup(pStack);
         ItemCooldowns.CooldownInstance itemcooldowns$cooldowninstance = this.cooldowns.get(resourcelocation);
         if (itemcooldowns$cooldowninstance != null) {
             float f = (float)(itemcooldowns$cooldowninstance.endTime - itemcooldowns$cooldowninstance.startTime);
-            float f1 = (float)itemcooldowns$cooldowninstance.endTime - ((float)this.tickCount + p_41523_);
+            float f1 = (float)itemcooldowns$cooldowninstance.endTime - ((float)this.tickCount + pPartialTick);
             return Mth.clamp(f1 / f, 0.0F, 1.0F);
         } else {
             return 0.0F;
@@ -45,30 +45,30 @@ public class ItemCooldowns {
         }
     }
 
-    public ResourceLocation getCooldownGroup(ItemStack p_361933_) {
-        UseCooldown usecooldown = p_361933_.get(DataComponents.USE_COOLDOWN);
-        ResourceLocation resourcelocation = BuiltInRegistries.ITEM.getKey(p_361933_.getItem());
+    public ResourceLocation getCooldownGroup(ItemStack pStack) {
+        UseCooldown usecooldown = pStack.get(DataComponents.USE_COOLDOWN);
+        ResourceLocation resourcelocation = BuiltInRegistries.ITEM.getKey(pStack.getItem());
         return usecooldown == null ? resourcelocation : usecooldown.cooldownGroup().orElse(resourcelocation);
     }
 
-    public void addCooldown(ItemStack p_366379_, int p_367584_) {
-        this.addCooldown(this.getCooldownGroup(p_366379_), p_367584_);
+    public void addCooldown(ItemStack pStack, int pCooldown) {
+        this.addCooldown(this.getCooldownGroup(pStack), pCooldown);
     }
 
-    public void addCooldown(ResourceLocation p_369799_, int p_41526_) {
-        this.cooldowns.put(p_369799_, new ItemCooldowns.CooldownInstance(this.tickCount, this.tickCount + p_41526_));
-        this.onCooldownStarted(p_369799_, p_41526_);
+    public void addCooldown(ResourceLocation pGroup, int pCooldown) {
+        this.cooldowns.put(pGroup, new ItemCooldowns.CooldownInstance(this.tickCount, this.tickCount + pCooldown));
+        this.onCooldownStarted(pGroup, pCooldown);
     }
 
-    public void removeCooldown(ResourceLocation p_361396_) {
-        this.cooldowns.remove(p_361396_);
-        this.onCooldownEnded(p_361396_);
+    public void removeCooldown(ResourceLocation pGroup) {
+        this.cooldowns.remove(pGroup);
+        this.onCooldownEnded(pGroup);
     }
 
-    protected void onCooldownStarted(ResourceLocation p_361466_, int p_41530_) {
+    protected void onCooldownStarted(ResourceLocation pGroup, int pCooldown) {
     }
 
-    protected void onCooldownEnded(ResourceLocation p_370122_) {
+    protected void onCooldownEnded(ResourceLocation pGroup) {
     }
 
     static record CooldownInstance(int startTime, int endTime) {

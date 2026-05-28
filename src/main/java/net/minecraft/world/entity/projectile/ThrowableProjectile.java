@@ -16,14 +16,14 @@ public abstract class ThrowableProjectile extends Projectile {
         super(p_37466_, p_37467_);
     }
 
-    protected ThrowableProjectile(EntityType<? extends ThrowableProjectile> p_37456_, double p_37457_, double p_37458_, double p_37459_, Level p_37460_) {
-        this(p_37456_, p_37460_);
-        this.setPos(p_37457_, p_37458_, p_37459_);
+    protected ThrowableProjectile(EntityType<? extends ThrowableProjectile> pEntityType, double pX, double pY, double pZ, Level pLevel) {
+        this(pEntityType, pLevel);
+        this.setPos(pX, pY, pZ);
     }
 
     @Override
-    public boolean shouldRenderAtSqrDistance(double p_37470_) {
-        if (this.tickCount < 2 && p_37470_ < 12.25) {
+    public boolean shouldRenderAtSqrDistance(double pDistance) {
+        if (this.tickCount < 2 && pDistance < 12.25) {
             return false;
         } else {
             double d0 = this.getBoundingBox().getSize() * 4.0;
@@ -32,7 +32,7 @@ public abstract class ThrowableProjectile extends Projectile {
             }
 
             d0 *= 64.0;
-            return p_37470_ < d0 * d0;
+            return pDistance < d0 * d0;
         }
     }
 

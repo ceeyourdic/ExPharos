@@ -13,20 +13,20 @@ public class ClientboundRemoveEntitiesPacket implements Packet<ClientGamePacketL
     );
     private final IntList entityIds;
 
-    public ClientboundRemoveEntitiesPacket(IntList p_182719_) {
-        this.entityIds = new IntArrayList(p_182719_);
+    public ClientboundRemoveEntitiesPacket(IntList pEntityIds) {
+        this.entityIds = new IntArrayList(pEntityIds);
     }
 
-    public ClientboundRemoveEntitiesPacket(int... p_182723_) {
-        this.entityIds = new IntArrayList(p_182723_);
+    public ClientboundRemoveEntitiesPacket(int... pEntityIds) {
+        this.entityIds = new IntArrayList(pEntityIds);
     }
 
-    private ClientboundRemoveEntitiesPacket(FriendlyByteBuf p_182721_) {
-        this.entityIds = p_182721_.readIntIdList();
+    private ClientboundRemoveEntitiesPacket(FriendlyByteBuf pBuffer) {
+        this.entityIds = pBuffer.readIntIdList();
     }
 
-    private void write(FriendlyByteBuf p_182725_) {
-        p_182725_.writeIntIdList(this.entityIds);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeIntIdList(this.entityIds);
     }
 
     @Override

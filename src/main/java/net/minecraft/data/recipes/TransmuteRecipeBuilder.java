@@ -25,15 +25,15 @@ public class TransmuteRecipeBuilder implements RecipeBuilder {
     @Nullable
     private String group;
 
-    private TransmuteRecipeBuilder(RecipeCategory p_365540_, Holder<Item> p_368366_, Ingredient p_365902_, Ingredient p_366998_) {
-        this.category = p_365540_;
-        this.result = p_368366_;
-        this.input = p_365902_;
-        this.material = p_366998_;
+    private TransmuteRecipeBuilder(RecipeCategory pCategory, Holder<Item> pResult, Ingredient pInput, Ingredient pMaterial) {
+        this.category = pCategory;
+        this.result = pResult;
+        this.input = pInput;
+        this.material = pMaterial;
     }
 
-    public static TransmuteRecipeBuilder transmute(RecipeCategory p_367390_, Ingredient p_365855_, Ingredient p_361211_, Item p_366896_) {
-        return new TransmuteRecipeBuilder(p_367390_, p_366896_.builtInRegistryHolder(), p_365855_, p_361211_);
+    public static TransmuteRecipeBuilder transmute(RecipeCategory pCategory, Ingredient pInput, Ingredient pMaterial, Item pResult) {
+        return new TransmuteRecipeBuilder(pCategory, pResult.builtInRegistryHolder(), pInput, pMaterial);
     }
 
     public TransmuteRecipeBuilder unlockedBy(String p_361429_, Criterion<?> p_362231_) {
@@ -67,9 +67,9 @@ public class TransmuteRecipeBuilder implements RecipeBuilder {
         );
     }
 
-    private void ensureValid(ResourceKey<Recipe<?>> p_368853_) {
+    private void ensureValid(ResourceKey<Recipe<?>> pRecipe) {
         if (this.criteria.isEmpty()) {
-            throw new IllegalStateException("No way of obtaining recipe " + p_368853_.location());
+            throw new IllegalStateException("No way of obtaining recipe " + pRecipe.location());
         }
     }
 }

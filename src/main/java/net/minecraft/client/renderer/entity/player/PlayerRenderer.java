@@ -53,25 +53,25 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, PlayerRenderState, PlayerModel> {
-    public PlayerRenderer(EntityRendererProvider.Context p_174557_, boolean p_174558_) {
-        super(p_174557_, new PlayerModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM : ModelLayers.PLAYER), p_174558_), 0.5F);
+    public PlayerRenderer(EntityRendererProvider.Context pContext, boolean pUseSlimModel) {
+        super(pContext, new PlayerModel(pContext.bakeLayer(pUseSlimModel ? ModelLayers.PLAYER_SLIM : ModelLayers.PLAYER), pUseSlimModel), 0.5F);
         this.addLayer(
             new HumanoidArmorLayer<>(
                 this,
-                new HumanoidArmorModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)),
-                new HumanoidArmorModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR)),
-                p_174557_.getEquipmentRenderer()
+                new HumanoidArmorModel(pContext.bakeLayer(pUseSlimModel ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)),
+                new HumanoidArmorModel(pContext.bakeLayer(pUseSlimModel ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR)),
+                pContext.getEquipmentRenderer()
             )
         );
         this.addLayer(new PlayerItemInHandLayer<>(this));
-        this.addLayer(new ArrowLayer<>(this, p_174557_));
-        this.addLayer(new Deadmau5EarsLayer(this, p_174557_.getModelSet()));
-        this.addLayer(new CapeLayer(this, p_174557_.getModelSet(), p_174557_.getEquipmentAssets()));
-        this.addLayer(new CustomHeadLayer<>(this, p_174557_.getModelSet()));
-        this.addLayer(new WingsLayer<>(this, p_174557_.getModelSet(), p_174557_.getEquipmentRenderer()));
-        this.addLayer(new ParrotOnShoulderLayer(this, p_174557_.getModelSet()));
-        this.addLayer(new SpinAttackEffectLayer(this, p_174557_.getModelSet()));
-        this.addLayer(new BeeStingerLayer<>(this, p_174557_));
+        this.addLayer(new ArrowLayer<>(this, pContext));
+        this.addLayer(new Deadmau5EarsLayer(this, pContext.getModelSet()));
+        this.addLayer(new CapeLayer(this, pContext.getModelSet(), pContext.getEquipmentAssets()));
+        this.addLayer(new CustomHeadLayer<>(this, pContext.getModelSet()));
+        this.addLayer(new WingsLayer<>(this, pContext.getModelSet(), pContext.getEquipmentRenderer()));
+        this.addLayer(new ParrotOnShoulderLayer(this, pContext.getModelSet()));
+        this.addLayer(new SpinAttackEffectLayer(this, pContext.getModelSet()));
+        this.addLayer(new BeeStingerLayer<>(this, pContext));
     }
 
     protected boolean shouldRenderLayers(PlayerRenderState p_362318_) {
@@ -83,24 +83,24 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
         return p_365223_.isCrouching ? vec3.add(0.0, (double)(p_365223_.scale * -2.0F) / 16.0, 0.0) : vec3;
     }
 
-    private static HumanoidModel.ArmPose getArmPose(AbstractClientPlayer p_375883_, HumanoidArm p_366116_) {
-        ItemStack itemstack = p_375883_.getItemInHand(InteractionHand.MAIN_HAND);
-        ItemStack itemstack1 = p_375883_.getItemInHand(InteractionHand.OFF_HAND);
-        HumanoidModel.ArmPose humanoidmodel$armpose = getArmPose(p_375883_, itemstack, InteractionHand.MAIN_HAND);
-        HumanoidModel.ArmPose humanoidmodel$armpose1 = getArmPose(p_375883_, itemstack1, InteractionHand.OFF_HAND);
+    private static HumanoidModel.ArmPose getArmPose(AbstractClientPlayer pPlayer, HumanoidArm pArm) {
+        ItemStack itemstack = pPlayer.getItemInHand(InteractionHand.MAIN_HAND);
+        ItemStack itemstack1 = pPlayer.getItemInHand(InteractionHand.OFF_HAND);
+        HumanoidModel.ArmPose humanoidmodel$armpose = getArmPose(pPlayer, itemstack, InteractionHand.MAIN_HAND);
+        HumanoidModel.ArmPose humanoidmodel$armpose1 = getArmPose(pPlayer, itemstack1, InteractionHand.OFF_HAND);
         if (humanoidmodel$armpose.isTwoHanded()) {
             humanoidmodel$armpose1 = itemstack1.isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
         }
 
-        return p_375883_.getMainArm() == p_366116_ ? humanoidmodel$armpose : humanoidmodel$armpose1;
+        return pPlayer.getMainArm() == pArm ? humanoidmodel$armpose : humanoidmodel$armpose1;
     }
 
-    private static HumanoidModel.ArmPose getArmPose(Player p_376602_, ItemStack p_376446_, InteractionHand p_361073_) {
-        if (p_376446_.isEmpty()) {
+    private static HumanoidModel.ArmPose getArmPose(Player pPlayer, ItemStack pStack, InteractionHand pHand) {
+        if (pStack.isEmpty()) {
             return HumanoidModel.ArmPose.EMPTY;
         } else {
-            if (p_376602_.getUsedItemHand() == p_361073_ && p_376602_.getUseItemRemainingTicks() > 0) {
-                ItemUseAnimation itemuseanimation = p_376446_.getUseAnimation();
+            if (pPlayer.getUsedItemHand() == pHand && pPlayer.getUseItemRemainingTicks() > 0) {
+                ItemUseAnimation itemuseanimation = pStack.getUseAnimation();
                 if (itemuseanimation == ItemUseAnimation.BLOCK) {
                     return HumanoidModel.ArmPose.BLOCK;
                 }
@@ -128,7 +128,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
                 if (itemuseanimation == ItemUseAnimation.BRUSH) {
                     return HumanoidModel.ArmPose.BRUSH;
                 }
-            } else if (!p_376602_.swinging && p_376446_.is(Items.CROSSBOW) && CrossbowItem.isCharged(p_376446_)) {
+            } else if (!pPlayer.swinging && pStack.is(Items.CROSSBOW) && CrossbowItem.isCharged(pStack)) {
                 return HumanoidModel.ArmPose.CROSSBOW_HOLD;
             }
 
@@ -207,70 +207,70 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
         }
     }
 
-    private static void extractFlightData(AbstractClientPlayer p_366513_, PlayerRenderState p_361371_, float p_365196_) {
-        p_361371_.fallFlyingTimeInTicks = (float)p_366513_.getFallFlyingTicks() + p_365196_;
-        Vec3 vec3 = p_366513_.getViewVector(p_365196_);
-        Vec3 vec31 = p_366513_.getDeltaMovementLerped(p_365196_);
+    private static void extractFlightData(AbstractClientPlayer pPlayer, PlayerRenderState pRenderState, float pPartialTick) {
+        pRenderState.fallFlyingTimeInTicks = (float)pPlayer.getFallFlyingTicks() + pPartialTick;
+        Vec3 vec3 = pPlayer.getViewVector(pPartialTick);
+        Vec3 vec31 = pPlayer.getDeltaMovementLerped(pPartialTick);
         double d0 = vec31.horizontalDistanceSqr();
         double d1 = vec3.horizontalDistanceSqr();
         if (d0 > 0.0 && d1 > 0.0) {
-            p_361371_.shouldApplyFlyingYRot = true;
+            pRenderState.shouldApplyFlyingYRot = true;
             double d2 = Math.min(1.0, (vec31.x * vec3.x + vec31.z * vec3.z) / Math.sqrt(d0 * d1));
             double d3 = vec31.x * vec3.z - vec31.z * vec3.x;
-            p_361371_.flyingYRot = (float)(Math.signum(d3) * Math.acos(d2));
+            pRenderState.flyingYRot = (float)(Math.signum(d3) * Math.acos(d2));
         } else {
-            p_361371_.shouldApplyFlyingYRot = false;
-            p_361371_.flyingYRot = 0.0F;
+            pRenderState.shouldApplyFlyingYRot = false;
+            pRenderState.flyingYRot = 0.0F;
         }
     }
 
-    private static void extractCapeState(AbstractClientPlayer p_366404_, PlayerRenderState p_365208_, float p_366613_) {
-        double d0 = Mth.lerp((double)p_366613_, p_366404_.xCloakO, p_366404_.xCloak)
-            - Mth.lerp((double)p_366613_, p_366404_.xo, p_366404_.getX());
-        double d1 = Mth.lerp((double)p_366613_, p_366404_.yCloakO, p_366404_.yCloak)
-            - Mth.lerp((double)p_366613_, p_366404_.yo, p_366404_.getY());
-        double d2 = Mth.lerp((double)p_366613_, p_366404_.zCloakO, p_366404_.zCloak)
-            - Mth.lerp((double)p_366613_, p_366404_.zo, p_366404_.getZ());
-        float f = Mth.rotLerp(p_366613_, p_366404_.yBodyRotO, p_366404_.yBodyRot);
+    private static void extractCapeState(AbstractClientPlayer pPlayer, PlayerRenderState pRenderState, float pPartialTick) {
+        double d0 = Mth.lerp((double)pPartialTick, pPlayer.xCloakO, pPlayer.xCloak)
+            - Mth.lerp((double)pPartialTick, pPlayer.xo, pPlayer.getX());
+        double d1 = Mth.lerp((double)pPartialTick, pPlayer.yCloakO, pPlayer.yCloak)
+            - Mth.lerp((double)pPartialTick, pPlayer.yo, pPlayer.getY());
+        double d2 = Mth.lerp((double)pPartialTick, pPlayer.zCloakO, pPlayer.zCloak)
+            - Mth.lerp((double)pPartialTick, pPlayer.zo, pPlayer.getZ());
+        float f = Mth.rotLerp(pPartialTick, pPlayer.yBodyRotO, pPlayer.yBodyRot);
         double d3 = (double)Mth.sin(f * (float) (Math.PI / 180.0));
         double d4 = (double)(-Mth.cos(f * (float) (Math.PI / 180.0)));
-        p_365208_.capeFlap = (float)d1 * 10.0F;
-        p_365208_.capeFlap = Mth.clamp(p_365208_.capeFlap, -6.0F, 32.0F);
-        p_365208_.capeLean = (float)(d0 * d3 + d2 * d4) * 100.0F;
-        p_365208_.capeLean = p_365208_.capeLean * (1.0F - p_365208_.fallFlyingScale());
-        p_365208_.capeLean = Mth.clamp(p_365208_.capeLean, 0.0F, 150.0F);
-        p_365208_.capeLean2 = (float)(d0 * d4 - d2 * d3) * 100.0F;
-        p_365208_.capeLean2 = Mth.clamp(p_365208_.capeLean2, -20.0F, 20.0F);
-        float f1 = Mth.lerp(p_366613_, p_366404_.oBob, p_366404_.bob);
-        float f2 = Mth.lerp(p_366613_, p_366404_.walkDistO, p_366404_.walkDist);
-        p_365208_.capeFlap = p_365208_.capeFlap + Mth.sin(f2 * 6.0F) * 32.0F * f1;
+        pRenderState.capeFlap = (float)d1 * 10.0F;
+        pRenderState.capeFlap = Mth.clamp(pRenderState.capeFlap, -6.0F, 32.0F);
+        pRenderState.capeLean = (float)(d0 * d3 + d2 * d4) * 100.0F;
+        pRenderState.capeLean = pRenderState.capeLean * (1.0F - pRenderState.fallFlyingScale());
+        pRenderState.capeLean = Mth.clamp(pRenderState.capeLean, 0.0F, 150.0F);
+        pRenderState.capeLean2 = (float)(d0 * d4 - d2 * d3) * 100.0F;
+        pRenderState.capeLean2 = Mth.clamp(pRenderState.capeLean2, -20.0F, 20.0F);
+        float f1 = Mth.lerp(pPartialTick, pPlayer.oBob, pPlayer.bob);
+        float f2 = Mth.lerp(pPartialTick, pPlayer.walkDistO, pPlayer.walkDist);
+        pRenderState.capeFlap = pRenderState.capeFlap + Mth.sin(f2 * 6.0F) * 32.0F * f1;
     }
 
     @Nullable
-    private static Parrot.Variant getParrotOnShoulder(AbstractClientPlayer p_362348_, boolean p_363425_) {
-        CompoundTag compoundtag = p_363425_ ? p_362348_.getShoulderEntityLeft() : p_362348_.getShoulderEntityRight();
+    private static Parrot.Variant getParrotOnShoulder(AbstractClientPlayer pPlayer, boolean pLeftShoulder) {
+        CompoundTag compoundtag = pLeftShoulder ? pPlayer.getShoulderEntityLeft() : pPlayer.getShoulderEntityRight();
         return EntityType.byString(compoundtag.getString("id")).filter(p_369258_ -> p_369258_ == EntityType.PARROT).isPresent()
             ? Parrot.Variant.byId(compoundtag.getInt("Variant"))
             : null;
     }
 
-    public void renderRightHand(PoseStack p_117771_, MultiBufferSource p_117772_, int p_117773_, ResourceLocation p_364347_, boolean p_367689_) {
-        this.renderHand(p_117771_, p_117772_, p_117773_, p_364347_, this.model.rightArm, p_367689_);
+    public void renderRightHand(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, ResourceLocation pSkinTexture, boolean pIsSleeveVisible) {
+        this.renderHand(pPoseStack, pBufferSource, pPackedLight, pSkinTexture, this.model.rightArm, pIsSleeveVisible);
     }
 
-    public void renderLeftHand(PoseStack p_117814_, MultiBufferSource p_117815_, int p_117816_, ResourceLocation p_368419_, boolean p_362915_) {
-        this.renderHand(p_117814_, p_117815_, p_117816_, p_368419_, this.model.leftArm, p_362915_);
+    public void renderLeftHand(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, ResourceLocation pSkinTexture, boolean pIsSleeveVisible) {
+        this.renderHand(pPoseStack, pBufferSource, pPackedLight, pSkinTexture, this.model.leftArm, pIsSleeveVisible);
     }
 
-    private void renderHand(PoseStack p_117776_, MultiBufferSource p_117777_, int p_117778_, ResourceLocation p_365409_, ModelPart p_117780_, boolean p_364227_) {
+    private void renderHand(PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, ResourceLocation pSkinTexture, ModelPart pArm, boolean pIsSleeveVisible) {
         PlayerModel playermodel = this.getModel();
-        p_117780_.resetPose();
-        p_117780_.visible = true;
-        playermodel.leftSleeve.visible = p_364227_;
-        playermodel.rightSleeve.visible = p_364227_;
+        pArm.resetPose();
+        pArm.visible = true;
+        playermodel.leftSleeve.visible = pIsSleeveVisible;
+        playermodel.rightSleeve.visible = pIsSleeveVisible;
         playermodel.leftArm.zRot = -0.1F;
         playermodel.rightArm.zRot = 0.1F;
-        p_117780_.render(p_117776_, p_117777_.getBuffer(RenderType.entityTranslucent(p_365409_)), p_117778_, OverlayTexture.NO_OVERLAY);
+        pArm.render(pPoseStack, pBufferSource.getBuffer(RenderType.entityTranslucent(pSkinTexture)), pPackedLight, OverlayTexture.NO_OVERLAY);
     }
 
     protected void setupRotations(PlayerRenderState p_369667_, PoseStack p_117803_, float p_117804_, float p_117805_) {

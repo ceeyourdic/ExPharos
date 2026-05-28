@@ -47,229 +47,229 @@ import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 public class EnchantmentHelper {
-    public static int getItemEnchantmentLevel(Holder<Enchantment> p_344652_, ItemStack p_44845_) {
-        ItemEnchantments itemenchantments = p_44845_.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
-        return itemenchantments.getLevel(p_344652_);
+    public static int getItemEnchantmentLevel(Holder<Enchantment> pEnchantment, ItemStack pStack) {
+        ItemEnchantments itemenchantments = pStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+        return itemenchantments.getLevel(pEnchantment);
     }
 
-    public static ItemEnchantments updateEnchantments(ItemStack p_333740_, Consumer<ItemEnchantments.Mutable> p_328467_) {
-        DataComponentType<ItemEnchantments> datacomponenttype = getComponentType(p_333740_);
-        ItemEnchantments itemenchantments = p_333740_.get(datacomponenttype);
+    public static ItemEnchantments updateEnchantments(ItemStack pStack, Consumer<ItemEnchantments.Mutable> pUpdater) {
+        DataComponentType<ItemEnchantments> datacomponenttype = getComponentType(pStack);
+        ItemEnchantments itemenchantments = pStack.get(datacomponenttype);
         if (itemenchantments == null) {
             return ItemEnchantments.EMPTY;
         } else {
             ItemEnchantments.Mutable itemenchantments$mutable = new ItemEnchantments.Mutable(itemenchantments);
-            p_328467_.accept(itemenchantments$mutable);
+            pUpdater.accept(itemenchantments$mutable);
             ItemEnchantments itemenchantments1 = itemenchantments$mutable.toImmutable();
-            p_333740_.set(datacomponenttype, itemenchantments1);
+            pStack.set(datacomponenttype, itemenchantments1);
             return itemenchantments1;
         }
     }
 
-    public static boolean canStoreEnchantments(ItemStack p_333572_) {
-        return p_333572_.has(getComponentType(p_333572_));
+    public static boolean canStoreEnchantments(ItemStack pStack) {
+        return pStack.has(getComponentType(pStack));
     }
 
-    public static void setEnchantments(ItemStack p_44867_, ItemEnchantments p_330134_) {
-        p_44867_.set(getComponentType(p_44867_), p_330134_);
+    public static void setEnchantments(ItemStack pStack, ItemEnchantments pEnchantments) {
+        pStack.set(getComponentType(pStack), pEnchantments);
     }
 
-    public static ItemEnchantments getEnchantmentsForCrafting(ItemStack p_335659_) {
-        return p_335659_.getOrDefault(getComponentType(p_335659_), ItemEnchantments.EMPTY);
+    public static ItemEnchantments getEnchantmentsForCrafting(ItemStack pStack) {
+        return pStack.getOrDefault(getComponentType(pStack), ItemEnchantments.EMPTY);
     }
 
-    private static DataComponentType<ItemEnchantments> getComponentType(ItemStack p_335414_) {
-        return p_335414_.is(Items.ENCHANTED_BOOK) ? DataComponents.STORED_ENCHANTMENTS : DataComponents.ENCHANTMENTS;
+    private static DataComponentType<ItemEnchantments> getComponentType(ItemStack pStack) {
+        return pStack.is(Items.ENCHANTED_BOOK) ? DataComponents.STORED_ENCHANTMENTS : DataComponents.ENCHANTMENTS;
     }
 
-    public static boolean hasAnyEnchantments(ItemStack p_335287_) {
-        return !p_335287_.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty()
-            || !p_335287_.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty();
+    public static boolean hasAnyEnchantments(ItemStack pStack) {
+        return !pStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty()
+            || !pStack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty();
     }
 
-    public static int processDurabilityChange(ServerLevel p_344040_, ItemStack p_345474_, int p_342600_) {
-        MutableFloat mutablefloat = new MutableFloat((float)p_342600_);
-        runIterationOnItem(p_345474_, (p_341764_, p_341765_) -> p_341764_.value().modifyDurabilityChange(p_344040_, p_341765_, p_345474_, mutablefloat));
+    public static int processDurabilityChange(ServerLevel pLevel, ItemStack pStack, int pDamage) {
+        MutableFloat mutablefloat = new MutableFloat((float)pDamage);
+        runIterationOnItem(pStack, (p_341764_, p_341765_) -> p_341764_.value().modifyDurabilityChange(pLevel, p_341765_, pStack, mutablefloat));
         return mutablefloat.intValue();
     }
 
-    public static int processAmmoUse(ServerLevel p_344585_, ItemStack p_344182_, ItemStack p_343578_, int p_342951_) {
-        MutableFloat mutablefloat = new MutableFloat((float)p_342951_);
-        runIterationOnItem(p_344182_, (p_341622_, p_341623_) -> p_341622_.value().modifyAmmoCount(p_344585_, p_341623_, p_343578_, mutablefloat));
+    public static int processAmmoUse(ServerLevel pLevel, ItemStack pWeapon, ItemStack pAmmo, int pCount) {
+        MutableFloat mutablefloat = new MutableFloat((float)pCount);
+        runIterationOnItem(pWeapon, (p_341622_, p_341623_) -> p_341622_.value().modifyAmmoCount(pLevel, p_341623_, pAmmo, mutablefloat));
         return mutablefloat.intValue();
     }
 
-    public static int processBlockExperience(ServerLevel p_343042_, ItemStack p_343624_, int p_342499_) {
-        MutableFloat mutablefloat = new MutableFloat((float)p_342499_);
-        runIterationOnItem(p_343624_, (p_341808_, p_341809_) -> p_341808_.value().modifyBlockExperience(p_343042_, p_341809_, p_343624_, mutablefloat));
+    public static int processBlockExperience(ServerLevel pLevel, ItemStack pStack, int pExperience) {
+        MutableFloat mutablefloat = new MutableFloat((float)pExperience);
+        runIterationOnItem(pStack, (p_341808_, p_341809_) -> p_341808_.value().modifyBlockExperience(pLevel, p_341809_, pStack, mutablefloat));
         return mutablefloat.intValue();
     }
 
-    public static int processMobExperience(ServerLevel p_343500_, @Nullable Entity p_345230_, Entity p_344218_, int p_342604_) {
-        if (p_345230_ instanceof LivingEntity livingentity) {
-            MutableFloat mutablefloat = new MutableFloat((float)p_342604_);
+    public static int processMobExperience(ServerLevel pLevel, @Nullable Entity pKiller, Entity pMob, int pExperience) {
+        if (pKiller instanceof LivingEntity livingentity) {
+            MutableFloat mutablefloat = new MutableFloat((float)pExperience);
             runIterationOnEquipment(
                 livingentity,
-                (p_341777_, p_341778_, p_341779_) -> p_341777_.value().modifyMobExperience(p_343500_, p_341778_, p_341779_.itemStack(), p_344218_, mutablefloat)
+                (p_341777_, p_341778_, p_341779_) -> p_341777_.value().modifyMobExperience(pLevel, p_341778_, p_341779_.itemStack(), pMob, mutablefloat)
             );
             return mutablefloat.intValue();
         } else {
-            return p_342604_;
+            return pExperience;
         }
     }
 
-    public static ItemStack createBook(EnchantmentInstance p_361083_) {
+    public static ItemStack createBook(EnchantmentInstance pEnchantmant) {
         ItemStack itemstack = new ItemStack(Items.ENCHANTED_BOOK);
-        itemstack.enchant(p_361083_.enchantment, p_361083_.level);
+        itemstack.enchant(pEnchantmant.enchantment, pEnchantmant.level);
         return itemstack;
     }
 
-    private static void runIterationOnItem(ItemStack p_343610_, EnchantmentHelper.EnchantmentVisitor p_342837_) {
-        ItemEnchantments itemenchantments = p_343610_.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+    private static void runIterationOnItem(ItemStack pStack, EnchantmentHelper.EnchantmentVisitor pVisitor) {
+        ItemEnchantments itemenchantments = pStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
 
         for (Entry<Holder<Enchantment>> entry : itemenchantments.entrySet()) {
-            p_342837_.accept(entry.getKey(), entry.getIntValue());
+            pVisitor.accept(entry.getKey(), entry.getIntValue());
         }
     }
 
-    private static void runIterationOnItem(ItemStack p_44852_, EquipmentSlot p_344793_, LivingEntity p_344959_, EnchantmentHelper.EnchantmentInSlotVisitor p_342058_) {
-        if (!p_44852_.isEmpty()) {
-            ItemEnchantments itemenchantments = p_44852_.get(DataComponents.ENCHANTMENTS);
+    private static void runIterationOnItem(ItemStack pStack, EquipmentSlot pSlot, LivingEntity pEntity, EnchantmentHelper.EnchantmentInSlotVisitor pVisitor) {
+        if (!pStack.isEmpty()) {
+            ItemEnchantments itemenchantments = pStack.get(DataComponents.ENCHANTMENTS);
             if (itemenchantments != null && !itemenchantments.isEmpty()) {
-                EnchantedItemInUse enchantediteminuse = new EnchantedItemInUse(p_44852_, p_344793_, p_344959_);
+                EnchantedItemInUse enchantediteminuse = new EnchantedItemInUse(pStack, pSlot, pEntity);
 
                 for (Entry<Holder<Enchantment>> entry : itemenchantments.entrySet()) {
                     Holder<Enchantment> holder = entry.getKey();
-                    if (holder.value().matchingSlot(p_344793_)) {
-                        p_342058_.accept(holder, entry.getIntValue(), enchantediteminuse);
+                    if (holder.value().matchingSlot(pSlot)) {
+                        pVisitor.accept(holder, entry.getIntValue(), enchantediteminuse);
                     }
                 }
             }
         }
     }
 
-    private static void runIterationOnEquipment(LivingEntity p_344171_, EnchantmentHelper.EnchantmentInSlotVisitor p_343067_) {
+    private static void runIterationOnEquipment(LivingEntity pEntity, EnchantmentHelper.EnchantmentInSlotVisitor pVisitor) {
         for (EquipmentSlot equipmentslot : EquipmentSlot.VALUES) {
-            runIterationOnItem(p_344171_.getItemBySlot(equipmentslot), equipmentslot, p_344171_, p_343067_);
+            runIterationOnItem(pEntity.getItemBySlot(equipmentslot), equipmentslot, pEntity, pVisitor);
         }
     }
 
-    public static boolean isImmuneToDamage(ServerLevel p_343151_, LivingEntity p_344523_, DamageSource p_343996_) {
+    public static boolean isImmuneToDamage(ServerLevel pLevel, LivingEntity pEntity, DamageSource pDamageSource) {
         MutableBoolean mutableboolean = new MutableBoolean();
         runIterationOnEquipment(
-            p_344523_,
+            pEntity,
             (p_341729_, p_341730_, p_341731_) -> mutableboolean.setValue(
-                    mutableboolean.isTrue() || p_341729_.value().isImmuneToDamage(p_343151_, p_341730_, p_344523_, p_343996_)
+                    mutableboolean.isTrue() || p_341729_.value().isImmuneToDamage(pLevel, p_341730_, pEntity, pDamageSource)
                 )
         );
         return mutableboolean.isTrue();
     }
 
-    public static float getDamageProtection(ServerLevel p_345416_, LivingEntity p_342248_, DamageSource p_44858_) {
+    public static float getDamageProtection(ServerLevel pLevel, LivingEntity pEntity, DamageSource pDamageSource) {
         MutableFloat mutablefloat = new MutableFloat(0.0F);
         runIterationOnEquipment(
-            p_342248_,
+            pEntity,
             (p_341717_, p_341718_, p_341719_) -> p_341717_.value()
-                    .modifyDamageProtection(p_345416_, p_341718_, p_341719_.itemStack(), p_342248_, p_44858_, mutablefloat)
+                    .modifyDamageProtection(pLevel, p_341718_, p_341719_.itemStack(), pEntity, pDamageSource, mutablefloat)
         );
         return mutablefloat.floatValue();
     }
 
-    public static float modifyDamage(ServerLevel p_343245_, ItemStack p_342430_, Entity p_344044_, DamageSource p_344705_, float p_344247_) {
-        MutableFloat mutablefloat = new MutableFloat(p_344247_);
-        runIterationOnItem(p_342430_, (p_341744_, p_341745_) -> p_341744_.value().modifyDamage(p_343245_, p_341745_, p_342430_, p_344044_, p_344705_, mutablefloat));
+    public static float modifyDamage(ServerLevel pLevel, ItemStack pTool, Entity pEntity, DamageSource pDamageSource, float pDamage) {
+        MutableFloat mutablefloat = new MutableFloat(pDamage);
+        runIterationOnItem(pTool, (p_341744_, p_341745_) -> p_341744_.value().modifyDamage(pLevel, p_341745_, pTool, pEntity, pDamageSource, mutablefloat));
         return mutablefloat.floatValue();
     }
 
-    public static float modifyFallBasedDamage(ServerLevel p_345393_, ItemStack p_344524_, Entity p_343535_, DamageSource p_343627_, float p_342940_) {
-        MutableFloat mutablefloat = new MutableFloat(p_342940_);
-        runIterationOnItem(p_344524_, (p_341771_, p_341772_) -> p_341771_.value().modifyFallBasedDamage(p_345393_, p_341772_, p_344524_, p_343535_, p_343627_, mutablefloat));
+    public static float modifyFallBasedDamage(ServerLevel pLevel, ItemStack pTool, Entity pEnity, DamageSource pDamageSource, float pFallBasedDamage) {
+        MutableFloat mutablefloat = new MutableFloat(pFallBasedDamage);
+        runIterationOnItem(pTool, (p_341771_, p_341772_) -> p_341771_.value().modifyFallBasedDamage(pLevel, p_341772_, pTool, pEnity, pDamageSource, mutablefloat));
         return mutablefloat.floatValue();
     }
 
-    public static float modifyArmorEffectiveness(ServerLevel p_345408_, ItemStack p_344868_, Entity p_345361_, DamageSource p_343275_, float p_345487_) {
-        MutableFloat mutablefloat = new MutableFloat(p_345487_);
-        runIterationOnItem(p_344868_, (p_341681_, p_341682_) -> p_341681_.value().modifyArmorEffectivness(p_345408_, p_341682_, p_344868_, p_345361_, p_343275_, mutablefloat));
+    public static float modifyArmorEffectiveness(ServerLevel pLevel, ItemStack pTool, Entity pEntity, DamageSource pDamageSource, float pArmorEffectiveness) {
+        MutableFloat mutablefloat = new MutableFloat(pArmorEffectiveness);
+        runIterationOnItem(pTool, (p_341681_, p_341682_) -> p_341681_.value().modifyArmorEffectivness(pLevel, p_341682_, pTool, pEntity, pDamageSource, mutablefloat));
         return mutablefloat.floatValue();
     }
 
-    public static float modifyKnockback(ServerLevel p_344591_, ItemStack p_345053_, Entity p_343711_, DamageSource p_344321_, float p_343554_) {
-        MutableFloat mutablefloat = new MutableFloat(p_343554_);
-        runIterationOnItem(p_345053_, (p_341790_, p_341791_) -> p_341790_.value().modifyKnockback(p_344591_, p_341791_, p_345053_, p_343711_, p_344321_, mutablefloat));
+    public static float modifyKnockback(ServerLevel pLevel, ItemStack pTool, Entity pEntity, DamageSource pDamageSource, float pKnockback) {
+        MutableFloat mutablefloat = new MutableFloat(pKnockback);
+        runIterationOnItem(pTool, (p_341790_, p_341791_) -> p_341790_.value().modifyKnockback(pLevel, p_341791_, pTool, pEntity, pDamageSource, mutablefloat));
         return mutablefloat.floatValue();
     }
 
-    public static void doPostAttackEffects(ServerLevel p_343618_, Entity p_343098_, DamageSource p_342187_) {
-        if (p_342187_.getEntity() instanceof LivingEntity livingentity) {
-            doPostAttackEffectsWithItemSource(p_343618_, p_343098_, p_342187_, livingentity.getWeaponItem());
+    public static void doPostAttackEffects(ServerLevel pLevel, Entity pEntity, DamageSource pDamageSource) {
+        if (pDamageSource.getEntity() instanceof LivingEntity livingentity) {
+            doPostAttackEffectsWithItemSource(pLevel, pEntity, pDamageSource, livingentity.getWeaponItem());
         } else {
-            doPostAttackEffectsWithItemSource(p_343618_, p_343098_, p_342187_, null);
+            doPostAttackEffectsWithItemSource(pLevel, pEntity, pDamageSource, null);
         }
     }
 
-    public static void doPostAttackEffectsWithItemSource(ServerLevel p_345038_, Entity p_342420_, DamageSource p_344777_, @Nullable ItemStack p_344587_) {
-        doPostAttackEffectsWithItemSourceOnBreak(p_345038_, p_342420_, p_344777_, p_344587_, null);
+    public static void doPostAttackEffectsWithItemSource(ServerLevel pLevel, Entity pEntity, DamageSource pDamageSource, @Nullable ItemStack pItemSource) {
+        doPostAttackEffectsWithItemSourceOnBreak(pLevel, pEntity, pDamageSource, pItemSource, null);
     }
 
     public static void doPostAttackEffectsWithItemSourceOnBreak(
-        ServerLevel p_366803_, Entity p_366526_, DamageSource p_361714_, @Nullable ItemStack p_361802_, @Nullable Consumer<Item> p_364917_
+        ServerLevel pLevel, Entity pEntity, DamageSource pDamageSource, @Nullable ItemStack pItemSource, @Nullable Consumer<Item> pOnBreak
     ) {
-        if (p_366526_ instanceof LivingEntity livingentity) {
+        if (pEntity instanceof LivingEntity livingentity) {
             runIterationOnEquipment(
                 livingentity,
                 (p_341753_, p_341754_, p_341755_) -> p_341753_.value()
-                        .doPostAttack(p_366803_, p_341754_, p_341755_, EnchantmentTarget.VICTIM, p_366526_, p_361714_)
+                        .doPostAttack(pLevel, p_341754_, p_341755_, EnchantmentTarget.VICTIM, pEntity, pDamageSource)
             );
         }
 
-        if (p_361802_ != null) {
-            if (p_361714_.getEntity() instanceof LivingEntity livingentity1) {
+        if (pItemSource != null) {
+            if (pDamageSource.getEntity() instanceof LivingEntity livingentity1) {
                 runIterationOnItem(
-                    p_361802_,
+                    pItemSource,
                     EquipmentSlot.MAINHAND,
                     livingentity1,
                     (p_341641_, p_341642_, p_341643_) -> p_341641_.value()
-                            .doPostAttack(p_366803_, p_341642_, p_341643_, EnchantmentTarget.ATTACKER, p_366526_, p_361714_)
+                            .doPostAttack(pLevel, p_341642_, p_341643_, EnchantmentTarget.ATTACKER, pEntity, pDamageSource)
                 );
-            } else if (p_364917_ != null) {
-                EnchantedItemInUse enchantediteminuse = new EnchantedItemInUse(p_361802_, null, null, p_364917_);
+            } else if (pOnBreak != null) {
+                EnchantedItemInUse enchantediteminuse = new EnchantedItemInUse(pItemSource, null, null, pOnBreak);
                 runIterationOnItem(
-                    p_361802_,
+                    pItemSource,
                     (p_359919_, p_359920_) -> p_359919_.value()
-                            .doPostAttack(p_366803_, p_359920_, enchantediteminuse, EnchantmentTarget.ATTACKER, p_366526_, p_361714_)
+                            .doPostAttack(pLevel, p_359920_, enchantediteminuse, EnchantmentTarget.ATTACKER, pEntity, pDamageSource)
                 );
             }
         }
     }
 
-    public static void runLocationChangedEffects(ServerLevel p_342390_, LivingEntity p_344486_) {
-        runIterationOnEquipment(p_344486_, (p_341602_, p_341603_, p_341604_) -> p_341602_.value().runLocationChangedEffects(p_342390_, p_341603_, p_341604_, p_344486_));
+    public static void runLocationChangedEffects(ServerLevel pLevel, LivingEntity pEntity) {
+        runIterationOnEquipment(pEntity, (p_341602_, p_341603_, p_341604_) -> p_341602_.value().runLocationChangedEffects(pLevel, p_341603_, p_341604_, pEntity));
     }
 
-    public static void runLocationChangedEffects(ServerLevel p_342666_, ItemStack p_342169_, LivingEntity p_343458_, EquipmentSlot p_344449_) {
+    public static void runLocationChangedEffects(ServerLevel pLevel, ItemStack pStack, LivingEntity pEntity, EquipmentSlot pSlot) {
         runIterationOnItem(
-            p_342169_, p_344449_, p_343458_, (p_341794_, p_341795_, p_341796_) -> p_341794_.value().runLocationChangedEffects(p_342666_, p_341795_, p_341796_, p_343458_)
+            pStack, pSlot, pEntity, (p_341794_, p_341795_, p_341796_) -> p_341794_.value().runLocationChangedEffects(pLevel, p_341795_, p_341796_, pEntity)
         );
     }
 
-    public static void stopLocationBasedEffects(LivingEntity p_342428_) {
-        runIterationOnEquipment(p_342428_, (p_341606_, p_341607_, p_341608_) -> p_341606_.value().stopLocationBasedEffects(p_341607_, p_341608_, p_342428_));
+    public static void stopLocationBasedEffects(LivingEntity pEntity) {
+        runIterationOnEquipment(pEntity, (p_341606_, p_341607_, p_341608_) -> p_341606_.value().stopLocationBasedEffects(p_341607_, p_341608_, pEntity));
     }
 
-    public static void stopLocationBasedEffects(ItemStack p_343782_, LivingEntity p_342864_, EquipmentSlot p_342427_) {
-        runIterationOnItem(p_343782_, p_342427_, p_342864_, (p_341625_, p_341626_, p_341627_) -> p_341625_.value().stopLocationBasedEffects(p_341626_, p_341627_, p_342864_));
+    public static void stopLocationBasedEffects(ItemStack pStack, LivingEntity pEntity, EquipmentSlot pSlot) {
+        runIterationOnItem(pStack, pSlot, pEntity, (p_341625_, p_341626_, p_341627_) -> p_341625_.value().stopLocationBasedEffects(p_341626_, p_341627_, pEntity));
     }
 
-    public static void tickEffects(ServerLevel p_344571_, LivingEntity p_343172_) {
-        runIterationOnEquipment(p_343172_, (p_341782_, p_341783_, p_341784_) -> p_341782_.value().tick(p_344571_, p_341783_, p_341784_, p_343172_));
+    public static void tickEffects(ServerLevel pLevel, LivingEntity pEntity) {
+        runIterationOnEquipment(pEntity, (p_341782_, p_341783_, p_341784_) -> p_341782_.value().tick(pLevel, p_341783_, p_341784_, pEntity));
     }
 
-    public static int getEnchantmentLevel(Holder<Enchantment> p_342592_, LivingEntity p_44838_) {
-        Iterable<ItemStack> iterable = p_342592_.value().getSlotItems(p_44838_).values();
+    public static int getEnchantmentLevel(Holder<Enchantment> pEnchantment, LivingEntity pEntity) {
+        Iterable<ItemStack> iterable = pEnchantment.value().getSlotItems(pEntity).values();
         int i = 0;
 
         for (ItemStack itemstack : iterable) {
-            int j = getItemEnchantmentLevel(p_342592_, itemstack);
+            int j = getItemEnchantmentLevel(pEnchantment, itemstack);
             if (j > i) {
                 i = j;
             }
@@ -278,59 +278,59 @@ public class EnchantmentHelper {
         return i;
     }
 
-    public static int processProjectileCount(ServerLevel p_344575_, ItemStack p_345314_, Entity p_343374_, int p_343111_) {
-        MutableFloat mutablefloat = new MutableFloat((float)p_343111_);
-        runIterationOnItem(p_345314_, (p_341617_, p_341618_) -> p_341617_.value().modifyProjectileCount(p_344575_, p_341618_, p_345314_, p_343374_, mutablefloat));
+    public static int processProjectileCount(ServerLevel pLevel, ItemStack pTool, Entity pEntity, int pProjectileCount) {
+        MutableFloat mutablefloat = new MutableFloat((float)pProjectileCount);
+        runIterationOnItem(pTool, (p_341617_, p_341618_) -> p_341617_.value().modifyProjectileCount(pLevel, p_341618_, pTool, pEntity, mutablefloat));
         return Math.max(0, mutablefloat.intValue());
     }
 
-    public static float processProjectileSpread(ServerLevel p_342105_, ItemStack p_345162_, Entity p_343316_, float p_342659_) {
-        MutableFloat mutablefloat = new MutableFloat(p_342659_);
-        runIterationOnItem(p_345162_, (p_341674_, p_341675_) -> p_341674_.value().modifyProjectileSpread(p_342105_, p_341675_, p_345162_, p_343316_, mutablefloat));
+    public static float processProjectileSpread(ServerLevel pLevel, ItemStack pTool, Entity pEntity, float pProjectileSpread) {
+        MutableFloat mutablefloat = new MutableFloat(pProjectileSpread);
+        runIterationOnItem(pTool, (p_341674_, p_341675_) -> p_341674_.value().modifyProjectileSpread(pLevel, p_341675_, pTool, pEntity, mutablefloat));
         return Math.max(0.0F, mutablefloat.floatValue());
     }
 
-    public static int getPiercingCount(ServerLevel p_343271_, ItemStack p_345451_, ItemStack p_343657_) {
+    public static int getPiercingCount(ServerLevel pLevel, ItemStack pFiredFromWeapon, ItemStack pPickupItemStack) {
         MutableFloat mutablefloat = new MutableFloat(0.0F);
-        runIterationOnItem(p_345451_, (p_341723_, p_341724_) -> p_341723_.value().modifyPiercingCount(p_343271_, p_341724_, p_343657_, mutablefloat));
+        runIterationOnItem(pFiredFromWeapon, (p_341723_, p_341724_) -> p_341723_.value().modifyPiercingCount(pLevel, p_341724_, pPickupItemStack, mutablefloat));
         return Math.max(0, mutablefloat.intValue());
     }
 
-    public static void onProjectileSpawned(ServerLevel p_343338_, ItemStack p_344853_, Projectile p_367369_, Consumer<Item> p_345317_) {
-        LivingEntity livingentity = p_367369_.getOwner() instanceof LivingEntity livingentity1 ? livingentity1 : null;
-        EnchantedItemInUse enchantediteminuse = new EnchantedItemInUse(p_344853_, null, livingentity, p_345317_);
-        runIterationOnItem(p_344853_, (p_341759_, p_341760_) -> p_341759_.value().onProjectileSpawned(p_343338_, p_341760_, enchantediteminuse, p_367369_));
+    public static void onProjectileSpawned(ServerLevel pLevel, ItemStack pFiredFromWeapon, Projectile pProjectile, Consumer<Item> pOnBreak) {
+        LivingEntity livingentity = pProjectile.getOwner() instanceof LivingEntity livingentity1 ? livingentity1 : null;
+        EnchantedItemInUse enchantediteminuse = new EnchantedItemInUse(pFiredFromWeapon, null, livingentity, pOnBreak);
+        runIterationOnItem(pFiredFromWeapon, (p_341759_, p_341760_) -> p_341759_.value().onProjectileSpawned(pLevel, p_341760_, enchantediteminuse, pProjectile));
     }
 
     public static void onHitBlock(
-        ServerLevel p_344864_,
-        ItemStack p_342595_,
-        @Nullable LivingEntity p_345505_,
-        Entity p_345420_,
-        @Nullable EquipmentSlot p_343177_,
-        Vec3 p_343033_,
-        BlockState p_343989_,
-        Consumer<Item> p_344574_
+        ServerLevel pLevel,
+        ItemStack pStack,
+        @Nullable LivingEntity pOwner,
+        Entity pEntity,
+        @Nullable EquipmentSlot pSlot,
+        Vec3 pPos,
+        BlockState pState,
+        Consumer<Item> pOnBreak
     ) {
-        EnchantedItemInUse enchantediteminuse = new EnchantedItemInUse(p_342595_, p_343177_, p_345505_, p_344574_);
+        EnchantedItemInUse enchantediteminuse = new EnchantedItemInUse(pStack, pSlot, pOwner, pOnBreak);
         runIterationOnItem(
-            p_342595_, (p_341663_, p_341664_) -> p_341663_.value().onHitBlock(p_344864_, p_341664_, enchantediteminuse, p_345420_, p_343033_, p_343989_)
+            pStack, (p_341663_, p_341664_) -> p_341663_.value().onHitBlock(pLevel, p_341664_, enchantediteminuse, pEntity, pPos, pState)
         );
     }
 
-    public static int modifyDurabilityToRepairFromXp(ServerLevel p_345080_, ItemStack p_343144_, int p_342792_) {
-        MutableFloat mutablefloat = new MutableFloat((float)p_342792_);
-        runIterationOnItem(p_343144_, (p_341656_, p_341657_) -> p_341656_.value().modifyDurabilityToRepairFromXp(p_345080_, p_341657_, p_343144_, mutablefloat));
+    public static int modifyDurabilityToRepairFromXp(ServerLevel pLevel, ItemStack pStack, int pDuabilityToRepairFromXp) {
+        MutableFloat mutablefloat = new MutableFloat((float)pDuabilityToRepairFromXp);
+        runIterationOnItem(pStack, (p_341656_, p_341657_) -> p_341656_.value().modifyDurabilityToRepairFromXp(pLevel, p_341657_, pStack, mutablefloat));
         return Math.max(0, mutablefloat.intValue());
     }
 
-    public static float processEquipmentDropChance(ServerLevel p_342296_, LivingEntity p_342126_, DamageSource p_344732_, float p_343626_) {
-        MutableFloat mutablefloat = new MutableFloat(p_343626_);
-        RandomSource randomsource = p_342126_.getRandom();
+    public static float processEquipmentDropChance(ServerLevel pLevel, LivingEntity pEntity, DamageSource pDamageSource, float pEquipmentDropChance) {
+        MutableFloat mutablefloat = new MutableFloat(pEquipmentDropChance);
+        RandomSource randomsource = pEntity.getRandom();
         runIterationOnEquipment(
-            p_342126_,
+            pEntity,
             (p_341693_, p_341694_, p_341695_) -> {
-                LootContext lootcontext = Enchantment.damageContext(p_342296_, p_341694_, p_342126_, p_344732_);
+                LootContext lootcontext = Enchantment.damageContext(pLevel, p_341694_, pEntity, pDamageSource);
                 p_341693_.value()
                     .getEffects(EnchantmentEffectComponents.EQUIPMENT_DROPS)
                     .forEach(
@@ -344,11 +344,11 @@ public class EnchantmentHelper {
                     );
             }
         );
-        if (p_344732_.getEntity() instanceof LivingEntity livingentity) {
+        if (pDamageSource.getEntity() instanceof LivingEntity livingentity) {
             runIterationOnEquipment(
                 livingentity,
                 (p_341650_, p_341651_, p_341652_) -> {
-                    LootContext lootcontext = Enchantment.damageContext(p_342296_, p_341651_, p_342126_, p_344732_);
+                    LootContext lootcontext = Enchantment.damageContext(pLevel, p_341651_, pEntity, pDamageSource);
                     p_341650_.value()
                         .getEffects(EnchantmentEffectComponents.EQUIPMENT_DROPS)
                         .forEach(
@@ -367,58 +367,58 @@ public class EnchantmentHelper {
         return mutablefloat.floatValue();
     }
 
-    public static void forEachModifier(ItemStack p_344460_, EquipmentSlotGroup p_343938_, BiConsumer<Holder<Attribute>, AttributeModifier> p_345426_) {
-        runIterationOnItem(p_344460_, (p_341748_, p_341749_) -> p_341748_.value().getEffects(EnchantmentEffectComponents.ATTRIBUTES).forEach(p_341738_ -> {
-                if (((Enchantment)p_341748_.value()).definition().slots().contains(p_343938_)) {
-                    p_345426_.accept(p_341738_.attribute(), p_341738_.getModifier(p_341749_, p_343938_));
+    public static void forEachModifier(ItemStack pStack, EquipmentSlotGroup pSlotGroup, BiConsumer<Holder<Attribute>, AttributeModifier> pAction) {
+        runIterationOnItem(pStack, (p_341748_, p_341749_) -> p_341748_.value().getEffects(EnchantmentEffectComponents.ATTRIBUTES).forEach(p_341738_ -> {
+                if (((Enchantment)p_341748_.value()).definition().slots().contains(pSlotGroup)) {
+                    pAction.accept(p_341738_.attribute(), p_341738_.getModifier(p_341749_, pSlotGroup));
                 }
             }));
     }
 
-    public static void forEachModifier(ItemStack p_343035_, EquipmentSlot p_342305_, BiConsumer<Holder<Attribute>, AttributeModifier> p_342639_) {
-        runIterationOnItem(p_343035_, (p_341598_, p_341599_) -> p_341598_.value().getEffects(EnchantmentEffectComponents.ATTRIBUTES).forEach(p_341804_ -> {
-                if (((Enchantment)p_341598_.value()).matchingSlot(p_342305_)) {
-                    p_342639_.accept(p_341804_.attribute(), p_341804_.getModifier(p_341599_, p_342305_));
+    public static void forEachModifier(ItemStack pStack, EquipmentSlot pSlot, BiConsumer<Holder<Attribute>, AttributeModifier> pAction) {
+        runIterationOnItem(pStack, (p_341598_, p_341599_) -> p_341598_.value().getEffects(EnchantmentEffectComponents.ATTRIBUTES).forEach(p_341804_ -> {
+                if (((Enchantment)p_341598_.value()).matchingSlot(pSlot)) {
+                    pAction.accept(p_341804_.attribute(), p_341804_.getModifier(p_341599_, pSlot));
                 }
             }));
     }
 
-    public static int getFishingLuckBonus(ServerLevel p_345183_, ItemStack p_44905_, Entity p_344199_) {
+    public static int getFishingLuckBonus(ServerLevel pLevel, ItemStack pStack, Entity pEntity) {
         MutableFloat mutablefloat = new MutableFloat(0.0F);
-        runIterationOnItem(p_44905_, (p_341704_, p_341705_) -> p_341704_.value().modifyFishingLuckBonus(p_345183_, p_341705_, p_44905_, p_344199_, mutablefloat));
+        runIterationOnItem(pStack, (p_341704_, p_341705_) -> p_341704_.value().modifyFishingLuckBonus(pLevel, p_341705_, pStack, pEntity, mutablefloat));
         return Math.max(0, mutablefloat.intValue());
     }
 
-    public static float getFishingTimeReduction(ServerLevel p_344336_, ItemStack p_343914_, Entity p_342898_) {
+    public static float getFishingTimeReduction(ServerLevel pLevel, ItemStack pStack, Entity pEntity) {
         MutableFloat mutablefloat = new MutableFloat(0.0F);
-        runIterationOnItem(p_343914_, (p_341814_, p_341815_) -> p_341814_.value().modifyFishingTimeReduction(p_344336_, p_341815_, p_343914_, p_342898_, mutablefloat));
+        runIterationOnItem(pStack, (p_341814_, p_341815_) -> p_341814_.value().modifyFishingTimeReduction(pLevel, p_341815_, pStack, pEntity, mutablefloat));
         return Math.max(0.0F, mutablefloat.floatValue());
     }
 
-    public static int getTridentReturnToOwnerAcceleration(ServerLevel p_342510_, ItemStack p_342608_, Entity p_343773_) {
+    public static int getTridentReturnToOwnerAcceleration(ServerLevel pLevel, ItemStack pStack, Entity pEntity) {
         MutableFloat mutablefloat = new MutableFloat(0.0F);
-        runIterationOnItem(p_342608_, (p_341632_, p_341633_) -> p_341632_.value().modifyTridentReturnToOwnerAcceleration(p_342510_, p_341633_, p_342608_, p_343773_, mutablefloat));
+        runIterationOnItem(pStack, (p_341632_, p_341633_) -> p_341632_.value().modifyTridentReturnToOwnerAcceleration(pLevel, p_341633_, pStack, pEntity, mutablefloat));
         return Math.max(0, mutablefloat.intValue());
     }
 
-    public static float modifyCrossbowChargingTime(ItemStack p_344573_, LivingEntity p_343136_, float p_343873_) {
-        MutableFloat mutablefloat = new MutableFloat(p_343873_);
-        runIterationOnItem(p_344573_, (p_375309_, p_375310_) -> p_375309_.value().modifyCrossbowChargeTime(p_343136_.getRandom(), p_375310_, mutablefloat));
+    public static float modifyCrossbowChargingTime(ItemStack pStack, LivingEntity pEntity, float pCrossbowChargingTime) {
+        MutableFloat mutablefloat = new MutableFloat(pCrossbowChargingTime);
+        runIterationOnItem(pStack, (p_375309_, p_375310_) -> p_375309_.value().modifyCrossbowChargeTime(pEntity.getRandom(), p_375310_, mutablefloat));
         return Math.max(0.0F, mutablefloat.floatValue());
     }
 
-    public static float getTridentSpinAttackStrength(ItemStack p_345397_, LivingEntity p_342067_) {
+    public static float getTridentSpinAttackStrength(ItemStack pStack, LivingEntity pEntity) {
         MutableFloat mutablefloat = new MutableFloat(0.0F);
-        runIterationOnItem(p_345397_, (p_375305_, p_375306_) -> p_375305_.value().modifyTridentSpinAttackStrength(p_342067_.getRandom(), p_375306_, mutablefloat));
+        runIterationOnItem(pStack, (p_375305_, p_375306_) -> p_375305_.value().modifyTridentSpinAttackStrength(pEntity.getRandom(), p_375306_, mutablefloat));
         return mutablefloat.floatValue();
     }
 
-    public static boolean hasTag(ItemStack p_344479_, TagKey<Enchantment> p_343396_) {
-        ItemEnchantments itemenchantments = p_344479_.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+    public static boolean hasTag(ItemStack pStack, TagKey<Enchantment> pTag) {
+        ItemEnchantments itemenchantments = pStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
 
         for (Entry<Holder<Enchantment>> entry : itemenchantments.entrySet()) {
             Holder<Enchantment> holder = entry.getKey();
-            if (holder.is(p_343396_)) {
+            if (holder.is(pTag)) {
                 return true;
             }
         }
@@ -426,18 +426,18 @@ public class EnchantmentHelper {
         return false;
     }
 
-    public static boolean has(ItemStack p_345483_, DataComponentType<?> p_344623_) {
+    public static boolean has(ItemStack pStack, DataComponentType<?> pComponentType) {
         MutableBoolean mutableboolean = new MutableBoolean(false);
-        runIterationOnItem(p_345483_, (p_341711_, p_341712_) -> {
-            if (p_341711_.value().effects().has(p_344623_)) {
+        runIterationOnItem(pStack, (p_341711_, p_341712_) -> {
+            if (p_341711_.value().effects().has(pComponentType)) {
                 mutableboolean.setTrue();
             }
         });
         return mutableboolean.booleanValue();
     }
 
-    public static <T> Optional<T> pickHighestLevel(ItemStack p_343484_, DataComponentType<List<T>> p_342070_) {
-        Pair<List<T>, Integer> pair = getHighestLevel(p_343484_, p_342070_);
+    public static <T> Optional<T> pickHighestLevel(ItemStack pStack, DataComponentType<List<T>> pComponentType) {
+        Pair<List<T>, Integer> pair = getHighestLevel(pStack, pComponentType);
         if (pair != null) {
             List<T> list = pair.getFirst();
             int i = pair.getSecond();
@@ -448,11 +448,11 @@ public class EnchantmentHelper {
     }
 
     @Nullable
-    public static <T> Pair<T, Integer> getHighestLevel(ItemStack p_345335_, DataComponentType<T> p_344437_) {
+    public static <T> Pair<T, Integer> getHighestLevel(ItemStack pStack, DataComponentType<T> pComponentType) {
         MutableObject<Pair<T, Integer>> mutableobject = new MutableObject<>();
-        runIterationOnItem(p_345335_, (p_341636_, p_341637_) -> {
+        runIterationOnItem(pStack, (p_341636_, p_341637_) -> {
             if (mutableobject.getValue() == null || mutableobject.getValue().getSecond() < p_341637_) {
-                T t = p_341636_.value().effects().get(p_344437_);
+                T t = p_341636_.value().effects().get(pComponentType);
                 if (t != null) {
                     mutableobject.setValue(Pair.of(t, p_341637_));
                 }
@@ -461,83 +461,83 @@ public class EnchantmentHelper {
         return mutableobject.getValue();
     }
 
-    public static Optional<EnchantedItemInUse> getRandomItemWith(DataComponentType<?> p_345106_, LivingEntity p_44908_, Predicate<ItemStack> p_345112_) {
+    public static Optional<EnchantedItemInUse> getRandomItemWith(DataComponentType<?> pComponentType, LivingEntity pEntity, Predicate<ItemStack> pFilter) {
         List<EnchantedItemInUse> list = new ArrayList<>();
 
         for (EquipmentSlot equipmentslot : EquipmentSlot.VALUES) {
-            ItemStack itemstack = p_44908_.getItemBySlot(equipmentslot);
-            if (p_345112_.test(itemstack)) {
+            ItemStack itemstack = pEntity.getItemBySlot(equipmentslot);
+            if (pFilter.test(itemstack)) {
                 ItemEnchantments itemenchantments = itemstack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
 
                 for (Entry<Holder<Enchantment>> entry : itemenchantments.entrySet()) {
                     Holder<Enchantment> holder = entry.getKey();
-                    if (holder.value().effects().has(p_345106_) && holder.value().matchingSlot(equipmentslot)) {
-                        list.add(new EnchantedItemInUse(itemstack, equipmentslot, p_44908_));
+                    if (holder.value().effects().has(pComponentType) && holder.value().matchingSlot(equipmentslot)) {
+                        list.add(new EnchantedItemInUse(itemstack, equipmentslot, pEntity));
                     }
                 }
             }
         }
 
-        return Util.getRandomSafe(list, p_44908_.getRandom());
+        return Util.getRandomSafe(list, pEntity.getRandom());
     }
 
-    public static int getEnchantmentCost(RandomSource p_220288_, int p_220289_, int p_220290_, ItemStack p_220291_) {
-        Enchantable enchantable = p_220291_.get(DataComponents.ENCHANTABLE);
+    public static int getEnchantmentCost(RandomSource pRandom, int pEnchantNum, int pPower, ItemStack pStack) {
+        Enchantable enchantable = pStack.get(DataComponents.ENCHANTABLE);
         if (enchantable == null) {
             return 0;
         } else {
-            if (p_220290_ > 15) {
-                p_220290_ = 15;
+            if (pPower > 15) {
+                pPower = 15;
             }
 
-            int i = p_220288_.nextInt(8) + 1 + (p_220290_ >> 1) + p_220288_.nextInt(p_220290_ + 1);
-            if (p_220289_ == 0) {
+            int i = pRandom.nextInt(8) + 1 + (pPower >> 1) + pRandom.nextInt(pPower + 1);
+            if (pEnchantNum == 0) {
                 return Math.max(i / 3, 1);
             } else {
-                return p_220289_ == 1 ? i * 2 / 3 + 1 : Math.max(i, p_220290_ * 2);
+                return pEnchantNum == 1 ? i * 2 / 3 + 1 : Math.max(i, pPower * 2);
             }
         }
     }
 
     public static ItemStack enchantItem(
-        RandomSource p_344212_, ItemStack p_345193_, int p_344120_, RegistryAccess p_345399_, Optional<? extends HolderSet<Enchantment>> p_342141_
+        RandomSource pRandom, ItemStack pStack, int pLevel, RegistryAccess pRegistryAccess, Optional<? extends HolderSet<Enchantment>> pPossibleEnchantments
     ) {
         return enchantItem(
-            p_344212_,
-            p_345193_,
-            p_344120_,
-            p_342141_.map(HolderSet::stream)
-                .orElseGet(() -> p_345399_.lookupOrThrow(Registries.ENCHANTMENT).listElements().map(p_341773_ -> (Holder<Enchantment>)p_341773_))
+            pRandom,
+            pStack,
+            pLevel,
+            pPossibleEnchantments.map(HolderSet::stream)
+                .orElseGet(() -> pRegistryAccess.lookupOrThrow(Registries.ENCHANTMENT).listElements().map(p_341773_ -> (Holder<Enchantment>)p_341773_))
         );
     }
 
-    public static ItemStack enchantItem(RandomSource p_220293_, ItemStack p_220294_, int p_220295_, Stream<Holder<Enchantment>> p_344664_) {
-        List<EnchantmentInstance> list = selectEnchantment(p_220293_, p_220294_, p_220295_, p_344664_);
-        if (p_220294_.is(Items.BOOK)) {
-            p_220294_ = new ItemStack(Items.ENCHANTED_BOOK);
+    public static ItemStack enchantItem(RandomSource pRandom, ItemStack pStack, int pLevel, Stream<Holder<Enchantment>> pPossibleEnchantments) {
+        List<EnchantmentInstance> list = selectEnchantment(pRandom, pStack, pLevel, pPossibleEnchantments);
+        if (pStack.is(Items.BOOK)) {
+            pStack = new ItemStack(Items.ENCHANTED_BOOK);
         }
 
         for (EnchantmentInstance enchantmentinstance : list) {
-            p_220294_.enchant(enchantmentinstance.enchantment, enchantmentinstance.level);
+            pStack.enchant(enchantmentinstance.enchantment, enchantmentinstance.level);
         }
 
-        return p_220294_;
+        return pStack;
     }
 
-    public static List<EnchantmentInstance> selectEnchantment(RandomSource p_220298_, ItemStack p_220299_, int p_220300_, Stream<Holder<Enchantment>> p_342119_) {
+    public static List<EnchantmentInstance> selectEnchantment(RandomSource pRandom, ItemStack pStack, int pLevel, Stream<Holder<Enchantment>> pPossibleEnchantments) {
         List<EnchantmentInstance> list = Lists.newArrayList();
-        Enchantable enchantable = p_220299_.get(DataComponents.ENCHANTABLE);
+        Enchantable enchantable = pStack.get(DataComponents.ENCHANTABLE);
         if (enchantable == null) {
             return list;
         } else {
-            p_220300_ += 1 + p_220298_.nextInt(enchantable.value() / 4 + 1) + p_220298_.nextInt(enchantable.value() / 4 + 1);
-            float f = (p_220298_.nextFloat() + p_220298_.nextFloat() - 1.0F) * 0.15F;
-            p_220300_ = Mth.clamp(Math.round((float)p_220300_ + (float)p_220300_ * f), 1, Integer.MAX_VALUE);
-            List<EnchantmentInstance> list1 = getAvailableEnchantmentResults(p_220300_, p_220299_, p_342119_);
+            pLevel += 1 + pRandom.nextInt(enchantable.value() / 4 + 1) + pRandom.nextInt(enchantable.value() / 4 + 1);
+            float f = (pRandom.nextFloat() + pRandom.nextFloat() - 1.0F) * 0.15F;
+            pLevel = Mth.clamp(Math.round((float)pLevel + (float)pLevel * f), 1, Integer.MAX_VALUE);
+            List<EnchantmentInstance> list1 = getAvailableEnchantmentResults(pLevel, pStack, pPossibleEnchantments);
             if (!list1.isEmpty()) {
-                WeightedRandom.getRandomItem(p_220298_, list1).ifPresent(list::add);
+                WeightedRandom.getRandomItem(pRandom, list1).ifPresent(list::add);
 
-                while (p_220298_.nextInt(50) <= p_220300_) {
+                while (pRandom.nextInt(50) <= pLevel) {
                     if (!list.isEmpty()) {
                         filterCompatibleEnchantments(list1, Util.lastOf(list));
                     }
@@ -546,8 +546,8 @@ public class EnchantmentHelper {
                         break;
                     }
 
-                    WeightedRandom.getRandomItem(p_220298_, list1).ifPresent(list::add);
-                    p_220300_ /= 2;
+                    WeightedRandom.getRandomItem(pRandom, list1).ifPresent(list::add);
+                    pLevel /= 2;
                 }
             }
 
@@ -555,13 +555,13 @@ public class EnchantmentHelper {
         }
     }
 
-    public static void filterCompatibleEnchantments(List<EnchantmentInstance> p_44863_, EnchantmentInstance p_44864_) {
-        p_44863_.removeIf(p_341733_ -> !Enchantment.areCompatible(p_44864_.enchantment, p_341733_.enchantment));
+    public static void filterCompatibleEnchantments(List<EnchantmentInstance> pDataList, EnchantmentInstance pData) {
+        pDataList.removeIf(p_341733_ -> !Enchantment.areCompatible(pData.enchantment, p_341733_.enchantment));
     }
 
-    public static boolean isEnchantmentCompatible(Collection<Holder<Enchantment>> p_44860_, Holder<Enchantment> p_345339_) {
-        for (Holder<Enchantment> holder : p_44860_) {
-            if (!Enchantment.areCompatible(holder, p_345339_)) {
+    public static boolean isEnchantmentCompatible(Collection<Holder<Enchantment>> pCurrentEnchantments, Holder<Enchantment> pNewEnchantment) {
+        for (Holder<Enchantment> holder : pCurrentEnchantments) {
+            if (!Enchantment.areCompatible(holder, pNewEnchantment)) {
                 return false;
             }
         }
@@ -569,14 +569,14 @@ public class EnchantmentHelper {
         return true;
     }
 
-    public static List<EnchantmentInstance> getAvailableEnchantmentResults(int p_44818_, ItemStack p_44819_, Stream<Holder<Enchantment>> p_342857_) {
+    public static List<EnchantmentInstance> getAvailableEnchantmentResults(int pLevel, ItemStack pStack, Stream<Holder<Enchantment>> pPossibleEnchantments) {
         List<EnchantmentInstance> list = Lists.newArrayList();
-        boolean flag = p_44819_.is(Items.BOOK);
-        p_342857_.filter(p_341799_ -> p_341799_.value().isPrimaryItem(p_44819_) || flag).forEach(p_341708_ -> {
+        boolean flag = pStack.is(Items.BOOK);
+        pPossibleEnchantments.filter(p_341799_ -> p_341799_.value().isPrimaryItem(pStack) || flag).forEach(p_341708_ -> {
             Enchantment enchantment = p_341708_.value();
 
             for (int i = enchantment.getMaxLevel(); i >= enchantment.getMinLevel(); i--) {
-                if (p_44818_ >= enchantment.getMinCost(i) && p_44818_ <= enchantment.getMaxCost(i)) {
+                if (pLevel >= enchantment.getMinCost(i) && pLevel <= enchantment.getMaxCost(i)) {
                     list.add(new EnchantmentInstance((Holder<Enchantment>)p_341708_, i));
                     break;
                 }
@@ -586,21 +586,21 @@ public class EnchantmentHelper {
     }
 
     public static void enchantItemFromProvider(
-        ItemStack p_344649_, RegistryAccess p_345511_, ResourceKey<EnchantmentProvider> p_342294_, DifficultyInstance p_343182_, RandomSource p_344701_
+        ItemStack pStack, RegistryAccess pRegistries, ResourceKey<EnchantmentProvider> pKey, DifficultyInstance pDifficulty, RandomSource pRandom
     ) {
-        EnchantmentProvider enchantmentprovider = p_345511_.lookupOrThrow(Registries.ENCHANTMENT_PROVIDER).getValue(p_342294_);
+        EnchantmentProvider enchantmentprovider = pRegistries.lookupOrThrow(Registries.ENCHANTMENT_PROVIDER).getValue(pKey);
         if (enchantmentprovider != null) {
-            updateEnchantments(p_344649_, p_341687_ -> enchantmentprovider.enchant(p_344649_, p_341687_, p_344701_, p_343182_));
+            updateEnchantments(pStack, p_341687_ -> enchantmentprovider.enchant(pStack, p_341687_, pRandom, pDifficulty));
         }
     }
 
     @FunctionalInterface
     interface EnchantmentInSlotVisitor {
-        void accept(Holder<Enchantment> p_342332_, int p_344522_, EnchantedItemInUse p_342472_);
+        void accept(Holder<Enchantment> pEnchantment, int pLevel, EnchantedItemInUse pItem);
     }
 
     @FunctionalInterface
     interface EnchantmentVisitor {
-        void accept(Holder<Enchantment> p_344975_, int p_44946_);
+        void accept(Holder<Enchantment> pEnchantment, int pLevel);
     }
 }

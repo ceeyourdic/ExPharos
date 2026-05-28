@@ -35,10 +35,10 @@ public class PlayerSkinWidget extends AbstractWidget {
     private float rotationX = -5.0F;
     private float rotationY = 30.0F;
 
-    public PlayerSkinWidget(int p_299990_, int p_297411_, EntityModelSet p_298438_, Supplier<PlayerSkin> p_299497_) {
-        super(0, 0, p_299990_, p_297411_, CommonComponents.EMPTY);
-        this.model = PlayerSkinWidget.Model.bake(p_298438_);
-        this.skin = p_299497_;
+    public PlayerSkinWidget(int pWidth, int pHeight, EntityModelSet pModel, Supplier<PlayerSkin> pSkin) {
+        super(0, 0, pWidth, pHeight, CommonComponents.EMPTY);
+        this.model = PlayerSkinWidget.Model.bake(pModel);
+        this.skin = pSkin;
     }
 
     @Override
@@ -85,20 +85,20 @@ public class PlayerSkinWidget extends AbstractWidget {
 
     @OnlyIn(Dist.CLIENT)
     static record Model(PlayerModel wideModel, PlayerModel slimModel) {
-        public static PlayerSkinWidget.Model bake(EntityModelSet p_300414_) {
-            PlayerModel playermodel = new PlayerModel(p_300414_.bakeLayer(ModelLayers.PLAYER), false);
-            PlayerModel playermodel1 = new PlayerModel(p_300414_.bakeLayer(ModelLayers.PLAYER_SLIM), true);
+        public static PlayerSkinWidget.Model bake(EntityModelSet pModel) {
+            PlayerModel playermodel = new PlayerModel(pModel.bakeLayer(ModelLayers.PLAYER), false);
+            PlayerModel playermodel1 = new PlayerModel(pModel.bakeLayer(ModelLayers.PLAYER_SLIM), true);
             return new PlayerSkinWidget.Model(playermodel, playermodel1);
         }
 
-        public void render(GuiGraphics p_299673_, PlayerSkin p_297884_) {
-            p_299673_.pose().pushPose();
-            p_299673_.pose().scale(1.0F, 1.0F, -1.0F);
-            p_299673_.pose().translate(0.0F, -1.501F, 0.0F);
-            PlayerModel playermodel = p_297884_.model() == PlayerSkin.Model.SLIM ? this.slimModel : this.wideModel;
-            RenderType rendertype = playermodel.renderType(p_297884_.texture());
-            p_299673_.drawSpecial(p_366660_ -> playermodel.renderToBuffer(p_299673_.pose(), p_366660_.getBuffer(rendertype), 15728880, OverlayTexture.NO_OVERLAY));
-            p_299673_.pose().popPose();
+        public void render(GuiGraphics pGuiGraphics, PlayerSkin pSkin) {
+            pGuiGraphics.pose().pushPose();
+            pGuiGraphics.pose().scale(1.0F, 1.0F, -1.0F);
+            pGuiGraphics.pose().translate(0.0F, -1.501F, 0.0F);
+            PlayerModel playermodel = pSkin.model() == PlayerSkin.Model.SLIM ? this.slimModel : this.wideModel;
+            RenderType rendertype = playermodel.renderType(pSkin.texture());
+            pGuiGraphics.drawSpecial(p_366660_ -> playermodel.renderToBuffer(pGuiGraphics.pose(), p_366660_.getBuffer(rendertype), 15728880, OverlayTexture.NO_OVERLAY));
+            pGuiGraphics.pose().popPose();
         }
     }
 }

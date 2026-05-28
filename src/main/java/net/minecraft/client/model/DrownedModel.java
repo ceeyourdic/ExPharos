@@ -18,17 +18,17 @@ public class DrownedModel extends ZombieModel<ZombieRenderState> {
         super(p_170534_);
     }
 
-    public static LayerDefinition createBodyLayer(CubeDeformation p_170536_) {
-        MeshDefinition meshdefinition = HumanoidModel.createMesh(p_170536_, 0.0F);
+    public static LayerDefinition createBodyLayer(CubeDeformation pCubeDeformation) {
+        MeshDefinition meshdefinition = HumanoidModel.createMesh(pCubeDeformation, 0.0F);
         PartDefinition partdefinition = meshdefinition.getRoot();
         partdefinition.addOrReplaceChild(
             "left_arm",
-            CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_170536_),
+            CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, pCubeDeformation),
             PartPose.offset(5.0F, 2.0F, 0.0F)
         );
         partdefinition.addOrReplaceChild(
             "left_leg",
-            CubeListBuilder.create().texOffs(16, 48).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_170536_),
+            CubeListBuilder.create().texOffs(16, 48).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, pCubeDeformation),
             PartPose.offset(1.9F, 12.0F, 0.0F)
         );
         return LayerDefinition.create(meshdefinition, 64, 64);

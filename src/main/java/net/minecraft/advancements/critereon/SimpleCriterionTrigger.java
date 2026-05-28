@@ -18,36 +18,36 @@ public abstract class SimpleCriterionTrigger<T extends SimpleCriterionTrigger.Si
     private final Map<PlayerAdvancements, Set<CriterionTrigger.Listener<T>>> players = Maps.newIdentityHashMap();
 
     @Override
-    public final void addPlayerListener(PlayerAdvancements p_66243_, CriterionTrigger.Listener<T> p_66244_) {
-        this.players.computeIfAbsent(p_66243_, p_66252_ -> Sets.newHashSet()).add(p_66244_);
+    public final void addPlayerListener(PlayerAdvancements pPlayerAdvancements, CriterionTrigger.Listener<T> pListener) {
+        this.players.computeIfAbsent(pPlayerAdvancements, p_66252_ -> Sets.newHashSet()).add(pListener);
     }
 
     @Override
-    public final void removePlayerListener(PlayerAdvancements p_66254_, CriterionTrigger.Listener<T> p_66255_) {
-        Set<CriterionTrigger.Listener<T>> set = this.players.get(p_66254_);
+    public final void removePlayerListener(PlayerAdvancements pPlayerAdvancements, CriterionTrigger.Listener<T> pListener) {
+        Set<CriterionTrigger.Listener<T>> set = this.players.get(pPlayerAdvancements);
         if (set != null) {
-            set.remove(p_66255_);
+            set.remove(pListener);
             if (set.isEmpty()) {
-                this.players.remove(p_66254_);
+                this.players.remove(pPlayerAdvancements);
             }
         }
     }
 
     @Override
-    public final void removePlayerListeners(PlayerAdvancements p_66241_) {
-        this.players.remove(p_66241_);
+    public final void removePlayerListeners(PlayerAdvancements pPlayerAdvancements) {
+        this.players.remove(pPlayerAdvancements);
     }
 
-    protected void trigger(ServerPlayer p_66235_, Predicate<T> p_66236_) {
-        PlayerAdvancements playeradvancements = p_66235_.getAdvancements();
+    protected void trigger(ServerPlayer pPlayer, Predicate<T> pTestTrigger) {
+        PlayerAdvancements playeradvancements = pPlayer.getAdvancements();
         Set<CriterionTrigger.Listener<T>> set = this.players.get(playeradvancements);
         if (set != null && !set.isEmpty()) {
-            LootContext lootcontext = EntityPredicate.createContext(p_66235_, p_66235_);
+            LootContext lootcontext = EntityPredicate.createContext(pPlayer, pPlayer);
             List<CriterionTrigger.Listener<T>> list = null;
 
             for (CriterionTrigger.Listener<T> listener : set) {
                 T t = listener.trigger();
-                if (p_66236_.test(t)) {
+                if (pTestTrigger.test(t)) {
                     Optional<ContextAwarePredicate> optional = t.player();
                     if (optional.isEmpty() || optional.get().matches(lootcontext)) {
                         if (list == null) {

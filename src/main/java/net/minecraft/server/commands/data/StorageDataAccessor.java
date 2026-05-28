@@ -42,18 +42,18 @@ public class StorageDataAccessor implements DataAccessor {
     private final CommandStorage storage;
     private final ResourceLocation id;
 
-    static CommandStorage getGlobalTags(CommandContext<CommandSourceStack> p_139561_) {
-        return p_139561_.getSource().getServer().getCommandStorage();
+    static CommandStorage getGlobalTags(CommandContext<CommandSourceStack> pContext) {
+        return pContext.getSource().getServer().getCommandStorage();
     }
 
-    StorageDataAccessor(CommandStorage p_139537_, ResourceLocation p_139538_) {
-        this.storage = p_139537_;
-        this.id = p_139538_;
+    StorageDataAccessor(CommandStorage pStorage, ResourceLocation pId) {
+        this.storage = pStorage;
+        this.id = pId;
     }
 
     @Override
-    public void setData(CompoundTag p_139556_) {
-        this.storage.set(this.id, p_139556_);
+    public void setData(CompoundTag pOther) {
+        this.storage.set(this.id, pOther);
     }
 
     @Override
@@ -67,14 +67,14 @@ public class StorageDataAccessor implements DataAccessor {
     }
 
     @Override
-    public Component getPrintSuccess(Tag p_139558_) {
-        return Component.translatable("commands.data.storage.query", Component.translationArg(this.id), NbtUtils.toPrettyComponent(p_139558_));
+    public Component getPrintSuccess(Tag pNbt) {
+        return Component.translatable("commands.data.storage.query", Component.translationArg(this.id), NbtUtils.toPrettyComponent(pNbt));
     }
 
     @Override
-    public Component getPrintSuccess(NbtPathArgument.NbtPath p_139550_, double p_139551_, int p_139552_) {
+    public Component getPrintSuccess(NbtPathArgument.NbtPath pPath, double pScale, int pValue) {
         return Component.translatable(
-            "commands.data.storage.get", p_139550_.asString(), Component.translationArg(this.id), String.format(Locale.ROOT, "%.2f", p_139551_), p_139552_
+            "commands.data.storage.get", pPath.asString(), Component.translationArg(this.id), String.format(Locale.ROOT, "%.2f", pScale), pValue
         );
     }
 }

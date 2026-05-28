@@ -8,8 +8,8 @@ import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.item.crafting.display.StonecutterRecipeDisplay;
 
 public class StonecutterRecipe extends SingleItemRecipe {
-    public StonecutterRecipe(String p_44479_, Ingredient p_44480_, ItemStack p_301701_) {
-        super(p_44479_, p_44480_, p_301701_);
+    public StonecutterRecipe(String pGroup, Ingredient pIngredient, ItemStack pResult) {
+        super(pGroup, pIngredient, pResult);
     }
 
     @Override

@@ -113,23 +113,23 @@ public class WitherBoss extends Monster implements RangedAttackMob {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_31485_) {
-        super.addAdditionalSaveData(p_31485_);
-        p_31485_.putInt("Invul", this.getInvulnerableTicks());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("Invul", this.getInvulnerableTicks());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_31474_) {
-        super.readAdditionalSaveData(p_31474_);
-        this.setInvulnerableTicks(p_31474_.getInt("Invul"));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setInvulnerableTicks(pCompound.getInt("Invul"));
         if (this.hasCustomName()) {
             this.bossEvent.setName(this.getDisplayName());
         }
     }
 
     @Override
-    public void setCustomName(@Nullable Component p_31476_) {
-        super.setCustomName(p_31476_);
+    public void setCustomName(@Nullable Component pName) {
+        super.setCustomName(pName);
         this.bossEvent.setName(this.getDisplayName());
     }
 
@@ -139,7 +139,7 @@ public class WitherBoss extends Monster implements RangedAttackMob {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_31500_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.WITHER_HURT;
     }
 
@@ -342,8 +342,8 @@ public class WitherBoss extends Monster implements RangedAttackMob {
         }
     }
 
-    public static boolean canDestroy(BlockState p_31492_) {
-        return !p_31492_.isAir() && !p_31492_.is(BlockTags.WITHER_IMMUNE);
+    public static boolean canDestroy(BlockState pState) {
+        return !pState.isAir() && !pState.is(BlockTags.WITHER_IMMUNE);
     }
 
     public void makeInvulnerable() {
@@ -353,84 +353,84 @@ public class WitherBoss extends Monster implements RangedAttackMob {
     }
 
     @Override
-    public void makeStuckInBlock(BlockState p_31471_, Vec3 p_31472_) {
+    public void makeStuckInBlock(BlockState pState, Vec3 pMotionMultiplier) {
     }
 
     @Override
-    public void startSeenByPlayer(ServerPlayer p_31483_) {
-        super.startSeenByPlayer(p_31483_);
-        this.bossEvent.addPlayer(p_31483_);
+    public void startSeenByPlayer(ServerPlayer pPlayer) {
+        super.startSeenByPlayer(pPlayer);
+        this.bossEvent.addPlayer(pPlayer);
     }
 
     @Override
-    public void stopSeenByPlayer(ServerPlayer p_31488_) {
-        super.stopSeenByPlayer(p_31488_);
-        this.bossEvent.removePlayer(p_31488_);
+    public void stopSeenByPlayer(ServerPlayer pPlayer) {
+        super.stopSeenByPlayer(pPlayer);
+        this.bossEvent.removePlayer(pPlayer);
     }
 
-    private double getHeadX(int p_31515_) {
-        if (p_31515_ <= 0) {
+    private double getHeadX(int pHead) {
+        if (pHead <= 0) {
             return this.getX();
         } else {
-            float f = (this.yBodyRot + (float)(180 * (p_31515_ - 1))) * (float) (Math.PI / 180.0);
+            float f = (this.yBodyRot + (float)(180 * (pHead - 1))) * (float) (Math.PI / 180.0);
             float f1 = Mth.cos(f);
             return this.getX() + (double)f1 * 1.3 * (double)this.getScale();
         }
     }
 
-    private double getHeadY(int p_31517_) {
-        float f = p_31517_ <= 0 ? 3.0F : 2.2F;
+    private double getHeadY(int pHead) {
+        float f = pHead <= 0 ? 3.0F : 2.2F;
         return this.getY() + (double)(f * this.getScale());
     }
 
-    private double getHeadZ(int p_31519_) {
-        if (p_31519_ <= 0) {
+    private double getHeadZ(int pHead) {
+        if (pHead <= 0) {
             return this.getZ();
         } else {
-            float f = (this.yBodyRot + (float)(180 * (p_31519_ - 1))) * (float) (Math.PI / 180.0);
+            float f = (this.yBodyRot + (float)(180 * (pHead - 1))) * (float) (Math.PI / 180.0);
             float f1 = Mth.sin(f);
             return this.getZ() + (double)f1 * 1.3 * (double)this.getScale();
         }
     }
 
-    private float rotlerp(float p_31443_, float p_31444_, float p_31445_) {
-        float f = Mth.wrapDegrees(p_31444_ - p_31443_);
-        if (f > p_31445_) {
-            f = p_31445_;
+    private float rotlerp(float pAngle, float pTargetAngle, float pMax) {
+        float f = Mth.wrapDegrees(pTargetAngle - pAngle);
+        if (f > pMax) {
+            f = pMax;
         }
 
-        if (f < -p_31445_) {
-            f = -p_31445_;
+        if (f < -pMax) {
+            f = -pMax;
         }
 
-        return p_31443_ + f;
+        return pAngle + f;
     }
 
-    private void performRangedAttack(int p_31458_, LivingEntity p_31459_) {
+    private void performRangedAttack(int pHead, LivingEntity pTarget) {
         this.performRangedAttack(
-            p_31458_,
-            p_31459_.getX(),
-            p_31459_.getY() + (double)p_31459_.getEyeHeight() * 0.5,
-            p_31459_.getZ(),
-            p_31458_ == 0 && this.random.nextFloat() < 0.001F
+            pHead,
+            pTarget.getX(),
+            pTarget.getY() + (double)pTarget.getEyeHeight() * 0.5,
+            pTarget.getZ(),
+            pHead == 0 && this.random.nextFloat() < 0.001F
         );
     }
 
-    private void performRangedAttack(int p_31449_, double p_31450_, double p_31451_, double p_31452_, boolean p_31453_) {
+    private void performRangedAttack(int pHead, double pX, double pY, double pZ, boolean pIsDangerous) {
         if (!this.isSilent()) {
             this.level().levelEvent(null, 1024, this.blockPosition(), 0);
         }
 
-        double d0 = this.getHeadX(p_31449_);
-        double d1 = this.getHeadY(p_31449_);
-        double d2 = this.getHeadZ(p_31449_);
-        double d3 = p_31450_ - d0;
-        double d4 = p_31451_ - d1;
-        double d5 = p_31452_ - d2;
+        double d0 = this.getHeadX(pHead);
+        double d1 = this.getHeadY(pHead);
+        double d2 = this.getHeadZ(pHead);
+        double d3 = pX - d0;
+        double d4 = pY - d1;
+        double d5 = pZ - d2;
         Vec3 vec3 = new Vec3(d3, d4, d5);
         WitherSkull witherskull = new WitherSkull(this.level(), this, vec3.normalize());
         witherskull.setOwner(this);
-        if (p_31453_) {
+        if (pIsDangerous) {
             witherskull.setDangerous(true);
         }
 
@@ -439,8 +439,8 @@ public class WitherBoss extends Monster implements RangedAttackMob {
     }
 
     @Override
-    public void performRangedAttack(LivingEntity p_31468_, float p_31469_) {
-        this.performRangedAttack(0, p_31468_);
+    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
+        this.performRangedAttack(0, pTarget);
     }
 
     @Override
@@ -520,16 +520,16 @@ public class WitherBoss extends Monster implements RangedAttackMob {
         return this.entityData.get(DATA_ID_INV);
     }
 
-    public void setInvulnerableTicks(int p_31511_) {
-        this.entityData.set(DATA_ID_INV, p_31511_);
+    public void setInvulnerableTicks(int pInvulnerableTicks) {
+        this.entityData.set(DATA_ID_INV, pInvulnerableTicks);
     }
 
-    public int getAlternativeTarget(int p_31513_) {
-        return this.entityData.get(DATA_TARGETS.get(p_31513_));
+    public int getAlternativeTarget(int pHead) {
+        return this.entityData.get(DATA_TARGETS.get(pHead));
     }
 
-    public void setAlternativeTarget(int p_31455_, int p_31456_) {
-        this.entityData.set(DATA_TARGETS.get(p_31455_), p_31456_);
+    public void setAlternativeTarget(int pTargetOffset, int pNewId) {
+        this.entityData.set(DATA_TARGETS.get(pTargetOffset), pNewId);
     }
 
     public boolean isPowered() {
@@ -537,7 +537,7 @@ public class WitherBoss extends Monster implements RangedAttackMob {
     }
 
     @Override
-    protected boolean canRide(Entity p_31508_) {
+    protected boolean canRide(Entity pEntity) {
         return false;
     }
 
@@ -547,8 +547,8 @@ public class WitherBoss extends Monster implements RangedAttackMob {
     }
 
     @Override
-    public boolean canBeAffected(MobEffectInstance p_31495_) {
-        return p_31495_.is(MobEffects.WITHER) ? false : super.canBeAffected(p_31495_);
+    public boolean canBeAffected(MobEffectInstance pPotioneffect) {
+        return pPotioneffect.is(MobEffects.WITHER) ? false : super.canBeAffected(pPotioneffect);
     }
 
     class WitherDoNothingGoal extends Goal {

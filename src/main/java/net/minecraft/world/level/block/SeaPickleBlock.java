@@ -46,30 +46,30 @@ public class SeaPickleBlock extends BushBlock implements BonemealableBlock, Simp
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_56089_) {
-        BlockState blockstate = p_56089_.getLevel().getBlockState(p_56089_.getClickedPos());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockState blockstate = pContext.getLevel().getBlockState(pContext.getClickedPos());
         if (blockstate.is(this)) {
             return blockstate.setValue(PICKLES, Integer.valueOf(Math.min(4, blockstate.getValue(PICKLES) + 1)));
         } else {
-            FluidState fluidstate = p_56089_.getLevel().getFluidState(p_56089_.getClickedPos());
+            FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
             boolean flag = fluidstate.getType() == Fluids.WATER;
-            return super.getStateForPlacement(p_56089_).setValue(WATERLOGGED, Boolean.valueOf(flag));
+            return super.getStateForPlacement(pContext).setValue(WATERLOGGED, Boolean.valueOf(flag));
         }
     }
 
-    public static boolean isDead(BlockState p_56133_) {
-        return !p_56133_.getValue(WATERLOGGED);
+    public static boolean isDead(BlockState pState) {
+        return !pState.getValue(WATERLOGGED);
     }
 
     @Override
-    protected boolean mayPlaceOn(BlockState p_56127_, BlockGetter p_56128_, BlockPos p_56129_) {
-        return !p_56127_.getCollisionShape(p_56128_, p_56129_).getFaceShape(Direction.UP).isEmpty() || p_56127_.isFaceSturdy(p_56128_, p_56129_, Direction.UP);
+    protected boolean mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return !pState.getCollisionShape(pLevel, pPos).getFaceShape(Direction.UP).isEmpty() || pState.isFaceSturdy(pLevel, pPos, Direction.UP);
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_56109_, LevelReader p_56110_, BlockPos p_56111_) {
-        BlockPos blockpos = p_56111_.below();
-        return this.mayPlaceOn(p_56110_.getBlockState(blockpos), p_56110_, blockpos);
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.below();
+        return this.mayPlaceOn(pLevel.getBlockState(blockpos), pLevel, blockpos);
     }
 
     @Override
@@ -95,15 +95,15 @@ public class SeaPickleBlock extends BushBlock implements BonemealableBlock, Simp
     }
 
     @Override
-    protected boolean canBeReplaced(BlockState p_56101_, BlockPlaceContext p_56102_) {
-        return !p_56102_.isSecondaryUseActive() && p_56102_.getItemInHand().is(this.asItem()) && p_56101_.getValue(PICKLES) < 4
+    protected boolean canBeReplaced(BlockState pState, BlockPlaceContext pUseContext) {
+        return !pUseContext.isSecondaryUseActive() && pUseContext.getItemInHand().is(this.asItem()) && pState.getValue(PICKLES) < 4
             ? true
-            : super.canBeReplaced(p_56101_, p_56102_);
+            : super.canBeReplaced(pState, pUseContext);
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_56122_, BlockGetter p_56123_, BlockPos p_56124_, CollisionContext p_56125_) {
-        switch (p_56122_.getValue(PICKLES)) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        switch (pState.getValue(PICKLES)) {
             case 1:
             default:
                 return ONE_AABB;
@@ -117,13 +117,13 @@ public class SeaPickleBlock extends BushBlock implements BonemealableBlock, Simp
     }
 
     @Override
-    protected FluidState getFluidState(BlockState p_56131_) {
-        return p_56131_.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(p_56131_);
+    protected FluidState getFluidState(BlockState pState) {
+        return pState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(pState);
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_56120_) {
-        p_56120_.add(PICKLES, WATERLOGGED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(PICKLES, WATERLOGGED);
     }
 
     @Override

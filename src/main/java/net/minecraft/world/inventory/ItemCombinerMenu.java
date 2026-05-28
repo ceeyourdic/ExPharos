@@ -25,29 +25,29 @@ public abstract class ItemCombinerMenu extends AbstractContainerMenu {
     };
     private final int resultSlotIndex;
 
-    protected boolean mayPickup(Player p_39798_, boolean p_39799_) {
+    protected boolean mayPickup(Player pPlayer, boolean pHasStack) {
         return true;
     }
 
-    protected abstract void onTake(Player p_150601_, ItemStack p_150602_);
+    protected abstract void onTake(Player pPlayer, ItemStack pStack);
 
-    protected abstract boolean isValidBlock(BlockState p_39788_);
+    protected abstract boolean isValidBlock(BlockState pState);
 
     public ItemCombinerMenu(
-        @Nullable MenuType<?> p_39773_, int p_39774_, Inventory p_39775_, ContainerLevelAccess p_39776_, ItemCombinerMenuSlotDefinition p_366801_
+        @Nullable MenuType<?> pMenuType, int pContainerId, Inventory pInventory, ContainerLevelAccess pAccess, ItemCombinerMenuSlotDefinition pSlotDefinition
     ) {
-        super(p_39773_, p_39774_);
-        this.access = p_39776_;
-        this.player = p_39775_.player;
-        this.inputSlots = this.createContainer(p_366801_.getNumOfInputSlots());
-        this.resultSlotIndex = p_366801_.getResultSlotIndex();
-        this.createInputSlots(p_366801_);
-        this.createResultSlot(p_366801_);
-        this.addStandardInventorySlots(p_39775_, 8, 84);
+        super(pMenuType, pContainerId);
+        this.access = pAccess;
+        this.player = pInventory.player;
+        this.inputSlots = this.createContainer(pSlotDefinition.getNumOfInputSlots());
+        this.resultSlotIndex = pSlotDefinition.getResultSlotIndex();
+        this.createInputSlots(pSlotDefinition);
+        this.createResultSlot(pSlotDefinition);
+        this.addStandardInventorySlots(pInventory, 8, 84);
     }
 
-    private void createInputSlots(ItemCombinerMenuSlotDefinition p_267172_) {
-        for (final ItemCombinerMenuSlotDefinition.SlotDefinition itemcombinermenuslotdefinition$slotdefinition : p_267172_.getSlots()) {
+    private void createInputSlots(ItemCombinerMenuSlotDefinition pSlotDefinition) {
+        for (final ItemCombinerMenuSlotDefinition.SlotDefinition itemcombinermenuslotdefinition$slotdefinition : pSlotDefinition.getSlots()) {
             this.addSlot(
                 new Slot(
                     this.inputSlots,
@@ -64,8 +64,8 @@ public abstract class ItemCombinerMenu extends AbstractContainerMenu {
         }
     }
 
-    private void createResultSlot(ItemCombinerMenuSlotDefinition p_267000_) {
-        this.addSlot(new Slot(this.resultSlots, p_267000_.getResultSlot().slotIndex(), p_267000_.getResultSlot().x(), p_267000_.getResultSlot().y()) {
+    private void createResultSlot(ItemCombinerMenuSlotDefinition pSlotDefinition) {
+        this.addSlot(new Slot(this.resultSlots, pSlotDefinition.getResultSlot().slotIndex(), pSlotDefinition.getResultSlot().x(), pSlotDefinition.getResultSlot().y()) {
             @Override
             public boolean mayPlace(ItemStack p_365170_) {
                 return false;
@@ -85,8 +85,8 @@ public abstract class ItemCombinerMenu extends AbstractContainerMenu {
 
     public abstract void createResult();
 
-    private SimpleContainer createContainer(int p_267204_) {
-        return new SimpleContainer(p_267204_) {
+    private SimpleContainer createContainer(int pSize) {
+        return new SimpleContainer(pSize) {
             @Override
             public void setChanged() {
                 super.setChanged();
@@ -96,52 +96,52 @@ public abstract class ItemCombinerMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public void slotsChanged(Container p_39778_) {
-        super.slotsChanged(p_39778_);
-        if (p_39778_ == this.inputSlots) {
+    public void slotsChanged(Container pInventory) {
+        super.slotsChanged(pInventory);
+        if (pInventory == this.inputSlots) {
             this.createResult();
         }
     }
 
     @Override
-    public void removed(Player p_39790_) {
-        super.removed(p_39790_);
-        this.access.execute((p_39796_, p_39797_) -> this.clearContainer(p_39790_, this.inputSlots));
+    public void removed(Player pPlayer) {
+        super.removed(pPlayer);
+        this.access.execute((p_39796_, p_39797_) -> this.clearContainer(pPlayer, this.inputSlots));
     }
 
     @Override
-    public boolean stillValid(Player p_39780_) {
-        return this.access.evaluate((p_327088_, p_327089_) -> !this.isValidBlock(p_327088_.getBlockState(p_327089_)) ? false : p_39780_.canInteractWithBlock(p_327089_, 4.0), true);
+    public boolean stillValid(Player pPlayer) {
+        return this.access.evaluate((p_327088_, p_327089_) -> !this.isValidBlock(p_327088_.getBlockState(p_327089_)) ? false : pPlayer.canInteractWithBlock(p_327089_, 4.0), true);
     }
 
     @Override
-    public ItemStack quickMoveStack(Player p_39792_, int p_39793_) {
+    public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(p_39793_);
+        Slot slot = this.slots.get(pIndex);
         if (slot != null && slot.hasItem()) {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
             int i = this.getInventorySlotStart();
             int j = this.getUseRowEnd();
-            if (p_39793_ == this.getResultSlot()) {
+            if (pIndex == this.getResultSlot()) {
                 if (!this.moveItemStackTo(itemstack1, i, j, true)) {
                     return ItemStack.EMPTY;
                 }
 
                 slot.onQuickCraft(itemstack1, itemstack);
-            } else if (p_39793_ >= 0 && p_39793_ < this.getResultSlot()) {
+            } else if (pIndex >= 0 && pIndex < this.getResultSlot()) {
                 if (!this.moveItemStackTo(itemstack1, i, j, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (this.canMoveIntoInputSlots(itemstack1) && p_39793_ >= this.getInventorySlotStart() && p_39793_ < this.getUseRowEnd()) {
+            } else if (this.canMoveIntoInputSlots(itemstack1) && pIndex >= this.getInventorySlotStart() && pIndex < this.getUseRowEnd()) {
                 if (!this.moveItemStackTo(itemstack1, 0, this.getResultSlot(), false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (p_39793_ >= this.getInventorySlotStart() && p_39793_ < this.getInventorySlotEnd()) {
+            } else if (pIndex >= this.getInventorySlotStart() && pIndex < this.getInventorySlotEnd()) {
                 if (!this.moveItemStackTo(itemstack1, this.getUseRowStart(), this.getUseRowEnd(), false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (p_39793_ >= this.getUseRowStart() && p_39793_ < this.getUseRowEnd() && !this.moveItemStackTo(itemstack1, this.getInventorySlotStart(), this.getInventorySlotEnd(), false)) {
+            } else if (pIndex >= this.getUseRowStart() && pIndex < this.getUseRowEnd() && !this.moveItemStackTo(itemstack1, this.getInventorySlotStart(), this.getInventorySlotEnd(), false)) {
                 return ItemStack.EMPTY;
             }
 
@@ -155,13 +155,13 @@ public abstract class ItemCombinerMenu extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
 
-            slot.onTake(p_39792_, itemstack1);
+            slot.onTake(pPlayer, itemstack1);
         }
 
         return itemstack;
     }
 
-    protected boolean canMoveIntoInputSlots(ItemStack p_39787_) {
+    protected boolean canMoveIntoInputSlots(ItemStack pStack) {
         return true;
     }
 

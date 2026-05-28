@@ -39,13 +39,13 @@ public class UpwardsBranchingTrunkPlacer extends TrunkPlacer {
     private final HolderSet<Block> canGrowThrough;
 
     public UpwardsBranchingTrunkPlacer(
-        int p_226201_, int p_226202_, int p_226203_, IntProvider p_226204_, float p_226205_, IntProvider p_226206_, HolderSet<Block> p_226207_
+        int pBaseHeight, int pHeightRandA, int pHeightRandB, IntProvider pExtraBranchSteps, float pPlaceBranchPerLogProbability, IntProvider pExtraBranchLength, HolderSet<Block> pCanGrowThrough
     ) {
-        super(p_226201_, p_226202_, p_226203_);
-        this.extraBranchSteps = p_226204_;
-        this.placeBranchPerLogProbability = p_226205_;
-        this.extraBranchLength = p_226206_;
-        this.canGrowThrough = p_226207_;
+        super(pBaseHeight, pHeightRandA, pHeightRandB);
+        this.extraBranchSteps = pExtraBranchSteps;
+        this.placeBranchPerLogProbability = pPlaceBranchPerLogProbability;
+        this.extraBranchLength = pExtraBranchLength;
+        this.canGrowThrough = pCanGrowThrough;
     }
 
     @Override
@@ -86,44 +86,44 @@ public class UpwardsBranchingTrunkPlacer extends TrunkPlacer {
     }
 
     private void placeBranch(
-        LevelSimulatedReader p_226213_,
-        BiConsumer<BlockPos, BlockState> p_226214_,
-        RandomSource p_226215_,
-        int p_226216_,
-        TreeConfiguration p_226217_,
-        List<FoliagePlacer.FoliageAttachment> p_226218_,
-        BlockPos.MutableBlockPos p_226219_,
-        int p_226220_,
-        Direction p_226221_,
-        int p_226222_,
-        int p_226223_
+        LevelSimulatedReader pLevel,
+        BiConsumer<BlockPos, BlockState> pBlockSetter,
+        RandomSource pRandom,
+        int pFreeTreeHeight,
+        TreeConfiguration pTreeConfig,
+        List<FoliagePlacer.FoliageAttachment> pFoliageAttachments,
+        BlockPos.MutableBlockPos pPos,
+        int pY,
+        Direction pDirection,
+        int pExtraBranchLength,
+        int pExtraBranchSteps
     ) {
-        int i = p_226220_ + p_226222_;
-        int j = p_226219_.getX();
-        int k = p_226219_.getZ();
-        int l = p_226222_;
+        int i = pY + pExtraBranchLength;
+        int j = pPos.getX();
+        int k = pPos.getZ();
+        int l = pExtraBranchLength;
 
-        while (l < p_226216_ && p_226223_ > 0) {
+        while (l < pFreeTreeHeight && pExtraBranchSteps > 0) {
             if (l >= 1) {
-                int i1 = p_226220_ + l;
-                j += p_226221_.getStepX();
-                k += p_226221_.getStepZ();
+                int i1 = pY + l;
+                j += pDirection.getStepX();
+                k += pDirection.getStepZ();
                 i = i1;
-                if (this.placeLog(p_226213_, p_226214_, p_226215_, p_226219_.set(j, i1, k), p_226217_)) {
+                if (this.placeLog(pLevel, pBlockSetter, pRandom, pPos.set(j, i1, k), pTreeConfig)) {
                     i = i1 + 1;
                 }
 
-                p_226218_.add(new FoliagePlacer.FoliageAttachment(p_226219_.immutable(), 0, false));
+                pFoliageAttachments.add(new FoliagePlacer.FoliageAttachment(pPos.immutable(), 0, false));
             }
 
             l++;
-            p_226223_--;
+            pExtraBranchSteps--;
         }
 
-        if (i - p_226220_ > 1) {
+        if (i - pY > 1) {
             BlockPos blockpos = new BlockPos(j, i, k);
-            p_226218_.add(new FoliagePlacer.FoliageAttachment(blockpos, 0, false));
-            p_226218_.add(new FoliagePlacer.FoliageAttachment(blockpos.below(2), 0, false));
+            pFoliageAttachments.add(new FoliagePlacer.FoliageAttachment(blockpos, 0, false));
+            pFoliageAttachments.add(new FoliagePlacer.FoliageAttachment(blockpos.below(2), 0, false));
         }
     }
 

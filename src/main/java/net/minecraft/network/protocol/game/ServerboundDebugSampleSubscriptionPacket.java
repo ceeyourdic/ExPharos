@@ -11,12 +11,12 @@ public record ServerboundDebugSampleSubscriptionPacket(RemoteDebugSampleType sam
         ServerboundDebugSampleSubscriptionPacket::write, ServerboundDebugSampleSubscriptionPacket::new
     );
 
-    private ServerboundDebugSampleSubscriptionPacket(FriendlyByteBuf p_329344_) {
-        this(p_329344_.readEnum(RemoteDebugSampleType.class));
+    private ServerboundDebugSampleSubscriptionPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readEnum(RemoteDebugSampleType.class));
     }
 
-    private void write(FriendlyByteBuf p_329925_) {
-        p_329925_.writeEnum(this.sampleType);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeEnum(this.sampleType);
     }
 
     @Override

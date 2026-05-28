@@ -23,14 +23,14 @@ public class VillagerModel extends EntityModel<VillagerRenderState> implements H
     private final ModelPart leftLeg;
     private final ModelPart arms;
 
-    public VillagerModel(ModelPart p_171051_) {
-        super(p_171051_);
-        this.head = p_171051_.getChild("head");
+    public VillagerModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
         this.hat = this.head.getChild("hat");
         this.hatRim = this.hat.getChild("hat_rim");
-        this.rightLeg = p_171051_.getChild("right_leg");
-        this.leftLeg = p_171051_.getChild("left_leg");
-        this.arms = p_171051_.getChild("arms");
+        this.rightLeg = pRoot.getChild("right_leg");
+        this.leftLeg = pRoot.getChild("left_leg");
+        this.arms = pRoot.getChild("arms");
     }
 
     public static MeshDefinition createBodyModel() {

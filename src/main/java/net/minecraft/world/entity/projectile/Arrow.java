@@ -26,13 +26,13 @@ public class Arrow extends AbstractArrow {
         super(p_36858_, p_36859_);
     }
 
-    public Arrow(Level p_36866_, double p_312497_, double p_312591_, double p_311058_, ItemStack p_310811_, @Nullable ItemStack p_343588_) {
-        super(EntityType.ARROW, p_312497_, p_312591_, p_311058_, p_36866_, p_310811_, p_343588_);
+    public Arrow(Level pLevel, double pX, double pY, double pZ, ItemStack pPickupItemStack, @Nullable ItemStack pFiredFromWeapon) {
+        super(EntityType.ARROW, pX, pY, pZ, pLevel, pPickupItemStack, pFiredFromWeapon);
         this.updateColor();
     }
 
-    public Arrow(Level p_36861_, LivingEntity p_310439_, ItemStack p_310691_, @Nullable ItemStack p_344310_) {
-        super(EntityType.ARROW, p_310439_, p_36861_, p_310691_, p_344310_);
+    public Arrow(Level pLevel, LivingEntity pOwner, ItemStack pPickupItemStack, @Nullable ItemStack pFiredFromWeapon) {
+        super(EntityType.ARROW, pOwner, pLevel, pPickupItemStack, pFiredFromWeapon);
         this.updateColor();
     }
 
@@ -40,8 +40,8 @@ public class Arrow extends AbstractArrow {
         return this.getPickupItemStackOrigin().getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
     }
 
-    private void setPotionContents(PotionContents p_328713_) {
-        this.getPickupItemStackOrigin().set(DataComponents.POTION_CONTENTS, p_328713_);
+    private void setPotionContents(PotionContents pPotionContents) {
+        this.getPickupItemStackOrigin().set(DataComponents.POTION_CONTENTS, pPotionContents);
         this.updateColor();
     }
 
@@ -56,8 +56,8 @@ public class Arrow extends AbstractArrow {
         this.entityData.set(ID_EFFECT_COLOR, potioncontents.equals(PotionContents.EMPTY) ? -1 : potioncontents.getColor());
     }
 
-    public void addEffect(MobEffectInstance p_36871_) {
-        this.setPotionContents(this.getPotionContents().withEffectAdded(p_36871_));
+    public void addEffect(MobEffectInstance pEffectInstance) {
+        this.setPotionContents(this.getPotionContents().withEffectAdded(pEffectInstance));
     }
 
     @Override
@@ -83,10 +83,10 @@ public class Arrow extends AbstractArrow {
         }
     }
 
-    private void makeParticle(int p_36877_) {
+    private void makeParticle(int pParticleAmount) {
         int i = this.getColor();
-        if (i != -1 && p_36877_ > 0) {
-            for (int j = 0; j < p_36877_; j++) {
+        if (i != -1 && pParticleAmount > 0) {
+            for (int j = 0; j < pParticleAmount; j++) {
                 this.level()
                     .addParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, i), this.getRandomX(0.5), this.getRandomY(), this.getRandomZ(0.5), 0.0, 0.0, 0.0);
             }
@@ -98,13 +98,13 @@ public class Arrow extends AbstractArrow {
     }
 
     @Override
-    protected void doPostHurtEffects(LivingEntity p_36873_) {
-        super.doPostHurtEffects(p_36873_);
+    protected void doPostHurtEffects(LivingEntity pLiving) {
+        super.doPostHurtEffects(pLiving);
         Entity entity = this.getEffectSource();
         PotionContents potioncontents = this.getPotionContents();
         if (potioncontents.potion().isPresent()) {
             for (MobEffectInstance mobeffectinstance : potioncontents.potion().get().value().getEffects()) {
-                p_36873_.addEffect(
+                pLiving.addEffect(
                     new MobEffectInstance(
                         mobeffectinstance.getEffect(),
                         Math.max(mobeffectinstance.mapDuration(p_268168_ -> p_268168_ / 8), 1),
@@ -118,7 +118,7 @@ public class Arrow extends AbstractArrow {
         }
 
         for (MobEffectInstance mobeffectinstance1 : potioncontents.customEffects()) {
-            p_36873_.addEffect(mobeffectinstance1, entity);
+            pLiving.addEffect(mobeffectinstance1, entity);
         }
     }
 

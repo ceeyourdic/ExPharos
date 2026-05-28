@@ -23,9 +23,9 @@ public class FurnaceRecipeBookComponent extends RecipeBookComponent<AbstractFurn
     );
     private final Component recipeFilterName;
 
-    public FurnaceRecipeBookComponent(AbstractFurnaceMenu p_360736_, Component p_363743_, List<RecipeBookComponent.TabInfo> p_365672_) {
-        super(p_360736_, p_365672_);
-        this.recipeFilterName = p_363743_;
+    public FurnaceRecipeBookComponent(AbstractFurnaceMenu pMenu, Component pRecipeFilterName, List<RecipeBookComponent.TabInfo> pTabInfos) {
+        super(pMenu, pTabInfos);
+        this.recipeFilterName = pRecipeFilterName;
     }
 
     @Override

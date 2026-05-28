@@ -28,13 +28,13 @@ public record DamageSourceCondition(Optional<DamageSourcePredicate> predicate) i
         return Set.of(LootContextParams.ORIGIN, LootContextParams.DAMAGE_SOURCE);
     }
 
-    public boolean test(LootContext p_81592_) {
-        DamageSource damagesource = p_81592_.getOptionalParameter(LootContextParams.DAMAGE_SOURCE);
-        Vec3 vec3 = p_81592_.getOptionalParameter(LootContextParams.ORIGIN);
-        return vec3 != null && damagesource != null ? this.predicate.isEmpty() || this.predicate.get().matches(p_81592_.getLevel(), vec3, damagesource) : false;
+    public boolean test(LootContext pContext) {
+        DamageSource damagesource = pContext.getOptionalParameter(LootContextParams.DAMAGE_SOURCE);
+        Vec3 vec3 = pContext.getOptionalParameter(LootContextParams.ORIGIN);
+        return vec3 != null && damagesource != null ? this.predicate.isEmpty() || this.predicate.get().matches(pContext.getLevel(), vec3, damagesource) : false;
     }
 
-    public static LootItemCondition.Builder hasDamageSource(DamageSourcePredicate.Builder p_81590_) {
-        return () -> new DamageSourceCondition(Optional.of(p_81590_.build()));
+    public static LootItemCondition.Builder hasDamageSource(DamageSourcePredicate.Builder pBuilder) {
+        return () -> new DamageSourceCondition(Optional.of(pBuilder.build()));
     }
 }

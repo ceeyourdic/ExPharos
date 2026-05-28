@@ -17,11 +17,11 @@ public abstract class PathfinderMob extends Mob {
         super(p_21683_, p_21684_);
     }
 
-    public float getWalkTargetValue(BlockPos p_21693_) {
-        return this.getWalkTargetValue(p_21693_, this.level());
+    public float getWalkTargetValue(BlockPos pPos) {
+        return this.getWalkTargetValue(pPos, this.level());
     }
 
-    public float getWalkTargetValue(BlockPos p_21688_, LevelReader p_21689_) {
+    public float getWalkTargetValue(BlockPos pPos, LevelReader pLevel) {
         return 0.0F;
     }
 

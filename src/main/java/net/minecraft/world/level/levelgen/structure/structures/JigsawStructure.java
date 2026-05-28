@@ -57,57 +57,57 @@ public final class JigsawStructure extends Structure {
     private final DimensionPadding dimensionPadding;
     private final LiquidSettings liquidSettings;
 
-    private static DataResult<JigsawStructure> verifyRange(JigsawStructure p_286886_) {
-        int i = switch (p_286886_.terrainAdaptation()) {
+    private static DataResult<JigsawStructure> verifyRange(JigsawStructure pStructure) {
+        int i = switch (pStructure.terrainAdaptation()) {
             case NONE -> 0;
             case BURY, BEARD_THIN, BEARD_BOX, ENCAPSULATE -> 12;
         };
-        return p_286886_.maxDistanceFromCenter + i > 128
+        return pStructure.maxDistanceFromCenter + i > 128
             ? DataResult.error(() -> "Structure size including terrain adaptation must not exceed 128")
-            : DataResult.success(p_286886_);
+            : DataResult.success(pStructure);
     }
 
     public JigsawStructure(
-        Structure.StructureSettings p_227627_,
-        Holder<StructureTemplatePool> p_227628_,
-        Optional<ResourceLocation> p_227629_,
-        int p_227630_,
-        HeightProvider p_227631_,
-        boolean p_227632_,
-        Optional<Heightmap.Types> p_227633_,
-        int p_227634_,
-        List<PoolAliasBinding> p_312703_,
-        DimensionPadding p_344382_,
-        LiquidSettings p_344801_
+        Structure.StructureSettings pSettings,
+        Holder<StructureTemplatePool> pStartPool,
+        Optional<ResourceLocation> pStartJigsawName,
+        int pMaxDepth,
+        HeightProvider pStartHeight,
+        boolean pUseExpansionHack,
+        Optional<Heightmap.Types> pProjectStartToHeightmap,
+        int pMaxDistanceFromCenter,
+        List<PoolAliasBinding> pPoolAliases,
+        DimensionPadding pDimensionPadding,
+        LiquidSettings pLiquidSettings
     ) {
-        super(p_227627_);
-        this.startPool = p_227628_;
-        this.startJigsawName = p_227629_;
-        this.maxDepth = p_227630_;
-        this.startHeight = p_227631_;
-        this.useExpansionHack = p_227632_;
-        this.projectStartToHeightmap = p_227633_;
-        this.maxDistanceFromCenter = p_227634_;
-        this.poolAliases = p_312703_;
-        this.dimensionPadding = p_344382_;
-        this.liquidSettings = p_344801_;
+        super(pSettings);
+        this.startPool = pStartPool;
+        this.startJigsawName = pStartJigsawName;
+        this.maxDepth = pMaxDepth;
+        this.startHeight = pStartHeight;
+        this.useExpansionHack = pUseExpansionHack;
+        this.projectStartToHeightmap = pProjectStartToHeightmap;
+        this.maxDistanceFromCenter = pMaxDistanceFromCenter;
+        this.poolAliases = pPoolAliases;
+        this.dimensionPadding = pDimensionPadding;
+        this.liquidSettings = pLiquidSettings;
     }
 
     public JigsawStructure(
-        Structure.StructureSettings p_227620_,
-        Holder<StructureTemplatePool> p_227621_,
-        int p_227622_,
-        HeightProvider p_227623_,
-        boolean p_227624_,
-        Heightmap.Types p_227625_
+        Structure.StructureSettings pSettings,
+        Holder<StructureTemplatePool> pStartPool,
+        int pMaxDepth,
+        HeightProvider pStartHeight,
+        boolean pUseExpansionHack,
+        Heightmap.Types pProjectStartToHeightmap
     ) {
-        this(p_227620_, p_227621_, Optional.empty(), p_227622_, p_227623_, p_227624_, Optional.of(p_227625_), 80, List.of(), DEFAULT_DIMENSION_PADDING, DEFAULT_LIQUID_SETTINGS);
+        this(pSettings, pStartPool, Optional.empty(), pMaxDepth, pStartHeight, pUseExpansionHack, Optional.of(pProjectStartToHeightmap), 80, List.of(), DEFAULT_DIMENSION_PADDING, DEFAULT_LIQUID_SETTINGS);
     }
 
     public JigsawStructure(
-        Structure.StructureSettings p_227614_, Holder<StructureTemplatePool> p_227615_, int p_227616_, HeightProvider p_227617_, boolean p_227618_
+        Structure.StructureSettings pSettings, Holder<StructureTemplatePool> pStartPool, int pMaxDepth, HeightProvider pStartHeight, boolean pUseExpansionHack
     ) {
-        this(p_227614_, p_227615_, Optional.empty(), p_227616_, p_227617_, p_227618_, Optional.empty(), 80, List.of(), DEFAULT_DIMENSION_PADDING, DEFAULT_LIQUID_SETTINGS);
+        this(pSettings, pStartPool, Optional.empty(), pMaxDepth, pStartHeight, pUseExpansionHack, Optional.empty(), 80, List.of(), DEFAULT_DIMENSION_PADDING, DEFAULT_LIQUID_SETTINGS);
     }
 
     @Override

@@ -12,19 +12,19 @@ public class ServerboundCommandSuggestionPacket implements Packet<ServerGamePack
     private final int id;
     private final String command;
 
-    public ServerboundCommandSuggestionPacket(int p_133893_, String p_133894_) {
-        this.id = p_133893_;
-        this.command = p_133894_;
+    public ServerboundCommandSuggestionPacket(int pId, String pCommand) {
+        this.id = pId;
+        this.command = pCommand;
     }
 
-    private ServerboundCommandSuggestionPacket(FriendlyByteBuf p_179565_) {
-        this.id = p_179565_.readVarInt();
-        this.command = p_179565_.readUtf(32500);
+    private ServerboundCommandSuggestionPacket(FriendlyByteBuf pBuffer) {
+        this.id = pBuffer.readVarInt();
+        this.command = pBuffer.readUtf(32500);
     }
 
-    private void write(FriendlyByteBuf p_133903_) {
-        p_133903_.writeVarInt(this.id);
-        p_133903_.writeUtf(this.command, 32500);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.id);
+        pBuffer.writeUtf(this.command, 32500);
     }
 
     @Override
@@ -32,8 +32,8 @@ public class ServerboundCommandSuggestionPacket implements Packet<ServerGamePack
         return GamePacketTypes.SERVERBOUND_COMMAND_SUGGESTION;
     }
 
-    public void handle(ServerGamePacketListener p_133900_) {
-        p_133900_.handleCustomCommandSuggestions(this);
+    public void handle(ServerGamePacketListener pHandler) {
+        pHandler.handleCustomCommandSuggestions(this);
     }
 
     public int getId() {

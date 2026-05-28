@@ -65,8 +65,8 @@ public class BowItem extends ProjectileWeaponItem {
         p_335269_.shootFromRotation(p_329327_, p_329327_.getXRot(), p_329327_.getYRot() + p_332058_, 0.0F, p_332731_, p_332848_);
     }
 
-    public static float getPowerForTime(int p_40662_) {
-        float f = (float)p_40662_ / 20.0F;
+    public static float getPowerForTime(int pCharge) {
+        float f = (float)pCharge / 20.0F;
         f = (f * f + f * 2.0F) / 3.0F;
         if (f > 1.0F) {
             f = 1.0F;

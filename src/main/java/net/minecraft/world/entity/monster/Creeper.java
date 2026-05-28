@@ -97,30 +97,30 @@ public class Creeper extends Monster {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_32304_) {
-        super.addAdditionalSaveData(p_32304_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
         if (this.entityData.get(DATA_IS_POWERED)) {
-            p_32304_.putBoolean("powered", true);
+            pCompound.putBoolean("powered", true);
         }
 
-        p_32304_.putShort("Fuse", (short)this.maxSwell);
-        p_32304_.putByte("ExplosionRadius", (byte)this.explosionRadius);
-        p_32304_.putBoolean("ignited", this.isIgnited());
+        pCompound.putShort("Fuse", (short)this.maxSwell);
+        pCompound.putByte("ExplosionRadius", (byte)this.explosionRadius);
+        pCompound.putBoolean("ignited", this.isIgnited());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_32296_) {
-        super.readAdditionalSaveData(p_32296_);
-        this.entityData.set(DATA_IS_POWERED, p_32296_.getBoolean("powered"));
-        if (p_32296_.contains("Fuse", 99)) {
-            this.maxSwell = p_32296_.getShort("Fuse");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.entityData.set(DATA_IS_POWERED, pCompound.getBoolean("powered"));
+        if (pCompound.contains("Fuse", 99)) {
+            this.maxSwell = pCompound.getShort("Fuse");
         }
 
-        if (p_32296_.contains("ExplosionRadius", 99)) {
-            this.explosionRadius = p_32296_.getByte("ExplosionRadius");
+        if (pCompound.contains("ExplosionRadius", 99)) {
+            this.explosionRadius = pCompound.getByte("ExplosionRadius");
         }
 
-        if (p_32296_.getBoolean("ignited")) {
+        if (pCompound.getBoolean("ignited")) {
             this.ignite();
         }
     }
@@ -161,7 +161,7 @@ public class Creeper extends Monster {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_32309_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.CREEPER_HURT;
     }
 
@@ -189,43 +189,43 @@ public class Creeper extends Monster {
         return this.entityData.get(DATA_IS_POWERED);
     }
 
-    public float getSwelling(float p_32321_) {
-        return Mth.lerp(p_32321_, (float)this.oldSwell, (float)this.swell) / (float)(this.maxSwell - 2);
+    public float getSwelling(float pPartialTicks) {
+        return Mth.lerp(pPartialTicks, (float)this.oldSwell, (float)this.swell) / (float)(this.maxSwell - 2);
     }
 
     public int getSwellDir() {
         return this.entityData.get(DATA_SWELL_DIR);
     }
 
-    public void setSwellDir(int p_32284_) {
-        this.entityData.set(DATA_SWELL_DIR, p_32284_);
+    public void setSwellDir(int pState) {
+        this.entityData.set(DATA_SWELL_DIR, pState);
     }
 
     @Override
-    public void thunderHit(ServerLevel p_32286_, LightningBolt p_32287_) {
-        super.thunderHit(p_32286_, p_32287_);
+    public void thunderHit(ServerLevel pLevel, LightningBolt pLightning) {
+        super.thunderHit(pLevel, pLightning);
         this.entityData.set(DATA_IS_POWERED, true);
     }
 
     @Override
-    protected InteractionResult mobInteract(Player p_32301_, InteractionHand p_32302_) {
-        ItemStack itemstack = p_32301_.getItemInHand(p_32302_);
+    protected InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
         if (itemstack.is(ItemTags.CREEPER_IGNITERS)) {
             SoundEvent soundevent = itemstack.is(Items.FIRE_CHARGE) ? SoundEvents.FIRECHARGE_USE : SoundEvents.FLINTANDSTEEL_USE;
             this.level()
-                .playSound(p_32301_, this.getX(), this.getY(), this.getZ(), soundevent, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
+                .playSound(pPlayer, this.getX(), this.getY(), this.getZ(), soundevent, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
             if (!this.level().isClientSide) {
                 this.ignite();
                 if (!itemstack.isDamageableItem()) {
                     itemstack.shrink(1);
                 } else {
-                    itemstack.hurtAndBreak(1, p_32301_, getSlotForHand(p_32302_));
+                    itemstack.hurtAndBreak(1, pPlayer, getSlotForHand(pHand));
                 }
             }
 
             return InteractionResult.SUCCESS;
         } else {
-            return super.mobInteract(p_32301_, p_32302_);
+            return super.mobInteract(pPlayer, pHand);
         }
     }
 

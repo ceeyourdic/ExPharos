@@ -15,15 +15,15 @@ public abstract class DataComponentRemainderFix extends DataFix {
     private final String componentId;
     private final String newComponentId;
 
-    public DataComponentRemainderFix(Schema p_376620_, String p_377270_, String p_377955_) {
-        this(p_376620_, p_377270_, p_377955_, p_377955_);
+    public DataComponentRemainderFix(Schema pOutputSchema, String pName, String pComponentId) {
+        this(pOutputSchema, pName, pComponentId, pComponentId);
     }
 
-    public DataComponentRemainderFix(Schema p_377436_, String p_376489_, String p_375602_, String p_378725_) {
-        super(p_377436_, false);
-        this.name = p_376489_;
-        this.componentId = p_375602_;
-        this.newComponentId = p_378725_;
+    public DataComponentRemainderFix(Schema pOutputSchema, String pName, String pComponentId, String pNewComponentId) {
+        super(pOutputSchema, false);
+        this.name = pName;
+        this.componentId = pComponentId;
+        this.newComponentId = pNewComponentId;
     }
 
     @Override
@@ -41,5 +41,5 @@ public abstract class DataComponentRemainderFix extends DataFix {
     }
 
     @Nullable
-    protected abstract <T> Dynamic<T> fixComponent(Dynamic<T> p_375785_);
+    protected abstract <T> Dynamic<T> fixComponent(Dynamic<T> pComponent);
 }

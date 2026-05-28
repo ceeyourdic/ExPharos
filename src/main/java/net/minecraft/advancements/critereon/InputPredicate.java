@@ -28,17 +28,17 @@ public record InputPredicate(
                 .apply(p_366376_, InputPredicate::new)
     );
 
-    public boolean matches(Input p_366387_) {
-        return this.matches(this.forward, p_366387_.forward())
-            && this.matches(this.backward, p_366387_.backward())
-            && this.matches(this.left, p_366387_.left())
-            && this.matches(this.right, p_366387_.right())
-            && this.matches(this.jump, p_366387_.jump())
-            && this.matches(this.sneak, p_366387_.shift())
-            && this.matches(this.sprint, p_366387_.sprint());
+    public boolean matches(Input pInput) {
+        return this.matches(this.forward, pInput.forward())
+            && this.matches(this.backward, pInput.backward())
+            && this.matches(this.left, pInput.left())
+            && this.matches(this.right, pInput.right())
+            && this.matches(this.jump, pInput.jump())
+            && this.matches(this.sneak, pInput.shift())
+            && this.matches(this.sprint, pInput.sprint());
     }
 
-    private boolean matches(Optional<Boolean> p_361317_, boolean p_366567_) {
-        return p_361317_.<Boolean>map(p_365276_ -> p_365276_ == p_366567_).orElse(true);
+    private boolean matches(Optional<Boolean> pInput, boolean pExpectedValue) {
+        return pInput.<Boolean>map(p_365276_ -> p_365276_ == pExpectedValue).orElse(true);
     }
 }

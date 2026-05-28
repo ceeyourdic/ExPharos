@@ -48,13 +48,13 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_52297_, BlockGetter p_52298_, BlockPos p_52299_, CollisionContext p_52300_) {
-        return SHAPE_BY_AGE[this.getAge(p_52297_)];
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return SHAPE_BY_AGE[this.getAge(pState)];
     }
 
     @Override
-    protected boolean mayPlaceOn(BlockState p_52302_, BlockGetter p_52303_, BlockPos p_52304_) {
-        return p_52302_.is(Blocks.FARMLAND);
+    protected boolean mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return pState.is(Blocks.FARMLAND);
     }
 
     protected IntegerProperty getAgeProperty() {
@@ -65,21 +65,21 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
         return 7;
     }
 
-    public int getAge(BlockState p_52306_) {
-        return p_52306_.getValue(this.getAgeProperty());
+    public int getAge(BlockState pState) {
+        return pState.getValue(this.getAgeProperty());
     }
 
-    public BlockState getStateForAge(int p_52290_) {
-        return this.defaultBlockState().setValue(this.getAgeProperty(), Integer.valueOf(p_52290_));
+    public BlockState getStateForAge(int pAge) {
+        return this.defaultBlockState().setValue(this.getAgeProperty(), Integer.valueOf(pAge));
     }
 
-    public final boolean isMaxAge(BlockState p_52308_) {
-        return this.getAge(p_52308_) >= this.getMaxAge();
+    public final boolean isMaxAge(BlockState pState) {
+        return this.getAge(pState) >= this.getMaxAge();
     }
 
     @Override
-    protected boolean isRandomlyTicking(BlockState p_52288_) {
-        return !this.isMaxAge(p_52288_);
+    protected boolean isRandomlyTicking(BlockState pState) {
+        return !this.isMaxAge(pState);
     }
 
     @Override
@@ -95,28 +95,28 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
         }
     }
 
-    public void growCrops(Level p_52264_, BlockPos p_52265_, BlockState p_52266_) {
-        int i = this.getAge(p_52266_) + this.getBonemealAgeIncrease(p_52264_);
+    public void growCrops(Level pLevel, BlockPos pPos, BlockState pState) {
+        int i = this.getAge(pState) + this.getBonemealAgeIncrease(pLevel);
         int j = this.getMaxAge();
         if (i > j) {
             i = j;
         }
 
-        p_52264_.setBlock(p_52265_, this.getStateForAge(i), 2);
+        pLevel.setBlock(pPos, this.getStateForAge(i), 2);
     }
 
-    protected int getBonemealAgeIncrease(Level p_52262_) {
-        return Mth.nextInt(p_52262_.random, 2, 5);
+    protected int getBonemealAgeIncrease(Level pLevel) {
+        return Mth.nextInt(pLevel.random, 2, 5);
     }
 
-    protected static float getGrowthSpeed(Block p_52273_, BlockGetter p_52274_, BlockPos p_52275_) {
+    protected static float getGrowthSpeed(Block pBlock, BlockGetter pLevel, BlockPos pPos) {
         float f = 1.0F;
-        BlockPos blockpos = p_52275_.below();
+        BlockPos blockpos = pPos.below();
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 float f1 = 0.0F;
-                BlockState blockstate = p_52274_.getBlockState(blockpos.offset(i, 0, j));
+                BlockState blockstate = pLevel.getBlockState(blockpos.offset(i, 0, j));
                 if (blockstate.is(Blocks.FARMLAND)) {
                     f1 = 1.0F;
                     if (blockstate.getValue(FarmBlock.MOISTURE) > 0) {
@@ -132,19 +132,19 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
             }
         }
 
-        BlockPos blockpos1 = p_52275_.north();
-        BlockPos blockpos2 = p_52275_.south();
-        BlockPos blockpos3 = p_52275_.west();
-        BlockPos blockpos4 = p_52275_.east();
-        boolean flag = p_52274_.getBlockState(blockpos3).is(p_52273_) || p_52274_.getBlockState(blockpos4).is(p_52273_);
-        boolean flag1 = p_52274_.getBlockState(blockpos1).is(p_52273_) || p_52274_.getBlockState(blockpos2).is(p_52273_);
+        BlockPos blockpos1 = pPos.north();
+        BlockPos blockpos2 = pPos.south();
+        BlockPos blockpos3 = pPos.west();
+        BlockPos blockpos4 = pPos.east();
+        boolean flag = pLevel.getBlockState(blockpos3).is(pBlock) || pLevel.getBlockState(blockpos4).is(pBlock);
+        boolean flag1 = pLevel.getBlockState(blockpos1).is(pBlock) || pLevel.getBlockState(blockpos2).is(pBlock);
         if (flag && flag1) {
             f /= 2.0F;
         } else {
-            boolean flag2 = p_52274_.getBlockState(blockpos3.north()).is(p_52273_)
-                || p_52274_.getBlockState(blockpos4.north()).is(p_52273_)
-                || p_52274_.getBlockState(blockpos4.south()).is(p_52273_)
-                || p_52274_.getBlockState(blockpos3.south()).is(p_52273_);
+            boolean flag2 = pLevel.getBlockState(blockpos3.north()).is(pBlock)
+                || pLevel.getBlockState(blockpos4.north()).is(pBlock)
+                || pLevel.getBlockState(blockpos4.south()).is(pBlock)
+                || pLevel.getBlockState(blockpos3.south()).is(pBlock);
             if (flag2) {
                 f /= 2.0F;
             }
@@ -154,21 +154,21 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_52282_, LevelReader p_52283_, BlockPos p_52284_) {
-        return hasSufficientLight(p_52283_, p_52284_) && super.canSurvive(p_52282_, p_52283_, p_52284_);
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        return hasSufficientLight(pLevel, pPos) && super.canSurvive(pState, pLevel, pPos);
     }
 
-    protected static boolean hasSufficientLight(LevelReader p_300321_, BlockPos p_300219_) {
-        return p_300321_.getRawBrightness(p_300219_, 0) >= 8;
+    protected static boolean hasSufficientLight(LevelReader pLevel, BlockPos pPos) {
+        return pLevel.getRawBrightness(pPos, 0) >= 8;
     }
 
     @Override
-    protected void entityInside(BlockState p_52277_, Level p_52278_, BlockPos p_52279_, Entity p_52280_) {
-        if (p_52278_ instanceof ServerLevel serverlevel && p_52280_ instanceof Ravager && serverlevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-            serverlevel.destroyBlock(p_52279_, true, p_52280_);
+    protected void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
+        if (pLevel instanceof ServerLevel serverlevel && pEntity instanceof Ravager && serverlevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+            serverlevel.destroyBlock(pPos, true, pEntity);
         }
 
-        super.entityInside(p_52277_, p_52278_, p_52279_, p_52280_);
+        super.entityInside(pState, pLevel, pPos, pEntity);
     }
 
     protected ItemLike getBaseSeedId() {
@@ -196,7 +196,7 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_52286_) {
-        p_52286_.add(AGE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(AGE);
     }
 }

@@ -52,12 +52,12 @@ public record TrialSpawnerConfig(
     );
     public static final Codec<Holder<TrialSpawnerConfig>> CODEC = RegistryFileCodec.create(Registries.TRIAL_SPAWNER_CONFIG, DIRECT_CODEC);
 
-    public int calculateTargetTotalMobs(int p_309661_) {
-        return (int)Math.floor((double)(this.totalMobs + this.totalMobsAddedPerPlayer * (float)p_309661_));
+    public int calculateTargetTotalMobs(int pPlayers) {
+        return (int)Math.floor((double)(this.totalMobs + this.totalMobsAddedPerPlayer * (float)pPlayers));
     }
 
-    public int calculateTargetSimultaneousMobs(int p_312677_) {
-        return (int)Math.floor((double)(this.simultaneousMobs + this.simultaneousMobsAddedPerPlayer * (float)p_312677_));
+    public int calculateTargetSimultaneousMobs(int pPlayers) {
+        return (int)Math.floor((double)(this.simultaneousMobs + this.simultaneousMobsAddedPerPlayer * (float)pPlayers));
     }
 
     public long ticksBetweenItemSpawners() {
@@ -68,9 +68,9 @@ public record TrialSpawnerConfig(
         return new TrialSpawnerConfig.Builder();
     }
 
-    public TrialSpawnerConfig withSpawning(EntityType<?> p_376640_) {
+    public TrialSpawnerConfig withSpawning(EntityType<?> pEntityType) {
         CompoundTag compoundtag = new CompoundTag();
-        compoundtag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(p_376640_).toString());
+        compoundtag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(pEntityType).toString());
         SpawnData spawndata = new SpawnData(compoundtag, Optional.empty(), Optional.empty());
         return new TrialSpawnerConfig(
             this.spawnRange,
@@ -99,48 +99,48 @@ public record TrialSpawnerConfig(
             .build();
         private ResourceKey<LootTable> itemsToDropWhenOminous = BuiltInLootTables.SPAWNER_TRIAL_ITEMS_TO_DROP_WHEN_OMINOUS;
 
-        public TrialSpawnerConfig.Builder spawnRange(int p_365760_) {
-            this.spawnRange = p_365760_;
+        public TrialSpawnerConfig.Builder spawnRange(int pSpawnRange) {
+            this.spawnRange = pSpawnRange;
             return this;
         }
 
-        public TrialSpawnerConfig.Builder totalMobs(float p_369310_) {
-            this.totalMobs = p_369310_;
+        public TrialSpawnerConfig.Builder totalMobs(float pTotalMobs) {
+            this.totalMobs = pTotalMobs;
             return this;
         }
 
-        public TrialSpawnerConfig.Builder simultaneousMobs(float p_365936_) {
-            this.simultaneousMobs = p_365936_;
+        public TrialSpawnerConfig.Builder simultaneousMobs(float pSimultaneousMobs) {
+            this.simultaneousMobs = pSimultaneousMobs;
             return this;
         }
 
-        public TrialSpawnerConfig.Builder totalMobsAddedPerPlayer(float p_360974_) {
-            this.totalMobsAddedPerPlayer = p_360974_;
+        public TrialSpawnerConfig.Builder totalMobsAddedPerPlayer(float pTotalMobsAddedPerPlayer) {
+            this.totalMobsAddedPerPlayer = pTotalMobsAddedPerPlayer;
             return this;
         }
 
-        public TrialSpawnerConfig.Builder simultaneousMobsAddedPerPlayer(float p_367537_) {
-            this.simultaneousMobsAddedPerPlayer = p_367537_;
+        public TrialSpawnerConfig.Builder simultaneousMobsAddedPerPlayer(float pSimultaneousMobsAddedPerPlayer) {
+            this.simultaneousMobsAddedPerPlayer = pSimultaneousMobsAddedPerPlayer;
             return this;
         }
 
-        public TrialSpawnerConfig.Builder ticksBetweenSpawn(int p_369084_) {
-            this.ticksBetweenSpawn = p_369084_;
+        public TrialSpawnerConfig.Builder ticksBetweenSpawn(int pTicksBetweenSpawn) {
+            this.ticksBetweenSpawn = pTicksBetweenSpawn;
             return this;
         }
 
-        public TrialSpawnerConfig.Builder spawnPotentialsDefinition(SimpleWeightedRandomList<SpawnData> p_363681_) {
-            this.spawnPotentialsDefinition = p_363681_;
+        public TrialSpawnerConfig.Builder spawnPotentialsDefinition(SimpleWeightedRandomList<SpawnData> pSpawnPotentialsDefinition) {
+            this.spawnPotentialsDefinition = pSpawnPotentialsDefinition;
             return this;
         }
 
-        public TrialSpawnerConfig.Builder lootTablesToEject(SimpleWeightedRandomList<ResourceKey<LootTable>> p_365621_) {
-            this.lootTablesToEject = p_365621_;
+        public TrialSpawnerConfig.Builder lootTablesToEject(SimpleWeightedRandomList<ResourceKey<LootTable>> pLootTablesToEject) {
+            this.lootTablesToEject = pLootTablesToEject;
             return this;
         }
 
-        public TrialSpawnerConfig.Builder itemsToDropWhenOminous(ResourceKey<LootTable> p_369844_) {
-            this.itemsToDropWhenOminous = p_369844_;
+        public TrialSpawnerConfig.Builder itemsToDropWhenOminous(ResourceKey<LootTable> pItemsToDropWhenOminous) {
+            this.itemsToDropWhenOminous = pItemsToDropWhenOminous;
             return this;
         }
 

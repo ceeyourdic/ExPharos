@@ -16,9 +16,9 @@ public class PineFoliagePlacer extends FoliagePlacer {
     );
     private final IntProvider height;
 
-    public PineFoliagePlacer(IntProvider p_161486_, IntProvider p_161487_, IntProvider p_161488_) {
-        super(p_161486_, p_161487_);
-        this.height = p_161488_;
+    public PineFoliagePlacer(IntProvider pRadius, IntProvider pOffset, IntProvider pHeight) {
+        super(pRadius, pOffset);
+        this.height = pHeight;
     }
 
     @Override

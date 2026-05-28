@@ -36,10 +36,10 @@ public class MinecartSpawner extends AbstractMinecart {
         return new ItemStack(Items.MINECART);
     }
 
-    private Runnable createTicker(Level p_150335_) {
-        return p_150335_ instanceof ServerLevel
-            ? () -> this.spawner.serverTick((ServerLevel)p_150335_, this.blockPosition())
-            : () -> this.spawner.clientTick(p_150335_, this.blockPosition());
+    private Runnable createTicker(Level pLevel) {
+        return pLevel instanceof ServerLevel
+            ? () -> this.spawner.serverTick((ServerLevel)pLevel, this.blockPosition())
+            : () -> this.spawner.clientTick(pLevel, this.blockPosition());
     }
 
     @Override
@@ -48,15 +48,15 @@ public class MinecartSpawner extends AbstractMinecart {
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag p_38633_) {
-        super.readAdditionalSaveData(p_38633_);
-        this.spawner.load(this.level(), this.blockPosition(), p_38633_);
+    protected void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.spawner.load(this.level(), this.blockPosition(), pCompound);
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag p_38635_) {
-        super.addAdditionalSaveData(p_38635_);
-        this.spawner.save(p_38635_);
+    protected void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.spawner.save(pCompound);
     }
 
     @Override

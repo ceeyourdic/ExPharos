@@ -67,20 +67,20 @@ public class BlendingData {
     private final List<List<Holder<Biome>>> biomes;
     private final transient double[][] densities;
 
-    private BlendingData(int p_224740_, int p_224741_, Optional<double[]> p_224742_) {
-        this.heights = p_224742_.orElseGet(() -> Util.make(new double[CELL_COLUMN_COUNT], p_224756_ -> Arrays.fill(p_224756_, Double.MAX_VALUE)));
+    private BlendingData(int pSectionX, int pSectionZ, Optional<double[]> pHeights) {
+        this.heights = pHeights.orElseGet(() -> Util.make(new double[CELL_COLUMN_COUNT], p_224756_ -> Arrays.fill(p_224756_, Double.MAX_VALUE)));
         this.densities = new double[CELL_COLUMN_COUNT][];
         ObjectArrayList<List<Holder<Biome>>> objectarraylist = new ObjectArrayList<>(CELL_COLUMN_COUNT);
         objectarraylist.size(CELL_COLUMN_COUNT);
         this.biomes = objectarraylist;
-        int i = SectionPos.sectionToBlockCoord(p_224740_);
-        int j = SectionPos.sectionToBlockCoord(p_224741_) - i;
+        int i = SectionPos.sectionToBlockCoord(pSectionX);
+        int j = SectionPos.sectionToBlockCoord(pSectionZ) - i;
         this.areaWithOldGeneration = LevelHeightAccessor.create(i, j);
     }
 
     @Nullable
-    public static BlendingData unpack(@Nullable BlendingData.Packed p_364541_) {
-        return p_364541_ == null ? null : new BlendingData(p_364541_.minSection(), p_364541_.maxSection(), p_364541_.heights());
+    public static BlendingData unpack(@Nullable BlendingData.Packed pPacked) {
+        return pPacked == null ? null : new BlendingData(pPacked.minSection(), pPacked.maxSection(), pPacked.heights());
     }
 
     public BlendingData.Packed pack() {
@@ -99,24 +99,24 @@ public class BlendingData {
     }
 
     @Nullable
-    public static BlendingData getOrUpdateBlendingData(WorldGenRegion p_190305_, int p_190306_, int p_190307_) {
-        ChunkAccess chunkaccess = p_190305_.getChunk(p_190306_, p_190307_);
+    public static BlendingData getOrUpdateBlendingData(WorldGenRegion pRegion, int pChunkX, int pChunkZ) {
+        ChunkAccess chunkaccess = pRegion.getChunk(pChunkX, pChunkZ);
         BlendingData blendingdata = chunkaccess.getBlendingData();
         if (blendingdata != null && !chunkaccess.getHighestGeneratedStatus().isBefore(ChunkStatus.BIOMES)) {
-            blendingdata.calculateData(chunkaccess, sideByGenerationAge(p_190305_, p_190306_, p_190307_, false));
+            blendingdata.calculateData(chunkaccess, sideByGenerationAge(pRegion, pChunkX, pChunkZ, false));
             return blendingdata;
         } else {
             return null;
         }
     }
 
-    public static Set<Direction8> sideByGenerationAge(WorldGenLevel p_197066_, int p_197067_, int p_197068_, boolean p_197069_) {
+    public static Set<Direction8> sideByGenerationAge(WorldGenLevel pLevel, int pChunkX, int pChunkZ, boolean pOldNoiseGeneration) {
         Set<Direction8> set = EnumSet.noneOf(Direction8.class);
 
         for (Direction8 direction8 : Direction8.values()) {
-            int i = p_197067_ + direction8.getStepX();
-            int j = p_197068_ + direction8.getStepZ();
-            if (p_197066_.getChunk(i, j).isOldNoiseGeneration() == p_197069_) {
+            int i = pChunkX + direction8.getStepX();
+            int j = pChunkZ + direction8.getStepZ();
+            if (pLevel.getChunk(i, j).isOldNoiseGeneration() == pOldNoiseGeneration) {
                 set.add(direction8);
             }
         }
@@ -124,70 +124,70 @@ public class BlendingData {
         return set;
     }
 
-    private void calculateData(ChunkAccess p_190318_, Set<Direction8> p_190319_) {
+    private void calculateData(ChunkAccess pChunk, Set<Direction8> pDirections) {
         if (!this.hasCalculatedData) {
-            if (p_190319_.contains(Direction8.NORTH) || p_190319_.contains(Direction8.WEST) || p_190319_.contains(Direction8.NORTH_WEST)) {
-                this.addValuesForColumn(getInsideIndex(0, 0), p_190318_, 0, 0);
+            if (pDirections.contains(Direction8.NORTH) || pDirections.contains(Direction8.WEST) || pDirections.contains(Direction8.NORTH_WEST)) {
+                this.addValuesForColumn(getInsideIndex(0, 0), pChunk, 0, 0);
             }
 
-            if (p_190319_.contains(Direction8.NORTH)) {
+            if (pDirections.contains(Direction8.NORTH)) {
                 for (int i = 1; i < QUARTS_PER_SECTION; i++) {
-                    this.addValuesForColumn(getInsideIndex(i, 0), p_190318_, 4 * i, 0);
+                    this.addValuesForColumn(getInsideIndex(i, 0), pChunk, 4 * i, 0);
                 }
             }
 
-            if (p_190319_.contains(Direction8.WEST)) {
+            if (pDirections.contains(Direction8.WEST)) {
                 for (int j = 1; j < QUARTS_PER_SECTION; j++) {
-                    this.addValuesForColumn(getInsideIndex(0, j), p_190318_, 0, 4 * j);
+                    this.addValuesForColumn(getInsideIndex(0, j), pChunk, 0, 4 * j);
                 }
             }
 
-            if (p_190319_.contains(Direction8.EAST)) {
+            if (pDirections.contains(Direction8.EAST)) {
                 for (int k = 1; k < QUARTS_PER_SECTION; k++) {
-                    this.addValuesForColumn(getOutsideIndex(CELL_HORIZONTAL_MAX_INDEX_OUTSIDE, k), p_190318_, 15, 4 * k);
+                    this.addValuesForColumn(getOutsideIndex(CELL_HORIZONTAL_MAX_INDEX_OUTSIDE, k), pChunk, 15, 4 * k);
                 }
             }
 
-            if (p_190319_.contains(Direction8.SOUTH)) {
+            if (pDirections.contains(Direction8.SOUTH)) {
                 for (int l = 0; l < QUARTS_PER_SECTION; l++) {
-                    this.addValuesForColumn(getOutsideIndex(l, CELL_HORIZONTAL_MAX_INDEX_OUTSIDE), p_190318_, 4 * l, 15);
+                    this.addValuesForColumn(getOutsideIndex(l, CELL_HORIZONTAL_MAX_INDEX_OUTSIDE), pChunk, 4 * l, 15);
                 }
             }
 
-            if (p_190319_.contains(Direction8.EAST) && p_190319_.contains(Direction8.NORTH_EAST)) {
-                this.addValuesForColumn(getOutsideIndex(CELL_HORIZONTAL_MAX_INDEX_OUTSIDE, 0), p_190318_, 15, 0);
+            if (pDirections.contains(Direction8.EAST) && pDirections.contains(Direction8.NORTH_EAST)) {
+                this.addValuesForColumn(getOutsideIndex(CELL_HORIZONTAL_MAX_INDEX_OUTSIDE, 0), pChunk, 15, 0);
             }
 
-            if (p_190319_.contains(Direction8.EAST) && p_190319_.contains(Direction8.SOUTH) && p_190319_.contains(Direction8.SOUTH_EAST)) {
-                this.addValuesForColumn(getOutsideIndex(CELL_HORIZONTAL_MAX_INDEX_OUTSIDE, CELL_HORIZONTAL_MAX_INDEX_OUTSIDE), p_190318_, 15, 15);
+            if (pDirections.contains(Direction8.EAST) && pDirections.contains(Direction8.SOUTH) && pDirections.contains(Direction8.SOUTH_EAST)) {
+                this.addValuesForColumn(getOutsideIndex(CELL_HORIZONTAL_MAX_INDEX_OUTSIDE, CELL_HORIZONTAL_MAX_INDEX_OUTSIDE), pChunk, 15, 15);
             }
 
             this.hasCalculatedData = true;
         }
     }
 
-    private void addValuesForColumn(int p_190300_, ChunkAccess p_190301_, int p_190302_, int p_190303_) {
-        if (this.heights[p_190300_] == Double.MAX_VALUE) {
-            this.heights[p_190300_] = (double)this.getHeightAtXZ(p_190301_, p_190302_, p_190303_);
+    private void addValuesForColumn(int pIndex, ChunkAccess pChunk, int pX, int pZ) {
+        if (this.heights[pIndex] == Double.MAX_VALUE) {
+            this.heights[pIndex] = (double)this.getHeightAtXZ(pChunk, pX, pZ);
         }
 
-        this.densities[p_190300_] = this.getDensityColumn(p_190301_, p_190302_, p_190303_, Mth.floor(this.heights[p_190300_]));
-        this.biomes.set(p_190300_, this.getBiomeColumn(p_190301_, p_190302_, p_190303_));
+        this.densities[pIndex] = this.getDensityColumn(pChunk, pX, pZ, Mth.floor(this.heights[pIndex]));
+        this.biomes.set(pIndex, this.getBiomeColumn(pChunk, pX, pZ));
     }
 
-    private int getHeightAtXZ(ChunkAccess p_190311_, int p_190312_, int p_190313_) {
+    private int getHeightAtXZ(ChunkAccess pChunk, int pX, int pZ) {
         int i;
-        if (p_190311_.hasPrimedHeightmap(Heightmap.Types.WORLD_SURFACE_WG)) {
-            i = Math.min(p_190311_.getHeight(Heightmap.Types.WORLD_SURFACE_WG, p_190312_, p_190313_), this.areaWithOldGeneration.getMaxY());
+        if (pChunk.hasPrimedHeightmap(Heightmap.Types.WORLD_SURFACE_WG)) {
+            i = Math.min(pChunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, pX, pZ), this.areaWithOldGeneration.getMaxY());
         } else {
             i = this.areaWithOldGeneration.getMaxY();
         }
 
         int j = this.areaWithOldGeneration.getMinY();
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(p_190312_, i, p_190313_);
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(pX, i, pZ);
 
         while (blockpos$mutableblockpos.getY() > j) {
-            if (SURFACE_BLOCKS.contains(p_190311_.getBlockState(blockpos$mutableblockpos).getBlock())) {
+            if (SURFACE_BLOCKS.contains(pChunk.getBlockState(blockpos$mutableblockpos).getBlock())) {
                 return blockpos$mutableblockpos.getY();
             }
 
@@ -197,36 +197,36 @@ public class BlendingData {
         return j;
     }
 
-    private static double read1(ChunkAccess p_198298_, BlockPos.MutableBlockPos p_198299_) {
-        return isGround(p_198298_, p_198299_.move(Direction.DOWN)) ? 1.0 : -1.0;
+    private static double read1(ChunkAccess pChunk, BlockPos.MutableBlockPos pPos) {
+        return isGround(pChunk, pPos.move(Direction.DOWN)) ? 1.0 : -1.0;
     }
 
-    private static double read7(ChunkAccess p_198301_, BlockPos.MutableBlockPos p_198302_) {
+    private static double read7(ChunkAccess pChunk, BlockPos.MutableBlockPos pPos) {
         double d0 = 0.0;
 
         for (int i = 0; i < 7; i++) {
-            d0 += read1(p_198301_, p_198302_);
+            d0 += read1(pChunk, pPos);
         }
 
         return d0;
     }
 
-    private double[] getDensityColumn(ChunkAccess p_198293_, int p_198294_, int p_198295_, int p_198296_) {
+    private double[] getDensityColumn(ChunkAccess pChunk, int pX, int pZ, int pHeight) {
         double[] adouble = new double[this.cellCountPerColumn()];
         Arrays.fill(adouble, -1.0);
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(p_198294_, this.areaWithOldGeneration.getMaxY() + 1, p_198295_);
-        double d0 = read7(p_198293_, blockpos$mutableblockpos);
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(pX, this.areaWithOldGeneration.getMaxY() + 1, pZ);
+        double d0 = read7(pChunk, blockpos$mutableblockpos);
 
         for (int i = adouble.length - 2; i >= 0; i--) {
-            double d1 = read1(p_198293_, blockpos$mutableblockpos);
-            double d2 = read7(p_198293_, blockpos$mutableblockpos);
+            double d1 = read1(pChunk, blockpos$mutableblockpos);
+            double d2 = read7(pChunk, blockpos$mutableblockpos);
             adouble[i] = (d0 + d1 + d2) / 15.0;
             d0 = d2;
         }
 
-        int j = this.getCellYIndex(Mth.floorDiv(p_198296_, 8));
+        int j = this.getCellYIndex(Mth.floorDiv(pHeight, 8));
         if (j >= 0 && j < adouble.length - 1) {
-            double d4 = ((double)p_198296_ + 0.5) % 8.0 / 8.0;
+            double d4 = ((double)pHeight + 0.5) % 8.0 / 8.0;
             double d5 = (1.0 - d4) / d4;
             double d3 = Math.max(d5, 1.0) * 0.25;
             adouble[j + 1] = -d5 / d3;
@@ -236,20 +236,20 @@ public class BlendingData {
         return adouble;
     }
 
-    private List<Holder<Biome>> getBiomeColumn(ChunkAccess p_224758_, int p_224759_, int p_224760_) {
+    private List<Holder<Biome>> getBiomeColumn(ChunkAccess pChunk, int pX, int pZ) {
         ObjectArrayList<Holder<Biome>> objectarraylist = new ObjectArrayList<>(this.quartCountPerColumn());
         objectarraylist.size(this.quartCountPerColumn());
 
         for (int i = 0; i < objectarraylist.size(); i++) {
             int j = i + QuartPos.fromBlock(this.areaWithOldGeneration.getMinY());
-            objectarraylist.set(i, p_224758_.getNoiseBiome(QuartPos.fromBlock(p_224759_), j, QuartPos.fromBlock(p_224760_)));
+            objectarraylist.set(i, pChunk.getNoiseBiome(QuartPos.fromBlock(pX), j, QuartPos.fromBlock(pZ)));
         }
 
         return objectarraylist;
     }
 
-    private static boolean isGround(ChunkAccess p_190315_, BlockPos p_190316_) {
-        BlockState blockstate = p_190315_.getBlockState(p_190316_);
+    private static boolean isGround(ChunkAccess pChunk, BlockPos pPos) {
+        BlockState blockstate = pChunk.getBlockState(pPos);
         if (blockstate.isAir()) {
             return false;
         } else if (blockstate.is(BlockTags.LEAVES)) {
@@ -257,74 +257,74 @@ public class BlendingData {
         } else if (blockstate.is(BlockTags.LOGS)) {
             return false;
         } else {
-            return blockstate.is(Blocks.BROWN_MUSHROOM_BLOCK) || blockstate.is(Blocks.RED_MUSHROOM_BLOCK) ? false : !blockstate.getCollisionShape(p_190315_, p_190316_).isEmpty();
+            return blockstate.is(Blocks.BROWN_MUSHROOM_BLOCK) || blockstate.is(Blocks.RED_MUSHROOM_BLOCK) ? false : !blockstate.getCollisionShape(pChunk, pPos).isEmpty();
         }
     }
 
-    protected double getHeight(int p_190286_, int p_190287_, int p_190288_) {
-        if (p_190286_ == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE || p_190288_ == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE) {
-            return this.heights[getOutsideIndex(p_190286_, p_190288_)];
+    protected double getHeight(int pX, int pY, int pZ) {
+        if (pX == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE || pZ == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE) {
+            return this.heights[getOutsideIndex(pX, pZ)];
         } else {
-            return p_190286_ != 0 && p_190288_ != 0 ? Double.MAX_VALUE : this.heights[getInsideIndex(p_190286_, p_190288_)];
+            return pX != 0 && pZ != 0 ? Double.MAX_VALUE : this.heights[getInsideIndex(pX, pZ)];
         }
     }
 
-    private double getDensity(@Nullable double[] p_190325_, int p_190326_) {
-        if (p_190325_ == null) {
+    private double getDensity(@Nullable double[] pHeights, int pY) {
+        if (pHeights == null) {
             return Double.MAX_VALUE;
         } else {
-            int i = this.getCellYIndex(p_190326_);
-            return i >= 0 && i < p_190325_.length ? p_190325_[i] * 0.1 : Double.MAX_VALUE;
+            int i = this.getCellYIndex(pY);
+            return i >= 0 && i < pHeights.length ? pHeights[i] * 0.1 : Double.MAX_VALUE;
         }
     }
 
-    protected double getDensity(int p_190334_, int p_190335_, int p_190336_) {
-        if (p_190335_ == this.getMinY()) {
+    protected double getDensity(int pX, int pY, int pZ) {
+        if (pY == this.getMinY()) {
             return 0.1;
-        } else if (p_190334_ == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE || p_190336_ == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE) {
-            return this.getDensity(this.densities[getOutsideIndex(p_190334_, p_190336_)], p_190335_);
+        } else if (pX == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE || pZ == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE) {
+            return this.getDensity(this.densities[getOutsideIndex(pX, pZ)], pY);
         } else {
-            return p_190334_ != 0 && p_190336_ != 0 ? Double.MAX_VALUE : this.getDensity(this.densities[getInsideIndex(p_190334_, p_190336_)], p_190335_);
+            return pX != 0 && pZ != 0 ? Double.MAX_VALUE : this.getDensity(this.densities[getInsideIndex(pX, pZ)], pY);
         }
     }
 
-    protected void iterateBiomes(int p_224749_, int p_224750_, int p_224751_, BlendingData.BiomeConsumer p_224752_) {
-        if (p_224750_ >= QuartPos.fromBlock(this.areaWithOldGeneration.getMinY()) && p_224750_ <= QuartPos.fromBlock(this.areaWithOldGeneration.getMaxY())) {
-            int i = p_224750_ - QuartPos.fromBlock(this.areaWithOldGeneration.getMinY());
+    protected void iterateBiomes(int pX, int pY, int pZ, BlendingData.BiomeConsumer pConsumer) {
+        if (pY >= QuartPos.fromBlock(this.areaWithOldGeneration.getMinY()) && pY <= QuartPos.fromBlock(this.areaWithOldGeneration.getMaxY())) {
+            int i = pY - QuartPos.fromBlock(this.areaWithOldGeneration.getMinY());
 
             for (int j = 0; j < this.biomes.size(); j++) {
                 if (this.biomes.get(j) != null) {
                     Holder<Biome> holder = this.biomes.get(j).get(i);
                     if (holder != null) {
-                        p_224752_.consume(p_224749_ + getX(j), p_224751_ + getZ(j), holder);
+                        pConsumer.consume(pX + getX(j), pZ + getZ(j), holder);
                     }
                 }
             }
         }
     }
 
-    protected void iterateHeights(int p_190296_, int p_190297_, BlendingData.HeightConsumer p_190298_) {
+    protected void iterateHeights(int pX, int pZ, BlendingData.HeightConsumer pConsumer) {
         for (int i = 0; i < this.heights.length; i++) {
             double d0 = this.heights[i];
             if (d0 != Double.MAX_VALUE) {
-                p_190298_.consume(p_190296_ + getX(i), p_190297_ + getZ(i), d0);
+                pConsumer.consume(pX + getX(i), pZ + getZ(i), d0);
             }
         }
     }
 
-    protected void iterateDensities(int p_190290_, int p_190291_, int p_190292_, int p_190293_, BlendingData.DensityConsumer p_190294_) {
+    protected void iterateDensities(int pX, int pZ, int pMinY, int pMaxY, BlendingData.DensityConsumer pConsumer) {
         int i = this.getColumnMinY();
-        int j = Math.max(0, p_190292_ - i);
-        int k = Math.min(this.cellCountPerColumn(), p_190293_ - i);
+        int j = Math.max(0, pMinY - i);
+        int k = Math.min(this.cellCountPerColumn(), pMaxY - i);
 
         for (int l = 0; l < this.densities.length; l++) {
             double[] adouble = this.densities[l];
             if (adouble != null) {
-                int i1 = p_190290_ + getX(l);
-                int j1 = p_190291_ + getZ(l);
+                int i1 = pX + getX(l);
+                int j1 = pZ + getZ(l);
 
                 for (int k1 = j; k1 < k; k1++) {
-                    p_190294_.consume(i1, k1 + i, j1, adouble[k1] * 0.1);
+                    pConsumer.consume(i1, k1 + i, j1, adouble[k1] * 0.1);
                 }
             }
         }
@@ -346,38 +346,38 @@ public class BlendingData {
         return this.areaWithOldGeneration.getMinSectionY() * 2;
     }
 
-    private int getCellYIndex(int p_224747_) {
-        return p_224747_ - this.getColumnMinY();
+    private int getCellYIndex(int pY) {
+        return pY - this.getColumnMinY();
     }
 
-    private static int getInsideIndex(int p_190331_, int p_190332_) {
-        return CELL_HORIZONTAL_MAX_INDEX_INSIDE - p_190331_ + p_190332_;
+    private static int getInsideIndex(int pX, int pZ) {
+        return CELL_HORIZONTAL_MAX_INDEX_INSIDE - pX + pZ;
     }
 
-    private static int getOutsideIndex(int p_190351_, int p_190352_) {
-        return CELL_COLUMN_INSIDE_COUNT + p_190351_ + CELL_HORIZONTAL_MAX_INDEX_OUTSIDE - p_190352_;
+    private static int getOutsideIndex(int pX, int pZ) {
+        return CELL_COLUMN_INSIDE_COUNT + pX + CELL_HORIZONTAL_MAX_INDEX_OUTSIDE - pZ;
     }
 
-    private static int getX(int p_190349_) {
-        if (p_190349_ < CELL_COLUMN_INSIDE_COUNT) {
-            return zeroIfNegative(CELL_HORIZONTAL_MAX_INDEX_INSIDE - p_190349_);
+    private static int getX(int pIndex) {
+        if (pIndex < CELL_COLUMN_INSIDE_COUNT) {
+            return zeroIfNegative(CELL_HORIZONTAL_MAX_INDEX_INSIDE - pIndex);
         } else {
-            int i = p_190349_ - CELL_COLUMN_INSIDE_COUNT;
+            int i = pIndex - CELL_COLUMN_INSIDE_COUNT;
             return CELL_HORIZONTAL_MAX_INDEX_OUTSIDE - zeroIfNegative(CELL_HORIZONTAL_MAX_INDEX_OUTSIDE - i);
         }
     }
 
-    private static int getZ(int p_190355_) {
-        if (p_190355_ < CELL_COLUMN_INSIDE_COUNT) {
-            return zeroIfNegative(p_190355_ - CELL_HORIZONTAL_MAX_INDEX_INSIDE);
+    private static int getZ(int pIndex) {
+        if (pIndex < CELL_COLUMN_INSIDE_COUNT) {
+            return zeroIfNegative(pIndex - CELL_HORIZONTAL_MAX_INDEX_INSIDE);
         } else {
-            int i = p_190355_ - CELL_COLUMN_INSIDE_COUNT;
+            int i = pIndex - CELL_COLUMN_INSIDE_COUNT;
             return CELL_HORIZONTAL_MAX_INDEX_OUTSIDE - zeroIfNegative(i - CELL_HORIZONTAL_MAX_INDEX_OUTSIDE);
         }
     }
 
-    private static int zeroIfNegative(int p_190357_) {
-        return p_190357_ & ~(p_190357_ >> 31);
+    private static int zeroIfNegative(int pValue) {
+        return pValue & ~(pValue >> 31);
     }
 
     public LevelHeightAccessor getAreaWithOldGeneration() {
@@ -385,15 +385,15 @@ public class BlendingData {
     }
 
     protected interface BiomeConsumer {
-        void consume(int p_204674_, int p_204675_, Holder<Biome> p_204676_);
+        void consume(int pX, int pZ, Holder<Biome> pBiome);
     }
 
     protected interface DensityConsumer {
-        void consume(int p_190362_, int p_190363_, int p_190364_, double p_190365_);
+        void consume(int pX, int pY, int pZ, double pDensity);
     }
 
     protected interface HeightConsumer {
-        void consume(int p_190367_, int p_190368_, double p_190369_);
+        void consume(int pX, int pZ, double pHeight);
     }
 
     public static record Packed(int minSection, int maxSection, Optional<double[]> heights) {
@@ -408,10 +408,10 @@ public class BlendingData {
             )
             .validate(BlendingData.Packed::validateArraySize);
 
-        private static DataResult<BlendingData.Packed> validateArraySize(BlendingData.Packed p_368802_) {
-            return p_368802_.heights.isPresent() && ((double[])p_368802_.heights.get()).length != BlendingData.CELL_COLUMN_COUNT
+        private static DataResult<BlendingData.Packed> validateArraySize(BlendingData.Packed pPacked) {
+            return pPacked.heights.isPresent() && ((double[])pPacked.heights.get()).length != BlendingData.CELL_COLUMN_COUNT
                 ? DataResult.error(() -> "heights has to be of length " + BlendingData.CELL_COLUMN_COUNT)
-                : DataResult.success(p_368802_);
+                : DataResult.success(pPacked);
         }
     }
 }

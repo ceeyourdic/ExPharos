@@ -352,8 +352,8 @@ public class ItemBlockRenderTypes {
     });
     private static boolean renderCutout;
 
-    public static RenderType getChunkRenderType(BlockState p_109283_) {
-        Block block = p_109283_.getBlock();
+    public static RenderType getChunkRenderType(BlockState pState) {
+        Block block = pState.getBlock();
         if (block instanceof LeavesBlock) {
             return renderCutout ? RenderType.cutoutMipped() : RenderType.solid();
         } else {
@@ -362,8 +362,8 @@ public class ItemBlockRenderTypes {
         }
     }
 
-    public static RenderType getMovingBlockRenderType(BlockState p_109294_) {
-        Block block = p_109294_.getBlock();
+    public static RenderType getMovingBlockRenderType(BlockState pState) {
+        Block block = pState.getBlock();
         if (block instanceof LeavesBlock) {
             return renderCutout ? RenderType.cutoutMipped() : RenderType.solid();
         } else {
@@ -376,13 +376,13 @@ public class ItemBlockRenderTypes {
         }
     }
 
-    public static RenderType getRenderType(BlockState p_364446_) {
-        RenderType rendertype = getChunkRenderType(p_364446_);
+    public static RenderType getRenderType(BlockState pState) {
+        RenderType rendertype = getChunkRenderType(pState);
         return rendertype == RenderType.translucent() ? Sheets.translucentItemSheet() : Sheets.cutoutBlockSheet();
     }
 
-    public static RenderType getRenderType(ItemStack p_363859_) {
-        if (p_363859_.getItem() instanceof BlockItem blockitem) {
+    public static RenderType getRenderType(ItemStack pStack) {
+        if (pStack.getItem() instanceof BlockItem blockitem) {
             Block block = blockitem.getBlock();
             return getRenderType(block.defaultBlockState());
         } else {
@@ -390,12 +390,12 @@ public class ItemBlockRenderTypes {
         }
     }
 
-    public static RenderType getRenderLayer(FluidState p_109288_) {
-        RenderType rendertype = TYPE_BY_FLUID.get(p_109288_.getType());
+    public static RenderType getRenderLayer(FluidState pFluidState) {
+        RenderType rendertype = TYPE_BY_FLUID.get(pFluidState.getType());
         return rendertype != null ? rendertype : RenderType.solid();
     }
 
-    public static void setFancy(boolean p_109292_) {
-        renderCutout = p_109292_;
+    public static void setFancy(boolean pFancy) {
+        renderCutout = pFancy;
     }
 }

@@ -20,12 +20,12 @@ public class StructureGridSpawner implements GameTestRunner.StructureSpawner {
     private float maxX = -1.0F;
     private final Collection<GameTestInfo> testInLastBatch = new ArrayList<>();
 
-    public StructureGridSpawner(BlockPos p_329915_, int p_328380_, boolean p_342481_) {
-        this.testsPerRow = p_328380_;
-        this.nextTestNorthWestCorner = p_329915_.mutable();
+    public StructureGridSpawner(BlockPos pNorthTestNorthWestCorner, int pTestsPerRow, boolean pClearOnBatch) {
+        this.testsPerRow = pTestsPerRow;
+        this.nextTestNorthWestCorner = pNorthTestNorthWestCorner.mutable();
         this.rowBounds = new AABB(this.nextTestNorthWestCorner);
-        this.firstTestNorthWestCorner = p_329915_;
-        this.clearOnBatch = p_342481_;
+        this.firstTestNorthWestCorner = pNorthTestNorthWestCorner;
+        this.clearOnBatch = pClearOnBatch;
     }
 
     @Override

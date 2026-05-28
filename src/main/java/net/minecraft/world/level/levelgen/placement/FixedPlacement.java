@@ -16,12 +16,12 @@ public class FixedPlacement extends PlacementModifier {
     );
     private final List<BlockPos> positions;
 
-    public static FixedPlacement of(BlockPos... p_345428_) {
-        return new FixedPlacement(List.of(p_345428_));
+    public static FixedPlacement of(BlockPos... pPositions) {
+        return new FixedPlacement(List.of(pPositions));
     }
 
-    private FixedPlacement(List<BlockPos> p_345049_) {
-        this.positions = p_345049_;
+    private FixedPlacement(List<BlockPos> pPositions) {
+        this.positions = pPositions;
     }
 
     @Override
@@ -40,8 +40,8 @@ public class FixedPlacement extends PlacementModifier {
         return !flag ? Stream.empty() : this.positions.stream().filter(p_344119_ -> isSameChunk(i, j, p_344119_));
     }
 
-    private static boolean isSameChunk(int p_342720_, int p_343562_, BlockPos p_342803_) {
-        return p_342720_ == SectionPos.blockToSectionCoord(p_342803_.getX()) && p_343562_ == SectionPos.blockToSectionCoord(p_342803_.getZ());
+    private static boolean isSameChunk(int pX, int pZ, BlockPos pPos) {
+        return pX == SectionPos.blockToSectionCoord(pPos.getX()) && pZ == SectionPos.blockToSectionCoord(pPos.getZ());
     }
 
     @Override

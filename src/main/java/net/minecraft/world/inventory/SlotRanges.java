@@ -47,41 +47,41 @@ public class SlotRanges {
     public static final Codec<SlotRange> CODEC = StringRepresentable.fromValues(() -> SLOTS.toArray(new SlotRange[0]));
     private static final Function<String, SlotRange> NAME_LOOKUP = StringRepresentable.createNameLookup(SLOTS.toArray(new SlotRange[0]), p_331861_ -> p_331861_);
 
-    private static SlotRange create(String p_328484_, int p_335544_) {
-        return SlotRange.of(p_328484_, IntLists.singleton(p_335544_));
+    private static SlotRange create(String pName, int pValue) {
+        return SlotRange.of(pName, IntLists.singleton(pValue));
     }
 
-    private static SlotRange create(String p_330835_, IntList p_333821_) {
-        return SlotRange.of(p_330835_, IntLists.unmodifiable(p_333821_));
+    private static SlotRange create(String pName, IntList pValues) {
+        return SlotRange.of(pName, IntLists.unmodifiable(pValues));
     }
 
-    private static SlotRange create(String p_333478_, int... p_336035_) {
-        return SlotRange.of(p_333478_, IntList.of(p_336035_));
+    private static SlotRange create(String pName, int... pValues) {
+        return SlotRange.of(pName, IntList.of(pValues));
     }
 
-    private static void addSingleSlot(List<SlotRange> p_332328_, String p_334715_, int p_328171_) {
-        p_332328_.add(create(p_334715_, p_328171_));
+    private static void addSingleSlot(List<SlotRange> pList, String pName, int pValue) {
+        pList.add(create(pName, pValue));
     }
 
-    private static void addSlotRange(List<SlotRange> p_328374_, String p_331284_, int p_329588_, int p_336322_) {
-        IntList intlist = new IntArrayList(p_336322_);
+    private static void addSlotRange(List<SlotRange> pList, String pPrefix, int pStartValue, int pSize) {
+        IntList intlist = new IntArrayList(pSize);
 
-        for (int i = 0; i < p_336322_; i++) {
-            int j = p_329588_ + i;
-            p_328374_.add(create(p_331284_ + i, j));
+        for (int i = 0; i < pSize; i++) {
+            int j = pStartValue + i;
+            pList.add(create(pPrefix + i, j));
             intlist.add(j);
         }
 
-        p_328374_.add(create(p_331284_ + "*", intlist));
+        pList.add(create(pPrefix + "*", intlist));
     }
 
-    private static void addSlots(List<SlotRange> p_329581_, String p_328279_, int... p_332253_) {
-        p_329581_.add(create(p_328279_, p_332253_));
+    private static void addSlots(List<SlotRange> pList, String pName, int... pValues) {
+        pList.add(create(pName, pValues));
     }
 
     @Nullable
-    public static SlotRange nameToIds(String p_328330_) {
-        return NAME_LOOKUP.apply(p_328330_);
+    public static SlotRange nameToIds(String pName) {
+        return NAME_LOOKUP.apply(pName);
     }
 
     public static Stream<String> allNames() {

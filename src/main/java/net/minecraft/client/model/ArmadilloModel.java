@@ -11,10 +11,7 @@ import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.entity.state.ArmadilloRenderState;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class ArmadilloModel extends EntityModel<ArmadilloRenderState> {
     public static final MeshTransformer BABY_TRANSFORMER = MeshTransformer.scaling(0.6F);
     private static final float MAX_DOWN_HEAD_ROTATION_EXTENT = 25.0F;
@@ -31,14 +28,14 @@ public class ArmadilloModel extends EntityModel<ArmadilloRenderState> {
     private final ModelPart head;
     private final ModelPart tail;
 
-    public ArmadilloModel(ModelPart p_329798_) {
-        super(p_329798_);
-        this.body = p_329798_.getChild("body");
-        this.rightHindLeg = p_329798_.getChild("right_hind_leg");
-        this.leftHindLeg = p_329798_.getChild("left_hind_leg");
+    public ArmadilloModel(ModelPart pRoot) {
+        super(pRoot);
+        this.body = pRoot.getChild("body");
+        this.rightHindLeg = pRoot.getChild("right_hind_leg");
+        this.leftHindLeg = pRoot.getChild("left_hind_leg");
         this.head = this.body.getChild("head");
         this.tail = this.body.getChild("tail");
-        this.cube = p_329798_.getChild("cube");
+        this.cube = pRoot.getChild("cube");
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -120,6 +117,14 @@ public class ArmadilloModel extends EntityModel<ArmadilloRenderState> {
             this.cube.visible = false;
             this.head.xRot = Mth.clamp(p_363759_.xRot, -22.5F, 25.0F) * (float) (Math.PI / 180.0);
             this.head.yRot = Mth.clamp(p_363759_.yRot, -32.5F, 32.5F) * (float) (Math.PI / 180.0);
+        }
+
+        if (this.body.cubes.isEmpty()) {
+            for (ModelPart modelpart : this.body.childModelsList) {
+                if (modelpart.isCustom()) {
+                    modelpart.visible = !this.body.skipDraw;
+                }
+            }
         }
 
         this.animateWalk(ArmadilloAnimation.ARMADILLO_WALK, p_363759_.walkAnimationPos, p_363759_.walkAnimationSpeed, 16.5F, 2.5F);

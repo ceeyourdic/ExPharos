@@ -20,87 +20,87 @@ import net.minecraft.world.level.block.Blocks;
 public class FuelValues {
     private final Object2IntSortedMap<Item> values;
 
-    FuelValues(Object2IntSortedMap<Item> p_367283_) {
-        this.values = p_367283_;
+    FuelValues(Object2IntSortedMap<Item> pValues) {
+        this.values = pValues;
     }
 
-    public boolean isFuel(ItemStack p_369912_) {
-        return this.values.containsKey(p_369912_.getItem());
+    public boolean isFuel(ItemStack pStack) {
+        return this.values.containsKey(pStack.getItem());
     }
 
     public SequencedSet<Item> fuelItems() {
         return Collections.unmodifiableSequencedSet(this.values.keySet());
     }
 
-    public int burnDuration(ItemStack p_368393_) {
-        return p_368393_.isEmpty() ? 0 : this.values.getInt(p_368393_.getItem());
+    public int burnDuration(ItemStack pStack) {
+        return pStack.isEmpty() ? 0 : this.values.getInt(pStack.getItem());
     }
 
-    public static FuelValues vanillaBurnTimes(HolderLookup.Provider p_363816_, FeatureFlagSet p_367705_) {
-        return vanillaBurnTimes(p_363816_, p_367705_, 200);
+    public static FuelValues vanillaBurnTimes(HolderLookup.Provider pRegistries, FeatureFlagSet pEnabledFeatures) {
+        return vanillaBurnTimes(pRegistries, pEnabledFeatures, 200);
     }
 
-    public static FuelValues vanillaBurnTimes(HolderLookup.Provider p_370014_, FeatureFlagSet p_364680_, int p_363278_) {
-        return new FuelValues.Builder(p_370014_, p_364680_)
-            .add(Items.LAVA_BUCKET, p_363278_ * 100)
-            .add(Blocks.COAL_BLOCK, p_363278_ * 8 * 10)
-            .add(Items.BLAZE_ROD, p_363278_ * 12)
-            .add(Items.COAL, p_363278_ * 8)
-            .add(Items.CHARCOAL, p_363278_ * 8)
-            .add(ItemTags.LOGS, p_363278_ * 3 / 2)
-            .add(ItemTags.BAMBOO_BLOCKS, p_363278_ * 3 / 2)
-            .add(ItemTags.PLANKS, p_363278_ * 3 / 2)
-            .add(Blocks.BAMBOO_MOSAIC, p_363278_ * 3 / 2)
-            .add(ItemTags.WOODEN_STAIRS, p_363278_ * 3 / 2)
-            .add(Blocks.BAMBOO_MOSAIC_STAIRS, p_363278_ * 3 / 2)
-            .add(ItemTags.WOODEN_SLABS, p_363278_ * 3 / 4)
-            .add(Blocks.BAMBOO_MOSAIC_SLAB, p_363278_ * 3 / 4)
-            .add(ItemTags.WOODEN_TRAPDOORS, p_363278_ * 3 / 2)
-            .add(ItemTags.WOODEN_PRESSURE_PLATES, p_363278_ * 3 / 2)
-            .add(ItemTags.WOODEN_FENCES, p_363278_ * 3 / 2)
-            .add(ItemTags.FENCE_GATES, p_363278_ * 3 / 2)
-            .add(Blocks.NOTE_BLOCK, p_363278_ * 3 / 2)
-            .add(Blocks.BOOKSHELF, p_363278_ * 3 / 2)
-            .add(Blocks.CHISELED_BOOKSHELF, p_363278_ * 3 / 2)
-            .add(Blocks.LECTERN, p_363278_ * 3 / 2)
-            .add(Blocks.JUKEBOX, p_363278_ * 3 / 2)
-            .add(Blocks.CHEST, p_363278_ * 3 / 2)
-            .add(Blocks.TRAPPED_CHEST, p_363278_ * 3 / 2)
-            .add(Blocks.CRAFTING_TABLE, p_363278_ * 3 / 2)
-            .add(Blocks.DAYLIGHT_DETECTOR, p_363278_ * 3 / 2)
-            .add(ItemTags.BANNERS, p_363278_ * 3 / 2)
-            .add(Items.BOW, p_363278_ * 3 / 2)
-            .add(Items.FISHING_ROD, p_363278_ * 3 / 2)
-            .add(Blocks.LADDER, p_363278_ * 3 / 2)
-            .add(ItemTags.SIGNS, p_363278_)
-            .add(ItemTags.HANGING_SIGNS, p_363278_ * 4)
-            .add(Items.WOODEN_SHOVEL, p_363278_)
-            .add(Items.WOODEN_SWORD, p_363278_)
-            .add(Items.WOODEN_HOE, p_363278_)
-            .add(Items.WOODEN_AXE, p_363278_)
-            .add(Items.WOODEN_PICKAXE, p_363278_)
-            .add(ItemTags.WOODEN_DOORS, p_363278_)
-            .add(ItemTags.BOATS, p_363278_ * 6)
-            .add(ItemTags.WOOL, p_363278_ / 2)
-            .add(ItemTags.WOODEN_BUTTONS, p_363278_ / 2)
-            .add(Items.STICK, p_363278_ / 2)
-            .add(ItemTags.SAPLINGS, p_363278_ / 2)
-            .add(Items.BOWL, p_363278_ / 2)
-            .add(ItemTags.WOOL_CARPETS, 1 + p_363278_ / 3)
-            .add(Blocks.DRIED_KELP_BLOCK, 1 + p_363278_ * 20)
-            .add(Items.CROSSBOW, p_363278_ * 3 / 2)
-            .add(Blocks.BAMBOO, p_363278_ / 4)
-            .add(Blocks.DEAD_BUSH, p_363278_ / 2)
-            .add(Blocks.SCAFFOLDING, p_363278_ / 4)
-            .add(Blocks.LOOM, p_363278_ * 3 / 2)
-            .add(Blocks.BARREL, p_363278_ * 3 / 2)
-            .add(Blocks.CARTOGRAPHY_TABLE, p_363278_ * 3 / 2)
-            .add(Blocks.FLETCHING_TABLE, p_363278_ * 3 / 2)
-            .add(Blocks.SMITHING_TABLE, p_363278_ * 3 / 2)
-            .add(Blocks.COMPOSTER, p_363278_ * 3 / 2)
-            .add(Blocks.AZALEA, p_363278_ / 2)
-            .add(Blocks.FLOWERING_AZALEA, p_363278_ / 2)
-            .add(Blocks.MANGROVE_ROOTS, p_363278_ * 3 / 2)
+    public static FuelValues vanillaBurnTimes(HolderLookup.Provider pRegistries, FeatureFlagSet pEnabledFeatures, int pSmeltingTime) {
+        return new FuelValues.Builder(pRegistries, pEnabledFeatures)
+            .add(Items.LAVA_BUCKET, pSmeltingTime * 100)
+            .add(Blocks.COAL_BLOCK, pSmeltingTime * 8 * 10)
+            .add(Items.BLAZE_ROD, pSmeltingTime * 12)
+            .add(Items.COAL, pSmeltingTime * 8)
+            .add(Items.CHARCOAL, pSmeltingTime * 8)
+            .add(ItemTags.LOGS, pSmeltingTime * 3 / 2)
+            .add(ItemTags.BAMBOO_BLOCKS, pSmeltingTime * 3 / 2)
+            .add(ItemTags.PLANKS, pSmeltingTime * 3 / 2)
+            .add(Blocks.BAMBOO_MOSAIC, pSmeltingTime * 3 / 2)
+            .add(ItemTags.WOODEN_STAIRS, pSmeltingTime * 3 / 2)
+            .add(Blocks.BAMBOO_MOSAIC_STAIRS, pSmeltingTime * 3 / 2)
+            .add(ItemTags.WOODEN_SLABS, pSmeltingTime * 3 / 4)
+            .add(Blocks.BAMBOO_MOSAIC_SLAB, pSmeltingTime * 3 / 4)
+            .add(ItemTags.WOODEN_TRAPDOORS, pSmeltingTime * 3 / 2)
+            .add(ItemTags.WOODEN_PRESSURE_PLATES, pSmeltingTime * 3 / 2)
+            .add(ItemTags.WOODEN_FENCES, pSmeltingTime * 3 / 2)
+            .add(ItemTags.FENCE_GATES, pSmeltingTime * 3 / 2)
+            .add(Blocks.NOTE_BLOCK, pSmeltingTime * 3 / 2)
+            .add(Blocks.BOOKSHELF, pSmeltingTime * 3 / 2)
+            .add(Blocks.CHISELED_BOOKSHELF, pSmeltingTime * 3 / 2)
+            .add(Blocks.LECTERN, pSmeltingTime * 3 / 2)
+            .add(Blocks.JUKEBOX, pSmeltingTime * 3 / 2)
+            .add(Blocks.CHEST, pSmeltingTime * 3 / 2)
+            .add(Blocks.TRAPPED_CHEST, pSmeltingTime * 3 / 2)
+            .add(Blocks.CRAFTING_TABLE, pSmeltingTime * 3 / 2)
+            .add(Blocks.DAYLIGHT_DETECTOR, pSmeltingTime * 3 / 2)
+            .add(ItemTags.BANNERS, pSmeltingTime * 3 / 2)
+            .add(Items.BOW, pSmeltingTime * 3 / 2)
+            .add(Items.FISHING_ROD, pSmeltingTime * 3 / 2)
+            .add(Blocks.LADDER, pSmeltingTime * 3 / 2)
+            .add(ItemTags.SIGNS, pSmeltingTime)
+            .add(ItemTags.HANGING_SIGNS, pSmeltingTime * 4)
+            .add(Items.WOODEN_SHOVEL, pSmeltingTime)
+            .add(Items.WOODEN_SWORD, pSmeltingTime)
+            .add(Items.WOODEN_HOE, pSmeltingTime)
+            .add(Items.WOODEN_AXE, pSmeltingTime)
+            .add(Items.WOODEN_PICKAXE, pSmeltingTime)
+            .add(ItemTags.WOODEN_DOORS, pSmeltingTime)
+            .add(ItemTags.BOATS, pSmeltingTime * 6)
+            .add(ItemTags.WOOL, pSmeltingTime / 2)
+            .add(ItemTags.WOODEN_BUTTONS, pSmeltingTime / 2)
+            .add(Items.STICK, pSmeltingTime / 2)
+            .add(ItemTags.SAPLINGS, pSmeltingTime / 2)
+            .add(Items.BOWL, pSmeltingTime / 2)
+            .add(ItemTags.WOOL_CARPETS, 1 + pSmeltingTime / 3)
+            .add(Blocks.DRIED_KELP_BLOCK, 1 + pSmeltingTime * 20)
+            .add(Items.CROSSBOW, pSmeltingTime * 3 / 2)
+            .add(Blocks.BAMBOO, pSmeltingTime / 4)
+            .add(Blocks.DEAD_BUSH, pSmeltingTime / 2)
+            .add(Blocks.SCAFFOLDING, pSmeltingTime / 4)
+            .add(Blocks.LOOM, pSmeltingTime * 3 / 2)
+            .add(Blocks.BARREL, pSmeltingTime * 3 / 2)
+            .add(Blocks.CARTOGRAPHY_TABLE, pSmeltingTime * 3 / 2)
+            .add(Blocks.FLETCHING_TABLE, pSmeltingTime * 3 / 2)
+            .add(Blocks.SMITHING_TABLE, pSmeltingTime * 3 / 2)
+            .add(Blocks.COMPOSTER, pSmeltingTime * 3 / 2)
+            .add(Blocks.AZALEA, pSmeltingTime / 2)
+            .add(Blocks.FLOWERING_AZALEA, pSmeltingTime / 2)
+            .add(Blocks.MANGROVE_ROOTS, pSmeltingTime * 3 / 2)
             .remove(ItemTags.NON_FLAMMABLE_WOOD)
             .build();
     }
@@ -110,38 +110,38 @@ public class FuelValues {
         private final FeatureFlagSet enabledFeatures;
         private final Object2IntSortedMap<Item> values = new Object2IntLinkedOpenHashMap<>();
 
-        public Builder(HolderLookup.Provider p_369440_, FeatureFlagSet p_369101_) {
-            this.items = p_369440_.lookupOrThrow(Registries.ITEM);
-            this.enabledFeatures = p_369101_;
+        public Builder(HolderLookup.Provider pRegistries, FeatureFlagSet pEnabledFeatures) {
+            this.items = pRegistries.lookupOrThrow(Registries.ITEM);
+            this.enabledFeatures = pEnabledFeatures;
         }
 
         public FuelValues build() {
             return new FuelValues(this.values);
         }
 
-        public FuelValues.Builder remove(TagKey<Item> p_369702_) {
-            this.values.keySet().removeIf(p_361506_ -> p_361506_.builtInRegistryHolder().is(p_369702_));
+        public FuelValues.Builder remove(TagKey<Item> pTag) {
+            this.values.keySet().removeIf(p_361506_ -> p_361506_.builtInRegistryHolder().is(pTag));
             return this;
         }
 
-        public FuelValues.Builder add(TagKey<Item> p_367371_, int p_368360_) {
-            this.items.get(p_367371_).ifPresent(p_361860_ -> {
+        public FuelValues.Builder add(TagKey<Item> pTag, int pValue) {
+            this.items.get(pTag).ifPresent(p_361860_ -> {
                 for (Holder<Item> holder : p_361860_) {
-                    this.putInternal(p_368360_, holder.value());
+                    this.putInternal(pValue, holder.value());
                 }
             });
             return this;
         }
 
-        public FuelValues.Builder add(ItemLike p_365111_, int p_364289_) {
-            Item item = p_365111_.asItem();
-            this.putInternal(p_364289_, item);
+        public FuelValues.Builder add(ItemLike pItem, int pValue) {
+            Item item = pItem.asItem();
+            this.putInternal(pValue, item);
             return this;
         }
 
-        private void putInternal(int p_361402_, Item p_366165_) {
-            if (p_366165_.isEnabled(this.enabledFeatures)) {
-                this.values.put(p_366165_, p_361402_);
+        private void putInternal(int pValue, Item pItem) {
+            if (pItem.isEnabled(this.enabledFeatures)) {
+                this.values.put(pItem, pValue);
             }
         }
     }

@@ -8,8 +8,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class MinecartRenderer extends AbstractMinecartRenderer<AbstractMinecart, MinecartRenderState> {
-    public MinecartRenderer(EntityRendererProvider.Context p_174300_, ModelLayerLocation p_174301_) {
-        super(p_174300_, p_174301_);
+    public MinecartRenderer(EntityRendererProvider.Context pContext, ModelLayerLocation pLayer) {
+        super(pContext, pLayer);
     }
 
     public MinecartRenderState createRenderState() {

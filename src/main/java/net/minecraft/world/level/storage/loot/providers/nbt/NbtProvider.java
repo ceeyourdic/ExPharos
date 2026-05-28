@@ -8,7 +8,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 
 public interface NbtProvider {
     @Nullable
-    Tag get(LootContext p_165622_);
+    Tag get(LootContext pLootContext);
 
     Set<ContextKey<?>> getReferencedContextParams();
 

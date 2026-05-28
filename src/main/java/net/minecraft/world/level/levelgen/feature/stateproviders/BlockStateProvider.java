@@ -12,15 +12,15 @@ public abstract class BlockStateProvider {
         .byNameCodec()
         .dispatch(BlockStateProvider::type, BlockStateProviderType::codec);
 
-    public static SimpleStateProvider simple(BlockState p_191385_) {
-        return new SimpleStateProvider(p_191385_);
+    public static SimpleStateProvider simple(BlockState pState) {
+        return new SimpleStateProvider(pState);
     }
 
-    public static SimpleStateProvider simple(Block p_191383_) {
-        return new SimpleStateProvider(p_191383_.defaultBlockState());
+    public static SimpleStateProvider simple(Block pBlock) {
+        return new SimpleStateProvider(pBlock.defaultBlockState());
     }
 
     protected abstract BlockStateProviderType<?> type();
 
-    public abstract BlockState getState(RandomSource p_225907_, BlockPos p_225908_);
+    public abstract BlockState getState(RandomSource pRandom, BlockPos pPos);
 }

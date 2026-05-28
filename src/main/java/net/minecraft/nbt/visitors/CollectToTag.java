@@ -36,8 +36,8 @@ public class CollectToTag implements StreamTagVisitor {
         return this.consumerStack.size();
     }
 
-    private void appendEntry(Tag p_197683_) {
-        this.consumerStack.getLast().accept(p_197683_);
+    private void appendEntry(Tag pTag) {
+        this.consumerStack.getLast().accept(pTag);
     }
 
     @Override
@@ -129,12 +129,12 @@ public class CollectToTag implements StreamTagVisitor {
         return StreamTagVisitor.EntryResult.ENTER;
     }
 
-    private void enterContainerIfNeeded(TagType<?> p_197712_) {
-        if (p_197712_ == ListTag.TYPE) {
+    private void enterContainerIfNeeded(TagType<?> pType) {
+        if (pType == ListTag.TYPE) {
             ListTag listtag = new ListTag();
             this.appendEntry(listtag);
             this.consumerStack.addLast(listtag::add);
-        } else if (p_197712_ == CompoundTag.TYPE) {
+        } else if (pType == CompoundTag.TYPE) {
             CompoundTag compoundtag = new CompoundTag();
             this.appendEntry(compoundtag);
             this.consumerStack.addLast(p_197703_ -> compoundtag.put(this.lastId, p_197703_));

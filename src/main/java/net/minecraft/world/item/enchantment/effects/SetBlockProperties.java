@@ -25,8 +25,8 @@ public record SetBlockProperties(BlockItemStateProperties properties, Vec3i offs
                 .apply(p_344188_, SetBlockProperties::new)
     );
 
-    public SetBlockProperties(BlockItemStateProperties p_344788_) {
-        this(p_344788_, Vec3i.ZERO, Optional.of(GameEvent.BLOCK_CHANGE));
+    public SetBlockProperties(BlockItemStateProperties pProperties) {
+        this(pProperties, Vec3i.ZERO, Optional.of(GameEvent.BLOCK_CHANGE));
     }
 
     @Override

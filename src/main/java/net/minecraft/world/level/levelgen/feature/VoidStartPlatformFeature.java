@@ -17,8 +17,8 @@ public class VoidStartPlatformFeature extends Feature<NoneFeatureConfiguration> 
         super(p_67354_);
     }
 
-    private static int checkerboardDistance(int p_67356_, int p_67357_, int p_67358_, int p_67359_) {
-        return Math.max(Math.abs(p_67356_ - p_67358_), Math.abs(p_67357_ - p_67359_));
+    private static int checkerboardDistance(int pFirstX, int pFirstZ, int pSecondX, int pSecondZ) {
+        return Math.max(Math.abs(pFirstX - pSecondX), Math.abs(pFirstZ - pSecondZ));
     }
 
     @Override

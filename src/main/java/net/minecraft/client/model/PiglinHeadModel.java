@@ -12,9 +12,9 @@ public class PiglinHeadModel extends SkullModelBase {
     private final ModelPart leftEar;
     private final ModelPart rightEar;
 
-    public PiglinHeadModel(ModelPart p_261926_) {
-        super(p_261926_);
-        this.head = p_261926_.getChild("head");
+    public PiglinHeadModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
         this.leftEar = this.head.getChild("left_ear");
         this.rightEar = this.head.getChild("right_ear");
     }

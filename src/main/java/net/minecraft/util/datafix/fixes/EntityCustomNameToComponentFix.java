@@ -13,8 +13,8 @@ import net.minecraft.util.datafix.ComponentDataFixUtils;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class EntityCustomNameToComponentFix extends DataFix {
-    public EntityCustomNameToComponentFix(Schema p_15398_, boolean p_15399_) {
-        super(p_15398_, p_15399_);
+    public EntityCustomNameToComponentFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
     }
 
     @Override
@@ -30,8 +30,8 @@ public class EntityCustomNameToComponentFix extends DataFix {
         );
     }
 
-    public static Dynamic<?> fixTagCustomName(Dynamic<?> p_15408_) {
-        String s = p_15408_.get("CustomName").asString("");
-        return s.isEmpty() ? p_15408_.remove("CustomName") : p_15408_.set("CustomName", ComponentDataFixUtils.createPlainTextComponent(p_15408_.getOps(), s));
+    public static Dynamic<?> fixTagCustomName(Dynamic<?> pTag) {
+        String s = pTag.get("CustomName").asString("");
+        return s.isEmpty() ? pTag.remove("CustomName") : pTag.set("CustomName", ComponentDataFixUtils.createPlainTextComponent(pTag.getOps(), s));
     }
 }

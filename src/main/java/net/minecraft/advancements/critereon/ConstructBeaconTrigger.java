@@ -14,8 +14,8 @@ public class ConstructBeaconTrigger extends SimpleCriterionTrigger<ConstructBeac
         return ConstructBeaconTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_148030_, int p_148031_) {
-        this.trigger(p_148030_, p_148028_ -> p_148028_.matches(p_148031_));
+    public void trigger(ServerPlayer pPlayer, int pLevel) {
+        this.trigger(pPlayer, p_148028_ -> p_148028_.matches(pLevel));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, MinMaxBounds.Ints level)
@@ -34,12 +34,12 @@ public class ConstructBeaconTrigger extends SimpleCriterionTrigger<ConstructBeac
             return CriteriaTriggers.CONSTRUCT_BEACON.createCriterion(new ConstructBeaconTrigger.TriggerInstance(Optional.empty(), MinMaxBounds.Ints.ANY));
         }
 
-        public static Criterion<ConstructBeaconTrigger.TriggerInstance> constructedBeacon(MinMaxBounds.Ints p_22766_) {
-            return CriteriaTriggers.CONSTRUCT_BEACON.createCriterion(new ConstructBeaconTrigger.TriggerInstance(Optional.empty(), p_22766_));
+        public static Criterion<ConstructBeaconTrigger.TriggerInstance> constructedBeacon(MinMaxBounds.Ints pLevel) {
+            return CriteriaTriggers.CONSTRUCT_BEACON.createCriterion(new ConstructBeaconTrigger.TriggerInstance(Optional.empty(), pLevel));
         }
 
-        public boolean matches(int p_148033_) {
-            return this.level.matches(p_148033_);
+        public boolean matches(int pLevel) {
+            return this.level.matches(pLevel);
         }
 
         @Override

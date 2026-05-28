@@ -64,21 +64,21 @@ public class WaterDropParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_108492_) {
-            this.sprite = p_108492_;
+        public Provider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_108503_,
-            ClientLevel p_108504_,
-            double p_108505_,
-            double p_108506_,
-            double p_108507_,
-            double p_108508_,
-            double p_108509_,
-            double p_108510_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            WaterDropParticle waterdropparticle = new WaterDropParticle(p_108504_, p_108505_, p_108506_, p_108507_);
+            WaterDropParticle waterdropparticle = new WaterDropParticle(pLevel, pX, pY, pZ);
             waterdropparticle.pickSprite(this.sprite);
             return waterdropparticle;
         }

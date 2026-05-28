@@ -13,34 +13,34 @@ public interface InventoryCarrier {
 
     SimpleContainer getInventory();
 
-    static void pickUpItem(ServerLevel p_361504_, Mob p_219612_, InventoryCarrier p_219613_, ItemEntity p_219614_) {
-        ItemStack itemstack = p_219614_.getItem();
-        if (p_219612_.wantsToPickUp(p_361504_, itemstack)) {
-            SimpleContainer simplecontainer = p_219613_.getInventory();
+    static void pickUpItem(ServerLevel pLevel, Mob pMob, InventoryCarrier pCarrier, ItemEntity pItemEntity) {
+        ItemStack itemstack = pItemEntity.getItem();
+        if (pMob.wantsToPickUp(pLevel, itemstack)) {
+            SimpleContainer simplecontainer = pCarrier.getInventory();
             boolean flag = simplecontainer.canAddItem(itemstack);
             if (!flag) {
                 return;
             }
 
-            p_219612_.onItemPickup(p_219614_);
+            pMob.onItemPickup(pItemEntity);
             int i = itemstack.getCount();
             ItemStack itemstack1 = simplecontainer.addItem(itemstack);
-            p_219612_.take(p_219614_, i - itemstack1.getCount());
+            pMob.take(pItemEntity, i - itemstack1.getCount());
             if (itemstack1.isEmpty()) {
-                p_219614_.discard();
+                pItemEntity.discard();
             } else {
                 itemstack.setCount(itemstack1.getCount());
             }
         }
     }
 
-    default void readInventoryFromTag(CompoundTag p_253699_, HolderLookup.Provider p_331899_) {
-        if (p_253699_.contains("Inventory", 9)) {
-            this.getInventory().fromTag(p_253699_.getList("Inventory", 10), p_331899_);
+    default void readInventoryFromTag(CompoundTag pTag, HolderLookup.Provider pLevelRegistry) {
+        if (pTag.contains("Inventory", 9)) {
+            this.getInventory().fromTag(pTag.getList("Inventory", 10), pLevelRegistry);
         }
     }
 
-    default void writeInventoryToTag(CompoundTag p_254428_, HolderLookup.Provider p_328974_) {
-        p_254428_.put("Inventory", this.getInventory().createTag(p_328974_));
+    default void writeInventoryToTag(CompoundTag pTag, HolderLookup.Provider pLevelRegistry) {
+        pTag.put("Inventory", this.getInventory().createTag(pLevelRegistry));
     }
 }

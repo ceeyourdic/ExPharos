@@ -49,14 +49,14 @@ public class ShulkerBullet extends Projectile {
         this.noPhysics = true;
     }
 
-    public ShulkerBullet(Level p_37330_, LivingEntity p_37331_, Entity p_37332_, Direction.Axis p_37333_) {
-        this(EntityType.SHULKER_BULLET, p_37330_);
-        this.setOwner(p_37331_);
-        Vec3 vec3 = p_37331_.getBoundingBox().getCenter();
+    public ShulkerBullet(Level pLevel, LivingEntity pShooter, Entity pFinalTarget, Direction.Axis pAxis) {
+        this(EntityType.SHULKER_BULLET, pLevel);
+        this.setOwner(pShooter);
+        Vec3 vec3 = pShooter.getBoundingBox().getCenter();
         this.moveTo(vec3.x, vec3.y, vec3.z, this.getYRot(), this.getXRot());
-        this.finalTarget = p_37332_;
+        this.finalTarget = pFinalTarget;
         this.currentMoveDirection = Direction.UP;
-        this.selectNextMoveDirection(p_37333_);
+        this.selectNextMoveDirection(pAxis);
     }
 
     @Override
@@ -65,35 +65,35 @@ public class ShulkerBullet extends Projectile {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag p_37357_) {
-        super.addAdditionalSaveData(p_37357_);
+    protected void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
         if (this.finalTarget != null) {
-            p_37357_.putUUID("Target", this.finalTarget.getUUID());
+            pCompound.putUUID("Target", this.finalTarget.getUUID());
         }
 
         if (this.currentMoveDirection != null) {
-            p_37357_.putInt("Dir", this.currentMoveDirection.get3DDataValue());
+            pCompound.putInt("Dir", this.currentMoveDirection.get3DDataValue());
         }
 
-        p_37357_.putInt("Steps", this.flightSteps);
-        p_37357_.putDouble("TXD", this.targetDeltaX);
-        p_37357_.putDouble("TYD", this.targetDeltaY);
-        p_37357_.putDouble("TZD", this.targetDeltaZ);
+        pCompound.putInt("Steps", this.flightSteps);
+        pCompound.putDouble("TXD", this.targetDeltaX);
+        pCompound.putDouble("TYD", this.targetDeltaY);
+        pCompound.putDouble("TZD", this.targetDeltaZ);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag p_37353_) {
-        super.readAdditionalSaveData(p_37353_);
-        this.flightSteps = p_37353_.getInt("Steps");
-        this.targetDeltaX = p_37353_.getDouble("TXD");
-        this.targetDeltaY = p_37353_.getDouble("TYD");
-        this.targetDeltaZ = p_37353_.getDouble("TZD");
-        if (p_37353_.contains("Dir", 99)) {
-            this.currentMoveDirection = Direction.from3DDataValue(p_37353_.getInt("Dir"));
+    protected void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.flightSteps = pCompound.getInt("Steps");
+        this.targetDeltaX = pCompound.getDouble("TXD");
+        this.targetDeltaY = pCompound.getDouble("TYD");
+        this.targetDeltaZ = pCompound.getDouble("TZD");
+        if (pCompound.contains("Dir", 99)) {
+            this.currentMoveDirection = Direction.from3DDataValue(pCompound.getInt("Dir"));
         }
 
-        if (p_37353_.hasUUID("Target")) {
-            this.targetId = p_37353_.getUUID("Target");
+        if (pCompound.hasUUID("Target")) {
+            this.targetId = pCompound.getUUID("Target");
         }
     }
 
@@ -106,11 +106,11 @@ public class ShulkerBullet extends Projectile {
         return this.currentMoveDirection;
     }
 
-    private void setMoveDirection(@Nullable Direction p_37351_) {
-        this.currentMoveDirection = p_37351_;
+    private void setMoveDirection(@Nullable Direction pDirection) {
+        this.currentMoveDirection = pDirection;
     }
 
-    private void selectNextMoveDirection(@Nullable Direction.Axis p_37349_) {
+    private void selectNextMoveDirection(@Nullable Direction.Axis pAxis) {
         double d0 = 0.5;
         BlockPos blockpos;
         if (this.finalTarget == null) {
@@ -127,7 +127,7 @@ public class ShulkerBullet extends Projectile {
         if (!blockpos.closerToCenterThan(this.position(), 2.0)) {
             BlockPos blockpos1 = this.blockPosition();
             List<Direction> list = Lists.newArrayList();
-            if (p_37349_ != Direction.Axis.X) {
+            if (pAxis != Direction.Axis.X) {
                 if (blockpos1.getX() < blockpos.getX() && this.level().isEmptyBlock(blockpos1.east())) {
                     list.add(Direction.EAST);
                 } else if (blockpos1.getX() > blockpos.getX() && this.level().isEmptyBlock(blockpos1.west())) {
@@ -135,7 +135,7 @@ public class ShulkerBullet extends Projectile {
                 }
             }
 
-            if (p_37349_ != Direction.Axis.Y) {
+            if (pAxis != Direction.Axis.Y) {
                 if (blockpos1.getY() < blockpos.getY() && this.level().isEmptyBlock(blockpos1.above())) {
                     list.add(Direction.UP);
                 } else if (blockpos1.getY() > blockpos.getY() && this.level().isEmptyBlock(blockpos1.below())) {
@@ -143,7 +143,7 @@ public class ShulkerBullet extends Projectile {
                 }
             }
 
-            if (p_37349_ != Direction.Axis.Z) {
+            if (pAxis != Direction.Axis.Z) {
                 if (blockpos1.getZ() < blockpos.getZ() && this.level().isEmptyBlock(blockpos1.south())) {
                     list.add(Direction.SOUTH);
                 } else if (blockpos1.getZ() > blockpos.getZ() && this.level().isEmptyBlock(blockpos1.north())) {
@@ -282,8 +282,8 @@ public class ShulkerBullet extends Projectile {
     }
 
     @Override
-    public boolean shouldRenderAtSqrDistance(double p_37336_) {
-        return p_37336_ < 16384.0;
+    public boolean shouldRenderAtSqrDistance(double pDistance) {
+        return pDistance < 16384.0;
     }
 
     @Override
@@ -292,9 +292,9 @@ public class ShulkerBullet extends Projectile {
     }
 
     @Override
-    protected void onHitEntity(EntityHitResult p_37345_) {
-        super.onHitEntity(p_37345_);
-        Entity entity = p_37345_.getEntity();
+    protected void onHitEntity(EntityHitResult pResult) {
+        super.onHitEntity(pResult);
+        Entity entity = pResult.getEntity();
         Entity entity1 = this.getOwner();
         LivingEntity livingentity = entity1 instanceof LivingEntity ? (LivingEntity)entity1 : null;
         DamageSource damagesource = this.damageSources().mobProjectile(this, livingentity);
@@ -323,8 +323,8 @@ public class ShulkerBullet extends Projectile {
     }
 
     @Override
-    protected void onHit(HitResult p_37347_) {
-        super.onHit(p_37347_);
+    protected void onHit(HitResult pResult) {
+        super.onHit(pResult);
         this.destroy();
     }
 

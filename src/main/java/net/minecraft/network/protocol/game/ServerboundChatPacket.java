@@ -15,22 +15,22 @@ public record ServerboundChatPacket(String message, Instant timeStamp, long salt
         ServerboundChatPacket::write, ServerboundChatPacket::new
     );
 
-    private ServerboundChatPacket(FriendlyByteBuf p_179545_) {
+    private ServerboundChatPacket(FriendlyByteBuf pBuffer) {
         this(
-            p_179545_.readUtf(256),
-            p_179545_.readInstant(),
-            p_179545_.readLong(),
-            p_179545_.readNullable(MessageSignature::read),
-            new LastSeenMessages.Update(p_179545_)
+            pBuffer.readUtf(256),
+            pBuffer.readInstant(),
+            pBuffer.readLong(),
+            pBuffer.readNullable(MessageSignature::read),
+            new LastSeenMessages.Update(pBuffer)
         );
     }
 
-    private void write(FriendlyByteBuf p_133839_) {
-        p_133839_.writeUtf(this.message, 256);
-        p_133839_.writeInstant(this.timeStamp);
-        p_133839_.writeLong(this.salt);
-        p_133839_.writeNullable(this.signature, MessageSignature::write);
-        this.lastSeenMessages.write(p_133839_);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeUtf(this.message, 256);
+        pBuffer.writeInstant(this.timeStamp);
+        pBuffer.writeLong(this.salt);
+        pBuffer.writeNullable(this.signature, MessageSignature::write);
+        this.lastSeenMessages.write(pBuffer);
     }
 
     @Override
@@ -38,7 +38,7 @@ public record ServerboundChatPacket(String message, Instant timeStamp, long salt
         return GamePacketTypes.SERVERBOUND_CHAT;
     }
 
-    public void handle(ServerGamePacketListener p_133836_) {
-        p_133836_.handleChat(this);
+    public void handle(ServerGamePacketListener pHandler) {
+        pHandler.handleChat(this);
     }
 }

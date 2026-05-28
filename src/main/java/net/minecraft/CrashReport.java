@@ -15,6 +15,8 @@ import java.util.Locale;
 import java.util.concurrent.CompletionException;
 import javax.annotation.Nullable;
 import net.minecraft.util.MemoryReserve;
+import net.optifine.CrashReporter;
+import net.optifine.reflect.Reflector;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
@@ -30,10 +32,11 @@ public class CrashReport {
     private boolean trackingStackTrace = true;
     private StackTraceElement[] uncategorizedStackTrace = new StackTraceElement[0];
     private final SystemReport systemReport = new SystemReport();
+    private boolean reported = false;
 
-    public CrashReport(String p_127509_, Throwable p_127510_) {
-        this.title = p_127509_;
-        this.exception = p_127510_;
+    public CrashReport(String pTitle, Throwable pException) {
+        this.title = pTitle;
+        this.exception = pException;
     }
 
     public String getTitle() {
@@ -50,30 +53,37 @@ public class CrashReport {
         return stringbuilder.toString();
     }
 
-    public void getDetails(StringBuilder p_127520_) {
+    public void getDetails(StringBuilder pBuilder) {
         if ((this.uncategorizedStackTrace == null || this.uncategorizedStackTrace.length <= 0) && !this.details.isEmpty()) {
             this.uncategorizedStackTrace = ArrayUtils.subarray(this.details.get(0).getStacktrace(), 0, 1);
         }
 
         if (this.uncategorizedStackTrace != null && this.uncategorizedStackTrace.length > 0) {
-            p_127520_.append("-- Head --\n");
-            p_127520_.append("Thread: ").append(Thread.currentThread().getName()).append("\n");
-            p_127520_.append("Stacktrace:\n");
+            pBuilder.append("-- Head --\n");
+            pBuilder.append("Thread: ").append(Thread.currentThread().getName()).append("\n");
+            if (Reflector.CrashReportExtender_generateEnhancedStackTraceSTE.exists()) {
+                pBuilder.append(Reflector.CrashReportAnalyser_appendSuspectedMods.callString(this.exception, this.uncategorizedStackTrace));
+                pBuilder.append("Stacktrace:");
+                pBuilder.append(Reflector.CrashReportExtender_generateEnhancedStackTraceSTE.callString1(this.uncategorizedStackTrace));
+            } else {
+                pBuilder.append("Stacktrace:\n");
 
-            for (StackTraceElement stacktraceelement : this.uncategorizedStackTrace) {
-                p_127520_.append("\t").append("at ").append(stacktraceelement);
-                p_127520_.append("\n");
+                for (StackTraceElement stacktraceelement : this.uncategorizedStackTrace) {
+                    pBuilder.append("\t").append("at ").append(stacktraceelement);
+                    pBuilder.append("\n");
+                }
+
+                pBuilder.append("\n");
             }
-
-            p_127520_.append("\n");
         }
 
         for (CrashReportCategory crashreportcategory : this.details) {
-            crashreportcategory.getDetails(p_127520_);
-            p_127520_.append("\n\n");
+            crashreportcategory.getDetails(pBuilder);
+            pBuilder.append("\n\n");
         }
 
-        this.systemReport.appendToCrashReportString(p_127520_);
+        Reflector.CrashReportExtender_extendSystemReport.call(this.systemReport);
+        this.systemReport.appendToCrashReportString(pBuilder);
     }
 
     public String getExceptionMessage() {
@@ -92,6 +102,14 @@ public class CrashReport {
             throwable.setStackTrace(this.exception.getStackTrace());
         }
 
+        try {
+            if (Reflector.CrashReportExtender_generateEnhancedStackTraceT.exists()) {
+                return Reflector.CrashReportExtender_generateEnhancedStackTraceT.callString(throwable);
+            }
+        } catch (Throwable throwable1) {
+            throwable1.printStackTrace();
+        }
+
         String s;
         try {
             stringwriter = new StringWriter();
@@ -106,9 +124,14 @@ public class CrashReport {
         return s;
     }
 
-    public String getFriendlyReport(ReportType p_343869_, List<String> p_342487_) {
+    public String getFriendlyReport(ReportType pType, List<String> pLinks) {
+        if (!this.reported) {
+            this.reported = true;
+            CrashReporter.onCrashReport(this, this.systemReport);
+        }
+
         StringBuilder stringbuilder = new StringBuilder();
-        p_343869_.appendHeader(stringbuilder, p_342487_);
+        pType.appendHeader(stringbuilder, pLinks);
         stringbuilder.append("Time: ");
         stringbuilder.append(DATE_TIME_FORMATTER.format(ZonedDateTime.now()));
         stringbuilder.append("\n");
@@ -127,8 +150,8 @@ public class CrashReport {
         return stringbuilder.toString();
     }
 
-    public String getFriendlyReport(ReportType p_343367_) {
-        return this.getFriendlyReport(p_343367_, List.of());
+    public String getFriendlyReport(ReportType pType) {
+        return this.getFriendlyReport(pType, List.of());
     }
 
     @Nullable
@@ -136,82 +159,87 @@ public class CrashReport {
         return this.saveFile;
     }
 
-    public boolean saveToFile(Path p_343023_, ReportType p_343502_, List<String> p_344584_) {
+    public boolean saveToFile(Path pPath, ReportType pType, List<String> pLinks) {
         if (this.saveFile != null) {
             return false;
         } else {
             try {
-                if (p_343023_.getParent() != null) {
-                    FileUtil.createDirectoriesSafe(p_343023_.getParent());
+                if (pPath.getParent() != null) {
+                    FileUtil.createDirectoriesSafe(pPath.getParent());
                 }
 
-                try (Writer writer = Files.newBufferedWriter(p_343023_, StandardCharsets.UTF_8)) {
-                    writer.write(this.getFriendlyReport(p_343502_, p_344584_));
+                try (Writer writer = Files.newBufferedWriter(pPath, StandardCharsets.UTF_8)) {
+                    writer.write(this.getFriendlyReport(pType, pLinks));
                 }
 
-                this.saveFile = p_343023_;
+                this.saveFile = pPath;
                 return true;
-            } catch (Throwable throwable1) {
-                LOGGER.error("Could not save crash report to {}", p_343023_, throwable1);
+            } catch (Throwable throwable11) {
+                LOGGER.error("Could not save crash report to {}", pPath, throwable11);
                 return false;
             }
         }
     }
 
-    public boolean saveToFile(Path p_342057_, ReportType p_344042_) {
-        return this.saveToFile(p_342057_, p_344042_, List.of());
+    public boolean saveToFile(Path pPath, ReportType pType) {
+        return this.saveToFile(pPath, pType, List.of());
     }
 
     public SystemReport getSystemReport() {
         return this.systemReport;
     }
 
-    public CrashReportCategory addCategory(String p_127515_) {
-        return this.addCategory(p_127515_, 1);
+    public CrashReportCategory addCategory(String pName) {
+        return this.addCategory(pName, 1);
     }
 
-    public CrashReportCategory addCategory(String p_127517_, int p_127518_) {
-        CrashReportCategory crashreportcategory = new CrashReportCategory(p_127517_);
-        if (this.trackingStackTrace) {
-            int i = crashreportcategory.fillInStackTrace(p_127518_);
-            StackTraceElement[] astacktraceelement = this.exception.getStackTrace();
-            StackTraceElement stacktraceelement = null;
-            StackTraceElement stacktraceelement1 = null;
-            int j = astacktraceelement.length - i;
-            if (j < 0) {
-                LOGGER.error("Negative index in crash report handler ({}/{})", astacktraceelement.length, i);
-            }
+    public CrashReportCategory addCategory(String pCategoryName, int pStacktraceLength) {
+        CrashReportCategory crashreportcategory = new CrashReportCategory(pCategoryName);
 
-            if (astacktraceelement != null && 0 <= j && j < astacktraceelement.length) {
-                stacktraceelement = astacktraceelement[j];
-                if (astacktraceelement.length + 1 - i < astacktraceelement.length) {
-                    stacktraceelement1 = astacktraceelement[astacktraceelement.length + 1 - i];
+        try {
+            if (this.trackingStackTrace) {
+                int i = crashreportcategory.fillInStackTrace(pStacktraceLength);
+                StackTraceElement[] astacktraceelement = this.exception.getStackTrace();
+                StackTraceElement stacktraceelement = null;
+                StackTraceElement stacktraceelement1 = null;
+                int j = astacktraceelement.length - i;
+                if (j < 0) {
+                    LOGGER.error("Negative index in crash report handler ({}/{})", astacktraceelement.length, i);
+                }
+
+                if (astacktraceelement != null && 0 <= j && j < astacktraceelement.length) {
+                    stacktraceelement = astacktraceelement[j];
+                    if (astacktraceelement.length + 1 - i < astacktraceelement.length) {
+                        stacktraceelement1 = astacktraceelement[astacktraceelement.length + 1 - i];
+                    }
+                }
+
+                this.trackingStackTrace = crashreportcategory.validateStackTrace(stacktraceelement, stacktraceelement1);
+                if (astacktraceelement != null && astacktraceelement.length >= i && 0 <= j && j < astacktraceelement.length) {
+                    this.uncategorizedStackTrace = new StackTraceElement[j];
+                    System.arraycopy(astacktraceelement, 0, this.uncategorizedStackTrace, 0, this.uncategorizedStackTrace.length);
+                } else {
+                    this.trackingStackTrace = false;
                 }
             }
-
-            this.trackingStackTrace = crashreportcategory.validateStackTrace(stacktraceelement, stacktraceelement1);
-            if (astacktraceelement != null && astacktraceelement.length >= i && 0 <= j && j < astacktraceelement.length) {
-                this.uncategorizedStackTrace = new StackTraceElement[j];
-                System.arraycopy(astacktraceelement, 0, this.uncategorizedStackTrace, 0, this.uncategorizedStackTrace.length);
-            } else {
-                this.trackingStackTrace = false;
-            }
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
         }
 
         this.details.add(crashreportcategory);
         return crashreportcategory;
     }
 
-    public static CrashReport forThrowable(Throwable p_127522_, String p_127523_) {
-        while (p_127522_ instanceof CompletionException && p_127522_.getCause() != null) {
-            p_127522_ = p_127522_.getCause();
+    public static CrashReport forThrowable(Throwable pCause, String pDescription) {
+        while (pCause instanceof CompletionException && pCause.getCause() != null) {
+            pCause = pCause.getCause();
         }
 
         CrashReport crashreport;
-        if (p_127522_ instanceof ReportedException reportedexception) {
+        if (pCause instanceof ReportedException reportedexception) {
             crashreport = reportedexception.getReport();
         } else {
-            crashreport = new CrashReport(p_127523_, p_127522_);
+            crashreport = new CrashReport(pDescription, pCause);
         }
 
         return crashreport;

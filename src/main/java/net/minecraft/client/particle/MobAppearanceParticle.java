@@ -53,22 +53,22 @@ public class MobAppearanceParticle extends Particle {
     }
 
     @Override
-    public void render(VertexConsumer p_107125_, Camera p_107126_, float p_107127_) {
+    public void render(VertexConsumer pBuffer, Camera pRenderInfo, float pPartialTicks) {
     }
 
     @OnlyIn(Dist.CLIENT)
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         public Particle createParticle(
-            SimpleParticleType p_107140_,
-            ClientLevel p_107141_,
-            double p_107142_,
-            double p_107143_,
-            double p_107144_,
-            double p_107145_,
-            double p_107146_,
-            double p_107147_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            return new MobAppearanceParticle(p_107141_, p_107142_, p_107143_, p_107144_);
+            return new MobAppearanceParticle(pLevel, pX, pY, pZ);
         }
     }
 }

@@ -8,8 +8,8 @@ import com.mojang.serialization.Dynamic;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class EmptyItemInVillagerTradeFix extends DataFix {
-    public EmptyItemInVillagerTradeFix(Schema p_331010_) {
-        super(p_331010_, false);
+    public EmptyItemInVillagerTradeFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override

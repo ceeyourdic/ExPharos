@@ -58,8 +58,8 @@ public class NetherPortalBlock extends Block implements Portal {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_54942_, BlockGetter p_54943_, BlockPos p_54944_, CollisionContext p_54945_) {
-        switch ((Direction.Axis)p_54942_.getValue(AXIS)) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        switch ((Direction.Axis)pState.getValue(AXIS)) {
             case Z:
                 return Z_AXIS_AABB;
             case X:
@@ -110,9 +110,9 @@ public class NetherPortalBlock extends Block implements Portal {
     }
 
     @Override
-    protected void entityInside(BlockState p_54915_, Level p_54916_, BlockPos p_54917_, Entity p_54918_) {
-        if (p_54918_.canUsePortal(false)) {
-            p_54918_.setAsInsidePortal(this, p_54917_);
+    protected void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
+        if (pEntity.canUsePortal(false)) {
+            pEntity.setAsInsidePortal(this, pPos);
         }
     }
 
@@ -141,21 +141,21 @@ public class NetherPortalBlock extends Block implements Portal {
 
     @Nullable
     private TeleportTransition getExitPortal(
-        ServerLevel p_343269_, Entity p_343673_, BlockPos p_343381_, BlockPos p_343194_, boolean p_343644_, WorldBorder p_343185_
+        ServerLevel pLevel, Entity pEntity, BlockPos pPos, BlockPos pExitPos, boolean pIsNether, WorldBorder pWorldBorder
     ) {
-        Optional<BlockPos> optional = p_343269_.getPortalForcer().findClosestPortalPosition(p_343194_, p_343644_, p_343185_);
+        Optional<BlockPos> optional = pLevel.getPortalForcer().findClosestPortalPosition(pExitPos, pIsNether, pWorldBorder);
         BlockUtil.FoundRectangle blockutil$foundrectangle;
         TeleportTransition.PostTeleportTransition teleporttransition$postteleporttransition;
         if (optional.isPresent()) {
             BlockPos blockpos = optional.get();
-            BlockState blockstate = p_343269_.getBlockState(blockpos);
+            BlockState blockstate = pLevel.getBlockState(blockpos);
             blockutil$foundrectangle = BlockUtil.getLargestRectangleAround(
-                blockpos, blockstate.getValue(BlockStateProperties.HORIZONTAL_AXIS), 21, Direction.Axis.Y, 21, p_343533_ -> p_343269_.getBlockState(p_343533_) == blockstate
+                blockpos, blockstate.getValue(BlockStateProperties.HORIZONTAL_AXIS), 21, Direction.Axis.Y, 21, p_343533_ -> pLevel.getBlockState(p_343533_) == blockstate
             );
             teleporttransition$postteleporttransition = TeleportTransition.PLAY_PORTAL_SOUND.then(p_343530_ -> p_343530_.placePortalTicket(blockpos));
         } else {
-            Direction.Axis direction$axis = p_343673_.level().getBlockState(p_343381_).getOptionalValue(AXIS).orElse(Direction.Axis.X);
-            Optional<BlockUtil.FoundRectangle> optional1 = p_343269_.getPortalForcer().createPortal(p_343194_, direction$axis);
+            Direction.Axis direction$axis = pEntity.level().getBlockState(pPos).getOptionalValue(AXIS).orElse(Direction.Axis.X);
+            Optional<BlockUtil.FoundRectangle> optional1 = pLevel.getPortalForcer().createPortal(pExitPos, direction$axis);
             if (optional1.isEmpty()) {
                 LOGGER.error("Unable to create a portal, likely target out of worldborder");
                 return null;
@@ -165,53 +165,53 @@ public class NetherPortalBlock extends Block implements Portal {
             teleporttransition$postteleporttransition = TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET);
         }
 
-        return getDimensionTransitionFromExit(p_343673_, p_343381_, blockutil$foundrectangle, p_343269_, teleporttransition$postteleporttransition);
+        return getDimensionTransitionFromExit(pEntity, pPos, blockutil$foundrectangle, pLevel, teleporttransition$postteleporttransition);
     }
 
     private static TeleportTransition getDimensionTransitionFromExit(
-        Entity p_344252_, BlockPos p_343376_, BlockUtil.FoundRectangle p_343595_, ServerLevel p_343963_, TeleportTransition.PostTeleportTransition p_368919_
+        Entity pEntity, BlockPos pPos, BlockUtil.FoundRectangle pRectangle, ServerLevel pLevel, TeleportTransition.PostTeleportTransition pPostTeleportTransition
     ) {
-        BlockState blockstate = p_344252_.level().getBlockState(p_343376_);
+        BlockState blockstate = pEntity.level().getBlockState(pPos);
         Direction.Axis direction$axis;
         Vec3 vec3;
         if (blockstate.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
             direction$axis = blockstate.getValue(BlockStateProperties.HORIZONTAL_AXIS);
             BlockUtil.FoundRectangle blockutil$foundrectangle = BlockUtil.getLargestRectangleAround(
-                p_343376_, direction$axis, 21, Direction.Axis.Y, 21, p_342174_ -> p_344252_.level().getBlockState(p_342174_) == blockstate
+                pPos, direction$axis, 21, Direction.Axis.Y, 21, p_342174_ -> pEntity.level().getBlockState(p_342174_) == blockstate
             );
-            vec3 = p_344252_.getRelativePortalPosition(direction$axis, blockutil$foundrectangle);
+            vec3 = pEntity.getRelativePortalPosition(direction$axis, blockutil$foundrectangle);
         } else {
             direction$axis = Direction.Axis.X;
             vec3 = new Vec3(0.5, 0.0, 0.0);
         }
 
-        return createDimensionTransition(p_343963_, p_343595_, direction$axis, vec3, p_344252_, p_368919_);
+        return createDimensionTransition(pLevel, pRectangle, direction$axis, vec3, pEntity, pPostTeleportTransition);
     }
 
     private static TeleportTransition createDimensionTransition(
-        ServerLevel p_344368_,
-        BlockUtil.FoundRectangle p_345089_,
-        Direction.Axis p_345454_,
-        Vec3 p_344397_,
-        Entity p_344167_,
-        TeleportTransition.PostTeleportTransition p_361307_
+        ServerLevel pLevel,
+        BlockUtil.FoundRectangle pRectangle,
+        Direction.Axis pAxis,
+        Vec3 pOffset,
+        Entity pEntity,
+        TeleportTransition.PostTeleportTransition pPostTeleportTransition
     ) {
-        BlockPos blockpos = p_345089_.minCorner;
-        BlockState blockstate = p_344368_.getBlockState(blockpos);
+        BlockPos blockpos = pRectangle.minCorner;
+        BlockState blockstate = pLevel.getBlockState(blockpos);
         Direction.Axis direction$axis = blockstate.getOptionalValue(BlockStateProperties.HORIZONTAL_AXIS).orElse(Direction.Axis.X);
-        double d0 = (double)p_345089_.axis1Size;
-        double d1 = (double)p_345089_.axis2Size;
-        EntityDimensions entitydimensions = p_344167_.getDimensions(p_344167_.getPose());
-        int i = p_345454_ == direction$axis ? 0 : 90;
-        double d2 = (double)entitydimensions.width() / 2.0 + (d0 - (double)entitydimensions.width()) * p_344397_.x();
-        double d3 = (d1 - (double)entitydimensions.height()) * p_344397_.y();
-        double d4 = 0.5 + p_344397_.z();
+        double d0 = (double)pRectangle.axis1Size;
+        double d1 = (double)pRectangle.axis2Size;
+        EntityDimensions entitydimensions = pEntity.getDimensions(pEntity.getPose());
+        int i = pAxis == direction$axis ? 0 : 90;
+        double d2 = (double)entitydimensions.width() / 2.0 + (d0 - (double)entitydimensions.width()) * pOffset.x();
+        double d3 = (d1 - (double)entitydimensions.height()) * pOffset.y();
+        double d4 = 0.5 + pOffset.z();
         boolean flag = direction$axis == Direction.Axis.X;
         Vec3 vec3 = new Vec3(
             (double)blockpos.getX() + (flag ? d2 : d4), (double)blockpos.getY() + d3, (double)blockpos.getZ() + (flag ? d4 : d2)
         );
-        Vec3 vec31 = PortalShape.findCollisionFreePosition(vec3, p_344368_, p_344167_, entitydimensions);
-        return new TeleportTransition(p_344368_, vec31, Vec3.ZERO, (float)i, 0.0F, Relative.union(Relative.DELTA, Relative.ROTATION), p_361307_);
+        Vec3 vec31 = PortalShape.findCollisionFreePosition(vec3, pLevel, pEntity, entitydimensions);
+        return new TeleportTransition(pLevel, vec31, Vec3.ZERO, (float)i, 0.0F, Relative.union(Relative.DELTA, Relative.ROTATION), pPostTeleportTransition);
     }
 
     @Override
@@ -260,25 +260,25 @@ public class NetherPortalBlock extends Block implements Portal {
     }
 
     @Override
-    protected BlockState rotate(BlockState p_54925_, Rotation p_54926_) {
-        switch (p_54926_) {
+    protected BlockState rotate(BlockState pState, Rotation pRot) {
+        switch (pRot) {
             case COUNTERCLOCKWISE_90:
             case CLOCKWISE_90:
-                switch ((Direction.Axis)p_54925_.getValue(AXIS)) {
+                switch ((Direction.Axis)pState.getValue(AXIS)) {
                     case Z:
-                        return p_54925_.setValue(AXIS, Direction.Axis.X);
+                        return pState.setValue(AXIS, Direction.Axis.X);
                     case X:
-                        return p_54925_.setValue(AXIS, Direction.Axis.Z);
+                        return pState.setValue(AXIS, Direction.Axis.Z);
                     default:
-                        return p_54925_;
+                        return pState;
                 }
             default:
-                return p_54925_;
+                return pState;
         }
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_54935_) {
-        p_54935_.add(AXIS);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(AXIS);
     }
 }

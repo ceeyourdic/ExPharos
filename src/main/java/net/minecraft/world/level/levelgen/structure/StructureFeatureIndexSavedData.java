@@ -19,17 +19,17 @@ public class StructureFeatureIndexSavedData extends SavedData {
         );
     }
 
-    private StructureFeatureIndexSavedData(LongSet p_163532_, LongSet p_163533_) {
-        this.all = p_163532_;
-        this.remaining = p_163533_;
+    private StructureFeatureIndexSavedData(LongSet pAll, LongSet pRemaining) {
+        this.all = pAll;
+        this.remaining = pRemaining;
     }
 
     public StructureFeatureIndexSavedData() {
         this(new LongOpenHashSet(), new LongOpenHashSet());
     }
 
-    public static StructureFeatureIndexSavedData load(CompoundTag p_163535_, HolderLookup.Provider p_333516_) {
-        return new StructureFeatureIndexSavedData(new LongOpenHashSet(p_163535_.getLongArray("All")), new LongOpenHashSet(p_163535_.getLongArray("Remaining")));
+    public static StructureFeatureIndexSavedData load(CompoundTag pTag, HolderLookup.Provider pRegistries) {
+        return new StructureFeatureIndexSavedData(new LongOpenHashSet(pTag.getLongArray("All")), new LongOpenHashSet(pTag.getLongArray("Remaining")));
     }
 
     @Override
@@ -39,22 +39,22 @@ public class StructureFeatureIndexSavedData extends SavedData {
         return p_73372_;
     }
 
-    public void addIndex(long p_73366_) {
-        this.all.add(p_73366_);
-        this.remaining.add(p_73366_);
+    public void addIndex(long pIndex) {
+        this.all.add(pIndex);
+        this.remaining.add(pIndex);
         this.setDirty();
     }
 
-    public boolean hasStartIndex(long p_73370_) {
-        return this.all.contains(p_73370_);
+    public boolean hasStartIndex(long pIndex) {
+        return this.all.contains(pIndex);
     }
 
-    public boolean hasUnhandledIndex(long p_73374_) {
-        return this.remaining.contains(p_73374_);
+    public boolean hasUnhandledIndex(long pIndex) {
+        return this.remaining.contains(pIndex);
     }
 
-    public void removeIndex(long p_73376_) {
-        if (this.remaining.remove(p_73376_)) {
+    public void removeIndex(long pIndex) {
+        if (this.remaining.remove(pIndex)) {
             this.setDirty();
         }
     }

@@ -15,7 +15,7 @@ public class Sniffing<E extends Warden> extends Behavior<E> {
     private static final double ANGER_FROM_SNIFFING_MAX_DISTANCE_XZ = 6.0;
     private static final double ANGER_FROM_SNIFFING_MAX_DISTANCE_Y = 20.0;
 
-    public Sniffing(int p_217647_) {
+    public Sniffing(int pDuration) {
         super(
             ImmutableMap.of(
                 MemoryModuleType.IS_SNIFFING,
@@ -33,7 +33,7 @@ public class Sniffing<E extends Warden> extends Behavior<E> {
                 MemoryModuleType.SNIFF_COOLDOWN,
                 MemoryStatus.REGISTERED
             ),
-            p_217647_
+            pDuration
         );
     }
 

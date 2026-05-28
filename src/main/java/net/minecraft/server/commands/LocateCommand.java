@@ -56,8 +56,8 @@ public class LocateCommand {
     private static final int BIOME_SAMPLE_RESOLUTION_VERTICAL = 64;
     private static final int POI_SEARCH_RADIUS = 256;
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_249870_, CommandBuildContext p_248936_) {
-        p_249870_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher, CommandBuildContext pContext) {
+        pDispatcher.register(
             Commands.literal("locate")
                 .requires(p_214470_ -> p_214470_.hasPermission(2))
                 .then(
@@ -74,7 +74,7 @@ public class LocateCommand {
                 .then(
                     Commands.literal("biome")
                         .then(
-                            Commands.argument("biome", ResourceOrTagArgument.resourceOrTag(p_248936_, Registries.BIOME))
+                            Commands.argument("biome", ResourceOrTagArgument.resourceOrTag(pContext, Registries.BIOME))
                                 .executes(
                                     p_258232_ -> locateBiome(p_258232_.getSource(), ResourceOrTagArgument.getResourceOrTag(p_258232_, "biome", Registries.BIOME))
                                 )
@@ -83,7 +83,7 @@ public class LocateCommand {
                 .then(
                     Commands.literal("poi")
                         .then(
-                            Commands.argument("poi", ResourceOrTagArgument.resourceOrTag(p_248936_, Registries.POINT_OF_INTEREST_TYPE))
+                            Commands.argument("poi", ResourceOrTagArgument.resourceOrTag(pContext, Registries.POINT_OF_INTEREST_TYPE))
                                 .executes(
                                     p_258234_ -> locatePoi(p_258234_.getSource(), ResourceOrTagArgument.getResourceOrTag(p_258234_, "poi", Registries.POINT_OF_INTEREST_TYPE))
                                 )
@@ -93,108 +93,108 @@ public class LocateCommand {
     }
 
     private static Optional<? extends HolderSet.ListBacked<Structure>> getHolders(
-        ResourceOrTagKeyArgument.Result<Structure> p_251212_, Registry<Structure> p_249691_
+        ResourceOrTagKeyArgument.Result<Structure> pStructure, Registry<Structure> pStructureRegistry
     ) {
-        return p_251212_.unwrap()
-            .map(p_358601_ -> p_249691_.get((ResourceKey<Structure>)p_358601_).map(p_214491_ -> HolderSet.direct(p_214491_)), p_249691_::get);
+        return pStructure.unwrap()
+            .map(p_358601_ -> pStructureRegistry.get((ResourceKey<Structure>)p_358601_).map(p_214491_ -> HolderSet.direct(p_214491_)), pStructureRegistry::get);
     }
 
-    private static int locateStructure(CommandSourceStack p_214472_, ResourceOrTagKeyArgument.Result<Structure> p_249893_) throws CommandSyntaxException {
-        Registry<Structure> registry = p_214472_.getLevel().registryAccess().lookupOrThrow(Registries.STRUCTURE);
-        HolderSet<Structure> holderset = (HolderSet<Structure>)getHolders(p_249893_, registry).orElseThrow(() -> ERROR_STRUCTURE_INVALID.create(p_249893_.asPrintable()));
-        BlockPos blockpos = BlockPos.containing(p_214472_.getPosition());
-        ServerLevel serverlevel = p_214472_.getLevel();
+    private static int locateStructure(CommandSourceStack pSource, ResourceOrTagKeyArgument.Result<Structure> pStructure) throws CommandSyntaxException {
+        Registry<Structure> registry = pSource.getLevel().registryAccess().lookupOrThrow(Registries.STRUCTURE);
+        HolderSet<Structure> holderset = (HolderSet<Structure>)getHolders(pStructure, registry).orElseThrow(() -> ERROR_STRUCTURE_INVALID.create(pStructure.asPrintable()));
+        BlockPos blockpos = BlockPos.containing(pSource.getPosition());
+        ServerLevel serverlevel = pSource.getLevel();
         Stopwatch stopwatch = Stopwatch.createStarted(Util.TICKER);
         Pair<BlockPos, Holder<Structure>> pair = serverlevel.getChunkSource().getGenerator().findNearestMapStructure(serverlevel, holderset, blockpos, 100, false);
         stopwatch.stop();
         if (pair == null) {
-            throw ERROR_STRUCTURE_NOT_FOUND.create(p_249893_.asPrintable());
+            throw ERROR_STRUCTURE_NOT_FOUND.create(pStructure.asPrintable());
         } else {
-            return showLocateResult(p_214472_, p_249893_, blockpos, pair, "commands.locate.structure.success", false, stopwatch.elapsed());
+            return showLocateResult(pSource, pStructure, blockpos, pair, "commands.locate.structure.success", false, stopwatch.elapsed());
         }
     }
 
-    private static int locateBiome(CommandSourceStack p_252062_, ResourceOrTagArgument.Result<Biome> p_249756_) throws CommandSyntaxException {
-        BlockPos blockpos = BlockPos.containing(p_252062_.getPosition());
+    private static int locateBiome(CommandSourceStack pSource, ResourceOrTagArgument.Result<Biome> pBiome) throws CommandSyntaxException {
+        BlockPos blockpos = BlockPos.containing(pSource.getPosition());
         Stopwatch stopwatch = Stopwatch.createStarted(Util.TICKER);
-        Pair<BlockPos, Holder<Biome>> pair = p_252062_.getLevel().findClosestBiome3d(p_249756_, blockpos, 6400, 32, 64);
+        Pair<BlockPos, Holder<Biome>> pair = pSource.getLevel().findClosestBiome3d(pBiome, blockpos, 6400, 32, 64);
         stopwatch.stop();
         if (pair == null) {
-            throw ERROR_BIOME_NOT_FOUND.create(p_249756_.asPrintable());
+            throw ERROR_BIOME_NOT_FOUND.create(pBiome.asPrintable());
         } else {
-            return showLocateResult(p_252062_, p_249756_, blockpos, pair, "commands.locate.biome.success", true, stopwatch.elapsed());
+            return showLocateResult(pSource, pBiome, blockpos, pair, "commands.locate.biome.success", true, stopwatch.elapsed());
         }
     }
 
-    private static int locatePoi(CommandSourceStack p_252013_, ResourceOrTagArgument.Result<PoiType> p_249480_) throws CommandSyntaxException {
-        BlockPos blockpos = BlockPos.containing(p_252013_.getPosition());
-        ServerLevel serverlevel = p_252013_.getLevel();
+    private static int locatePoi(CommandSourceStack pSource, ResourceOrTagArgument.Result<PoiType> pPoiType) throws CommandSyntaxException {
+        BlockPos blockpos = BlockPos.containing(pSource.getPosition());
+        ServerLevel serverlevel = pSource.getLevel();
         Stopwatch stopwatch = Stopwatch.createStarted(Util.TICKER);
-        Optional<Pair<Holder<PoiType>, BlockPos>> optional = serverlevel.getPoiManager().findClosestWithType(p_249480_, blockpos, 256, PoiManager.Occupancy.ANY);
+        Optional<Pair<Holder<PoiType>, BlockPos>> optional = serverlevel.getPoiManager().findClosestWithType(pPoiType, blockpos, 256, PoiManager.Occupancy.ANY);
         stopwatch.stop();
         if (optional.isEmpty()) {
-            throw ERROR_POI_NOT_FOUND.create(p_249480_.asPrintable());
+            throw ERROR_POI_NOT_FOUND.create(pPoiType.asPrintable());
         } else {
-            return showLocateResult(p_252013_, p_249480_, blockpos, optional.get().swap(), "commands.locate.poi.success", false, stopwatch.elapsed());
+            return showLocateResult(pSource, pPoiType, blockpos, optional.get().swap(), "commands.locate.poi.success", false, stopwatch.elapsed());
         }
     }
 
     public static int showLocateResult(
-        CommandSourceStack p_263098_,
-        ResourceOrTagArgument.Result<?> p_262956_,
-        BlockPos p_262917_,
-        Pair<BlockPos, ? extends Holder<?>> p_263074_,
-        String p_262937_,
-        boolean p_263051_,
-        Duration p_263028_
+        CommandSourceStack pSource,
+        ResourceOrTagArgument.Result<?> pResult,
+        BlockPos pSourcePosition,
+        Pair<BlockPos, ? extends Holder<?>> pResultWithPosition,
+        String pTranslationKey,
+        boolean pAbsoluteY,
+        Duration pDuration
     ) {
-        String s = p_262956_.unwrap()
-            .map(p_248147_ -> p_262956_.asPrintable(), p_326290_ -> p_262956_.asPrintable() + " (" + p_263074_.getSecond().getRegisteredName() + ")");
-        return showLocateResult(p_263098_, p_262917_, p_263074_, p_262937_, p_263051_, s, p_263028_);
+        String s = pResult.unwrap()
+            .map(p_248147_ -> pResult.asPrintable(), p_326290_ -> pResult.asPrintable() + " (" + pResultWithPosition.getSecond().getRegisteredName() + ")");
+        return showLocateResult(pSource, pSourcePosition, pResultWithPosition, pTranslationKey, pAbsoluteY, s, pDuration);
     }
 
     public static int showLocateResult(
-        CommandSourceStack p_263019_,
-        ResourceOrTagKeyArgument.Result<?> p_263031_,
-        BlockPos p_262989_,
-        Pair<BlockPos, ? extends Holder<?>> p_262959_,
-        String p_263045_,
-        boolean p_262934_,
-        Duration p_262960_
+        CommandSourceStack pSource,
+        ResourceOrTagKeyArgument.Result<?> pResult,
+        BlockPos pSourcePosition,
+        Pair<BlockPos, ? extends Holder<?>> pResultWithPosition,
+        String pTranslationKey,
+        boolean pAbsoluteY,
+        Duration pDuration
     ) {
-        String s = p_263031_.unwrap()
-            .map(p_214498_ -> p_214498_.location().toString(), p_326287_ -> "#" + p_326287_.location() + " (" + p_262959_.getSecond().getRegisteredName() + ")");
-        return showLocateResult(p_263019_, p_262989_, p_262959_, p_263045_, p_262934_, s, p_262960_);
+        String s = pResult.unwrap()
+            .map(p_214498_ -> p_214498_.location().toString(), p_326287_ -> "#" + p_326287_.location() + " (" + pResultWithPosition.getSecond().getRegisteredName() + ")");
+        return showLocateResult(pSource, pSourcePosition, pResultWithPosition, pTranslationKey, pAbsoluteY, s, pDuration);
     }
 
     private static int showLocateResult(
-        CommandSourceStack p_262983_,
-        BlockPos p_263016_,
-        Pair<BlockPos, ? extends Holder<?>> p_262941_,
-        String p_263083_,
-        boolean p_263010_,
-        String p_263048_,
-        Duration p_263040_
+        CommandSourceStack pSource,
+        BlockPos pSourcePosition,
+        Pair<BlockPos, ? extends Holder<?>> pResultWithoutPosition,
+        String pTranslationKey,
+        boolean pAbsoluteY,
+        String pElementName,
+        Duration pDuration
     ) {
-        BlockPos blockpos = p_262941_.getFirst();
-        int i = p_263010_
-            ? Mth.floor(Mth.sqrt((float)p_263016_.distSqr(blockpos)))
-            : Mth.floor(dist(p_263016_.getX(), p_263016_.getZ(), blockpos.getX(), blockpos.getZ()));
-        String s = p_263010_ ? String.valueOf(blockpos.getY()) : "~";
+        BlockPos blockpos = pResultWithoutPosition.getFirst();
+        int i = pAbsoluteY
+            ? Mth.floor(Mth.sqrt((float)pSourcePosition.distSqr(blockpos)))
+            : Mth.floor(dist(pSourcePosition.getX(), pSourcePosition.getZ(), blockpos.getX(), blockpos.getZ()));
+        String s = pAbsoluteY ? String.valueOf(blockpos.getY()) : "~";
         Component component = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", blockpos.getX(), s, blockpos.getZ()))
             .withStyle(
                 p_214489_ -> p_214489_.withColor(ChatFormatting.GREEN)
                         .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + blockpos.getX() + " " + s + " " + blockpos.getZ()))
                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")))
             );
-        p_262983_.sendSuccess(() -> Component.translatable(p_263083_, p_263048_, component, i), false);
-        LOGGER.info("Locating element " + p_263048_ + " took " + p_263040_.toMillis() + " ms");
+        pSource.sendSuccess(() -> Component.translatable(pTranslationKey, pElementName, component, i), false);
+        LOGGER.info("Locating element " + pElementName + " took " + pDuration.toMillis() + " ms");
         return i;
     }
 
-    private static float dist(int p_137854_, int p_137855_, int p_137856_, int p_137857_) {
-        int i = p_137856_ - p_137854_;
-        int j = p_137857_ - p_137855_;
+    private static float dist(int pX1, int pZ1, int pX2, int pZ2) {
+        int i = pX2 - pX1;
+        int j = pZ2 - pZ1;
         return Mth.sqrt((float)(i * i + j * j));
     }
 }

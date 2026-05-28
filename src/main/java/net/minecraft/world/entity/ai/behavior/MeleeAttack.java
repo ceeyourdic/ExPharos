@@ -14,11 +14,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 
 public class MeleeAttack {
-    public static <T extends Mob> OneShot<T> create(int p_259758_) {
-        return create(p_358993_ -> true, p_259758_);
+    public static <T extends Mob> OneShot<T> create(int pAttackCooldown) {
+        return create(p_358993_ -> true, pAttackCooldown);
     }
 
-    public static <T extends Mob> OneShot<T> create(Predicate<T> p_365972_, int p_361186_) {
+    public static <T extends Mob> OneShot<T> create(Predicate<T> pCanAttack, int pAttackCooldown) {
         return BehaviorBuilder.create(
             p_358992_ -> p_358992_.group(
                         p_358992_.registered(MemoryModuleType.LOOK_TARGET),
@@ -30,14 +30,14 @@ public class MeleeAttack {
                         p_358992_,
                         (p_358997_, p_358998_, p_358999_, p_359000_) -> (p_359008_, p_359009_, p_359010_) -> {
                                 LivingEntity livingentity = p_358992_.get(p_358998_);
-                                if (p_365972_.test(p_359009_)
+                                if (pCanAttack.test(p_359009_)
                                     && !isHoldingUsableProjectileWeapon(p_359009_)
                                     && p_359009_.isWithinMeleeAttackRange(livingentity)
                                     && p_358992_.<NearestVisibleLivingEntities>get(p_359000_).contains(livingentity)) {
                                     p_358997_.set(new EntityTracker(livingentity, true));
                                     p_359009_.swing(InteractionHand.MAIN_HAND);
                                     p_359009_.doHurtTarget(p_359008_, livingentity);
-                                    p_358999_.setWithExpiry(true, (long)p_361186_);
+                                    p_358999_.setWithExpiry(true, (long)pAttackCooldown);
                                     return true;
                                 } else {
                                     return false;
@@ -47,10 +47,10 @@ public class MeleeAttack {
         );
     }
 
-    private static boolean isHoldingUsableProjectileWeapon(Mob p_23528_) {
-        return p_23528_.isHolding(p_147697_ -> {
+    private static boolean isHoldingUsableProjectileWeapon(Mob pMob) {
+        return pMob.isHolding(p_147697_ -> {
             Item item = p_147697_.getItem();
-            return item instanceof ProjectileWeaponItem && p_23528_.canFireProjectileWeapon((ProjectileWeaponItem)item);
+            return item instanceof ProjectileWeaponItem && pMob.canFireProjectileWeapon((ProjectileWeaponItem)item);
         });
     }
 }

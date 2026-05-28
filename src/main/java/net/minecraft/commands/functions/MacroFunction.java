@@ -37,10 +37,10 @@ public class MacroFunction<T extends ExecutionCommandSource<T>> implements Comma
     private final ResourceLocation id;
     private final List<MacroFunction.Entry<T>> entries;
 
-    public MacroFunction(ResourceLocation p_311437_, List<MacroFunction.Entry<T>> p_310862_, List<String> p_310686_) {
-        this.id = p_311437_;
-        this.entries = p_310862_;
-        this.parameters = p_310686_;
+    public MacroFunction(ResourceLocation pId, List<MacroFunction.Entry<T>> pEntries, List<String> pParameters) {
+        this.id = pId;
+        this.entries = pEntries;
+        this.parameters = pParameters;
     }
 
     @Override
@@ -81,41 +81,41 @@ public class MacroFunction<T extends ExecutionCommandSource<T>> implements Comma
         }
     }
 
-    private static String stringify(Tag p_313061_) {
-        if (p_313061_ instanceof FloatTag floattag) {
+    private static String stringify(Tag pTag) {
+        if (pTag instanceof FloatTag floattag) {
             return DECIMAL_FORMAT.format((double)floattag.getAsFloat());
-        } else if (p_313061_ instanceof DoubleTag doubletag) {
+        } else if (pTag instanceof DoubleTag doubletag) {
             return DECIMAL_FORMAT.format(doubletag.getAsDouble());
-        } else if (p_313061_ instanceof ByteTag bytetag) {
+        } else if (pTag instanceof ByteTag bytetag) {
             return String.valueOf(bytetag.getAsByte());
-        } else if (p_313061_ instanceof ShortTag shorttag) {
+        } else if (pTag instanceof ShortTag shorttag) {
             return String.valueOf(shorttag.getAsShort());
         } else {
-            return p_313061_ instanceof LongTag longtag ? String.valueOf(longtag.getAsLong()) : p_313061_.getAsString();
+            return pTag instanceof LongTag longtag ? String.valueOf(longtag.getAsLong()) : pTag.getAsString();
         }
     }
 
-    private static void lookupValues(List<String> p_313206_, IntList p_310595_, List<String> p_310258_) {
-        p_310258_.clear();
-        p_310595_.forEach(p_312583_ -> p_310258_.add(p_313206_.get(p_312583_)));
+    private static void lookupValues(List<String> pArguments, IntList pParameters, List<String> pOutput) {
+        pOutput.clear();
+        pParameters.forEach(p_312583_ -> pOutput.add(pArguments.get(p_312583_)));
     }
 
-    private InstantiatedFunction<T> substituteAndParse(List<String> p_312865_, List<String> p_312778_, CommandDispatcher<T> p_311234_) throws FunctionInstantiationException {
+    private InstantiatedFunction<T> substituteAndParse(List<String> pArgumentNames, List<String> pArgumentValues, CommandDispatcher<T> pDispatcher) throws FunctionInstantiationException {
         List<UnboundEntryAction<T>> list = new ArrayList<>(this.entries.size());
-        List<String> list1 = new ArrayList<>(p_312778_.size());
+        List<String> list1 = new ArrayList<>(pArgumentValues.size());
 
         for (MacroFunction.Entry<T> entry : this.entries) {
-            lookupValues(p_312778_, entry.parameters(), list1);
-            list.add(entry.instantiate(list1, p_311234_, this.id));
+            lookupValues(pArgumentValues, entry.parameters(), list1);
+            list.add(entry.instantiate(list1, pDispatcher, this.id));
         }
 
-        return new PlainTextFunction<>(this.id().withPath(p_312634_ -> p_312634_ + "/" + p_312865_.hashCode()), list);
+        return new PlainTextFunction<>(this.id().withPath(p_312634_ -> p_312634_ + "/" + pArgumentNames.hashCode()), list);
     }
 
     interface Entry<T> {
         IntList parameters();
 
-        UnboundEntryAction<T> instantiate(List<String> p_312452_, CommandDispatcher<T> p_313016_, ResourceLocation p_311242_) throws FunctionInstantiationException;
+        UnboundEntryAction<T> instantiate(List<String> pArguments, CommandDispatcher<T> pDispatcher, ResourceLocation pFunction) throws FunctionInstantiationException;
     }
 
     static class MacroEntry<T extends ExecutionCommandSource<T>> implements MacroFunction.Entry<T> {
@@ -123,10 +123,10 @@ public class MacroFunction<T extends ExecutionCommandSource<T>> implements Comma
         private final IntList parameters;
         private final T compilationContext;
 
-        public MacroEntry(StringTemplate p_309563_, IntList p_312180_, T p_336169_) {
-            this.template = p_309563_;
-            this.parameters = p_312180_;
-            this.compilationContext = p_336169_;
+        public MacroEntry(StringTemplate pTemplate, IntList pParameters, T pCompilationContext) {
+            this.template = pTemplate;
+            this.parameters = pParameters;
+            this.compilationContext = pCompilationContext;
         }
 
         @Override
@@ -151,8 +151,8 @@ public class MacroFunction<T extends ExecutionCommandSource<T>> implements Comma
     static class PlainTextEntry<T> implements MacroFunction.Entry<T> {
         private final UnboundEntryAction<T> compiledAction;
 
-        public PlainTextEntry(UnboundEntryAction<T> p_309648_) {
-            this.compiledAction = p_309648_;
+        public PlainTextEntry(UnboundEntryAction<T> pCompiledAction) {
+            this.compiledAction = pCompiledAction;
         }
 
         @Override

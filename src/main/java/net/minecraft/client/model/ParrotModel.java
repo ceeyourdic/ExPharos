@@ -23,15 +23,15 @@ public class ParrotModel extends EntityModel<ParrotRenderState> {
     private final ModelPart leftLeg;
     private final ModelPart rightLeg;
 
-    public ParrotModel(ModelPart p_170780_) {
-        super(p_170780_);
-        this.body = p_170780_.getChild("body");
-        this.tail = p_170780_.getChild("tail");
-        this.leftWing = p_170780_.getChild("left_wing");
-        this.rightWing = p_170780_.getChild("right_wing");
-        this.head = p_170780_.getChild("head");
-        this.leftLeg = p_170780_.getChild("left_leg");
-        this.rightLeg = p_170780_.getChild("right_leg");
+    public ParrotModel(ModelPart pRoot) {
+        super(pRoot);
+        this.body = pRoot.getChild("body");
+        this.tail = pRoot.getChild("tail");
+        this.leftWing = pRoot.getChild("left_wing");
+        this.rightWing = pRoot.getChild("right_wing");
+        this.head = pRoot.getChild("head");
+        this.leftLeg = pRoot.getChild("left_leg");
+        this.rightLeg = pRoot.getChild("right_leg");
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -127,8 +127,8 @@ public class ParrotModel extends EntityModel<ParrotRenderState> {
         }
     }
 
-    private void prepare(ParrotModel.Pose p_360920_) {
-        switch (p_360920_) {
+    private void prepare(ParrotModel.Pose pPose) {
+        switch (pPose) {
             case FLYING:
                 this.leftLeg.xRot += (float) (Math.PI * 2.0 / 9.0);
                 this.rightLeg.xRot += (float) (Math.PI * 2.0 / 9.0);
@@ -157,13 +157,13 @@ public class ParrotModel extends EntityModel<ParrotRenderState> {
         }
     }
 
-    public static ParrotModel.Pose getPose(Parrot p_364386_) {
-        if (p_364386_.isPartyParrot()) {
+    public static ParrotModel.Pose getPose(Parrot pParrot) {
+        if (pParrot.isPartyParrot()) {
             return ParrotModel.Pose.PARTY;
-        } else if (p_364386_.isInSittingPose()) {
+        } else if (pParrot.isInSittingPose()) {
             return ParrotModel.Pose.SITTING;
         } else {
-            return p_364386_.isFlying() ? ParrotModel.Pose.FLYING : ParrotModel.Pose.STANDING;
+            return pParrot.isFlying() ? ParrotModel.Pose.FLYING : ParrotModel.Pose.STANDING;
         }
     }
 

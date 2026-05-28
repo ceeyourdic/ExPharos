@@ -79,7 +79,7 @@ public class EndGatewayBlock extends BaseEntityBlock implements Portal {
     }
 
     @Override
-    protected boolean canBeReplaced(BlockState p_53012_, Fluid p_53013_) {
+    protected boolean canBeReplaced(BlockState pState, Fluid pFluid) {
         return false;
     }
 

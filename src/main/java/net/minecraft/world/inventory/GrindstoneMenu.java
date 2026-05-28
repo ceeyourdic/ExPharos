@@ -39,13 +39,13 @@ public class GrindstoneMenu extends AbstractContainerMenu {
     };
     private final ContainerLevelAccess access;
 
-    public GrindstoneMenu(int p_39563_, Inventory p_39564_) {
-        this(p_39563_, p_39564_, ContainerLevelAccess.NULL);
+    public GrindstoneMenu(int pContainerId, Inventory pPlayerInventory) {
+        this(pContainerId, pPlayerInventory, ContainerLevelAccess.NULL);
     }
 
-    public GrindstoneMenu(int p_39566_, Inventory p_39567_, final ContainerLevelAccess p_39568_) {
-        super(MenuType.GRINDSTONE, p_39566_);
-        this.access = p_39568_;
+    public GrindstoneMenu(int pContainerId, Inventory pPlayerInventory, final ContainerLevelAccess pAccess) {
+        super(MenuType.GRINDSTONE, pContainerId);
+        this.access = pAccess;
         this.addSlot(new Slot(this.repairSlots, 0, 49, 19) {
             @Override
             public boolean mayPlace(ItemStack p_39607_) {
@@ -66,7 +66,7 @@ public class GrindstoneMenu extends AbstractContainerMenu {
 
             @Override
             public void onTake(Player p_150574_, ItemStack p_150575_) {
-                p_39568_.execute((p_39634_, p_39635_) -> {
+                pAccess.execute((p_39634_, p_39635_) -> {
                     if (p_39634_ instanceof ServerLevel) {
                         ExperienceOrb.award((ServerLevel)p_39634_, Vec3.atCenterOf(p_39635_), this.getExperienceAmount(p_39634_));
                     }
@@ -104,13 +104,13 @@ public class GrindstoneMenu extends AbstractContainerMenu {
                 return i;
             }
         });
-        this.addStandardInventorySlots(p_39567_, 8, 84);
+        this.addStandardInventorySlots(pPlayerInventory, 8, 84);
     }
 
     @Override
-    public void slotsChanged(Container p_39570_) {
-        super.slotsChanged(p_39570_);
-        if (p_39570_ == this.repairSlots) {
+    public void slotsChanged(Container pInventory) {
+        super.slotsChanged(pInventory);
+        if (pInventory == this.repairSlots) {
             this.createResult();
         }
     }
@@ -120,54 +120,54 @@ public class GrindstoneMenu extends AbstractContainerMenu {
         this.broadcastChanges();
     }
 
-    private ItemStack computeResult(ItemStack p_335167_, ItemStack p_329934_) {
-        boolean flag = !p_335167_.isEmpty() || !p_329934_.isEmpty();
+    private ItemStack computeResult(ItemStack pInputItem, ItemStack pAdditionalItem) {
+        boolean flag = !pInputItem.isEmpty() || !pAdditionalItem.isEmpty();
         if (!flag) {
             return ItemStack.EMPTY;
-        } else if (p_335167_.getCount() <= 1 && p_329934_.getCount() <= 1) {
-            boolean flag1 = !p_335167_.isEmpty() && !p_329934_.isEmpty();
+        } else if (pInputItem.getCount() <= 1 && pAdditionalItem.getCount() <= 1) {
+            boolean flag1 = !pInputItem.isEmpty() && !pAdditionalItem.isEmpty();
             if (!flag1) {
-                ItemStack itemstack = !p_335167_.isEmpty() ? p_335167_ : p_329934_;
+                ItemStack itemstack = !pInputItem.isEmpty() ? pInputItem : pAdditionalItem;
                 return !EnchantmentHelper.hasAnyEnchantments(itemstack) ? ItemStack.EMPTY : this.removeNonCursesFrom(itemstack.copy());
             } else {
-                return this.mergeItems(p_335167_, p_329934_);
+                return this.mergeItems(pInputItem, pAdditionalItem);
             }
         } else {
             return ItemStack.EMPTY;
         }
     }
 
-    private ItemStack mergeItems(ItemStack p_327826_, ItemStack p_328339_) {
-        if (!p_327826_.is(p_328339_.getItem())) {
+    private ItemStack mergeItems(ItemStack pInputItem, ItemStack pAdditionalItem) {
+        if (!pInputItem.is(pAdditionalItem.getItem())) {
             return ItemStack.EMPTY;
         } else {
-            int i = Math.max(p_327826_.getMaxDamage(), p_328339_.getMaxDamage());
-            int j = p_327826_.getMaxDamage() - p_327826_.getDamageValue();
-            int k = p_328339_.getMaxDamage() - p_328339_.getDamageValue();
+            int i = Math.max(pInputItem.getMaxDamage(), pAdditionalItem.getMaxDamage());
+            int j = pInputItem.getMaxDamage() - pInputItem.getDamageValue();
+            int k = pAdditionalItem.getMaxDamage() - pAdditionalItem.getDamageValue();
             int l = j + k + i * 5 / 100;
             int i1 = 1;
-            if (!p_327826_.isDamageableItem()) {
-                if (p_327826_.getMaxStackSize() < 2 || !ItemStack.matches(p_327826_, p_328339_)) {
+            if (!pInputItem.isDamageableItem()) {
+                if (pInputItem.getMaxStackSize() < 2 || !ItemStack.matches(pInputItem, pAdditionalItem)) {
                     return ItemStack.EMPTY;
                 }
 
                 i1 = 2;
             }
 
-            ItemStack itemstack = p_327826_.copyWithCount(i1);
+            ItemStack itemstack = pInputItem.copyWithCount(i1);
             if (itemstack.isDamageableItem()) {
                 itemstack.set(DataComponents.MAX_DAMAGE, i);
                 itemstack.setDamageValue(Math.max(i - l, 0));
             }
 
-            this.mergeEnchantsFrom(itemstack, p_328339_);
+            this.mergeEnchantsFrom(itemstack, pAdditionalItem);
             return this.removeNonCursesFrom(itemstack);
         }
     }
 
-    private void mergeEnchantsFrom(ItemStack p_332353_, ItemStack p_333431_) {
-        EnchantmentHelper.updateEnchantments(p_332353_, p_341519_ -> {
-            ItemEnchantments itemenchantments = EnchantmentHelper.getEnchantmentsForCrafting(p_333431_);
+    private void mergeEnchantsFrom(ItemStack pInputItem, ItemStack pAdditionalItem) {
+        EnchantmentHelper.updateEnchantments(pInputItem, p_341519_ -> {
+            ItemEnchantments itemenchantments = EnchantmentHelper.getEnchantmentsForCrafting(pAdditionalItem);
 
             for (Entry<Holder<Enchantment>> entry : itemenchantments.entrySet()) {
                 Holder<Enchantment> holder = entry.getKey();
@@ -178,12 +178,12 @@ public class GrindstoneMenu extends AbstractContainerMenu {
         });
     }
 
-    private ItemStack removeNonCursesFrom(ItemStack p_332592_) {
+    private ItemStack removeNonCursesFrom(ItemStack pItem) {
         ItemEnchantments itemenchantments = EnchantmentHelper.updateEnchantments(
-            p_332592_, p_327083_ -> p_327083_.removeIf(p_341517_ -> !p_341517_.is(EnchantmentTags.CURSE))
+            pItem, p_327083_ -> p_327083_.removeIf(p_341517_ -> !p_341517_.is(EnchantmentTags.CURSE))
         );
-        if (p_332592_.is(Items.ENCHANTED_BOOK) && itemenchantments.isEmpty()) {
-            p_332592_ = p_332592_.transmuteCopy(Items.BOOK);
+        if (pItem.is(Items.ENCHANTED_BOOK) && itemenchantments.isEmpty()) {
+            pItem = pItem.transmuteCopy(Items.BOOK);
         }
 
         int i = 0;
@@ -192,43 +192,43 @@ public class GrindstoneMenu extends AbstractContainerMenu {
             i = AnvilMenu.calculateIncreasedRepairCost(i);
         }
 
-        p_332592_.set(DataComponents.REPAIR_COST, i);
-        return p_332592_;
+        pItem.set(DataComponents.REPAIR_COST, i);
+        return pItem;
     }
 
     @Override
-    public void removed(Player p_39586_) {
-        super.removed(p_39586_);
-        this.access.execute((p_39575_, p_39576_) -> this.clearContainer(p_39586_, this.repairSlots));
+    public void removed(Player pPlayer) {
+        super.removed(pPlayer);
+        this.access.execute((p_39575_, p_39576_) -> this.clearContainer(pPlayer, this.repairSlots));
     }
 
     @Override
-    public boolean stillValid(Player p_39572_) {
-        return stillValid(this.access, p_39572_, Blocks.GRINDSTONE);
+    public boolean stillValid(Player pPlayer) {
+        return stillValid(this.access, pPlayer, Blocks.GRINDSTONE);
     }
 
     @Override
-    public ItemStack quickMoveStack(Player p_39588_, int p_39589_) {
+    public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(p_39589_);
+        Slot slot = this.slots.get(pIndex);
         if (slot != null && slot.hasItem()) {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
             ItemStack itemstack2 = this.repairSlots.getItem(0);
             ItemStack itemstack3 = this.repairSlots.getItem(1);
-            if (p_39589_ == 2) {
+            if (pIndex == 2) {
                 if (!this.moveItemStackTo(itemstack1, 3, 39, true)) {
                     return ItemStack.EMPTY;
                 }
 
                 slot.onQuickCraft(itemstack1, itemstack);
-            } else if (p_39589_ != 0 && p_39589_ != 1) {
+            } else if (pIndex != 0 && pIndex != 1) {
                 if (!itemstack2.isEmpty() && !itemstack3.isEmpty()) {
-                    if (p_39589_ >= 3 && p_39589_ < 30) {
+                    if (pIndex >= 3 && pIndex < 30) {
                         if (!this.moveItemStackTo(itemstack1, 30, 39, false)) {
                             return ItemStack.EMPTY;
                         }
-                    } else if (p_39589_ >= 30 && p_39589_ < 39 && !this.moveItemStackTo(itemstack1, 3, 30, false)) {
+                    } else if (pIndex >= 30 && pIndex < 39 && !this.moveItemStackTo(itemstack1, 3, 30, false)) {
                         return ItemStack.EMPTY;
                     }
                 } else if (!this.moveItemStackTo(itemstack1, 0, 2, false)) {
@@ -248,7 +248,7 @@ public class GrindstoneMenu extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
 
-            slot.onTake(p_39588_, itemstack1);
+            slot.onTake(pPlayer, itemstack1);
         }
 
         return itemstack;

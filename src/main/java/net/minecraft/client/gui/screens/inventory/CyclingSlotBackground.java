@@ -20,13 +20,13 @@ public class CyclingSlotBackground {
     private int tick;
     private int iconIndex;
 
-    public CyclingSlotBackground(int p_267314_) {
-        this.slotIndex = p_267314_;
+    public CyclingSlotBackground(int pSlotIndex) {
+        this.slotIndex = pSlotIndex;
     }
 
-    public void tick(List<ResourceLocation> p_267074_) {
-        if (!this.icons.equals(p_267074_)) {
-            this.icons = p_267074_;
+    public void tick(List<ResourceLocation> pIcons) {
+        if (!this.icons.equals(pIcons)) {
+            this.icons = pIcons;
             this.iconIndex = 0;
         }
 
@@ -35,26 +35,26 @@ public class CyclingSlotBackground {
         }
     }
 
-    public void render(AbstractContainerMenu p_267293_, GuiGraphics p_282894_, float p_266785_, int p_266711_, int p_266841_) {
-        Slot slot = p_267293_.getSlot(this.slotIndex);
+    public void render(AbstractContainerMenu pContainerMenu, GuiGraphics pGuiGraphics, float pPartialTick, int pX, int pY) {
+        Slot slot = pContainerMenu.getSlot(this.slotIndex);
         if (!this.icons.isEmpty() && !slot.hasItem()) {
             boolean flag = this.icons.size() > 1 && this.tick >= 30;
-            float f = flag ? this.getIconTransitionTransparency(p_266785_) : 1.0F;
+            float f = flag ? this.getIconTransitionTransparency(pPartialTick) : 1.0F;
             if (f < 1.0F) {
                 int i = Math.floorMod(this.iconIndex - 1, this.icons.size());
-                this.renderIcon(slot, this.icons.get(i), 1.0F - f, p_282894_, p_266711_, p_266841_);
+                this.renderIcon(slot, this.icons.get(i), 1.0F - f, pGuiGraphics, pX, pY);
             }
 
-            this.renderIcon(slot, this.icons.get(this.iconIndex), f, p_282894_, p_266711_, p_266841_);
+            this.renderIcon(slot, this.icons.get(this.iconIndex), f, pGuiGraphics, pX, pY);
         }
     }
 
-    private void renderIcon(Slot p_283532_, ResourceLocation p_283004_, float p_282627_, GuiGraphics p_282825_, int p_281375_, int p_283041_) {
-        p_282825_.blitSprite(RenderType::guiTextured, p_283004_, p_281375_ + p_283532_.x, p_283041_ + p_283532_.y, 16, 16, ARGB.white(p_282627_));
+    private void renderIcon(Slot pSlot, ResourceLocation pIcon, float pAlpha, GuiGraphics pGuiGraphics, int pX, int pY) {
+        pGuiGraphics.blitSprite(RenderType::guiTextured, pIcon, pX + pSlot.x, pY + pSlot.y, 16, 16, ARGB.white(pAlpha));
     }
 
-    private float getIconTransitionTransparency(float p_266904_) {
-        float f = (float)(this.tick % 30) + p_266904_;
+    private float getIconTransitionTransparency(float pPartialTick) {
+        float f = (float)(this.tick % 30) + pPartialTick;
         return Math.min(f, 4.0F) / 4.0F;
     }
 }

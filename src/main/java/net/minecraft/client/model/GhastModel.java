@@ -17,16 +17,16 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class GhastModel extends EntityModel<GhastRenderState> {
     private final ModelPart[] tentacles = new ModelPart[9];
 
-    public GhastModel(ModelPart p_170570_) {
-        super(p_170570_);
+    public GhastModel(ModelPart pRoot) {
+        super(pRoot);
 
         for (int i = 0; i < this.tentacles.length; i++) {
-            this.tentacles[i] = p_170570_.getChild(createTentacleName(i));
+            this.tentacles[i] = pRoot.getChild(createTentacleName(i));
         }
     }
 
-    private static String createTentacleName(int p_170573_) {
-        return "tentacle" + p_170573_;
+    private static String createTentacleName(int pIndex) {
+        return "tentacle" + pIndex;
     }
 
     public static LayerDefinition createBodyLayer() {

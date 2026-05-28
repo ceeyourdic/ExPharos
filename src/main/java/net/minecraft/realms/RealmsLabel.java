@@ -14,11 +14,11 @@ public class RealmsLabel implements Renderable {
     private final int y;
     private final int color;
 
-    public RealmsLabel(Component p_120736_, int p_120737_, int p_120738_, int p_120739_) {
-        this.text = p_120736_;
-        this.x = p_120737_;
-        this.y = p_120738_;
-        this.color = p_120739_;
+    public RealmsLabel(Component pText, int pX, int pY, int pColor) {
+        this.text = pText;
+        this.x = pX;
+        this.y = pY;
+        this.color = pColor;
     }
 
     @Override

@@ -23,24 +23,24 @@ public class DonkeyModel extends AbstractEquineModel<DonkeyRenderState> {
         super(p_370220_);
     }
 
-    public static LayerDefinition createBodyLayer(float p_377317_) {
+    public static LayerDefinition createBodyLayer(float pScale) {
         MeshDefinition meshdefinition = AbstractEquineModel.createBodyMesh(CubeDeformation.NONE);
         modifyMesh(meshdefinition.getRoot());
-        return LayerDefinition.create(meshdefinition, 64, 64).apply(MeshTransformer.scaling(p_377317_));
+        return LayerDefinition.create(meshdefinition, 64, 64).apply(MeshTransformer.scaling(pScale));
     }
 
-    public static LayerDefinition createBabyLayer(float p_375532_) {
+    public static LayerDefinition createBabyLayer(float pScale) {
         MeshDefinition meshdefinition = AbstractEquineModel.createFullScaleBabyMesh(CubeDeformation.NONE);
         modifyMesh(meshdefinition.getRoot());
-        return LayerDefinition.create(AbstractEquineModel.BABY_TRANSFORMER.apply(meshdefinition), 64, 64).apply(MeshTransformer.scaling(p_375532_));
+        return LayerDefinition.create(AbstractEquineModel.BABY_TRANSFORMER.apply(meshdefinition), 64, 64).apply(MeshTransformer.scaling(pScale));
     }
 
-    private static void modifyMesh(PartDefinition p_362806_) {
-        PartDefinition partdefinition = p_362806_.getChild("body");
+    private static void modifyMesh(PartDefinition pPartDefinition) {
+        PartDefinition partdefinition = pPartDefinition.getChild("body");
         CubeListBuilder cubelistbuilder = CubeListBuilder.create().texOffs(26, 21).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 8.0F, 3.0F);
         partdefinition.addOrReplaceChild("left_chest", cubelistbuilder, PartPose.offsetAndRotation(6.0F, -8.0F, 0.0F, 0.0F, (float) (-Math.PI / 2), 0.0F));
         partdefinition.addOrReplaceChild("right_chest", cubelistbuilder, PartPose.offsetAndRotation(-6.0F, -8.0F, 0.0F, 0.0F, (float) (Math.PI / 2), 0.0F));
-        PartDefinition partdefinition1 = p_362806_.getChild("head_parts").getChild("head");
+        PartDefinition partdefinition1 = pPartDefinition.getChild("head_parts").getChild("head");
         CubeListBuilder cubelistbuilder1 = CubeListBuilder.create().texOffs(0, 12).addBox(-1.0F, -7.0F, 0.0F, 2.0F, 7.0F, 1.0F);
         partdefinition1.addOrReplaceChild("left_ear", cubelistbuilder1, PartPose.offsetAndRotation(1.25F, -10.0F, 4.0F, (float) (Math.PI / 12), 0.0F, (float) (Math.PI / 12)));
         partdefinition1.addOrReplaceChild(

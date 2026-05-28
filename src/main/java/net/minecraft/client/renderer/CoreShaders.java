@@ -68,12 +68,12 @@ public class CoreShaders {
     public static final ShaderProgram RENDERTYPE_GUI_GHOST_RECIPE_OVERLAY = register("rendertype_gui_ghost_recipe_overlay", DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderProgram RENDERTYPE_BREEZE_WIND = register("rendertype_breeze_wind", DefaultVertexFormat.NEW_ENTITY);
 
-    private static ShaderProgram register(String p_365674_, VertexFormat p_366650_) {
-        return register(p_365674_, p_366650_, ShaderDefines.EMPTY);
+    private static ShaderProgram register(String pName, VertexFormat pVertexFormat) {
+        return register(pName, pVertexFormat, ShaderDefines.EMPTY);
     }
 
-    private static ShaderProgram register(String p_369491_, VertexFormat p_361914_, ShaderDefines p_368508_) {
-        ShaderProgram shaderprogram = new ShaderProgram(ResourceLocation.withDefaultNamespace("core/" + p_369491_), p_361914_, p_368508_);
+    private static ShaderProgram register(String pName, VertexFormat pVertexFormat, ShaderDefines pDefines) {
+        ShaderProgram shaderprogram = new ShaderProgram(ResourceLocation.withDefaultNamespace("core/" + pName), pVertexFormat, pDefines);
         PROGRAMS.add(shaderprogram);
         return shaderprogram;
     }

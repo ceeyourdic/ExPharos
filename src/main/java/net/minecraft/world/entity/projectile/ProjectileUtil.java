@@ -21,37 +21,37 @@ import net.minecraft.world.phys.Vec3;
 public final class ProjectileUtil {
     private static final float DEFAULT_ENTITY_HIT_RESULT_MARGIN = 0.3F;
 
-    public static HitResult getHitResultOnMoveVector(Entity p_278228_, Predicate<Entity> p_278315_) {
-        Vec3 vec3 = p_278228_.getDeltaMovement();
-        Level level = p_278228_.level();
-        Vec3 vec31 = p_278228_.position();
-        return getHitResult(vec31, p_278228_, p_278315_, vec3, level, 0.3F, ClipContext.Block.COLLIDER);
+    public static HitResult getHitResultOnMoveVector(Entity pProjectile, Predicate<Entity> pFilter) {
+        Vec3 vec3 = pProjectile.getDeltaMovement();
+        Level level = pProjectile.level();
+        Vec3 vec31 = pProjectile.position();
+        return getHitResult(vec31, pProjectile, pFilter, vec3, level, 0.3F, ClipContext.Block.COLLIDER);
     }
 
-    public static HitResult getHitResultOnMoveVector(Entity p_311718_, Predicate<Entity> p_311003_, ClipContext.Block p_312093_) {
-        Vec3 vec3 = p_311718_.getDeltaMovement();
-        Level level = p_311718_.level();
-        Vec3 vec31 = p_311718_.position();
-        return getHitResult(vec31, p_311718_, p_311003_, vec3, level, 0.3F, p_312093_);
+    public static HitResult getHitResultOnMoveVector(Entity pProjectile, Predicate<Entity> pFilter, ClipContext.Block pClipContext) {
+        Vec3 vec3 = pProjectile.getDeltaMovement();
+        Level level = pProjectile.level();
+        Vec3 vec31 = pProjectile.position();
+        return getHitResult(vec31, pProjectile, pFilter, vec3, level, 0.3F, pClipContext);
     }
 
-    public static HitResult getHitResultOnViewVector(Entity p_278281_, Predicate<Entity> p_278306_, double p_278293_) {
-        Vec3 vec3 = p_278281_.getViewVector(0.0F).scale(p_278293_);
-        Level level = p_278281_.level();
-        Vec3 vec31 = p_278281_.getEyePosition();
-        return getHitResult(vec31, p_278281_, p_278306_, vec3, level, 0.0F, ClipContext.Block.COLLIDER);
+    public static HitResult getHitResultOnViewVector(Entity pProjectile, Predicate<Entity> pFilter, double pScale) {
+        Vec3 vec3 = pProjectile.getViewVector(0.0F).scale(pScale);
+        Level level = pProjectile.level();
+        Vec3 vec31 = pProjectile.getEyePosition();
+        return getHitResult(vec31, pProjectile, pFilter, vec3, level, 0.0F, ClipContext.Block.COLLIDER);
     }
 
     private static HitResult getHitResult(
-        Vec3 p_278237_, Entity p_278320_, Predicate<Entity> p_278257_, Vec3 p_278342_, Level p_278321_, float p_310295_, ClipContext.Block p_310049_
+        Vec3 pPos, Entity pProjectile, Predicate<Entity> pFilter, Vec3 pDeltaMovement, Level pLevel, float pMargin, ClipContext.Block pClipContext
     ) {
-        Vec3 vec3 = p_278237_.add(p_278342_);
-        HitResult hitresult = p_278321_.clipIncludingBorder(new ClipContext(p_278237_, vec3, p_310049_, ClipContext.Fluid.NONE, p_278320_));
+        Vec3 vec3 = pPos.add(pDeltaMovement);
+        HitResult hitresult = pLevel.clipIncludingBorder(new ClipContext(pPos, vec3, pClipContext, ClipContext.Fluid.NONE, pProjectile));
         if (hitresult.getType() != HitResult.Type.MISS) {
             vec3 = hitresult.getLocation();
         }
 
-        HitResult hitresult1 = getEntityHitResult(p_278321_, p_278320_, p_278237_, vec3, p_278320_.getBoundingBox().expandTowards(p_278342_).inflate(1.0), p_278257_, p_310295_);
+        HitResult hitresult1 = getEntityHitResult(pLevel, pProjectile, pPos, vec3, pProjectile.getBoundingBox().expandTowards(pDeltaMovement).inflate(1.0), pFilter, pMargin);
         if (hitresult1 != null) {
             hitresult = hitresult1;
         }
@@ -60,26 +60,26 @@ public final class ProjectileUtil {
     }
 
     @Nullable
-    public static EntityHitResult getEntityHitResult(Entity p_37288_, Vec3 p_37289_, Vec3 p_37290_, AABB p_37291_, Predicate<Entity> p_37292_, double p_37293_) {
-        Level level = p_37288_.level();
-        double d0 = p_37293_;
+    public static EntityHitResult getEntityHitResult(Entity pShooter, Vec3 pStartVec, Vec3 pEndVec, AABB pBoundingBox, Predicate<Entity> pFilter, double pDistance) {
+        Level level = pShooter.level();
+        double d0 = pDistance;
         Entity entity = null;
         Vec3 vec3 = null;
 
-        for (Entity entity1 : level.getEntities(p_37288_, p_37291_, p_37292_)) {
+        for (Entity entity1 : level.getEntities(pShooter, pBoundingBox, pFilter)) {
             AABB aabb = entity1.getBoundingBox().inflate((double)entity1.getPickRadius());
-            Optional<Vec3> optional = aabb.clip(p_37289_, p_37290_);
-            if (aabb.contains(p_37289_)) {
+            Optional<Vec3> optional = aabb.clip(pStartVec, pEndVec);
+            if (aabb.contains(pStartVec)) {
                 if (d0 >= 0.0) {
                     entity = entity1;
-                    vec3 = optional.orElse(p_37289_);
+                    vec3 = optional.orElse(pStartVec);
                     d0 = 0.0;
                 }
             } else if (optional.isPresent()) {
                 Vec3 vec31 = optional.get();
-                double d1 = p_37289_.distanceToSqr(vec31);
+                double d1 = pStartVec.distanceToSqr(vec31);
                 if (d1 < d0 || d0 == 0.0) {
-                    if (entity1.getRootVehicle() == p_37288_.getRootVehicle()) {
+                    if (entity1.getRootVehicle() == pShooter.getRootVehicle()) {
                         if (d0 == 0.0) {
                             entity = entity1;
                             vec3 = vec31;
@@ -97,23 +97,23 @@ public final class ProjectileUtil {
     }
 
     @Nullable
-    public static EntityHitResult getEntityHitResult(Level p_37305_, Entity p_37306_, Vec3 p_37307_, Vec3 p_37308_, AABB p_37309_, Predicate<Entity> p_37310_) {
-        return getEntityHitResult(p_37305_, p_37306_, p_37307_, p_37308_, p_37309_, p_37310_, 0.3F);
+    public static EntityHitResult getEntityHitResult(Level pLevel, Entity pProjectile, Vec3 pStartVec, Vec3 pEndVec, AABB pBoundingBox, Predicate<Entity> pFilter) {
+        return getEntityHitResult(pLevel, pProjectile, pStartVec, pEndVec, pBoundingBox, pFilter, 0.3F);
     }
 
     @Nullable
     public static EntityHitResult getEntityHitResult(
-        Level p_150176_, Entity p_150177_, Vec3 p_150178_, Vec3 p_150179_, AABB p_150180_, Predicate<Entity> p_150181_, float p_150182_
+        Level pLevel, Entity pProjectile, Vec3 pStartVec, Vec3 pEndVec, AABB pBoundingBox, Predicate<Entity> pFilter, float pInflationAmount
     ) {
         double d0 = Double.MAX_VALUE;
         Optional<Vec3> optional = Optional.empty();
         Entity entity = null;
 
-        for (Entity entity1 : p_150176_.getEntities(p_150177_, p_150180_, p_150181_)) {
-            AABB aabb = entity1.getBoundingBox().inflate((double)p_150182_);
-            Optional<Vec3> optional1 = aabb.clip(p_150178_, p_150179_);
+        for (Entity entity1 : pLevel.getEntities(pProjectile, pBoundingBox, pFilter)) {
+            AABB aabb = entity1.getBoundingBox().inflate((double)pInflationAmount);
+            Optional<Vec3> optional1 = aabb.clip(pStartVec, pEndVec);
             if (optional1.isPresent()) {
-                double d1 = p_150178_.distanceToSqr(optional1.get());
+                double d1 = pStartVec.distanceToSqr(optional1.get());
                 if (d1 < d0) {
                     entity = entity1;
                     d0 = d1;
@@ -125,42 +125,42 @@ public final class ProjectileUtil {
         return entity == null ? null : new EntityHitResult(entity, optional.get());
     }
 
-    public static void rotateTowardsMovement(Entity p_37285_, float p_37286_) {
-        Vec3 vec3 = p_37285_.getDeltaMovement();
+    public static void rotateTowardsMovement(Entity pProjectile, float pRotationSpeed) {
+        Vec3 vec3 = pProjectile.getDeltaMovement();
         if (vec3.lengthSqr() != 0.0) {
             double d0 = vec3.horizontalDistance();
-            p_37285_.setYRot((float)(Mth.atan2(vec3.z, vec3.x) * 180.0F / (float)Math.PI) + 90.0F);
-            p_37285_.setXRot((float)(Mth.atan2(d0, vec3.y) * 180.0F / (float)Math.PI) - 90.0F);
+            pProjectile.setYRot((float)(Mth.atan2(vec3.z, vec3.x) * 180.0F / (float)Math.PI) + 90.0F);
+            pProjectile.setXRot((float)(Mth.atan2(d0, vec3.y) * 180.0F / (float)Math.PI) - 90.0F);
 
-            while (p_37285_.getXRot() - p_37285_.xRotO < -180.0F) {
-                p_37285_.xRotO -= 360.0F;
+            while (pProjectile.getXRot() - pProjectile.xRotO < -180.0F) {
+                pProjectile.xRotO -= 360.0F;
             }
 
-            while (p_37285_.getXRot() - p_37285_.xRotO >= 180.0F) {
-                p_37285_.xRotO += 360.0F;
+            while (pProjectile.getXRot() - pProjectile.xRotO >= 180.0F) {
+                pProjectile.xRotO += 360.0F;
             }
 
-            while (p_37285_.getYRot() - p_37285_.yRotO < -180.0F) {
-                p_37285_.yRotO -= 360.0F;
+            while (pProjectile.getYRot() - pProjectile.yRotO < -180.0F) {
+                pProjectile.yRotO -= 360.0F;
             }
 
-            while (p_37285_.getYRot() - p_37285_.yRotO >= 180.0F) {
-                p_37285_.yRotO += 360.0F;
+            while (pProjectile.getYRot() - pProjectile.yRotO >= 180.0F) {
+                pProjectile.yRotO += 360.0F;
             }
 
-            p_37285_.setXRot(Mth.lerp(p_37286_, p_37285_.xRotO, p_37285_.getXRot()));
-            p_37285_.setYRot(Mth.lerp(p_37286_, p_37285_.yRotO, p_37285_.getYRot()));
+            pProjectile.setXRot(Mth.lerp(pRotationSpeed, pProjectile.xRotO, pProjectile.getXRot()));
+            pProjectile.setYRot(Mth.lerp(pRotationSpeed, pProjectile.yRotO, pProjectile.getYRot()));
         }
     }
 
-    public static InteractionHand getWeaponHoldingHand(LivingEntity p_37298_, Item p_37299_) {
-        return p_37298_.getMainHandItem().is(p_37299_) ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+    public static InteractionHand getWeaponHoldingHand(LivingEntity pShooter, Item pWeapon) {
+        return pShooter.getMainHandItem().is(pWeapon) ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
     }
 
-    public static AbstractArrow getMobArrow(LivingEntity p_37301_, ItemStack p_37302_, float p_37303_, @Nullable ItemStack p_342402_) {
-        ArrowItem arrowitem = (ArrowItem)(p_37302_.getItem() instanceof ArrowItem ? p_37302_.getItem() : Items.ARROW);
-        AbstractArrow abstractarrow = arrowitem.createArrow(p_37301_.level(), p_37302_, p_37301_, p_342402_);
-        abstractarrow.setBaseDamageFromMob(p_37303_);
+    public static AbstractArrow getMobArrow(LivingEntity pShooter, ItemStack pArrow, float pVelocity, @Nullable ItemStack pWeapon) {
+        ArrowItem arrowitem = (ArrowItem)(pArrow.getItem() instanceof ArrowItem ? pArrow.getItem() : Items.ARROW);
+        AbstractArrow abstractarrow = arrowitem.createArrow(pShooter.level(), pArrow, pShooter, pWeapon);
+        abstractarrow.setBaseDamageFromMob(pVelocity);
         return abstractarrow;
     }
 }

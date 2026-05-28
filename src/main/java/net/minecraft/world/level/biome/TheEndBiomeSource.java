@@ -28,22 +28,22 @@ public class TheEndBiomeSource extends BiomeSource {
     private final Holder<Biome> islands;
     private final Holder<Biome> barrens;
 
-    public static TheEndBiomeSource create(HolderGetter<Biome> p_256561_) {
+    public static TheEndBiomeSource create(HolderGetter<Biome> pBiomeGetter) {
         return new TheEndBiomeSource(
-            p_256561_.getOrThrow(Biomes.THE_END),
-            p_256561_.getOrThrow(Biomes.END_HIGHLANDS),
-            p_256561_.getOrThrow(Biomes.END_MIDLANDS),
-            p_256561_.getOrThrow(Biomes.SMALL_END_ISLANDS),
-            p_256561_.getOrThrow(Biomes.END_BARRENS)
+            pBiomeGetter.getOrThrow(Biomes.THE_END),
+            pBiomeGetter.getOrThrow(Biomes.END_HIGHLANDS),
+            pBiomeGetter.getOrThrow(Biomes.END_MIDLANDS),
+            pBiomeGetter.getOrThrow(Biomes.SMALL_END_ISLANDS),
+            pBiomeGetter.getOrThrow(Biomes.END_BARRENS)
         );
     }
 
-    private TheEndBiomeSource(Holder<Biome> p_220678_, Holder<Biome> p_220679_, Holder<Biome> p_220680_, Holder<Biome> p_220681_, Holder<Biome> p_220682_) {
-        this.end = p_220678_;
-        this.highlands = p_220679_;
-        this.midlands = p_220680_;
-        this.islands = p_220681_;
-        this.barrens = p_220682_;
+    private TheEndBiomeSource(Holder<Biome> pEnd, Holder<Biome> pHighlands, Holder<Biome> pMidlands, Holder<Biome> pIslands, Holder<Biome> pBarrens) {
+        this.end = pEnd;
+        this.highlands = pHighlands;
+        this.midlands = pMidlands;
+        this.islands = pIslands;
+        this.barrens = pBarrens;
     }
 
     @Override

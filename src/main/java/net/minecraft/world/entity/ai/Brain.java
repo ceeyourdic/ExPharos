@@ -58,20 +58,20 @@ public class Brain<E extends LivingEntity> {
     private long lastScheduleUpdate = -9999L;
 
     public static <E extends LivingEntity> Brain.Provider<E> provider(
-        Collection<? extends MemoryModuleType<?>> p_21924_, Collection<? extends SensorType<? extends Sensor<? super E>>> p_21925_
+        Collection<? extends MemoryModuleType<?>> pMemoryTypes, Collection<? extends SensorType<? extends Sensor<? super E>>> pSensorTypes
     ) {
-        return new Brain.Provider<>(p_21924_, p_21925_);
+        return new Brain.Provider<>(pMemoryTypes, pSensorTypes);
     }
 
     public static <E extends LivingEntity> Codec<Brain<E>> codec(
-        final Collection<? extends MemoryModuleType<?>> p_21947_, final Collection<? extends SensorType<? extends Sensor<? super E>>> p_21948_
+        final Collection<? extends MemoryModuleType<?>> pMemoryTypes, final Collection<? extends SensorType<? extends Sensor<? super E>>> pSensorTypes
     ) {
         final MutableObject<Codec<Brain<E>>> mutableobject = new MutableObject<>();
         mutableobject.setValue(
             (new MapCodec<Brain<E>>() {
                     @Override
                     public <T> Stream<T> keys(DynamicOps<T> p_22029_) {
-                        return p_21947_.stream()
+                        return pMemoryTypes.stream()
                             .flatMap(
                                 p_22020_ -> p_22020_.getCodec().map(p_258254_ -> BuiltInRegistries.MEMORY_MODULE_TYPE.getKey((MemoryModuleType<?>)p_22020_)).stream()
                             )
@@ -97,7 +97,7 @@ public class Brain<E extends LivingEntity> {
                             .resultOrPartial(Brain.LOGGER::error)
                             .map(Builder::build)
                             .orElseGet(ImmutableList::of);
-                        return DataResult.success(new Brain<>(p_21947_, p_21948_, immutablelist, mutableobject::getValue));
+                        return DataResult.success(new Brain<>(pMemoryTypes, pSensorTypes, immutablelist, mutableobject::getValue));
                     }
 
                     private <T, U> DataResult<Brain.MemoryValue<U>> captureRead(MemoryModuleType<U> p_21997_, DynamicOps<T> p_21998_, T p_21999_) {
@@ -120,18 +120,18 @@ public class Brain<E extends LivingEntity> {
     }
 
     public Brain(
-        Collection<? extends MemoryModuleType<?>> p_21855_,
-        Collection<? extends SensorType<? extends Sensor<? super E>>> p_21856_,
-        ImmutableList<Brain.MemoryValue<?>> p_21857_,
-        Supplier<Codec<Brain<E>>> p_21858_
+        Collection<? extends MemoryModuleType<?>> pMemoryModuleTypes,
+        Collection<? extends SensorType<? extends Sensor<? super E>>> pSensorTypes,
+        ImmutableList<Brain.MemoryValue<?>> pMemoryValues,
+        Supplier<Codec<Brain<E>>> pCodec
     ) {
-        this.codec = p_21858_;
+        this.codec = pCodec;
 
-        for (MemoryModuleType<?> memorymoduletype : p_21855_) {
+        for (MemoryModuleType<?> memorymoduletype : pMemoryModuleTypes) {
             this.memories.put(memorymoduletype, Optional.empty());
         }
 
-        for (SensorType<? extends Sensor<? super E>> sensortype : p_21856_) {
+        for (SensorType<? extends Sensor<? super E>> sensortype : pSensorTypes) {
             this.sensors.put(sensortype, (Sensor<? super E>)sensortype.create());
         }
 
@@ -141,70 +141,70 @@ public class Brain<E extends LivingEntity> {
             }
         }
 
-        for (Brain.MemoryValue<?> memoryvalue : p_21857_) {
+        for (Brain.MemoryValue<?> memoryvalue : pMemoryValues) {
             memoryvalue.setMemoryInternal(this);
         }
     }
 
-    public <T> DataResult<T> serializeStart(DynamicOps<T> p_21915_) {
-        return this.codec.get().encodeStart(p_21915_, this);
+    public <T> DataResult<T> serializeStart(DynamicOps<T> pOps) {
+        return this.codec.get().encodeStart(pOps, this);
     }
 
     Stream<Brain.MemoryValue<?>> memories() {
         return this.memories.entrySet().stream().map(p_21929_ -> Brain.MemoryValue.createUnchecked(p_21929_.getKey(), p_21929_.getValue()));
     }
 
-    public boolean hasMemoryValue(MemoryModuleType<?> p_21875_) {
-        return this.checkMemory(p_21875_, MemoryStatus.VALUE_PRESENT);
+    public boolean hasMemoryValue(MemoryModuleType<?> pType) {
+        return this.checkMemory(pType, MemoryStatus.VALUE_PRESENT);
     }
 
     public void clearMemories() {
         this.memories.keySet().forEach(p_276103_ -> this.memories.put((MemoryModuleType<?>)p_276103_, Optional.empty()));
     }
 
-    public <U> void eraseMemory(MemoryModuleType<U> p_21937_) {
-        this.setMemory(p_21937_, Optional.empty());
+    public <U> void eraseMemory(MemoryModuleType<U> pType) {
+        this.setMemory(pType, Optional.empty());
     }
 
-    public <U> void setMemory(MemoryModuleType<U> p_21880_, @Nullable U p_21881_) {
-        this.setMemory(p_21880_, Optional.ofNullable(p_21881_));
+    public <U> void setMemory(MemoryModuleType<U> pMemoryType, @Nullable U pMemory) {
+        this.setMemory(pMemoryType, Optional.ofNullable(pMemory));
     }
 
-    public <U> void setMemoryWithExpiry(MemoryModuleType<U> p_21883_, U p_21884_, long p_21885_) {
-        this.setMemoryInternal(p_21883_, Optional.of(ExpirableValue.of(p_21884_, p_21885_)));
+    public <U> void setMemoryWithExpiry(MemoryModuleType<U> pMemoryType, U pMemory, long pTimeToLive) {
+        this.setMemoryInternal(pMemoryType, Optional.of(ExpirableValue.of(pMemory, pTimeToLive)));
     }
 
-    public <U> void setMemory(MemoryModuleType<U> p_21887_, Optional<? extends U> p_21888_) {
-        this.setMemoryInternal(p_21887_, p_21888_.map(ExpirableValue::of));
+    public <U> void setMemory(MemoryModuleType<U> pMemoryType, Optional<? extends U> pMemory) {
+        this.setMemoryInternal(pMemoryType, pMemory.map(ExpirableValue::of));
     }
 
-    <U> void setMemoryInternal(MemoryModuleType<U> p_21942_, Optional<? extends ExpirableValue<?>> p_21943_) {
-        if (this.memories.containsKey(p_21942_)) {
-            if (p_21943_.isPresent() && this.isEmptyCollection(p_21943_.get().getValue())) {
-                this.eraseMemory(p_21942_);
+    <U> void setMemoryInternal(MemoryModuleType<U> pMemoryType, Optional<? extends ExpirableValue<?>> pMemory) {
+        if (this.memories.containsKey(pMemoryType)) {
+            if (pMemory.isPresent() && this.isEmptyCollection(pMemory.get().getValue())) {
+                this.eraseMemory(pMemoryType);
             } else {
-                this.memories.put(p_21942_, p_21943_);
+                this.memories.put(pMemoryType, pMemory);
             }
         }
     }
 
-    public <U> Optional<U> getMemory(MemoryModuleType<U> p_21953_) {
-        Optional<? extends ExpirableValue<?>> optional = this.memories.get(p_21953_);
+    public <U> Optional<U> getMemory(MemoryModuleType<U> pType) {
+        Optional<? extends ExpirableValue<?>> optional = this.memories.get(pType);
         if (optional == null) {
-            throw new IllegalStateException("Unregistered memory fetched: " + p_21953_);
+            throw new IllegalStateException("Unregistered memory fetched: " + pType);
         } else {
             return (Optional<U>)optional.map(ExpirableValue::getValue);
         }
     }
 
     @Nullable
-    public <U> Optional<U> getMemoryInternal(MemoryModuleType<U> p_259344_) {
-        Optional<? extends ExpirableValue<?>> optional = this.memories.get(p_259344_);
+    public <U> Optional<U> getMemoryInternal(MemoryModuleType<U> pType) {
+        Optional<? extends ExpirableValue<?>> optional = this.memories.get(pType);
         return optional == null ? null : (Optional<U>)optional.map(ExpirableValue::getValue);
     }
 
-    public <U> long getTimeUntilExpiry(MemoryModuleType<U> p_147342_) {
-        Optional<? extends ExpirableValue<?>> optional = this.memories.get(p_147342_);
+    public <U> long getTimeUntilExpiry(MemoryModuleType<U> pMemoryType) {
+        Optional<? extends ExpirableValue<?>> optional = this.memories.get(pMemoryType);
         return optional.map(ExpirableValue::getTimeToLive).orElse(0L);
     }
 
@@ -214,29 +214,29 @@ public class Brain<E extends LivingEntity> {
         return this.memories;
     }
 
-    public <U> boolean isMemoryValue(MemoryModuleType<U> p_21939_, U p_21940_) {
-        return !this.hasMemoryValue(p_21939_) ? false : this.getMemory(p_21939_).filter(p_21922_ -> p_21922_.equals(p_21940_)).isPresent();
+    public <U> boolean isMemoryValue(MemoryModuleType<U> pMemoryType, U pMemory) {
+        return !this.hasMemoryValue(pMemoryType) ? false : this.getMemory(pMemoryType).filter(p_21922_ -> p_21922_.equals(pMemory)).isPresent();
     }
 
-    public boolean checkMemory(MemoryModuleType<?> p_21877_, MemoryStatus p_21878_) {
-        Optional<? extends ExpirableValue<?>> optional = this.memories.get(p_21877_);
+    public boolean checkMemory(MemoryModuleType<?> pMemoryType, MemoryStatus pMemoryStatus) {
+        Optional<? extends ExpirableValue<?>> optional = this.memories.get(pMemoryType);
         return optional == null
             ? false
-            : p_21878_ == MemoryStatus.REGISTERED
-                || p_21878_ == MemoryStatus.VALUE_PRESENT && optional.isPresent()
-                || p_21878_ == MemoryStatus.VALUE_ABSENT && optional.isEmpty();
+            : pMemoryStatus == MemoryStatus.REGISTERED
+                || pMemoryStatus == MemoryStatus.VALUE_PRESENT && optional.isPresent()
+                || pMemoryStatus == MemoryStatus.VALUE_ABSENT && optional.isEmpty();
     }
 
     public Schedule getSchedule() {
         return this.schedule;
     }
 
-    public void setSchedule(Schedule p_21913_) {
-        this.schedule = p_21913_;
+    public void setSchedule(Schedule pNewSchedule) {
+        this.schedule = pNewSchedule;
     }
 
-    public void setCoreActivities(Set<Activity> p_21931_) {
-        this.coreActivities = p_21931_;
+    public void setCoreActivities(Set<Activity> pNewActivities) {
+        this.coreActivities = pNewActivities;
     }
 
     @Deprecated
@@ -277,26 +277,26 @@ public class Brain<E extends LivingEntity> {
         return Optional.empty();
     }
 
-    public void setActiveActivityIfPossible(Activity p_21890_) {
-        if (this.activityRequirementsAreMet(p_21890_)) {
-            this.setActiveActivity(p_21890_);
+    public void setActiveActivityIfPossible(Activity pActivity) {
+        if (this.activityRequirementsAreMet(pActivity)) {
+            this.setActiveActivity(pActivity);
         } else {
             this.useDefaultActivity();
         }
     }
 
-    private void setActiveActivity(Activity p_21961_) {
-        if (!this.isActive(p_21961_)) {
-            this.eraseMemoriesForOtherActivitesThan(p_21961_);
+    private void setActiveActivity(Activity pActivity) {
+        if (!this.isActive(pActivity)) {
+            this.eraseMemoriesForOtherActivitesThan(pActivity);
             this.activeActivities.clear();
             this.activeActivities.addAll(this.coreActivities);
-            this.activeActivities.add(p_21961_);
+            this.activeActivities.add(pActivity);
         }
     }
 
-    private void eraseMemoriesForOtherActivitesThan(Activity p_21967_) {
+    private void eraseMemoriesForOtherActivitesThan(Activity pActivity) {
         for (Activity activity : this.activeActivities) {
-            if (activity != p_21967_) {
+            if (activity != pActivity) {
                 Set<MemoryModuleType<?>> set = this.activityMemoriesToEraseWhenStopped.get(activity);
                 if (set != null) {
                     for (MemoryModuleType<?> memorymoduletype : set) {
@@ -307,18 +307,18 @@ public class Brain<E extends LivingEntity> {
         }
     }
 
-    public void updateActivityFromSchedule(long p_21863_, long p_21864_) {
-        if (p_21864_ - this.lastScheduleUpdate > 20L) {
-            this.lastScheduleUpdate = p_21864_;
-            Activity activity = this.getSchedule().getActivityAt((int)(p_21863_ % 24000L));
+    public void updateActivityFromSchedule(long pDayTime, long pGameTime) {
+        if (pGameTime - this.lastScheduleUpdate > 20L) {
+            this.lastScheduleUpdate = pGameTime;
+            Activity activity = this.getSchedule().getActivityAt((int)(pDayTime % 24000L));
             if (!this.activeActivities.contains(activity)) {
                 this.setActiveActivityIfPossible(activity);
             }
         }
     }
 
-    public void setActiveActivityToFirstValid(List<Activity> p_21927_) {
-        for (Activity activity : p_21927_) {
+    public void setActiveActivityToFirstValid(List<Activity> pActivities) {
+        for (Activity activity : pActivities) {
             if (this.activityRequirementsAreMet(activity)) {
                 this.setActiveActivity(activity);
                 break;
@@ -326,47 +326,47 @@ public class Brain<E extends LivingEntity> {
         }
     }
 
-    public void setDefaultActivity(Activity p_21945_) {
-        this.defaultActivity = p_21945_;
+    public void setDefaultActivity(Activity pNewFallbackActivity) {
+        this.defaultActivity = pNewFallbackActivity;
     }
 
-    public void addActivity(Activity p_21892_, int p_21893_, ImmutableList<? extends BehaviorControl<? super E>> p_21894_) {
-        this.addActivity(p_21892_, this.createPriorityPairs(p_21893_, p_21894_));
+    public void addActivity(Activity pActivity, int pPriorityStart, ImmutableList<? extends BehaviorControl<? super E>> pTasks) {
+        this.addActivity(pActivity, this.createPriorityPairs(pPriorityStart, pTasks));
     }
 
-    public void addActivityAndRemoveMemoryWhenStopped(Activity p_21896_, int p_21897_, ImmutableList<? extends BehaviorControl<? super E>> p_21898_, MemoryModuleType<?> p_21899_) {
-        Set<Pair<MemoryModuleType<?>, MemoryStatus>> set = ImmutableSet.of(Pair.of(p_21899_, MemoryStatus.VALUE_PRESENT));
-        Set<MemoryModuleType<?>> set1 = ImmutableSet.of(p_21899_);
-        this.addActivityAndRemoveMemoriesWhenStopped(p_21896_, this.createPriorityPairs(p_21897_, p_21898_), set, set1);
+    public void addActivityAndRemoveMemoryWhenStopped(Activity pActivity, int pPriorityStart, ImmutableList<? extends BehaviorControl<? super E>> pTasks, MemoryModuleType<?> pMemoryType) {
+        Set<Pair<MemoryModuleType<?>, MemoryStatus>> set = ImmutableSet.of(Pair.of(pMemoryType, MemoryStatus.VALUE_PRESENT));
+        Set<MemoryModuleType<?>> set1 = ImmutableSet.of(pMemoryType);
+        this.addActivityAndRemoveMemoriesWhenStopped(pActivity, this.createPriorityPairs(pPriorityStart, pTasks), set, set1);
     }
 
-    public void addActivity(Activity p_21901_, ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super E>>> p_21902_) {
-        this.addActivityAndRemoveMemoriesWhenStopped(p_21901_, p_21902_, ImmutableSet.of(), Sets.newHashSet());
+    public void addActivity(Activity pActivity, ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super E>>> pTasks) {
+        this.addActivityAndRemoveMemoriesWhenStopped(pActivity, pTasks, ImmutableSet.of(), Sets.newHashSet());
     }
 
     public void addActivityWithConditions(
-        Activity p_21904_,
-        ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super E>>> p_21905_,
-        Set<Pair<MemoryModuleType<?>, MemoryStatus>> p_21906_
+        Activity pActivity,
+        ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super E>>> pTasks,
+        Set<Pair<MemoryModuleType<?>, MemoryStatus>> pMemoryStatuses
     ) {
-        this.addActivityAndRemoveMemoriesWhenStopped(p_21904_, p_21905_, p_21906_, Sets.newHashSet());
+        this.addActivityAndRemoveMemoriesWhenStopped(pActivity, pTasks, pMemoryStatuses, Sets.newHashSet());
     }
 
     public void addActivityAndRemoveMemoriesWhenStopped(
-        Activity p_21908_,
-        ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super E>>> p_21909_,
-        Set<Pair<MemoryModuleType<?>, MemoryStatus>> p_21910_,
-        Set<MemoryModuleType<?>> p_21911_
+        Activity pActivity,
+        ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super E>>> pTasks,
+        Set<Pair<MemoryModuleType<?>, MemoryStatus>> pMemorieStatuses,
+        Set<MemoryModuleType<?>> pMemoryTypes
     ) {
-        this.activityRequirements.put(p_21908_, p_21910_);
-        if (!p_21911_.isEmpty()) {
-            this.activityMemoriesToEraseWhenStopped.put(p_21908_, p_21911_);
+        this.activityRequirements.put(pActivity, pMemorieStatuses);
+        if (!pMemoryTypes.isEmpty()) {
+            this.activityMemoriesToEraseWhenStopped.put(pActivity, pMemoryTypes);
         }
 
-        for (Pair<Integer, ? extends BehaviorControl<? super E>> pair : p_21909_) {
+        for (Pair<Integer, ? extends BehaviorControl<? super E>> pair : pTasks) {
             this.availableBehaviorsByPriority
                 .computeIfAbsent(pair.getFirst(), p_21917_ -> Maps.newHashMap())
-                .computeIfAbsent(p_21908_, p_21972_ -> Sets.newLinkedHashSet())
+                .computeIfAbsent(pActivity, p_21972_ -> Sets.newLinkedHashSet())
                 .add((BehaviorControl<? super E>)pair.getSecond());
         }
     }
@@ -376,8 +376,8 @@ public class Brain<E extends LivingEntity> {
         this.availableBehaviorsByPriority.clear();
     }
 
-    public boolean isActive(Activity p_21955_) {
-        return this.activeActivities.contains(p_21955_);
+    public boolean isActive(Activity pActivity) {
+        return this.activeActivities.contains(pActivity);
     }
 
     public Brain<E> copyWithoutBehaviors() {
@@ -393,16 +393,16 @@ public class Brain<E extends LivingEntity> {
         return brain;
     }
 
-    public void tick(ServerLevel p_21866_, E p_21867_) {
+    public void tick(ServerLevel pLevel, E pEntity) {
         this.forgetOutdatedMemories();
-        this.tickSensors(p_21866_, p_21867_);
-        this.startEachNonRunningBehavior(p_21866_, p_21867_);
-        this.tickEachRunningBehavior(p_21866_, p_21867_);
+        this.tickSensors(pLevel, pEntity);
+        this.startEachNonRunningBehavior(pLevel, pEntity);
+        this.tickEachRunningBehavior(pLevel, pEntity);
     }
 
-    private void tickSensors(ServerLevel p_21950_, E p_21951_) {
+    private void tickSensors(ServerLevel pLevel, E pBrainHolder) {
         for (Sensor<? super E> sensor : this.sensors.values()) {
-            sensor.tick(p_21950_, p_21951_);
+            sensor.tick(pLevel, pBrainHolder);
         }
     }
 
@@ -419,16 +419,16 @@ public class Brain<E extends LivingEntity> {
         }
     }
 
-    public void stopAll(ServerLevel p_21934_, E p_21935_) {
-        long i = p_21935_.level().getGameTime();
+    public void stopAll(ServerLevel pLevel, E pOwner) {
+        long i = pOwner.level().getGameTime();
 
         for (BehaviorControl<? super E> behaviorcontrol : this.getRunningBehaviors()) {
-            behaviorcontrol.doStop(p_21934_, p_21935_, i);
+            behaviorcontrol.doStop(pLevel, pOwner, i);
         }
     }
 
-    private void startEachNonRunningBehavior(ServerLevel p_21958_, E p_21959_) {
-        long i = p_21958_.getGameTime();
+    private void startEachNonRunningBehavior(ServerLevel pLevel, E pEntity) {
+        long i = pLevel.getGameTime();
 
         for (Map<Activity, Set<BehaviorControl<? super E>>> map : this.availableBehaviorsByPriority.values()) {
             for (Entry<Activity, Set<BehaviorControl<? super E>>> entry : map.entrySet()) {
@@ -436,7 +436,7 @@ public class Brain<E extends LivingEntity> {
                 if (this.activeActivities.contains(activity)) {
                     for (BehaviorControl<? super E> behaviorcontrol : entry.getValue()) {
                         if (behaviorcontrol.getStatus() == Behavior.Status.STOPPED) {
-                            behaviorcontrol.tryStart(p_21958_, p_21959_, i);
+                            behaviorcontrol.tryStart(pLevel, pEntity, i);
                         }
                     }
                 }
@@ -444,19 +444,19 @@ public class Brain<E extends LivingEntity> {
         }
     }
 
-    private void tickEachRunningBehavior(ServerLevel p_21964_, E p_21965_) {
-        long i = p_21964_.getGameTime();
+    private void tickEachRunningBehavior(ServerLevel pLevel, E pEntity) {
+        long i = pLevel.getGameTime();
 
         for (BehaviorControl<? super E> behaviorcontrol : this.getRunningBehaviors()) {
-            behaviorcontrol.tickOrStop(p_21964_, p_21965_, i);
+            behaviorcontrol.tickOrStop(pLevel, pEntity, i);
         }
     }
 
-    private boolean activityRequirementsAreMet(Activity p_21970_) {
-        if (!this.activityRequirements.containsKey(p_21970_)) {
+    private boolean activityRequirementsAreMet(Activity pActivity) {
+        if (!this.activityRequirements.containsKey(pActivity)) {
             return false;
         } else {
-            for (Pair<MemoryModuleType<?>, MemoryStatus> pair : this.activityRequirements.get(p_21970_)) {
+            for (Pair<MemoryModuleType<?>, MemoryStatus> pair : this.activityRequirements.get(pActivity)) {
                 MemoryModuleType<?> memorymoduletype = pair.getFirst();
                 MemoryStatus memorystatus = pair.getSecond();
                 if (!this.checkMemory(memorymoduletype, memorystatus)) {
@@ -468,17 +468,17 @@ public class Brain<E extends LivingEntity> {
         }
     }
 
-    private boolean isEmptyCollection(Object p_21919_) {
-        return p_21919_ instanceof Collection && ((Collection)p_21919_).isEmpty();
+    private boolean isEmptyCollection(Object pCollection) {
+        return pCollection instanceof Collection && ((Collection)pCollection).isEmpty();
     }
 
     ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super E>>> createPriorityPairs(
-        int p_21860_, ImmutableList<? extends BehaviorControl<? super E>> p_21861_
+        int pPriorityStart, ImmutableList<? extends BehaviorControl<? super E>> pTasks
     ) {
-        int i = p_21860_;
+        int i = pPriorityStart;
         Builder<Pair<Integer, ? extends BehaviorControl<? super E>>> builder = ImmutableList.builder();
 
-        for (BehaviorControl<? super E> behaviorcontrol : p_21861_) {
+        for (BehaviorControl<? super E> behaviorcontrol : pTasks) {
             builder.add(Pair.of(i++, behaviorcontrol));
         }
 
@@ -489,28 +489,28 @@ public class Brain<E extends LivingEntity> {
         private final MemoryModuleType<U> type;
         private final Optional<? extends ExpirableValue<U>> value;
 
-        static <U> Brain.MemoryValue<U> createUnchecked(MemoryModuleType<U> p_22060_, Optional<? extends ExpirableValue<?>> p_22061_) {
-            return new Brain.MemoryValue<>(p_22060_, (Optional<? extends ExpirableValue<U>>)p_22061_);
+        static <U> Brain.MemoryValue<U> createUnchecked(MemoryModuleType<U> pMemoryType, Optional<? extends ExpirableValue<?>> pMemory) {
+            return new Brain.MemoryValue<>(pMemoryType, (Optional<? extends ExpirableValue<U>>)pMemory);
         }
 
-        MemoryValue(MemoryModuleType<U> p_22033_, Optional<? extends ExpirableValue<U>> p_22034_) {
-            this.type = p_22033_;
-            this.value = p_22034_;
+        MemoryValue(MemoryModuleType<U> pType, Optional<? extends ExpirableValue<U>> pValue) {
+            this.type = pType;
+            this.value = pValue;
         }
 
-        void setMemoryInternal(Brain<?> p_22043_) {
-            p_22043_.setMemoryInternal(this.type, this.value);
+        void setMemoryInternal(Brain<?> pBrain) {
+            pBrain.setMemoryInternal(this.type, this.value);
         }
 
-        public <T> void serialize(DynamicOps<T> p_22048_, RecordBuilder<T> p_22049_) {
+        public <T> void serialize(DynamicOps<T> pOps, RecordBuilder<T> pBuilder) {
             this.type
                 .getCodec()
                 .ifPresent(
                     p_22053_ -> this.value
                             .ifPresent(
-                                p_358912_ -> p_22049_.add(
-                                        BuiltInRegistries.MEMORY_MODULE_TYPE.byNameCodec().encodeStart(p_22048_, this.type),
-                                        p_22053_.encodeStart(p_22048_, (ExpirableValue<U>)p_358912_)
+                                p_358912_ -> pBuilder.add(
+                                        BuiltInRegistries.MEMORY_MODULE_TYPE.byNameCodec().encodeStart(pOps, this.type),
+                                        p_22053_.encodeStart(pOps, (ExpirableValue<U>)p_358912_)
                                     )
                             )
                 );
@@ -522,15 +522,15 @@ public class Brain<E extends LivingEntity> {
         private final Collection<? extends SensorType<? extends Sensor<? super E>>> sensorTypes;
         private final Codec<Brain<E>> codec;
 
-        Provider(Collection<? extends MemoryModuleType<?>> p_22066_, Collection<? extends SensorType<? extends Sensor<? super E>>> p_22067_) {
-            this.memoryTypes = p_22066_;
-            this.sensorTypes = p_22067_;
-            this.codec = Brain.codec(p_22066_, p_22067_);
+        Provider(Collection<? extends MemoryModuleType<?>> pMemoryTypes, Collection<? extends SensorType<? extends Sensor<? super E>>> pSensorTypes) {
+            this.memoryTypes = pMemoryTypes;
+            this.sensorTypes = pSensorTypes;
+            this.codec = Brain.codec(pMemoryTypes, pSensorTypes);
         }
 
-        public Brain<E> makeBrain(Dynamic<?> p_22074_) {
+        public Brain<E> makeBrain(Dynamic<?> pOps) {
             return this.codec
-                .parse(p_22074_)
+                .parse(pOps)
                 .resultOrPartial(Brain.LOGGER::error)
                 .orElseGet(() -> new Brain<>(this.memoryTypes, this.sensorTypes, ImmutableList.of(), () -> this.codec));
         }

@@ -34,8 +34,8 @@ public class MovementTutorialStepInstance implements TutorialStepInstance {
     private int moveCompleted = -1;
     private int lookCompleted = -1;
 
-    public MovementTutorialStepInstance(Tutorial p_120522_) {
-        this.tutorial = p_120522_;
+    public MovementTutorialStepInstance(Tutorial pTutorial) {
+        this.tutorial = pTutorial;
     }
 
     @Override
@@ -122,8 +122,8 @@ public class MovementTutorialStepInstance implements TutorialStepInstance {
     }
 
     @Override
-    public void onMouse(double p_120525_, double p_120526_) {
-        if (Math.abs(p_120525_) > 0.01 || Math.abs(p_120526_) > 0.01) {
+    public void onMouse(double pVelocityX, double pVelocityY) {
+        if (Math.abs(pVelocityX) > 0.01 || Math.abs(pVelocityY) > 0.01) {
             this.turned = true;
         }
     }

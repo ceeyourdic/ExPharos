@@ -56,8 +56,8 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
     public float oOpen;
     private ItemStack last = ItemStack.EMPTY;
 
-    public EnchantmentScreen(EnchantmentMenu p_98754_, Inventory p_98755_, Component p_98756_) {
-        super(p_98754_, p_98755_, p_98756_);
+    public EnchantmentScreen(EnchantmentMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, pPlayerInventory, pTitle);
     }
 
     @Override
@@ -73,20 +73,20 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
     }
 
     @Override
-    public boolean mouseClicked(double p_98758_, double p_98759_, int p_98760_) {
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         int i = (this.width - this.imageWidth) / 2;
         int j = (this.height - this.imageHeight) / 2;
 
         for (int k = 0; k < 3; k++) {
-            double d0 = p_98758_ - (double)(i + 60);
-            double d1 = p_98759_ - (double)(j + 14 + 19 * k);
+            double d0 = pMouseX - (double)(i + 60);
+            double d1 = pMouseY - (double)(j + 14 + 19 * k);
             if (d0 >= 0.0 && d1 >= 0.0 && d0 < 108.0 && d1 < 19.0 && this.menu.clickMenuButton(this.minecraft.player, k)) {
                 this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, k);
                 return true;
             }
         }
 
-        return super.mouseClicked(p_98758_, p_98759_, p_98760_);
+        return super.mouseClicked(pMouseX, pMouseY, pButton);
     }
 
     @Override
@@ -134,29 +134,29 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
         }
     }
 
-    private void renderBook(GuiGraphics p_289697_, int p_289667_, int p_289669_, float p_289670_) {
-        float f = Mth.lerp(p_289670_, this.oOpen, this.open);
-        float f1 = Mth.lerp(p_289670_, this.oFlip, this.flip);
-        p_289697_.flush();
+    private void renderBook(GuiGraphics pGuiGraphics, int pX, int pY, float pPartialTick) {
+        float f = Mth.lerp(pPartialTick, this.oOpen, this.open);
+        float f1 = Mth.lerp(pPartialTick, this.oFlip, this.flip);
+        pGuiGraphics.flush();
         Lighting.setupForEntityInInventory();
-        p_289697_.pose().pushPose();
-        p_289697_.pose().translate((float)p_289667_ + 33.0F, (float)p_289669_ + 31.0F, 100.0F);
+        pGuiGraphics.pose().pushPose();
+        pGuiGraphics.pose().translate((float)pX + 33.0F, (float)pY + 31.0F, 100.0F);
         float f2 = 40.0F;
-        p_289697_.pose().scale(-40.0F, 40.0F, 40.0F);
-        p_289697_.pose().mulPose(Axis.XP.rotationDegrees(25.0F));
-        p_289697_.pose().translate((1.0F - f) * 0.2F, (1.0F - f) * 0.1F, (1.0F - f) * 0.25F);
+        pGuiGraphics.pose().scale(-40.0F, 40.0F, 40.0F);
+        pGuiGraphics.pose().mulPose(Axis.XP.rotationDegrees(25.0F));
+        pGuiGraphics.pose().translate((1.0F - f) * 0.2F, (1.0F - f) * 0.1F, (1.0F - f) * 0.25F);
         float f3 = -(1.0F - f) * 90.0F - 90.0F;
-        p_289697_.pose().mulPose(Axis.YP.rotationDegrees(f3));
-        p_289697_.pose().mulPose(Axis.XP.rotationDegrees(180.0F));
+        pGuiGraphics.pose().mulPose(Axis.YP.rotationDegrees(f3));
+        pGuiGraphics.pose().mulPose(Axis.XP.rotationDegrees(180.0F));
         float f4 = Mth.clamp(Mth.frac(f1 + 0.25F) * 1.6F - 0.3F, 0.0F, 1.0F);
         float f5 = Mth.clamp(Mth.frac(f1 + 0.75F) * 1.6F - 0.3F, 0.0F, 1.0F);
         this.bookModel.setupAnim(0.0F, f4, f5, f);
-        p_289697_.drawSpecial(p_367194_ -> {
+        pGuiGraphics.drawSpecial(p_367194_ -> {
             VertexConsumer vertexconsumer = p_367194_.getBuffer(this.bookModel.renderType(ENCHANTING_BOOK_LOCATION));
-            this.bookModel.renderToBuffer(p_289697_.pose(), vertexconsumer, 15728880, OverlayTexture.NO_OVERLAY);
+            this.bookModel.renderToBuffer(pGuiGraphics.pose(), vertexconsumer, 15728880, OverlayTexture.NO_OVERLAY);
         });
-        p_289697_.flush();
-        p_289697_.pose().popPose();
+        pGuiGraphics.flush();
+        pGuiGraphics.pose().popPose();
         Lighting.setupFor3DItems();
     }
 

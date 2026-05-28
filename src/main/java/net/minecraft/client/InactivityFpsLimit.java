@@ -16,10 +16,10 @@ public enum InactivityFpsLimit implements OptionEnum, StringRepresentable {
     private final String serializedName;
     private final String key;
 
-    private InactivityFpsLimit(final int p_370129_, final String p_363713_, final String p_363219_) {
-        this.id = p_370129_;
-        this.serializedName = p_363713_;
-        this.key = p_363219_;
+    private InactivityFpsLimit(final int pId, final String pSerializedName, final String pKey) {
+        this.id = pId;
+        this.serializedName = pSerializedName;
+        this.key = pKey;
     }
 
     @Override

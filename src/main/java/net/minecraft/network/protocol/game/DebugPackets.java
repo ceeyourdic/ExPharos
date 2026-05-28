@@ -50,73 +50,73 @@ import org.slf4j.Logger;
 public class DebugPackets {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static void sendGameTestAddMarker(ServerLevel p_133683_, BlockPos p_133684_, String p_133685_, int p_133686_, int p_133687_) {
-        sendPacketToAllPlayers(p_133683_, new GameTestAddMarkerDebugPayload(p_133684_, p_133686_, p_133685_, p_133687_));
+    public static void sendGameTestAddMarker(ServerLevel pLevel, BlockPos pPos, String pText, int pColor, int pLifetimeMillis) {
+        sendPacketToAllPlayers(pLevel, new GameTestAddMarkerDebugPayload(pPos, pColor, pText, pLifetimeMillis));
     }
 
-    public static void sendGameTestClearPacket(ServerLevel p_133675_) {
-        sendPacketToAllPlayers(p_133675_, new GameTestClearMarkersDebugPayload());
+    public static void sendGameTestClearPacket(ServerLevel pLevel) {
+        sendPacketToAllPlayers(pLevel, new GameTestClearMarkersDebugPayload());
     }
 
-    public static void sendPoiPacketsForChunk(ServerLevel p_133677_, ChunkPos p_133678_) {
+    public static void sendPoiPacketsForChunk(ServerLevel pLevel, ChunkPos pChunkPos) {
     }
 
-    public static void sendPoiAddedPacket(ServerLevel p_133680_, BlockPos p_133681_) {
-        sendVillageSectionsPacket(p_133680_, p_133681_);
+    public static void sendPoiAddedPacket(ServerLevel pLevel, BlockPos pPos) {
+        sendVillageSectionsPacket(pLevel, pPos);
     }
 
-    public static void sendPoiRemovedPacket(ServerLevel p_133717_, BlockPos p_133718_) {
-        sendVillageSectionsPacket(p_133717_, p_133718_);
+    public static void sendPoiRemovedPacket(ServerLevel pLevel, BlockPos pPos) {
+        sendVillageSectionsPacket(pLevel, pPos);
     }
 
-    public static void sendPoiTicketCountPacket(ServerLevel p_133720_, BlockPos p_133721_) {
-        sendVillageSectionsPacket(p_133720_, p_133721_);
+    public static void sendPoiTicketCountPacket(ServerLevel pLevel, BlockPos pPos) {
+        sendVillageSectionsPacket(pLevel, pPos);
     }
 
-    private static void sendVillageSectionsPacket(ServerLevel p_133723_, BlockPos p_133724_) {
+    private static void sendVillageSectionsPacket(ServerLevel pLevel, BlockPos pPos) {
     }
 
-    public static void sendPathFindingPacket(Level p_133704_, Mob p_133705_, @Nullable Path p_133706_, float p_133707_) {
+    public static void sendPathFindingPacket(Level pLevel, Mob pMob, @Nullable Path pPath, float pMaxDistanceToWaypoint) {
     }
 
-    public static void sendNeighborsUpdatePacket(Level p_133709_, BlockPos p_133710_) {
+    public static void sendNeighborsUpdatePacket(Level pLevel, BlockPos pPos) {
     }
 
-    public static void sendWireUpdates(Level p_368754_, RedstoneWireOrientationsDebugPayload p_365750_) {
-        if (p_368754_ instanceof ServerLevel serverlevel) {
-            sendPacketToAllPlayers(serverlevel, p_365750_);
+    public static void sendWireUpdates(Level pLevel, RedstoneWireOrientationsDebugPayload pPayload) {
+        if (pLevel instanceof ServerLevel serverlevel) {
+            sendPacketToAllPlayers(serverlevel, pPayload);
         }
     }
 
-    public static void sendStructurePacket(WorldGenLevel p_133712_, StructureStart p_133713_) {
+    public static void sendStructurePacket(WorldGenLevel pLevel, StructureStart pStructureStart) {
     }
 
-    public static void sendGoalSelector(Level p_133700_, Mob p_133701_, GoalSelector p_133702_) {
+    public static void sendGoalSelector(Level pLevel, Mob pMob, GoalSelector pGoalSelector) {
     }
 
-    public static void sendRaids(ServerLevel p_133689_, Collection<Raid> p_133690_) {
+    public static void sendRaids(ServerLevel pLevel, Collection<Raid> pRaids) {
     }
 
-    public static void sendEntityBrain(LivingEntity p_133696_) {
+    public static void sendEntityBrain(LivingEntity pLivingEntity) {
     }
 
-    public static void sendBeeInfo(Bee p_133698_) {
+    public static void sendBeeInfo(Bee pBee) {
     }
 
-    public static void sendBreezeInfo(Breeze p_310112_) {
+    public static void sendBreezeInfo(Breeze pBreeze) {
     }
 
-    public static void sendGameEventInfo(Level p_237888_, Holder<GameEvent> p_328608_, Vec3 p_237890_) {
+    public static void sendGameEventInfo(Level pLevel, Holder<GameEvent> pGameEvent, Vec3 pPos) {
     }
 
-    public static void sendGameEventListenerInfo(Level p_179508_, GameEventListener p_179509_) {
+    public static void sendGameEventListenerInfo(Level pLevel, GameEventListener pGameEventListener) {
     }
 
-    public static void sendHiveInfo(Level p_179511_, BlockPos p_179512_, BlockState p_179513_, BeehiveBlockEntity p_179514_) {
+    public static void sendHiveInfo(Level pLevel, BlockPos pPos, BlockState pBlockState, BeehiveBlockEntity pHiveBlockEntity) {
     }
 
-    private static List<String> getMemoryDescriptions(LivingEntity p_179496_, long p_179497_) {
-        Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> map = p_179496_.getBrain().getMemories();
+    private static List<String> getMemoryDescriptions(LivingEntity pEntity, long pGameTime) {
+        Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> map = pEntity.getBrain().getMemories();
         List<String> list = Lists.newArrayList();
 
         for (Entry<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> entry : map.entrySet()) {
@@ -127,12 +127,12 @@ public class DebugPackets {
                 ExpirableValue<?> expirablevalue = (ExpirableValue<?>)optional.get();
                 Object object = expirablevalue.getValue();
                 if (memorymoduletype == MemoryModuleType.HEARD_BELL_TIME) {
-                    long i = p_179497_ - (Long)object;
+                    long i = pGameTime - (Long)object;
                     s = i + " ticks ago";
                 } else if (expirablevalue.canExpire()) {
-                    s = getShortDescription((ServerLevel)p_179496_.level(), object) + " (ttl: " + expirablevalue.getTimeToLive() + ")";
+                    s = getShortDescription((ServerLevel)pEntity.level(), object) + " (ttl: " + expirablevalue.getTimeToLive() + ")";
                 } else {
-                    s = getShortDescription((ServerLevel)p_179496_.level(), object);
+                    s = getShortDescription((ServerLevel)pEntity.level(), object);
                 }
             } else {
                 s = "-";
@@ -145,44 +145,44 @@ public class DebugPackets {
         return list;
     }
 
-    private static String getShortDescription(ServerLevel p_179493_, @Nullable Object p_179494_) {
-        if (p_179494_ == null) {
+    private static String getShortDescription(ServerLevel pLevel, @Nullable Object pObject) {
+        if (pObject == null) {
             return "-";
-        } else if (p_179494_ instanceof UUID) {
-            return getShortDescription(p_179493_, p_179493_.getEntity((UUID)p_179494_));
-        } else if (p_179494_ instanceof LivingEntity) {
-            Entity entity1 = (Entity)p_179494_;
+        } else if (pObject instanceof UUID) {
+            return getShortDescription(pLevel, pLevel.getEntity((UUID)pObject));
+        } else if (pObject instanceof LivingEntity) {
+            Entity entity1 = (Entity)pObject;
             return DebugEntityNameGenerator.getEntityName(entity1);
-        } else if (p_179494_ instanceof Nameable) {
-            return ((Nameable)p_179494_).getName().getString();
-        } else if (p_179494_ instanceof WalkTarget) {
-            return getShortDescription(p_179493_, ((WalkTarget)p_179494_).getTarget());
-        } else if (p_179494_ instanceof EntityTracker) {
-            return getShortDescription(p_179493_, ((EntityTracker)p_179494_).getEntity());
-        } else if (p_179494_ instanceof GlobalPos) {
-            return getShortDescription(p_179493_, ((GlobalPos)p_179494_).pos());
-        } else if (p_179494_ instanceof BlockPosTracker) {
-            return getShortDescription(p_179493_, ((BlockPosTracker)p_179494_).currentBlockPosition());
-        } else if (p_179494_ instanceof DamageSource) {
-            Entity entity = ((DamageSource)p_179494_).getEntity();
-            return entity == null ? p_179494_.toString() : getShortDescription(p_179493_, entity);
-        } else if (!(p_179494_ instanceof Collection)) {
-            return p_179494_.toString();
+        } else if (pObject instanceof Nameable) {
+            return ((Nameable)pObject).getName().getString();
+        } else if (pObject instanceof WalkTarget) {
+            return getShortDescription(pLevel, ((WalkTarget)pObject).getTarget());
+        } else if (pObject instanceof EntityTracker) {
+            return getShortDescription(pLevel, ((EntityTracker)pObject).getEntity());
+        } else if (pObject instanceof GlobalPos) {
+            return getShortDescription(pLevel, ((GlobalPos)pObject).pos());
+        } else if (pObject instanceof BlockPosTracker) {
+            return getShortDescription(pLevel, ((BlockPosTracker)pObject).currentBlockPosition());
+        } else if (pObject instanceof DamageSource) {
+            Entity entity = ((DamageSource)pObject).getEntity();
+            return entity == null ? pObject.toString() : getShortDescription(pLevel, entity);
+        } else if (!(pObject instanceof Collection)) {
+            return pObject.toString();
         } else {
             List<String> list = Lists.newArrayList();
 
-            for (Object object : (Iterable)p_179494_) {
-                list.add(getShortDescription(p_179493_, object));
+            for (Object object : (Iterable)pObject) {
+                list.add(getShortDescription(pLevel, object));
             }
 
             return list.toString();
         }
     }
 
-    private static void sendPacketToAllPlayers(ServerLevel p_133692_, CustomPacketPayload p_298207_) {
-        Packet<?> packet = new ClientboundCustomPayloadPacket(p_298207_);
+    private static void sendPacketToAllPlayers(ServerLevel pLevel, CustomPacketPayload pPayload) {
+        Packet<?> packet = new ClientboundCustomPayloadPacket(pPayload);
 
-        for (ServerPlayer serverplayer : p_133692_.players()) {
+        for (ServerPlayer serverplayer : pLevel.players()) {
             serverplayer.connection.send(packet);
         }
     }

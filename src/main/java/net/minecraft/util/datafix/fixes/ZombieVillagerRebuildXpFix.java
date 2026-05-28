@@ -7,8 +7,8 @@ import com.mojang.serialization.Dynamic;
 import java.util.Optional;
 
 public class ZombieVillagerRebuildXpFix extends NamedEntityFix {
-    public ZombieVillagerRebuildXpFix(Schema p_17298_, boolean p_17299_) {
-        super(p_17298_, p_17299_, "Zombie Villager XP rebuild", References.ENTITY, "minecraft:zombie_villager");
+    public ZombieVillagerRebuildXpFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType, "Zombie Villager XP rebuild", References.ENTITY, "minecraft:zombie_villager");
     }
 
     @Override

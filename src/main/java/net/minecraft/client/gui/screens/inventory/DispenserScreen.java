@@ -13,8 +13,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class DispenserScreen extends AbstractContainerScreen<DispenserMenu> {
     private static final ResourceLocation CONTAINER_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/dispenser.png");
 
-    public DispenserScreen(DispenserMenu p_98685_, Inventory p_98686_, Component p_98687_) {
-        super(p_98685_, p_98686_, p_98687_);
+    public DispenserScreen(DispenserMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, pPlayerInventory, pTitle);
     }
 
     @Override

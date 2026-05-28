@@ -20,9 +20,9 @@ public class KeyValueCondition implements Condition {
     private final String key;
     private final String value;
 
-    public KeyValueCondition(String p_111939_, String p_111940_) {
-        this.key = p_111939_;
-        this.value = p_111940_;
+    public KeyValueCondition(String pKey, String pValue) {
+        this.key = pKey;
+        this.value = pValue;
     }
 
     @Override
@@ -55,16 +55,16 @@ public class KeyValueCondition implements Condition {
         }
     }
 
-    private Predicate<BlockState> getBlockStatePredicate(StateDefinition<Block, BlockState> p_111945_, Property<?> p_111946_, String p_111947_) {
-        Optional<?> optional = p_111946_.getValue(p_111947_);
+    private Predicate<BlockState> getBlockStatePredicate(StateDefinition<Block, BlockState> pDefinition, Property<?> pProperty, String pValue) {
+        Optional<?> optional = pProperty.getValue(pValue);
         if (optional.isEmpty()) {
             throw new RuntimeException(
                 String.format(
-                    Locale.ROOT, "Unknown value '%s' for property '%s' on '%s' in '%s'", p_111947_, this.key, p_111945_.getOwner(), this.value
+                    Locale.ROOT, "Unknown value '%s' for property '%s' on '%s' in '%s'", pValue, this.key, pDefinition.getOwner(), this.value
                 )
             );
         } else {
-            return p_325519_ -> p_325519_.getValue(p_111946_).equals(optional.get());
+            return p_325519_ -> p_325519_.getValue(pProperty).equals(optional.get());
         }
     }
 

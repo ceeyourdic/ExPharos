@@ -42,24 +42,24 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_52402_, BlockGetter p_52403_, BlockPos p_52404_, CollisionContext p_52405_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
     @Override
-    protected boolean useShapeForLightOcclusion(BlockState p_52409_) {
+    protected boolean useShapeForLightOcclusion(BlockState pState) {
         return true;
     }
 
     @Override
-    protected int getSignal(BlockState p_52386_, BlockGetter p_52387_, BlockPos p_52388_, Direction p_52389_) {
-        return p_52386_.getValue(POWER);
+    protected int getSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
+        return pBlockState.getValue(POWER);
     }
 
-    private static void updateSignalStrength(BlockState p_52411_, Level p_52412_, BlockPos p_52413_) {
-        int i = p_52412_.getBrightness(LightLayer.SKY, p_52413_) - p_52412_.getSkyDarken();
-        float f = p_52412_.getSunAngle(1.0F);
-        boolean flag = p_52411_.getValue(INVERTED);
+    private static void updateSignalStrength(BlockState pState, Level pLevel, BlockPos pPos) {
+        int i = pLevel.getBrightness(LightLayer.SKY, pPos) - pLevel.getSkyDarken();
+        float f = pLevel.getSunAngle(1.0F);
+        boolean flag = pState.getValue(INVERTED);
         if (flag) {
             i = 15 - i;
         } else if (i > 0) {
@@ -69,8 +69,8 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
         }
 
         i = Mth.clamp(i, 0, 15);
-        if (p_52411_.getValue(POWER) != i) {
-            p_52412_.setBlock(p_52413_, p_52411_.setValue(POWER, Integer.valueOf(i)), 3);
+        if (pState.getValue(POWER) != i) {
+            pLevel.setBlock(pPos, pState.setValue(POWER, Integer.valueOf(i)), 3);
         }
     }
 
@@ -91,7 +91,7 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected boolean isSignalSource(BlockState p_52407_) {
+    protected boolean isSignalSource(BlockState pState) {
         return true;
     }
 
@@ -106,14 +106,14 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
         return !p_153109_.isClientSide && p_153109_.dimensionType().hasSkyLight() ? createTickerHelper(p_153111_, BlockEntityType.DAYLIGHT_DETECTOR, DaylightDetectorBlock::tickEntity) : null;
     }
 
-    private static void tickEntity(Level p_153113_, BlockPos p_153114_, BlockState p_153115_, DaylightDetectorBlockEntity p_153116_) {
-        if (p_153113_.getGameTime() % 20L == 0L) {
-            updateSignalStrength(p_153115_, p_153113_, p_153114_);
+    private static void tickEntity(Level pLevel, BlockPos pPos, BlockState pState, DaylightDetectorBlockEntity pBlockEntity) {
+        if (pLevel.getGameTime() % 20L == 0L) {
+            updateSignalStrength(pState, pLevel, pPos);
         }
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_52398_) {
-        p_52398_.add(POWER, INVERTED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(POWER, INVERTED);
     }
 }

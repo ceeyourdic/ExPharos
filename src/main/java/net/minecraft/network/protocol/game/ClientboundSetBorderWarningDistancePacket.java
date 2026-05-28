@@ -12,16 +12,16 @@ public class ClientboundSetBorderWarningDistancePacket implements Packet<ClientG
     );
     private final int warningBlocks;
 
-    public ClientboundSetBorderWarningDistancePacket(WorldBorder p_179267_) {
-        this.warningBlocks = p_179267_.getWarningBlocks();
+    public ClientboundSetBorderWarningDistancePacket(WorldBorder pWorldBorder) {
+        this.warningBlocks = pWorldBorder.getWarningBlocks();
     }
 
-    private ClientboundSetBorderWarningDistancePacket(FriendlyByteBuf p_179269_) {
-        this.warningBlocks = p_179269_.readVarInt();
+    private ClientboundSetBorderWarningDistancePacket(FriendlyByteBuf pBuffer) {
+        this.warningBlocks = pBuffer.readVarInt();
     }
 
-    private void write(FriendlyByteBuf p_179271_) {
-        p_179271_.writeVarInt(this.warningBlocks);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.warningBlocks);
     }
 
     @Override

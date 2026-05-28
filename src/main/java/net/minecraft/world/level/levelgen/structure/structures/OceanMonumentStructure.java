@@ -40,24 +40,24 @@ public class OceanMonumentStructure extends Structure {
         return onTopOfChunkCenter(p_228964_, Heightmap.Types.OCEAN_FLOOR_WG, p_228967_ -> generatePieces(p_228967_, p_228964_));
     }
 
-    private static StructurePiece createTopPiece(ChunkPos p_228961_, WorldgenRandom p_228962_) {
-        int i = p_228961_.getMinBlockX() - 29;
-        int j = p_228961_.getMinBlockZ() - 29;
-        Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(p_228962_);
-        return new OceanMonumentPieces.MonumentBuilding(p_228962_, i, j, direction);
+    private static StructurePiece createTopPiece(ChunkPos pChunkPos, WorldgenRandom pRandom) {
+        int i = pChunkPos.getMinBlockX() - 29;
+        int j = pChunkPos.getMinBlockZ() - 29;
+        Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(pRandom);
+        return new OceanMonumentPieces.MonumentBuilding(pRandom, i, j, direction);
     }
 
-    private static void generatePieces(StructurePiecesBuilder p_228969_, Structure.GenerationContext p_228970_) {
-        p_228969_.addPiece(createTopPiece(p_228970_.chunkPos(), p_228970_.random()));
+    private static void generatePieces(StructurePiecesBuilder pBuilder, Structure.GenerationContext pContext) {
+        pBuilder.addPiece(createTopPiece(pContext.chunkPos(), pContext.random()));
     }
 
-    public static PiecesContainer regeneratePiecesAfterLoad(ChunkPos p_228957_, long p_228958_, PiecesContainer p_228959_) {
-        if (p_228959_.isEmpty()) {
-            return p_228959_;
+    public static PiecesContainer regeneratePiecesAfterLoad(ChunkPos pChunkPos, long pSeed, PiecesContainer pPiecesContainer) {
+        if (pPiecesContainer.isEmpty()) {
+            return pPiecesContainer;
         } else {
             WorldgenRandom worldgenrandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.generateUniqueSeed()));
-            worldgenrandom.setLargeFeatureSeed(p_228958_, p_228957_.x, p_228957_.z);
-            StructurePiece structurepiece = p_228959_.pieces().get(0);
+            worldgenrandom.setLargeFeatureSeed(pSeed, pChunkPos.x, pChunkPos.z);
+            StructurePiece structurepiece = pPiecesContainer.pieces().get(0);
             BoundingBox boundingbox = structurepiece.getBoundingBox();
             int i = boundingbox.minX();
             int j = boundingbox.minZ();

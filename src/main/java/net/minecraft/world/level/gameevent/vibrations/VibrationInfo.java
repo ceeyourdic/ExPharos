@@ -33,32 +33,32 @@ public record VibrationInfo(
                 )
     );
 
-    public VibrationInfo(Holder<GameEvent> p_332399_, float p_250190_, Vec3 p_251692_, @Nullable UUID p_249849_, @Nullable UUID p_249731_) {
-        this(p_332399_, p_250190_, p_251692_, p_249849_, p_249731_, null);
+    public VibrationInfo(Holder<GameEvent> pGameEvent, float pDistance, Vec3 pPos, @Nullable UUID pUuid, @Nullable UUID pProjectileOwnerUuid) {
+        this(pGameEvent, pDistance, pPos, pUuid, pProjectileOwnerUuid, null);
     }
 
-    public VibrationInfo(Holder<GameEvent> p_333558_, float p_251086_, Vec3 p_250935_, @Nullable Entity p_249432_) {
-        this(p_333558_, p_251086_, p_250935_, p_249432_ == null ? null : p_249432_.getUUID(), getProjectileOwner(p_249432_), p_249432_);
+    public VibrationInfo(Holder<GameEvent> pGameEvent, float pDistance, Vec3 pPos, @Nullable Entity pEntity) {
+        this(pGameEvent, pDistance, pPos, pEntity == null ? null : pEntity.getUUID(), getProjectileOwner(pEntity), pEntity);
     }
 
     @Nullable
-    private static UUID getProjectileOwner(@Nullable Entity p_251531_) {
-        if (p_251531_ instanceof Projectile projectile && projectile.getOwner() != null) {
+    private static UUID getProjectileOwner(@Nullable Entity pEntity) {
+        if (pEntity instanceof Projectile projectile && projectile.getOwner() != null) {
             return projectile.getOwner().getUUID();
         }
 
         return null;
     }
 
-    public Optional<Entity> getEntity(ServerLevel p_249184_) {
-        return Optional.ofNullable(this.entity).or(() -> Optional.ofNullable(this.uuid).map(p_249184_::getEntity));
+    public Optional<Entity> getEntity(ServerLevel pLevel) {
+        return Optional.ofNullable(this.entity).or(() -> Optional.ofNullable(this.uuid).map(pLevel::getEntity));
     }
 
-    public Optional<Entity> getProjectileOwner(ServerLevel p_249217_) {
-        return this.getEntity(p_249217_)
+    public Optional<Entity> getProjectileOwner(ServerLevel pLevel) {
+        return this.getEntity(pLevel)
             .filter(p_249829_ -> p_249829_ instanceof Projectile)
             .map(p_249388_ -> (Projectile)p_249388_)
             .map(Projectile::getOwner)
-            .or(() -> Optional.ofNullable(this.projectileOwnerUuid).map(p_249217_::getEntity));
+            .or(() -> Optional.ofNullable(this.projectileOwnerUuid).map(pLevel::getEntity));
     }
 }

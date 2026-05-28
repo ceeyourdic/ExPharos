@@ -16,9 +16,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class CarriedBlockLayer extends RenderLayer<EndermanRenderState, EndermanModel<EndermanRenderState>> {
     private final BlockRenderDispatcher blockRenderer;
 
-    public CarriedBlockLayer(RenderLayerParent<EndermanRenderState, EndermanModel<EndermanRenderState>> p_234814_, BlockRenderDispatcher p_234815_) {
-        super(p_234814_);
-        this.blockRenderer = p_234815_;
+    public CarriedBlockLayer(RenderLayerParent<EndermanRenderState, EndermanModel<EndermanRenderState>> pRenderer, BlockRenderDispatcher pBlockRenderer) {
+        super(pRenderer);
+        this.blockRenderer = pBlockRenderer;
     }
 
     public void render(PoseStack p_116639_, MultiBufferSource p_116640_, int p_116641_, EndermanRenderState p_365835_, float p_116643_, float p_116644_) {

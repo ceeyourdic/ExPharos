@@ -21,13 +21,13 @@ public class Potion implements FeatureElement {
     private final List<MobEffectInstance> effects;
     private FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 
-    public Potion(String p_43484_, MobEffectInstance... p_43485_) {
-        this.name = p_43484_;
-        this.effects = List.of(p_43485_);
+    public Potion(String pName, MobEffectInstance... pEffects) {
+        this.name = pName;
+        this.effects = List.of(pEffects);
     }
 
-    public Potion requiredFeatures(FeatureFlag... p_331264_) {
-        this.requiredFeatures = FeatureFlags.REGISTRY.subset(p_331264_);
+    public Potion requiredFeatures(FeatureFlag... pRequiredFeatures) {
+        this.requiredFeatures = FeatureFlags.REGISTRY.subset(pRequiredFeatures);
         return this;
     }
 

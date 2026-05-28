@@ -30,16 +30,16 @@ public class RabbitModel extends EntityModel<RabbitRenderState> {
     private final ModelPart rightFrontLeg;
     private final ModelPart head;
 
-    public RabbitModel(ModelPart p_170881_) {
-        super(p_170881_);
-        this.leftHaunch = p_170881_.getChild("left_haunch");
-        this.rightHaunch = p_170881_.getChild("right_haunch");
-        this.leftFrontLeg = p_170881_.getChild("left_front_leg");
-        this.rightFrontLeg = p_170881_.getChild("right_front_leg");
-        this.head = p_170881_.getChild("head");
+    public RabbitModel(ModelPart pRoot) {
+        super(pRoot);
+        this.leftHaunch = pRoot.getChild("left_haunch");
+        this.rightHaunch = pRoot.getChild("right_haunch");
+        this.leftFrontLeg = pRoot.getChild("left_front_leg");
+        this.rightFrontLeg = pRoot.getChild("right_front_leg");
+        this.head = pRoot.getChild("head");
     }
 
-    public static LayerDefinition createBodyLayer(boolean p_369409_) {
+    public static LayerDefinition createBodyLayer(boolean pBaby) {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
         PartDefinition partdefinition1 = partdefinition.addOrReplaceChild(
@@ -96,7 +96,7 @@ public class RabbitModel extends EntityModel<RabbitRenderState> {
             PartPose.offsetAndRotation(0.0F, 20.0F, 7.0F, -0.3490659F, 0.0F, 0.0F)
         );
         partdefinition3.addOrReplaceChild("nose", CubeListBuilder.create().texOffs(32, 9).addBox(-0.5F, -2.5F, -5.5F, 1.0F, 1.0F, 1.0F), PartPose.ZERO);
-        return LayerDefinition.create(meshdefinition, 64, 32).apply(p_369409_ ? BABY_TRANSFORMER : ADULT_TRANSFORMER);
+        return LayerDefinition.create(meshdefinition, 64, 32).apply(pBaby ? BABY_TRANSFORMER : ADULT_TRANSFORMER);
     }
 
     public void setupAnim(RabbitRenderState p_366536_) {

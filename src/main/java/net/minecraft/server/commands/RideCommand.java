@@ -31,8 +31,8 @@ public class RideCommand {
         Component.translatable("commands.ride.mount.failure.wrong_dimension")
     );
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_265201_) {
-        p_265201_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("ride")
                 .requires(p_265326_ -> p_265326_.hasPermission(2))
                 .then(
@@ -57,31 +57,31 @@ public class RideCommand {
         );
     }
 
-    private static int mount(CommandSourceStack p_265285_, Entity p_265711_, Entity p_265339_) throws CommandSyntaxException {
-        Entity entity = p_265711_.getVehicle();
+    private static int mount(CommandSourceStack pSource, Entity pTarget, Entity pVehicle) throws CommandSyntaxException {
+        Entity entity = pTarget.getVehicle();
         if (entity != null) {
-            throw ERROR_ALREADY_RIDING.create(p_265711_.getDisplayName(), entity.getDisplayName());
-        } else if (p_265339_.getType() == EntityType.PLAYER) {
+            throw ERROR_ALREADY_RIDING.create(pTarget.getDisplayName(), entity.getDisplayName());
+        } else if (pVehicle.getType() == EntityType.PLAYER) {
             throw ERROR_MOUNTING_PLAYER.create();
-        } else if (p_265711_.getSelfAndPassengers().anyMatch(p_265501_ -> p_265501_ == p_265339_)) {
+        } else if (pTarget.getSelfAndPassengers().anyMatch(p_265501_ -> p_265501_ == pVehicle)) {
             throw ERROR_MOUNTING_LOOP.create();
-        } else if (p_265711_.level() != p_265339_.level()) {
+        } else if (pTarget.level() != pVehicle.level()) {
             throw ERROR_WRONG_DIMENSION.create();
-        } else if (!p_265711_.startRiding(p_265339_, true)) {
-            throw ERROR_MOUNT_FAILED.create(p_265711_.getDisplayName(), p_265339_.getDisplayName());
+        } else if (!pTarget.startRiding(pVehicle, true)) {
+            throw ERROR_MOUNT_FAILED.create(pTarget.getDisplayName(), pVehicle.getDisplayName());
         } else {
-            p_265285_.sendSuccess(() -> Component.translatable("commands.ride.mount.success", p_265711_.getDisplayName(), p_265339_.getDisplayName()), true);
+            pSource.sendSuccess(() -> Component.translatable("commands.ride.mount.success", pTarget.getDisplayName(), pVehicle.getDisplayName()), true);
             return 1;
         }
     }
 
-    private static int dismount(CommandSourceStack p_265724_, Entity p_265678_) throws CommandSyntaxException {
-        Entity entity = p_265678_.getVehicle();
+    private static int dismount(CommandSourceStack pSource, Entity pTarget) throws CommandSyntaxException {
+        Entity entity = pTarget.getVehicle();
         if (entity == null) {
-            throw ERROR_NOT_RIDING.create(p_265678_.getDisplayName());
+            throw ERROR_NOT_RIDING.create(pTarget.getDisplayName());
         } else {
-            p_265678_.stopRiding();
-            p_265724_.sendSuccess(() -> Component.translatable("commands.ride.dismount.success", p_265678_.getDisplayName(), entity.getDisplayName()), true);
+            pTarget.stopRiding();
+            pSource.sendSuccess(() -> Component.translatable("commands.ride.dismount.success", pTarget.getDisplayName(), entity.getDisplayName()), true);
             return 1;
         }
     }

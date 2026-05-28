@@ -29,17 +29,17 @@ public record UseCooldown(float seconds, Optional<ResourceLocation> cooldownGrou
         UseCooldown::new
     );
 
-    public UseCooldown(float p_362364_) {
-        this(p_362364_, Optional.empty());
+    public UseCooldown(float pSeconds) {
+        this(pSeconds, Optional.empty());
     }
 
     public int ticks() {
         return (int)(this.seconds * 20.0F);
     }
 
-    public void apply(ItemStack p_360969_, LivingEntity p_366259_) {
-        if (p_366259_ instanceof Player player) {
-            player.getCooldowns().addCooldown(p_360969_, this.ticks());
+    public void apply(ItemStack pStack, LivingEntity pEntity) {
+        if (pEntity instanceof Player player) {
+            player.getCooldowns().addCooldown(pStack, this.ticks());
         }
     }
 }

@@ -21,7 +21,7 @@ public record ClientboundCooldownPacket(ResourceLocation cooldownGroup, int dura
         return GamePacketTypes.CLIENTBOUND_COOLDOWN;
     }
 
-    public void handle(ClientGamePacketListener p_132007_) {
-        p_132007_.handleItemCooldown(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleItemCooldown(this);
     }
 }

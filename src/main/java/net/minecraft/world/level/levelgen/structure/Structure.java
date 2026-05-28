@@ -48,16 +48,16 @@ public abstract class Structure {
     public static final Codec<Holder<Structure>> CODEC = RegistryFileCodec.create(Registries.STRUCTURE, DIRECT_CODEC);
     protected final Structure.StructureSettings settings;
 
-    public static <S extends Structure> RecordCodecBuilder<S, Structure.StructureSettings> settingsCodec(Instance<S> p_226568_) {
+    public static <S extends Structure> RecordCodecBuilder<S, Structure.StructureSettings> settingsCodec(Instance<S> pInstance) {
         return Structure.StructureSettings.CODEC.forGetter(p_226595_ -> p_226595_.settings);
     }
 
-    public static <S extends Structure> MapCodec<S> simpleCodec(Function<Structure.StructureSettings, S> p_226608_) {
-        return RecordCodecBuilder.mapCodec(p_226611_ -> p_226611_.group(settingsCodec(p_226611_)).apply(p_226611_, p_226608_));
+    public static <S extends Structure> MapCodec<S> simpleCodec(Function<Structure.StructureSettings, S> pFactory) {
+        return RecordCodecBuilder.mapCodec(p_226611_ -> p_226611_.group(settingsCodec(p_226611_)).apply(p_226611_, pFactory));
     }
 
-    protected Structure(Structure.StructureSettings p_226558_) {
-        this.settings = p_226558_;
+    protected Structure(Structure.StructureSettings pSettings) {
+        this.settings = pSettings;
     }
 
     public HolderSet<Biome> biomes() {
@@ -76,32 +76,32 @@ public abstract class Structure {
         return this.settings.terrainAdaptation;
     }
 
-    public BoundingBox adjustBoundingBox(BoundingBox p_226570_) {
-        return this.terrainAdaptation() != TerrainAdjustment.NONE ? p_226570_.inflatedBy(12) : p_226570_;
+    public BoundingBox adjustBoundingBox(BoundingBox pBoundingBox) {
+        return this.terrainAdaptation() != TerrainAdjustment.NONE ? pBoundingBox.inflatedBy(12) : pBoundingBox;
     }
 
     public StructureStart generate(
-        Holder<Structure> p_378494_,
-        ResourceKey<Level> p_376569_,
-        RegistryAccess p_226597_,
-        ChunkGenerator p_226598_,
-        BiomeSource p_226599_,
-        RandomState p_226600_,
-        StructureTemplateManager p_226601_,
-        long p_226602_,
-        ChunkPos p_226603_,
-        int p_226604_,
-        LevelHeightAccessor p_226605_,
-        Predicate<Holder<Biome>> p_226606_
+        Holder<Structure> pStructure,
+        ResourceKey<Level> pLevel,
+        RegistryAccess pRegistryAccess,
+        ChunkGenerator pChunkGenerator,
+        BiomeSource pBiomeSource,
+        RandomState pRandomState,
+        StructureTemplateManager pStructureTemplateManager,
+        long pSeed,
+        ChunkPos pChunkPos,
+        int pReferences,
+        LevelHeightAccessor pHeightAccessor,
+        Predicate<Holder<Biome>> pValidBiome
     ) {
-        ProfiledDuration profiledduration = JvmProfiler.INSTANCE.onStructureGenerate(p_226603_, p_376569_, p_378494_);
+        ProfiledDuration profiledduration = JvmProfiler.INSTANCE.onStructureGenerate(pChunkPos, pLevel, pStructure);
         Structure.GenerationContext structure$generationcontext = new Structure.GenerationContext(
-            p_226597_, p_226598_, p_226599_, p_226600_, p_226601_, p_226602_, p_226603_, p_226605_, p_226606_
+            pRegistryAccess, pChunkGenerator, pBiomeSource, pRandomState, pStructureTemplateManager, pSeed, pChunkPos, pHeightAccessor, pValidBiome
         );
         Optional<Structure.GenerationStub> optional = this.findValidGenerationPoint(structure$generationcontext);
         if (optional.isPresent()) {
             StructurePiecesBuilder structurepiecesbuilder = optional.get().getPiecesBuilder();
-            StructureStart structurestart = new StructureStart(this, p_226603_, p_226604_, structurepiecesbuilder.build());
+            StructureStart structurestart = new StructureStart(this, pChunkPos, pReferences, structurepiecesbuilder.build());
             if (structurestart.isValid()) {
                 if (profiledduration != null) {
                     profiledduration.finish(true);
@@ -119,93 +119,93 @@ public abstract class Structure {
     }
 
     protected static Optional<Structure.GenerationStub> onTopOfChunkCenter(
-        Structure.GenerationContext p_226586_, Heightmap.Types p_226587_, Consumer<StructurePiecesBuilder> p_226588_
+        Structure.GenerationContext pContext, Heightmap.Types pHeightmapTypes, Consumer<StructurePiecesBuilder> pGenerator
     ) {
-        ChunkPos chunkpos = p_226586_.chunkPos();
+        ChunkPos chunkpos = pContext.chunkPos();
         int i = chunkpos.getMiddleBlockX();
         int j = chunkpos.getMiddleBlockZ();
-        int k = p_226586_.chunkGenerator().getFirstOccupiedHeight(i, j, p_226587_, p_226586_.heightAccessor(), p_226586_.randomState());
-        return Optional.of(new Structure.GenerationStub(new BlockPos(i, k, j), p_226588_));
+        int k = pContext.chunkGenerator().getFirstOccupiedHeight(i, j, pHeightmapTypes, pContext.heightAccessor(), pContext.randomState());
+        return Optional.of(new Structure.GenerationStub(new BlockPos(i, k, j), pGenerator));
     }
 
-    private static boolean isValidBiome(Structure.GenerationStub p_263042_, Structure.GenerationContext p_263005_) {
-        BlockPos blockpos = p_263042_.position();
-        return p_263005_.validBiome
+    private static boolean isValidBiome(Structure.GenerationStub pStub, Structure.GenerationContext pContext) {
+        BlockPos blockpos = pStub.position();
+        return pContext.validBiome
             .test(
-                p_263005_.chunkGenerator
+                pContext.chunkGenerator
                     .getBiomeSource()
                     .getNoiseBiome(
                         QuartPos.fromBlock(blockpos.getX()),
                         QuartPos.fromBlock(blockpos.getY()),
                         QuartPos.fromBlock(blockpos.getZ()),
-                        p_263005_.randomState.sampler()
+                        pContext.randomState.sampler()
                     )
             );
     }
 
     public void afterPlace(
-        WorldGenLevel p_226560_,
-        StructureManager p_226561_,
-        ChunkGenerator p_226562_,
-        RandomSource p_226563_,
-        BoundingBox p_226564_,
-        ChunkPos p_226565_,
-        PiecesContainer p_226566_
+        WorldGenLevel pLevel,
+        StructureManager pStructureManager,
+        ChunkGenerator pChunkGenerator,
+        RandomSource pRandom,
+        BoundingBox pBoundingBox,
+        ChunkPos pChunkPos,
+        PiecesContainer pPieces
     ) {
     }
 
-    private static int[] getCornerHeights(Structure.GenerationContext p_226614_, int p_226615_, int p_226616_, int p_226617_, int p_226618_) {
-        ChunkGenerator chunkgenerator = p_226614_.chunkGenerator();
-        LevelHeightAccessor levelheightaccessor = p_226614_.heightAccessor();
-        RandomState randomstate = p_226614_.randomState();
+    private static int[] getCornerHeights(Structure.GenerationContext pContext, int pMinX, int pMaxX, int pMinZ, int pMaxZ) {
+        ChunkGenerator chunkgenerator = pContext.chunkGenerator();
+        LevelHeightAccessor levelheightaccessor = pContext.heightAccessor();
+        RandomState randomstate = pContext.randomState();
         return new int[]{
-            chunkgenerator.getFirstOccupiedHeight(p_226615_, p_226617_, Heightmap.Types.WORLD_SURFACE_WG, levelheightaccessor, randomstate),
-            chunkgenerator.getFirstOccupiedHeight(p_226615_, p_226617_ + p_226618_, Heightmap.Types.WORLD_SURFACE_WG, levelheightaccessor, randomstate),
-            chunkgenerator.getFirstOccupiedHeight(p_226615_ + p_226616_, p_226617_, Heightmap.Types.WORLD_SURFACE_WG, levelheightaccessor, randomstate),
-            chunkgenerator.getFirstOccupiedHeight(p_226615_ + p_226616_, p_226617_ + p_226618_, Heightmap.Types.WORLD_SURFACE_WG, levelheightaccessor, randomstate)
+            chunkgenerator.getFirstOccupiedHeight(pMinX, pMinZ, Heightmap.Types.WORLD_SURFACE_WG, levelheightaccessor, randomstate),
+            chunkgenerator.getFirstOccupiedHeight(pMinX, pMinZ + pMaxZ, Heightmap.Types.WORLD_SURFACE_WG, levelheightaccessor, randomstate),
+            chunkgenerator.getFirstOccupiedHeight(pMinX + pMaxX, pMinZ, Heightmap.Types.WORLD_SURFACE_WG, levelheightaccessor, randomstate),
+            chunkgenerator.getFirstOccupiedHeight(pMinX + pMaxX, pMinZ + pMaxZ, Heightmap.Types.WORLD_SURFACE_WG, levelheightaccessor, randomstate)
         };
     }
 
-    public static int getMeanFirstOccupiedHeight(Structure.GenerationContext p_334739_, int p_329786_, int p_332089_, int p_333818_, int p_333198_) {
-        int[] aint = getCornerHeights(p_334739_, p_329786_, p_332089_, p_333818_, p_333198_);
+    public static int getMeanFirstOccupiedHeight(Structure.GenerationContext pContext, int pMinX, int pMaxX, int pMinZ, int pMaxZ) {
+        int[] aint = getCornerHeights(pContext, pMinX, pMaxX, pMinZ, pMaxZ);
         return (aint[0] + aint[1] + aint[2] + aint[3]) / 4;
     }
 
-    protected static int getLowestY(Structure.GenerationContext p_226573_, int p_226574_, int p_226575_) {
-        ChunkPos chunkpos = p_226573_.chunkPos();
+    protected static int getLowestY(Structure.GenerationContext pContext, int pMaxX, int pMaxZ) {
+        ChunkPos chunkpos = pContext.chunkPos();
         int i = chunkpos.getMinBlockX();
         int j = chunkpos.getMinBlockZ();
-        return getLowestY(p_226573_, i, j, p_226574_, p_226575_);
+        return getLowestY(pContext, i, j, pMaxX, pMaxZ);
     }
 
-    protected static int getLowestY(Structure.GenerationContext p_226577_, int p_226578_, int p_226579_, int p_226580_, int p_226581_) {
-        int[] aint = getCornerHeights(p_226577_, p_226578_, p_226580_, p_226579_, p_226581_);
+    protected static int getLowestY(Structure.GenerationContext pContext, int pMinX, int pMinZ, int pMaxX, int pMaxZ) {
+        int[] aint = getCornerHeights(pContext, pMinX, pMaxX, pMinZ, pMaxZ);
         return Math.min(Math.min(aint[0], aint[1]), Math.min(aint[2], aint[3]));
     }
 
     @Deprecated
-    protected BlockPos getLowestYIn5by5BoxOffset7Blocks(Structure.GenerationContext p_226583_, Rotation p_226584_) {
+    protected BlockPos getLowestYIn5by5BoxOffset7Blocks(Structure.GenerationContext pContext, Rotation pRotation) {
         int i = 5;
         int j = 5;
-        if (p_226584_ == Rotation.CLOCKWISE_90) {
+        if (pRotation == Rotation.CLOCKWISE_90) {
             i = -5;
-        } else if (p_226584_ == Rotation.CLOCKWISE_180) {
+        } else if (pRotation == Rotation.CLOCKWISE_180) {
             i = -5;
             j = -5;
-        } else if (p_226584_ == Rotation.COUNTERCLOCKWISE_90) {
+        } else if (pRotation == Rotation.COUNTERCLOCKWISE_90) {
             j = -5;
         }
 
-        ChunkPos chunkpos = p_226583_.chunkPos();
+        ChunkPos chunkpos = pContext.chunkPos();
         int k = chunkpos.getBlockX(7);
         int l = chunkpos.getBlockZ(7);
-        return new BlockPos(k, getLowestY(p_226583_, k, l, i, j), l);
+        return new BlockPos(k, getLowestY(pContext, k, l, i, j), l);
     }
 
-    protected abstract Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext p_226571_);
+    protected abstract Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext pContext);
 
-    public Optional<Structure.GenerationStub> findValidGenerationPoint(Structure.GenerationContext p_263060_) {
-        return this.findGenerationPoint(p_263060_).filter(p_262911_ -> isValidBiome(p_262911_, p_263060_));
+    public Optional<Structure.GenerationStub> findValidGenerationPoint(Structure.GenerationContext pContext) {
+        return this.findGenerationPoint(pContext).filter(p_262911_ -> isValidBiome(p_262911_, pContext));
     }
 
     public abstract StructureType<?> type();
@@ -223,29 +223,29 @@ public abstract class Structure {
         Predicate<Holder<Biome>> validBiome
     ) {
         public GenerationContext(
-            RegistryAccess p_226632_,
-            ChunkGenerator p_226633_,
-            BiomeSource p_226634_,
-            RandomState p_226635_,
-            StructureTemplateManager p_226636_,
-            long p_226637_,
-            ChunkPos p_226638_,
-            LevelHeightAccessor p_226639_,
-            Predicate<Holder<Biome>> p_226640_
+            RegistryAccess pRegistryAccess,
+            ChunkGenerator pChunkGenerator,
+            BiomeSource pBiomeSource,
+            RandomState pRandomState,
+            StructureTemplateManager pStructureTemplateManager,
+            long pSeed,
+            ChunkPos pChunkPos,
+            LevelHeightAccessor pHeightAccessor,
+            Predicate<Holder<Biome>> pValidBiome
         ) {
-            this(p_226632_, p_226633_, p_226634_, p_226635_, p_226636_, makeRandom(p_226637_, p_226638_), p_226637_, p_226638_, p_226639_, p_226640_);
+            this(pRegistryAccess, pChunkGenerator, pBiomeSource, pRandomState, pStructureTemplateManager, makeRandom(pSeed, pChunkPos), pSeed, pChunkPos, pHeightAccessor, pValidBiome);
         }
 
-        private static WorldgenRandom makeRandom(long p_226654_, ChunkPos p_226655_) {
+        private static WorldgenRandom makeRandom(long pSeed, ChunkPos pChunkPos) {
             WorldgenRandom worldgenrandom = new WorldgenRandom(new LegacyRandomSource(0L));
-            worldgenrandom.setLargeFeatureSeed(p_226654_, p_226655_.x, p_226655_.z);
+            worldgenrandom.setLargeFeatureSeed(pSeed, pChunkPos.x, pChunkPos.z);
             return worldgenrandom;
         }
     }
 
     public static record GenerationStub(BlockPos position, Either<Consumer<StructurePiecesBuilder>, StructurePiecesBuilder> generator) {
-        public GenerationStub(BlockPos p_226675_, Consumer<StructurePiecesBuilder> p_226676_) {
-            this(p_226675_, Either.left(p_226676_));
+        public GenerationStub(BlockPos pPosition, Consumer<StructurePiecesBuilder> pGenerator) {
+            this(pPosition, Either.left(pGenerator));
         }
 
         public StructurePiecesBuilder getPiecesBuilder() {
@@ -277,8 +277,8 @@ public abstract class Structure {
                     .apply(p_341910_, Structure.StructureSettings::new)
         );
 
-        public StructureSettings(HolderSet<Biome> p_345322_) {
-            this(p_345322_, DEFAULT.spawnOverrides, DEFAULT.step, DEFAULT.terrainAdaptation);
+        public StructureSettings(HolderSet<Biome> pBiomes) {
+            this(pBiomes, DEFAULT.spawnOverrides, DEFAULT.step, DEFAULT.terrainAdaptation);
         }
 
         public static class Builder {
@@ -287,22 +287,22 @@ public abstract class Structure {
             private GenerationStep.Decoration step = Structure.StructureSettings.DEFAULT.step;
             private TerrainAdjustment terrainAdaption = Structure.StructureSettings.DEFAULT.terrainAdaptation;
 
-            public Builder(HolderSet<Biome> p_345430_) {
-                this.biomes = p_345430_;
+            public Builder(HolderSet<Biome> pBiomes) {
+                this.biomes = pBiomes;
             }
 
-            public Structure.StructureSettings.Builder spawnOverrides(Map<MobCategory, StructureSpawnOverride> p_344031_) {
-                this.spawnOverrides = p_344031_;
+            public Structure.StructureSettings.Builder spawnOverrides(Map<MobCategory, StructureSpawnOverride> pSpawnOverrides) {
+                this.spawnOverrides = pSpawnOverrides;
                 return this;
             }
 
-            public Structure.StructureSettings.Builder generationStep(GenerationStep.Decoration p_342290_) {
-                this.step = p_342290_;
+            public Structure.StructureSettings.Builder generationStep(GenerationStep.Decoration pGenerationStep) {
+                this.step = pGenerationStep;
                 return this;
             }
 
-            public Structure.StructureSettings.Builder terrainAdapation(TerrainAdjustment p_344665_) {
-                this.terrainAdaption = p_344665_;
+            public Structure.StructureSettings.Builder terrainAdapation(TerrainAdjustment pTerrainAdaptation) {
+                this.terrainAdaption = pTerrainAdaptation;
                 return this;
             }
 

@@ -20,35 +20,35 @@ public class FeatureFlagRegistry {
     private final Map<ResourceLocation, FeatureFlag> names;
     private final FeatureFlagSet allFlags;
 
-    FeatureFlagRegistry(FeatureFlagUniverse p_249715_, FeatureFlagSet p_249277_, Map<ResourceLocation, FeatureFlag> p_249557_) {
-        this.universe = p_249715_;
-        this.names = p_249557_;
-        this.allFlags = p_249277_;
+    FeatureFlagRegistry(FeatureFlagUniverse pUniverse, FeatureFlagSet pAllFlags, Map<ResourceLocation, FeatureFlag> pNames) {
+        this.universe = pUniverse;
+        this.names = pNames;
+        this.allFlags = pAllFlags;
     }
 
-    public boolean isSubset(FeatureFlagSet p_251939_) {
-        return p_251939_.isSubsetOf(this.allFlags);
+    public boolean isSubset(FeatureFlagSet pSet) {
+        return pSet.isSubsetOf(this.allFlags);
     }
 
     public FeatureFlagSet allFlags() {
         return this.allFlags;
     }
 
-    public FeatureFlagSet fromNames(Iterable<ResourceLocation> p_250759_) {
-        return this.fromNames(p_250759_, p_251224_ -> LOGGER.warn("Unknown feature flag: {}", p_251224_));
+    public FeatureFlagSet fromNames(Iterable<ResourceLocation> pNames) {
+        return this.fromNames(pNames, p_251224_ -> LOGGER.warn("Unknown feature flag: {}", p_251224_));
     }
 
-    public FeatureFlagSet subset(FeatureFlag... p_252295_) {
-        return FeatureFlagSet.create(this.universe, Arrays.asList(p_252295_));
+    public FeatureFlagSet subset(FeatureFlag... pFlags) {
+        return FeatureFlagSet.create(this.universe, Arrays.asList(pFlags));
     }
 
-    public FeatureFlagSet fromNames(Iterable<ResourceLocation> p_251769_, Consumer<ResourceLocation> p_251521_) {
+    public FeatureFlagSet fromNames(Iterable<ResourceLocation> pNames, Consumer<ResourceLocation> pOnError) {
         Set<FeatureFlag> set = Sets.newIdentityHashSet();
 
-        for (ResourceLocation resourcelocation : p_251769_) {
+        for (ResourceLocation resourcelocation : pNames) {
             FeatureFlag featureflag = this.names.get(resourcelocation);
             if (featureflag == null) {
-                p_251521_.accept(resourcelocation);
+                pOnError.accept(resourcelocation);
             } else {
                 set.add(featureflag);
             }
@@ -57,10 +57,10 @@ public class FeatureFlagRegistry {
         return FeatureFlagSet.create(this.universe, set);
     }
 
-    public Set<ResourceLocation> toNames(FeatureFlagSet p_251153_) {
+    public Set<ResourceLocation> toNames(FeatureFlagSet pSet) {
         Set<ResourceLocation> set = new HashSet<>();
         this.names.forEach((p_252018_, p_250772_) -> {
-            if (p_251153_.contains(p_250772_)) {
+            if (pSet.contains(p_250772_)) {
                 set.add(p_252018_);
             }
         });
@@ -80,22 +80,22 @@ public class FeatureFlagRegistry {
         private int id;
         private final Map<ResourceLocation, FeatureFlag> flags = new LinkedHashMap<>();
 
-        public Builder(String p_251576_) {
-            this.universe = new FeatureFlagUniverse(p_251576_);
+        public Builder(String pId) {
+            this.universe = new FeatureFlagUniverse(pId);
         }
 
-        public FeatureFlag createVanilla(String p_251782_) {
-            return this.create(ResourceLocation.withDefaultNamespace(p_251782_));
+        public FeatureFlag createVanilla(String pId) {
+            return this.create(ResourceLocation.withDefaultNamespace(pId));
         }
 
-        public FeatureFlag create(ResourceLocation p_250098_) {
+        public FeatureFlag create(ResourceLocation pLocation) {
             if (this.id >= 64) {
                 throw new IllegalStateException("Too many feature flags");
             } else {
                 FeatureFlag featureflag = new FeatureFlag(this.universe, this.id++);
-                FeatureFlag featureflag1 = this.flags.put(p_250098_, featureflag);
+                FeatureFlag featureflag1 = this.flags.put(pLocation, featureflag);
                 if (featureflag1 != null) {
-                    throw new IllegalStateException("Duplicate feature flag " + p_250098_);
+                    throw new IllegalStateException("Duplicate feature flag " + pLocation);
                 } else {
                     return featureflag;
                 }

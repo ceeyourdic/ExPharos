@@ -23,12 +23,12 @@ public class SoundEngineExecutor extends BlockableEventLoop<Runnable> {
     }
 
     @Override
-    public Runnable wrapRunnable(Runnable p_120341_) {
-        return p_120341_;
+    public Runnable wrapRunnable(Runnable pRunnable) {
+        return pRunnable;
     }
 
     @Override
-    protected boolean shouldRun(Runnable p_120339_) {
+    protected boolean shouldRun(Runnable pRunnable) {
         return !this.shutdown;
     }
 

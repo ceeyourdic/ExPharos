@@ -31,10 +31,10 @@ public class BendingTrunkPlacer extends TrunkPlacer {
     private final int minHeightForLeaves;
     private final IntProvider bendLength;
 
-    public BendingTrunkPlacer(int p_161770_, int p_161771_, int p_161772_, int p_161773_, IntProvider p_161774_) {
-        super(p_161770_, p_161771_, p_161772_);
-        this.minHeightForLeaves = p_161773_;
-        this.bendLength = p_161774_;
+    public BendingTrunkPlacer(int pBaseHeight, int pHeightRandA, int pHeightRandB, int pMinHeightForLeaves, IntProvider pBendLength) {
+        super(pBaseHeight, pHeightRandA, pHeightRandB);
+        this.minHeightForLeaves = pMinHeightForLeaves;
+        this.bendLength = pBendLength;
     }
 
     @Override

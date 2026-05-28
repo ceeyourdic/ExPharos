@@ -58,17 +58,17 @@ public class AttachedStemBlock extends BushBlock {
         return CODEC;
     }
 
-    protected AttachedStemBlock(ResourceKey<Block> p_309773_, ResourceKey<Block> p_312687_, ResourceKey<Item> p_310792_, BlockBehaviour.Properties p_152062_) {
-        super(p_152062_);
+    protected AttachedStemBlock(ResourceKey<Block> pStem, ResourceKey<Block> pFruit, ResourceKey<Item> pSeed, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
-        this.stem = p_309773_;
-        this.fruit = p_312687_;
-        this.seed = p_310792_;
+        this.stem = pStem;
+        this.fruit = pFruit;
+        this.seed = pSeed;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_48858_, BlockGetter p_48859_, BlockPos p_48860_, CollisionContext p_48861_) {
-        return AABBS.get(p_48858_.getValue(FACING));
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return AABBS.get(pState.getValue(FACING));
     }
 
     @Override
@@ -93,8 +93,8 @@ public class AttachedStemBlock extends BushBlock {
     }
 
     @Override
-    protected boolean mayPlaceOn(BlockState p_48863_, BlockGetter p_48864_, BlockPos p_48865_) {
-        return p_48863_.is(Blocks.FARMLAND);
+    protected boolean mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return pState.is(Blocks.FARMLAND);
     }
 
     @Override
@@ -103,17 +103,17 @@ public class AttachedStemBlock extends BushBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState p_48845_, Rotation p_48846_) {
-        return p_48845_.setValue(FACING, p_48846_.rotate(p_48845_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRot) {
+        return pState.setValue(FACING, pRot.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_48842_, Mirror p_48843_) {
-        return p_48842_.rotate(p_48843_.getRotation(p_48842_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_48855_) {
-        p_48855_.add(FACING);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING);
     }
 }

@@ -12,8 +12,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class ArrowLayer<M extends PlayerModel> extends StuckInBodyLayer<M> {
-    public ArrowLayer(LivingEntityRenderer<?, PlayerRenderState, M> p_174466_, EntityRendererProvider.Context p_174465_) {
-        super(p_174466_, new ArrowModel(p_174465_.bakeLayer(ModelLayers.ARROW)), TippableArrowRenderer.NORMAL_ARROW_LOCATION, StuckInBodyLayer.PlacementStyle.IN_CUBE);
+    public ArrowLayer(LivingEntityRenderer<?, PlayerRenderState, M> pRenderer, EntityRendererProvider.Context pContext) {
+        super(pRenderer, new ArrowModel(pContext.bakeLayer(ModelLayers.ARROW)), TippableArrowRenderer.NORMAL_ARROW_LOCATION, StuckInBodyLayer.PlacementStyle.IN_CUBE);
     }
 
     @Override

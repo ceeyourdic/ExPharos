@@ -15,29 +15,29 @@ public class ZombifiedPiglinRenderer extends HumanoidMobRenderer<ZombifiedPiglin
     private static final ResourceLocation ZOMBIFIED_PIGLIN_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/piglin/zombified_piglin.png");
 
     public ZombifiedPiglinRenderer(
-        EntityRendererProvider.Context p_366482_,
-        ModelLayerLocation p_361904_,
-        ModelLayerLocation p_361115_,
-        ModelLayerLocation p_361147_,
-        ModelLayerLocation p_367192_,
-        ModelLayerLocation p_364736_,
-        ModelLayerLocation p_363244_
+        EntityRendererProvider.Context pContext,
+        ModelLayerLocation pAdultModel,
+        ModelLayerLocation pBabyModel,
+        ModelLayerLocation pInnerArmorLayer,
+        ModelLayerLocation pOuterArmorLayer,
+        ModelLayerLocation pInnerArmorBaby,
+        ModelLayerLocation pOuterArmorBaby
     ) {
         super(
-            p_366482_,
-            new ZombifiedPiglinModel(p_366482_.bakeLayer(p_361904_)),
-            new ZombifiedPiglinModel(p_366482_.bakeLayer(p_361115_)),
+            pContext,
+            new ZombifiedPiglinModel(pContext.bakeLayer(pAdultModel)),
+            new ZombifiedPiglinModel(pContext.bakeLayer(pBabyModel)),
             0.5F,
             PiglinRenderer.PIGLIN_CUSTOM_HEAD_TRANSFORMS
         );
         this.addLayer(
             new HumanoidArmorLayer<>(
                 this,
-                new HumanoidArmorModel(p_366482_.bakeLayer(p_361147_)),
-                new HumanoidArmorModel(p_366482_.bakeLayer(p_367192_)),
-                new HumanoidArmorModel(p_366482_.bakeLayer(p_364736_)),
-                new HumanoidArmorModel(p_366482_.bakeLayer(p_364736_)),
-                p_366482_.getEquipmentRenderer()
+                new HumanoidArmorModel(pContext.bakeLayer(pInnerArmorLayer)),
+                new HumanoidArmorModel(pContext.bakeLayer(pOuterArmorLayer)),
+                new HumanoidArmorModel(pContext.bakeLayer(pInnerArmorBaby)),
+                new HumanoidArmorModel(pContext.bakeLayer(pInnerArmorBaby)),
+                pContext.getEquipmentRenderer()
             )
         );
     }

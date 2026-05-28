@@ -22,8 +22,8 @@ public abstract class WaterAnimal extends PathfinderMob {
     }
 
     @Override
-    public boolean checkSpawnObstruction(LevelReader p_30348_) {
-        return p_30348_.isUnobstructed(this);
+    public boolean checkSpawnObstruction(LevelReader pLevel) {
+        return pLevel.isUnobstructed(this);
     }
 
     @Override
@@ -36,9 +36,9 @@ public abstract class WaterAnimal extends PathfinderMob {
         return 1 + this.random.nextInt(3);
     }
 
-    protected void handleAirSupply(int p_30344_) {
+    protected void handleAirSupply(int pAirSupply) {
         if (this.isAlive() && !this.isInWaterOrBubble()) {
-            this.setAirSupply(p_30344_ - 1);
+            this.setAirSupply(pAirSupply - 1);
             if (this.getAirSupply() == -20) {
                 this.setAirSupply(0);
                 this.hurt(this.damageSources().drown(), 2.0F);
@@ -66,13 +66,13 @@ public abstract class WaterAnimal extends PathfinderMob {
     }
 
     public static boolean checkSurfaceWaterAnimalSpawnRules(
-        EntityType<? extends WaterAnimal> p_218283_, LevelAccessor p_218284_, EntitySpawnReason p_365830_, BlockPos p_218286_, RandomSource p_218287_
+        EntityType<? extends WaterAnimal> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        int i = p_218284_.getSeaLevel();
+        int i = pLevel.getSeaLevel();
         int j = i - 13;
-        return p_218286_.getY() >= j
-            && p_218286_.getY() <= i
-            && p_218284_.getFluidState(p_218286_.below()).is(FluidTags.WATER)
-            && p_218284_.getBlockState(p_218286_.above()).is(Blocks.WATER);
+        return pPos.getY() >= j
+            && pPos.getY() <= i
+            && pLevel.getFluidState(pPos.below()).is(FluidTags.WATER)
+            && pLevel.getBlockState(pPos.above()).is(Blocks.WATER);
     }
 }

@@ -24,13 +24,13 @@ public class UniformInt extends IntProvider {
     private final int minInclusive;
     private final int maxInclusive;
 
-    private UniformInt(int p_146619_, int p_146620_) {
-        this.minInclusive = p_146619_;
-        this.maxInclusive = p_146620_;
+    private UniformInt(int pMinInclusive, int pMaxInclusive) {
+        this.minInclusive = pMinInclusive;
+        this.maxInclusive = pMaxInclusive;
     }
 
-    public static UniformInt of(int p_146623_, int p_146624_) {
-        return new UniformInt(p_146623_, p_146624_);
+    public static UniformInt of(int pMinInclusive, int pMaxInclusive) {
+        return new UniformInt(pMinInclusive, pMaxInclusive);
     }
 
     @Override

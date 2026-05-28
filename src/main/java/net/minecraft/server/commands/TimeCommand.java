@@ -10,8 +10,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 
 public class TimeCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> p_139072_) {
-        p_139072_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("time")
                 .requires(p_139076_ -> p_139076_.hasPermission(2))
                 .then(
@@ -49,33 +49,33 @@ public class TimeCommand {
         );
     }
 
-    private static int getDayTime(ServerLevel p_139070_) {
-        return (int)(p_139070_.getDayTime() % 24000L);
+    private static int getDayTime(ServerLevel pLevel) {
+        return (int)(pLevel.getDayTime() % 24000L);
     }
 
-    private static int queryTime(CommandSourceStack p_139088_, int p_139089_) {
-        p_139088_.sendSuccess(() -> Component.translatable("commands.time.query", p_139089_), false);
-        return p_139089_;
+    private static int queryTime(CommandSourceStack pSource, int pTime) {
+        pSource.sendSuccess(() -> Component.translatable("commands.time.query", pTime), false);
+        return pTime;
     }
 
-    public static int setTime(CommandSourceStack p_139078_, int p_139079_) {
-        for (ServerLevel serverlevel : p_139078_.getServer().getAllLevels()) {
-            serverlevel.setDayTime((long)p_139079_);
+    public static int setTime(CommandSourceStack pSource, int pTime) {
+        for (ServerLevel serverlevel : pSource.getServer().getAllLevels()) {
+            serverlevel.setDayTime((long)pTime);
         }
 
-        p_139078_.getServer().forceTimeSynchronization();
-        p_139078_.sendSuccess(() -> Component.translatable("commands.time.set", p_139079_), true);
-        return getDayTime(p_139078_.getLevel());
+        pSource.getServer().forceTimeSynchronization();
+        pSource.sendSuccess(() -> Component.translatable("commands.time.set", pTime), true);
+        return getDayTime(pSource.getLevel());
     }
 
-    public static int addTime(CommandSourceStack p_139083_, int p_139084_) {
-        for (ServerLevel serverlevel : p_139083_.getServer().getAllLevels()) {
-            serverlevel.setDayTime(serverlevel.getDayTime() + (long)p_139084_);
+    public static int addTime(CommandSourceStack pSource, int pAmount) {
+        for (ServerLevel serverlevel : pSource.getServer().getAllLevels()) {
+            serverlevel.setDayTime(serverlevel.getDayTime() + (long)pAmount);
         }
 
-        p_139083_.getServer().forceTimeSynchronization();
-        int i = getDayTime(p_139083_.getLevel());
-        p_139083_.sendSuccess(() -> Component.translatable("commands.time.set", i), true);
+        pSource.getServer().forceTimeSynchronization();
+        int i = getDayTime(pSource.getLevel());
+        pSource.sendSuccess(() -> Component.translatable("commands.time.set", i), true);
         return i;
     }
 }

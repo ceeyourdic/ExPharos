@@ -7,17 +7,17 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 public class MonitoredLocalFrameDecoder extends ChannelInboundHandlerAdapter {
     private final BandwidthDebugMonitor monitor;
 
-    public MonitoredLocalFrameDecoder(BandwidthDebugMonitor p_377665_) {
-        this.monitor = p_377665_;
+    public MonitoredLocalFrameDecoder(BandwidthDebugMonitor pMonitor) {
+        this.monitor = pMonitor;
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext p_377429_, Object p_375529_) {
-        p_375529_ = HiddenByteBuf.unpack(p_375529_);
-        if (p_375529_ instanceof ByteBuf bytebuf) {
+    public void channelRead(ChannelHandlerContext pContext, Object pMsg) {
+        pMsg = HiddenByteBuf.unpack(pMsg);
+        if (pMsg instanceof ByteBuf bytebuf) {
             this.monitor.onReceive(bytebuf.readableBytes());
         }
 
-        p_377429_.fireChannelRead(p_375529_);
+        pContext.fireChannelRead(pMsg);
     }
 }

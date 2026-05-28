@@ -11,7 +11,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class HoldingEntityRenderState extends LivingEntityRenderState {
     public final ItemStackRenderState heldItem = new ItemStackRenderState();
 
-    public static void extractHoldingEntityRenderState(LivingEntity p_376251_, HoldingEntityRenderState p_378625_, ItemModelResolver p_378710_) {
-        p_378710_.updateForLiving(p_378625_.heldItem, p_376251_.getMainHandItem(), ItemDisplayContext.GROUND, false, p_376251_);
+    public static void extractHoldingEntityRenderState(LivingEntity pEntity, HoldingEntityRenderState pReusedState, ItemModelResolver pResolver) {
+        pResolver.updateForLiving(pReusedState.heldItem, pEntity.getMainHandItem(), ItemDisplayContext.GROUND, false, pEntity);
     }
 }

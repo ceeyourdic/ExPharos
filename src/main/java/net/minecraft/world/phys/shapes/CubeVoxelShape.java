@@ -10,13 +10,13 @@ public final class CubeVoxelShape extends VoxelShape {
     }
 
     @Override
-    public DoubleList getCoords(Direction.Axis p_82767_) {
-        return new CubePointRange(this.shape.getSize(p_82767_));
+    public DoubleList getCoords(Direction.Axis pAxis) {
+        return new CubePointRange(this.shape.getSize(pAxis));
     }
 
     @Override
-    protected int findIndex(Direction.Axis p_82769_, double p_82770_) {
-        int i = this.shape.getSize(p_82769_);
-        return Mth.floor(Mth.clamp(p_82770_ * (double)i, -1.0, (double)i));
+    protected int findIndex(Direction.Axis pAxis, double pPosition) {
+        int i = this.shape.getSize(pAxis);
+        return Mth.floor(Mth.clamp(pPosition * (double)i, -1.0, (double)i));
     }
 }

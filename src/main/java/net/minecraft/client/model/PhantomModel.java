@@ -22,9 +22,9 @@ public class PhantomModel extends EntityModel<PhantomRenderState> {
     private final ModelPart tailBase;
     private final ModelPart tailTip;
 
-    public PhantomModel(ModelPart p_170788_) {
-        super(p_170788_);
-        ModelPart modelpart = p_170788_.getChild("body");
+    public PhantomModel(ModelPart pRoot) {
+        super(pRoot);
+        ModelPart modelpart = pRoot.getChild("body");
         this.tailBase = modelpart.getChild("tail_base");
         this.tailTip = this.tailBase.getChild("tail_tip");
         this.leftWingBase = modelpart.getChild("left_wing_base");

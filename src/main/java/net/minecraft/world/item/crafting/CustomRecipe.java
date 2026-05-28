@@ -9,8 +9,8 @@ import net.minecraft.network.codec.StreamCodec;
 public abstract class CustomRecipe implements CraftingRecipe {
     private final CraftingBookCategory category;
 
-    public CustomRecipe(CraftingBookCategory p_249010_) {
-        this.category = p_249010_;
+    public CustomRecipe(CraftingBookCategory pCategory) {
+        this.category = pCategory;
     }
 
     @Override
@@ -35,14 +35,14 @@ public abstract class CustomRecipe implements CraftingRecipe {
         private final MapCodec<T> codec;
         private final StreamCodec<RegistryFriendlyByteBuf, T> streamCodec;
 
-        public Serializer(CustomRecipe.Serializer.Factory<T> p_361018_) {
+        public Serializer(CustomRecipe.Serializer.Factory<T> pFactory) {
             this.codec = RecordCodecBuilder.mapCodec(
                 p_362686_ -> p_362686_.group(
                             CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(CraftingRecipe::category)
                         )
-                        .apply(p_362686_, p_361018_::create)
+                        .apply(p_362686_, pFactory::create)
             );
-            this.streamCodec = StreamCodec.composite(CraftingBookCategory.STREAM_CODEC, CraftingRecipe::category, p_361018_::create);
+            this.streamCodec = StreamCodec.composite(CraftingBookCategory.STREAM_CODEC, CraftingRecipe::category, pFactory::create);
         }
 
         @Override
@@ -57,7 +57,7 @@ public abstract class CustomRecipe implements CraftingRecipe {
 
         @FunctionalInterface
         public interface Factory<T extends CraftingRecipe> {
-            T create(CraftingBookCategory p_369875_);
+            T create(CraftingBookCategory pCategory);
         }
     }
 }

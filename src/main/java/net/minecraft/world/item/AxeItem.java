@@ -50,23 +50,23 @@ public class AxeItem extends DiggerItem {
         .put(Blocks.BAMBOO_BLOCK, Blocks.STRIPPED_BAMBOO_BLOCK)
         .build();
 
-    public AxeItem(ToolMaterial p_365403_, float p_363626_, float p_361899_, Item.Properties p_40524_) {
-        super(p_365403_, BlockTags.MINEABLE_WITH_AXE, p_363626_, p_361899_, p_40524_);
+    public AxeItem(ToolMaterial pMaterial, float pAttackDamage, float pAttackSpeed, Item.Properties pProperties) {
+        super(pMaterial, BlockTags.MINEABLE_WITH_AXE, pAttackDamage, pAttackSpeed, pProperties);
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext p_40529_) {
-        Level level = p_40529_.getLevel();
-        BlockPos blockpos = p_40529_.getClickedPos();
-        Player player = p_40529_.getPlayer();
-        if (playerHasShieldUseIntent(p_40529_)) {
+    public InteractionResult useOn(UseOnContext pContext) {
+        Level level = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
+        Player player = pContext.getPlayer();
+        if (playerHasShieldUseIntent(pContext)) {
             return InteractionResult.PASS;
         } else {
             Optional<BlockState> optional = this.evaluateNewBlockState(level, blockpos, player, level.getBlockState(blockpos));
             if (optional.isEmpty()) {
                 return InteractionResult.PASS;
             } else {
-                ItemStack itemstack = p_40529_.getItemInHand();
+                ItemStack itemstack = pContext.getItemInHand();
                 if (player instanceof ServerPlayer) {
                     CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)player, blockpos, itemstack);
                 }
@@ -74,7 +74,7 @@ public class AxeItem extends DiggerItem {
                 level.setBlock(blockpos, optional.get(), 11);
                 level.gameEvent(GameEvent.BLOCK_CHANGE, blockpos, GameEvent.Context.of(player, optional.get()));
                 if (player != null) {
-                    itemstack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(p_40529_.getHand()));
+                    itemstack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(pContext.getHand()));
                 }
 
                 return InteractionResult.SUCCESS;
@@ -82,28 +82,28 @@ public class AxeItem extends DiggerItem {
         }
     }
 
-    private static boolean playerHasShieldUseIntent(UseOnContext p_343474_) {
-        Player player = p_343474_.getPlayer();
-        return p_343474_.getHand().equals(InteractionHand.MAIN_HAND) && player.getOffhandItem().is(Items.SHIELD) && !player.isSecondaryUseActive();
+    private static boolean playerHasShieldUseIntent(UseOnContext pContext) {
+        Player player = pContext.getPlayer();
+        return pContext.getHand().equals(InteractionHand.MAIN_HAND) && player.getOffhandItem().is(Items.SHIELD) && !player.isSecondaryUseActive();
     }
 
-    private Optional<BlockState> evaluateNewBlockState(Level p_312809_, BlockPos p_313114_, @Nullable Player p_312029_, BlockState p_311198_) {
-        Optional<BlockState> optional = this.getStripped(p_311198_);
+    private Optional<BlockState> evaluateNewBlockState(Level pLevel, BlockPos pPos, @Nullable Player pPlayer, BlockState pState) {
+        Optional<BlockState> optional = this.getStripped(pState);
         if (optional.isPresent()) {
-            p_312809_.playSound(p_312029_, p_313114_, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 1.0F);
+            pLevel.playSound(pPlayer, pPos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 1.0F);
             return optional;
         } else {
-            Optional<BlockState> optional1 = WeatheringCopper.getPrevious(p_311198_);
+            Optional<BlockState> optional1 = WeatheringCopper.getPrevious(pState);
             if (optional1.isPresent()) {
-                p_312809_.playSound(p_312029_, p_313114_, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0F, 1.0F);
-                p_312809_.levelEvent(p_312029_, 3005, p_313114_, 0);
+                pLevel.playSound(pPlayer, pPos, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                pLevel.levelEvent(pPlayer, 3005, pPos, 0);
                 return optional1;
             } else {
-                Optional<BlockState> optional2 = Optional.ofNullable(HoneycombItem.WAX_OFF_BY_BLOCK.get().get(p_311198_.getBlock()))
-                    .map(p_150694_ -> p_150694_.withPropertiesOf(p_311198_));
+                Optional<BlockState> optional2 = Optional.ofNullable(HoneycombItem.WAX_OFF_BY_BLOCK.get().get(pState.getBlock()))
+                    .map(p_150694_ -> p_150694_.withPropertiesOf(pState));
                 if (optional2.isPresent()) {
-                    p_312809_.playSound(p_312029_, p_313114_, SoundEvents.AXE_WAX_OFF, SoundSource.BLOCKS, 1.0F, 1.0F);
-                    p_312809_.levelEvent(p_312029_, 3004, p_313114_, 0);
+                    pLevel.playSound(pPlayer, pPos, SoundEvents.AXE_WAX_OFF, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    pLevel.levelEvent(pPlayer, 3004, pPos, 0);
                     return optional2;
                 } else {
                     return Optional.empty();
@@ -112,8 +112,8 @@ public class AxeItem extends DiggerItem {
         }
     }
 
-    private Optional<BlockState> getStripped(BlockState p_150691_) {
-        return Optional.ofNullable(STRIPPABLES.get(p_150691_.getBlock()))
-            .map(p_359378_ -> p_359378_.defaultBlockState().setValue(RotatedPillarBlock.AXIS, p_150691_.getValue(RotatedPillarBlock.AXIS)));
+    private Optional<BlockState> getStripped(BlockState pUnstrippedState) {
+        return Optional.ofNullable(STRIPPABLES.get(pUnstrippedState.getBlock()))
+            .map(p_359378_ -> p_359378_.defaultBlockState().setValue(RotatedPillarBlock.AXIS, pUnstrippedState.getValue(RotatedPillarBlock.AXIS)));
     }
 }

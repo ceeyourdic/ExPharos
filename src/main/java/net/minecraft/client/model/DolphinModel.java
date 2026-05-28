@@ -19,9 +19,9 @@ public class DolphinModel extends EntityModel<DolphinRenderState> {
     private final ModelPart tail;
     private final ModelPart tailFin;
 
-    public DolphinModel(ModelPart p_170530_) {
-        super(p_170530_);
-        this.body = p_170530_.getChild("body");
+    public DolphinModel(ModelPart pRoot) {
+        super(pRoot);
+        this.body = pRoot.getChild("body");
         this.tail = this.body.getChild("tail");
         this.tailFin = this.tail.getChild("tail_fin");
     }

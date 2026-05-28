@@ -26,12 +26,12 @@ public interface LootItemCondition extends LootContextUser, Predicate<LootContex
             return InvertedLootItemCondition.invert(this);
         }
 
-        default AnyOfCondition.Builder or(LootItemCondition.Builder p_286316_) {
-            return AnyOfCondition.anyOf(this, p_286316_);
+        default AnyOfCondition.Builder or(LootItemCondition.Builder pCondition) {
+            return AnyOfCondition.anyOf(this, pCondition);
         }
 
-        default AllOfCondition.Builder and(LootItemCondition.Builder p_286363_) {
-            return AllOfCondition.allOf(this, p_286363_);
+        default AllOfCondition.Builder and(LootItemCondition.Builder pCondition) {
+            return AllOfCondition.allOf(this, pCondition);
         }
     }
 }

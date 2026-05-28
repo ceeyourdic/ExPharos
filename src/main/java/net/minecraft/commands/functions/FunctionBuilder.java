@@ -16,36 +16,36 @@ class FunctionBuilder<T extends ExecutionCommandSource<T>> {
     private List<MacroFunction.Entry<T>> macroEntries;
     private final List<String> macroArguments = new ArrayList<>();
 
-    public void addCommand(UnboundEntryAction<T> p_309592_) {
+    public void addCommand(UnboundEntryAction<T> pCommand) {
         if (this.macroEntries != null) {
-            this.macroEntries.add(new MacroFunction.PlainTextEntry<>(p_309592_));
+            this.macroEntries.add(new MacroFunction.PlainTextEntry<>(pCommand));
         } else {
-            this.plainEntries.add(p_309592_);
+            this.plainEntries.add(pCommand);
         }
     }
 
-    private int getArgumentIndex(String p_312711_) {
-        int i = this.macroArguments.indexOf(p_312711_);
+    private int getArgumentIndex(String pArgument) {
+        int i = this.macroArguments.indexOf(pArgument);
         if (i == -1) {
             i = this.macroArguments.size();
-            this.macroArguments.add(p_312711_);
+            this.macroArguments.add(pArgument);
         }
 
         return i;
     }
 
-    private IntList convertToIndices(List<String> p_311467_) {
-        IntArrayList intarraylist = new IntArrayList(p_311467_.size());
+    private IntList convertToIndices(List<String> pArguments) {
+        IntArrayList intarraylist = new IntArrayList(pArguments.size());
 
-        for (String s : p_311467_) {
+        for (String s : pArguments) {
             intarraylist.add(this.getArgumentIndex(s));
         }
 
         return intarraylist;
     }
 
-    public void addMacro(String p_312905_, int p_310777_, T p_328106_) {
-        StringTemplate stringtemplate = StringTemplate.fromString(p_312905_, p_310777_);
+    public void addMacro(String pName, int pLineNumber, T pCompilationContext) {
+        StringTemplate stringtemplate = StringTemplate.fromString(pName, pLineNumber);
         if (this.plainEntries != null) {
             this.macroEntries = new ArrayList<>(this.plainEntries.size() + 1);
 
@@ -56,12 +56,12 @@ class FunctionBuilder<T extends ExecutionCommandSource<T>> {
             this.plainEntries = null;
         }
 
-        this.macroEntries.add(new MacroFunction.MacroEntry<>(stringtemplate, this.convertToIndices(stringtemplate.variables()), p_328106_));
+        this.macroEntries.add(new MacroFunction.MacroEntry<>(stringtemplate, this.convertToIndices(stringtemplate.variables()), pCompilationContext));
     }
 
-    public CommandFunction<T> build(ResourceLocation p_311383_) {
+    public CommandFunction<T> build(ResourceLocation pId) {
         return (CommandFunction<T>)(this.macroEntries != null
-            ? new MacroFunction<>(p_311383_, this.macroEntries, this.macroArguments)
-            : new PlainTextFunction<>(p_311383_, this.plainEntries));
+            ? new MacroFunction<>(pId, this.macroEntries, this.macroArguments)
+            : new PlainTextFunction<>(pId, this.plainEntries));
     }
 }

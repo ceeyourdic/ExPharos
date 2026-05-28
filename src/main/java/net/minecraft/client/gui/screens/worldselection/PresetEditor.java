@@ -49,20 +49,20 @@ public interface PresetEditor {
         (p_232962_, p_232963_) -> new CreateBuffetWorldScreen(p_232962_, p_232963_, p_267861_ -> p_232962_.getUiState().updateDimensions(fixedBiomeConfigurator(p_267861_)))
     );
 
-    Screen createEditScreen(CreateWorldScreen p_232977_, WorldCreationContext p_232978_);
+    Screen createEditScreen(CreateWorldScreen pLastScreen, WorldCreationContext pContext);
 
-    static WorldCreationContext.DimensionsUpdater flatWorldConfigurator(FlatLevelGeneratorSettings p_250871_) {
+    static WorldCreationContext.DimensionsUpdater flatWorldConfigurator(FlatLevelGeneratorSettings pSettings) {
         return (p_357742_, p_357743_) -> {
-            ChunkGenerator chunkgenerator = new FlatLevelSource(p_250871_);
+            ChunkGenerator chunkgenerator = new FlatLevelSource(pSettings);
             return p_357743_.replaceOverworldGenerator(p_357742_, chunkgenerator);
         };
     }
 
-    private static WorldCreationContext.DimensionsUpdater fixedBiomeConfigurator(Holder<Biome> p_248835_) {
+    private static WorldCreationContext.DimensionsUpdater fixedBiomeConfigurator(Holder<Biome> pBiome) {
         return (p_357739_, p_357740_) -> {
             Registry<NoiseGeneratorSettings> registry = p_357739_.lookupOrThrow(Registries.NOISE_SETTINGS);
             Holder<NoiseGeneratorSettings> holder = registry.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
-            BiomeSource biomesource = new FixedBiomeSource(p_248835_);
+            BiomeSource biomesource = new FixedBiomeSource(pBiome);
             ChunkGenerator chunkgenerator = new NoiseBasedChunkGenerator(biomesource, holder);
             return p_357740_.replaceOverworldGenerator(p_357739_, chunkgenerator);
         };

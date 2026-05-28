@@ -9,12 +9,12 @@ public class ConstantInt extends IntProvider {
     public static final MapCodec<ConstantInt> CODEC = Codec.INT.fieldOf("value").xmap(ConstantInt::of, ConstantInt::getValue);
     private final int value;
 
-    public static ConstantInt of(int p_146484_) {
-        return p_146484_ == 0 ? ZERO : new ConstantInt(p_146484_);
+    public static ConstantInt of(int pValue) {
+        return pValue == 0 ? ZERO : new ConstantInt(pValue);
     }
 
-    private ConstantInt(int p_146481_) {
-        this.value = p_146481_;
+    private ConstantInt(int pValue) {
+        this.value = pValue;
     }
 
     public int getValue() {

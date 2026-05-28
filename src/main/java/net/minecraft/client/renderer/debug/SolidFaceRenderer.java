@@ -20,8 +20,8 @@ import org.joml.Matrix4f;
 public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
     private final Minecraft minecraft;
 
-    public SolidFaceRenderer(Minecraft p_113668_) {
-        this.minecraft = p_113668_;
+    public SolidFaceRenderer(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
     @Override

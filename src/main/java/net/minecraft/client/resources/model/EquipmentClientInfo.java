@@ -33,8 +33,8 @@ public record EquipmentClientInfo(Map<EquipmentClientInfo.LayerType, List<Equipm
         return new EquipmentClientInfo.Builder();
     }
 
-    public List<EquipmentClientInfo.Layer> getLayers(EquipmentClientInfo.LayerType p_377530_) {
-        return this.layers.getOrDefault(p_377530_, List.of());
+    public List<EquipmentClientInfo.Layer> getLayers(EquipmentClientInfo.LayerType pType) {
+        return this.layers.getOrDefault(pType, List.of());
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -44,22 +44,22 @@ public record EquipmentClientInfo(Map<EquipmentClientInfo.LayerType, List<Equipm
         Builder() {
         }
 
-        public EquipmentClientInfo.Builder addHumanoidLayers(ResourceLocation p_376576_) {
-            return this.addHumanoidLayers(p_376576_, false);
+        public EquipmentClientInfo.Builder addHumanoidLayers(ResourceLocation pTextureId) {
+            return this.addHumanoidLayers(pTextureId, false);
         }
 
-        public EquipmentClientInfo.Builder addHumanoidLayers(ResourceLocation p_376103_, boolean p_377923_) {
-            this.addLayers(EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS, EquipmentClientInfo.Layer.leatherDyeable(p_376103_, p_377923_));
-            this.addMainHumanoidLayer(p_376103_, p_377923_);
+        public EquipmentClientInfo.Builder addHumanoidLayers(ResourceLocation pTextureId, boolean pDyeable) {
+            this.addLayers(EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS, EquipmentClientInfo.Layer.leatherDyeable(pTextureId, pDyeable));
+            this.addMainHumanoidLayer(pTextureId, pDyeable);
             return this;
         }
 
-        public EquipmentClientInfo.Builder addMainHumanoidLayer(ResourceLocation p_375484_, boolean p_378714_) {
-            return this.addLayers(EquipmentClientInfo.LayerType.HUMANOID, EquipmentClientInfo.Layer.leatherDyeable(p_375484_, p_378714_));
+        public EquipmentClientInfo.Builder addMainHumanoidLayer(ResourceLocation pTextureId, boolean pDyeable) {
+            return this.addLayers(EquipmentClientInfo.LayerType.HUMANOID, EquipmentClientInfo.Layer.leatherDyeable(pTextureId, pDyeable));
         }
 
-        public EquipmentClientInfo.Builder addLayers(EquipmentClientInfo.LayerType p_377620_, EquipmentClientInfo.Layer... p_377277_) {
-            Collections.addAll(this.layersByType.computeIfAbsent(p_377620_, p_376726_ -> new ArrayList<>()), p_377277_);
+        public EquipmentClientInfo.Builder addLayers(EquipmentClientInfo.LayerType pType, EquipmentClientInfo.Layer... pLayers) {
+            Collections.addAll(this.layersByType.computeIfAbsent(pType, p_376726_ -> new ArrayList<>()), pLayers);
             return this;
         }
 
@@ -89,24 +89,24 @@ public record EquipmentClientInfo(Map<EquipmentClientInfo.LayerType, List<Equipm
                     .apply(p_377965_, EquipmentClientInfo.Layer::new)
         );
 
-        public Layer(ResourceLocation p_378074_) {
-            this(p_378074_, Optional.empty(), false);
+        public Layer(ResourceLocation pTextureId) {
+            this(pTextureId, Optional.empty(), false);
         }
 
-        public static EquipmentClientInfo.Layer leatherDyeable(ResourceLocation p_378679_, boolean p_377080_) {
+        public static EquipmentClientInfo.Layer leatherDyeable(ResourceLocation pTextureId, boolean pDyeable) {
             return new EquipmentClientInfo.Layer(
-                p_378679_, p_377080_ ? Optional.of(new EquipmentClientInfo.Dyeable(Optional.of(-6265536))) : Optional.empty(), false
+                pTextureId, pDyeable ? Optional.of(new EquipmentClientInfo.Dyeable(Optional.of(-6265536))) : Optional.empty(), false
             );
         }
 
-        public static EquipmentClientInfo.Layer onlyIfDyed(ResourceLocation p_378779_, boolean p_376357_) {
+        public static EquipmentClientInfo.Layer onlyIfDyed(ResourceLocation pTextureId, boolean pDyeable) {
             return new EquipmentClientInfo.Layer(
-                p_378779_, p_376357_ ? Optional.of(new EquipmentClientInfo.Dyeable(Optional.empty())) : Optional.empty(), false
+                pTextureId, pDyeable ? Optional.of(new EquipmentClientInfo.Dyeable(Optional.empty())) : Optional.empty(), false
             );
         }
 
-        public ResourceLocation getTextureLocation(EquipmentClientInfo.LayerType p_375959_) {
-            return this.textureId.withPath(p_376895_ -> "textures/entity/equipment/" + p_375959_.getSerializedName() + "/" + p_376895_ + ".png");
+        public ResourceLocation getTextureLocation(EquipmentClientInfo.LayerType pType) {
+            return this.textureId.withPath(p_376895_ -> "textures/entity/equipment/" + pType.getSerializedName() + "/" + p_376895_ + ".png");
         }
     }
 
@@ -122,8 +122,8 @@ public record EquipmentClientInfo(Map<EquipmentClientInfo.LayerType, List<Equipm
         public static final Codec<EquipmentClientInfo.LayerType> CODEC = StringRepresentable.fromEnum(EquipmentClientInfo.LayerType::values);
         private final String id;
 
-        private LayerType(final String p_378823_) {
-            this.id = p_378823_;
+        private LayerType(final String pId) {
+            this.id = pId;
         }
 
         @Override

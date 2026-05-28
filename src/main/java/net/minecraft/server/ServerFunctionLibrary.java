@@ -44,25 +44,25 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
     private final int functionCompilationLevel;
     private final CommandDispatcher<CommandSourceStack> dispatcher;
 
-    public Optional<CommandFunction<CommandSourceStack>> getFunction(ResourceLocation p_136090_) {
-        return Optional.ofNullable(this.functions.get(p_136090_));
+    public Optional<CommandFunction<CommandSourceStack>> getFunction(ResourceLocation pLocation) {
+        return Optional.ofNullable(this.functions.get(pLocation));
     }
 
     public Map<ResourceLocation, CommandFunction<CommandSourceStack>> getFunctions() {
         return this.functions;
     }
 
-    public List<CommandFunction<CommandSourceStack>> getTag(ResourceLocation p_214328_) {
-        return this.tags.getOrDefault(p_214328_, List.of());
+    public List<CommandFunction<CommandSourceStack>> getTag(ResourceLocation pLocation) {
+        return this.tags.getOrDefault(pLocation, List.of());
     }
 
     public Iterable<ResourceLocation> getAvailableTags() {
         return this.tags.keySet();
     }
 
-    public ServerFunctionLibrary(int p_136053_, CommandDispatcher<CommandSourceStack> p_136054_) {
-        this.functionCompilationLevel = p_136053_;
-        this.dispatcher = p_136054_;
+    public ServerFunctionLibrary(int pFunctionCompilationLevel, CommandDispatcher<CommandSourceStack> pDispatcher) {
+        this.functionCompilationLevel = pFunctionCompilationLevel;
+        this.dispatcher = pDispatcher;
     }
 
     @Override
@@ -117,10 +117,10 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
             );
     }
 
-    private static List<String> readLines(Resource p_214317_) {
+    private static List<String> readLines(Resource pResource) {
         try {
             List list;
-            try (BufferedReader bufferedreader = p_214317_.openAsReader()) {
+            try (BufferedReader bufferedreader = pResource.openAsReader()) {
                 list = bufferedreader.lines().toList();
             }
 

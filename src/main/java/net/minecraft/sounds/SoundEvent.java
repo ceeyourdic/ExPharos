@@ -31,19 +31,19 @@ public record SoundEvent(ResourceLocation location, Optional<Float> fixedRange) 
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, Holder<SoundEvent>> STREAM_CODEC = ByteBufCodecs.holder(Registries.SOUND_EVENT, DIRECT_STREAM_CODEC);
 
-    private static SoundEvent create(ResourceLocation p_263406_, Optional<Float> p_263346_) {
-        return p_263346_.<SoundEvent>map(p_263360_ -> createFixedRangeEvent(p_263406_, p_263360_)).orElseGet(() -> createVariableRangeEvent(p_263406_));
+    private static SoundEvent create(ResourceLocation pLocation, Optional<Float> pRange) {
+        return pRange.<SoundEvent>map(p_263360_ -> createFixedRangeEvent(pLocation, p_263360_)).orElseGet(() -> createVariableRangeEvent(pLocation));
     }
 
-    public static SoundEvent createVariableRangeEvent(ResourceLocation p_262973_) {
-        return new SoundEvent(p_262973_, Optional.empty());
+    public static SoundEvent createVariableRangeEvent(ResourceLocation pLocation) {
+        return new SoundEvent(pLocation, Optional.empty());
     }
 
-    public static SoundEvent createFixedRangeEvent(ResourceLocation p_263003_, float p_263029_) {
-        return new SoundEvent(p_263003_, Optional.of(p_263029_));
+    public static SoundEvent createFixedRangeEvent(ResourceLocation pLocation, float pRange) {
+        return new SoundEvent(pLocation, Optional.of(pRange));
     }
 
-    public float getRange(float p_215669_) {
-        return this.fixedRange.orElse(p_215669_ > 1.0F ? 16.0F * p_215669_ : 16.0F);
+    public float getRange(float pVolume) {
+        return this.fixedRange.orElse(pVolume > 1.0F ? 16.0F * pVolume : 16.0F);
     }
 }

@@ -63,14 +63,14 @@ public class SculkPatchFeature extends Feature<SculkPatchConfiguration> {
         }
     }
 
-    private boolean canSpreadFrom(LevelAccessor p_225239_, BlockPos p_225240_) {
-        BlockState blockstate = p_225239_.getBlockState(p_225240_);
+    private boolean canSpreadFrom(LevelAccessor pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
         if (blockstate.getBlock() instanceof SculkBehaviour) {
             return true;
         } else {
             return !blockstate.isAir() && (!blockstate.is(Blocks.WATER) || !blockstate.getFluidState().isSource())
                 ? false
-                : Direction.stream().map(p_225240_::relative).anyMatch(p_360609_ -> p_225239_.getBlockState(p_360609_).isCollisionShapeFullBlock(p_225239_, p_360609_));
+                : Direction.stream().map(pPos::relative).anyMatch(p_360609_ -> pLevel.getBlockState(p_360609_).isCollisionShapeFullBlock(pLevel, p_360609_));
         }
     }
 }

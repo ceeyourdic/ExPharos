@@ -93,10 +93,10 @@ public class Vindicator extends AbstractIllager {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_34100_) {
-        super.addAdditionalSaveData(p_34100_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
         if (this.isJohnny) {
-            p_34100_.putBoolean("Johnny", true);
+            pCompound.putBoolean("Johnny", true);
         }
     }
 
@@ -110,10 +110,10 @@ public class Vindicator extends AbstractIllager {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_34094_) {
-        super.readAdditionalSaveData(p_34094_);
-        if (p_34094_.contains("Johnny", 99)) {
-            this.isJohnny = p_34094_.getBoolean("Johnny");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("Johnny", 99)) {
+            this.isJohnny = pCompound.getBoolean("Johnny");
         }
     }
 
@@ -141,9 +141,9 @@ public class Vindicator extends AbstractIllager {
     }
 
     @Override
-    public void setCustomName(@Nullable Component p_34096_) {
-        super.setCustomName(p_34096_);
-        if (!this.isJohnny && p_34096_ != null && p_34096_.getString().equals("Johnny")) {
+    public void setCustomName(@Nullable Component pName) {
+        super.setCustomName(pName);
+        if (!this.isJohnny && pName != null && pName.getString().equals("Johnny")) {
             this.isJohnny = true;
         }
     }
@@ -159,7 +159,7 @@ public class Vindicator extends AbstractIllager {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_34103_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.VINDICATOR_HURT;
     }
 
@@ -204,8 +204,8 @@ public class Vindicator extends AbstractIllager {
     }
 
     static class VindicatorJohnnyAttackGoal extends NearestAttackableTargetGoal<LivingEntity> {
-        public VindicatorJohnnyAttackGoal(Vindicator p_34117_) {
-            super(p_34117_, LivingEntity.class, 0, true, true, (p_366054_, p_368223_) -> p_366054_.attackable());
+        public VindicatorJohnnyAttackGoal(Vindicator pVindicator) {
+            super(pVindicator, LivingEntity.class, 0, true, true, (p_366054_, p_368223_) -> p_366054_.attackable());
         }
 
         @Override

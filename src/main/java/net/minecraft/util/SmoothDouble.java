@@ -5,8 +5,8 @@ public class SmoothDouble {
     private double remainingValue;
     private double lastAmount;
 
-    public double getNewDeltaValue(double p_14238_, double p_14239_) {
-        this.targetValue += p_14238_;
+    public double getNewDeltaValue(double pInput, double pMultiplier) {
+        this.targetValue += pInput;
         double d0 = this.targetValue - this.remainingValue;
         double d1 = Mth.lerp(0.5, this.lastAmount, d0);
         double d2 = Math.signum(d0);
@@ -15,8 +15,8 @@ public class SmoothDouble {
         }
 
         this.lastAmount = d1;
-        this.remainingValue += d0 * p_14239_;
-        return d0 * p_14239_;
+        this.remainingValue += d0 * pMultiplier;
+        return d0 * pMultiplier;
     }
 
     public void reset() {

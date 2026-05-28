@@ -35,6 +35,8 @@ import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.ConsumableListener;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
+import net.optifine.Config;
+import net.optifine.CustomColors;
 
 public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> customColor, List<MobEffectInstance> customEffects, Optional<String> customName)
     implements ConsumableListener {
@@ -42,13 +44,13 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
     private static final Component NO_EFFECT = Component.translatable("effect.none").withStyle(ChatFormatting.GRAY);
     public static final int BASE_POTION_COLOR = -13083194;
     private static final Codec<PotionContents> FULL_CODEC = RecordCodecBuilder.create(
-        p_359800_ -> p_359800_.group(
+        contentsIn -> contentsIn.group(
                     Potion.CODEC.optionalFieldOf("potion").forGetter(PotionContents::potion),
                     Codec.INT.optionalFieldOf("custom_color").forGetter(PotionContents::customColor),
                     MobEffectInstance.CODEC.listOf().optionalFieldOf("custom_effects", List.of()).forGetter(PotionContents::customEffects),
                     Codec.STRING.optionalFieldOf("custom_name").forGetter(PotionContents::customName)
                 )
-                .apply(p_359800_, PotionContents::new)
+                .apply(contentsIn, PotionContents::new)
     );
     public static final Codec<PotionContents> CODEC = Codec.withAlternative(FULL_CODEC, Potion.CODEC, PotionContents::new);
     public static final StreamCodec<RegistryFriendlyByteBuf, PotionContents> STREAM_CODEC = StreamCodec.composite(
@@ -63,18 +65,18 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
         PotionContents::new
     );
 
-    public PotionContents(Holder<Potion> p_335062_) {
-        this(Optional.of(p_335062_), Optional.empty(), List.of(), Optional.empty());
+    public PotionContents(Holder<Potion> pPotion) {
+        this(Optional.of(pPotion), Optional.empty(), List.of(), Optional.empty());
     }
 
-    public static ItemStack createItemStack(Item p_328254_, Holder<Potion> p_334269_) {
-        ItemStack itemstack = new ItemStack(p_328254_);
-        itemstack.set(DataComponents.POTION_CONTENTS, new PotionContents(p_334269_));
+    public static ItemStack createItemStack(Item pItem, Holder<Potion> pPotion) {
+        ItemStack itemstack = new ItemStack(pItem);
+        itemstack.set(DataComponents.POTION_CONTENTS, new PotionContents(pPotion));
         return itemstack;
     }
 
-    public boolean is(Holder<Potion> p_329141_) {
-        return this.potion.isPresent() && this.potion.get().is(p_329141_) && this.customEffects.isEmpty();
+    public boolean is(Holder<Potion> pPotion) {
+        return this.potion.isPresent() && this.potion.get().is(pPotion) && this.customEffects.isEmpty();
     }
 
     public Iterable<MobEffectInstance> getAllEffects() {
@@ -87,48 +89,52 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
         }
     }
 
-    public void forEachEffect(Consumer<MobEffectInstance> p_335805_) {
+    public void forEachEffect(Consumer<MobEffectInstance> pAction) {
         if (this.potion.isPresent()) {
             for (MobEffectInstance mobeffectinstance : this.potion.get().value().getEffects()) {
-                p_335805_.accept(new MobEffectInstance(mobeffectinstance));
+                pAction.accept(new MobEffectInstance(mobeffectinstance));
             }
         }
 
         for (MobEffectInstance mobeffectinstance1 : this.customEffects) {
-            p_335805_.accept(new MobEffectInstance(mobeffectinstance1));
+            pAction.accept(new MobEffectInstance(mobeffectinstance1));
         }
     }
 
-    public PotionContents withPotion(Holder<Potion> p_333654_) {
-        return new PotionContents(Optional.of(p_333654_), this.customColor, this.customEffects, this.customName);
+    public PotionContents withPotion(Holder<Potion> pPotion) {
+        return new PotionContents(Optional.of(pPotion), this.customColor, this.customEffects, this.customName);
     }
 
-    public PotionContents withEffectAdded(MobEffectInstance p_328742_) {
-        return new PotionContents(this.potion, this.customColor, Util.copyAndAdd(this.customEffects, p_328742_), this.customName);
+    public PotionContents withEffectAdded(MobEffectInstance pEffect) {
+        return new PotionContents(this.potion, this.customColor, Util.copyAndAdd(this.customEffects, pEffect), this.customName);
     }
 
     public int getColor() {
         return this.getColorOr(-13083194);
     }
 
-    public int getColorOr(int p_378053_) {
-        return this.customColor.isPresent() ? this.customColor.get() : getColorOptional(this.getAllEffects()).orElse(p_378053_);
+    public int getColorOr(int pDefaultValue) {
+        return this.customColor.isPresent() ? this.customColor.get() : getColorOptional(this.getAllEffects()).orElse(pDefaultValue);
     }
 
-    public Component getName(String p_367744_) {
-        String s = this.customName.or(() -> this.potion.map(p_359801_ -> p_359801_.value().name())).orElse("empty");
-        return Component.translatable(p_367744_ + s);
+    public Component getName(String pName) {
+        String s = this.customName.or(() -> this.potion.map(potionIn -> potionIn.value().name())).orElse("empty");
+        return Component.translatable(pName + s);
     }
 
-    public static OptionalInt getColorOptional(Iterable<MobEffectInstance> p_331345_) {
+    public static OptionalInt getColorOptional(Iterable<MobEffectInstance> pEffects) {
         int i = 0;
         int j = 0;
         int k = 0;
         int l = 0;
 
-        for (MobEffectInstance mobeffectinstance : p_331345_) {
+        for (MobEffectInstance mobeffectinstance : pEffects) {
             if (mobeffectinstance.isVisible()) {
                 int i1 = mobeffectinstance.getEffect().value().getColor();
+                if (Config.isCustomColors()) {
+                    i1 = CustomColors.getPotionColor(mobeffectinstance.getEffect().value(), i1);
+                }
+
                 int j1 = mobeffectinstance.getAmplifier() + 1;
                 i += j1 * ARGB.red(i1);
                 j += j1 * ARGB.green(i1);
@@ -148,32 +154,32 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
         return Lists.transform(this.customEffects, MobEffectInstance::new);
     }
 
-    public void addPotionTooltip(Consumer<Component> p_334042_, float p_336314_, float p_328696_) {
-        addPotionTooltip(this.getAllEffects(), p_334042_, p_336314_, p_328696_);
+    public void addPotionTooltip(Consumer<Component> pTooltipAdder, float pDurationFactor, float pTicksPerSecond) {
+        addPotionTooltip(this.getAllEffects(), pTooltipAdder, pDurationFactor, pTicksPerSecond);
     }
 
-    public void applyToLivingEntity(LivingEntity p_362891_) {
-        if (p_362891_.level() instanceof ServerLevel serverlevel) {
-            Player player1 = p_362891_ instanceof Player player ? player : null;
-            this.forEachEffect(p_359805_ -> {
-                if (p_359805_.getEffect().value().isInstantenous()) {
-                    p_359805_.getEffect().value().applyInstantenousEffect(serverlevel, player1, player1, p_362891_, p_359805_.getAmplifier(), 1.0);
+    public void applyToLivingEntity(LivingEntity pEntity) {
+        if (pEntity.level() instanceof ServerLevel serverlevel) {
+            Player player1 = pEntity instanceof Player player ? player : null;
+            this.forEachEffect(effectIn -> {
+                if (effectIn.getEffect().value().isInstantenous()) {
+                    effectIn.getEffect().value().applyInstantenousEffect(serverlevel, player1, player1, pEntity, effectIn.getAmplifier(), 1.0);
                 } else {
-                    p_362891_.addEffect(p_359805_);
+                    pEntity.addEffect(effectIn);
                 }
             });
         }
     }
 
-    public static void addPotionTooltip(Iterable<MobEffectInstance> p_328255_, Consumer<Component> p_336197_, float p_333725_, float p_333963_) {
+    public static void addPotionTooltip(Iterable<MobEffectInstance> pEffects, Consumer<Component> pTooltipAdder, float pDurationFactor, float pTicksPerSecond) {
         List<Pair<Holder<Attribute>, AttributeModifier>> list = Lists.newArrayList();
         boolean flag = true;
 
-        for (MobEffectInstance mobeffectinstance : p_328255_) {
+        for (MobEffectInstance mobeffectinstance : pEffects) {
             flag = false;
             MutableComponent mutablecomponent = Component.translatable(mobeffectinstance.getDescriptionId());
             Holder<MobEffect> holder = mobeffectinstance.getEffect();
-            holder.value().createModifiers(mobeffectinstance.getAmplifier(), (p_329075_, p_331827_) -> list.add(new Pair<>(p_329075_, p_331827_)));
+            holder.value().createModifiers(mobeffectinstance.getAmplifier(), (attributeIn, modifierIn) -> list.add(new Pair<>(attributeIn, modifierIn)));
             if (mobeffectinstance.getAmplifier() > 0) {
                 mutablecomponent = Component.translatable(
                     "potion.withAmplifier", mutablecomponent, Component.translatable("potion.potency." + mobeffectinstance.getAmplifier())
@@ -182,20 +188,20 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 
             if (!mobeffectinstance.endsWithin(20)) {
                 mutablecomponent = Component.translatable(
-                    "potion.withDuration", mutablecomponent, MobEffectUtil.formatDuration(mobeffectinstance, p_333725_, p_333963_)
+                    "potion.withDuration", mutablecomponent, MobEffectUtil.formatDuration(mobeffectinstance, pDurationFactor, pTicksPerSecond)
                 );
             }
 
-            p_336197_.accept(mutablecomponent.withStyle(holder.value().getCategory().getTooltipFormatting()));
+            pTooltipAdder.accept(mutablecomponent.withStyle(holder.value().getCategory().getTooltipFormatting()));
         }
 
         if (flag) {
-            p_336197_.accept(NO_EFFECT);
+            pTooltipAdder.accept(NO_EFFECT);
         }
 
         if (!list.isEmpty()) {
-            p_336197_.accept(CommonComponents.EMPTY);
-            p_336197_.accept(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
+            pTooltipAdder.accept(CommonComponents.EMPTY);
+            pTooltipAdder.accept(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
 
             for (Pair<Holder<Attribute>, AttributeModifier> pair : list) {
                 AttributeModifier attributemodifier = pair.getSecond();
@@ -209,7 +215,7 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
                 }
 
                 if (d1 > 0.0) {
-                    p_336197_.accept(
+                    pTooltipAdder.accept(
                         Component.translatable(
                                 "attribute.modifier.plus." + attributemodifier.operation().id(),
                                 ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(d0),
@@ -219,7 +225,7 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
                     );
                 } else if (d1 < 0.0) {
                     d0 *= -1.0;
-                    p_336197_.accept(
+                    pTooltipAdder.accept(
                         Component.translatable(
                                 "attribute.modifier.take." + attributemodifier.operation().id(),
                                 ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(d0),

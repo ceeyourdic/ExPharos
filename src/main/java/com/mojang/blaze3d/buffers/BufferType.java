@@ -15,7 +15,7 @@ public enum BufferType {
 
     final int id;
 
-    private BufferType(final int p_362116_) {
-        this.id = p_362116_;
+    private BufferType(final int pId) {
+        this.id = pId;
     }
 }

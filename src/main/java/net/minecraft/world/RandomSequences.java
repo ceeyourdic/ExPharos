@@ -23,38 +23,38 @@ public class RandomSequences extends SavedData {
     private boolean includeSequenceId = true;
     private final Map<ResourceLocation, RandomSequence> sequences = new Object2ObjectOpenHashMap<>();
 
-    public static SavedData.Factory<RandomSequences> factory(long p_297402_) {
+    public static SavedData.Factory<RandomSequences> factory(long pSeed) {
         return new SavedData.Factory<>(
-            () -> new RandomSequences(p_297402_), (p_296656_, p_331296_) -> load(p_297402_, p_296656_), DataFixTypes.SAVED_DATA_RANDOM_SEQUENCES
+            () -> new RandomSequences(pSeed), (p_296656_, p_331296_) -> load(pSeed, p_296656_), DataFixTypes.SAVED_DATA_RANDOM_SEQUENCES
         );
     }
 
-    public RandomSequences(long p_287622_) {
-        this.worldSeed = p_287622_;
+    public RandomSequences(long pSeed) {
+        this.worldSeed = pSeed;
     }
 
-    public RandomSource get(ResourceLocation p_287751_) {
-        RandomSource randomsource = this.sequences.computeIfAbsent(p_287751_, this::createSequence).random();
+    public RandomSource get(ResourceLocation pLocation) {
+        RandomSource randomsource = this.sequences.computeIfAbsent(pLocation, this::createSequence).random();
         return new RandomSequences.DirtyMarkingRandomSource(randomsource);
     }
 
-    private RandomSequence createSequence(ResourceLocation p_299723_) {
-        return this.createSequence(p_299723_, this.salt, this.includeWorldSeed, this.includeSequenceId);
+    private RandomSequence createSequence(ResourceLocation pLocation) {
+        return this.createSequence(pLocation, this.salt, this.includeWorldSeed, this.includeSequenceId);
     }
 
-    private RandomSequence createSequence(ResourceLocation p_299881_, int p_299267_, boolean p_300525_, boolean p_297272_) {
-        long i = (p_300525_ ? this.worldSeed : 0L) ^ (long)p_299267_;
-        return new RandomSequence(i, p_297272_ ? Optional.of(p_299881_) : Optional.empty());
+    private RandomSequence createSequence(ResourceLocation pLocation, int pSalt, boolean pIncludeWorldSeed, boolean pIncludeSequenceId) {
+        long i = (pIncludeWorldSeed ? this.worldSeed : 0L) ^ (long)pSalt;
+        return new RandomSequence(i, pIncludeSequenceId ? Optional.of(pLocation) : Optional.empty());
     }
 
-    public void forAllSequences(BiConsumer<ResourceLocation, RandomSequence> p_299883_) {
-        this.sequences.forEach(p_299883_);
+    public void forAllSequences(BiConsumer<ResourceLocation, RandomSequence> pAction) {
+        this.sequences.forEach(pAction);
     }
 
-    public void setSeedDefaults(int p_299968_, boolean p_298395_, boolean p_298518_) {
-        this.salt = p_299968_;
-        this.includeWorldSeed = p_298395_;
-        this.includeSequenceId = p_298518_;
+    public void setSeedDefaults(int pSalt, boolean pIncludeWorldSeed, boolean pIncludeSequenceId) {
+        this.salt = pSalt;
+        this.includeWorldSeed = pIncludeWorldSeed;
+        this.includeSequenceId = pIncludeSequenceId;
     }
 
     @Override
@@ -73,16 +73,16 @@ public class RandomSequences extends SavedData {
         return p_287658_;
     }
 
-    private static boolean getBooleanWithDefault(CompoundTag p_297418_, String p_298953_, boolean p_297237_) {
-        return p_297418_.contains(p_298953_, 1) ? p_297418_.getBoolean(p_298953_) : p_297237_;
+    private static boolean getBooleanWithDefault(CompoundTag pTag, String pKey, boolean pDefaultValue) {
+        return pTag.contains(pKey, 1) ? pTag.getBoolean(pKey) : pDefaultValue;
     }
 
-    public static RandomSequences load(long p_287756_, CompoundTag p_287587_) {
-        RandomSequences randomsequences = new RandomSequences(p_287756_);
+    public static RandomSequences load(long pSeed, CompoundTag pTag) {
+        RandomSequences randomsequences = new RandomSequences(pSeed);
         randomsequences.setSeedDefaults(
-            p_287587_.getInt("salt"), getBooleanWithDefault(p_287587_, "include_world_seed", true), getBooleanWithDefault(p_287587_, "include_sequence_id", true)
+            pTag.getInt("salt"), getBooleanWithDefault(pTag, "include_world_seed", true), getBooleanWithDefault(pTag, "include_sequence_id", true)
         );
-        CompoundTag compoundtag = p_287587_.getCompound("sequences");
+        CompoundTag compoundtag = pTag.getCompound("sequences");
 
         for (String s : compoundtag.getAllKeys()) {
             try {
@@ -102,19 +102,19 @@ public class RandomSequences extends SavedData {
         return i;
     }
 
-    public void reset(ResourceLocation p_298741_) {
-        this.sequences.put(p_298741_, this.createSequence(p_298741_));
+    public void reset(ResourceLocation pSequence) {
+        this.sequences.put(pSequence, this.createSequence(pSequence));
     }
 
-    public void reset(ResourceLocation p_301350_, int p_298554_, boolean p_298049_, boolean p_301283_) {
-        this.sequences.put(p_301350_, this.createSequence(p_301350_, p_298554_, p_298049_, p_301283_));
+    public void reset(ResourceLocation pSequence, int pSeed, boolean pIncludeWorldSeed, boolean pIncludeSequenceId) {
+        this.sequences.put(pSequence, this.createSequence(pSequence, pSeed, pIncludeWorldSeed, pIncludeSequenceId));
     }
 
     class DirtyMarkingRandomSource implements RandomSource {
         private final RandomSource random;
 
-        DirtyMarkingRandomSource(final RandomSource p_299209_) {
-            this.random = p_299209_;
+        DirtyMarkingRandomSource(final RandomSource pRandom) {
+            this.random = pRandom;
         }
 
         @Override
@@ -178,11 +178,11 @@ public class RandomSequences extends SavedData {
         }
 
         @Override
-        public boolean equals(Object p_299603_) {
-            if (this == p_299603_) {
+        public boolean equals(Object pOther) {
+            if (this == pOther) {
                 return true;
             } else {
-                return p_299603_ instanceof RandomSequences.DirtyMarkingRandomSource randomsequences$dirtymarkingrandomsource
+                return pOther instanceof RandomSequences.DirtyMarkingRandomSource randomsequences$dirtymarkingrandomsource
                     ? this.random.equals(randomsequences$dirtymarkingrandomsource.random)
                     : false;
             }

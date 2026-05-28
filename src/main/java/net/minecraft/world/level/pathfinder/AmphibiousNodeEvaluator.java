@@ -12,8 +12,8 @@ public class AmphibiousNodeEvaluator extends WalkNodeEvaluator {
     private float oldWalkableCost;
     private float oldWaterBorderCost;
 
-    public AmphibiousNodeEvaluator(boolean p_164659_) {
-        this.prefersShallowSwimming = p_164659_;
+    public AmphibiousNodeEvaluator(boolean pPrefersShallowSwimming) {
+        this.prefersShallowSwimming = pPrefersShallowSwimming;
     }
 
     @Override
@@ -84,8 +84,8 @@ public class AmphibiousNodeEvaluator extends WalkNodeEvaluator {
         return i;
     }
 
-    private boolean isVerticalNeighborValid(@Nullable Node p_230611_, Node p_230612_) {
-        return this.isNeighborValid(p_230611_, p_230612_) && p_230611_.type == PathType.WATER;
+    private boolean isVerticalNeighborValid(@Nullable Node pNeighbor, Node pNode) {
+        return this.isNeighborValid(pNeighbor, pNode) && pNeighbor.type == PathType.WATER;
     }
 
     @Override

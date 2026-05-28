@@ -62,35 +62,35 @@ public class RegionFileVersion {
     private final RegionFileVersion.StreamWrapper<OutputStream> outputWrapper;
 
     private RegionFileVersion(
-        int p_63752_, @Nullable String p_336103_, RegionFileVersion.StreamWrapper<InputStream> p_63753_, RegionFileVersion.StreamWrapper<OutputStream> p_63754_
+        int pId, @Nullable String pOptionName, RegionFileVersion.StreamWrapper<InputStream> pInputWrapper, RegionFileVersion.StreamWrapper<OutputStream> pOutputWrapper
     ) {
-        this.id = p_63752_;
-        this.optionName = p_336103_;
-        this.inputWrapper = p_63753_;
-        this.outputWrapper = p_63754_;
+        this.id = pId;
+        this.optionName = pOptionName;
+        this.inputWrapper = pInputWrapper;
+        this.outputWrapper = pOutputWrapper;
     }
 
-    private static RegionFileVersion register(RegionFileVersion p_63759_) {
-        VERSIONS.put(p_63759_.id, p_63759_);
-        if (p_63759_.optionName != null) {
-            VERSIONS_BY_NAME.put(p_63759_.optionName, p_63759_);
+    private static RegionFileVersion register(RegionFileVersion pFileVersion) {
+        VERSIONS.put(pFileVersion.id, pFileVersion);
+        if (pFileVersion.optionName != null) {
+            VERSIONS_BY_NAME.put(pFileVersion.optionName, pFileVersion);
         }
 
-        return p_63759_;
+        return pFileVersion;
     }
 
     @Nullable
-    public static RegionFileVersion fromId(int p_63757_) {
-        return VERSIONS.get(p_63757_);
+    public static RegionFileVersion fromId(int pId) {
+        return VERSIONS.get(pId);
     }
 
-    public static void configure(String p_335730_) {
-        RegionFileVersion regionfileversion = VERSIONS_BY_NAME.get(p_335730_);
+    public static void configure(String pOptionValue) {
+        RegionFileVersion regionfileversion = VERSIONS_BY_NAME.get(pOptionValue);
         if (regionfileversion != null) {
             selected = regionfileversion;
         } else {
             LOGGER.error(
-                "Invalid `region-file-compression` value `{}` in server.properties. Please use one of: {}", p_335730_, String.join(", ", VERSIONS_BY_NAME.keySet())
+                "Invalid `region-file-compression` value `{}` in server.properties. Please use one of: {}", pOptionValue, String.join(", ", VERSIONS_BY_NAME.keySet())
             );
         }
     }
@@ -99,24 +99,24 @@ public class RegionFileVersion {
         return selected;
     }
 
-    public static boolean isValidVersion(int p_63765_) {
-        return VERSIONS.containsKey(p_63765_);
+    public static boolean isValidVersion(int pId) {
+        return VERSIONS.containsKey(pId);
     }
 
     public int getId() {
         return this.id;
     }
 
-    public OutputStream wrap(OutputStream p_63763_) throws IOException {
-        return this.outputWrapper.wrap(p_63763_);
+    public OutputStream wrap(OutputStream pOutputStream) throws IOException {
+        return this.outputWrapper.wrap(pOutputStream);
     }
 
-    public InputStream wrap(InputStream p_63761_) throws IOException {
-        return this.inputWrapper.wrap(p_63761_);
+    public InputStream wrap(InputStream pInputStream) throws IOException {
+        return this.inputWrapper.wrap(pInputStream);
     }
 
     @FunctionalInterface
     interface StreamWrapper<O> {
-        O wrap(O p_63771_) throws IOException;
+        O wrap(O pStream) throws IOException;
     }
 }

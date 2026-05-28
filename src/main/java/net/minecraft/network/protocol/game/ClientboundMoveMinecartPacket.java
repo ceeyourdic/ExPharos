@@ -30,7 +30,7 @@ public record ClientboundMoveMinecartPacket(int entityId, List<NewMinecartBehavi
     }
 
     @Nullable
-    public Entity getEntity(Level p_361971_) {
-        return p_361971_.getEntity(this.entityId);
+    public Entity getEntity(Level pLevel) {
+        return pLevel.getEntity(this.entityId);
     }
 }

@@ -15,9 +15,9 @@ public class ShulkerBulletModel extends EntityModel<ShulkerBulletRenderState> {
     private static final String MAIN = "main";
     private final ModelPart main;
 
-    public ShulkerBulletModel(ModelPart p_170916_) {
-        super(p_170916_);
-        this.main = p_170916_.getChild("main");
+    public ShulkerBulletModel(ModelPart pRoot) {
+        super(pRoot);
+        this.main = pRoot.getChild("main");
     }
 
     public static LayerDefinition createBodyLayer() {

@@ -12,13 +12,13 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public record TargetedConditionalEffect<T>(EnchantmentTarget enchanted, EnchantmentTarget affected, T effect, Optional<LootItemCondition> requirements) {
-    public static <S> Codec<TargetedConditionalEffect<S>> codec(Codec<S> p_345149_, ContextKeySet p_365659_) {
+    public static <S> Codec<TargetedConditionalEffect<S>> codec(Codec<S> pCodec, ContextKeySet pContextKeySet) {
         return RecordCodecBuilder.create(
             p_359932_ -> p_359932_.group(
                         EnchantmentTarget.CODEC.fieldOf("enchanted").forGetter(TargetedConditionalEffect::enchanted),
                         EnchantmentTarget.CODEC.fieldOf("affected").forGetter(TargetedConditionalEffect::affected),
-                        p_345149_.fieldOf("effect").forGetter((Function<TargetedConditionalEffect<S>, S>)(TargetedConditionalEffect::effect)),
-                        ConditionalEffect.conditionCodec(p_365659_).optionalFieldOf("requirements").forGetter(TargetedConditionalEffect::requirements)
+                        pCodec.fieldOf("effect").forGetter((Function<TargetedConditionalEffect<S>, S>)(TargetedConditionalEffect::effect)),
+                        ConditionalEffect.conditionCodec(pContextKeySet).optionalFieldOf("requirements").forGetter(TargetedConditionalEffect::requirements)
                     )
                     .apply(
                         p_359932_,
@@ -27,7 +27,7 @@ public record TargetedConditionalEffect<T>(EnchantmentTarget enchanted, Enchantm
         );
     }
 
-    public static <S> Codec<TargetedConditionalEffect<S>> equipmentDropsCodec(Codec<S> p_343050_, ContextKeySet p_363330_) {
+    public static <S> Codec<TargetedConditionalEffect<S>> equipmentDropsCodec(Codec<S> pCodec, ContextKeySet pContextKeySet) {
         return RecordCodecBuilder.create(
             p_359935_ -> p_359935_.group(
                         EnchantmentTarget.CODEC
@@ -38,8 +38,8 @@ public record TargetedConditionalEffect<T>(EnchantmentTarget enchanted, Enchantm
                             )
                             .fieldOf("enchanted")
                             .forGetter(TargetedConditionalEffect::enchanted),
-                        p_343050_.fieldOf("effect").forGetter((Function<TargetedConditionalEffect<S>, S>)(TargetedConditionalEffect::effect)),
-                        ConditionalEffect.conditionCodec(p_363330_).optionalFieldOf("requirements").forGetter(TargetedConditionalEffect::requirements)
+                        pCodec.fieldOf("effect").forGetter((Function<TargetedConditionalEffect<S>, S>)(TargetedConditionalEffect::effect)),
+                        ConditionalEffect.conditionCodec(pContextKeySet).optionalFieldOf("requirements").forGetter(TargetedConditionalEffect::requirements)
                     )
                     .apply(
                         p_359935_,
@@ -48,7 +48,7 @@ public record TargetedConditionalEffect<T>(EnchantmentTarget enchanted, Enchantm
         );
     }
 
-    public boolean matches(LootContext p_343867_) {
-        return this.requirements.isEmpty() ? true : this.requirements.get().test(p_343867_);
+    public boolean matches(LootContext pContext) {
+        return this.requirements.isEmpty() ? true : this.requirements.get().test(pContext);
     }
 }

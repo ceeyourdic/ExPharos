@@ -36,10 +36,10 @@ public class AccessibilityOnboardingScreen extends Screen {
     private FocusableTextWidget textWidget;
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, this.initTitleYPos(), 33);
 
-    public AccessibilityOnboardingScreen(Options p_265483_, Runnable p_298904_) {
+    public AccessibilityOnboardingScreen(Options pOptions, Runnable pOnClose) {
         super(TITLE);
-        this.options = p_265483_;
-        this.onClose = p_298904_;
+        this.options = pOptions;
+        this.onClose = pOnClose;
         this.logoRenderer = new LogoRenderer(true);
         this.narratorAvailable = Minecraft.getInstance().getNarrator().isActive();
     }
@@ -91,17 +91,17 @@ public class AccessibilityOnboardingScreen extends Screen {
         this.close(true, this.onClose);
     }
 
-    private void closeAndSetScreen(Screen p_272914_) {
-        this.close(false, () -> this.minecraft.setScreen(p_272914_));
+    private void closeAndSetScreen(Screen pScreen) {
+        this.close(false, () -> this.minecraft.setScreen(pScreen));
     }
 
-    private void close(boolean p_342115_, Runnable p_299263_) {
-        if (p_342115_) {
+    private void close(boolean pMarkAsFinished, Runnable pOnClose) {
+        if (pMarkAsFinished) {
             this.options.onboardingAccessibilityFinished();
         }
 
         Narrator.getNarrator().clear();
-        p_299263_.run();
+        pOnClose.run();
     }
 
     @Override

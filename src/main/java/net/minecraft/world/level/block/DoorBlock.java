@@ -61,9 +61,9 @@ public class DoorBlock extends Block {
         return CODEC;
     }
 
-    protected DoorBlock(BlockSetType p_272854_, BlockBehaviour.Properties p_273303_) {
-        super(p_273303_.sound(p_272854_.soundType()));
-        this.type = p_272854_;
+    protected DoorBlock(BlockSetType pType, BlockBehaviour.Properties pProperties) {
+        super(pProperties.sound(pType.soundType()));
+        this.type = pType;
         this.registerDefaultState(
             this.stateDefinition
                 .any()
@@ -80,10 +80,10 @@ public class DoorBlock extends Block {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_52807_, BlockGetter p_52808_, BlockPos p_52809_, CollisionContext p_52810_) {
-        Direction direction = p_52807_.getValue(FACING);
-        boolean flag = !p_52807_.getValue(OPEN);
-        boolean flag1 = p_52807_.getValue(HINGE) == DoorHingeSide.RIGHT;
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        Direction direction = pState.getValue(FACING);
+        boolean flag = !pState.getValue(OPEN);
+        boolean flag1 = pState.getValue(HINGE) == DoorHingeSide.RIGHT;
 
         return switch (direction) {
             case SOUTH -> flag ? SOUTH_AABB : (flag1 ? EAST_AABB : WEST_AABB);
@@ -144,14 +144,14 @@ public class DoorBlock extends Block {
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_52739_) {
-        BlockPos blockpos = p_52739_.getClickedPos();
-        Level level = p_52739_.getLevel();
-        if (blockpos.getY() < level.getMaxY() && level.getBlockState(blockpos.above()).canBeReplaced(p_52739_)) {
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockPos blockpos = pContext.getClickedPos();
+        Level level = pContext.getLevel();
+        if (blockpos.getY() < level.getMaxY() && level.getBlockState(blockpos.above()).canBeReplaced(pContext)) {
             boolean flag = level.hasNeighborSignal(blockpos) || level.hasNeighborSignal(blockpos.above());
             return this.defaultBlockState()
-                .setValue(FACING, p_52739_.getHorizontalDirection())
-                .setValue(HINGE, this.getHinge(p_52739_))
+                .setValue(FACING, pContext.getHorizontalDirection())
+                .setValue(HINGE, this.getHinge(pContext))
                 .setValue(POWERED, Boolean.valueOf(flag))
                 .setValue(OPEN, Boolean.valueOf(flag))
                 .setValue(HALF, DoubleBlockHalf.LOWER);
@@ -161,14 +161,14 @@ public class DoorBlock extends Block {
     }
 
     @Override
-    public void setPlacedBy(Level p_52749_, BlockPos p_52750_, BlockState p_52751_, LivingEntity p_52752_, ItemStack p_52753_) {
-        p_52749_.setBlock(p_52750_.above(), p_52751_.setValue(HALF, DoubleBlockHalf.UPPER), 3);
+    public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, LivingEntity pPlacer, ItemStack pStack) {
+        pLevel.setBlock(pPos.above(), pState.setValue(HALF, DoubleBlockHalf.UPPER), 3);
     }
 
-    private DoorHingeSide getHinge(BlockPlaceContext p_52805_) {
-        BlockGetter blockgetter = p_52805_.getLevel();
-        BlockPos blockpos = p_52805_.getClickedPos();
-        Direction direction = p_52805_.getHorizontalDirection();
+    private DoorHingeSide getHinge(BlockPlaceContext pContext) {
+        BlockGetter blockgetter = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
+        Direction direction = pContext.getHorizontalDirection();
         BlockPos blockpos1 = blockpos.above();
         Direction direction1 = direction.getCounterClockWise();
         BlockPos blockpos2 = blockpos.relative(direction1);
@@ -190,7 +190,7 @@ public class DoorBlock extends Block {
             if ((!flag1 || flag) && i >= 0) {
                 int j = direction.getStepX();
                 int k = direction.getStepZ();
-                Vec3 vec3 = p_52805_.getClickLocation();
+                Vec3 vec3 = pContext.getClickLocation();
                 double d0 = vec3.x - (double)blockpos.getX();
                 double d1 = vec3.z - (double)blockpos.getZ();
                 return (j >= 0 || !(d1 < 0.5)) && (j <= 0 || !(d1 > 0.5)) && (k >= 0 || !(d0 > 0.5)) && (k <= 0 || !(d0 < 0.5))
@@ -217,15 +217,15 @@ public class DoorBlock extends Block {
         }
     }
 
-    public boolean isOpen(BlockState p_52816_) {
-        return p_52816_.getValue(OPEN);
+    public boolean isOpen(BlockState pState) {
+        return pState.getValue(OPEN);
     }
 
-    public void setOpen(@Nullable Entity p_153166_, Level p_153167_, BlockState p_153168_, BlockPos p_153169_, boolean p_153170_) {
-        if (p_153168_.is(this) && p_153168_.getValue(OPEN) != p_153170_) {
-            p_153167_.setBlock(p_153169_, p_153168_.setValue(OPEN, Boolean.valueOf(p_153170_)), 10);
-            this.playSound(p_153166_, p_153167_, p_153169_, p_153170_);
-            p_153167_.gameEvent(p_153166_, p_153170_ ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, p_153169_);
+    public void setOpen(@Nullable Entity pEntity, Level pLevel, BlockState pState, BlockPos pPos, boolean pOpen) {
+        if (pState.is(this) && pState.getValue(OPEN) != pOpen) {
+            pLevel.setBlock(pPos, pState.setValue(OPEN, Boolean.valueOf(pOpen)), 10);
+            this.playSound(pEntity, pLevel, pPos, pOpen);
+            pLevel.gameEvent(pEntity, pOpen ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, pPos);
         }
     }
 
@@ -244,51 +244,51 @@ public class DoorBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_52783_, LevelReader p_52784_, BlockPos p_52785_) {
-        BlockPos blockpos = p_52785_.below();
-        BlockState blockstate = p_52784_.getBlockState(blockpos);
-        return p_52783_.getValue(HALF) == DoubleBlockHalf.LOWER ? blockstate.isFaceSturdy(p_52784_, blockpos, Direction.UP) : blockstate.is(this);
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.below();
+        BlockState blockstate = pLevel.getBlockState(blockpos);
+        return pState.getValue(HALF) == DoubleBlockHalf.LOWER ? blockstate.isFaceSturdy(pLevel, blockpos, Direction.UP) : blockstate.is(this);
     }
 
-    private void playSound(@Nullable Entity p_251616_, Level p_249656_, BlockPos p_249439_, boolean p_251628_) {
-        p_249656_.playSound(
-            p_251616_,
-            p_249439_,
-            p_251628_ ? this.type.doorOpen() : this.type.doorClose(),
+    private void playSound(@Nullable Entity pSource, Level pLevel, BlockPos pPos, boolean pIsOpening) {
+        pLevel.playSound(
+            pSource,
+            pPos,
+            pIsOpening ? this.type.doorOpen() : this.type.doorClose(),
             SoundSource.BLOCKS,
             1.0F,
-            p_249656_.getRandom().nextFloat() * 0.1F + 0.9F
+            pLevel.getRandom().nextFloat() * 0.1F + 0.9F
         );
     }
 
     @Override
-    protected BlockState rotate(BlockState p_52790_, Rotation p_52791_) {
-        return p_52790_.setValue(FACING, p_52791_.rotate(p_52790_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_52787_, Mirror p_52788_) {
-        return p_52788_ == Mirror.NONE ? p_52787_ : p_52787_.rotate(p_52788_.getRotation(p_52787_.getValue(FACING))).cycle(HINGE);
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pMirror == Mirror.NONE ? pState : pState.rotate(pMirror.getRotation(pState.getValue(FACING))).cycle(HINGE);
     }
 
     @Override
-    protected long getSeed(BlockState p_52793_, BlockPos p_52794_) {
+    protected long getSeed(BlockState pState, BlockPos pPos) {
         return Mth.getSeed(
-            p_52794_.getX(), p_52794_.below(p_52793_.getValue(HALF) == DoubleBlockHalf.LOWER ? 0 : 1).getY(), p_52794_.getZ()
+            pPos.getX(), pPos.below(pState.getValue(HALF) == DoubleBlockHalf.LOWER ? 0 : 1).getY(), pPos.getZ()
         );
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_52803_) {
-        p_52803_.add(HALF, FACING, OPEN, HINGE, POWERED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(HALF, FACING, OPEN, HINGE, POWERED);
     }
 
-    public static boolean isWoodenDoor(Level p_52746_, BlockPos p_52747_) {
-        return isWoodenDoor(p_52746_.getBlockState(p_52747_));
+    public static boolean isWoodenDoor(Level pLevel, BlockPos pPos) {
+        return isWoodenDoor(pLevel.getBlockState(pPos));
     }
 
-    public static boolean isWoodenDoor(BlockState p_52818_) {
-        if (p_52818_.getBlock() instanceof DoorBlock doorblock && doorblock.type().canOpenByHand()) {
+    public static boolean isWoodenDoor(BlockState pState) {
+        if (pState.getBlock() instanceof DoorBlock doorblock && doorblock.type().canOpenByHand()) {
             return true;
         }
 

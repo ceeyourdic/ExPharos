@@ -42,11 +42,11 @@ public class SmokerBlock extends AbstractFurnaceBlock {
     }
 
     @Override
-    protected void openContainer(Level p_56443_, BlockPos p_56444_, Player p_56445_) {
-        BlockEntity blockentity = p_56443_.getBlockEntity(p_56444_);
+    protected void openContainer(Level pLevel, BlockPos pPos, Player pPlayer) {
+        BlockEntity blockentity = pLevel.getBlockEntity(pPos);
         if (blockentity instanceof SmokerBlockEntity) {
-            p_56445_.openMenu((MenuProvider)blockentity);
-            p_56445_.awardStat(Stats.INTERACT_WITH_SMOKER);
+            pPlayer.openMenu((MenuProvider)blockentity);
+            pPlayer.awardStat(Stats.INTERACT_WITH_SMOKER);
         }
     }
 

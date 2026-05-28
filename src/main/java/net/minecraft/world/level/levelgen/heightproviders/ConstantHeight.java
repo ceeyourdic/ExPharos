@@ -10,12 +10,12 @@ public class ConstantHeight extends HeightProvider {
     public static final MapCodec<ConstantHeight> CODEC = VerticalAnchor.CODEC.fieldOf("value").xmap(ConstantHeight::new, ConstantHeight::getValue);
     private final VerticalAnchor value;
 
-    public static ConstantHeight of(VerticalAnchor p_161957_) {
-        return new ConstantHeight(p_161957_);
+    public static ConstantHeight of(VerticalAnchor pValue) {
+        return new ConstantHeight(pValue);
     }
 
-    private ConstantHeight(VerticalAnchor p_161950_) {
-        this.value = p_161950_;
+    private ConstantHeight(VerticalAnchor pValue) {
+        this.value = pValue;
     }
 
     public VerticalAnchor getValue() {

@@ -112,10 +112,10 @@ public class EnderMan extends Monster implements NeutralMob {
     }
 
     @Override
-    public void setTarget(@Nullable LivingEntity p_32537_) {
-        super.setTarget(p_32537_);
+    public void setTarget(@Nullable LivingEntity pLivingEntity) {
+        super.setTarget(pLivingEntity);
         AttributeInstance attributeinstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-        if (p_32537_ == null) {
+        if (pLivingEntity == null) {
             this.targetChangeTime = 0;
             this.entityData.set(DATA_CREEPY, false);
             this.entityData.set(DATA_STARED_AT, false);
@@ -143,8 +143,8 @@ public class EnderMan extends Monster implements NeutralMob {
     }
 
     @Override
-    public void setRemainingPersistentAngerTime(int p_32515_) {
-        this.remainingPersistentAngerTime = p_32515_;
+    public void setRemainingPersistentAngerTime(int pTime) {
+        this.remainingPersistentAngerTime = pTime;
     }
 
     @Override
@@ -153,8 +153,8 @@ public class EnderMan extends Monster implements NeutralMob {
     }
 
     @Override
-    public void setPersistentAngerTarget(@Nullable UUID p_32509_) {
-        this.persistentAngerTarget = p_32509_;
+    public void setPersistentAngerTarget(@Nullable UUID pTarget) {
+        this.persistentAngerTarget = pTarget;
     }
 
     @Nullable
@@ -173,42 +173,42 @@ public class EnderMan extends Monster implements NeutralMob {
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_32513_) {
-        if (DATA_CREEPY.equals(p_32513_) && this.hasBeenStaredAt() && this.level().isClientSide) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        if (DATA_CREEPY.equals(pKey) && this.hasBeenStaredAt() && this.level().isClientSide) {
             this.playStareSound();
         }
 
-        super.onSyncedDataUpdated(p_32513_);
+        super.onSyncedDataUpdated(pKey);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_32520_) {
-        super.addAdditionalSaveData(p_32520_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
         BlockState blockstate = this.getCarriedBlock();
         if (blockstate != null) {
-            p_32520_.put("carriedBlockState", NbtUtils.writeBlockState(blockstate));
+            pCompound.put("carriedBlockState", NbtUtils.writeBlockState(blockstate));
         }
 
-        this.addPersistentAngerSaveData(p_32520_);
+        this.addPersistentAngerSaveData(pCompound);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_32511_) {
-        super.readAdditionalSaveData(p_32511_);
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
         BlockState blockstate = null;
-        if (p_32511_.contains("carriedBlockState", 10)) {
-            blockstate = NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), p_32511_.getCompound("carriedBlockState"));
+        if (pCompound.contains("carriedBlockState", 10)) {
+            blockstate = NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), pCompound.getCompound("carriedBlockState"));
             if (blockstate.isAir()) {
                 blockstate = null;
             }
         }
 
         this.setCarriedBlock(blockstate);
-        this.readPersistentAngerSaveData(this.level(), p_32511_);
+        this.readPersistentAngerSaveData(this.level(), pCompound);
     }
 
-    boolean isBeingStaredBy(Player p_368759_) {
-        return !LivingEntity.PLAYER_NOT_WEARING_DISGUISE_ITEM.test(p_368759_) ? false : this.isLookingAtMe(p_368759_, 0.025, true, false, new double[]{this.getEyeY()});
+    boolean isBeingStaredBy(Player pPlayer) {
+        return !LivingEntity.PLAYER_NOT_WEARING_DISGUISE_ITEM.test(pPlayer) ? false : this.isLookingAtMe(pPlayer, 0.025, true, false, new double[]{this.getEyeY()});
     }
 
     @Override
@@ -265,8 +265,8 @@ public class EnderMan extends Monster implements NeutralMob {
         }
     }
 
-    boolean teleportTowards(Entity p_32501_) {
-        Vec3 vec3 = new Vec3(this.getX() - p_32501_.getX(), this.getY(0.5) - p_32501_.getEyeY(), this.getZ() - p_32501_.getZ());
+    boolean teleportTowards(Entity pTarget) {
+        Vec3 vec3 = new Vec3(this.getX() - pTarget.getX(), this.getY(0.5) - pTarget.getEyeY(), this.getZ() - pTarget.getZ());
         vec3 = vec3.normalize();
         double d0 = 16.0;
         double d1 = this.getX() + (this.random.nextDouble() - 0.5) * 8.0 - vec3.x * 16.0;
@@ -275,8 +275,8 @@ public class EnderMan extends Monster implements NeutralMob {
         return this.teleport(d1, d2, d3);
     }
 
-    private boolean teleport(double p_32544_, double p_32545_, double p_32546_) {
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(p_32544_, p_32545_, p_32546_);
+    private boolean teleport(double pX, double pY, double pZ) {
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(pX, pY, pZ);
 
         while (blockpos$mutableblockpos.getY() > this.level().getMinY() && !this.level().getBlockState(blockpos$mutableblockpos).blocksMotion()) {
             blockpos$mutableblockpos.move(Direction.DOWN);
@@ -287,7 +287,7 @@ public class EnderMan extends Monster implements NeutralMob {
         boolean flag1 = blockstate.getFluidState().is(FluidTags.WATER);
         if (flag && !flag1) {
             Vec3 vec3 = this.position();
-            boolean flag2 = this.randomTeleport(p_32544_, p_32545_, p_32546_, true);
+            boolean flag2 = this.randomTeleport(pX, pY, pZ, true);
             if (flag2) {
                 this.level().gameEvent(GameEvent.TELEPORT, vec3, GameEvent.Context.of(this));
                 if (!this.isSilent()) {
@@ -308,7 +308,7 @@ public class EnderMan extends Monster implements NeutralMob {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_32527_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.ENDERMAN_HURT;
     }
 
@@ -337,8 +337,8 @@ public class EnderMan extends Monster implements NeutralMob {
         }
     }
 
-    public void setCarriedBlock(@Nullable BlockState p_32522_) {
-        this.entityData.set(DATA_CARRY_STATE, Optional.ofNullable(p_32522_));
+    public void setCarriedBlock(@Nullable BlockState pState) {
+        this.entityData.set(DATA_CARRY_STATE, Optional.ofNullable(pState));
     }
 
     @Nullable
@@ -373,10 +373,10 @@ public class EnderMan extends Monster implements NeutralMob {
         }
     }
 
-    private boolean hurtWithCleanWater(ServerLevel p_362708_, DamageSource p_186273_, ThrownPotion p_186274_, float p_186275_) {
-        ItemStack itemstack = p_186274_.getItem();
+    private boolean hurtWithCleanWater(ServerLevel pLevel, DamageSource pDamageSource, ThrownPotion pPotion, float pAmount) {
+        ItemStack itemstack = pPotion.getItem();
         PotionContents potioncontents = itemstack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
-        return potioncontents.is(Potions.WATER) ? super.hurtServer(p_362708_, p_186273_, p_186275_) : false;
+        return potioncontents.is(Potions.WATER) ? super.hurtServer(pLevel, pDamageSource, pAmount) : false;
     }
 
     public boolean isCreepy() {
@@ -401,8 +401,8 @@ public class EnderMan extends Monster implements NeutralMob {
         @Nullable
         private LivingEntity target;
 
-        public EndermanFreezeWhenLookedAt(EnderMan p_32550_) {
-            this.enderman = p_32550_;
+        public EndermanFreezeWhenLookedAt(EnderMan pEnderman) {
+            this.enderman = pEnderman;
             this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE));
         }
 
@@ -431,8 +431,8 @@ public class EnderMan extends Monster implements NeutralMob {
     static class EndermanLeaveBlockGoal extends Goal {
         private final EnderMan enderman;
 
-        public EndermanLeaveBlockGoal(EnderMan p_32556_) {
-            this.enderman = p_32556_;
+        public EndermanLeaveBlockGoal(EnderMan pEnderman) {
+            this.enderman = pEnderman;
         }
 
         @Override
@@ -466,13 +466,13 @@ public class EnderMan extends Monster implements NeutralMob {
             }
         }
 
-        private boolean canPlaceBlock(Level p_32559_, BlockPos p_32560_, BlockState p_32561_, BlockState p_32562_, BlockState p_32563_, BlockPos p_32564_) {
-            return p_32562_.isAir()
-                && !p_32563_.isAir()
-                && !p_32563_.is(Blocks.BEDROCK)
-                && p_32563_.isCollisionShapeFullBlock(p_32559_, p_32564_)
-                && p_32561_.canSurvive(p_32559_, p_32560_)
-                && p_32559_.getEntities(this.enderman, AABB.unitCubeFromLowerCorner(Vec3.atLowerCornerOf(p_32560_))).isEmpty();
+        private boolean canPlaceBlock(Level pLevel, BlockPos pDestinationPos, BlockState pCarriedState, BlockState pDestinationState, BlockState pBelowDestinationState, BlockPos pBelowDestinationPos) {
+            return pDestinationState.isAir()
+                && !pBelowDestinationState.isAir()
+                && !pBelowDestinationState.is(Blocks.BEDROCK)
+                && pBelowDestinationState.isCollisionShapeFullBlock(pLevel, pBelowDestinationPos)
+                && pCarriedState.canSurvive(pLevel, pDestinationPos)
+                && pLevel.getEntities(this.enderman, AABB.unitCubeFromLowerCorner(Vec3.atLowerCornerOf(pDestinationPos))).isEmpty();
         }
     }
 
@@ -486,11 +486,11 @@ public class EnderMan extends Monster implements NeutralMob {
         private final TargetingConditions continueAggroTargetConditions = TargetingConditions.forCombat().ignoreLineOfSight();
         private final TargetingConditions.Selector isAngerInducing;
 
-        public EndermanLookForPlayerGoal(EnderMan p_32573_, @Nullable TargetingConditions.Selector p_369637_) {
-            super(p_32573_, Player.class, 10, false, false, p_369637_);
-            this.enderman = p_32573_;
-            this.isAngerInducing = (p_359240_, p_359241_) -> (p_32573_.isBeingStaredBy((Player)p_359240_) || p_32573_.isAngryAt(p_359240_, p_359241_))
-                    && !p_32573_.hasIndirectPassenger(p_359240_);
+        public EndermanLookForPlayerGoal(EnderMan pEnderman, @Nullable TargetingConditions.Selector pSelector) {
+            super(pEnderman, Player.class, 10, false, false, pSelector);
+            this.enderman = pEnderman;
+            this.isAngerInducing = (p_359240_, p_359241_) -> (pEnderman.isBeingStaredBy((Player)p_359240_) || pEnderman.isAngryAt(p_359240_, p_359241_))
+                    && !pEnderman.hasIndirectPassenger(p_359240_);
             this.startAggroTargetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(this.isAngerInducing);
         }
 
@@ -570,8 +570,8 @@ public class EnderMan extends Monster implements NeutralMob {
     static class EndermanTakeBlockGoal extends Goal {
         private final EnderMan enderman;
 
-        public EndermanTakeBlockGoal(EnderMan p_32585_) {
-            this.enderman = p_32585_;
+        public EndermanTakeBlockGoal(EnderMan pEnderman) {
+            this.enderman = pEnderman;
         }
 
         @Override

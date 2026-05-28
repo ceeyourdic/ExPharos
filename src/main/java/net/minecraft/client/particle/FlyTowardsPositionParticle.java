@@ -22,29 +22,29 @@ public class FlyTowardsPositionParticle extends TextureSheetParticle {
     }
 
     FlyTowardsPositionParticle(
-        ClientLevel p_335275_,
-        double p_329537_,
-        double p_335588_,
-        double p_335971_,
-        double p_331161_,
-        double p_331135_,
-        double p_331015_,
-        boolean p_334585_,
-        Particle.LifetimeAlpha p_330679_
+        ClientLevel pLevel,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed,
+        boolean pIsGlowing,
+        Particle.LifetimeAlpha pLifetimeAlpha
     ) {
-        super(p_335275_, p_329537_, p_335588_, p_335971_);
-        this.isGlowing = p_334585_;
-        this.lifetimeAlpha = p_330679_;
-        this.setAlpha(p_330679_.startAlpha());
-        this.xd = p_331161_;
-        this.yd = p_331135_;
-        this.zd = p_331015_;
-        this.xStart = p_329537_;
-        this.yStart = p_335588_;
-        this.zStart = p_335971_;
-        this.xo = p_329537_ + p_331161_;
-        this.yo = p_335588_ + p_331135_;
-        this.zo = p_335971_ + p_331015_;
+        super(pLevel, pX, pY, pZ);
+        this.isGlowing = pIsGlowing;
+        this.lifetimeAlpha = pLifetimeAlpha;
+        this.setAlpha(pLifetimeAlpha.startAlpha());
+        this.xd = pXSpeed;
+        this.yd = pYSpeed;
+        this.zd = pZSpeed;
+        this.xStart = pX;
+        this.yStart = pY;
+        this.zStart = pZ;
+        this.xo = pX + pXSpeed;
+        this.yo = pY + pYSpeed;
+        this.zo = pZ + pZSpeed;
         this.x = this.xo;
         this.y = this.yo;
         this.z = this.zo;
@@ -117,8 +117,8 @@ public class FlyTowardsPositionParticle extends TextureSheetParticle {
     public static class EnchantProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public EnchantProvider(SpriteSet p_333845_) {
-            this.sprite = p_333845_;
+        public EnchantProvider(SpriteSet pSprite) {
+            this.sprite = pSprite;
         }
 
         public Particle createParticle(
@@ -143,8 +143,8 @@ public class FlyTowardsPositionParticle extends TextureSheetParticle {
     public static class NautilusProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public NautilusProvider(SpriteSet p_331980_) {
-            this.sprite = p_331980_;
+        public NautilusProvider(SpriteSet pSprite) {
+            this.sprite = pSprite;
         }
 
         public Particle createParticle(
@@ -169,8 +169,8 @@ public class FlyTowardsPositionParticle extends TextureSheetParticle {
     public static class VaultConnectionProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public VaultConnectionProvider(SpriteSet p_329375_) {
-            this.sprite = p_329375_;
+        public VaultConnectionProvider(SpriteSet pSprite) {
+            this.sprite = pSprite;
         }
 
         public Particle createParticle(

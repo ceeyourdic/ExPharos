@@ -79,8 +79,8 @@ public class Phantom extends FlyingMob implements Enemy {
         p_331815_.define(ID_SIZE, 0);
     }
 
-    public void setPhantomSize(int p_33109_) {
-        this.entityData.set(ID_SIZE, Mth.clamp(p_33109_, 0, 64));
+    public void setPhantomSize(int pPhantomSize) {
+        this.entityData.set(ID_SIZE, Mth.clamp(pPhantomSize, 0, 64));
     }
 
     private void updatePhantomSizeInfo() {
@@ -93,12 +93,12 @@ public class Phantom extends FlyingMob implements Enemy {
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_33134_) {
-        if (ID_SIZE.equals(p_33134_)) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        if (ID_SIZE.equals(pKey)) {
             this.updatePhantomSizeInfo();
         }
 
-        super.onSyncedDataUpdated(p_33134_);
+        super.onSyncedDataUpdated(pKey);
     }
 
     public int getUniqueFlapTickOffset() {
@@ -158,26 +158,26 @@ public class Phantom extends FlyingMob implements Enemy {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_33132_) {
-        super.readAdditionalSaveData(p_33132_);
-        if (p_33132_.contains("AX")) {
-            this.anchorPoint = new BlockPos(p_33132_.getInt("AX"), p_33132_.getInt("AY"), p_33132_.getInt("AZ"));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("AX")) {
+            this.anchorPoint = new BlockPos(pCompound.getInt("AX"), pCompound.getInt("AY"), pCompound.getInt("AZ"));
         }
 
-        this.setPhantomSize(p_33132_.getInt("Size"));
+        this.setPhantomSize(pCompound.getInt("Size"));
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_33141_) {
-        super.addAdditionalSaveData(p_33141_);
-        p_33141_.putInt("AX", this.anchorPoint.getX());
-        p_33141_.putInt("AY", this.anchorPoint.getY());
-        p_33141_.putInt("AZ", this.anchorPoint.getZ());
-        p_33141_.putInt("Size", this.getPhantomSize());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("AX", this.anchorPoint.getX());
+        pCompound.putInt("AY", this.anchorPoint.getY());
+        pCompound.putInt("AZ", this.anchorPoint.getZ());
+        pCompound.putInt("Size", this.getPhantomSize());
     }
 
     @Override
-    public boolean shouldRenderAtSqrDistance(double p_33107_) {
+    public boolean shouldRenderAtSqrDistance(double pDistance) {
         return true;
     }
 
@@ -192,7 +192,7 @@ public class Phantom extends FlyingMob implements Enemy {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_33152_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.PHANTOM_HURT;
     }
 
@@ -207,7 +207,7 @@ public class Phantom extends FlyingMob implements Enemy {
     }
 
     @Override
-    public boolean canAttackType(EntityType<?> p_33111_) {
+    public boolean canAttackType(EntityType<?> pType) {
         return true;
     }
 
@@ -218,8 +218,8 @@ public class Phantom extends FlyingMob implements Enemy {
         return entitydimensions.scale(1.0F + 0.15F * (float)i);
     }
 
-    boolean canAttack(ServerLevel p_365188_, LivingEntity p_367013_, TargetingConditions p_364315_) {
-        return p_364315_.test(p_365188_, this, p_367013_);
+    boolean canAttack(ServerLevel pLevel, LivingEntity pEntity, TargetingConditions pTargetingConditions) {
+        return pTargetingConditions.test(pLevel, this, pEntity);
     }
 
     static enum AttackPhase {
@@ -307,8 +307,8 @@ public class Phantom extends FlyingMob implements Enemy {
     }
 
     class PhantomBodyRotationControl extends BodyRotationControl {
-        public PhantomBodyRotationControl(final Mob p_33216_) {
-            super(p_33216_);
+        public PhantomBodyRotationControl(final Mob pMob) {
+            super(pMob);
         }
 
         @Override
@@ -399,8 +399,8 @@ public class Phantom extends FlyingMob implements Enemy {
     class PhantomMoveControl extends MoveControl {
         private float speed = 0.1F;
 
-        public PhantomMoveControl(final Mob p_33241_) {
-            super(p_33241_);
+        public PhantomMoveControl(final Mob pMob) {
+            super(pMob);
         }
 
         @Override

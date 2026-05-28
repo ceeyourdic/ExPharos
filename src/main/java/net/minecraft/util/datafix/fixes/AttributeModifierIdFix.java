@@ -73,8 +73,8 @@ public class AttributeModifierIdFix extends DataFix {
         "minecraft:reinforcement_caller_charge"
     );
 
-    public AttributeModifierIdFix(Schema p_345485_) {
-        super(p_345485_, false);
+    public AttributeModifierIdFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override
@@ -92,13 +92,13 @@ public class AttributeModifierIdFix extends DataFix {
         );
     }
 
-    private static Stream<Dynamic<?>> fixModifiersTypeWrapper(Stream<?> p_343594_) {
-        return fixModifiers((Stream<Dynamic<?>>)p_343594_);
+    private static Stream<Dynamic<?>> fixModifiersTypeWrapper(Stream<?> pModifiers) {
+        return fixModifiers((Stream<Dynamic<?>>)pModifiers);
     }
 
-    private static Stream<Dynamic<?>> fixModifiers(Stream<Dynamic<?>> p_345064_) {
+    private static Stream<Dynamic<?>> fixModifiers(Stream<Dynamic<?>> pModifiers) {
         Map<String, Dynamic<?>> map = new Object2ObjectArrayMap<>();
-        p_345064_.forEach(p_345302_ -> {
+        pModifiers.forEach(p_345302_ -> {
             UUID uuid = uuidFromIntArray(p_345302_.get("uuid").asIntStream().toArray());
             String s = p_345302_.get("name").asString("");
             String s1 = uuid != null ? ID_MAP.get(uuid) : null;
@@ -125,8 +125,8 @@ public class AttributeModifierIdFix extends DataFix {
         return map.values().stream();
     }
 
-    private static Dynamic<?> convertModifierForEntity(Dynamic<?> p_342220_) {
-        return p_342220_.renameField("UUID", "uuid")
+    private static Dynamic<?> convertModifierForEntity(Dynamic<?> pModifier) {
+        return pModifier.renameField("UUID", "uuid")
             .renameField("Name", "name")
             .renameField("Amount", "amount")
             .renameAndFixField("Operation", "operation", p_343070_ -> {
@@ -139,8 +139,8 @@ public class AttributeModifierIdFix extends DataFix {
             });
     }
 
-    private static Dynamic<?> fixItemStackComponents(Dynamic<?> p_344331_) {
-        return p_344331_.update(
+    private static Dynamic<?> fixItemStackComponents(Dynamic<?> pTag) {
+        return pTag.update(
             "minecraft:attribute_modifiers",
             p_345459_ -> p_345459_.update(
                     "modifiers",
@@ -151,8 +151,8 @@ public class AttributeModifierIdFix extends DataFix {
         );
     }
 
-    private static Dynamic<?> fixAttribute(Dynamic<?> p_343414_) {
-        return p_343414_.renameField("Name", "id")
+    private static Dynamic<?> fixAttribute(Dynamic<?> pTag) {
+        return pTag.renameField("Name", "id")
             .renameField("Base", "base")
             .renameAndFixField(
                 "Modifiers",
@@ -162,14 +162,14 @@ public class AttributeModifierIdFix extends DataFix {
                             .result()
                             .map(p_343824_ -> p_343824_.map(AttributeModifierIdFix::convertModifierForEntity))
                             .map(AttributeModifierIdFix::fixModifiersTypeWrapper)
-                            .map(p_343414_::createList),
+                            .map(pTag::createList),
                         p_342564_
                     )
             );
     }
 
-    private static Typed<?> fixEntity(Typed<?> p_342192_) {
-        return p_342192_.update(
+    private static Typed<?> fixEntity(Typed<?> pEntity) {
+        return pEntity.update(
             DSL.remainderFinder(),
             p_344980_ -> p_344980_.renameAndFixField(
                     "Attributes",
@@ -183,9 +183,9 @@ public class AttributeModifierIdFix extends DataFix {
     }
 
     @Nullable
-    public static UUID uuidFromIntArray(int[] p_342854_) {
-        return p_342854_.length != 4
+    public static UUID uuidFromIntArray(int[] pIntArray) {
+        return pIntArray.length != 4
             ? null
-            : new UUID((long)p_342854_[0] << 32 | (long)p_342854_[1] & 4294967295L, (long)p_342854_[2] << 32 | (long)p_342854_[3] & 4294967295L);
+            : new UUID((long)pIntArray[0] << 32 | (long)pIntArray[1] & 4294967295L, (long)pIntArray[2] << 32 | (long)pIntArray[3] & 4294967295L);
     }
 }

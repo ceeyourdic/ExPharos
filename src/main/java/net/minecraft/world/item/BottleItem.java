@@ -70,8 +70,8 @@ public class BottleItem extends Item {
         }
     }
 
-    protected ItemStack turnBottleIntoItem(ItemStack p_40652_, Player p_40653_, ItemStack p_40654_) {
-        p_40653_.awardStat(Stats.ITEM_USED.get(this));
-        return ItemUtils.createFilledResult(p_40652_, p_40653_, p_40654_);
+    protected ItemStack turnBottleIntoItem(ItemStack pBottleStack, Player pPlayer, ItemStack pFilledBottleStack) {
+        pPlayer.awardStat(Stats.ITEM_USED.get(this));
+        return ItemUtils.createFilledResult(pBottleStack, pPlayer, pFilledBottleStack);
     }
 }

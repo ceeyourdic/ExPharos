@@ -18,11 +18,11 @@ public abstract class NamedEntityWriteReadFix extends DataFix {
     private final String entityName;
     private final TypeReference type;
 
-    public NamedEntityWriteReadFix(Schema p_310297_, boolean p_312818_, String p_313129_, TypeReference p_311108_, String p_313092_) {
-        super(p_310297_, p_312818_);
-        this.name = p_313129_;
-        this.type = p_311108_;
-        this.entityName = p_313092_;
+    public NamedEntityWriteReadFix(Schema pOutputSchema, boolean pChangesType, String pName, TypeReference pType, String pEntityName) {
+        super(pOutputSchema, pChangesType);
+        this.name = pName;
+        this.type = pType;
+        this.entityName = pEntityName;
     }
 
     @Override
@@ -36,15 +36,15 @@ public abstract class NamedEntityWriteReadFix extends DataFix {
         return this.fix(type, type2, opticfinder, type3, type4);
     }
 
-    private <S, T, A, B> TypeRewriteRule fix(Type<S> p_334263_, Type<T> p_329342_, OpticFinder<A> p_329193_, Type<B> p_333979_, Type<?> p_327956_) {
-        return this.fixTypeEverywhere(this.name, p_334263_, p_329342_, p_326626_ -> p_326621_ -> {
-                Typed<S> typed = new Typed<>(p_334263_, p_326626_, p_326621_);
-                return (T)typed.update(p_329193_, p_333979_, p_326631_ -> {
-                    Typed<A> typed1 = new Typed<>((Type<A>)p_327956_, p_326626_, p_326631_);
-                    return Util.writeAndReadTypedOrThrow(typed1, p_333979_, this::fix).getValue();
+    private <S, T, A, B> TypeRewriteRule fix(Type<S> pInputType, Type<T> pOutputType, OpticFinder<A> pFinder, Type<B> pOutputChoiceType, Type<?> pNewType) {
+        return this.fixTypeEverywhere(this.name, pInputType, pOutputType, p_326626_ -> p_326621_ -> {
+                Typed<S> typed = new Typed<>(pInputType, p_326626_, p_326621_);
+                return (T)typed.update(pFinder, pOutputChoiceType, p_326631_ -> {
+                    Typed<A> typed1 = new Typed<>((Type<A>)pNewType, p_326626_, p_326631_);
+                    return Util.writeAndReadTypedOrThrow(typed1, pOutputChoiceType, this::fix).getValue();
                 }).getValue();
             });
     }
 
-    protected abstract <T> Dynamic<T> fix(Dynamic<T> p_310304_);
+    protected abstract <T> Dynamic<T> fix(Dynamic<T> pTag);
 }

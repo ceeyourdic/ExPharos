@@ -28,24 +28,24 @@ public class RealmsDataFetcher {
     public final DataFetcher.Task<RealmsServerPlayerLists> onlinePlayersTask;
     public final RealmsNewsManager newsManager = new RealmsNewsManager(new RealmsPersistence());
 
-    public RealmsDataFetcher(RealmsClient p_238853_) {
+    public RealmsDataFetcher(RealmsClient pRealmsClient) {
         this.serverListUpdateTask = this.dataFetcher
             .createTask(
                 "server list",
                 () -> {
-                    com.mojang.realmsclient.dto.RealmsServerList realmsserverlist = p_238853_.listRealms();
+                    com.mojang.realmsclient.dto.RealmsServerList realmsserverlist = pRealmsClient.listRealms();
                     return RealmsMainScreen.isSnapshot()
-                        ? new RealmsDataFetcher.ServerListData(realmsserverlist.servers, p_238853_.listSnapshotEligibleRealms())
+                        ? new RealmsDataFetcher.ServerListData(realmsserverlist.servers, pRealmsClient.listSnapshotEligibleRealms())
                         : new RealmsDataFetcher.ServerListData(realmsserverlist.servers, List.of());
                 },
                 Duration.ofSeconds(60L),
                 RepeatedDelayStrategy.CONSTANT
             );
-        this.pendingInvitesTask = this.dataFetcher.createTask("pending invite count", p_238853_::pendingInvitesCount, Duration.ofSeconds(10L), RepeatedDelayStrategy.exponentialBackoff(360));
-        this.trialAvailabilityTask = this.dataFetcher.createTask("trial availablity", p_238853_::trialAvailable, Duration.ofSeconds(60L), RepeatedDelayStrategy.exponentialBackoff(60));
-        this.newsTask = this.dataFetcher.createTask("unread news", p_238853_::getNews, Duration.ofMinutes(5L), RepeatedDelayStrategy.CONSTANT);
-        this.notificationsTask = this.dataFetcher.createTask("notifications", p_238853_::getNotifications, Duration.ofMinutes(5L), RepeatedDelayStrategy.CONSTANT);
-        this.onlinePlayersTask = this.dataFetcher.createTask("online players", p_238853_::getLiveStats, Duration.ofSeconds(10L), RepeatedDelayStrategy.CONSTANT);
+        this.pendingInvitesTask = this.dataFetcher.createTask("pending invite count", pRealmsClient::pendingInvitesCount, Duration.ofSeconds(10L), RepeatedDelayStrategy.exponentialBackoff(360));
+        this.trialAvailabilityTask = this.dataFetcher.createTask("trial availablity", pRealmsClient::trialAvailable, Duration.ofSeconds(60L), RepeatedDelayStrategy.exponentialBackoff(60));
+        this.newsTask = this.dataFetcher.createTask("unread news", pRealmsClient::getNews, Duration.ofMinutes(5L), RepeatedDelayStrategy.CONSTANT);
+        this.notificationsTask = this.dataFetcher.createTask("notifications", pRealmsClient::getNotifications, Duration.ofMinutes(5L), RepeatedDelayStrategy.CONSTANT);
+        this.onlinePlayersTask = this.dataFetcher.createTask("online players", pRealmsClient::getLiveStats, Duration.ofSeconds(10L), RepeatedDelayStrategy.CONSTANT);
         this.tasks = List.of(this.notificationsTask, this.serverListUpdateTask, this.pendingInvitesTask, this.trialAvailabilityTask, this.newsTask, this.onlinePlayersTask);
     }
 

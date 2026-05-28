@@ -37,16 +37,16 @@ public class DownloadQueue implements AutoCloseable {
     private final JsonEventLog<DownloadQueue.LogEntry> eventLog;
     private final ConsecutiveExecutor tasks = new ConsecutiveExecutor(Util.nonCriticalIoPool(), "download-queue");
 
-    public DownloadQueue(Path p_311573_) throws IOException {
-        this.cacheDir = p_311573_;
-        FileUtil.createDirectoriesSafe(p_311573_);
-        this.eventLog = JsonEventLog.open(DownloadQueue.LogEntry.CODEC, p_311573_.resolve("log.json"));
-        DownloadCacheCleaner.vacuumCacheDir(p_311573_, 20);
+    public DownloadQueue(Path pCacheDir) throws IOException {
+        this.cacheDir = pCacheDir;
+        FileUtil.createDirectoriesSafe(pCacheDir);
+        this.eventLog = JsonEventLog.open(DownloadQueue.LogEntry.CODEC, pCacheDir.resolve("log.json"));
+        DownloadCacheCleaner.vacuumCacheDir(pCacheDir, 20);
     }
 
-    private DownloadQueue.BatchResult runDownload(DownloadQueue.BatchConfig p_312964_, Map<UUID, DownloadQueue.DownloadRequest> p_311709_) {
+    private DownloadQueue.BatchResult runDownload(DownloadQueue.BatchConfig pBatchConfig, Map<UUID, DownloadQueue.DownloadRequest> pDownloads) {
         DownloadQueue.BatchResult downloadqueue$batchresult = new DownloadQueue.BatchResult();
-        p_311709_.forEach(
+        pDownloads.forEach(
             (p_311290_, p_311466_) -> {
                 Path path = this.cacheDir.resolve(p_311290_.toString());
                 Path path1 = null;
@@ -55,12 +55,12 @@ public class DownloadQueue implements AutoCloseable {
                     path1 = HttpUtil.downloadFile(
                         path,
                         p_311466_.url,
-                        p_312964_.headers,
-                        p_312964_.hashFunction,
+                        pBatchConfig.headers,
+                        pBatchConfig.hashFunction,
                         p_311466_.hash,
-                        p_312964_.maxSize,
-                        p_312964_.proxy,
-                        p_312964_.listener
+                        pBatchConfig.maxSize,
+                        pBatchConfig.proxy,
+                        pBatchConfig.listener
                     );
                     downloadqueue$batchresult.downloaded.put(p_311290_, path1);
                 } catch (Exception exception1) {
@@ -87,19 +87,19 @@ public class DownloadQueue implements AutoCloseable {
         return downloadqueue$batchresult;
     }
 
-    private Either<String, DownloadQueue.FileInfoEntry> getFileInfo(Path p_310185_) {
+    private Either<String, DownloadQueue.FileInfoEntry> getFileInfo(Path pPath) {
         try {
-            long i = Files.size(p_310185_);
-            Path path = this.cacheDir.relativize(p_310185_);
+            long i = Files.size(pPath);
+            Path path = this.cacheDir.relativize(pPath);
             return Either.right(new DownloadQueue.FileInfoEntry(path.toString(), i));
         } catch (IOException ioexception) {
-            LOGGER.error("Failed to get file size of {}", p_310185_, ioexception);
+            LOGGER.error("Failed to get file size of {}", pPath, ioexception);
             return Either.left("no_access");
         }
     }
 
-    public CompletableFuture<DownloadQueue.BatchResult> downloadBatch(DownloadQueue.BatchConfig p_312532_, Map<UUID, DownloadQueue.DownloadRequest> p_312658_) {
-        return CompletableFuture.supplyAsync(() -> this.runDownload(p_312532_, p_312658_), this.tasks::schedule);
+    public CompletableFuture<DownloadQueue.BatchResult> downloadBatch(DownloadQueue.BatchConfig pBatchConfig, Map<UUID, DownloadQueue.DownloadRequest> pDownloads) {
+        return CompletableFuture.supplyAsync(() -> this.runDownload(pBatchConfig, pDownloads), this.tasks::schedule);
     }
 
     @Override

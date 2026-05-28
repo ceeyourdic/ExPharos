@@ -59,7 +59,7 @@ public class MagmaBlock extends Block {
     }
 
     @Override
-    protected void onPlace(BlockState p_54823_, Level p_54824_, BlockPos p_54825_, BlockState p_54826_, boolean p_54827_) {
-        p_54824_.scheduleTick(p_54825_, this, 20);
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        pLevel.scheduleTick(pPos, this, 20);
     }
 }

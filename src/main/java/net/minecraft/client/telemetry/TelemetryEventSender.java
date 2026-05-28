@@ -10,12 +10,12 @@ public interface TelemetryEventSender {
     TelemetryEventSender DISABLED = (p_261883_, p_261730_) -> {
     };
 
-    default TelemetryEventSender decorate(Consumer<TelemetryPropertyMap.Builder> p_261897_) {
+    default TelemetryEventSender decorate(Consumer<TelemetryPropertyMap.Builder> pPropertyAdder) {
         return (p_261694_, p_261504_) -> this.send(p_261694_, p_261539_ -> {
                 p_261504_.accept(p_261539_);
-                p_261897_.accept(p_261539_);
+                pPropertyAdder.accept(p_261539_);
             });
     }
 
-    void send(TelemetryEventType p_261620_, Consumer<TelemetryPropertyMap.Builder> p_262079_);
+    void send(TelemetryEventType pEventType, Consumer<TelemetryPropertyMap.Builder> pPropertyAdder);
 }

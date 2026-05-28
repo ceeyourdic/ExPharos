@@ -79,30 +79,30 @@ public abstract class AbstractArrow extends Projectile {
     }
 
     protected AbstractArrow(
-        EntityType<? extends AbstractArrow> p_36721_,
-        double p_343835_,
-        double p_344593_,
-        double p_344772_,
-        Level p_36722_,
-        ItemStack p_309639_,
-        @Nullable ItemStack p_343861_
+        EntityType<? extends AbstractArrow> pEntityType,
+        double pX,
+        double pY,
+        double pZ,
+        Level pLevel,
+        ItemStack pPickupItemStack,
+        @Nullable ItemStack pFiredFromWeapon
     ) {
-        this(p_36721_, p_36722_);
-        this.pickupItemStack = p_309639_.copy();
-        this.setCustomName(p_309639_.get(DataComponents.CUSTOM_NAME));
-        Unit unit = p_309639_.remove(DataComponents.INTANGIBLE_PROJECTILE);
+        this(pEntityType, pLevel);
+        this.pickupItemStack = pPickupItemStack.copy();
+        this.setCustomName(pPickupItemStack.get(DataComponents.CUSTOM_NAME));
+        Unit unit = pPickupItemStack.remove(DataComponents.INTANGIBLE_PROJECTILE);
         if (unit != null) {
             this.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
         }
 
-        this.setPos(p_343835_, p_344593_, p_344772_);
-        if (p_343861_ != null && p_36722_ instanceof ServerLevel serverlevel) {
-            if (p_343861_.isEmpty()) {
+        this.setPos(pX, pY, pZ);
+        if (pFiredFromWeapon != null && pLevel instanceof ServerLevel serverlevel) {
+            if (pFiredFromWeapon.isEmpty()) {
                 throw new IllegalArgumentException("Invalid weapon firing an arrow");
             }
 
-            this.firedFromWeapon = p_343861_.copy();
-            int i = EnchantmentHelper.getPiercingCount(serverlevel, p_343861_, this.pickupItemStack);
+            this.firedFromWeapon = pFiredFromWeapon.copy();
+            int i = EnchantmentHelper.getPiercingCount(serverlevel, pFiredFromWeapon, this.pickupItemStack);
             if (i > 0) {
                 this.setPierceLevel((byte)i);
             }
@@ -110,25 +110,25 @@ public abstract class AbstractArrow extends Projectile {
     }
 
     protected AbstractArrow(
-        EntityType<? extends AbstractArrow> p_36711_, LivingEntity p_342675_, Level p_36715_, ItemStack p_310436_, @Nullable ItemStack p_343107_
+        EntityType<? extends AbstractArrow> pEntityType, LivingEntity pOwner, Level pLevel, ItemStack pPickupItemStack, @Nullable ItemStack pFiredFromWeapon
     ) {
-        this(p_36711_, p_342675_.getX(), p_342675_.getEyeY() - 0.1F, p_342675_.getZ(), p_36715_, p_310436_, p_343107_);
-        this.setOwner(p_342675_);
+        this(pEntityType, pOwner.getX(), pOwner.getEyeY() - 0.1F, pOwner.getZ(), pLevel, pPickupItemStack, pFiredFromWeapon);
+        this.setOwner(pOwner);
     }
 
-    public void setSoundEvent(SoundEvent p_36741_) {
-        this.soundEvent = p_36741_;
+    public void setSoundEvent(SoundEvent pSoundEvent) {
+        this.soundEvent = pSoundEvent;
     }
 
     @Override
-    public boolean shouldRenderAtSqrDistance(double p_36726_) {
+    public boolean shouldRenderAtSqrDistance(double pDistance) {
         double d0 = this.getBoundingBox().getSize() * 10.0;
         if (Double.isNaN(d0)) {
             d0 = 1.0;
         }
 
         d0 *= 64.0 * getViewScale();
-        return p_36726_ < d0 * d0;
+        return pDistance < d0 * d0;
     }
 
     @Override
@@ -139,8 +139,8 @@ public abstract class AbstractArrow extends Projectile {
     }
 
     @Override
-    public void shoot(double p_36775_, double p_36776_, double p_36777_, float p_36778_, float p_36779_) {
-        super.shoot(p_36775_, p_36776_, p_36777_, p_36778_, p_36779_);
+    public void shoot(double pX, double pY, double pZ, float pVelocity, float pInaccuracy) {
+        super.shoot(pX, pY, pZ, pVelocity, pInaccuracy);
         this.life = 0;
     }
 
@@ -151,10 +151,10 @@ public abstract class AbstractArrow extends Projectile {
     }
 
     @Override
-    public void lerpMotion(double p_36786_, double p_36787_, double p_36788_) {
-        super.lerpMotion(p_36786_, p_36787_, p_36788_);
+    public void lerpMotion(double pX, double pY, double pZ) {
+        super.lerpMotion(pX, pY, pZ);
         this.life = 0;
-        if (this.isInGround() && Mth.lengthSquared(p_36786_, p_36787_, p_36788_) > 0.0) {
+        if (this.isInGround() && Mth.lengthSquared(pX, pY, pZ) > 0.0) {
             this.setInGround(false);
         }
     }
@@ -262,11 +262,11 @@ public abstract class AbstractArrow extends Projectile {
         }
     }
 
-    private void stepMoveAndHit(BlockHitResult p_365483_) {
+    private void stepMoveAndHit(BlockHitResult pHitResult) {
         while (this.isAlive()) {
             Vec3 vec3 = this.position();
-            EntityHitResult entityhitresult = this.findHitEntity(vec3, p_365483_.getLocation());
-            Vec3 vec31 = Objects.requireNonNullElse(entityhitresult, p_365483_).getLocation();
+            EntityHitResult entityhitresult = this.findHitEntity(vec3, pHitResult.getLocation());
+            Vec3 vec31 = Objects.requireNonNullElse(entityhitresult, pHitResult).getLocation();
             this.setPos(vec31);
             this.applyEffectsFromBlocks(vec3, vec31);
             if (this.portalProcess != null && this.portalProcess.isInsidePortalThisTick()) {
@@ -274,8 +274,8 @@ public abstract class AbstractArrow extends Projectile {
             }
 
             if (entityhitresult == null) {
-                if (this.isAlive() && p_365483_.getType() != HitResult.Type.MISS) {
-                    this.hitTargetOrDeflectSelf(p_365483_);
+                if (this.isAlive() && pHitResult.getType() != HitResult.Type.MISS) {
+                    this.hitTargetOrDeflectSelf(pHitResult);
                     this.hasImpulse = true;
                 }
                 break;
@@ -290,12 +290,12 @@ public abstract class AbstractArrow extends Projectile {
         }
     }
 
-    private void applyInertia(float p_375588_) {
+    private void applyInertia(float pInertia) {
         Vec3 vec3 = this.getDeltaMovement();
-        this.setDeltaMovement(vec3.scale((double)p_375588_));
+        this.setDeltaMovement(vec3.scale((double)pInertia));
     }
 
-    private void addBubbleParticles(Vec3 p_363513_) {
+    private void addBubbleParticles(Vec3 pPos) {
         Vec3 vec3 = this.getDeltaMovement();
 
         for (int i = 0; i < 4; i++) {
@@ -303,9 +303,9 @@ public abstract class AbstractArrow extends Projectile {
             this.level()
                 .addParticle(
                     ParticleTypes.BUBBLE,
-                    p_363513_.x - vec3.x * 0.25,
-                    p_363513_.y - vec3.y * 0.25,
-                    p_363513_.z - vec3.z * 0.25,
+                    pPos.x - vec3.x * 0.25,
+                    pPos.y - vec3.y * 0.25,
+                    pPos.z - vec3.z * 0.25,
                     vec3.x,
                     vec3.y,
                     vec3.z
@@ -335,14 +335,14 @@ public abstract class AbstractArrow extends Projectile {
         return this.entityData.get(IN_GROUND);
     }
 
-    protected void setInGround(boolean p_366805_) {
-        this.entityData.set(IN_GROUND, p_366805_);
+    protected void setInGround(boolean pInGround) {
+        this.entityData.set(IN_GROUND, pInGround);
     }
 
     @Override
-    public void move(MoverType p_36749_, Vec3 p_36750_) {
-        super.move(p_36749_, p_36750_);
-        if (p_36749_ != MoverType.SELF && this.shouldFall()) {
+    public void move(MoverType pType, Vec3 pPos) {
+        super.move(pType, pPos);
+        if (pType != MoverType.SELF && this.shouldFall()) {
             this.startFalling();
         }
     }
@@ -384,9 +384,9 @@ public abstract class AbstractArrow extends Projectile {
     }
 
     @Override
-    protected void onHitEntity(EntityHitResult p_36757_) {
-        super.onHitEntity(p_36757_);
-        Entity entity = p_36757_.getEntity();
+    protected void onHitEntity(EntityHitResult pResult) {
+        super.onHitEntity(pResult);
+        Entity entity = pResult.getEntity();
         float f = (float)this.getDeltaMovement().length();
         double d0 = this.baseDamage;
         Entity entity1 = this.getOwner();
@@ -479,17 +479,17 @@ public abstract class AbstractArrow extends Projectile {
         }
     }
 
-    protected void doKnockback(LivingEntity p_342292_, DamageSource p_345063_) {
+    protected void doKnockback(LivingEntity pEntity, DamageSource pDamageSource) {
         double d0 = (double)(
             this.firedFromWeapon != null && this.level() instanceof ServerLevel serverlevel
-                ? EnchantmentHelper.modifyKnockback(serverlevel, this.firedFromWeapon, p_342292_, p_345063_, 0.0F)
+                ? EnchantmentHelper.modifyKnockback(serverlevel, this.firedFromWeapon, pEntity, pDamageSource, 0.0F)
                 : 0.0F
         );
         if (d0 > 0.0) {
-            double d1 = Math.max(0.0, 1.0 - p_342292_.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+            double d1 = Math.max(0.0, 1.0 - pEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
             Vec3 vec3 = this.getDeltaMovement().multiply(1.0, 0.0, 1.0).normalize().scale(d0 * 0.6 * d1);
             if (vec3.lengthSqr() > 0.0) {
-                p_342292_.push(vec3.x, 0.1, vec3.z);
+                pEntity.push(vec3.x, 0.1, vec3.z);
             }
         }
     }
@@ -517,16 +517,16 @@ public abstract class AbstractArrow extends Projectile {
         this.resetPiercedEntities();
     }
 
-    protected void hitBlockEnchantmentEffects(ServerLevel p_344773_, BlockHitResult p_343962_, ItemStack p_342314_) {
-        Vec3 vec3 = p_343962_.getBlockPos().clampLocationWithin(p_343962_.getLocation());
+    protected void hitBlockEnchantmentEffects(ServerLevel pLevel, BlockHitResult pHitResult, ItemStack pStack) {
+        Vec3 vec3 = pHitResult.getBlockPos().clampLocationWithin(pHitResult.getLocation());
         EnchantmentHelper.onHitBlock(
-            p_344773_,
-            p_342314_,
+            pLevel,
+            pStack,
             this.getOwner() instanceof LivingEntity livingentity ? livingentity : null,
             this,
             null,
             vec3,
-            p_344773_.getBlockState(p_343962_.getBlockPos()),
+            pLevel.getBlockState(pHitResult.getBlockPos()),
             p_344325_ -> this.firedFromWeapon = null
         );
     }
@@ -544,12 +544,12 @@ public abstract class AbstractArrow extends Projectile {
         return this.soundEvent;
     }
 
-    protected void doPostHurtEffects(LivingEntity p_36744_) {
+    protected void doPostHurtEffects(LivingEntity pTarget) {
     }
 
     @Nullable
-    protected EntityHitResult findHitEntity(Vec3 p_36758_, Vec3 p_36759_) {
-        return ProjectileUtil.getEntityHitResult(this.level(), this, p_36758_, p_36759_, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), this::canHitEntity);
+    protected EntityHitResult findHitEntity(Vec3 pStartVec, Vec3 pEndVec) {
+        return ProjectileUtil.getEntityHitResult(this.level(), this, pStartVec, pEndVec, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), this::canHitEntity);
     }
 
     @Override
@@ -560,65 +560,65 @@ public abstract class AbstractArrow extends Projectile {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_36772_) {
-        super.addAdditionalSaveData(p_36772_);
-        p_36772_.putShort("life", (short)this.life);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putShort("life", (short)this.life);
         if (this.lastState != null) {
-            p_36772_.put("inBlockState", NbtUtils.writeBlockState(this.lastState));
+            pCompound.put("inBlockState", NbtUtils.writeBlockState(this.lastState));
         }
 
-        p_36772_.putByte("shake", (byte)this.shakeTime);
-        p_36772_.putBoolean("inGround", this.isInGround());
-        p_36772_.putByte("pickup", (byte)this.pickup.ordinal());
-        p_36772_.putDouble("damage", this.baseDamage);
-        p_36772_.putBoolean("crit", this.isCritArrow());
-        p_36772_.putByte("PierceLevel", this.getPierceLevel());
-        p_36772_.putString("SoundEvent", BuiltInRegistries.SOUND_EVENT.getKey(this.soundEvent).toString());
-        p_36772_.put("item", this.pickupItemStack.save(this.registryAccess()));
+        pCompound.putByte("shake", (byte)this.shakeTime);
+        pCompound.putBoolean("inGround", this.isInGround());
+        pCompound.putByte("pickup", (byte)this.pickup.ordinal());
+        pCompound.putDouble("damage", this.baseDamage);
+        pCompound.putBoolean("crit", this.isCritArrow());
+        pCompound.putByte("PierceLevel", this.getPierceLevel());
+        pCompound.putString("SoundEvent", BuiltInRegistries.SOUND_EVENT.getKey(this.soundEvent).toString());
+        pCompound.put("item", this.pickupItemStack.save(this.registryAccess()));
         if (this.firedFromWeapon != null) {
-            p_36772_.put("weapon", this.firedFromWeapon.save(this.registryAccess(), new CompoundTag()));
+            pCompound.put("weapon", this.firedFromWeapon.save(this.registryAccess(), new CompoundTag()));
         }
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_36761_) {
-        super.readAdditionalSaveData(p_36761_);
-        this.life = p_36761_.getShort("life");
-        if (p_36761_.contains("inBlockState", 10)) {
-            this.lastState = NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), p_36761_.getCompound("inBlockState"));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.life = pCompound.getShort("life");
+        if (pCompound.contains("inBlockState", 10)) {
+            this.lastState = NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), pCompound.getCompound("inBlockState"));
         }
 
-        this.shakeTime = p_36761_.getByte("shake") & 255;
-        this.setInGround(p_36761_.getBoolean("inGround"));
-        if (p_36761_.contains("damage", 99)) {
-            this.baseDamage = p_36761_.getDouble("damage");
+        this.shakeTime = pCompound.getByte("shake") & 255;
+        this.setInGround(pCompound.getBoolean("inGround"));
+        if (pCompound.contains("damage", 99)) {
+            this.baseDamage = pCompound.getDouble("damage");
         }
 
-        this.pickup = AbstractArrow.Pickup.byOrdinal(p_36761_.getByte("pickup"));
-        this.setCritArrow(p_36761_.getBoolean("crit"));
-        this.setPierceLevel(p_36761_.getByte("PierceLevel"));
-        if (p_36761_.contains("SoundEvent", 8)) {
-            this.soundEvent = BuiltInRegistries.SOUND_EVENT.getOptional(ResourceLocation.parse(p_36761_.getString("SoundEvent"))).orElse(this.getDefaultHitGroundSoundEvent());
+        this.pickup = AbstractArrow.Pickup.byOrdinal(pCompound.getByte("pickup"));
+        this.setCritArrow(pCompound.getBoolean("crit"));
+        this.setPierceLevel(pCompound.getByte("PierceLevel"));
+        if (pCompound.contains("SoundEvent", 8)) {
+            this.soundEvent = BuiltInRegistries.SOUND_EVENT.getOptional(ResourceLocation.parse(pCompound.getString("SoundEvent"))).orElse(this.getDefaultHitGroundSoundEvent());
         }
 
-        if (p_36761_.contains("item", 10)) {
-            this.setPickupItemStack(ItemStack.parse(this.registryAccess(), p_36761_.getCompound("item")).orElse(this.getDefaultPickupItem()));
+        if (pCompound.contains("item", 10)) {
+            this.setPickupItemStack(ItemStack.parse(this.registryAccess(), pCompound.getCompound("item")).orElse(this.getDefaultPickupItem()));
         } else {
             this.setPickupItemStack(this.getDefaultPickupItem());
         }
 
-        if (p_36761_.contains("weapon", 10)) {
-            this.firedFromWeapon = ItemStack.parse(this.registryAccess(), p_36761_.getCompound("weapon")).orElse(null);
+        if (pCompound.contains("weapon", 10)) {
+            this.firedFromWeapon = ItemStack.parse(this.registryAccess(), pCompound.getCompound("weapon")).orElse(null);
         } else {
             this.firedFromWeapon = null;
         }
     }
 
     @Override
-    public void setOwner(@Nullable Entity p_36770_) {
-        super.setOwner(p_36770_);
+    public void setOwner(@Nullable Entity pEntity) {
+        super.setOwner(pEntity);
 
-        this.pickup = switch (p_36770_) {
+        this.pickup = switch (pEntity) {
             case Player player when this.pickup == AbstractArrow.Pickup.DISALLOWED -> AbstractArrow.Pickup.ALLOWED;
             case OminousItemSpawner ominousitemspawner -> AbstractArrow.Pickup.DISALLOWED;
             case null, default -> this.pickup;
@@ -626,20 +626,20 @@ public abstract class AbstractArrow extends Projectile {
     }
 
     @Override
-    public void playerTouch(Player p_36766_) {
+    public void playerTouch(Player pEntity) {
         if (!this.level().isClientSide && (this.isInGround() || this.isNoPhysics()) && this.shakeTime <= 0) {
-            if (this.tryPickup(p_36766_)) {
-                p_36766_.take(this, 1);
+            if (this.tryPickup(pEntity)) {
+                pEntity.take(this, 1);
                 this.discard();
             }
         }
     }
 
-    protected boolean tryPickup(Player p_150121_) {
+    protected boolean tryPickup(Player pPlayer) {
         return switch (this.pickup) {
             case DISALLOWED -> false;
-            case ALLOWED -> p_150121_.getInventory().add(this.getPickupItem());
-            case CREATIVE_ONLY -> p_150121_.hasInfiniteMaterials();
+            case ALLOWED -> pPlayer.getInventory().add(this.getPickupItem());
+            case CREATIVE_ONLY -> pPlayer.hasInfiniteMaterials();
         };
     }
 
@@ -658,8 +658,8 @@ public abstract class AbstractArrow extends Projectile {
         return this.pickupItemStack;
     }
 
-    public void setBaseDamage(double p_36782_) {
-        this.baseDamage = p_36782_;
+    public void setBaseDamage(double pBaseDamage) {
+        this.baseDamage = pBaseDamage;
     }
 
     public double getBaseDamage() {
@@ -671,26 +671,26 @@ public abstract class AbstractArrow extends Projectile {
         return this.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE);
     }
 
-    public void setCritArrow(boolean p_36763_) {
-        this.setFlag(1, p_36763_);
+    public void setCritArrow(boolean pCritArrow) {
+        this.setFlag(1, pCritArrow);
     }
 
-    private void setPierceLevel(byte p_36768_) {
-        this.entityData.set(PIERCE_LEVEL, p_36768_);
+    private void setPierceLevel(byte pPierceLevel) {
+        this.entityData.set(PIERCE_LEVEL, pPierceLevel);
     }
 
-    private void setFlag(int p_36738_, boolean p_36739_) {
+    private void setFlag(int pId, boolean pValue) {
         byte b0 = this.entityData.get(ID_FLAGS);
-        if (p_36739_) {
-            this.entityData.set(ID_FLAGS, (byte)(b0 | p_36738_));
+        if (pValue) {
+            this.entityData.set(ID_FLAGS, (byte)(b0 | pId));
         } else {
-            this.entityData.set(ID_FLAGS, (byte)(b0 & ~p_36738_));
+            this.entityData.set(ID_FLAGS, (byte)(b0 & ~pId));
         }
     }
 
-    protected void setPickupItemStack(ItemStack p_329565_) {
-        if (!p_329565_.isEmpty()) {
-            this.pickupItemStack = p_329565_;
+    protected void setPickupItemStack(ItemStack pPickupItemStack) {
+        if (!pPickupItemStack.isEmpty()) {
+            this.pickupItemStack = pPickupItemStack;
         } else {
             this.pickupItemStack = this.getDefaultPickupItem();
         }
@@ -705,17 +705,17 @@ public abstract class AbstractArrow extends Projectile {
         return this.entityData.get(PIERCE_LEVEL);
     }
 
-    public void setBaseDamageFromMob(float p_345045_) {
-        this.setBaseDamage((double)(p_345045_ * 2.0F) + this.random.triangle((double)this.level().getDifficulty().getId() * 0.11, 0.57425));
+    public void setBaseDamageFromMob(float pVelocity) {
+        this.setBaseDamage((double)(pVelocity * 2.0F) + this.random.triangle((double)this.level().getDifficulty().getId() * 0.11, 0.57425));
     }
 
     protected float getWaterInertia() {
         return 0.6F;
     }
 
-    public void setNoPhysics(boolean p_36791_) {
-        this.noPhysics = p_36791_;
-        this.setFlag(2, p_36791_);
+    public void setNoPhysics(boolean pNoPhysics) {
+        this.noPhysics = pNoPhysics;
+        this.setFlag(2, pNoPhysics);
     }
 
     public boolean isNoPhysics() {
@@ -742,12 +742,12 @@ public abstract class AbstractArrow extends Projectile {
         ALLOWED,
         CREATIVE_ONLY;
 
-        public static AbstractArrow.Pickup byOrdinal(int p_36809_) {
-            if (p_36809_ < 0 || p_36809_ > values().length) {
-                p_36809_ = 0;
+        public static AbstractArrow.Pickup byOrdinal(int pOrdinal) {
+            if (pOrdinal < 0 || pOrdinal > values().length) {
+                pOrdinal = 0;
             }
 
-            return values()[p_36809_];
+            return values()[pOrdinal];
         }
     }
 }

@@ -18,9 +18,9 @@ public class BlendingDataFix extends DataFix {
     private final String name;
     private static final Set<String> STATUSES_TO_SKIP_BLENDING = Set.of("minecraft:empty", "minecraft:structure_starts", "minecraft:structure_references", "minecraft:biomes");
 
-    public BlendingDataFix(Schema p_216561_) {
-        super(p_216561_, false);
-        this.name = "Blending Data Fix v" + p_216561_.getVersionKey();
+    public BlendingDataFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
+        this.name = "Blending Data Fix v" + pOutputSchema.getVersionKey();
     }
 
     @Override
@@ -31,36 +31,36 @@ public class BlendingDataFix extends DataFix {
         );
     }
 
-    private static Dynamic<?> updateChunkTag(Dynamic<?> p_240279_, OptionalDynamic<?> p_240280_) {
-        p_240279_ = p_240279_.remove("blending_data");
-        boolean flag = "minecraft:overworld".equals(p_240280_.get("dimension").asString().result().orElse(""));
-        Optional<? extends Dynamic<?>> optional = p_240279_.get("Status").result();
+    private static Dynamic<?> updateChunkTag(Dynamic<?> pChunkTag, OptionalDynamic<?> pContext) {
+        pChunkTag = pChunkTag.remove("blending_data");
+        boolean flag = "minecraft:overworld".equals(pContext.get("dimension").asString().result().orElse(""));
+        Optional<? extends Dynamic<?>> optional = pChunkTag.get("Status").result();
         if (flag && optional.isPresent()) {
             String s = NamespacedSchema.ensureNamespaced(optional.get().asString("empty"));
-            Optional<? extends Dynamic<?>> optional1 = p_240279_.get("below_zero_retrogen").result();
+            Optional<? extends Dynamic<?>> optional1 = pChunkTag.get("below_zero_retrogen").result();
             if (!STATUSES_TO_SKIP_BLENDING.contains(s)) {
-                p_240279_ = updateBlendingData(p_240279_, 384, -64);
+                pChunkTag = updateBlendingData(pChunkTag, 384, -64);
             } else if (optional1.isPresent()) {
                 Dynamic<?> dynamic = (Dynamic<?>)optional1.get();
                 String s1 = NamespacedSchema.ensureNamespaced(dynamic.get("target_status").asString("empty"));
                 if (!STATUSES_TO_SKIP_BLENDING.contains(s1)) {
-                    p_240279_ = updateBlendingData(p_240279_, 256, 0);
+                    pChunkTag = updateBlendingData(pChunkTag, 256, 0);
                 }
             }
         }
 
-        return p_240279_;
+        return pChunkTag;
     }
 
-    private static Dynamic<?> updateBlendingData(Dynamic<?> p_216567_, int p_216568_, int p_216569_) {
-        return p_216567_.set(
+    private static Dynamic<?> updateBlendingData(Dynamic<?> pChunkTag, int pMaxY, int pMinY) {
+        return pChunkTag.set(
             "blending_data",
-            p_216567_.createMap(
+            pChunkTag.createMap(
                 Map.of(
-                    p_216567_.createString("min_section"),
-                    p_216567_.createInt(SectionPos.blockToSectionCoord(p_216569_)),
-                    p_216567_.createString("max_section"),
-                    p_216567_.createInt(SectionPos.blockToSectionCoord(p_216569_ + p_216568_))
+                    pChunkTag.createString("min_section"),
+                    pChunkTag.createInt(SectionPos.blockToSectionCoord(pMinY)),
+                    pChunkTag.createString("max_section"),
+                    pChunkTag.createInt(SectionPos.blockToSectionCoord(pMinY + pMaxY))
                 )
             )
         );

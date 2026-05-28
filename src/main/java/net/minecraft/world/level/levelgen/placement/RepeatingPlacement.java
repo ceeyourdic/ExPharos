@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 
 public abstract class RepeatingPlacement extends PlacementModifier {
-    protected abstract int count(RandomSource p_226400_, BlockPos p_226401_);
+    protected abstract int count(RandomSource pRandom, BlockPos pPos);
 
     @Override
     public Stream<BlockPos> getPositions(PlacementContext p_226403_, RandomSource p_226404_, BlockPos p_226405_) {

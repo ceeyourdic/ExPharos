@@ -7,5 +7,5 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public interface ResourceDescriptor<T> {
     T allocate();
 
-    void free(T p_364928_);
+    void free(T pTarget);
 }

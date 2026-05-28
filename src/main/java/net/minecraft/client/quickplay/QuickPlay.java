@@ -34,66 +34,66 @@ public class QuickPlay {
     private static final Component TO_WORLD_LIST = Component.translatable("gui.toWorld");
     private static final Component TO_REALMS_LIST = Component.translatable("gui.toRealms");
 
-    public static void connect(Minecraft p_279319_, GameConfig.QuickPlayData p_279291_, RealmsClient p_279322_) {
-        String s = p_279291_.singleplayer();
-        String s1 = p_279291_.multiplayer();
-        String s2 = p_279291_.realms();
+    public static void connect(Minecraft pMinecraft, GameConfig.QuickPlayData pQuickPlayData, RealmsClient pRealmsClient) {
+        String s = pQuickPlayData.singleplayer();
+        String s1 = pQuickPlayData.multiplayer();
+        String s2 = pQuickPlayData.realms();
         if (!StringUtil.isBlank(s)) {
-            joinSingleplayerWorld(p_279319_, s);
+            joinSingleplayerWorld(pMinecraft, s);
         } else if (!StringUtil.isBlank(s1)) {
-            joinMultiplayerWorld(p_279319_, s1);
+            joinMultiplayerWorld(pMinecraft, s1);
         } else if (!StringUtil.isBlank(s2)) {
-            joinRealmsWorld(p_279319_, p_279322_, s2);
+            joinRealmsWorld(pMinecraft, pRealmsClient, s2);
         }
     }
 
-    private static void joinSingleplayerWorld(Minecraft p_279420_, String p_279459_) {
-        if (!p_279420_.getLevelSource().levelExists(p_279459_)) {
+    private static void joinSingleplayerWorld(Minecraft pMinecraft, String pLevelName) {
+        if (!pMinecraft.getLevelSource().levelExists(pLevelName)) {
             Screen screen = new SelectWorldScreen(new TitleScreen());
-            p_279420_.setScreen(new DisconnectedScreen(screen, ERROR_TITLE, INVALID_IDENTIFIER, TO_WORLD_LIST));
+            pMinecraft.setScreen(new DisconnectedScreen(screen, ERROR_TITLE, INVALID_IDENTIFIER, TO_WORLD_LIST));
         } else {
-            p_279420_.createWorldOpenFlows().openWorld(p_279459_, () -> p_279420_.setScreen(new TitleScreen()));
+            pMinecraft.createWorldOpenFlows().openWorld(pLevelName, () -> pMinecraft.setScreen(new TitleScreen()));
         }
     }
 
-    private static void joinMultiplayerWorld(Minecraft p_279276_, String p_279128_) {
-        ServerList serverlist = new ServerList(p_279276_);
+    private static void joinMultiplayerWorld(Minecraft pMinecraft, String pIp) {
+        ServerList serverlist = new ServerList(pMinecraft);
         serverlist.load();
-        ServerData serverdata = serverlist.get(p_279128_);
+        ServerData serverdata = serverlist.get(pIp);
         if (serverdata == null) {
-            serverdata = new ServerData(I18n.get("selectServer.defaultName"), p_279128_, ServerData.Type.OTHER);
+            serverdata = new ServerData(I18n.get("selectServer.defaultName"), pIp, ServerData.Type.OTHER);
             serverlist.add(serverdata, true);
             serverlist.save();
         }
 
-        ServerAddress serveraddress = ServerAddress.parseString(p_279128_);
-        ConnectScreen.startConnecting(new JoinMultiplayerScreen(new TitleScreen()), p_279276_, serveraddress, serverdata, true, null);
+        ServerAddress serveraddress = ServerAddress.parseString(pIp);
+        ConnectScreen.startConnecting(new JoinMultiplayerScreen(new TitleScreen()), pMinecraft, serveraddress, serverdata, true, null);
     }
 
-    private static void joinRealmsWorld(Minecraft p_279320_, RealmsClient p_279468_, String p_279371_) {
+    private static void joinRealmsWorld(Minecraft pMinecraft, RealmsClient pRealmsClient, String pServerId) {
         long i;
         RealmsServerList realmsserverlist;
         try {
-            i = Long.parseLong(p_279371_);
-            realmsserverlist = p_279468_.listRealms();
+            i = Long.parseLong(pServerId);
+            realmsserverlist = pRealmsClient.listRealms();
         } catch (NumberFormatException numberformatexception) {
             Screen screen1 = new RealmsMainScreen(new TitleScreen());
-            p_279320_.setScreen(new DisconnectedScreen(screen1, ERROR_TITLE, INVALID_IDENTIFIER, TO_REALMS_LIST));
+            pMinecraft.setScreen(new DisconnectedScreen(screen1, ERROR_TITLE, INVALID_IDENTIFIER, TO_REALMS_LIST));
             return;
         } catch (RealmsServiceException realmsserviceexception) {
             Screen screen = new TitleScreen();
-            p_279320_.setScreen(new DisconnectedScreen(screen, ERROR_TITLE, REALM_CONNECT, TO_TITLE));
+            pMinecraft.setScreen(new DisconnectedScreen(screen, ERROR_TITLE, REALM_CONNECT, TO_TITLE));
             return;
         }
 
         RealmsServer realmsserver = realmsserverlist.servers.stream().filter(p_279424_ -> p_279424_.id == i).findFirst().orElse(null);
         if (realmsserver == null) {
             Screen screen2 = new RealmsMainScreen(new TitleScreen());
-            p_279320_.setScreen(new DisconnectedScreen(screen2, ERROR_TITLE, REALM_PERMISSION, TO_REALMS_LIST));
+            pMinecraft.setScreen(new DisconnectedScreen(screen2, ERROR_TITLE, REALM_PERMISSION, TO_REALMS_LIST));
         } else {
             TitleScreen titlescreen = new TitleScreen();
             GetServerDetailsTask getserverdetailstask = new GetServerDetailsTask(titlescreen, realmsserver);
-            p_279320_.setScreen(new RealmsLongRunningMcoTaskScreen(titlescreen, getserverdetailstask));
+            pMinecraft.setScreen(new RealmsLongRunningMcoTaskScreen(titlescreen, getserverdetailstask));
         }
     }
 }

@@ -91,8 +91,8 @@ public class Zoglin extends Monster implements HoglinBase {
     }
 
     @Override
-    protected Brain<?> makeBrain(Dynamic<?> p_34221_) {
-        Brain<Zoglin> brain = this.brainProvider().makeBrain(p_34221_);
+    protected Brain<?> makeBrain(Dynamic<?> pDynamic) {
+        Brain<Zoglin> brain = this.brainProvider().makeBrain(pDynamic);
         initCoreActivity(brain);
         initIdleActivity(brain);
         initFightActivity(brain);
@@ -102,12 +102,12 @@ public class Zoglin extends Monster implements HoglinBase {
         return brain;
     }
 
-    private static void initCoreActivity(Brain<Zoglin> p_34217_) {
-        p_34217_.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink()));
+    private static void initCoreActivity(Brain<Zoglin> pBrain) {
+        pBrain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink()));
     }
 
-    private static void initIdleActivity(Brain<Zoglin> p_34229_) {
-        p_34229_.addActivity(
+    private static void initIdleActivity(Brain<Zoglin> pBrain) {
+        pBrain.addActivity(
             Activity.IDLE,
             10,
             ImmutableList.of(
@@ -122,8 +122,8 @@ public class Zoglin extends Monster implements HoglinBase {
         );
     }
 
-    private static void initFightActivity(Brain<Zoglin> p_34237_) {
-        p_34237_.addActivityAndRemoveMemoryWhenStopped(
+    private static void initFightActivity(Brain<Zoglin> pBrain) {
+        pBrain.addActivityAndRemoveMemoryWhenStopped(
             Activity.FIGHT,
             10,
             ImmutableList.of(
@@ -136,16 +136,16 @@ public class Zoglin extends Monster implements HoglinBase {
         );
     }
 
-    private Optional<? extends LivingEntity> findNearestValidAttackTarget(ServerLevel p_363321_) {
+    private Optional<? extends LivingEntity> findNearestValidAttackTarget(ServerLevel pLevel) {
         return this.getBrain()
             .getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
             .orElse(NearestVisibleLivingEntities.empty())
-            .findClosest(p_365722_ -> this.isTargetable(p_363321_, p_365722_));
+            .findClosest(p_365722_ -> this.isTargetable(pLevel, p_365722_));
     }
 
-    private boolean isTargetable(ServerLevel p_362768_, LivingEntity p_34253_) {
-        EntityType<?> entitytype = p_34253_.getType();
-        return entitytype != EntityType.ZOGLIN && entitytype != EntityType.CREEPER && Sensor.isEntityAttackable(p_362768_, this, p_34253_);
+    private boolean isTargetable(ServerLevel pLevel, LivingEntity pEntity) {
+        EntityType<?> entitytype = pEntity.getType();
+        return entitytype != EntityType.ZOGLIN && entitytype != EntityType.CREEPER && Sensor.isEntityAttackable(pLevel, this, pEntity);
     }
 
     @Override
@@ -155,9 +155,9 @@ public class Zoglin extends Monster implements HoglinBase {
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_34225_) {
-        super.onSyncedDataUpdated(p_34225_);
-        if (DATA_BABY_ID.equals(p_34225_)) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        super.onSyncedDataUpdated(pKey);
+        if (DATA_BABY_ID.equals(pKey)) {
             this.refreshDimensions();
         }
     }
@@ -203,9 +203,9 @@ public class Zoglin extends Monster implements HoglinBase {
     }
 
     @Override
-    protected void blockedByShield(LivingEntity p_34246_) {
+    protected void blockedByShield(LivingEntity pEntity) {
         if (!this.isBaby()) {
-            HoglinBase.throwTarget(this, p_34246_);
+            HoglinBase.throwTarget(this, pEntity);
         }
     }
 
@@ -223,9 +223,9 @@ public class Zoglin extends Monster implements HoglinBase {
         }
     }
 
-    private void setAttackTarget(LivingEntity p_34255_) {
+    private void setAttackTarget(LivingEntity pTarget) {
         this.brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
-        this.brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, p_34255_, 200L);
+        this.brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, pTarget, 200L);
     }
 
     @Override
@@ -254,9 +254,9 @@ public class Zoglin extends Monster implements HoglinBase {
     }
 
     @Override
-    public void setBaby(boolean p_34227_) {
-        this.getEntityData().set(DATA_BABY_ID, p_34227_);
-        if (!this.level().isClientSide && p_34227_) {
+    public void setBaby(boolean pChildZombie) {
+        this.getEntityData().set(DATA_BABY_ID, pChildZombie);
+        if (!this.level().isClientSide && pChildZombie) {
             this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.5);
         }
     }
@@ -300,7 +300,7 @@ public class Zoglin extends Monster implements HoglinBase {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_34244_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.ZOGLIN_HURT;
     }
 
@@ -310,7 +310,7 @@ public class Zoglin extends Monster implements HoglinBase {
     }
 
     @Override
-    protected void playStepSound(BlockPos p_34231_, BlockState p_34232_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(SoundEvents.ZOGLIN_STEP, 0.15F, 1.0F);
     }
 
@@ -331,17 +331,17 @@ public class Zoglin extends Monster implements HoglinBase {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_34234_) {
-        super.addAdditionalSaveData(p_34234_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
         if (this.isBaby()) {
-            p_34234_.putBoolean("IsBaby", true);
+            pCompound.putBoolean("IsBaby", true);
         }
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_34223_) {
-        super.readAdditionalSaveData(p_34223_);
-        if (p_34223_.getBoolean("IsBaby")) {
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.getBoolean("IsBaby")) {
             this.setBaby(true);
         }
     }

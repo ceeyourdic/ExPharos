@@ -50,8 +50,8 @@ public class MinecartChest extends AbstractMinecartContainer {
     }
 
     @Override
-    public AbstractContainerMenu createMenu(int p_38496_, Inventory p_38497_) {
-        return ChestMenu.threeRows(p_38496_, p_38497_, this);
+    public AbstractContainerMenu createMenu(int pId, Inventory pPlayerInventory) {
+        return ChestMenu.threeRows(pId, pPlayerInventory, this);
     }
 
     @Override

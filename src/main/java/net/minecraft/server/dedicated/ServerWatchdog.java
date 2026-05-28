@@ -27,9 +27,9 @@ public class ServerWatchdog implements Runnable {
     private final DedicatedServer server;
     private final long maxTickTimeNanos;
 
-    public ServerWatchdog(DedicatedServer p_139786_) {
-        this.server = p_139786_;
-        this.maxTickTimeNanos = p_139786_.getMaxTickLength() * TimeUtil.NANOSECONDS_PER_MILLISECOND;
+    public ServerWatchdog(DedicatedServer pServer) {
+        this.server = pServer;
+        this.maxTickTimeNanos = pServer.getMaxTickLength() * TimeUtil.NANOSECONDS_PER_MILLISECOND;
     }
 
     @Override
@@ -74,14 +74,14 @@ public class ServerWatchdog implements Runnable {
         }
     }
 
-    public static CrashReport createWatchdogCrashReport(String p_362648_, long p_368427_) {
+    public static CrashReport createWatchdogCrashReport(String pTitle, long pThreadId) {
         ThreadMXBean threadmxbean = ManagementFactory.getThreadMXBean();
         ThreadInfo[] athreadinfo = threadmxbean.dumpAllThreads(true, true);
         StringBuilder stringbuilder = new StringBuilder();
         Error error = new Error("Watchdog");
 
         for (ThreadInfo threadinfo : athreadinfo) {
-            if (threadinfo.getThreadId() == p_368427_) {
+            if (threadinfo.getThreadId() == pThreadId) {
                 error.setStackTrace(threadinfo.getStackTrace());
             }
 
@@ -89,7 +89,7 @@ public class ServerWatchdog implements Runnable {
             stringbuilder.append("\n");
         }
 
-        CrashReport crashreport = new CrashReport(p_362648_, error);
+        CrashReport crashreport = new CrashReport(pTitle, error);
         CrashReportCategory crashreportcategory = crashreport.addCategory("Thread Dump");
         crashreportcategory.setDetail("Threads", stringbuilder);
         return crashreport;

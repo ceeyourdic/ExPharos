@@ -40,62 +40,62 @@ public class DimensionDataStorage implements AutoCloseable {
     private final Path dataFolder;
     private CompletableFuture<?> pendingWriteFuture = CompletableFuture.completedFuture(null);
 
-    public DimensionDataStorage(Path p_364133_, DataFixer p_78150_, HolderLookup.Provider p_336063_) {
-        this.fixerUpper = p_78150_;
-        this.dataFolder = p_364133_;
-        this.registries = p_336063_;
+    public DimensionDataStorage(Path pDataFolder, DataFixer pFixerUpper, HolderLookup.Provider pRegistries) {
+        this.fixerUpper = pFixerUpper;
+        this.dataFolder = pDataFolder;
+        this.registries = pRegistries;
     }
 
-    private Path getDataFile(String p_78157_) {
-        return this.dataFolder.resolve(p_78157_ + ".dat");
+    private Path getDataFile(String pFilename) {
+        return this.dataFolder.resolve(pFilename + ".dat");
     }
 
-    public <T extends SavedData> T computeIfAbsent(SavedData.Factory<T> p_297495_, String p_164864_) {
-        T t = this.get(p_297495_, p_164864_);
+    public <T extends SavedData> T computeIfAbsent(SavedData.Factory<T> pFactory, String pName) {
+        T t = this.get(pFactory, pName);
         if (t != null) {
             return t;
         } else {
-            T t1 = (T)p_297495_.constructor().get();
-            this.set(p_164864_, t1);
+            T t1 = (T)pFactory.constructor().get();
+            this.set(pName, t1);
             return t1;
         }
     }
 
     @Nullable
-    public <T extends SavedData> T get(SavedData.Factory<T> p_297465_, String p_164860_) {
-        Optional<SavedData> optional = this.cache.get(p_164860_);
+    public <T extends SavedData> T get(SavedData.Factory<T> pFactory, String pName) {
+        Optional<SavedData> optional = this.cache.get(pName);
         if (optional == null) {
-            optional = Optional.ofNullable(this.readSavedData(p_297465_.deserializer(), p_297465_.type(), p_164860_));
-            this.cache.put(p_164860_, optional);
+            optional = Optional.ofNullable(this.readSavedData(pFactory.deserializer(), pFactory.type(), pName));
+            this.cache.put(pName, optional);
         }
 
         return (T)optional.orElse(null);
     }
 
     @Nullable
-    private <T extends SavedData> T readSavedData(BiFunction<CompoundTag, HolderLookup.Provider, T> p_335409_, DataFixTypes p_300231_, String p_164870_) {
+    private <T extends SavedData> T readSavedData(BiFunction<CompoundTag, HolderLookup.Provider, T> pReader, DataFixTypes pDataFixType, String pFilename) {
         try {
-            Path path = this.getDataFile(p_164870_);
+            Path path = this.getDataFile(pFilename);
             if (Files.exists(path)) {
-                CompoundTag compoundtag = this.readTagFromDisk(p_164870_, p_300231_, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
-                return p_335409_.apply(compoundtag.getCompound("data"), this.registries);
+                CompoundTag compoundtag = this.readTagFromDisk(pFilename, pDataFixType, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+                return pReader.apply(compoundtag.getCompound("data"), this.registries);
             }
         } catch (Exception exception) {
-            LOGGER.error("Error loading saved data: {}", p_164870_, exception);
+            LOGGER.error("Error loading saved data: {}", pFilename, exception);
         }
 
         return null;
     }
 
-    public void set(String p_164856_, SavedData p_164857_) {
-        this.cache.put(p_164856_, Optional.of(p_164857_));
-        p_164857_.setDirty();
+    public void set(String pName, SavedData pSavedData) {
+        this.cache.put(pName, Optional.of(pSavedData));
+        pSavedData.setDirty();
     }
 
-    public CompoundTag readTagFromDisk(String p_78159_, DataFixTypes p_301060_, int p_78160_) throws IOException {
+    public CompoundTag readTagFromDisk(String pFilename, DataFixTypes pDataFixType, int pVersion) throws IOException {
         CompoundTag compoundtag1;
         try (
-            InputStream inputstream = Files.newInputStream(this.getDataFile(p_78159_));
+            InputStream inputstream = Files.newInputStream(this.getDataFile(pFilename));
             PushbackInputStream pushbackinputstream = new PushbackInputStream(new FastBufferedInputStream(inputstream), 2);
         ) {
             CompoundTag compoundtag;
@@ -108,16 +108,16 @@ public class DimensionDataStorage implements AutoCloseable {
             }
 
             int i = NbtUtils.getDataVersion(compoundtag, 1343);
-            compoundtag1 = p_301060_.update(this.fixerUpper, compoundtag, i, p_78160_);
+            compoundtag1 = pDataFixType.update(this.fixerUpper, compoundtag, i, pVersion);
         }
 
         return compoundtag1;
     }
 
-    private boolean isGzip(PushbackInputStream p_78155_) throws IOException {
+    private boolean isGzip(PushbackInputStream pInputStream) throws IOException {
         byte[] abyte = new byte[2];
         boolean flag = false;
-        int i = p_78155_.read(abyte, 0, 2);
+        int i = pInputStream.read(abyte, 0, 2);
         if (i == 2) {
             int j = (abyte[1] & 255) << 8 | abyte[0] & 255;
             if (j == 35615) {
@@ -126,7 +126,7 @@ public class DimensionDataStorage implements AutoCloseable {
         }
 
         if (i != 0) {
-            p_78155_.unread(abyte, 0, i);
+            pInputStream.unread(abyte, 0, i);
         }
 
         return flag;
@@ -180,11 +180,11 @@ public class DimensionDataStorage implements AutoCloseable {
         return map;
     }
 
-    private static void tryWrite(Path p_377750_, CompoundTag p_378799_) {
+    private static void tryWrite(Path pPath, CompoundTag pTag) {
         try {
-            NbtIo.writeCompressed(p_378799_, p_377750_);
+            NbtIo.writeCompressed(pTag, pPath);
         } catch (IOException ioexception) {
-            LOGGER.error("Could not save data to {}", p_377750_.getFileName(), ioexception);
+            LOGGER.error("Could not save data to {}", pPath.getFileName(), ioexception);
         }
     }
 

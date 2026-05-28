@@ -137,10 +137,10 @@ public class SharedConstants {
     @Nullable
     private static WorldVersion CURRENT_VERSION;
 
-    public static void setVersion(WorldVersion p_183706_) {
+    public static void setVersion(WorldVersion pVersion) {
         if (CURRENT_VERSION == null) {
-            CURRENT_VERSION = p_183706_;
-        } else if (p_183706_ != CURRENT_VERSION) {
+            CURRENT_VERSION = pVersion;
+        } else if (pVersion != CURRENT_VERSION) {
             throw new IllegalStateException("Cannot override the current game version!");
         }
     }
@@ -163,9 +163,9 @@ public class SharedConstants {
         return 769;
     }
 
-    public static boolean debugVoidTerrain(ChunkPos p_183708_) {
-        int i = p_183708_.getMinBlockX();
-        int j = p_183708_.getMinBlockZ();
+    public static boolean debugVoidTerrain(ChunkPos pChunkPos) {
+        int i = pChunkPos.getMinBlockX();
+        int j = pChunkPos.getMinBlockZ();
         return !debugGenerateSquareTerrainWithoutNoise ? false : i > 8192 || i < 0 || j > 1024 || j < 0;
     }
 

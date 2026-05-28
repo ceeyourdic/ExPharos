@@ -17,10 +17,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 class RenderChunk {
     private final Map<BlockPos, BlockEntity> blockEntities;
     @Nullable
@@ -28,14 +25,14 @@ class RenderChunk {
     private final boolean debug;
     private final LevelChunk wrapped;
 
-    RenderChunk(LevelChunk p_200446_) {
-        this.wrapped = p_200446_;
-        this.debug = p_200446_.getLevel().isDebug();
-        this.blockEntities = ImmutableMap.copyOf(p_200446_.getBlockEntities());
-        if (p_200446_ instanceof EmptyLevelChunk) {
+    RenderChunk(LevelChunk pWrapped) {
+        this.wrapped = pWrapped;
+        this.debug = pWrapped.getLevel().isDebug();
+        this.blockEntities = ImmutableMap.copyOf(pWrapped.getBlockEntities());
+        if (pWrapped instanceof EmptyLevelChunk) {
             this.sections = null;
         } else {
-            LevelChunkSection[] alevelchunksection = p_200446_.getSections();
+            LevelChunkSection[] alevelchunksection = pWrapped.getSections();
             this.sections = new ArrayList<>(alevelchunksection.length);
 
             for (LevelChunkSection levelchunksection : alevelchunksection) {
@@ -45,14 +42,14 @@ class RenderChunk {
     }
 
     @Nullable
-    public BlockEntity getBlockEntity(BlockPos p_200452_) {
-        return this.blockEntities.get(p_200452_);
+    public BlockEntity getBlockEntity(BlockPos pPos) {
+        return this.blockEntities.get(pPos);
     }
 
-    public BlockState getBlockState(BlockPos p_200454_) {
-        int i = p_200454_.getX();
-        int j = p_200454_.getY();
-        int k = p_200454_.getZ();
+    public BlockState getBlockState(BlockPos pPos) {
+        int i = pPos.getX();
+        int j = pPos.getY();
+        int k = pPos.getZ();
         if (this.debug) {
             BlockState blockstate = null;
             if (j == 60) {
@@ -77,11 +74,26 @@ class RenderChunk {
                 }
 
                 return Blocks.AIR.defaultBlockState();
-            } catch (Throwable throwable) {
-                CrashReport crashreport = CrashReport.forThrowable(throwable, "Getting block state");
+            } catch (Throwable throwable1) {
+                CrashReport crashreport = CrashReport.forThrowable(throwable1, "Getting block state");
                 CrashReportCategory crashreportcategory = crashreport.addCategory("Block being got");
                 crashreportcategory.setDetail("Location", () -> CrashReportCategory.formatLocation(this.wrapped, i, j, k));
                 throw new ReportedException(crashreport);
+            }
+        }
+    }
+
+    public LevelChunk getChunk() {
+        return this.wrapped;
+    }
+
+    public void finish() {
+        if (this.sections != null) {
+            for (int i = 0; i < this.sections.size(); i++) {
+                PalettedContainer<BlockState> palettedcontainer = this.sections.get(i);
+                if (palettedcontainer != null) {
+                    palettedcontainer.finish();
+                }
             }
         }
     }

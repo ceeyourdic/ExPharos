@@ -21,25 +21,25 @@ public interface CaveVines {
     VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
     BooleanProperty BERRIES = BlockStateProperties.BERRIES;
 
-    static InteractionResult use(@Nullable Entity p_270738_, BlockState p_270772_, Level p_270721_, BlockPos p_270587_) {
-        if (p_270772_.getValue(BERRIES)) {
-            Block.popResource(p_270721_, p_270587_, new ItemStack(Items.GLOW_BERRIES, 1));
-            float f = Mth.randomBetween(p_270721_.random, 0.8F, 1.2F);
-            p_270721_.playSound(null, p_270587_, SoundEvents.CAVE_VINES_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, f);
-            BlockState blockstate = p_270772_.setValue(BERRIES, Boolean.valueOf(false));
-            p_270721_.setBlock(p_270587_, blockstate, 2);
-            p_270721_.gameEvent(GameEvent.BLOCK_CHANGE, p_270587_, GameEvent.Context.of(p_270738_, blockstate));
+    static InteractionResult use(@Nullable Entity pEntity, BlockState pState, Level pLevel, BlockPos pPos) {
+        if (pState.getValue(BERRIES)) {
+            Block.popResource(pLevel, pPos, new ItemStack(Items.GLOW_BERRIES, 1));
+            float f = Mth.randomBetween(pLevel.random, 0.8F, 1.2F);
+            pLevel.playSound(null, pPos, SoundEvents.CAVE_VINES_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, f);
+            BlockState blockstate = pState.setValue(BERRIES, Boolean.valueOf(false));
+            pLevel.setBlock(pPos, blockstate, 2);
+            pLevel.gameEvent(GameEvent.BLOCK_CHANGE, pPos, GameEvent.Context.of(pEntity, blockstate));
             return InteractionResult.SUCCESS;
         } else {
             return InteractionResult.PASS;
         }
     }
 
-    static boolean hasGlowBerries(BlockState p_152952_) {
-        return p_152952_.hasProperty(BERRIES) && p_152952_.getValue(BERRIES);
+    static boolean hasGlowBerries(BlockState pState) {
+        return pState.hasProperty(BERRIES) && pState.getValue(BERRIES);
     }
 
-    static ToIntFunction<BlockState> emission(int p_181218_) {
-        return p_181216_ -> p_181216_.getValue(BlockStateProperties.BERRIES) ? p_181218_ : 0;
+    static ToIntFunction<BlockState> emission(int pBerries) {
+        return p_181216_ -> p_181216_.getValue(BlockStateProperties.BERRIES) ? pBerries : 0;
     }
 }

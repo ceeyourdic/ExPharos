@@ -23,9 +23,9 @@ public class ClientMetricsSamplersProvider implements MetricsSamplerProvider {
     private final Set<MetricSampler> samplers = new ObjectOpenHashSet<>();
     private final ProfilerSamplerAdapter samplerFactory = new ProfilerSamplerAdapter();
 
-    public ClientMetricsSamplersProvider(LongSupplier p_172540_, LevelRenderer p_172541_) {
-        this.levelRenderer = p_172541_;
-        this.samplers.add(ServerMetricsSamplersProvider.tickTimeSampler(p_172540_));
+    public ClientMetricsSamplersProvider(LongSupplier pTimeSource, LevelRenderer pLevelRenderer) {
+        this.levelRenderer = pLevelRenderer;
+        this.samplers.add(ServerMetricsSamplersProvider.tickTimeSampler(pTimeSource));
         this.registerStaticSamplers();
     }
 

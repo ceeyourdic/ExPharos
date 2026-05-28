@@ -36,8 +36,8 @@ public class BambooSaplingBlock extends Block implements BonemealableBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_49003_, BlockGetter p_49004_, BlockPos p_49005_, CollisionContext p_49006_) {
-        Vec3 vec3 = p_49003_.getOffset(p_49005_);
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        Vec3 vec3 = pState.getOffset(pPos);
         return SAPLING_SHAPE.move(vec3.x, vec3.y, vec3.z);
     }
 
@@ -49,8 +49,8 @@ public class BambooSaplingBlock extends Block implements BonemealableBlock {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_48986_, LevelReader p_48987_, BlockPos p_48988_) {
-        return p_48987_.getBlockState(p_48988_.below()).is(BlockTags.BAMBOO_PLANTABLE_ON);
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        return pLevel.getBlockState(pPos.below()).is(BlockTags.BAMBOO_PLANTABLE_ON);
     }
 
     @Override
@@ -94,11 +94,11 @@ public class BambooSaplingBlock extends Block implements BonemealableBlock {
     }
 
     @Override
-    protected float getDestroyProgress(BlockState p_48981_, Player p_48982_, BlockGetter p_48983_, BlockPos p_48984_) {
-        return p_48982_.getMainHandItem().getItem() instanceof SwordItem ? 1.0F : super.getDestroyProgress(p_48981_, p_48982_, p_48983_, p_48984_);
+    protected float getDestroyProgress(BlockState pState, Player pPlayer, BlockGetter pLevel, BlockPos pPos) {
+        return pPlayer.getMainHandItem().getItem() instanceof SwordItem ? 1.0F : super.getDestroyProgress(pState, pPlayer, pLevel, pPos);
     }
 
-    protected void growBamboo(Level p_48973_, BlockPos p_48974_) {
-        p_48973_.setBlock(p_48974_.above(), Blocks.BAMBOO.defaultBlockState().setValue(BambooStalkBlock.LEAVES, BambooLeaves.SMALL), 3);
+    protected void growBamboo(Level pLevel, BlockPos pState) {
+        pLevel.setBlock(pState.above(), Blocks.BAMBOO.defaultBlockState().setValue(BambooStalkBlock.LEAVES, BambooLeaves.SMALL), 3);
     }
 }

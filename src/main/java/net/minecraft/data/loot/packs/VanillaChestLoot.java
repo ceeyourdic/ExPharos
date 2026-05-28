@@ -1547,13 +1547,13 @@ public record VanillaChestLoot(HolderLookup.Provider registries) implements Loot
         this.spawnerLootTables(p_250931_);
     }
 
-    public void spawnerLootTables(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> p_312949_) {
+    public void spawnerLootTables(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> pOutput) {
         HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
-        p_312949_.accept(
+        pOutput.accept(
             BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_KEY,
             LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.TRIAL_KEY)))
         );
-        p_312949_.accept(
+        pOutput.accept(
             BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_CONSUMABLES,
             LootTable.lootTable()
                 .withPool(
@@ -1578,11 +1578,11 @@ public record VanillaChestLoot(HolderLookup.Provider registries) implements Loot
                         )
                 )
         );
-        p_312949_.accept(
+        pOutput.accept(
             BuiltInLootTables.SPAWNER_OMINOUS_TRIAL_CHAMBER_KEY,
             LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.OMINOUS_TRIAL_KEY)))
         );
-        p_312949_.accept(
+        pOutput.accept(
             BuiltInLootTables.SPAWNER_OMINOUS_TRIAL_CHAMBER_CONSUMABLES,
             LootTable.lootTable()
                 .withPool(
@@ -1609,7 +1609,7 @@ public record VanillaChestLoot(HolderLookup.Provider registries) implements Loot
                         )
                 )
         );
-        p_312949_.accept(
+        pOutput.accept(
             BuiltInLootTables.SPAWNER_TRIAL_ITEMS_TO_DROP_WHEN_OMINOUS,
             LootTable.lootTable()
                 .withPool(

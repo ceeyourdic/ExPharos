@@ -81,26 +81,26 @@ public class ItemPredicateArgument implements ArgumentType<ItemPredicateArgument
         );
     private final Grammar<List<Predicate<ItemStack>>> grammarWithContext;
 
-    public ItemPredicateArgument(CommandBuildContext p_235352_) {
-        ItemPredicateArgument.Context itempredicateargument$context = new ItemPredicateArgument.Context(p_235352_);
+    public ItemPredicateArgument(CommandBuildContext pContext) {
+        ItemPredicateArgument.Context itempredicateargument$context = new ItemPredicateArgument.Context(pContext);
         this.grammarWithContext = ComponentPredicateParser.createGrammar(itempredicateargument$context);
     }
 
-    public static ItemPredicateArgument itemPredicate(CommandBuildContext p_235354_) {
-        return new ItemPredicateArgument(p_235354_);
+    public static ItemPredicateArgument itemPredicate(CommandBuildContext pContext) {
+        return new ItemPredicateArgument(pContext);
     }
 
-    public ItemPredicateArgument.Result parse(StringReader p_121039_) throws CommandSyntaxException {
-        return Util.allOf(this.grammarWithContext.parseForCommands(p_121039_))::test;
+    public ItemPredicateArgument.Result parse(StringReader pReader) throws CommandSyntaxException {
+        return Util.allOf(this.grammarWithContext.parseForCommands(pReader))::test;
     }
 
-    public static ItemPredicateArgument.Result getItemPredicate(CommandContext<CommandSourceStack> p_121041_, String p_121042_) {
-        return p_121041_.getArgument(p_121042_, ItemPredicateArgument.Result.class);
+    public static ItemPredicateArgument.Result getItemPredicate(CommandContext<CommandSourceStack> pContext, String pName) {
+        return pContext.getArgument(pName, ItemPredicateArgument.Result.class);
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_121054_, SuggestionsBuilder p_121055_) {
-        return this.grammarWithContext.parseForSuggestions(p_121055_);
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> pContext, SuggestionsBuilder pBuilder) {
+        return this.grammarWithContext.parseForSuggestions(pBuilder);
     }
 
     @Override
@@ -110,23 +110,23 @@ public class ItemPredicateArgument implements ArgumentType<ItemPredicateArgument
 
     static record ComponentWrapper(ResourceLocation id, Predicate<ItemStack> presenceChecker, Decoder<? extends Predicate<ItemStack>> valueChecker) {
         public static <T> ItemPredicateArgument.ComponentWrapper create(
-            ImmutableStringReader p_336159_, ResourceLocation p_334103_, DataComponentType<T> p_331569_
+            ImmutableStringReader pReader, ResourceLocation pId, DataComponentType<T> pComponentType
         ) throws CommandSyntaxException {
-            Codec<T> codec = p_331569_.codec();
+            Codec<T> codec = pComponentType.codec();
             if (codec == null) {
-                throw ItemPredicateArgument.ERROR_UNKNOWN_COMPONENT.createWithContext(p_336159_, p_334103_);
+                throw ItemPredicateArgument.ERROR_UNKNOWN_COMPONENT.createWithContext(pReader, pId);
             } else {
-                return new ItemPredicateArgument.ComponentWrapper(p_334103_, p_327858_ -> p_327858_.has(p_331569_), codec.map(p_335085_ -> p_331446_ -> {
-                        T t = p_331446_.get(p_331569_);
+                return new ItemPredicateArgument.ComponentWrapper(pId, p_327858_ -> p_327858_.has(pComponentType), codec.map(p_335085_ -> p_331446_ -> {
+                        T t = p_331446_.get(pComponentType);
                         return Objects.equals(p_335085_, t);
                     }));
             }
         }
 
-        public Predicate<ItemStack> decode(ImmutableStringReader p_333508_, RegistryOps<Tag> p_329031_, Tag p_332091_) throws CommandSyntaxException {
-            DataResult<? extends Predicate<ItemStack>> dataresult = this.valueChecker.parse(p_329031_, p_332091_);
+        public Predicate<ItemStack> decode(ImmutableStringReader pReader, RegistryOps<Tag> pOps, Tag pValue) throws CommandSyntaxException {
+            DataResult<? extends Predicate<ItemStack>> dataresult = this.valueChecker.parse(pOps, pValue);
             return (Predicate<ItemStack>)dataresult.getOrThrow(
-                p_331995_ -> ItemPredicateArgument.ERROR_MALFORMED_COMPONENT.createWithContext(p_333508_, this.id.toString(), p_331995_)
+                p_331995_ -> ItemPredicateArgument.ERROR_MALFORMED_COMPONENT.createWithContext(pReader, this.id.toString(), p_331995_)
             );
         }
     }
@@ -138,11 +138,11 @@ public class ItemPredicateArgument implements ArgumentType<ItemPredicateArgument
         private final HolderLookup.RegistryLookup<ItemSubPredicate.Type<?>> predicates;
         private final RegistryOps<Tag> registryOps;
 
-        Context(HolderLookup.Provider p_331757_) {
-            this.items = p_331757_.lookupOrThrow(Registries.ITEM);
-            this.components = p_331757_.lookupOrThrow(Registries.DATA_COMPONENT_TYPE);
-            this.predicates = p_331757_.lookupOrThrow(Registries.ITEM_SUB_PREDICATE_TYPE);
-            this.registryOps = p_331757_.createSerializationContext(NbtOps.INSTANCE);
+        Context(HolderLookup.Provider pRegistries) {
+            this.items = pRegistries.lookupOrThrow(Registries.ITEM);
+            this.components = pRegistries.lookupOrThrow(Registries.DATA_COMPONENT_TYPE);
+            this.predicates = pRegistries.lookupOrThrow(Registries.ITEM_SUB_PREDICATE_TYPE);
+            this.registryOps = pRegistries.createSerializationContext(NbtOps.INSTANCE);
         }
 
         public Predicate<ItemStack> forElementType(ImmutableStringReader p_328916_, ResourceLocation p_333737_) throws CommandSyntaxException {
@@ -227,14 +227,14 @@ public class ItemPredicateArgument implements ArgumentType<ItemPredicateArgument
     }
 
     static record PredicateWrapper(ResourceLocation id, Decoder<? extends Predicate<ItemStack>> type) {
-        public PredicateWrapper(Holder.Reference<ItemSubPredicate.Type<?>> p_327901_) {
-            this(p_327901_.key().location(), p_327901_.value().codec().map(p_330179_ -> p_330179_::matches));
+        public PredicateWrapper(Holder.Reference<ItemSubPredicate.Type<?>> pPredicate) {
+            this(pPredicate.key().location(), pPredicate.value().codec().map(p_330179_ -> p_330179_::matches));
         }
 
-        public Predicate<ItemStack> decode(ImmutableStringReader p_335853_, RegistryOps<Tag> p_335697_, Tag p_330696_) throws CommandSyntaxException {
-            DataResult<? extends Predicate<ItemStack>> dataresult = this.type.parse(p_335697_, p_330696_);
+        public Predicate<ItemStack> decode(ImmutableStringReader pReader, RegistryOps<Tag> pOps, Tag pValue) throws CommandSyntaxException {
+            DataResult<? extends Predicate<ItemStack>> dataresult = this.type.parse(pOps, pValue);
             return (Predicate<ItemStack>)dataresult.getOrThrow(
-                p_334639_ -> ItemPredicateArgument.ERROR_MALFORMED_PREDICATE.createWithContext(p_335853_, this.id.toString(), p_334639_)
+                p_334639_ -> ItemPredicateArgument.ERROR_MALFORMED_PREDICATE.createWithContext(pReader, this.id.toString(), p_334639_)
             );
         }
     }

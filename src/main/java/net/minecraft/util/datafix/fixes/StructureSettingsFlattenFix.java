@@ -12,8 +12,8 @@ import com.mojang.serialization.Dynamic;
 import net.minecraft.Util;
 
 public class StructureSettingsFlattenFix extends DataFix {
-    public StructureSettingsFlattenFix(Schema p_204000_) {
-        super(p_204000_, false);
+    public StructureSettingsFlattenFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override
@@ -30,24 +30,24 @@ public class StructureSettingsFlattenFix extends DataFix {
         );
     }
 
-    private static Pair<Dynamic<?>, Dynamic<?>> fixDimension(Pair<Dynamic<?>, Dynamic<?>> p_204005_) {
-        Dynamic<?> dynamic = p_204005_.getSecond();
+    private static Pair<Dynamic<?>, Dynamic<?>> fixDimension(Pair<Dynamic<?>, Dynamic<?>> pDimensions) {
+        Dynamic<?> dynamic = pDimensions.getSecond();
         return Pair.of(
-            p_204005_.getFirst(),
+            pDimensions.getFirst(),
             dynamic.update(
                 "generator", p_204018_ -> p_204018_.update("settings", p_204020_ -> p_204020_.update("structures", StructureSettingsFlattenFix::fixStructures))
             )
         );
     }
 
-    private static Dynamic<?> fixStructures(Dynamic<?> p_204007_) {
-        Dynamic<?> dynamic = p_204007_.get("structures")
+    private static Dynamic<?> fixStructures(Dynamic<?> pDynamic) {
+        Dynamic<?> dynamic = pDynamic.get("structures")
             .orElseEmptyMap()
-            .updateMapValues(p_204010_ -> p_204010_.mapSecond(p_204013_ -> p_204013_.set("type", p_204007_.createString("minecraft:random_spread"))));
+            .updateMapValues(p_204010_ -> p_204010_.mapSecond(p_204013_ -> p_204013_.set("type", pDynamic.createString("minecraft:random_spread"))));
         return DataFixUtils.orElse(
-            p_204007_.get("stronghold")
+            pDynamic.get("stronghold")
                 .result()
-                .map(p_207675_ -> dynamic.set("minecraft:stronghold", p_207675_.set("type", p_204007_.createString("minecraft:concentric_rings")))),
+                .map(p_207675_ -> dynamic.set("minecraft:stronghold", p_207675_.set("type", pDynamic.createString("minecraft:concentric_rings")))),
             dynamic
         );
     }

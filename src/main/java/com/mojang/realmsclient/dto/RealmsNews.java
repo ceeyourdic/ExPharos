@@ -15,11 +15,11 @@ public class RealmsNews extends ValueObject {
     @Nullable
     public String newsLink;
 
-    public static RealmsNews parse(String p_87472_) {
+    public static RealmsNews parse(String pJson) {
         RealmsNews realmsnews = new RealmsNews();
 
         try {
-            JsonObject jsonobject = JsonParser.parseString(p_87472_).getAsJsonObject();
+            JsonObject jsonobject = JsonParser.parseString(pJson).getAsJsonObject();
             realmsnews.newsLink = JsonUtils.getStringOr("newsLink", jsonobject, null);
         } catch (Exception exception) {
             LOGGER.error("Could not parse RealmsNews: {}", exception.getMessage());

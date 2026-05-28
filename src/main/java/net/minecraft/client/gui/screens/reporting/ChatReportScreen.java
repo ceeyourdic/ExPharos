@@ -23,16 +23,16 @@ public class ChatReportScreen extends AbstractReportScreen<ChatReport.Builder> {
     private Button selectMessagesButton;
     private Button selectReasonButton;
 
-    private ChatReportScreen(Screen p_254505_, ReportingContext p_254531_, ChatReport.Builder p_298527_) {
-        super(TITLE, p_254505_, p_254531_, p_298527_);
+    private ChatReportScreen(Screen pLastScreen, ReportingContext pReportingContext, ChatReport.Builder pReportBuilder) {
+        super(TITLE, pLastScreen, pReportingContext, pReportBuilder);
     }
 
-    public ChatReportScreen(Screen p_239116_, ReportingContext p_239117_, UUID p_239118_) {
-        this(p_239116_, p_239117_, new ChatReport.Builder(p_239118_, p_239117_.sender().reportLimits()));
+    public ChatReportScreen(Screen pLastScreen, ReportingContext pReportingContext, UUID pReportId) {
+        this(pLastScreen, pReportingContext, new ChatReport.Builder(pReportId, pReportingContext.sender().reportLimits()));
     }
 
-    public ChatReportScreen(Screen p_253839_, ReportingContext p_254386_, ChatReport p_297371_) {
-        this(p_253839_, p_254386_, new ChatReport.Builder(p_297371_, p_254386_.sender().reportLimits()));
+    public ChatReportScreen(Screen pLastScreen, ReportingContext pReportContext, ChatReport pReport) {
+        this(pLastScreen, pReportContext, new ChatReport.Builder(pReport, pReportContext.sender().reportLimits()));
     }
 
     @Override

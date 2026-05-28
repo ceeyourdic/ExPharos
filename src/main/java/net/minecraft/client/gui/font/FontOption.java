@@ -17,8 +17,8 @@ public enum FontOption implements StringRepresentable {
     public static final Codec<FontOption> CODEC = StringRepresentable.fromEnum(FontOption::values);
     private final String name;
 
-    private FontOption(final String p_334824_) {
-        this.name = p_334824_;
+    private FontOption(final String pName) {
+        this.name = pName;
     }
 
     @Override
@@ -33,13 +33,13 @@ public enum FontOption implements StringRepresentable {
             .xmap(FontOption.Filter::new, p_329501_ -> p_329501_.values);
         public static final FontOption.Filter ALWAYS_PASS = new FontOption.Filter(Map.of());
 
-        public Filter(Map<FontOption, Boolean> p_332258_) {
-            this.values = p_332258_;
+        public Filter(Map<FontOption, Boolean> pValues) {
+            this.values = pValues;
         }
 
-        public boolean apply(Set<FontOption> p_334823_) {
+        public boolean apply(Set<FontOption> pOptions) {
             for (Entry<FontOption, Boolean> entry : this.values.entrySet()) {
-                if (p_334823_.contains(entry.getKey()) != entry.getValue()) {
+                if (pOptions.contains(entry.getKey()) != entry.getValue()) {
                     return false;
                 }
             }
@@ -47,8 +47,8 @@ public enum FontOption implements StringRepresentable {
             return true;
         }
 
-        public FontOption.Filter merge(FontOption.Filter p_331605_) {
-            Map<FontOption, Boolean> map = new HashMap<>(p_331605_.values);
+        public FontOption.Filter merge(FontOption.Filter pFilter) {
+            Map<FontOption, Boolean> map = new HashMap<>(pFilter.values);
             map.putAll(this.values);
             return new FontOption.Filter(Map.copyOf(map));
         }

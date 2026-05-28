@@ -19,7 +19,7 @@ public class MagmaCubeRenderer extends MobRenderer<MagmaCube, SlimeRenderState, 
         super(p_174298_, new LavaSlimeModel(p_174298_.bakeLayer(ModelLayers.MAGMA_CUBE)), 0.25F);
     }
 
-    protected int getBlockLightLevel(MagmaCube p_115399_, BlockPos p_115400_) {
+    protected int getBlockLightLevel(MagmaCube pEntity, BlockPos pPos) {
         return 15;
     }
 

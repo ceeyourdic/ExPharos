@@ -15,76 +15,79 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelDebugName;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class TextureSlots {
     public static final TextureSlots EMPTY = new TextureSlots(Map.of());
     private static final char REFERENCE_CHAR = '#';
     private final Map<String, Material> resolvedValues;
 
-    TextureSlots(Map<String, Material> p_376574_) {
-        this.resolvedValues = p_376574_;
+    public TextureSlots(Map<String, Material> pResolvedValues) {
+        this.resolvedValues = pResolvedValues;
     }
 
     @Nullable
-    public Material getMaterial(String p_375817_) {
-        if (isTextureReference(p_375817_)) {
-            p_375817_ = p_375817_.substring(1);
+    public Material getMaterial(String pName) {
+        if (isTextureReference(pName)) {
+            pName = pName.substring(1);
         }
 
-        return this.resolvedValues.get(p_375817_);
+        return this.resolvedValues.get(pName);
     }
 
-    private static boolean isTextureReference(String p_376119_) {
-        return p_376119_.charAt(0) == '#';
+    private static boolean isTextureReference(String pName) {
+        return pName.charAt(0) == '#';
     }
 
-    public static TextureSlots.Data parseTextureMap(JsonObject p_376737_, ResourceLocation p_378464_) {
+    public static TextureSlots.Data parseTextureMap(JsonObject pJson, ResourceLocation pAtlas) {
         TextureSlots.Data.Builder textureslots$data$builder = new TextureSlots.Data.Builder();
 
-        for (Entry<String, JsonElement> entry : p_376737_.entrySet()) {
-            parseEntry(p_378464_, entry.getKey(), entry.getValue().getAsString(), textureslots$data$builder);
+        for (Entry<String, JsonElement> entry : pJson.entrySet()) {
+            parseEntry(pAtlas, entry.getKey(), entry.getValue().getAsString(), textureslots$data$builder);
         }
 
         return textureslots$data$builder.build();
     }
 
-    private static void parseEntry(ResourceLocation p_375809_, String p_376233_, String p_378647_, TextureSlots.Data.Builder p_376019_) {
-        if (isTextureReference(p_378647_)) {
-            p_376019_.addReference(p_376233_, p_378647_.substring(1));
+    private static void parseEntry(ResourceLocation pAtlas, String pName, String pMaterial, TextureSlots.Data.Builder pBuilder) {
+        if (isTextureReference(pMaterial)) {
+            pBuilder.addReference(pName, pMaterial.substring(1));
         } else {
-            ResourceLocation resourcelocation = ResourceLocation.tryParse(p_378647_);
+            ResourceLocation resourcelocation = ResourceLocation.tryParse(pMaterial);
             if (resourcelocation == null) {
-                throw new JsonParseException(p_378647_ + " is not valid resource location");
+                throw new JsonParseException(pMaterial + " is not valid resource location");
             }
 
-            p_376019_.addTexture(p_376233_, new Material(p_375809_, resourcelocation));
+            pBuilder.addTexture(pName, new Material(pAtlas, resourcelocation));
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    public Map<String, Material> getResolvedValues() {
+        return this.resolvedValues;
+    }
+
+    @Override
+    public String toString() {
+        return this.resolvedValues + "";
+    }
+
     public static record Data(Map<String, TextureSlots.SlotContents> values) {
         public static final TextureSlots.Data EMPTY = new TextureSlots.Data(Map.of());
 
-        @OnlyIn(Dist.CLIENT)
         public static class Builder {
             private final Map<String, TextureSlots.SlotContents> textureMap = new HashMap<>();
 
-            public TextureSlots.Data.Builder addReference(String p_375509_, String p_378243_) {
-                this.textureMap.put(p_375509_, new TextureSlots.Reference(p_378243_));
+            public TextureSlots.Data.Builder addReference(String pName, String pMaterial) {
+                this.textureMap.put(pName, new TextureSlots.Reference(pMaterial));
                 return this;
             }
 
-            public TextureSlots.Data.Builder addTexture(String p_376424_, Material p_377345_) {
-                this.textureMap.put(p_376424_, new TextureSlots.Value(p_377345_));
+            public TextureSlots.Data.Builder addTexture(String pName, Material pMaterial) {
+                this.textureMap.put(pName, new TextureSlots.Value(pMaterial));
                 return this;
             }
 
@@ -94,26 +97,24 @@ public class TextureSlots {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     static record Reference(String target) implements TextureSlots.SlotContents {
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static class Resolver {
         private static final Logger LOGGER = LogUtils.getLogger();
         private final List<TextureSlots.Data> entries = new ArrayList<>();
 
-        public TextureSlots.Resolver addLast(TextureSlots.Data p_375723_) {
-            this.entries.addLast(p_375723_);
+        public TextureSlots.Resolver addLast(TextureSlots.Data pData) {
+            this.entries.addLast(pData);
             return this;
         }
 
-        public TextureSlots.Resolver addFirst(TextureSlots.Data p_377819_) {
-            this.entries.addFirst(p_377819_);
+        public TextureSlots.Resolver addFirst(TextureSlots.Data pData) {
+            this.entries.addFirst(pData);
             return this;
         }
 
-        public TextureSlots resolve(ModelDebugName p_375822_) {
+        public TextureSlots resolve(ModelDebugName pName) {
             if (this.entries.isEmpty()) {
                 return TextureSlots.EMPTY;
             } else {
@@ -121,16 +122,17 @@ public class TextureSlots {
                 Object2ObjectMap<String, TextureSlots.Reference> object2objectmap1 = new Object2ObjectArrayMap<>();
 
                 for (TextureSlots.Data textureslots$data : Lists.reverse(this.entries)) {
-                    textureslots$data.values.forEach((p_376922_, p_376306_) -> {
-                        Objects.requireNonNull(p_376306_);
-                        switch (p_376306_) {
+                    textureslots$data.values.forEach((keyIn, slotIn) -> {
+                        Objects.requireNonNull(slotIn);
+                        Objects.requireNonNull(slotIn);
+                        switch (slotIn) {
                             case TextureSlots.Value textureslots$value:
-                                object2objectmap1.remove(p_376922_);
-                                object2objectmap.put(p_376922_, textureslots$value.material());
+                                object2objectmap1.remove(keyIn);
+                                object2objectmap.put(keyIn, textureslots$value.material());
                                 break;
-                            case TextureSlots.Reference textureslots$reference:
-                                object2objectmap.remove(p_376922_);
-                                object2objectmap1.put(p_376922_, textureslots$reference);
+                            case TextureSlots.Reference textureslots$reference1:
+                                object2objectmap.remove(keyIn);
+                                object2objectmap1.put(keyIn, textureslots$reference1);
                                 break;
                             default:
                                 throw new MatchException(null, null);
@@ -161,14 +163,15 @@ public class TextureSlots {
                     }
 
                     if (!object2objectmap1.isEmpty()) {
-                        LOGGER.warn(
-                            "Unresolved texture references in {}:\n{}",
-                            p_375822_.get(),
-                            object2objectmap1.entrySet()
-                                .stream()
-                                .map(p_378552_ -> "\t#" + p_378552_.getKey() + "-> #" + p_378552_.getValue().target + "\n")
-                                .collect(Collectors.joining())
-                        );
+                        Map<String, Material> map = object2objectmap;
+                        Map<String, TextureSlots.Reference> map1 = object2objectmap1;
+
+                        for (String s : object2objectmap1.keySet()) {
+                            TextureSlots.Reference textureslots$reference = map1.get(s);
+                            if (!map.isEmpty() || map1.size() != 1 || !s.equals("particle") || !textureslots$reference.target.equals("layer0")) {
+                                LOGGER.warn("Unresolved texture reference in {}, {}", pName.get(), "#" + s + " -> #" + textureslots$reference.target);
+                            }
+                        }
                     }
 
                     return new TextureSlots(object2objectmap);
@@ -177,11 +180,9 @@ public class TextureSlots {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public sealed interface SlotContents permits TextureSlots.Value, TextureSlots.Reference {
     }
 
-    @OnlyIn(Dist.CLIENT)
     static record Value(Material material) implements TextureSlots.SlotContents {
     }
 }

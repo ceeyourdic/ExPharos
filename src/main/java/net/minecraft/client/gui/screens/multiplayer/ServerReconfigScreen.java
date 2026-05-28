@@ -22,9 +22,9 @@ public class ServerReconfigScreen extends Screen {
     private int delayTicker;
     private final LinearLayout layout = LinearLayout.vertical();
 
-    public ServerReconfigScreen(Component p_298223_, Connection p_298466_) {
-        super(p_298223_);
-        this.connection = p_298466_;
+    public ServerReconfigScreen(Component pTitle, Connection pConnection) {
+        super(pTitle);
+        this.connection = pConnection;
     }
 
     @Override

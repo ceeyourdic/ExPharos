@@ -64,41 +64,41 @@ public class VanillaPackResourcesBuilder {
     private BuiltInMetadata metadata = BuiltInMetadata.of();
     private final Set<String> namespaces = new HashSet<>();
 
-    private static Path safeGetPath(URI p_248652_) throws IOException {
+    private static Path safeGetPath(URI pUri) throws IOException {
         try {
-            return Paths.get(p_248652_);
+            return Paths.get(pUri);
         } catch (FileSystemNotFoundException filesystemnotfoundexception) {
         } catch (Throwable throwable) {
-            LOGGER.warn("Unable to get path for: {}", p_248652_, throwable);
+            LOGGER.warn("Unable to get path for: {}", pUri, throwable);
         }
 
         try {
-            FileSystems.newFileSystem(p_248652_, Collections.emptyMap());
+            FileSystems.newFileSystem(pUri, Collections.emptyMap());
         } catch (FileSystemAlreadyExistsException filesystemalreadyexistsexception) {
         }
 
-        return Paths.get(p_248652_);
+        return Paths.get(pUri);
     }
 
-    private boolean validateDirPath(Path p_249112_) {
-        if (!Files.exists(p_249112_)) {
+    private boolean validateDirPath(Path pPath) {
+        if (!Files.exists(pPath)) {
             return false;
-        } else if (!Files.isDirectory(p_249112_)) {
-            throw new IllegalArgumentException("Path " + p_249112_.toAbsolutePath() + " is not directory");
+        } else if (!Files.isDirectory(pPath)) {
+            throw new IllegalArgumentException("Path " + pPath.toAbsolutePath() + " is not directory");
         } else {
             return true;
         }
     }
 
-    private void pushRootPath(Path p_251084_) {
-        if (this.validateDirPath(p_251084_)) {
-            this.rootPaths.add(p_251084_);
+    private void pushRootPath(Path pRootPath) {
+        if (this.validateDirPath(pRootPath)) {
+            this.rootPaths.add(pRootPath);
         }
     }
 
-    private void pushPathForType(PackType p_250073_, Path p_252259_) {
-        if (this.validateDirPath(p_252259_)) {
-            this.pathsForType.computeIfAbsent(p_250073_, p_250639_ -> new LinkedHashSet<>()).add(p_252259_);
+    private void pushPathForType(PackType pPackType, Path pPath) {
+        if (this.validateDirPath(pPath)) {
+            this.pathsForType.computeIfAbsent(pPackType, p_250639_ -> new LinkedHashSet<>()).add(pPath);
         }
     }
 
@@ -110,11 +110,11 @@ public class VanillaPackResourcesBuilder {
         return this;
     }
 
-    public VanillaPackResourcesBuilder pushClasspathResources(PackType p_251987_, Class<?> p_249062_) {
+    public VanillaPackResourcesBuilder pushClasspathResources(PackType pPackType, Class<?> pClazz) {
         Enumeration<URL> enumeration = null;
 
         try {
-            enumeration = p_249062_.getClassLoader().getResources(p_251987_.getDirectory() + "/");
+            enumeration = pClazz.getClassLoader().getResources(pPackType.getDirectory() + "/");
         } catch (IOException ioexception) {
         }
 
@@ -126,7 +126,7 @@ public class VanillaPackResourcesBuilder {
                 if ("file".equals(uri.getScheme())) {
                     Path path = Paths.get(uri);
                     this.pushRootPath(path.getParent());
-                    this.pushPathForType(p_251987_, path);
+                    this.pushPathForType(pPackType, path);
                 }
             } catch (Exception exception) {
                 LOGGER.error("Failed to extract path from {}", url, exception);
@@ -141,33 +141,33 @@ public class VanillaPackResourcesBuilder {
         return this;
     }
 
-    public VanillaPackResourcesBuilder pushUniversalPath(Path p_249464_) {
-        this.pushRootPath(p_249464_);
+    public VanillaPackResourcesBuilder pushUniversalPath(Path pPath) {
+        this.pushRootPath(pPath);
 
         for (PackType packtype : PackType.values()) {
-            this.pushPathForType(packtype, p_249464_.resolve(packtype.getDirectory()));
+            this.pushPathForType(packtype, pPath.resolve(packtype.getDirectory()));
         }
 
         return this;
     }
 
-    public VanillaPackResourcesBuilder pushAssetPath(PackType p_248623_, Path p_250065_) {
-        this.pushRootPath(p_250065_);
-        this.pushPathForType(p_248623_, p_250065_);
+    public VanillaPackResourcesBuilder pushAssetPath(PackType pPackType, Path pPath) {
+        this.pushRootPath(pPath);
+        this.pushPathForType(pPackType, pPath);
         return this;
     }
 
-    public VanillaPackResourcesBuilder setMetadata(BuiltInMetadata p_249597_) {
-        this.metadata = p_249597_;
+    public VanillaPackResourcesBuilder setMetadata(BuiltInMetadata pMetadata) {
+        this.metadata = pMetadata;
         return this;
     }
 
-    public VanillaPackResourcesBuilder exposeNamespace(String... p_250838_) {
-        this.namespaces.addAll(Arrays.asList(p_250838_));
+    public VanillaPackResourcesBuilder exposeNamespace(String... pNamespaces) {
+        this.namespaces.addAll(Arrays.asList(pNamespaces));
         return this;
     }
 
-    public VanillaPackResources build(PackLocationInfo p_332000_) {
+    public VanillaPackResources build(PackLocationInfo pLocation) {
         Map<PackType, List<Path>> map = new EnumMap<>(PackType.class);
 
         for (PackType packtype : PackType.values()) {
@@ -175,11 +175,11 @@ public class VanillaPackResourcesBuilder {
             map.put(packtype, list);
         }
 
-        return new VanillaPackResources(p_332000_, this.metadata, Set.copyOf(this.namespaces), copyAndReverse(this.rootPaths), map);
+        return new VanillaPackResources(pLocation, this.metadata, Set.copyOf(this.namespaces), copyAndReverse(this.rootPaths), map);
     }
 
-    private static List<Path> copyAndReverse(Collection<Path> p_252072_) {
-        List<Path> list = new ArrayList<>(p_252072_);
+    private static List<Path> copyAndReverse(Collection<Path> pPaths) {
+        List<Path> list = new ArrayList<>(pPaths);
         Collections.reverse(list);
         return List.copyOf(list);
     }

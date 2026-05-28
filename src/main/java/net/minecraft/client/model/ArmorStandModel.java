@@ -92,11 +92,11 @@ public class ArmorStandModel extends ArmorStandArmorModel {
     }
 
     @Override
-    public void translateToHand(HumanoidArm p_102157_, PoseStack p_102158_) {
-        ModelPart modelpart = this.getArm(p_102157_);
+    public void translateToHand(HumanoidArm pSide, PoseStack pPoseStack) {
+        ModelPart modelpart = this.getArm(pSide);
         boolean flag = modelpart.visible;
         modelpart.visible = true;
-        super.translateToHand(p_102157_, p_102158_);
+        super.translateToHand(pSide, pPoseStack);
         modelpart.visible = flag;
     }
 }

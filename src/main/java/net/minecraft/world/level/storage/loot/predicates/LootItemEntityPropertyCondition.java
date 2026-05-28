@@ -31,21 +31,21 @@ public record LootItemEntityPropertyCondition(Optional<EntityPredicate> predicat
         return Set.of(LootContextParams.ORIGIN, this.entityTarget.getParam());
     }
 
-    public boolean test(LootContext p_81871_) {
-        Entity entity = p_81871_.getOptionalParameter(this.entityTarget.getParam());
-        Vec3 vec3 = p_81871_.getOptionalParameter(LootContextParams.ORIGIN);
-        return this.predicate.isEmpty() || this.predicate.get().matches(p_81871_.getLevel(), vec3, entity);
+    public boolean test(LootContext pContext) {
+        Entity entity = pContext.getOptionalParameter(this.entityTarget.getParam());
+        Vec3 vec3 = pContext.getOptionalParameter(LootContextParams.ORIGIN);
+        return this.predicate.isEmpty() || this.predicate.get().matches(pContext.getLevel(), vec3, entity);
     }
 
-    public static LootItemCondition.Builder entityPresent(LootContext.EntityTarget p_81863_) {
-        return hasProperties(p_81863_, EntityPredicate.Builder.entity());
+    public static LootItemCondition.Builder entityPresent(LootContext.EntityTarget pTarget) {
+        return hasProperties(pTarget, EntityPredicate.Builder.entity());
     }
 
-    public static LootItemCondition.Builder hasProperties(LootContext.EntityTarget p_81865_, EntityPredicate.Builder p_81866_) {
-        return () -> new LootItemEntityPropertyCondition(Optional.of(p_81866_.build()), p_81865_);
+    public static LootItemCondition.Builder hasProperties(LootContext.EntityTarget pTarget, EntityPredicate.Builder pPredicateBuilder) {
+        return () -> new LootItemEntityPropertyCondition(Optional.of(pPredicateBuilder.build()), pTarget);
     }
 
-    public static LootItemCondition.Builder hasProperties(LootContext.EntityTarget p_81868_, EntityPredicate p_81869_) {
-        return () -> new LootItemEntityPropertyCondition(Optional.of(p_81869_), p_81868_);
+    public static LootItemCondition.Builder hasProperties(LootContext.EntityTarget pTarget, EntityPredicate pEntityPredicate) {
+        return () -> new LootItemEntityPropertyCondition(Optional.of(pEntityPredicate), pTarget);
     }
 }

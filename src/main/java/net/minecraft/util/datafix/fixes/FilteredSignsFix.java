@@ -6,8 +6,8 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.serialization.Dynamic;
 
 public class FilteredSignsFix extends NamedEntityFix {
-    public FilteredSignsFix(Schema p_216666_) {
-        super(p_216666_, false, "Remove filtered text from signs", References.BLOCK_ENTITY, "minecraft:sign");
+    public FilteredSignsFix(Schema pOutputSchema) {
+        super(pOutputSchema, false, "Remove filtered text from signs", References.BLOCK_ENTITY, "minecraft:sign");
     }
 
     @Override

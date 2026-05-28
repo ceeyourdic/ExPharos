@@ -41,12 +41,12 @@ public class BarrierBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState p_49098_) {
+    protected RenderShape getRenderShape(BlockState pState) {
         return RenderShape.INVISIBLE;
     }
 
     @Override
-    protected float getShadeBrightness(BlockState p_49094_, BlockGetter p_49095_, BlockPos p_49096_) {
+    protected float getShadeBrightness(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
         return 1.0F;
     }
 

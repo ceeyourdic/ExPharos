@@ -31,14 +31,14 @@ public class TrapezoidFloat extends FloatProvider {
     private final float max;
     private final float plateau;
 
-    public static TrapezoidFloat of(float p_146572_, float p_146573_, float p_146574_) {
-        return new TrapezoidFloat(p_146572_, p_146573_, p_146574_);
+    public static TrapezoidFloat of(float pMin, float pMax, float pPlateau) {
+        return new TrapezoidFloat(pMin, pMax, pPlateau);
     }
 
-    private TrapezoidFloat(float p_146567_, float p_146568_, float p_146569_) {
-        this.min = p_146567_;
-        this.max = p_146568_;
-        this.plateau = p_146569_;
+    private TrapezoidFloat(float pMin, float pMax, float pPlateau) {
+        this.min = pMin;
+        this.max = pMax;
+        this.plateau = pPlateau;
     }
 
     @Override

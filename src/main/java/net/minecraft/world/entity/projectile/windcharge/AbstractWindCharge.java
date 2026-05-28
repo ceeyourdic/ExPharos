@@ -37,10 +37,10 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
     }
 
     public AbstractWindCharge(
-        EntityType<? extends AbstractWindCharge> p_328691_, Level p_334245_, Entity p_335850_, double p_331511_, double p_328582_, double p_333875_
+        EntityType<? extends AbstractWindCharge> pEntityType, Level pLevel, Entity pOwner, double pX, double pY, double pZ
     ) {
-        super(p_328691_, p_331511_, p_328582_, p_333875_, p_334245_);
-        this.setOwner(p_335850_);
+        super(pEntityType, pX, pY, pZ, pLevel);
+        this.setOwner(pOwner);
         this.accelerationPower = 0.0;
     }
 
@@ -103,7 +103,7 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
     public void push(double p_328125_, double p_336037_, double p_328448_) {
     }
 
-    protected abstract void explode(Vec3 p_342463_);
+    protected abstract void explode(Vec3 pPos);
 
     @Override
     protected void onHitBlock(BlockHitResult p_330277_) {

@@ -23,15 +23,15 @@ public class PackMetadataGenerator implements DataProvider {
     private final PackOutput output;
     private final Map<String, Supplier<JsonElement>> elements = new HashMap<>();
 
-    public PackMetadataGenerator(PackOutput p_254070_) {
-        this.output = p_254070_;
+    public PackMetadataGenerator(PackOutput pOutput) {
+        this.output = pOutput;
     }
 
-    public <T> PackMetadataGenerator add(MetadataSectionType<T> p_252067_, T p_249511_) {
+    public <T> PackMetadataGenerator add(MetadataSectionType<T> pType, T pValue) {
         this.elements
             .put(
-                p_252067_.name(),
-                () -> p_252067_.codec().encodeStart(JsonOps.INSTANCE, p_249511_).getOrThrow(IllegalArgumentException::new).getAsJsonObject()
+                pType.name(),
+                () -> pType.codec().encodeStart(JsonOps.INSTANCE, pValue).getOrThrow(IllegalArgumentException::new).getAsJsonObject()
             );
         return this;
     }
@@ -48,14 +48,14 @@ public class PackMetadataGenerator implements DataProvider {
         return "Pack Metadata";
     }
 
-    public static PackMetadataGenerator forFeaturePack(PackOutput p_256281_, Component p_255661_) {
-        return new PackMetadataGenerator(p_256281_)
+    public static PackMetadataGenerator forFeaturePack(PackOutput pOutput, Component pDescription) {
+        return new PackMetadataGenerator(pOutput)
             .add(
-                PackMetadataSection.TYPE, new PackMetadataSection(p_255661_, DetectedVersion.BUILT_IN.getPackVersion(PackType.SERVER_DATA), Optional.empty())
+                PackMetadataSection.TYPE, new PackMetadataSection(pDescription, DetectedVersion.BUILT_IN.getPackVersion(PackType.SERVER_DATA), Optional.empty())
             );
     }
 
-    public static PackMetadataGenerator forFeaturePack(PackOutput p_253903_, Component p_254497_, FeatureFlagSet p_253848_) {
-        return forFeaturePack(p_253903_, p_254497_).add(FeatureFlagsMetadataSection.TYPE, new FeatureFlagsMetadataSection(p_253848_));
+    public static PackMetadataGenerator forFeaturePack(PackOutput pOutput, Component pDescription, FeatureFlagSet pFlags) {
+        return forFeaturePack(pOutput, pDescription).add(FeatureFlagsMetadataSection.TYPE, new FeatureFlagsMetadataSection(pFlags));
     }
 }

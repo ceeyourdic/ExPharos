@@ -9,8 +9,8 @@ import com.mojang.serialization.Dynamic;
 import java.util.Optional;
 
 public class CarvingStepRemoveFix extends DataFix {
-    public CarvingStepRemoveFix(Schema p_361259_) {
-        super(p_361259_, false);
+    public CarvingStepRemoveFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override
@@ -18,8 +18,8 @@ public class CarvingStepRemoveFix extends DataFix {
         return this.fixTypeEverywhereTyped("CarvingStepRemoveFix", this.getInputSchema().getType(References.CHUNK), CarvingStepRemoveFix::fixChunk);
     }
 
-    private static Typed<?> fixChunk(Typed<?> p_362518_) {
-        return p_362518_.update(DSL.remainderFinder(), p_363979_ -> {
+    private static Typed<?> fixChunk(Typed<?> pChunkTag) {
+        return pChunkTag.update(DSL.remainderFinder(), p_363979_ -> {
             Dynamic<?> dynamic = p_363979_;
             Optional<? extends Dynamic<?>> optional = p_363979_.get("CarvingMasks").result();
             if (optional.isPresent()) {

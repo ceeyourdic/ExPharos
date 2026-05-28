@@ -42,11 +42,11 @@ public class WitherRoseBlock extends FlowerBlock {
     }
 
     @Override
-    protected boolean mayPlaceOn(BlockState p_58248_, BlockGetter p_58249_, BlockPos p_58250_) {
-        return super.mayPlaceOn(p_58248_, p_58249_, p_58250_)
-            || p_58248_.is(Blocks.NETHERRACK)
-            || p_58248_.is(Blocks.SOUL_SAND)
-            || p_58248_.is(Blocks.SOUL_SOIL);
+    protected boolean mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return super.mayPlaceOn(pState, pLevel, pPos)
+            || pState.is(Blocks.NETHERRACK)
+            || pState.is(Blocks.SOUL_SAND)
+            || pState.is(Blocks.SOUL_SOIL);
     }
 
     @Override
@@ -72,11 +72,11 @@ public class WitherRoseBlock extends FlowerBlock {
     }
 
     @Override
-    protected void entityInside(BlockState p_58238_, Level p_58239_, BlockPos p_58240_, Entity p_58241_) {
-        if (p_58239_ instanceof ServerLevel serverlevel
-            && p_58239_.getDifficulty() != Difficulty.PEACEFUL
-            && p_58241_ instanceof LivingEntity livingentity
-            && !livingentity.isInvulnerableTo(serverlevel, p_58239_.damageSources().wither())) {
+    protected void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
+        if (pLevel instanceof ServerLevel serverlevel
+            && pLevel.getDifficulty() != Difficulty.PEACEFUL
+            && pEntity instanceof LivingEntity livingentity
+            && !livingentity.isInvulnerableTo(serverlevel, pLevel.damageSources().wither())) {
             livingentity.addEffect(this.getBeeInteractionEffect());
         }
     }

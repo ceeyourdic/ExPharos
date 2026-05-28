@@ -13,20 +13,20 @@ public class V4059 extends NamespacedSchema {
         super(p_365559_, p_368040_);
     }
 
-    public static SequencedMap<String, Supplier<TypeTemplate>> components(Schema p_363212_) {
-        SequencedMap<String, Supplier<TypeTemplate>> sequencedmap = V3818_3.components(p_363212_);
+    public static SequencedMap<String, Supplier<TypeTemplate>> components(Schema pSchema) {
+        SequencedMap<String, Supplier<TypeTemplate>> sequencedmap = V3818_3.components(pSchema);
         sequencedmap.remove("minecraft:food");
-        sequencedmap.put("minecraft:use_remainder", () -> References.ITEM_STACK.in(p_363212_));
+        sequencedmap.put("minecraft:use_remainder", () -> References.ITEM_STACK.in(pSchema));
         sequencedmap.put(
             "minecraft:equippable",
-            () -> DSL.optionalFields("allowed_entities", DSL.or(References.ENTITY_NAME.in(p_363212_), DSL.list(References.ENTITY_NAME.in(p_363212_))))
+            () -> DSL.optionalFields("allowed_entities", DSL.or(References.ENTITY_NAME.in(pSchema), DSL.list(References.ENTITY_NAME.in(pSchema))))
         );
         return sequencedmap;
     }
 
     @Override
-    public void registerTypes(Schema p_361152_, Map<String, Supplier<TypeTemplate>> p_368342_, Map<String, Supplier<TypeTemplate>> p_363758_) {
-        super.registerTypes(p_361152_, p_368342_, p_363758_);
-        p_361152_.registerType(true, References.DATA_COMPONENTS, () -> DSL.optionalFieldsLazy(components(p_361152_)));
+    public void registerTypes(Schema pSchema, Map<String, Supplier<TypeTemplate>> pEntityTypes, Map<String, Supplier<TypeTemplate>> pBlockEntityTypes) {
+        super.registerTypes(pSchema, pEntityTypes, pBlockEntityTypes);
+        pSchema.registerType(true, References.DATA_COMPONENTS, () -> DSL.optionalFieldsLazy(components(pSchema)));
     }
 }

@@ -14,21 +14,21 @@ public abstract class RowButton {
     public final int xOffset;
     public final int yOffset;
 
-    public RowButton(int p_88012_, int p_88013_, int p_88014_, int p_88015_) {
-        this.width = p_88012_;
-        this.height = p_88013_;
-        this.xOffset = p_88014_;
-        this.yOffset = p_88015_;
+    public RowButton(int pWidth, int pHeight, int pXOffset, int pYOffset) {
+        this.width = pWidth;
+        this.height = pHeight;
+        this.xOffset = pXOffset;
+        this.yOffset = pYOffset;
     }
 
-    public void drawForRowAt(GuiGraphics p_281584_, int p_88020_, int p_88021_, int p_88022_, int p_88023_) {
-        int i = p_88020_ + this.xOffset;
-        int j = p_88021_ + this.yOffset;
-        boolean flag = p_88022_ >= i && p_88022_ <= i + this.width && p_88023_ >= j && p_88023_ <= j + this.height;
-        this.draw(p_281584_, i, j, flag);
+    public void drawForRowAt(GuiGraphics pGuiGraphics, int pX, int pY, int pMouseX, int pMouseY) {
+        int i = pX + this.xOffset;
+        int j = pY + this.yOffset;
+        boolean flag = pMouseX >= i && pMouseX <= i + this.width && pMouseY >= j && pMouseY <= j + this.height;
+        this.draw(pGuiGraphics, i, j, flag);
     }
 
-    protected abstract void draw(GuiGraphics p_281291_, int p_88025_, int p_88026_, boolean p_88027_);
+    protected abstract void draw(GuiGraphics pGuiGraphics, int pX, int pY, boolean pShowTooltip);
 
     public int getRight() {
         return this.xOffset + this.width;
@@ -38,30 +38,30 @@ public abstract class RowButton {
         return this.yOffset + this.height;
     }
 
-    public abstract void onClick(int p_88017_);
+    public abstract void onClick(int pIndex);
 
     public static void drawButtonsInRow(
-        GuiGraphics p_281401_, List<RowButton> p_283164_, AbstractSelectionList<?> p_362215_, int p_282527_, int p_281326_, int p_281575_, int p_282538_
+        GuiGraphics pGuiGraphics, List<RowButton> pRowButtons, AbstractSelectionList<?> pPendingInvitations, int pX, int pY, int pMouseX, int pMouseY
     ) {
-        for (RowButton rowbutton : p_283164_) {
-            if (p_362215_.getRowWidth() > rowbutton.getRight()) {
-                rowbutton.drawForRowAt(p_281401_, p_282527_, p_281326_, p_281575_, p_282538_);
+        for (RowButton rowbutton : pRowButtons) {
+            if (pPendingInvitations.getRowWidth() > rowbutton.getRight()) {
+                rowbutton.drawForRowAt(pGuiGraphics, pX, pY, pMouseX, pMouseY);
             }
         }
     }
 
     public static void rowButtonMouseClicked(
-        AbstractSelectionList<?> p_364213_, ObjectSelectionList.Entry<?> p_88038_, List<RowButton> p_88039_, int p_88040_, double p_88041_, double p_88042_
+        AbstractSelectionList<?> pPendingInvitations, ObjectSelectionList.Entry<?> pEntry, List<RowButton> pRowButtons, int pButton, double pMouseX, double pMouseY
     ) {
-        int i = p_364213_.children().indexOf(p_88038_);
+        int i = pPendingInvitations.children().indexOf(pEntry);
         if (i > -1) {
-            p_364213_.setSelectedIndex(i);
-            int j = p_364213_.getRowLeft();
-            int k = p_364213_.getRowTop(i);
-            int l = (int)(p_88041_ - (double)j);
-            int i1 = (int)(p_88042_ - (double)k);
+            pPendingInvitations.setSelectedIndex(i);
+            int j = pPendingInvitations.getRowLeft();
+            int k = pPendingInvitations.getRowTop(i);
+            int l = (int)(pMouseX - (double)j);
+            int i1 = (int)(pMouseY - (double)k);
 
-            for (RowButton rowbutton : p_88039_) {
+            for (RowButton rowbutton : pRowButtons) {
                 if (l >= rowbutton.xOffset && l <= rowbutton.getRight() && i1 >= rowbutton.yOffset && i1 <= rowbutton.getBottom()) {
                     rowbutton.onClick(i);
                 }

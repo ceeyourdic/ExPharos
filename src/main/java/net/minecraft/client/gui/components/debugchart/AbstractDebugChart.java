@@ -1,15 +1,13 @@
 package net.minecraft.client.gui.components.debugchart;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.debugchart.SampleStorage;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class AbstractDebugChart {
     protected static final int COLOR_GREY = 14737632;
     protected static final int CHART_HEIGHT = 60;
@@ -17,91 +15,98 @@ public abstract class AbstractDebugChart {
     protected final Font font;
     protected final SampleStorage sampleStorage;
 
-    protected AbstractDebugChart(Font p_297994_, SampleStorage p_333599_) {
-        this.font = p_297994_;
-        this.sampleStorage = p_333599_;
+    protected AbstractDebugChart(Font pFont, SampleStorage pSampleStorage) {
+        this.font = pFont;
+        this.sampleStorage = pSampleStorage;
     }
 
-    public int getWidth(int p_300792_) {
-        return Math.min(this.sampleStorage.capacity() + 2, p_300792_);
+    public int getWidth(int pMaxWidth) {
+        return Math.min(this.sampleStorage.capacity() + 2, pMaxWidth);
     }
 
     public int getFullHeight() {
-        return 60 + 9;
+        return 69;
     }
 
-    public void drawChart(GuiGraphics p_300681_, int p_298472_, int p_298870_) {
-        int i = p_300681_.guiHeight();
-        p_300681_.fill(RenderType.guiOverlay(), p_298472_, i - 60, p_298472_ + p_298870_, i, -1873784752);
-        long j = 0L;
-        long k = 2147483647L;
-        long l = -2147483648L;
-        int i1 = Math.max(0, this.sampleStorage.capacity() - (p_298870_ - 2));
-        int j1 = this.sampleStorage.size() - i1;
-
-        for (int k1 = 0; k1 < j1; k1++) {
-            int l1 = p_298472_ + k1 + 1;
-            int i2 = i1 + k1;
-            long j2 = this.getValueForAggregation(i2);
-            k = Math.min(k, j2);
-            l = Math.max(l, j2);
-            j += j2;
-            this.drawDimensions(p_300681_, i, l1, i2);
+    public void drawChart(GuiGraphics pGuiGraphics, int pX, int pWidth) {
+        if (this instanceof TpsDebugChart) {
+            Minecraft minecraft = Minecraft.getInstance();
+            int i = (int)(512.0 / minecraft.getWindow().getGuiScale());
+            pX = Math.max(pX, i);
+            pWidth = minecraft.getWindow().getGuiScaledWidth() - pX;
         }
 
-        p_300681_.hLine(RenderType.guiOverlay(), p_298472_, p_298472_ + p_298870_ - 1, i - 60, -1);
-        p_300681_.hLine(RenderType.guiOverlay(), p_298472_, p_298472_ + p_298870_ - 1, i - 1, -1);
-        p_300681_.vLine(RenderType.guiOverlay(), p_298472_, i - 60, i, -1);
-        p_300681_.vLine(RenderType.guiOverlay(), p_298472_ + p_298870_ - 1, i - 60, i, -1);
-        if (j1 > 0) {
-            String s = this.toDisplayString((double)k) + " min";
-            String s1 = this.toDisplayString((double)j / (double)j1) + " avg";
-            String s2 = this.toDisplayString((double)l) + " max";
-            p_300681_.drawString(this.font, s, p_298472_ + 2, i - 60 - 9, 14737632);
-            p_300681_.drawCenteredString(this.font, s1, p_298472_ + p_298870_ / 2, i - 60 - 9, 14737632);
-            p_300681_.drawString(this.font, s2, p_298472_ + p_298870_ - this.font.width(s2) - 2, i - 60 - 9, 14737632);
+        int j2 = pGuiGraphics.guiHeight();
+        pGuiGraphics.fill(RenderType.guiOverlay(), pX, j2 - 60, pX + pWidth, j2, -1873784752);
+        long k2 = 0L;
+        long j = 2147483647L;
+        long k = -2147483648L;
+        int l = Math.max(0, this.sampleStorage.capacity() - (pWidth - 2));
+        int i1 = this.sampleStorage.size() - l;
+
+        for (int j1 = 0; j1 < i1; j1++) {
+            int k1 = pX + j1 + 1;
+            int l1 = l + j1;
+            long i2 = this.getValueForAggregation(l1);
+            j = Math.min(j, i2);
+            k = Math.max(k, i2);
+            k2 += i2;
+            this.drawDimensions(pGuiGraphics, j2, k1, l1);
         }
 
-        this.renderAdditionalLinesAndLabels(p_300681_, p_298472_, p_298870_, i);
+        pGuiGraphics.hLine(RenderType.guiOverlay(), pX, pX + pWidth - 1, j2 - 60, -1);
+        pGuiGraphics.hLine(RenderType.guiOverlay(), pX, pX + pWidth - 1, j2 - 1, -1);
+        pGuiGraphics.vLine(RenderType.guiOverlay(), pX, j2 - 60, j2, -1);
+        pGuiGraphics.vLine(RenderType.guiOverlay(), pX + pWidth - 1, j2 - 60, j2, -1);
+        if (i1 > 0) {
+            String s = this.toDisplayString((double)j) + " min";
+            String s1 = this.toDisplayString((double)k2 / (double)i1) + " avg";
+            String s2 = this.toDisplayString((double)k) + " max";
+            pGuiGraphics.drawString(this.font, s, pX + 2, j2 - 60 - 9, 14737632);
+            pGuiGraphics.drawCenteredString(this.font, s1, pX + pWidth / 2, j2 - 60 - 9, 14737632);
+            pGuiGraphics.drawString(this.font, s2, pX + pWidth - this.font.width(s2) - 2, j2 - 60 - 9, 14737632);
+        }
+
+        this.renderAdditionalLinesAndLabels(pGuiGraphics, pX, pWidth, j2);
     }
 
-    protected void drawDimensions(GuiGraphics p_332509_, int p_335817_, int p_329430_, int p_328589_) {
-        this.drawMainDimension(p_332509_, p_335817_, p_329430_, p_328589_);
-        this.drawAdditionalDimensions(p_332509_, p_335817_, p_329430_, p_328589_);
+    protected void drawDimensions(GuiGraphics pGuiGraphics, int pHeight, int pX, int pIndex) {
+        this.drawMainDimension(pGuiGraphics, pHeight, pX, pIndex);
+        this.drawAdditionalDimensions(pGuiGraphics, pHeight, pX, pIndex);
     }
 
-    protected void drawMainDimension(GuiGraphics p_336289_, int p_328284_, int p_335372_, int p_331181_) {
-        long i = this.sampleStorage.get(p_331181_);
+    protected void drawMainDimension(GuiGraphics pGuiGraphics, int pHeight, int pX, int pIndex) {
+        long i = this.sampleStorage.get(pIndex);
         int j = this.getSampleHeight((double)i);
         int k = this.getSampleColor(i);
-        p_336289_.fill(RenderType.guiOverlay(), p_335372_, p_328284_ - j, p_335372_ + 1, p_328284_, k);
+        pGuiGraphics.fill(RenderType.guiOverlay(), pX, pHeight - j, pX + 1, pHeight, k);
     }
 
-    protected void drawAdditionalDimensions(GuiGraphics p_332338_, int p_333190_, int p_332312_, int p_328542_) {
+    protected void drawAdditionalDimensions(GuiGraphics pGuiGraphics, int pHeight, int pX, int pIndex) {
     }
 
-    protected long getValueForAggregation(int p_335854_) {
-        return this.sampleStorage.get(p_335854_);
+    protected long getValueForAggregation(int pIndex) {
+        return this.sampleStorage.get(pIndex);
     }
 
-    protected void renderAdditionalLinesAndLabels(GuiGraphics p_300007_, int p_299062_, int p_300355_, int p_297248_) {
+    protected void renderAdditionalLinesAndLabels(GuiGraphics pGuiGraphics, int pX, int pWidth, int pHeight) {
     }
 
-    protected void drawStringWithShade(GuiGraphics p_300760_, String p_299957_, int p_301259_, int p_298524_) {
-        p_300760_.fill(RenderType.guiOverlay(), p_301259_, p_298524_, p_301259_ + this.font.width(p_299957_) + 1, p_298524_ + 9, -1873784752);
-        p_300760_.drawString(this.font, p_299957_, p_301259_ + 1, p_298524_ + 1, 14737632, false);
+    protected void drawStringWithShade(GuiGraphics pGuiGraphics, String pText, int pX, int pY) {
+        pGuiGraphics.fill(RenderType.guiOverlay(), pX, pY, pX + this.font.width(pText) + 1, pY + 9, -1873784752);
+        pGuiGraphics.drawString(this.font, pText, pX + 1, pY + 1, 14737632, false);
     }
 
-    protected abstract String toDisplayString(double p_299846_);
+    protected abstract String toDisplayString(double pValue);
 
-    protected abstract int getSampleHeight(double p_298917_);
+    protected abstract int getSampleHeight(double pValue);
 
-    protected abstract int getSampleColor(long p_301058_);
+    protected abstract int getSampleColor(long pValue);
 
-    protected int getSampleColor(double p_300651_, double p_300082_, int p_298618_, double p_299706_, int p_300095_, double p_298068_, int p_299403_) {
-        p_300651_ = Mth.clamp(p_300651_, p_300082_, p_298068_);
-        return p_300651_ < p_299706_
-            ? ARGB.lerp((float)((p_300651_ - p_300082_) / (p_299706_ - p_300082_)), p_298618_, p_300095_)
-            : ARGB.lerp((float)((p_300651_ - p_299706_) / (p_298068_ - p_299706_)), p_300095_, p_299403_);
+    protected int getSampleColor(double pValue, double pMinPosition, int pMinColor, double pMidPosition, int pMidColor, double pMaxPosition, int pGuiGraphics) {
+        pValue = Mth.clamp(pValue, pMinPosition, pMaxPosition);
+        return pValue < pMidPosition
+            ? ARGB.lerp((float)((pValue - pMinPosition) / (pMidPosition - pMinPosition)), pMinColor, pMidColor)
+            : ARGB.lerp((float)((pValue - pMidPosition) / (pMaxPosition - pMidPosition)), pMidColor, pGuiGraphics);
     }
 }

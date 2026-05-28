@@ -126,11 +126,11 @@ public class LootContextParamSets {
                 .required(LootContextParams.BLOCK_STATE)
     );
 
-    private static ContextKeySet register(String p_81429_, Consumer<ContextKeySet.Builder> p_81430_) {
+    private static ContextKeySet register(String pName, Consumer<ContextKeySet.Builder> pConstructor) {
         ContextKeySet.Builder contextkeyset$builder = new ContextKeySet.Builder();
-        p_81430_.accept(contextkeyset$builder);
+        pConstructor.accept(contextkeyset$builder);
         ContextKeySet contextkeyset = contextkeyset$builder.build();
-        ResourceLocation resourcelocation = ResourceLocation.withDefaultNamespace(p_81429_);
+        ResourceLocation resourcelocation = ResourceLocation.withDefaultNamespace(pName);
         ContextKeySet contextkeyset1 = REGISTRY.put(resourcelocation, contextkeyset);
         if (contextkeyset1 != null) {
             throw new IllegalStateException("Loot table parameter set " + resourcelocation + " is already registered");

@@ -18,9 +18,9 @@ public class ItemListReport implements DataProvider {
     private final PackOutput output;
     private final CompletableFuture<HolderLookup.Provider> registries;
 
-    public ItemListReport(PackOutput p_333960_, CompletableFuture<HolderLookup.Provider> p_331732_) {
-        this.output = p_333960_;
-        this.registries = p_331732_;
+    public ItemListReport(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pRegistries) {
+        this.output = pOutput;
+        this.registries = pRegistries;
     }
 
     @Override

@@ -13,22 +13,22 @@ public class ClientboundHorseScreenOpenPacket implements Packet<ClientGamePacket
     private final int inventoryColumns;
     private final int entityId;
 
-    public ClientboundHorseScreenOpenPacket(int p_132195_, int p_132196_, int p_132197_) {
-        this.containerId = p_132195_;
-        this.inventoryColumns = p_132196_;
-        this.entityId = p_132197_;
+    public ClientboundHorseScreenOpenPacket(int pContainerId, int pSize, int pEntityId) {
+        this.containerId = pContainerId;
+        this.inventoryColumns = pSize;
+        this.entityId = pEntityId;
     }
 
-    private ClientboundHorseScreenOpenPacket(FriendlyByteBuf p_178867_) {
-        this.containerId = p_178867_.readContainerId();
-        this.inventoryColumns = p_178867_.readVarInt();
-        this.entityId = p_178867_.readInt();
+    private ClientboundHorseScreenOpenPacket(FriendlyByteBuf pBuffer) {
+        this.containerId = pBuffer.readContainerId();
+        this.inventoryColumns = pBuffer.readVarInt();
+        this.entityId = pBuffer.readInt();
     }
 
-    private void write(FriendlyByteBuf p_132206_) {
-        p_132206_.writeContainerId(this.containerId);
-        p_132206_.writeVarInt(this.inventoryColumns);
-        p_132206_.writeInt(this.entityId);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeContainerId(this.containerId);
+        pBuffer.writeVarInt(this.inventoryColumns);
+        pBuffer.writeInt(this.entityId);
     }
 
     @Override
@@ -36,8 +36,8 @@ public class ClientboundHorseScreenOpenPacket implements Packet<ClientGamePacket
         return GamePacketTypes.CLIENTBOUND_HORSE_SCREEN_OPEN;
     }
 
-    public void handle(ClientGamePacketListener p_132203_) {
-        p_132203_.handleHorseScreenOpen(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleHorseScreenOpen(this);
     }
 
     public int getContainerId() {

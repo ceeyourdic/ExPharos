@@ -15,21 +15,21 @@ public class StoringChunkProgressListener implements ChunkProgressListener {
     private final int diameter;
     private boolean started;
 
-    private StoringChunkProgressListener(LoggerChunkProgressListener p_333746_, int p_9661_, int p_328006_, int p_335828_) {
-        this.delegate = p_333746_;
-        this.fullDiameter = p_9661_;
-        this.radius = p_328006_;
-        this.diameter = p_335828_;
+    private StoringChunkProgressListener(LoggerChunkProgressListener pDelegate, int pFullDiameter, int pRadius, int pDiameter) {
+        this.delegate = pDelegate;
+        this.fullDiameter = pFullDiameter;
+        this.radius = pRadius;
+        this.diameter = pDiameter;
     }
 
-    public static StoringChunkProgressListener createFromGameruleRadius(int p_329839_) {
-        return p_329839_ > 0 ? create(p_329839_ + 1) : createCompleted();
+    public static StoringChunkProgressListener createFromGameruleRadius(int pRadius) {
+        return pRadius > 0 ? create(pRadius + 1) : createCompleted();
     }
 
-    public static StoringChunkProgressListener create(int p_335925_) {
-        LoggerChunkProgressListener loggerchunkprogresslistener = LoggerChunkProgressListener.create(p_335925_);
-        int i = ChunkProgressListener.calculateDiameter(p_335925_);
-        int j = p_335925_ + ChunkLevel.RADIUS_AROUND_FULL_CHUNK;
+    public static StoringChunkProgressListener create(int pRadius) {
+        LoggerChunkProgressListener loggerchunkprogresslistener = LoggerChunkProgressListener.create(pRadius);
+        int i = ChunkProgressListener.calculateDiameter(pRadius);
+        int j = pRadius + ChunkLevel.RADIUS_AROUND_FULL_CHUNK;
         int k = ChunkProgressListener.calculateDiameter(j);
         return new StoringChunkProgressListener(loggerchunkprogresslistener, i, j, k);
     }
@@ -39,10 +39,10 @@ public class StoringChunkProgressListener implements ChunkProgressListener {
     }
 
     @Override
-    public void updateSpawnPos(ChunkPos p_9667_) {
+    public void updateSpawnPos(ChunkPos pCenter) {
         if (this.started) {
-            this.delegate.updateSpawnPos(p_9667_);
-            this.spawnPos = p_9667_;
+            this.delegate.updateSpawnPos(pCenter);
+            this.spawnPos = pCenter;
         }
     }
 
@@ -84,7 +84,7 @@ public class StoringChunkProgressListener implements ChunkProgressListener {
     }
 
     @Nullable
-    public ChunkStatus getStatus(int p_9664_, int p_9665_) {
-        return this.statuses.get(ChunkPos.asLong(p_9664_ + this.spawnPos.x - this.radius, p_9665_ + this.spawnPos.z - this.radius));
+    public ChunkStatus getStatus(int pX, int pZ) {
+        return this.statuses.get(ChunkPos.asLong(pX + this.spawnPos.x - this.radius, pZ + this.spawnPos.z - this.radius));
     }
 }

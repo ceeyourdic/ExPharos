@@ -7,16 +7,16 @@ import net.minecraft.core.RegistryAccess;
 public class RegistryFriendlyByteBuf extends FriendlyByteBuf {
     private final RegistryAccess registryAccess;
 
-    public RegistryFriendlyByteBuf(ByteBuf p_333796_, RegistryAccess p_330009_) {
-        super(p_333796_);
-        this.registryAccess = p_330009_;
+    public RegistryFriendlyByteBuf(ByteBuf pSource, RegistryAccess pRegistryAccess) {
+        super(pSource);
+        this.registryAccess = pRegistryAccess;
     }
 
     public RegistryAccess registryAccess() {
         return this.registryAccess;
     }
 
-    public static Function<ByteBuf, RegistryFriendlyByteBuf> decorator(RegistryAccess p_336066_) {
-        return p_328649_ -> new RegistryFriendlyByteBuf(p_328649_, p_336066_);
+    public static Function<ByteBuf, RegistryFriendlyByteBuf> decorator(RegistryAccess pRegistry) {
+        return p_328649_ -> new RegistryFriendlyByteBuf(p_328649_, pRegistry);
     }
 }

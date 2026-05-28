@@ -14,8 +14,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class LlamaSpitModel extends EntityModel<EntityRenderState> {
     private static final String MAIN = "main";
 
-    public LlamaSpitModel(ModelPart p_170730_) {
-        super(p_170730_);
+    public LlamaSpitModel(ModelPart pRoot) {
+        super(pRoot);
     }
 
     public static LayerDefinition createBodyLayer() {

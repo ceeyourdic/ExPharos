@@ -128,7 +128,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
         }
     }
 
-    private EntityType<?> randomEntityId(RandomSource p_225154_) {
-        return Util.getRandom(MOBS, p_225154_);
+    private EntityType<?> randomEntityId(RandomSource pRandom) {
+        return Util.getRandom(MOBS, pRandom);
     }
 }

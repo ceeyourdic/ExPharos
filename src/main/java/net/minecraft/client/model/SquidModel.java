@@ -18,13 +18,13 @@ public class SquidModel extends EntityModel<SquidRenderState> {
     public static final MeshTransformer BABY_TRANSFORMER = MeshTransformer.scaling(0.5F);
     private final ModelPart[] tentacles = new ModelPart[8];
 
-    public SquidModel(ModelPart p_170989_) {
-        super(p_170989_);
-        Arrays.setAll(this.tentacles, p_170995_ -> p_170989_.getChild(createTentacleName(p_170995_)));
+    public SquidModel(ModelPart pRoot) {
+        super(pRoot);
+        Arrays.setAll(this.tentacles, p_170995_ -> pRoot.getChild(createTentacleName(p_170995_)));
     }
 
-    private static String createTentacleName(int p_170992_) {
-        return "tentacle" + p_170992_;
+    private static String createTentacleName(int pIndex) {
+        return "tentacle" + pIndex;
     }
 
     public static LayerDefinition createBodyLayer() {

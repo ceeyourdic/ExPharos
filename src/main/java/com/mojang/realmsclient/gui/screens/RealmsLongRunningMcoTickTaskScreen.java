@@ -9,9 +9,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class RealmsLongRunningMcoTickTaskScreen extends RealmsLongRunningMcoTaskScreen {
     private final LongRunningTask task;
 
-    public RealmsLongRunningMcoTickTaskScreen(Screen p_298922_, LongRunningTask p_298079_) {
-        super(p_298922_, p_298079_);
-        this.task = p_298079_;
+    public RealmsLongRunningMcoTickTaskScreen(Screen pLastScreen, LongRunningTask pTask) {
+        super(pLastScreen, pTask);
+        this.task = pTask;
     }
 
     @Override

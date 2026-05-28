@@ -32,21 +32,21 @@ public class EvokerFangs extends Entity implements TraceableEntity {
         super(p_36923_, p_36924_);
     }
 
-    public EvokerFangs(Level p_36926_, double p_36927_, double p_36928_, double p_36929_, float p_36930_, int p_36931_, LivingEntity p_36932_) {
-        this(EntityType.EVOKER_FANGS, p_36926_);
-        this.warmupDelayTicks = p_36931_;
-        this.setOwner(p_36932_);
-        this.setYRot(p_36930_ * (180.0F / (float)Math.PI));
-        this.setPos(p_36927_, p_36928_, p_36929_);
+    public EvokerFangs(Level pLevel, double pX, double pY, double pZ, float pYRot, int pWarmupDelay, LivingEntity pOwner) {
+        this(EntityType.EVOKER_FANGS, pLevel);
+        this.warmupDelayTicks = pWarmupDelay;
+        this.setOwner(pOwner);
+        this.setYRot(pYRot * (180.0F / (float)Math.PI));
+        this.setPos(pX, pY, pZ);
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder p_335129_) {
     }
 
-    public void setOwner(@Nullable LivingEntity p_36939_) {
-        this.owner = p_36939_;
-        this.ownerUUID = p_36939_ == null ? null : p_36939_.getUUID();
+    public void setOwner(@Nullable LivingEntity pOwner) {
+        this.owner = pOwner;
+        this.ownerUUID = pOwner == null ? null : pOwner.getUUID();
     }
 
     @Nullable
@@ -62,18 +62,18 @@ public class EvokerFangs extends Entity implements TraceableEntity {
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag p_36941_) {
-        this.warmupDelayTicks = p_36941_.getInt("Warmup");
-        if (p_36941_.hasUUID("Owner")) {
-            this.ownerUUID = p_36941_.getUUID("Owner");
+    protected void readAdditionalSaveData(CompoundTag pCompound) {
+        this.warmupDelayTicks = pCompound.getInt("Warmup");
+        if (pCompound.hasUUID("Owner")) {
+            this.ownerUUID = pCompound.getUUID("Owner");
         }
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag p_36943_) {
-        p_36943_.putInt("Warmup", this.warmupDelayTicks);
+    protected void addAdditionalSaveData(CompoundTag pCompound) {
+        pCompound.putInt("Warmup", this.warmupDelayTicks);
         if (this.ownerUUID != null) {
-            p_36943_.putUUID("Owner", this.ownerUUID);
+            pCompound.putUUID("Owner", this.ownerUUID);
         }
     }
 
@@ -113,19 +113,19 @@ public class EvokerFangs extends Entity implements TraceableEntity {
         }
     }
 
-    private void dealDamageTo(LivingEntity p_36945_) {
+    private void dealDamageTo(LivingEntity pTarget) {
         LivingEntity livingentity = this.getOwner();
-        if (p_36945_.isAlive() && !p_36945_.isInvulnerable() && p_36945_ != livingentity) {
+        if (pTarget.isAlive() && !pTarget.isInvulnerable() && pTarget != livingentity) {
             if (livingentity == null) {
-                p_36945_.hurt(this.damageSources().magic(), 6.0F);
+                pTarget.hurt(this.damageSources().magic(), 6.0F);
             } else {
-                if (livingentity.isAlliedTo(p_36945_)) {
+                if (livingentity.isAlliedTo(pTarget)) {
                     return;
                 }
 
                 DamageSource damagesource = this.damageSources().indirectMagic(this, livingentity);
-                if (this.level() instanceof ServerLevel serverlevel && p_36945_.hurtServer(serverlevel, damagesource, 6.0F)) {
-                    EnchantmentHelper.doPostAttackEffects(serverlevel, p_36945_, damagesource);
+                if (this.level() instanceof ServerLevel serverlevel && pTarget.hurtServer(serverlevel, damagesource, 6.0F)) {
+                    EnchantmentHelper.doPostAttackEffects(serverlevel, pTarget, damagesource);
                 }
             }
         }
@@ -152,12 +152,12 @@ public class EvokerFangs extends Entity implements TraceableEntity {
         }
     }
 
-    public float getAnimationProgress(float p_36937_) {
+    public float getAnimationProgress(float pPartialTicks) {
         if (!this.clientSideAttackStarted) {
             return 0.0F;
         } else {
             int i = this.lifeTicks - 2;
-            return i <= 0 ? 1.0F : 1.0F - ((float)i - p_36937_) / 20.0F;
+            return i <= 0 ? 1.0F : 1.0F - ((float)i - pPartialTicks) / 20.0F;
         }
     }
 

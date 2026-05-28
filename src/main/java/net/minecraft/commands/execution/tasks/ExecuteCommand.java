@@ -15,10 +15,10 @@ public class ExecuteCommand<T extends ExecutionCommandSource<T>> implements Unbo
     private final ChainModifiers modifiers;
     private final CommandContext<T> executionContext;
 
-    public ExecuteCommand(String p_310766_, ChainModifiers p_309629_, CommandContext<T> p_310460_) {
-        this.commandInput = p_310766_;
-        this.modifiers = p_309629_;
-        this.executionContext = p_310460_;
+    public ExecuteCommand(String pCommandInput, ChainModifiers pModifiers, CommandContext<T> pExecutionContext) {
+        this.commandInput = pCommandInput;
+        this.modifiers = pModifiers;
+        this.executionContext = pExecutionContext;
     }
 
     public void execute(T p_310632_, ExecutionContext<T> p_310757_, Frame p_311301_) {

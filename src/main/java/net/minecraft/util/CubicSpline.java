@@ -19,9 +19,9 @@ public interface CubicSpline<C, I extends ToFloatFunction<C>> extends ToFloatFun
     @VisibleForDebug
     String parityString();
 
-    CubicSpline<C, I> mapAll(CubicSpline.CoordinateVisitor<I> p_211579_);
+    CubicSpline<C, I> mapAll(CubicSpline.CoordinateVisitor<I> pVisitor);
 
-    static <C, I extends ToFloatFunction<C>> Codec<CubicSpline<C, I>> codec(Codec<I> p_184263_) {
+    static <C, I extends ToFloatFunction<C>> Codec<CubicSpline<C, I>> codec(Codec<I> pCodec) {
         MutableObject<Codec<CubicSpline<C, I>>> mutableobject = new MutableObject<>();
 
         record Point<C, I extends ToFloatFunction<C>>(float location, CubicSpline<C, I> value, float derivative) {
@@ -37,7 +37,7 @@ public interface CubicSpline<C, I extends ToFloatFunction<C>> extends ToFloatFun
         );
         Codec<CubicSpline.Multipoint<C, I>> codec1 = RecordCodecBuilder.create(
             p_184267_ -> p_184267_.group(
-                        p_184263_.fieldOf("coordinate").forGetter(CubicSpline.Multipoint::coordinate),
+                        pCodec.fieldOf("coordinate").forGetter(CubicSpline.Multipoint::coordinate),
                         ExtraCodecs.nonEmptyList(codec.listOf())
                             .fieldOf("points")
                             .forGetter(
@@ -77,16 +77,16 @@ public interface CubicSpline<C, I extends ToFloatFunction<C>> extends ToFloatFun
         return mutableobject.getValue();
     }
 
-    static <C, I extends ToFloatFunction<C>> CubicSpline<C, I> constant(float p_184240_) {
-        return new CubicSpline.Constant<>(p_184240_);
+    static <C, I extends ToFloatFunction<C>> CubicSpline<C, I> constant(float pValue) {
+        return new CubicSpline.Constant<>(pValue);
     }
 
-    static <C, I extends ToFloatFunction<C>> CubicSpline.Builder<C, I> builder(I p_184253_) {
-        return new CubicSpline.Builder<>(p_184253_);
+    static <C, I extends ToFloatFunction<C>> CubicSpline.Builder<C, I> builder(I pCoordinate) {
+        return new CubicSpline.Builder<>(pCoordinate);
     }
 
-    static <C, I extends ToFloatFunction<C>> CubicSpline.Builder<C, I> builder(I p_184255_, ToFloatFunction<Float> p_184256_) {
-        return new CubicSpline.Builder<>(p_184255_, p_184256_);
+    static <C, I extends ToFloatFunction<C>> CubicSpline.Builder<C, I> builder(I pCoordinate, ToFloatFunction<Float> pValueTransformer) {
+        return new CubicSpline.Builder<>(pCoordinate, pValueTransformer);
     }
 
     public static final class Builder<C, I extends ToFloatFunction<C>> {
@@ -96,34 +96,34 @@ public interface CubicSpline<C, I extends ToFloatFunction<C>> extends ToFloatFun
         private final List<CubicSpline<C, I>> values = Lists.newArrayList();
         private final FloatList derivatives = new FloatArrayList();
 
-        protected Builder(I p_184293_) {
-            this(p_184293_, ToFloatFunction.IDENTITY);
+        protected Builder(I pCoordinate) {
+            this(pCoordinate, ToFloatFunction.IDENTITY);
         }
 
-        protected Builder(I p_184295_, ToFloatFunction<Float> p_184296_) {
-            this.coordinate = p_184295_;
-            this.valueTransformer = p_184296_;
+        protected Builder(I pCoordinate, ToFloatFunction<Float> pValueTransformer) {
+            this.coordinate = pCoordinate;
+            this.valueTransformer = pValueTransformer;
         }
 
-        public CubicSpline.Builder<C, I> addPoint(float p_216115_, float p_216116_) {
-            return this.addPoint(p_216115_, new CubicSpline.Constant<>(this.valueTransformer.apply(p_216116_)), 0.0F);
+        public CubicSpline.Builder<C, I> addPoint(float pLocation, float pValue) {
+            return this.addPoint(pLocation, new CubicSpline.Constant<>(this.valueTransformer.apply(pValue)), 0.0F);
         }
 
-        public CubicSpline.Builder<C, I> addPoint(float p_184299_, float p_184300_, float p_184301_) {
-            return this.addPoint(p_184299_, new CubicSpline.Constant<>(this.valueTransformer.apply(p_184300_)), p_184301_);
+        public CubicSpline.Builder<C, I> addPoint(float pLocation, float pValue, float pDerivative) {
+            return this.addPoint(pLocation, new CubicSpline.Constant<>(this.valueTransformer.apply(pValue)), pDerivative);
         }
 
-        public CubicSpline.Builder<C, I> addPoint(float p_216118_, CubicSpline<C, I> p_216119_) {
-            return this.addPoint(p_216118_, p_216119_, 0.0F);
+        public CubicSpline.Builder<C, I> addPoint(float pLocation, CubicSpline<C, I> pValue) {
+            return this.addPoint(pLocation, pValue, 0.0F);
         }
 
-        private CubicSpline.Builder<C, I> addPoint(float p_184303_, CubicSpline<C, I> p_184304_, float p_184305_) {
-            if (!this.locations.isEmpty() && p_184303_ <= this.locations.getFloat(this.locations.size() - 1)) {
+        private CubicSpline.Builder<C, I> addPoint(float pLocation, CubicSpline<C, I> pValue, float pDerivative) {
+            if (!this.locations.isEmpty() && pLocation <= this.locations.getFloat(this.locations.size() - 1)) {
                 throw new IllegalArgumentException("Please register points in ascending order");
             } else {
-                this.locations.add(p_184303_);
-                this.values.add(p_184304_);
-                this.derivatives.add(p_184305_);
+                this.locations.add(pLocation);
+                this.values.add(pValue);
+                this.derivatives.add(pDerivative);
                 return this;
             }
         }
@@ -168,7 +168,7 @@ public interface CubicSpline<C, I extends ToFloatFunction<C>> extends ToFloatFun
     }
 
     public interface CoordinateVisitor<I> {
-        I visit(I p_216123_);
+        I visit(I pCoordinate);
     }
 
     @VisibleForDebug
@@ -186,45 +186,45 @@ public interface CubicSpline<C, I extends ToFloatFunction<C>> extends ToFloatFun
         }
 
         static <C, I extends ToFloatFunction<C>> CubicSpline.Multipoint<C, I> create(
-            I p_216144_, float[] p_216145_, List<CubicSpline<C, I>> p_216146_, float[] p_216147_
+            I pCoordinate, float[] pLocations, List<CubicSpline<C, I>> pValues, float[] pDerivatives
         ) {
-            validateSizes(p_216145_, p_216146_, p_216147_);
-            int i = p_216145_.length - 1;
+            validateSizes(pLocations, pValues, pDerivatives);
+            int i = pLocations.length - 1;
             float f = Float.POSITIVE_INFINITY;
             float f1 = Float.NEGATIVE_INFINITY;
-            float f2 = p_216144_.minValue();
-            float f3 = p_216144_.maxValue();
-            if (f2 < p_216145_[0]) {
-                float f4 = linearExtend(f2, p_216145_, p_216146_.get(0).minValue(), p_216147_, 0);
-                float f5 = linearExtend(f2, p_216145_, p_216146_.get(0).maxValue(), p_216147_, 0);
+            float f2 = pCoordinate.minValue();
+            float f3 = pCoordinate.maxValue();
+            if (f2 < pLocations[0]) {
+                float f4 = linearExtend(f2, pLocations, pValues.get(0).minValue(), pDerivatives, 0);
+                float f5 = linearExtend(f2, pLocations, pValues.get(0).maxValue(), pDerivatives, 0);
                 f = Math.min(f, Math.min(f4, f5));
                 f1 = Math.max(f1, Math.max(f4, f5));
             }
 
-            if (f3 > p_216145_[i]) {
-                float f24 = linearExtend(f3, p_216145_, p_216146_.get(i).minValue(), p_216147_, i);
-                float f25 = linearExtend(f3, p_216145_, p_216146_.get(i).maxValue(), p_216147_, i);
+            if (f3 > pLocations[i]) {
+                float f24 = linearExtend(f3, pLocations, pValues.get(i).minValue(), pDerivatives, i);
+                float f25 = linearExtend(f3, pLocations, pValues.get(i).maxValue(), pDerivatives, i);
                 f = Math.min(f, Math.min(f24, f25));
                 f1 = Math.max(f1, Math.max(f24, f25));
             }
 
-            for (CubicSpline<C, I> cubicspline2 : p_216146_) {
+            for (CubicSpline<C, I> cubicspline2 : pValues) {
                 f = Math.min(f, cubicspline2.minValue());
                 f1 = Math.max(f1, cubicspline2.maxValue());
             }
 
             for (int j = 0; j < i; j++) {
-                float f26 = p_216145_[j];
-                float f6 = p_216145_[j + 1];
+                float f26 = pLocations[j];
+                float f6 = pLocations[j + 1];
                 float f7 = f6 - f26;
-                CubicSpline<C, I> cubicspline = p_216146_.get(j);
-                CubicSpline<C, I> cubicspline1 = p_216146_.get(j + 1);
+                CubicSpline<C, I> cubicspline = pValues.get(j);
+                CubicSpline<C, I> cubicspline1 = pValues.get(j + 1);
                 float f8 = cubicspline.minValue();
                 float f9 = cubicspline.maxValue();
                 float f10 = cubicspline1.minValue();
                 float f11 = cubicspline1.maxValue();
-                float f12 = p_216147_[j];
-                float f13 = p_216147_[j + 1];
+                float f12 = pDerivatives[j];
+                float f13 = pDerivatives[j + 1];
                 if (f12 != 0.0F || f13 != 0.0F) {
                     float f14 = f12 * f7;
                     float f15 = f13 * f7;
@@ -241,18 +241,18 @@ public interface CubicSpline<C, I extends ToFloatFunction<C>> extends ToFloatFun
                 }
             }
 
-            return new CubicSpline.Multipoint<>(p_216144_, p_216145_, p_216146_, p_216147_, f, f1);
+            return new CubicSpline.Multipoint<>(pCoordinate, pLocations, pValues, pDerivatives, f, f1);
         }
 
-        private static float linearExtend(float p_216134_, float[] p_216135_, float p_216136_, float[] p_216137_, int p_216138_) {
-            float f = p_216137_[p_216138_];
-            return f == 0.0F ? p_216136_ : p_216136_ + f * (p_216134_ - p_216135_[p_216138_]);
+        private static float linearExtend(float pCoordinate, float[] pLocations, float pValue, float[] pDerivatives, int pIndex) {
+            float f = pDerivatives[pIndex];
+            return f == 0.0F ? pValue : pValue + f * (pCoordinate - pLocations[pIndex]);
         }
 
-        private static <C, I extends ToFloatFunction<C>> void validateSizes(float[] p_216152_, List<CubicSpline<C, I>> p_216153_, float[] p_216154_) {
-            if (p_216152_.length != p_216153_.size() || p_216152_.length != p_216154_.length) {
-                throw new IllegalArgumentException("All lengths must be equal, got: " + p_216152_.length + " " + p_216153_.size() + " " + p_216154_.length);
-            } else if (p_216152_.length == 0) {
+        private static <C, I extends ToFloatFunction<C>> void validateSizes(float[] pLocations, List<CubicSpline<C, I>> pValues, float[] pDerivatives) {
+            if (pLocations.length != pValues.size() || pLocations.length != pDerivatives.length) {
+                throw new IllegalArgumentException("All lengths must be equal, got: " + pLocations.length + " " + pValues.size() + " " + pDerivatives.length);
+            } else if (pLocations.length == 0) {
                 throw new IllegalArgumentException("Cannot create a multipoint spline with no points");
             }
         }
@@ -282,8 +282,8 @@ public interface CubicSpline<C, I extends ToFloatFunction<C>> extends ToFloatFun
             }
         }
 
-        private static int findIntervalStart(float[] p_216149_, float p_216150_) {
-            return Mth.binarySearch(0, p_216149_.length, p_216142_ -> p_216150_ < p_216149_[p_216142_]) - 1;
+        private static int findIntervalStart(float[] pLocations, float pStart) {
+            return Mth.binarySearch(0, pLocations.length, p_216142_ -> pStart < pLocations[p_216142_]) - 1;
         }
 
         @VisibleForTesting
@@ -300,10 +300,10 @@ public interface CubicSpline<C, I extends ToFloatFunction<C>> extends ToFloatFun
                 + "}";
         }
 
-        private String toString(float[] p_184335_) {
+        private String toString(float[] pLocations) {
             return "["
-                + IntStream.range(0, p_184335_.length)
-                    .mapToDouble(p_184338_ -> (double)p_184335_[p_184338_])
+                + IntStream.range(0, pLocations.length)
+                    .mapToDouble(p_184338_ -> (double)pLocations[p_184338_])
                     .mapToObj(p_184330_ -> String.format(Locale.ROOT, "%.3f", p_184330_))
                     .collect(Collectors.joining(", "))
                 + "]";

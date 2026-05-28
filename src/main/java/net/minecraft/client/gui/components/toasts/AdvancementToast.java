@@ -23,8 +23,8 @@ public class AdvancementToast implements Toast {
     private boolean playedSound;
     private Toast.Visibility wantedVisibility = Toast.Visibility.HIDE;
 
-    public AdvancementToast(AdvancementHolder p_298724_) {
-        this.advancement = p_298724_;
+    public AdvancementToast(AdvancementHolder pAdvancement) {
+        this.advancement = pAdvancement;
     }
 
     @Override

@@ -17,21 +17,21 @@ public class MultipleTestTracker {
     public MultipleTestTracker() {
     }
 
-    public MultipleTestTracker(Collection<GameTestInfo> p_127802_) {
-        this.tests.addAll(p_127802_);
+    public MultipleTestTracker(Collection<GameTestInfo> pTestInfos) {
+        this.tests.addAll(pTestInfos);
     }
 
-    public void addTestToTrack(GameTestInfo p_127810_) {
-        this.tests.add(p_127810_);
-        this.listeners.forEach(p_127810_::addListener);
+    public void addTestToTrack(GameTestInfo pTestInfo) {
+        this.tests.add(pTestInfo);
+        this.listeners.forEach(pTestInfo::addListener);
     }
 
-    public void addListener(GameTestListener p_127812_) {
-        this.listeners.add(p_127812_);
-        this.tests.forEach(p_127815_ -> p_127815_.addListener(p_127812_));
+    public void addListener(GameTestListener pTestListener) {
+        this.listeners.add(pTestListener);
+        this.tests.forEach(p_127815_ -> p_127815_.addListener(pTestListener));
     }
 
-    public void addFailureListener(final Consumer<GameTestInfo> p_127808_) {
+    public void addFailureListener(final Consumer<GameTestInfo> pOnFail) {
         this.addListener(new GameTestListener() {
             @Override
             public void testStructureLoaded(GameTestInfo p_127830_) {
@@ -43,7 +43,7 @@ public class MultipleTestTracker {
 
             @Override
             public void testFailed(GameTestInfo p_127832_, GameTestRunner p_329601_) {
-                p_127808_.accept(p_127832_);
+                pOnFail.accept(p_127832_);
             }
 
             @Override
@@ -111,7 +111,7 @@ public class MultipleTestTracker {
         return this.getProgressBar();
     }
 
-    public void remove(GameTestInfo p_333633_) {
-        this.tests.remove(p_333633_);
+    public void remove(GameTestInfo pGameTestInfo) {
+        this.tests.remove(pGameTestInfo);
     }
 }

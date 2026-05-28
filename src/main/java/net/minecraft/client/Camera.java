@@ -1,5 +1,8 @@
 package net.minecraft.client;
 
+import cn.lazymoon.Client;
+import cn.lazymoon.features.module.impl.visual.OldHitting;
+import cn.lazymoon.utils.animations.Animation;
 import java.util.Arrays;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -7,6 +10,8 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.entity.vehicle.NewMinecartBehavior;
 import net.minecraft.world.level.BlockGetter;
@@ -17,12 +22,10 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.reflect.Reflector;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-@OnlyIn(Dist.CLIENT)
 public class Camera {
     private static final float DEFAULT_CAMERA_DISTANCE = 4.0F;
     private static final Vector3f FORWARDS = new Vector3f(0.0F, 0.0F, -1.0F);
@@ -43,55 +46,132 @@ public class Camera {
     private float eyeHeight;
     private float eyeHeightOld;
     private float partialTickTime;
+    private double arcane$lastRenderX;
+    private double arcane$lastRenderY;
+    private double arcane$lastRenderZ;
+    private float arcane$smoothedThirdPersonDistance;
+    private float arcane$smoothedThirdPersonRotate;
     public static final float FOG_DISTANCE_SCALE = 0.083333336F;
 
-    public void setup(BlockGetter p_90576_, Entity p_90577_, boolean p_90578_, boolean p_90579_, float p_90580_) {
+    public void setup(BlockGetter pLevel, Entity pEntity, boolean pDetached, boolean pThirdPersonReverse, float pPartialTick) {
         this.initialized = true;
-        this.level = p_90576_;
-        this.entity = p_90577_;
-        this.detached = p_90578_;
-        this.partialTickTime = p_90580_;
-        if (p_90577_.isPassenger()
-            && p_90577_.getVehicle() instanceof Minecart minecart
+        this.level = pLevel;
+        this.entity = pEntity;
+        this.detached = pDetached;
+        this.partialTickTime = pPartialTick;
+        if (pEntity.isPassenger()
+            && pEntity.getVehicle() instanceof Minecart minecart
             && minecart.getBehavior() instanceof NewMinecartBehavior newminecartbehavior
             && newminecartbehavior.cartHasPosRotLerp()) {
-            Vec3 vec3 = minecart.getPassengerRidingPosition(p_90577_)
+            Vec3 vec3 = minecart.getPassengerRidingPosition(pEntity)
                 .subtract(minecart.position())
-                .subtract(p_90577_.getVehicleAttachmentPoint(minecart))
-                .add(new Vec3(0.0, (double)Mth.lerp(p_90580_, this.eyeHeightOld, this.eyeHeight), 0.0));
-            this.setRotation(p_90577_.getViewYRot(p_90580_), p_90577_.getViewXRot(p_90580_));
-            this.setPosition(newminecartbehavior.getCartLerpPosition(p_90580_).add(vec3));
+                .subtract(pEntity.getVehicleAttachmentPoint(minecart))
+                .add(new Vec3(0.0, (double)Mth.lerp(pPartialTick, this.eyeHeightOld, this.eyeHeight), 0.0));
+            this.setRotation(pEntity.getViewYRot(pPartialTick), pEntity.getViewXRot(pPartialTick));
+            this.setPosition(newminecartbehavior.getCartLerpPosition(pPartialTick).add(vec3));
         } else {
-            this.setRotation(p_90577_.getViewYRot(p_90580_), p_90577_.getViewXRot(p_90580_));
+            this.setRotation(pEntity.getViewYRot(pPartialTick), pEntity.getViewXRot(pPartialTick));
             this.setPosition(
-                Mth.lerp((double)p_90580_, p_90577_.xo, p_90577_.getX()),
-                Mth.lerp((double)p_90580_, p_90577_.yo, p_90577_.getY()) + (double)Mth.lerp(p_90580_, this.eyeHeightOld, this.eyeHeight),
-                Mth.lerp((double)p_90580_, p_90577_.zo, p_90577_.getZ())
+                Mth.lerp((double)pPartialTick, pEntity.xo, pEntity.getX()),
+                Mth.lerp((double)pPartialTick, pEntity.yo, pEntity.getY()) + (double)Mth.lerp(pPartialTick, this.eyeHeightOld, this.eyeHeight),
+                Mth.lerp((double)pPartialTick, pEntity.zo, pEntity.getZ())
             );
         }
 
-        if (p_90578_) {
-            if (p_90579_) {
-                this.setRotation(this.yRot + 180.0F, -this.xRot);
+        // Arcane mixin port: Camera motion smoothing can replace the interpolated camera position.
+        cn.lazymoon.features.module.impl.visual.Camera arcaneCamera = Client.INSTANCE.getModuleManager()
+            .getModule(cn.lazymoon.features.module.impl.visual.Camera.class);
+        boolean arcaneCameraEnabled = arcaneCamera != null && arcaneCamera.isState();
+        double arcaneRenderX = Mth.lerp((double)pPartialTick, pEntity.xo, pEntity.getX());
+        double arcaneRenderY = Mth.lerp((double)pPartialTick, pEntity.yo, pEntity.getY()) + (double)Mth.lerp(pPartialTick, this.eyeHeightOld, this.eyeHeight);
+        double arcaneRenderZ = Mth.lerp((double)pPartialTick, pEntity.zo, pEntity.getZ());
+        if (arcaneCameraEnabled && cn.lazymoon.features.module.impl.visual.Camera.cameraOptions.isEnabled("Motion Camera")) {
+            if (Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
+                this.arcane$lastRenderX = arcaneRenderX;
+                this.arcane$lastRenderY = arcaneRenderY;
+                this.arcane$lastRenderZ = arcaneRenderZ;
+            } else {
+                double speed = cn.lazymoon.features.module.impl.visual.Camera.cameraSpeed.getValue();
+                this.arcane$lastRenderX = Animation.animate(this.arcane$lastRenderX * 1000.0, arcaneRenderX * 1000.0, speed) / 1000.0;
+                this.arcane$lastRenderY = Animation.animate(this.arcane$lastRenderY * 1000.0, arcaneRenderY * 1000.0, speed) / 1000.0;
+                this.arcane$lastRenderZ = Animation.animate(this.arcane$lastRenderZ * 1000.0, arcaneRenderZ * 1000.0, speed) / 1000.0;
+                this.setPosition(this.arcane$lastRenderX, this.arcane$lastRenderY, this.arcane$lastRenderZ);
+            }
+        } else {
+            this.arcane$lastRenderX = arcaneRenderX;
+            this.arcane$lastRenderY = arcaneRenderY;
+            this.arcane$lastRenderZ = arcaneRenderZ;
+        }
+
+        if (pDetached) {
+            if (pThirdPersonReverse) {
+                // Arcane mixin port: smooth reverse-third-person rotation.
+                if (arcaneCameraEnabled && cn.lazymoon.features.module.impl.visual.Camera.cameraOptions.isEnabled("Smooth")) {
+                    this.arcane$smoothedThirdPersonRotate = (float)(Animation.animate(this.arcane$smoothedThirdPersonRotate * 10.0F, 1800.0F, 0.1F) / 10.0);
+                    this.setRotation(this.yRot + this.arcane$smoothedThirdPersonRotate, -this.xRot);
+                } else {
+                    this.setRotation(this.yRot + 180.0F, -this.xRot);
+                }
+            } else {
+                this.arcane$smoothedThirdPersonRotate = 0.0F;
             }
 
-            float f = p_90577_ instanceof LivingEntity livingentity ? livingentity.getScale() : 1.0F;
-            this.move(-this.getMaxZoom(4.0F * f), 0.0F, 0.0F);
-        } else if (p_90577_ instanceof LivingEntity && ((LivingEntity)p_90577_).isSleeping()) {
-            Direction direction = ((LivingEntity)p_90577_).getBedOrientation();
+            float f = pEntity instanceof LivingEntity livingentity ? livingentity.getScale() : 1.0F;
+            // Arcane mixin port: custom third-person camera distance, smoothing, and no-clip.
+            float distance = arcaneCameraEnabled ? cn.lazymoon.features.module.impl.visual.Camera.cameraDistance.getValue().floatValue() : 4.0F * f;
+            float zoom = -this.getMaxZoom(distance);
+            if (arcaneCameraEnabled && cn.lazymoon.features.module.impl.visual.Camera.cameraOptions.isEnabled("Smooth")) {
+                this.arcane$smoothedThirdPersonDistance = (float)(Animation.animate(this.arcane$smoothedThirdPersonDistance * 10.0F, zoom * 10.0F, 0.1F) / 10.0);
+                this.move(this.arcane$smoothedThirdPersonDistance, 0.0F, 0.0F);
+            } else {
+                this.move(zoom, 0.0F, 0.0F);
+            }
+        } else if (pEntity instanceof LivingEntity && ((LivingEntity)pEntity).isSleeping()) {
+            Direction direction = ((LivingEntity)pEntity).getBedOrientation();
             this.setRotation(direction != null ? direction.toYRot() - 180.0F : 0.0F, 0.0F);
             this.move(0.0F, 0.3F, 0.0F);
+        }
+
+        // Arcane mixin port: OldHitting shifts the first-person camera to older version positions.
+        if (!OldHitting.cameraVersion.get().equals("Latest") && !pDetached && !(pEntity instanceof LivingEntity livingEntity && livingEntity.isSleeping())) {
+            switch (OldHitting.cameraVersion.getValue()) {
+                case "Pre 1.8":
+                    this.move(-0.15F, 0.0F, 0.0F);
+                case "Pre 1.13":
+                    this.move(0.1F, 0.0F, 0.0F);
+                case "Pre 1.14":
+                    this.move(-0.05000000074505806F, 0.0F, 0.0F);
+                default:
+                    break;
+            }
         }
     }
 
     public void tick() {
         if (this.entity != null) {
             this.eyeHeightOld = this.eyeHeight;
-            this.eyeHeight = this.eyeHeight + (this.entity.getEyeHeight() - this.eyeHeight) * 0.5F;
+            float targetEyeHeight = this.arcane$getEyeHeight();
+            // Arcane mixin port: OldHitting can remove/swap smooth sneaking eye-height interpolation.
+            if (!OldHitting.smoothSneaking.get()) {
+                this.eyeHeight = targetEyeHeight;
+                this.eyeHeightOld = targetEyeHeight;
+            } else if (OldHitting.alternativeSmoothSneaking.get() && targetEyeHeight < this.eyeHeight) {
+                this.eyeHeight = targetEyeHeight;
+            } else {
+                this.eyeHeight = this.eyeHeight + (targetEyeHeight - this.eyeHeight) * 0.5F;
+            }
         }
     }
 
-    private float getMaxZoom(float p_345111_) {
+    private float getMaxZoom(float pMaxZoom) {
+        // Arcane mixin port: Camera "No Camera Clip" bypasses third-person ray clipping.
+        cn.lazymoon.features.module.impl.visual.Camera arcaneCamera = Client.INSTANCE.getModuleManager()
+            .getModule(cn.lazymoon.features.module.impl.visual.Camera.class);
+        if (arcaneCamera != null && arcaneCamera.isState()
+            && cn.lazymoon.features.module.impl.visual.Camera.cameraOptions.isEnabled("No Camera Clip")) {
+            return pMaxZoom;
+        }
+
         float f = 0.1F;
 
         for (int i = 0; i < 8; i++) {
@@ -99,46 +179,55 @@ public class Camera {
             float f2 = (float)((i >> 1 & 1) * 2 - 1);
             float f3 = (float)((i >> 2 & 1) * 2 - 1);
             Vec3 vec3 = this.position.add((double)(f1 * 0.1F), (double)(f2 * 0.1F), (double)(f3 * 0.1F));
-            Vec3 vec31 = vec3.add(new Vec3(this.forwards).scale((double)(-p_345111_)));
+            Vec3 vec31 = vec3.add(new Vec3(this.forwards).scale((double)(-pMaxZoom)));
             HitResult hitresult = this.level.clip(new ClipContext(vec3, vec31, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, this.entity));
             if (hitresult.getType() != HitResult.Type.MISS) {
                 float f4 = (float)hitresult.getLocation().distanceToSqr(this.position);
-                if (f4 < Mth.square(p_345111_)) {
-                    p_345111_ = Mth.sqrt(f4);
+                if (f4 < Mth.square(pMaxZoom)) {
+                    pMaxZoom = Mth.sqrt(f4);
                 }
             }
         }
 
-        return p_345111_;
+        return pMaxZoom;
     }
 
-    protected void move(float p_343871_, float p_343008_, float p_343953_) {
-        Vector3f vector3f = new Vector3f(p_343953_, p_343008_, -p_343871_).rotate(this.rotation);
+    protected void move(float pZoom, float pDy, float pDx) {
+        Vector3f vector3f = new Vector3f(pDx, pDy, -pZoom).rotate(this.rotation);
         this.setPosition(
             new Vec3(this.position.x + (double)vector3f.x, this.position.y + (double)vector3f.y, this.position.z + (double)vector3f.z)
         );
     }
 
-    protected void setRotation(float p_90573_, float p_90574_) {
-        this.xRot = p_90574_;
-        this.yRot = p_90573_;
-        this.rotation.rotationYXZ((float) Math.PI - p_90573_ * (float) (Math.PI / 180.0), -p_90574_ * (float) (Math.PI / 180.0), 0.0F);
+    protected void setRotation(float pYRot, float pXRot) {
+        this.setRotation(pYRot, pXRot, 0.0F);
+    }
+
+    public void setRotation(float pitchIn, float yawIn, float z) {
+        this.xRot = yawIn;
+        this.yRot = pitchIn;
+        this.rotation.rotationYXZ((float) Math.PI - pitchIn * (float) (Math.PI / 180.0), -yawIn * (float) (Math.PI / 180.0), z * (float) (Math.PI / 180.0));
         FORWARDS.rotate(this.rotation, this.forwards);
         UP.rotate(this.rotation, this.up);
         LEFT.rotate(this.rotation, this.left);
     }
 
-    protected void setPosition(double p_90585_, double p_90586_, double p_90587_) {
-        this.setPosition(new Vec3(p_90585_, p_90586_, p_90587_));
+    protected void setPosition(double pX, double pY, double pZ) {
+        this.setPosition(new Vec3(pX, pY, pZ));
     }
 
-    protected void setPosition(Vec3 p_90582_) {
-        this.position = p_90582_;
-        this.blockPosition.set(p_90582_.x, p_90582_.y, p_90582_.z);
+    protected void setPosition(Vec3 pPos) {
+        this.position = pPos;
+        this.blockPosition.set(pPos.x, pPos.y, pPos.z);
     }
 
     public Vec3 getPosition() {
         return this.position;
+    }
+
+    // Arcane mixin port: compatibility alias for Yarn-style camera access.
+    public Vec3 position() {
+        return this.getPosition();
     }
 
     public BlockPos getBlockPosition() {
@@ -155,6 +244,11 @@ public class Camera {
 
     public Quaternionf rotation() {
         return this.rotation;
+    }
+
+    // Arcane mixin port: compatibility alias for Yarn-style camera rotation access.
+    public Quaternionf getRotation() {
+        return this.rotation();
     }
 
     public Entity getEntity() {
@@ -181,6 +275,14 @@ public class Camera {
     }
 
     public FogType getFluidInCamera() {
+        // Arcane mixin port: Camera "No Fog" makes the camera report no fluid/submersion fog.
+        cn.lazymoon.features.module.impl.visual.Camera arcaneCamera = Client.INSTANCE.getModuleManager()
+            .getModule(cn.lazymoon.features.module.impl.visual.Camera.class);
+        if (arcaneCamera != null && arcaneCamera.isState()
+            && cn.lazymoon.features.module.impl.visual.Camera.cameraOptions.isEnabled("No Fog")) {
+            return FogType.NONE;
+        }
+
         if (!this.initialized) {
             return FogType.NONE;
         } else {
@@ -218,6 +320,28 @@ public class Camera {
         }
     }
 
+    public BlockState getBlockState() {
+        return !this.initialized ? Blocks.AIR.defaultBlockState() : this.level.getBlockState(this.blockPosition);
+    }
+
+    public void setAnglesInternal(float yaw, float pitch) {
+        this.yRot = yaw;
+        this.xRot = pitch;
+    }
+
+    public BlockState getBlockAtCamera() {
+        if (!this.initialized) {
+            return Blocks.AIR.defaultBlockState();
+        } else {
+            BlockState blockstate = this.level.getBlockState(this.blockPosition);
+            if (Reflector.IForgeBlockState_getStateAtViewpoint.exists()) {
+                blockstate = (BlockState)Reflector.call(blockstate, Reflector.IForgeBlockState_getStateAtViewpoint, this.level, this.blockPosition, this.position);
+            }
+
+            return blockstate;
+        }
+    }
+
     public final Vector3f getLookVector() {
         return this.forwards;
     }
@@ -236,20 +360,32 @@ public class Camera {
         this.initialized = false;
     }
 
+    private float arcane$getEyeHeight() {
+        if (this.entity == null) {
+            return this.eyeHeight;
+        }
+
+        if (OldHitting.fakeEyeHeight.get() && this.entity instanceof Player && this.entity.getPose() == Pose.CROUCHING) {
+            float scale = this.entity instanceof LivingEntity livingEntity ? livingEntity.getScale() : 1.0F;
+            return 1.54F * scale;
+        }
+
+        return this.entity.getEyeHeight();
+    }
+
     public float getPartialTickTime() {
         return this.partialTickTime;
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static class NearPlane {
         final Vec3 forward;
         private final Vec3 left;
         private final Vec3 up;
 
-        NearPlane(Vec3 p_167691_, Vec3 p_167692_, Vec3 p_167693_) {
-            this.forward = p_167691_;
-            this.left = p_167692_;
-            this.up = p_167693_;
+        NearPlane(Vec3 pForward, Vec3 pLeft, Vec3 pUp) {
+            this.forward = pForward;
+            this.left = pLeft;
+            this.up = pUp;
         }
 
         public Vec3 getTopLeft() {
@@ -268,8 +404,8 @@ public class Camera {
             return this.forward.subtract(this.up).subtract(this.left);
         }
 
-        public Vec3 getPointOnPlane(float p_167696_, float p_167697_) {
-            return this.forward.add(this.up.scale((double)p_167697_)).subtract(this.left.scale((double)p_167696_));
+        public Vec3 getPointOnPlane(float pLeftScale, float pUpScale) {
+            return this.forward.add(this.up.scale((double)pUpScale)).subtract(this.left.scale((double)pLeftScale));
         }
     }
 }

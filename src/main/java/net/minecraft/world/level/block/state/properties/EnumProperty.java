@@ -15,22 +15,22 @@ public final class EnumProperty<T extends Enum<T> & StringRepresentable> extends
     private final Map<String, T> names;
     private final int[] ordinalToIndex;
 
-    private EnumProperty(String p_61579_, Class<T> p_61580_, List<T> p_368786_) {
-        super(p_61579_, p_61580_);
-        if (p_368786_.isEmpty()) {
-            throw new IllegalArgumentException("Trying to make empty EnumProperty '" + p_61579_ + "'");
+    private EnumProperty(String pName, Class<T> pClazz, List<T> pValues) {
+        super(pName, pClazz);
+        if (pValues.isEmpty()) {
+            throw new IllegalArgumentException("Trying to make empty EnumProperty '" + pName + "'");
         } else {
-            this.values = List.copyOf(p_368786_);
-            T[] at = p_61580_.getEnumConstants();
+            this.values = List.copyOf(pValues);
+            T[] at = pClazz.getEnumConstants();
             this.ordinalToIndex = new int[at.length];
 
             for (T t : at) {
-                this.ordinalToIndex[t.ordinal()] = p_368786_.indexOf(t);
+                this.ordinalToIndex[t.ordinal()] = pValues.indexOf(t);
             }
 
             Builder<String, T> builder = ImmutableMap.builder();
 
-            for (T t1 : p_368786_) {
+            for (T t1 : pValues) {
                 String s = t1.getSerializedName();
                 builder.put(s, t1);
             }
@@ -45,12 +45,12 @@ public final class EnumProperty<T extends Enum<T> & StringRepresentable> extends
     }
 
     @Override
-    public Optional<T> getValue(String p_61604_) {
-        return Optional.ofNullable(this.names.get(p_61604_));
+    public Optional<T> getValue(String pValue) {
+        return Optional.ofNullable(this.names.get(pValue));
     }
 
-    public String getName(T p_61586_) {
-        return p_61586_.getSerializedName();
+    public String getName(T pValue) {
+        return pValue.getSerializedName();
     }
 
     public int getInternalIndex(T p_363721_) {
@@ -76,20 +76,20 @@ public final class EnumProperty<T extends Enum<T> & StringRepresentable> extends
         return 31 * i + this.values.hashCode();
     }
 
-    public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String p_61588_, Class<T> p_61589_) {
-        return create(p_61588_, p_61589_, p_187560_ -> true);
+    public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String pName, Class<T> pClazz) {
+        return create(pName, pClazz, p_187560_ -> true);
     }
 
-    public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String p_61595_, Class<T> p_61596_, Predicate<T> p_61597_) {
-        return create(p_61595_, p_61596_, Arrays.<T>stream(p_61596_.getEnumConstants()).filter(p_61597_).collect(Collectors.toList()));
+    public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String pName, Class<T> pClazz, Predicate<T> pFilter) {
+        return create(pName, pClazz, Arrays.<T>stream(pClazz.getEnumConstants()).filter(pFilter).collect(Collectors.toList()));
     }
 
     @SafeVarargs
-    public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String p_61599_, Class<T> p_61600_, T... p_61601_) {
-        return create(p_61599_, p_61600_, List.of(p_61601_));
+    public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String pName, Class<T> pClazz, T... pValues) {
+        return create(pName, pClazz, List.of(pValues));
     }
 
-    public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String p_61591_, Class<T> p_61592_, List<T> p_367534_) {
-        return new EnumProperty<>(p_61591_, p_61592_, p_367534_);
+    public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String pName, Class<T> pClazz, List<T> pValues) {
+        return new EnumProperty<>(pName, pClazz, pValues);
     }
 }

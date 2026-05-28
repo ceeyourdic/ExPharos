@@ -17,15 +17,15 @@ public class SpellParticle extends TextureSheetParticle {
     private float originalAlpha = 1.0F;
 
     SpellParticle(
-        ClientLevel p_107762_, double p_107763_, double p_107764_, double p_107765_, double p_107766_, double p_107767_, double p_107768_, SpriteSet p_107769_
+        ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites
     ) {
-        super(p_107762_, p_107763_, p_107764_, p_107765_, 0.5 - RANDOM.nextDouble(), p_107767_, 0.5 - RANDOM.nextDouble());
+        super(pLevel, pX, pY, pZ, 0.5 - RANDOM.nextDouble(), pYSpeed, 0.5 - RANDOM.nextDouble());
         this.friction = 0.96F;
         this.gravity = -0.1F;
         this.speedUpWhenYMotionIsBlocked = true;
-        this.sprites = p_107769_;
+        this.sprites = pSprites;
         this.yd *= 0.2F;
-        if (p_107766_ == 0.0 && p_107768_ == 0.0) {
+        if (pXSpeed == 0.0 && pZSpeed == 0.0) {
             this.xd *= 0.1F;
             this.zd *= 0.1F;
         }
@@ -33,7 +33,7 @@ public class SpellParticle extends TextureSheetParticle {
         this.quadSize *= 0.75F;
         this.lifetime = (int)(8.0 / (Math.random() * 0.8 + 0.2));
         this.hasPhysics = false;
-        this.setSpriteFromAge(p_107769_);
+        this.setSpriteFromAge(pSprites);
         if (this.isCloseToScopingPlayer()) {
             this.setAlpha(0.0F);
         }
@@ -74,21 +74,21 @@ public class SpellParticle extends TextureSheetParticle {
     public static class InstantProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public InstantProvider(SpriteSet p_107805_) {
-            this.sprite = p_107805_;
+        public InstantProvider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_107816_,
-            ClientLevel p_107817_,
-            double p_107818_,
-            double p_107819_,
-            double p_107820_,
-            double p_107821_,
-            double p_107822_,
-            double p_107823_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            return new SpellParticle(p_107817_, p_107818_, p_107819_, p_107820_, p_107821_, p_107822_, p_107823_, this.sprite);
+            return new SpellParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprite);
         }
     }
 
@@ -96,8 +96,8 @@ public class SpellParticle extends TextureSheetParticle {
     public static class MobEffectProvider implements ParticleProvider<ColorParticleOption> {
         private final SpriteSet sprite;
 
-        public MobEffectProvider(SpriteSet p_328237_) {
-            this.sprite = p_328237_;
+        public MobEffectProvider(SpriteSet pSprite) {
+            this.sprite = pSprite;
         }
 
         public Particle createParticle(
@@ -121,21 +121,21 @@ public class SpellParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_107847_) {
-            this.sprite = p_107847_;
+        public Provider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_107858_,
-            ClientLevel p_107859_,
-            double p_107860_,
-            double p_107861_,
-            double p_107862_,
-            double p_107863_,
-            double p_107864_,
-            double p_107865_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            return new SpellParticle(p_107859_, p_107860_, p_107861_, p_107862_, p_107863_, p_107864_, p_107865_, this.sprite);
+            return new SpellParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprite);
         }
     }
 
@@ -143,22 +143,22 @@ public class SpellParticle extends TextureSheetParticle {
     public static class WitchProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public WitchProvider(SpriteSet p_107868_) {
-            this.sprite = p_107868_;
+        public WitchProvider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_107879_,
-            ClientLevel p_107880_,
-            double p_107881_,
-            double p_107882_,
-            double p_107883_,
-            double p_107884_,
-            double p_107885_,
-            double p_107886_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            SpellParticle spellparticle = new SpellParticle(p_107880_, p_107881_, p_107882_, p_107883_, p_107884_, p_107885_, p_107886_, this.sprite);
-            float f = p_107880_.random.nextFloat() * 0.5F + 0.35F;
+            SpellParticle spellparticle = new SpellParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprite);
+            float f = pLevel.random.nextFloat() * 0.5F + 0.35F;
             spellparticle.setColor(1.0F * f, 0.0F * f, 1.0F * f);
             return spellparticle;
         }

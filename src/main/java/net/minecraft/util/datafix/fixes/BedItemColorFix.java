@@ -13,8 +13,8 @@ import java.util.Optional;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class BedItemColorFix extends DataFix {
-    public BedItemColorFix(Schema p_14720_, boolean p_14721_) {
-        super(p_14720_, p_14721_);
+    public BedItemColorFix(Schema pOutputSchema, boolean pChangesType) {
+        super(pOutputSchema, pChangesType);
     }
 
     @Override

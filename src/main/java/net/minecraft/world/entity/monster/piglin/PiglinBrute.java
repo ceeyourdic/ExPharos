@@ -92,8 +92,8 @@ public class PiglinBrute extends AbstractPiglin {
     }
 
     @Override
-    protected Brain<?> makeBrain(Dynamic<?> p_35064_) {
-        return PiglinBruteAi.makeBrain(this, this.brainProvider().makeBrain(p_35064_));
+    protected Brain<?> makeBrain(Dynamic<?> pDynamic) {
+        return PiglinBruteAi.makeBrain(this, this.brainProvider().makeBrain(pDynamic));
     }
 
     @Override
@@ -143,7 +143,7 @@ public class PiglinBrute extends AbstractPiglin {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_35072_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.PIGLIN_BRUTE_HURT;
     }
 
@@ -153,7 +153,7 @@ public class PiglinBrute extends AbstractPiglin {
     }
 
     @Override
-    protected void playStepSound(BlockPos p_35066_, BlockState p_35067_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(SoundEvents.PIGLIN_BRUTE_STEP, 0.15F, 1.0F);
     }
 

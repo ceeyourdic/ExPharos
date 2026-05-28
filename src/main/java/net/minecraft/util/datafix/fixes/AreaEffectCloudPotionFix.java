@@ -7,8 +7,8 @@ import com.mojang.serialization.Dynamic;
 import java.util.Optional;
 
 public class AreaEffectCloudPotionFix extends NamedEntityFix {
-    public AreaEffectCloudPotionFix(Schema p_328994_) {
-        super(p_328994_, false, "AreaEffectCloudPotionFix", References.ENTITY, "minecraft:area_effect_cloud");
+    public AreaEffectCloudPotionFix(Schema pOutputSchema) {
+        super(pOutputSchema, false, "AreaEffectCloudPotionFix", References.ENTITY, "minecraft:area_effect_cloud");
     }
 
     @Override
@@ -16,15 +16,15 @@ public class AreaEffectCloudPotionFix extends NamedEntityFix {
         return p_327776_.update(DSL.remainderFinder(), this::fix);
     }
 
-    private <T> Dynamic<T> fix(Dynamic<T> p_332584_) {
-        Optional<Dynamic<T>> optional = p_332584_.get("Color").result();
-        Optional<Dynamic<T>> optional1 = p_332584_.get("effects").result();
-        Optional<Dynamic<T>> optional2 = p_332584_.get("Potion").result();
-        p_332584_ = p_332584_.remove("Color").remove("effects").remove("Potion");
+    private <T> Dynamic<T> fix(Dynamic<T> pTag) {
+        Optional<Dynamic<T>> optional = pTag.get("Color").result();
+        Optional<Dynamic<T>> optional1 = pTag.get("effects").result();
+        Optional<Dynamic<T>> optional2 = pTag.get("Potion").result();
+        pTag = pTag.remove("Color").remove("effects").remove("Potion");
         if (optional.isEmpty() && optional1.isEmpty() && optional2.isEmpty()) {
-            return p_332584_;
+            return pTag;
         } else {
-            Dynamic<T> dynamic = p_332584_.emptyMap();
+            Dynamic<T> dynamic = pTag.emptyMap();
             if (optional.isPresent()) {
                 dynamic = dynamic.set("custom_color", optional.get());
             }
@@ -37,7 +37,7 @@ public class AreaEffectCloudPotionFix extends NamedEntityFix {
                 dynamic = dynamic.set("potion", optional2.get());
             }
 
-            return p_332584_.set("potion_contents", dynamic);
+            return pTag.set("potion_contents", dynamic);
         }
     }
 }

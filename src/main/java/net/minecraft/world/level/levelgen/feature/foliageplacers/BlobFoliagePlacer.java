@@ -17,13 +17,13 @@ public class BlobFoliagePlacer extends FoliagePlacer {
     );
     protected final int height;
 
-    protected static <P extends BlobFoliagePlacer> P3<Mu<P>, IntProvider, IntProvider, Integer> blobParts(Instance<P> p_68414_) {
-        return foliagePlacerParts(p_68414_).and(Codec.intRange(0, 16).fieldOf("height").forGetter(p_68412_ -> p_68412_.height));
+    protected static <P extends BlobFoliagePlacer> P3<Mu<P>, IntProvider, IntProvider, Integer> blobParts(Instance<P> pInstance) {
+        return foliagePlacerParts(pInstance).and(Codec.intRange(0, 16).fieldOf("height").forGetter(p_68412_ -> p_68412_.height));
     }
 
-    public BlobFoliagePlacer(IntProvider p_161356_, IntProvider p_161357_, int p_161358_) {
-        super(p_161356_, p_161357_);
-        this.height = p_161358_;
+    public BlobFoliagePlacer(IntProvider pRadius, IntProvider pOffset, int pHeight) {
+        super(pRadius, pOffset);
+        this.height = pHeight;
     }
 
     @Override

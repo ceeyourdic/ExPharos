@@ -21,7 +21,7 @@ public interface EquipmentAssets {
     Map<DyeColor, ResourceKey<EquipmentAsset>> CARPETS = Util.makeEnumMap(DyeColor.class, p_378269_ -> createId(p_378269_.getSerializedName() + "_carpet"));
     ResourceKey<EquipmentAsset> TRADER_LLAMA = createId("trader_llama");
 
-    static ResourceKey<EquipmentAsset> createId(String p_377499_) {
-        return ResourceKey.create(ROOT_ID, ResourceLocation.withDefaultNamespace(p_377499_));
+    static ResourceKey<EquipmentAsset> createId(String pName) {
+        return ResourceKey.create(ROOT_ID, ResourceLocation.withDefaultNamespace(pName));
     }
 }

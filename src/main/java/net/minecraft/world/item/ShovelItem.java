@@ -31,19 +31,19 @@ public class ShovelItem extends DiggerItem {
             .build()
     );
 
-    public ShovelItem(ToolMaterial p_366398_, float p_361074_, float p_368875_, Item.Properties p_43117_) {
-        super(p_366398_, BlockTags.MINEABLE_WITH_SHOVEL, p_361074_, p_368875_, p_43117_);
+    public ShovelItem(ToolMaterial pMaterial, float pAttackDamage, float pAttackSpeed, Item.Properties pProperties) {
+        super(pMaterial, BlockTags.MINEABLE_WITH_SHOVEL, pAttackDamage, pAttackSpeed, pProperties);
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext p_43119_) {
-        Level level = p_43119_.getLevel();
-        BlockPos blockpos = p_43119_.getClickedPos();
+    public InteractionResult useOn(UseOnContext pContext) {
+        Level level = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
         BlockState blockstate = level.getBlockState(blockpos);
-        if (p_43119_.getClickedFace() == Direction.DOWN) {
+        if (pContext.getClickedFace() == Direction.DOWN) {
             return InteractionResult.PASS;
         } else {
-            Player player = p_43119_.getPlayer();
+            Player player = pContext.getPlayer();
             BlockState blockstate1 = FLATTENABLES.get(blockstate.getBlock());
             BlockState blockstate2 = null;
             if (blockstate1 != null && level.getBlockState(blockpos.above()).isAir()) {
@@ -54,7 +54,7 @@ public class ShovelItem extends DiggerItem {
                     level.levelEvent(null, 1009, blockpos, 0);
                 }
 
-                CampfireBlock.dowse(p_43119_.getPlayer(), level, blockpos, blockstate);
+                CampfireBlock.dowse(pContext.getPlayer(), level, blockpos, blockstate);
                 blockstate2 = blockstate.setValue(CampfireBlock.LIT, Boolean.valueOf(false));
             }
 
@@ -63,7 +63,7 @@ public class ShovelItem extends DiggerItem {
                     level.setBlock(blockpos, blockstate2, 11);
                     level.gameEvent(GameEvent.BLOCK_CHANGE, blockpos, GameEvent.Context.of(player, blockstate2));
                     if (player != null) {
-                        p_43119_.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(p_43119_.getHand()));
+                        pContext.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(pContext.getHand()));
                     }
                 }
 

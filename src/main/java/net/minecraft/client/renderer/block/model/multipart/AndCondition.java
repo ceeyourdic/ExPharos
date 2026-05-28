@@ -14,8 +14,8 @@ public class AndCondition implements Condition {
     public static final String TOKEN = "AND";
     private final Iterable<? extends Condition> conditions;
 
-    public AndCondition(Iterable<? extends Condition> p_111910_) {
-        this.conditions = p_111910_;
+    public AndCondition(Iterable<? extends Condition> pConditions) {
+        this.conditions = pConditions;
     }
 
     @Override

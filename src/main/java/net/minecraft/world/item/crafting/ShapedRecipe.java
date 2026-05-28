@@ -27,16 +27,16 @@ public class ShapedRecipe implements CraftingRecipe {
     @Nullable
     private PlacementInfo placementInfo;
 
-    public ShapedRecipe(String p_250221_, CraftingBookCategory p_250716_, ShapedRecipePattern p_312200_, ItemStack p_248581_, boolean p_310619_) {
-        this.group = p_250221_;
-        this.category = p_250716_;
-        this.pattern = p_312200_;
-        this.result = p_248581_;
-        this.showNotification = p_310619_;
+    public ShapedRecipe(String pGroup, CraftingBookCategory pCategory, ShapedRecipePattern pPattern, ItemStack pResult, boolean pShowNotification) {
+        this.group = pGroup;
+        this.category = pCategory;
+        this.pattern = pPattern;
+        this.result = pResult;
+        this.showNotification = pShowNotification;
     }
 
-    public ShapedRecipe(String p_272759_, CraftingBookCategory p_273506_, ShapedRecipePattern p_310709_, ItemStack p_272852_) {
-        this(p_272759_, p_273506_, p_310709_, p_272852_, true);
+    public ShapedRecipe(String pGroup, CraftingBookCategory pCategory, ShapedRecipePattern pPattern, ItemStack pResult) {
+        this(pGroup, pCategory, pPattern, pResult, true);
     }
 
     @Override
@@ -127,21 +127,21 @@ public class ShapedRecipe implements CraftingRecipe {
             return STREAM_CODEC;
         }
 
-        private static ShapedRecipe fromNetwork(RegistryFriendlyByteBuf p_335571_) {
-            String s = p_335571_.readUtf();
-            CraftingBookCategory craftingbookcategory = p_335571_.readEnum(CraftingBookCategory.class);
-            ShapedRecipePattern shapedrecipepattern = ShapedRecipePattern.STREAM_CODEC.decode(p_335571_);
-            ItemStack itemstack = ItemStack.STREAM_CODEC.decode(p_335571_);
-            boolean flag = p_335571_.readBoolean();
+        private static ShapedRecipe fromNetwork(RegistryFriendlyByteBuf pBuffer) {
+            String s = pBuffer.readUtf();
+            CraftingBookCategory craftingbookcategory = pBuffer.readEnum(CraftingBookCategory.class);
+            ShapedRecipePattern shapedrecipepattern = ShapedRecipePattern.STREAM_CODEC.decode(pBuffer);
+            ItemStack itemstack = ItemStack.STREAM_CODEC.decode(pBuffer);
+            boolean flag = pBuffer.readBoolean();
             return new ShapedRecipe(s, craftingbookcategory, shapedrecipepattern, itemstack, flag);
         }
 
-        private static void toNetwork(RegistryFriendlyByteBuf p_336365_, ShapedRecipe p_330934_) {
-            p_336365_.writeUtf(p_330934_.group);
-            p_336365_.writeEnum(p_330934_.category);
-            ShapedRecipePattern.STREAM_CODEC.encode(p_336365_, p_330934_.pattern);
-            ItemStack.STREAM_CODEC.encode(p_336365_, p_330934_.result);
-            p_336365_.writeBoolean(p_330934_.showNotification);
+        private static void toNetwork(RegistryFriendlyByteBuf pBuffer, ShapedRecipe pRecipe) {
+            pBuffer.writeUtf(pRecipe.group);
+            pBuffer.writeEnum(pRecipe.category);
+            ShapedRecipePattern.STREAM_CODEC.encode(pBuffer, pRecipe.pattern);
+            ItemStack.STREAM_CODEC.encode(pBuffer, pRecipe.result);
+            pBuffer.writeBoolean(pRecipe.showNotification);
         }
     }
 }

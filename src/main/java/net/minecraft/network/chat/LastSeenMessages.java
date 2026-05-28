@@ -15,34 +15,34 @@ public record LastSeenMessages(List<MessageSignature> entries) {
     public static LastSeenMessages EMPTY = new LastSeenMessages(List.of());
     public static final int LAST_SEEN_MESSAGES_MAX_LENGTH = 20;
 
-    public void updateSignature(SignatureUpdater.Output p_251665_) throws SignatureException {
-        p_251665_.update(Ints.toByteArray(this.entries.size()));
+    public void updateSignature(SignatureUpdater.Output pUpdaterOutput) throws SignatureException {
+        pUpdaterOutput.update(Ints.toByteArray(this.entries.size()));
 
         for (MessageSignature messagesignature : this.entries) {
-            p_251665_.update(messagesignature.bytes());
+            pUpdaterOutput.update(messagesignature.bytes());
         }
     }
 
-    public LastSeenMessages.Packed pack(MessageSignatureCache p_253961_) {
-        return new LastSeenMessages.Packed(this.entries.stream().map(p_253457_ -> p_253457_.pack(p_253961_)).toList());
+    public LastSeenMessages.Packed pack(MessageSignatureCache pSignatureCache) {
+        return new LastSeenMessages.Packed(this.entries.stream().map(p_253457_ -> p_253457_.pack(pSignatureCache)).toList());
     }
 
     public static record Packed(List<MessageSignature.Packed> entries) {
         public static final LastSeenMessages.Packed EMPTY = new LastSeenMessages.Packed(List.of());
 
-        public Packed(FriendlyByteBuf p_249757_) {
-            this(p_249757_.<MessageSignature.Packed, List<MessageSignature.Packed>>readCollection(FriendlyByteBuf.limitValue(ArrayList::new, 20), MessageSignature.Packed::read));
+        public Packed(FriendlyByteBuf pBuffer) {
+            this(pBuffer.<MessageSignature.Packed, List<MessageSignature.Packed>>readCollection(FriendlyByteBuf.limitValue(ArrayList::new, 20), MessageSignature.Packed::read));
         }
 
-        public void write(FriendlyByteBuf p_250725_) {
-            p_250725_.writeCollection(this.entries, MessageSignature.Packed::write);
+        public void write(FriendlyByteBuf pBuffer) {
+            pBuffer.writeCollection(this.entries, MessageSignature.Packed::write);
         }
 
-        public Optional<LastSeenMessages> unpack(MessageSignatureCache p_253745_) {
+        public Optional<LastSeenMessages> unpack(MessageSignatureCache pSignatureCache) {
             List<MessageSignature> list = new ArrayList<>(this.entries.size());
 
             for (MessageSignature.Packed messagesignature$packed : this.entries) {
-                Optional<MessageSignature> optional = messagesignature$packed.unpack(p_253745_);
+                Optional<MessageSignature> optional = messagesignature$packed.unpack(pSignatureCache);
                 if (optional.isEmpty()) {
                     return Optional.empty();
                 }
@@ -55,13 +55,13 @@ public record LastSeenMessages(List<MessageSignature> entries) {
     }
 
     public static record Update(int offset, BitSet acknowledged) {
-        public Update(FriendlyByteBuf p_242184_) {
-            this(p_242184_.readVarInt(), p_242184_.readFixedBitSet(20));
+        public Update(FriendlyByteBuf pBuffer) {
+            this(pBuffer.readVarInt(), pBuffer.readFixedBitSet(20));
         }
 
-        public void write(FriendlyByteBuf p_242221_) {
-            p_242221_.writeVarInt(this.offset);
-            p_242221_.writeFixedBitSet(this.acknowledged, 20);
+        public void write(FriendlyByteBuf pBuffer) {
+            pBuffer.writeVarInt(this.offset);
+            pBuffer.writeFixedBitSet(this.acknowledged, 20);
         }
     }
 }

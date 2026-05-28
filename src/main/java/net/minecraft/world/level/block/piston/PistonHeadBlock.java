@@ -65,25 +65,25 @@ public class PistonHeadBlock extends DirectionalBlock {
         return CODEC;
     }
 
-    private static VoxelShape[] makeShapes(boolean p_60313_) {
-        return Arrays.stream(Direction.values()).map(p_60316_ -> calculateShape(p_60316_, p_60313_)).toArray(VoxelShape[]::new);
+    private static VoxelShape[] makeShapes(boolean pExtended) {
+        return Arrays.stream(Direction.values()).map(p_60316_ -> calculateShape(p_60316_, pExtended)).toArray(VoxelShape[]::new);
     }
 
-    private static VoxelShape calculateShape(Direction p_60310_, boolean p_60311_) {
-        switch (p_60310_) {
+    private static VoxelShape calculateShape(Direction pDirection, boolean pShortArm) {
+        switch (pDirection) {
             case DOWN:
             default:
-                return Shapes.or(DOWN_AABB, p_60311_ ? SHORT_DOWN_ARM_AABB : DOWN_ARM_AABB);
+                return Shapes.or(DOWN_AABB, pShortArm ? SHORT_DOWN_ARM_AABB : DOWN_ARM_AABB);
             case UP:
-                return Shapes.or(UP_AABB, p_60311_ ? SHORT_UP_ARM_AABB : UP_ARM_AABB);
+                return Shapes.or(UP_AABB, pShortArm ? SHORT_UP_ARM_AABB : UP_ARM_AABB);
             case NORTH:
-                return Shapes.or(NORTH_AABB, p_60311_ ? SHORT_NORTH_ARM_AABB : NORTH_ARM_AABB);
+                return Shapes.or(NORTH_AABB, pShortArm ? SHORT_NORTH_ARM_AABB : NORTH_ARM_AABB);
             case SOUTH:
-                return Shapes.or(SOUTH_AABB, p_60311_ ? SHORT_SOUTH_ARM_AABB : SOUTH_ARM_AABB);
+                return Shapes.or(SOUTH_AABB, pShortArm ? SHORT_SOUTH_ARM_AABB : SOUTH_ARM_AABB);
             case WEST:
-                return Shapes.or(WEST_AABB, p_60311_ ? SHORT_WEST_ARM_AABB : WEST_ARM_AABB);
+                return Shapes.or(WEST_AABB, pShortArm ? SHORT_WEST_ARM_AABB : WEST_ARM_AABB);
             case EAST:
-                return Shapes.or(EAST_AABB, p_60311_ ? SHORT_EAST_ARM_AABB : EAST_ARM_AABB);
+                return Shapes.or(EAST_AABB, pShortArm ? SHORT_EAST_ARM_AABB : EAST_ARM_AABB);
         }
     }
 
@@ -95,18 +95,18 @@ public class PistonHeadBlock extends DirectionalBlock {
     }
 
     @Override
-    protected boolean useShapeForLightOcclusion(BlockState p_60325_) {
+    protected boolean useShapeForLightOcclusion(BlockState pState) {
         return true;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_60320_, BlockGetter p_60321_, BlockPos p_60322_, CollisionContext p_60323_) {
-        return (p_60320_.getValue(SHORT) ? SHAPES_SHORT : SHAPES_LONG)[p_60320_.getValue(FACING).ordinal()];
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return (pState.getValue(SHORT) ? SHAPES_SHORT : SHAPES_LONG)[pState.getValue(FACING).ordinal()];
     }
 
-    private boolean isFittingBase(BlockState p_60298_, BlockState p_60299_) {
-        Block block = p_60298_.getValue(TYPE) == PistonType.DEFAULT ? Blocks.PISTON : Blocks.STICKY_PISTON;
-        return p_60299_.is(block) && p_60299_.getValue(PistonBaseBlock.EXTENDED) && p_60299_.getValue(FACING) == p_60298_.getValue(FACING);
+    private boolean isFittingBase(BlockState pBaseState, BlockState pExtendedState) {
+        Block block = pBaseState.getValue(TYPE) == PistonType.DEFAULT ? Blocks.PISTON : Blocks.STICKY_PISTON;
+        return pExtendedState.is(block) && pExtendedState.getValue(PistonBaseBlock.EXTENDED) && pExtendedState.getValue(FACING) == pBaseState.getValue(FACING);
     }
 
     @Override
@@ -122,12 +122,12 @@ public class PistonHeadBlock extends DirectionalBlock {
     }
 
     @Override
-    protected void onRemove(BlockState p_60282_, Level p_60283_, BlockPos p_60284_, BlockState p_60285_, boolean p_60286_) {
-        if (!p_60282_.is(p_60285_.getBlock())) {
-            super.onRemove(p_60282_, p_60283_, p_60284_, p_60285_, p_60286_);
-            BlockPos blockpos = p_60284_.relative(p_60282_.getValue(FACING).getOpposite());
-            if (this.isFittingBase(p_60282_, p_60283_.getBlockState(blockpos))) {
-                p_60283_.destroyBlock(blockpos, true);
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        if (!pState.is(pNewState.getBlock())) {
+            super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+            BlockPos blockpos = pPos.relative(pState.getValue(FACING).getOpposite());
+            if (this.isFittingBase(pState, pLevel.getBlockState(blockpos))) {
+                pLevel.destroyBlock(blockpos, true);
             }
         }
     }
@@ -149,9 +149,9 @@ public class PistonHeadBlock extends DirectionalBlock {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_60288_, LevelReader p_60289_, BlockPos p_60290_) {
-        BlockState blockstate = p_60289_.getBlockState(p_60290_.relative(p_60288_.getValue(FACING).getOpposite()));
-        return this.isFittingBase(p_60288_, blockstate) || blockstate.is(Blocks.MOVING_PISTON) && blockstate.getValue(FACING) == p_60288_.getValue(FACING);
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos.relative(pState.getValue(FACING).getOpposite()));
+        return this.isFittingBase(pState, blockstate) || blockstate.is(Blocks.MOVING_PISTON) && blockstate.getValue(FACING) == pState.getValue(FACING);
     }
 
     @Override
@@ -171,18 +171,18 @@ public class PistonHeadBlock extends DirectionalBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState p_60295_, Rotation p_60296_) {
-        return p_60295_.setValue(FACING, p_60296_.rotate(p_60295_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRot) {
+        return pState.setValue(FACING, pRot.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_60292_, Mirror p_60293_) {
-        return p_60292_.rotate(p_60293_.getRotation(p_60292_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_60308_) {
-        p_60308_.add(FACING, TYPE, SHORT);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, TYPE, SHORT);
     }
 
     @Override

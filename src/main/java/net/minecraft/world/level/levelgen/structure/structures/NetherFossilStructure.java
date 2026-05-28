@@ -24,9 +24,9 @@ public class NetherFossilStructure extends Structure {
     );
     public final HeightProvider height;
 
-    public NetherFossilStructure(Structure.StructureSettings p_228573_, HeightProvider p_228574_) {
-        super(p_228573_);
-        this.height = p_228574_;
+    public NetherFossilStructure(Structure.StructureSettings pSettings, HeightProvider pHeight) {
+        super(pSettings);
+        this.height = pHeight;
     }
 
     @Override

@@ -45,21 +45,21 @@ public class ByteTag extends NumericTag {
     public static final ByteTag ONE = valueOf((byte)1);
     private final byte data;
 
-    ByteTag(byte p_128261_) {
-        this.data = p_128261_;
+    ByteTag(byte pData) {
+        this.data = pData;
     }
 
-    public static ByteTag valueOf(byte p_128267_) {
-        return ByteTag.Cache.cache[128 + p_128267_];
+    public static ByteTag valueOf(byte pData) {
+        return ByteTag.Cache.cache[128 + pData];
     }
 
-    public static ByteTag valueOf(boolean p_128274_) {
-        return p_128274_ ? ONE : ZERO;
+    public static ByteTag valueOf(boolean pData) {
+        return pData ? ONE : ZERO;
     }
 
     @Override
-    public void write(DataOutput p_128269_) throws IOException {
-        p_128269_.writeByte(this.data);
+    public void write(DataOutput pOutput) throws IOException {
+        pOutput.writeByte(this.data);
     }
 
     @Override
@@ -82,8 +82,8 @@ public class ByteTag extends NumericTag {
     }
 
     @Override
-    public boolean equals(Object p_128280_) {
-        return this == p_128280_ ? true : p_128280_ instanceof ByteTag && this.data == ((ByteTag)p_128280_).data;
+    public boolean equals(Object pOther) {
+        return this == pOther ? true : pOther instanceof ByteTag && this.data == ((ByteTag)pOther).data;
     }
 
     @Override

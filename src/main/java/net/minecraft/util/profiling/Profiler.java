@@ -12,16 +12,16 @@ public final class Profiler {
     private Profiler() {
     }
 
-    public static Profiler.Scope use(ProfilerFiller p_361779_) {
-        startUsing(p_361779_);
+    public static Profiler.Scope use(ProfilerFiller pProfiler) {
+        startUsing(pProfiler);
         return Profiler::stopUsing;
     }
 
-    private static void startUsing(ProfilerFiller p_367831_) {
+    private static void startUsing(ProfilerFiller pProfiler) {
         if (ACTIVE.get() != null) {
             throw new IllegalStateException("Profiler is already active");
         } else {
-            ProfilerFiller profilerfiller = decorateFiller(p_367831_);
+            ProfilerFiller profilerfiller = decorateFiller(pProfiler);
             ACTIVE.set(profilerfiller);
             ACTIVE_COUNT.incrementAndGet();
             profilerfiller.startTick();
@@ -39,8 +39,8 @@ public final class Profiler {
         }
     }
 
-    private static ProfilerFiller decorateFiller(ProfilerFiller p_364301_) {
-        return ProfilerFiller.combine(getDefaultFiller(), p_364301_);
+    private static ProfilerFiller decorateFiller(ProfilerFiller pFiller) {
+        return ProfilerFiller.combine(getDefaultFiller(), pFiller);
     }
 
     public static ProfilerFiller get() {

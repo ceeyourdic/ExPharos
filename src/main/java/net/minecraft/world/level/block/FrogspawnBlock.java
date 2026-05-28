@@ -58,8 +58,8 @@ public class FrogspawnBlock extends Block {
         p_221228_.scheduleTick(p_221229_, this, getFrogspawnHatchDelay(p_221228_.getRandom()));
     }
 
-    private static int getFrogspawnHatchDelay(RandomSource p_221186_) {
-        return p_221186_.nextInt(minHatchTickDelay, maxHatchTickDelay);
+    private static int getFrogspawnHatchDelay(RandomSource pRandom) {
+        return pRandom.nextInt(minHatchTickDelay, maxHatchTickDelay);
     }
 
     @Override
@@ -94,47 +94,47 @@ public class FrogspawnBlock extends Block {
         }
     }
 
-    private static boolean mayPlaceOn(BlockGetter p_221188_, BlockPos p_221189_) {
-        FluidState fluidstate = p_221188_.getFluidState(p_221189_);
-        FluidState fluidstate1 = p_221188_.getFluidState(p_221189_.above());
+    private static boolean mayPlaceOn(BlockGetter pLevel, BlockPos pPos) {
+        FluidState fluidstate = pLevel.getFluidState(pPos);
+        FluidState fluidstate1 = pLevel.getFluidState(pPos.above());
         return fluidstate.getType() == Fluids.WATER && fluidstate1.getType() == Fluids.EMPTY;
     }
 
-    private void hatchFrogspawn(ServerLevel p_221182_, BlockPos p_221183_, RandomSource p_221184_) {
-        this.destroyBlock(p_221182_, p_221183_);
-        p_221182_.playSound(null, p_221183_, SoundEvents.FROGSPAWN_HATCH, SoundSource.BLOCKS, 1.0F, 1.0F);
-        this.spawnTadpoles(p_221182_, p_221183_, p_221184_);
+    private void hatchFrogspawn(ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
+        this.destroyBlock(pLevel, pPos);
+        pLevel.playSound(null, pPos, SoundEvents.FROGSPAWN_HATCH, SoundSource.BLOCKS, 1.0F, 1.0F);
+        this.spawnTadpoles(pLevel, pPos, pRandom);
     }
 
-    private void destroyBlock(Level p_221191_, BlockPos p_221192_) {
-        p_221191_.destroyBlock(p_221192_, false);
+    private void destroyBlock(Level pLevel, BlockPos pPos) {
+        pLevel.destroyBlock(pPos, false);
     }
 
-    private void spawnTadpoles(ServerLevel p_221221_, BlockPos p_221222_, RandomSource p_221223_) {
-        int i = p_221223_.nextInt(2, 6);
+    private void spawnTadpoles(ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
+        int i = pRandom.nextInt(2, 6);
 
         for (int j = 1; j <= i; j++) {
-            Tadpole tadpole = EntityType.TADPOLE.create(p_221221_, EntitySpawnReason.BREEDING);
+            Tadpole tadpole = EntityType.TADPOLE.create(pLevel, EntitySpawnReason.BREEDING);
             if (tadpole != null) {
-                double d0 = (double)p_221222_.getX() + this.getRandomTadpolePositionOffset(p_221223_);
-                double d1 = (double)p_221222_.getZ() + this.getRandomTadpolePositionOffset(p_221223_);
-                int k = p_221223_.nextInt(1, 361);
-                tadpole.moveTo(d0, (double)p_221222_.getY() - 0.5, d1, (float)k, 0.0F);
+                double d0 = (double)pPos.getX() + this.getRandomTadpolePositionOffset(pRandom);
+                double d1 = (double)pPos.getZ() + this.getRandomTadpolePositionOffset(pRandom);
+                int k = pRandom.nextInt(1, 361);
+                tadpole.moveTo(d0, (double)pPos.getY() - 0.5, d1, (float)k, 0.0F);
                 tadpole.setPersistenceRequired();
-                p_221221_.addFreshEntity(tadpole);
+                pLevel.addFreshEntity(tadpole);
             }
         }
     }
 
-    private double getRandomTadpolePositionOffset(RandomSource p_221225_) {
+    private double getRandomTadpolePositionOffset(RandomSource pRandom) {
         double d0 = 0.2F;
-        return Mth.clamp(p_221225_.nextDouble(), 0.2F, 0.7999999970197678);
+        return Mth.clamp(pRandom.nextDouble(), 0.2F, 0.7999999970197678);
     }
 
     @VisibleForTesting
-    public static void setHatchDelay(int p_221179_, int p_221180_) {
-        minHatchTickDelay = p_221179_;
-        maxHatchTickDelay = p_221180_;
+    public static void setHatchDelay(int pMinHatchDelay, int pMaxHatchDelay) {
+        minHatchTickDelay = pMinHatchDelay;
+        maxHatchTickDelay = pMaxHatchDelay;
     }
 
     @VisibleForTesting

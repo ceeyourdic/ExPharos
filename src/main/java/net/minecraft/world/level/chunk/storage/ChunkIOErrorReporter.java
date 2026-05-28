@@ -6,20 +6,20 @@ import net.minecraft.ReportedException;
 import net.minecraft.world.level.ChunkPos;
 
 public interface ChunkIOErrorReporter {
-    void reportChunkLoadFailure(Throwable p_344152_, RegionStorageInfo p_342086_, ChunkPos p_342081_);
+    void reportChunkLoadFailure(Throwable pThrowable, RegionStorageInfo pRegionStorageInfo, ChunkPos pChunkPos);
 
-    void reportChunkSaveFailure(Throwable p_342260_, RegionStorageInfo p_344817_, ChunkPos p_345030_);
+    void reportChunkSaveFailure(Throwable pThrowable, RegionStorageInfo pRegionStorageInfo, ChunkPos pChunkPos);
 
-    static ReportedException createMisplacedChunkReport(ChunkPos p_343859_, ChunkPos p_343919_) {
+    static ReportedException createMisplacedChunkReport(ChunkPos pPos, ChunkPos pExpectedPos) {
         CrashReport crashreport = CrashReport.forThrowable(
-            new IllegalStateException("Retrieved chunk position " + p_343859_ + " does not match requested " + p_343919_), "Chunk found in invalid location"
+            new IllegalStateException("Retrieved chunk position " + pPos + " does not match requested " + pExpectedPos), "Chunk found in invalid location"
         );
         CrashReportCategory crashreportcategory = crashreport.addCategory("Misplaced Chunk");
-        crashreportcategory.setDetail("Stored Position", p_343859_::toString);
+        crashreportcategory.setDetail("Stored Position", pPos::toString);
         return new ReportedException(crashreport);
     }
 
-    default void reportMisplacedChunk(ChunkPos p_344532_, ChunkPos p_343492_, RegionStorageInfo p_342478_) {
-        this.reportChunkLoadFailure(createMisplacedChunkReport(p_344532_, p_343492_), p_342478_, p_343492_);
+    default void reportMisplacedChunk(ChunkPos pPos, ChunkPos pExpectedPos, RegionStorageInfo pRegionStorageInfo) {
+        this.reportChunkLoadFailure(createMisplacedChunkReport(pPos, pExpectedPos), pRegionStorageInfo, pExpectedPos);
     }
 }

@@ -16,20 +16,20 @@ public class ChunkedSampleByteBuf implements FloatConsumer {
     private int byteCount;
     private ByteBuffer currentBuffer;
 
-    public ChunkedSampleByteBuf(int p_330452_) {
-        this.bufferSize = p_330452_ + 1 & -2;
-        this.currentBuffer = BufferUtils.createByteBuffer(p_330452_);
+    public ChunkedSampleByteBuf(int pBufferSize) {
+        this.bufferSize = pBufferSize + 1 & -2;
+        this.currentBuffer = BufferUtils.createByteBuffer(pBufferSize);
     }
 
     @Override
-    public void accept(float p_332948_) {
+    public void accept(float pValue) {
         if (this.currentBuffer.remaining() == 0) {
             this.currentBuffer.flip();
             this.buffers.add(this.currentBuffer);
             this.currentBuffer = BufferUtils.createByteBuffer(this.bufferSize);
         }
 
-        int i = Mth.clamp((int)(p_332948_ * 32767.5F - 0.5F), -32768, 32767);
+        int i = Mth.clamp((int)(pValue * 32767.5F - 0.5F), -32768, 32767);
         this.currentBuffer.putShort((short)i);
         this.byteCount += 2;
     }

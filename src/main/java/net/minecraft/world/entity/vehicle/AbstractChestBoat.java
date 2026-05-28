@@ -159,8 +159,8 @@ public abstract class AbstractChestBoat extends AbstractBoat implements HasCusto
         }
     }
 
-    public void unpackLootTable(@Nullable Player p_362478_) {
-        this.unpackChestVehicleLootTable(p_362478_);
+    public void unpackLootTable(@Nullable Player pPlayer) {
+        this.unpackChestVehicleLootTable(pPlayer);
     }
 
     @Nullable

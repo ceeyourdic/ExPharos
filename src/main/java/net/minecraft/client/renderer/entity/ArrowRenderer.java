@@ -34,7 +34,7 @@ public abstract class ArrowRenderer<T extends AbstractArrow, S extends ArrowRend
         super.render(p_364846_, p_113822_, p_113823_, p_113824_);
     }
 
-    protected abstract ResourceLocation getTextureLocation(S p_364393_);
+    protected abstract ResourceLocation getTextureLocation(S pRenderState);
 
     public void extractRenderState(T p_363488_, S p_367796_, float p_365866_) {
         super.extractRenderState(p_363488_, p_367796_, p_365866_);

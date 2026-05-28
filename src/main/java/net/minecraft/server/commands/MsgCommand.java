@@ -15,8 +15,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 
 public class MsgCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> p_138061_) {
-        LiteralCommandNode<CommandSourceStack> literalcommandnode = p_138061_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        LiteralCommandNode<CommandSourceStack> literalcommandnode = pDispatcher.register(
             Commands.literal("msg")
                 .then(
                     Commands.argument("targets", EntityArgument.players())
@@ -30,25 +30,25 @@ public class MsgCommand {
                         }))
                 )
         );
-        p_138061_.register(Commands.literal("tell").redirect(literalcommandnode));
-        p_138061_.register(Commands.literal("w").redirect(literalcommandnode));
+        pDispatcher.register(Commands.literal("tell").redirect(literalcommandnode));
+        pDispatcher.register(Commands.literal("w").redirect(literalcommandnode));
     }
 
-    private static void sendMessage(CommandSourceStack p_250209_, Collection<ServerPlayer> p_252344_, PlayerChatMessage p_249416_) {
-        ChatType.Bound chattype$bound = ChatType.bind(ChatType.MSG_COMMAND_INCOMING, p_250209_);
-        OutgoingChatMessage outgoingchatmessage = OutgoingChatMessage.create(p_249416_);
+    private static void sendMessage(CommandSourceStack pSource, Collection<ServerPlayer> pTargets, PlayerChatMessage pMessage) {
+        ChatType.Bound chattype$bound = ChatType.bind(ChatType.MSG_COMMAND_INCOMING, pSource);
+        OutgoingChatMessage outgoingchatmessage = OutgoingChatMessage.create(pMessage);
         boolean flag = false;
 
-        for (ServerPlayer serverplayer : p_252344_) {
-            ChatType.Bound chattype$bound1 = ChatType.bind(ChatType.MSG_COMMAND_OUTGOING, p_250209_).withTargetName(serverplayer.getDisplayName());
-            p_250209_.sendChatMessage(outgoingchatmessage, false, chattype$bound1);
-            boolean flag1 = p_250209_.shouldFilterMessageTo(serverplayer);
+        for (ServerPlayer serverplayer : pTargets) {
+            ChatType.Bound chattype$bound1 = ChatType.bind(ChatType.MSG_COMMAND_OUTGOING, pSource).withTargetName(serverplayer.getDisplayName());
+            pSource.sendChatMessage(outgoingchatmessage, false, chattype$bound1);
+            boolean flag1 = pSource.shouldFilterMessageTo(serverplayer);
             serverplayer.sendChatMessage(outgoingchatmessage, flag1, chattype$bound);
-            flag |= flag1 && p_249416_.isFullyFiltered();
+            flag |= flag1 && pMessage.isFullyFiltered();
         }
 
         if (flag) {
-            p_250209_.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
+            pSource.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
         }
     }
 }

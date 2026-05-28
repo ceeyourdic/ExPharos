@@ -26,13 +26,13 @@ public record AnimationMetadataSection(
     );
     public static final MetadataSectionType<AnimationMetadataSection> TYPE = new MetadataSectionType<>("animation", CODEC);
 
-    public FrameSize calculateFrameSize(int p_249859_, int p_250148_) {
+    public FrameSize calculateFrameSize(int pWidth, int pHeight) {
         if (this.frameWidth.isPresent()) {
-            return this.frameHeight.isPresent() ? new FrameSize(this.frameWidth.get(), this.frameHeight.get()) : new FrameSize(this.frameWidth.get(), p_250148_);
+            return this.frameHeight.isPresent() ? new FrameSize(this.frameWidth.get(), this.frameHeight.get()) : new FrameSize(this.frameWidth.get(), pHeight);
         } else if (this.frameHeight.isPresent()) {
-            return new FrameSize(p_249859_, this.frameHeight.get());
+            return new FrameSize(pWidth, this.frameHeight.get());
         } else {
-            int i = Math.min(p_249859_, p_250148_);
+            int i = Math.min(pWidth, pHeight);
             return new FrameSize(i, i);
         }
     }

@@ -24,9 +24,9 @@ public enum ReportReason {
     private final Component title;
     private final Component description;
 
-    private ReportReason(final String p_273339_) {
-        this.backendName = p_273339_.toUpperCase(Locale.ROOT);
-        String s = "gui.abuseReport.reason." + p_273339_;
+    private ReportReason(final String pName) {
+        this.backendName = pName.toUpperCase(Locale.ROOT);
+        String s = "gui.abuseReport.reason." + pName;
         this.title = Component.translatable(s);
         this.description = Component.translatable(s + ".description");
     }
@@ -43,8 +43,8 @@ public enum ReportReason {
         return this.description;
     }
 
-    public static List<ReportReason> getIncompatibleCategories(ReportType p_369639_) {
-        return switch (p_369639_) {
+    public static List<ReportReason> getIncompatibleCategories(ReportType pReportType) {
+        return switch (pReportType) {
             case CHAT -> List.of(SEXUALLY_INAPPROPRIATE);
             case SKIN -> List.of(IMMINENT_HARM, DEFAMATION_IMPERSONATION_FALSE_INFORMATION);
             default -> List.of();

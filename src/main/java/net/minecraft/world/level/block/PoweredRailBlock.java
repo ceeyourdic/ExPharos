@@ -33,32 +33,32 @@ public class PoweredRailBlock extends BaseRailBlock {
         );
     }
 
-    protected boolean findPoweredRailSignal(Level p_55220_, BlockPos p_55221_, BlockState p_55222_, boolean p_55223_, int p_55224_) {
-        if (p_55224_ >= 8) {
+    protected boolean findPoweredRailSignal(Level pLevel, BlockPos pPos, BlockState pState, boolean pSearchForward, int pRecursionCount) {
+        if (pRecursionCount >= 8) {
             return false;
         } else {
-            int i = p_55221_.getX();
-            int j = p_55221_.getY();
-            int k = p_55221_.getZ();
+            int i = pPos.getX();
+            int j = pPos.getY();
+            int k = pPos.getZ();
             boolean flag = true;
-            RailShape railshape = p_55222_.getValue(SHAPE);
+            RailShape railshape = pState.getValue(SHAPE);
             switch (railshape) {
                 case NORTH_SOUTH:
-                    if (p_55223_) {
+                    if (pSearchForward) {
                         k++;
                     } else {
                         k--;
                     }
                     break;
                 case EAST_WEST:
-                    if (p_55223_) {
+                    if (pSearchForward) {
                         i--;
                     } else {
                         i++;
                     }
                     break;
                 case ASCENDING_EAST:
-                    if (p_55223_) {
+                    if (pSearchForward) {
                         i--;
                     } else {
                         i++;
@@ -69,7 +69,7 @@ public class PoweredRailBlock extends BaseRailBlock {
                     railshape = RailShape.EAST_WEST;
                     break;
                 case ASCENDING_WEST:
-                    if (p_55223_) {
+                    if (pSearchForward) {
                         i--;
                         j++;
                         flag = false;
@@ -80,7 +80,7 @@ public class PoweredRailBlock extends BaseRailBlock {
                     railshape = RailShape.EAST_WEST;
                     break;
                 case ASCENDING_NORTH:
-                    if (p_55223_) {
+                    if (pSearchForward) {
                         k++;
                     } else {
                         k--;
@@ -91,7 +91,7 @@ public class PoweredRailBlock extends BaseRailBlock {
                     railshape = RailShape.NORTH_SOUTH;
                     break;
                 case ASCENDING_SOUTH:
-                    if (p_55223_) {
+                    if (pSearchForward) {
                         k++;
                         j++;
                         flag = false;
@@ -102,26 +102,26 @@ public class PoweredRailBlock extends BaseRailBlock {
                     railshape = RailShape.NORTH_SOUTH;
             }
 
-            return this.isSameRailWithPower(p_55220_, new BlockPos(i, j, k), p_55223_, p_55224_, railshape)
+            return this.isSameRailWithPower(pLevel, new BlockPos(i, j, k), pSearchForward, pRecursionCount, railshape)
                 ? true
-                : flag && this.isSameRailWithPower(p_55220_, new BlockPos(i, j - 1, k), p_55223_, p_55224_, railshape);
+                : flag && this.isSameRailWithPower(pLevel, new BlockPos(i, j - 1, k), pSearchForward, pRecursionCount, railshape);
         }
     }
 
-    protected boolean isSameRailWithPower(Level p_55226_, BlockPos p_55227_, boolean p_55228_, int p_55229_, RailShape p_55230_) {
-        BlockState blockstate = p_55226_.getBlockState(p_55227_);
+    protected boolean isSameRailWithPower(Level pLevel, BlockPos pState, boolean pSearchForward, int pRecursionCount, RailShape pShape) {
+        BlockState blockstate = pLevel.getBlockState(pState);
         if (!blockstate.is(this)) {
             return false;
         } else {
             RailShape railshape = blockstate.getValue(SHAPE);
-            if (p_55230_ != RailShape.EAST_WEST
+            if (pShape != RailShape.EAST_WEST
                 || railshape != RailShape.NORTH_SOUTH && railshape != RailShape.ASCENDING_NORTH && railshape != RailShape.ASCENDING_SOUTH) {
-                if (p_55230_ != RailShape.NORTH_SOUTH
+                if (pShape != RailShape.NORTH_SOUTH
                     || railshape != RailShape.EAST_WEST && railshape != RailShape.ASCENDING_EAST && railshape != RailShape.ASCENDING_WEST) {
                     if (!blockstate.getValue(POWERED)) {
                         return false;
                     } else {
-                        return p_55226_.hasNeighborSignal(p_55227_) ? true : this.findPoweredRailSignal(p_55226_, p_55227_, blockstate, p_55228_, p_55229_ + 1);
+                        return pLevel.hasNeighborSignal(pState) ? true : this.findPoweredRailSignal(pLevel, pState, blockstate, pSearchForward, pRecursionCount + 1);
                     }
                 } else {
                     return false;
@@ -133,16 +133,16 @@ public class PoweredRailBlock extends BaseRailBlock {
     }
 
     @Override
-    protected void updateState(BlockState p_55232_, Level p_55233_, BlockPos p_55234_, Block p_55235_) {
-        boolean flag = p_55232_.getValue(POWERED);
-        boolean flag1 = p_55233_.hasNeighborSignal(p_55234_)
-            || this.findPoweredRailSignal(p_55233_, p_55234_, p_55232_, true, 0)
-            || this.findPoweredRailSignal(p_55233_, p_55234_, p_55232_, false, 0);
+    protected void updateState(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock) {
+        boolean flag = pState.getValue(POWERED);
+        boolean flag1 = pLevel.hasNeighborSignal(pPos)
+            || this.findPoweredRailSignal(pLevel, pPos, pState, true, 0)
+            || this.findPoweredRailSignal(pLevel, pPos, pState, false, 0);
         if (flag1 != flag) {
-            p_55233_.setBlock(p_55234_, p_55232_.setValue(POWERED, Boolean.valueOf(flag1)), 3);
-            p_55233_.updateNeighborsAt(p_55234_.below(), this);
-            if (p_55232_.getValue(SHAPE).isSlope()) {
-                p_55233_.updateNeighborsAt(p_55234_.above(), this);
+            pLevel.setBlock(pPos, pState.setValue(POWERED, Boolean.valueOf(flag1)), 3);
+            pLevel.updateNeighborsAt(pPos.below(), this);
+            if (pState.getValue(SHAPE).isSlope()) {
+                pLevel.updateNeighborsAt(pPos.above(), this);
             }
         }
     }
@@ -153,125 +153,125 @@ public class PoweredRailBlock extends BaseRailBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState p_55240_, Rotation p_55241_) {
-        switch (p_55241_) {
+    protected BlockState rotate(BlockState pState, Rotation pRot) {
+        switch (pRot) {
             case CLOCKWISE_180:
-                switch ((RailShape)p_55240_.getValue(SHAPE)) {
+                switch ((RailShape)pState.getValue(SHAPE)) {
                     case ASCENDING_EAST:
-                        return p_55240_.setValue(SHAPE, RailShape.ASCENDING_WEST);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_WEST);
                     case ASCENDING_WEST:
-                        return p_55240_.setValue(SHAPE, RailShape.ASCENDING_EAST);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_EAST);
                     case ASCENDING_NORTH:
-                        return p_55240_.setValue(SHAPE, RailShape.ASCENDING_SOUTH);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_SOUTH);
                     case ASCENDING_SOUTH:
-                        return p_55240_.setValue(SHAPE, RailShape.ASCENDING_NORTH);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_NORTH);
                     case SOUTH_EAST:
-                        return p_55240_.setValue(SHAPE, RailShape.NORTH_WEST);
+                        return pState.setValue(SHAPE, RailShape.NORTH_WEST);
                     case SOUTH_WEST:
-                        return p_55240_.setValue(SHAPE, RailShape.NORTH_EAST);
+                        return pState.setValue(SHAPE, RailShape.NORTH_EAST);
                     case NORTH_WEST:
-                        return p_55240_.setValue(SHAPE, RailShape.SOUTH_EAST);
+                        return pState.setValue(SHAPE, RailShape.SOUTH_EAST);
                     case NORTH_EAST:
-                        return p_55240_.setValue(SHAPE, RailShape.SOUTH_WEST);
+                        return pState.setValue(SHAPE, RailShape.SOUTH_WEST);
                 }
             case COUNTERCLOCKWISE_90:
-                switch ((RailShape)p_55240_.getValue(SHAPE)) {
+                switch ((RailShape)pState.getValue(SHAPE)) {
                     case NORTH_SOUTH:
-                        return p_55240_.setValue(SHAPE, RailShape.EAST_WEST);
+                        return pState.setValue(SHAPE, RailShape.EAST_WEST);
                     case EAST_WEST:
-                        return p_55240_.setValue(SHAPE, RailShape.NORTH_SOUTH);
+                        return pState.setValue(SHAPE, RailShape.NORTH_SOUTH);
                     case ASCENDING_EAST:
-                        return p_55240_.setValue(SHAPE, RailShape.ASCENDING_NORTH);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_NORTH);
                     case ASCENDING_WEST:
-                        return p_55240_.setValue(SHAPE, RailShape.ASCENDING_SOUTH);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_SOUTH);
                     case ASCENDING_NORTH:
-                        return p_55240_.setValue(SHAPE, RailShape.ASCENDING_WEST);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_WEST);
                     case ASCENDING_SOUTH:
-                        return p_55240_.setValue(SHAPE, RailShape.ASCENDING_EAST);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_EAST);
                     case SOUTH_EAST:
-                        return p_55240_.setValue(SHAPE, RailShape.NORTH_EAST);
+                        return pState.setValue(SHAPE, RailShape.NORTH_EAST);
                     case SOUTH_WEST:
-                        return p_55240_.setValue(SHAPE, RailShape.SOUTH_EAST);
+                        return pState.setValue(SHAPE, RailShape.SOUTH_EAST);
                     case NORTH_WEST:
-                        return p_55240_.setValue(SHAPE, RailShape.SOUTH_WEST);
+                        return pState.setValue(SHAPE, RailShape.SOUTH_WEST);
                     case NORTH_EAST:
-                        return p_55240_.setValue(SHAPE, RailShape.NORTH_WEST);
+                        return pState.setValue(SHAPE, RailShape.NORTH_WEST);
                 }
             case CLOCKWISE_90:
-                switch ((RailShape)p_55240_.getValue(SHAPE)) {
+                switch ((RailShape)pState.getValue(SHAPE)) {
                     case NORTH_SOUTH:
-                        return p_55240_.setValue(SHAPE, RailShape.EAST_WEST);
+                        return pState.setValue(SHAPE, RailShape.EAST_WEST);
                     case EAST_WEST:
-                        return p_55240_.setValue(SHAPE, RailShape.NORTH_SOUTH);
+                        return pState.setValue(SHAPE, RailShape.NORTH_SOUTH);
                     case ASCENDING_EAST:
-                        return p_55240_.setValue(SHAPE, RailShape.ASCENDING_SOUTH);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_SOUTH);
                     case ASCENDING_WEST:
-                        return p_55240_.setValue(SHAPE, RailShape.ASCENDING_NORTH);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_NORTH);
                     case ASCENDING_NORTH:
-                        return p_55240_.setValue(SHAPE, RailShape.ASCENDING_EAST);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_EAST);
                     case ASCENDING_SOUTH:
-                        return p_55240_.setValue(SHAPE, RailShape.ASCENDING_WEST);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_WEST);
                     case SOUTH_EAST:
-                        return p_55240_.setValue(SHAPE, RailShape.SOUTH_WEST);
+                        return pState.setValue(SHAPE, RailShape.SOUTH_WEST);
                     case SOUTH_WEST:
-                        return p_55240_.setValue(SHAPE, RailShape.NORTH_WEST);
+                        return pState.setValue(SHAPE, RailShape.NORTH_WEST);
                     case NORTH_WEST:
-                        return p_55240_.setValue(SHAPE, RailShape.NORTH_EAST);
+                        return pState.setValue(SHAPE, RailShape.NORTH_EAST);
                     case NORTH_EAST:
-                        return p_55240_.setValue(SHAPE, RailShape.SOUTH_EAST);
+                        return pState.setValue(SHAPE, RailShape.SOUTH_EAST);
                 }
             default:
-                return p_55240_;
+                return pState;
         }
     }
 
     @Override
-    protected BlockState mirror(BlockState p_55237_, Mirror p_55238_) {
-        RailShape railshape = p_55237_.getValue(SHAPE);
-        switch (p_55238_) {
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        RailShape railshape = pState.getValue(SHAPE);
+        switch (pMirror) {
             case LEFT_RIGHT:
                 switch (railshape) {
                     case ASCENDING_NORTH:
-                        return p_55237_.setValue(SHAPE, RailShape.ASCENDING_SOUTH);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_SOUTH);
                     case ASCENDING_SOUTH:
-                        return p_55237_.setValue(SHAPE, RailShape.ASCENDING_NORTH);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_NORTH);
                     case SOUTH_EAST:
-                        return p_55237_.setValue(SHAPE, RailShape.NORTH_EAST);
+                        return pState.setValue(SHAPE, RailShape.NORTH_EAST);
                     case SOUTH_WEST:
-                        return p_55237_.setValue(SHAPE, RailShape.NORTH_WEST);
+                        return pState.setValue(SHAPE, RailShape.NORTH_WEST);
                     case NORTH_WEST:
-                        return p_55237_.setValue(SHAPE, RailShape.SOUTH_WEST);
+                        return pState.setValue(SHAPE, RailShape.SOUTH_WEST);
                     case NORTH_EAST:
-                        return p_55237_.setValue(SHAPE, RailShape.SOUTH_EAST);
+                        return pState.setValue(SHAPE, RailShape.SOUTH_EAST);
                     default:
-                        return super.mirror(p_55237_, p_55238_);
+                        return super.mirror(pState, pMirror);
                 }
             case FRONT_BACK:
                 switch (railshape) {
                     case ASCENDING_EAST:
-                        return p_55237_.setValue(SHAPE, RailShape.ASCENDING_WEST);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_WEST);
                     case ASCENDING_WEST:
-                        return p_55237_.setValue(SHAPE, RailShape.ASCENDING_EAST);
+                        return pState.setValue(SHAPE, RailShape.ASCENDING_EAST);
                     case ASCENDING_NORTH:
                     case ASCENDING_SOUTH:
                     default:
                         break;
                     case SOUTH_EAST:
-                        return p_55237_.setValue(SHAPE, RailShape.SOUTH_WEST);
+                        return pState.setValue(SHAPE, RailShape.SOUTH_WEST);
                     case SOUTH_WEST:
-                        return p_55237_.setValue(SHAPE, RailShape.SOUTH_EAST);
+                        return pState.setValue(SHAPE, RailShape.SOUTH_EAST);
                     case NORTH_WEST:
-                        return p_55237_.setValue(SHAPE, RailShape.NORTH_EAST);
+                        return pState.setValue(SHAPE, RailShape.NORTH_EAST);
                     case NORTH_EAST:
-                        return p_55237_.setValue(SHAPE, RailShape.NORTH_WEST);
+                        return pState.setValue(SHAPE, RailShape.NORTH_WEST);
                 }
         }
 
-        return super.mirror(p_55237_, p_55238_);
+        return super.mirror(pState, pMirror);
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_55243_) {
-        p_55243_.add(SHAPE, POWERED, WATERLOGGED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(SHAPE, POWERED, WATERLOGGED);
     }
 }

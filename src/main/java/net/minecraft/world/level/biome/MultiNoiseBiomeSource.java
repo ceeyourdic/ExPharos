@@ -25,16 +25,16 @@ public class MultiNoiseBiomeSource extends BiomeSource {
         .xmap(MultiNoiseBiomeSource::new, p_275170_ -> p_275170_.parameters);
     private final Either<Climate.ParameterList<Holder<Biome>>, Holder<MultiNoiseBiomeSourceParameterList>> parameters;
 
-    private MultiNoiseBiomeSource(Either<Climate.ParameterList<Holder<Biome>>, Holder<MultiNoiseBiomeSourceParameterList>> p_275370_) {
-        this.parameters = p_275370_;
+    private MultiNoiseBiomeSource(Either<Climate.ParameterList<Holder<Biome>>, Holder<MultiNoiseBiomeSourceParameterList>> pParameters) {
+        this.parameters = pParameters;
     }
 
-    public static MultiNoiseBiomeSource createFromList(Climate.ParameterList<Holder<Biome>> p_275223_) {
-        return new MultiNoiseBiomeSource(Either.left(p_275223_));
+    public static MultiNoiseBiomeSource createFromList(Climate.ParameterList<Holder<Biome>> pParameters) {
+        return new MultiNoiseBiomeSource(Either.left(pParameters));
     }
 
-    public static MultiNoiseBiomeSource createFromPreset(Holder<MultiNoiseBiomeSourceParameterList> p_275250_) {
-        return new MultiNoiseBiomeSource(Either.right(p_275250_));
+    public static MultiNoiseBiomeSource createFromPreset(Holder<MultiNoiseBiomeSourceParameterList> pParameters) {
+        return new MultiNoiseBiomeSource(Either.right(pParameters));
     }
 
     private Climate.ParameterList<Holder<Biome>> parameters() {
@@ -51,9 +51,9 @@ public class MultiNoiseBiomeSource extends BiomeSource {
         return CODEC;
     }
 
-    public boolean stable(ResourceKey<MultiNoiseBiomeSourceParameterList> p_275637_) {
+    public boolean stable(ResourceKey<MultiNoiseBiomeSourceParameterList> pResourceKey) {
         Optional<Holder<MultiNoiseBiomeSourceParameterList>> optional = this.parameters.right();
-        return optional.isPresent() && optional.get().is(p_275637_);
+        return optional.isPresent() && optional.get().is(pResourceKey);
     }
 
     @Override
@@ -62,8 +62,8 @@ public class MultiNoiseBiomeSource extends BiomeSource {
     }
 
     @VisibleForDebug
-    public Holder<Biome> getNoiseBiome(Climate.TargetPoint p_204270_) {
-        return this.parameters().findValue(p_204270_);
+    public Holder<Biome> getNoiseBiome(Climate.TargetPoint pTargetPoint) {
+        return this.parameters().findValue(pTargetPoint);
     }
 
     @Override

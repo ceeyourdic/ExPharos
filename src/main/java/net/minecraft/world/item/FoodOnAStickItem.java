@@ -15,10 +15,10 @@ public class FoodOnAStickItem<T extends Entity & ItemSteerable> extends Item {
     private final EntityType<T> canInteractWith;
     private final int consumeItemDamage;
 
-    public FoodOnAStickItem(EntityType<T> p_41308_, int p_41309_, Item.Properties p_41307_) {
-        super(p_41307_);
-        this.canInteractWith = p_41308_;
-        this.consumeItemDamage = p_41309_;
+    public FoodOnAStickItem(EntityType<T> pCanInteractWith, int pConsumeItemDamage, Item.Properties pProperties) {
+        super(pProperties);
+        this.canInteractWith = pCanInteractWith;
+        this.consumeItemDamage = pConsumeItemDamage;
     }
 
     @Override

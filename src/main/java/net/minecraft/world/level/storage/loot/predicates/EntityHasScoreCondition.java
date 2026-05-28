@@ -38,15 +38,15 @@ public record EntityHasScoreCondition(Map<String, IntRange> scores, LootContext.
             .collect(ImmutableSet.toImmutableSet());
     }
 
-    public boolean test(LootContext p_81631_) {
-        Entity entity = p_81631_.getOptionalParameter(this.entityTarget.getParam());
+    public boolean test(LootContext pContext) {
+        Entity entity = pContext.getOptionalParameter(this.entityTarget.getParam());
         if (entity == null) {
             return false;
         } else {
-            Scoreboard scoreboard = p_81631_.getLevel().getScoreboard();
+            Scoreboard scoreboard = pContext.getLevel().getScoreboard();
 
             for (Entry<String, IntRange> entry : this.scores.entrySet()) {
-                if (!this.hasScore(p_81631_, entity, scoreboard, entry.getKey(), entry.getValue())) {
+                if (!this.hasScore(pContext, entity, scoreboard, entry.getKey(), entry.getValue())) {
                     return false;
                 }
             }
@@ -55,30 +55,30 @@ public record EntityHasScoreCondition(Map<String, IntRange> scores, LootContext.
         }
     }
 
-    protected boolean hasScore(LootContext p_165491_, Entity p_165492_, Scoreboard p_165493_, String p_165494_, IntRange p_165495_) {
-        Objective objective = p_165493_.getObjective(p_165494_);
+    protected boolean hasScore(LootContext pLootContext, Entity pTargetEntity, Scoreboard pScoreboard, String pObjectiveName, IntRange pScoreRange) {
+        Objective objective = pScoreboard.getObjective(pObjectiveName);
         if (objective == null) {
             return false;
         } else {
-            ReadOnlyScoreInfo readonlyscoreinfo = p_165493_.getPlayerScoreInfo(p_165492_, objective);
-            return readonlyscoreinfo == null ? false : p_165495_.test(p_165491_, readonlyscoreinfo.value());
+            ReadOnlyScoreInfo readonlyscoreinfo = pScoreboard.getPlayerScoreInfo(pTargetEntity, objective);
+            return readonlyscoreinfo == null ? false : pScoreRange.test(pLootContext, readonlyscoreinfo.value());
         }
     }
 
-    public static EntityHasScoreCondition.Builder hasScores(LootContext.EntityTarget p_165489_) {
-        return new EntityHasScoreCondition.Builder(p_165489_);
+    public static EntityHasScoreCondition.Builder hasScores(LootContext.EntityTarget pEntityTarget) {
+        return new EntityHasScoreCondition.Builder(pEntityTarget);
     }
 
     public static class Builder implements LootItemCondition.Builder {
         private final ImmutableMap.Builder<String, IntRange> scores = ImmutableMap.builder();
         private final LootContext.EntityTarget entityTarget;
 
-        public Builder(LootContext.EntityTarget p_165499_) {
-            this.entityTarget = p_165499_;
+        public Builder(LootContext.EntityTarget pEntityTarget) {
+            this.entityTarget = pEntityTarget;
         }
 
-        public EntityHasScoreCondition.Builder withScore(String p_165501_, IntRange p_165502_) {
-            this.scores.put(p_165501_, p_165502_);
+        public EntityHasScoreCondition.Builder withScore(String pObjectiveName, IntRange pScoreRange) {
+            this.scores.put(pObjectiveName, pScoreRange);
             return this;
         }
 

@@ -71,27 +71,27 @@ public class ShipwreckPieces {
     );
 
     public static ShipwreckPieces.ShipwreckPiece addRandomPiece(
-        StructureTemplateManager p_334187_, BlockPos p_334016_, Rotation p_333925_, StructurePieceAccessor p_330683_, RandomSource p_331305_, boolean p_332987_
+        StructureTemplateManager pStructureTemplateManager, BlockPos pPos, Rotation pRotation, StructurePieceAccessor pPieces, RandomSource pRandom, boolean pIsBeached
     ) {
-        ResourceLocation resourcelocation = Util.getRandom(p_332987_ ? STRUCTURE_LOCATION_BEACHED : STRUCTURE_LOCATION_OCEAN, p_331305_);
+        ResourceLocation resourcelocation = Util.getRandom(pIsBeached ? STRUCTURE_LOCATION_BEACHED : STRUCTURE_LOCATION_OCEAN, pRandom);
         ShipwreckPieces.ShipwreckPiece shipwreckpieces$shipwreckpiece = new ShipwreckPieces.ShipwreckPiece(
-            p_334187_, resourcelocation, p_334016_, p_333925_, p_332987_
+            pStructureTemplateManager, resourcelocation, pPos, pRotation, pIsBeached
         );
-        p_330683_.addPiece(shipwreckpieces$shipwreckpiece);
+        pPieces.addPiece(shipwreckpieces$shipwreckpiece);
         return shipwreckpieces$shipwreckpiece;
     }
 
     public static class ShipwreckPiece extends TemplateStructurePiece {
         private final boolean isBeached;
 
-        public ShipwreckPiece(StructureTemplateManager p_229354_, ResourceLocation p_229355_, BlockPos p_229356_, Rotation p_229357_, boolean p_229358_) {
-            super(StructurePieceType.SHIPWRECK_PIECE, 0, p_229354_, p_229355_, p_229355_.toString(), makeSettings(p_229357_), p_229356_);
-            this.isBeached = p_229358_;
+        public ShipwreckPiece(StructureTemplateManager pStructureTemplateManager, ResourceLocation pLocation, BlockPos pPos, Rotation pRotation, boolean pIsBeached) {
+            super(StructurePieceType.SHIPWRECK_PIECE, 0, pStructureTemplateManager, pLocation, pLocation.toString(), makeSettings(pRotation), pPos);
+            this.isBeached = pIsBeached;
         }
 
-        public ShipwreckPiece(StructureTemplateManager p_229360_, CompoundTag p_229361_) {
-            super(StructurePieceType.SHIPWRECK_PIECE, p_229361_, p_229360_, p_229383_ -> makeSettings(Rotation.valueOf(p_229361_.getString("Rot"))));
-            this.isBeached = p_229361_.getBoolean("isBeached");
+        public ShipwreckPiece(StructureTemplateManager pStructureTemplateManager, CompoundTag pTag) {
+            super(StructurePieceType.SHIPWRECK_PIECE, pTag, pStructureTemplateManager, p_229383_ -> makeSettings(Rotation.valueOf(pTag.getString("Rot"))));
+            this.isBeached = pTag.getBoolean("isBeached");
         }
 
         @Override
@@ -101,9 +101,9 @@ public class ShipwreckPieces {
             p_229374_.putString("Rot", this.placeSettings.getRotation().name());
         }
 
-        private static StructurePlaceSettings makeSettings(Rotation p_229371_) {
+        private static StructurePlaceSettings makeSettings(Rotation pRotation) {
             return new StructurePlaceSettings()
-                .setRotation(p_229371_)
+                .setRotation(pRotation)
                 .setMirror(Mirror.NONE)
                 .setRotationPivot(ShipwreckPieces.PIVOT)
                 .addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
@@ -159,12 +159,12 @@ public class ShipwreckPieces {
             return vec3i.getX() > 32 || vec3i.getY() > 32;
         }
 
-        public int calculateBeachedPosition(int p_332021_, RandomSource p_332823_) {
-            return p_332021_ - this.template.getSize().getY() / 2 - p_332823_.nextInt(3);
+        public int calculateBeachedPosition(int pMaxHeight, RandomSource pRandom) {
+            return pMaxHeight - this.template.getSize().getY() / 2 - pRandom.nextInt(3);
         }
 
-        public void adjustPositionHeight(int p_331508_) {
-            this.templatePosition = new BlockPos(this.templatePosition.getX(), p_331508_, this.templatePosition.getZ());
+        public void adjustPositionHeight(int pHeight) {
+            this.templatePosition = new BlockPos(this.templatePosition.getX(), pHeight, this.templatePosition.getZ());
         }
     }
 }

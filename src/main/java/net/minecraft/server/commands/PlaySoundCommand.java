@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 public class PlaySoundCommand {
     private static final SimpleCommandExceptionType ERROR_TOO_FAR = new SimpleCommandExceptionType(Component.translatable("commands.playsound.failed"));
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_138157_) {
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
         RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> requiredargumentbuilder = Commands.argument("sound", ResourceLocationArgument.id())
             .suggests(SuggestionProviders.AVAILABLE_SOUNDS)
             .executes(
@@ -49,17 +49,17 @@ public class PlaySoundCommand {
             requiredargumentbuilder.then(source(soundsource));
         }
 
-        p_138157_.register(Commands.literal("playsound").requires(p_138159_ -> p_138159_.hasPermission(2)).then(requiredargumentbuilder));
+        pDispatcher.register(Commands.literal("playsound").requires(p_138159_ -> p_138159_.hasPermission(2)).then(requiredargumentbuilder));
     }
 
-    private static LiteralArgumentBuilder<CommandSourceStack> source(SoundSource p_138152_) {
-        return Commands.literal(p_138152_.getName())
+    private static LiteralArgumentBuilder<CommandSourceStack> source(SoundSource pCategory) {
+        return Commands.literal(pCategory.getName())
             .executes(
                 p_326324_ -> playSound(
                         p_326324_.getSource(),
                         getCallingPlayerAsCollection(p_326324_.getSource().getPlayer()),
                         ResourceLocationArgument.getId(p_326324_, "sound"),
-                        p_138152_,
+                        pCategory,
                         p_326324_.getSource().getPosition(),
                         1.0F,
                         1.0F,
@@ -73,7 +73,7 @@ public class PlaySoundCommand {
                                 p_138180_.getSource(),
                                 EntityArgument.getPlayers(p_138180_, "targets"),
                                 ResourceLocationArgument.getId(p_138180_, "sound"),
-                                p_138152_,
+                                pCategory,
                                 p_138180_.getSource().getPosition(),
                                 1.0F,
                                 1.0F,
@@ -87,7 +87,7 @@ public class PlaySoundCommand {
                                         p_138177_.getSource(),
                                         EntityArgument.getPlayers(p_138177_, "targets"),
                                         ResourceLocationArgument.getId(p_138177_, "sound"),
-                                        p_138152_,
+                                        pCategory,
                                         Vec3Argument.getVec3(p_138177_, "pos"),
                                         1.0F,
                                         1.0F,
@@ -101,7 +101,7 @@ public class PlaySoundCommand {
                                                 p_138174_.getSource(),
                                                 EntityArgument.getPlayers(p_138174_, "targets"),
                                                 ResourceLocationArgument.getId(p_138174_, "sound"),
-                                                p_138152_,
+                                                pCategory,
                                                 Vec3Argument.getVec3(p_138174_, "pos"),
                                                 p_138174_.getArgument("volume", Float.class),
                                                 1.0F,
@@ -115,7 +115,7 @@ public class PlaySoundCommand {
                                                         p_138171_.getSource(),
                                                         EntityArgument.getPlayers(p_138171_, "targets"),
                                                         ResourceLocationArgument.getId(p_138171_, "sound"),
-                                                        p_138152_,
+                                                        pCategory,
                                                         Vec3Argument.getVec3(p_138171_, "pos"),
                                                         p_138171_.getArgument("volume", Float.class),
                                                         p_138171_.getArgument("pitch", Float.class),
@@ -129,7 +129,7 @@ public class PlaySoundCommand {
                                                                 p_138155_.getSource(),
                                                                 EntityArgument.getPlayers(p_138155_, "targets"),
                                                                 ResourceLocationArgument.getId(p_138155_, "sound"),
-                                                                p_138152_,
+                                                                pCategory,
                                                                 Vec3Argument.getVec3(p_138155_, "pos"),
                                                                 p_138155_.getArgument("volume", Float.class),
                                                                 p_138155_.getArgument("pitch", Float.class),
@@ -143,55 +143,55 @@ public class PlaySoundCommand {
             );
     }
 
-    private static Collection<ServerPlayer> getCallingPlayerAsCollection(@Nullable ServerPlayer p_334744_) {
-        return p_334744_ != null ? List.of(p_334744_) : List.of();
+    private static Collection<ServerPlayer> getCallingPlayerAsCollection(@Nullable ServerPlayer pPlayer) {
+        return pPlayer != null ? List.of(pPlayer) : List.of();
     }
 
     private static int playSound(
-        CommandSourceStack p_138161_,
-        Collection<ServerPlayer> p_138162_,
-        ResourceLocation p_138163_,
-        SoundSource p_138164_,
-        Vec3 p_138165_,
-        float p_138166_,
-        float p_138167_,
-        float p_138168_
+        CommandSourceStack pSource,
+        Collection<ServerPlayer> pTargets,
+        ResourceLocation pSound,
+        SoundSource pCategory,
+        Vec3 pPos,
+        float pVolume,
+        float pPitch,
+        float pMinVolume
     ) throws CommandSyntaxException {
-        Holder<SoundEvent> holder = Holder.direct(SoundEvent.createVariableRangeEvent(p_138163_));
-        double d0 = (double)Mth.square(holder.value().getRange(p_138166_));
+        Holder<SoundEvent> holder = Holder.direct(SoundEvent.createVariableRangeEvent(pSound));
+        double d0 = (double)Mth.square(holder.value().getRange(pVolume));
         int i = 0;
-        long j = p_138161_.getLevel().getRandom().nextLong();
+        long j = pSource.getLevel().getRandom().nextLong();
 
-        for (ServerPlayer serverplayer : p_138162_) {
-            double d1 = p_138165_.x - serverplayer.getX();
-            double d2 = p_138165_.y - serverplayer.getY();
-            double d3 = p_138165_.z - serverplayer.getZ();
+        for (ServerPlayer serverplayer : pTargets) {
+            double d1 = pPos.x - serverplayer.getX();
+            double d2 = pPos.y - serverplayer.getY();
+            double d3 = pPos.z - serverplayer.getZ();
             double d4 = d1 * d1 + d2 * d2 + d3 * d3;
-            Vec3 vec3 = p_138165_;
-            float f = p_138166_;
+            Vec3 vec3 = pPos;
+            float f = pVolume;
             if (d4 > d0) {
-                if (p_138168_ <= 0.0F) {
+                if (pMinVolume <= 0.0F) {
                     continue;
                 }
 
                 double d5 = Math.sqrt(d4);
                 vec3 = new Vec3(serverplayer.getX() + d1 / d5 * 2.0, serverplayer.getY() + d2 / d5 * 2.0, serverplayer.getZ() + d3 / d5 * 2.0);
-                f = p_138168_;
+                f = pMinVolume;
             }
 
-            serverplayer.connection.send(new ClientboundSoundPacket(holder, p_138164_, vec3.x(), vec3.y(), vec3.z(), f, p_138167_, j));
+            serverplayer.connection.send(new ClientboundSoundPacket(holder, pCategory, vec3.x(), vec3.y(), vec3.z(), f, pPitch, j));
             i++;
         }
 
         if (i == 0) {
             throw ERROR_TOO_FAR.create();
         } else {
-            if (p_138162_.size() == 1) {
-                p_138161_.sendSuccess(
-                    () -> Component.translatable("commands.playsound.success.single", Component.translationArg(p_138163_), p_138162_.iterator().next().getDisplayName()), true
+            if (pTargets.size() == 1) {
+                pSource.sendSuccess(
+                    () -> Component.translatable("commands.playsound.success.single", Component.translationArg(pSound), pTargets.iterator().next().getDisplayName()), true
                 );
             } else {
-                p_138161_.sendSuccess(() -> Component.translatable("commands.playsound.success.multiple", Component.translationArg(p_138163_), p_138162_.size()), true);
+                pSource.sendSuccess(() -> Component.translatable("commands.playsound.success.multiple", Component.translationArg(pSound), pTargets.size()), true);
             }
 
             return i;

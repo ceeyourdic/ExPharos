@@ -20,10 +20,10 @@ public class GeodeLayerSettings {
     public final double middleLayer;
     public final double outerLayer;
 
-    public GeodeLayerSettings(double p_158349_, double p_158350_, double p_158351_, double p_158352_) {
-        this.filling = p_158349_;
-        this.innerLayer = p_158350_;
-        this.middleLayer = p_158351_;
-        this.outerLayer = p_158352_;
+    public GeodeLayerSettings(double pFilling, double pInnerLayer, double pMiddleLayer, double pOuterLayer) {
+        this.filling = pFilling;
+        this.innerLayer = pInnerLayer;
+        this.middleLayer = pMiddleLayer;
+        this.outerLayer = pOuterLayer;
     }
 }

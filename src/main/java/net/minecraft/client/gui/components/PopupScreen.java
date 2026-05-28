@@ -38,21 +38,21 @@ public class PopupScreen extends Screen {
     private final LinearLayout layout = LinearLayout.vertical();
 
     PopupScreen(
-        Screen p_311716_,
-        int p_312972_,
-        @Nullable ResourceLocation p_312263_,
-        Component p_311243_,
-        Component p_313078_,
-        List<PopupScreen.ButtonOption> p_312924_,
-        @Nullable Runnable p_309530_
+        Screen pBackgroundScreen,
+        int pWidth,
+        @Nullable ResourceLocation pImage,
+        Component pTitle,
+        Component pMessage,
+        List<PopupScreen.ButtonOption> pButtons,
+        @Nullable Runnable pOnClose
     ) {
-        super(p_311243_);
-        this.backgroundScreen = p_311716_;
-        this.image = p_312263_;
-        this.message = p_313078_;
-        this.buttons = p_312924_;
-        this.onClose = p_309530_;
-        this.contentWidth = p_312972_ - 36;
+        super(pTitle);
+        this.backgroundScreen = pBackgroundScreen;
+        this.image = pImage;
+        this.message = pMessage;
+        this.buttons = pButtons;
+        this.onClose = pOnClose;
+        this.contentWidth = pWidth - 36;
     }
 
     @Override
@@ -143,33 +143,33 @@ public class PopupScreen extends Screen {
         @Nullable
         private Runnable onClose = null;
 
-        public Builder(Screen p_311941_, Component p_309447_) {
-            this.backgroundScreen = p_311941_;
-            this.title = p_309447_;
+        public Builder(Screen pBackgroundScreen, Component pTitle) {
+            this.backgroundScreen = pBackgroundScreen;
+            this.title = pTitle;
         }
 
-        public PopupScreen.Builder setWidth(int p_311856_) {
-            this.width = p_311856_;
+        public PopupScreen.Builder setWidth(int pWidth) {
+            this.width = pWidth;
             return this;
         }
 
-        public PopupScreen.Builder setImage(ResourceLocation p_309878_) {
-            this.image = p_309878_;
+        public PopupScreen.Builder setImage(ResourceLocation pImage) {
+            this.image = pImage;
             return this;
         }
 
-        public PopupScreen.Builder setMessage(Component p_309841_) {
-            this.message = p_309841_;
+        public PopupScreen.Builder setMessage(Component pMessage) {
+            this.message = pMessage;
             return this;
         }
 
-        public PopupScreen.Builder addButton(Component p_309455_, Consumer<PopupScreen> p_311142_) {
-            this.buttons.add(new PopupScreen.ButtonOption(p_309455_, p_311142_));
+        public PopupScreen.Builder addButton(Component pMessage, Consumer<PopupScreen> pAction) {
+            this.buttons.add(new PopupScreen.ButtonOption(pMessage, pAction));
             return this;
         }
 
-        public PopupScreen.Builder onClose(Runnable p_311998_) {
-            this.onClose = p_311998_;
+        public PopupScreen.Builder onClose(Runnable pOnClose) {
+            this.onClose = pOnClose;
             return this;
         }
 

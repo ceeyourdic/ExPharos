@@ -28,11 +28,11 @@ public abstract class Fireball extends AbstractHurtingProjectile implements Item
         super(p_36999_, p_37000_, p_342508_, p_37004_);
     }
 
-    public void setItem(ItemStack p_37011_) {
-        if (p_37011_.isEmpty()) {
+    public void setItem(ItemStack pStack) {
+        if (pStack.isEmpty()) {
             this.getEntityData().set(DATA_ITEM_STACK, this.getDefaultItem());
         } else {
-            this.getEntityData().set(DATA_ITEM_STACK, p_37011_.copyWithCount(1));
+            this.getEntityData().set(DATA_ITEM_STACK, pStack.copyWithCount(1));
         }
     }
 
@@ -51,16 +51,16 @@ public abstract class Fireball extends AbstractHurtingProjectile implements Item
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_37013_) {
-        super.addAdditionalSaveData(p_37013_);
-        p_37013_.put("Item", this.getItem().save(this.registryAccess()));
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.put("Item", this.getItem().save(this.registryAccess()));
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_37009_) {
-        super.readAdditionalSaveData(p_37009_);
-        if (p_37009_.contains("Item", 10)) {
-            this.setItem(ItemStack.parse(this.registryAccess(), p_37009_.getCompound("Item")).orElse(this.getDefaultItem()));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("Item", 10)) {
+            this.setItem(ItemStack.parse(this.registryAccess(), pCompound.getCompound("Item")).orElse(this.getDefaultItem()));
         } else {
             this.setItem(this.getDefaultItem());
         }

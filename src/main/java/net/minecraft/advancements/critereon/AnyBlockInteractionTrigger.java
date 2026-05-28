@@ -20,17 +20,17 @@ public class AnyBlockInteractionTrigger extends SimpleCriterionTrigger<AnyBlockI
         return AnyBlockInteractionTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_329152_, BlockPos p_334977_, ItemStack p_334131_) {
-        ServerLevel serverlevel = p_329152_.serverLevel();
-        BlockState blockstate = serverlevel.getBlockState(p_334977_);
+    public void trigger(ServerPlayer pPlayer, BlockPos pPos, ItemStack pStack) {
+        ServerLevel serverlevel = pPlayer.serverLevel();
+        BlockState blockstate = serverlevel.getBlockState(pPos);
         LootParams lootparams = new LootParams.Builder(serverlevel)
-            .withParameter(LootContextParams.ORIGIN, p_334977_.getCenter())
-            .withParameter(LootContextParams.THIS_ENTITY, p_329152_)
+            .withParameter(LootContextParams.ORIGIN, pPos.getCenter())
+            .withParameter(LootContextParams.THIS_ENTITY, pPlayer)
             .withParameter(LootContextParams.BLOCK_STATE, blockstate)
-            .withParameter(LootContextParams.TOOL, p_334131_)
+            .withParameter(LootContextParams.TOOL, pStack)
             .create(LootContextParamSets.ADVANCEMENT_LOCATION);
         LootContext lootcontext = new LootContext.Builder(lootparams).create(Optional.empty());
-        this.trigger(p_329152_, p_330225_ -> p_330225_.matches(lootcontext));
+        this.trigger(pPlayer, p_330225_ -> p_330225_.matches(lootcontext));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ContextAwarePredicate> location)
@@ -43,8 +43,8 @@ public class AnyBlockInteractionTrigger extends SimpleCriterionTrigger<AnyBlockI
                     .apply(p_335009_, AnyBlockInteractionTrigger.TriggerInstance::new)
         );
 
-        public boolean matches(LootContext p_333498_) {
-            return this.location.isEmpty() || this.location.get().matches(p_333498_);
+        public boolean matches(LootContext pContext) {
+            return this.location.isEmpty() || this.location.get().matches(pContext);
         }
 
         @Override

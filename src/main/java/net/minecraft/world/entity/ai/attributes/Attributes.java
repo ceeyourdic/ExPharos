@@ -84,11 +84,11 @@ public class Attributes {
         "water_movement_efficiency", new RangedAttribute("attribute.name.water_movement_efficiency", 0.0, 0.0, 1.0).setSyncable(true)
     );
 
-    private static Holder<Attribute> register(String p_22291_, Attribute p_22292_) {
-        return Registry.registerForHolder(BuiltInRegistries.ATTRIBUTE, ResourceLocation.withDefaultNamespace(p_22291_), p_22292_);
+    private static Holder<Attribute> register(String pName, Attribute pAttribute) {
+        return Registry.registerForHolder(BuiltInRegistries.ATTRIBUTE, ResourceLocation.withDefaultNamespace(pName), pAttribute);
     }
 
-    public static Holder<Attribute> bootstrap(Registry<Attribute> p_336189_) {
+    public static Holder<Attribute> bootstrap(Registry<Attribute> pRegistry) {
         return MAX_HEALTH;
     }
 }

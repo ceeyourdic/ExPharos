@@ -15,15 +15,15 @@ public interface CraftingRecipe extends Recipe<CraftingInput> {
 
     CraftingBookCategory category();
 
-    default NonNullList<ItemStack> getRemainingItems(CraftingInput p_367909_) {
-        return defaultCraftingReminder(p_367909_);
+    default NonNullList<ItemStack> getRemainingItems(CraftingInput pInput) {
+        return defaultCraftingReminder(pInput);
     }
 
-    static NonNullList<ItemStack> defaultCraftingReminder(CraftingInput p_368314_) {
-        NonNullList<ItemStack> nonnulllist = NonNullList.withSize(p_368314_.size(), ItemStack.EMPTY);
+    static NonNullList<ItemStack> defaultCraftingReminder(CraftingInput pInput) {
+        NonNullList<ItemStack> nonnulllist = NonNullList.withSize(pInput.size(), ItemStack.EMPTY);
 
         for (int i = 0; i < nonnulllist.size(); i++) {
-            Item item = p_368314_.getItem(i).getItem();
+            Item item = pInput.getItem(i).getItem();
             nonnulllist.set(i, item.getCraftingRemainder());
         }
 

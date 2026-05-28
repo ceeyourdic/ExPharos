@@ -40,19 +40,19 @@ public record ConditionReference(ResourceKey<LootItemCondition> name) implements
         }
     }
 
-    public boolean test(LootContext p_81558_) {
-        LootItemCondition lootitemcondition = p_81558_.getResolver().get(this.name).map(Holder.Reference::value).orElse(null);
+    public boolean test(LootContext pContext) {
+        LootItemCondition lootitemcondition = pContext.getResolver().get(this.name).map(Holder.Reference::value).orElse(null);
         if (lootitemcondition == null) {
             LOGGER.warn("Tried using unknown condition table called {}", this.name.location());
             return false;
         } else {
             LootContext.VisitedEntry<?> visitedentry = LootContext.createVisitedEntry(lootitemcondition);
-            if (p_81558_.pushVisitedElement(visitedentry)) {
+            if (pContext.pushVisitedElement(visitedentry)) {
                 boolean flag;
                 try {
-                    flag = lootitemcondition.test(p_81558_);
+                    flag = lootitemcondition.test(pContext);
                 } finally {
-                    p_81558_.popVisitedElement(visitedentry);
+                    pContext.popVisitedElement(visitedentry);
                 }
 
                 return flag;
@@ -63,7 +63,7 @@ public record ConditionReference(ResourceKey<LootItemCondition> name) implements
         }
     }
 
-    public static LootItemCondition.Builder conditionReference(ResourceKey<LootItemCondition> p_330473_) {
-        return () -> new ConditionReference(p_330473_);
+    public static LootItemCondition.Builder conditionReference(ResourceKey<LootItemCondition> pName) {
+        return () -> new ConditionReference(pName);
     }
 }

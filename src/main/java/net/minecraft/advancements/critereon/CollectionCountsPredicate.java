@@ -9,40 +9,40 @@ import java.util.function.Predicate;
 public interface CollectionCountsPredicate<T, P extends Predicate<T>> extends Predicate<Iterable<T>> {
     List<CollectionCountsPredicate.Entry<T, P>> unpack();
 
-    static <T, P extends Predicate<T>> Codec<CollectionCountsPredicate<T, P>> codec(Codec<P> p_335836_) {
-        return CollectionCountsPredicate.Entry.<T, P>codec(p_335836_)
+    static <T, P extends Predicate<T>> Codec<CollectionCountsPredicate<T, P>> codec(Codec<P> pTestCodec) {
+        return CollectionCountsPredicate.Entry.<T, P>codec(pTestCodec)
             .listOf()
             .xmap(CollectionCountsPredicate::of, CollectionCountsPredicate::unpack);
     }
 
     @SafeVarargs
-    static <T, P extends Predicate<T>> CollectionCountsPredicate<T, P> of(CollectionCountsPredicate.Entry<T, P>... p_332496_) {
-        return of(List.of(p_332496_));
+    static <T, P extends Predicate<T>> CollectionCountsPredicate<T, P> of(CollectionCountsPredicate.Entry<T, P>... pEntries) {
+        return of(List.of(pEntries));
     }
 
-    static <T, P extends Predicate<T>> CollectionCountsPredicate<T, P> of(List<CollectionCountsPredicate.Entry<T, P>> p_334665_) {
-        return (CollectionCountsPredicate<T, P>)(switch (p_334665_.size()) {
+    static <T, P extends Predicate<T>> CollectionCountsPredicate<T, P> of(List<CollectionCountsPredicate.Entry<T, P>> pEntries) {
+        return (CollectionCountsPredicate<T, P>)(switch (pEntries.size()) {
             case 0 -> new CollectionCountsPredicate.Zero();
-            case 1 -> new CollectionCountsPredicate.Single(p_334665_.getFirst());
-            default -> new CollectionCountsPredicate.Multiple(p_334665_);
+            case 1 -> new CollectionCountsPredicate.Single(pEntries.getFirst());
+            default -> new CollectionCountsPredicate.Multiple(pEntries);
         });
     }
 
     public static record Entry<T, P extends Predicate<T>>(P test, MinMaxBounds.Ints count) {
-        public static <T, P extends Predicate<T>> Codec<CollectionCountsPredicate.Entry<T, P>> codec(Codec<P> p_334145_) {
+        public static <T, P extends Predicate<T>> Codec<CollectionCountsPredicate.Entry<T, P>> codec(Codec<P> pTestCodec) {
             return RecordCodecBuilder.create(
                 p_334567_ -> p_334567_.group(
-                            p_334145_.fieldOf("test").forGetter(CollectionCountsPredicate.Entry::test),
+                            pTestCodec.fieldOf("test").forGetter(CollectionCountsPredicate.Entry::test),
                             MinMaxBounds.Ints.CODEC.fieldOf("count").forGetter(CollectionCountsPredicate.Entry::count)
                         )
                         .apply(p_334567_, CollectionCountsPredicate.Entry::new)
             );
         }
 
-        public boolean test(Iterable<T> p_329726_) {
+        public boolean test(Iterable<T> pCollection) {
             int i = 0;
 
-            for (T t : p_329726_) {
+            for (T t : pCollection) {
                 if (this.test.test(t)) {
                     i++;
                 }
@@ -53,9 +53,9 @@ public interface CollectionCountsPredicate<T, P extends Predicate<T>> extends Pr
     }
 
     public static record Multiple<T, P extends Predicate<T>>(List<CollectionCountsPredicate.Entry<T, P>> entries) implements CollectionCountsPredicate<T, P> {
-        public boolean test(Iterable<T> p_329412_) {
+        public boolean test(Iterable<T> pCollection) {
             for (CollectionCountsPredicate.Entry<T, P> entry : this.entries) {
-                if (!entry.test(p_329412_)) {
+                if (!entry.test(pCollection)) {
                     return false;
                 }
             }
@@ -70,8 +70,8 @@ public interface CollectionCountsPredicate<T, P extends Predicate<T>> extends Pr
     }
 
     public static record Single<T, P extends Predicate<T>>(CollectionCountsPredicate.Entry<T, P> entry) implements CollectionCountsPredicate<T, P> {
-        public boolean test(Iterable<T> p_333879_) {
-            return this.entry.test(p_333879_);
+        public boolean test(Iterable<T> pCollection) {
+            return this.entry.test(pCollection);
         }
 
         @Override
@@ -81,7 +81,7 @@ public interface CollectionCountsPredicate<T, P extends Predicate<T>> extends Pr
     }
 
     public static class Zero<T, P extends Predicate<T>> implements CollectionCountsPredicate<T, P> {
-        public boolean test(Iterable<T> p_329157_) {
+        public boolean test(Iterable<T> pCollection) {
             return true;
         }
 

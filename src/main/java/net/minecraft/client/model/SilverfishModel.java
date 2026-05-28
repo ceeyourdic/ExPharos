@@ -20,18 +20,18 @@ public class SilverfishModel extends EntityModel<EntityRenderState> {
     private static final int[][] BODY_SIZES = new int[][]{{3, 2, 2}, {4, 3, 2}, {6, 4, 3}, {3, 3, 3}, {2, 2, 3}, {2, 1, 2}, {1, 1, 2}};
     private static final int[][] BODY_TEXS = new int[][]{{0, 0}, {0, 4}, {0, 9}, {0, 16}, {0, 22}, {11, 0}, {13, 4}};
 
-    public SilverfishModel(ModelPart p_170927_) {
-        super(p_170927_);
-        Arrays.setAll(this.bodyParts, p_170939_ -> p_170927_.getChild(getSegmentName(p_170939_)));
-        Arrays.setAll(this.bodyLayers, p_170933_ -> p_170927_.getChild(getLayerName(p_170933_)));
+    public SilverfishModel(ModelPart pRoot) {
+        super(pRoot);
+        Arrays.setAll(this.bodyParts, p_170939_ -> pRoot.getChild(getSegmentName(p_170939_)));
+        Arrays.setAll(this.bodyLayers, p_170933_ -> pRoot.getChild(getLayerName(p_170933_)));
     }
 
-    private static String getLayerName(int p_170930_) {
-        return "layer" + p_170930_;
+    private static String getLayerName(int pIndex) {
+        return "layer" + pIndex;
     }
 
-    private static String getSegmentName(int p_170936_) {
-        return "segment" + p_170936_;
+    private static String getSegmentName(int pIndex) {
+        return "segment" + pIndex;
     }
 
     public static LayerDefinition createBodyLayer() {

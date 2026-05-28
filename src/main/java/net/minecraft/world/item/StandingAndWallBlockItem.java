@@ -14,27 +14,27 @@ public class StandingAndWallBlockItem extends BlockItem {
     protected final Block wallBlock;
     private final Direction attachmentDirection;
 
-    public StandingAndWallBlockItem(Block p_248873_, Block p_251044_, Direction p_250800_, Item.Properties p_249308_) {
-        super(p_248873_, p_249308_);
-        this.wallBlock = p_251044_;
-        this.attachmentDirection = p_250800_;
+    public StandingAndWallBlockItem(Block pBlock, Block pWallBlock, Direction pAttachmentDirection, Item.Properties pProperties) {
+        super(pBlock, pProperties);
+        this.wallBlock = pWallBlock;
+        this.attachmentDirection = pAttachmentDirection;
     }
 
-    protected boolean canPlace(LevelReader p_250350_, BlockState p_249311_, BlockPos p_250328_) {
-        return p_249311_.canSurvive(p_250350_, p_250328_);
+    protected boolean canPlace(LevelReader pLevel, BlockState pState, BlockPos pPos) {
+        return pState.canSurvive(pLevel, pPos);
     }
 
     @Nullable
     @Override
-    protected BlockState getPlacementState(BlockPlaceContext p_43255_) {
-        BlockState blockstate = this.wallBlock.getStateForPlacement(p_43255_);
+    protected BlockState getPlacementState(BlockPlaceContext pContext) {
+        BlockState blockstate = this.wallBlock.getStateForPlacement(pContext);
         BlockState blockstate1 = null;
-        LevelReader levelreader = p_43255_.getLevel();
-        BlockPos blockpos = p_43255_.getClickedPos();
+        LevelReader levelreader = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
 
-        for (Direction direction : p_43255_.getNearestLookingDirections()) {
+        for (Direction direction : pContext.getNearestLookingDirections()) {
             if (direction != this.attachmentDirection.getOpposite()) {
-                BlockState blockstate2 = direction == this.attachmentDirection ? this.getBlock().getStateForPlacement(p_43255_) : blockstate;
+                BlockState blockstate2 = direction == this.attachmentDirection ? this.getBlock().getStateForPlacement(pContext) : blockstate;
                 if (blockstate2 != null && this.canPlace(levelreader, blockstate2, blockpos)) {
                     blockstate1 = blockstate2;
                     break;
@@ -46,8 +46,8 @@ public class StandingAndWallBlockItem extends BlockItem {
     }
 
     @Override
-    public void registerBlocks(Map<Block, Item> p_43252_, Item p_43253_) {
-        super.registerBlocks(p_43252_, p_43253_);
-        p_43252_.put(this.wallBlock, p_43253_);
+    public void registerBlocks(Map<Block, Item> pBlockToItemMap, Item pItem) {
+        super.registerBlocks(pBlockToItemMap, pItem);
+        pBlockToItemMap.put(this.wallBlock, pItem);
     }
 }

@@ -17,16 +17,16 @@ public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketL
     private final MinecraftServer server;
     private final Connection connection;
 
-    public ServerHandshakePacketListenerImpl(MinecraftServer p_9969_, Connection p_9970_) {
-        this.server = p_9969_;
-        this.connection = p_9970_;
+    public ServerHandshakePacketListenerImpl(MinecraftServer pServer, Connection pConnection) {
+        this.server = pServer;
+        this.connection = pConnection;
     }
 
     @Override
-    public void handleIntention(ClientIntentionPacket p_9975_) {
-        switch (p_9975_.intention()) {
+    public void handleIntention(ClientIntentionPacket pPacket) {
+        switch (pPacket.intention()) {
             case LOGIN:
-                this.beginLogin(p_9975_, false);
+                this.beginLogin(pPacket, false);
                 break;
             case STATUS:
                 ServerStatus serverstatus = this.server.getStatus();
@@ -44,19 +44,19 @@ public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketL
                     this.connection.send(new ClientboundLoginDisconnectPacket(component));
                     this.connection.disconnect(component);
                 } else {
-                    this.beginLogin(p_9975_, true);
+                    this.beginLogin(pPacket, true);
                 }
                 break;
             default:
-                throw new UnsupportedOperationException("Invalid intention " + p_9975_.intention());
+                throw new UnsupportedOperationException("Invalid intention " + pPacket.intention());
         }
     }
 
-    private void beginLogin(ClientIntentionPacket p_330592_, boolean p_332714_) {
+    private void beginLogin(ClientIntentionPacket pPacket, boolean pTransferred) {
         this.connection.setupOutboundProtocol(LoginProtocols.CLIENTBOUND);
-        if (p_330592_.protocolVersion() != SharedConstants.getCurrentVersion().getProtocolVersion()) {
+        if (pPacket.protocolVersion() != SharedConstants.getCurrentVersion().getProtocolVersion()) {
             Component component;
-            if (p_330592_.protocolVersion() < 754) {
+            if (pPacket.protocolVersion() < 754) {
                 component = Component.translatable("multiplayer.disconnect.outdated_client", SharedConstants.getCurrentVersion().getName());
             } else {
                 component = Component.translatable("multiplayer.disconnect.incompatible", SharedConstants.getCurrentVersion().getName());
@@ -65,7 +65,7 @@ public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketL
             this.connection.send(new ClientboundLoginDisconnectPacket(component));
             this.connection.disconnect(component);
         } else {
-            this.connection.setupInboundProtocol(LoginProtocols.SERVERBOUND, new ServerLoginPacketListenerImpl(this.server, this.connection, p_332714_));
+            this.connection.setupInboundProtocol(LoginProtocols.SERVERBOUND, new ServerLoginPacketListenerImpl(this.server, this.connection, pTransferred));
         }
     }
 

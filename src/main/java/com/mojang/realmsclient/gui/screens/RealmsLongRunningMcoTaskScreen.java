@@ -34,16 +34,16 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen {
     @Nullable
     private LoadingDotsWidget loadingDotsWidget;
 
-    public RealmsLongRunningMcoTaskScreen(Screen p_88777_, LongRunningTask... p_309789_) {
+    public RealmsLongRunningMcoTaskScreen(Screen pLastScreen, LongRunningTask... pQueuedTasks) {
         super(GameNarrator.NO_TITLE);
-        this.lastScreen = p_88777_;
-        this.queuedTasks = List.of(p_309789_);
+        this.lastScreen = pLastScreen;
+        this.queuedTasks = List.of(pQueuedTasks);
         if (this.queuedTasks.isEmpty()) {
             throw new IllegalArgumentException("No tasks added");
         } else {
             this.title = this.queuedTasks.get(0).getTitle();
             Runnable runnable = () -> {
-                for (LongRunningTask longrunningtask : p_309789_) {
+                for (LongRunningTask longrunningtask : pQueuedTasks) {
                     this.setTitle(longrunningtask.getTitle());
                     if (longrunningtask.aborted()) {
                         break;
@@ -105,11 +105,11 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen {
         this.minecraft.setScreen(this.lastScreen);
     }
 
-    public void setTitle(Component p_88797_) {
+    public void setTitle(Component pTitle) {
         if (this.loadingDotsWidget != null) {
-            this.loadingDotsWidget.setMessage(p_88797_);
+            this.loadingDotsWidget.setMessage(pTitle);
         }
 
-        this.title = p_88797_;
+        this.title = pTitle;
     }
 }

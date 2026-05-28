@@ -23,8 +23,8 @@ public class LootItemKilledByPlayerCondition implements LootItemCondition {
         return Set.of(LootContextParams.LAST_DAMAGE_PLAYER);
     }
 
-    public boolean test(LootContext p_81899_) {
-        return p_81899_.hasParameter(LootContextParams.LAST_DAMAGE_PLAYER);
+    public boolean test(LootContext pContext) {
+        return pContext.hasParameter(LootContextParams.LAST_DAMAGE_PLAYER);
     }
 
     public static LootItemCondition.Builder killedByPlayer() {

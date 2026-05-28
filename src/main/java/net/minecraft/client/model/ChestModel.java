@@ -18,10 +18,10 @@ public class ChestModel extends Model {
     private final ModelPart lid;
     private final ModelPart lock;
 
-    public ChestModel(ModelPart p_361015_) {
-        super(p_361015_, RenderType::entitySolid);
-        this.lid = p_361015_.getChild("lid");
-        this.lock = p_361015_.getChild("lock");
+    public ChestModel(ModelPart pRoot) {
+        super(pRoot, RenderType::entitySolid);
+        this.lid = pRoot.getChild("lid");
+        this.lock = pRoot.getChild("lock");
     }
 
     public static LayerDefinition createSingleBodyLayer() {
@@ -63,8 +63,8 @@ public class ChestModel extends Model {
         return LayerDefinition.create(meshdefinition, 64, 64);
     }
 
-    public void setupAnim(float p_366833_) {
-        this.lid.xRot = -(p_366833_ * (float) (Math.PI / 2));
+    public void setupAnim(float pOpenness) {
+        this.lid.xRot = -(pOpenness * (float) (Math.PI / 2));
         this.lock.xRot = this.lid.xRot;
     }
 }

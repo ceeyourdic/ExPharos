@@ -20,16 +20,21 @@ public class ClipContext {
     private final ClipContext.Fluid fluid;
     private final CollisionContext collisionContext;
 
-    public ClipContext(Vec3 p_45688_, Vec3 p_45689_, ClipContext.Block p_45690_, ClipContext.Fluid p_45691_, Entity p_45692_) {
-        this(p_45688_, p_45689_, p_45690_, p_45691_, CollisionContext.of(p_45692_));
+    public ClipContext(Vec3 pFrom, Vec3 pTo, ClipContext.Block pBlock, ClipContext.Fluid pFluid, Entity pEntity) {
+        this(pFrom, pTo, pBlock, pFluid, CollisionContext.of(pEntity));
     }
 
-    public ClipContext(Vec3 p_312751_, Vec3 p_311517_, ClipContext.Block p_311464_, ClipContext.Fluid p_311910_, CollisionContext p_310522_) {
-        this.from = p_312751_;
-        this.to = p_311517_;
-        this.block = p_311464_;
-        this.fluid = p_311910_;
-        this.collisionContext = p_310522_;
+    // Arcane mixin port: accept Yarn wrapper names for block/fluid clipping modes.
+    public ClipContext(Vec3 pFrom, Vec3 pTo, ClipContext.ShapeType pBlock, ClipContext.FluidHandling pFluid, Entity pEntity) {
+        this(pFrom, pTo, pBlock.block, pFluid.fluid, pEntity);
+    }
+
+    public ClipContext(Vec3 pFrom, Vec3 pTo, ClipContext.Block pBlock, ClipContext.Fluid pFluid, CollisionContext pCollisionContext) {
+        this.from = pFrom;
+        this.to = pTo;
+        this.block = pBlock;
+        this.fluid = pFluid;
+        this.collisionContext = pCollisionContext;
     }
 
     public Vec3 getTo() {
@@ -40,12 +45,12 @@ public class ClipContext {
         return this.from;
     }
 
-    public VoxelShape getBlockShape(BlockState p_45695_, BlockGetter p_45696_, BlockPos p_45697_) {
-        return this.block.get(p_45695_, p_45696_, p_45697_, this.collisionContext);
+    public VoxelShape getBlockShape(BlockState pBlockState, BlockGetter pLevel, BlockPos pPos) {
+        return this.block.get(pBlockState, pLevel, pPos, this.collisionContext);
     }
 
-    public VoxelShape getFluidShape(FluidState p_45699_, BlockGetter p_45700_, BlockPos p_45701_) {
-        return this.fluid.canPick(p_45699_) ? p_45699_.getShape(p_45700_, p_45701_) : Shapes.empty();
+    public VoxelShape getFluidShape(FluidState pState, BlockGetter pLevel, BlockPos pPos) {
+        return this.fluid.canPick(pState) ? pState.getShape(pLevel, pPos) : Shapes.empty();
     }
 
     public static enum Block implements ClipContext.ShapeGetter {
@@ -56,8 +61,8 @@ public class ClipContext {
 
         private final ClipContext.ShapeGetter shapeGetter;
 
-        private Block(final ClipContext.ShapeGetter p_45712_) {
-            this.shapeGetter = p_45712_;
+        private Block(final ClipContext.ShapeGetter pShapeGetter) {
+            this.shapeGetter = pShapeGetter;
         }
 
         @Override
@@ -74,16 +79,41 @@ public class ClipContext {
 
         private final Predicate<FluidState> canPick;
 
-        private Fluid(final Predicate<FluidState> p_45730_) {
-            this.canPick = p_45730_;
+        private Fluid(final Predicate<FluidState> pCanPick) {
+            this.canPick = pCanPick;
         }
 
-        public boolean canPick(FluidState p_45732_) {
-            return this.canPick.test(p_45732_);
+        public boolean canPick(FluidState pState) {
+            return this.canPick.test(pState);
+        }
+    }
+
+    // Arcane mixin port: Yarn nested names that forward to official Block constants.
+    public static final class ShapeType {
+        public static final ClipContext.ShapeType COLLIDER = new ClipContext.ShapeType(ClipContext.Block.COLLIDER);
+        public static final ClipContext.ShapeType OUTLINE = new ClipContext.ShapeType(ClipContext.Block.OUTLINE);
+        public static final ClipContext.ShapeType VISUAL = new ClipContext.ShapeType(ClipContext.Block.VISUAL);
+        private final ClipContext.Block block;
+
+        private ShapeType(ClipContext.Block pBlock) {
+            this.block = pBlock;
+        }
+    }
+
+    // Arcane mixin port: Yarn nested names that forward to official Fluid constants.
+    public static final class FluidHandling {
+        public static final ClipContext.FluidHandling NONE = new ClipContext.FluidHandling(ClipContext.Fluid.NONE);
+        public static final ClipContext.FluidHandling SOURCE_ONLY = new ClipContext.FluidHandling(ClipContext.Fluid.SOURCE_ONLY);
+        public static final ClipContext.FluidHandling ANY = new ClipContext.FluidHandling(ClipContext.Fluid.ANY);
+        public static final ClipContext.FluidHandling WATER = new ClipContext.FluidHandling(ClipContext.Fluid.WATER);
+        private final ClipContext.Fluid fluid;
+
+        private FluidHandling(ClipContext.Fluid pFluid) {
+            this.fluid = pFluid;
         }
     }
 
     public interface ShapeGetter {
-        VoxelShape get(BlockState p_45740_, BlockGetter p_45741_, BlockPos p_45742_, CollisionContext p_45743_);
+        VoxelShape get(BlockState pState, BlockGetter pBlock, BlockPos pPos, CollisionContext pCollisionContext);
     }
 }

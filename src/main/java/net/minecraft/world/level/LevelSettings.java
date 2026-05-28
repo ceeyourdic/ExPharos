@@ -13,27 +13,27 @@ public final class LevelSettings {
     private final WorldDataConfiguration dataConfiguration;
 
     public LevelSettings(
-        String p_250485_, GameType p_250207_, boolean p_251631_, Difficulty p_252122_, boolean p_248961_, GameRules p_248536_, WorldDataConfiguration p_249797_
+        String pLevelName, GameType pGameType, boolean pHardcore, Difficulty pDifficulty, boolean pAllowCommands, GameRules pGameRules, WorldDataConfiguration pDataConfiguration
     ) {
-        this.levelName = p_250485_;
-        this.gameType = p_250207_;
-        this.hardcore = p_251631_;
-        this.difficulty = p_252122_;
-        this.allowCommands = p_248961_;
-        this.gameRules = p_248536_;
-        this.dataConfiguration = p_249797_;
+        this.levelName = pLevelName;
+        this.gameType = pGameType;
+        this.hardcore = pHardcore;
+        this.difficulty = pDifficulty;
+        this.allowCommands = pAllowCommands;
+        this.gameRules = pGameRules;
+        this.dataConfiguration = pDataConfiguration;
     }
 
-    public static LevelSettings parse(Dynamic<?> p_46925_, WorldDataConfiguration p_251697_) {
-        GameType gametype = GameType.byId(p_46925_.get("GameType").asInt(0));
+    public static LevelSettings parse(Dynamic<?> pLevelData, WorldDataConfiguration pDataConfiguration) {
+        GameType gametype = GameType.byId(pLevelData.get("GameType").asInt(0));
         return new LevelSettings(
-            p_46925_.get("LevelName").asString(""),
+            pLevelData.get("LevelName").asString(""),
             gametype,
-            p_46925_.get("hardcore").asBoolean(false),
-            p_46925_.get("Difficulty").asNumber().map(p_46928_ -> Difficulty.byId(p_46928_.byteValue())).result().orElse(Difficulty.NORMAL),
-            p_46925_.get("allowCommands").asBoolean(gametype == GameType.CREATIVE),
-            new GameRules(p_251697_.enabledFeatures(), p_46925_.get("GameRules")),
-            p_251697_
+            pLevelData.get("hardcore").asBoolean(false),
+            pLevelData.get("Difficulty").asNumber().map(p_46928_ -> Difficulty.byId(p_46928_.byteValue())).result().orElse(Difficulty.NORMAL),
+            pLevelData.get("allowCommands").asBoolean(gametype == GameType.CREATIVE),
+            new GameRules(pDataConfiguration.enabledFeatures(), pLevelData.get("GameRules")),
+            pDataConfiguration
         );
     }
 
@@ -65,16 +65,16 @@ public final class LevelSettings {
         return this.dataConfiguration;
     }
 
-    public LevelSettings withGameType(GameType p_46923_) {
-        return new LevelSettings(this.levelName, p_46923_, this.hardcore, this.difficulty, this.allowCommands, this.gameRules, this.dataConfiguration);
+    public LevelSettings withGameType(GameType pGameType) {
+        return new LevelSettings(this.levelName, pGameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules, this.dataConfiguration);
     }
 
-    public LevelSettings withDifficulty(Difficulty p_46919_) {
-        return new LevelSettings(this.levelName, this.gameType, this.hardcore, p_46919_, this.allowCommands, this.gameRules, this.dataConfiguration);
+    public LevelSettings withDifficulty(Difficulty pDifficulty) {
+        return new LevelSettings(this.levelName, this.gameType, this.hardcore, pDifficulty, this.allowCommands, this.gameRules, this.dataConfiguration);
     }
 
-    public LevelSettings withDataConfiguration(WorldDataConfiguration p_250867_) {
-        return new LevelSettings(this.levelName, this.gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules, p_250867_);
+    public LevelSettings withDataConfiguration(WorldDataConfiguration pDataConfiguration) {
+        return new LevelSettings(this.levelName, this.gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules, pDataConfiguration);
     }
 
     public LevelSettings copy() {

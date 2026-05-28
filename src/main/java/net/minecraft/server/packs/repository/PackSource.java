@@ -12,26 +12,26 @@ public interface PackSource {
     PackSource WORLD = create(decorateWithSource("pack.source.world"), true);
     PackSource SERVER = create(decorateWithSource("pack.source.server"), true);
 
-    Component decorate(Component p_10541_);
+    Component decorate(Component pName);
 
     boolean shouldAddAutomatically();
 
-    static PackSource create(final UnaryOperator<Component> p_251995_, final boolean p_249897_) {
+    static PackSource create(final UnaryOperator<Component> pDecorator, final boolean pShouldAddAutomatically) {
         return new PackSource() {
             @Override
             public Component decorate(Component p_251609_) {
-                return p_251995_.apply(p_251609_);
+                return pDecorator.apply(p_251609_);
             }
 
             @Override
             public boolean shouldAddAutomatically() {
-                return p_249897_;
+                return pShouldAddAutomatically;
             }
         };
     }
 
-    private static UnaryOperator<Component> decorateWithSource(String p_10534_) {
-        Component component = Component.translatable(p_10534_);
+    private static UnaryOperator<Component> decorateWithSource(String pTranslationKey) {
+        Component component = Component.translatable(pTranslationKey);
         return p_10539_ -> Component.translatable("pack.nameAndSource", p_10539_, component).withStyle(ChatFormatting.GRAY);
     }
 }

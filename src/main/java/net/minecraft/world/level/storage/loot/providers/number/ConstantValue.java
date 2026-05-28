@@ -22,17 +22,17 @@ public record ConstantValue(float value) implements NumberProvider {
         return this.value;
     }
 
-    public static ConstantValue exactly(float p_165693_) {
-        return new ConstantValue(p_165693_);
+    public static ConstantValue exactly(float pValue) {
+        return new ConstantValue(pValue);
     }
 
     @Override
-    public boolean equals(Object p_165697_) {
-        if (this == p_165697_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            return p_165697_ != null && this.getClass() == p_165697_.getClass()
-                ? Float.compare(((ConstantValue)p_165697_).value, this.value) == 0
+            return pOther != null && this.getClass() == pOther.getClass()
+                ? Float.compare(((ConstantValue)pOther).value, this.value) == 0
                 : false;
         }
     }

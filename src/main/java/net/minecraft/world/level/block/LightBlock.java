@@ -108,8 +108,8 @@ public class LightBlock extends Block implements SimpleWaterloggedBlock {
         return setLightOnStack(super.getCloneItemStack(p_310734_, p_153665_, p_153666_, p_375572_), p_153666_.getValue(LEVEL));
     }
 
-    public static ItemStack setLightOnStack(ItemStack p_259339_, int p_259353_) {
-        p_259339_.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(LEVEL, p_259353_));
-        return p_259339_;
+    public static ItemStack setLightOnStack(ItemStack pStack, int pLight) {
+        pStack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(LEVEL, pLight));
+        return pStack;
     }
 }

@@ -12,16 +12,16 @@ public class Weight {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final int value;
 
-    private Weight(int p_146280_) {
-        this.value = p_146280_;
+    private Weight(int pWeight) {
+        this.value = pWeight;
     }
 
-    public static Weight of(int p_146283_) {
-        if (p_146283_ == 1) {
+    public static Weight of(int pWeight) {
+        if (pWeight == 1) {
             return ONE;
         } else {
-            validateWeight(p_146283_);
-            return new Weight(p_146283_);
+            validateWeight(pWeight);
+            return new Weight(pWeight);
         }
     }
 
@@ -29,11 +29,11 @@ public class Weight {
         return this.value;
     }
 
-    private static void validateWeight(int p_146285_) {
-        if (p_146285_ < 0) {
+    private static void validateWeight(int pWeight) {
+        if (pWeight < 0) {
             throw (IllegalArgumentException)Util.pauseInIde(new IllegalArgumentException("Weight should be >= 0"));
         } else {
-            if (p_146285_ == 0 && SharedConstants.IS_RUNNING_IN_IDE) {
+            if (pWeight == 0 && SharedConstants.IS_RUNNING_IN_IDE) {
                 LOGGER.warn("Found 0 weight, make sure this is intentional!");
             }
         }
@@ -50,7 +50,7 @@ public class Weight {
     }
 
     @Override
-    public boolean equals(Object p_146287_) {
-        return this == p_146287_ ? true : p_146287_ instanceof Weight && this.value == ((Weight)p_146287_).value;
+    public boolean equals(Object pOther) {
+        return this == pOther ? true : pOther instanceof Weight && this.value == ((Weight)pOther).value;
     }
 }

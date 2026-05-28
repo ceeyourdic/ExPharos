@@ -11,7 +11,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public interface Tab {
     Component getTabTitle();
 
-    void visitChildren(Consumer<AbstractWidget> p_268213_);
+    void visitChildren(Consumer<AbstractWidget> pConsumer);
 
-    void doLayout(ScreenRectangle p_268081_);
+    void doLayout(ScreenRectangle pRectangle);
 }

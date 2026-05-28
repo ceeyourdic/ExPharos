@@ -15,12 +15,12 @@ public class HeightmapPlacement extends PlacementModifier {
     );
     private final Heightmap.Types heightmap;
 
-    private HeightmapPlacement(Heightmap.Types p_191699_) {
-        this.heightmap = p_191699_;
+    private HeightmapPlacement(Heightmap.Types pHeightmap) {
+        this.heightmap = pHeightmap;
     }
 
-    public static HeightmapPlacement onHeightmap(Heightmap.Types p_191703_) {
-        return new HeightmapPlacement(p_191703_);
+    public static HeightmapPlacement onHeightmap(Heightmap.Types pHeightmap) {
+        return new HeightmapPlacement(pHeightmap);
     }
 
     @Override

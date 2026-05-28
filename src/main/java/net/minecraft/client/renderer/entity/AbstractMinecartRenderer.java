@@ -28,11 +28,11 @@ public abstract class AbstractMinecartRenderer<T extends AbstractMinecart, S ext
     protected final MinecartModel model;
     private final BlockRenderDispatcher blockRenderer;
 
-    public AbstractMinecartRenderer(EntityRendererProvider.Context p_369922_, ModelLayerLocation p_364230_) {
-        super(p_369922_);
+    public AbstractMinecartRenderer(EntityRendererProvider.Context pContext, ModelLayerLocation pModelLayer) {
+        super(pContext);
         this.shadowRadius = 0.7F;
-        this.model = new MinecartModel(p_369922_.bakeLayer(p_364230_));
-        this.blockRenderer = p_369922_.getBlockRenderDispatcher();
+        this.model = new MinecartModel(pContext.bakeLayer(pModelLayer));
+        this.blockRenderer = pContext.getBlockRenderDispatcher();
     }
 
     public void render(S p_361135_, PoseStack p_366647_, MultiBufferSource p_368030_, int p_370214_) {
@@ -72,22 +72,22 @@ public abstract class AbstractMinecartRenderer<T extends AbstractMinecart, S ext
         p_366647_.popPose();
     }
 
-    private static <S extends MinecartRenderState> void newRender(S p_369039_, PoseStack p_366808_) {
-        p_366808_.mulPose(Axis.YP.rotationDegrees(p_369039_.yRot));
-        p_366808_.mulPose(Axis.ZP.rotationDegrees(-p_369039_.xRot));
-        p_366808_.translate(0.0F, 0.375F, 0.0F);
+    private static <S extends MinecartRenderState> void newRender(S pRenderState, PoseStack pPoseStack) {
+        pPoseStack.mulPose(Axis.YP.rotationDegrees(pRenderState.yRot));
+        pPoseStack.mulPose(Axis.ZP.rotationDegrees(-pRenderState.xRot));
+        pPoseStack.translate(0.0F, 0.375F, 0.0F);
     }
 
-    private static <S extends MinecartRenderState> void oldRender(S p_364306_, PoseStack p_367729_) {
-        double d0 = p_364306_.x;
-        double d1 = p_364306_.y;
-        double d2 = p_364306_.z;
-        float f = p_364306_.xRot;
-        float f1 = p_364306_.yRot;
-        if (p_364306_.posOnRail != null && p_364306_.frontPos != null && p_364306_.backPos != null) {
-            Vec3 vec3 = p_364306_.frontPos;
-            Vec3 vec31 = p_364306_.backPos;
-            p_367729_.translate(p_364306_.posOnRail.x - d0, (vec3.y + vec31.y) / 2.0 - d1, p_364306_.posOnRail.z - d2);
+    private static <S extends MinecartRenderState> void oldRender(S pRenderState, PoseStack pPoseStack) {
+        double d0 = pRenderState.x;
+        double d1 = pRenderState.y;
+        double d2 = pRenderState.z;
+        float f = pRenderState.xRot;
+        float f1 = pRenderState.yRot;
+        if (pRenderState.posOnRail != null && pRenderState.frontPos != null && pRenderState.backPos != null) {
+            Vec3 vec3 = pRenderState.frontPos;
+            Vec3 vec31 = pRenderState.backPos;
+            pPoseStack.translate(pRenderState.posOnRail.x - d0, (vec3.y + vec31.y) / 2.0 - d1, pRenderState.posOnRail.z - d2);
             Vec3 vec32 = vec31.add(-vec3.x, -vec3.y, -vec3.z);
             if (vec32.length() != 0.0) {
                 vec32 = vec32.normalize();
@@ -96,9 +96,9 @@ public abstract class AbstractMinecartRenderer<T extends AbstractMinecart, S ext
             }
         }
 
-        p_367729_.translate(0.0F, 0.375F, 0.0F);
-        p_367729_.mulPose(Axis.YP.rotationDegrees(180.0F - f1));
-        p_367729_.mulPose(Axis.ZP.rotationDegrees(-f));
+        pPoseStack.translate(0.0F, 0.375F, 0.0F);
+        pPoseStack.mulPose(Axis.YP.rotationDegrees(180.0F - f1));
+        pPoseStack.mulPose(Axis.ZP.rotationDegrees(-f));
     }
 
     public void extractRenderState(T p_369176_, S p_364445_, float p_364174_) {
@@ -121,44 +121,44 @@ public abstract class AbstractMinecartRenderer<T extends AbstractMinecart, S ext
     }
 
     private static <T extends AbstractMinecart, S extends MinecartRenderState> void newExtractState(
-        T p_366236_, NewMinecartBehavior p_366892_, S p_367623_, float p_365529_
+        T pMinecart, NewMinecartBehavior pBehavior, S pRenderState, float pPartialTick
     ) {
-        if (p_366892_.cartHasPosRotLerp()) {
-            p_367623_.renderPos = p_366892_.getCartLerpPosition(p_365529_);
-            p_367623_.xRot = p_366892_.getCartLerpXRot(p_365529_);
-            p_367623_.yRot = p_366892_.getCartLerpYRot(p_365529_);
+        if (pBehavior.cartHasPosRotLerp()) {
+            pRenderState.renderPos = pBehavior.getCartLerpPosition(pPartialTick);
+            pRenderState.xRot = pBehavior.getCartLerpXRot(pPartialTick);
+            pRenderState.yRot = pBehavior.getCartLerpYRot(pPartialTick);
         } else {
-            p_367623_.renderPos = null;
-            p_367623_.xRot = p_366236_.getXRot();
-            p_367623_.yRot = p_366236_.getYRot();
+            pRenderState.renderPos = null;
+            pRenderState.xRot = pMinecart.getXRot();
+            pRenderState.yRot = pMinecart.getYRot();
         }
     }
 
     private static <T extends AbstractMinecart, S extends MinecartRenderState> void oldExtractState(
-        T p_367481_, OldMinecartBehavior p_362885_, S p_368073_, float p_362159_
+        T pMinecart, OldMinecartBehavior pBehavior, S pRenderState, float pPartialTick
     ) {
         float f = 0.3F;
-        p_368073_.xRot = p_367481_.getXRot(p_362159_);
-        p_368073_.yRot = p_367481_.getYRot(p_362159_);
-        double d0 = p_368073_.x;
-        double d1 = p_368073_.y;
-        double d2 = p_368073_.z;
-        Vec3 vec3 = p_362885_.getPos(d0, d1, d2);
+        pRenderState.xRot = pMinecart.getXRot(pPartialTick);
+        pRenderState.yRot = pMinecart.getYRot(pPartialTick);
+        double d0 = pRenderState.x;
+        double d1 = pRenderState.y;
+        double d2 = pRenderState.z;
+        Vec3 vec3 = pBehavior.getPos(d0, d1, d2);
         if (vec3 != null) {
-            p_368073_.posOnRail = vec3;
-            Vec3 vec31 = p_362885_.getPosOffs(d0, d1, d2, 0.3F);
-            Vec3 vec32 = p_362885_.getPosOffs(d0, d1, d2, -0.3F);
-            p_368073_.frontPos = Objects.requireNonNullElse(vec31, vec3);
-            p_368073_.backPos = Objects.requireNonNullElse(vec32, vec3);
+            pRenderState.posOnRail = vec3;
+            Vec3 vec31 = pBehavior.getPosOffs(d0, d1, d2, 0.3F);
+            Vec3 vec32 = pBehavior.getPosOffs(d0, d1, d2, -0.3F);
+            pRenderState.frontPos = Objects.requireNonNullElse(vec31, vec3);
+            pRenderState.backPos = Objects.requireNonNullElse(vec32, vec3);
         } else {
-            p_368073_.posOnRail = null;
-            p_368073_.frontPos = null;
-            p_368073_.backPos = null;
+            pRenderState.posOnRail = null;
+            pRenderState.frontPos = null;
+            pRenderState.backPos = null;
         }
     }
 
-    protected void renderMinecartContents(S p_361290_, BlockState p_362203_, PoseStack p_367440_, MultiBufferSource p_368595_, int p_366033_) {
-        this.blockRenderer.renderSingleBlock(p_362203_, p_367440_, p_368595_, p_366033_, OverlayTexture.NO_OVERLAY);
+    protected void renderMinecartContents(S pRenderState, BlockState pState, PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight) {
+        this.blockRenderer.renderSingleBlock(pState, pPoseStack, pBufferSource, pPackedLight, OverlayTexture.NO_OVERLAY);
     }
 
     protected AABB getBoundingBoxForCulling(T p_363708_) {

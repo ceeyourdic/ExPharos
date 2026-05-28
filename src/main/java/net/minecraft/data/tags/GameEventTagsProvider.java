@@ -55,8 +55,8 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
         GameEvent.UNEQUIP.key()
     );
 
-    public GameEventTagsProvider(PackOutput p_256060_, CompletableFuture<HolderLookup.Provider> p_255621_) {
-        super(p_256060_, Registries.GAME_EVENT, p_255621_);
+    public GameEventTagsProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pProvider) {
+        super(pOutput, Registries.GAME_EVENT, pProvider);
     }
 
     @Override

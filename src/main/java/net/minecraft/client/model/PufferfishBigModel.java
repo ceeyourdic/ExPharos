@@ -16,10 +16,10 @@ public class PufferfishBigModel extends EntityModel<EntityRenderState> {
     private final ModelPart leftBlueFin;
     private final ModelPart rightBlueFin;
 
-    public PufferfishBigModel(ModelPart p_170835_) {
-        super(p_170835_);
-        this.leftBlueFin = p_170835_.getChild("left_blue_fin");
-        this.rightBlueFin = p_170835_.getChild("right_blue_fin");
+    public PufferfishBigModel(ModelPart pRoot) {
+        super(pRoot);
+        this.leftBlueFin = pRoot.getChild("left_blue_fin");
+        this.rightBlueFin = pRoot.getChild("right_blue_fin");
     }
 
     public static LayerDefinition createBodyLayer() {

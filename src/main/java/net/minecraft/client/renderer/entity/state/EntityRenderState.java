@@ -2,11 +2,9 @@ package net.minecraft.client.renderer.entity.state;
 
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class EntityRenderState {
     public double x;
     public double y;
@@ -27,8 +25,8 @@ public class EntityRenderState {
     public Vec3 nameTagAttachment;
     @Nullable
     public EntityRenderState.LeashState leashState;
+    public Entity entity;
 
-    @OnlyIn(Dist.CLIENT)
     public static class LeashState {
         public Vec3 offset = Vec3.ZERO;
         public Vec3 start = Vec3.ZERO;

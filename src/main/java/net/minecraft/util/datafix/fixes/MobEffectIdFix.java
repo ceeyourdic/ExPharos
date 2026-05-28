@@ -57,56 +57,56 @@ public class MobEffectIdFix extends DataFix {
     });
     private static final Set<String> MOB_EFFECT_INSTANCE_CARRIER_ITEMS = Set.of("minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion", "minecraft:tipped_arrow");
 
-    public MobEffectIdFix(Schema p_300797_) {
-        super(p_300797_, false);
+    public MobEffectIdFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
-    private static <T> Optional<Dynamic<T>> getAndConvertMobEffectId(Dynamic<T> p_300040_, String p_300405_) {
-        return p_300040_.get(p_300405_).asNumber().result().map(p_298913_ -> ID_MAP.get(p_298913_.intValue())).map(p_300040_::createString);
+    private static <T> Optional<Dynamic<T>> getAndConvertMobEffectId(Dynamic<T> pDynamic, String pKey) {
+        return pDynamic.get(pKey).asNumber().result().map(p_298913_ -> ID_MAP.get(p_298913_.intValue())).map(pDynamic::createString);
     }
 
-    private static <T> Dynamic<T> updateMobEffectIdField(Dynamic<T> p_299189_, String p_301147_, Dynamic<T> p_297288_, String p_297619_) {
-        Optional<Dynamic<T>> optional = getAndConvertMobEffectId(p_299189_, p_301147_);
-        return p_297288_.replaceField(p_301147_, p_297619_, optional);
+    private static <T> Dynamic<T> updateMobEffectIdField(Dynamic<T> pOldDynamic, String pOldName, Dynamic<T> pNewDynamic, String pNewName) {
+        Optional<Dynamic<T>> optional = getAndConvertMobEffectId(pOldDynamic, pOldName);
+        return pNewDynamic.replaceField(pOldName, pNewName, optional);
     }
 
-    private static <T> Dynamic<T> updateMobEffectIdField(Dynamic<T> p_299905_, String p_299399_, String p_301048_) {
-        return updateMobEffectIdField(p_299905_, p_299399_, p_299905_, p_301048_);
+    private static <T> Dynamic<T> updateMobEffectIdField(Dynamic<T> pDynamic, String pOldName, String pNewName) {
+        return updateMobEffectIdField(pDynamic, pOldName, pDynamic, pNewName);
     }
 
-    private static <T> Dynamic<T> updateMobEffectInstance(Dynamic<T> p_297886_) {
-        p_297886_ = updateMobEffectIdField(p_297886_, "Id", "id");
-        p_297886_ = p_297886_.renameField("Ambient", "ambient");
-        p_297886_ = p_297886_.renameField("Amplifier", "amplifier");
-        p_297886_ = p_297886_.renameField("Duration", "duration");
-        p_297886_ = p_297886_.renameField("ShowParticles", "show_particles");
-        p_297886_ = p_297886_.renameField("ShowIcon", "show_icon");
-        Optional<Dynamic<T>> optional = p_297886_.get("HiddenEffect").result().map(MobEffectIdFix::updateMobEffectInstance);
-        return p_297886_.replaceField("HiddenEffect", "hidden_effect", optional);
+    private static <T> Dynamic<T> updateMobEffectInstance(Dynamic<T> pDynamic) {
+        pDynamic = updateMobEffectIdField(pDynamic, "Id", "id");
+        pDynamic = pDynamic.renameField("Ambient", "ambient");
+        pDynamic = pDynamic.renameField("Amplifier", "amplifier");
+        pDynamic = pDynamic.renameField("Duration", "duration");
+        pDynamic = pDynamic.renameField("ShowParticles", "show_particles");
+        pDynamic = pDynamic.renameField("ShowIcon", "show_icon");
+        Optional<Dynamic<T>> optional = pDynamic.get("HiddenEffect").result().map(MobEffectIdFix::updateMobEffectInstance);
+        return pDynamic.replaceField("HiddenEffect", "hidden_effect", optional);
     }
 
-    private static <T> Dynamic<T> updateMobEffectInstanceList(Dynamic<T> p_298694_, String p_298177_, String p_300921_) {
-        Optional<Dynamic<T>> optional = p_298694_.get(p_298177_)
+    private static <T> Dynamic<T> updateMobEffectInstanceList(Dynamic<T> pTag, String pOldName, String pNewName) {
+        Optional<Dynamic<T>> optional = pTag.get(pOldName)
             .asStreamOpt()
             .result()
-            .map(p_297707_ -> p_298694_.createList(p_297707_.map(MobEffectIdFix::updateMobEffectInstance)));
-        return p_298694_.replaceField(p_298177_, p_300921_, optional);
+            .map(p_297707_ -> pTag.createList(p_297707_.map(MobEffectIdFix::updateMobEffectInstance)));
+        return pTag.replaceField(pOldName, pNewName, optional);
     }
 
-    private static <T> Dynamic<T> updateSuspiciousStewEntry(Dynamic<T> p_299220_, Dynamic<T> p_300010_) {
-        p_300010_ = updateMobEffectIdField(p_299220_, "EffectId", p_300010_, "id");
-        Optional<Dynamic<T>> optional = p_299220_.get("EffectDuration").result();
-        return p_300010_.replaceField("EffectDuration", "duration", optional);
+    private static <T> Dynamic<T> updateSuspiciousStewEntry(Dynamic<T> pOldDynamic, Dynamic<T> pNewDynamic) {
+        pNewDynamic = updateMobEffectIdField(pOldDynamic, "EffectId", pNewDynamic, "id");
+        Optional<Dynamic<T>> optional = pOldDynamic.get("EffectDuration").result();
+        return pNewDynamic.replaceField("EffectDuration", "duration", optional);
     }
 
-    private static <T> Dynamic<T> updateSuspiciousStewEntry(Dynamic<T> p_297367_) {
-        return updateSuspiciousStewEntry(p_297367_, p_297367_);
+    private static <T> Dynamic<T> updateSuspiciousStewEntry(Dynamic<T> pSuspiciousStewEntry) {
+        return updateSuspiciousStewEntry(pSuspiciousStewEntry, pSuspiciousStewEntry);
     }
 
-    private Typed<?> updateNamedChoice(Typed<?> p_299605_, TypeReference p_299152_, String p_300042_, Function<Dynamic<?>, Dynamic<?>> p_300498_) {
-        Type<?> type = this.getInputSchema().getChoiceType(p_299152_, p_300042_);
-        Type<?> type1 = this.getOutputSchema().getChoiceType(p_299152_, p_300042_);
-        return p_299605_.updateTyped(DSL.namedChoice(p_300042_, type), type1, p_299360_ -> p_299360_.update(DSL.remainderFinder(), p_300498_));
+    private Typed<?> updateNamedChoice(Typed<?> pTyped, TypeReference pReference, String pId, Function<Dynamic<?>, Dynamic<?>> pFixer) {
+        Type<?> type = this.getInputSchema().getChoiceType(pReference, pId);
+        Type<?> type1 = this.getOutputSchema().getChoiceType(pReference, pId);
+        return pTyped.updateTyped(DSL.namedChoice(pId, type), type1, p_299360_ -> p_299360_.update(DSL.remainderFinder(), pFixer));
     }
 
     private TypeRewriteRule blockEntityFixer() {
@@ -119,26 +119,26 @@ public class MobEffectIdFix extends DataFix {
         );
     }
 
-    private static <T> Dynamic<T> fixMooshroomTag(Dynamic<T> p_298884_) {
-        Dynamic<T> dynamic = p_298884_.emptyMap();
-        Dynamic<T> dynamic1 = updateSuspiciousStewEntry(p_298884_, dynamic);
+    private static <T> Dynamic<T> fixMooshroomTag(Dynamic<T> pMooshroomTag) {
+        Dynamic<T> dynamic = pMooshroomTag.emptyMap();
+        Dynamic<T> dynamic1 = updateSuspiciousStewEntry(pMooshroomTag, dynamic);
         if (!dynamic1.equals(dynamic)) {
-            p_298884_ = p_298884_.set("stew_effects", p_298884_.createList(Stream.of(dynamic1)));
+            pMooshroomTag = pMooshroomTag.set("stew_effects", pMooshroomTag.createList(Stream.of(dynamic1)));
         }
 
-        return p_298884_.remove("EffectId").remove("EffectDuration");
+        return pMooshroomTag.remove("EffectId").remove("EffectDuration");
     }
 
-    private static <T> Dynamic<T> fixArrowTag(Dynamic<T> p_298539_) {
-        return updateMobEffectInstanceList(p_298539_, "CustomPotionEffects", "custom_potion_effects");
+    private static <T> Dynamic<T> fixArrowTag(Dynamic<T> pArrowTag) {
+        return updateMobEffectInstanceList(pArrowTag, "CustomPotionEffects", "custom_potion_effects");
     }
 
-    private static <T> Dynamic<T> fixAreaEffectCloudTag(Dynamic<T> p_300392_) {
-        return updateMobEffectInstanceList(p_300392_, "Effects", "effects");
+    private static <T> Dynamic<T> fixAreaEffectCloudTag(Dynamic<T> pAreaEffectCloudTag) {
+        return updateMobEffectInstanceList(pAreaEffectCloudTag, "Effects", "effects");
     }
 
-    private static Dynamic<?> updateLivingEntityTag(Dynamic<?> p_299534_) {
-        return updateMobEffectInstanceList(p_299534_, "ActiveEffects", "active_effects");
+    private static Dynamic<?> updateLivingEntityTag(Dynamic<?> pLivingEntityTag) {
+        return updateMobEffectInstanceList(pLivingEntityTag, "ActiveEffects", "active_effects");
     }
 
     private TypeRewriteRule entityFixer() {
@@ -156,12 +156,12 @@ public class MobEffectIdFix extends DataFix {
         return this.fixTypeEverywhereTyped("PlayerMobEffectIdFix", type, p_297935_ -> p_297935_.update(DSL.remainderFinder(), MobEffectIdFix::updateLivingEntityTag));
     }
 
-    private static <T> Dynamic<T> fixSuspiciousStewTag(Dynamic<T> p_301166_) {
-        Optional<Dynamic<T>> optional = p_301166_.get("Effects")
+    private static <T> Dynamic<T> fixSuspiciousStewTag(Dynamic<T> pSuspiciousStewTag) {
+        Optional<Dynamic<T>> optional = pSuspiciousStewTag.get("Effects")
             .asStreamOpt()
             .result()
-            .map(p_299334_ -> p_301166_.createList(p_299334_.map(MobEffectIdFix::updateSuspiciousStewEntry)));
-        return p_301166_.replaceField("Effects", "effects", optional);
+            .map(p_299334_ -> pSuspiciousStewTag.createList(p_299334_.map(MobEffectIdFix::updateSuspiciousStewEntry)));
+        return pSuspiciousStewTag.replaceField("Effects", "effects", optional);
     }
 
     private TypeRewriteRule itemStackFixer() {

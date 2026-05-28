@@ -25,7 +25,7 @@ public class NumberProviders {
     public static final LootNumberProviderType STORAGE = register("storage", StorageValue.CODEC);
     public static final LootNumberProviderType ENCHANTMENT_LEVEL = register("enchantment_level", EnchantmentLevelProvider.CODEC);
 
-    private static LootNumberProviderType register(String p_165739_, MapCodec<? extends NumberProvider> p_330989_) {
-        return Registry.register(BuiltInRegistries.LOOT_NUMBER_PROVIDER_TYPE, ResourceLocation.withDefaultNamespace(p_165739_), new LootNumberProviderType(p_330989_));
+    private static LootNumberProviderType register(String pName, MapCodec<? extends NumberProvider> pCodec) {
+        return Registry.register(BuiltInRegistries.LOOT_NUMBER_PROVIDER_TYPE, ResourceLocation.withDefaultNamespace(pName), new LootNumberProviderType(pCodec));
     }
 }

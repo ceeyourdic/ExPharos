@@ -4,21 +4,21 @@ import com.mojang.serialization.Codec;
 import net.minecraft.server.PlayerAdvancements;
 
 public interface CriterionTrigger<T extends CriterionTriggerInstance> {
-    void addPlayerListener(PlayerAdvancements p_13674_, CriterionTrigger.Listener<T> p_13675_);
+    void addPlayerListener(PlayerAdvancements pPlayerAdvancements, CriterionTrigger.Listener<T> pListener);
 
-    void removePlayerListener(PlayerAdvancements p_13676_, CriterionTrigger.Listener<T> p_13677_);
+    void removePlayerListener(PlayerAdvancements pPlayerAdvancements, CriterionTrigger.Listener<T> pListener);
 
-    void removePlayerListeners(PlayerAdvancements p_13673_);
+    void removePlayerListeners(PlayerAdvancements pPlayerAdvancements);
 
     Codec<T> codec();
 
-    default Criterion<T> createCriterion(T p_299598_) {
-        return new Criterion<>(this, p_299598_);
+    default Criterion<T> createCriterion(T pTriggerInstance) {
+        return new Criterion<>(this, pTriggerInstance);
     }
 
     public static record Listener<T extends CriterionTriggerInstance>(T trigger, AdvancementHolder advancement, String criterion) {
-        public void run(PlayerAdvancements p_13687_) {
-            p_13687_.award(this.advancement, this.criterion);
+        public void run(PlayerAdvancements pPlayerAdvancements) {
+            pPlayerAdvancements.award(this.advancement, this.criterion);
         }
     }
 }

@@ -15,25 +15,25 @@ public class ServerboundUseItemPacket implements Packet<ServerGamePacketListener
     private final float yRot;
     private final float xRot;
 
-    public ServerboundUseItemPacket(InteractionHand p_238011_, int p_238012_, float p_342904_, float p_343639_) {
-        this.hand = p_238011_;
-        this.sequence = p_238012_;
-        this.yRot = p_342904_;
-        this.xRot = p_343639_;
+    public ServerboundUseItemPacket(InteractionHand pHand, int pSequence, float pYRot, float pXRot) {
+        this.hand = pHand;
+        this.sequence = pSequence;
+        this.yRot = pYRot;
+        this.xRot = pXRot;
     }
 
-    private ServerboundUseItemPacket(FriendlyByteBuf p_179798_) {
-        this.hand = p_179798_.readEnum(InteractionHand.class);
-        this.sequence = p_179798_.readVarInt();
-        this.yRot = p_179798_.readFloat();
-        this.xRot = p_179798_.readFloat();
+    private ServerboundUseItemPacket(FriendlyByteBuf pBuffer) {
+        this.hand = pBuffer.readEnum(InteractionHand.class);
+        this.sequence = pBuffer.readVarInt();
+        this.yRot = pBuffer.readFloat();
+        this.xRot = pBuffer.readFloat();
     }
 
-    private void write(FriendlyByteBuf p_134719_) {
-        p_134719_.writeEnum(this.hand);
-        p_134719_.writeVarInt(this.sequence);
-        p_134719_.writeFloat(this.yRot);
-        p_134719_.writeFloat(this.xRot);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeEnum(this.hand);
+        pBuffer.writeVarInt(this.sequence);
+        pBuffer.writeFloat(this.yRot);
+        pBuffer.writeFloat(this.xRot);
     }
 
     @Override
@@ -41,8 +41,8 @@ public class ServerboundUseItemPacket implements Packet<ServerGamePacketListener
         return GamePacketTypes.SERVERBOUND_USE_ITEM;
     }
 
-    public void handle(ServerGamePacketListener p_134716_) {
-        p_134716_.handleUseItem(this);
+    public void handle(ServerGamePacketListener pHandler) {
+        pHandler.handleUseItem(this);
     }
 
     public InteractionHand getHand() {

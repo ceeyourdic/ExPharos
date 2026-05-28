@@ -40,12 +40,12 @@ public class ReportReasonSelectionScreen extends Screen {
     final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
     final ReportType reportType;
 
-    public ReportReasonSelectionScreen(@Nullable Screen p_239438_, @Nullable ReportReason p_239439_, ReportType p_362010_, Consumer<ReportReason> p_239440_) {
+    public ReportReasonSelectionScreen(@Nullable Screen pLastScreen, @Nullable ReportReason pCurrentlySelectedReason, ReportType pReportType, Consumer<ReportReason> pOnSelectedReason) {
         super(REASON_TITLE);
-        this.lastScreen = p_239438_;
-        this.currentlySelectedReason = p_239439_;
-        this.onSelectedReason = p_239440_;
-        this.reportType = p_362010_;
+        this.lastScreen = pLastScreen;
+        this.currentlySelectedReason = pCurrentlySelectedReason;
+        this.onSelectedReason = pOnSelectedReason;
+        this.reportType = pReportType;
     }
 
     @Override
@@ -136,9 +136,9 @@ public class ReportReasonSelectionScreen extends Screen {
 
     @OnlyIn(Dist.CLIENT)
     public class ReasonSelectionList extends ObjectSelectionList<ReportReasonSelectionScreen.ReasonSelectionList.Entry> {
-        public ReasonSelectionList(final Minecraft p_239715_) {
+        public ReasonSelectionList(final Minecraft pMinecraft) {
             super(
-                p_239715_,
+                pMinecraft,
                 ReportReasonSelectionScreen.this.width,
                 ReportReasonSelectionScreen.this.listHeight(),
                 ReportReasonSelectionScreen.this.layout.getHeaderHeight(),
@@ -153,8 +153,8 @@ public class ReportReasonSelectionScreen extends Screen {
         }
 
         @Nullable
-        public ReportReasonSelectionScreen.ReasonSelectionList.Entry findEntry(ReportReason p_239168_) {
-            return this.children().stream().filter(p_239293_ -> p_239293_.reason == p_239168_).findFirst().orElse(null);
+        public ReportReasonSelectionScreen.ReasonSelectionList.Entry findEntry(ReportReason pReason) {
+            return this.children().stream().filter(p_239293_ -> p_239293_.reason == pReason).findFirst().orElse(null);
         }
 
         @Override
@@ -171,8 +171,8 @@ public class ReportReasonSelectionScreen extends Screen {
         public class Entry extends ObjectSelectionList.Entry<ReportReasonSelectionScreen.ReasonSelectionList.Entry> {
             final ReportReason reason;
 
-            public Entry(final ReportReason p_239267_) {
-                this.reason = p_239267_;
+            public Entry(final ReportReason pReason) {
+                this.reason = pReason;
             }
 
             @Override

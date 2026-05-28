@@ -110,101 +110,101 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
         return this.hasShearsOrSilkTouch().invert();
     }
 
-    protected BlockLootSubProvider(Set<Item> p_281507_, FeatureFlagSet p_283552_, HolderLookup.Provider p_345174_) {
-        this(p_281507_, p_283552_, new HashMap<>(), p_345174_);
+    protected BlockLootSubProvider(Set<Item> pExplosionResistant, FeatureFlagSet pEnabledFeatures, HolderLookup.Provider pRegistries) {
+        this(pExplosionResistant, pEnabledFeatures, new HashMap<>(), pRegistries);
     }
 
     protected BlockLootSubProvider(
-        Set<Item> p_249153_, FeatureFlagSet p_251215_, Map<ResourceKey<LootTable>, LootTable.Builder> p_343991_, HolderLookup.Provider p_343444_
+        Set<Item> pExplosionResistant, FeatureFlagSet pEnabledFeatures, Map<ResourceKey<LootTable>, LootTable.Builder> pMap, HolderLookup.Provider pRegistries
     ) {
-        this.explosionResistant = p_249153_;
-        this.enabledFeatures = p_251215_;
-        this.map = p_343991_;
-        this.registries = p_343444_;
+        this.explosionResistant = pExplosionResistant;
+        this.enabledFeatures = pEnabledFeatures;
+        this.map = pMap;
+        this.registries = pRegistries;
     }
 
-    protected <T extends FunctionUserBuilder<T>> T applyExplosionDecay(ItemLike p_248695_, FunctionUserBuilder<T> p_248548_) {
-        return !this.explosionResistant.contains(p_248695_.asItem()) ? p_248548_.apply(ApplyExplosionDecay.explosionDecay()) : p_248548_.unwrap();
+    protected <T extends FunctionUserBuilder<T>> T applyExplosionDecay(ItemLike pItem, FunctionUserBuilder<T> pFunctionBuilder) {
+        return !this.explosionResistant.contains(pItem.asItem()) ? pFunctionBuilder.apply(ApplyExplosionDecay.explosionDecay()) : pFunctionBuilder.unwrap();
     }
 
-    protected <T extends ConditionUserBuilder<T>> T applyExplosionCondition(ItemLike p_249717_, ConditionUserBuilder<T> p_248851_) {
-        return !this.explosionResistant.contains(p_249717_.asItem()) ? p_248851_.when(ExplosionCondition.survivesExplosion()) : p_248851_.unwrap();
+    protected <T extends ConditionUserBuilder<T>> T applyExplosionCondition(ItemLike pItem, ConditionUserBuilder<T> pConditionBuilder) {
+        return !this.explosionResistant.contains(pItem.asItem()) ? pConditionBuilder.when(ExplosionCondition.survivesExplosion()) : pConditionBuilder.unwrap();
     }
 
-    public LootTable.Builder createSingleItemTable(ItemLike p_251912_) {
+    public LootTable.Builder createSingleItemTable(ItemLike pItem) {
         return LootTable.lootTable()
-            .withPool(this.applyExplosionCondition(p_251912_, LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(p_251912_))));
+            .withPool(this.applyExplosionCondition(pItem, LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(pItem))));
     }
 
-    private static LootTable.Builder createSelfDropDispatchTable(Block p_252253_, LootItemCondition.Builder p_248764_, LootPoolEntryContainer.Builder<?> p_249146_) {
+    private static LootTable.Builder createSelfDropDispatchTable(Block pBlock, LootItemCondition.Builder pConditionBuilder, LootPoolEntryContainer.Builder<?> pAlternativeBuilder) {
         return LootTable.lootTable()
             .withPool(
-                LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(p_252253_).when(p_248764_).otherwise(p_249146_))
+                LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(pBlock).when(pConditionBuilder).otherwise(pAlternativeBuilder))
             );
     }
 
-    protected LootTable.Builder createSilkTouchDispatchTable(Block p_250203_, LootPoolEntryContainer.Builder<?> p_252089_) {
-        return createSelfDropDispatchTable(p_250203_, this.hasSilkTouch(), p_252089_);
+    protected LootTable.Builder createSilkTouchDispatchTable(Block pBlock, LootPoolEntryContainer.Builder<?> pBuilder) {
+        return createSelfDropDispatchTable(pBlock, this.hasSilkTouch(), pBuilder);
     }
 
-    protected LootTable.Builder createShearsDispatchTable(Block p_252195_, LootPoolEntryContainer.Builder<?> p_250102_) {
-        return createSelfDropDispatchTable(p_252195_, this.hasShears(), p_250102_);
+    protected LootTable.Builder createShearsDispatchTable(Block pBlock, LootPoolEntryContainer.Builder<?> pBuilder) {
+        return createSelfDropDispatchTable(pBlock, this.hasShears(), pBuilder);
     }
 
-    protected LootTable.Builder createSilkTouchOrShearsDispatchTable(Block p_250539_, LootPoolEntryContainer.Builder<?> p_251459_) {
-        return createSelfDropDispatchTable(p_250539_, this.hasShearsOrSilkTouch(), p_251459_);
+    protected LootTable.Builder createSilkTouchOrShearsDispatchTable(Block pBlock, LootPoolEntryContainer.Builder<?> pBuilder) {
+        return createSelfDropDispatchTable(pBlock, this.hasShearsOrSilkTouch(), pBuilder);
     }
 
-    protected LootTable.Builder createSingleItemTableWithSilkTouch(Block p_249305_, ItemLike p_251905_) {
-        return this.createSilkTouchDispatchTable(p_249305_, (LootPoolEntryContainer.Builder<?>)this.applyExplosionCondition(p_249305_, LootItem.lootTableItem(p_251905_)));
+    protected LootTable.Builder createSingleItemTableWithSilkTouch(Block pBlock, ItemLike pItem) {
+        return this.createSilkTouchDispatchTable(pBlock, (LootPoolEntryContainer.Builder<?>)this.applyExplosionCondition(pBlock, LootItem.lootTableItem(pItem)));
     }
 
-    protected LootTable.Builder createSingleItemTable(ItemLike p_251584_, NumberProvider p_249865_) {
+    protected LootTable.Builder createSingleItemTable(ItemLike pItem, NumberProvider pCount) {
         return LootTable.lootTable()
             .withPool(
                 LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1.0F))
                     .add(
                         (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                            p_251584_, LootItem.lootTableItem(p_251584_).apply(SetItemCountFunction.setCount(p_249865_))
+                            pItem, LootItem.lootTableItem(pItem).apply(SetItemCountFunction.setCount(pCount))
                         )
                     )
             );
     }
 
-    protected LootTable.Builder createSingleItemTableWithSilkTouch(Block p_251449_, ItemLike p_248558_, NumberProvider p_250047_) {
+    protected LootTable.Builder createSingleItemTableWithSilkTouch(Block pBlock, ItemLike pItem, NumberProvider pCount) {
         return this.createSilkTouchDispatchTable(
-            p_251449_,
-            (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(p_251449_, LootItem.lootTableItem(p_248558_).apply(SetItemCountFunction.setCount(p_250047_)))
+            pBlock,
+            (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(pBlock, LootItem.lootTableItem(pItem).apply(SetItemCountFunction.setCount(pCount)))
         );
     }
 
-    private LootTable.Builder createSilkTouchOnlyTable(ItemLike p_252216_) {
+    private LootTable.Builder createSilkTouchOnlyTable(ItemLike pItem) {
         return LootTable.lootTable()
-            .withPool(LootPool.lootPool().when(this.hasSilkTouch()).setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(p_252216_)));
+            .withPool(LootPool.lootPool().when(this.hasSilkTouch()).setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(pItem)));
     }
 
-    private LootTable.Builder createPotFlowerItemTable(ItemLike p_249395_) {
+    private LootTable.Builder createPotFlowerItemTable(ItemLike pItem) {
         return LootTable.lootTable()
             .withPool(
                 this.applyExplosionCondition(Blocks.FLOWER_POT, LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Blocks.FLOWER_POT)))
             )
-            .withPool(this.applyExplosionCondition(p_249395_, LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(p_249395_))));
+            .withPool(this.applyExplosionCondition(pItem, LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(pItem))));
     }
 
-    protected LootTable.Builder createSlabItemTable(Block p_251313_) {
+    protected LootTable.Builder createSlabItemTable(Block pBlock) {
         return LootTable.lootTable()
             .withPool(
                 LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1.0F))
                     .add(
                         (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                            p_251313_,
-                            LootItem.lootTableItem(p_251313_)
+                            pBlock,
+                            LootItem.lootTableItem(pBlock)
                                 .apply(
                                     SetItemCountFunction.setCount(ConstantValue.exactly(2.0F))
                                         .when(
-                                            LootItemBlockStatePropertyCondition.hasBlockStateProperties(p_251313_)
+                                            LootItemBlockStatePropertyCondition.hasBlockStateProperties(pBlock)
                                                 .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SlabBlock.TYPE, SlabType.DOUBLE))
                                         )
                                 )
@@ -213,48 +213,48 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
             );
     }
 
-    protected <T extends Comparable<T> & StringRepresentable> LootTable.Builder createSinglePropConditionTable(Block p_252154_, Property<T> p_250272_, T p_250292_) {
+    protected <T extends Comparable<T> & StringRepresentable> LootTable.Builder createSinglePropConditionTable(Block pBlock, Property<T> pProperty, T pValue) {
         return LootTable.lootTable()
             .withPool(
                 this.applyExplosionCondition(
-                    p_252154_,
+                    pBlock,
                     LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
                         .add(
-                            LootItem.lootTableItem(p_252154_)
+                            LootItem.lootTableItem(pBlock)
                                 .when(
-                                    LootItemBlockStatePropertyCondition.hasBlockStateProperties(p_252154_)
-                                        .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(p_250272_, p_250292_))
+                                    LootItemBlockStatePropertyCondition.hasBlockStateProperties(pBlock)
+                                        .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(pProperty, pValue))
                                 )
                         )
                 )
             );
     }
 
-    protected LootTable.Builder createNameableBlockEntityTable(Block p_252291_) {
+    protected LootTable.Builder createNameableBlockEntityTable(Block pBlock) {
         return LootTable.lootTable()
             .withPool(
                 this.applyExplosionCondition(
-                    p_252291_,
+                    pBlock,
                     LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
                         .add(
-                            LootItem.lootTableItem(p_252291_)
+                            LootItem.lootTableItem(pBlock)
                                 .apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).include(DataComponents.CUSTOM_NAME))
                         )
                 )
             );
     }
 
-    protected LootTable.Builder createShulkerBoxDrop(Block p_252164_) {
+    protected LootTable.Builder createShulkerBoxDrop(Block pBlock) {
         return LootTable.lootTable()
             .withPool(
                 this.applyExplosionCondition(
-                    p_252164_,
+                    pBlock,
                     LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
                         .add(
-                            LootItem.lootTableItem(p_252164_)
+                            LootItem.lootTableItem(pBlock)
                                 .apply(
                                     CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
                                         .include(DataComponents.CUSTOM_NAME)
@@ -267,12 +267,12 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
             );
     }
 
-    protected LootTable.Builder createCopperOreDrops(Block p_251306_) {
+    protected LootTable.Builder createCopperOreDrops(Block pBlock) {
         HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
         return this.createSilkTouchDispatchTable(
-            p_251306_,
+            pBlock,
             (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                p_251306_,
+                pBlock,
                 LootItem.lootTableItem(Items.RAW_COPPER)
                     .apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F)))
                     .apply(ApplyBonusCount.addOreBonusCount(registrylookup.getOrThrow(Enchantments.FORTUNE)))
@@ -280,12 +280,12 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
         );
     }
 
-    protected LootTable.Builder createLapisOreDrops(Block p_251511_) {
+    protected LootTable.Builder createLapisOreDrops(Block pBlock) {
         HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
         return this.createSilkTouchDispatchTable(
-            p_251511_,
+            pBlock,
             (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                p_251511_,
+                pBlock,
                 LootItem.lootTableItem(Items.LAPIS_LAZULI)
                     .apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 9.0F)))
                     .apply(ApplyBonusCount.addOreBonusCount(registrylookup.getOrThrow(Enchantments.FORTUNE)))
@@ -293,12 +293,12 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
         );
     }
 
-    protected LootTable.Builder createRedstoneOreDrops(Block p_251906_) {
+    protected LootTable.Builder createRedstoneOreDrops(Block pBlock) {
         HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
         return this.createSilkTouchDispatchTable(
-            p_251906_,
+            pBlock,
             (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                p_251906_,
+                pBlock,
                 LootItem.lootTableItem(Items.REDSTONE)
                     .apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 5.0F)))
                     .apply(ApplyBonusCount.addUniformBonusCount(registrylookup.getOrThrow(Enchantments.FORTUNE)))
@@ -306,15 +306,15 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
         );
     }
 
-    protected LootTable.Builder createBannerDrop(Block p_249810_) {
+    protected LootTable.Builder createBannerDrop(Block pBlock) {
         return LootTable.lootTable()
             .withPool(
                 this.applyExplosionCondition(
-                    p_249810_,
+                    pBlock,
                     LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
                         .add(
-                            LootItem.lootTableItem(p_249810_)
+                            LootItem.lootTableItem(pBlock)
                                 .apply(
                                     CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
                                         .include(DataComponents.CUSTOM_NAME)
@@ -328,75 +328,75 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
             );
     }
 
-    protected LootTable.Builder createBeeNestDrop(Block p_250988_) {
+    protected LootTable.Builder createBeeNestDrop(Block pBlock) {
         return LootTable.lootTable()
             .withPool(
                 LootPool.lootPool()
                     .when(this.hasSilkTouch())
                     .setRolls(ConstantValue.exactly(1.0F))
                     .add(
-                        LootItem.lootTableItem(p_250988_)
+                        LootItem.lootTableItem(pBlock)
                             .apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).include(DataComponents.BEES))
-                            .apply(CopyBlockState.copyState(p_250988_).copy(BeehiveBlock.HONEY_LEVEL))
+                            .apply(CopyBlockState.copyState(pBlock).copy(BeehiveBlock.HONEY_LEVEL))
                     )
             );
     }
 
-    protected LootTable.Builder createBeeHiveDrop(Block p_248770_) {
+    protected LootTable.Builder createBeeHiveDrop(Block pBlock) {
         return LootTable.lootTable()
             .withPool(
                 LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1.0F))
                     .add(
-                        LootItem.lootTableItem(p_248770_)
+                        LootItem.lootTableItem(pBlock)
                             .when(this.hasSilkTouch())
                             .apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).include(DataComponents.BEES))
-                            .apply(CopyBlockState.copyState(p_248770_).copy(BeehiveBlock.HONEY_LEVEL))
-                            .otherwise(LootItem.lootTableItem(p_248770_))
+                            .apply(CopyBlockState.copyState(pBlock).copy(BeehiveBlock.HONEY_LEVEL))
+                            .otherwise(LootItem.lootTableItem(pBlock))
                     )
             );
     }
 
-    protected LootTable.Builder createCaveVinesDrop(Block p_251070_) {
+    protected LootTable.Builder createCaveVinesDrop(Block pBlock) {
         return LootTable.lootTable()
             .withPool(
                 LootPool.lootPool()
                     .add(LootItem.lootTableItem(Items.GLOW_BERRIES))
                     .when(
-                        LootItemBlockStatePropertyCondition.hasBlockStateProperties(p_251070_)
+                        LootItemBlockStatePropertyCondition.hasBlockStateProperties(pBlock)
                             .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CaveVines.BERRIES, true))
                     )
             );
     }
 
-    protected LootTable.Builder createOreDrop(Block p_250450_, Item p_249745_) {
+    protected LootTable.Builder createOreDrop(Block pBlock, Item pItem) {
         HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
         return this.createSilkTouchDispatchTable(
-            p_250450_,
+            pBlock,
             (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                p_250450_, LootItem.lootTableItem(p_249745_).apply(ApplyBonusCount.addOreBonusCount(registrylookup.getOrThrow(Enchantments.FORTUNE)))
+                pBlock, LootItem.lootTableItem(pItem).apply(ApplyBonusCount.addOreBonusCount(registrylookup.getOrThrow(Enchantments.FORTUNE)))
             )
         );
     }
 
-    protected LootTable.Builder createMushroomBlockDrop(Block p_249959_, ItemLike p_249315_) {
+    protected LootTable.Builder createMushroomBlockDrop(Block pBlock, ItemLike pItem) {
         return this.createSilkTouchDispatchTable(
-            p_249959_,
+            pBlock,
             (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                p_249959_,
-                LootItem.lootTableItem(p_249315_)
+                pBlock,
+                LootItem.lootTableItem(pItem)
                     .apply(SetItemCountFunction.setCount(UniformGenerator.between(-6.0F, 2.0F)))
                     .apply(LimitCount.limitCount(IntRange.lowerBound(0)))
             )
         );
     }
 
-    protected LootTable.Builder createGrassDrops(Block p_252139_) {
+    protected LootTable.Builder createGrassDrops(Block pBlock) {
         HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
         return this.createShearsDispatchTable(
-            p_252139_,
+            pBlock,
             (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                p_252139_,
+                pBlock,
                 LootItem.lootTableItem(Items.WHEAT_SEEDS)
                     .when(LootItemRandomChanceCondition.randomChance(0.125F))
                     .apply(ApplyBonusCount.addUniformBonusCount(registrylookup.getOrThrow(Enchantments.FORTUNE), 2))
@@ -404,20 +404,20 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
         );
     }
 
-    public LootTable.Builder createStemDrops(Block p_250957_, Item p_249098_) {
+    public LootTable.Builder createStemDrops(Block pBlock, Item pItem) {
         return LootTable.lootTable()
             .withPool(
                 this.applyExplosionDecay(
-                    p_250957_,
+                    pBlock,
                     LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
                         .add(
-                            LootItem.lootTableItem(p_249098_)
+                            LootItem.lootTableItem(pItem)
                                 .apply(
                                     StemBlock.AGE.getPossibleValues(),
                                     p_249795_ -> SetItemCountFunction.setCount(BinomialDistributionGenerator.binomial(3, (float)(p_249795_ + 1) / 15.0F))
                                             .when(
-                                                LootItemBlockStatePropertyCondition.hasBlockStateProperties(p_250957_)
+                                                LootItemBlockStatePropertyCondition.hasBlockStateProperties(pBlock)
                                                     .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(StemBlock.AGE, p_249795_))
                                             )
                                 )
@@ -426,44 +426,44 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
             );
     }
 
-    public LootTable.Builder createAttachedStemDrops(Block p_249778_, Item p_250678_) {
+    public LootTable.Builder createAttachedStemDrops(Block pBlock, Item pItem) {
         return LootTable.lootTable()
             .withPool(
                 this.applyExplosionDecay(
-                    p_249778_,
+                    pBlock,
                     LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
                         .add(
-                            LootItem.lootTableItem(p_250678_).apply(SetItemCountFunction.setCount(BinomialDistributionGenerator.binomial(3, 0.53333336F)))
+                            LootItem.lootTableItem(pItem).apply(SetItemCountFunction.setCount(BinomialDistributionGenerator.binomial(3, 0.53333336F)))
                         )
                 )
             );
     }
 
-    protected LootTable.Builder createShearsOnlyDrop(ItemLike p_250684_) {
+    protected LootTable.Builder createShearsOnlyDrop(ItemLike pItem) {
         return LootTable.lootTable()
-            .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(this.hasShears()).add(LootItem.lootTableItem(p_250684_)));
+            .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(this.hasShears()).add(LootItem.lootTableItem(pItem)));
     }
 
-    protected LootTable.Builder createShearsOrSilkTouchOnlyDrop(ItemLike p_364223_) {
+    protected LootTable.Builder createShearsOrSilkTouchOnlyDrop(ItemLike pItem) {
         return LootTable.lootTable()
-            .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(this.hasShearsOrSilkTouch()).add(LootItem.lootTableItem(p_364223_)));
+            .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(this.hasShearsOrSilkTouch()).add(LootItem.lootTableItem(pItem)));
     }
 
-    protected LootTable.Builder createMultifaceBlockDrops(Block p_249088_, LootItemCondition.Builder p_251535_) {
+    protected LootTable.Builder createMultifaceBlockDrops(Block pBlock, LootItemCondition.Builder pBuilder) {
         return LootTable.lootTable()
             .withPool(
                 LootPool.lootPool()
                     .add(
                         (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                            p_249088_,
-                            LootItem.lootTableItem(p_249088_)
-                                .when(p_251535_)
+                            pBlock,
+                            LootItem.lootTableItem(pBlock)
+                                .when(pBuilder)
                                 .apply(
                                     Direction.values(),
                                     p_251536_ -> SetItemCountFunction.setCount(ConstantValue.exactly(1.0F), true)
                                             .when(
-                                                LootItemBlockStatePropertyCondition.hasBlockStateProperties(p_249088_)
+                                                LootItemBlockStatePropertyCondition.hasBlockStateProperties(pBlock)
                                                     .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(MultifaceBlock.getFaceProperty(p_251536_), true))
                                             )
                                 )
@@ -473,19 +473,19 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
             );
     }
 
-    protected LootTable.Builder createMultifaceBlockDrops(Block p_377116_) {
+    protected LootTable.Builder createMultifaceBlockDrops(Block pBlock) {
         return LootTable.lootTable()
             .withPool(
                 LootPool.lootPool()
                     .add(
                         (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                            p_377116_,
-                            LootItem.lootTableItem(p_377116_)
+                            pBlock,
+                            LootItem.lootTableItem(pBlock)
                                 .apply(
                                     Direction.values(),
                                     p_374755_ -> SetItemCountFunction.setCount(ConstantValue.exactly(1.0F), true)
                                             .when(
-                                                LootItemBlockStatePropertyCondition.hasBlockStateProperties(p_377116_)
+                                                LootItemBlockStatePropertyCondition.hasBlockStateProperties(pBlock)
                                                     .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(MultifaceBlock.getFaceProperty(p_374755_), true))
                                             )
                                 )
@@ -495,16 +495,16 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
             );
     }
 
-    protected LootTable.Builder createMossyCarpetBlockDrops(Block p_363021_) {
+    protected LootTable.Builder createMossyCarpetBlockDrops(Block pBlock) {
         return LootTable.lootTable()
             .withPool(
                 LootPool.lootPool()
                     .add(
                         (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                            p_363021_,
-                            LootItem.lootTableItem(p_363021_)
+                            pBlock,
+                            LootItem.lootTableItem(pBlock)
                                 .when(
-                                    LootItemBlockStatePropertyCondition.hasBlockStateProperties(p_363021_)
+                                    LootItemBlockStatePropertyCondition.hasBlockStateProperties(pBlock)
                                         .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(MossyCarpetBlock.BASE, true))
                                 )
                         )
@@ -512,12 +512,12 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
             );
     }
 
-    protected LootTable.Builder createLeavesDrops(Block p_250088_, Block p_250731_, float... p_248949_) {
+    protected LootTable.Builder createLeavesDrops(Block pLeavesBlock, Block pSaplingBlock, float... pChances) {
         HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
         return this.createSilkTouchOrShearsDispatchTable(
-                p_250088_,
-                ((LootPoolSingletonContainer.Builder)this.applyExplosionCondition(p_250088_, LootItem.lootTableItem(p_250731_)))
-                    .when(BonusLevelTableCondition.bonusLevelFlatChance(registrylookup.getOrThrow(Enchantments.FORTUNE), p_248949_))
+                pLeavesBlock,
+                ((LootPoolSingletonContainer.Builder)this.applyExplosionCondition(pLeavesBlock, LootItem.lootTableItem(pSaplingBlock)))
+                    .when(BonusLevelTableCondition.bonusLevelFlatChance(registrylookup.getOrThrow(Enchantments.FORTUNE), pChances))
             )
             .withPool(
                 LootPool.lootPool()
@@ -525,22 +525,22 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
                     .when(this.doesNotHaveShearsOrSilkTouch())
                     .add(
                         ((LootPoolSingletonContainer.Builder)this.applyExplosionDecay(
-                                p_250088_, LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F)))
+                                pLeavesBlock, LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F)))
                             ))
                             .when(BonusLevelTableCondition.bonusLevelFlatChance(registrylookup.getOrThrow(Enchantments.FORTUNE), NORMAL_LEAVES_STICK_CHANCES))
                     )
             );
     }
 
-    protected LootTable.Builder createOakLeavesDrops(Block p_249535_, Block p_251505_, float... p_250753_) {
+    protected LootTable.Builder createOakLeavesDrops(Block pOakLeavesBlock, Block pSaplingBlock, float... pChances) {
         HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
-        return this.createLeavesDrops(p_249535_, p_251505_, p_250753_)
+        return this.createLeavesDrops(pOakLeavesBlock, pSaplingBlock, pChances)
             .withPool(
                 LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1.0F))
                     .when(this.doesNotHaveShearsOrSilkTouch())
                     .add(
-                        ((LootPoolSingletonContainer.Builder)this.applyExplosionCondition(p_249535_, LootItem.lootTableItem(Items.APPLE)))
+                        ((LootPoolSingletonContainer.Builder)this.applyExplosionCondition(pOakLeavesBlock, LootItem.lootTableItem(Items.APPLE)))
                             .when(
                                 BonusLevelTableCondition.bonusLevelFlatChance(
                                     registrylookup.getOrThrow(Enchantments.FORTUNE), 0.005F, 0.0055555557F, 0.00625F, 0.008333334F, 0.025F
@@ -550,10 +550,10 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
             );
     }
 
-    protected LootTable.Builder createMangroveLeavesDrops(Block p_251103_) {
+    protected LootTable.Builder createMangroveLeavesDrops(Block pBlock) {
         HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
         return this.createSilkTouchOrShearsDispatchTable(
-            p_251103_,
+            pBlock,
             ((LootPoolSingletonContainer.Builder)this.applyExplosionDecay(
                     Blocks.MANGROVE_LEAVES, LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F)))
                 ))
@@ -561,38 +561,38 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
         );
     }
 
-    protected LootTable.Builder createCropDrops(Block p_249457_, Item p_248599_, Item p_251915_, LootItemCondition.Builder p_252202_) {
+    protected LootTable.Builder createCropDrops(Block pCropBlock, Item pGrownCropItem, Item pSeedsItem, LootItemCondition.Builder pDropGrownCropCondition) {
         HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
         return this.applyExplosionDecay(
-            p_249457_,
+            pCropBlock,
             LootTable.lootTable()
-                .withPool(LootPool.lootPool().add(LootItem.lootTableItem(p_248599_).when(p_252202_).otherwise(LootItem.lootTableItem(p_251915_))))
+                .withPool(LootPool.lootPool().add(LootItem.lootTableItem(pGrownCropItem).when(pDropGrownCropCondition).otherwise(LootItem.lootTableItem(pSeedsItem))))
                 .withPool(
                     LootPool.lootPool()
-                        .when(p_252202_)
+                        .when(pDropGrownCropCondition)
                         .add(
-                            LootItem.lootTableItem(p_251915_).apply(ApplyBonusCount.addBonusBinomialDistributionCount(registrylookup.getOrThrow(Enchantments.FORTUNE), 0.5714286F, 3))
+                            LootItem.lootTableItem(pSeedsItem).apply(ApplyBonusCount.addBonusBinomialDistributionCount(registrylookup.getOrThrow(Enchantments.FORTUNE), 0.5714286F, 3))
                         )
                 )
         );
     }
 
-    protected LootTable.Builder createDoublePlantShearsDrop(Block p_248678_) {
+    protected LootTable.Builder createDoublePlantShearsDrop(Block pSheared) {
         return LootTable.lootTable()
             .withPool(
                 LootPool.lootPool()
                     .when(this.hasShears())
-                    .add(LootItem.lootTableItem(p_248678_).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F))))
+                    .add(LootItem.lootTableItem(pSheared).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F))))
             );
     }
 
-    protected LootTable.Builder createDoublePlantWithSeedDrops(Block p_248590_, Block p_248735_) {
+    protected LootTable.Builder createDoublePlantWithSeedDrops(Block pBlock, Block pSheared) {
         HolderLookup.RegistryLookup<Block> registrylookup = this.registries.lookupOrThrow(Registries.BLOCK);
-        LootPoolEntryContainer.Builder<?> builder = LootItem.lootTableItem(p_248735_)
+        LootPoolEntryContainer.Builder<?> builder = LootItem.lootTableItem(pSheared)
             .apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F)))
             .when(this.hasShears())
             .otherwise(
-                ((LootPoolSingletonContainer.Builder)this.applyExplosionCondition(p_248590_, LootItem.lootTableItem(Items.WHEAT_SEEDS)))
+                ((LootPoolSingletonContainer.Builder)this.applyExplosionCondition(pBlock, LootItem.lootTableItem(Items.WHEAT_SEEDS)))
                     .when(LootItemRandomChanceCondition.randomChance(0.125F))
             );
         return LootTable.lootTable()
@@ -600,7 +600,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
                 LootPool.lootPool()
                     .add(builder)
                     .when(
-                        LootItemBlockStatePropertyCondition.hasBlockStateProperties(p_248590_)
+                        LootItemBlockStatePropertyCondition.hasBlockStateProperties(pBlock)
                             .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER))
                     )
                     .when(
@@ -608,7 +608,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
                             LocationPredicate.Builder.location()
                                 .setBlock(
                                     BlockPredicate.Builder.block()
-                                        .of(registrylookup, p_248590_)
+                                        .of(registrylookup, pBlock)
                                         .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER))
                                 ),
                             new BlockPos(0, 1, 0)
@@ -619,7 +619,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
                 LootPool.lootPool()
                     .add(builder)
                     .when(
-                        LootItemBlockStatePropertyCondition.hasBlockStateProperties(p_248590_)
+                        LootItemBlockStatePropertyCondition.hasBlockStateProperties(pBlock)
                             .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER))
                     )
                     .when(
@@ -627,7 +627,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
                             LocationPredicate.Builder.location()
                                 .setBlock(
                                     BlockPredicate.Builder.block()
-                                        .of(registrylookup, p_248590_)
+                                        .of(registrylookup, pBlock)
                                         .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER))
                                 ),
                             new BlockPos(0, -1, 0)
@@ -636,20 +636,20 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
             );
     }
 
-    protected LootTable.Builder createCandleDrops(Block p_250896_) {
+    protected LootTable.Builder createCandleDrops(Block pCandleBlock) {
         return LootTable.lootTable()
             .withPool(
                 LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1.0F))
                     .add(
                         (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                            p_250896_,
-                            LootItem.lootTableItem(p_250896_)
+                            pCandleBlock,
+                            LootItem.lootTableItem(pCandleBlock)
                                 .apply(
                                     List.of(2, 3, 4),
                                     p_249985_ -> SetItemCountFunction.setCount(ConstantValue.exactly((float)p_249985_.intValue()))
                                             .when(
-                                                LootItemBlockStatePropertyCondition.hasBlockStateProperties(p_250896_)
+                                                LootItemBlockStatePropertyCondition.hasBlockStateProperties(pCandleBlock)
                                                     .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CandleBlock.CANDLES, p_249985_))
                                             )
                                 )
@@ -658,20 +658,20 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
             );
     }
 
-    protected LootTable.Builder createPetalsDrops(Block p_273240_) {
+    protected LootTable.Builder createPetalsDrops(Block pPetalBlock) {
         return LootTable.lootTable()
             .withPool(
                 LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1.0F))
                     .add(
                         (LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-                            p_273240_,
-                            LootItem.lootTableItem(p_273240_)
+                            pPetalBlock,
+                            LootItem.lootTableItem(pPetalBlock)
                                 .apply(
                                     IntStream.rangeClosed(1, 4).boxed().toList(),
                                     p_272348_ -> SetItemCountFunction.setCount(ConstantValue.exactly((float)p_272348_.intValue()))
                                             .when(
-                                                LootItemBlockStatePropertyCondition.hasBlockStateProperties(p_273240_)
+                                                LootItemBlockStatePropertyCondition.hasBlockStateProperties(pPetalBlock)
                                                     .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(PinkPetalsBlock.AMOUNT, p_272348_))
                                             )
                                 )
@@ -680,8 +680,8 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
             );
     }
 
-    protected static LootTable.Builder createCandleCakeDrops(Block p_250280_) {
-        return LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(p_250280_)));
+    protected static LootTable.Builder createCandleCakeDrops(Block pCandleCakeBlock) {
+        return LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(pCandleCakeBlock)));
     }
 
     public static LootTable.Builder noDrop() {
@@ -722,46 +722,46 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
         }
     }
 
-    protected void addNetherVinesDropTable(Block p_252269_, Block p_250696_) {
+    protected void addNetherVinesDropTable(Block pVines, Block pPlant) {
         HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
         LootTable.Builder loottable$builder = this.createSilkTouchOrShearsDispatchTable(
-            p_252269_,
-            LootItem.lootTableItem(p_252269_)
+            pVines,
+            LootItem.lootTableItem(pVines)
                 .when(BonusLevelTableCondition.bonusLevelFlatChance(registrylookup.getOrThrow(Enchantments.FORTUNE), 0.33F, 0.55F, 0.77F, 1.0F))
         );
-        this.add(p_252269_, loottable$builder);
-        this.add(p_250696_, loottable$builder);
+        this.add(pVines, loottable$builder);
+        this.add(pPlant, loottable$builder);
     }
 
-    protected LootTable.Builder createDoorTable(Block p_252166_) {
-        return this.createSinglePropConditionTable(p_252166_, DoorBlock.HALF, DoubleBlockHalf.LOWER);
+    protected LootTable.Builder createDoorTable(Block pDoorBlock) {
+        return this.createSinglePropConditionTable(pDoorBlock, DoorBlock.HALF, DoubleBlockHalf.LOWER);
     }
 
-    protected void dropPottedContents(Block p_251064_) {
-        this.add(p_251064_, p_308498_ -> this.createPotFlowerItemTable(((FlowerPotBlock)p_308498_).getPotted()));
+    protected void dropPottedContents(Block pFlowerPot) {
+        this.add(pFlowerPot, p_308498_ -> this.createPotFlowerItemTable(((FlowerPotBlock)p_308498_).getPotted()));
     }
 
-    protected void otherWhenSilkTouch(Block p_249932_, Block p_252053_) {
-        this.add(p_249932_, this.createSilkTouchOnlyTable(p_252053_));
+    protected void otherWhenSilkTouch(Block pBlock, Block pOther) {
+        this.add(pBlock, this.createSilkTouchOnlyTable(pOther));
     }
 
-    protected void dropOther(Block p_248885_, ItemLike p_251883_) {
-        this.add(p_248885_, this.createSingleItemTable(p_251883_));
+    protected void dropOther(Block pBlock, ItemLike pItem) {
+        this.add(pBlock, this.createSingleItemTable(pItem));
     }
 
-    protected void dropWhenSilkTouch(Block p_250855_) {
-        this.otherWhenSilkTouch(p_250855_, p_250855_);
+    protected void dropWhenSilkTouch(Block pBlock) {
+        this.otherWhenSilkTouch(pBlock, pBlock);
     }
 
-    protected void dropSelf(Block p_249181_) {
-        this.dropOther(p_249181_, p_249181_);
+    protected void dropSelf(Block pBlock) {
+        this.dropOther(pBlock, pBlock);
     }
 
-    protected void add(Block p_251966_, Function<Block, LootTable.Builder> p_251699_) {
-        this.add(p_251966_, p_251699_.apply(p_251966_));
+    protected void add(Block pBlock, Function<Block, LootTable.Builder> pFactory) {
+        this.add(pBlock, pFactory.apply(pBlock));
     }
 
-    protected void add(Block p_250610_, LootTable.Builder p_249817_) {
-        this.map.put(p_250610_.getLootTable().orElseThrow(() -> new IllegalStateException("Block " + p_250610_ + " does not have loot table")), p_249817_);
+    protected void add(Block pBlock, LootTable.Builder pBuilder) {
+        this.map.put(pBlock.getLootTable().orElseThrow(() -> new IllegalStateException("Block " + pBlock + " does not have loot table")), pBuilder);
     }
 }

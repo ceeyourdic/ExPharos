@@ -82,7 +82,7 @@ public class CaveFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> SCULK_PATCH_ANCIENT_CITY = FeatureUtils.createKey("sculk_patch_ancient_city");
     public static final ResourceKey<ConfiguredFeature<?, ?>> SCULK_VEIN = FeatureUtils.createKey("sculk_vein");
 
-    private static Holder<PlacedFeature> makeDripleaf(Direction p_206468_) {
+    private static Holder<PlacedFeature> makeDripleaf(Direction pFacingDirection) {
         return PlacementUtils.inlinePlaced(
             Feature.BLOCK_COLUMN,
             new BlockColumnConfiguration(
@@ -94,10 +94,10 @@ public class CaveFeatures {
                                 .add(ConstantInt.of(0), 1)
                                 .build()
                         ),
-                        BlockStateProvider.simple(Blocks.BIG_DRIPLEAF_STEM.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, p_206468_))
+                        BlockStateProvider.simple(Blocks.BIG_DRIPLEAF_STEM.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, pFacingDirection))
                     ),
                     BlockColumnConfiguration.layer(
-                        ConstantInt.of(1), BlockStateProvider.simple(Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, p_206468_))
+                        ConstantInt.of(1), BlockStateProvider.simple(Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, pFacingDirection))
                     )
                 ),
                 Direction.UP,
@@ -122,10 +122,10 @@ public class CaveFeatures {
         );
     }
 
-    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> p_333250_) {
-        HolderGetter<ConfiguredFeature<?, ?>> holdergetter = p_333250_.lookup(Registries.CONFIGURED_FEATURE);
-        HolderGetter<StructureProcessorList> holdergetter1 = p_333250_.lookup(Registries.PROCESSOR_LIST);
-        FeatureUtils.register(p_333250_, MONSTER_ROOM, Feature.MONSTER_ROOM);
+    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> pContext) {
+        HolderGetter<ConfiguredFeature<?, ?>> holdergetter = pContext.lookup(Registries.CONFIGURED_FEATURE);
+        HolderGetter<StructureProcessorList> holdergetter1 = pContext.lookup(Registries.PROCESSOR_LIST);
+        FeatureUtils.register(pContext, MONSTER_ROOM, Feature.MONSTER_ROOM);
         List<ResourceLocation> list = List.of(
             ResourceLocation.withDefaultNamespace("fossil/spine_1"),
             ResourceLocation.withDefaultNamespace("fossil/spine_2"),
@@ -148,13 +148,13 @@ public class CaveFeatures {
         );
         Holder<StructureProcessorList> holder = holdergetter1.getOrThrow(ProcessorLists.FOSSIL_ROT);
         FeatureUtils.register(
-            p_333250_, FOSSIL_COAL, Feature.FOSSIL, new FossilFeatureConfiguration(list, list1, holder, holdergetter1.getOrThrow(ProcessorLists.FOSSIL_COAL), 4)
+            pContext, FOSSIL_COAL, Feature.FOSSIL, new FossilFeatureConfiguration(list, list1, holder, holdergetter1.getOrThrow(ProcessorLists.FOSSIL_COAL), 4)
         );
         FeatureUtils.register(
-            p_333250_, FOSSIL_DIAMONDS, Feature.FOSSIL, new FossilFeatureConfiguration(list, list1, holder, holdergetter1.getOrThrow(ProcessorLists.FOSSIL_DIAMONDS), 4)
+            pContext, FOSSIL_DIAMONDS, Feature.FOSSIL, new FossilFeatureConfiguration(list, list1, holder, holdergetter1.getOrThrow(ProcessorLists.FOSSIL_DIAMONDS), 4)
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             DRIPSTONE_CLUSTER,
             Feature.DRIPSTONE_CLUSTER,
             new DripstoneClusterConfiguration(
@@ -172,7 +172,7 @@ public class CaveFeatures {
             )
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             LARGE_DRIPSTONE,
             Feature.LARGE_DRIPSTONE,
             new LargeDripstoneConfiguration(
@@ -188,7 +188,7 @@ public class CaveFeatures {
             )
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             POINTED_DRIPSTONE,
             Feature.SIMPLE_RANDOM_SELECTOR,
             new SimpleRandomFeatureConfiguration(
@@ -208,10 +208,10 @@ public class CaveFeatures {
                 )
             )
         );
-        FeatureUtils.register(p_333250_, UNDERWATER_MAGMA, Feature.UNDERWATER_MAGMA, new UnderwaterMagmaConfiguration(5, 1, 0.5F));
+        FeatureUtils.register(pContext, UNDERWATER_MAGMA, Feature.UNDERWATER_MAGMA, new UnderwaterMagmaConfiguration(5, 1, 0.5F));
         MultifaceSpreadeableBlock multifacespreadeableblock = (MultifaceSpreadeableBlock)Blocks.GLOW_LICHEN;
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             GLOW_LICHEN,
             Feature.MULTIFACE_GROWTH,
             new MultifaceGrowthConfiguration(
@@ -235,7 +235,7 @@ public class CaveFeatures {
             )
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             ROOTED_AZALEA_TREE,
             Feature.ROOT_SYSTEM,
             new RootSystemConfiguration(
@@ -274,7 +274,7 @@ public class CaveFeatures {
             UniformInt.of(23, 25)
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             CAVE_VINE,
             Feature.BLOCK_COLUMN,
             new BlockColumnConfiguration(
@@ -297,7 +297,7 @@ public class CaveFeatures {
             )
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             CAVE_VINE_IN_MOSS,
             Feature.BLOCK_COLUMN,
             new BlockColumnConfiguration(
@@ -319,7 +319,7 @@ public class CaveFeatures {
             )
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             MOSS_VEGETATION,
             Feature.SIMPLE_BLOCK,
             new SimpleBlockConfiguration(
@@ -334,7 +334,7 @@ public class CaveFeatures {
             )
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             MOSS_PATCH,
             Feature.VEGETATION_PATCH,
             new VegetationPatchConfiguration(
@@ -351,7 +351,7 @@ public class CaveFeatures {
             )
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             MOSS_PATCH_BONEMEAL,
             Feature.VEGETATION_PATCH,
             new VegetationPatchConfiguration(
@@ -368,7 +368,7 @@ public class CaveFeatures {
             )
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             DRIPLEAF,
             Feature.SIMPLE_RANDOM_SELECTOR,
             new SimpleRandomFeatureConfiguration(
@@ -376,7 +376,7 @@ public class CaveFeatures {
             )
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             CLAY_WITH_DRIPLEAVES,
             Feature.VEGETATION_PATCH,
             new VegetationPatchConfiguration(
@@ -393,7 +393,7 @@ public class CaveFeatures {
             )
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             CLAY_POOL_WITH_DRIPLEAVES,
             Feature.WATERLOGGED_VEGETATION_PATCH,
             new VegetationPatchConfiguration(
@@ -410,7 +410,7 @@ public class CaveFeatures {
             )
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             LUSH_CAVES_CLAY,
             Feature.RANDOM_BOOLEAN_SELECTOR,
             new RandomBooleanFeatureConfiguration(
@@ -418,7 +418,7 @@ public class CaveFeatures {
             )
         );
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             MOSS_PATCH_CEILING,
             Feature.VEGETATION_PATCH,
             new VegetationPatchConfiguration(
@@ -434,9 +434,9 @@ public class CaveFeatures {
                 0.3F
             )
         );
-        FeatureUtils.register(p_333250_, SPORE_BLOSSOM, Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.SPORE_BLOSSOM)));
+        FeatureUtils.register(pContext, SPORE_BLOSSOM, Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.SPORE_BLOSSOM)));
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             AMETHYST_GEODE,
             Feature.GEODE,
             new GeodeConfiguration(
@@ -464,11 +464,11 @@ public class CaveFeatures {
                 1
             )
         );
-        FeatureUtils.register(p_333250_, SCULK_PATCH_DEEP_DARK, Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, ConstantInt.of(0), 0.5F));
-        FeatureUtils.register(p_333250_, SCULK_PATCH_ANCIENT_CITY, Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, UniformInt.of(1, 3), 0.5F));
+        FeatureUtils.register(pContext, SCULK_PATCH_DEEP_DARK, Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, ConstantInt.of(0), 0.5F));
+        FeatureUtils.register(pContext, SCULK_PATCH_ANCIENT_CITY, Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, UniformInt.of(1, 3), 0.5F));
         MultifaceSpreadeableBlock multifacespreadeableblock1 = (MultifaceSpreadeableBlock)Blocks.SCULK_VEIN;
         FeatureUtils.register(
-            p_333250_,
+            pContext,
             SCULK_VEIN,
             Feature.MULTIFACE_GROWTH,
             new MultifaceGrowthConfiguration(

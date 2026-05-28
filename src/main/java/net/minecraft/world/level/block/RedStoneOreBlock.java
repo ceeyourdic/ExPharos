@@ -36,9 +36,9 @@ public class RedStoneOreBlock extends Block {
     }
 
     @Override
-    protected void attack(BlockState p_55467_, Level p_55468_, BlockPos p_55469_, Player p_55470_) {
-        interact(p_55467_, p_55468_, p_55469_);
-        super.attack(p_55467_, p_55468_, p_55469_, p_55470_);
+    protected void attack(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer) {
+        interact(pState, pLevel, pPos);
+        super.attack(pState, pLevel, pPos, pPlayer);
     }
 
     @Override
@@ -65,16 +65,16 @@ public class RedStoneOreBlock extends Block {
             : InteractionResult.SUCCESS);
     }
 
-    private static void interact(BlockState p_55493_, Level p_55494_, BlockPos p_55495_) {
-        spawnParticles(p_55494_, p_55495_);
-        if (!p_55493_.getValue(LIT)) {
-            p_55494_.setBlock(p_55495_, p_55493_.setValue(LIT, Boolean.valueOf(true)), 3);
+    private static void interact(BlockState pState, Level pLevel, BlockPos pPos) {
+        spawnParticles(pLevel, pPos);
+        if (!pState.getValue(LIT)) {
+            pLevel.setBlock(pPos, pState.setValue(LIT, Boolean.valueOf(true)), 3);
         }
     }
 
     @Override
-    protected boolean isRandomlyTicking(BlockState p_55486_) {
-        return p_55486_.getValue(LIT);
+    protected boolean isRandomlyTicking(BlockState pState) {
+        return pState.getValue(LIT);
     }
 
     @Override
@@ -99,22 +99,22 @@ public class RedStoneOreBlock extends Block {
         }
     }
 
-    private static void spawnParticles(Level p_55455_, BlockPos p_55456_) {
+    private static void spawnParticles(Level pLevel, BlockPos pPos) {
         double d0 = 0.5625;
-        RandomSource randomsource = p_55455_.random;
+        RandomSource randomsource = pLevel.random;
 
         for (Direction direction : Direction.values()) {
-            BlockPos blockpos = p_55456_.relative(direction);
-            if (!p_55455_.getBlockState(blockpos).isSolidRender()) {
+            BlockPos blockpos = pPos.relative(direction);
+            if (!pLevel.getBlockState(blockpos).isSolidRender()) {
                 Direction.Axis direction$axis = direction.getAxis();
                 double d1 = direction$axis == Direction.Axis.X ? 0.5 + 0.5625 * (double)direction.getStepX() : (double)randomsource.nextFloat();
                 double d2 = direction$axis == Direction.Axis.Y ? 0.5 + 0.5625 * (double)direction.getStepY() : (double)randomsource.nextFloat();
                 double d3 = direction$axis == Direction.Axis.Z ? 0.5 + 0.5625 * (double)direction.getStepZ() : (double)randomsource.nextFloat();
-                p_55455_.addParticle(
+                pLevel.addParticle(
                     DustParticleOptions.REDSTONE,
-                    (double)p_55456_.getX() + d1,
-                    (double)p_55456_.getY() + d2,
-                    (double)p_55456_.getZ() + d3,
+                    (double)pPos.getX() + d1,
+                    (double)pPos.getY() + d2,
+                    (double)pPos.getZ() + d3,
                     0.0,
                     0.0,
                     0.0
@@ -124,7 +124,7 @@ public class RedStoneOreBlock extends Block {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_55484_) {
-        p_55484_.add(LIT);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(LIT);
     }
 }

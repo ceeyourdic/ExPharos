@@ -18,18 +18,18 @@ public class FallingDustParticle extends TextureSheetParticle {
     private final SpriteSet sprites;
 
     FallingDustParticle(
-        ClientLevel p_106610_, double p_106611_, double p_106612_, double p_106613_, float p_106614_, float p_106615_, float p_106616_, SpriteSet p_106617_
+        ClientLevel pLevel, double pX, double pY, double pZ, float pXSpeed, float pYSpeed, float pZSpeed, SpriteSet pSprites
     ) {
-        super(p_106610_, p_106611_, p_106612_, p_106613_);
-        this.sprites = p_106617_;
-        this.rCol = p_106614_;
-        this.gCol = p_106615_;
-        this.bCol = p_106616_;
+        super(pLevel, pX, pY, pZ);
+        this.sprites = pSprites;
+        this.rCol = pXSpeed;
+        this.gCol = pYSpeed;
+        this.bCol = pZSpeed;
         float f = 0.9F;
         this.quadSize *= 0.67499995F;
         int i = (int)(32.0 / (Math.random() * 0.8 + 0.2));
         this.lifetime = (int)Math.max((float)i * 0.9F, 1.0F);
-        this.setSpriteFromAge(p_106617_);
+        this.setSpriteFromAge(pSprites);
         this.rotSpeed = ((float)Math.random() - 0.5F) * 0.1F;
         this.roll = (float)Math.random() * (float) (Math.PI * 2);
     }
@@ -40,8 +40,8 @@ public class FallingDustParticle extends TextureSheetParticle {
     }
 
     @Override
-    public float getQuadSize(float p_106631_) {
-        return this.quadSize * Mth.clamp(((float)this.age + p_106631_) / (float)this.lifetime * 32.0F, 0.0F, 1.0F);
+    public float getQuadSize(float pScaleFactor) {
+        return this.quadSize * Mth.clamp(((float)this.age + pScaleFactor) / (float)this.lifetime * 32.0F, 0.0F, 1.0F);
     }
 
     @Override
@@ -69,35 +69,35 @@ public class FallingDustParticle extends TextureSheetParticle {
     public static class Provider implements ParticleProvider<BlockParticleOption> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet p_106634_) {
-            this.sprite = p_106634_;
+        public Provider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         @Nullable
         public Particle createParticle(
-            BlockParticleOption p_106636_,
-            ClientLevel p_106637_,
-            double p_106638_,
-            double p_106639_,
-            double p_106640_,
-            double p_106641_,
-            double p_106642_,
-            double p_106643_
+            BlockParticleOption pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            BlockState blockstate = p_106636_.getState();
+            BlockState blockstate = pType.getState();
             if (!blockstate.isAir() && blockstate.getRenderShape() == RenderShape.INVISIBLE) {
                 return null;
             } else {
-                BlockPos blockpos = BlockPos.containing(p_106638_, p_106639_, p_106640_);
-                int i = Minecraft.getInstance().getBlockColors().getColor(blockstate, p_106637_, blockpos);
+                BlockPos blockpos = BlockPos.containing(pX, pY, pZ);
+                int i = Minecraft.getInstance().getBlockColors().getColor(blockstate, pLevel, blockpos);
                 if (blockstate.getBlock() instanceof FallingBlock) {
-                    i = ((FallingBlock)blockstate.getBlock()).getDustColor(blockstate, p_106637_, blockpos);
+                    i = ((FallingBlock)blockstate.getBlock()).getDustColor(blockstate, pLevel, blockpos);
                 }
 
                 float f = (float)(i >> 16 & 0xFF) / 255.0F;
                 float f1 = (float)(i >> 8 & 0xFF) / 255.0F;
                 float f2 = (float)(i & 0xFF) / 255.0F;
-                return new FallingDustParticle(p_106637_, p_106638_, p_106639_, p_106640_, f, f1, f2, this.sprite);
+                return new FallingDustParticle(pLevel, pX, pY, pZ, f, f1, f2, this.sprite);
             }
         }
     }

@@ -23,9 +23,9 @@ public class SynchronizeRegistriesTask implements ConfigurationTask {
     private final List<KnownPack> requestedPacks;
     private final LayeredRegistryAccess<RegistryLayer> registries;
 
-    public SynchronizeRegistriesTask(List<KnownPack> p_331975_, LayeredRegistryAccess<RegistryLayer> p_334926_) {
-        this.requestedPacks = p_331975_;
-        this.registries = p_334926_;
+    public SynchronizeRegistriesTask(List<KnownPack> pRequestedPacks, LayeredRegistryAccess<RegistryLayer> pRegistries) {
+        this.requestedPacks = pRequestedPacks;
+        this.registries = pRegistries;
     }
 
     @Override
@@ -33,22 +33,22 @@ public class SynchronizeRegistriesTask implements ConfigurationTask {
         p_333641_.accept(new ClientboundSelectKnownPacks(this.requestedPacks));
     }
 
-    private void sendRegistries(Consumer<Packet<?>> p_333495_, Set<KnownPack> p_335321_) {
+    private void sendRegistries(Consumer<Packet<?>> pPacketSender, Set<KnownPack> pPacks) {
         DynamicOps<Tag> dynamicops = this.registries.compositeAccess().createSerializationContext(NbtOps.INSTANCE);
         RegistrySynchronization.packRegistries(
             dynamicops,
             this.registries.getAccessFrom(RegistryLayer.WORLDGEN),
-            p_335321_,
-            (p_334638_, p_328189_) -> p_333495_.accept(new ClientboundRegistryDataPacket(p_334638_, p_328189_))
+            pPacks,
+            (p_334638_, p_328189_) -> pPacketSender.accept(new ClientboundRegistryDataPacket(p_334638_, p_328189_))
         );
-        p_333495_.accept(new ClientboundUpdateTagsPacket(TagNetworkSerialization.serializeTagsToNetwork(this.registries)));
+        pPacketSender.accept(new ClientboundUpdateTagsPacket(TagNetworkSerialization.serializeTagsToNetwork(this.registries)));
     }
 
-    public void handleResponse(List<KnownPack> p_332734_, Consumer<Packet<?>> p_331332_) {
-        if (p_332734_.equals(this.requestedPacks)) {
-            this.sendRegistries(p_331332_, Set.copyOf(this.requestedPacks));
+    public void handleResponse(List<KnownPack> pPacks, Consumer<Packet<?>> pPacketSender) {
+        if (pPacks.equals(this.requestedPacks)) {
+            this.sendRegistries(pPacketSender, Set.copyOf(this.requestedPacks));
         } else {
-            this.sendRegistries(p_331332_, Set.of());
+            this.sendRegistries(pPacketSender, Set.of());
         }
     }
 

@@ -20,14 +20,14 @@ public class FollowOwnerGoal extends Goal {
     private final float startDistance;
     private float oldWaterCost;
 
-    public FollowOwnerGoal(TamableAnimal p_25294_, double p_25295_, float p_25296_, float p_25297_) {
-        this.tamable = p_25294_;
-        this.speedModifier = p_25295_;
-        this.navigation = p_25294_.getNavigation();
-        this.startDistance = p_25296_;
-        this.stopDistance = p_25297_;
+    public FollowOwnerGoal(TamableAnimal pTamable, double pSpeedModifier, float pStartDistance, float pStopDistance) {
+        this.tamable = pTamable;
+        this.speedModifier = pSpeedModifier;
+        this.navigation = pTamable.getNavigation();
+        this.startDistance = pStartDistance;
+        this.stopDistance = pStopDistance;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
-        if (!(p_25294_.getNavigation() instanceof GroundPathNavigation) && !(p_25294_.getNavigation() instanceof FlyingPathNavigation)) {
+        if (!(pTamable.getNavigation() instanceof GroundPathNavigation) && !(pTamable.getNavigation() instanceof FlyingPathNavigation)) {
             throw new IllegalArgumentException("Unsupported mob type for FollowOwnerGoal");
         }
     }

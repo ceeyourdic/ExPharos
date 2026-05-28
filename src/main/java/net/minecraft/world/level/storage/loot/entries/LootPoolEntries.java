@@ -19,7 +19,7 @@ public class LootPoolEntries {
     public static final LootPoolEntryType SEQUENCE = register("sequence", SequentialEntry.CODEC);
     public static final LootPoolEntryType GROUP = register("group", EntryGroup.CODEC);
 
-    private static LootPoolEntryType register(String p_79630_, MapCodec<? extends LootPoolEntryContainer> p_328987_) {
-        return Registry.register(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, ResourceLocation.withDefaultNamespace(p_79630_), new LootPoolEntryType(p_328987_));
+    private static LootPoolEntryType register(String pName, MapCodec<? extends LootPoolEntryContainer> pCodec) {
+        return Registry.register(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, ResourceLocation.withDefaultNamespace(pName), new LootPoolEntryType(pCodec));
     }
 }

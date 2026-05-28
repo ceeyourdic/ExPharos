@@ -12,10 +12,10 @@ public class ContinuationTask<T, P> implements EntryAction<T> {
     private final CommandQueueEntry<T> selfEntry;
     private int index;
 
-    private ContinuationTask(ContinuationTask.TaskProvider<T, P> p_312248_, List<P> p_311891_, Frame p_311182_) {
-        this.taskFactory = p_312248_;
-        this.arguments = p_311891_;
-        this.selfEntry = new CommandQueueEntry<>(p_311182_, this);
+    private ContinuationTask(ContinuationTask.TaskProvider<T, P> pTaskFactory, List<P> pArguments, Frame pFrame) {
+        this.taskFactory = pTaskFactory;
+        this.arguments = pArguments;
+        this.selfEntry = new CommandQueueEntry<>(pFrame, this);
     }
 
     @Override
@@ -27,25 +27,25 @@ public class ContinuationTask<T, P> implements EntryAction<T> {
         }
     }
 
-    public static <T, P> void schedule(ExecutionContext<T> p_311894_, Frame p_312100_, List<P> p_310159_, ContinuationTask.TaskProvider<T, P> p_309687_) {
-        int i = p_310159_.size();
+    public static <T, P> void schedule(ExecutionContext<T> pExecutionContext, Frame pFrame, List<P> pArguments, ContinuationTask.TaskProvider<T, P> pTaskProvider) {
+        int i = pArguments.size();
         switch (i) {
             case 0:
                 break;
             case 1:
-                p_311894_.queueNext(p_309687_.create(p_312100_, p_310159_.get(0)));
+                pExecutionContext.queueNext(pTaskProvider.create(pFrame, pArguments.get(0)));
                 break;
             case 2:
-                p_311894_.queueNext(p_309687_.create(p_312100_, p_310159_.get(0)));
-                p_311894_.queueNext(p_309687_.create(p_312100_, p_310159_.get(1)));
+                pExecutionContext.queueNext(pTaskProvider.create(pFrame, pArguments.get(0)));
+                pExecutionContext.queueNext(pTaskProvider.create(pFrame, pArguments.get(1)));
                 break;
             default:
-                p_311894_.queueNext((new ContinuationTask<>(p_309687_, p_310159_, p_312100_)).selfEntry);
+                pExecutionContext.queueNext((new ContinuationTask<>(pTaskProvider, pArguments, pFrame)).selfEntry);
         }
     }
 
     @FunctionalInterface
     public interface TaskProvider<T, P> {
-        CommandQueueEntry<T> create(Frame p_312749_, P p_312271_);
+        CommandQueueEntry<T> create(Frame pFrame, P pArgument);
     }
 }

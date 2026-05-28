@@ -33,21 +33,21 @@ public class NoiseThresholdProvider extends NoiseBasedStateProvider {
     private final List<BlockState> highStates;
 
     public NoiseThresholdProvider(
-        long p_191471_,
-        NormalNoise.NoiseParameters p_191472_,
-        float p_191473_,
-        float p_191474_,
-        float p_191475_,
-        BlockState p_191476_,
-        List<BlockState> p_191477_,
-        List<BlockState> p_191478_
+        long pSeed,
+        NormalNoise.NoiseParameters pParameters,
+        float pScale,
+        float pThreshold,
+        float pHighChance,
+        BlockState pDefaultState,
+        List<BlockState> pLowStates,
+        List<BlockState> pHighStates
     ) {
-        super(p_191471_, p_191472_, p_191473_);
-        this.threshold = p_191474_;
-        this.highChance = p_191475_;
-        this.defaultState = p_191476_;
-        this.lowStates = p_191477_;
-        this.highStates = p_191478_;
+        super(pSeed, pParameters, pScale);
+        this.threshold = pThreshold;
+        this.highChance = pHighChance;
+        this.defaultState = pDefaultState;
+        this.lowStates = pLowStates;
+        this.highStates = pHighStates;
     }
 
     @Override

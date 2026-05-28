@@ -18,9 +18,9 @@ class MatchingBlocksPredicate extends StateTestingPredicate {
                 .apply(p_259004_, MatchingBlocksPredicate::new)
     );
 
-    public MatchingBlocksPredicate(Vec3i p_204690_, HolderSet<Block> p_204691_) {
-        super(p_204690_);
-        this.blocks = p_204691_;
+    public MatchingBlocksPredicate(Vec3i pOffset, HolderSet<Block> pBlocks) {
+        super(pOffset);
+        this.blocks = pBlocks;
     }
 
     @Override

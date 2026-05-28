@@ -22,12 +22,12 @@ public class VillageSectionsDebugRenderer implements DebugRenderer.SimpleDebugRe
         this.villageSections.clear();
     }
 
-    public void setVillageSection(SectionPos p_113710_) {
-        this.villageSections.add(p_113710_);
+    public void setVillageSection(SectionPos pPos) {
+        this.villageSections.add(pPos);
     }
 
-    public void setNotVillageSection(SectionPos p_113712_) {
-        this.villageSections.remove(p_113712_);
+    public void setNotVillageSection(SectionPos pPos) {
+        this.villageSections.remove(pPos);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class VillageSectionsDebugRenderer implements DebugRenderer.SimpleDebugRe
         });
     }
 
-    private static void highlightVillageSection(PoseStack p_270832_, MultiBufferSource p_270443_, SectionPos p_271021_) {
-        DebugRenderer.renderFilledUnitCube(p_270832_, p_270443_, p_271021_.center(), 0.2F, 1.0F, 0.2F, 0.15F);
+    private static void highlightVillageSection(PoseStack pPoseStack, MultiBufferSource pBuffer, SectionPos pPos) {
+        DebugRenderer.renderFilledUnitCube(pPoseStack, pBuffer, pPos.center(), 0.2F, 1.0F, 0.2F, 0.15F);
     }
 }

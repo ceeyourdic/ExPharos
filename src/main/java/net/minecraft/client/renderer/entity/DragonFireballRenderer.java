@@ -21,7 +21,7 @@ public class DragonFireballRenderer extends EntityRenderer<DragonFireball, Entit
         super(p_173962_);
     }
 
-    protected int getBlockLightLevel(DragonFireball p_114087_, BlockPos p_114088_) {
+    protected int getBlockLightLevel(DragonFireball pEntity, BlockPos pPos) {
         return 15;
     }
 
@@ -41,14 +41,14 @@ public class DragonFireballRenderer extends EntityRenderer<DragonFireball, Entit
     }
 
     private static void vertex(
-        VertexConsumer p_254095_, PoseStack.Pose p_336223_, int p_253829_, float p_253995_, int p_254031_, int p_253641_, int p_254243_
+        VertexConsumer pConsumer, PoseStack.Pose pPose, int pPackedLight, float pX, int pY, int pU, int pV
     ) {
-        p_254095_.addVertex(p_336223_, p_253995_ - 0.5F, (float)p_254031_ - 0.25F, 0.0F)
+        pConsumer.addVertex(pPose, pX - 0.5F, (float)pY - 0.25F, 0.0F)
             .setColor(-1)
-            .setUv((float)p_253641_, (float)p_254243_)
+            .setUv((float)pU, (float)pV)
             .setOverlay(OverlayTexture.NO_OVERLAY)
-            .setLight(p_253829_)
-            .setNormal(p_336223_, 0.0F, 1.0F, 0.0F);
+            .setLight(pPackedLight)
+            .setNormal(pPose, 0.0F, 1.0F, 0.0F);
     }
 
     @Override

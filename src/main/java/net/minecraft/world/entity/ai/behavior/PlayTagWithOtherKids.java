@@ -65,18 +65,18 @@ public class PlayTagWithOtherKids {
     }
 
     private static void chaseKid(
-        MemoryAccessor<?, LivingEntity> p_259811_,
-        MemoryAccessor<?, PositionTracker> p_259299_,
-        MemoryAccessor<?, WalkTarget> p_260056_,
-        LivingEntity p_259463_
+        MemoryAccessor<?, LivingEntity> pInteractionTarget,
+        MemoryAccessor<?, PositionTracker> pLookTarget,
+        MemoryAccessor<?, WalkTarget> pWalkTarget,
+        LivingEntity pKid
     ) {
-        p_259811_.set(p_259463_);
-        p_259299_.set(new EntityTracker(p_259463_, true));
-        p_260056_.set(new WalkTarget(new EntityTracker(p_259463_, false), 0.6F, 1));
+        pInteractionTarget.set(pKid);
+        pLookTarget.set(new EntityTracker(pKid, true));
+        pWalkTarget.set(new WalkTarget(new EntityTracker(pKid, false), 0.6F, 1));
     }
 
-    private static Optional<LivingEntity> findSomeoneBeingChased(List<LivingEntity> p_259655_) {
-        Map<LivingEntity, Integer> map = checkHowManyChasersEachFriendHas(p_259655_);
+    private static Optional<LivingEntity> findSomeoneBeingChased(List<LivingEntity> pKids) {
+        Map<LivingEntity, Integer> map = checkHowManyChasersEachFriendHas(pKids);
         return map.entrySet()
             .stream()
             .sorted(Comparator.comparingInt(Entry::getValue))
@@ -85,23 +85,23 @@ public class PlayTagWithOtherKids {
             .findFirst();
     }
 
-    private static Map<LivingEntity, Integer> checkHowManyChasersEachFriendHas(List<LivingEntity> p_259989_) {
+    private static Map<LivingEntity, Integer> checkHowManyChasersEachFriendHas(List<LivingEntity> pKids) {
         Map<LivingEntity, Integer> map = Maps.newHashMap();
-        p_259989_.stream()
+        pKids.stream()
             .filter(PlayTagWithOtherKids::isChasingSomeone)
             .forEach(p_258565_ -> map.compute(whoAreYouChasing(p_258565_), (p_147707_, p_147708_) -> p_147708_ == null ? 1 : p_147708_ + 1));
         return map;
     }
 
-    private static LivingEntity whoAreYouChasing(LivingEntity p_23640_) {
-        return p_23640_.getBrain().getMemory(MemoryModuleType.INTERACTION_TARGET).get();
+    private static LivingEntity whoAreYouChasing(LivingEntity pKid) {
+        return pKid.getBrain().getMemory(MemoryModuleType.INTERACTION_TARGET).get();
     }
 
-    private static boolean isChasingSomeone(LivingEntity p_23668_) {
-        return p_23668_.getBrain().getMemory(MemoryModuleType.INTERACTION_TARGET).isPresent();
+    private static boolean isChasingSomeone(LivingEntity pKid) {
+        return pKid.getBrain().getMemory(MemoryModuleType.INTERACTION_TARGET).isPresent();
     }
 
-    private static boolean isFriendChasingMe(LivingEntity p_23642_, LivingEntity p_23643_) {
-        return p_23643_.getBrain().getMemory(MemoryModuleType.INTERACTION_TARGET).filter(p_23661_ -> p_23661_ == p_23642_).isPresent();
+    private static boolean isFriendChasingMe(LivingEntity pEntity, LivingEntity pKid) {
+        return pKid.getBrain().getMemory(MemoryModuleType.INTERACTION_TARGET).filter(p_23661_ -> p_23661_ == pEntity).isPresent();
     }
 }

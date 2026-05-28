@@ -38,11 +38,11 @@ public class SlimeBlock extends HalfTransparentBlock {
         }
     }
 
-    private void bounceUp(Entity p_56404_) {
-        Vec3 vec3 = p_56404_.getDeltaMovement();
+    private void bounceUp(Entity pEntity) {
+        Vec3 vec3 = pEntity.getDeltaMovement();
         if (vec3.y < 0.0) {
-            double d0 = p_56404_ instanceof LivingEntity ? 1.0 : 0.8;
-            p_56404_.setDeltaMovement(vec3.x, -vec3.y * d0, vec3.z);
+            double d0 = pEntity instanceof LivingEntity ? 1.0 : 0.8;
+            pEntity.setDeltaMovement(vec3.x, -vec3.y * d0, vec3.z);
         }
     }
 

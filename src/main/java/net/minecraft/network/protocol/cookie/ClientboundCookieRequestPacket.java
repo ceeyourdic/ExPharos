@@ -11,12 +11,12 @@ public record ClientboundCookieRequestPacket(ResourceLocation key) implements Pa
         ClientboundCookieRequestPacket::write, ClientboundCookieRequestPacket::new
     );
 
-    private ClientboundCookieRequestPacket(FriendlyByteBuf p_331420_) {
-        this(p_331420_.readResourceLocation());
+    private ClientboundCookieRequestPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readResourceLocation());
     }
 
-    private void write(FriendlyByteBuf p_330468_) {
-        p_330468_.writeResourceLocation(this.key);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeResourceLocation(this.key);
     }
 
     @Override

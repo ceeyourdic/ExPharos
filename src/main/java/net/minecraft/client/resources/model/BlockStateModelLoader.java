@@ -60,9 +60,9 @@ public class BlockStateModelLoader {
         return map::get;
     }
 
-    public static CompletableFuture<BlockStateModelLoader.LoadedModels> loadBlockStates(UnbakedModel p_375655_, ResourceManager p_378230_, Executor p_378682_) {
+    public static CompletableFuture<BlockStateModelLoader.LoadedModels> loadBlockStates(UnbakedModel pModel, ResourceManager pResourceManager, Executor pExecutor) {
         Function<ResourceLocation, StateDefinition<Block, BlockState>> function = definitionLocationToBlockMapper();
-        return CompletableFuture.<Map<ResourceLocation, List<Resource>>>supplyAsync(() -> BLOCKSTATE_LISTER.listMatchingResourceStacks(p_378230_), p_378682_).thenCompose(p_374696_ -> {
+        return CompletableFuture.<Map<ResourceLocation, List<Resource>>>supplyAsync(() -> BLOCKSTATE_LISTER.listMatchingResourceStacks(pResourceManager), pExecutor).thenCompose(p_374696_ -> {
             List<CompletableFuture<BlockStateModelLoader.LoadedModels>> list = new ArrayList<>(p_374696_.size());
 
             for (Entry<ResourceLocation, List<Resource>> entry : p_374696_.entrySet()) {
@@ -87,13 +87,13 @@ public class BlockStateModelLoader {
                         }
 
                         try {
-                            return loadBlockStateDefinitionStack(resourcelocation, statedefinition, list2, p_375655_);
+                            return loadBlockStateDefinitionStack(resourcelocation, statedefinition, list2, pModel);
                         } catch (Exception exception) {
                             LOGGER.error("Failed to load blockstate definition {}", resourcelocation, exception);
                             return null;
                         }
                     }
-                }, p_378682_));
+                }, pExecutor));
             }
 
             return Util.sequence(list).thenApply(p_374692_ -> {
@@ -111,18 +111,18 @@ public class BlockStateModelLoader {
     }
 
     private static BlockStateModelLoader.LoadedModels loadBlockStateDefinitionStack(
-        ResourceLocation p_367866_,
-        StateDefinition<Block, BlockState> p_361140_,
-        List<BlockStateModelLoader.LoadedBlockModelDefinition> p_367255_,
-        UnbakedModel p_377371_
+        ResourceLocation pId,
+        StateDefinition<Block, BlockState> pStateDefinition,
+        List<BlockStateModelLoader.LoadedBlockModelDefinition> pModelDefinitions,
+        UnbakedModel pModel
     ) {
         Map<ModelResourceLocation, BlockStateModelLoader.LoadedModel> map = new HashMap<>();
 
-        for (BlockStateModelLoader.LoadedBlockModelDefinition blockstatemodelloader$loadedblockmodeldefinition : p_367255_) {
+        for (BlockStateModelLoader.LoadedBlockModelDefinition blockstatemodelloader$loadedblockmodeldefinition : pModelDefinitions) {
             blockstatemodelloader$loadedblockmodeldefinition.contents
-                .instantiate(p_361140_, p_367866_ + "/" + blockstatemodelloader$loadedblockmodeldefinition.source)
+                .instantiate(pStateDefinition, pId + "/" + blockstatemodelloader$loadedblockmodeldefinition.source)
                 .forEach((p_374690_, p_374691_) -> {
-                    ModelResourceLocation modelresourcelocation = BlockModelShaper.stateToModelLocation(p_367866_, p_374690_);
+                    ModelResourceLocation modelresourcelocation = BlockModelShaper.stateToModelLocation(pId, p_374690_);
                     map.put(modelresourcelocation, new BlockStateModelLoader.LoadedModel(p_374690_, p_374691_));
                 });
         }

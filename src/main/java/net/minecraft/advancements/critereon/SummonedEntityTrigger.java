@@ -16,9 +16,9 @@ public class SummonedEntityTrigger extends SimpleCriterionTrigger<SummonedEntity
         return SummonedEntityTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_68257_, Entity p_68258_) {
-        LootContext lootcontext = EntityPredicate.createContext(p_68257_, p_68258_);
-        this.trigger(p_68257_, p_68265_ -> p_68265_.matches(lootcontext));
+    public void trigger(ServerPlayer pPlayer, Entity pEntity) {
+        LootContext lootcontext = EntityPredicate.createContext(pPlayer, pEntity);
+        this.trigger(pPlayer, p_68265_ -> p_68265_.matches(lootcontext));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ContextAwarePredicate> entity)
@@ -31,13 +31,13 @@ public class SummonedEntityTrigger extends SimpleCriterionTrigger<SummonedEntity
                     .apply(p_325253_, SummonedEntityTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<SummonedEntityTrigger.TriggerInstance> summonedEntity(EntityPredicate.Builder p_68276_) {
+        public static Criterion<SummonedEntityTrigger.TriggerInstance> summonedEntity(EntityPredicate.Builder pEntity) {
             return CriteriaTriggers.SUMMONED_ENTITY
-                .createCriterion(new SummonedEntityTrigger.TriggerInstance(Optional.empty(), Optional.of(EntityPredicate.wrap(p_68276_))));
+                .createCriterion(new SummonedEntityTrigger.TriggerInstance(Optional.empty(), Optional.of(EntityPredicate.wrap(pEntity))));
         }
 
-        public boolean matches(LootContext p_68280_) {
-            return this.entity.isEmpty() || this.entity.get().matches(p_68280_);
+        public boolean matches(LootContext pLootContext) {
+            return this.entity.isEmpty() || this.entity.get().matches(pLootContext);
         }
 
         @Override

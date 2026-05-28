@@ -19,35 +19,35 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
     private final RealmsGenericErrorScreen.ErrorMessage lines;
     private MultiLineLabel line2Split = MultiLineLabel.EMPTY;
 
-    public RealmsGenericErrorScreen(RealmsServiceException p_88669_, Screen p_88670_) {
+    public RealmsGenericErrorScreen(RealmsServiceException pServiceException, Screen pNextScreen) {
         super(GameNarrator.NO_TITLE);
-        this.nextScreen = p_88670_;
-        this.lines = errorMessage(p_88669_);
+        this.nextScreen = pNextScreen;
+        this.lines = errorMessage(pServiceException);
     }
 
-    public RealmsGenericErrorScreen(Component p_88672_, Screen p_88673_) {
+    public RealmsGenericErrorScreen(Component pMessage, Screen pNextScreen) {
         super(GameNarrator.NO_TITLE);
-        this.nextScreen = p_88673_;
-        this.lines = errorMessage(p_88672_);
+        this.nextScreen = pNextScreen;
+        this.lines = errorMessage(pMessage);
     }
 
-    public RealmsGenericErrorScreen(Component p_88675_, Component p_88676_, Screen p_88677_) {
+    public RealmsGenericErrorScreen(Component pTitle, Component pLine2, Screen pMessage) {
         super(GameNarrator.NO_TITLE);
-        this.nextScreen = p_88677_;
-        this.lines = errorMessage(p_88675_, p_88676_);
+        this.nextScreen = pMessage;
+        this.lines = errorMessage(pTitle, pLine2);
     }
 
-    private static RealmsGenericErrorScreen.ErrorMessage errorMessage(RealmsServiceException p_288965_) {
-        RealmsError realmserror = p_288965_.realmsError;
+    private static RealmsGenericErrorScreen.ErrorMessage errorMessage(RealmsServiceException pException) {
+        RealmsError realmserror = pException.realmsError;
         return errorMessage(Component.translatable("mco.errorMessage.realmsService.realmsError", realmserror.errorCode()), realmserror.errorMessage());
     }
 
-    private static RealmsGenericErrorScreen.ErrorMessage errorMessage(Component p_289003_) {
-        return errorMessage(Component.translatable("mco.errorMessage.generic"), p_289003_);
+    private static RealmsGenericErrorScreen.ErrorMessage errorMessage(Component pMessage) {
+        return errorMessage(Component.translatable("mco.errorMessage.generic"), pMessage);
     }
 
-    private static RealmsGenericErrorScreen.ErrorMessage errorMessage(Component p_289010_, Component p_289015_) {
-        return new RealmsGenericErrorScreen.ErrorMessage(p_289010_, p_289015_);
+    private static RealmsGenericErrorScreen.ErrorMessage errorMessage(Component pTitle, Component pMessage) {
+        return new RealmsGenericErrorScreen.ErrorMessage(pTitle, pMessage);
     }
 
     @Override

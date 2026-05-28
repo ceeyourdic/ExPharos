@@ -14,8 +14,8 @@ public class BreezeWindCharge extends AbstractWindCharge {
         super(p_328102_, p_329873_);
     }
 
-    public BreezeWindCharge(Breeze p_330729_, Level p_329490_) {
-        super(EntityType.BREEZE_WIND_CHARGE, p_329490_, p_330729_, p_330729_.getX(), p_330729_.getFiringYPosition(), p_330729_.getZ());
+    public BreezeWindCharge(Breeze pBreeze, Level pLevel) {
+        super(EntityType.BREEZE_WIND_CHARGE, pLevel, pBreeze, pBreeze.getX(), pBreeze.getFiringYPosition(), pBreeze.getZ());
     }
 
     @Override

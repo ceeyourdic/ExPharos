@@ -17,9 +17,9 @@ public class TelemetryEventLog implements AutoCloseable {
     private final JsonEventLog<TelemetryEventInstance> log;
     private final ConsecutiveExecutor consecutiveExecutor;
 
-    public TelemetryEventLog(FileChannel p_261731_, Executor p_262010_) {
-        this.log = new JsonEventLog<>(TelemetryEventInstance.CODEC, p_261731_);
-        this.consecutiveExecutor = new ConsecutiveExecutor(p_262010_, "telemetry-event-log");
+    public TelemetryEventLog(FileChannel pChannel, Executor pDispatcher) {
+        this.log = new JsonEventLog<>(TelemetryEventInstance.CODEC, pChannel);
+        this.consecutiveExecutor = new ConsecutiveExecutor(pDispatcher, "telemetry-event-log");
     }
 
     public TelemetryEventLogger logger() {

@@ -27,9 +27,9 @@ class SwitchGrid {
     private final List<SwitchGrid.LabeledSwitch> switches;
     private final Layout layout;
 
-    SwitchGrid(List<SwitchGrid.LabeledSwitch> p_268257_, Layout p_377885_) {
-        this.switches = p_268257_;
-        this.layout = p_377885_;
+    SwitchGrid(List<SwitchGrid.LabeledSwitch> pSwitches, Layout pLayout) {
+        this.switches = pSwitches;
+        this.layout = pLayout;
     }
 
     public Layout layout() {
@@ -40,8 +40,8 @@ class SwitchGrid {
         this.switches.forEach(SwitchGrid.LabeledSwitch::refreshState);
     }
 
-    public static SwitchGrid.Builder builder(int p_268344_) {
-        return new SwitchGrid.Builder(p_268344_);
+    public static SwitchGrid.Builder builder(int pWidth) {
+        return new SwitchGrid.Builder(pWidth);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -53,27 +53,27 @@ class SwitchGrid {
         int rowCount;
         Optional<SwitchGrid.InfoUnderneathSettings> infoUnderneath = Optional.empty();
 
-        public Builder(int p_267987_) {
-            this.width = p_267987_;
+        public Builder(int pWidth) {
+            this.width = pWidth;
         }
 
         void increaseRow() {
             this.rowCount++;
         }
 
-        public SwitchGrid.SwitchBuilder addSwitch(Component p_268004_, BooleanSupplier p_268017_, Consumer<Boolean> p_268320_) {
-            SwitchGrid.SwitchBuilder switchgrid$switchbuilder = new SwitchGrid.SwitchBuilder(p_268004_, p_268017_, p_268320_, 44);
+        public SwitchGrid.SwitchBuilder addSwitch(Component pLabel, BooleanSupplier pStateSupplier, Consumer<Boolean> pOnClicked) {
+            SwitchGrid.SwitchBuilder switchgrid$switchbuilder = new SwitchGrid.SwitchBuilder(pLabel, pStateSupplier, pOnClicked, 44);
             this.switchBuilders.add(switchgrid$switchbuilder);
             return switchgrid$switchbuilder;
         }
 
-        public SwitchGrid.Builder withPaddingLeft(int p_267998_) {
-            this.paddingLeft = p_267998_;
+        public SwitchGrid.Builder withPaddingLeft(int pPaddingLeft) {
+            this.paddingLeft = pPaddingLeft;
             return this;
         }
 
-        public SwitchGrid.Builder withRowSpacing(int p_270750_) {
-            this.rowSpacing = p_270750_;
+        public SwitchGrid.Builder withRowSpacing(int pRowSpacing) {
+            this.rowSpacing = pRowSpacing;
             return this;
         }
 
@@ -94,8 +94,8 @@ class SwitchGrid {
             return switchgrid;
         }
 
-        public SwitchGrid.Builder withInfoUnderneath(int p_270730_, boolean p_270594_) {
-            this.infoUnderneath = Optional.of(new SwitchGrid.InfoUnderneathSettings(p_270730_, p_270594_));
+        public SwitchGrid.Builder withInfoUnderneath(int pMaxInfoRows, boolean pAlwaysMaxHeight) {
+            this.infoUnderneath = Optional.of(new SwitchGrid.InfoUnderneathSettings(pMaxInfoRows, pAlwaysMaxHeight));
             return this;
         }
     }
@@ -125,28 +125,28 @@ class SwitchGrid {
         private BooleanSupplier isActiveCondition;
         private final int buttonWidth;
 
-        SwitchBuilder(Component p_268282_, BooleanSupplier p_268294_, Consumer<Boolean> p_268132_, int p_268250_) {
-            this.label = p_268282_;
-            this.stateSupplier = p_268294_;
-            this.onClicked = p_268132_;
-            this.buttonWidth = p_268250_;
+        SwitchBuilder(Component pLabel, BooleanSupplier pStateSupplier, Consumer<Boolean> pOnClicked, int pButtonWidth) {
+            this.label = pLabel;
+            this.stateSupplier = pStateSupplier;
+            this.onClicked = pOnClicked;
+            this.buttonWidth = pButtonWidth;
         }
 
-        public SwitchGrid.SwitchBuilder withIsActiveCondition(BooleanSupplier p_267966_) {
-            this.isActiveCondition = p_267966_;
+        public SwitchGrid.SwitchBuilder withIsActiveCondition(BooleanSupplier pIsActiveCondition) {
+            this.isActiveCondition = pIsActiveCondition;
             return this;
         }
 
-        public SwitchGrid.SwitchBuilder withInfo(Component p_268240_) {
-            this.info = p_268240_;
+        public SwitchGrid.SwitchBuilder withInfo(Component pInfo) {
+            this.info = pInfo;
             return this;
         }
 
-        SwitchGrid.LabeledSwitch build(SwitchGrid.Builder p_270513_, GridLayout p_271004_, int p_270506_) {
-            p_270513_.increaseRow();
+        SwitchGrid.LabeledSwitch build(SwitchGrid.Builder pBuilder, GridLayout pGridLayout, int pColumn) {
+            pBuilder.increaseRow();
             StringWidget stringwidget = new StringWidget(this.label, Minecraft.getInstance().font).alignLeft();
-            p_271004_.addChild(stringwidget, p_270513_.rowCount, p_270506_, p_271004_.newCellSettings().align(0.0F, 0.5F).paddingLeft(p_270513_.paddingLeft));
-            Optional<SwitchGrid.InfoUnderneathSettings> optional = p_270513_.infoUnderneath;
+            pGridLayout.addChild(stringwidget, pBuilder.rowCount, pColumn, pGridLayout.newCellSettings().align(0.0F, 0.5F).paddingLeft(pBuilder.paddingLeft));
+            Optional<SwitchGrid.InfoUnderneathSettings> optional = pBuilder.infoUnderneath;
             CycleButton.Builder<Boolean> builder = CycleButton.onOffBuilder(this.stateSupplier.getAsBoolean());
             builder.displayOnlyValue();
             boolean flag = this.info != null && optional.isEmpty();
@@ -168,19 +168,19 @@ class SwitchGrid {
                 cyclebutton.active = this.isActiveCondition.getAsBoolean();
             }
 
-            p_271004_.addChild(cyclebutton, p_270513_.rowCount, p_270506_ + 1, p_271004_.newCellSettings().alignHorizontallyRight());
+            pGridLayout.addChild(cyclebutton, pBuilder.rowCount, pColumn + 1, pGridLayout.newCellSettings().alignHorizontallyRight());
             if (this.info != null) {
                 optional.ifPresent(
                     p_269649_ -> {
                         Component component = this.info.copy().withStyle(ChatFormatting.GRAY);
                         Font font = Minecraft.getInstance().font;
                         MultiLineTextWidget multilinetextwidget = new MultiLineTextWidget(component, font);
-                        multilinetextwidget.setMaxWidth(p_270513_.width - p_270513_.paddingLeft - this.buttonWidth);
+                        multilinetextwidget.setMaxWidth(pBuilder.width - pBuilder.paddingLeft - this.buttonWidth);
                         multilinetextwidget.setMaxRows(p_269649_.maxInfoRows());
-                        p_270513_.increaseRow();
+                        pBuilder.increaseRow();
                         int i = p_269649_.alwaysMaxHeight ? 9 * p_269649_.maxInfoRows - multilinetextwidget.getHeight() : 0;
-                        p_271004_.addChild(
-                            multilinetextwidget, p_270513_.rowCount, p_270506_, p_271004_.newCellSettings().paddingTop(-p_270513_.rowSpacing).paddingBottom(i)
+                        pGridLayout.addChild(
+                            multilinetextwidget, pBuilder.rowCount, pColumn, pGridLayout.newCellSettings().paddingTop(-pBuilder.rowSpacing).paddingBottom(i)
                         );
                     }
                 );

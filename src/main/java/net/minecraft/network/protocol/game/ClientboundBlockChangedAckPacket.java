@@ -10,12 +10,12 @@ public record ClientboundBlockChangedAckPacket(int sequence) implements Packet<C
         ClientboundBlockChangedAckPacket::write, ClientboundBlockChangedAckPacket::new
     );
 
-    private ClientboundBlockChangedAckPacket(FriendlyByteBuf p_237582_) {
-        this(p_237582_.readVarInt());
+    private ClientboundBlockChangedAckPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readVarInt());
     }
 
-    private void write(FriendlyByteBuf p_237584_) {
-        p_237584_.writeVarInt(this.sequence);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.sequence);
     }
 
     @Override

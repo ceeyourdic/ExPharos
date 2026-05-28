@@ -33,49 +33,49 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
         return new MessageArgument();
     }
 
-    public static Component getMessage(CommandContext<CommandSourceStack> p_96836_, String p_96837_) throws CommandSyntaxException {
-        MessageArgument.Message messageargument$message = p_96836_.getArgument(p_96837_, MessageArgument.Message.class);
-        return messageargument$message.resolveComponent(p_96836_.getSource());
+    public static Component getMessage(CommandContext<CommandSourceStack> pContext, String pName) throws CommandSyntaxException {
+        MessageArgument.Message messageargument$message = pContext.getArgument(pName, MessageArgument.Message.class);
+        return messageargument$message.resolveComponent(pContext.getSource());
     }
 
-    public static void resolveChatMessage(CommandContext<CommandSourceStack> p_249433_, String p_248718_, Consumer<PlayerChatMessage> p_249460_) throws CommandSyntaxException {
-        MessageArgument.Message messageargument$message = p_249433_.getArgument(p_248718_, MessageArgument.Message.class);
-        CommandSourceStack commandsourcestack = p_249433_.getSource();
+    public static void resolveChatMessage(CommandContext<CommandSourceStack> pContext, String pKey, Consumer<PlayerChatMessage> pCallback) throws CommandSyntaxException {
+        MessageArgument.Message messageargument$message = pContext.getArgument(pKey, MessageArgument.Message.class);
+        CommandSourceStack commandsourcestack = pContext.getSource();
         Component component = messageargument$message.resolveComponent(commandsourcestack);
         CommandSigningContext commandsigningcontext = commandsourcestack.getSigningContext();
-        PlayerChatMessage playerchatmessage = commandsigningcontext.getArgument(p_248718_);
+        PlayerChatMessage playerchatmessage = commandsigningcontext.getArgument(pKey);
         if (playerchatmessage != null) {
-            resolveSignedMessage(p_249460_, commandsourcestack, playerchatmessage.withUnsignedContent(component));
+            resolveSignedMessage(pCallback, commandsourcestack, playerchatmessage.withUnsignedContent(component));
         } else {
-            resolveDisguisedMessage(p_249460_, commandsourcestack, PlayerChatMessage.system(messageargument$message.text).withUnsignedContent(component));
+            resolveDisguisedMessage(pCallback, commandsourcestack, PlayerChatMessage.system(messageargument$message.text).withUnsignedContent(component));
         }
     }
 
-    private static void resolveSignedMessage(Consumer<PlayerChatMessage> p_250000_, CommandSourceStack p_252335_, PlayerChatMessage p_249420_) {
-        MinecraftServer minecraftserver = p_252335_.getServer();
-        CompletableFuture<FilteredText> completablefuture = filterPlainText(p_252335_, p_249420_);
-        Component component = minecraftserver.getChatDecorator().decorate(p_252335_.getPlayer(), p_249420_.decoratedContent());
-        p_252335_.getChatMessageChainer().append(completablefuture, p_296325_ -> {
-            PlayerChatMessage playerchatmessage = p_249420_.withUnsignedContent(component).filter(p_296325_.mask());
-            p_250000_.accept(playerchatmessage);
+    private static void resolveSignedMessage(Consumer<PlayerChatMessage> pCallback, CommandSourceStack pSource, PlayerChatMessage pMessage) {
+        MinecraftServer minecraftserver = pSource.getServer();
+        CompletableFuture<FilteredText> completablefuture = filterPlainText(pSource, pMessage);
+        Component component = minecraftserver.getChatDecorator().decorate(pSource.getPlayer(), pMessage.decoratedContent());
+        pSource.getChatMessageChainer().append(completablefuture, p_296325_ -> {
+            PlayerChatMessage playerchatmessage = pMessage.withUnsignedContent(component).filter(p_296325_.mask());
+            pCallback.accept(playerchatmessage);
         });
     }
 
-    private static void resolveDisguisedMessage(Consumer<PlayerChatMessage> p_249162_, CommandSourceStack p_248759_, PlayerChatMessage p_252332_) {
-        ChatDecorator chatdecorator = p_248759_.getServer().getChatDecorator();
-        Component component = chatdecorator.decorate(p_248759_.getPlayer(), p_252332_.decoratedContent());
-        p_249162_.accept(p_252332_.withUnsignedContent(component));
+    private static void resolveDisguisedMessage(Consumer<PlayerChatMessage> pCallback, CommandSourceStack pSource, PlayerChatMessage pMessage) {
+        ChatDecorator chatdecorator = pSource.getServer().getChatDecorator();
+        Component component = chatdecorator.decorate(pSource.getPlayer(), pMessage.decoratedContent());
+        pCallback.accept(pMessage.withUnsignedContent(component));
     }
 
-    private static CompletableFuture<FilteredText> filterPlainText(CommandSourceStack p_252063_, PlayerChatMessage p_251184_) {
-        ServerPlayer serverplayer = p_252063_.getPlayer();
-        return serverplayer != null && p_251184_.hasSignatureFrom(serverplayer.getUUID())
-            ? serverplayer.getTextFilter().processStreamMessage(p_251184_.signedContent())
-            : CompletableFuture.completedFuture(FilteredText.passThrough(p_251184_.signedContent()));
+    private static CompletableFuture<FilteredText> filterPlainText(CommandSourceStack pSource, PlayerChatMessage pMessage) {
+        ServerPlayer serverplayer = pSource.getPlayer();
+        return serverplayer != null && pMessage.hasSignatureFrom(serverplayer.getUUID())
+            ? serverplayer.getTextFilter().processStreamMessage(pMessage.signedContent())
+            : CompletableFuture.completedFuture(FilteredText.passThrough(pMessage.signedContent()));
     }
 
-    public MessageArgument.Message parse(StringReader p_96834_) throws CommandSyntaxException {
-        return MessageArgument.Message.parseText(p_96834_, true);
+    public MessageArgument.Message parse(StringReader pReader) throws CommandSyntaxException {
+        return MessageArgument.Message.parseText(pReader, true);
     }
 
     public <S> MessageArgument.Message parse(StringReader p_345550_, @Nullable S p_345556_) throws CommandSyntaxException {
@@ -88,17 +88,17 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
     }
 
     public static record Message(String text, MessageArgument.Part[] parts) {
-        Component resolveComponent(CommandSourceStack p_232197_) throws CommandSyntaxException {
-            return this.toComponent(p_232197_, EntitySelectorParser.allowSelectors(p_232197_));
+        Component resolveComponent(CommandSourceStack pSource) throws CommandSyntaxException {
+            return this.toComponent(pSource, EntitySelectorParser.allowSelectors(pSource));
         }
 
-        public Component toComponent(CommandSourceStack p_96850_, boolean p_96851_) throws CommandSyntaxException {
-            if (this.parts.length != 0 && p_96851_) {
+        public Component toComponent(CommandSourceStack pSource, boolean pAllowSelectors) throws CommandSyntaxException {
+            if (this.parts.length != 0 && pAllowSelectors) {
                 MutableComponent mutablecomponent = Component.literal(this.text.substring(0, this.parts[0].start()));
                 int i = this.parts[0].start();
 
                 for (MessageArgument.Part messageargument$part : this.parts) {
-                    Component component = messageargument$part.toComponent(p_96850_);
+                    Component component = messageargument$part.toComponent(pSource);
                     if (i < messageargument$part.start()) {
                         mutablecomponent.append(this.text.substring(i, messageargument$part.start()));
                     }
@@ -117,31 +117,31 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
             }
         }
 
-        public static MessageArgument.Message parseText(StringReader p_96847_, boolean p_96848_) throws CommandSyntaxException {
-            if (p_96847_.getRemainingLength() > 256) {
-                throw MessageArgument.TOO_LONG.create(p_96847_.getRemainingLength(), 256);
+        public static MessageArgument.Message parseText(StringReader pReader, boolean pAllowSelectors) throws CommandSyntaxException {
+            if (pReader.getRemainingLength() > 256) {
+                throw MessageArgument.TOO_LONG.create(pReader.getRemainingLength(), 256);
             } else {
-                String s = p_96847_.getRemaining();
-                if (!p_96848_) {
-                    p_96847_.setCursor(p_96847_.getTotalLength());
+                String s = pReader.getRemaining();
+                if (!pAllowSelectors) {
+                    pReader.setCursor(pReader.getTotalLength());
                     return new MessageArgument.Message(s, new MessageArgument.Part[0]);
                 } else {
                     List<MessageArgument.Part> list = Lists.newArrayList();
-                    int i = p_96847_.getCursor();
+                    int i = pReader.getCursor();
 
                     while (true) {
                         int j;
                         EntitySelector entityselector;
                         while (true) {
-                            if (!p_96847_.canRead()) {
+                            if (!pReader.canRead()) {
                                 return new MessageArgument.Message(s, list.toArray(new MessageArgument.Part[0]));
                             }
 
-                            if (p_96847_.peek() == '@') {
-                                j = p_96847_.getCursor();
+                            if (pReader.peek() == '@') {
+                                j = pReader.getCursor();
 
                                 try {
-                                    EntitySelectorParser entityselectorparser = new EntitySelectorParser(p_96847_, true);
+                                    EntitySelectorParser entityselectorparser = new EntitySelectorParser(pReader, true);
                                     entityselector = entityselectorparser.parse();
                                     break;
                                 } catch (CommandSyntaxException commandsyntaxexception) {
@@ -150,14 +150,14 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
                                         throw commandsyntaxexception;
                                     }
 
-                                    p_96847_.setCursor(j + 1);
+                                    pReader.setCursor(j + 1);
                                 }
                             } else {
-                                p_96847_.skip();
+                                pReader.skip();
                             }
                         }
 
-                        list.add(new MessageArgument.Part(j - i, p_96847_.getCursor() - i, entityselector));
+                        list.add(new MessageArgument.Part(j - i, pReader.getCursor() - i, entityselector));
                     }
                 }
             }
@@ -165,8 +165,8 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
     }
 
     public static record Part(int start, int end, EntitySelector selector) {
-        public Component toComponent(CommandSourceStack p_96861_) throws CommandSyntaxException {
-            return EntitySelector.joinNames(this.selector.findEntities(p_96861_));
+        public Component toComponent(CommandSourceStack pSource) throws CommandSyntaxException {
+            return EntitySelector.joinNames(this.selector.findEntities(pSource));
         }
     }
 }

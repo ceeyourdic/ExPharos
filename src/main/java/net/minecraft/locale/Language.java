@@ -66,20 +66,20 @@ public abstract class Language {
         };
     }
 
-    private static void parseTranslations(BiConsumer<String, String> p_282031_, String p_283638_) {
-        try (InputStream inputstream = Language.class.getResourceAsStream(p_283638_)) {
-            loadFromJson(inputstream, p_282031_);
+    private static void parseTranslations(BiConsumer<String, String> pOutput, String pLanguagePath) {
+        try (InputStream inputstream = Language.class.getResourceAsStream(pLanguagePath)) {
+            loadFromJson(inputstream, pOutput);
         } catch (JsonParseException | IOException ioexception) {
-            LOGGER.error("Couldn't read strings from {}", p_283638_, ioexception);
+            LOGGER.error("Couldn't read strings from {}", pLanguagePath, ioexception);
         }
     }
 
-    public static void loadFromJson(InputStream p_128109_, BiConsumer<String, String> p_128110_) {
-        JsonObject jsonobject = GSON.fromJson(new InputStreamReader(p_128109_, StandardCharsets.UTF_8), JsonObject.class);
+    public static void loadFromJson(InputStream pStream, BiConsumer<String, String> pOutput) {
+        JsonObject jsonobject = GSON.fromJson(new InputStreamReader(pStream, StandardCharsets.UTF_8), JsonObject.class);
 
         for (Entry<String, JsonElement> entry : jsonobject.entrySet()) {
             String s = UNSUPPORTED_FORMAT_PATTERN.matcher(GsonHelper.convertToString(entry.getValue(), entry.getKey())).replaceAll("%$1s");
-            p_128110_.accept(entry.getKey(), s);
+            pOutput.accept(entry.getKey(), s);
         }
     }
 
@@ -87,23 +87,23 @@ public abstract class Language {
         return instance;
     }
 
-    public static void inject(Language p_128115_) {
-        instance = p_128115_;
+    public static void inject(Language pInstance) {
+        instance = pInstance;
     }
 
-    public String getOrDefault(String p_128111_) {
-        return this.getOrDefault(p_128111_, p_128111_);
+    public String getOrDefault(String pId) {
+        return this.getOrDefault(pId, pId);
     }
 
-    public abstract String getOrDefault(String p_265702_, String p_265599_);
+    public abstract String getOrDefault(String pKey, String pDefaultValue);
 
-    public abstract boolean has(String p_128117_);
+    public abstract boolean has(String pId);
 
     public abstract boolean isDefaultRightToLeft();
 
-    public abstract FormattedCharSequence getVisualOrder(FormattedText p_128116_);
+    public abstract FormattedCharSequence getVisualOrder(FormattedText pText);
 
-    public List<FormattedCharSequence> getVisualOrder(List<FormattedText> p_128113_) {
-        return p_128113_.stream().map(this::getVisualOrder).collect(ImmutableList.toImmutableList());
+    public List<FormattedCharSequence> getVisualOrder(List<FormattedText> pText) {
+        return pText.stream().map(this::getVisualOrder).collect(ImmutableList.toImmutableList());
     }
 }

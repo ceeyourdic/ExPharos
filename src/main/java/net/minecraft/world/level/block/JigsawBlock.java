@@ -33,26 +33,26 @@ public class JigsawBlock extends Block implements EntityBlock, GameMasterBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_54244_) {
-        p_54244_.add(ORIENTATION);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(ORIENTATION);
     }
 
     @Override
-    protected BlockState rotate(BlockState p_54241_, Rotation p_54242_) {
-        return p_54241_.setValue(ORIENTATION, p_54242_.rotation().rotate(p_54241_.getValue(ORIENTATION)));
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(ORIENTATION, pRotation.rotation().rotate(pState.getValue(ORIENTATION)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_54238_, Mirror p_54239_) {
-        return p_54238_.setValue(ORIENTATION, p_54239_.rotation().rotate(p_54238_.getValue(ORIENTATION)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.setValue(ORIENTATION, pMirror.rotation().rotate(pState.getValue(ORIENTATION)));
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_54227_) {
-        Direction direction = p_54227_.getClickedFace();
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        Direction direction = pContext.getClickedFace();
         Direction direction1;
         if (direction.getAxis() == Direction.Axis.Y) {
-            direction1 = p_54227_.getHorizontalDirection().getOpposite();
+            direction1 = pContext.getHorizontalDirection().getOpposite();
         } else {
             direction1 = Direction.UP;
         }
@@ -76,21 +76,21 @@ public class JigsawBlock extends Block implements EntityBlock, GameMasterBlock {
         }
     }
 
-    public static boolean canAttach(StructureTemplate.JigsawBlockInfo p_368058_, StructureTemplate.JigsawBlockInfo p_367580_) {
-        Direction direction = getFrontFacing(p_368058_.info().state());
-        Direction direction1 = getFrontFacing(p_367580_.info().state());
-        Direction direction2 = getTopFacing(p_368058_.info().state());
-        Direction direction3 = getTopFacing(p_367580_.info().state());
-        JigsawBlockEntity.JointType jigsawblockentity$jointtype = p_368058_.jointType();
+    public static boolean canAttach(StructureTemplate.JigsawBlockInfo pParent, StructureTemplate.JigsawBlockInfo pChild) {
+        Direction direction = getFrontFacing(pParent.info().state());
+        Direction direction1 = getFrontFacing(pChild.info().state());
+        Direction direction2 = getTopFacing(pParent.info().state());
+        Direction direction3 = getTopFacing(pChild.info().state());
+        JigsawBlockEntity.JointType jigsawblockentity$jointtype = pParent.jointType();
         boolean flag = jigsawblockentity$jointtype == JigsawBlockEntity.JointType.ROLLABLE;
-        return direction == direction1.getOpposite() && (flag || direction2 == direction3) && p_368058_.target().equals(p_367580_.name());
+        return direction == direction1.getOpposite() && (flag || direction2 == direction3) && pParent.target().equals(pChild.name());
     }
 
-    public static Direction getFrontFacing(BlockState p_54251_) {
-        return p_54251_.getValue(ORIENTATION).front();
+    public static Direction getFrontFacing(BlockState pState) {
+        return pState.getValue(ORIENTATION).front();
     }
 
-    public static Direction getTopFacing(BlockState p_54253_) {
-        return p_54253_.getValue(ORIENTATION).top();
+    public static Direction getTopFacing(BlockState pState) {
+        return pState.getValue(ORIENTATION).top();
     }
 }

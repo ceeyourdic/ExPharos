@@ -30,7 +30,7 @@ public class DragonEggBlock extends FallingBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_52930_, BlockGetter p_52931_, BlockPos p_52932_, CollisionContext p_52933_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
@@ -41,34 +41,34 @@ public class DragonEggBlock extends FallingBlock {
     }
 
     @Override
-    protected void attack(BlockState p_52918_, Level p_52919_, BlockPos p_52920_, Player p_52921_) {
-        this.teleport(p_52918_, p_52919_, p_52920_);
+    protected void attack(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer) {
+        this.teleport(pState, pLevel, pPos);
     }
 
-    private void teleport(BlockState p_52936_, Level p_52937_, BlockPos p_52938_) {
-        WorldBorder worldborder = p_52937_.getWorldBorder();
+    private void teleport(BlockState pState, Level pLevel, BlockPos pPos) {
+        WorldBorder worldborder = pLevel.getWorldBorder();
 
         for (int i = 0; i < 1000; i++) {
-            BlockPos blockpos = p_52938_.offset(
-                p_52937_.random.nextInt(16) - p_52937_.random.nextInt(16),
-                p_52937_.random.nextInt(8) - p_52937_.random.nextInt(8),
-                p_52937_.random.nextInt(16) - p_52937_.random.nextInt(16)
+            BlockPos blockpos = pPos.offset(
+                pLevel.random.nextInt(16) - pLevel.random.nextInt(16),
+                pLevel.random.nextInt(8) - pLevel.random.nextInt(8),
+                pLevel.random.nextInt(16) - pLevel.random.nextInt(16)
             );
-            if (p_52937_.getBlockState(blockpos).isAir() && worldborder.isWithinBounds(blockpos)) {
-                if (p_52937_.isClientSide) {
+            if (pLevel.getBlockState(blockpos).isAir() && worldborder.isWithinBounds(blockpos)) {
+                if (pLevel.isClientSide) {
                     for (int j = 0; j < 128; j++) {
-                        double d0 = p_52937_.random.nextDouble();
-                        float f = (p_52937_.random.nextFloat() - 0.5F) * 0.2F;
-                        float f1 = (p_52937_.random.nextFloat() - 0.5F) * 0.2F;
-                        float f2 = (p_52937_.random.nextFloat() - 0.5F) * 0.2F;
-                        double d1 = Mth.lerp(d0, (double)blockpos.getX(), (double)p_52938_.getX()) + (p_52937_.random.nextDouble() - 0.5) + 0.5;
-                        double d2 = Mth.lerp(d0, (double)blockpos.getY(), (double)p_52938_.getY()) + p_52937_.random.nextDouble() - 0.5;
-                        double d3 = Mth.lerp(d0, (double)blockpos.getZ(), (double)p_52938_.getZ()) + (p_52937_.random.nextDouble() - 0.5) + 0.5;
-                        p_52937_.addParticle(ParticleTypes.PORTAL, d1, d2, d3, (double)f, (double)f1, (double)f2);
+                        double d0 = pLevel.random.nextDouble();
+                        float f = (pLevel.random.nextFloat() - 0.5F) * 0.2F;
+                        float f1 = (pLevel.random.nextFloat() - 0.5F) * 0.2F;
+                        float f2 = (pLevel.random.nextFloat() - 0.5F) * 0.2F;
+                        double d1 = Mth.lerp(d0, (double)blockpos.getX(), (double)pPos.getX()) + (pLevel.random.nextDouble() - 0.5) + 0.5;
+                        double d2 = Mth.lerp(d0, (double)blockpos.getY(), (double)pPos.getY()) + pLevel.random.nextDouble() - 0.5;
+                        double d3 = Mth.lerp(d0, (double)blockpos.getZ(), (double)pPos.getZ()) + (pLevel.random.nextDouble() - 0.5) + 0.5;
+                        pLevel.addParticle(ParticleTypes.PORTAL, d1, d2, d3, (double)f, (double)f1, (double)f2);
                     }
                 } else {
-                    p_52937_.setBlock(blockpos, p_52936_, 2);
-                    p_52937_.removeBlock(p_52938_, false);
+                    pLevel.setBlock(blockpos, pState, 2);
+                    pLevel.removeBlock(pPos, false);
                 }
 
                 return;

@@ -16,34 +16,34 @@ public class FlyStraightTowardsParticle extends TextureSheetParticle {
     private final int endColor;
 
     FlyStraightTowardsParticle(
-        ClientLevel p_331392_,
-        double p_328454_,
-        double p_335936_,
-        double p_334729_,
-        double p_335747_,
-        double p_333574_,
-        double p_334122_,
-        int p_328231_,
-        int p_329614_
+        ClientLevel pLevel,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed,
+        int pStartColor,
+        int pEndColor
     ) {
-        super(p_331392_, p_328454_, p_335936_, p_334729_);
-        this.xd = p_335747_;
-        this.yd = p_333574_;
-        this.zd = p_334122_;
-        this.xStart = p_328454_;
-        this.yStart = p_335936_;
-        this.zStart = p_334729_;
-        this.xo = p_328454_ + p_335747_;
-        this.yo = p_335936_ + p_333574_;
-        this.zo = p_334729_ + p_334122_;
+        super(pLevel, pX, pY, pZ);
+        this.xd = pXSpeed;
+        this.yd = pYSpeed;
+        this.zd = pZSpeed;
+        this.xStart = pX;
+        this.yStart = pY;
+        this.zStart = pZ;
+        this.xo = pX + pXSpeed;
+        this.yo = pY + pYSpeed;
+        this.zo = pZ + pZSpeed;
         this.x = this.xo;
         this.y = this.yo;
         this.z = this.zo;
         this.quadSize = 0.1F * (this.random.nextFloat() * 0.5F + 0.2F);
         this.hasPhysics = false;
         this.lifetime = (int)(Math.random() * 5.0) + 25;
-        this.startColor = p_328231_;
-        this.endColor = p_329614_;
+        this.startColor = pStartColor;
+        this.endColor = pEndColor;
     }
 
     @Override
@@ -83,8 +83,8 @@ public class FlyStraightTowardsParticle extends TextureSheetParticle {
     public static class OminousSpawnProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public OminousSpawnProvider(SpriteSet p_327679_) {
-            this.sprite = p_327679_;
+        public OminousSpawnProvider(SpriteSet pSprite) {
+            this.sprite = pSprite;
         }
 
         public Particle createParticle(

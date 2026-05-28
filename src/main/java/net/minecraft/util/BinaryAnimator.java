@@ -6,18 +6,18 @@ public class BinaryAnimator {
     private int ticks;
     private int ticksOld;
 
-    public BinaryAnimator(int p_368328_, BinaryAnimator.EasingFunction p_370148_) {
-        this.animationLength = p_368328_;
-        this.easingFunction = p_370148_;
+    public BinaryAnimator(int pAnimationLength, BinaryAnimator.EasingFunction pEasingFunction) {
+        this.animationLength = pAnimationLength;
+        this.easingFunction = pEasingFunction;
     }
 
-    public BinaryAnimator(int p_365144_) {
-        this(p_365144_, p_364253_ -> p_364253_);
+    public BinaryAnimator(int pAnimationLength) {
+        this(pAnimationLength, p_364253_ -> p_364253_);
     }
 
-    public void tick(boolean p_364056_) {
+    public void tick(boolean pCondition) {
         this.ticksOld = this.ticks;
-        if (p_364056_) {
+        if (pCondition) {
             if (this.ticks < this.animationLength) {
                 this.ticks++;
             }
@@ -26,12 +26,12 @@ public class BinaryAnimator {
         }
     }
 
-    public float getFactor(float p_364595_) {
-        float f = Mth.lerp(p_364595_, (float)this.ticksOld, (float)this.ticks) / (float)this.animationLength;
+    public float getFactor(float pPartialTick) {
+        float f = Mth.lerp(pPartialTick, (float)this.ticksOld, (float)this.ticks) / (float)this.animationLength;
         return this.easingFunction.apply(f);
     }
 
     public interface EasingFunction {
-        float apply(float p_363249_);
+        float apply(float pTicks);
     }
 }

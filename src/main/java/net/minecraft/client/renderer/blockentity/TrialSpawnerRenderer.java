@@ -15,8 +15,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class TrialSpawnerRenderer implements BlockEntityRenderer<TrialSpawnerBlockEntity> {
     private final EntityRenderDispatcher entityRenderer;
 
-    public TrialSpawnerRenderer(BlockEntityRendererProvider.Context p_311333_) {
-        this.entityRenderer = p_311333_.getEntityRenderer();
+    public TrialSpawnerRenderer(BlockEntityRendererProvider.Context pContext) {
+        this.entityRenderer = pContext.getEntityRenderer();
     }
 
     public void render(TrialSpawnerBlockEntity p_311991_, float p_312826_, PoseStack p_310994_, MultiBufferSource p_310042_, int p_311268_, int p_312508_) {

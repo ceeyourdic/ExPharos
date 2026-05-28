@@ -23,22 +23,22 @@ public class CanyonCarverConfiguration extends CarverConfiguration {
     public final CanyonCarverConfiguration.CanyonShapeConfiguration shape;
 
     public CanyonCarverConfiguration(
-        float p_224788_,
-        HeightProvider p_224789_,
-        FloatProvider p_224790_,
-        VerticalAnchor p_224791_,
-        CarverDebugSettings p_224792_,
-        HolderSet<Block> p_224793_,
-        FloatProvider p_224794_,
-        CanyonCarverConfiguration.CanyonShapeConfiguration p_224795_
+        float pProbability,
+        HeightProvider pY,
+        FloatProvider pYScale,
+        VerticalAnchor pLavaLevel,
+        CarverDebugSettings pDebugSettings,
+        HolderSet<Block> pReplaceable,
+        FloatProvider pVerticalRotation,
+        CanyonCarverConfiguration.CanyonShapeConfiguration pShape
     ) {
-        super(p_224788_, p_224789_, p_224790_, p_224791_, p_224792_, p_224793_);
-        this.verticalRotation = p_224794_;
-        this.shape = p_224795_;
+        super(pProbability, pY, pYScale, pLavaLevel, pDebugSettings, pReplaceable);
+        this.verticalRotation = pVerticalRotation;
+        this.shape = pShape;
     }
 
-    public CanyonCarverConfiguration(CarverConfiguration p_158980_, FloatProvider p_158981_, CanyonCarverConfiguration.CanyonShapeConfiguration p_158982_) {
-        this(p_158980_.probability, p_158980_.y, p_158980_.yScale, p_158980_.lavaLevel, p_158980_.debugSettings, p_158980_.replaceable, p_158981_, p_158982_);
+    public CanyonCarverConfiguration(CarverConfiguration pConfig, FloatProvider pVerticalRotation, CanyonCarverConfiguration.CanyonShapeConfiguration pShape) {
+        this(pConfig.probability, pConfig.y, pConfig.yScale, pConfig.lavaLevel, pConfig.debugSettings, pConfig.replaceable, pVerticalRotation, pShape);
     }
 
     public static class CanyonShapeConfiguration {
@@ -61,14 +61,14 @@ public class CanyonCarverConfiguration extends CarverConfiguration {
         public final float verticalRadiusCenterFactor;
 
         public CanyonShapeConfiguration(
-            FloatProvider p_159000_, FloatProvider p_159001_, int p_159002_, FloatProvider p_159003_, float p_159004_, float p_159005_
+            FloatProvider pDistanceFactor, FloatProvider pThickness, int pWidthSmoothness, FloatProvider pHorizontalRadiusFactor, float pVerticalRadiusDefaultFactor, float pVerticalRadiusCenterFactor
         ) {
-            this.widthSmoothness = p_159002_;
-            this.horizontalRadiusFactor = p_159003_;
-            this.verticalRadiusDefaultFactor = p_159004_;
-            this.verticalRadiusCenterFactor = p_159005_;
-            this.distanceFactor = p_159000_;
-            this.thickness = p_159001_;
+            this.widthSmoothness = pWidthSmoothness;
+            this.horizontalRadiusFactor = pHorizontalRadiusFactor;
+            this.verticalRadiusDefaultFactor = pVerticalRadiusDefaultFactor;
+            this.verticalRadiusCenterFactor = pVerticalRadiusCenterFactor;
+            this.distanceFactor = pDistanceFactor;
+            this.thickness = pThickness;
         }
     }
 }

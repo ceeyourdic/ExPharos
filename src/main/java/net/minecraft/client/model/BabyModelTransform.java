@@ -13,12 +13,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public record BabyModelTransform(boolean scaleHead, float babyYHeadOffset, float babyZHeadOffset, float babyHeadScale, float babyBodyScale, float bodyYOffset, Set<String> headParts)
     implements MeshTransformer {
-    public BabyModelTransform(Set<String> p_361409_) {
-        this(false, 5.0F, 2.0F, p_361409_);
+    public BabyModelTransform(Set<String> pHeadParts) {
+        this(false, 5.0F, 2.0F, pHeadParts);
     }
 
-    public BabyModelTransform(boolean p_363472_, float p_363171_, float p_366309_, Set<String> p_363509_) {
-        this(p_363472_, p_363171_, p_366309_, 2.0F, 2.0F, 24.0F, p_363509_);
+    public BabyModelTransform(boolean pScaleHead, float pBabyYHeadOffset, float pBabyZHeadOffset, Set<String> pHeadParts) {
+        this(pScaleHead, pBabyYHeadOffset, pBabyZHeadOffset, 2.0F, 2.0F, 24.0F, pHeadParts);
     }
 
     @Override

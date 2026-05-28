@@ -51,14 +51,14 @@ public class ReplaceBlobsFeature extends Feature<ReplaceSphereConfiguration> {
     }
 
     @Nullable
-    private static BlockPos findTarget(LevelAccessor p_66635_, BlockPos.MutableBlockPos p_66636_, Block p_66637_) {
-        while (p_66636_.getY() > p_66635_.getMinY() + 1) {
-            BlockState blockstate = p_66635_.getBlockState(p_66636_);
-            if (blockstate.is(p_66637_)) {
-                return p_66636_;
+    private static BlockPos findTarget(LevelAccessor pLevel, BlockPos.MutableBlockPos pTopPos, Block pBlock) {
+        while (pTopPos.getY() > pLevel.getMinY() + 1) {
+            BlockState blockstate = pLevel.getBlockState(pTopPos);
+            if (blockstate.is(pBlock)) {
+                return pTopPos;
             }
 
-            p_66636_.move(Direction.DOWN);
+            pTopPos.move(Direction.DOWN);
         }
 
         return null;

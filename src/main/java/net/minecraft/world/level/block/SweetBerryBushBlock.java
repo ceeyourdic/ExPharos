@@ -52,17 +52,17 @@ public class SweetBerryBushBlock extends BushBlock implements BonemealableBlock 
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_57291_, BlockGetter p_57292_, BlockPos p_57293_, CollisionContext p_57294_) {
-        if (p_57291_.getValue(AGE) == 0) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        if (pState.getValue(AGE) == 0) {
             return SAPLING_SHAPE;
         } else {
-            return p_57291_.getValue(AGE) < 3 ? MID_GROWTH_SHAPE : super.getShape(p_57291_, p_57292_, p_57293_, p_57294_);
+            return pState.getValue(AGE) < 3 ? MID_GROWTH_SHAPE : super.getShape(pState, pLevel, pPos, pContext);
         }
     }
 
     @Override
-    protected boolean isRandomlyTicking(BlockState p_57284_) {
-        return p_57284_.getValue(AGE) < 3;
+    protected boolean isRandomlyTicking(BlockState pState) {
+        return pState.getValue(AGE) < 3;
     }
 
     @Override
@@ -76,16 +76,16 @@ public class SweetBerryBushBlock extends BushBlock implements BonemealableBlock 
     }
 
     @Override
-    protected void entityInside(BlockState p_57270_, Level p_57271_, BlockPos p_57272_, Entity p_57273_) {
-        if (p_57273_ instanceof LivingEntity && p_57273_.getType() != EntityType.FOX && p_57273_.getType() != EntityType.BEE) {
-            p_57273_.makeStuckInBlock(p_57270_, new Vec3(0.8F, 0.75, 0.8F));
-            if (p_57271_ instanceof ServerLevel serverlevel && p_57270_.getValue(AGE) != 0) {
-                Vec3 vec3 = p_57273_.isControlledByClient() ? p_57273_.getKnownMovement() : p_57273_.oldPosition().subtract(p_57273_.position());
+    protected void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
+        if (pEntity instanceof LivingEntity && pEntity.getType() != EntityType.FOX && pEntity.getType() != EntityType.BEE) {
+            pEntity.makeStuckInBlock(pState, new Vec3(0.8F, 0.75, 0.8F));
+            if (pLevel instanceof ServerLevel serverlevel && pState.getValue(AGE) != 0) {
+                Vec3 vec3 = pEntity.isControlledByClient() ? pEntity.getKnownMovement() : pEntity.oldPosition().subtract(pEntity.position());
                 if (vec3.horizontalDistanceSqr() > 0.0) {
                     double d0 = Math.abs(vec3.x());
                     double d1 = Math.abs(vec3.z());
                     if (d0 >= 0.003F || d1 >= 0.003F) {
-                        p_57273_.hurtServer(serverlevel, p_57271_.damageSources().sweetBerryBush(), 1.0F);
+                        pEntity.hurtServer(serverlevel, pLevel.damageSources().sweetBerryBush(), 1.0F);
                     }
                 }
 
@@ -123,8 +123,8 @@ public class SweetBerryBushBlock extends BushBlock implements BonemealableBlock 
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_57282_) {
-        p_57282_.add(AGE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(AGE);
     }
 
     @Override

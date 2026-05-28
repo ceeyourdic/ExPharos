@@ -85,6 +85,7 @@ import net.minecraft.util.SingleKeyCache;
 import net.minecraft.util.TimeSource;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.optifine.SmartExecutorService;
 import org.slf4j.Logger;
 
 public class Util {
@@ -109,11 +110,13 @@ public class Util {
     public static final UUID NIL_UUID = new UUID(0L, 0L);
     public static final FileSystemProvider ZIP_FILE_SYSTEM_PROVIDER = FileSystemProvider.installedProviders()
         .stream()
-        .filter(p_201865_ -> p_201865_.getScheme().equalsIgnoreCase("jar"))
+        .filter(providerIn -> providerIn.getScheme().equalsIgnoreCase("jar"))
         .findFirst()
         .orElseThrow(() -> new IllegalStateException("No jar file system provider found"));
-    private static Consumer<String> thePauser = p_201905_ -> {
+    private static Consumer<String> thePauser = nameIn -> {
     };
+    private static Exception exceptionOpenUrl;
+    private static final TracingExecutor CAPE_EXECUTOR = makeExecutor("Cape");
 
     public static <K, V> Collector<Entry<? extends K, ? extends V>, ?, Map<K, V>> toMap() {
         return Collectors.toMap(Entry::getKey, Entry::getValue);
@@ -123,14 +126,14 @@ public class Util {
         return Collectors.toCollection(Lists::newArrayList);
     }
 
-    public static <T extends Comparable<T>> String getPropertyName(Property<T> p_137454_, Object p_137455_) {
-        return p_137454_.getName((T)p_137455_);
+    public static <T extends Comparable<T>> String getPropertyName(Property<T> pProperty, Object pValue) {
+        return pProperty.getName((T)pValue);
     }
 
-    public static String makeDescriptionId(String p_137493_, @Nullable ResourceLocation p_137494_) {
-        return p_137494_ == null
-            ? p_137493_ + ".unregistered_sadface"
-            : p_137493_ + "." + p_137494_.getNamespace() + "." + p_137494_.getPath().replace('/', '.');
+    public static String makeDescriptionId(String pType, @Nullable ResourceLocation pId) {
+        return pId == null
+            ? pType + ".unregistered_sadface"
+            : pType + "." + pId.getNamespace() + "." + pId.getPath().replace('/', '.');
     }
 
     public static long getMillis() {
@@ -149,39 +152,57 @@ public class Util {
         return FILENAME_DATE_TIME_FORMATTER.format(ZonedDateTime.now());
     }
 
-    private static TracingExecutor makeExecutor(String p_137478_) {
+    private static TracingExecutor makeExecutor(String pName) {
         int i = maxAllowedExecutorThreads();
         ExecutorService executorservice;
         if (i <= 0) {
             executorservice = MoreExecutors.newDirectExecutorService();
         } else {
             AtomicInteger atomicinteger = new AtomicInteger(1);
-            executorservice = new ForkJoinPool(i, p_357604_ -> {
-                final String s = "Worker-" + p_137478_ + "-" + atomicinteger.getAndIncrement();
-                ForkJoinWorkerThread forkjoinworkerthread = new ForkJoinWorkerThread(p_357604_) {
+            executorservice = new ForkJoinPool(i, poolIn -> {
+                final String s = "Worker-" + pName + "-" + atomicinteger.getAndIncrement();
+                ForkJoinWorkerThread forkjoinworkerthread = new ForkJoinWorkerThread(poolIn) {
                     @Override
                     protected void onStart() {
-                        TracyClient.setThreadName(s, p_137478_.hashCode());
+                        TracyClient.setThreadName(s, pName.hashCode());
                         super.onStart();
                     }
 
                     @Override
-                    protected void onTermination(Throwable p_211561_) {
-                        if (p_211561_ != null) {
-                            Util.LOGGER.warn("{} died", this.getName(), p_211561_);
+                    protected void onTermination(Throwable p_onTermination_1_) {
+                        if (p_onTermination_1_ != null) {
+                            Util.LOGGER.warn("{} died", this.getName(), p_onTermination_1_);
                         } else {
                             Util.LOGGER.debug("{} shutdown", this.getName());
                         }
 
-                        super.onTermination(p_211561_);
+                        super.onTermination(p_onTermination_1_);
                     }
                 };
                 forkjoinworkerthread.setName(s);
+                if (pName.equals("Bootstrap")) {
+                    forkjoinworkerthread.setPriority(1);
+                }
+
                 return forkjoinworkerthread;
             }, Util::onThreadException, true);
         }
 
+        if (pName.equals("Bootstrap")) {
+            executorservice = createSmartExecutor(executorservice);
+        }
+
         return new TracingExecutor(executorservice);
+    }
+
+    private static ExecutorService createSmartExecutor(ExecutorService executor) {
+        int i = Runtime.getRuntime().availableProcessors();
+        if (i <= 1) {
+            return executor;
+        } else {
+            ExecutorService executorservice = new SmartExecutorService(executor);
+            return executorservice;
+        }
     }
 
     public static int maxAllowedExecutorThreads() {
@@ -198,7 +219,7 @@ public class Util {
                 }
 
                 LOGGER.error("Wrong {} property value '{}'. Should be an integer value between 1 and {}.", "max.bg.threads", s, 255);
-            } catch (NumberFormatException numberformatexception) {
+            } catch (NumberFormatException numberformatexception1) {
                 LOGGER.error("Could not parse {} property value '{}'. Should be an integer value between 1 and {}.", "max.bg.threads", s, 255);
             }
         }
@@ -221,54 +242,55 @@ public class Util {
     public static void shutdownExecutors() {
         BACKGROUND_EXECUTOR.shutdownAndAwait(3L, TimeUnit.SECONDS);
         IO_POOL.shutdownAndAwait(3L, TimeUnit.SECONDS);
+        CAPE_EXECUTOR.shutdownAndAwait(3L, TimeUnit.SECONDS);
     }
 
-    private static TracingExecutor makeIoExecutor(String p_309722_, boolean p_310621_) {
+    private static TracingExecutor makeIoExecutor(String pName, boolean pDaemon) {
         AtomicInteger atomicinteger = new AtomicInteger(1);
-        return new TracingExecutor(Executors.newCachedThreadPool(p_357582_ -> {
-            Thread thread = new Thread(p_357582_);
-            String s = p_309722_ + atomicinteger.getAndIncrement();
-            TracyClient.setThreadName(s, p_309722_.hashCode());
+        return new TracingExecutor(Executors.newCachedThreadPool(runIn -> {
+            Thread thread = new Thread(runIn);
+            String s = pName + atomicinteger.getAndIncrement();
+            TracyClient.setThreadName(s, pName.hashCode());
             thread.setName(s);
-            thread.setDaemon(p_310621_);
+            thread.setDaemon(pDaemon);
             thread.setUncaughtExceptionHandler(Util::onThreadException);
             return thread;
         }));
     }
 
-    public static void throwAsRuntime(Throwable p_137560_) {
-        throw p_137560_ instanceof RuntimeException ? (RuntimeException)p_137560_ : new RuntimeException(p_137560_);
+    public static void throwAsRuntime(Throwable pThrowable) {
+        throw pThrowable instanceof RuntimeException ? (RuntimeException)pThrowable : new RuntimeException(pThrowable);
     }
 
-    private static void onThreadException(Thread p_137496_, Throwable p_137497_) {
-        pauseInIde(p_137497_);
-        if (p_137497_ instanceof CompletionException) {
-            p_137497_ = p_137497_.getCause();
+    private static void onThreadException(Thread pThread, Throwable pThrowable) {
+        pauseInIde(pThrowable);
+        if (pThrowable instanceof CompletionException) {
+            pThrowable = pThrowable.getCause();
         }
 
-        if (p_137497_ instanceof ReportedException reportedexception) {
+        if (pThrowable instanceof ReportedException reportedexception) {
             Bootstrap.realStdoutPrintln(reportedexception.getReport().getFriendlyReport(ReportType.CRASH));
             System.exit(-1);
         }
 
-        LOGGER.error(String.format(Locale.ROOT, "Caught exception in thread %s", p_137496_), p_137497_);
+        LOGGER.error(String.format(Locale.ROOT, "Caught exception in thread %s", pThread), pThrowable);
     }
 
     @Nullable
-    public static Type<?> fetchChoiceType(TypeReference p_137457_, String p_137458_) {
-        return !SharedConstants.CHECK_DATA_FIXER_SCHEMA ? null : doFetchChoiceType(p_137457_, p_137458_);
+    public static Type<?> fetchChoiceType(TypeReference pType, String pChoiceName) {
+        return !SharedConstants.CHECK_DATA_FIXER_SCHEMA ? null : doFetchChoiceType(pType, pChoiceName);
     }
 
     @Nullable
-    private static Type<?> doFetchChoiceType(TypeReference p_137552_, String p_137553_) {
+    private static Type<?> doFetchChoiceType(TypeReference pType, String pChoiceName) {
         Type<?> type = null;
 
         try {
             type = DataFixers.getDataFixer()
                 .getSchema(DataFixUtils.makeKey(SharedConstants.getCurrentVersion().getDataVersion().getVersion()))
-                .getChoiceType(p_137552_, p_137553_);
+                .getChoiceType(pType, pChoiceName);
         } catch (IllegalArgumentException illegalargumentexception) {
-            LOGGER.error("No data fixer registered for {}", p_137553_);
+            LOGGER.debug("No data fixer registered for {}", pChoiceName);
             if (SharedConstants.IS_RUNNING_IN_IDE) {
                 throw illegalargumentexception;
             }
@@ -277,70 +299,66 @@ public class Util {
         return type;
     }
 
-    public static void runNamed(Runnable p_369252_, String p_367193_) {
+    public static void runNamed(Runnable pTask, String pName) {
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             Thread thread = Thread.currentThread();
             String s = thread.getName();
-            thread.setName(p_367193_);
+            thread.setName(pName);
 
-            try (Zone zone = TracyClient.beginZone(p_367193_, SharedConstants.IS_RUNNING_IN_IDE)) {
-                p_369252_.run();
+            try (Zone zone = TracyClient.beginZone(pName, SharedConstants.IS_RUNNING_IN_IDE)) {
+                pTask.run();
             } finally {
                 thread.setName(s);
             }
         } else {
-            try (Zone zone1 = TracyClient.beginZone(p_367193_, SharedConstants.IS_RUNNING_IN_IDE)) {
-                p_369252_.run();
+            try (Zone zone1 = TracyClient.beginZone(pName, SharedConstants.IS_RUNNING_IN_IDE)) {
+                pTask.run();
             }
         }
     }
 
-    public static <T> String getRegisteredName(Registry<T> p_336230_, T p_335370_) {
-        ResourceLocation resourcelocation = p_336230_.getKey(p_335370_);
+    public static <T> String getRegisteredName(Registry<T> pRegistry, T pValue) {
+        ResourceLocation resourcelocation = pRegistry.getKey(pValue);
         return resourcelocation == null ? "[unregistered]" : resourcelocation.toString();
     }
 
     public static <T> Predicate<T> allOf() {
-        return p_325171_ -> true;
+        return objIn -> true;
     }
 
-    public static <T> Predicate<T> allOf(Predicate<? super T> p_370105_) {
-        return (Predicate<T>)p_370105_;
+    public static <T> Predicate<T> allOf(Predicate<? super T> pPredicate) {
+        return (Predicate<T>)pPredicate;
     }
 
-    public static <T> Predicate<T> allOf(Predicate<? super T> p_363065_, Predicate<? super T> p_369468_) {
-        return p_357607_ -> p_363065_.test(p_357607_) && p_369468_.test(p_357607_);
+    public static <T> Predicate<T> allOf(Predicate<? super T> pPredicate1, Predicate<? super T> pPredicate2) {
+        return objIn -> pPredicate1.test(objIn) && pPredicate2.test(objIn);
     }
 
-    public static <T> Predicate<T> allOf(Predicate<? super T> p_367355_, Predicate<? super T> p_368540_, Predicate<? super T> p_368292_) {
-        return p_357611_ -> p_367355_.test(p_357611_) && p_368540_.test(p_357611_) && p_368292_.test(p_357611_);
-    }
-
-    public static <T> Predicate<T> allOf(
-        Predicate<? super T> p_366665_, Predicate<? super T> p_362170_, Predicate<? super T> p_368098_, Predicate<? super T> p_368091_
-    ) {
-        return p_357595_ -> p_366665_.test(p_357595_) && p_362170_.test(p_357595_) && p_368098_.test(p_357595_) && p_368091_.test(p_357595_);
+    public static <T> Predicate<T> allOf(Predicate<? super T> pPredicate1, Predicate<? super T> pPredicate2, Predicate<? super T> pPredicate3) {
+        return objIn -> pPredicate1.test(objIn) && pPredicate2.test(objIn) && pPredicate3.test(objIn);
     }
 
     public static <T> Predicate<T> allOf(
-        Predicate<? super T> p_364729_,
-        Predicate<? super T> p_370126_,
-        Predicate<? super T> p_365718_,
-        Predicate<? super T> p_361334_,
-        Predicate<? super T> p_364329_
+        Predicate<? super T> pPredicate1, Predicate<? super T> pPredicate2, Predicate<? super T> pPredicate3, Predicate<? super T> pPredicate4
     ) {
-        return p_357574_ -> p_364729_.test(p_357574_)
-                && p_370126_.test(p_357574_)
-                && p_365718_.test(p_357574_)
-                && p_361334_.test(p_357574_)
-                && p_364329_.test(p_357574_);
+        return objIn -> pPredicate1.test(objIn) && pPredicate2.test(objIn) && pPredicate3.test(objIn) && pPredicate4.test(objIn);
+    }
+
+    public static <T> Predicate<T> allOf(
+        Predicate<? super T> pPredicate1,
+        Predicate<? super T> pPredicate2,
+        Predicate<? super T> pPredicate3,
+        Predicate<? super T> pPredicate4,
+        Predicate<? super T> pPredicate5
+    ) {
+        return objIn -> pPredicate1.test(objIn) && pPredicate2.test(objIn) && pPredicate3.test(objIn) && pPredicate4.test(objIn) && pPredicate5.test(objIn);
     }
 
     @SafeVarargs
-    public static <T> Predicate<T> allOf(Predicate<? super T>... p_362015_) {
-        return p_340746_ -> {
-            for (Predicate<? super T> predicate : p_362015_) {
-                if (!predicate.test(p_340746_)) {
+    public static <T> Predicate<T> allOf(Predicate<? super T>... pPredicates) {
+        return valIn -> {
+            for (Predicate<? super T> predicate : pPredicates) {
+                if (!predicate.test(valIn)) {
                     return false;
                 }
             }
@@ -349,73 +367,69 @@ public class Util {
         };
     }
 
-    public static <T> Predicate<T> allOf(List<? extends Predicate<? super T>> p_333513_) {
-        return switch (p_333513_.size()) {
+    public static <T> Predicate<T> allOf(List<? extends Predicate<? super T>> pPredicates) {
+        return switch (pPredicates.size()) {
             case 0 -> allOf();
-            case 1 -> allOf((Predicate<? super T>)p_333513_.get(0));
-            case 2 -> allOf((Predicate<? super T>)p_333513_.get(0), (Predicate<? super T>)p_333513_.get(1));
-            case 3 -> allOf((Predicate<? super T>)p_333513_.get(0), (Predicate<? super T>)p_333513_.get(1), (Predicate<? super T>)p_333513_.get(2));
+            case 1 -> allOf((Predicate<? super T>)pPredicates.get(0));
+            case 2 -> allOf((Predicate<? super T>)pPredicates.get(0), (Predicate<? super T>)pPredicates.get(1));
+            case 3 -> allOf((Predicate<? super T>)pPredicates.get(0), (Predicate<? super T>)pPredicates.get(1), (Predicate<? super T>)pPredicates.get(2));
             case 4 -> allOf(
-            (Predicate<? super T>)p_333513_.get(0),
-            (Predicate<? super T>)p_333513_.get(1),
-            (Predicate<? super T>)p_333513_.get(2),
-            (Predicate<? super T>)p_333513_.get(3)
+            (Predicate<? super T>)pPredicates.get(0),
+            (Predicate<? super T>)pPredicates.get(1),
+            (Predicate<? super T>)pPredicates.get(2),
+            (Predicate<? super T>)pPredicates.get(3)
         );
             case 5 -> allOf(
-            (Predicate<? super T>)p_333513_.get(0),
-            (Predicate<? super T>)p_333513_.get(1),
-            (Predicate<? super T>)p_333513_.get(2),
-            (Predicate<? super T>)p_333513_.get(3),
-            (Predicate<? super T>)p_333513_.get(4)
+            (Predicate<? super T>)pPredicates.get(0),
+            (Predicate<? super T>)pPredicates.get(1),
+            (Predicate<? super T>)pPredicates.get(2),
+            (Predicate<? super T>)pPredicates.get(3),
+            (Predicate<? super T>)pPredicates.get(4)
         );
             default -> {
-                Predicate<? super T>[] predicate = p_333513_.toArray(Predicate[]::new);
+                Predicate<? super T>[] predicate = pPredicates.toArray(Predicate[]::new);
                 yield allOf(predicate);
             }
         };
     }
 
     public static <T> Predicate<T> anyOf() {
-        return p_325174_ -> false;
+        return objIn -> false;
     }
 
-    public static <T> Predicate<T> anyOf(Predicate<? super T> p_369369_) {
-        return (Predicate<T>)p_369369_;
+    public static <T> Predicate<T> anyOf(Predicate<? super T> pPredicate) {
+        return (Predicate<T>)pPredicate;
     }
 
-    public static <T> Predicate<T> anyOf(Predicate<? super T> p_361301_, Predicate<? super T> p_361372_) {
-        return p_357585_ -> p_361301_.test(p_357585_) || p_361372_.test(p_357585_);
+    public static <T> Predicate<T> anyOf(Predicate<? super T> pPredicate1, Predicate<? super T> pPredicate2) {
+        return objIn -> pPredicate1.test(objIn) || pPredicate2.test(objIn);
     }
 
-    public static <T> Predicate<T> anyOf(Predicate<? super T> p_368986_, Predicate<? super T> p_367469_, Predicate<? super T> p_363214_) {
-        return p_357578_ -> p_368986_.test(p_357578_) || p_367469_.test(p_357578_) || p_363214_.test(p_357578_);
-    }
-
-    public static <T> Predicate<T> anyOf(
-        Predicate<? super T> p_366428_, Predicate<? super T> p_363267_, Predicate<? super T> p_367688_, Predicate<? super T> p_364700_
-    ) {
-        return p_357590_ -> p_366428_.test(p_357590_) || p_363267_.test(p_357590_) || p_367688_.test(p_357590_) || p_364700_.test(p_357590_);
+    public static <T> Predicate<T> anyOf(Predicate<? super T> pPredicate1, Predicate<? super T> pPredicate2, Predicate<? super T> pPredicate3) {
+        return objIn -> pPredicate1.test(objIn) || pPredicate2.test(objIn) || pPredicate3.test(objIn);
     }
 
     public static <T> Predicate<T> anyOf(
-        Predicate<? super T> p_364065_,
-        Predicate<? super T> p_361450_,
-        Predicate<? super T> p_368832_,
-        Predicate<? super T> p_367216_,
-        Predicate<? super T> p_367149_
+        Predicate<? super T> pPredicate1, Predicate<? super T> pPredicate2, Predicate<? super T> pPredicate3, Predicate<? super T> pPredicate4
     ) {
-        return p_357601_ -> p_364065_.test(p_357601_)
-                || p_361450_.test(p_357601_)
-                || p_368832_.test(p_357601_)
-                || p_367216_.test(p_357601_)
-                || p_367149_.test(p_357601_);
+        return objIn -> pPredicate1.test(objIn) || pPredicate2.test(objIn) || pPredicate3.test(objIn) || pPredicate4.test(objIn);
+    }
+
+    public static <T> Predicate<T> anyOf(
+        Predicate<? super T> pPredicate1,
+        Predicate<? super T> pPredicate2,
+        Predicate<? super T> pPredicate3,
+        Predicate<? super T> pPredicate4,
+        Predicate<? super T> pPredicate5
+    ) {
+        return objIn -> pPredicate1.test(objIn) || pPredicate2.test(objIn) || pPredicate3.test(objIn) || pPredicate4.test(objIn) || pPredicate5.test(objIn);
     }
 
     @SafeVarargs
-    public static <T> Predicate<T> anyOf(Predicate<? super T>... p_362161_) {
-        return p_340748_ -> {
-            for (Predicate<? super T> predicate : p_362161_) {
-                if (predicate.test(p_340748_)) {
+    public static <T> Predicate<T> anyOf(Predicate<? super T>... pPredicates) {
+        return valIn -> {
+            for (Predicate<? super T> predicate : pPredicates) {
+                if (predicate.test(valIn)) {
                     return true;
                 }
             }
@@ -424,43 +438,43 @@ public class Util {
         };
     }
 
-    public static <T> Predicate<T> anyOf(List<? extends Predicate<? super T>> p_328136_) {
-        return switch (p_328136_.size()) {
+    public static <T> Predicate<T> anyOf(List<? extends Predicate<? super T>> pPredicates) {
+        return switch (pPredicates.size()) {
             case 0 -> anyOf();
-            case 1 -> anyOf((Predicate<? super T>)p_328136_.get(0));
-            case 2 -> anyOf((Predicate<? super T>)p_328136_.get(0), (Predicate<? super T>)p_328136_.get(1));
-            case 3 -> anyOf((Predicate<? super T>)p_328136_.get(0), (Predicate<? super T>)p_328136_.get(1), (Predicate<? super T>)p_328136_.get(2));
+            case 1 -> anyOf((Predicate<? super T>)pPredicates.get(0));
+            case 2 -> anyOf((Predicate<? super T>)pPredicates.get(0), (Predicate<? super T>)pPredicates.get(1));
+            case 3 -> anyOf((Predicate<? super T>)pPredicates.get(0), (Predicate<? super T>)pPredicates.get(1), (Predicate<? super T>)pPredicates.get(2));
             case 4 -> anyOf(
-            (Predicate<? super T>)p_328136_.get(0),
-            (Predicate<? super T>)p_328136_.get(1),
-            (Predicate<? super T>)p_328136_.get(2),
-            (Predicate<? super T>)p_328136_.get(3)
+            (Predicate<? super T>)pPredicates.get(0),
+            (Predicate<? super T>)pPredicates.get(1),
+            (Predicate<? super T>)pPredicates.get(2),
+            (Predicate<? super T>)pPredicates.get(3)
         );
             case 5 -> anyOf(
-            (Predicate<? super T>)p_328136_.get(0),
-            (Predicate<? super T>)p_328136_.get(1),
-            (Predicate<? super T>)p_328136_.get(2),
-            (Predicate<? super T>)p_328136_.get(3),
-            (Predicate<? super T>)p_328136_.get(4)
+            (Predicate<? super T>)pPredicates.get(0),
+            (Predicate<? super T>)pPredicates.get(1),
+            (Predicate<? super T>)pPredicates.get(2),
+            (Predicate<? super T>)pPredicates.get(3),
+            (Predicate<? super T>)pPredicates.get(4)
         );
             default -> {
-                Predicate<? super T>[] predicate = p_328136_.toArray(Predicate[]::new);
+                Predicate<? super T>[] predicate = pPredicates.toArray(Predicate[]::new);
                 yield anyOf(predicate);
             }
         };
     }
 
-    public static <T> boolean isSymmetrical(int p_342989_, int p_344905_, List<T> p_342186_) {
-        if (p_342989_ == 1) {
+    public static <T> boolean isSymmetrical(int pWidth, int pHeight, List<T> pList) {
+        if (pWidth == 1) {
             return true;
         } else {
-            int i = p_342989_ / 2;
+            int i = pWidth / 2;
 
-            for (int j = 0; j < p_344905_; j++) {
+            for (int j = 0; j < pHeight; j++) {
                 for (int k = 0; k < i; k++) {
-                    int l = p_342989_ - 1 - k;
-                    T t = p_342186_.get(k + j * p_342989_);
-                    T t1 = p_342186_.get(l + j * p_342989_);
+                    int l = pWidth - 1 - k;
+                    T t = pList.get(k + j * pWidth);
+                    T t1 = pList.get(l + j * pWidth);
                     if (!t.equals(t1)) {
                         return false;
                     }
@@ -488,15 +502,15 @@ public class Util {
         }
     }
 
-    public static URI parseAndValidateUntrustedUri(String p_343758_) throws URISyntaxException {
-        URI uri = new URI(p_343758_);
+    public static URI parseAndValidateUntrustedUri(String pUri) throws URISyntaxException {
+        URI uri = new URI(pUri);
         String s = uri.getScheme();
         if (s == null) {
-            throw new URISyntaxException(p_343758_, "Missing protocol in URI: " + p_343758_);
+            throw new URISyntaxException(pUri, "Missing protocol in URI: " + pUri);
         } else {
             String s1 = s.toLowerCase(Locale.ROOT);
             if (!ALLOWED_UNTRUSTED_LINK_PROTOCOLS.contains(s1)) {
-                throw new URISyntaxException(p_343758_, "Unsupported protocol in URI: " + p_343758_);
+                throw new URISyntaxException(pUri, "Unsupported protocol in URI: " + pUri);
             } else {
                 return uri;
             }
@@ -505,20 +519,20 @@ public class Util {
 
     public static Stream<String> getVmArguments() {
         RuntimeMXBean runtimemxbean = ManagementFactory.getRuntimeMXBean();
-        return runtimemxbean.getInputArguments().stream().filter(p_201903_ -> p_201903_.startsWith("-X"));
+        return runtimemxbean.getInputArguments().stream().filter(argIn -> argIn.startsWith("-X"));
     }
 
-    public static <T> T lastOf(List<T> p_137510_) {
-        return p_137510_.get(p_137510_.size() - 1);
+    public static <T> T lastOf(List<T> pList) {
+        return pList.get(pList.size() - 1);
     }
 
-    public static <T> T findNextInIterable(Iterable<T> p_137467_, @Nullable T p_137468_) {
-        Iterator<T> iterator = p_137467_.iterator();
+    public static <T> T findNextInIterable(Iterable<T> pIterable, @Nullable T pElement) {
+        Iterator<T> iterator = pIterable.iterator();
         T t = iterator.next();
-        if (p_137468_ != null) {
+        if (pElement != null) {
             T t1 = t;
 
-            while (t1 != p_137468_) {
+            while (t1 != pElement) {
                 if (iterator.hasNext()) {
                     t1 = iterator.next();
                 }
@@ -532,15 +546,15 @@ public class Util {
         return t;
     }
 
-    public static <T> T findPreviousInIterable(Iterable<T> p_137555_, @Nullable T p_137556_) {
-        Iterator<T> iterator = p_137555_.iterator();
+    public static <T> T findPreviousInIterable(Iterable<T> pIterable, @Nullable T pCurrent) {
+        Iterator<T> iterator = pIterable.iterator();
         T t = null;
 
         while (iterator.hasNext()) {
             T t1 = iterator.next();
-            if (t1 == p_137556_) {
+            if (t1 == pCurrent) {
                 if (t == null) {
-                    t = iterator.hasNext() ? Iterators.getLast(iterator) : p_137556_;
+                    t = iterator.hasNext() ? Iterators.getLast(iterator) : pCurrent;
                 }
                 break;
             }
@@ -551,153 +565,165 @@ public class Util {
         return t;
     }
 
-    public static <T> T make(Supplier<T> p_137538_) {
-        return p_137538_.get();
+    public static <T> T make(Supplier<T> pSupplier) {
+        return pSupplier.get();
     }
 
-    public static <T> T make(T p_137470_, Consumer<? super T> p_137471_) {
-        p_137471_.accept(p_137470_);
-        return p_137470_;
+    public static <T> T make(T pObject, Consumer<? super T> pConsumer) {
+        pConsumer.accept(pObject);
+        return pObject;
     }
 
-    public static <K extends Enum<K>, V> EnumMap<K, V> makeEnumMap(Class<K> p_361919_, Function<K, V> p_363082_) {
-        EnumMap<K, V> enummap = new EnumMap<>(p_361919_);
+    public static <K extends Enum<K>, V> EnumMap<K, V> makeEnumMap(Class<K> pEnumClass, Function<K, V> pValueGetter) {
+        EnumMap<K, V> enummap = new EnumMap<>(pEnumClass);
 
-        for (K k : p_361919_.getEnumConstants()) {
-            enummap.put(k, p_363082_.apply(k));
+        for (K k : pEnumClass.getEnumConstants()) {
+            enummap.put(k, pValueGetter.apply(k));
         }
 
         return enummap;
     }
 
-    public static <V> CompletableFuture<List<V>> sequence(List<? extends CompletableFuture<V>> p_137568_) {
-        if (p_137568_.isEmpty()) {
+    public static <V> CompletableFuture<List<V>> sequence(List<? extends CompletableFuture<V>> pFutures) {
+        if (pFutures.isEmpty()) {
             return CompletableFuture.completedFuture(List.of());
-        } else if (p_137568_.size() == 1) {
-            return p_137568_.get(0).thenApply(List::of);
+        } else if (pFutures.size() == 1) {
+            return pFutures.get(0).thenApply(List::of);
         } else {
-            CompletableFuture<Void> completablefuture = CompletableFuture.allOf(p_137568_.toArray(new CompletableFuture[0]));
-            return completablefuture.thenApply(p_203746_ -> p_137568_.stream().map(CompletableFuture::join).toList());
+            CompletableFuture<Void> completablefuture = CompletableFuture.allOf(pFutures.toArray(new CompletableFuture[0]));
+            return completablefuture.thenApply(objIn -> pFutures.stream().map(CompletableFuture::join).toList());
         }
     }
 
-    public static <V> CompletableFuture<List<V>> sequenceFailFast(List<? extends CompletableFuture<? extends V>> p_143841_) {
+    public static <V> CompletableFuture<List<V>> sequenceFailFast(List<? extends CompletableFuture<? extends V>> pCompletableFutures) {
         CompletableFuture<List<V>> completablefuture = new CompletableFuture<>();
-        return fallibleSequence(p_143841_, completablefuture::completeExceptionally).applyToEither(completablefuture, Function.identity());
+        return fallibleSequence(pCompletableFutures, completablefuture::completeExceptionally).applyToEither(completablefuture, Function.identity());
     }
 
-    public static <V> CompletableFuture<List<V>> sequenceFailFastAndCancel(List<? extends CompletableFuture<? extends V>> p_214685_) {
+    public static <V> CompletableFuture<List<V>> sequenceFailFastAndCancel(List<? extends CompletableFuture<? extends V>> pCompletableFutures) {
         CompletableFuture<List<V>> completablefuture = new CompletableFuture<>();
-        return fallibleSequence(p_214685_, p_274642_ -> {
-            if (completablefuture.completeExceptionally(p_274642_)) {
-                for (CompletableFuture<? extends V> completablefuture1 : p_214685_) {
+        return fallibleSequence(pCompletableFutures, throwableIn -> {
+            if (completablefuture.completeExceptionally(throwableIn)) {
+                for (CompletableFuture<? extends V> completablefuture1 : pCompletableFutures) {
                     completablefuture1.cancel(true);
                 }
             }
         }).applyToEither(completablefuture, Function.identity());
     }
 
-    private static <V> CompletableFuture<List<V>> fallibleSequence(List<? extends CompletableFuture<? extends V>> p_214632_, Consumer<Throwable> p_214633_) {
-        List<V> list = Lists.newArrayListWithCapacity(p_214632_.size());
-        CompletableFuture<?>[] completablefuture = new CompletableFuture[p_214632_.size()];
-        p_214632_.forEach(p_214641_ -> {
+    private static <V> CompletableFuture<List<V>> fallibleSequence(List<? extends CompletableFuture<? extends V>> pCompletableFutures, Consumer<Throwable> pThrowableConsumer) {
+        List<V> list = Lists.newArrayListWithCapacity(pCompletableFutures.size());
+        CompletableFuture<?>[] completablefuture = new CompletableFuture[pCompletableFutures.size()];
+        pCompletableFutures.forEach(futureIn -> {
             int i = list.size();
             list.add(null);
-            completablefuture[i] = p_214641_.whenComplete((p_214650_, p_214651_) -> {
-                if (p_214651_ != null) {
-                    p_214633_.accept(p_214651_);
+            completablefuture[i] = futureIn.whenComplete((objIn, throwableIn) -> {
+                if (throwableIn != null) {
+                    pThrowableConsumer.accept(throwableIn);
                 } else {
-                    list.set(i, (V)p_214650_);
+                    list.set(i, (V)objIn);
                 }
             });
         });
-        return CompletableFuture.allOf(completablefuture).thenApply(p_214626_ -> list);
+        return CompletableFuture.allOf(completablefuture).thenApply(voidIn -> list);
     }
 
-    public static <T> Optional<T> ifElse(Optional<T> p_137522_, Consumer<T> p_137523_, Runnable p_137524_) {
-        if (p_137522_.isPresent()) {
-            p_137523_.accept(p_137522_.get());
+    public static Exception getExceptionOpenUrl() {
+        return exceptionOpenUrl;
+    }
+
+    public static void setExceptionOpenUrl(Exception exceptionOpenUrl) {
+        Util.exceptionOpenUrl = exceptionOpenUrl;
+    }
+
+    public static TracingExecutor getCapeExecutor() {
+        return CAPE_EXECUTOR;
+    }
+
+    public static <T> Optional<T> ifElse(Optional<T> pOpt, Consumer<T> pConsumer, Runnable pOrElse) {
+        if (pOpt.isPresent()) {
+            pConsumer.accept(pOpt.get());
         } else {
-            p_137524_.run();
+            pOrElse.run();
         }
 
-        return p_137522_;
+        return pOpt;
     }
 
-    public static <T> Supplier<T> name(Supplier<T> p_214656_, Supplier<String> p_214657_) {
-        return p_214656_;
+    public static <T> Supplier<T> name(Supplier<T> pItem, Supplier<String> pNameSupplier) {
+        return pItem;
     }
 
-    public static Runnable name(Runnable p_137475_, Supplier<String> p_137476_) {
-        return p_137475_;
+    public static Runnable name(Runnable pItem, Supplier<String> pNameSupplier) {
+        return pItem;
     }
 
-    public static void logAndPauseIfInIde(String p_143786_) {
-        LOGGER.error(p_143786_);
+    public static void logAndPauseIfInIde(String pError) {
+        LOGGER.error(pError);
         if (SharedConstants.IS_RUNNING_IN_IDE) {
-            doPause(p_143786_);
+            doPause(pError);
         }
     }
 
-    public static void logAndPauseIfInIde(String p_200891_, Throwable p_200892_) {
-        LOGGER.error(p_200891_, p_200892_);
+    public static void logAndPauseIfInIde(String pMessage, Throwable pError) {
+        LOGGER.error(pMessage, pError);
         if (SharedConstants.IS_RUNNING_IN_IDE) {
-            doPause(p_200891_);
+            doPause(pMessage);
         }
     }
 
-    public static <T extends Throwable> T pauseInIde(T p_137571_) {
+    public static <T extends Throwable> T pauseInIde(T pThrowable) {
         if (SharedConstants.IS_RUNNING_IN_IDE) {
-            LOGGER.error("Trying to throw a fatal exception, pausing in IDE", p_137571_);
-            doPause(p_137571_.getMessage());
+            LOGGER.error("Trying to throw a fatal exception, pausing in IDE", pThrowable);
+            doPause(pThrowable.getMessage());
         }
 
-        return p_137571_;
+        return pThrowable;
     }
 
-    public static void setPause(Consumer<String> p_183970_) {
-        thePauser = p_183970_;
+    public static void setPause(Consumer<String> pThePauser) {
+        thePauser = pThePauser;
     }
 
-    private static void doPause(String p_183985_) {
+    private static void doPause(String pMessage) {
         Instant instant = Instant.now();
         LOGGER.warn("Did you remember to set a breakpoint here?");
         boolean flag = Duration.between(instant, Instant.now()).toMillis() > 500L;
         if (!flag) {
-            thePauser.accept(p_183985_);
+            thePauser.accept(pMessage);
         }
     }
 
-    public static String describeError(Throwable p_137576_) {
-        if (p_137576_.getCause() != null) {
-            return describeError(p_137576_.getCause());
+    public static String describeError(Throwable pThrowable) {
+        if (pThrowable.getCause() != null) {
+            return describeError(pThrowable.getCause());
         } else {
-            return p_137576_.getMessage() != null ? p_137576_.getMessage() : p_137576_.toString();
+            return pThrowable.getMessage() != null ? pThrowable.getMessage() : pThrowable.toString();
         }
     }
 
-    public static <T> T getRandom(T[] p_214671_, RandomSource p_214672_) {
-        return p_214671_[p_214672_.nextInt(p_214671_.length)];
+    public static <T> T getRandom(T[] pSelections, RandomSource pRandom) {
+        return pSelections[pRandom.nextInt(pSelections.length)];
     }
 
-    public static int getRandom(int[] p_214668_, RandomSource p_214669_) {
-        return p_214668_[p_214669_.nextInt(p_214668_.length)];
+    public static int getRandom(int[] pSelections, RandomSource pRandom) {
+        return pSelections[pRandom.nextInt(pSelections.length)];
     }
 
-    public static <T> T getRandom(List<T> p_214622_, RandomSource p_214623_) {
-        return p_214622_.get(p_214623_.nextInt(p_214622_.size()));
+    public static <T> T getRandom(List<T> pSelections, RandomSource pRandom) {
+        return pSelections.get(pRandom.nextInt(pSelections.size()));
     }
 
-    public static <T> Optional<T> getRandomSafe(List<T> p_214677_, RandomSource p_214678_) {
-        return p_214677_.isEmpty() ? Optional.empty() : Optional.of(getRandom(p_214677_, p_214678_));
+    public static <T> Optional<T> getRandomSafe(List<T> pSelections, RandomSource pRandom) {
+        return pSelections.isEmpty() ? Optional.empty() : Optional.of(getRandom(pSelections, pRandom));
     }
 
-    private static BooleanSupplier createRenamer(final Path p_137503_, final Path p_137504_) {
+    private static BooleanSupplier createRenamer(final Path pFilePath, final Path pNewName) {
         return new BooleanSupplier() {
             @Override
             public boolean getAsBoolean() {
                 try {
-                    Files.move(p_137503_, p_137504_);
+                    Files.move(pFilePath, pNewName);
                     return true;
                 } catch (IOException ioexception) {
                     Util.LOGGER.error("Failed to rename", (Throwable)ioexception);
@@ -707,17 +733,17 @@ public class Util {
 
             @Override
             public String toString() {
-                return "rename " + p_137503_ + " to " + p_137504_;
+                return "rename " + pFilePath + " to " + pNewName;
             }
         };
     }
 
-    private static BooleanSupplier createDeleter(final Path p_137501_) {
+    private static BooleanSupplier createDeleter(final Path pFilePath) {
         return new BooleanSupplier() {
             @Override
             public boolean getAsBoolean() {
                 try {
-                    Files.deleteIfExists(p_137501_);
+                    Files.deleteIfExists(pFilePath);
                     return true;
                 } catch (IOException ioexception) {
                     Util.LOGGER.warn("Failed to delete", (Throwable)ioexception);
@@ -727,41 +753,41 @@ public class Util {
 
             @Override
             public String toString() {
-                return "delete old " + p_137501_;
+                return "delete old " + pFilePath;
             }
         };
     }
 
-    private static BooleanSupplier createFileDeletedCheck(final Path p_137562_) {
+    private static BooleanSupplier createFileDeletedCheck(final Path pFilePath) {
         return new BooleanSupplier() {
             @Override
             public boolean getAsBoolean() {
-                return !Files.exists(p_137562_);
+                return !Files.exists(pFilePath);
             }
 
             @Override
             public String toString() {
-                return "verify that " + p_137562_ + " is deleted";
+                return "verify that " + pFilePath + " is deleted";
             }
         };
     }
 
-    private static BooleanSupplier createFileCreatedCheck(final Path p_137573_) {
+    private static BooleanSupplier createFileCreatedCheck(final Path pFilePath) {
         return new BooleanSupplier() {
             @Override
             public boolean getAsBoolean() {
-                return Files.isRegularFile(p_137573_);
+                return Files.isRegularFile(pFilePath);
             }
 
             @Override
             public String toString() {
-                return "verify that " + p_137573_ + " is present";
+                return "verify that " + pFilePath + " is present";
             }
         };
     }
 
-    private static boolean executeInSequence(BooleanSupplier... p_137549_) {
-        for (BooleanSupplier booleansupplier : p_137549_) {
+    private static boolean executeInSequence(BooleanSupplier... pSuppliers) {
+        for (BooleanSupplier booleansupplier : pSuppliers) {
             if (!booleansupplier.getAsBoolean()) {
                 LOGGER.warn("Failed to execute {}", booleansupplier);
                 return false;
@@ -771,87 +797,87 @@ public class Util {
         return true;
     }
 
-    private static boolean runWithRetries(int p_137450_, String p_137451_, BooleanSupplier... p_137452_) {
-        for (int i = 0; i < p_137450_; i++) {
-            if (executeInSequence(p_137452_)) {
+    private static boolean runWithRetries(int pMaxTries, String pActionName, BooleanSupplier... pSuppliers) {
+        for (int i = 0; i < pMaxTries; i++) {
+            if (executeInSequence(pSuppliers)) {
                 return true;
             }
 
-            LOGGER.error("Failed to {}, retrying {}/{}", p_137451_, i, p_137450_);
+            LOGGER.error("Failed to {}, retrying {}/{}", pActionName, i, pMaxTries);
         }
 
-        LOGGER.error("Failed to {}, aborting, progress might be lost", p_137451_);
+        LOGGER.error("Failed to {}, aborting, progress might be lost", pActionName);
         return false;
     }
 
-    public static void safeReplaceFile(Path p_137506_, Path p_137507_, Path p_137508_) {
-        safeReplaceOrMoveFile(p_137506_, p_137507_, p_137508_, false);
+    public static void safeReplaceFile(Path pCurrent, Path pLatest, Path pOldBackup) {
+        safeReplaceOrMoveFile(pCurrent, pLatest, pOldBackup, false);
     }
 
-    public static boolean safeReplaceOrMoveFile(Path p_311739_, Path p_310810_, Path p_310842_, boolean p_212228_) {
-        if (Files.exists(p_311739_)
-            && !runWithRetries(10, "create backup " + p_310842_, createDeleter(p_310842_), createRenamer(p_311739_, p_310842_), createFileCreatedCheck(p_310842_))) {
+    public static boolean safeReplaceOrMoveFile(Path pCurrent, Path pLatest, Path pOldBackup, boolean pRestore) {
+        if (Files.exists(pCurrent)
+            && !runWithRetries(10, "create backup " + pOldBackup, createDeleter(pOldBackup), createRenamer(pCurrent, pOldBackup), createFileCreatedCheck(pOldBackup))) {
             return false;
-        } else if (!runWithRetries(10, "remove old " + p_311739_, createDeleter(p_311739_), createFileDeletedCheck(p_311739_))) {
+        } else if (!runWithRetries(10, "remove old " + pCurrent, createDeleter(pCurrent), createFileDeletedCheck(pCurrent))) {
             return false;
-        } else if (!runWithRetries(10, "replace " + p_311739_ + " with " + p_310810_, createRenamer(p_310810_, p_311739_), createFileCreatedCheck(p_311739_)) && !p_212228_) {
-            runWithRetries(10, "restore " + p_311739_ + " from " + p_310842_, createRenamer(p_310842_, p_311739_), createFileCreatedCheck(p_311739_));
+        } else if (!runWithRetries(10, "replace " + pCurrent + " with " + pLatest, createRenamer(pLatest, pCurrent), createFileCreatedCheck(pCurrent)) && !pRestore) {
+            runWithRetries(10, "restore " + pCurrent + " from " + pOldBackup, createRenamer(pOldBackup, pCurrent), createFileCreatedCheck(pCurrent));
             return false;
         } else {
             return true;
         }
     }
 
-    public static int offsetByCodepoints(String p_137480_, int p_137481_, int p_137482_) {
-        int i = p_137480_.length();
-        if (p_137482_ >= 0) {
-            for (int j = 0; p_137481_ < i && j < p_137482_; j++) {
-                if (Character.isHighSurrogate(p_137480_.charAt(p_137481_++)) && p_137481_ < i && Character.isLowSurrogate(p_137480_.charAt(p_137481_))) {
-                    p_137481_++;
+    public static int offsetByCodepoints(String pText, int pCursorPos, int pDirection) {
+        int i = pText.length();
+        if (pDirection >= 0) {
+            for (int j = 0; pCursorPos < i && j < pDirection; j++) {
+                if (Character.isHighSurrogate(pText.charAt(pCursorPos++)) && pCursorPos < i && Character.isLowSurrogate(pText.charAt(pCursorPos))) {
+                    pCursorPos++;
                 }
             }
         } else {
-            for (int k = p_137482_; p_137481_ > 0 && k < 0; k++) {
-                p_137481_--;
-                if (Character.isLowSurrogate(p_137480_.charAt(p_137481_)) && p_137481_ > 0 && Character.isHighSurrogate(p_137480_.charAt(p_137481_ - 1))) {
-                    p_137481_--;
+            for (int k = pDirection; pCursorPos > 0 && k < 0; k++) {
+                pCursorPos--;
+                if (Character.isLowSurrogate(pText.charAt(pCursorPos)) && pCursorPos > 0 && Character.isHighSurrogate(pText.charAt(pCursorPos - 1))) {
+                    pCursorPos--;
                 }
             }
         }
 
-        return p_137481_;
+        return pCursorPos;
     }
 
-    public static Consumer<String> prefix(String p_137490_, Consumer<String> p_137491_) {
-        return p_214645_ -> p_137491_.accept(p_137490_ + p_214645_);
+    public static Consumer<String> prefix(String pPrefix, Consumer<String> pExpectedSize) {
+        return strIn -> pExpectedSize.accept(pPrefix + strIn);
     }
 
-    public static DataResult<int[]> fixedSize(IntStream p_137540_, int p_137541_) {
-        int[] aint = p_137540_.limit((long)(p_137541_ + 1)).toArray();
-        if (aint.length != p_137541_) {
-            Supplier<String> supplier = () -> "Input is not a list of " + p_137541_ + " ints";
-            return aint.length >= p_137541_ ? DataResult.error(supplier, Arrays.copyOf(aint, p_137541_)) : DataResult.error(supplier);
+    public static DataResult<int[]> fixedSize(IntStream pStream, int pSize) {
+        int[] aint = pStream.limit((long)(pSize + 1)).toArray();
+        if (aint.length != pSize) {
+            Supplier<String> supplier = () -> "Input is not a list of " + pSize + " ints";
+            return aint.length >= pSize ? DataResult.error(supplier, Arrays.copyOf(aint, pSize)) : DataResult.error(supplier);
         } else {
             return DataResult.success(aint);
         }
     }
 
-    public static DataResult<long[]> fixedSize(LongStream p_287579_, int p_287631_) {
-        long[] along = p_287579_.limit((long)(p_287631_ + 1)).toArray();
-        if (along.length != p_287631_) {
-            Supplier<String> supplier = () -> "Input is not a list of " + p_287631_ + " longs";
-            return along.length >= p_287631_ ? DataResult.error(supplier, Arrays.copyOf(along, p_287631_)) : DataResult.error(supplier);
+    public static DataResult<long[]> fixedSize(LongStream pStream, int pExpectedSize) {
+        long[] along = pStream.limit((long)(pExpectedSize + 1)).toArray();
+        if (along.length != pExpectedSize) {
+            Supplier<String> supplier = () -> "Input is not a list of " + pExpectedSize + " longs";
+            return along.length >= pExpectedSize ? DataResult.error(supplier, Arrays.copyOf(along, pExpectedSize)) : DataResult.error(supplier);
         } else {
             return DataResult.success(along);
         }
     }
 
-    public static <T> DataResult<List<T>> fixedSize(List<T> p_143796_, int p_143797_) {
-        if (p_143796_.size() != p_143797_) {
-            Supplier<String> supplier = () -> "Input is not a list of " + p_143797_ + " elements";
-            return p_143796_.size() >= p_143797_ ? DataResult.error(supplier, p_143796_.subList(0, p_143797_)) : DataResult.error(supplier);
+    public static <T> DataResult<List<T>> fixedSize(List<T> pList, int pExpectedSize) {
+        if (pList.size() != pExpectedSize) {
+            Supplier<String> supplier = () -> "Input is not a list of " + pExpectedSize + " elements";
+            return pList.size() >= pExpectedSize ? DataResult.error(supplier, pList.subList(0, pExpectedSize)) : DataResult.error(supplier);
         } else {
-            return DataResult.success(p_143796_);
+            return DataResult.success(pList);
         }
     }
 
@@ -874,103 +900,103 @@ public class Util {
         thread.start();
     }
 
-    public static void copyBetweenDirs(Path p_137564_, Path p_137565_, Path p_137566_) throws IOException {
-        Path path = p_137564_.relativize(p_137566_);
-        Path path1 = p_137565_.resolve(path);
-        Files.copy(p_137566_, path1);
+    public static void copyBetweenDirs(Path pFromDirectory, Path pToDirectory, Path pFilePath) throws IOException {
+        Path path = pFromDirectory.relativize(pFilePath);
+        Path path1 = pToDirectory.resolve(path);
+        Files.copy(pFilePath, path1);
     }
 
-    public static String sanitizeName(String p_137484_, CharPredicate p_137485_) {
-        return p_137484_.toLowerCase(Locale.ROOT)
+    public static String sanitizeName(String pFileName, CharPredicate pCharacterValidator) {
+        return pFileName.toLowerCase(Locale.ROOT)
             .chars()
-            .mapToObj(p_214666_ -> p_137485_.test((char)p_214666_) ? Character.toString((char)p_214666_) : "_")
+            .mapToObj(charIn -> pCharacterValidator.test((char)charIn) ? Character.toString((char)charIn) : "_")
             .collect(Collectors.joining());
     }
 
-    public static <K, V> SingleKeyCache<K, V> singleKeyCache(Function<K, V> p_270326_) {
-        return new SingleKeyCache<>(p_270326_);
+    public static <K, V> SingleKeyCache<K, V> singleKeyCache(Function<K, V> pComputeValue) {
+        return new SingleKeyCache<>(pComputeValue);
     }
 
-    public static <T, R> Function<T, R> memoize(final Function<T, R> p_143828_) {
+    public static <T, R> Function<T, R> memoize(final Function<T, R> pMemoFunction) {
         return new Function<T, R>() {
             private final Map<T, R> cache = new ConcurrentHashMap<>();
 
             @Override
-            public R apply(T p_214691_) {
-                return this.cache.computeIfAbsent(p_214691_, p_143828_);
+            public R apply(T p_apply_1_) {
+                return this.cache.computeIfAbsent(p_apply_1_, pMemoFunction);
             }
 
             @Override
             public String toString() {
-                return "memoize/1[function=" + p_143828_ + ", size=" + this.cache.size() + "]";
+                return "memoize/1[function=" + pMemoFunction + ", size=" + this.cache.size() + "]";
             }
         };
     }
 
-    public static <T, U, R> BiFunction<T, U, R> memoize(final BiFunction<T, U, R> p_143822_) {
+    public static <T, U, R> BiFunction<T, U, R> memoize(final BiFunction<T, U, R> pMemoBiFunction) {
         return new BiFunction<T, U, R>() {
             private final Map<Pair<T, U>, R> cache = new ConcurrentHashMap<>();
 
             @Override
-            public R apply(T p_214700_, U p_214701_) {
-                return this.cache.computeIfAbsent(Pair.of(p_214700_, p_214701_), p_214698_ -> p_143822_.apply(p_214698_.getFirst(), p_214698_.getSecond()));
+            public R apply(T p_apply_1_, U p_apply_2_) {
+                return this.cache.computeIfAbsent(Pair.of(p_apply_1_, p_apply_2_), pairIn -> pMemoBiFunction.apply(pairIn.getFirst(), pairIn.getSecond()));
             }
 
             @Override
             public String toString() {
-                return "memoize/2[function=" + p_143822_ + ", size=" + this.cache.size() + "]";
+                return "memoize/2[function=" + pMemoBiFunction + ", size=" + this.cache.size() + "]";
             }
         };
     }
 
-    public static <T> List<T> toShuffledList(Stream<T> p_214662_, RandomSource p_214663_) {
-        ObjectArrayList<T> objectarraylist = p_214662_.collect(ObjectArrayList.toList());
-        shuffle(objectarraylist, p_214663_);
+    public static <T> List<T> toShuffledList(Stream<T> pStream, RandomSource pRandom) {
+        ObjectArrayList<T> objectarraylist = pStream.collect(ObjectArrayList.toList());
+        shuffle(objectarraylist, pRandom);
         return objectarraylist;
     }
 
-    public static IntArrayList toShuffledList(IntStream p_214659_, RandomSource p_214660_) {
-        IntArrayList intarraylist = IntArrayList.wrap(p_214659_.toArray());
+    public static IntArrayList toShuffledList(IntStream pStream, RandomSource pRandom) {
+        IntArrayList intarraylist = IntArrayList.wrap(pStream.toArray());
         int i = intarraylist.size();
 
         for (int j = i; j > 1; j--) {
-            int k = p_214660_.nextInt(j);
+            int k = pRandom.nextInt(j);
             intarraylist.set(j - 1, intarraylist.set(k, intarraylist.getInt(j - 1)));
         }
 
         return intarraylist;
     }
 
-    public static <T> List<T> shuffledCopy(T[] p_214682_, RandomSource p_214683_) {
-        ObjectArrayList<T> objectarraylist = new ObjectArrayList<>(p_214682_);
-        shuffle(objectarraylist, p_214683_);
+    public static <T> List<T> shuffledCopy(T[] pArray, RandomSource pRandom) {
+        ObjectArrayList<T> objectarraylist = new ObjectArrayList<>(pArray);
+        shuffle(objectarraylist, pRandom);
         return objectarraylist;
     }
 
-    public static <T> List<T> shuffledCopy(ObjectArrayList<T> p_214612_, RandomSource p_214613_) {
-        ObjectArrayList<T> objectarraylist = new ObjectArrayList<>(p_214612_);
-        shuffle(objectarraylist, p_214613_);
+    public static <T> List<T> shuffledCopy(ObjectArrayList<T> pList, RandomSource pRandom) {
+        ObjectArrayList<T> objectarraylist = new ObjectArrayList<>(pList);
+        shuffle(objectarraylist, pRandom);
         return objectarraylist;
     }
 
-    public static <T> void shuffle(List<T> p_309952_, RandomSource p_214675_) {
-        int i = p_309952_.size();
+    public static <T> void shuffle(List<T> pList, RandomSource pRandom) {
+        int i = pList.size();
 
         for (int j = i; j > 1; j--) {
-            int k = p_214675_.nextInt(j);
-            p_309952_.set(j - 1, p_309952_.set(k, p_309952_.get(j - 1)));
+            int k = pRandom.nextInt(j);
+            pList.set(j - 1, pList.set(k, pList.get(j - 1)));
         }
     }
 
-    public static <T> CompletableFuture<T> blockUntilDone(Function<Executor, CompletableFuture<T>> p_214680_) {
-        return blockUntilDone(p_214680_, CompletableFuture::isDone);
+    public static <T> CompletableFuture<T> blockUntilDone(Function<Executor, CompletableFuture<T>> pTask) {
+        return blockUntilDone(pTask, CompletableFuture::isDone);
     }
 
-    public static <T> T blockUntilDone(Function<Executor, T> p_214653_, Predicate<T> p_214654_) {
+    public static <T> T blockUntilDone(Function<Executor, T> pTask, Predicate<T> pDonePredicate) {
         BlockingQueue<Runnable> blockingqueue = new LinkedBlockingQueue<>();
-        T t = p_214653_.apply(blockingqueue::add);
+        T t = pTask.apply(blockingqueue::add);
 
-        while (!p_214654_.test(t)) {
+        while (!pDonePredicate.test(t)) {
             try {
                 Runnable runnable = blockingqueue.poll(100L, TimeUnit.MILLISECONDS);
                 if (runnable != null) {
@@ -990,72 +1016,72 @@ public class Util {
         return t;
     }
 
-    public static <T> ToIntFunction<T> createIndexLookup(List<T> p_214687_) {
-        int i = p_214687_.size();
+    public static <T> ToIntFunction<T> createIndexLookup(List<T> pList) {
+        int i = pList.size();
         if (i < 8) {
-            return p_214687_::indexOf;
+            return pList::indexOf;
         } else {
             Object2IntMap<T> object2intmap = new Object2IntOpenHashMap<>(i);
             object2intmap.defaultReturnValue(-1);
 
             for (int j = 0; j < i; j++) {
-                object2intmap.put(p_214687_.get(j), j);
+                object2intmap.put(pList.get(j), j);
             }
 
             return object2intmap;
         }
     }
 
-    public static <T> ToIntFunction<T> createIndexIdentityLookup(List<T> p_310693_) {
-        int i = p_310693_.size();
+    public static <T> ToIntFunction<T> createIndexIdentityLookup(List<T> pList) {
+        int i = pList.size();
         if (i < 8) {
-            ReferenceList<T> referencelist = new ReferenceImmutableList<>(p_310693_);
+            ReferenceList<T> referencelist = new ReferenceImmutableList<>(pList);
             return referencelist::indexOf;
         } else {
             Reference2IntMap<T> reference2intmap = new Reference2IntOpenHashMap<>(i);
             reference2intmap.defaultReturnValue(-1);
 
             for (int j = 0; j < i; j++) {
-                reference2intmap.put(p_310693_.get(j), j);
+                reference2intmap.put(pList.get(j), j);
             }
 
             return reference2intmap;
         }
     }
 
-    public static <A, B> Typed<B> writeAndReadTypedOrThrow(Typed<A> p_309938_, Type<B> p_312439_, UnaryOperator<Dynamic<?>> p_312172_) {
-        Dynamic<?> dynamic = (Dynamic<?>)p_309938_.write().getOrThrow();
-        return readTypedOrThrow(p_312439_, p_312172_.apply(dynamic), true);
+    public static <A, B> Typed<B> writeAndReadTypedOrThrow(Typed<A> pTyped, Type<B> pType, UnaryOperator<Dynamic<?>> pOperator) {
+        Dynamic<?> dynamic = (Dynamic<?>)pTyped.write().getOrThrow();
+        return readTypedOrThrow(pType, pOperator.apply(dynamic), true);
     }
 
-    public static <T> Typed<T> readTypedOrThrow(Type<T> p_309502_, Dynamic<?> p_310749_) {
-        return readTypedOrThrow(p_309502_, p_310749_, false);
+    public static <T> Typed<T> readTypedOrThrow(Type<T> pType, Dynamic<?> pData) {
+        return readTypedOrThrow(pType, pData, false);
     }
 
-    public static <T> Typed<T> readTypedOrThrow(Type<T> p_309451_, Dynamic<?> p_312737_, boolean p_310890_) {
-        DataResult<Typed<T>> dataresult = p_309451_.readTyped(p_312737_).map(Pair::getFirst);
+    public static <T> Typed<T> readTypedOrThrow(Type<T> pType, Dynamic<?> pData, boolean pPartial) {
+        DataResult<Typed<T>> dataresult = pType.readTyped(pData).map(Pair::getFirst);
 
         try {
-            return p_310890_ ? dataresult.getPartialOrThrow(IllegalStateException::new) : dataresult.getOrThrow(IllegalStateException::new);
+            return pPartial ? dataresult.getPartialOrThrow(IllegalStateException::new) : dataresult.getOrThrow(IllegalStateException::new);
         } catch (IllegalStateException illegalstateexception) {
             CrashReport crashreport = CrashReport.forThrowable(illegalstateexception, "Reading type");
             CrashReportCategory crashreportcategory = crashreport.addCategory("Info");
-            crashreportcategory.setDetail("Data", p_312737_);
-            crashreportcategory.setDetail("Type", p_309451_);
+            crashreportcategory.setDetail("Data", pData);
+            crashreportcategory.setDetail("Type", pType);
             throw new ReportedException(crashreport);
         }
     }
 
-    public static <T> List<T> copyAndAdd(List<T> p_329243_, T p_329663_) {
-        return ImmutableList.<T>builderWithExpectedSize(p_329243_.size() + 1).addAll(p_329243_).add(p_329663_).build();
+    public static <T> List<T> copyAndAdd(List<T> pList, T pValue) {
+        return ImmutableList.<T>builderWithExpectedSize(pList.size() + 1).addAll(pList).add(pValue).build();
     }
 
-    public static <T> List<T> copyAndAdd(T p_330591_, List<T> p_336069_) {
-        return ImmutableList.<T>builderWithExpectedSize(p_336069_.size() + 1).add(p_330591_).addAll(p_336069_).build();
+    public static <T> List<T> copyAndAdd(T pValue, List<T> pList) {
+        return ImmutableList.<T>builderWithExpectedSize(pList.size() + 1).add(pValue).addAll(pList).build();
     }
 
-    public static <K, V> Map<K, V> copyAndPut(Map<K, V> p_334319_, K p_335336_, V p_331863_) {
-        return ImmutableMap.<K, V>builderWithExpectedSize(p_334319_.size() + 1).putAll(p_334319_).put(p_335336_, p_331863_).buildKeepingLast();
+    public static <K, V> Map<K, V> copyAndPut(Map<K, V> pMap, K pKey, V pValue) {
+        return ImmutableMap.<K, V>builderWithExpectedSize(pMap.size() + 1).putAll(pMap).put(pKey, pValue).buildKeepingLast();
     }
 
     public static enum OS {
@@ -1077,45 +1103,46 @@ public class Util {
 
         private final String telemetryName;
 
-        OS(final String p_183998_) {
-            this.telemetryName = p_183998_;
+        private OS(final String pTelemetryName) {
+            this.telemetryName = pTelemetryName;
         }
 
-        public void openUri(URI p_137649_) {
+        public void openUri(URI pUri) {
             try {
                 Process process = AccessController.doPrivileged(
-                    (PrivilegedExceptionAction<Process>)(() -> Runtime.getRuntime().exec(this.getOpenUriArguments(p_137649_)))
+                    (PrivilegedExceptionAction<Process>)(() -> Runtime.getRuntime().exec(this.getOpenUriArguments(pUri)))
                 );
                 process.getInputStream().close();
                 process.getErrorStream().close();
                 process.getOutputStream().close();
-            } catch (IOException | PrivilegedActionException privilegedactionexception) {
-                Util.LOGGER.error("Couldn't open location '{}'", p_137649_, privilegedactionexception);
+            } catch (PrivilegedActionException | IOException ioexception) {
+                Util.LOGGER.error("Couldn't open location '{}'", pUri, ioexception);
+                Util.exceptionOpenUrl = ioexception;
             }
         }
 
-        public void openFile(File p_137645_) {
-            this.openUri(p_137645_.toURI());
+        public void openFile(File pFile) {
+            this.openUri(pFile.toURI());
         }
 
-        public void openPath(Path p_342716_) {
-            this.openUri(p_342716_.toUri());
+        public void openPath(Path pPath) {
+            this.openUri(pPath.toUri());
         }
 
-        protected String[] getOpenUriArguments(URI p_344731_) {
-            String s = p_344731_.toString();
-            if ("file".equals(p_344731_.getScheme())) {
+        protected String[] getOpenUriArguments(URI pUri) {
+            String s = pUri.toString();
+            if ("file".equals(pUri.getScheme())) {
                 s = s.replace("file:", "file://");
             }
 
             return new String[]{"xdg-open", s};
         }
 
-        public void openUri(String p_137647_) {
+        public void openUri(String pUri) {
             try {
-                this.openUri(new URI(p_137647_));
-            } catch (IllegalArgumentException | URISyntaxException urisyntaxexception) {
-                Util.LOGGER.error("Couldn't open uri '{}'", p_137647_, urisyntaxexception);
+                this.openUri(new URI(pUri));
+            } catch (URISyntaxException | IllegalArgumentException illegalargumentexception) {
+                Util.LOGGER.error("Couldn't open uri '{}'", pUri, illegalargumentexception);
             }
         }
 

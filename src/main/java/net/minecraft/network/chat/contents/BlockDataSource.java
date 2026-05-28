@@ -22,14 +22,14 @@ public record BlockDataSource(String posPattern, @Nullable Coordinates compiledP
     );
     public static final DataSource.Type<BlockDataSource> TYPE = new DataSource.Type<>(SUB_CODEC, "block");
 
-    public BlockDataSource(String p_237312_) {
-        this(p_237312_, compilePos(p_237312_));
+    public BlockDataSource(String pPosPattern) {
+        this(pPosPattern, compilePos(pPosPattern));
     }
 
     @Nullable
-    private static Coordinates compilePos(String p_237318_) {
+    private static Coordinates compilePos(String pPosPattern) {
         try {
-            return BlockPosArgument.blockPos().parse(new StringReader(p_237318_));
+            return BlockPosArgument.blockPos().parse(new StringReader(pPosPattern));
         } catch (CommandSyntaxException commandsyntaxexception) {
             return null;
         }
@@ -62,11 +62,11 @@ public record BlockDataSource(String posPattern, @Nullable Coordinates compiledP
     }
 
     @Override
-    public boolean equals(Object p_237321_) {
-        if (this == p_237321_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            if (p_237321_ instanceof BlockDataSource blockdatasource && this.posPattern.equals(blockdatasource.posPattern)) {
+            if (pOther instanceof BlockDataSource blockdatasource && this.posPattern.equals(blockdatasource.posPattern)) {
                 return true;
             }
 

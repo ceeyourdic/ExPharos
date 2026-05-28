@@ -25,8 +25,8 @@ public class TrialSpawnerBlockEntity extends BlockEntity implements Spawner, Tri
     private static final Logger LOGGER = LogUtils.getLogger();
     private TrialSpawner trialSpawner;
 
-    public TrialSpawnerBlockEntity(BlockPos p_309527_, BlockState p_312341_) {
-        super(BlockEntityType.TRIAL_SPAWNER, p_309527_, p_312341_);
+    public TrialSpawnerBlockEntity(BlockPos pPos, BlockState pState) {
+        super(BlockEntityType.TRIAL_SPAWNER, pPos, pState);
         PlayerDetector playerdetector = PlayerDetector.NO_CREATIVE_PLAYERS;
         PlayerDetector.EntitySelector playerdetector$entityselector = PlayerDetector.EntitySelector.SELECT_FROM_LEVEL;
         this.trialSpawner = new TrialSpawner(this, playerdetector, playerdetector$entityselector);

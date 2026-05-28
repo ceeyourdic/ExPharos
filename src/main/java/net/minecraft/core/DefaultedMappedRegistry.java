@@ -12,9 +12,9 @@ public class DefaultedMappedRegistry<T> extends MappedRegistry<T> implements Def
     private final ResourceLocation defaultKey;
     private Holder.Reference<T> defaultValue;
 
-    public DefaultedMappedRegistry(String p_260196_, ResourceKey<? extends Registry<T>> p_259440_, Lifecycle p_260260_, boolean p_259808_) {
-        super(p_259440_, p_260260_, p_259808_);
-        this.defaultKey = ResourceLocation.parse(p_260196_);
+    public DefaultedMappedRegistry(String pDefaultKey, ResourceKey<? extends Registry<T>> pKey, Lifecycle pRegistryLifecycle, boolean pHasIntrusiveHolders) {
+        super(pKey, pRegistryLifecycle, pHasIntrusiveHolders);
+        this.defaultKey = ResourceLocation.parse(pDefaultKey);
     }
 
     @Override

@@ -25,8 +25,8 @@ public class JukeboxBlockEntity extends BlockEntity implements ContainerSingleIt
     private ItemStack item = ItemStack.EMPTY;
     private final JukeboxSongPlayer jukeboxSongPlayer = new JukeboxSongPlayer(this::onSongChanged, this.getBlockPos());
 
-    public JukeboxBlockEntity(BlockPos p_155613_, BlockState p_155614_) {
-        super(BlockEntityType.JUKEBOX, p_155613_, p_155614_);
+    public JukeboxBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        super(BlockEntityType.JUKEBOX, pPos, pBlockState);
     }
 
     public JukeboxSongPlayer getSongPlayer() {
@@ -38,9 +38,9 @@ public class JukeboxBlockEntity extends BlockEntity implements ContainerSingleIt
         this.setChanged();
     }
 
-    private void notifyItemChangedInJukebox(boolean p_342785_) {
+    private void notifyItemChangedInJukebox(boolean pHasRecord) {
         if (this.level != null && this.level.getBlockState(this.getBlockPos()) == this.getBlockState()) {
-            this.level.setBlock(this.getBlockPos(), this.getBlockState().setValue(JukeboxBlock.HAS_RECORD, Boolean.valueOf(p_342785_)), 2);
+            this.level.setBlock(this.getBlockPos(), this.getBlockState().setValue(JukeboxBlock.HAS_RECORD, Boolean.valueOf(pHasRecord)), 2);
             this.level.gameEvent(GameEvent.BLOCK_CHANGE, this.getBlockPos(), GameEvent.Context.of(this.getBlockState()));
         }
     }
@@ -60,8 +60,8 @@ public class JukeboxBlockEntity extends BlockEntity implements ContainerSingleIt
         }
     }
 
-    public static void tick(Level p_273615_, BlockPos p_273143_, BlockState p_273372_, JukeboxBlockEntity p_343932_) {
-        p_343932_.jukeboxSongPlayer.tick(p_273615_, p_273372_);
+    public static void tick(Level pLevel, BlockPos pPos, BlockState pState, JukeboxBlockEntity pJukebox) {
+        pJukebox.jukeboxSongPlayer.tick(pLevel, pState);
     }
 
     public int getComparatorOutput() {
@@ -145,9 +145,9 @@ public class JukeboxBlockEntity extends BlockEntity implements ContainerSingleIt
     }
 
     @VisibleForTesting
-    public void setSongItemWithoutPlaying(ItemStack p_343692_) {
-        this.item = p_343692_;
-        JukeboxSong.fromStack(this.level.registryAccess(), p_343692_).ifPresent(p_343857_ -> this.jukeboxSongPlayer.setSongWithoutPlaying((Holder<JukeboxSong>)p_343857_, 0L));
+    public void setSongItemWithoutPlaying(ItemStack pStack) {
+        this.item = pStack;
+        JukeboxSong.fromStack(this.level.registryAccess(), pStack).ifPresent(p_343857_ -> this.jukeboxSongPlayer.setSongWithoutPlaying((Holder<JukeboxSong>)p_343857_, 0L));
         this.level.updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
         this.setChanged();
     }

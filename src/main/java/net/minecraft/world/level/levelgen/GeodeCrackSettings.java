@@ -18,9 +18,9 @@ public class GeodeCrackSettings {
     public final double baseCrackSize;
     public final int crackPointOffset;
 
-    public GeodeCrackSettings(double p_158330_, double p_158331_, int p_158332_) {
-        this.generateCrackChance = p_158330_;
-        this.baseCrackSize = p_158331_;
-        this.crackPointOffset = p_158332_;
+    public GeodeCrackSettings(double pGenerateCrackChance, double pBaseCrackSize, int pCrackPointOffset) {
+        this.generateCrackChance = pGenerateCrackChance;
+        this.baseCrackSize = pBaseCrackSize;
+        this.crackPointOffset = pCrackPointOffset;
     }
 }

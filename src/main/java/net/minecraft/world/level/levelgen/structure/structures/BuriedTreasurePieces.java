@@ -19,12 +19,12 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class BuriedTreasurePieces {
     public static class BuriedTreasurePiece extends StructurePiece {
-        public BuriedTreasurePiece(BlockPos p_227366_) {
-            super(StructurePieceType.BURIED_TREASURE_PIECE, 0, new BoundingBox(p_227366_));
+        public BuriedTreasurePiece(BlockPos pPos) {
+            super(StructurePieceType.BURIED_TREASURE_PIECE, 0, new BoundingBox(pPos));
         }
 
-        public BuriedTreasurePiece(CompoundTag p_227368_) {
-            super(StructurePieceType.BURIED_TREASURE_PIECE, p_227368_);
+        public BuriedTreasurePiece(CompoundTag pTag) {
+            super(StructurePieceType.BURIED_TREASURE_PIECE, pTag);
         }
 
         @Override
@@ -77,8 +77,8 @@ public class BuriedTreasurePieces {
             }
         }
 
-        private boolean isLiquid(BlockState p_227381_) {
-            return p_227381_ == Blocks.WATER.defaultBlockState() || p_227381_ == Blocks.LAVA.defaultBlockState();
+        private boolean isLiquid(BlockState pState) {
+            return pState == Blocks.WATER.defaultBlockState() || pState == Blocks.LAVA.defaultBlockState();
         }
     }
 }

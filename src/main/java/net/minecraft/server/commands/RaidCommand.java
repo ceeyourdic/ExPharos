@@ -27,8 +27,8 @@ import net.minecraft.world.entity.raid.Raids;
 import net.minecraft.world.phys.Vec3;
 
 public class RaidCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> p_180469_, CommandBuildContext p_334392_) {
-        p_180469_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher, CommandBuildContext pContext) {
+        pDispatcher.register(
             Commands.literal("raid")
                 .requires(p_180498_ -> p_180498_.hasPermission(3))
                 .then(
@@ -43,7 +43,7 @@ public class RaidCommand {
                 .then(
                     Commands.literal("sound")
                         .then(
-                            Commands.argument("type", ComponentArgument.textComponent(p_334392_))
+                            Commands.argument("type", ComponentArgument.textComponent(pContext))
                                 .executes(p_180492_ -> playSound(p_180492_.getSource(), ComponentArgument.getComponent(p_180492_, "type")))
                         )
                 )
@@ -59,8 +59,8 @@ public class RaidCommand {
         );
     }
 
-    private static int glow(CommandSourceStack p_180473_) throws CommandSyntaxException {
-        Raid raid = getRaid(p_180473_.getPlayerOrException());
+    private static int glow(CommandSourceStack pSource) throws CommandSyntaxException {
+        Raid raid = getRaid(pSource.getPlayerOrException());
         if (raid != null) {
             for (Raider raider : raid.getAllRaiders()) {
                 raider.addEffect(new MobEffectInstance(MobEffects.GLOWING, 1000, 1));
@@ -70,44 +70,44 @@ public class RaidCommand {
         return 1;
     }
 
-    private static int setRaidOmenLevel(CommandSourceStack p_180475_, int p_180476_) throws CommandSyntaxException {
-        Raid raid = getRaid(p_180475_.getPlayerOrException());
+    private static int setRaidOmenLevel(CommandSourceStack pSource, int pLevel) throws CommandSyntaxException {
+        Raid raid = getRaid(pSource.getPlayerOrException());
         if (raid != null) {
             int i = raid.getMaxRaidOmenLevel();
-            if (p_180476_ > i) {
-                p_180475_.sendFailure(Component.literal("Sorry, the max raid omen level you can set is " + i));
+            if (pLevel > i) {
+                pSource.sendFailure(Component.literal("Sorry, the max raid omen level you can set is " + i));
             } else {
                 int j = raid.getRaidOmenLevel();
-                raid.setRaidOmenLevel(p_180476_);
-                p_180475_.sendSuccess(() -> Component.literal("Changed village's raid omen level from " + j + " to " + p_180476_), false);
+                raid.setRaidOmenLevel(pLevel);
+                pSource.sendSuccess(() -> Component.literal("Changed village's raid omen level from " + j + " to " + pLevel), false);
             }
         } else {
-            p_180475_.sendFailure(Component.literal("No raid found here"));
+            pSource.sendFailure(Component.literal("No raid found here"));
         }
 
         return 1;
     }
 
-    private static int spawnLeader(CommandSourceStack p_180483_) {
-        p_180483_.sendSuccess(() -> Component.literal("Spawned a raid captain"), false);
-        Raider raider = EntityType.PILLAGER.create(p_180483_.getLevel(), EntitySpawnReason.COMMAND);
+    private static int spawnLeader(CommandSourceStack pSource) {
+        pSource.sendSuccess(() -> Component.literal("Spawned a raid captain"), false);
+        Raider raider = EntityType.PILLAGER.create(pSource.getLevel(), EntitySpawnReason.COMMAND);
         if (raider == null) {
-            p_180483_.sendFailure(Component.literal("Pillager failed to spawn"));
+            pSource.sendFailure(Component.literal("Pillager failed to spawn"));
             return 0;
         } else {
             raider.setPatrolLeader(true);
-            raider.setItemSlot(EquipmentSlot.HEAD, Raid.getOminousBannerInstance(p_180483_.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
-            raider.setPos(p_180483_.getPosition().x, p_180483_.getPosition().y, p_180483_.getPosition().z);
-            raider.finalizeSpawn(p_180483_.getLevel(), p_180483_.getLevel().getCurrentDifficultyAt(BlockPos.containing(p_180483_.getPosition())), EntitySpawnReason.COMMAND, null);
-            p_180483_.getLevel().addFreshEntityWithPassengers(raider);
+            raider.setItemSlot(EquipmentSlot.HEAD, Raid.getOminousBannerInstance(pSource.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
+            raider.setPos(pSource.getPosition().x, pSource.getPosition().y, pSource.getPosition().z);
+            raider.finalizeSpawn(pSource.getLevel(), pSource.getLevel().getCurrentDifficultyAt(BlockPos.containing(pSource.getPosition())), EntitySpawnReason.COMMAND, null);
+            pSource.getLevel().addFreshEntityWithPassengers(raider);
             return 1;
         }
     }
 
-    private static int playSound(CommandSourceStack p_180478_, @Nullable Component p_180479_) {
-        if (p_180479_ != null && p_180479_.getString().equals("local")) {
-            ServerLevel serverlevel = p_180478_.getLevel();
-            Vec3 vec3 = p_180478_.getPosition().add(5.0, 0.0, 0.0);
+    private static int playSound(CommandSourceStack pSource, @Nullable Component pType) {
+        if (pType != null && pType.getString().equals("local")) {
+            ServerLevel serverlevel = pSource.getLevel();
+            Vec3 vec3 = pSource.getPosition().add(5.0, 0.0, 0.0);
             serverlevel.playSeededSound(
                 null, vec3.x, vec3.y, vec3.z, SoundEvents.RAID_HORN, SoundSource.NEUTRAL, 2.0F, 1.0F, serverlevel.random.nextLong()
             );
@@ -116,47 +116,47 @@ public class RaidCommand {
         return 1;
     }
 
-    private static int start(CommandSourceStack p_180485_, int p_180486_) throws CommandSyntaxException {
-        ServerPlayer serverplayer = p_180485_.getPlayerOrException();
+    private static int start(CommandSourceStack pSource, int pBadOmenLevel) throws CommandSyntaxException {
+        ServerPlayer serverplayer = pSource.getPlayerOrException();
         BlockPos blockpos = serverplayer.blockPosition();
         if (serverplayer.serverLevel().isRaided(blockpos)) {
-            p_180485_.sendFailure(Component.literal("Raid already started close by"));
+            pSource.sendFailure(Component.literal("Raid already started close by"));
             return -1;
         } else {
             Raids raids = serverplayer.serverLevel().getRaids();
             Raid raid = raids.createOrExtendRaid(serverplayer, serverplayer.blockPosition());
             if (raid != null) {
-                raid.setRaidOmenLevel(p_180486_);
+                raid.setRaidOmenLevel(pBadOmenLevel);
                 raids.setDirty();
-                p_180485_.sendSuccess(() -> Component.literal("Created a raid in your local village"), false);
+                pSource.sendSuccess(() -> Component.literal("Created a raid in your local village"), false);
             } else {
-                p_180485_.sendFailure(Component.literal("Failed to create a raid in your local village"));
+                pSource.sendFailure(Component.literal("Failed to create a raid in your local village"));
             }
 
             return 1;
         }
     }
 
-    private static int stop(CommandSourceStack p_180490_) throws CommandSyntaxException {
-        ServerPlayer serverplayer = p_180490_.getPlayerOrException();
+    private static int stop(CommandSourceStack pSource) throws CommandSyntaxException {
+        ServerPlayer serverplayer = pSource.getPlayerOrException();
         BlockPos blockpos = serverplayer.blockPosition();
         Raid raid = serverplayer.serverLevel().getRaidAt(blockpos);
         if (raid != null) {
             raid.stop();
-            p_180490_.sendSuccess(() -> Component.literal("Stopped raid"), false);
+            pSource.sendSuccess(() -> Component.literal("Stopped raid"), false);
             return 1;
         } else {
-            p_180490_.sendFailure(Component.literal("No raid here"));
+            pSource.sendFailure(Component.literal("No raid here"));
             return -1;
         }
     }
 
-    private static int check(CommandSourceStack p_180494_) throws CommandSyntaxException {
-        Raid raid = getRaid(p_180494_.getPlayerOrException());
+    private static int check(CommandSourceStack pSource) throws CommandSyntaxException {
+        Raid raid = getRaid(pSource.getPlayerOrException());
         if (raid != null) {
             StringBuilder stringbuilder = new StringBuilder();
             stringbuilder.append("Found a started raid! ");
-            p_180494_.sendSuccess(() -> Component.literal(stringbuilder.toString()), false);
+            pSource.sendSuccess(() -> Component.literal(stringbuilder.toString()), false);
             StringBuilder stringbuilder1 = new StringBuilder();
             stringbuilder1.append("Num groups spawned: ");
             stringbuilder1.append(raid.getGroupsSpawned());
@@ -168,16 +168,16 @@ public class RaidCommand {
             stringbuilder1.append(raid.getHealthOfLivingRaiders());
             stringbuilder1.append(" / ");
             stringbuilder1.append(raid.getTotalHealth());
-            p_180494_.sendSuccess(() -> Component.literal(stringbuilder1.toString()), false);
+            pSource.sendSuccess(() -> Component.literal(stringbuilder1.toString()), false);
             return 1;
         } else {
-            p_180494_.sendFailure(Component.literal("Found no started raids"));
+            pSource.sendFailure(Component.literal("Found no started raids"));
             return 0;
         }
     }
 
     @Nullable
-    private static Raid getRaid(ServerPlayer p_180467_) {
-        return p_180467_.serverLevel().getRaidAt(p_180467_.blockPosition());
+    private static Raid getRaid(ServerPlayer pPlayer) {
+        return pPlayer.serverLevel().getRaidAt(pPlayer.blockPosition());
     }
 }

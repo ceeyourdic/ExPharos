@@ -38,12 +38,12 @@ public record ResolvableProfile(Optional<String> name, Optional<UUID> id, Proper
         ResolvableProfile::new
     );
 
-    public ResolvableProfile(Optional<String> p_328556_, Optional<UUID> p_331819_, PropertyMap p_329390_) {
-        this(p_328556_, p_331819_, p_329390_, createProfile(p_328556_, p_331819_, p_329390_));
+    public ResolvableProfile(Optional<String> pName, Optional<UUID> pId, PropertyMap pProperties) {
+        this(pName, pId, pProperties, createProfile(pName, pId, pProperties));
     }
 
-    public ResolvableProfile(GameProfile p_332940_) {
-        this(Optional.of(p_332940_.getName()), Optional.of(p_332940_.getId()), p_332940_.getProperties(), p_332940_);
+    public ResolvableProfile(GameProfile pProfile) {
+        this(Optional.of(pProfile.getName()), Optional.of(pProfile.getId()), pProfile.getProperties(), pProfile);
     }
 
     public CompletableFuture<ResolvableProfile> resolve() {
@@ -60,9 +60,9 @@ public record ResolvableProfile(Optional<String> name, Optional<UUID> id, Proper
         }
     }
 
-    private static GameProfile createProfile(Optional<String> p_329472_, Optional<UUID> p_333643_, PropertyMap p_330035_) {
-        GameProfile gameprofile = new GameProfile(p_333643_.orElse(Util.NIL_UUID), p_329472_.orElse(""));
-        gameprofile.getProperties().putAll(p_330035_);
+    private static GameProfile createProfile(Optional<String> pName, Optional<UUID> pId, PropertyMap pProperties) {
+        GameProfile gameprofile = new GameProfile(pId.orElse(Util.NIL_UUID), pName.orElse(""));
+        gameprofile.getProperties().putAll(pProperties);
         return gameprofile;
     }
 

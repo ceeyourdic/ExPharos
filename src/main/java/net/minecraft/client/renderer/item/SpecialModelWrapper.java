@@ -13,17 +13,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class SpecialModelWrapper<T> implements ItemModel {
     private final SpecialModelRenderer<T> specialRenderer;
     private final BakedModel baseModel;
 
-    public SpecialModelWrapper(SpecialModelRenderer<T> p_375554_, BakedModel p_376824_) {
-        this.specialRenderer = p_375554_;
-        this.baseModel = p_376824_;
+    public SpecialModelWrapper(SpecialModelRenderer<T> pSpecialRenderer, BakedModel pBaseModel) {
+        this.specialRenderer = pSpecialRenderer;
+        this.baseModel = pBaseModel;
     }
 
     @Override
@@ -37,6 +34,7 @@ public class SpecialModelWrapper<T> implements ItemModel {
         int p_375847_
     ) {
         ItemStackRenderState.LayerRenderState itemstackrenderstate$layerrenderstate = p_376096_.newLayer();
+        itemstackrenderstate$layerrenderstate.setItemStack(p_376294_);
         if (p_376294_.hasFoil()) {
             itemstackrenderstate$layerrenderstate.setFoilType(ItemStackRenderState.FoilType.STANDARD);
         }
@@ -44,14 +42,13 @@ public class SpecialModelWrapper<T> implements ItemModel {
         itemstackrenderstate$layerrenderstate.setupSpecialModel(this.specialRenderer, this.specialRenderer.extractArgument(p_376294_), this.baseModel);
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static record Unbaked(ResourceLocation base, SpecialModelRenderer.Unbaked specialModel) implements ItemModel.Unbaked {
         public static final MapCodec<SpecialModelWrapper.Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(
-            p_375865_ -> p_375865_.group(
+            instanceIn -> instanceIn.group(
                         ResourceLocation.CODEC.fieldOf("base").forGetter(SpecialModelWrapper.Unbaked::base),
                         SpecialModelRenderers.CODEC.fieldOf("model").forGetter(SpecialModelWrapper.Unbaked::specialModel)
                     )
-                    .apply(p_375865_, SpecialModelWrapper.Unbaked::new)
+                    .apply(instanceIn, SpecialModelWrapper.Unbaked::new)
         );
 
         @Override

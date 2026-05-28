@@ -85,16 +85,16 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
     protected Map<String, String> customReportDetails;
     protected ServerLinks serverLinks;
 
-    protected ClientCommonPacketListenerImpl(Minecraft p_300051_, Connection p_300688_, CommonListenerCookie p_300429_) {
-        this.minecraft = p_300051_;
-        this.connection = p_300688_;
-        this.serverData = p_300429_.serverData();
-        this.serverBrand = p_300429_.serverBrand();
-        this.telemetryManager = p_300429_.telemetryManager();
-        this.postDisconnectScreen = p_300429_.postDisconnectScreen();
-        this.serverCookies = p_300429_.serverCookies();
-        this.customReportDetails = p_300429_.customReportDetails();
-        this.serverLinks = p_300429_.serverLinks();
+    protected ClientCommonPacketListenerImpl(Minecraft pMinecraft, Connection pConnection, CommonListenerCookie pCommonListenerCookie) {
+        this.minecraft = pMinecraft;
+        this.connection = pConnection;
+        this.serverData = pCommonListenerCookie.serverData();
+        this.serverBrand = pCommonListenerCookie.serverBrand();
+        this.telemetryManager = pCommonListenerCookie.telemetryManager();
+        this.postDisconnectScreen = pCommonListenerCookie.postDisconnectScreen();
+        this.serverCookies = pCommonListenerCookie.serverCookies();
+        this.customReportDetails = pCommonListenerCookie.customReportDetails();
+        this.serverLinks = pCommonListenerCookie.serverLinks();
     }
 
     @Override
@@ -112,9 +112,9 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
         return new DisconnectionDetails(p_342124_, optional, optional1);
     }
 
-    private Optional<Path> storeDisconnectionReport(@Nullable Packet p_344412_, Throwable p_344707_) {
-        CrashReport crashreport = CrashReport.forThrowable(p_344707_, "Packet handling error");
-        PacketUtils.fillCrashReport(crashreport, this, p_344412_);
+    private Optional<Path> storeDisconnectionReport(@Nullable Packet pPacket, Throwable pError) {
+        CrashReport crashreport = CrashReport.forThrowable(pError, "Packet handling error");
+        PacketUtils.fillCrashReport(crashreport, this, pPacket);
         Path path = this.minecraft.gameDirectory.toPath().resolve("debug");
         Path path1 = path.resolve("disconnect-" + Util.getFilenameFormattedDateTime() + "-client.txt");
         Optional<ServerLinks.Entry> optional = this.serverLinks.findKnownType(ServerLinks.KnownLinkType.BUG_REPORT);
@@ -154,7 +154,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
         }
     }
 
-    protected abstract void handleCustomPayload(CustomPacketPayload p_297976_);
+    protected abstract void handleCustomPayload(CustomPacketPayload pPayload);
 
     @Override
     public void handleResourcePackPush(ClientboundResourcePackPushPacket p_310071_) {
@@ -182,14 +182,14 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
         p_311803_.id().ifPresentOrElse(p_308277_ -> this.minecraft.getDownloadedPackSource().popPack(p_308277_), () -> this.minecraft.getDownloadedPackSource().popAll());
     }
 
-    static Component preparePackPrompt(Component p_299226_, @Nullable Component p_298885_) {
-        return (Component)(p_298885_ == null ? p_299226_ : Component.translatable("multiplayer.texturePrompt.serverPrompt", p_299226_, p_298885_));
+    static Component preparePackPrompt(Component pLine1, @Nullable Component pLine2) {
+        return (Component)(pLine2 == null ? pLine1 : Component.translatable("multiplayer.texturePrompt.serverPrompt", pLine1, pLine2));
     }
 
     @Nullable
-    private static URL parseResourcePackUrl(String p_298850_) {
+    private static URL parseResourcePackUrl(String pUrl) {
         try {
-            URL url = new URL(p_298850_);
+            URL url = new URL(pUrl);
             String s = url.getProtocol();
             return !"http".equals(s) && !"https".equals(s) ? null : url;
         } catch (MalformedURLException malformedurlexception) {
@@ -276,8 +276,8 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
         }
     }
 
-    public void send(Packet<?> p_300175_) {
-        this.connection.send(p_300175_);
+    public void send(Packet<?> pPacket) {
+        this.connection.send(pPacket);
     }
 
     @Override
@@ -298,11 +298,11 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
         }
     }
 
-    protected Screen createDisconnectScreen(DisconnectionDetails p_342895_) {
+    protected Screen createDisconnectScreen(DisconnectionDetails pDetails) {
         Screen screen = Objects.requireNonNullElseGet(this.postDisconnectScreen, () -> new JoinMultiplayerScreen(new TitleScreen()));
         return (Screen)(this.serverData != null && this.serverData.isRealm()
-            ? new DisconnectedRealmsScreen(screen, GENERIC_DISCONNECT_MESSAGE, p_342895_.reason())
-            : new DisconnectedScreen(screen, GENERIC_DISCONNECT_MESSAGE, p_342895_));
+            ? new DisconnectedRealmsScreen(screen, GENERIC_DISCONNECT_MESSAGE, pDetails.reason())
+            : new DisconnectedScreen(screen, GENERIC_DISCONNECT_MESSAGE, pDetails));
     }
 
     @Nullable
@@ -310,24 +310,24 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
         return this.serverBrand;
     }
 
-    private void sendWhen(Packet<? extends ServerboundPacketListener> p_300852_, BooleanSupplier p_299754_, Duration p_299011_) {
-        if (p_299754_.getAsBoolean()) {
-            this.send(p_300852_);
+    private void sendWhen(Packet<? extends ServerboundPacketListener> pPacket, BooleanSupplier pSendCondition, Duration pExpirationTime) {
+        if (pSendCondition.getAsBoolean()) {
+            this.send(pPacket);
         } else {
-            this.deferredPackets.add(new ClientCommonPacketListenerImpl.DeferredPacket(p_300852_, p_299754_, Util.getMillis() + p_299011_.toMillis()));
+            this.deferredPackets.add(new ClientCommonPacketListenerImpl.DeferredPacket(pPacket, pSendCondition, Util.getMillis() + pExpirationTime.toMillis()));
         }
     }
 
-    private Screen addOrUpdatePackPrompt(UUID p_313077_, URL p_312880_, String p_309420_, boolean p_312218_, @Nullable Component p_309535_) {
+    private Screen addOrUpdatePackPrompt(UUID pId, URL pUrl, String pHash, boolean pRequired, @Nullable Component pPrompt) {
         Screen screen = this.minecraft.screen;
         return screen instanceof ClientCommonPacketListenerImpl.PackConfirmScreen clientcommonpacketlistenerimpl$packconfirmscreen
-            ? clientcommonpacketlistenerimpl$packconfirmscreen.update(this.minecraft, p_313077_, p_312880_, p_309420_, p_312218_, p_309535_)
+            ? clientcommonpacketlistenerimpl$packconfirmscreen.update(this.minecraft, pId, pUrl, pHash, pRequired, pPrompt)
             : new ClientCommonPacketListenerImpl.PackConfirmScreen(
                 this.minecraft,
                 screen,
-                List.of(new ClientCommonPacketListenerImpl.PackConfirmScreen.PendingRequest(p_313077_, p_312880_, p_309420_)),
-                p_312218_,
-                p_309535_
+                List.of(new ClientCommonPacketListenerImpl.PackConfirmScreen.PendingRequest(pId, pUrl, pHash)),
+                pRequired,
+                pPrompt
             );
     }
 
@@ -342,16 +342,16 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
         private final Screen parentScreen;
 
         PackConfirmScreen(
-            final Minecraft p_309743_,
-            @Nullable final Screen p_312679_,
-            final List<ClientCommonPacketListenerImpl.PackConfirmScreen.PendingRequest> p_312458_,
-            final boolean p_313140_,
-            @Nullable final Component p_312901_
+            final Minecraft pMinecraft,
+            @Nullable final Screen pParentScreen,
+            final List<ClientCommonPacketListenerImpl.PackConfirmScreen.PendingRequest> pRequests,
+            final boolean pRequired,
+            @Nullable final Component pPrompt
         ) {
             super(
                 p_309396_ -> {
-                    p_309743_.setScreen(p_312679_);
-                    DownloadedPackSource downloadedpacksource = p_309743_.getDownloadedPackSource();
+                    pMinecraft.setScreen(pParentScreen);
+                    DownloadedPackSource downloadedpacksource = pMinecraft.getDownloadedPackSource();
                     if (p_309396_) {
                         if (ClientCommonPacketListenerImpl.this.serverData != null) {
                             ClientCommonPacketListenerImpl.this.serverData.setResourcePackStatus(ServerData.ServerPackStatus.ENABLED);
@@ -360,14 +360,14 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
                         downloadedpacksource.allowServerPacks();
                     } else {
                         downloadedpacksource.rejectServerPacks();
-                        if (p_313140_) {
+                        if (pRequired) {
                             ClientCommonPacketListenerImpl.this.connection.disconnect(Component.translatable("multiplayer.requiredTexturePrompt.disconnect"));
                         } else if (ClientCommonPacketListenerImpl.this.serverData != null) {
                             ClientCommonPacketListenerImpl.this.serverData.setResourcePackStatus(ServerData.ServerPackStatus.DISABLED);
                         }
                     }
 
-                    for (ClientCommonPacketListenerImpl.PackConfirmScreen.PendingRequest clientcommonpacketlistenerimpl$packconfirmscreen$pendingrequest : p_312458_) {
+                    for (ClientCommonPacketListenerImpl.PackConfirmScreen.PendingRequest clientcommonpacketlistenerimpl$packconfirmscreen$pendingrequest : pRequests) {
                         downloadedpacksource.pushPack(
                             clientcommonpacketlistenerimpl$packconfirmscreen$pendingrequest.id,
                             clientcommonpacketlistenerimpl$packconfirmscreen$pendingrequest.url,
@@ -379,30 +379,30 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
                         ServerList.saveSingleServer(ClientCommonPacketListenerImpl.this.serverData);
                     }
                 },
-                p_313140_ ? Component.translatable("multiplayer.requiredTexturePrompt.line1") : Component.translatable("multiplayer.texturePrompt.line1"),
+                pRequired ? Component.translatable("multiplayer.requiredTexturePrompt.line1") : Component.translatable("multiplayer.texturePrompt.line1"),
                 ClientCommonPacketListenerImpl.preparePackPrompt(
-                    p_313140_
+                    pRequired
                         ? Component.translatable("multiplayer.requiredTexturePrompt.line2").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
                         : Component.translatable("multiplayer.texturePrompt.line2"),
-                    p_312901_
+                    pPrompt
                 ),
-                p_313140_ ? CommonComponents.GUI_PROCEED : CommonComponents.GUI_YES,
-                p_313140_ ? CommonComponents.GUI_DISCONNECT : CommonComponents.GUI_NO
+                pRequired ? CommonComponents.GUI_PROCEED : CommonComponents.GUI_YES,
+                pRequired ? CommonComponents.GUI_DISCONNECT : CommonComponents.GUI_NO
             );
-            this.requests = p_312458_;
-            this.parentScreen = p_312679_;
+            this.requests = pRequests;
+            this.parentScreen = pParentScreen;
         }
 
         public ClientCommonPacketListenerImpl.PackConfirmScreen update(
-            Minecraft p_312486_, UUID p_311436_, URL p_309404_, String p_312909_, boolean p_312985_, @Nullable Component p_309496_
+            Minecraft pMinecraft, UUID pId, URL pUrl, String pHash, boolean pRequired, @Nullable Component pPrompt
         ) {
             List<ClientCommonPacketListenerImpl.PackConfirmScreen.PendingRequest> list = ImmutableList.<ClientCommonPacketListenerImpl.PackConfirmScreen.PendingRequest>builderWithExpectedSize(
                     this.requests.size() + 1
                 )
                 .addAll(this.requests)
-                .add(new ClientCommonPacketListenerImpl.PackConfirmScreen.PendingRequest(p_311436_, p_309404_, p_312909_))
+                .add(new ClientCommonPacketListenerImpl.PackConfirmScreen.PendingRequest(pId, pUrl, pHash))
                 .build();
-            return ClientCommonPacketListenerImpl.this.new PackConfirmScreen(p_312486_, this.parentScreen, list, p_312985_, p_309496_);
+            return ClientCommonPacketListenerImpl.this.new PackConfirmScreen(pMinecraft, this.parentScreen, list, pRequired, pPrompt);
         }
 
         @OnlyIn(Dist.CLIENT)

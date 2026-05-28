@@ -5,10 +5,7 @@ import com.mojang.jtracy.MemoryPool;
 import com.mojang.jtracy.TracyClient;
 import java.nio.ByteBuffer;
 import javax.annotation.Nullable;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class GpuBuffer implements AutoCloseable {
     private static final MemoryPool MEMORY_POOl = TracyClient.createMemoryPool("GPU Buffers");
     private final BufferType type;
@@ -18,19 +15,19 @@ public class GpuBuffer implements AutoCloseable {
     public final int handle;
     public int size;
 
-    public GpuBuffer(BufferType p_367350_, BufferUsage p_363902_, int p_361832_) {
-        this.type = p_367350_;
-        this.size = p_361832_;
-        this.usage = p_363902_;
+    public GpuBuffer(BufferType pType, BufferUsage pUsage, int pSize) {
+        this.type = pType;
+        this.size = pSize;
+        this.usage = pUsage;
         this.handle = GlStateManager._glGenBuffers();
     }
 
-    public GpuBuffer(BufferType p_367048_, BufferUsage p_369969_, ByteBuffer p_364811_) {
-        this(p_367048_, p_369969_, p_364811_.remaining());
-        this.write(p_364811_, 0);
+    public GpuBuffer(BufferType pType, BufferUsage pUsage, ByteBuffer pBuffer) {
+        this(pType, pUsage, pBuffer.remaining());
+        this.write(pBuffer, 0);
     }
 
-    public void resize(int p_367249_) {
+    public void resize(int pSize) {
         if (this.closed) {
             throw new IllegalStateException("Buffer already closed");
         } else {
@@ -38,31 +35,31 @@ public class GpuBuffer implements AutoCloseable {
                 MEMORY_POOl.free((long)this.handle);
             }
 
-            this.size = p_367249_;
+            this.size = pSize;
             if (this.usage.writable) {
                 this.initialized = false;
             } else {
                 this.bind();
-                GlStateManager._glBufferData(this.type.id, (long)p_367249_, this.usage.id);
-                MEMORY_POOl.malloc((long)this.handle, p_367249_);
+                GlStateManager._glBufferData(this.type.id, (long)pSize, this.usage.id);
+                MEMORY_POOl.malloc((long)this.handle, pSize);
                 this.initialized = true;
             }
         }
     }
 
-    public void write(ByteBuffer p_363379_, int p_364980_) {
+    public void write(ByteBuffer pBuffer, int pOffset) {
         if (this.closed) {
             throw new IllegalStateException("Buffer already closed");
         } else if (!this.usage.writable) {
             throw new IllegalStateException("Buffer is not writable");
         } else {
-            int i = p_363379_.remaining();
-            if (i + p_364980_ > this.size) {
+            int i = pBuffer.remaining();
+            if (i + pOffset > this.size) {
                 throw new IllegalArgumentException(
                     "Cannot write more data than this buffer can hold (attempting to write "
                         + i
                         + " bytes at offset "
-                        + p_364980_
+                        + pOffset
                         + " to "
                         + this.size
                         + " size buffer)"
@@ -70,14 +67,14 @@ public class GpuBuffer implements AutoCloseable {
             } else {
                 this.bind();
                 if (this.initialized) {
-                    GlStateManager._glBufferSubData(this.type.id, p_364980_, p_363379_);
-                } else if (p_364980_ == 0 && i == this.size) {
-                    GlStateManager._glBufferData(this.type.id, p_363379_, this.usage.id);
+                    GlStateManager._glBufferSubData(this.type.id, pOffset, pBuffer);
+                } else if (pOffset == 0 && i == this.size) {
+                    GlStateManager._glBufferData(this.type.id, pBuffer, this.usage.id);
                     MEMORY_POOl.malloc((long)this.handle, this.size);
                     this.initialized = true;
                 } else {
                     GlStateManager._glBufferData(this.type.id, (long)this.size, this.usage.id);
-                    GlStateManager._glBufferSubData(this.type.id, p_364980_, p_363379_);
+                    GlStateManager._glBufferSubData(this.type.id, pOffset, pBuffer);
                     MEMORY_POOl.malloc((long)this.handle, this.size);
                     this.initialized = true;
                 }
@@ -91,24 +88,24 @@ public class GpuBuffer implements AutoCloseable {
     }
 
     @Nullable
-    public GpuBuffer.ReadView read(int p_361869_, int p_362198_) {
+    public GpuBuffer.ReadView read(int pOffset, int pLength) {
         if (this.closed) {
             throw new IllegalStateException("Buffer already closed");
         } else if (!this.usage.readable) {
             throw new IllegalStateException("Buffer is not readable");
-        } else if (p_361869_ + p_362198_ > this.size) {
+        } else if (pOffset + pLength > this.size) {
             throw new IllegalArgumentException(
                 "Cannot read more data than this buffer can hold (attempting to read "
-                    + p_362198_
+                    + pLength
                     + " bytes at offset "
-                    + p_361869_
+                    + pOffset
                     + " from "
                     + this.size
                     + " size buffer)"
             );
         } else {
             this.bind();
-            ByteBuffer bytebuffer = GlStateManager._glMapBufferRange(this.type.id, p_361869_, p_362198_, 1);
+            ByteBuffer bytebuffer = GlStateManager._glMapBufferRange(this.type.id, pOffset, pLength, 1);
             return bytebuffer == null ? null : new GpuBuffer.ReadView(this.type.id, bytebuffer);
         }
     }
@@ -128,14 +125,21 @@ public class GpuBuffer implements AutoCloseable {
         GlStateManager._glBindBuffer(this.type.id, this.handle);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    public boolean isClosed() {
+        return this.closed;
+    }
+
+    public boolean isInitialized() {
+        return this.initialized;
+    }
+
     public static class ReadView implements AutoCloseable {
         private final int target;
         private final ByteBuffer data;
 
-        protected ReadView(int p_367113_, ByteBuffer p_362615_) {
-            this.target = p_367113_;
-            this.data = p_362615_;
+        protected ReadView(int pTarget, ByteBuffer pData) {
+            this.target = pTarget;
+            this.data = pData;
         }
 
         public ByteBuffer data() {

@@ -37,19 +37,19 @@ public class ChorusPlantBlock extends PipeBlock {
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_51709_) {
-        return getStateWithConnections(p_51709_.getLevel(), p_51709_.getClickedPos(), this.defaultBlockState());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return getStateWithConnections(pContext.getLevel(), pContext.getClickedPos(), this.defaultBlockState());
     }
 
-    public static BlockState getStateWithConnections(BlockGetter p_51711_, BlockPos p_51712_, BlockState p_312378_) {
-        BlockState blockstate = p_51711_.getBlockState(p_51712_.below());
-        BlockState blockstate1 = p_51711_.getBlockState(p_51712_.above());
-        BlockState blockstate2 = p_51711_.getBlockState(p_51712_.north());
-        BlockState blockstate3 = p_51711_.getBlockState(p_51712_.east());
-        BlockState blockstate4 = p_51711_.getBlockState(p_51712_.south());
-        BlockState blockstate5 = p_51711_.getBlockState(p_51712_.west());
-        Block block = p_312378_.getBlock();
-        return p_312378_.trySetValue(
+    public static BlockState getStateWithConnections(BlockGetter pLevel, BlockPos pPos, BlockState pState) {
+        BlockState blockstate = pLevel.getBlockState(pPos.below());
+        BlockState blockstate1 = pLevel.getBlockState(pPos.above());
+        BlockState blockstate2 = pLevel.getBlockState(pPos.north());
+        BlockState blockstate3 = pLevel.getBlockState(pPos.east());
+        BlockState blockstate4 = pLevel.getBlockState(pPos.south());
+        BlockState blockstate5 = pLevel.getBlockState(pPos.west());
+        Block block = pState.getBlock();
+        return pState.trySetValue(
                 DOWN, Boolean.valueOf(blockstate.is(block) || blockstate.is(Blocks.CHORUS_FLOWER) || blockstate.is(Blocks.END_STONE))
             )
             .trySetValue(UP, Boolean.valueOf(blockstate1.is(block) || blockstate1.is(Blocks.CHORUS_FLOWER)))
@@ -87,19 +87,19 @@ public class ChorusPlantBlock extends PipeBlock {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_51724_, LevelReader p_51725_, BlockPos p_51726_) {
-        BlockState blockstate = p_51725_.getBlockState(p_51726_.below());
-        boolean flag = !p_51725_.getBlockState(p_51726_.above()).isAir() && !blockstate.isAir();
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos.below());
+        boolean flag = !pLevel.getBlockState(pPos.above()).isAir() && !blockstate.isAir();
 
         for (Direction direction : Direction.Plane.HORIZONTAL) {
-            BlockPos blockpos = p_51726_.relative(direction);
-            BlockState blockstate1 = p_51725_.getBlockState(blockpos);
+            BlockPos blockpos = pPos.relative(direction);
+            BlockState blockstate1 = pLevel.getBlockState(blockpos);
             if (blockstate1.is(this)) {
                 if (flag) {
                     return false;
                 }
 
-                BlockState blockstate2 = p_51725_.getBlockState(blockpos.below());
+                BlockState blockstate2 = pLevel.getBlockState(blockpos.below());
                 if (blockstate2.is(this) || blockstate2.is(Blocks.END_STONE)) {
                     return true;
                 }
@@ -110,8 +110,8 @@ public class ChorusPlantBlock extends PipeBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_51735_) {
-        p_51735_.add(NORTH, EAST, SOUTH, WEST, UP, DOWN);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(NORTH, EAST, SOUTH, WEST, UP, DOWN);
     }
 
     @Override

@@ -42,25 +42,25 @@ public record LocationPredicate(
                 .apply(p_296137_, LocationPredicate::new)
     );
 
-    public boolean matches(ServerLevel p_52618_, double p_52619_, double p_52620_, double p_52621_) {
-        if (this.position.isPresent() && !this.position.get().matches(p_52619_, p_52620_, p_52621_)) {
+    public boolean matches(ServerLevel pLevel, double pX, double pY, double pZ) {
+        if (this.position.isPresent() && !this.position.get().matches(pX, pY, pZ)) {
             return false;
-        } else if (this.dimension.isPresent() && this.dimension.get() != p_52618_.dimension()) {
+        } else if (this.dimension.isPresent() && this.dimension.get() != pLevel.dimension()) {
             return false;
         } else {
-            BlockPos blockpos = BlockPos.containing(p_52619_, p_52620_, p_52621_);
-            boolean flag = p_52618_.isLoaded(blockpos);
-            if (!this.biomes.isPresent() || flag && this.biomes.get().contains(p_52618_.getBiome(blockpos))) {
-                if (!this.structures.isPresent() || flag && p_52618_.structureManager().getStructureWithPieceAt(blockpos, this.structures.get()).isValid()) {
-                    if (!this.smokey.isPresent() || flag && this.smokey.get() == CampfireBlock.isSmokeyPos(p_52618_, blockpos)) {
-                        if (this.light.isPresent() && !this.light.get().matches(p_52618_, blockpos)) {
+            BlockPos blockpos = BlockPos.containing(pX, pY, pZ);
+            boolean flag = pLevel.isLoaded(blockpos);
+            if (!this.biomes.isPresent() || flag && this.biomes.get().contains(pLevel.getBiome(blockpos))) {
+                if (!this.structures.isPresent() || flag && pLevel.structureManager().getStructureWithPieceAt(blockpos, this.structures.get()).isValid()) {
+                    if (!this.smokey.isPresent() || flag && this.smokey.get() == CampfireBlock.isSmokeyPos(pLevel, blockpos)) {
+                        if (this.light.isPresent() && !this.light.get().matches(pLevel, blockpos)) {
                             return false;
-                        } else if (this.block.isPresent() && !this.block.get().matches(p_52618_, blockpos)) {
+                        } else if (this.block.isPresent() && !this.block.get().matches(pLevel, blockpos)) {
                             return false;
                         } else {
-                            return this.fluid.isPresent() && !this.fluid.get().matches(p_52618_, blockpos)
+                            return this.fluid.isPresent() && !this.fluid.get().matches(pLevel, blockpos)
                                 ? false
-                                : !this.canSeeSky.isPresent() || this.canSeeSky.get() == p_52618_.canSeeSky(blockpos);
+                                : !this.canSeeSky.isPresent() || this.canSeeSky.get() == pLevel.canSeeSky(blockpos);
                         }
                     } else {
                         return false;
@@ -91,74 +91,74 @@ public record LocationPredicate(
             return new LocationPredicate.Builder();
         }
 
-        public static LocationPredicate.Builder inBiome(Holder<Biome> p_334208_) {
-            return location().setBiomes(HolderSet.direct(p_334208_));
+        public static LocationPredicate.Builder inBiome(Holder<Biome> pBiome) {
+            return location().setBiomes(HolderSet.direct(pBiome));
         }
 
-        public static LocationPredicate.Builder inDimension(ResourceKey<Level> p_300753_) {
-            return location().setDimension(p_300753_);
+        public static LocationPredicate.Builder inDimension(ResourceKey<Level> pDimension) {
+            return location().setDimension(pDimension);
         }
 
-        public static LocationPredicate.Builder inStructure(Holder<Structure> p_333866_) {
-            return location().setStructures(HolderSet.direct(p_333866_));
+        public static LocationPredicate.Builder inStructure(Holder<Structure> pStructure) {
+            return location().setStructures(HolderSet.direct(pStructure));
         }
 
-        public static LocationPredicate.Builder atYLocation(MinMaxBounds.Doubles p_297662_) {
-            return location().setY(p_297662_);
+        public static LocationPredicate.Builder atYLocation(MinMaxBounds.Doubles pY) {
+            return location().setY(pY);
         }
 
-        public LocationPredicate.Builder setX(MinMaxBounds.Doubles p_153971_) {
-            this.x = p_153971_;
+        public LocationPredicate.Builder setX(MinMaxBounds.Doubles pX) {
+            this.x = pX;
             return this;
         }
 
-        public LocationPredicate.Builder setY(MinMaxBounds.Doubles p_153975_) {
-            this.y = p_153975_;
+        public LocationPredicate.Builder setY(MinMaxBounds.Doubles pY) {
+            this.y = pY;
             return this;
         }
 
-        public LocationPredicate.Builder setZ(MinMaxBounds.Doubles p_153979_) {
-            this.z = p_153979_;
+        public LocationPredicate.Builder setZ(MinMaxBounds.Doubles pZ) {
+            this.z = pZ;
             return this;
         }
 
-        public LocationPredicate.Builder setBiomes(HolderSet<Biome> p_330531_) {
-            this.biomes = Optional.of(p_330531_);
+        public LocationPredicate.Builder setBiomes(HolderSet<Biome> pBiomes) {
+            this.biomes = Optional.of(pBiomes);
             return this;
         }
 
-        public LocationPredicate.Builder setStructures(HolderSet<Structure> p_330147_) {
-            this.structures = Optional.of(p_330147_);
+        public LocationPredicate.Builder setStructures(HolderSet<Structure> pStructures) {
+            this.structures = Optional.of(pStructures);
             return this;
         }
 
-        public LocationPredicate.Builder setDimension(ResourceKey<Level> p_153977_) {
-            this.dimension = Optional.of(p_153977_);
+        public LocationPredicate.Builder setDimension(ResourceKey<Level> pDimension) {
+            this.dimension = Optional.of(pDimension);
             return this;
         }
 
-        public LocationPredicate.Builder setLight(LightPredicate.Builder p_298990_) {
-            this.light = Optional.of(p_298990_.build());
+        public LocationPredicate.Builder setLight(LightPredicate.Builder pLight) {
+            this.light = Optional.of(pLight.build());
             return this;
         }
 
-        public LocationPredicate.Builder setBlock(BlockPredicate.Builder p_298525_) {
-            this.block = Optional.of(p_298525_.build());
+        public LocationPredicate.Builder setBlock(BlockPredicate.Builder pBlock) {
+            this.block = Optional.of(pBlock.build());
             return this;
         }
 
-        public LocationPredicate.Builder setFluid(FluidPredicate.Builder p_298614_) {
-            this.fluid = Optional.of(p_298614_.build());
+        public LocationPredicate.Builder setFluid(FluidPredicate.Builder pFluid) {
+            this.fluid = Optional.of(pFluid.build());
             return this;
         }
 
-        public LocationPredicate.Builder setSmokey(boolean p_299005_) {
-            this.smokey = Optional.of(p_299005_);
+        public LocationPredicate.Builder setSmokey(boolean pSmokey) {
+            this.smokey = Optional.of(pSmokey);
             return this;
         }
 
-        public LocationPredicate.Builder setCanSeeSky(boolean p_342130_) {
-            this.canSeeSky = Optional.of(p_342130_);
+        public LocationPredicate.Builder setCanSeeSky(boolean pCanSeeSky) {
+            this.canSeeSky = Optional.of(pCanSeeSky);
             return this;
         }
 
@@ -187,15 +187,15 @@ public record LocationPredicate(
         );
 
         static Optional<LocationPredicate.PositionPredicate> of(
-            MinMaxBounds.Doubles p_300563_, MinMaxBounds.Doubles p_301250_, MinMaxBounds.Doubles p_299764_
+            MinMaxBounds.Doubles pX, MinMaxBounds.Doubles pY, MinMaxBounds.Doubles pZ
         ) {
-            return p_300563_.isAny() && p_301250_.isAny() && p_299764_.isAny()
+            return pX.isAny() && pY.isAny() && pZ.isAny()
                 ? Optional.empty()
-                : Optional.of(new LocationPredicate.PositionPredicate(p_300563_, p_301250_, p_299764_));
+                : Optional.of(new LocationPredicate.PositionPredicate(pX, pY, pZ));
         }
 
-        public boolean matches(double p_299909_, double p_298621_, double p_299854_) {
-            return this.x.matches(p_299909_) && this.y.matches(p_298621_) && this.z.matches(p_299854_);
+        public boolean matches(double pX, double pY, double pZ) {
+            return this.x.matches(pX) && this.y.matches(pY) && this.z.matches(pZ);
         }
     }
 }

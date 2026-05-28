@@ -28,35 +28,35 @@ public class ServerboundContainerClickPacket implements Packet<ServerGamePacketL
     private final Int2ObjectMap<ItemStack> changedSlots;
 
     public ServerboundContainerClickPacket(
-        int p_182734_, int p_182735_, int p_182736_, int p_182737_, ClickType p_182738_, ItemStack p_182739_, Int2ObjectMap<ItemStack> p_182740_
+        int pContainerId, int pStateId, int pSlotNum, int pButtonNum, ClickType pClickType, ItemStack pCarriedItem, Int2ObjectMap<ItemStack> pChangedSlots
     ) {
-        this.containerId = p_182734_;
-        this.stateId = p_182735_;
-        this.slotNum = p_182736_;
-        this.buttonNum = p_182737_;
-        this.clickType = p_182738_;
-        this.carriedItem = p_182739_;
-        this.changedSlots = Int2ObjectMaps.unmodifiable(p_182740_);
+        this.containerId = pContainerId;
+        this.stateId = pStateId;
+        this.slotNum = pSlotNum;
+        this.buttonNum = pButtonNum;
+        this.clickType = pClickType;
+        this.carriedItem = pCarriedItem;
+        this.changedSlots = Int2ObjectMaps.unmodifiable(pChangedSlots);
     }
 
-    private ServerboundContainerClickPacket(RegistryFriendlyByteBuf p_329756_) {
-        this.containerId = p_329756_.readContainerId();
-        this.stateId = p_329756_.readVarInt();
-        this.slotNum = p_329756_.readShort();
-        this.buttonNum = p_329756_.readByte();
-        this.clickType = p_329756_.readEnum(ClickType.class);
-        this.changedSlots = Int2ObjectMaps.unmodifiable(SLOTS_STREAM_CODEC.decode(p_329756_));
-        this.carriedItem = ItemStack.OPTIONAL_STREAM_CODEC.decode(p_329756_);
+    private ServerboundContainerClickPacket(RegistryFriendlyByteBuf pBuffer) {
+        this.containerId = pBuffer.readContainerId();
+        this.stateId = pBuffer.readVarInt();
+        this.slotNum = pBuffer.readShort();
+        this.buttonNum = pBuffer.readByte();
+        this.clickType = pBuffer.readEnum(ClickType.class);
+        this.changedSlots = Int2ObjectMaps.unmodifiable(SLOTS_STREAM_CODEC.decode(pBuffer));
+        this.carriedItem = ItemStack.OPTIONAL_STREAM_CODEC.decode(pBuffer);
     }
 
-    private void write(RegistryFriendlyByteBuf p_335657_) {
-        p_335657_.writeContainerId(this.containerId);
-        p_335657_.writeVarInt(this.stateId);
-        p_335657_.writeShort(this.slotNum);
-        p_335657_.writeByte(this.buttonNum);
-        p_335657_.writeEnum(this.clickType);
-        SLOTS_STREAM_CODEC.encode(p_335657_, this.changedSlots);
-        ItemStack.OPTIONAL_STREAM_CODEC.encode(p_335657_, this.carriedItem);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeContainerId(this.containerId);
+        pBuffer.writeVarInt(this.stateId);
+        pBuffer.writeShort(this.slotNum);
+        pBuffer.writeByte(this.buttonNum);
+        pBuffer.writeEnum(this.clickType);
+        SLOTS_STREAM_CODEC.encode(pBuffer, this.changedSlots);
+        ItemStack.OPTIONAL_STREAM_CODEC.encode(pBuffer, this.carriedItem);
     }
 
     @Override
@@ -64,8 +64,8 @@ public class ServerboundContainerClickPacket implements Packet<ServerGamePacketL
         return GamePacketTypes.SERVERBOUND_CONTAINER_CLICK;
     }
 
-    public void handle(ServerGamePacketListener p_133958_) {
-        p_133958_.handleContainerClick(this);
+    public void handle(ServerGamePacketListener pHandler) {
+        pHandler.handleContainerClick(this);
     }
 
     public int getContainerId() {

@@ -19,8 +19,8 @@ public record LightningBoltPredicate(MinMaxBounds.Ints blocksSetOnFire, Optional
                 .apply(p_325227_, LightningBoltPredicate::new)
     );
 
-    public static LightningBoltPredicate blockSetOnFire(MinMaxBounds.Ints p_297323_) {
-        return new LightningBoltPredicate(p_297323_, Optional.empty());
+    public static LightningBoltPredicate blockSetOnFire(MinMaxBounds.Ints pBlocksSetOnFire) {
+        return new LightningBoltPredicate(pBlocksSetOnFire, Optional.empty());
     }
 
     @Override

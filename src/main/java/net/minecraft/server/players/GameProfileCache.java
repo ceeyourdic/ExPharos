@@ -57,22 +57,22 @@ public class GameProfileCache {
     @Nullable
     private Executor executor;
 
-    public GameProfileCache(GameProfileRepository p_10974_, File p_10975_) {
-        this.profileRepository = p_10974_;
-        this.file = p_10975_;
+    public GameProfileCache(GameProfileRepository pProfileRepository, File pFile) {
+        this.profileRepository = pProfileRepository;
+        this.file = pFile;
         Lists.reverse(this.load()).forEach(this::safeAdd);
     }
 
-    private void safeAdd(GameProfileCache.GameProfileInfo p_10980_) {
-        GameProfile gameprofile = p_10980_.getProfile();
-        p_10980_.setLastAccess(this.getNextOperation());
-        this.profilesByName.put(gameprofile.getName().toLowerCase(Locale.ROOT), p_10980_);
-        this.profilesByUUID.put(gameprofile.getId(), p_10980_);
+    private void safeAdd(GameProfileCache.GameProfileInfo pProfile) {
+        GameProfile gameprofile = pProfile.getProfile();
+        pProfile.setLastAccess(this.getNextOperation());
+        this.profilesByName.put(gameprofile.getName().toLowerCase(Locale.ROOT), pProfile);
+        this.profilesByUUID.put(gameprofile.getId(), pProfile);
     }
 
-    private static Optional<GameProfile> lookupGameProfile(GameProfileRepository p_10994_, String p_10995_) {
-        if (!StringUtil.isValidPlayerName(p_10995_)) {
-            return createUnknownProfile(p_10995_);
+    private static Optional<GameProfile> lookupGameProfile(GameProfileRepository pProfileRepo, String pName) {
+        if (!StringUtil.isValidPlayerName(pName)) {
+            return createUnknownProfile(pName);
         } else {
             final AtomicReference<GameProfile> atomicreference = new AtomicReference<>();
             ProfileLookupCallback profilelookupcallback = new ProfileLookupCallback() {
@@ -86,30 +86,30 @@ public class GameProfileCache {
                     atomicreference.set(null);
                 }
             };
-            p_10994_.findProfilesByNames(new String[]{p_10995_}, profilelookupcallback);
+            pProfileRepo.findProfilesByNames(new String[]{pName}, profilelookupcallback);
             GameProfile gameprofile = atomicreference.get();
-            return gameprofile != null ? Optional.of(gameprofile) : createUnknownProfile(p_10995_);
+            return gameprofile != null ? Optional.of(gameprofile) : createUnknownProfile(pName);
         }
     }
 
-    private static Optional<GameProfile> createUnknownProfile(String p_311687_) {
-        return usesAuthentication() ? Optional.empty() : Optional.of(UUIDUtil.createOfflineProfile(p_311687_));
+    private static Optional<GameProfile> createUnknownProfile(String pProfileName) {
+        return usesAuthentication() ? Optional.empty() : Optional.of(UUIDUtil.createOfflineProfile(pProfileName));
     }
 
-    public static void setUsesAuthentication(boolean p_11005_) {
-        usesAuthentication = p_11005_;
+    public static void setUsesAuthentication(boolean pOnlineMode) {
+        usesAuthentication = pOnlineMode;
     }
 
     private static boolean usesAuthentication() {
         return usesAuthentication;
     }
 
-    public void add(GameProfile p_10992_) {
+    public void add(GameProfile pGameProfile) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.add(2, 1);
         Date date = calendar.getTime();
-        GameProfileCache.GameProfileInfo gameprofilecache$gameprofileinfo = new GameProfileCache.GameProfileInfo(p_10992_, date);
+        GameProfileCache.GameProfileInfo gameprofilecache$gameprofileinfo = new GameProfileCache.GameProfileInfo(pGameProfile, date);
         this.safeAdd(gameprofilecache$gameprofileinfo);
         this.save();
     }
@@ -118,8 +118,8 @@ public class GameProfileCache {
         return this.operationCount.incrementAndGet();
     }
 
-    public Optional<GameProfile> get(String p_10997_) {
-        String s = p_10997_.toLowerCase(Locale.ROOT);
+    public Optional<GameProfile> get(String pName) {
+        String s = pName.toLowerCase(Locale.ROOT);
         GameProfileCache.GameProfileInfo gameprofilecache$gameprofileinfo = this.profilesByName.get(s);
         boolean flag = false;
         if (gameprofilecache$gameprofileinfo != null && new Date().getTime() >= gameprofilecache$gameprofileinfo.expirationDate.getTime()) {
@@ -148,26 +148,26 @@ public class GameProfileCache {
         return optional;
     }
 
-    public CompletableFuture<Optional<GameProfile>> getAsync(String p_143968_) {
+    public CompletableFuture<Optional<GameProfile>> getAsync(String pName) {
         if (this.executor == null) {
             throw new IllegalStateException("No executor");
         } else {
-            CompletableFuture<Optional<GameProfile>> completablefuture = this.requests.get(p_143968_);
+            CompletableFuture<Optional<GameProfile>> completablefuture = this.requests.get(pName);
             if (completablefuture != null) {
                 return completablefuture;
             } else {
                 CompletableFuture<Optional<GameProfile>> completablefuture1 = CompletableFuture.<Optional<GameProfile>>supplyAsync(
-                        () -> this.get(p_143968_), Util.backgroundExecutor().forName("getProfile")
+                        () -> this.get(pName), Util.backgroundExecutor().forName("getProfile")
                     )
-                    .whenCompleteAsync((p_143965_, p_143966_) -> this.requests.remove(p_143968_), this.executor);
-                this.requests.put(p_143968_, completablefuture1);
+                    .whenCompleteAsync((p_143965_, p_143966_) -> this.requests.remove(pName), this.executor);
+                this.requests.put(pName, completablefuture1);
                 return completablefuture1;
             }
         }
     }
 
-    public Optional<GameProfile> get(UUID p_11003_) {
-        GameProfileCache.GameProfileInfo gameprofilecache$gameprofileinfo = this.profilesByUUID.get(p_11003_);
+    public Optional<GameProfile> get(UUID pUuid) {
+        GameProfileCache.GameProfileInfo gameprofilecache$gameprofileinfo = this.profilesByUUID.get(pUuid);
         if (gameprofilecache$gameprofileinfo == null) {
             return Optional.empty();
         } else {
@@ -176,8 +176,8 @@ public class GameProfileCache {
         }
     }
 
-    public void setExecutor(Executor p_143975_) {
-        this.executor = p_143975_;
+    public void setExecutor(Executor pExectutor) {
+        this.executor = pExectutor;
     }
 
     public void clearExecutor() {
@@ -225,24 +225,24 @@ public class GameProfileCache {
         }
     }
 
-    private Stream<GameProfileCache.GameProfileInfo> getTopMRUProfiles(int p_10978_) {
+    private Stream<GameProfileCache.GameProfileInfo> getTopMRUProfiles(int pLimit) {
         return ImmutableList.copyOf(this.profilesByUUID.values())
             .stream()
             .sorted(Comparator.comparing(GameProfileCache.GameProfileInfo::getLastAccess).reversed())
-            .limit((long)p_10978_);
+            .limit((long)pLimit);
     }
 
-    private static JsonElement writeGameProfile(GameProfileCache.GameProfileInfo p_10982_, DateFormat p_10983_) {
+    private static JsonElement writeGameProfile(GameProfileCache.GameProfileInfo pProfileInfo, DateFormat pDateFormat) {
         JsonObject jsonobject = new JsonObject();
-        jsonobject.addProperty("name", p_10982_.getProfile().getName());
-        jsonobject.addProperty("uuid", p_10982_.getProfile().getId().toString());
-        jsonobject.addProperty("expiresOn", p_10983_.format(p_10982_.getExpirationDate()));
+        jsonobject.addProperty("name", pProfileInfo.getProfile().getName());
+        jsonobject.addProperty("uuid", pProfileInfo.getProfile().getId().toString());
+        jsonobject.addProperty("expiresOn", pDateFormat.format(pProfileInfo.getExpirationDate()));
         return jsonobject;
     }
 
-    private static Optional<GameProfileCache.GameProfileInfo> readGameProfile(JsonElement p_10989_, DateFormat p_10990_) {
-        if (p_10989_.isJsonObject()) {
-            JsonObject jsonobject = p_10989_.getAsJsonObject();
+    private static Optional<GameProfileCache.GameProfileInfo> readGameProfile(JsonElement pJson, DateFormat pDateFormat) {
+        if (pJson.isJsonObject()) {
+            JsonObject jsonobject = pJson.getAsJsonObject();
             JsonElement jsonelement = jsonobject.get("name");
             JsonElement jsonelement1 = jsonobject.get("uuid");
             JsonElement jsonelement2 = jsonobject.get("expiresOn");
@@ -252,7 +252,7 @@ public class GameProfileCache {
                 Date date = null;
                 if (jsonelement2 != null) {
                     try {
-                        date = p_10990_.parse(jsonelement2.getAsString());
+                        date = pDateFormat.parse(jsonelement2.getAsString());
                     } catch (ParseException parseexception) {
                     }
                 }
@@ -282,9 +282,9 @@ public class GameProfileCache {
         final Date expirationDate;
         private volatile long lastAccess;
 
-        GameProfileInfo(GameProfile p_11022_, Date p_11023_) {
-            this.profile = p_11022_;
-            this.expirationDate = p_11023_;
+        GameProfileInfo(GameProfile pProfile, Date pExpirationDate) {
+            this.profile = pProfile;
+            this.expirationDate = pExpirationDate;
         }
 
         public GameProfile getProfile() {
@@ -295,8 +295,8 @@ public class GameProfileCache {
             return this.expirationDate;
         }
 
-        public void setLastAccess(long p_11030_) {
-            this.lastAccess = p_11030_;
+        public void setLastAccess(long pLastAccess) {
+            this.lastAccess = pLastAccess;
         }
 
         public long getLastAccess() {

@@ -7,9 +7,9 @@ import net.minecraft.world.level.block.Block;
 public class AirItem extends Item {
     private final Block block;
 
-    public AirItem(Block p_40368_, Item.Properties p_40369_) {
-        super(p_40369_);
-        this.block = p_40368_;
+    public AirItem(Block pBlock, Item.Properties pProperties) {
+        super(pProperties);
+        this.block = pBlock;
     }
 
     @Override

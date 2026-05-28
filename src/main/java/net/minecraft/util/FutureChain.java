@@ -14,8 +14,8 @@ public class FutureChain implements TaskChainer, AutoCloseable {
     private final Executor executor;
     private volatile boolean closed;
 
-    public FutureChain(Executor p_242395_) {
-        this.executor = p_242395_;
+    public FutureChain(Executor pExecutor) {
+        this.executor = pExecutor;
     }
 
     @Override

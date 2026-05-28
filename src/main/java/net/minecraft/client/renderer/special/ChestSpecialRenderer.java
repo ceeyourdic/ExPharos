@@ -28,10 +28,10 @@ public class ChestSpecialRenderer implements NoDataSpecialModelRenderer {
     private final Material material;
     private final float openness;
 
-    public ChestSpecialRenderer(ChestModel p_375837_, Material p_377410_, float p_378366_) {
-        this.model = p_375837_;
-        this.material = p_377410_;
-        this.openness = p_378366_;
+    public ChestSpecialRenderer(ChestModel pModel, Material pMaterial, float pOpenness) {
+        this.model = pModel;
+        this.material = pMaterial;
+        this.openness = pOpenness;
     }
 
     @Override
@@ -51,8 +51,8 @@ public class ChestSpecialRenderer implements NoDataSpecialModelRenderer {
                     .apply(p_376535_, ChestSpecialRenderer.Unbaked::new)
         );
 
-        public Unbaked(ResourceLocation p_376432_) {
-            this(p_376432_, 0.0F);
+        public Unbaked(ResourceLocation pTexture) {
+            this(pTexture, 0.0F);
         }
 
         @Override

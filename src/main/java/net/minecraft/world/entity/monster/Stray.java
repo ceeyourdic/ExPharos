@@ -23,16 +23,16 @@ public class Stray extends AbstractSkeleton {
     }
 
     public static boolean checkStraySpawnRules(
-        EntityType<Stray> p_219121_, ServerLevelAccessor p_219122_, EntitySpawnReason p_364808_, BlockPos p_219124_, RandomSource p_219125_
+        EntityType<Stray> pEntityType, ServerLevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        BlockPos blockpos = p_219124_;
+        BlockPos blockpos = pPos;
 
         do {
             blockpos = blockpos.above();
-        } while (p_219122_.getBlockState(blockpos).is(Blocks.POWDER_SNOW));
+        } while (pLevel.getBlockState(blockpos).is(Blocks.POWDER_SNOW));
 
-        return checkMonsterSpawnRules(p_219121_, p_219122_, p_364808_, p_219124_, p_219125_)
-            && (EntitySpawnReason.isSpawner(p_364808_) || p_219122_.canSeeSky(blockpos.below()));
+        return checkMonsterSpawnRules(pEntityType, pLevel, pSpawnReason, pPos, pRandom)
+            && (EntitySpawnReason.isSpawner(pSpawnReason) || pLevel.canSeeSky(blockpos.below()));
     }
 
     @Override
@@ -41,7 +41,7 @@ public class Stray extends AbstractSkeleton {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_33850_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.STRAY_HURT;
     }
 

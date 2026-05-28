@@ -40,11 +40,11 @@ public class JukeboxBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void setPlacedBy(Level p_54264_, BlockPos p_54265_, BlockState p_54266_, @Nullable LivingEntity p_54267_, ItemStack p_54268_) {
-        super.setPlacedBy(p_54264_, p_54265_, p_54266_, p_54267_, p_54268_);
-        CustomData customdata = p_54268_.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+    public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
+        super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
+        CustomData customdata = pStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
         if (customdata.contains("RecordItem")) {
-            p_54264_.setBlock(p_54265_, p_54266_.setValue(HAS_RECORD, Boolean.valueOf(true)), 2);
+            pLevel.setBlock(pPos, pState.setValue(HAS_RECORD, Boolean.valueOf(true)), 2);
         }
     }
 
@@ -72,13 +72,13 @@ public class JukeboxBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void onRemove(BlockState p_54288_, Level p_54289_, BlockPos p_54290_, BlockState p_54291_, boolean p_54292_) {
-        if (!p_54288_.is(p_54291_.getBlock())) {
-            if (p_54289_.getBlockEntity(p_54290_) instanceof JukeboxBlockEntity jukeboxblockentity) {
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        if (!pState.is(pNewState.getBlock())) {
+            if (pLevel.getBlockEntity(pPos) instanceof JukeboxBlockEntity jukeboxblockentity) {
                 jukeboxblockentity.popOutTheItem();
             }
 
-            super.onRemove(p_54288_, p_54289_, p_54290_, p_54291_, p_54292_);
+            super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
         }
     }
 
@@ -102,18 +102,18 @@ public class JukeboxBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected boolean hasAnalogOutputSignal(BlockState p_54275_) {
+    protected boolean hasAnalogOutputSignal(BlockState pState) {
         return true;
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState p_54277_, Level p_54278_, BlockPos p_54279_) {
-        return p_54278_.getBlockEntity(p_54279_) instanceof JukeboxBlockEntity jukeboxblockentity ? jukeboxblockentity.getComparatorOutput() : 0;
+    protected int getAnalogOutputSignal(BlockState pBlockState, Level pLevel, BlockPos pPos) {
+        return pLevel.getBlockEntity(pPos) instanceof JukeboxBlockEntity jukeboxblockentity ? jukeboxblockentity.getComparatorOutput() : 0;
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_54294_) {
-        p_54294_.add(HAS_RECORD);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(HAS_RECORD);
     }
 
     @Nullable

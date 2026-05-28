@@ -107,69 +107,74 @@ public class Block extends BlockBehaviour implements ItemLike {
         return CODEC;
     }
 
-    public static int getId(@Nullable BlockState p_49957_) {
-        if (p_49957_ == null) {
+    public static int getId(@Nullable BlockState pState) {
+        if (pState == null) {
             return 0;
         } else {
-            int i = BLOCK_STATE_REGISTRY.getId(p_49957_);
+            int i = BLOCK_STATE_REGISTRY.getId(pState);
             return i == -1 ? 0 : i;
         }
     }
 
-    public static BlockState stateById(int p_49804_) {
-        BlockState blockstate = BLOCK_STATE_REGISTRY.byId(p_49804_);
+    public static BlockState stateById(int pId) {
+        BlockState blockstate = BLOCK_STATE_REGISTRY.byId(pId);
         return blockstate == null ? Blocks.AIR.defaultBlockState() : blockstate;
     }
 
-    public static Block byItem(@Nullable Item p_49815_) {
-        return p_49815_ instanceof BlockItem ? ((BlockItem)p_49815_).getBlock() : Blocks.AIR;
+    public static Block byItem(@Nullable Item pItem) {
+        return pItem instanceof BlockItem ? ((BlockItem)pItem).getBlock() : Blocks.AIR;
     }
 
-    public static BlockState pushEntitiesUp(BlockState p_49898_, BlockState p_49899_, LevelAccessor p_238252_, BlockPos p_49901_) {
-        VoxelShape voxelshape = Shapes.joinUnoptimized(p_49898_.getCollisionShape(p_238252_, p_49901_), p_49899_.getCollisionShape(p_238252_, p_49901_), BooleanOp.ONLY_SECOND)
-            .move((double)p_49901_.getX(), (double)p_49901_.getY(), (double)p_49901_.getZ());
+    // Arcane mixin port: Yarn name for official byItem().
+    public static Block getBlockFromItem(@Nullable Item pItem) {
+        return byItem(pItem);
+    }
+
+    public static BlockState pushEntitiesUp(BlockState pOldState, BlockState pNewState, LevelAccessor pLevel, BlockPos pPos) {
+        VoxelShape voxelshape = Shapes.joinUnoptimized(pOldState.getCollisionShape(pLevel, pPos), pNewState.getCollisionShape(pLevel, pPos), BooleanOp.ONLY_SECOND)
+            .move((double)pPos.getX(), (double)pPos.getY(), (double)pPos.getZ());
         if (voxelshape.isEmpty()) {
-            return p_49899_;
+            return pNewState;
         } else {
-            for (Entity entity : p_238252_.getEntities(null, voxelshape.bounds())) {
+            for (Entity entity : pLevel.getEntities(null, voxelshape.bounds())) {
                 double d0 = Shapes.collide(Direction.Axis.Y, entity.getBoundingBox().move(0.0, 1.0, 0.0), List.of(voxelshape), -1.0);
                 entity.teleportRelative(0.0, 1.0 + d0, 0.0);
             }
 
-            return p_49899_;
+            return pNewState;
         }
     }
 
-    public static VoxelShape box(double p_49797_, double p_49798_, double p_49799_, double p_49800_, double p_49801_, double p_49802_) {
-        return Shapes.box(p_49797_ / 16.0, p_49798_ / 16.0, p_49799_ / 16.0, p_49800_ / 16.0, p_49801_ / 16.0, p_49802_ / 16.0);
+    public static VoxelShape box(double pX1, double pY1, double pZ1, double pX2, double pY2, double pZ2) {
+        return Shapes.box(pX1 / 16.0, pY1 / 16.0, pZ1 / 16.0, pX2 / 16.0, pY2 / 16.0, pZ2 / 16.0);
     }
 
-    public static BlockState updateFromNeighbourShapes(BlockState p_49932_, LevelAccessor p_49933_, BlockPos p_49934_) {
-        BlockState blockstate = p_49932_;
+    public static BlockState updateFromNeighbourShapes(BlockState pCurrentState, LevelAccessor pLevel, BlockPos pPos) {
+        BlockState blockstate = pCurrentState;
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
         for (Direction direction : UPDATE_SHAPE_ORDER) {
-            blockpos$mutableblockpos.setWithOffset(p_49934_, direction);
+            blockpos$mutableblockpos.setWithOffset(pPos, direction);
             blockstate = blockstate.updateShape(
-                p_49933_, p_49933_, p_49934_, direction, blockpos$mutableblockpos, p_49933_.getBlockState(blockpos$mutableblockpos), p_49933_.getRandom()
+                pLevel, pLevel, pPos, direction, blockpos$mutableblockpos, pLevel.getBlockState(blockpos$mutableblockpos), pLevel.getRandom()
             );
         }
 
         return blockstate;
     }
 
-    public static void updateOrDestroy(BlockState p_49903_, BlockState p_49904_, LevelAccessor p_49905_, BlockPos p_49906_, int p_49907_) {
-        updateOrDestroy(p_49903_, p_49904_, p_49905_, p_49906_, p_49907_, 512);
+    public static void updateOrDestroy(BlockState pOldState, BlockState pNewState, LevelAccessor pLevel, BlockPos pPos, int pFlags) {
+        updateOrDestroy(pOldState, pNewState, pLevel, pPos, pFlags, 512);
     }
 
-    public static void updateOrDestroy(BlockState p_49909_, BlockState p_49910_, LevelAccessor p_49911_, BlockPos p_49912_, int p_49913_, int p_49914_) {
-        if (p_49910_ != p_49909_) {
-            if (p_49910_.isAir()) {
-                if (!p_49911_.isClientSide()) {
-                    p_49911_.destroyBlock(p_49912_, (p_49913_ & 32) == 0, null, p_49914_);
+    public static void updateOrDestroy(BlockState pOldState, BlockState pNewState, LevelAccessor pLevel, BlockPos pPos, int pFlags, int pRecursionLeft) {
+        if (pNewState != pOldState) {
+            if (pNewState.isAir()) {
+                if (!pLevel.isClientSide()) {
+                    pLevel.destroyBlock(pPos, (pFlags & 32) == 0, null, pRecursionLeft);
                 }
             } else {
-                p_49911_.setBlock(p_49912_, p_49910_, p_49913_ & -33, p_49914_);
+                pLevel.setBlock(pPos, pNewState, pFlags & -33, pRecursionLeft);
             }
         }
     }
@@ -188,26 +193,26 @@ public class Block extends BlockBehaviour implements ItemLike {
         }
     }
 
-    public static boolean isExceptionForConnection(BlockState p_152464_) {
-        return p_152464_.getBlock() instanceof LeavesBlock
-            || p_152464_.is(Blocks.BARRIER)
-            || p_152464_.is(Blocks.CARVED_PUMPKIN)
-            || p_152464_.is(Blocks.JACK_O_LANTERN)
-            || p_152464_.is(Blocks.MELON)
-            || p_152464_.is(Blocks.PUMPKIN)
-            || p_152464_.is(BlockTags.SHULKER_BOXES);
+    public static boolean isExceptionForConnection(BlockState pState) {
+        return pState.getBlock() instanceof LeavesBlock
+            || pState.is(Blocks.BARRIER)
+            || pState.is(Blocks.CARVED_PUMPKIN)
+            || pState.is(Blocks.JACK_O_LANTERN)
+            || pState.is(Blocks.MELON)
+            || pState.is(Blocks.PUMPKIN)
+            || pState.is(BlockTags.SHULKER_BOXES);
     }
 
-    public static boolean shouldRenderFace(BlockState p_152445_, BlockState p_362730_, Direction p_152448_) {
-        VoxelShape voxelshape = p_362730_.getFaceOcclusionShape(p_152448_.getOpposite());
+    public static boolean shouldRenderFace(BlockState pCurrentFace, BlockState pNeighboringFace, Direction pFace) {
+        VoxelShape voxelshape = pNeighboringFace.getFaceOcclusionShape(pFace.getOpposite());
         if (voxelshape == Shapes.block()) {
             return false;
-        } else if (p_152445_.skipRendering(p_362730_, p_152448_)) {
+        } else if (pCurrentFace.skipRendering(pNeighboringFace, pFace)) {
             return false;
         } else if (voxelshape == Shapes.empty()) {
             return true;
         } else {
-            VoxelShape voxelshape1 = p_152445_.getFaceOcclusionShape(p_152448_);
+            VoxelShape voxelshape1 = pCurrentFace.getFaceOcclusionShape(pFace);
             if (voxelshape1 == Shapes.empty()) {
                 return true;
             } else {
@@ -229,109 +234,109 @@ public class Block extends BlockBehaviour implements ItemLike {
         }
     }
 
-    public static boolean canSupportRigidBlock(BlockGetter p_49937_, BlockPos p_49938_) {
-        return p_49937_.getBlockState(p_49938_).isFaceSturdy(p_49937_, p_49938_, Direction.UP, SupportType.RIGID);
+    public static boolean canSupportRigidBlock(BlockGetter pLevel, BlockPos pPos) {
+        return pLevel.getBlockState(pPos).isFaceSturdy(pLevel, pPos, Direction.UP, SupportType.RIGID);
     }
 
-    public static boolean canSupportCenter(LevelReader p_49864_, BlockPos p_49865_, Direction p_49866_) {
-        BlockState blockstate = p_49864_.getBlockState(p_49865_);
-        return p_49866_ == Direction.DOWN && blockstate.is(BlockTags.UNSTABLE_BOTTOM_CENTER)
+    public static boolean canSupportCenter(LevelReader pLevel, BlockPos pPos, Direction pDirection) {
+        BlockState blockstate = pLevel.getBlockState(pPos);
+        return pDirection == Direction.DOWN && blockstate.is(BlockTags.UNSTABLE_BOTTOM_CENTER)
             ? false
-            : blockstate.isFaceSturdy(p_49864_, p_49865_, p_49866_, SupportType.CENTER);
+            : blockstate.isFaceSturdy(pLevel, pPos, pDirection, SupportType.CENTER);
     }
 
-    public static boolean isFaceFull(VoxelShape p_49919_, Direction p_49920_) {
-        VoxelShape voxelshape = p_49919_.getFaceShape(p_49920_);
+    public static boolean isFaceFull(VoxelShape pShape, Direction pFace) {
+        VoxelShape voxelshape = pShape.getFaceShape(pFace);
         return isShapeFullBlock(voxelshape);
     }
 
-    public static boolean isShapeFullBlock(VoxelShape p_49917_) {
-        return SHAPE_FULL_BLOCK_CACHE.getUnchecked(p_49917_);
+    public static boolean isShapeFullBlock(VoxelShape pShape) {
+        return SHAPE_FULL_BLOCK_CACHE.getUnchecked(pShape);
     }
 
-    public void animateTick(BlockState p_220827_, Level p_220828_, BlockPos p_220829_, RandomSource p_220830_) {
+    public void animateTick(BlockState pState, Level pLevel, BlockPos pPos, RandomSource pRandom) {
     }
 
-    public void destroy(LevelAccessor p_49860_, BlockPos p_49861_, BlockState p_49862_) {
+    public void destroy(LevelAccessor pLevel, BlockPos pPos, BlockState pState) {
     }
 
-    public static List<ItemStack> getDrops(BlockState p_49870_, ServerLevel p_49871_, BlockPos p_49872_, @Nullable BlockEntity p_49873_) {
-        LootParams.Builder lootparams$builder = new LootParams.Builder(p_49871_)
-            .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(p_49872_))
+    public static List<ItemStack> getDrops(BlockState pState, ServerLevel pLevel, BlockPos pPos, @Nullable BlockEntity pBlockEntity) {
+        LootParams.Builder lootparams$builder = new LootParams.Builder(pLevel)
+            .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pPos))
             .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
-            .withOptionalParameter(LootContextParams.BLOCK_ENTITY, p_49873_);
-        return p_49870_.getDrops(lootparams$builder);
+            .withOptionalParameter(LootContextParams.BLOCK_ENTITY, pBlockEntity);
+        return pState.getDrops(lootparams$builder);
     }
 
     public static List<ItemStack> getDrops(
-        BlockState p_49875_, ServerLevel p_49876_, BlockPos p_49877_, @Nullable BlockEntity p_49878_, @Nullable Entity p_49879_, ItemStack p_49880_
+        BlockState pState, ServerLevel pLevel, BlockPos pPos, @Nullable BlockEntity pBlockEntity, @Nullable Entity pEntity, ItemStack pTool
     ) {
-        LootParams.Builder lootparams$builder = new LootParams.Builder(p_49876_)
-            .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(p_49877_))
-            .withParameter(LootContextParams.TOOL, p_49880_)
-            .withOptionalParameter(LootContextParams.THIS_ENTITY, p_49879_)
-            .withOptionalParameter(LootContextParams.BLOCK_ENTITY, p_49878_);
-        return p_49875_.getDrops(lootparams$builder);
+        LootParams.Builder lootparams$builder = new LootParams.Builder(pLevel)
+            .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pPos))
+            .withParameter(LootContextParams.TOOL, pTool)
+            .withOptionalParameter(LootContextParams.THIS_ENTITY, pEntity)
+            .withOptionalParameter(LootContextParams.BLOCK_ENTITY, pBlockEntity);
+        return pState.getDrops(lootparams$builder);
     }
 
-    public static void dropResources(BlockState p_49951_, Level p_49952_, BlockPos p_49953_) {
-        if (p_49952_ instanceof ServerLevel) {
-            getDrops(p_49951_, (ServerLevel)p_49952_, p_49953_, null).forEach(p_152406_ -> popResource(p_49952_, p_49953_, p_152406_));
-            p_49951_.spawnAfterBreak((ServerLevel)p_49952_, p_49953_, ItemStack.EMPTY, true);
+    public static void dropResources(BlockState pState, Level pLevel, BlockPos pPos) {
+        if (pLevel instanceof ServerLevel) {
+            getDrops(pState, (ServerLevel)pLevel, pPos, null).forEach(p_152406_ -> popResource(pLevel, pPos, p_152406_));
+            pState.spawnAfterBreak((ServerLevel)pLevel, pPos, ItemStack.EMPTY, true);
         }
     }
 
-    public static void dropResources(BlockState p_49893_, LevelAccessor p_49894_, BlockPos p_49895_, @Nullable BlockEntity p_49896_) {
-        if (p_49894_ instanceof ServerLevel) {
-            getDrops(p_49893_, (ServerLevel)p_49894_, p_49895_, p_49896_).forEach(p_49859_ -> popResource((ServerLevel)p_49894_, p_49895_, p_49859_));
-            p_49893_.spawnAfterBreak((ServerLevel)p_49894_, p_49895_, ItemStack.EMPTY, true);
+    public static void dropResources(BlockState pState, LevelAccessor pLevel, BlockPos pPos, @Nullable BlockEntity pBlockEntity) {
+        if (pLevel instanceof ServerLevel) {
+            getDrops(pState, (ServerLevel)pLevel, pPos, pBlockEntity).forEach(p_49859_ -> popResource((ServerLevel)pLevel, pPos, p_49859_));
+            pState.spawnAfterBreak((ServerLevel)pLevel, pPos, ItemStack.EMPTY, true);
         }
     }
 
     public static void dropResources(
-        BlockState p_49882_, Level p_49883_, BlockPos p_49884_, @Nullable BlockEntity p_49885_, @Nullable Entity p_49886_, ItemStack p_49887_
+        BlockState pState, Level pLevel, BlockPos pPos, @Nullable BlockEntity pBlockEntity, @Nullable Entity pEntity, ItemStack pTool
     ) {
-        if (p_49883_ instanceof ServerLevel) {
-            getDrops(p_49882_, (ServerLevel)p_49883_, p_49884_, p_49885_, p_49886_, p_49887_).forEach(p_49944_ -> popResource(p_49883_, p_49884_, p_49944_));
-            p_49882_.spawnAfterBreak((ServerLevel)p_49883_, p_49884_, p_49887_, true);
+        if (pLevel instanceof ServerLevel) {
+            getDrops(pState, (ServerLevel)pLevel, pPos, pBlockEntity, pEntity, pTool).forEach(p_49944_ -> popResource(pLevel, pPos, p_49944_));
+            pState.spawnAfterBreak((ServerLevel)pLevel, pPos, pTool, true);
         }
     }
 
-    public static void popResource(Level p_49841_, BlockPos p_49842_, ItemStack p_49843_) {
+    public static void popResource(Level pLevel, BlockPos pPos, ItemStack pStack) {
         double d0 = (double)EntityType.ITEM.getHeight() / 2.0;
-        double d1 = (double)p_49842_.getX() + 0.5 + Mth.nextDouble(p_49841_.random, -0.25, 0.25);
-        double d2 = (double)p_49842_.getY() + 0.5 + Mth.nextDouble(p_49841_.random, -0.25, 0.25) - d0;
-        double d3 = (double)p_49842_.getZ() + 0.5 + Mth.nextDouble(p_49841_.random, -0.25, 0.25);
-        popResource(p_49841_, () -> new ItemEntity(p_49841_, d1, d2, d3, p_49843_), p_49843_);
+        double d1 = (double)pPos.getX() + 0.5 + Mth.nextDouble(pLevel.random, -0.25, 0.25);
+        double d2 = (double)pPos.getY() + 0.5 + Mth.nextDouble(pLevel.random, -0.25, 0.25) - d0;
+        double d3 = (double)pPos.getZ() + 0.5 + Mth.nextDouble(pLevel.random, -0.25, 0.25);
+        popResource(pLevel, () -> new ItemEntity(pLevel, d1, d2, d3, pStack), pStack);
     }
 
-    public static void popResourceFromFace(Level p_152436_, BlockPos p_152437_, Direction p_152438_, ItemStack p_152439_) {
-        int i = p_152438_.getStepX();
-        int j = p_152438_.getStepY();
-        int k = p_152438_.getStepZ();
+    public static void popResourceFromFace(Level pLevel, BlockPos pPos, Direction pDirection, ItemStack pStack) {
+        int i = pDirection.getStepX();
+        int j = pDirection.getStepY();
+        int k = pDirection.getStepZ();
         double d0 = (double)EntityType.ITEM.getWidth() / 2.0;
         double d1 = (double)EntityType.ITEM.getHeight() / 2.0;
-        double d2 = (double)p_152437_.getX() + 0.5 + (i == 0 ? Mth.nextDouble(p_152436_.random, -0.25, 0.25) : (double)i * (0.5 + d0));
-        double d3 = (double)p_152437_.getY() + 0.5 + (j == 0 ? Mth.nextDouble(p_152436_.random, -0.25, 0.25) : (double)j * (0.5 + d1)) - d1;
-        double d4 = (double)p_152437_.getZ() + 0.5 + (k == 0 ? Mth.nextDouble(p_152436_.random, -0.25, 0.25) : (double)k * (0.5 + d0));
-        double d5 = i == 0 ? Mth.nextDouble(p_152436_.random, -0.1, 0.1) : (double)i * 0.1;
-        double d6 = j == 0 ? Mth.nextDouble(p_152436_.random, 0.0, 0.1) : (double)j * 0.1 + 0.1;
-        double d7 = k == 0 ? Mth.nextDouble(p_152436_.random, -0.1, 0.1) : (double)k * 0.1;
-        popResource(p_152436_, () -> new ItemEntity(p_152436_, d2, d3, d4, p_152439_, d5, d6, d7), p_152439_);
+        double d2 = (double)pPos.getX() + 0.5 + (i == 0 ? Mth.nextDouble(pLevel.random, -0.25, 0.25) : (double)i * (0.5 + d0));
+        double d3 = (double)pPos.getY() + 0.5 + (j == 0 ? Mth.nextDouble(pLevel.random, -0.25, 0.25) : (double)j * (0.5 + d1)) - d1;
+        double d4 = (double)pPos.getZ() + 0.5 + (k == 0 ? Mth.nextDouble(pLevel.random, -0.25, 0.25) : (double)k * (0.5 + d0));
+        double d5 = i == 0 ? Mth.nextDouble(pLevel.random, -0.1, 0.1) : (double)i * 0.1;
+        double d6 = j == 0 ? Mth.nextDouble(pLevel.random, 0.0, 0.1) : (double)j * 0.1 + 0.1;
+        double d7 = k == 0 ? Mth.nextDouble(pLevel.random, -0.1, 0.1) : (double)k * 0.1;
+        popResource(pLevel, () -> new ItemEntity(pLevel, d2, d3, d4, pStack, d5, d6, d7), pStack);
     }
 
-    private static void popResource(Level p_152441_, Supplier<ItemEntity> p_152442_, ItemStack p_152443_) {
-        if (p_152441_ instanceof ServerLevel serverlevel && !p_152443_.isEmpty() && serverlevel.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
-            ItemEntity itementity = p_152442_.get();
+    private static void popResource(Level pLevel, Supplier<ItemEntity> pItemEntitySupplier, ItemStack pStack) {
+        if (pLevel instanceof ServerLevel serverlevel && !pStack.isEmpty() && serverlevel.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
+            ItemEntity itementity = pItemEntitySupplier.get();
             itementity.setDefaultPickUpDelay();
-            p_152441_.addFreshEntity(itementity);
+            pLevel.addFreshEntity(itementity);
             return;
         }
     }
 
-    protected void popExperience(ServerLevel p_49806_, BlockPos p_49807_, int p_49808_) {
-        if (p_49806_.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
-            ExperienceOrb.award(p_49806_, Vec3.atCenterOf(p_49807_), p_49808_);
+    protected void popExperience(ServerLevel pLevel, BlockPos pPos, int pAmount) {
+        if (pLevel.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
+            ExperienceOrb.award(pLevel, Vec3.atCenterOf(pPos), pAmount);
         }
     }
 
@@ -339,40 +344,40 @@ public class Block extends BlockBehaviour implements ItemLike {
         return this.explosionResistance;
     }
 
-    public void wasExploded(ServerLevel p_361938_, BlockPos p_49845_, Explosion p_49846_) {
+    public void wasExploded(ServerLevel pLevel, BlockPos pPos, Explosion pExplosion) {
     }
 
-    public void stepOn(Level p_152431_, BlockPos p_152432_, BlockState p_152433_, Entity p_152434_) {
+    public void stepOn(Level pLevel, BlockPos pPos, BlockState pState, Entity pEntity) {
     }
 
     @Nullable
-    public BlockState getStateForPlacement(BlockPlaceContext p_49820_) {
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
         return this.defaultBlockState();
     }
 
-    public void playerDestroy(Level p_49827_, Player p_49828_, BlockPos p_49829_, BlockState p_49830_, @Nullable BlockEntity p_49831_, ItemStack p_49832_) {
-        p_49828_.awardStat(Stats.BLOCK_MINED.get(this));
-        p_49828_.causeFoodExhaustion(0.005F);
-        dropResources(p_49830_, p_49827_, p_49829_, p_49831_, p_49828_, p_49832_);
+    public void playerDestroy(Level pLevel, Player pPlayer, BlockPos pPos, BlockState pState, @Nullable BlockEntity pBlockEntity, ItemStack pTool) {
+        pPlayer.awardStat(Stats.BLOCK_MINED.get(this));
+        pPlayer.causeFoodExhaustion(0.005F);
+        dropResources(pState, pLevel, pPos, pBlockEntity, pPlayer, pTool);
     }
 
-    public void setPlacedBy(Level p_49847_, BlockPos p_49848_, BlockState p_49849_, @Nullable LivingEntity p_49850_, ItemStack p_49851_) {
+    public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
     }
 
-    public boolean isPossibleToRespawnInThis(BlockState p_279289_) {
-        return !p_279289_.isSolid() && !p_279289_.liquid();
+    public boolean isPossibleToRespawnInThis(BlockState pState) {
+        return !pState.isSolid() && !pState.liquid();
     }
 
     public MutableComponent getName() {
         return Component.translatable(this.getDescriptionId());
     }
 
-    public void fallOn(Level p_152426_, BlockState p_152427_, BlockPos p_152428_, Entity p_152429_, float p_152430_) {
-        p_152429_.causeFallDamage(p_152430_, 1.0F, p_152429_.damageSources().fall());
+    public void fallOn(Level pLevel, BlockState pState, BlockPos pPos, Entity pEntity, float pFallDistance) {
+        pEntity.causeFallDamage(pFallDistance, 1.0F, pEntity.damageSources().fall());
     }
 
-    public void updateEntityMovementAfterFallOn(BlockGetter p_49821_, Entity p_49822_) {
-        p_49822_.setDeltaMovement(p_49822_.getDeltaMovement().multiply(1.0, 0.0, 1.0));
+    public void updateEntityMovementAfterFallOn(BlockGetter pLevel, Entity pEntity) {
+        pEntity.setDeltaMovement(pEntity.getDeltaMovement().multiply(1.0, 0.0, 1.0));
     }
 
     public float getFriction() {
@@ -387,56 +392,61 @@ public class Block extends BlockBehaviour implements ItemLike {
         return this.jumpFactor;
     }
 
-    protected void spawnDestroyParticles(Level p_152422_, Player p_152423_, BlockPos p_152424_, BlockState p_152425_) {
-        p_152422_.levelEvent(p_152423_, 2001, p_152424_, getId(p_152425_));
+    protected void spawnDestroyParticles(Level pLevel, Player pPlayer, BlockPos pPos, BlockState pState) {
+        pLevel.levelEvent(pPlayer, 2001, pPos, getId(pState));
     }
 
-    public BlockState playerWillDestroy(Level p_49852_, BlockPos p_49853_, BlockState p_49854_, Player p_49855_) {
-        this.spawnDestroyParticles(p_49852_, p_49855_, p_49853_, p_49854_);
-        if (p_49854_.is(BlockTags.GUARDED_BY_PIGLINS) && p_49852_ instanceof ServerLevel serverlevel) {
-            PiglinAi.angerNearbyPiglins(serverlevel, p_49855_, false);
+    public BlockState playerWillDestroy(Level pLevel, BlockPos pPos, BlockState pState, Player pPlayer) {
+        this.spawnDestroyParticles(pLevel, pPlayer, pPos, pState);
+        if (pState.is(BlockTags.GUARDED_BY_PIGLINS) && pLevel instanceof ServerLevel serverlevel) {
+            PiglinAi.angerNearbyPiglins(serverlevel, pPlayer, false);
         }
 
-        p_49852_.gameEvent(GameEvent.BLOCK_DESTROY, p_49853_, GameEvent.Context.of(p_49855_, p_49854_));
-        return p_49854_;
+        pLevel.gameEvent(GameEvent.BLOCK_DESTROY, pPos, GameEvent.Context.of(pPlayer, pState));
+        return pState;
     }
 
-    public void handlePrecipitation(BlockState p_152450_, Level p_152451_, BlockPos p_152452_, Biome.Precipitation p_152453_) {
+    public void handlePrecipitation(BlockState pState, Level pLevel, BlockPos pPos, Biome.Precipitation pPrecipitation) {
     }
 
-    public boolean dropFromExplosion(Explosion p_49826_) {
+    public boolean dropFromExplosion(Explosion pExplosion) {
         return true;
     }
 
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_49915_) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
     }
 
     public StateDefinition<Block, BlockState> getStateDefinition() {
         return this.stateDefinition;
     }
 
-    protected final void registerDefaultState(BlockState p_49960_) {
-        this.defaultBlockState = p_49960_;
+    protected final void registerDefaultState(BlockState pState) {
+        this.defaultBlockState = pState;
     }
 
     public final BlockState defaultBlockState() {
         return this.defaultBlockState;
     }
 
-    public final BlockState withPropertiesOf(BlockState p_152466_) {
+    // Arcane mixin port: Yarn name for official defaultBlockState().
+    public final BlockState getDefaultState() {
+        return this.defaultBlockState();
+    }
+
+    public final BlockState withPropertiesOf(BlockState pState) {
         BlockState blockstate = this.defaultBlockState();
 
-        for (Property<?> property : p_152466_.getBlock().getStateDefinition().getProperties()) {
+        for (Property<?> property : pState.getBlock().getStateDefinition().getProperties()) {
             if (blockstate.hasProperty(property)) {
-                blockstate = copyProperty(p_152466_, blockstate, property);
+                blockstate = copyProperty(pState, blockstate, property);
             }
         }
 
         return blockstate;
     }
 
-    private static <T extends Comparable<T>> BlockState copyProperty(BlockState p_152455_, BlockState p_152456_, Property<T> p_152457_) {
-        return p_152456_.setValue(p_152457_, p_152455_.getValue(p_152457_));
+    private static <T extends Comparable<T>> BlockState copyProperty(BlockState pSourceState, BlockState pTargetState, Property<T> pProperty) {
+        return pTargetState.setValue(pProperty, pSourceState.getValue(pProperty));
     }
 
     @Override
@@ -457,7 +467,7 @@ public class Block extends BlockBehaviour implements ItemLike {
         return "Block{" + BuiltInRegistries.BLOCK.wrapAsHolder(this).getRegisteredName() + "}";
     }
 
-    public void appendHoverText(ItemStack p_49816_, Item.TooltipContext p_331399_, List<Component> p_49818_, TooltipFlag p_49819_) {
+    public void appendHoverText(ItemStack pStack, Item.TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pTooltipFlag) {
     }
 
     @Override
@@ -465,8 +475,8 @@ public class Block extends BlockBehaviour implements ItemLike {
         return this;
     }
 
-    protected ImmutableMap<BlockState, VoxelShape> getShapeForEachState(Function<BlockState, VoxelShape> p_152459_) {
-        return this.stateDefinition.getPossibleStates().stream().collect(ImmutableMap.toImmutableMap(Function.identity(), p_152459_));
+    protected ImmutableMap<BlockState, VoxelShape> getShapeForEachState(Function<BlockState, VoxelShape> pShapeGetter) {
+        return this.stateDefinition.getPossibleStates().stream().collect(ImmutableMap.toImmutableMap(Function.identity(), pShapeGetter));
     }
 
     @Deprecated
@@ -474,17 +484,17 @@ public class Block extends BlockBehaviour implements ItemLike {
         return this.builtInRegistryHolder;
     }
 
-    protected void tryDropExperience(ServerLevel p_220823_, BlockPos p_220824_, ItemStack p_220825_, IntProvider p_220826_) {
-        int i = EnchantmentHelper.processBlockExperience(p_220823_, p_220825_, p_220826_.sample(p_220823_.getRandom()));
+    protected void tryDropExperience(ServerLevel pLevel, BlockPos pPos, ItemStack pHeldItem, IntProvider pAmount) {
+        int i = EnchantmentHelper.processBlockExperience(pLevel, pHeldItem, pAmount.sample(pLevel.getRandom()));
         if (i > 0) {
-            this.popExperience(p_220823_, p_220824_, i);
+            this.popExperience(pLevel, pPos, i);
         }
     }
 
     static record ShapePairKey(VoxelShape first, VoxelShape second) {
         @Override
-        public boolean equals(Object p_363342_) {
-            if (p_363342_ instanceof Block.ShapePairKey block$shapepairkey
+        public boolean equals(Object pOther) {
+            if (pOther instanceof Block.ShapePairKey block$shapepairkey
                 && this.first == block$shapepairkey.first
                 && this.second == block$shapepairkey.second) {
                 return true;

@@ -8,8 +8,8 @@ import net.minecraft.world.level.block.state.BlockState;
 public class ComparatorBlockEntity extends BlockEntity {
     private int output;
 
-    public ComparatorBlockEntity(BlockPos p_155386_, BlockState p_155387_) {
-        super(BlockEntityType.COMPARATOR, p_155386_, p_155387_);
+    public ComparatorBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        super(BlockEntityType.COMPARATOR, pPos, pBlockState);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class ComparatorBlockEntity extends BlockEntity {
         return this.output;
     }
 
-    public void setOutputSignal(int p_59176_) {
-        this.output = p_59176_;
+    public void setOutputSignal(int pOutput) {
+        this.output = pOutput;
     }
 }

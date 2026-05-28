@@ -11,12 +11,12 @@ public record ServerboundClientInformationPacket(ClientInformation information) 
         ServerboundClientInformationPacket::write, ServerboundClientInformationPacket::new
     );
 
-    private ServerboundClientInformationPacket(FriendlyByteBuf p_299808_) {
-        this(new ClientInformation(p_299808_));
+    private ServerboundClientInformationPacket(FriendlyByteBuf pBuffer) {
+        this(new ClientInformation(pBuffer));
     }
 
-    private void write(FriendlyByteBuf p_298054_) {
-        this.information.write(p_298054_);
+    private void write(FriendlyByteBuf pBuffer) {
+        this.information.write(pBuffer);
     }
 
     @Override

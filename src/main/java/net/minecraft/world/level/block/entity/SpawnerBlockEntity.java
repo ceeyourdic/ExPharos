@@ -32,8 +32,8 @@ public class SpawnerBlockEntity extends BlockEntity implements Spawner {
         }
     };
 
-    public SpawnerBlockEntity(BlockPos p_155752_, BlockState p_155753_) {
-        super(BlockEntityType.MOB_SPAWNER, p_155752_, p_155753_);
+    public SpawnerBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        super(BlockEntityType.MOB_SPAWNER, pPos, pBlockState);
     }
 
     @Override
@@ -48,12 +48,12 @@ public class SpawnerBlockEntity extends BlockEntity implements Spawner {
         this.spawner.save(p_187521_);
     }
 
-    public static void clientTick(Level p_155755_, BlockPos p_155756_, BlockState p_155757_, SpawnerBlockEntity p_155758_) {
-        p_155758_.spawner.clientTick(p_155755_, p_155756_);
+    public static void clientTick(Level pLevel, BlockPos pPos, BlockState pState, SpawnerBlockEntity pBlockEntity) {
+        pBlockEntity.spawner.clientTick(pLevel, pPos);
     }
 
-    public static void serverTick(Level p_155762_, BlockPos p_155763_, BlockState p_155764_, SpawnerBlockEntity p_155765_) {
-        p_155765_.spawner.serverTick((ServerLevel)p_155762_, p_155763_);
+    public static void serverTick(Level pLevel, BlockPos pPos, BlockState pState, SpawnerBlockEntity pBlockEntity) {
+        pBlockEntity.spawner.serverTick((ServerLevel)pLevel, pPos);
     }
 
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
@@ -68,13 +68,13 @@ public class SpawnerBlockEntity extends BlockEntity implements Spawner {
     }
 
     @Override
-    public boolean triggerEvent(int p_59797_, int p_59798_) {
-        return this.spawner.onEventTriggered(this.level, p_59797_) ? true : super.triggerEvent(p_59797_, p_59798_);
+    public boolean triggerEvent(int pId, int pType) {
+        return this.spawner.onEventTriggered(this.level, pId) ? true : super.triggerEvent(pId, pType);
     }
 
     @Override
-    public void setEntityId(EntityType<?> p_254530_, RandomSource p_253719_) {
-        this.spawner.setEntityId(p_254530_, this.level, p_253719_, this.worldPosition);
+    public void setEntityId(EntityType<?> pType, RandomSource pRandom) {
+        this.spawner.setEntityId(pType, this.level, pRandom, this.worldPosition);
         this.setChanged();
     }
 

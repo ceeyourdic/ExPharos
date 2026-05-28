@@ -28,8 +28,8 @@ public class FixedFormat implements NumberFormat {
     };
     final Component value;
 
-    public FixedFormat(Component p_309670_) {
-        this.value = p_309670_;
+    public FixedFormat(Component pValue) {
+        this.value = pValue;
     }
 
     @Override

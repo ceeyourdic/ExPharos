@@ -19,8 +19,8 @@ public class RecipeCommand {
     private static final SimpleCommandExceptionType ERROR_GIVE_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.recipe.give.failed"));
     private static final SimpleCommandExceptionType ERROR_TAKE_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.recipe.take.failed"));
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_138201_) {
-        p_138201_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("recipe")
                 .requires(p_138205_ -> p_138205_.hasPermission(2))
                 .then(
@@ -78,44 +78,44 @@ public class RecipeCommand {
         );
     }
 
-    private static int giveRecipes(CommandSourceStack p_138207_, Collection<ServerPlayer> p_138208_, Collection<RecipeHolder<?>> p_138209_) throws CommandSyntaxException {
+    private static int giveRecipes(CommandSourceStack pSource, Collection<ServerPlayer> pTargets, Collection<RecipeHolder<?>> pRecipes) throws CommandSyntaxException {
         int i = 0;
 
-        for (ServerPlayer serverplayer : p_138208_) {
-            i += serverplayer.awardRecipes(p_138209_);
+        for (ServerPlayer serverplayer : pTargets) {
+            i += serverplayer.awardRecipes(pRecipes);
         }
 
         if (i == 0) {
             throw ERROR_GIVE_FAILED.create();
         } else {
-            if (p_138208_.size() == 1) {
-                p_138207_.sendSuccess(
-                    () -> Component.translatable("commands.recipe.give.success.single", p_138209_.size(), p_138208_.iterator().next().getDisplayName()), true
+            if (pTargets.size() == 1) {
+                pSource.sendSuccess(
+                    () -> Component.translatable("commands.recipe.give.success.single", pRecipes.size(), pTargets.iterator().next().getDisplayName()), true
                 );
             } else {
-                p_138207_.sendSuccess(() -> Component.translatable("commands.recipe.give.success.multiple", p_138209_.size(), p_138208_.size()), true);
+                pSource.sendSuccess(() -> Component.translatable("commands.recipe.give.success.multiple", pRecipes.size(), pTargets.size()), true);
             }
 
             return i;
         }
     }
 
-    private static int takeRecipes(CommandSourceStack p_138213_, Collection<ServerPlayer> p_138214_, Collection<RecipeHolder<?>> p_138215_) throws CommandSyntaxException {
+    private static int takeRecipes(CommandSourceStack pSource, Collection<ServerPlayer> pTargets, Collection<RecipeHolder<?>> pRecipes) throws CommandSyntaxException {
         int i = 0;
 
-        for (ServerPlayer serverplayer : p_138214_) {
-            i += serverplayer.resetRecipes(p_138215_);
+        for (ServerPlayer serverplayer : pTargets) {
+            i += serverplayer.resetRecipes(pRecipes);
         }
 
         if (i == 0) {
             throw ERROR_TAKE_FAILED.create();
         } else {
-            if (p_138214_.size() == 1) {
-                p_138213_.sendSuccess(
-                    () -> Component.translatable("commands.recipe.take.success.single", p_138215_.size(), p_138214_.iterator().next().getDisplayName()), true
+            if (pTargets.size() == 1) {
+                pSource.sendSuccess(
+                    () -> Component.translatable("commands.recipe.take.success.single", pRecipes.size(), pTargets.iterator().next().getDisplayName()), true
                 );
             } else {
-                p_138213_.sendSuccess(() -> Component.translatable("commands.recipe.take.success.multiple", p_138215_.size(), p_138214_.size()), true);
+                pSource.sendSuccess(() -> Component.translatable("commands.recipe.take.success.multiple", pRecipes.size(), pTargets.size()), true);
             }
 
             return i;

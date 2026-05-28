@@ -16,9 +16,9 @@ import net.minecraft.world.level.material.Fluids;
 public class EmptyLevelChunk extends LevelChunk {
     private final Holder<Biome> biome;
 
-    public EmptyLevelChunk(Level p_204422_, ChunkPos p_204423_, Holder<Biome> p_204424_) {
-        super(p_204422_, p_204423_);
-        this.biome = p_204424_;
+    public EmptyLevelChunk(Level pLevel, ChunkPos pPos, Holder<Biome> pBiome) {
+        super(pLevel, pPos);
+        this.biome = pBiome;
     }
 
     @Override

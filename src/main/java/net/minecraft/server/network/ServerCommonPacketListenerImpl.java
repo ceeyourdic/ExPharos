@@ -44,12 +44,12 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
     private int latency;
     private volatile boolean suspendFlushingOnServerThread = false;
 
-    public ServerCommonPacketListenerImpl(MinecraftServer p_299469_, Connection p_300872_, CommonListenerCookie p_300277_) {
-        this.server = p_299469_;
-        this.connection = p_300872_;
+    public ServerCommonPacketListenerImpl(MinecraftServer pServer, Connection pConnection, CommonListenerCookie pCookie) {
+        this.server = pServer;
+        this.connection = pConnection;
         this.keepAliveTime = Util.getMillis();
-        this.latency = p_300277_.latency();
-        this.transferred = p_300277_.transferred();
+        this.latency = pCookie.latency();
+        this.transferred = pCookie.transferred();
     }
 
     private void close() {
@@ -123,9 +123,9 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
         Profiler.get().pop();
     }
 
-    private boolean checkIfClosed(long p_331601_) {
+    private boolean checkIfClosed(long pTime) {
         if (this.closed) {
-            if (p_331601_ - this.closedListenerTime >= 15000L) {
+            if (pTime - this.closedListenerTime >= 15000L) {
                 this.disconnect(TIMEOUT_DISCONNECTION_MESSAGE);
             }
 
@@ -144,34 +144,34 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
         this.connection.flushChannel();
     }
 
-    public void send(Packet<?> p_300558_) {
-        this.send(p_300558_, null);
+    public void send(Packet<?> pPacket) {
+        this.send(pPacket, null);
     }
 
-    public void send(Packet<?> p_300325_, @Nullable PacketSendListener p_301165_) {
-        if (p_300325_.isTerminal()) {
+    public void send(Packet<?> pPacket, @Nullable PacketSendListener pListener) {
+        if (pPacket.isTerminal()) {
             this.close();
         }
 
         boolean flag = !this.suspendFlushingOnServerThread || !this.server.isSameThread();
 
         try {
-            this.connection.send(p_300325_, p_301165_, flag);
+            this.connection.send(pPacket, pListener, flag);
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.forThrowable(throwable, "Sending packet");
             CrashReportCategory crashreportcategory = crashreport.addCategory("Packet being sent");
-            crashreportcategory.setDetail("Packet class", () -> p_300325_.getClass().getCanonicalName());
+            crashreportcategory.setDetail("Packet class", () -> pPacket.getClass().getCanonicalName());
             throw new ReportedException(crashreport);
         }
     }
 
-    public void disconnect(Component p_299122_) {
-        this.disconnect(new DisconnectionDetails(p_299122_));
+    public void disconnect(Component pReason) {
+        this.disconnect(new DisconnectionDetails(pReason));
     }
 
-    public void disconnect(DisconnectionDetails p_345473_) {
+    public void disconnect(DisconnectionDetails pDisconnectionDetails) {
         this.connection
-            .send(new ClientboundDisconnectPacket(p_345473_.reason()), PacketSendListener.thenRun(() -> this.connection.disconnect(p_345473_)));
+            .send(new ClientboundDisconnectPacket(pDisconnectionDetails.reason()), PacketSendListener.thenRun(() -> this.connection.disconnect(pDisconnectionDetails)));
         this.connection.setReadOnly();
         this.server.executeBlocking(this.connection::handleDisconnection);
     }
@@ -191,7 +191,7 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
         return this.latency;
     }
 
-    protected CommonListenerCookie createCookie(ClientInformation p_297318_) {
-        return new CommonListenerCookie(this.playerProfile(), this.latency, p_297318_, this.transferred);
+    protected CommonListenerCookie createCookie(ClientInformation pClientInformation) {
+        return new CommonListenerCookie(this.playerProfile(), this.latency, pClientInformation, this.transferred);
     }
 }

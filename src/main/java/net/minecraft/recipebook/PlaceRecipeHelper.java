@@ -6,44 +6,44 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 
 public interface PlaceRecipeHelper {
-    static <T> void placeRecipe(int p_369532_, int p_361267_, Recipe<?> p_361929_, Iterable<T> p_367857_, PlaceRecipeHelper.Output<T> p_369633_) {
-        if (p_361929_ instanceof ShapedRecipe shapedrecipe) {
-            placeRecipe(p_369532_, p_361267_, shapedrecipe.getWidth(), shapedrecipe.getHeight(), p_367857_, p_369633_);
+    static <T> void placeRecipe(int pWidth, int pHeight, Recipe<?> pRecipe, Iterable<T> pIngredients, PlaceRecipeHelper.Output<T> pOutput) {
+        if (pRecipe instanceof ShapedRecipe shapedrecipe) {
+            placeRecipe(pWidth, pHeight, shapedrecipe.getWidth(), shapedrecipe.getHeight(), pIngredients, pOutput);
         } else {
-            placeRecipe(p_369532_, p_361267_, p_369532_, p_361267_, p_367857_, p_369633_);
+            placeRecipe(pWidth, pHeight, pWidth, pHeight, pIngredients, pOutput);
         }
     }
 
-    static <T> void placeRecipe(int p_363279_, int p_367196_, int p_360764_, int p_364759_, Iterable<T> p_367701_, PlaceRecipeHelper.Output<T> p_369100_) {
-        Iterator<T> iterator = p_367701_.iterator();
+    static <T> void placeRecipe(int pGridWidth, int pGridHeight, int pWidth, int pHeight, Iterable<T> pIngredients, PlaceRecipeHelper.Output<T> pOutput) {
+        Iterator<T> iterator = pIngredients.iterator();
         int i = 0;
 
-        for (int j = 0; j < p_367196_; j++) {
-            boolean flag = (float)p_364759_ < (float)p_367196_ / 2.0F;
-            int k = Mth.floor((float)p_367196_ / 2.0F - (float)p_364759_ / 2.0F);
+        for (int j = 0; j < pGridHeight; j++) {
+            boolean flag = (float)pHeight < (float)pGridHeight / 2.0F;
+            int k = Mth.floor((float)pGridHeight / 2.0F - (float)pHeight / 2.0F);
             if (flag && k > j) {
-                i += p_363279_;
+                i += pGridWidth;
                 j++;
             }
 
-            for (int l = 0; l < p_363279_; l++) {
+            for (int l = 0; l < pGridWidth; l++) {
                 if (!iterator.hasNext()) {
                     return;
                 }
 
-                flag = (float)p_360764_ < (float)p_363279_ / 2.0F;
-                k = Mth.floor((float)p_363279_ / 2.0F - (float)p_360764_ / 2.0F);
-                int i1 = p_360764_;
-                boolean flag1 = l < p_360764_;
+                flag = (float)pWidth < (float)pGridWidth / 2.0F;
+                k = Mth.floor((float)pGridWidth / 2.0F - (float)pWidth / 2.0F);
+                int i1 = pWidth;
+                boolean flag1 = l < pWidth;
                 if (flag) {
-                    i1 = k + p_360764_;
-                    flag1 = k <= l && l < k + p_360764_;
+                    i1 = k + pWidth;
+                    flag1 = k <= l && l < k + pWidth;
                 }
 
                 if (flag1) {
-                    p_369100_.addItemToSlot(iterator.next(), i, l, j);
+                    pOutput.addItemToSlot(iterator.next(), i, l, j);
                 } else if (i1 == l) {
-                    i += p_363279_ - l;
+                    i += pGridWidth - l;
                     break;
                 }
 
@@ -54,6 +54,6 @@ public interface PlaceRecipeHelper {
 
     @FunctionalInterface
     public interface Output<T> {
-        void addItemToSlot(T p_363956_, int p_361316_, int p_365726_, int p_362457_);
+        void addItemToSlot(T pItem, int pSlot, int pX, int pY);
     }
 }

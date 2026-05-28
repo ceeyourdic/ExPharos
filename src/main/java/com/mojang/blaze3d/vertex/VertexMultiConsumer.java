@@ -1,38 +1,38 @@
 package com.mojang.blaze3d.vertex;
 
 import java.util.function.Consumer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.render.VertexBuilderWrapper;
 
-@OnlyIn(Dist.CLIENT)
 public class VertexMultiConsumer {
     public static VertexConsumer create() {
         throw new IllegalArgumentException();
     }
 
-    public static VertexConsumer create(VertexConsumer p_167062_) {
-        return p_167062_;
+    public static VertexConsumer create(VertexConsumer pConsumer) {
+        return pConsumer;
     }
 
-    public static VertexConsumer create(VertexConsumer p_86169_, VertexConsumer p_86170_) {
-        return new VertexMultiConsumer.Double(p_86169_, p_86170_);
+    public static VertexConsumer create(VertexConsumer pFirst, VertexConsumer pSecond) {
+        return new VertexMultiConsumer.Double(pFirst, pSecond);
     }
 
-    public static VertexConsumer create(VertexConsumer... p_167064_) {
-        return new VertexMultiConsumer.Multiple(p_167064_);
+    public static VertexConsumer create(VertexConsumer... pDelegates) {
+        return new VertexMultiConsumer.Multiple(pDelegates);
     }
 
-    @OnlyIn(Dist.CLIENT)
-    static class Double implements VertexConsumer {
+    static class Double extends VertexBuilderWrapper implements VertexConsumer {
         private final VertexConsumer first;
         private final VertexConsumer second;
+        private boolean fixMultitextureUV;
 
-        public Double(VertexConsumer p_86174_, VertexConsumer p_86175_) {
-            if (p_86174_ == p_86175_) {
+        public Double(VertexConsumer pFirst, VertexConsumer pSecond) {
+            super(pSecond);
+            if (pFirst == pSecond) {
                 throw new IllegalArgumentException("Duplicate delegates");
             } else {
-                this.first = p_86174_;
-                this.second = p_86175_;
+                this.first = pFirst;
+                this.second = pSecond;
+                this.updateFixMultitextureUv();
             }
         }
 
@@ -92,14 +92,36 @@ public class VertexMultiConsumer {
             float p_344193_,
             float p_343729_
         ) {
-            this.first.addVertex(p_345388_, p_343258_, p_344041_, p_343827_, p_342641_, p_344103_, p_345208_, p_344566_, p_344092_, p_344193_, p_343729_);
+            if (this.fixMultitextureUV) {
+                this.first
+                    .addVertex(
+                        p_345388_, p_343258_, p_344041_, p_343827_, p_342641_ / 32.0F, p_344103_ / 32.0F, p_345208_, p_344566_, p_344092_, p_344193_, p_343729_
+                    );
+            } else {
+                this.first
+                    .addVertex(p_345388_, p_343258_, p_344041_, p_343827_, p_342641_, p_344103_, p_345208_, p_344566_, p_344092_, p_344193_, p_343729_);
+            }
+
             this.second.addVertex(p_345388_, p_343258_, p_344041_, p_343827_, p_342641_, p_344103_, p_345208_, p_344566_, p_344092_, p_344193_, p_343729_);
+        }
+
+        private void updateFixMultitextureUv() {
+            this.fixMultitextureUV = !this.first.isMultiTexture() && this.second.isMultiTexture();
+        }
+
+        @Override
+        public VertexConsumer getSecondaryBuilder() {
+            return this.first;
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    static record Multiple(VertexConsumer[] delegates) implements VertexConsumer {
+    static class Multiple extends VertexBuilderWrapper implements VertexConsumer {
+        private VertexConsumer[] delegates;
+
         Multiple(VertexConsumer[] delegates) {
+            super(delegates.length > 0 ? delegates[0] : null);
+            this.delegates = delegates;
+
             for (int i = 0; i < delegates.length; i++) {
                 for (int j = i + 1; j < delegates.length; j++) {
                     if (delegates[i] == delegates[j]) {
@@ -111,45 +133,45 @@ public class VertexMultiConsumer {
             this.delegates = delegates;
         }
 
-        private void forEach(Consumer<VertexConsumer> p_167145_) {
+        private void forEach(Consumer<VertexConsumer> pAction) {
             for (VertexConsumer vertexconsumer : this.delegates) {
-                p_167145_.accept(vertexconsumer);
+                pAction.accept(vertexconsumer);
             }
         }
 
         @Override
         public VertexConsumer addVertex(float p_167147_, float p_167148_, float p_167149_) {
-            this.forEach(p_340694_ -> p_340694_.addVertex(p_167147_, p_167148_, p_167149_));
+            this.forEach(consumerIn -> consumerIn.addVertex(p_167147_, p_167148_, p_167149_));
             return this;
         }
 
         @Override
         public VertexConsumer setColor(int p_167130_, int p_167131_, int p_167132_, int p_167133_) {
-            this.forEach(p_340699_ -> p_340699_.setColor(p_167130_, p_167131_, p_167132_, p_167133_));
+            this.forEach(consumerIn -> consumerIn.setColor(p_167130_, p_167131_, p_167132_, p_167133_));
             return this;
         }
 
         @Override
         public VertexConsumer setUv(float p_167084_, float p_167085_) {
-            this.forEach(p_340684_ -> p_340684_.setUv(p_167084_, p_167085_));
+            this.forEach(consumerIn -> consumerIn.setUv(p_167084_, p_167085_));
             return this;
         }
 
         @Override
         public VertexConsumer setUv1(int p_343411_, int p_342288_) {
-            this.forEach(p_340687_ -> p_340687_.setUv1(p_343411_, p_342288_));
+            this.forEach(consumerIn -> consumerIn.setUv1(p_343411_, p_342288_));
             return this;
         }
 
         @Override
         public VertexConsumer setUv2(int p_343645_, int p_344197_) {
-            this.forEach(p_340690_ -> p_340690_.setUv2(p_343645_, p_344197_));
+            this.forEach(consumerIn -> consumerIn.setUv2(p_343645_, p_344197_));
             return this;
         }
 
         @Override
         public VertexConsumer setNormal(float p_343750_, float p_344366_, float p_342844_) {
-            this.forEach(p_340669_ -> p_340669_.setNormal(p_343750_, p_344366_, p_342844_));
+            this.forEach(consumerIn -> consumerIn.setNormal(p_343750_, p_344366_, p_342844_));
             return this;
         }
 
@@ -168,7 +190,7 @@ public class VertexMultiConsumer {
             float p_344334_
         ) {
             this.forEach(
-                p_340681_ -> p_340681_.addVertex(
+                consumerIn -> consumerIn.addVertex(
                         p_342518_, p_344848_, p_345186_, p_343970_, p_345395_, p_342765_, p_345332_, p_342050_, p_343977_, p_342883_, p_344334_
                     )
             );

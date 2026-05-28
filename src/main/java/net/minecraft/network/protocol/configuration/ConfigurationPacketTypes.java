@@ -14,11 +14,11 @@ public class ConfigurationPacketTypes {
     public static final PacketType<ServerboundFinishConfigurationPacket> SERVERBOUND_FINISH_CONFIGURATION = createServerbound("finish_configuration");
     public static final PacketType<ServerboundSelectKnownPacks> SERVERBOUND_SELECT_KNOWN_PACKS = createServerbound("select_known_packs");
 
-    private static <T extends Packet<ClientConfigurationPacketListener>> PacketType<T> createClientbound(String p_334889_) {
-        return new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.withDefaultNamespace(p_334889_));
+    private static <T extends Packet<ClientConfigurationPacketListener>> PacketType<T> createClientbound(String pName) {
+        return new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.withDefaultNamespace(pName));
     }
 
-    private static <T extends Packet<ServerConfigurationPacketListener>> PacketType<T> createServerbound(String p_334731_) {
-        return new PacketType<>(PacketFlow.SERVERBOUND, ResourceLocation.withDefaultNamespace(p_334731_));
+    private static <T extends Packet<ServerConfigurationPacketListener>> PacketType<T> createServerbound(String pName) {
+        return new PacketType<>(PacketFlow.SERVERBOUND, ResourceLocation.withDefaultNamespace(pName));
     }
 }

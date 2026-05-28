@@ -16,11 +16,11 @@ public class RealmsConfirmScreen extends RealmsScreen {
     private final Component title1;
     private final Component title2;
 
-    public RealmsConfirmScreen(BooleanConsumer p_88550_, Component p_88551_, Component p_88552_) {
+    public RealmsConfirmScreen(BooleanConsumer pCallback, Component pTitle1, Component pTitle2) {
         super(GameNarrator.NO_TITLE);
-        this.callback = p_88550_;
-        this.title1 = p_88551_;
-        this.title2 = p_88552_;
+        this.callback = pCallback;
+        this.title1 = pTitle1;
+        this.title2 = pTitle2;
     }
 
     @Override

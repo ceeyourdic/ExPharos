@@ -21,8 +21,8 @@ public class KeybindContents implements ComponentContents {
     @Nullable
     private Supplier<Component> nameResolver;
 
-    public KeybindContents(String p_237347_) {
-        this.name = p_237347_;
+    public KeybindContents(String pName) {
+        this.name = pName;
     }
 
     private Component getNestedComponent() {
@@ -44,11 +44,11 @@ public class KeybindContents implements ComponentContents {
     }
 
     @Override
-    public boolean equals(Object p_237356_) {
-        if (this == p_237356_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            if (p_237356_ instanceof KeybindContents keybindcontents && this.name.equals(keybindcontents.name)) {
+            if (pOther instanceof KeybindContents keybindcontents && this.name.equals(keybindcontents.name)) {
                 return true;
             }
 

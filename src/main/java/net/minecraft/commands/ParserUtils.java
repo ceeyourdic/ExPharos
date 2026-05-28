@@ -32,38 +32,38 @@ public class ParserUtils {
         }
     });
 
-    private static int getPos(JsonReader p_311647_) {
+    private static int getPos(JsonReader pReader) {
         try {
-            return JSON_READER_POS.getInt(p_311647_) - JSON_READER_LINESTART.getInt(p_311647_);
+            return JSON_READER_POS.getInt(pReader) - JSON_READER_LINESTART.getInt(pReader);
         } catch (IllegalAccessException illegalaccessexception) {
             throw new IllegalStateException("Couldn't read position of JsonReader", illegalaccessexception);
         }
     }
 
-    public static <T> T parseJson(HolderLookup.Provider p_330013_, StringReader p_311860_, Codec<T> p_311403_) {
-        JsonReader jsonreader = new JsonReader(new java.io.StringReader(p_311860_.getRemaining()));
+    public static <T> T parseJson(HolderLookup.Provider pRegistries, StringReader pReader, Codec<T> pCodec) {
+        JsonReader jsonreader = new JsonReader(new java.io.StringReader(pReader.getRemaining()));
         jsonreader.setLenient(false);
 
         Object object;
         try {
             JsonElement jsonelement = Streams.parse(jsonreader);
-            object = p_311403_.parse(p_330013_.createSerializationContext(JsonOps.INSTANCE), jsonelement).getOrThrow(JsonParseException::new);
+            object = pCodec.parse(pRegistries.createSerializationContext(JsonOps.INSTANCE), jsonelement).getOrThrow(JsonParseException::new);
         } catch (StackOverflowError stackoverflowerror) {
             throw new JsonParseException(stackoverflowerror);
         } finally {
-            p_311860_.setCursor(p_311860_.getCursor() + getPos(jsonreader));
+            pReader.setCursor(pReader.getCursor() + getPos(jsonreader));
         }
 
         return (T)object;
     }
 
-    public static String readWhile(StringReader p_333885_, CharPredicate p_328669_) {
-        int i = p_333885_.getCursor();
+    public static String readWhile(StringReader pReader, CharPredicate pPredicate) {
+        int i = pReader.getCursor();
 
-        while (p_333885_.canRead() && p_328669_.test(p_333885_.peek())) {
-            p_333885_.skip();
+        while (pReader.canRead() && pPredicate.test(pReader.peek())) {
+            pReader.skip();
         }
 
-        return p_333885_.getString().substring(i, p_333885_.getCursor());
+        return pReader.getString().substring(i, pReader.getCursor());
     }
 }

@@ -19,8 +19,8 @@ public class EnterBlockTrigger extends SimpleCriterionTrigger<EnterBlockTrigger.
         return EnterBlockTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_31270_, BlockState p_31271_) {
-        this.trigger(p_31270_, p_31277_ -> p_31277_.matches(p_31271_));
+    public void trigger(ServerPlayer pPlayer, BlockState pState) {
+        this.trigger(pPlayer, p_31277_ -> p_31277_.matches(pState));
     }
 
     public static record TriggerInstance(
@@ -36,25 +36,25 @@ public class EnterBlockTrigger extends SimpleCriterionTrigger<EnterBlockTrigger.
             )
             .validate(EnterBlockTrigger.TriggerInstance::validate);
 
-        private static DataResult<EnterBlockTrigger.TriggerInstance> validate(EnterBlockTrigger.TriggerInstance p_312153_) {
-            return p_312153_.block
+        private static DataResult<EnterBlockTrigger.TriggerInstance> validate(EnterBlockTrigger.TriggerInstance pTriggerInstance) {
+            return pTriggerInstance.block
                 .<DataResult<EnterBlockTrigger.TriggerInstance>>flatMap(
-                    p_308123_ -> p_312153_.state
+                    p_308123_ -> pTriggerInstance.state
                             .<String>flatMap(p_308130_ -> p_308130_.checkState(((Block)p_308123_.value()).getStateDefinition()))
                             .map(p_308125_ -> DataResult.error(() -> "Block" + p_308123_ + " has no property " + p_308125_))
                 )
-                .orElseGet(() -> DataResult.success(p_312153_));
+                .orElseGet(() -> DataResult.success(pTriggerInstance));
         }
 
-        public static Criterion<EnterBlockTrigger.TriggerInstance> entersBlock(Block p_31298_) {
+        public static Criterion<EnterBlockTrigger.TriggerInstance> entersBlock(Block pBlock) {
             return CriteriaTriggers.ENTER_BLOCK
-                .createCriterion(new EnterBlockTrigger.TriggerInstance(Optional.empty(), Optional.of(p_31298_.builtInRegistryHolder()), Optional.empty()));
+                .createCriterion(new EnterBlockTrigger.TriggerInstance(Optional.empty(), Optional.of(pBlock.builtInRegistryHolder()), Optional.empty()));
         }
 
-        public boolean matches(BlockState p_31300_) {
-            return this.block.isPresent() && !p_31300_.is(this.block.get())
+        public boolean matches(BlockState pState) {
+            return this.block.isPresent() && !pState.is(this.block.get())
                 ? false
-                : !this.state.isPresent() || this.state.get().matches(p_31300_);
+                : !this.state.isPresent() || this.state.get().matches(pState);
         }
 
         @Override

@@ -6,12 +6,12 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.serialization.Dynamic;
 
 public class EntityBrushableBlockFieldsRenameFix extends NamedEntityFix {
-    public EntityBrushableBlockFieldsRenameFix(Schema p_278044_) {
-        super(p_278044_, false, "EntityBrushableBlockFieldsRenameFix", References.BLOCK_ENTITY, "minecraft:brushable_block");
+    public EntityBrushableBlockFieldsRenameFix(Schema pOutputSchema) {
+        super(pOutputSchema, false, "EntityBrushableBlockFieldsRenameFix", References.BLOCK_ENTITY, "minecraft:brushable_block");
     }
 
-    public Dynamic<?> fixTag(Dynamic<?> p_277830_) {
-        return p_277830_.renameField("loot_table", "LootTable").renameField("loot_table_seed", "LootTableSeed");
+    public Dynamic<?> fixTag(Dynamic<?> pTag) {
+        return pTag.renameField("loot_table", "LootTable").renameField("loot_table_seed", "LootTableSeed");
     }
 
     @Override

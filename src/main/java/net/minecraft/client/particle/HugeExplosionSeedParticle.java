@@ -31,16 +31,16 @@ public class HugeExplosionSeedParticle extends NoRenderParticle {
     @OnlyIn(Dist.CLIENT)
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         public Particle createParticle(
-            SimpleParticleType p_106969_,
-            ClientLevel p_106970_,
-            double p_106971_,
-            double p_106972_,
-            double p_106973_,
-            double p_106974_,
-            double p_106975_,
-            double p_106976_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
-            return new HugeExplosionSeedParticle(p_106970_, p_106971_, p_106972_, p_106973_);
+            return new HugeExplosionSeedParticle(pLevel, pX, pY, pZ);
         }
     }
 }

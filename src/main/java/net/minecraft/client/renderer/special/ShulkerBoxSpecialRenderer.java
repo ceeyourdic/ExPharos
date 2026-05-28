@@ -24,11 +24,11 @@ public class ShulkerBoxSpecialRenderer implements NoDataSpecialModelRenderer {
     private final Direction orientation;
     private final Material material;
 
-    public ShulkerBoxSpecialRenderer(ShulkerBoxRenderer p_378569_, float p_376947_, Direction p_375769_, Material p_377130_) {
-        this.shulkerBoxRenderer = p_378569_;
-        this.openness = p_376947_;
-        this.orientation = p_375769_;
-        this.material = p_377130_;
+    public ShulkerBoxSpecialRenderer(ShulkerBoxRenderer pShulkerBoxRenderer, float pOpenness, Direction pOrientation, Material pMaterial) {
+        this.shulkerBoxRenderer = pShulkerBoxRenderer;
+        this.openness = pOpenness;
+        this.orientation = pOrientation;
+        this.material = pMaterial;
     }
 
     @Override
@@ -51,8 +51,8 @@ public class ShulkerBoxSpecialRenderer implements NoDataSpecialModelRenderer {
             this(ResourceLocation.withDefaultNamespace("shulker"), 0.0F, Direction.UP);
         }
 
-        public Unbaked(DyeColor p_375531_) {
-            this(Sheets.colorToShulkerMaterial(p_375531_), 0.0F, Direction.UP);
+        public Unbaked(DyeColor pColor) {
+            this(Sheets.colorToShulkerMaterial(pColor), 0.0F, Direction.UP);
         }
 
         @Override

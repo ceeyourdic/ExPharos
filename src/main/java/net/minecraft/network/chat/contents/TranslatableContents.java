@@ -57,30 +57,30 @@ public class TranslatableContents implements ComponentContents {
     private List<FormattedText> decomposedParts = ImmutableList.of();
     private static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
 
-    private static DataResult<Object> filterAllowedArguments(@Nullable Object p_310291_) {
-        return !isAllowedPrimitiveArgument(p_310291_) ? DataResult.error(() -> "This value needs to be parsed as component") : DataResult.success(p_310291_);
+    private static DataResult<Object> filterAllowedArguments(@Nullable Object pInput) {
+        return !isAllowedPrimitiveArgument(pInput) ? DataResult.error(() -> "This value needs to be parsed as component") : DataResult.success(pInput);
     }
 
-    public static boolean isAllowedPrimitiveArgument(@Nullable Object p_313191_) {
-        return p_313191_ instanceof Number || p_313191_ instanceof Boolean || p_313191_ instanceof String;
+    public static boolean isAllowedPrimitiveArgument(@Nullable Object pInput) {
+        return pInput instanceof Number || pInput instanceof Boolean || pInput instanceof String;
     }
 
-    private static Optional<List<Object>> adjustArgs(Object[] p_310705_) {
-        return p_310705_.length == 0 ? Optional.empty() : Optional.of(Arrays.asList(p_310705_));
+    private static Optional<List<Object>> adjustArgs(Object[] pArgs) {
+        return pArgs.length == 0 ? Optional.empty() : Optional.of(Arrays.asList(pArgs));
     }
 
-    private static Object[] adjustArgs(Optional<List<Object>> p_309492_) {
-        return p_309492_.<Object[]>map(p_309407_ -> p_309407_.isEmpty() ? NO_ARGS : p_309407_.toArray()).orElse(NO_ARGS);
+    private static Object[] adjustArgs(Optional<List<Object>> pArgs) {
+        return pArgs.<Object[]>map(p_309407_ -> p_309407_.isEmpty() ? NO_ARGS : p_309407_.toArray()).orElse(NO_ARGS);
     }
 
-    private static TranslatableContents create(String p_311603_, Optional<String> p_311479_, Optional<List<Object>> p_312087_) {
-        return new TranslatableContents(p_311603_, p_311479_.orElse(null), adjustArgs(p_312087_));
+    private static TranslatableContents create(String pKey, Optional<String> pFallback, Optional<List<Object>> pArgs) {
+        return new TranslatableContents(pKey, pFallback.orElse(null), adjustArgs(pArgs));
     }
 
-    public TranslatableContents(String p_265775_, @Nullable String p_265204_, Object[] p_265752_) {
-        this.key = p_265775_;
-        this.fallback = p_265204_;
-        this.args = p_265752_;
+    public TranslatableContents(String pKey, @Nullable String pFallback, Object[] pArgs) {
+        this.key = pKey;
+        this.fallback = pFallback;
+        this.args = pArgs;
     }
 
     @Override
@@ -104,8 +104,8 @@ public class TranslatableContents implements ComponentContents {
         }
     }
 
-    private void decomposeTemplate(String p_237516_, Consumer<FormattedText> p_237517_) {
-        Matcher matcher = FORMAT_PATTERN.matcher(p_237516_);
+    private void decomposeTemplate(String pFormatTemplate, Consumer<FormattedText> pConsumer) {
+        Matcher matcher = FORMAT_PATTERN.matcher(pFormatTemplate);
 
         try {
             int i = 0;
@@ -115,18 +115,18 @@ public class TranslatableContents implements ComponentContents {
                 int k = matcher.start();
                 int l = matcher.end();
                 if (k > j) {
-                    String s = p_237516_.substring(j, k);
+                    String s = pFormatTemplate.substring(j, k);
                     if (s.indexOf(37) != -1) {
                         throw new IllegalArgumentException();
                     }
 
-                    p_237517_.accept(FormattedText.of(s));
+                    pConsumer.accept(FormattedText.of(s));
                 }
 
                 String s4 = matcher.group(2);
-                String s1 = p_237516_.substring(k, l);
+                String s1 = pFormatTemplate.substring(k, l);
                 if ("%".equals(s4) && "%%".equals(s1)) {
-                    p_237517_.accept(TEXT_PERCENT);
+                    pConsumer.accept(TEXT_PERCENT);
                 } else {
                     if (!"s".equals(s4)) {
                         throw new TranslatableFormatException(this, "Unsupported format: '" + s1 + "'");
@@ -134,35 +134,35 @@ public class TranslatableContents implements ComponentContents {
 
                     String s2 = matcher.group(1);
                     int i1 = s2 != null ? Integer.parseInt(s2) - 1 : i++;
-                    p_237517_.accept(this.getArgument(i1));
+                    pConsumer.accept(this.getArgument(i1));
                 }
 
                 j = l;
             }
 
-            if (j < p_237516_.length()) {
-                String s3 = p_237516_.substring(j);
+            if (j < pFormatTemplate.length()) {
+                String s3 = pFormatTemplate.substring(j);
                 if (s3.indexOf(37) != -1) {
                     throw new IllegalArgumentException();
                 }
 
-                p_237517_.accept(FormattedText.of(s3));
+                pConsumer.accept(FormattedText.of(s3));
             }
         } catch (IllegalArgumentException illegalargumentexception) {
             throw new TranslatableFormatException(this, illegalargumentexception);
         }
     }
 
-    private FormattedText getArgument(int p_237510_) {
-        if (p_237510_ >= 0 && p_237510_ < this.args.length) {
-            Object object = this.args[p_237510_];
+    private FormattedText getArgument(int pIndex) {
+        if (pIndex >= 0 && pIndex < this.args.length) {
+            Object object = this.args[pIndex];
             if (object instanceof Component) {
                 return (Component)object;
             } else {
                 return object == null ? TEXT_NULL : FormattedText.of(object.toString());
             }
         } else {
-            throw new TranslatableFormatException(this, p_237510_);
+            throw new TranslatableFormatException(this, pIndex);
         }
     }
 
@@ -211,11 +211,11 @@ public class TranslatableContents implements ComponentContents {
     }
 
     @Override
-    public boolean equals(Object p_237526_) {
-        if (this == p_237526_) {
+    public boolean equals(Object pOther) {
+        if (this == pOther) {
             return true;
         } else {
-            if (p_237526_ instanceof TranslatableContents translatablecontents
+            if (pOther instanceof TranslatableContents translatablecontents
                 && Objects.equals(this.key, translatablecontents.key)
                 && Objects.equals(this.fallback, translatablecontents.fallback)
                 && Arrays.equals(this.args, translatablecontents.args)) {

@@ -33,10 +33,10 @@ public class DustColorTransitionOptions extends ScalableParticleOptionsBase {
     private final int fromColor;
     private final int toColor;
 
-    public DustColorTransitionOptions(int p_367182_, int p_360907_, float p_254178_) {
-        super(p_254178_);
-        this.fromColor = p_367182_;
-        this.toColor = p_360907_;
+    public DustColorTransitionOptions(int pFromColor, int pToColor, float pScale) {
+        super(pScale);
+        this.fromColor = pFromColor;
+        this.toColor = pToColor;
     }
 
     public Vector3f getFromColor() {

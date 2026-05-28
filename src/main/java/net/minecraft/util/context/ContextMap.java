@@ -11,72 +11,72 @@ import org.jetbrains.annotations.Contract;
 public class ContextMap {
     private final Map<ContextKey<?>, Object> params;
 
-    ContextMap(Map<ContextKey<?>, Object> p_362494_) {
-        this.params = p_362494_;
+    ContextMap(Map<ContextKey<?>, Object> pParams) {
+        this.params = pParams;
     }
 
-    public boolean has(ContextKey<?> p_365248_) {
-        return this.params.containsKey(p_365248_);
+    public boolean has(ContextKey<?> pKey) {
+        return this.params.containsKey(pKey);
     }
 
-    public <T> T getOrThrow(ContextKey<T> p_366932_) {
-        T t = (T)this.params.get(p_366932_);
+    public <T> T getOrThrow(ContextKey<T> pKey) {
+        T t = (T)this.params.get(pKey);
         if (t == null) {
-            throw new NoSuchElementException(p_366932_.name().toString());
+            throw new NoSuchElementException(pKey.name().toString());
         } else {
             return t;
         }
     }
 
     @Nullable
-    public <T> T getOptional(ContextKey<T> p_362151_) {
-        return (T)this.params.get(p_362151_);
+    public <T> T getOptional(ContextKey<T> pKey) {
+        return (T)this.params.get(pKey);
     }
 
     @Nullable
     @Contract("_,!null->!null; _,_->_")
-    public <T> T getOrDefault(ContextKey<T> p_368195_, @Nullable T p_368521_) {
-        return (T)this.params.getOrDefault(p_368195_, p_368521_);
+    public <T> T getOrDefault(ContextKey<T> pKey, @Nullable T pDefaultValue) {
+        return (T)this.params.getOrDefault(pKey, pDefaultValue);
     }
 
     public static class Builder {
         private final Map<ContextKey<?>, Object> params = new IdentityHashMap<>();
 
-        public <T> ContextMap.Builder withParameter(ContextKey<T> p_369289_, T p_362485_) {
-            this.params.put(p_369289_, p_362485_);
+        public <T> ContextMap.Builder withParameter(ContextKey<T> pKey, T pValue) {
+            this.params.put(pKey, pValue);
             return this;
         }
 
-        public <T> ContextMap.Builder withOptionalParameter(ContextKey<T> p_366888_, @Nullable T p_366368_) {
-            if (p_366368_ == null) {
-                this.params.remove(p_366888_);
+        public <T> ContextMap.Builder withOptionalParameter(ContextKey<T> pKey, @Nullable T pValue) {
+            if (pValue == null) {
+                this.params.remove(pKey);
             } else {
-                this.params.put(p_366888_, p_366368_);
+                this.params.put(pKey, pValue);
             }
 
             return this;
         }
 
-        public <T> T getParameter(ContextKey<T> p_363188_) {
-            T t = (T)this.params.get(p_363188_);
+        public <T> T getParameter(ContextKey<T> pKey) {
+            T t = (T)this.params.get(pKey);
             if (t == null) {
-                throw new NoSuchElementException(p_363188_.name().toString());
+                throw new NoSuchElementException(pKey.name().toString());
             } else {
                 return t;
             }
         }
 
         @Nullable
-        public <T> T getOptionalParameter(ContextKey<T> p_362877_) {
-            return (T)this.params.get(p_362877_);
+        public <T> T getOptionalParameter(ContextKey<T> pKey) {
+            return (T)this.params.get(pKey);
         }
 
-        public ContextMap create(ContextKeySet p_369803_) {
-            Set<ContextKey<?>> set = Sets.difference(this.params.keySet(), p_369803_.allowed());
+        public ContextMap create(ContextKeySet pContextKeySet) {
+            Set<ContextKey<?>> set = Sets.difference(this.params.keySet(), pContextKeySet.allowed());
             if (!set.isEmpty()) {
                 throw new IllegalArgumentException("Parameters not allowed in this parameter set: " + set);
             } else {
-                Set<ContextKey<?>> set1 = Sets.difference(p_369803_.required(), this.params.keySet());
+                Set<ContextKey<?>> set1 = Sets.difference(pContextKeySet.required(), this.params.keySet());
                 if (!set1.isEmpty()) {
                     throw new IllegalArgumentException("Missing required parameters: " + set1);
                 } else {

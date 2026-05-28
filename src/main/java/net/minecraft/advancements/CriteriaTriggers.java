@@ -106,11 +106,11 @@ public class CriteriaTriggers {
     public static final RecipeCraftedTrigger CRAFTER_RECIPE_CRAFTED = register("crafter_recipe_crafted", new RecipeCraftedTrigger());
     public static final FallAfterExplosionTrigger FALL_AFTER_EXPLOSION = register("fall_after_explosion", new FallAfterExplosionTrigger());
 
-    private static <T extends CriterionTrigger<?>> T register(String p_298570_, T p_10596_) {
-        return Registry.register(BuiltInRegistries.TRIGGER_TYPES, p_298570_, p_10596_);
+    private static <T extends CriterionTrigger<?>> T register(String pName, T pTrigger) {
+        return Registry.register(BuiltInRegistries.TRIGGER_TYPES, pName, pTrigger);
     }
 
-    public static CriterionTrigger<?> bootstrap(Registry<CriterionTrigger<?>> p_310592_) {
+    public static CriterionTrigger<?> bootstrap(Registry<CriterionTrigger<?>> pRegistry) {
         return IMPOSSIBLE;
     }
 }

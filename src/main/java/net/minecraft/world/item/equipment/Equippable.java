@@ -68,43 +68,43 @@ public record Equippable(
         Equippable::new
     );
 
-    public static Equippable llamaSwag(DyeColor p_369724_) {
+    public static Equippable llamaSwag(DyeColor pColor) {
         return builder(EquipmentSlot.BODY)
             .setEquipSound(SoundEvents.LLAMA_SWAG)
-            .setAsset(EquipmentAssets.CARPETS.get(p_369724_))
+            .setAsset(EquipmentAssets.CARPETS.get(pColor))
             .setAllowedEntities(EntityType.LLAMA, EntityType.TRADER_LLAMA)
             .build();
     }
 
-    public static Equippable.Builder builder(EquipmentSlot p_362012_) {
-        return new Equippable.Builder(p_362012_);
+    public static Equippable.Builder builder(EquipmentSlot pSlot) {
+        return new Equippable.Builder(pSlot);
     }
 
-    public InteractionResult swapWithEquipmentSlot(ItemStack p_362062_, Player p_365204_) {
-        if (!p_365204_.canUseSlot(this.slot)) {
+    public InteractionResult swapWithEquipmentSlot(ItemStack pStack, Player pPlayer) {
+        if (!pPlayer.canUseSlot(this.slot)) {
             return InteractionResult.PASS;
         } else {
-            ItemStack itemstack = p_365204_.getItemBySlot(this.slot);
-            if ((!EnchantmentHelper.has(itemstack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE) || p_365204_.isCreative())
-                && !ItemStack.isSameItemSameComponents(p_362062_, itemstack)) {
-                if (!p_365204_.level().isClientSide()) {
-                    p_365204_.awardStat(Stats.ITEM_USED.get(p_362062_.getItem()));
+            ItemStack itemstack = pPlayer.getItemBySlot(this.slot);
+            if ((!EnchantmentHelper.has(itemstack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE) || pPlayer.isCreative())
+                && !ItemStack.isSameItemSameComponents(pStack, itemstack)) {
+                if (!pPlayer.level().isClientSide()) {
+                    pPlayer.awardStat(Stats.ITEM_USED.get(pStack.getItem()));
                 }
 
-                if (p_362062_.getCount() <= 1) {
-                    ItemStack itemstack3 = itemstack.isEmpty() ? p_362062_ : itemstack.copyAndClear();
-                    ItemStack itemstack4 = p_365204_.isCreative() ? p_362062_.copy() : p_362062_.copyAndClear();
-                    p_365204_.setItemSlot(this.slot, itemstack4);
+                if (pStack.getCount() <= 1) {
+                    ItemStack itemstack3 = itemstack.isEmpty() ? pStack : itemstack.copyAndClear();
+                    ItemStack itemstack4 = pPlayer.isCreative() ? pStack.copy() : pStack.copyAndClear();
+                    pPlayer.setItemSlot(this.slot, itemstack4);
                     return InteractionResult.SUCCESS.heldItemTransformedTo(itemstack3);
                 } else {
                     ItemStack itemstack1 = itemstack.copyAndClear();
-                    ItemStack itemstack2 = p_362062_.consumeAndReturn(1, p_365204_);
-                    p_365204_.setItemSlot(this.slot, itemstack2);
-                    if (!p_365204_.getInventory().add(itemstack1)) {
-                        p_365204_.drop(itemstack1, false);
+                    ItemStack itemstack2 = pStack.consumeAndReturn(1, pPlayer);
+                    pPlayer.setItemSlot(this.slot, itemstack2);
+                    if (!pPlayer.getInventory().add(itemstack1)) {
+                        pPlayer.drop(itemstack1, false);
                     }
 
-                    return InteractionResult.SUCCESS.heldItemTransformedTo(p_362062_);
+                    return InteractionResult.SUCCESS.heldItemTransformedTo(pStack);
                 }
             } else {
                 return InteractionResult.FAIL;
@@ -112,8 +112,8 @@ public record Equippable(
         }
     }
 
-    public boolean canBeEquippedBy(EntityType<?> p_365620_) {
-        return this.allowedEntities.isEmpty() || this.allowedEntities.get().contains(p_365620_.builtInRegistryHolder());
+    public boolean canBeEquippedBy(EntityType<?> pEntityType) {
+        return this.allowedEntities.isEmpty() || this.allowedEntities.get().contains(pEntityType.builtInRegistryHolder());
     }
 
     public static class Builder {
@@ -126,46 +126,46 @@ public record Equippable(
         private boolean swappable = true;
         private boolean damageOnHurt = true;
 
-        Builder(EquipmentSlot p_363455_) {
-            this.slot = p_363455_;
+        Builder(EquipmentSlot pSlot) {
+            this.slot = pSlot;
         }
 
-        public Equippable.Builder setEquipSound(Holder<SoundEvent> p_368836_) {
-            this.equipSound = p_368836_;
+        public Equippable.Builder setEquipSound(Holder<SoundEvent> pEquipSound) {
+            this.equipSound = pEquipSound;
             return this;
         }
 
-        public Equippable.Builder setAsset(ResourceKey<EquipmentAsset> p_378631_) {
-            this.assetId = Optional.of(p_378631_);
+        public Equippable.Builder setAsset(ResourceKey<EquipmentAsset> pAsset) {
+            this.assetId = Optional.of(pAsset);
             return this;
         }
 
-        public Equippable.Builder setCameraOverlay(ResourceLocation p_360906_) {
-            this.cameraOverlay = Optional.of(p_360906_);
+        public Equippable.Builder setCameraOverlay(ResourceLocation pCameraOverlay) {
+            this.cameraOverlay = Optional.of(pCameraOverlay);
             return this;
         }
 
-        public Equippable.Builder setAllowedEntities(EntityType<?>... p_370045_) {
-            return this.setAllowedEntities(HolderSet.direct(EntityType::builtInRegistryHolder, p_370045_));
+        public Equippable.Builder setAllowedEntities(EntityType<?>... pAllowedEntities) {
+            return this.setAllowedEntities(HolderSet.direct(EntityType::builtInRegistryHolder, pAllowedEntities));
         }
 
-        public Equippable.Builder setAllowedEntities(HolderSet<EntityType<?>> p_363901_) {
-            this.allowedEntities = Optional.of(p_363901_);
+        public Equippable.Builder setAllowedEntities(HolderSet<EntityType<?>> pAllowedEntities) {
+            this.allowedEntities = Optional.of(pAllowedEntities);
             return this;
         }
 
-        public Equippable.Builder setDispensable(boolean p_370164_) {
-            this.dispensable = p_370164_;
+        public Equippable.Builder setDispensable(boolean pDispensable) {
+            this.dispensable = pDispensable;
             return this;
         }
 
-        public Equippable.Builder setSwappable(boolean p_367437_) {
-            this.swappable = p_367437_;
+        public Equippable.Builder setSwappable(boolean pSwappable) {
+            this.swappable = pSwappable;
             return this;
         }
 
-        public Equippable.Builder setDamageOnHurt(boolean p_363080_) {
-            this.damageOnHurt = p_363080_;
+        public Equippable.Builder setDamageOnHurt(boolean pDamageOnHurt) {
+            this.damageOnHurt = pDamageOnHurt;
             return this;
         }
 

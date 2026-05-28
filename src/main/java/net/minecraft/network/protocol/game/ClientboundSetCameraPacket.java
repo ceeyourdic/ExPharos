@@ -14,16 +14,16 @@ public class ClientboundSetCameraPacket implements Packet<ClientGamePacketListen
     );
     private final int cameraId;
 
-    public ClientboundSetCameraPacket(Entity p_133058_) {
-        this.cameraId = p_133058_.getId();
+    public ClientboundSetCameraPacket(Entity pCameraEntity) {
+        this.cameraId = pCameraEntity.getId();
     }
 
-    private ClientboundSetCameraPacket(FriendlyByteBuf p_179278_) {
-        this.cameraId = p_179278_.readVarInt();
+    private ClientboundSetCameraPacket(FriendlyByteBuf pBuffer) {
+        this.cameraId = pBuffer.readVarInt();
     }
 
-    private void write(FriendlyByteBuf p_133068_) {
-        p_133068_.writeVarInt(this.cameraId);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.cameraId);
     }
 
     @Override
@@ -31,12 +31,12 @@ public class ClientboundSetCameraPacket implements Packet<ClientGamePacketListen
         return GamePacketTypes.CLIENTBOUND_SET_CAMERA;
     }
 
-    public void handle(ClientGamePacketListener p_133066_) {
-        p_133066_.handleSetCamera(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleSetCamera(this);
     }
 
     @Nullable
-    public Entity getEntity(Level p_133060_) {
-        return p_133060_.getEntity(this.cameraId);
+    public Entity getEntity(Level pLevel) {
+        return pLevel.getEntity(this.cameraId);
     }
 }

@@ -31,9 +31,9 @@ public class GuardianModel extends EntityModel<GuardianRenderState> {
     private final ModelPart[] spikeParts = new ModelPart[12];
     private final ModelPart[] tailParts;
 
-    public GuardianModel(ModelPart p_170600_) {
-        super(p_170600_);
-        this.head = p_170600_.getChild("head");
+    public GuardianModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
 
         for (int i = 0; i < this.spikeParts.length; i++) {
             this.spikeParts[i] = this.head.getChild(createSpikeName(i));
@@ -46,8 +46,8 @@ public class GuardianModel extends EntityModel<GuardianRenderState> {
         this.tailParts[2] = this.tailParts[1].getChild("tail2");
     }
 
-    private static String createSpikeName(int p_170603_) {
-        return "spike" + p_170603_;
+    private static String createSpikeName(int pIndex) {
+        return "spike" + pIndex;
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -135,27 +135,27 @@ public class GuardianModel extends EntityModel<GuardianRenderState> {
         this.tailParts[2].yRot = Mth.sin(f1) * (float) Math.PI * 0.15F;
     }
 
-    private void setupSpikes(float p_102709_, float p_102710_) {
+    private void setupSpikes(float pAgeInTicks, float pSpikeAnimation) {
         for (int i = 0; i < 12; i++) {
-            this.spikeParts[i].x = getSpikeX(i, p_102709_, p_102710_);
-            this.spikeParts[i].y = getSpikeY(i, p_102709_, p_102710_);
-            this.spikeParts[i].z = getSpikeZ(i, p_102709_, p_102710_);
+            this.spikeParts[i].x = getSpikeX(i, pAgeInTicks, pSpikeAnimation);
+            this.spikeParts[i].y = getSpikeY(i, pAgeInTicks, pSpikeAnimation);
+            this.spikeParts[i].z = getSpikeZ(i, pAgeInTicks, pSpikeAnimation);
         }
     }
 
-    private static float getSpikeOffset(int p_170605_, float p_170606_, float p_170607_) {
-        return 1.0F + Mth.cos(p_170606_ * 1.5F + (float)p_170605_) * 0.01F - p_170607_;
+    private static float getSpikeOffset(int pIndex, float pAgeInTicks, float pSpikeAnimation) {
+        return 1.0F + Mth.cos(pAgeInTicks * 1.5F + (float)pIndex) * 0.01F - pSpikeAnimation;
     }
 
-    private static float getSpikeX(int p_170610_, float p_170611_, float p_170612_) {
-        return SPIKE_X[p_170610_] * getSpikeOffset(p_170610_, p_170611_, p_170612_);
+    private static float getSpikeX(int pIndex, float pAgeInTicks, float pSpikeAnimation) {
+        return SPIKE_X[pIndex] * getSpikeOffset(pIndex, pAgeInTicks, pSpikeAnimation);
     }
 
-    private static float getSpikeY(int p_170614_, float p_170615_, float p_170616_) {
-        return 16.0F + SPIKE_Y[p_170614_] * getSpikeOffset(p_170614_, p_170615_, p_170616_);
+    private static float getSpikeY(int pIndex, float pAgeInTicks, float pSpikeAnimation) {
+        return 16.0F + SPIKE_Y[pIndex] * getSpikeOffset(pIndex, pAgeInTicks, pSpikeAnimation);
     }
 
-    private static float getSpikeZ(int p_170618_, float p_170619_, float p_170620_) {
-        return SPIKE_Z[p_170618_] * getSpikeOffset(p_170618_, p_170619_, p_170620_);
+    private static float getSpikeZ(int pIndex, float pAgeInTicks, float pSpikeAnimation) {
+        return SPIKE_Z[pIndex] * getSpikeOffset(pIndex, pAgeInTicks, pSpikeAnimation);
     }
 }

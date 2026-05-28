@@ -54,8 +54,8 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
     int scrollOff;
     private boolean isDragging;
 
-    public MerchantScreen(MerchantMenu p_99123_, Inventory p_99124_, Component p_99125_) {
-        super(p_99123_, p_99124_, p_99125_);
+    public MerchantScreen(MerchantMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, pPlayerInventory, pTitle);
         this.imageWidth = 276;
         this.inventoryLabelX = 107;
     }
@@ -120,28 +120,28 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
         }
     }
 
-    private void renderProgressBar(GuiGraphics p_281426_, int p_283008_, int p_283085_, MerchantOffer p_282094_) {
+    private void renderProgressBar(GuiGraphics pGuiGraphics, int pPosX, int pPosY, MerchantOffer pMerchantOffer) {
         int i = this.menu.getTraderLevel();
         int j = this.menu.getTraderXp();
         if (i < 5) {
-            p_281426_.blitSprite(RenderType::guiTextured, EXPERIENCE_BAR_BACKGROUND_SPRITE, p_283008_ + 136, p_283085_ + 16, 102, 5);
+            pGuiGraphics.blitSprite(RenderType::guiTextured, EXPERIENCE_BAR_BACKGROUND_SPRITE, pPosX + 136, pPosY + 16, 102, 5);
             int k = VillagerData.getMinXpPerLevel(i);
             if (j >= k && VillagerData.canLevelUp(i)) {
                 int l = 102;
                 float f = 102.0F / (float)(VillagerData.getMaxXpPerLevel(i) - k);
                 int i1 = Math.min(Mth.floor(f * (float)(j - k)), 102);
-                p_281426_.blitSprite(RenderType::guiTextured, EXPERIENCE_BAR_CURRENT_SPRITE, 102, 5, 0, 0, p_283008_ + 136, p_283085_ + 16, i1, 5);
+                pGuiGraphics.blitSprite(RenderType::guiTextured, EXPERIENCE_BAR_CURRENT_SPRITE, 102, 5, 0, 0, pPosX + 136, pPosY + 16, i1, 5);
                 int j1 = this.menu.getFutureTraderXp();
                 if (j1 > 0) {
                     int k1 = Math.min(Mth.floor((float)j1 * f), 102 - i1);
-                    p_281426_.blitSprite(RenderType::guiTextured, EXPERIENCE_BAR_RESULT_SPRITE, 102, 5, i1, 0, p_283008_ + 136 + i1, p_283085_ + 16, k1, 5);
+                    pGuiGraphics.blitSprite(RenderType::guiTextured, EXPERIENCE_BAR_RESULT_SPRITE, 102, 5, i1, 0, pPosX + 136 + i1, pPosY + 16, k1, 5);
                 }
             }
         }
     }
 
-    private void renderScroller(GuiGraphics p_283030_, int p_283154_, int p_281664_, MerchantOffers p_282877_) {
-        int i = p_282877_.size() + 1 - 7;
+    private void renderScroller(GuiGraphics pGuiGraphics, int pPosX, int pPosY, MerchantOffers pMerchantOffers) {
+        int i = pMerchantOffers.size() + 1 - 7;
         if (i > 1) {
             int j = 139 - (27 + (i - 1) * 139 / i);
             int k = 1 + j / i + 139 / i;
@@ -151,9 +151,9 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
                 i1 = 113;
             }
 
-            p_283030_.blitSprite(RenderType::guiTextured, SCROLLER_SPRITE, p_283154_ + 94, p_281664_ + 18 + i1, 6, 27);
+            pGuiGraphics.blitSprite(RenderType::guiTextured, SCROLLER_SPRITE, pPosX + 94, pPosY + 18 + i1, 6, 27);
         } else {
-            p_283030_.blitSprite(RenderType::guiTextured, SCROLLER_DISABLED_SPRITE, p_283154_ + 94, p_281664_ + 18, 6, 27);
+            pGuiGraphics.blitSprite(RenderType::guiTextured, SCROLLER_DISABLED_SPRITE, pPosX + 94, pPosY + 18, 6, 27);
         }
     }
 
@@ -217,30 +217,30 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
         this.renderTooltip(p_283487_, p_281994_, p_282099_);
     }
 
-    private void renderButtonArrows(GuiGraphics p_283020_, MerchantOffer p_281926_, int p_282752_, int p_282179_) {
-        if (p_281926_.isOutOfStock()) {
-            p_283020_.blitSprite(RenderType::guiTextured, TRADE_ARROW_OUT_OF_STOCK_SPRITE, p_282752_ + 5 + 35 + 20, p_282179_ + 3, 10, 9);
+    private void renderButtonArrows(GuiGraphics pGuiGraphics, MerchantOffer pMerchantOffers, int pPosX, int pPosY) {
+        if (pMerchantOffers.isOutOfStock()) {
+            pGuiGraphics.blitSprite(RenderType::guiTextured, TRADE_ARROW_OUT_OF_STOCK_SPRITE, pPosX + 5 + 35 + 20, pPosY + 3, 10, 9);
         } else {
-            p_283020_.blitSprite(RenderType::guiTextured, TRADE_ARROW_SPRITE, p_282752_ + 5 + 35 + 20, p_282179_ + 3, 10, 9);
+            pGuiGraphics.blitSprite(RenderType::guiTextured, TRADE_ARROW_SPRITE, pPosX + 5 + 35 + 20, pPosY + 3, 10, 9);
         }
     }
 
-    private void renderAndDecorateCostA(GuiGraphics p_281357_, ItemStack p_283466_, ItemStack p_282046_, int p_282403_, int p_283601_) {
-        p_281357_.renderFakeItem(p_283466_, p_282403_, p_283601_);
-        if (p_282046_.getCount() == p_283466_.getCount()) {
-            p_281357_.renderItemDecorations(this.font, p_283466_, p_282403_, p_283601_);
+    private void renderAndDecorateCostA(GuiGraphics pGuiGraphics, ItemStack pRealCost, ItemStack pBaseCost, int pX, int pY) {
+        pGuiGraphics.renderFakeItem(pRealCost, pX, pY);
+        if (pBaseCost.getCount() == pRealCost.getCount()) {
+            pGuiGraphics.renderItemDecorations(this.font, pRealCost, pX, pY);
         } else {
-            p_281357_.renderItemDecorations(this.font, p_282046_, p_282403_, p_283601_, p_282046_.getCount() == 1 ? "1" : null);
-            p_281357_.renderItemDecorations(this.font, p_283466_, p_282403_ + 14, p_283601_, p_283466_.getCount() == 1 ? "1" : null);
-            p_281357_.pose().pushPose();
-            p_281357_.pose().translate(0.0F, 0.0F, 300.0F);
-            p_281357_.blitSprite(RenderType::guiTextured, DISCOUNT_STRIKETHRUOGH_SPRITE, p_282403_ + 7, p_283601_ + 12, 9, 2);
-            p_281357_.pose().popPose();
+            pGuiGraphics.renderItemDecorations(this.font, pBaseCost, pX, pY, pBaseCost.getCount() == 1 ? "1" : null);
+            pGuiGraphics.renderItemDecorations(this.font, pRealCost, pX + 14, pY, pRealCost.getCount() == 1 ? "1" : null);
+            pGuiGraphics.pose().pushPose();
+            pGuiGraphics.pose().translate(0.0F, 0.0F, 300.0F);
+            pGuiGraphics.blitSprite(RenderType::guiTextured, DISCOUNT_STRIKETHRUOGH_SPRITE, pX + 7, pY + 12, 9, 2);
+            pGuiGraphics.pose().popPose();
         }
     }
 
-    private boolean canScroll(int p_99141_) {
-        return p_99141_ > 7;
+    private boolean canScroll(int pNumOffers) {
+        return pNumOffers > 7;
     }
 
     @Override
@@ -259,44 +259,44 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
     }
 
     @Override
-    public boolean mouseDragged(double p_99135_, double p_99136_, int p_99137_, double p_99138_, double p_99139_) {
+    public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
         int i = this.menu.getOffers().size();
         if (this.isDragging) {
             int j = this.topPos + 18;
             int k = j + 139;
             int l = i - 7;
-            float f = ((float)p_99136_ - (float)j - 13.5F) / ((float)(k - j) - 27.0F);
+            float f = ((float)pMouseY - (float)j - 13.5F) / ((float)(k - j) - 27.0F);
             f = f * (float)l + 0.5F;
             this.scrollOff = Mth.clamp((int)f, 0, l);
             return true;
         } else {
-            return super.mouseDragged(p_99135_, p_99136_, p_99137_, p_99138_, p_99139_);
+            return super.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY);
         }
     }
 
     @Override
-    public boolean mouseClicked(double p_99131_, double p_99132_, int p_99133_) {
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         this.isDragging = false;
         int i = (this.width - this.imageWidth) / 2;
         int j = (this.height - this.imageHeight) / 2;
         if (this.canScroll(this.menu.getOffers().size())
-            && p_99131_ > (double)(i + 94)
-            && p_99131_ < (double)(i + 94 + 6)
-            && p_99132_ > (double)(j + 18)
-            && p_99132_ <= (double)(j + 18 + 139 + 1)) {
+            && pMouseX > (double)(i + 94)
+            && pMouseX < (double)(i + 94 + 6)
+            && pMouseY > (double)(j + 18)
+            && pMouseY <= (double)(j + 18 + 139 + 1)) {
             this.isDragging = true;
         }
 
-        return super.mouseClicked(p_99131_, p_99132_, p_99133_);
+        return super.mouseClicked(pMouseX, pMouseY, pButton);
     }
 
     @OnlyIn(Dist.CLIENT)
     class TradeOfferButton extends Button {
         final int index;
 
-        public TradeOfferButton(final int p_99205_, final int p_99206_, final int p_99207_, final Button.OnPress p_99208_) {
-            super(p_99205_, p_99206_, 88, 20, CommonComponents.EMPTY, p_99208_, DEFAULT_NARRATION);
-            this.index = p_99207_;
+        public TradeOfferButton(final int pX, final int pY, final int pIndex, final Button.OnPress pOnPress) {
+            super(pX, pY, 88, 20, CommonComponents.EMPTY, pOnPress, DEFAULT_NARRATION);
+            this.index = pIndex;
             this.visible = false;
         }
 
@@ -304,19 +304,19 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
             return this.index;
         }
 
-        public void renderToolTip(GuiGraphics p_281313_, int p_283342_, int p_283060_) {
+        public void renderToolTip(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
             if (this.isHovered && MerchantScreen.this.menu.getOffers().size() > this.index + MerchantScreen.this.scrollOff) {
-                if (p_283342_ < this.getX() + 20) {
+                if (pMouseX < this.getX() + 20) {
                     ItemStack itemstack = MerchantScreen.this.menu.getOffers().get(this.index + MerchantScreen.this.scrollOff).getCostA();
-                    p_281313_.renderTooltip(MerchantScreen.this.font, itemstack, p_283342_, p_283060_);
-                } else if (p_283342_ < this.getX() + 50 && p_283342_ > this.getX() + 30) {
+                    pGuiGraphics.renderTooltip(MerchantScreen.this.font, itemstack, pMouseX, pMouseY);
+                } else if (pMouseX < this.getX() + 50 && pMouseX > this.getX() + 30) {
                     ItemStack itemstack2 = MerchantScreen.this.menu.getOffers().get(this.index + MerchantScreen.this.scrollOff).getCostB();
                     if (!itemstack2.isEmpty()) {
-                        p_281313_.renderTooltip(MerchantScreen.this.font, itemstack2, p_283342_, p_283060_);
+                        pGuiGraphics.renderTooltip(MerchantScreen.this.font, itemstack2, pMouseX, pMouseY);
                     }
-                } else if (p_283342_ > this.getX() + 65) {
+                } else if (pMouseX > this.getX() + 65) {
                     ItemStack itemstack1 = MerchantScreen.this.menu.getOffers().get(this.index + MerchantScreen.this.scrollOff).getResult();
-                    p_281313_.renderTooltip(MerchantScreen.this.font, itemstack1, p_283342_, p_283060_);
+                    pGuiGraphics.renderTooltip(MerchantScreen.this.font, itemstack1, pMouseX, pMouseY);
                 }
             }
         }

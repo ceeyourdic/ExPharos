@@ -19,7 +19,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @FunctionalInterface
 @OnlyIn(Dist.CLIENT)
 public interface EntityRendererProvider<T extends Entity> {
-    EntityRenderer<T, ?> create(EntityRendererProvider.Context p_174010_);
+    EntityRenderer<T, ?> create(EntityRendererProvider.Context pContext);
 
     @OnlyIn(Dist.CLIENT)
     public static class Context {
@@ -34,24 +34,24 @@ public interface EntityRendererProvider<T extends Entity> {
         private final EquipmentLayerRenderer equipmentRenderer;
 
         public Context(
-            EntityRenderDispatcher p_234590_,
-            ItemModelResolver p_376231_,
-            MapRenderer p_361143_,
-            BlockRenderDispatcher p_234592_,
-            ResourceManager p_234594_,
-            EntityModelSet p_234595_,
-            EquipmentAssetManager p_377420_,
-            Font p_234596_
+            EntityRenderDispatcher pEntityRenderDispatcher,
+            ItemModelResolver pItemModelResolver,
+            MapRenderer pMapRenderer,
+            BlockRenderDispatcher pBlockRenderDispatcher,
+            ResourceManager pResourceManager,
+            EntityModelSet pModelSet,
+            EquipmentAssetManager pEquipmentAssets,
+            Font pFont
         ) {
-            this.entityRenderDispatcher = p_234590_;
-            this.itemModelResolver = p_376231_;
-            this.mapRenderer = p_361143_;
-            this.blockRenderDispatcher = p_234592_;
-            this.resourceManager = p_234594_;
-            this.modelSet = p_234595_;
-            this.equipmentAssets = p_377420_;
-            this.font = p_234596_;
-            this.equipmentRenderer = new EquipmentLayerRenderer(p_377420_, this.getModelManager().getAtlas(Sheets.ARMOR_TRIMS_SHEET));
+            this.entityRenderDispatcher = pEntityRenderDispatcher;
+            this.itemModelResolver = pItemModelResolver;
+            this.mapRenderer = pMapRenderer;
+            this.blockRenderDispatcher = pBlockRenderDispatcher;
+            this.resourceManager = pResourceManager;
+            this.modelSet = pModelSet;
+            this.equipmentAssets = pEquipmentAssets;
+            this.font = pFont;
+            this.equipmentRenderer = new EquipmentLayerRenderer(pEquipmentAssets, this.getModelManager().getAtlas(Sheets.ARMOR_TRIMS_SHEET));
         }
 
         public EntityRenderDispatcher getEntityRenderDispatcher() {
@@ -90,8 +90,8 @@ public interface EntityRendererProvider<T extends Entity> {
             return this.blockRenderDispatcher.getBlockModelShaper().getModelManager();
         }
 
-        public ModelPart bakeLayer(ModelLayerLocation p_174024_) {
-            return this.modelSet.bakeLayer(p_174024_);
+        public ModelPart bakeLayer(ModelLayerLocation pLayer) {
+            return this.modelSet.bakeLayer(pLayer);
         }
 
         public Font getFont() {

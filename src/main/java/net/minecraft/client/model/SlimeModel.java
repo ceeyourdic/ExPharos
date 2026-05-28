@@ -12,8 +12,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class SlimeModel extends EntityModel<EntityRenderState> {
-    public SlimeModel(ModelPart p_170955_) {
-        super(p_170955_);
+    public SlimeModel(ModelPart pRoot) {
+        super(pRoot);
     }
 
     public static LayerDefinition createOuterBodyLayer() {

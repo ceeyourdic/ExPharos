@@ -32,12 +32,12 @@ public class Orientation {
     private final Map<Direction, Orientation> withUp = new EnumMap<>(Direction.class);
     private final Map<Orientation.SideBias, Orientation> withSideBias = new EnumMap<>(Orientation.SideBias.class);
 
-    private Orientation(Direction p_370197_, Direction p_369849_, Orientation.SideBias p_366338_) {
-        this.up = p_370197_;
-        this.front = p_369849_;
-        this.sideBias = p_366338_;
-        this.index = generateIndex(p_370197_, p_369849_, p_366338_);
-        Vec3i vec3i = p_369849_.getUnitVec3i().cross(p_370197_.getUnitVec3i());
+    private Orientation(Direction pUp, Direction pFront, Orientation.SideBias pSideBias) {
+        this.up = pUp;
+        this.front = pFront;
+        this.sideBias = pSideBias;
+        this.index = generateIndex(pUp, pFront, pSideBias);
+        Vec3i vec3i = pFront.getUnitVec3i().cross(pUp.getUnitVec3i());
         Direction direction = Direction.getNearest(vec3i, null);
         Objects.requireNonNull(direction);
         if (this.sideBias == Orientation.SideBias.RIGHT) {
@@ -53,29 +53,29 @@ public class Orientation {
         this.verticalNeighbors = this.neighbors.stream().filter(p_365283_ -> p_365283_.getAxis() == this.up.getAxis()).toList();
     }
 
-    public static Orientation of(Direction p_367835_, Direction p_362776_, Orientation.SideBias p_367906_) {
-        return ORIENTATIONS[generateIndex(p_367835_, p_362776_, p_367906_)];
+    public static Orientation of(Direction pUp, Direction pFront, Orientation.SideBias pSideBias) {
+        return ORIENTATIONS[generateIndex(pUp, pFront, pSideBias)];
     }
 
-    public Orientation withUp(Direction p_368311_) {
-        return this.withUp.get(p_368311_);
+    public Orientation withUp(Direction pUp) {
+        return this.withUp.get(pUp);
     }
 
-    public Orientation withFront(Direction p_366881_) {
-        return this.withFront.get(p_366881_);
+    public Orientation withFront(Direction pFront) {
+        return this.withFront.get(pFront);
     }
 
-    public Orientation withFrontPreserveUp(Direction p_364290_) {
-        return p_364290_.getAxis() == this.up.getAxis() ? this : this.withFront.get(p_364290_);
+    public Orientation withFrontPreserveUp(Direction pFront) {
+        return pFront.getAxis() == this.up.getAxis() ? this : this.withFront.get(pFront);
     }
 
-    public Orientation withFrontAdjustSideBias(Direction p_367524_) {
-        Orientation orientation = this.withFront(p_367524_);
+    public Orientation withFrontAdjustSideBias(Direction pFront) {
+        Orientation orientation = this.withFront(pFront);
         return this.front == orientation.side ? orientation.withMirror() : orientation;
     }
 
-    public Orientation withSideBias(Orientation.SideBias p_365192_) {
-        return this.withSideBias.get(p_365192_);
+    public Orientation withSideBias(Orientation.SideBias pSideBias) {
+        return this.withSideBias.get(pSideBias);
     }
 
     public Orientation withMirror() {
@@ -119,69 +119,69 @@ public class Orientation {
         return this.index;
     }
 
-    public static Orientation fromIndex(int p_367043_) {
-        return ORIENTATIONS[p_367043_];
+    public static Orientation fromIndex(int pIndex) {
+        return ORIENTATIONS[pIndex];
     }
 
-    public static Orientation random(RandomSource p_363137_) {
-        return Util.getRandom(ORIENTATIONS, p_363137_);
+    public static Orientation random(RandomSource pRandom) {
+        return Util.getRandom(ORIENTATIONS, pRandom);
     }
 
-    private static Orientation generateContext(Orientation p_365452_, Orientation[] p_362094_) {
-        if (p_362094_[p_365452_.getIndex()] != null) {
-            return p_362094_[p_365452_.getIndex()];
+    private static Orientation generateContext(Orientation pStart, Orientation[] pOutput) {
+        if (pOutput[pStart.getIndex()] != null) {
+            return pOutput[pStart.getIndex()];
         } else {
-            p_362094_[p_365452_.getIndex()] = p_365452_;
+            pOutput[pStart.getIndex()] = pStart;
 
             for (Orientation.SideBias orientation$sidebias : Orientation.SideBias.values()) {
-                p_365452_.withSideBias
-                    .put(orientation$sidebias, generateContext(new Orientation(p_365452_.up, p_365452_.front, orientation$sidebias), p_362094_));
+                pStart.withSideBias
+                    .put(orientation$sidebias, generateContext(new Orientation(pStart.up, pStart.front, orientation$sidebias), pOutput));
             }
 
             for (Direction direction1 : Direction.values()) {
-                Direction direction = p_365452_.up;
-                if (direction1 == p_365452_.up) {
-                    direction = p_365452_.front.getOpposite();
+                Direction direction = pStart.up;
+                if (direction1 == pStart.up) {
+                    direction = pStart.front.getOpposite();
                 }
 
-                if (direction1 == p_365452_.up.getOpposite()) {
-                    direction = p_365452_.front;
+                if (direction1 == pStart.up.getOpposite()) {
+                    direction = pStart.front;
                 }
 
-                p_365452_.withFront.put(direction1, generateContext(new Orientation(direction, direction1, p_365452_.sideBias), p_362094_));
+                pStart.withFront.put(direction1, generateContext(new Orientation(direction, direction1, pStart.sideBias), pOutput));
             }
 
             for (Direction direction2 : Direction.values()) {
-                Direction direction3 = p_365452_.front;
-                if (direction2 == p_365452_.front) {
-                    direction3 = p_365452_.up.getOpposite();
+                Direction direction3 = pStart.front;
+                if (direction2 == pStart.front) {
+                    direction3 = pStart.up.getOpposite();
                 }
 
-                if (direction2 == p_365452_.front.getOpposite()) {
-                    direction3 = p_365452_.up;
+                if (direction2 == pStart.front.getOpposite()) {
+                    direction3 = pStart.up;
                 }
 
-                p_365452_.withUp.put(direction2, generateContext(new Orientation(direction2, direction3, p_365452_.sideBias), p_362094_));
+                pStart.withUp.put(direction2, generateContext(new Orientation(direction2, direction3, pStart.sideBias), pOutput));
             }
 
-            return p_365452_;
+            return pStart;
         }
     }
 
     @VisibleForTesting
-    protected static int generateIndex(Direction p_368123_, Direction p_368048_, Orientation.SideBias p_369086_) {
-        if (p_368123_.getAxis() == p_368048_.getAxis()) {
+    protected static int generateIndex(Direction pUp, Direction pFront, Orientation.SideBias pSideBias) {
+        if (pUp.getAxis() == pFront.getAxis()) {
             throw new IllegalStateException("Up-vector and front-vector can not be on the same axis");
         } else {
             int i;
-            if (p_368123_.getAxis() == Direction.Axis.Y) {
-                i = p_368048_.getAxis() == Direction.Axis.X ? 1 : 0;
+            if (pUp.getAxis() == Direction.Axis.Y) {
+                i = pFront.getAxis() == Direction.Axis.X ? 1 : 0;
             } else {
-                i = p_368048_.getAxis() == Direction.Axis.Y ? 1 : 0;
+                i = pFront.getAxis() == Direction.Axis.Y ? 1 : 0;
             }
 
-            int j = i << 1 | p_368048_.getAxisDirection().ordinal();
-            return ((p_368123_.ordinal() << 2) + j << 1) + p_369086_.ordinal();
+            int j = i << 1 | pFront.getAxisDirection().ordinal();
+            return ((pUp.ordinal() << 2) + j << 1) + pSideBias.ordinal();
         }
     }
 
@@ -191,8 +191,8 @@ public class Orientation {
 
         private final String name;
 
-        private SideBias(final String p_365296_) {
-            this.name = p_365296_;
+        private SideBias(final String pName) {
+            this.name = pName;
         }
 
         public Orientation.SideBias getOpposite() {

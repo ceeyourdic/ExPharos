@@ -128,29 +128,29 @@ public class RegistryDataLoader {
     );
 
     public static RegistryAccess.Frozen load(
-        ResourceManager p_252046_, List<HolderLookup.RegistryLookup<?>> p_250344_, List<RegistryDataLoader.RegistryData<?>> p_366741_
+        ResourceManager pResourceManager, List<HolderLookup.RegistryLookup<?>> pRegistryLookups, List<RegistryDataLoader.RegistryData<?>> pRegistryData
     ) {
-        return load((p_326156_, p_326157_) -> p_326156_.loadFromResources(p_252046_, p_326157_), p_250344_, p_366741_);
+        return load((p_326156_, p_326157_) -> p_326156_.loadFromResources(pResourceManager, p_326157_), pRegistryLookups, pRegistryData);
     }
 
     public static RegistryAccess.Frozen load(
-        Map<ResourceKey<? extends Registry<?>>, RegistryDataLoader.NetworkedRegistryData> p_328212_,
-        ResourceProvider p_335625_,
-        List<HolderLookup.RegistryLookup<?>> p_329346_,
-        List<RegistryDataLoader.RegistryData<?>> p_362679_
+        Map<ResourceKey<? extends Registry<?>>, RegistryDataLoader.NetworkedRegistryData> pElements,
+        ResourceProvider pResourceProvider,
+        List<HolderLookup.RegistryLookup<?>> pRegistryLookups,
+        List<RegistryDataLoader.RegistryData<?>> pRegistryData
     ) {
-        return load((p_326153_, p_326154_) -> p_326153_.loadFromNetwork(p_328212_, p_335625_, p_326154_), p_329346_, p_362679_);
+        return load((p_326153_, p_326154_) -> p_326153_.loadFromNetwork(pElements, pResourceProvider, p_326154_), pRegistryLookups, pRegistryData);
     }
 
     private static RegistryAccess.Frozen load(
-        RegistryDataLoader.LoadingFunction p_332256_, List<HolderLookup.RegistryLookup<?>> p_333463_, List<RegistryDataLoader.RegistryData<?>> p_368458_
+        RegistryDataLoader.LoadingFunction pLoadingFunction, List<HolderLookup.RegistryLookup<?>> pRegistryLookups, List<RegistryDataLoader.RegistryData<?>> pRegistryData
     ) {
         Map<ResourceKey<?>, Exception> map = new HashMap<>();
-        List<RegistryDataLoader.Loader<?>> list = p_368458_.stream()
+        List<RegistryDataLoader.Loader<?>> list = pRegistryData.stream()
             .map(p_326168_ -> p_326168_.create(Lifecycle.stable(), map))
             .collect(Collectors.toUnmodifiableList());
-        RegistryOps.RegistryInfoLookup registryops$registryinfolookup = createContext(p_333463_, list);
-        list.forEach(p_326160_ -> p_332256_.apply((RegistryDataLoader.Loader<?>)p_326160_, registryops$registryinfolookup));
+        RegistryOps.RegistryInfoLookup registryops$registryinfolookup = createContext(pRegistryLookups, list);
+        list.forEach(p_326160_ -> pLoadingFunction.apply((RegistryDataLoader.Loader<?>)p_326160_, registryops$registryinfolookup));
         list.forEach(p_358491_ -> {
             Registry<?> registry = p_358491_.registry();
 
@@ -171,10 +171,10 @@ public class RegistryDataLoader {
         }
     }
 
-    private static RegistryOps.RegistryInfoLookup createContext(List<HolderLookup.RegistryLookup<?>> p_255821_, List<RegistryDataLoader.Loader<?>> p_365131_) {
+    private static RegistryOps.RegistryInfoLookup createContext(List<HolderLookup.RegistryLookup<?>> pRegistryLookups, List<RegistryDataLoader.Loader<?>> pLoaders) {
         final Map<ResourceKey<? extends Registry<?>>, RegistryOps.RegistryInfo<?>> map = new HashMap<>();
-        p_255821_.forEach(p_358498_ -> map.put(p_358498_.key(), createInfoForContextRegistry((HolderLookup.RegistryLookup<?>)p_358498_)));
-        p_365131_.forEach(p_358493_ -> map.put(p_358493_.registry.key(), createInfoForNewRegistry(p_358493_.registry)));
+        pRegistryLookups.forEach(p_358498_ -> map.put(p_358498_.key(), createInfoForContextRegistry((HolderLookup.RegistryLookup<?>)p_358498_)));
+        pLoaders.forEach(p_358493_ -> map.put(p_358493_.registry.key(), createInfoForNewRegistry(p_358493_.registry)));
         return new RegistryOps.RegistryInfoLookup() {
             @Override
             public <T> Optional<RegistryOps.RegistryInfo<T>> lookup(ResourceKey<? extends Registry<? extends T>> p_256014_) {
@@ -183,23 +183,23 @@ public class RegistryDataLoader {
         };
     }
 
-    private static <T> RegistryOps.RegistryInfo<T> createInfoForNewRegistry(WritableRegistry<T> p_256020_) {
-        return new RegistryOps.RegistryInfo<>(p_256020_, p_256020_.createRegistrationLookup(), p_256020_.registryLifecycle());
+    private static <T> RegistryOps.RegistryInfo<T> createInfoForNewRegistry(WritableRegistry<T> pRegistry) {
+        return new RegistryOps.RegistryInfo<>(pRegistry, pRegistry.createRegistrationLookup(), pRegistry.registryLifecycle());
     }
 
-    private static <T> RegistryOps.RegistryInfo<T> createInfoForContextRegistry(HolderLookup.RegistryLookup<T> p_367102_) {
-        return new RegistryOps.RegistryInfo<>(p_367102_, p_367102_, p_367102_.registryLifecycle());
+    private static <T> RegistryOps.RegistryInfo<T> createInfoForContextRegistry(HolderLookup.RegistryLookup<T> pRegistryLookup) {
+        return new RegistryOps.RegistryInfo<>(pRegistryLookup, pRegistryLookup, pRegistryLookup.registryLifecycle());
     }
 
-    private static ReportedException logErrors(Map<ResourceKey<?>, Exception> p_361753_) {
-        printFullDetailsToLog(p_361753_);
-        return createReportWithBriefInfo(p_361753_);
+    private static ReportedException logErrors(Map<ResourceKey<?>, Exception> pErrors) {
+        printFullDetailsToLog(pErrors);
+        return createReportWithBriefInfo(pErrors);
     }
 
-    private static void printFullDetailsToLog(Map<ResourceKey<?>, Exception> p_252325_) {
+    private static void printFullDetailsToLog(Map<ResourceKey<?>, Exception> pErrors) {
         StringWriter stringwriter = new StringWriter();
         PrintWriter printwriter = new PrintWriter(stringwriter);
-        Map<ResourceLocation, Map<ResourceLocation, Exception>> map = p_252325_.entrySet()
+        Map<ResourceLocation, Map<ResourceLocation, Exception>> map = pErrors.entrySet()
             .stream()
             .collect(
                 Collectors.groupingBy(
@@ -217,14 +217,14 @@ public class RegistryDataLoader {
         LOGGER.error("Registry loading errors:\n{}", stringwriter);
     }
 
-    private static ReportedException createReportWithBriefInfo(Map<ResourceKey<?>, Exception> p_368267_) {
+    private static ReportedException createReportWithBriefInfo(Map<ResourceKey<?>, Exception> pErrors) {
         CrashReport crashreport = CrashReport.forThrowable(new IllegalStateException("Failed to load registries due to errors"), "Registry Loading");
         CrashReportCategory crashreportcategory = crashreport.addCategory("Loading info");
         crashreportcategory.setDetail(
             "Errors",
             () -> {
                 StringBuilder stringbuilder = new StringBuilder();
-                p_368267_.entrySet()
+                pErrors.entrySet()
                     .stream()
                     .sorted(Entry.comparingByKey(ERROR_KEY_COMPARATOR))
                     .forEach(
@@ -242,74 +242,74 @@ public class RegistryDataLoader {
     }
 
     private static <E> void loadElementFromResource(
-        WritableRegistry<E> p_330991_,
-        Decoder<E> p_333909_,
-        RegistryOps<JsonElement> p_332135_,
-        ResourceKey<E> p_332850_,
-        Resource p_335244_,
-        RegistrationInfo p_332222_
+        WritableRegistry<E> pRegistry,
+        Decoder<E> pCodec,
+        RegistryOps<JsonElement> pOps,
+        ResourceKey<E> pResourceKey,
+        Resource pResource,
+        RegistrationInfo pRegistrationInfo
     ) throws IOException {
-        try (Reader reader = p_335244_.openAsReader()) {
+        try (Reader reader = pResource.openAsReader()) {
             JsonElement jsonelement = JsonParser.parseReader(reader);
-            DataResult<E> dataresult = p_333909_.parse(p_332135_, jsonelement);
+            DataResult<E> dataresult = pCodec.parse(pOps, jsonelement);
             E e = dataresult.getOrThrow();
-            p_330991_.register(p_332850_, e, p_332222_);
+            pRegistry.register(pResourceKey, e, pRegistrationInfo);
         }
     }
 
     static <E> void loadContentsFromManager(
-        ResourceManager p_335634_,
-        RegistryOps.RegistryInfoLookup p_333035_,
-        WritableRegistry<E> p_331358_,
-        Decoder<E> p_329404_,
-        Map<ResourceKey<?>, Exception> p_335074_
+        ResourceManager pResourceManager,
+        RegistryOps.RegistryInfoLookup pRegistryInfoLookup,
+        WritableRegistry<E> pRegistry,
+        Decoder<E> pCodec,
+        Map<ResourceKey<?>, Exception> pLoadingErrors
     ) {
-        FileToIdConverter filetoidconverter = FileToIdConverter.registry(p_331358_.key());
-        RegistryOps<JsonElement> registryops = RegistryOps.create(JsonOps.INSTANCE, p_333035_);
+        FileToIdConverter filetoidconverter = FileToIdConverter.registry(pRegistry.key());
+        RegistryOps<JsonElement> registryops = RegistryOps.create(JsonOps.INSTANCE, pRegistryInfoLookup);
 
-        for (Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(p_335634_).entrySet()) {
+        for (Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(pResourceManager).entrySet()) {
             ResourceLocation resourcelocation = entry.getKey();
-            ResourceKey<E> resourcekey = ResourceKey.create(p_331358_.key(), filetoidconverter.fileToId(resourcelocation));
+            ResourceKey<E> resourcekey = ResourceKey.create(pRegistry.key(), filetoidconverter.fileToId(resourcelocation));
             Resource resource = entry.getValue();
             RegistrationInfo registrationinfo = REGISTRATION_INFO_CACHE.apply(resource.knownPackInfo());
 
             try {
-                loadElementFromResource(p_331358_, p_329404_, registryops, resourcekey, resource, registrationinfo);
+                loadElementFromResource(pRegistry, pCodec, registryops, resourcekey, resource, registrationinfo);
             } catch (Exception exception) {
-                p_335074_.put(
+                pLoadingErrors.put(
                     resourcekey,
                     new IllegalStateException(String.format(Locale.ROOT, "Failed to parse %s from pack %s", resourcelocation, resource.sourcePackId()), exception)
                 );
             }
         }
 
-        TagLoader.loadTagsForRegistry(p_335634_, p_331358_);
+        TagLoader.loadTagsForRegistry(pResourceManager, pRegistry);
     }
 
     static <E> void loadContentsFromNetwork(
-        Map<ResourceKey<? extends Registry<?>>, RegistryDataLoader.NetworkedRegistryData> p_331925_,
-        ResourceProvider p_332010_,
-        RegistryOps.RegistryInfoLookup p_329253_,
-        WritableRegistry<E> p_332518_,
-        Decoder<E> p_328898_,
-        Map<ResourceKey<?>, Exception> p_335768_
+        Map<ResourceKey<? extends Registry<?>>, RegistryDataLoader.NetworkedRegistryData> pElements,
+        ResourceProvider pResourceProvider,
+        RegistryOps.RegistryInfoLookup pRegistryInfoLookup,
+        WritableRegistry<E> pRegistry,
+        Decoder<E> pCodec,
+        Map<ResourceKey<?>, Exception> pLoadingErrors
     ) {
-        RegistryDataLoader.NetworkedRegistryData registrydataloader$networkedregistrydata = p_331925_.get(p_332518_.key());
+        RegistryDataLoader.NetworkedRegistryData registrydataloader$networkedregistrydata = pElements.get(pRegistry.key());
         if (registrydataloader$networkedregistrydata != null) {
-            RegistryOps<Tag> registryops = RegistryOps.create(NbtOps.INSTANCE, p_329253_);
-            RegistryOps<JsonElement> registryops1 = RegistryOps.create(JsonOps.INSTANCE, p_329253_);
-            FileToIdConverter filetoidconverter = FileToIdConverter.registry(p_332518_.key());
+            RegistryOps<Tag> registryops = RegistryOps.create(NbtOps.INSTANCE, pRegistryInfoLookup);
+            RegistryOps<JsonElement> registryops1 = RegistryOps.create(JsonOps.INSTANCE, pRegistryInfoLookup);
+            FileToIdConverter filetoidconverter = FileToIdConverter.registry(pRegistry.key());
 
             for (RegistrySynchronization.PackedRegistryEntry registrysynchronization$packedregistryentry : registrydataloader$networkedregistrydata.elements) {
-                ResourceKey<E> resourcekey = ResourceKey.create(p_332518_.key(), registrysynchronization$packedregistryentry.id());
+                ResourceKey<E> resourcekey = ResourceKey.create(pRegistry.key(), registrysynchronization$packedregistryentry.id());
                 Optional<Tag> optional = registrysynchronization$packedregistryentry.data();
                 if (optional.isPresent()) {
                     try {
-                        DataResult<E> dataresult = p_328898_.parse(registryops, optional.get());
+                        DataResult<E> dataresult = pCodec.parse(registryops, optional.get());
                         E e = dataresult.getOrThrow();
-                        p_332518_.register(resourcekey, e, NETWORK_REGISTRATION_INFO);
+                        pRegistry.register(resourcekey, e, NETWORK_REGISTRATION_INFO);
                     } catch (Exception exception) {
-                        p_335768_.put(
+                        pLoadingErrors.put(
                             resourcekey,
                             new IllegalStateException(String.format(Locale.ROOT, "Failed to parse value %s from server", optional.get()), exception)
                         );
@@ -318,52 +318,52 @@ public class RegistryDataLoader {
                     ResourceLocation resourcelocation = filetoidconverter.idToFile(registrysynchronization$packedregistryentry.id());
 
                     try {
-                        Resource resource = p_332010_.getResourceOrThrow(resourcelocation);
-                        loadElementFromResource(p_332518_, p_328898_, registryops1, resourcekey, resource, NETWORK_REGISTRATION_INFO);
+                        Resource resource = pResourceProvider.getResourceOrThrow(resourcelocation);
+                        loadElementFromResource(pRegistry, pCodec, registryops1, resourcekey, resource, NETWORK_REGISTRATION_INFO);
                     } catch (Exception exception1) {
-                        p_335768_.put(resourcekey, new IllegalStateException("Failed to parse local data", exception1));
+                        pLoadingErrors.put(resourcekey, new IllegalStateException("Failed to parse local data", exception1));
                     }
                 }
             }
 
-            TagLoader.loadTagsFromNetwork(registrydataloader$networkedregistrydata.tags, p_332518_);
+            TagLoader.loadTagsFromNetwork(registrydataloader$networkedregistrydata.tags, pRegistry);
         }
     }
 
     static record Loader<T>(RegistryDataLoader.RegistryData<T> data, WritableRegistry<T> registry, Map<ResourceKey<?>, Exception> loadingErrors) {
-        public void loadFromResources(ResourceManager p_328137_, RegistryOps.RegistryInfoLookup p_330371_) {
-            RegistryDataLoader.loadContentsFromManager(p_328137_, p_330371_, this.registry, this.data.elementCodec, this.loadingErrors);
+        public void loadFromResources(ResourceManager pResouceManager, RegistryOps.RegistryInfoLookup pRegistryInfoLookup) {
+            RegistryDataLoader.loadContentsFromManager(pResouceManager, pRegistryInfoLookup, this.registry, this.data.elementCodec, this.loadingErrors);
         }
 
         public void loadFromNetwork(
-            Map<ResourceKey<? extends Registry<?>>, RegistryDataLoader.NetworkedRegistryData> p_333047_,
-            ResourceProvider p_333682_,
-            RegistryOps.RegistryInfoLookup p_330665_
+            Map<ResourceKey<? extends Registry<?>>, RegistryDataLoader.NetworkedRegistryData> pElements,
+            ResourceProvider pResourceProvider,
+            RegistryOps.RegistryInfoLookup pRegistryInfoLookup
         ) {
-            RegistryDataLoader.loadContentsFromNetwork(p_333047_, p_333682_, p_330665_, this.registry, this.data.elementCodec, this.loadingErrors);
+            RegistryDataLoader.loadContentsFromNetwork(pElements, pResourceProvider, pRegistryInfoLookup, this.registry, this.data.elementCodec, this.loadingErrors);
         }
     }
 
     @FunctionalInterface
     interface LoadingFunction {
-        void apply(RegistryDataLoader.Loader<?> p_332841_, RegistryOps.RegistryInfoLookup p_332366_);
+        void apply(RegistryDataLoader.Loader<?> pLoader, RegistryOps.RegistryInfoLookup pRegistryInfoLookup);
     }
 
     public static record NetworkedRegistryData(List<RegistrySynchronization.PackedRegistryEntry> elements, TagNetworkSerialization.NetworkPayload tags) {
     }
 
     public static record RegistryData<T>(ResourceKey<? extends Registry<T>> key, Codec<T> elementCodec, boolean requiredNonEmpty) {
-        RegistryData(ResourceKey<? extends Registry<T>> p_251360_, Codec<T> p_248976_) {
-            this(p_251360_, p_248976_, false);
+        RegistryData(ResourceKey<? extends Registry<T>> pKey, Codec<T> pElementCodec) {
+            this(pKey, pElementCodec, false);
         }
 
-        RegistryDataLoader.Loader<T> create(Lifecycle p_251662_, Map<ResourceKey<?>, Exception> p_251565_) {
-            WritableRegistry<T> writableregistry = new MappedRegistry<>(this.key, p_251662_);
-            return new RegistryDataLoader.Loader<>(this, writableregistry, p_251565_);
+        RegistryDataLoader.Loader<T> create(Lifecycle pRegistryLifecycle, Map<ResourceKey<?>, Exception> pLoadingErrors) {
+            WritableRegistry<T> writableregistry = new MappedRegistry<>(this.key, pRegistryLifecycle);
+            return new RegistryDataLoader.Loader<>(this, writableregistry, pLoadingErrors);
         }
 
-        public void runWithArguments(BiConsumer<ResourceKey<? extends Registry<T>>, Codec<T>> p_310351_) {
-            p_310351_.accept(this.key, this.elementCodec);
+        public void runWithArguments(BiConsumer<ResourceKey<? extends Registry<T>>, Codec<T>> pRunner) {
+            pRunner.accept(this.key, this.elementCodec);
         }
     }
 }

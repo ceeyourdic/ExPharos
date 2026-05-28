@@ -20,9 +20,9 @@ public class SetCustomDataFunction extends LootItemConditionalFunction {
     );
     private final CompoundTag tag;
 
-    private SetCustomDataFunction(List<LootItemCondition> p_334383_, CompoundTag p_334528_) {
-        super(p_334383_);
-        this.tag = p_334528_;
+    private SetCustomDataFunction(List<LootItemCondition> pConditions, CompoundTag pTag) {
+        super(pConditions);
+        this.tag = pTag;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class SetCustomDataFunction extends LootItemConditionalFunction {
     }
 
     @Deprecated
-    public static LootItemConditionalFunction.Builder<?> setCustomData(CompoundTag p_328660_) {
-        return simpleBuilder(p_332883_ -> new SetCustomDataFunction(p_332883_, p_328660_));
+    public static LootItemConditionalFunction.Builder<?> setCustomData(CompoundTag pTag) {
+        return simpleBuilder(p_332883_ -> new SetCustomDataFunction(p_332883_, pTag));
     }
 }

@@ -8,32 +8,42 @@ import java.io.IOException;
 import java.nio.file.Path;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.optifine.Config;
+import net.optifine.shaders.ShadersTex;
 import org.slf4j.Logger;
 
-@OnlyIn(Dist.CLIENT)
 public class DynamicTexture extends AbstractTexture implements Dumpable {
     private static final Logger LOGGER = LogUtils.getLogger();
     @Nullable
     private NativeImage pixels;
+    private boolean capeTexture;
+    private boolean elytraCapeTexture;
 
-    public DynamicTexture(NativeImage p_117984_) {
-        this.pixels = p_117984_;
+    public DynamicTexture(NativeImage pPixels) {
+        this.pixels = pPixels;
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> {
                 TextureUtil.prepareImage(this.getId(), this.pixels.getWidth(), this.pixels.getHeight());
                 this.upload();
+                if (Config.isShaders()) {
+                    ShadersTex.initDynamicTextureNS(this);
+                }
             });
         } else {
             TextureUtil.prepareImage(this.getId(), this.pixels.getWidth(), this.pixels.getHeight());
             this.upload();
+            if (Config.isShaders()) {
+                ShadersTex.initDynamicTextureNS(this);
+            }
         }
     }
 
-    public DynamicTexture(int p_117980_, int p_117981_, boolean p_117982_) {
-        this.pixels = new NativeImage(p_117980_, p_117981_, p_117982_);
+    public DynamicTexture(int pWidth, int pHeight, boolean pUseCalloc) {
+        this.pixels = new NativeImage(pWidth, pHeight, pUseCalloc);
         TextureUtil.prepareImage(this.getId(), this.pixels.getWidth(), this.pixels.getHeight());
+        if (Config.isShaders()) {
+            ShadersTex.initDynamicTextureNS(this);
+        }
     }
 
     public void upload() {
@@ -50,12 +60,12 @@ public class DynamicTexture extends AbstractTexture implements Dumpable {
         return this.pixels;
     }
 
-    public void setPixels(NativeImage p_117989_) {
+    public void setPixels(NativeImage pPixels) {
         if (this.pixels != null) {
             this.pixels.close();
         }
 
-        this.pixels = p_117989_;
+        this.pixels = pPixels;
     }
 
     @Override
@@ -74,5 +84,21 @@ public class DynamicTexture extends AbstractTexture implements Dumpable {
             Path path = p_276105_.resolve(s);
             this.pixels.writeToFile(path);
         }
+    }
+
+    public boolean isCapeTexture() {
+        return this.capeTexture;
+    }
+
+    public void setCapeTexture(boolean capeTexture) {
+        this.capeTexture = capeTexture;
+    }
+
+    public boolean isElytraCapeTexture() {
+        return this.elytraCapeTexture;
+    }
+
+    public void setElytraCapeTexture(boolean elytraCapeTexture) {
+        this.elytraCapeTexture = elytraCapeTexture;
     }
 }

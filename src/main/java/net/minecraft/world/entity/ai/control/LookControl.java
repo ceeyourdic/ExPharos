@@ -16,32 +16,32 @@ public class LookControl implements Control {
     protected double wantedY;
     protected double wantedZ;
 
-    public LookControl(Mob p_24945_) {
-        this.mob = p_24945_;
+    public LookControl(Mob pMob) {
+        this.mob = pMob;
     }
 
-    public void setLookAt(Vec3 p_24965_) {
-        this.setLookAt(p_24965_.x, p_24965_.y, p_24965_.z);
+    public void setLookAt(Vec3 pLookVector) {
+        this.setLookAt(pLookVector.x, pLookVector.y, pLookVector.z);
     }
 
-    public void setLookAt(Entity p_148052_) {
-        this.setLookAt(p_148052_.getX(), getWantedY(p_148052_), p_148052_.getZ());
+    public void setLookAt(Entity pEntity) {
+        this.setLookAt(pEntity.getX(), getWantedY(pEntity), pEntity.getZ());
     }
 
-    public void setLookAt(Entity p_24961_, float p_24962_, float p_24963_) {
-        this.setLookAt(p_24961_.getX(), getWantedY(p_24961_), p_24961_.getZ(), p_24962_, p_24963_);
+    public void setLookAt(Entity pEntity, float pDeltaYaw, float pDeltaPitch) {
+        this.setLookAt(pEntity.getX(), getWantedY(pEntity), pEntity.getZ(), pDeltaYaw, pDeltaPitch);
     }
 
-    public void setLookAt(double p_24947_, double p_24948_, double p_24949_) {
-        this.setLookAt(p_24947_, p_24948_, p_24949_, (float)this.mob.getHeadRotSpeed(), (float)this.mob.getMaxHeadXRot());
+    public void setLookAt(double pX, double pY, double pZ) {
+        this.setLookAt(pX, pY, pZ, (float)this.mob.getHeadRotSpeed(), (float)this.mob.getMaxHeadXRot());
     }
 
-    public void setLookAt(double p_24951_, double p_24952_, double p_24953_, float p_24954_, float p_24955_) {
-        this.wantedX = p_24951_;
-        this.wantedY = p_24952_;
-        this.wantedZ = p_24953_;
-        this.yMaxRotSpeed = p_24954_;
-        this.xMaxRotAngle = p_24955_;
+    public void setLookAt(double pX, double pY, double pZ, float pDeltaYaw, float pDeltaPitch) {
+        this.wantedX = pX;
+        this.wantedY = pY;
+        this.wantedZ = pZ;
+        this.yMaxRotSpeed = pDeltaYaw;
+        this.xMaxRotAngle = pDeltaPitch;
         this.lookAtCooldown = 2;
     }
 
@@ -105,7 +105,7 @@ public class LookControl implements Control {
             : Optional.of((float)(Mth.atan2(d1, d0) * 180.0F / (float)Math.PI) - 90.0F);
     }
 
-    private static double getWantedY(Entity p_24967_) {
-        return p_24967_ instanceof LivingEntity ? p_24967_.getEyeY() : (p_24967_.getBoundingBox().minY + p_24967_.getBoundingBox().maxY) / 2.0;
+    private static double getWantedY(Entity pEntity) {
+        return pEntity instanceof LivingEntity ? pEntity.getEyeY() : (pEntity.getBoundingBox().minY + pEntity.getBoundingBox().maxY) / 2.0;
     }
 }

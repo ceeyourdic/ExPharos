@@ -23,11 +23,11 @@ public class WorldSessionTelemetryManager {
     private final PerformanceMetricsEvent performanceMetricsEvent;
     private final WorldLoadTimesEvent worldLoadTimesEvent;
 
-    public WorldSessionTelemetryManager(TelemetryEventSender p_286529_, boolean p_286429_, @Nullable Duration p_286727_, @Nullable String p_286633_) {
-        this.worldLoadEvent = new WorldLoadEvent(p_286633_);
+    public WorldSessionTelemetryManager(TelemetryEventSender pSender, boolean pNewWorld, @Nullable Duration pWorldLoadDuration, @Nullable String pMinigameName) {
+        this.worldLoadEvent = new WorldLoadEvent(pMinigameName);
         this.performanceMetricsEvent = new PerformanceMetricsEvent();
-        this.worldLoadTimesEvent = new WorldLoadTimesEvent(p_286429_, p_286727_);
-        this.eventSender = p_286529_.decorate(p_261981_ -> {
+        this.worldLoadTimesEvent = new WorldLoadTimesEvent(pNewWorld, pWorldLoadDuration);
+        this.eventSender = pSender.decorate(p_261981_ -> {
             this.worldLoadEvent.addProperties(p_261981_);
             p_261981_.put(TelemetryProperty.WORLD_SESSION_ID, this.worldSessionId);
         });
@@ -37,19 +37,19 @@ public class WorldSessionTelemetryManager {
         this.performanceMetricsEvent.tick(this.eventSender);
     }
 
-    public void onPlayerInfoReceived(GameType p_261768_, boolean p_261669_) {
-        this.worldLoadEvent.setGameMode(p_261768_, p_261669_);
+    public void onPlayerInfoReceived(GameType pGameType, boolean pIsHardcore) {
+        this.worldLoadEvent.setGameMode(pGameType, pIsHardcore);
         this.worldUnloadEvent.onPlayerInfoReceived();
         this.worldSessionStart();
     }
 
-    public void onServerBrandReceived(String p_261520_) {
-        this.worldLoadEvent.setServerBrand(p_261520_);
+    public void onServerBrandReceived(String pServerBrand) {
+        this.worldLoadEvent.setServerBrand(pServerBrand);
         this.worldSessionStart();
     }
 
-    public void setTime(long p_261878_) {
-        this.worldUnloadEvent.setTime(p_261878_);
+    public void setTime(long pTime) {
+        this.worldUnloadEvent.setTime(pTime);
     }
 
     public void worldSessionStart() {
@@ -65,10 +65,10 @@ public class WorldSessionTelemetryManager {
         this.worldUnloadEvent.send(this.eventSender);
     }
 
-    public void onAdvancementDone(Level p_286825_, AdvancementHolder p_298119_) {
-        ResourceLocation resourcelocation = p_298119_.id();
-        if (p_298119_.value().sendsTelemetryEvent() && "minecraft".equals(resourcelocation.getNamespace())) {
-            long i = p_286825_.getGameTime();
+    public void onAdvancementDone(Level pLevel, AdvancementHolder pAdvancement) {
+        ResourceLocation resourcelocation = pAdvancement.id();
+        if (pAdvancement.value().sendsTelemetryEvent() && "minecraft".equals(resourcelocation.getNamespace())) {
+            long i = pLevel.getGameTime();
             this.eventSender.send(TelemetryEventType.ADVANCEMENT_MADE, p_286184_ -> {
                 p_286184_.put(TelemetryProperty.ADVANCEMENT_ID, resourcelocation.toString());
                 p_286184_.put(TelemetryProperty.ADVANCEMENT_GAME_TIME, i);

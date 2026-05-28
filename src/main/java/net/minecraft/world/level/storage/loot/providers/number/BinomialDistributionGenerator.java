@@ -44,8 +44,8 @@ public record BinomialDistributionGenerator(NumberProvider n, NumberProvider p) 
         return (float)this.getInt(p_165666_);
     }
 
-    public static BinomialDistributionGenerator binomial(int p_165660_, float p_165661_) {
-        return new BinomialDistributionGenerator(ConstantValue.exactly((float)p_165660_), ConstantValue.exactly(p_165661_));
+    public static BinomialDistributionGenerator binomial(int pN, float pP) {
+        return new BinomialDistributionGenerator(ConstantValue.exactly((float)pN), ConstantValue.exactly(pP));
     }
 
     @Override

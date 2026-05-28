@@ -63,32 +63,32 @@ public class LiquidBlock extends Block implements BucketPickup {
         return CODEC;
     }
 
-    protected LiquidBlock(FlowingFluid p_54694_, BlockBehaviour.Properties p_54695_) {
-        super(p_54695_);
-        this.fluid = p_54694_;
+    protected LiquidBlock(FlowingFluid pFluid, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.fluid = pFluid;
         this.stateCache = Lists.newArrayList();
-        this.stateCache.add(p_54694_.getSource(false));
+        this.stateCache.add(pFluid.getSource(false));
 
         for (int i = 1; i < 8; i++) {
-            this.stateCache.add(p_54694_.getFlowing(8 - i, false));
+            this.stateCache.add(pFluid.getFlowing(8 - i, false));
         }
 
-        this.stateCache.add(p_54694_.getFlowing(8, true));
+        this.stateCache.add(pFluid.getFlowing(8, true));
         this.registerDefaultState(this.stateDefinition.any().setValue(LEVEL, Integer.valueOf(0)));
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState p_54760_, BlockGetter p_54761_, BlockPos p_54762_, CollisionContext p_54763_) {
-        return p_54763_.isAbove(STABLE_SHAPE, p_54762_, true)
-                && p_54760_.getValue(LEVEL) == 0
-                && p_54763_.canStandOnFluid(p_54761_.getFluidState(p_54762_.above()), p_54760_.getFluidState())
+    protected VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return pContext.isAbove(STABLE_SHAPE, pPos, true)
+                && pState.getValue(LEVEL) == 0
+                && pContext.canStandOnFluid(pLevel.getFluidState(pPos.above()), pState.getFluidState())
             ? STABLE_SHAPE
             : Shapes.empty();
     }
 
     @Override
-    protected boolean isRandomlyTicking(BlockState p_54732_) {
-        return p_54732_.getFluidState().isRandomlyTicking();
+    protected boolean isRandomlyTicking(BlockState pState) {
+        return pState.getFluidState().isRandomlyTicking();
     }
 
     @Override
@@ -107,18 +107,18 @@ public class LiquidBlock extends Block implements BucketPickup {
     }
 
     @Override
-    protected FluidState getFluidState(BlockState p_54765_) {
-        int i = p_54765_.getValue(LEVEL);
+    protected FluidState getFluidState(BlockState pState) {
+        int i = pState.getValue(LEVEL);
         return this.stateCache.get(Math.min(i, 8));
     }
 
     @Override
-    protected boolean skipRendering(BlockState p_54716_, BlockState p_54717_, Direction p_54718_) {
-        return p_54717_.getFluidState().getType().isSame(this.fluid);
+    protected boolean skipRendering(BlockState pState, BlockState pAdjacentBlockState, Direction pSide) {
+        return pAdjacentBlockState.getFluidState().getType().isSame(this.fluid);
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState p_54738_) {
+    protected RenderShape getRenderShape(BlockState pState) {
         return RenderShape.INVISIBLE;
     }
 
@@ -128,14 +128,14 @@ public class LiquidBlock extends Block implements BucketPickup {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_54749_, BlockGetter p_54750_, BlockPos p_54751_, CollisionContext p_54752_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return Shapes.empty();
     }
 
     @Override
-    protected void onPlace(BlockState p_54754_, Level p_54755_, BlockPos p_54756_, BlockState p_54757_, boolean p_54758_) {
-        if (this.shouldSpreadLiquid(p_54755_, p_54756_, p_54754_)) {
-            p_54755_.scheduleTick(p_54756_, p_54754_.getFluidState().getType(), this.fluid.getTickDelay(p_54755_));
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        if (this.shouldSpreadLiquid(pLevel, pPos, pState)) {
+            pLevel.scheduleTick(pPos, pState.getFluidState().getType(), this.fluid.getTickDelay(pLevel));
         }
     }
 
@@ -164,22 +164,22 @@ public class LiquidBlock extends Block implements BucketPickup {
         }
     }
 
-    private boolean shouldSpreadLiquid(Level p_54697_, BlockPos p_54698_, BlockState p_54699_) {
+    private boolean shouldSpreadLiquid(Level pLevel, BlockPos pPos, BlockState pState) {
         if (this.fluid.is(FluidTags.LAVA)) {
-            boolean flag = p_54697_.getBlockState(p_54698_.below()).is(Blocks.SOUL_SOIL);
+            boolean flag = pLevel.getBlockState(pPos.below()).is(Blocks.SOUL_SOIL);
 
             for (Direction direction : POSSIBLE_FLOW_DIRECTIONS) {
-                BlockPos blockpos = p_54698_.relative(direction.getOpposite());
-                if (p_54697_.getFluidState(blockpos).is(FluidTags.WATER)) {
-                    Block block = p_54697_.getFluidState(p_54698_).isSource() ? Blocks.OBSIDIAN : Blocks.COBBLESTONE;
-                    p_54697_.setBlockAndUpdate(p_54698_, block.defaultBlockState());
-                    this.fizz(p_54697_, p_54698_);
+                BlockPos blockpos = pPos.relative(direction.getOpposite());
+                if (pLevel.getFluidState(blockpos).is(FluidTags.WATER)) {
+                    Block block = pLevel.getFluidState(pPos).isSource() ? Blocks.OBSIDIAN : Blocks.COBBLESTONE;
+                    pLevel.setBlockAndUpdate(pPos, block.defaultBlockState());
+                    this.fizz(pLevel, pPos);
                     return false;
                 }
 
-                if (flag && p_54697_.getBlockState(blockpos).is(Blocks.BLUE_ICE)) {
-                    p_54697_.setBlockAndUpdate(p_54698_, Blocks.BASALT.defaultBlockState());
-                    this.fizz(p_54697_, p_54698_);
+                if (flag && pLevel.getBlockState(blockpos).is(Blocks.BLUE_ICE)) {
+                    pLevel.setBlockAndUpdate(pPos, Blocks.BASALT.defaultBlockState());
+                    this.fizz(pLevel, pPos);
                     return false;
                 }
             }
@@ -188,13 +188,13 @@ public class LiquidBlock extends Block implements BucketPickup {
         return true;
     }
 
-    private void fizz(LevelAccessor p_54701_, BlockPos p_54702_) {
-        p_54701_.levelEvent(1501, p_54702_, 0);
+    private void fizz(LevelAccessor pLevel, BlockPos pPos) {
+        pLevel.levelEvent(1501, pPos, 0);
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_54730_) {
-        p_54730_.add(LEVEL);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(LEVEL);
     }
 
     @Override

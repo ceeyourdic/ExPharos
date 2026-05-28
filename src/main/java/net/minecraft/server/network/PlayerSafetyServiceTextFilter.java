@@ -30,25 +30,25 @@ public class PlayerSafetyServiceTextFilter extends ServerTextFilter {
     private final int connectionReadTimeoutMs;
 
     private PlayerSafetyServiceTextFilter(
-        URL p_364099_,
-        ServerTextFilter.MessageEncoder p_365356_,
-        ServerTextFilter.IgnoreStrategy p_362188_,
-        ExecutorService p_367186_,
-        ConfidentialClientApplication p_368420_,
-        ClientCredentialParameters p_366786_,
-        Set<String> p_368170_,
-        int p_367351_
+        URL pChatEndpoint,
+        ServerTextFilter.MessageEncoder pChatEncoder,
+        ServerTextFilter.IgnoreStrategy pChatIgnoreStrategy,
+        ExecutorService pWorkerPool,
+        ConfidentialClientApplication pClient,
+        ClientCredentialParameters pClientParameters,
+        Set<String> pFullyFilteredEvents,
+        int pConnectionReadTimeoutMs
     ) {
-        super(p_364099_, p_365356_, p_362188_, p_367186_);
-        this.client = p_368420_;
-        this.clientParameters = p_366786_;
-        this.fullyFilteredEvents = p_368170_;
-        this.connectionReadTimeoutMs = p_367351_;
+        super(pChatEndpoint, pChatEncoder, pChatIgnoreStrategy, pWorkerPool);
+        this.client = pClient;
+        this.clientParameters = pClientParameters;
+        this.fullyFilteredEvents = pFullyFilteredEvents;
+        this.connectionReadTimeoutMs = pConnectionReadTimeoutMs;
     }
 
     @Nullable
-    public static ServerTextFilter createTextFilterFromConfig(String p_365652_) {
-        JsonObject jsonobject = GsonHelper.parse(p_365652_);
+    public static ServerTextFilter createTextFilterFromConfig(String pConfig) {
+        JsonObject jsonobject = GsonHelper.parse(pConfig);
         URI uri = URI.create(GsonHelper.getAsString(jsonobject, "apiServer"));
         String s = GsonHelper.getAsString(jsonobject, "apiPath");
         String s1 = GsonHelper.getAsString(jsonobject, "scope");

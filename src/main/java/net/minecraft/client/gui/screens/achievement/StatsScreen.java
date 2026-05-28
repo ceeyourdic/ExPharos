@@ -67,10 +67,10 @@ public class StatsScreen extends Screen {
     private ObjectSelectionList<?> activeList;
     private boolean isLoading = true;
 
-    public StatsScreen(Screen p_96906_, StatsCounter p_96907_) {
+    public StatsScreen(Screen pLastScreen, StatsCounter pStats) {
         super(TITLE);
-        this.lastScreen = p_96906_;
-        this.stats = p_96907_;
+        this.lastScreen = pLastScreen;
+        this.stats = pStats;
     }
 
     @Override
@@ -138,26 +138,26 @@ public class StatsScreen extends Screen {
         return !this.isLoading;
     }
 
-    public void setActiveList(@Nullable ObjectSelectionList<?> p_96925_) {
+    public void setActiveList(@Nullable ObjectSelectionList<?> pActiveList) {
         if (this.activeList != null) {
             this.removeWidget(this.activeList);
         }
 
-        if (p_96925_ != null) {
-            this.addRenderableWidget(p_96925_);
-            this.activeList = p_96925_;
+        if (pActiveList != null) {
+            this.addRenderableWidget(pActiveList);
+            this.activeList = pActiveList;
             this.repositionElements();
         }
     }
 
-    static String getTranslationKey(Stat<ResourceLocation> p_96947_) {
-        return "stat." + p_96947_.getValue().toString().replace(':', '.');
+    static String getTranslationKey(Stat<ResourceLocation> pStat) {
+        return "stat." + pStat.getValue().toString().replace(':', '.');
     }
 
     @OnlyIn(Dist.CLIENT)
     class GeneralStatisticsList extends ObjectSelectionList<StatsScreen.GeneralStatisticsList.Entry> {
-        public GeneralStatisticsList(final Minecraft p_96995_) {
-            super(p_96995_, StatsScreen.this.width, StatsScreen.this.height - 33 - 58, 33, 14);
+        public GeneralStatisticsList(final Minecraft pMinecraft) {
+            super(pMinecraft, StatsScreen.this.width, StatsScreen.this.height - 33 - 58, 33, 14);
             ObjectArrayList<Stat<ResourceLocation>> objectarraylist = new ObjectArrayList<>(Stats.CUSTOM.iterator());
             objectarraylist.sort(Comparator.comparing(p_96997_ -> I18n.get(StatsScreen.getTranslationKey((Stat<ResourceLocation>)p_96997_))));
 
@@ -176,9 +176,9 @@ public class StatsScreen extends Screen {
             private final Stat<ResourceLocation> stat;
             private final Component statDisplay;
 
-            Entry(final Stat<ResourceLocation> p_97005_) {
-                this.stat = p_97005_;
-                this.statDisplay = Component.translatable(StatsScreen.getTranslationKey(p_97005_));
+            Entry(final Stat<ResourceLocation> pStat) {
+                this.stat = pStat;
+                this.statDisplay = Component.translatable(StatsScreen.getTranslationKey(pStat));
             }
 
             private String getValueText() {
@@ -238,8 +238,8 @@ public class StatsScreen extends Screen {
         protected int headerPressed = -1;
         protected int sortOrder;
 
-        public ItemStatisticsList(final Minecraft p_97032_) {
-            super(p_97032_, StatsScreen.this.width, StatsScreen.this.height - 33 - 58, 33, 22, 22);
+        public ItemStatisticsList(final Minecraft pMinecraft) {
+            super(pMinecraft, StatsScreen.this.width, StatsScreen.this.height - 33 - 58, 33, 22, 22);
             this.blockColumns = Lists.newArrayList();
             this.blockColumns.add(Stats.BLOCK_MINED);
             this.itemColumns = Lists.newArrayList(Stats.ITEM_BROKEN, Stats.ITEM_CRAFTED, Stats.ITEM_USED, Stats.ITEM_PICKED_UP, Stats.ITEM_DROPPED);
@@ -280,8 +280,8 @@ public class StatsScreen extends Screen {
             }
         }
 
-        int getColumnX(int p_329609_) {
-            return 75 + 40 * p_329609_;
+        int getColumnX(int pIndex) {
+            return 75 + 40 * pIndex;
         }
 
         @Override
@@ -319,11 +319,11 @@ public class StatsScreen extends Screen {
                 : flag;
         }
 
-        protected boolean clickedHeader(int p_97036_, int p_97037_) {
+        protected boolean clickedHeader(int pX, int pY) {
             this.headerPressed = -1;
 
             for (int i = 0; i < this.iconSprites.length; i++) {
-                int j = p_97036_ - this.getColumnX(i);
+                int j = pX - this.getColumnX(i);
                 if (j >= -36 && j <= 0) {
                     this.headerPressed = i;
                     break;
@@ -344,16 +344,16 @@ public class StatsScreen extends Screen {
             return 280;
         }
 
-        private StatType<?> getColumn(int p_97034_) {
-            return p_97034_ < this.blockColumns.size() ? this.blockColumns.get(p_97034_) : this.itemColumns.get(p_97034_ - this.blockColumns.size());
+        private StatType<?> getColumn(int pIndex) {
+            return pIndex < this.blockColumns.size() ? this.blockColumns.get(pIndex) : this.itemColumns.get(pIndex - this.blockColumns.size());
         }
 
-        private int getColumnIndex(StatType<?> p_97059_) {
-            int i = this.blockColumns.indexOf(p_97059_);
+        private int getColumnIndex(StatType<?> pStatType) {
+            int i = this.blockColumns.indexOf(pStatType);
             if (i >= 0) {
                 return i;
             } else {
-                int j = this.itemColumns.indexOf(p_97059_);
+                int j = this.itemColumns.indexOf(pStatType);
                 return j >= 0 ? j + this.blockColumns.size() : -1;
             }
         }
@@ -389,9 +389,9 @@ public class StatsScreen extends Screen {
             }
         }
 
-        protected void sortByColumn(StatType<?> p_97039_) {
-            if (p_97039_ != this.sortColumn) {
-                this.sortColumn = p_97039_;
+        protected void sortByColumn(StatType<?> pStatType) {
+            if (pStatType != this.sortColumn) {
+                this.sortColumn = pStatType;
                 this.sortOrder = -1;
             } else if (this.sortOrder == -1) {
                 this.sortOrder = 1;
@@ -407,8 +407,8 @@ public class StatsScreen extends Screen {
         class ItemRow extends ObjectSelectionList.Entry<StatsScreen.ItemStatisticsList.ItemRow> {
             private final Item item;
 
-            ItemRow(final Item p_169517_) {
-                this.item = p_169517_;
+            ItemRow(final Item pItem) {
+                this.item = pItem;
             }
 
             public Item getItem() {
@@ -454,12 +454,12 @@ public class StatsScreen extends Screen {
                 }
             }
 
-            protected void renderStat(GuiGraphics p_282544_, @Nullable Stat<?> p_97093_, int p_97094_, int p_97095_, boolean p_97096_) {
-                Component component = (Component)(p_97093_ == null
+            protected void renderStat(GuiGraphics pGuiGraphics, @Nullable Stat<?> pStat, int pX, int pY, boolean pEvenRow) {
+                Component component = (Component)(pStat == null
                     ? StatsScreen.NO_VALUE_DISPLAY
-                    : Component.literal(p_97093_.format(StatsScreen.this.stats.getValue(p_97093_))));
-                p_282544_.drawString(
-                    StatsScreen.this.font, component, p_97094_ - StatsScreen.this.font.width(component), p_97095_, p_97096_ ? -1 : -4539718
+                    : Component.literal(pStat.format(StatsScreen.this.stats.getValue(pStat))));
+                pGuiGraphics.drawString(
+                    StatsScreen.this.font, component, pX - StatsScreen.this.font.width(component), pY, pEvenRow ? -1 : -4539718
                 );
             }
 
@@ -471,9 +471,9 @@ public class StatsScreen extends Screen {
 
         @OnlyIn(Dist.CLIENT)
         class ItemRowComparator implements Comparator<StatsScreen.ItemStatisticsList.ItemRow> {
-            public int compare(StatsScreen.ItemStatisticsList.ItemRow p_169524_, StatsScreen.ItemStatisticsList.ItemRow p_169525_) {
-                Item item = p_169524_.getItem();
-                Item item1 = p_169525_.getItem();
+            public int compare(StatsScreen.ItemStatisticsList.ItemRow pRow1, StatsScreen.ItemStatisticsList.ItemRow pRow2) {
+                Item item = pRow1.getItem();
+                Item item1 = pRow2.getItem();
                 int i;
                 int j;
                 if (ItemStatisticsList.this.sortColumn == null) {
@@ -498,8 +498,8 @@ public class StatsScreen extends Screen {
 
     @OnlyIn(Dist.CLIENT)
     class MobsStatisticsList extends ObjectSelectionList<StatsScreen.MobsStatisticsList.MobRow> {
-        public MobsStatisticsList(final Minecraft p_97100_) {
-            super(p_97100_, StatsScreen.this.width, StatsScreen.this.height - 33 - 58, 33, 9 * 4);
+        public MobsStatisticsList(final Minecraft pMinecraft) {
+            super(pMinecraft, StatsScreen.this.width, StatsScreen.this.height - 33 - 58, 33, 9 * 4);
 
             for (EntityType<?> entitytype : BuiltInRegistries.ENTITY_TYPE) {
                 if (StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entitytype)) > 0
@@ -522,9 +522,9 @@ public class StatsScreen extends Screen {
             private final boolean hasKills;
             private final boolean wasKilledBy;
 
-            public MobRow(final EntityType<?> p_97112_) {
-                this.mobName = p_97112_.getDescription();
-                int i = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(p_97112_));
+            public MobRow(final EntityType<?> pEntityType) {
+                this.mobName = pEntityType.getDescription();
+                int i = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(pEntityType));
                 if (i == 0) {
                     this.kills = Component.translatable("stat_type.minecraft.killed.none", this.mobName);
                     this.hasKills = false;
@@ -533,7 +533,7 @@ public class StatsScreen extends Screen {
                     this.hasKills = true;
                 }
 
-                int j = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(p_97112_));
+                int j = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(pEntityType));
                 if (j == 0) {
                     this.killedBy = Component.translatable("stat_type.minecraft.killed_by.none", this.mobName);
                     this.wasKilledBy = false;

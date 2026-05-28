@@ -102,21 +102,21 @@ public class ChiseledBookShelfBlock extends BaseEntityBlock {
         }
     }
 
-    private OptionalInt getHitSlot(BlockHitResult p_333742_, BlockState p_330398_) {
-        return getRelativeHitCoordinatesForBlockFace(p_333742_, p_330398_.getValue(HorizontalDirectionalBlock.FACING)).map(p_327255_ -> {
+    private OptionalInt getHitSlot(BlockHitResult pHitReselt, BlockState pState) {
+        return getRelativeHitCoordinatesForBlockFace(pHitReselt, pState.getValue(HorizontalDirectionalBlock.FACING)).map(p_327255_ -> {
             int i = p_327255_.y >= 0.5F ? 0 : 1;
             int j = getSection(p_327255_.x);
             return OptionalInt.of(j + i * 3);
         }).orElseGet(OptionalInt::empty);
     }
 
-    private static Optional<Vec2> getRelativeHitCoordinatesForBlockFace(BlockHitResult p_261714_, Direction p_262116_) {
-        Direction direction = p_261714_.getDirection();
-        if (p_262116_ != direction) {
+    private static Optional<Vec2> getRelativeHitCoordinatesForBlockFace(BlockHitResult pHitResult, Direction pFace) {
+        Direction direction = pHitResult.getDirection();
+        if (pFace != direction) {
             return Optional.empty();
         } else {
-            BlockPos blockpos = p_261714_.getBlockPos().relative(direction);
-            Vec3 vec3 = p_261714_.getLocation().subtract((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
+            BlockPos blockpos = pHitResult.getBlockPos().relative(direction);
+            Vec3 vec3 = pHitResult.getLocation().subtract((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
             double d0 = vec3.x();
             double d1 = vec3.y();
             double d2 = vec3.z();
@@ -131,38 +131,38 @@ public class ChiseledBookShelfBlock extends BaseEntityBlock {
         }
     }
 
-    private static int getSection(float p_261599_) {
+    private static int getSection(float pX) {
         float f = 0.0625F;
         float f1 = 0.375F;
-        if (p_261599_ < 0.375F) {
+        if (pX < 0.375F) {
             return 0;
         } else {
             float f2 = 0.6875F;
-            return p_261599_ < 0.6875F ? 1 : 2;
+            return pX < 0.6875F ? 1 : 2;
         }
     }
 
     private static void addBook(
-        Level p_262592_, BlockPos p_262669_, Player p_262572_, ChiseledBookShelfBlockEntity p_262606_, ItemStack p_262587_, int p_262692_
+        Level pLevel, BlockPos pPos, Player pPlayer, ChiseledBookShelfBlockEntity pBlockEntity, ItemStack pBookStack, int pSlot
     ) {
-        if (!p_262592_.isClientSide) {
-            p_262572_.awardStat(Stats.ITEM_USED.get(p_262587_.getItem()));
-            SoundEvent soundevent = p_262587_.is(Items.ENCHANTED_BOOK) ? SoundEvents.CHISELED_BOOKSHELF_INSERT_ENCHANTED : SoundEvents.CHISELED_BOOKSHELF_INSERT;
-            p_262606_.setItem(p_262692_, p_262587_.consumeAndReturn(1, p_262572_));
-            p_262592_.playSound(null, p_262669_, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+        if (!pLevel.isClientSide) {
+            pPlayer.awardStat(Stats.ITEM_USED.get(pBookStack.getItem()));
+            SoundEvent soundevent = pBookStack.is(Items.ENCHANTED_BOOK) ? SoundEvents.CHISELED_BOOKSHELF_INSERT_ENCHANTED : SoundEvents.CHISELED_BOOKSHELF_INSERT;
+            pBlockEntity.setItem(pSlot, pBookStack.consumeAndReturn(1, pPlayer));
+            pLevel.playSound(null, pPos, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
         }
     }
 
-    private static void removeBook(Level p_262654_, BlockPos p_262601_, Player p_262636_, ChiseledBookShelfBlockEntity p_262605_, int p_262673_) {
-        if (!p_262654_.isClientSide) {
-            ItemStack itemstack = p_262605_.removeItem(p_262673_, 1);
+    private static void removeBook(Level pLevel, BlockPos pPos, Player pPlayer, ChiseledBookShelfBlockEntity pBlockEntity, int pSlot) {
+        if (!pLevel.isClientSide) {
+            ItemStack itemstack = pBlockEntity.removeItem(pSlot, 1);
             SoundEvent soundevent = itemstack.is(Items.ENCHANTED_BOOK) ? SoundEvents.CHISELED_BOOKSHELF_PICKUP_ENCHANTED : SoundEvents.CHISELED_BOOKSHELF_PICKUP;
-            p_262654_.playSound(null, p_262601_, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
-            if (!p_262636_.getInventory().add(itemstack)) {
-                p_262636_.drop(itemstack, false);
+            pLevel.playSound(null, pPos, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+            if (!pPlayer.getInventory().add(itemstack)) {
+                pPlayer.drop(itemstack, false);
             }
 
-            p_262654_.gameEvent(p_262636_, GameEvent.BLOCK_CHANGE, p_262601_);
+            pLevel.gameEvent(pPlayer, GameEvent.BLOCK_CHANGE, pPos);
         }
     }
 

@@ -14,11 +14,11 @@ public abstract class ShoulderRidingEntity extends TamableAnimal {
         super(p_29893_, p_29894_);
     }
 
-    public boolean setEntityOnShoulder(ServerPlayer p_29896_) {
+    public boolean setEntityOnShoulder(ServerPlayer pPlayer) {
         CompoundTag compoundtag = new CompoundTag();
         compoundtag.putString("id", this.getEncodeId());
         this.saveWithoutId(compoundtag);
-        if (p_29896_.setEntityOnShoulder(compoundtag)) {
+        if (pPlayer.setEntityOnShoulder(compoundtag)) {
             this.discard();
             return true;
         } else {

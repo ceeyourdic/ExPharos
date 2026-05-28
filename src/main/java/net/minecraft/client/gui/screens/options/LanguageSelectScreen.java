@@ -24,9 +24,9 @@ public class LanguageSelectScreen extends OptionsSubScreen {
     private LanguageSelectScreen.LanguageSelectionList languageSelectionList;
     final LanguageManager languageManager;
 
-    public LanguageSelectScreen(Screen p_344210_, Options p_342264_, LanguageManager p_343432_) {
-        super(p_344210_, p_342264_, Component.translatable("options.language.title"));
-        this.languageManager = p_343432_;
+    public LanguageSelectScreen(Screen pLastScreen, Options pOptions, LanguageManager pLanguageManager) {
+        super(pLastScreen, pOptions, Component.translatable("options.language.title"));
+        this.languageManager = pLanguageManager;
         this.layout.setFooterHeight(53);
     }
 
@@ -71,8 +71,8 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 
     @OnlyIn(Dist.CLIENT)
     class LanguageSelectionList extends ObjectSelectionList<LanguageSelectScreen.LanguageSelectionList.Entry> {
-        public LanguageSelectionList(final Minecraft p_343433_) {
-            super(p_343433_, LanguageSelectScreen.this.width, LanguageSelectScreen.this.height - 33 - 53, 33, 18);
+        public LanguageSelectionList(final Minecraft pMinecraft) {
+            super(pMinecraft, LanguageSelectScreen.this.width, LanguageSelectScreen.this.height - 33 - 53, 33, 18);
             String s = LanguageSelectScreen.this.languageManager.getSelected();
             LanguageSelectScreen.this.languageManager
                 .getLanguages()
@@ -103,9 +103,9 @@ public class LanguageSelectScreen extends OptionsSubScreen {
             private final Component language;
             private long lastClickTime;
 
-            public Entry(final String p_344457_, final LanguageInfo p_342261_) {
-                this.code = p_344457_;
-                this.language = p_342261_.toComponent();
+            public Entry(final String pCode, final LanguageInfo pLanguageInfo) {
+                this.code = pCode;
+                this.language = pLanguageInfo.toComponent();
             }
 
             @Override

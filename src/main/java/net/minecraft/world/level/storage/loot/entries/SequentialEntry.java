@@ -37,15 +37,15 @@ public class SequentialEntry extends CompositeEntryBase {
         };
     }
 
-    public static SequentialEntry.Builder sequential(LootPoolEntryContainer.Builder<?>... p_165153_) {
-        return new SequentialEntry.Builder(p_165153_);
+    public static SequentialEntry.Builder sequential(LootPoolEntryContainer.Builder<?>... pChildren) {
+        return new SequentialEntry.Builder(pChildren);
     }
 
     public static class Builder extends LootPoolEntryContainer.Builder<SequentialEntry.Builder> {
         private final ImmutableList.Builder<LootPoolEntryContainer> entries = ImmutableList.builder();
 
-        public Builder(LootPoolEntryContainer.Builder<?>... p_165156_) {
-            for (LootPoolEntryContainer.Builder<?> builder : p_165156_) {
+        public Builder(LootPoolEntryContainer.Builder<?>... pChildren) {
+            for (LootPoolEntryContainer.Builder<?> builder : pChildren) {
                 this.entries.add(builder.build());
             }
         }

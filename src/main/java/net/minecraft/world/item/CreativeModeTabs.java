@@ -66,13 +66,13 @@ public class CreativeModeTabs {
     @Nullable
     private static CreativeModeTab.ItemDisplayParameters CACHED_PARAMETERS;
 
-    private static ResourceKey<CreativeModeTab> createKey(String p_281544_) {
-        return ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.withDefaultNamespace(p_281544_));
+    private static ResourceKey<CreativeModeTab> createKey(String pName) {
+        return ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.withDefaultNamespace(pName));
     }
 
-    public static CreativeModeTab bootstrap(Registry<CreativeModeTab> p_283144_) {
+    public static CreativeModeTab bootstrap(Registry<CreativeModeTab> pRegistry) {
         Registry.register(
-            p_283144_,
+            pRegistry,
             BUILDING_BLOCKS,
             CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
                 .title(Component.translatable("itemGroup.buildingBlocks"))
@@ -502,7 +502,7 @@ public class CreativeModeTabs {
                 .build()
         );
         Registry.register(
-            p_283144_,
+            pRegistry,
             COLORED_BLOCKS,
             CreativeModeTab.builder(CreativeModeTab.Row.TOP, 1)
                 .title(Component.translatable("itemGroup.coloredBlocks"))
@@ -710,7 +710,7 @@ public class CreativeModeTabs {
                 .build()
         );
         Registry.register(
-            p_283144_,
+            pRegistry,
             NATURAL_BLOCKS,
             CreativeModeTab.builder(CreativeModeTab.Row.TOP, 2)
                 .title(Component.translatable("itemGroup.natural"))
@@ -955,7 +955,7 @@ public class CreativeModeTabs {
                 .build()
         );
         Registry.register(
-            p_283144_,
+            pRegistry,
             FUNCTIONAL_BLOCKS,
             CreativeModeTab.builder(CreativeModeTab.Row.TOP, 3)
                 .title(Component.translatable("itemGroup.functional"))
@@ -1159,7 +1159,7 @@ public class CreativeModeTabs {
                 .build()
         );
         Registry.register(
-            p_283144_,
+            pRegistry,
             REDSTONE_BLOCKS,
             CreativeModeTab.builder(CreativeModeTab.Row.TOP, 4)
                 .title(Component.translatable("itemGroup.redstone"))
@@ -1237,7 +1237,7 @@ public class CreativeModeTabs {
                 .build()
         );
         Registry.register(
-            p_283144_,
+            pRegistry,
             HOTBAR,
             CreativeModeTab.builder(CreativeModeTab.Row.TOP, 5)
                 .title(Component.translatable("itemGroup.hotbar"))
@@ -1247,7 +1247,7 @@ public class CreativeModeTabs {
                 .build()
         );
         Registry.register(
-            p_283144_,
+            pRegistry,
             SEARCH,
             CreativeModeTab.builder(CreativeModeTab.Row.TOP, 6)
                 .title(Component.translatable("itemGroup.search"))
@@ -1255,7 +1255,7 @@ public class CreativeModeTabs {
                 .displayItems((p_327118_, p_327119_) -> {
                     Set<ItemStack> set = ItemStackLinkedSet.createTypeAndComponentsSet();
 
-                    for (CreativeModeTab creativemodetab : p_283144_) {
+                    for (CreativeModeTab creativemodetab : pRegistry) {
                         if (creativemodetab.getType() != CreativeModeTab.Type.SEARCH) {
                             set.addAll(creativemodetab.getSearchTabDisplayItems());
                         }
@@ -1269,7 +1269,7 @@ public class CreativeModeTabs {
                 .build()
         );
         Registry.register(
-            p_283144_,
+            pRegistry,
             TOOLS_AND_UTILITIES,
             CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 0)
                 .title(Component.translatable("itemGroup.tools"))
@@ -1410,7 +1410,7 @@ public class CreativeModeTabs {
                 .build()
         );
         Registry.register(
-            p_283144_,
+            pRegistry,
             COMBAT,
             CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 1)
                 .title(Component.translatable("itemGroup.combat"))
@@ -1485,7 +1485,7 @@ public class CreativeModeTabs {
                 .build()
         );
         Registry.register(
-            p_283144_,
+            pRegistry,
             FOOD_AND_DRINKS,
             CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 2)
                 .title(Component.translatable("itemGroup.foodAndDrink"))
@@ -1543,7 +1543,7 @@ public class CreativeModeTabs {
                 .build()
         );
         Registry.register(
-            p_283144_,
+            pRegistry,
             INGREDIENTS,
             CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 3)
                 .title(Component.translatable("itemGroup.ingredients"))
@@ -1705,7 +1705,7 @@ public class CreativeModeTabs {
                 .build()
         );
         Registry.register(
-            p_283144_,
+            pRegistry,
             SPAWN_EGGS,
             CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 4)
                 .title(Component.translatable("itemGroup.spawnEggs"))
@@ -1797,7 +1797,7 @@ public class CreativeModeTabs {
                 .build()
         );
         Registry.register(
-            p_283144_,
+            pRegistry,
             OP_BLOCKS,
             CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 5)
                 .title(Component.translatable("itemGroup.op"))
@@ -1837,7 +1837,7 @@ public class CreativeModeTabs {
                 .build()
         );
         return Registry.register(
-            p_283144_,
+            pRegistry,
             INVENTORY,
             CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 6)
                 .title(Component.translatable("itemGroup.inventory"))
@@ -1869,45 +1869,45 @@ public class CreativeModeTabs {
     }
 
     private static void generatePotionEffectTypes(
-        CreativeModeTab.Output p_270129_, HolderLookup<Potion> p_270334_, Item p_270968_, CreativeModeTab.TabVisibility p_270778_, FeatureFlagSet p_331502_
+        CreativeModeTab.Output pOutput, HolderLookup<Potion> pPotions, Item pItem, CreativeModeTab.TabVisibility pTabVisibility, FeatureFlagSet pRequiredFeatures
     ) {
-        p_270334_.listElements()
-            .filter(p_327145_ -> p_327145_.value().isEnabled(p_331502_))
-            .map(p_327116_ -> PotionContents.createItemStack(p_270968_, p_327116_))
-            .forEach(p_270000_ -> p_270129_.accept(p_270000_, p_270778_));
+        pPotions.listElements()
+            .filter(p_327145_ -> p_327145_.value().isEnabled(pRequiredFeatures))
+            .map(p_327116_ -> PotionContents.createItemStack(pItem, p_327116_))
+            .forEach(p_270000_ -> pOutput.accept(p_270000_, pTabVisibility));
     }
 
-    private static void generateEnchantmentBookTypesOnlyMaxLevel(CreativeModeTab.Output p_270868_, HolderLookup<Enchantment> p_270903_, CreativeModeTab.TabVisibility p_270407_) {
-        p_270903_.listElements()
+    private static void generateEnchantmentBookTypesOnlyMaxLevel(CreativeModeTab.Output pOutput, HolderLookup<Enchantment> pEnchantments, CreativeModeTab.TabVisibility pTabVisibility) {
+        pEnchantments.listElements()
             .map(p_359390_ -> EnchantmentHelper.createBook(new EnchantmentInstance(p_359390_, p_359390_.value().getMaxLevel())))
-            .forEach(p_269989_ -> p_270868_.accept(p_269989_, p_270407_));
+            .forEach(p_269989_ -> pOutput.accept(p_269989_, pTabVisibility));
     }
 
-    private static void generateEnchantmentBookTypesAllLevels(CreativeModeTab.Output p_270961_, HolderLookup<Enchantment> p_270628_, CreativeModeTab.TabVisibility p_270805_) {
-        p_270628_.listElements()
+    private static void generateEnchantmentBookTypesAllLevels(CreativeModeTab.Output pOutput, HolderLookup<Enchantment> pEnchantments, CreativeModeTab.TabVisibility pTabVisibility) {
+        pEnchantments.listElements()
             .flatMap(
                 p_341523_ -> IntStream.rangeClosed(p_341523_.value().getMinLevel(), p_341523_.value().getMaxLevel())
                         .mapToObj(p_359385_ -> EnchantmentHelper.createBook(new EnchantmentInstance(p_341523_, p_359385_)))
             )
-            .forEach(p_270017_ -> p_270961_.accept(p_270017_, p_270805_));
+            .forEach(p_270017_ -> pOutput.accept(p_270017_, pTabVisibility));
     }
 
     private static void generateInstrumentTypes(
-        CreativeModeTab.Output p_270699_,
-        HolderLookup<Instrument> p_270948_,
-        Item p_270421_,
-        TagKey<Instrument> p_270798_,
-        CreativeModeTab.TabVisibility p_270817_
+        CreativeModeTab.Output pOutput,
+        HolderLookup<Instrument> pInstruments,
+        Item pItem,
+        TagKey<Instrument> pInstrument,
+        CreativeModeTab.TabVisibility pTabVisibility
     ) {
-        p_270948_.get(p_270798_)
+        pInstruments.get(pInstrument)
             .ifPresent(
                 p_270021_ -> p_270021_.stream()
-                        .map(p_269995_ -> InstrumentItem.create(p_270421_, (Holder<Instrument>)p_269995_))
-                        .forEach(p_270011_ -> p_270699_.accept(p_270011_, p_270817_))
+                        .map(p_269995_ -> InstrumentItem.create(pItem, (Holder<Instrument>)p_269995_))
+                        .forEach(p_270011_ -> pOutput.accept(p_270011_, pTabVisibility))
             );
     }
 
-    private static void generateSuspiciousStews(CreativeModeTab.Output p_259484_, CreativeModeTab.TabVisibility p_260051_) {
+    private static void generateSuspiciousStews(CreativeModeTab.Output pOutput, CreativeModeTab.TabVisibility pTabVisibility) {
         List<SuspiciousEffectHolder> list = SuspiciousEffectHolder.getAllEffectHolders();
         Set<ItemStack> set = ItemStackLinkedSet.createTypeAndComponentsSet();
 
@@ -1917,35 +1917,35 @@ public class CreativeModeTabs {
             set.add(itemstack);
         }
 
-        p_259484_.acceptAll(set, p_260051_);
+        pOutput.acceptAll(set, pTabVisibility);
     }
 
-    private static void generateOminousBottles(CreativeModeTab.Output p_361386_, CreativeModeTab.TabVisibility p_366838_) {
+    private static void generateOminousBottles(CreativeModeTab.Output pOutput, CreativeModeTab.TabVisibility pTabVisibility) {
         for (int i = 0; i <= 4; i++) {
             ItemStack itemstack = new ItemStack(Items.OMINOUS_BOTTLE);
             itemstack.set(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, new OminousBottleAmplifier(i));
-            p_361386_.accept(itemstack, p_366838_);
+            pOutput.accept(itemstack, pTabVisibility);
         }
     }
 
-    private static void generateFireworksAllDurations(CreativeModeTab.Output p_259586_, CreativeModeTab.TabVisibility p_259372_) {
+    private static void generateFireworksAllDurations(CreativeModeTab.Output pOutput, CreativeModeTab.TabVisibility pTabVisibility) {
         for (byte b0 : FireworkRocketItem.CRAFTABLE_DURATIONS) {
             ItemStack itemstack = new ItemStack(Items.FIREWORK_ROCKET);
             itemstack.set(DataComponents.FIREWORKS, new Fireworks(b0, List.of()));
-            p_259586_.accept(itemstack, p_259372_);
+            pOutput.accept(itemstack, pTabVisibility);
         }
     }
 
     private static void generatePresetPaintings(
-        CreativeModeTab.Output p_271007_,
-        HolderLookup.Provider p_342142_,
-        HolderLookup.RegistryLookup<PaintingVariant> p_270618_,
-        Predicate<Holder<PaintingVariant>> p_270878_,
-        CreativeModeTab.TabVisibility p_270261_
+        CreativeModeTab.Output pOutput,
+        HolderLookup.Provider pRegistries,
+        HolderLookup.RegistryLookup<PaintingVariant> pPaintingVariants,
+        Predicate<Holder<PaintingVariant>> pPredicate,
+        CreativeModeTab.TabVisibility pTabVisibility
     ) {
-        RegistryOps<Tag> registryops = p_342142_.createSerializationContext(NbtOps.INSTANCE);
-        p_270618_.listElements()
-            .filter(p_270878_)
+        RegistryOps<Tag> registryops = pRegistries.createSerializationContext(NbtOps.INSTANCE);
+        pPaintingVariants.listElements()
+            .filter(pPredicate)
             .sorted(PAINTING_COMPARATOR)
             .forEach(
                 p_341529_ -> {
@@ -1955,7 +1955,7 @@ public class CreativeModeTabs {
                         .update(p_327130_ -> p_327130_.putString("id", "minecraft:painting"));
                     ItemStack itemstack = new ItemStack(Items.PAINTING);
                     itemstack.set(DataComponents.ENTITY_DATA, customdata);
-                    p_271007_.accept(itemstack, p_270261_);
+                    pOutput.accept(itemstack, pTabVisibility);
                 }
             );
     }
@@ -1976,16 +1976,16 @@ public class CreativeModeTabs {
         return BuiltInRegistries.CREATIVE_MODE_TAB.getValueOrThrow(SEARCH);
     }
 
-    private static void buildAllTabContents(CreativeModeTab.ItemDisplayParameters p_270447_) {
-        streamAllTabs().filter(p_259647_ -> p_259647_.getType() == CreativeModeTab.Type.CATEGORY).forEach(p_269997_ -> p_269997_.buildContents(p_270447_));
-        streamAllTabs().filter(p_260124_ -> p_260124_.getType() != CreativeModeTab.Type.CATEGORY).forEach(p_270002_ -> p_270002_.buildContents(p_270447_));
+    private static void buildAllTabContents(CreativeModeTab.ItemDisplayParameters pParameters) {
+        streamAllTabs().filter(p_259647_ -> p_259647_.getType() == CreativeModeTab.Type.CATEGORY).forEach(p_269997_ -> p_269997_.buildContents(pParameters));
+        streamAllTabs().filter(p_260124_ -> p_260124_.getType() != CreativeModeTab.Type.CATEGORY).forEach(p_270002_ -> p_270002_.buildContents(pParameters));
     }
 
-    public static boolean tryRebuildTabContents(FeatureFlagSet p_270988_, boolean p_270090_, HolderLookup.Provider p_270799_) {
-        if (CACHED_PARAMETERS != null && !CACHED_PARAMETERS.needsUpdate(p_270988_, p_270090_, p_270799_)) {
+    public static boolean tryRebuildTabContents(FeatureFlagSet pEnabledFeatures, boolean pHasPermissions, HolderLookup.Provider pRegistries) {
+        if (CACHED_PARAMETERS != null && !CACHED_PARAMETERS.needsUpdate(pEnabledFeatures, pHasPermissions, pRegistries)) {
             return false;
         } else {
-            CACHED_PARAMETERS = new CreativeModeTab.ItemDisplayParameters(p_270988_, p_270090_, p_270799_);
+            CACHED_PARAMETERS = new CreativeModeTab.ItemDisplayParameters(pEnabledFeatures, pHasPermissions, pRegistries);
             buildAllTabContents(CACHED_PARAMETERS);
             return true;
         }

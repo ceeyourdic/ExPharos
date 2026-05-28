@@ -9,8 +9,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class RealmsUploadTooLargeException extends RealmsUploadException {
     final long sizeLimit;
 
-    public RealmsUploadTooLargeException(long p_361069_) {
-        this.sizeLimit = p_361069_;
+    public RealmsUploadTooLargeException(long pSizeLimit) {
+        this.sizeLimit = pSizeLimit;
     }
 
     @Override

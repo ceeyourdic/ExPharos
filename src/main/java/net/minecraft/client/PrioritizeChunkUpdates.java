@@ -18,9 +18,9 @@ public enum PrioritizeChunkUpdates implements OptionEnum {
     private final int id;
     private final String key;
 
-    private PrioritizeChunkUpdates(final int p_193784_, final String p_193785_) {
-        this.id = p_193784_;
-        this.key = p_193785_;
+    private PrioritizeChunkUpdates(final int pId, final String pKey) {
+        this.id = pId;
+        this.key = pKey;
     }
 
     @Override
@@ -33,7 +33,7 @@ public enum PrioritizeChunkUpdates implements OptionEnum {
         return this.key;
     }
 
-    public static PrioritizeChunkUpdates byId(int p_193788_) {
-        return BY_ID.apply(p_193788_);
+    public static PrioritizeChunkUpdates byId(int pId) {
+        return BY_ID.apply(pId);
     }
 }

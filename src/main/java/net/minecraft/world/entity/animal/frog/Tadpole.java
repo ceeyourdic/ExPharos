@@ -198,30 +198,30 @@ public class Tadpole extends AbstractFish {
         return SoundEvents.BUCKET_FILL_TADPOLE;
     }
 
-    private boolean isFood(ItemStack p_218727_) {
-        return p_218727_.is(ItemTags.FROG_FOOD);
+    private boolean isFood(ItemStack pStack) {
+        return pStack.is(ItemTags.FROG_FOOD);
     }
 
-    private void feed(Player p_218691_, ItemStack p_218692_) {
-        this.usePlayerItem(p_218691_, p_218692_);
+    private void feed(Player pPlayer, ItemStack pStack) {
+        this.usePlayerItem(pPlayer, pStack);
         this.ageUp(AgeableMob.getSpeedUpSecondsWhenFeeding(this.getTicksLeftUntilAdult()));
         this.level().addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
     }
 
-    private void usePlayerItem(Player p_218706_, ItemStack p_218707_) {
-        p_218707_.consume(1, p_218706_);
+    private void usePlayerItem(Player pPlayer, ItemStack pStack) {
+        pStack.consume(1, pPlayer);
     }
 
     private int getAge() {
         return this.age;
     }
 
-    private void ageUp(int p_218701_) {
-        this.setAge(this.age + p_218701_ * 20);
+    private void ageUp(int pOffset) {
+        this.setAge(this.age + pOffset * 20);
     }
 
-    private void setAge(int p_218711_) {
-        this.age = p_218711_;
+    private void setAge(int pAge) {
+        this.age = pAge;
         if (this.age >= ticksToBeFrog) {
             this.ageUp();
         }

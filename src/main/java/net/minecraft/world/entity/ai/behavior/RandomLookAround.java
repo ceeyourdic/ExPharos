@@ -16,15 +16,15 @@ public class RandomLookAround extends Behavior<Mob> {
     private final float minPitch;
     private final float pitchRange;
 
-    public RandomLookAround(IntProvider p_248963_, float p_251826_, float p_251456_, float p_249962_) {
+    public RandomLookAround(IntProvider pInterval, float pMaxYaw, float pMinPitch, float pMaxPitch) {
         super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.GAZE_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT));
-        if (p_251456_ > p_249962_) {
-            throw new IllegalArgumentException("Minimum pitch is larger than maximum pitch! " + p_251456_ + " > " + p_249962_);
+        if (pMinPitch > pMaxPitch) {
+            throw new IllegalArgumentException("Minimum pitch is larger than maximum pitch! " + pMinPitch + " > " + pMaxPitch);
         } else {
-            this.interval = p_248963_;
-            this.maxYaw = p_251826_;
-            this.minPitch = p_251456_;
-            this.pitchRange = p_249962_ - p_251456_;
+            this.interval = pInterval;
+            this.maxYaw = pMaxYaw;
+            this.minPitch = pMinPitch;
+            this.pitchRange = pMaxPitch - pMinPitch;
         }
     }
 

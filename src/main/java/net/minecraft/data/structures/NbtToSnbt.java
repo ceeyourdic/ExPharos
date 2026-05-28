@@ -30,9 +30,9 @@ public class NbtToSnbt implements DataProvider {
     private final Iterable<Path> inputFolders;
     private final PackOutput output;
 
-    public NbtToSnbt(PackOutput p_250442_, Collection<Path> p_249158_) {
-        this.inputFolders = p_249158_;
-        this.output = p_250442_;
+    public NbtToSnbt(PackOutput pOutput, Collection<Path> pInputFolders) {
+        this.inputFolders = pInputFolders;
+        this.output = pOutput;
     }
 
     @Override
@@ -78,37 +78,37 @@ public class NbtToSnbt implements DataProvider {
         return "NBT -> SNBT";
     }
 
-    private static String getName(Path p_126436_, Path p_126437_) {
-        String s = p_126436_.relativize(p_126437_).toString().replaceAll("\\\\", "/");
+    private static String getName(Path pInputFolder, Path pNbtPath) {
+        String s = pInputFolder.relativize(pNbtPath).toString().replaceAll("\\\\", "/");
         return s.substring(0, s.length() - ".nbt".length());
     }
 
     @Nullable
-    public static Path convertStructure(CachedOutput p_236382_, Path p_236383_, String p_236384_, Path p_236385_) {
+    public static Path convertStructure(CachedOutput pOutput, Path pNbtPath, String pName, Path pDirectoryPath) {
         try {
             Path path1;
             try (
-                InputStream inputstream = Files.newInputStream(p_236383_);
+                InputStream inputstream = Files.newInputStream(pNbtPath);
                 InputStream inputstream1 = new FastBufferedInputStream(inputstream);
             ) {
-                Path path = p_236385_.resolve(p_236384_ + ".snbt");
-                writeSnbt(p_236382_, path, NbtUtils.structureToSnbt(NbtIo.readCompressed(inputstream1, NbtAccounter.unlimitedHeap())));
-                LOGGER.info("Converted {} from NBT to SNBT", p_236384_);
+                Path path = pDirectoryPath.resolve(pName + ".snbt");
+                writeSnbt(pOutput, path, NbtUtils.structureToSnbt(NbtIo.readCompressed(inputstream1, NbtAccounter.unlimitedHeap())));
+                LOGGER.info("Converted {} from NBT to SNBT", pName);
                 path1 = path;
             }
 
             return path1;
         } catch (IOException ioexception) {
-            LOGGER.error("Couldn't convert {} from NBT to SNBT at {}", p_236384_, p_236383_, ioexception);
+            LOGGER.error("Couldn't convert {} from NBT to SNBT at {}", pName, pNbtPath, ioexception);
             return null;
         }
     }
 
-    public static void writeSnbt(CachedOutput p_236378_, Path p_236379_, String p_236380_) throws IOException {
+    public static void writeSnbt(CachedOutput pOutput, Path pPath, String pContents) throws IOException {
         ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
         HashingOutputStream hashingoutputstream = new HashingOutputStream(Hashing.sha1(), bytearrayoutputstream);
-        hashingoutputstream.write(p_236380_.getBytes(StandardCharsets.UTF_8));
+        hashingoutputstream.write(pContents.getBytes(StandardCharsets.UTF_8));
         hashingoutputstream.write(10);
-        p_236378_.writeIfNeeded(p_236379_, bytearrayoutputstream.toByteArray(), hashingoutputstream.hash());
+        pOutput.writeIfNeeded(pPath, bytearrayoutputstream.toByteArray(), hashingoutputstream.hash());
     }
 }

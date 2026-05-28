@@ -143,8 +143,8 @@ public class Frog extends Animal implements VariantHolder<Holder<FrogVariant>> {
         return this.entityData.get(DATA_TONGUE_TARGET_ID).stream().mapToObj(this.level()::getEntity).filter(Objects::nonNull).findFirst();
     }
 
-    public void setTongueTarget(Entity p_218482_) {
-        this.entityData.set(DATA_TONGUE_TARGET_ID, OptionalInt.of(p_218482_.getId()));
+    public void setTongueTarget(Entity pTongueTarget) {
+        this.entityData.set(DATA_TONGUE_TARGET_ID, OptionalInt.of(pTongueTarget.getId()));
     }
 
     @Override
@@ -343,12 +343,12 @@ public class Frog extends Animal implements VariantHolder<Holder<FrogVariant>> {
         }
     }
 
-    public static boolean canEat(LivingEntity p_218533_) {
-        if (p_218533_ instanceof Slime slime && slime.getSize() != 1) {
+    public static boolean canEat(LivingEntity pEntity) {
+        if (pEntity instanceof Slime slime && slime.getSize() != 1) {
             return false;
         }
 
-        return p_218533_.getType().is(EntityTypeTags.FROG_FOOD);
+        return pEntity.getType().is(EntityTypeTags.FROG_FOOD);
     }
 
     @Override
@@ -368,14 +368,14 @@ public class Frog extends Animal implements VariantHolder<Holder<FrogVariant>> {
     }
 
     public static boolean checkFrogSpawnRules(
-        EntityType<? extends Animal> p_218512_, LevelAccessor p_218513_, EntitySpawnReason p_369828_, BlockPos p_218515_, RandomSource p_218516_
+        EntityType<? extends Animal> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return p_218513_.getBlockState(p_218515_.below()).is(BlockTags.FROGS_SPAWNABLE_ON) && isBrightEnoughToSpawn(p_218513_, p_218515_);
+        return pLevel.getBlockState(pPos.below()).is(BlockTags.FROGS_SPAWNABLE_ON) && isBrightEnoughToSpawn(pLevel, pPos);
     }
 
     class FrogLookControl extends LookControl {
-        FrogLookControl(final Mob p_218544_) {
-            super(p_218544_);
+        FrogLookControl(final Mob pMob) {
+            super(pMob);
         }
 
         @Override
@@ -413,8 +413,8 @@ public class Frog extends Animal implements VariantHolder<Holder<FrogVariant>> {
     }
 
     static class FrogPathNavigation extends AmphibiousPathNavigation {
-        FrogPathNavigation(Frog p_218556_, Level p_218557_) {
-            super(p_218556_, p_218557_);
+        FrogPathNavigation(Frog pMob, Level pLevel) {
+            super(pMob, pLevel);
         }
 
         @Override

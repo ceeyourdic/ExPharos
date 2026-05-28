@@ -24,31 +24,31 @@ public record CommonPlayerSpawnInfo(
     int portalCooldown,
     int seaLevel
 ) {
-    public CommonPlayerSpawnInfo(RegistryFriendlyByteBuf p_331063_) {
+    public CommonPlayerSpawnInfo(RegistryFriendlyByteBuf pBuffer) {
         this(
-            DimensionType.STREAM_CODEC.decode(p_331063_),
-            p_331063_.readResourceKey(Registries.DIMENSION),
-            p_331063_.readLong(),
-            GameType.byId(p_331063_.readByte()),
-            GameType.byNullableId(p_331063_.readByte()),
-            p_331063_.readBoolean(),
-            p_331063_.readBoolean(),
-            p_331063_.readOptional(FriendlyByteBuf::readGlobalPos),
-            p_331063_.readVarInt(),
-            p_331063_.readVarInt()
+            DimensionType.STREAM_CODEC.decode(pBuffer),
+            pBuffer.readResourceKey(Registries.DIMENSION),
+            pBuffer.readLong(),
+            GameType.byId(pBuffer.readByte()),
+            GameType.byNullableId(pBuffer.readByte()),
+            pBuffer.readBoolean(),
+            pBuffer.readBoolean(),
+            pBuffer.readOptional(FriendlyByteBuf::readGlobalPos),
+            pBuffer.readVarInt(),
+            pBuffer.readVarInt()
         );
     }
 
-    public void write(RegistryFriendlyByteBuf p_335866_) {
-        DimensionType.STREAM_CODEC.encode(p_335866_, this.dimensionType);
-        p_335866_.writeResourceKey(this.dimension);
-        p_335866_.writeLong(this.seed);
-        p_335866_.writeByte(this.gameType.getId());
-        p_335866_.writeByte(GameType.getNullableId(this.previousGameType));
-        p_335866_.writeBoolean(this.isDebug);
-        p_335866_.writeBoolean(this.isFlat);
-        p_335866_.writeOptional(this.lastDeathLocation, FriendlyByteBuf::writeGlobalPos);
-        p_335866_.writeVarInt(this.portalCooldown);
-        p_335866_.writeVarInt(this.seaLevel);
+    public void write(RegistryFriendlyByteBuf pBuffer) {
+        DimensionType.STREAM_CODEC.encode(pBuffer, this.dimensionType);
+        pBuffer.writeResourceKey(this.dimension);
+        pBuffer.writeLong(this.seed);
+        pBuffer.writeByte(this.gameType.getId());
+        pBuffer.writeByte(GameType.getNullableId(this.previousGameType));
+        pBuffer.writeBoolean(this.isDebug);
+        pBuffer.writeBoolean(this.isFlat);
+        pBuffer.writeOptional(this.lastDeathLocation, FriendlyByteBuf::writeGlobalPos);
+        pBuffer.writeVarInt(this.portalCooldown);
+        pBuffer.writeVarInt(this.seaLevel);
     }
 }

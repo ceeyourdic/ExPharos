@@ -21,8 +21,8 @@ public class DispenserBlockEntity extends RandomizableContainerBlockEntity {
         super(p_155489_, p_155490_, p_155491_);
     }
 
-    public DispenserBlockEntity(BlockPos p_155493_, BlockState p_155494_) {
-        this(BlockEntityType.DISPENSER, p_155493_, p_155494_);
+    public DispenserBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        this(BlockEntityType.DISPENSER, pPos, pBlockState);
     }
 
     @Override
@@ -30,13 +30,13 @@ public class DispenserBlockEntity extends RandomizableContainerBlockEntity {
         return 9;
     }
 
-    public int getRandomSlot(RandomSource p_222762_) {
+    public int getRandomSlot(RandomSource pRandom) {
         this.unpackLootTable(null);
         int i = -1;
         int j = 1;
 
         for (int k = 0; k < this.items.size(); k++) {
-            if (!this.items.get(k).isEmpty() && p_222762_.nextInt(j++) == 0) {
+            if (!this.items.get(k).isEmpty() && pRandom.nextInt(j++) == 0) {
                 i = k;
             }
         }
@@ -44,29 +44,29 @@ public class DispenserBlockEntity extends RandomizableContainerBlockEntity {
         return i;
     }
 
-    public ItemStack insertItem(ItemStack p_345441_) {
-        int i = this.getMaxStackSize(p_345441_);
+    public ItemStack insertItem(ItemStack pStack) {
+        int i = this.getMaxStackSize(pStack);
 
         for (int j = 0; j < this.items.size(); j++) {
             ItemStack itemstack = this.items.get(j);
-            if (itemstack.isEmpty() || ItemStack.isSameItemSameComponents(p_345441_, itemstack)) {
-                int k = Math.min(p_345441_.getCount(), i - itemstack.getCount());
+            if (itemstack.isEmpty() || ItemStack.isSameItemSameComponents(pStack, itemstack)) {
+                int k = Math.min(pStack.getCount(), i - itemstack.getCount());
                 if (k > 0) {
                     if (itemstack.isEmpty()) {
-                        this.setItem(j, p_345441_.split(k));
+                        this.setItem(j, pStack.split(k));
                     } else {
-                        p_345441_.shrink(k);
+                        pStack.shrink(k);
                         itemstack.grow(k);
                     }
                 }
 
-                if (p_345441_.isEmpty()) {
+                if (pStack.isEmpty()) {
                     break;
                 }
             }
         }
 
-        return p_345441_;
+        return pStack;
     }
 
     @Override
@@ -97,12 +97,12 @@ public class DispenserBlockEntity extends RandomizableContainerBlockEntity {
     }
 
     @Override
-    protected void setItems(NonNullList<ItemStack> p_59243_) {
-        this.items = p_59243_;
+    protected void setItems(NonNullList<ItemStack> pItems) {
+        this.items = pItems;
     }
 
     @Override
-    protected AbstractContainerMenu createMenu(int p_59235_, Inventory p_59236_) {
-        return new DispenserMenu(p_59235_, p_59236_, this);
+    protected AbstractContainerMenu createMenu(int pId, Inventory pPlayer) {
+        return new DispenserMenu(pId, pPlayer, this);
     }
 }

@@ -309,10 +309,10 @@ public class OldMinecartBehavior extends MinecartBehavior {
     }
 
     @Nullable
-    public Vec3 getPosOffs(double p_361728_, double p_364195_, double p_366610_, double p_364609_) {
-        int i = Mth.floor(p_361728_);
-        int j = Mth.floor(p_364195_);
-        int k = Mth.floor(p_366610_);
+    public Vec3 getPosOffs(double pX, double pY, double pZ, double pScale) {
+        int i = Mth.floor(pX);
+        int j = Mth.floor(pY);
+        int k = Mth.floor(pZ);
         if (this.level().getBlockState(new BlockPos(i, j - 1, k)).is(BlockTags.RAILS)) {
             j--;
         }
@@ -320,9 +320,9 @@ public class OldMinecartBehavior extends MinecartBehavior {
         BlockState blockstate = this.level().getBlockState(new BlockPos(i, j, k));
         if (BaseRailBlock.isRail(blockstate)) {
             RailShape railshape = blockstate.getValue(((BaseRailBlock)blockstate.getBlock()).getShapeProperty());
-            p_364195_ = (double)j;
+            pY = (double)j;
             if (railshape.isSlope()) {
-                p_364195_ = (double)(j + 1);
+                pY = (double)(j + 1);
             }
 
             Pair<Vec3i, Vec3i> pair = AbstractMinecart.exits(railshape);
@@ -333,25 +333,25 @@ public class OldMinecartBehavior extends MinecartBehavior {
             double d2 = Math.sqrt(d0 * d0 + d1 * d1);
             d0 /= d2;
             d1 /= d2;
-            p_361728_ += d0 * p_364609_;
-            p_366610_ += d1 * p_364609_;
-            if (vec3i.getY() != 0 && Mth.floor(p_361728_) - i == vec3i.getX() && Mth.floor(p_366610_) - k == vec3i.getZ()) {
-                p_364195_ += (double)vec3i.getY();
-            } else if (vec3i1.getY() != 0 && Mth.floor(p_361728_) - i == vec3i1.getX() && Mth.floor(p_366610_) - k == vec3i1.getZ()) {
-                p_364195_ += (double)vec3i1.getY();
+            pX += d0 * pScale;
+            pZ += d1 * pScale;
+            if (vec3i.getY() != 0 && Mth.floor(pX) - i == vec3i.getX() && Mth.floor(pZ) - k == vec3i.getZ()) {
+                pY += (double)vec3i.getY();
+            } else if (vec3i1.getY() != 0 && Mth.floor(pX) - i == vec3i1.getX() && Mth.floor(pZ) - k == vec3i1.getZ()) {
+                pY += (double)vec3i1.getY();
             }
 
-            return this.getPos(p_361728_, p_364195_, p_366610_);
+            return this.getPos(pX, pY, pZ);
         } else {
             return null;
         }
     }
 
     @Nullable
-    public Vec3 getPos(double p_364250_, double p_361662_, double p_364713_) {
-        int i = Mth.floor(p_364250_);
-        int j = Mth.floor(p_361662_);
-        int k = Mth.floor(p_364713_);
+    public Vec3 getPos(double pX, double pY, double pZ) {
+        int i = Mth.floor(pX);
+        int j = Mth.floor(pY);
+        int k = Mth.floor(pZ);
         if (this.level().getBlockState(new BlockPos(i, j - 1, k)).is(BlockTags.RAILS)) {
             j--;
         }
@@ -373,25 +373,25 @@ public class OldMinecartBehavior extends MinecartBehavior {
             double d8 = d5 - d2;
             double d9;
             if (d6 == 0.0) {
-                d9 = p_364713_ - (double)k;
+                d9 = pZ - (double)k;
             } else if (d8 == 0.0) {
-                d9 = p_364250_ - (double)i;
+                d9 = pX - (double)i;
             } else {
-                double d10 = p_364250_ - d0;
-                double d11 = p_364713_ - d2;
+                double d10 = pX - d0;
+                double d11 = pZ - d2;
                 d9 = (d10 * d6 + d11 * d8) * 2.0;
             }
 
-            p_364250_ = d0 + d6 * d9;
-            p_361662_ = d1 + d7 * d9;
-            p_364713_ = d2 + d8 * d9;
+            pX = d0 + d6 * d9;
+            pY = d1 + d7 * d9;
+            pZ = d2 + d8 * d9;
             if (d7 < 0.0) {
-                p_361662_++;
+                pY++;
             } else if (d7 > 0.0) {
-                p_361662_ += 0.5;
+                pY += 0.5;
             }
 
-            return new Vec3(p_364250_, p_361662_, p_364713_);
+            return new Vec3(pX, pY, pZ);
         } else {
             return null;
         }

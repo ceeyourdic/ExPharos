@@ -38,8 +38,8 @@ public class FlyingPathNavigation extends PathNavigation {
     }
 
     @Override
-    public Path createPath(Entity p_26430_, int p_26431_) {
-        return this.createPath(p_26430_.blockPosition(), p_26431_);
+    public Path createPath(Entity pEntity, int p_26431_) {
+        return this.createPath(pEntity.blockPosition(), p_26431_);
     }
 
     @Override
@@ -69,12 +69,12 @@ public class FlyingPathNavigation extends PathNavigation {
         }
     }
 
-    public void setCanOpenDoors(boolean p_26441_) {
-        this.nodeEvaluator.setCanOpenDoors(p_26441_);
+    public void setCanOpenDoors(boolean pCanOpenDoors) {
+        this.nodeEvaluator.setCanOpenDoors(pCanOpenDoors);
     }
 
     @Override
-    public boolean isStableDestination(BlockPos p_26439_) {
-        return this.level.getBlockState(p_26439_).entityCanStandOn(this.level, p_26439_, this.mob);
+    public boolean isStableDestination(BlockPos pPos) {
+        return this.level.getBlockState(pPos).entityCanStandOn(this.level, pPos, this.mob);
     }
 }

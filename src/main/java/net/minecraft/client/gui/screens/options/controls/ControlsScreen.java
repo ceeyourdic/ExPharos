@@ -14,12 +14,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class ControlsScreen extends OptionsSubScreen {
     private static final Component TITLE = Component.translatable("controls.title");
 
-    private static OptionInstance<?>[] options(Options p_342219_) {
-        return new OptionInstance[]{p_342219_.toggleCrouch(), p_342219_.toggleSprint(), p_342219_.autoJump(), p_342219_.operatorItemsTab()};
+    private static OptionInstance<?>[] options(Options pOptions) {
+        return new OptionInstance[]{pOptions.toggleCrouch(), pOptions.toggleSprint(), pOptions.autoJump(), pOptions.operatorItemsTab()};
     }
 
-    public ControlsScreen(Screen p_342882_, Options p_345081_) {
-        super(p_342882_, p_345081_, TITLE);
+    public ControlsScreen(Screen pLastScreen, Options pOptions) {
+        super(pLastScreen, pOptions, TITLE);
     }
 
     @Override

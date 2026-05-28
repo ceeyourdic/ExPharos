@@ -21,8 +21,8 @@ public class GridLayout extends AbstractLayout {
         this(0, 0);
     }
 
-    public GridLayout(int p_265045_, int p_265035_) {
-        super(p_265045_, p_265035_, 0, 0);
+    public GridLayout(int pX, int pY) {
+        super(pX, pY, 0, 0);
     }
 
     @Override
@@ -92,50 +92,50 @@ public class GridLayout extends AbstractLayout {
         this.height = aint3[i] + aint1[i];
     }
 
-    public <T extends LayoutElement> T addChild(T p_265485_, int p_265720_, int p_265679_) {
-        return this.addChild(p_265485_, p_265720_, p_265679_, this.newCellSettings());
+    public <T extends LayoutElement> T addChild(T pChild, int pRow, int pColumn) {
+        return this.addChild(pChild, pRow, pColumn, this.newCellSettings());
     }
 
-    public <T extends LayoutElement> T addChild(T p_265061_, int p_265080_, int p_265105_, LayoutSettings p_265057_) {
-        return this.addChild(p_265061_, p_265080_, p_265105_, 1, 1, p_265057_);
+    public <T extends LayoutElement> T addChild(T pChild, int pRow, int pColumn, LayoutSettings pLayoutSettings) {
+        return this.addChild(pChild, pRow, pColumn, 1, 1, pLayoutSettings);
     }
 
-    public <T extends LayoutElement> T addChild(T p_297804_, int p_298357_, int p_300223_, Consumer<LayoutSettings> p_299636_) {
-        return this.addChild(p_297804_, p_298357_, p_300223_, 1, 1, Util.make(this.newCellSettings(), p_299636_));
+    public <T extends LayoutElement> T addChild(T pChild, int pRow, int pColumn, Consumer<LayoutSettings> pLayoutSettingsFactory) {
+        return this.addChild(pChild, pRow, pColumn, 1, 1, Util.make(this.newCellSettings(), pLayoutSettingsFactory));
     }
 
-    public <T extends LayoutElement> T addChild(T p_265590_, int p_265556_, int p_265323_, int p_265531_, int p_265352_) {
-        return this.addChild(p_265590_, p_265556_, p_265323_, p_265531_, p_265352_, this.newCellSettings());
+    public <T extends LayoutElement> T addChild(T pChild, int pRow, int pColumn, int pOccupiedRows, int pOccupiedColumns) {
+        return this.addChild(pChild, pRow, pColumn, pOccupiedRows, pOccupiedColumns, this.newCellSettings());
     }
 
-    public <T extends LayoutElement> T addChild(T p_265031_, int p_265582_, int p_265782_, int p_265612_, int p_265448_, LayoutSettings p_265579_) {
-        if (p_265612_ < 1) {
+    public <T extends LayoutElement> T addChild(T pChild, int pRow, int pColumn, int pOccupiedRows, int pOccupiedColumns, LayoutSettings pLayoutSettings) {
+        if (pOccupiedRows < 1) {
             throw new IllegalArgumentException("Occupied rows must be at least 1");
-        } else if (p_265448_ < 1) {
+        } else if (pOccupiedColumns < 1) {
             throw new IllegalArgumentException("Occupied columns must be at least 1");
         } else {
-            this.cellInhabitants.add(new GridLayout.CellInhabitant(p_265031_, p_265582_, p_265782_, p_265612_, p_265448_, p_265579_));
-            this.children.add(p_265031_);
-            return p_265031_;
+            this.cellInhabitants.add(new GridLayout.CellInhabitant(pChild, pRow, pColumn, pOccupiedRows, pOccupiedColumns, pLayoutSettings));
+            this.children.add(pChild);
+            return pChild;
         }
     }
 
-    public <T extends LayoutElement> T addChild(T p_299753_, int p_298560_, int p_297873_, int p_297702_, int p_298330_, Consumer<LayoutSettings> p_301225_) {
-        return this.addChild(p_299753_, p_298560_, p_297873_, p_297702_, p_298330_, Util.make(this.newCellSettings(), p_301225_));
+    public <T extends LayoutElement> T addChild(T pChild, int pRow, int pColumn, int pOccupiedRows, int pOccupiedColumns, Consumer<LayoutSettings> pLayoutSettingsFactory) {
+        return this.addChild(pChild, pRow, pColumn, pOccupiedRows, pOccupiedColumns, Util.make(this.newCellSettings(), pLayoutSettingsFactory));
     }
 
-    public GridLayout columnSpacing(int p_268135_) {
-        this.columnSpacing = p_268135_;
+    public GridLayout columnSpacing(int pColumnSpacing) {
+        this.columnSpacing = pColumnSpacing;
         return this;
     }
 
-    public GridLayout rowSpacing(int p_268237_) {
-        this.rowSpacing = p_268237_;
+    public GridLayout rowSpacing(int pRowSpacing) {
+        this.rowSpacing = pRowSpacing;
         return this;
     }
 
-    public GridLayout spacing(int p_268351_) {
-        return this.columnSpacing(p_268351_).rowSpacing(p_268351_);
+    public GridLayout spacing(int pSpacing) {
+        return this.columnSpacing(pSpacing).rowSpacing(pSpacing);
     }
 
     @Override
@@ -151,8 +151,8 @@ public class GridLayout extends AbstractLayout {
         return this.defaultCellSettings;
     }
 
-    public GridLayout.RowHelper createRowHelper(int p_265327_) {
-        return new GridLayout.RowHelper(p_265327_);
+    public GridLayout.RowHelper createRowHelper(int pColumns) {
+        return new GridLayout.RowHelper(pColumns);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -162,12 +162,12 @@ public class GridLayout extends AbstractLayout {
         final int occupiedRows;
         final int occupiedColumns;
 
-        CellInhabitant(LayoutElement p_265063_, int p_265675_, int p_265198_, int p_265625_, int p_265517_, LayoutSettings p_265036_) {
-            super(p_265063_, p_265036_.getExposed());
-            this.row = p_265675_;
-            this.column = p_265198_;
-            this.occupiedRows = p_265625_;
-            this.occupiedColumns = p_265517_;
+        CellInhabitant(LayoutElement pChild, int pRow, int pColumn, int pOccupiedRows, int pOccupiedColumns, LayoutSettings pLayoutSettings) {
+            super(pChild, pLayoutSettings.getExposed());
+            this.row = pRow;
+            this.column = pColumn;
+            this.occupiedRows = pOccupiedRows;
+            this.occupiedColumns = pOccupiedColumns;
         }
 
         public int getLastOccupiedRow() {
@@ -184,33 +184,33 @@ public class GridLayout extends AbstractLayout {
         private final int columns;
         private int index;
 
-        RowHelper(final int p_265633_) {
-            this.columns = p_265633_;
+        RowHelper(final int pColumns) {
+            this.columns = pColumns;
         }
 
-        public <T extends LayoutElement> T addChild(T p_265455_) {
-            return this.addChild(p_265455_, 1);
+        public <T extends LayoutElement> T addChild(T pChild) {
+            return this.addChild(pChild, 1);
         }
 
-        public <T extends LayoutElement> T addChild(T p_265413_, int p_265491_) {
-            return this.addChild(p_265413_, p_265491_, this.defaultCellSetting());
+        public <T extends LayoutElement> T addChild(T pChild, int pOccupiedColumns) {
+            return this.addChild(pChild, pOccupiedColumns, this.defaultCellSetting());
         }
 
-        public <T extends LayoutElement> T addChild(T p_265411_, LayoutSettings p_265755_) {
-            return this.addChild(p_265411_, 1, p_265755_);
+        public <T extends LayoutElement> T addChild(T pChild, LayoutSettings pLayoutSettings) {
+            return this.addChild(pChild, 1, pLayoutSettings);
         }
 
-        public <T extends LayoutElement> T addChild(T p_265200_, int p_265044_, LayoutSettings p_265797_) {
+        public <T extends LayoutElement> T addChild(T pChild, int pOccupiedColumns, LayoutSettings pLayoutSettings) {
             int i = this.index / this.columns;
             int j = this.index % this.columns;
-            if (j + p_265044_ > this.columns) {
+            if (j + pOccupiedColumns > this.columns) {
                 i++;
                 j = 0;
                 this.index = Mth.roundToward(this.index, this.columns);
             }
 
-            this.index += p_265044_;
-            return GridLayout.this.addChild(p_265200_, i, j, 1, p_265044_, p_265797_);
+            this.index += pOccupiedColumns;
+            return GridLayout.this.addChild(pChild, i, j, 1, pOccupiedColumns, pLayoutSettings);
         }
 
         public GridLayout getGrid() {

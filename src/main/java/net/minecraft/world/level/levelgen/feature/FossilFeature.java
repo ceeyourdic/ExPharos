@@ -68,10 +68,10 @@ public class FossilFeature extends Feature<FossilFeatureConfiguration> {
         }
     }
 
-    private static int countEmptyCorners(WorldGenLevel p_159782_, BoundingBox p_159783_) {
+    private static int countEmptyCorners(WorldGenLevel pLevel, BoundingBox pBoundingBox) {
         MutableInt mutableint = new MutableInt(0);
-        p_159783_.forAllCorners(p_360607_ -> {
-            BlockState blockstate = p_159782_.getBlockState(p_360607_);
+        pBoundingBox.forAllCorners(p_360607_ -> {
+            BlockState blockstate = pLevel.getBlockState(p_360607_);
             if (blockstate.isAir() || blockstate.is(Blocks.LAVA) || blockstate.is(Blocks.WATER)) {
                 mutableint.add(1);
             }

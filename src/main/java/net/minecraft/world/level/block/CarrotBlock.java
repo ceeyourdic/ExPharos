@@ -38,7 +38,7 @@ public class CarrotBlock extends CropBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_51330_, BlockGetter p_51331_, BlockPos p_51332_, CollisionContext p_51333_) {
-        return SHAPE_BY_AGE[this.getAge(p_51330_)];
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return SHAPE_BY_AGE[this.getAge(pState)];
     }
 }

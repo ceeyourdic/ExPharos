@@ -106,8 +106,8 @@ public class Armadillo extends Animal {
         DebugPackets.sendEntityBrain(this);
     }
 
-    public void switchToState(Armadillo.ArmadilloState p_330881_) {
-        this.entityData.set(ARMADILLO_STATE, p_330881_);
+    public void switchToState(Armadillo.ArmadilloState pState) {
+        this.entityData.set(ARMADILLO_STATE, pState);
     }
 
     @Override
@@ -223,19 +223,19 @@ public class Armadillo extends Animal {
     }
 
     public static boolean checkArmadilloSpawnRules(
-        EntityType<Armadillo> p_328712_, LevelAccessor p_330410_, EntitySpawnReason p_367817_, BlockPos p_328785_, RandomSource p_328859_
+        EntityType<Armadillo> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return p_330410_.getBlockState(p_328785_.below()).is(BlockTags.ARMADILLO_SPAWNABLE_ON) && isBrightEnoughToSpawn(p_330410_, p_328785_);
+        return pLevel.getBlockState(pPos.below()).is(BlockTags.ARMADILLO_SPAWNABLE_ON) && isBrightEnoughToSpawn(pLevel, pPos);
     }
 
-    public boolean isScaredBy(LivingEntity p_331619_) {
-        if (!this.getBoundingBox().inflate(7.0, 2.0, 7.0).intersects(p_331619_.getBoundingBox())) {
+    public boolean isScaredBy(LivingEntity pEntity) {
+        if (!this.getBoundingBox().inflate(7.0, 2.0, 7.0).intersects(pEntity.getBoundingBox())) {
             return false;
-        } else if (p_331619_.getType().is(EntityTypeTags.UNDEAD)) {
+        } else if (pEntity.getType().is(EntityTypeTags.UNDEAD)) {
             return true;
-        } else if (this.getLastHurtByMob() == p_331619_) {
+        } else if (this.getLastHurtByMob() == pEntity) {
             return true;
-        } else if (p_331619_ instanceof Player player) {
+        } else if (pEntity instanceof Player player) {
             return player.isSpectator() ? false : player.isSprinting() || player.isPassenger();
         } else {
             return false;
@@ -412,15 +412,15 @@ public class Armadillo extends Animal {
         private final int animationDuration;
         private final int id;
 
-        ArmadilloState(final String p_327882_, final boolean p_330882_, final int p_328662_, final int p_328018_) {
-            this.name = p_327882_;
-            this.isThreatened = p_330882_;
-            this.animationDuration = p_328662_;
-            this.id = p_328018_;
+        ArmadilloState(final String pName, final boolean pIsThreatened, final int pAnimationDuration, final int pId) {
+            this.name = pName;
+            this.isThreatened = pIsThreatened;
+            this.animationDuration = pAnimationDuration;
+            this.id = pId;
         }
 
-        public static Armadillo.ArmadilloState fromName(String p_329762_) {
-            return CODEC.byName(p_329762_, IDLE);
+        public static Armadillo.ArmadilloState fromName(String pName) {
+            return CODEC.byName(pName, IDLE);
         }
 
         @Override
@@ -432,7 +432,7 @@ public class Armadillo extends Animal {
             return this.id;
         }
 
-        public abstract boolean shouldHideInShell(long p_329790_);
+        public abstract boolean shouldHideInShell(long pInStateTicks);
 
         public boolean isThreatened() {
             return this.isThreatened;

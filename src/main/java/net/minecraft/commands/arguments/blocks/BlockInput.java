@@ -19,10 +19,10 @@ public class BlockInput implements Predicate<BlockInWorld> {
     @Nullable
     private final CompoundTag tag;
 
-    public BlockInput(BlockState p_114666_, Set<Property<?>> p_114667_, @Nullable CompoundTag p_114668_) {
-        this.state = p_114666_;
-        this.properties = p_114667_;
-        this.tag = p_114668_;
+    public BlockInput(BlockState pState, Set<Property<?>> pProperties, @Nullable CompoundTag pTag) {
+        this.state = pState;
+        this.properties = pProperties;
+        this.tag = pTag;
     }
 
     public BlockState getState() {
@@ -33,8 +33,8 @@ public class BlockInput implements Predicate<BlockInWorld> {
         return this.properties;
     }
 
-    public boolean test(BlockInWorld p_114675_) {
-        BlockState blockstate = p_114675_.getState();
+    public boolean test(BlockInWorld pBlock) {
+        BlockState blockstate = pBlock.getState();
         if (!blockstate.is(this.state.getBlock())) {
             return false;
         } else {
@@ -47,30 +47,30 @@ public class BlockInput implements Predicate<BlockInWorld> {
             if (this.tag == null) {
                 return true;
             } else {
-                BlockEntity blockentity = p_114675_.getEntity();
-                return blockentity != null && NbtUtils.compareNbt(this.tag, blockentity.saveWithFullMetadata(p_114675_.getLevel().registryAccess()), true);
+                BlockEntity blockentity = pBlock.getEntity();
+                return blockentity != null && NbtUtils.compareNbt(this.tag, blockentity.saveWithFullMetadata(pBlock.getLevel().registryAccess()), true);
             }
         }
     }
 
-    public boolean test(ServerLevel p_173524_, BlockPos p_173525_) {
-        return this.test(new BlockInWorld(p_173524_, p_173525_, false));
+    public boolean test(ServerLevel pLevel, BlockPos pPos) {
+        return this.test(new BlockInWorld(pLevel, pPos, false));
     }
 
-    public boolean place(ServerLevel p_114671_, BlockPos p_114672_, int p_114673_) {
-        BlockState blockstate = Block.updateFromNeighbourShapes(this.state, p_114671_, p_114672_);
+    public boolean place(ServerLevel pLevel, BlockPos pPos, int pFlags) {
+        BlockState blockstate = Block.updateFromNeighbourShapes(this.state, pLevel, pPos);
         if (blockstate.isAir()) {
             blockstate = this.state;
         }
 
         blockstate = this.overwriteWithDefinedProperties(blockstate);
-        if (!p_114671_.setBlock(p_114672_, blockstate, p_114673_)) {
+        if (!pLevel.setBlock(pPos, blockstate, pFlags)) {
             return false;
         } else {
             if (this.tag != null) {
-                BlockEntity blockentity = p_114671_.getBlockEntity(p_114672_);
+                BlockEntity blockentity = pLevel.getBlockEntity(pPos);
                 if (blockentity != null) {
-                    blockentity.loadWithComponents(this.tag, p_114671_.registryAccess());
+                    blockentity.loadWithComponents(this.tag, pLevel.registryAccess());
                 }
             }
 
@@ -78,19 +78,19 @@ public class BlockInput implements Predicate<BlockInWorld> {
         }
     }
 
-    private BlockState overwriteWithDefinedProperties(BlockState p_376464_) {
-        if (p_376464_ == this.state) {
-            return p_376464_;
+    private BlockState overwriteWithDefinedProperties(BlockState pState) {
+        if (pState == this.state) {
+            return pState;
         } else {
             for (Property<?> property : this.properties) {
-                p_376464_ = copyProperty(p_376464_, this.state, property);
+                pState = copyProperty(pState, this.state, property);
             }
 
-            return p_376464_;
+            return pState;
         }
     }
 
-    private static <T extends Comparable<T>> BlockState copyProperty(BlockState p_377223_, BlockState p_377871_, Property<T> p_378516_) {
-        return p_377223_.setValue(p_378516_, p_377871_.getValue(p_378516_));
+    private static <T extends Comparable<T>> BlockState copyProperty(BlockState pSource, BlockState pTarget, Property<T> pProperty) {
+        return pSource.setValue(pProperty, pTarget.getValue(pProperty));
     }
 }

@@ -11,11 +11,11 @@ public class GustSeedParticle extends NoRenderParticle {
     private final double scale;
     private final int tickDelayInBetween;
 
-    GustSeedParticle(ClientLevel p_312399_, double p_312363_, double p_309505_, double p_311805_, double p_330876_, int p_331354_, int p_334045_) {
-        super(p_312399_, p_312363_, p_309505_, p_311805_, 0.0, 0.0, 0.0);
-        this.scale = p_330876_;
-        this.lifetime = p_331354_;
-        this.tickDelayInBetween = p_334045_;
+    GustSeedParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pScale, int pLifetime, int pTickDelayInBetween) {
+        super(pLevel, pX, pY, pZ, 0.0, 0.0, 0.0);
+        this.scale = pScale;
+        this.lifetime = pLifetime;
+        this.tickDelayInBetween = pTickDelayInBetween;
     }
 
     @Override
@@ -40,10 +40,10 @@ public class GustSeedParticle extends NoRenderParticle {
         private final int lifetime;
         private final int tickDelayInBetween;
 
-        public Provider(double p_331106_, int p_334776_, int p_330209_) {
-            this.scale = p_331106_;
-            this.lifetime = p_334776_;
-            this.tickDelayInBetween = p_330209_;
+        public Provider(double pScale, int pLifetime, int pTickDelayInBetween) {
+            this.scale = pScale;
+            this.lifetime = pLifetime;
+            this.tickDelayInBetween = pTickDelayInBetween;
         }
 
         public Particle createParticle(

@@ -53,11 +53,11 @@ public class WinScreen extends Screen {
     private int direction;
     private final LogoRenderer logoRenderer = new LogoRenderer(false);
 
-    public WinScreen(boolean p_276286_, Runnable p_276294_) {
+    public WinScreen(boolean pPoem, Runnable pOnFinished) {
         super(GameNarrator.NO_TITLE);
-        this.poem = p_276286_;
-        this.onFinished = p_276294_;
-        if (!p_276286_) {
+        this.poem = pPoem;
+        this.onFinished = pOnFinished;
+        if (!pPoem) {
             this.unmodifiedScrollSpeed = 0.75F;
         } else {
             this.unmodifiedScrollSpeed = 0.5F;
@@ -138,16 +138,16 @@ public class WinScreen extends Screen {
         }
     }
 
-    private void wrapCreditsIO(ResourceLocation p_342721_, WinScreen.CreditsReader p_197400_) {
-        try (Reader reader = this.minecraft.getResourceManager().openAsReader(p_342721_)) {
-            p_197400_.read(reader);
+    private void wrapCreditsIO(ResourceLocation pLocation, WinScreen.CreditsReader pReader) {
+        try (Reader reader = this.minecraft.getResourceManager().openAsReader(pLocation)) {
+            pReader.read(reader);
         } catch (Exception exception) {
-            LOGGER.error("Couldn't load credits from file {}", p_342721_, exception);
+            LOGGER.error("Couldn't load credits from file {}", pLocation, exception);
         }
     }
 
-    private void addPoemFile(Reader p_232818_) throws IOException {
-        BufferedReader bufferedreader = new BufferedReader(p_232818_);
+    private void addPoemFile(Reader pReader) throws IOException {
+        BufferedReader bufferedreader = new BufferedReader(pReader);
         RandomSource randomsource = RandomSource.create(8124371L);
 
         String s;
@@ -170,8 +170,8 @@ public class WinScreen extends Screen {
         }
     }
 
-    private void addCreditsFile(Reader p_232820_) {
-        for (JsonElement jsonelement : GsonHelper.parseArray(p_232820_)) {
+    private void addCreditsFile(Reader pReader) {
+        for (JsonElement jsonelement : GsonHelper.parseArray(pReader)) {
             JsonObject jsonobject = jsonelement.getAsJsonObject();
             String s = jsonobject.get("section").getAsString();
             this.addCreditsLine(SECTION_HEADING, true);
@@ -211,16 +211,16 @@ public class WinScreen extends Screen {
         this.lines.add(FormattedCharSequence.EMPTY);
     }
 
-    private void addPoemLines(String p_181398_) {
-        this.lines.addAll(this.minecraft.font.split(Component.literal(p_181398_), 256));
+    private void addPoemLines(String pText) {
+        this.lines.addAll(this.minecraft.font.split(Component.literal(pText), 256));
     }
 
-    private void addCreditsLine(Component p_169473_, boolean p_169474_) {
-        if (p_169474_) {
+    private void addCreditsLine(Component pCreditsLine, boolean pCentered) {
+        if (pCentered) {
             this.centeredLines.add(this.lines.size());
         }
 
-        this.lines.add(p_169473_.getVisualOrderText());
+        this.lines.add(pCreditsLine.getVisualOrderText());
     }
 
     @Override
@@ -259,8 +259,8 @@ public class WinScreen extends Screen {
         p_281907_.pose().popPose();
     }
 
-    private void renderVignette(GuiGraphics p_330215_) {
-        p_330215_.blit(RenderType::vignette, VIGNETTE_LOCATION, 0, 0, 0.0F, 0.0F, this.width, this.height, this.width, this.height);
+    private void renderVignette(GuiGraphics pGuiGraphics) {
+        pGuiGraphics.blit(RenderType::vignette, VIGNETTE_LOCATION, 0, 0, 0.0F, 0.0F, this.width, this.height, this.width, this.height);
     }
 
     @Override
@@ -296,6 +296,6 @@ public class WinScreen extends Screen {
     @FunctionalInterface
     @OnlyIn(Dist.CLIENT)
     interface CreditsReader {
-        void read(Reader p_232822_) throws IOException;
+        void read(Reader pReader) throws IOException;
     }
 }

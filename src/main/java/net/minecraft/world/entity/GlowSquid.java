@@ -95,8 +95,8 @@ public class GlowSquid extends Squid {
         return flag;
     }
 
-    private void setDarkTicks(int p_147120_) {
-        this.entityData.set(DATA_DARK_TICKS_REMAINING, p_147120_);
+    private void setDarkTicks(int pDarkTicks) {
+        this.entityData.set(DATA_DARK_TICKS_REMAINING, pDarkTicks);
     }
 
     public int getDarkTicksRemaining() {
@@ -104,10 +104,10 @@ public class GlowSquid extends Squid {
     }
 
     public static boolean checkGlowSquidSpawnRules(
-        EntityType<? extends LivingEntity> p_300540_, ServerLevelAccessor p_297255_, EntitySpawnReason p_363233_, BlockPos p_299141_, RandomSource p_297395_
+        EntityType<? extends LivingEntity> pEntityType, ServerLevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return p_299141_.getY() <= p_297255_.getSeaLevel() - 33
-            && p_297255_.getRawBrightness(p_299141_, 0) == 0
-            && p_297255_.getBlockState(p_299141_).is(Blocks.WATER);
+        return pPos.getY() <= pLevel.getSeaLevel() - 33
+            && pLevel.getRawBrightness(pPos, 0) == 0
+            && pLevel.getBlockState(pPos).is(Blocks.WATER);
     }
 }

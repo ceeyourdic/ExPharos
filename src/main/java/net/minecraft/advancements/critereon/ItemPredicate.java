@@ -33,16 +33,16 @@ public record ItemPredicate(
                 .apply(p_325221_, ItemPredicate::new)
     );
 
-    public boolean test(ItemStack p_331873_) {
-        if (this.items.isPresent() && !p_331873_.is(this.items.get())) {
+    public boolean test(ItemStack pStack) {
+        if (this.items.isPresent() && !pStack.is(this.items.get())) {
             return false;
-        } else if (!this.count.matches(p_331873_.getCount())) {
+        } else if (!this.count.matches(pStack.getCount())) {
             return false;
-        } else if (!this.components.test(p_331873_)) {
+        } else if (!this.components.test(pStack)) {
             return false;
         } else {
             for (ItemSubPredicate itemsubpredicate : this.subPredicates.values()) {
-                if (!itemsubpredicate.matches(p_331873_)) {
+                if (!itemsubpredicate.matches(pStack)) {
                     return false;
                 }
             }
@@ -64,28 +64,28 @@ public record ItemPredicate(
             return new ItemPredicate.Builder();
         }
 
-        public ItemPredicate.Builder of(HolderGetter<Item> p_369135_, ItemLike... p_151446_) {
-            this.items = Optional.of(HolderSet.direct(p_300947_ -> p_300947_.asItem().builtInRegistryHolder(), p_151446_));
+        public ItemPredicate.Builder of(HolderGetter<Item> pItemRegistry, ItemLike... pItems) {
+            this.items = Optional.of(HolderSet.direct(p_300947_ -> p_300947_.asItem().builtInRegistryHolder(), pItems));
             return this;
         }
 
-        public ItemPredicate.Builder of(HolderGetter<Item> p_367979_, TagKey<Item> p_204146_) {
-            this.items = Optional.of(p_367979_.getOrThrow(p_204146_));
+        public ItemPredicate.Builder of(HolderGetter<Item> pItemRegistry, TagKey<Item> pTag) {
+            this.items = Optional.of(pItemRegistry.getOrThrow(pTag));
             return this;
         }
 
-        public ItemPredicate.Builder withCount(MinMaxBounds.Ints p_151444_) {
-            this.count = p_151444_;
+        public ItemPredicate.Builder withCount(MinMaxBounds.Ints pCount) {
+            this.count = pCount;
             return this;
         }
 
-        public <T extends ItemSubPredicate> ItemPredicate.Builder withSubPredicate(ItemSubPredicate.Type<T> p_331234_, T p_331877_) {
-            this.subPredicates.put(p_331234_, p_331877_);
+        public <T extends ItemSubPredicate> ItemPredicate.Builder withSubPredicate(ItemSubPredicate.Type<T> pType, T pSubPredicate) {
+            this.subPredicates.put(pType, pSubPredicate);
             return this;
         }
 
-        public ItemPredicate.Builder hasComponents(DataComponentPredicate p_333545_) {
-            this.components = p_333545_;
+        public ItemPredicate.Builder hasComponents(DataComponentPredicate pComponents) {
+            this.components = pComponents;
             return this;
         }
 

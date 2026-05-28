@@ -10,16 +10,16 @@ import net.minecraft.network.FriendlyByteBuf;
 public class SingletonArgumentInfo<A extends ArgumentType<?>> implements ArgumentTypeInfo<A, SingletonArgumentInfo<A>.Template> {
     private final SingletonArgumentInfo<A>.Template template;
 
-    private SingletonArgumentInfo(Function<CommandBuildContext, A> p_235434_) {
-        this.template = new SingletonArgumentInfo.Template(p_235434_);
+    private SingletonArgumentInfo(Function<CommandBuildContext, A> pConstructor) {
+        this.template = new SingletonArgumentInfo.Template(pConstructor);
     }
 
-    public static <T extends ArgumentType<?>> SingletonArgumentInfo<T> contextFree(Supplier<T> p_235452_) {
-        return new SingletonArgumentInfo<>(p_235455_ -> p_235452_.get());
+    public static <T extends ArgumentType<?>> SingletonArgumentInfo<T> contextFree(Supplier<T> pArgumentTypeSupplier) {
+        return new SingletonArgumentInfo<>(p_235455_ -> pArgumentTypeSupplier.get());
     }
 
-    public static <T extends ArgumentType<?>> SingletonArgumentInfo<T> contextAware(Function<CommandBuildContext, T> p_235450_) {
-        return new SingletonArgumentInfo<>(p_235450_);
+    public static <T extends ArgumentType<?>> SingletonArgumentInfo<T> contextAware(Function<CommandBuildContext, T> pArgumentType) {
+        return new SingletonArgumentInfo<>(pArgumentType);
     }
 
     public void serializeToNetwork(SingletonArgumentInfo<A>.Template p_235447_, FriendlyByteBuf p_235448_) {
@@ -39,8 +39,8 @@ public class SingletonArgumentInfo<A extends ArgumentType<?>> implements Argumen
     public final class Template implements ArgumentTypeInfo.Template<A> {
         private final Function<CommandBuildContext, A> constructor;
 
-        public Template(final Function<CommandBuildContext, A> p_235466_) {
-            this.constructor = p_235466_;
+        public Template(final Function<CommandBuildContext, A> pConstructor) {
+            this.constructor = pConstructor;
         }
 
         @Override

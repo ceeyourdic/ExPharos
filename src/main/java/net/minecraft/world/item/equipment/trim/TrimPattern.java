@@ -38,7 +38,7 @@ public record TrimPattern(ResourceLocation assetId, Holder<Item> templateItem, C
     public static final Codec<Holder<TrimPattern>> CODEC = RegistryFileCodec.create(Registries.TRIM_PATTERN, DIRECT_CODEC);
     public static final StreamCodec<RegistryFriendlyByteBuf, Holder<TrimPattern>> STREAM_CODEC = ByteBufCodecs.holder(Registries.TRIM_PATTERN, DIRECT_STREAM_CODEC);
 
-    public Component copyWithStyle(Holder<TrimMaterial> p_365604_) {
-        return this.description.copy().withStyle(p_365604_.value().description().getStyle());
+    public Component copyWithStyle(Holder<TrimMaterial> pMaterial) {
+        return this.description.copy().withStyle(pMaterial.value().description().getStyle());
     }
 }

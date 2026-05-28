@@ -23,13 +23,13 @@ public class LlamaSpit extends Projectile {
         super(p_37224_, p_37225_);
     }
 
-    public LlamaSpit(Level p_37235_, Llama p_37236_) {
-        this(EntityType.LLAMA_SPIT, p_37235_);
-        this.setOwner(p_37236_);
+    public LlamaSpit(Level pLevel, Llama pSpitter) {
+        this(EntityType.LLAMA_SPIT, pLevel);
+        this.setOwner(pSpitter);
         this.setPos(
-            p_37236_.getX() - (double)(p_37236_.getBbWidth() + 1.0F) * 0.5 * (double)Mth.sin(p_37236_.yBodyRot * (float) (Math.PI / 180.0)),
-            p_37236_.getEyeY() - 0.1F,
-            p_37236_.getZ() + (double)(p_37236_.getBbWidth() + 1.0F) * 0.5 * (double)Mth.cos(p_37236_.yBodyRot * (float) (Math.PI / 180.0))
+            pSpitter.getX() - (double)(pSpitter.getBbWidth() + 1.0F) * 0.5 * (double)Mth.sin(pSpitter.yBodyRot * (float) (Math.PI / 180.0)),
+            pSpitter.getEyeY() - 0.1F,
+            pSpitter.getZ() + (double)(pSpitter.getBbWidth() + 1.0F) * 0.5 * (double)Mth.cos(pSpitter.yBodyRot * (float) (Math.PI / 180.0))
         );
     }
 
@@ -61,10 +61,10 @@ public class LlamaSpit extends Projectile {
     }
 
     @Override
-    protected void onHitEntity(EntityHitResult p_37241_) {
-        super.onHitEntity(p_37241_);
+    protected void onHitEntity(EntityHitResult pResult) {
+        super.onHitEntity(pResult);
         if (this.getOwner() instanceof LivingEntity livingentity) {
-            Entity entity = p_37241_.getEntity();
+            Entity entity = pResult.getEntity();
             DamageSource damagesource = this.damageSources().spit(this, livingentity);
             if (this.level() instanceof ServerLevel serverlevel && entity.hurtServer(serverlevel, damagesource, 1.0F)) {
                 EnchantmentHelper.doPostAttackEffects(serverlevel, entity, damagesource);

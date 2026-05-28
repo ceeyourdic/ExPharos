@@ -43,19 +43,19 @@ public class CreateFlatWorldScreen extends Screen {
     @Nullable
     private Button deleteLayerButton;
 
-    public CreateFlatWorldScreen(CreateWorldScreen p_95822_, Consumer<FlatLevelGeneratorSettings> p_95823_, FlatLevelGeneratorSettings p_95824_) {
+    public CreateFlatWorldScreen(CreateWorldScreen pParent, Consumer<FlatLevelGeneratorSettings> pApplySettings, FlatLevelGeneratorSettings pGenerator) {
         super(TITLE);
-        this.parent = p_95822_;
-        this.applySettings = p_95823_;
-        this.generator = p_95824_;
+        this.parent = pParent;
+        this.applySettings = pApplySettings;
+        this.generator = pGenerator;
     }
 
     public FlatLevelGeneratorSettings settings() {
         return this.generator;
     }
 
-    public void setConfig(FlatLevelGeneratorSettings p_95826_) {
-        this.generator = p_95826_;
+    public void setConfig(FlatLevelGeneratorSettings pGenerator) {
+        this.generator = pGenerator;
         if (this.list != null) {
             this.list.resetRows();
             this.updateButtonValidity();
@@ -139,8 +139,8 @@ public class CreateFlatWorldScreen extends Screen {
             }
         }
 
-        public void setSelected(@Nullable CreateFlatWorldScreen.DetailsList.Entry p_95855_) {
-            super.setSelected(p_95855_);
+        public void setSelected(@Nullable CreateFlatWorldScreen.DetailsList.Entry pEntry) {
+            super.setSelected(pEntry);
             CreateFlatWorldScreen.this.updateButtonValidity();
         }
 
@@ -207,12 +207,12 @@ public class CreateFlatWorldScreen extends Screen {
                 );
             }
 
-            private ItemStack getDisplayItem(BlockState p_169294_) {
-                Item item = p_169294_.getBlock().asItem();
+            private ItemStack getDisplayItem(BlockState pState) {
+                Item item = pState.getBlock().asItem();
                 if (item == Items.AIR) {
-                    if (p_169294_.is(Blocks.WATER)) {
+                    if (pState.is(Blocks.WATER)) {
                         item = Items.WATER_BUCKET;
-                    } else if (p_169294_.is(Blocks.LAVA)) {
+                    } else if (pState.is(Blocks.LAVA)) {
                         item = Items.LAVA_BUCKET;
                     }
                 }
@@ -230,20 +230,20 @@ public class CreateFlatWorldScreen extends Screen {
             }
 
             @Override
-            public boolean mouseClicked(double p_95868_, double p_95869_, int p_95870_) {
+            public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
                 DetailsList.this.setSelected(this);
-                return super.mouseClicked(p_95868_, p_95869_, p_95870_);
+                return super.mouseClicked(pMouseX, pMouseY, pButton);
             }
 
-            private void blitSlot(GuiGraphics p_281733_, int p_282373_, int p_282844_, ItemStack p_281263_) {
-                this.blitSlotBg(p_281733_, p_282373_ + 1, p_282844_ + 1);
-                if (!p_281263_.isEmpty()) {
-                    p_281733_.renderFakeItem(p_281263_, p_282373_ + 2, p_282844_ + 2);
+            private void blitSlot(GuiGraphics pGuiGraphics, int pX, int pY, ItemStack pStack) {
+                this.blitSlotBg(pGuiGraphics, pX + 1, pY + 1);
+                if (!pStack.isEmpty()) {
+                    pGuiGraphics.renderFakeItem(pStack, pX + 2, pY + 2);
                 }
             }
 
-            private void blitSlotBg(GuiGraphics p_282271_, int p_281324_, int p_283171_) {
-                p_282271_.blitSprite(RenderType::guiTextured, CreateFlatWorldScreen.SLOT_SPRITE, p_281324_, p_283171_, 18, 18);
+            private void blitSlotBg(GuiGraphics pGuiGraphics, int pX, int pY) {
+                pGuiGraphics.blitSprite(RenderType::guiTextured, CreateFlatWorldScreen.SLOT_SPRITE, pX, pY, 18, 18);
             }
         }
     }

@@ -18,29 +18,29 @@ public class ClientboundAddExperienceOrbPacket implements Packet<ClientGamePacke
     private final double z;
     private final int value;
 
-    public ClientboundAddExperienceOrbPacket(ExperienceOrb p_131517_, ServerEntity p_344822_) {
-        this.id = p_131517_.getId();
-        Vec3 vec3 = p_344822_.getPositionBase();
+    public ClientboundAddExperienceOrbPacket(ExperienceOrb pOrb, ServerEntity pEntity) {
+        this.id = pOrb.getId();
+        Vec3 vec3 = pEntity.getPositionBase();
         this.x = vec3.x();
         this.y = vec3.y();
         this.z = vec3.z();
-        this.value = p_131517_.getValue();
+        this.value = pOrb.getValue();
     }
 
-    private ClientboundAddExperienceOrbPacket(FriendlyByteBuf p_178564_) {
-        this.id = p_178564_.readVarInt();
-        this.x = p_178564_.readDouble();
-        this.y = p_178564_.readDouble();
-        this.z = p_178564_.readDouble();
-        this.value = p_178564_.readShort();
+    private ClientboundAddExperienceOrbPacket(FriendlyByteBuf pBuffer) {
+        this.id = pBuffer.readVarInt();
+        this.x = pBuffer.readDouble();
+        this.y = pBuffer.readDouble();
+        this.z = pBuffer.readDouble();
+        this.value = pBuffer.readShort();
     }
 
-    private void write(FriendlyByteBuf p_131526_) {
-        p_131526_.writeVarInt(this.id);
-        p_131526_.writeDouble(this.x);
-        p_131526_.writeDouble(this.y);
-        p_131526_.writeDouble(this.z);
-        p_131526_.writeShort(this.value);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.id);
+        pBuffer.writeDouble(this.x);
+        pBuffer.writeDouble(this.y);
+        pBuffer.writeDouble(this.z);
+        pBuffer.writeShort(this.value);
     }
 
     @Override
@@ -48,8 +48,8 @@ public class ClientboundAddExperienceOrbPacket implements Packet<ClientGamePacke
         return GamePacketTypes.CLIENTBOUND_ADD_EXPERIENCE_ORB;
     }
 
-    public void handle(ClientGamePacketListener p_131523_) {
-        p_131523_.handleAddExperienceOrb(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleAddExperienceOrb(this);
     }
 
     public int getId() {

@@ -102,19 +102,19 @@ public abstract class BlockBehaviour implements FeatureElement {
     protected final Optional<ResourceKey<LootTable>> drops;
     protected final String descriptionId;
 
-    public BlockBehaviour(BlockBehaviour.Properties p_60452_) {
-        this.hasCollision = p_60452_.hasCollision;
-        this.drops = p_60452_.effectiveDrops();
-        this.descriptionId = p_60452_.effectiveDescriptionId();
-        this.explosionResistance = p_60452_.explosionResistance;
-        this.isRandomlyTicking = p_60452_.isRandomlyTicking;
-        this.soundType = p_60452_.soundType;
-        this.friction = p_60452_.friction;
-        this.speedFactor = p_60452_.speedFactor;
-        this.jumpFactor = p_60452_.jumpFactor;
-        this.dynamicShape = p_60452_.dynamicShape;
-        this.requiredFeatures = p_60452_.requiredFeatures;
-        this.properties = p_60452_;
+    public BlockBehaviour(BlockBehaviour.Properties pProperties) {
+        this.hasCollision = pProperties.hasCollision;
+        this.drops = pProperties.effectiveDrops();
+        this.descriptionId = pProperties.effectiveDescriptionId();
+        this.explosionResistance = pProperties.explosionResistance;
+        this.isRandomlyTicking = pProperties.isRandomlyTicking;
+        this.soundType = pProperties.soundType;
+        this.friction = pProperties.friction;
+        this.speedFactor = pProperties.speedFactor;
+        this.jumpFactor = pProperties.jumpFactor;
+        this.dynamicShape = pProperties.dynamicShape;
+        this.requiredFeatures = pProperties.requiredFeatures;
+        this.properties = pProperties;
     }
 
     public BlockBehaviour.Properties properties() {
@@ -127,110 +127,110 @@ public abstract class BlockBehaviour implements FeatureElement {
         return BlockBehaviour.Properties.CODEC.fieldOf("properties").forGetter(BlockBehaviour::properties);
     }
 
-    public static <B extends Block> MapCodec<B> simpleCodec(Function<BlockBehaviour.Properties, B> p_312290_) {
-        return RecordCodecBuilder.mapCodec(p_309873_ -> p_309873_.group(propertiesCodec()).apply(p_309873_, p_312290_));
+    public static <B extends Block> MapCodec<B> simpleCodec(Function<BlockBehaviour.Properties, B> pFactory) {
+        return RecordCodecBuilder.mapCodec(p_309873_ -> p_309873_.group(propertiesCodec()).apply(p_309873_, pFactory));
     }
 
-    protected void updateIndirectNeighbourShapes(BlockState p_60520_, LevelAccessor p_60521_, BlockPos p_60522_, int p_60523_, int p_60524_) {
+    protected void updateIndirectNeighbourShapes(BlockState pState, LevelAccessor pLevel, BlockPos pPos, int pFlags, int pRecursionLeft) {
     }
 
-    protected boolean isPathfindable(BlockState p_60475_, PathComputationType p_60478_) {
-        switch (p_60478_) {
+    protected boolean isPathfindable(BlockState pState, PathComputationType pPathComputationType) {
+        switch (pPathComputationType) {
             case LAND:
-                return !p_60475_.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+                return !pState.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
             case WATER:
-                return p_60475_.getFluidState().is(FluidTags.WATER);
+                return pState.getFluidState().is(FluidTags.WATER);
             case AIR:
-                return !p_60475_.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+                return !pState.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
             default:
                 return false;
         }
     }
 
     protected BlockState updateShape(
-        BlockState p_60541_,
-        LevelReader p_368027_,
-        ScheduledTickAccess p_366146_,
-        BlockPos p_60545_,
-        Direction p_60542_,
-        BlockPos p_60546_,
-        BlockState p_60543_,
-        RandomSource p_363918_
+        BlockState pState,
+        LevelReader pLevel,
+        ScheduledTickAccess pScheduledTickAccess,
+        BlockPos pPos,
+        Direction pDirection,
+        BlockPos pNeighborPos,
+        BlockState pNeighborState,
+        RandomSource pRandom
     ) {
-        return p_60541_;
+        return pState;
     }
 
-    protected boolean skipRendering(BlockState p_60532_, BlockState p_60533_, Direction p_60534_) {
+    protected boolean skipRendering(BlockState pState, BlockState pAdjacentState, Direction pDirection) {
         return false;
     }
 
-    protected void neighborChanged(BlockState p_60509_, Level p_60510_, BlockPos p_60511_, Block p_60512_, @Nullable Orientation p_364486_, boolean p_60514_) {
+    protected void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pNeighborBlock, @Nullable Orientation pOrientation, boolean pMovedByPiston) {
     }
 
-    protected void onPlace(BlockState p_60566_, Level p_60567_, BlockPos p_60568_, BlockState p_60569_, boolean p_60570_) {
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pMovedByPiston) {
     }
 
-    protected void onRemove(BlockState p_60515_, Level p_60516_, BlockPos p_60517_, BlockState p_60518_, boolean p_60519_) {
-        if (p_60515_.hasBlockEntity() && !p_60515_.is(p_60518_.getBlock())) {
-            p_60516_.removeBlockEntity(p_60517_);
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pMovedByPiston) {
+        if (pState.hasBlockEntity() && !pState.is(pNewState.getBlock())) {
+            pLevel.removeBlockEntity(pPos);
         }
     }
 
-    protected void onExplosionHit(BlockState p_310712_, ServerLevel p_367589_, BlockPos p_311490_, Explosion p_312709_, BiConsumer<ItemStack, BlockPos> p_311277_) {
-        if (!p_310712_.isAir() && p_312709_.getBlockInteraction() != Explosion.BlockInteraction.TRIGGER_BLOCK) {
-            Block block = p_310712_.getBlock();
-            boolean flag = p_312709_.getIndirectSourceEntity() instanceof Player;
-            if (block.dropFromExplosion(p_312709_)) {
-                BlockEntity blockentity = p_310712_.hasBlockEntity() ? p_367589_.getBlockEntity(p_311490_) : null;
-                LootParams.Builder lootparams$builder = new LootParams.Builder(p_367589_)
-                    .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(p_311490_))
+    protected void onExplosionHit(BlockState pState, ServerLevel pLevel, BlockPos pPos, Explosion pExplosion, BiConsumer<ItemStack, BlockPos> pDropConsumer) {
+        if (!pState.isAir() && pExplosion.getBlockInteraction() != Explosion.BlockInteraction.TRIGGER_BLOCK) {
+            Block block = pState.getBlock();
+            boolean flag = pExplosion.getIndirectSourceEntity() instanceof Player;
+            if (block.dropFromExplosion(pExplosion)) {
+                BlockEntity blockentity = pState.hasBlockEntity() ? pLevel.getBlockEntity(pPos) : null;
+                LootParams.Builder lootparams$builder = new LootParams.Builder(pLevel)
+                    .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pPos))
                     .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
                     .withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockentity)
-                    .withOptionalParameter(LootContextParams.THIS_ENTITY, p_312709_.getDirectSourceEntity());
-                if (p_312709_.getBlockInteraction() == Explosion.BlockInteraction.DESTROY_WITH_DECAY) {
-                    lootparams$builder.withParameter(LootContextParams.EXPLOSION_RADIUS, p_312709_.radius());
+                    .withOptionalParameter(LootContextParams.THIS_ENTITY, pExplosion.getDirectSourceEntity());
+                if (pExplosion.getBlockInteraction() == Explosion.BlockInteraction.DESTROY_WITH_DECAY) {
+                    lootparams$builder.withParameter(LootContextParams.EXPLOSION_RADIUS, pExplosion.radius());
                 }
 
-                p_310712_.spawnAfterBreak(p_367589_, p_311490_, ItemStack.EMPTY, flag);
-                p_310712_.getDrops(lootparams$builder).forEach(p_309419_ -> p_311277_.accept(p_309419_, p_311490_));
+                pState.spawnAfterBreak(pLevel, pPos, ItemStack.EMPTY, flag);
+                pState.getDrops(lootparams$builder).forEach(p_309419_ -> pDropConsumer.accept(p_309419_, pPos));
             }
 
-            p_367589_.setBlock(p_311490_, Blocks.AIR.defaultBlockState(), 3);
-            block.wasExploded(p_367589_, p_311490_, p_312709_);
+            pLevel.setBlock(pPos, Blocks.AIR.defaultBlockState(), 3);
+            block.wasExploded(pLevel, pPos, pExplosion);
         }
     }
 
-    protected InteractionResult useWithoutItem(BlockState p_60503_, Level p_60504_, BlockPos p_60505_, Player p_60506_, BlockHitResult p_60508_) {
+    protected InteractionResult useWithoutItem(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, BlockHitResult pHitResult) {
         return InteractionResult.PASS;
     }
 
     protected InteractionResult useItemOn(
-        ItemStack p_330929_, BlockState p_335716_, Level p_336112_, BlockPos p_328869_, Player p_332840_, InteractionHand p_336117_, BlockHitResult p_332723_
+        ItemStack pStack, BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHitResult
     ) {
         return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
-    protected boolean triggerEvent(BlockState p_60490_, Level p_60491_, BlockPos p_60492_, int p_60493_, int p_60494_) {
+    protected boolean triggerEvent(BlockState pState, Level pLevel, BlockPos pPos, int pId, int pParam) {
         return false;
     }
 
-    protected RenderShape getRenderShape(BlockState p_60550_) {
+    protected RenderShape getRenderShape(BlockState pState) {
         return RenderShape.MODEL;
     }
 
-    protected boolean useShapeForLightOcclusion(BlockState p_60576_) {
+    protected boolean useShapeForLightOcclusion(BlockState pState) {
         return false;
     }
 
-    protected boolean isSignalSource(BlockState p_60571_) {
+    protected boolean isSignalSource(BlockState pState) {
         return false;
     }
 
-    protected FluidState getFluidState(BlockState p_60577_) {
+    protected FluidState getFluidState(BlockState pState) {
         return Fluids.EMPTY.defaultFluidState();
     }
 
-    protected boolean hasAnalogOutputSignal(BlockState p_60457_) {
+    protected boolean hasAnalogOutputSignal(BlockState pState) {
         return false;
     }
 
@@ -247,124 +247,124 @@ public abstract class BlockBehaviour implements FeatureElement {
         return this.requiredFeatures;
     }
 
-    protected BlockState rotate(BlockState p_60530_, Rotation p_60531_) {
-        return p_60530_;
+    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState;
     }
 
-    protected BlockState mirror(BlockState p_60528_, Mirror p_60529_) {
-        return p_60528_;
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState;
     }
 
-    protected boolean canBeReplaced(BlockState p_60470_, BlockPlaceContext p_60471_) {
-        return p_60470_.canBeReplaced() && (p_60471_.getItemInHand().isEmpty() || !p_60471_.getItemInHand().is(this.asItem()));
+    protected boolean canBeReplaced(BlockState pState, BlockPlaceContext pUseContext) {
+        return pState.canBeReplaced() && (pUseContext.getItemInHand().isEmpty() || !pUseContext.getItemInHand().is(this.asItem()));
     }
 
-    protected boolean canBeReplaced(BlockState p_60535_, Fluid p_60536_) {
-        return p_60535_.canBeReplaced() || !p_60535_.isSolid();
+    protected boolean canBeReplaced(BlockState pState, Fluid pFluid) {
+        return pState.canBeReplaced() || !pState.isSolid();
     }
 
-    protected List<ItemStack> getDrops(BlockState p_287732_, LootParams.Builder p_287596_) {
+    protected List<ItemStack> getDrops(BlockState pState, LootParams.Builder pParams) {
         if (this.drops.isEmpty()) {
             return Collections.emptyList();
         } else {
-            LootParams lootparams = p_287596_.withParameter(LootContextParams.BLOCK_STATE, p_287732_).create(LootContextParamSets.BLOCK);
+            LootParams lootparams = pParams.withParameter(LootContextParams.BLOCK_STATE, pState).create(LootContextParamSets.BLOCK);
             ServerLevel serverlevel = lootparams.getLevel();
             LootTable loottable = serverlevel.getServer().reloadableRegistries().getLootTable(this.drops.get());
             return loottable.getRandomItems(lootparams);
         }
     }
 
-    protected long getSeed(BlockState p_60539_, BlockPos p_60540_) {
-        return Mth.getSeed(p_60540_);
+    protected long getSeed(BlockState pState, BlockPos pPos) {
+        return Mth.getSeed(pPos);
     }
 
-    protected VoxelShape getOcclusionShape(BlockState p_60578_) {
-        return p_60578_.getShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+    protected VoxelShape getOcclusionShape(BlockState pState) {
+        return pState.getShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
     }
 
-    protected VoxelShape getBlockSupportShape(BlockState p_60581_, BlockGetter p_60582_, BlockPos p_60583_) {
-        return this.getCollisionShape(p_60581_, p_60582_, p_60583_, CollisionContext.empty());
+    protected VoxelShape getBlockSupportShape(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return this.getCollisionShape(pState, pLevel, pPos, CollisionContext.empty());
     }
 
-    protected VoxelShape getInteractionShape(BlockState p_60547_, BlockGetter p_60548_, BlockPos p_60549_) {
+    protected VoxelShape getInteractionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
         return Shapes.empty();
     }
 
-    protected int getLightBlock(BlockState p_60585_) {
-        if (p_60585_.isSolidRender()) {
+    protected int getLightBlock(BlockState pState) {
+        if (pState.isSolidRender()) {
             return 15;
         } else {
-            return p_60585_.propagatesSkylightDown() ? 0 : 1;
+            return pState.propagatesSkylightDown() ? 0 : 1;
         }
     }
 
     @Nullable
-    protected MenuProvider getMenuProvider(BlockState p_60563_, Level p_60564_, BlockPos p_60565_) {
+    protected MenuProvider getMenuProvider(BlockState pState, Level pLevel, BlockPos pPos) {
         return null;
     }
 
-    protected boolean canSurvive(BlockState p_60525_, LevelReader p_60526_, BlockPos p_60527_) {
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
         return true;
     }
 
-    protected float getShadeBrightness(BlockState p_60472_, BlockGetter p_60473_, BlockPos p_60474_) {
-        return p_60472_.isCollisionShapeFullBlock(p_60473_, p_60474_) ? 0.2F : 1.0F;
+    protected float getShadeBrightness(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return pState.isCollisionShapeFullBlock(pLevel, pPos) ? 0.2F : 1.0F;
     }
 
-    protected int getAnalogOutputSignal(BlockState p_60487_, Level p_60488_, BlockPos p_60489_) {
+    protected int getAnalogOutputSignal(BlockState pState, Level pLevel, BlockPos pPos) {
         return 0;
     }
 
-    protected VoxelShape getShape(BlockState p_60555_, BlockGetter p_60556_, BlockPos p_60557_, CollisionContext p_60558_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return Shapes.block();
     }
 
-    protected VoxelShape getCollisionShape(BlockState p_60572_, BlockGetter p_60573_, BlockPos p_60574_, CollisionContext p_60575_) {
-        return this.hasCollision ? p_60572_.getShape(p_60573_, p_60574_) : Shapes.empty();
+    protected VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return this.hasCollision ? pState.getShape(pLevel, pPos) : Shapes.empty();
     }
 
-    protected boolean isCollisionShapeFullBlock(BlockState p_181242_, BlockGetter p_181243_, BlockPos p_181244_) {
-        return Block.isShapeFullBlock(p_181242_.getCollisionShape(p_181243_, p_181244_));
+    protected boolean isCollisionShapeFullBlock(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return Block.isShapeFullBlock(pState.getCollisionShape(pLevel, pPos));
     }
 
-    protected VoxelShape getVisualShape(BlockState p_60479_, BlockGetter p_60480_, BlockPos p_60481_, CollisionContext p_60482_) {
-        return this.getCollisionShape(p_60479_, p_60480_, p_60481_, p_60482_);
+    protected VoxelShape getVisualShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return this.getCollisionShape(pState, pLevel, pPos, pContext);
     }
 
-    protected void randomTick(BlockState p_222954_, ServerLevel p_222955_, BlockPos p_222956_, RandomSource p_222957_) {
+    protected void randomTick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
     }
 
-    protected void tick(BlockState p_222945_, ServerLevel p_222946_, BlockPos p_222947_, RandomSource p_222948_) {
+    protected void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
     }
 
-    protected float getDestroyProgress(BlockState p_60466_, Player p_60467_, BlockGetter p_60468_, BlockPos p_60469_) {
-        float f = p_60466_.getDestroySpeed(p_60468_, p_60469_);
+    protected float getDestroyProgress(BlockState pState, Player pPlayer, BlockGetter pLevel, BlockPos pPos) {
+        float f = pState.getDestroySpeed(pLevel, pPos);
         if (f == -1.0F) {
             return 0.0F;
         } else {
-            int i = p_60467_.hasCorrectToolForDrops(p_60466_) ? 30 : 100;
-            return p_60467_.getDestroySpeed(p_60466_) / f / (float)i;
+            int i = pPlayer.hasCorrectToolForDrops(pState) ? 30 : 100;
+            return pPlayer.getDestroySpeed(pState) / f / (float)i;
         }
     }
 
-    protected void spawnAfterBreak(BlockState p_222949_, ServerLevel p_222950_, BlockPos p_222951_, ItemStack p_222952_, boolean p_222953_) {
+    protected void spawnAfterBreak(BlockState pState, ServerLevel pLevel, BlockPos pPos, ItemStack pStack, boolean pDropExperience) {
     }
 
-    protected void attack(BlockState p_60499_, Level p_60500_, BlockPos p_60501_, Player p_60502_) {
+    protected void attack(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer) {
     }
 
-    protected int getSignal(BlockState p_60483_, BlockGetter p_60484_, BlockPos p_60485_, Direction p_60486_) {
+    protected int getSignal(BlockState pState, BlockGetter pLevel, BlockPos pPos, Direction pDirection) {
         return 0;
     }
 
-    protected void entityInside(BlockState p_60495_, Level p_60496_, BlockPos p_60497_, Entity p_60498_) {
+    protected void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
     }
 
-    protected VoxelShape getEntityInsideCollisionShape(BlockState p_362126_, Level p_362740_, BlockPos p_367338_) {
+    protected VoxelShape getEntityInsideCollisionShape(BlockState pState, Level pLevel, BlockPos pPos) {
         return Shapes.block();
     }
 
-    protected int getDirectSignal(BlockState p_60559_, BlockGetter p_60560_, BlockPos p_60561_, Direction p_60562_) {
+    protected int getDirectSignal(BlockState pState, BlockGetter pLevel, BlockPos pPos, Direction pDirection) {
         return 0;
     }
 
@@ -376,22 +376,22 @@ public abstract class BlockBehaviour implements FeatureElement {
         return this.descriptionId;
     }
 
-    protected void onProjectileHit(Level p_60453_, BlockState p_60454_, BlockHitResult p_60455_, Projectile p_60456_) {
+    protected void onProjectileHit(Level pLevel, BlockState pState, BlockHitResult pHit, Projectile pProjectile) {
     }
 
-    protected boolean propagatesSkylightDown(BlockState p_331634_) {
-        return !Block.isShapeFullBlock(p_331634_.getShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) && p_331634_.getFluidState().isEmpty();
+    protected boolean propagatesSkylightDown(BlockState pState) {
+        return !Block.isShapeFullBlock(pState.getShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) && pState.getFluidState().isEmpty();
     }
 
-    protected boolean isRandomlyTicking(BlockState p_333968_) {
+    protected boolean isRandomlyTicking(BlockState pState) {
         return this.isRandomlyTicking;
     }
 
-    protected SoundType getSoundType(BlockState p_328629_) {
+    protected SoundType getSoundType(BlockState pState) {
         return this.soundType;
     }
 
-    protected ItemStack getCloneItemStack(LevelReader p_376835_, BlockPos p_375399_, BlockState p_375675_, boolean p_376021_) {
+    protected ItemStack getCloneItemStack(LevelReader pLevel, BlockPos pPos, BlockState pState, boolean pIncludeData) {
         return new ItemStack(this.asItem());
     }
 
@@ -444,11 +444,11 @@ public abstract class BlockBehaviour implements FeatureElement {
         private boolean propagatesSkylightDown;
         private int lightBlock;
 
-        protected BlockStateBase(Block p_60608_, Reference2ObjectArrayMap<Property<?>, Comparable<?>> p_332547_, MapCodec<BlockState> p_60610_) {
-            super(p_60608_, p_332547_, p_60610_);
-            BlockBehaviour.Properties blockbehaviour$properties = p_60608_.properties;
+        protected BlockStateBase(Block pOwner, Reference2ObjectArrayMap<Property<?>, Comparable<?>> pValues, MapCodec<BlockState> pPropertiesCodec) {
+            super(pOwner, pValues, pPropertiesCodec);
+            BlockBehaviour.Properties blockbehaviour$properties = pOwner.properties;
             this.lightEmission = blockbehaviour$properties.lightEmission.applyAsInt(this.asState());
-            this.useShapeForLightOcclusion = p_60608_.useShapeForLightOcclusion(this.asState());
+            this.useShapeForLightOcclusion = pOwner.useShapeForLightOcclusion(this.asState());
             this.isAir = blockbehaviour$properties.isAir;
             this.ignitedByLava = blockbehaviour$properties.ignitedByLava;
             this.liquid = blockbehaviour$properties.liquid;
@@ -531,8 +531,8 @@ public abstract class BlockBehaviour implements FeatureElement {
             return this.legacySolid;
         }
 
-        public boolean isValidSpawn(BlockGetter p_60644_, BlockPos p_60645_, EntityType<?> p_60646_) {
-            return this.getBlock().properties.isValidSpawn.test(this.asState(), p_60644_, p_60645_, p_60646_);
+        public boolean isValidSpawn(BlockGetter pLevel, BlockPos pPos, EntityType<?> pEntityType) {
+            return this.getBlock().properties.isValidSpawn.test(this.asState(), pLevel, pPos, pEntityType);
         }
 
         public boolean propagatesSkylightDown() {
@@ -543,8 +543,8 @@ public abstract class BlockBehaviour implements FeatureElement {
             return this.lightBlock;
         }
 
-        public VoxelShape getFaceOcclusionShape(Direction p_60658_) {
-            return this.occlusionShapesByFace[p_60658_.ordinal()];
+        public VoxelShape getFaceOcclusionShape(Direction pFace) {
+            return this.occlusionShapesByFace[pFace.ordinal()];
         }
 
         public VoxelShape getOcclusionShape() {
@@ -576,60 +576,70 @@ public abstract class BlockBehaviour implements FeatureElement {
             return this.liquid;
         }
 
-        public MapColor getMapColor(BlockGetter p_285002_, BlockPos p_285293_) {
+        public MapColor getMapColor(BlockGetter pLevel, BlockPos pPos) {
             return this.mapColor;
         }
 
-        public BlockState rotate(Rotation p_60718_) {
-            return this.getBlock().rotate(this.asState(), p_60718_);
+        public BlockState rotate(Rotation pRotation) {
+            return this.getBlock().rotate(this.asState(), pRotation);
         }
 
-        public BlockState mirror(Mirror p_60716_) {
-            return this.getBlock().mirror(this.asState(), p_60716_);
+        public BlockState mirror(Mirror pMirror) {
+            return this.getBlock().mirror(this.asState(), pMirror);
         }
 
         public RenderShape getRenderShape() {
             return this.getBlock().getRenderShape(this.asState());
         }
 
-        public boolean emissiveRendering(BlockGetter p_60789_, BlockPos p_60790_) {
-            return this.emissiveRendering.test(this.asState(), p_60789_, p_60790_);
+        public boolean emissiveRendering(BlockGetter pLevel, BlockPos pPos) {
+            return this.emissiveRendering.test(this.asState(), pLevel, pPos);
         }
 
-        public float getShadeBrightness(BlockGetter p_60793_, BlockPos p_60794_) {
-            return this.getBlock().getShadeBrightness(this.asState(), p_60793_, p_60794_);
+        public float getShadeBrightness(BlockGetter pLevel, BlockPos pPos) {
+            return this.getBlock().getShadeBrightness(this.asState(), pLevel, pPos);
         }
 
-        public boolean isRedstoneConductor(BlockGetter p_60797_, BlockPos p_60798_) {
-            return this.isRedstoneConductor.test(this.asState(), p_60797_, p_60798_);
+        public boolean isRedstoneConductor(BlockGetter pLevel, BlockPos pPos) {
+            return this.isRedstoneConductor.test(this.asState(), pLevel, pPos);
         }
 
         public boolean isSignalSource() {
             return this.getBlock().isSignalSource(this.asState());
         }
 
-        public int getSignal(BlockGetter p_60747_, BlockPos p_60748_, Direction p_60749_) {
-            return this.getBlock().getSignal(this.asState(), p_60747_, p_60748_, p_60749_);
+        public int getSignal(BlockGetter pLevel, BlockPos pPos, Direction pDirection) {
+            return this.getBlock().getSignal(this.asState(), pLevel, pPos, pDirection);
         }
 
         public boolean hasAnalogOutputSignal() {
             return this.getBlock().hasAnalogOutputSignal(this.asState());
         }
 
-        public int getAnalogOutputSignal(Level p_60675_, BlockPos p_60676_) {
-            return this.getBlock().getAnalogOutputSignal(this.asState(), p_60675_, p_60676_);
+        public int getAnalogOutputSignal(Level pLevel, BlockPos pPos) {
+            return this.getBlock().getAnalogOutputSignal(this.asState(), pLevel, pPos);
         }
 
-        public float getDestroySpeed(BlockGetter p_60801_, BlockPos p_60802_) {
+        public float getDestroySpeed(BlockGetter pLevel, BlockPos pPos) {
             return this.destroySpeed;
         }
 
-        public float getDestroyProgress(Player p_60626_, BlockGetter p_60627_, BlockPos p_60628_) {
-            return this.getBlock().getDestroyProgress(this.asState(), p_60626_, p_60627_, p_60628_);
+        // Arcane mixin port: Yarn names this getHardness(); official uses getDestroySpeed().
+        public float getHardness(BlockGetter pLevel, BlockPos pPos) {
+            return this.getDestroySpeed(pLevel, pPos);
         }
 
-        public int getDirectSignal(BlockGetter p_60776_, BlockPos p_60777_, Direction p_60778_) {
-            return this.getBlock().getDirectSignal(this.asState(), p_60776_, p_60777_, p_60778_);
+        public float getDestroyProgress(Player pPlayer, BlockGetter pLevel, BlockPos pPos) {
+            return this.getBlock().getDestroyProgress(this.asState(), pPlayer, pLevel, pPos);
+        }
+
+        // Arcane mixin port: Yarn name for official destroy-progress calculation.
+        public float calcBlockBreakingDelta(Player pPlayer, BlockGetter pLevel, BlockPos pPos) {
+            return this.getDestroyProgress(pPlayer, pLevel, pPos);
+        }
+
+        public int getDirectSignal(BlockGetter pLevel, BlockPos pPos, Direction pDirection) {
+            return this.getBlock().getDirectSignal(this.asState(), pLevel, pPos, pDirection);
         }
 
         public PushReaction getPistonPushReaction() {
@@ -640,200 +650,215 @@ public abstract class BlockBehaviour implements FeatureElement {
             return this.solidRender;
         }
 
+        // Arcane mixin port: Yarn call sites use isFullCube(level, pos); official exposes solid-render/full-shape checks separately.
+        public boolean isFullCube(BlockGetter pLevel, BlockPos pPos) {
+            return this.isSolidRender();
+        }
+
+        // Arcane mixin port: Yarn name for side full-square checks.
+        public boolean isSideSolidFullSquare(BlockGetter pLevel, BlockPos pPos, Direction pDirection) {
+            return this.isFaceSturdy(pLevel, pPos, pDirection);
+        }
+
         public boolean canOcclude() {
             return this.canOcclude;
         }
 
-        public boolean skipRendering(BlockState p_60720_, Direction p_60721_) {
-            return this.getBlock().skipRendering(this.asState(), p_60720_, p_60721_);
+        public boolean skipRendering(BlockState pState, Direction pFace) {
+            return this.getBlock().skipRendering(this.asState(), pState, pFace);
         }
 
-        public VoxelShape getShape(BlockGetter p_60809_, BlockPos p_60810_) {
-            return this.getShape(p_60809_, p_60810_, CollisionContext.empty());
+        public VoxelShape getShape(BlockGetter pLevel, BlockPos pPos) {
+            return this.getShape(pLevel, pPos, CollisionContext.empty());
         }
 
-        public VoxelShape getShape(BlockGetter p_60652_, BlockPos p_60653_, CollisionContext p_60654_) {
-            return this.getBlock().getShape(this.asState(), p_60652_, p_60653_, p_60654_);
+        // Arcane mixin port: Yarn name for the outline shape accessor.
+        public VoxelShape getOutlineShape(BlockGetter pLevel, BlockPos pPos) {
+            return this.getShape(pLevel, pPos);
         }
 
-        public VoxelShape getCollisionShape(BlockGetter p_60813_, BlockPos p_60814_) {
-            return this.cache != null ? this.cache.collisionShape : this.getCollisionShape(p_60813_, p_60814_, CollisionContext.empty());
+        public VoxelShape getShape(BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+            return this.getBlock().getShape(this.asState(), pLevel, pPos, pContext);
         }
 
-        public VoxelShape getCollisionShape(BlockGetter p_60743_, BlockPos p_60744_, CollisionContext p_60745_) {
-            return this.getBlock().getCollisionShape(this.asState(), p_60743_, p_60744_, p_60745_);
+        public VoxelShape getCollisionShape(BlockGetter pLevel, BlockPos pPos) {
+            return this.cache != null ? this.cache.collisionShape : this.getCollisionShape(pLevel, pPos, CollisionContext.empty());
         }
 
-        public VoxelShape getBlockSupportShape(BlockGetter p_60817_, BlockPos p_60818_) {
-            return this.getBlock().getBlockSupportShape(this.asState(), p_60817_, p_60818_);
+        public VoxelShape getCollisionShape(BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+            return this.getBlock().getCollisionShape(this.asState(), pLevel, pPos, pContext);
         }
 
-        public VoxelShape getVisualShape(BlockGetter p_60772_, BlockPos p_60773_, CollisionContext p_60774_) {
-            return this.getBlock().getVisualShape(this.asState(), p_60772_, p_60773_, p_60774_);
+        public VoxelShape getBlockSupportShape(BlockGetter pLevel, BlockPos pPos) {
+            return this.getBlock().getBlockSupportShape(this.asState(), pLevel, pPos);
         }
 
-        public VoxelShape getInteractionShape(BlockGetter p_60821_, BlockPos p_60822_) {
-            return this.getBlock().getInteractionShape(this.asState(), p_60821_, p_60822_);
+        public VoxelShape getVisualShape(BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+            return this.getBlock().getVisualShape(this.asState(), pLevel, pPos, pContext);
         }
 
-        public final boolean entityCanStandOn(BlockGetter p_60635_, BlockPos p_60636_, Entity p_60637_) {
-            return this.entityCanStandOnFace(p_60635_, p_60636_, p_60637_, Direction.UP);
+        public VoxelShape getInteractionShape(BlockGetter pLevel, BlockPos pPos) {
+            return this.getBlock().getInteractionShape(this.asState(), pLevel, pPos);
         }
 
-        public final boolean entityCanStandOnFace(BlockGetter p_60639_, BlockPos p_60640_, Entity p_60641_, Direction p_60642_) {
-            return Block.isFaceFull(this.getCollisionShape(p_60639_, p_60640_, CollisionContext.of(p_60641_)), p_60642_);
+        public final boolean entityCanStandOn(BlockGetter pLevel, BlockPos pPos, Entity pEntity) {
+            return this.entityCanStandOnFace(pLevel, pPos, pEntity, Direction.UP);
         }
 
-        public Vec3 getOffset(BlockPos p_60826_) {
+        public final boolean entityCanStandOnFace(BlockGetter pLevel, BlockPos pPos, Entity pEntity, Direction pFace) {
+            return Block.isFaceFull(this.getCollisionShape(pLevel, pPos, CollisionContext.of(pEntity)), pFace);
+        }
+
+        public Vec3 getOffset(BlockPos pPos) {
             BlockBehaviour.OffsetFunction blockbehaviour$offsetfunction = this.offsetFunction;
-            return blockbehaviour$offsetfunction != null ? blockbehaviour$offsetfunction.evaluate(this.asState(), p_60826_) : Vec3.ZERO;
+            return blockbehaviour$offsetfunction != null ? blockbehaviour$offsetfunction.evaluate(this.asState(), pPos) : Vec3.ZERO;
         }
 
         public boolean hasOffsetFunction() {
             return this.offsetFunction != null;
         }
 
-        public boolean triggerEvent(Level p_60678_, BlockPos p_60679_, int p_60680_, int p_60681_) {
-            return this.getBlock().triggerEvent(this.asState(), p_60678_, p_60679_, p_60680_, p_60681_);
+        public boolean triggerEvent(Level pLevel, BlockPos pPos, int pId, int pParam) {
+            return this.getBlock().triggerEvent(this.asState(), pLevel, pPos, pId, pParam);
         }
 
-        public void handleNeighborChanged(Level p_60691_, BlockPos p_60692_, Block p_60693_, @Nullable Orientation p_366551_, boolean p_60695_) {
-            DebugPackets.sendNeighborsUpdatePacket(p_60691_, p_60692_);
-            this.getBlock().neighborChanged(this.asState(), p_60691_, p_60692_, p_60693_, p_366551_, p_60695_);
+        public void handleNeighborChanged(Level pLevel, BlockPos pPos, Block pNeighborBlock, @Nullable Orientation pOrientation, boolean pMovedByPiston) {
+            DebugPackets.sendNeighborsUpdatePacket(pLevel, pPos);
+            this.getBlock().neighborChanged(this.asState(), pLevel, pPos, pNeighborBlock, pOrientation, pMovedByPiston);
         }
 
-        public final void updateNeighbourShapes(LevelAccessor p_60702_, BlockPos p_60703_, int p_60704_) {
-            this.updateNeighbourShapes(p_60702_, p_60703_, p_60704_, 512);
+        public final void updateNeighbourShapes(LevelAccessor pLevel, BlockPos pPos, int pFlags) {
+            this.updateNeighbourShapes(pLevel, pPos, pFlags, 512);
         }
 
-        public final void updateNeighbourShapes(LevelAccessor p_60706_, BlockPos p_60707_, int p_60708_, int p_60709_) {
+        public final void updateNeighbourShapes(LevelAccessor pLevel, BlockPos pPos, int pFlags, int pRecursionLeft) {
             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
             for (Direction direction : BlockBehaviour.UPDATE_SHAPE_ORDER) {
-                blockpos$mutableblockpos.setWithOffset(p_60707_, direction);
-                p_60706_.neighborShapeChanged(direction.getOpposite(), blockpos$mutableblockpos, p_60707_, this.asState(), p_60708_, p_60709_);
+                blockpos$mutableblockpos.setWithOffset(pPos, direction);
+                pLevel.neighborShapeChanged(direction.getOpposite(), blockpos$mutableblockpos, pPos, this.asState(), pFlags, pRecursionLeft);
             }
         }
 
-        public final void updateIndirectNeighbourShapes(LevelAccessor p_60759_, BlockPos p_60760_, int p_60761_) {
-            this.updateIndirectNeighbourShapes(p_60759_, p_60760_, p_60761_, 512);
+        public final void updateIndirectNeighbourShapes(LevelAccessor pLevel, BlockPos pPos, int pFlags) {
+            this.updateIndirectNeighbourShapes(pLevel, pPos, pFlags, 512);
         }
 
-        public void updateIndirectNeighbourShapes(LevelAccessor p_60763_, BlockPos p_60764_, int p_60765_, int p_60766_) {
-            this.getBlock().updateIndirectNeighbourShapes(this.asState(), p_60763_, p_60764_, p_60765_, p_60766_);
+        public void updateIndirectNeighbourShapes(LevelAccessor pLevel, BlockPos pPos, int pFlags, int pRecursionLeft) {
+            this.getBlock().updateIndirectNeighbourShapes(this.asState(), pLevel, pPos, pFlags, pRecursionLeft);
         }
 
-        public void onPlace(Level p_60697_, BlockPos p_60698_, BlockState p_60699_, boolean p_60700_) {
-            this.getBlock().onPlace(this.asState(), p_60697_, p_60698_, p_60699_, p_60700_);
+        public void onPlace(Level pLevel, BlockPos pPos, BlockState pOldState, boolean pMovedByPiston) {
+            this.getBlock().onPlace(this.asState(), pLevel, pPos, pOldState, pMovedByPiston);
         }
 
-        public void onRemove(Level p_60754_, BlockPos p_60755_, BlockState p_60756_, boolean p_60757_) {
-            this.getBlock().onRemove(this.asState(), p_60754_, p_60755_, p_60756_, p_60757_);
+        public void onRemove(Level pLevel, BlockPos pPos, BlockState pNewState, boolean pMovedByPiston) {
+            this.getBlock().onRemove(this.asState(), pLevel, pPos, pNewState, pMovedByPiston);
         }
 
-        public void onExplosionHit(ServerLevel p_368679_, BlockPos p_311683_, Explosion p_310588_, BiConsumer<ItemStack, BlockPos> p_309567_) {
-            this.getBlock().onExplosionHit(this.asState(), p_368679_, p_311683_, p_310588_, p_309567_);
+        public void onExplosionHit(ServerLevel pLevel, BlockPos pPos, Explosion pExplosion, BiConsumer<ItemStack, BlockPos> pDropConsumer) {
+            this.getBlock().onExplosionHit(this.asState(), pLevel, pPos, pExplosion, pDropConsumer);
         }
 
-        public void tick(ServerLevel p_222964_, BlockPos p_222965_, RandomSource p_222966_) {
-            this.getBlock().tick(this.asState(), p_222964_, p_222965_, p_222966_);
+        public void tick(ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
+            this.getBlock().tick(this.asState(), pLevel, pPos, pRandom);
         }
 
-        public void randomTick(ServerLevel p_222973_, BlockPos p_222974_, RandomSource p_222975_) {
-            this.getBlock().randomTick(this.asState(), p_222973_, p_222974_, p_222975_);
+        public void randomTick(ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
+            this.getBlock().randomTick(this.asState(), pLevel, pPos, pRandom);
         }
 
-        public void entityInside(Level p_60683_, BlockPos p_60684_, Entity p_60685_) {
-            this.getBlock().entityInside(this.asState(), p_60683_, p_60684_, p_60685_);
+        public void entityInside(Level pLevel, BlockPos pPos, Entity pEntity) {
+            this.getBlock().entityInside(this.asState(), pLevel, pPos, pEntity);
         }
 
-        public VoxelShape getEntityInsideCollisionShape(Level p_364417_, BlockPos p_363118_) {
-            return this.getBlock().getEntityInsideCollisionShape(this.asState(), p_364417_, p_363118_);
+        public VoxelShape getEntityInsideCollisionShape(Level pLevel, BlockPos pPos) {
+            return this.getBlock().getEntityInsideCollisionShape(this.asState(), pLevel, pPos);
         }
 
-        public void spawnAfterBreak(ServerLevel p_222968_, BlockPos p_222969_, ItemStack p_222970_, boolean p_222971_) {
-            this.getBlock().spawnAfterBreak(this.asState(), p_222968_, p_222969_, p_222970_, p_222971_);
+        public void spawnAfterBreak(ServerLevel pLevel, BlockPos pPos, ItemStack pStack, boolean pDropExperience) {
+            this.getBlock().spawnAfterBreak(this.asState(), pLevel, pPos, pStack, pDropExperience);
         }
 
-        public List<ItemStack> getDrops(LootParams.Builder p_287688_) {
-            return this.getBlock().getDrops(this.asState(), p_287688_);
+        public List<ItemStack> getDrops(LootParams.Builder pLootParams) {
+            return this.getBlock().getDrops(this.asState(), pLootParams);
         }
 
-        public InteractionResult useItemOn(ItemStack p_335325_, Level p_335008_, Player p_334247_, InteractionHand p_329982_, BlockHitResult p_332030_) {
-            return this.getBlock().useItemOn(p_335325_, this.asState(), p_335008_, p_332030_.getBlockPos(), p_334247_, p_329982_, p_332030_);
+        public InteractionResult useItemOn(ItemStack pStack, Level pLevel, Player pPlayer, InteractionHand pHand, BlockHitResult pHitResult) {
+            return this.getBlock().useItemOn(pStack, this.asState(), pLevel, pHitResult.getBlockPos(), pPlayer, pHand, pHitResult);
         }
 
-        public InteractionResult useWithoutItem(Level p_332538_, Player p_332562_, BlockHitResult p_330524_) {
-            return this.getBlock().useWithoutItem(this.asState(), p_332538_, p_330524_.getBlockPos(), p_332562_, p_330524_);
+        public InteractionResult useWithoutItem(Level pLevel, Player pPlayer, BlockHitResult pHitResult) {
+            return this.getBlock().useWithoutItem(this.asState(), pLevel, pHitResult.getBlockPos(), pPlayer, pHitResult);
         }
 
-        public void attack(Level p_60687_, BlockPos p_60688_, Player p_60689_) {
-            this.getBlock().attack(this.asState(), p_60687_, p_60688_, p_60689_);
+        public void attack(Level pLevel, BlockPos pPos, Player pPlayer) {
+            this.getBlock().attack(this.asState(), pLevel, pPos, pPlayer);
         }
 
-        public boolean isSuffocating(BlockGetter p_60829_, BlockPos p_60830_) {
-            return this.isSuffocating.test(this.asState(), p_60829_, p_60830_);
+        public boolean isSuffocating(BlockGetter pLevel, BlockPos pPos) {
+            return this.isSuffocating.test(this.asState(), pLevel, pPos);
         }
 
-        public boolean isViewBlocking(BlockGetter p_60832_, BlockPos p_60833_) {
-            return this.isViewBlocking.test(this.asState(), p_60832_, p_60833_);
+        public boolean isViewBlocking(BlockGetter pLevel, BlockPos pPos) {
+            return this.isViewBlocking.test(this.asState(), pLevel, pPos);
         }
 
         public BlockState updateShape(
-            LevelReader p_363881_,
-            ScheduledTickAccess p_363259_,
-            BlockPos p_60732_,
-            Direction p_60729_,
-            BlockPos p_60733_,
-            BlockState p_60730_,
-            RandomSource p_363991_
+            LevelReader pLevel,
+            ScheduledTickAccess pScheduledTickAccess,
+            BlockPos pPos,
+            Direction pDirection,
+            BlockPos pNeighborPos,
+            BlockState pNeighborState,
+            RandomSource pRandom
         ) {
-            return this.getBlock().updateShape(this.asState(), p_363881_, p_363259_, p_60732_, p_60729_, p_60733_, p_60730_, p_363991_);
+            return this.getBlock().updateShape(this.asState(), pLevel, pScheduledTickAccess, pPos, pDirection, pNeighborPos, pNeighborState, pRandom);
         }
 
-        public boolean isPathfindable(PathComputationType p_60650_) {
-            return this.getBlock().isPathfindable(this.asState(), p_60650_);
+        public boolean isPathfindable(PathComputationType pType) {
+            return this.getBlock().isPathfindable(this.asState(), pType);
         }
 
-        public boolean canBeReplaced(BlockPlaceContext p_60630_) {
-            return this.getBlock().canBeReplaced(this.asState(), p_60630_);
+        public boolean canBeReplaced(BlockPlaceContext pUseContext) {
+            return this.getBlock().canBeReplaced(this.asState(), pUseContext);
         }
 
-        public boolean canBeReplaced(Fluid p_60723_) {
-            return this.getBlock().canBeReplaced(this.asState(), p_60723_);
+        public boolean canBeReplaced(Fluid pFluid) {
+            return this.getBlock().canBeReplaced(this.asState(), pFluid);
         }
 
         public boolean canBeReplaced() {
             return this.replaceable;
         }
 
-        public boolean canSurvive(LevelReader p_60711_, BlockPos p_60712_) {
-            return this.getBlock().canSurvive(this.asState(), p_60711_, p_60712_);
+        public boolean canSurvive(LevelReader pLevel, BlockPos pPos) {
+            return this.getBlock().canSurvive(this.asState(), pLevel, pPos);
         }
 
-        public boolean hasPostProcess(BlockGetter p_60836_, BlockPos p_60837_) {
-            return this.hasPostProcess.test(this.asState(), p_60836_, p_60837_);
+        public boolean hasPostProcess(BlockGetter pLevel, BlockPos pPos) {
+            return this.hasPostProcess.test(this.asState(), pLevel, pPos);
         }
 
         @Nullable
-        public MenuProvider getMenuProvider(Level p_60751_, BlockPos p_60752_) {
-            return this.getBlock().getMenuProvider(this.asState(), p_60751_, p_60752_);
+        public MenuProvider getMenuProvider(Level pLevel, BlockPos pPos) {
+            return this.getBlock().getMenuProvider(this.asState(), pLevel, pPos);
         }
 
-        public boolean is(TagKey<Block> p_204337_) {
-            return this.getBlock().builtInRegistryHolder().is(p_204337_);
+        public boolean is(TagKey<Block> pTag) {
+            return this.getBlock().builtInRegistryHolder().is(pTag);
         }
 
-        public boolean is(TagKey<Block> p_204339_, Predicate<BlockBehaviour.BlockStateBase> p_204340_) {
-            return this.is(p_204339_) && p_204340_.test(this);
+        public boolean is(TagKey<Block> pTag, Predicate<BlockBehaviour.BlockStateBase> pPredicate) {
+            return this.is(pTag) && pPredicate.test(this);
         }
 
-        public boolean is(HolderSet<Block> p_204342_) {
-            return p_204342_.contains(this.getBlock().builtInRegistryHolder());
+        public boolean is(HolderSet<Block> pHolder) {
+            return pHolder.contains(this.getBlock().builtInRegistryHolder());
         }
 
-        public boolean is(Holder<Block> p_300456_) {
-            return this.is(p_300456_.value());
+        public boolean is(Holder<Block> pBlock) {
+            return this.is(pBlock.value());
         }
 
         public Stream<TagKey<Block>> getTags() {
@@ -845,16 +870,21 @@ public abstract class BlockBehaviour implements FeatureElement {
         }
 
         @Nullable
-        public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level p_155945_, BlockEntityType<T> p_155946_) {
-            return this.getBlock() instanceof EntityBlock ? ((EntityBlock)this.getBlock()).getTicker(p_155945_, this.asState(), p_155946_) : null;
+        public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockEntityType<T> pBlockEntityType) {
+            return this.getBlock() instanceof EntityBlock ? ((EntityBlock)this.getBlock()).getTicker(pLevel, this.asState(), pBlockEntityType) : null;
         }
 
-        public boolean is(Block p_60714_) {
-            return this.getBlock() == p_60714_;
+        public boolean is(Block pBlock) {
+            return this.getBlock() == pBlock;
         }
 
-        public boolean is(ResourceKey<Block> p_310877_) {
-            return this.getBlock().builtInRegistryHolder().is(p_310877_);
+        // Arcane mixin port: Yarn name for official is(Block).
+        public boolean isOf(Block pBlock) {
+            return this.is(pBlock);
+        }
+
+        public boolean is(ResourceKey<Block> pBlock) {
+            return this.getBlock().builtInRegistryHolder().is(pBlock);
         }
 
         public FluidState getFluidState() {
@@ -865,32 +895,32 @@ public abstract class BlockBehaviour implements FeatureElement {
             return this.isRandomlyTicking;
         }
 
-        public long getSeed(BlockPos p_60727_) {
-            return this.getBlock().getSeed(this.asState(), p_60727_);
+        public long getSeed(BlockPos pPos) {
+            return this.getBlock().getSeed(this.asState(), pPos);
         }
 
         public SoundType getSoundType() {
             return this.getBlock().getSoundType(this.asState());
         }
 
-        public void onProjectileHit(Level p_60670_, BlockState p_60671_, BlockHitResult p_60672_, Projectile p_60673_) {
-            this.getBlock().onProjectileHit(p_60670_, p_60671_, p_60672_, p_60673_);
+        public void onProjectileHit(Level pLevel, BlockState pState, BlockHitResult pHit, Projectile pProjectile) {
+            this.getBlock().onProjectileHit(pLevel, pState, pHit, pProjectile);
         }
 
-        public boolean isFaceSturdy(BlockGetter p_60784_, BlockPos p_60785_, Direction p_60786_) {
-            return this.isFaceSturdy(p_60784_, p_60785_, p_60786_, SupportType.FULL);
+        public boolean isFaceSturdy(BlockGetter pLevel, BlockPos pPos, Direction pDirection) {
+            return this.isFaceSturdy(pLevel, pPos, pDirection, SupportType.FULL);
         }
 
-        public boolean isFaceSturdy(BlockGetter p_60660_, BlockPos p_60661_, Direction p_60662_, SupportType p_60663_) {
-            return this.cache != null ? this.cache.isFaceSturdy(p_60662_, p_60663_) : p_60663_.isSupporting(this.asState(), p_60660_, p_60661_, p_60662_);
+        public boolean isFaceSturdy(BlockGetter pLevel, BlockPos pPos, Direction pFace, SupportType pSupportType) {
+            return this.cache != null ? this.cache.isFaceSturdy(pFace, pSupportType) : pSupportType.isSupporting(this.asState(), pLevel, pPos, pFace);
         }
 
-        public boolean isCollisionShapeFullBlock(BlockGetter p_60839_, BlockPos p_60840_) {
-            return this.cache != null ? this.cache.isCollisionShapeFullBlock : this.getBlock().isCollisionShapeFullBlock(this.asState(), p_60839_, p_60840_);
+        public boolean isCollisionShapeFullBlock(BlockGetter pLevel, BlockPos pPos) {
+            return this.cache != null ? this.cache.isCollisionShapeFullBlock : this.getBlock().isCollisionShapeFullBlock(this.asState(), pLevel, pPos);
         }
 
-        public ItemStack getCloneItemStack(LevelReader p_378130_, BlockPos p_376485_, boolean p_376921_) {
-            return this.getBlock().getCloneItemStack(p_378130_, p_376485_, this.asState(), p_376921_);
+        public ItemStack getCloneItemStack(LevelReader pLevel, BlockPos pPos, boolean pIncludeData) {
+            return this.getBlock().getCloneItemStack(pLevel, pPos, this.asState(), pIncludeData);
         }
 
         protected abstract BlockState asState();
@@ -915,10 +945,10 @@ public abstract class BlockBehaviour implements FeatureElement {
             private final boolean[] faceSturdy;
             protected final boolean isCollisionShapeFullBlock;
 
-            Cache(BlockState p_60853_) {
-                Block block = p_60853_.getBlock();
-                this.collisionShape = block.getCollisionShape(p_60853_, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, CollisionContext.empty());
-                if (!this.collisionShape.isEmpty() && p_60853_.hasOffsetFunction()) {
+            Cache(BlockState pState) {
+                Block block = pState.getBlock();
+                this.collisionShape = block.getCollisionShape(pState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, CollisionContext.empty());
+                if (!this.collisionShape.isEmpty() && pState.hasOffsetFunction()) {
                     throw new IllegalStateException(
                         String.format(
                             Locale.ROOT,
@@ -934,28 +964,28 @@ public abstract class BlockBehaviour implements FeatureElement {
                     for (Direction direction : DIRECTIONS) {
                         for (SupportType supporttype : SupportType.values()) {
                             this.faceSturdy[getFaceSupportIndex(direction, supporttype)] = supporttype.isSupporting(
-                                p_60853_, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, direction
+                                pState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, direction
                             );
                         }
                     }
 
-                    this.isCollisionShapeFullBlock = Block.isShapeFullBlock(p_60853_.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
+                    this.isCollisionShapeFullBlock = Block.isShapeFullBlock(pState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
                 }
             }
 
-            public boolean isFaceSturdy(Direction p_60862_, SupportType p_60863_) {
-                return this.faceSturdy[getFaceSupportIndex(p_60862_, p_60863_)];
+            public boolean isFaceSturdy(Direction pDirection, SupportType pSupportType) {
+                return this.faceSturdy[getFaceSupportIndex(pDirection, pSupportType)];
             }
 
-            private static int getFaceSupportIndex(Direction p_60867_, SupportType p_60868_) {
-                return p_60867_.ordinal() * SUPPORT_TYPE_COUNT + p_60868_.ordinal();
+            private static int getFaceSupportIndex(Direction pDirection, SupportType pSupportType) {
+                return pDirection.ordinal() * SUPPORT_TYPE_COUNT + pSupportType.ordinal();
             }
         }
     }
 
     @FunctionalInterface
     public interface OffsetFunction {
-        Vec3 evaluate(BlockState p_273639_, BlockPos p_273779_);
+        Vec3 evaluate(BlockState pState, BlockPos pPos);
     }
 
     public static enum OffsetType {
@@ -1016,9 +1046,9 @@ public abstract class BlockBehaviour implements FeatureElement {
             return new BlockBehaviour.Properties();
         }
 
-        public static BlockBehaviour.Properties ofFullCopy(BlockBehaviour p_311099_) {
-            BlockBehaviour.Properties blockbehaviour$properties = ofLegacyCopy(p_311099_);
-            BlockBehaviour.Properties blockbehaviour$properties1 = p_311099_.properties;
+        public static BlockBehaviour.Properties ofFullCopy(BlockBehaviour pBlockBehaviour) {
+            BlockBehaviour.Properties blockbehaviour$properties = ofLegacyCopy(pBlockBehaviour);
+            BlockBehaviour.Properties blockbehaviour$properties1 = pBlockBehaviour.properties;
             blockbehaviour$properties.jumpFactor = blockbehaviour$properties1.jumpFactor;
             blockbehaviour$properties.isRedstoneConductor = blockbehaviour$properties1.isRedstoneConductor;
             blockbehaviour$properties.isValidSpawn = blockbehaviour$properties1.isValidSpawn;
@@ -1031,9 +1061,9 @@ public abstract class BlockBehaviour implements FeatureElement {
         }
 
         @Deprecated
-        public static BlockBehaviour.Properties ofLegacyCopy(BlockBehaviour p_312896_) {
+        public static BlockBehaviour.Properties ofLegacyCopy(BlockBehaviour pBlockBehaviour) {
             BlockBehaviour.Properties blockbehaviour$properties = new BlockBehaviour.Properties();
-            BlockBehaviour.Properties blockbehaviour$properties1 = p_312896_.properties;
+            BlockBehaviour.Properties blockbehaviour$properties1 = pBlockBehaviour.properties;
             blockbehaviour$properties.destroyTime = blockbehaviour$properties1.destroyTime;
             blockbehaviour$properties.explosionResistance = blockbehaviour$properties1.explosionResistance;
             blockbehaviour$properties.hasCollision = blockbehaviour$properties1.hasCollision;
@@ -1061,18 +1091,18 @@ public abstract class BlockBehaviour implements FeatureElement {
             return blockbehaviour$properties;
         }
 
-        public BlockBehaviour.Properties mapColor(DyeColor p_285331_) {
-            this.mapColor = p_284892_ -> p_285331_.getMapColor();
+        public BlockBehaviour.Properties mapColor(DyeColor pMapColor) {
+            this.mapColor = p_284892_ -> pMapColor.getMapColor();
             return this;
         }
 
-        public BlockBehaviour.Properties mapColor(MapColor p_285137_) {
-            this.mapColor = p_222988_ -> p_285137_;
+        public BlockBehaviour.Properties mapColor(MapColor pMapColor) {
+            this.mapColor = p_222988_ -> pMapColor;
             return this;
         }
 
-        public BlockBehaviour.Properties mapColor(Function<BlockState, MapColor> p_285406_) {
-            this.mapColor = p_285406_;
+        public BlockBehaviour.Properties mapColor(Function<BlockState, MapColor> pMapColor) {
+            this.mapColor = pMapColor;
             return this;
         }
 
@@ -1087,41 +1117,41 @@ public abstract class BlockBehaviour implements FeatureElement {
             return this;
         }
 
-        public BlockBehaviour.Properties friction(float p_60912_) {
-            this.friction = p_60912_;
+        public BlockBehaviour.Properties friction(float pFriction) {
+            this.friction = pFriction;
             return this;
         }
 
-        public BlockBehaviour.Properties speedFactor(float p_60957_) {
-            this.speedFactor = p_60957_;
+        public BlockBehaviour.Properties speedFactor(float pSpeedFactor) {
+            this.speedFactor = pSpeedFactor;
             return this;
         }
 
-        public BlockBehaviour.Properties jumpFactor(float p_60968_) {
-            this.jumpFactor = p_60968_;
+        public BlockBehaviour.Properties jumpFactor(float pJumpFactor) {
+            this.jumpFactor = pJumpFactor;
             return this;
         }
 
-        public BlockBehaviour.Properties sound(SoundType p_60919_) {
-            this.soundType = p_60919_;
+        public BlockBehaviour.Properties sound(SoundType pSoundType) {
+            this.soundType = pSoundType;
             return this;
         }
 
-        public BlockBehaviour.Properties lightLevel(ToIntFunction<BlockState> p_60954_) {
-            this.lightEmission = p_60954_;
+        public BlockBehaviour.Properties lightLevel(ToIntFunction<BlockState> pLightEmission) {
+            this.lightEmission = pLightEmission;
             return this;
         }
 
-        public BlockBehaviour.Properties strength(float p_60914_, float p_60915_) {
-            return this.destroyTime(p_60914_).explosionResistance(p_60915_);
+        public BlockBehaviour.Properties strength(float pDestroyTime, float pExplosionResistance) {
+            return this.destroyTime(pDestroyTime).explosionResistance(pExplosionResistance);
         }
 
         public BlockBehaviour.Properties instabreak() {
             return this.strength(0.0F);
         }
 
-        public BlockBehaviour.Properties strength(float p_60979_) {
-            this.strength(p_60979_, p_60979_);
+        public BlockBehaviour.Properties strength(float pStrength) {
+            this.strength(pStrength, pStrength);
             return this;
         }
 
@@ -1140,8 +1170,8 @@ public abstract class BlockBehaviour implements FeatureElement {
             return this;
         }
 
-        public BlockBehaviour.Properties overrideLootTable(Optional<ResourceKey<LootTable>> p_362490_) {
-            this.drops = DependantName.fixed(p_362490_);
+        public BlockBehaviour.Properties overrideLootTable(Optional<ResourceKey<LootTable>> pLootTable) {
+            this.drops = DependantName.fixed(pLootTable);
             return this;
         }
 
@@ -1170,8 +1200,8 @@ public abstract class BlockBehaviour implements FeatureElement {
             return this;
         }
 
-        public BlockBehaviour.Properties pushReaction(PushReaction p_278265_) {
-            this.pushReaction = p_278265_;
+        public BlockBehaviour.Properties pushReaction(PushReaction pPushReaction) {
+            this.pushReaction = pPushReaction;
             return this;
         }
 
@@ -1180,33 +1210,33 @@ public abstract class BlockBehaviour implements FeatureElement {
             return this;
         }
 
-        public BlockBehaviour.Properties isValidSpawn(BlockBehaviour.StateArgumentPredicate<EntityType<?>> p_60923_) {
-            this.isValidSpawn = p_60923_;
+        public BlockBehaviour.Properties isValidSpawn(BlockBehaviour.StateArgumentPredicate<EntityType<?>> pIsValidSpawn) {
+            this.isValidSpawn = pIsValidSpawn;
             return this;
         }
 
-        public BlockBehaviour.Properties isRedstoneConductor(BlockBehaviour.StatePredicate p_60925_) {
-            this.isRedstoneConductor = p_60925_;
+        public BlockBehaviour.Properties isRedstoneConductor(BlockBehaviour.StatePredicate pIsRedstoneConductor) {
+            this.isRedstoneConductor = pIsRedstoneConductor;
             return this;
         }
 
-        public BlockBehaviour.Properties isSuffocating(BlockBehaviour.StatePredicate p_60961_) {
-            this.isSuffocating = p_60961_;
+        public BlockBehaviour.Properties isSuffocating(BlockBehaviour.StatePredicate pIsSuffocating) {
+            this.isSuffocating = pIsSuffocating;
             return this;
         }
 
-        public BlockBehaviour.Properties isViewBlocking(BlockBehaviour.StatePredicate p_60972_) {
-            this.isViewBlocking = p_60972_;
+        public BlockBehaviour.Properties isViewBlocking(BlockBehaviour.StatePredicate pIsViewBlocking) {
+            this.isViewBlocking = pIsViewBlocking;
             return this;
         }
 
-        public BlockBehaviour.Properties hasPostProcess(BlockBehaviour.StatePredicate p_60983_) {
-            this.hasPostProcess = p_60983_;
+        public BlockBehaviour.Properties hasPostProcess(BlockBehaviour.StatePredicate pHasPostProcess) {
+            this.hasPostProcess = pHasPostProcess;
             return this;
         }
 
-        public BlockBehaviour.Properties emissiveRendering(BlockBehaviour.StatePredicate p_60992_) {
-            this.emissiveRendering = p_60992_;
+        public BlockBehaviour.Properties emissiveRendering(BlockBehaviour.StatePredicate pEmissiveRendering) {
+            this.emissiveRendering = pEmissiveRendering;
             return this;
         }
 
@@ -1215,18 +1245,18 @@ public abstract class BlockBehaviour implements FeatureElement {
             return this;
         }
 
-        public BlockBehaviour.Properties destroyTime(float p_155955_) {
-            this.destroyTime = p_155955_;
+        public BlockBehaviour.Properties destroyTime(float pDestroyTime) {
+            this.destroyTime = pDestroyTime;
             return this;
         }
 
-        public BlockBehaviour.Properties explosionResistance(float p_155957_) {
-            this.explosionResistance = Math.max(0.0F, p_155957_);
+        public BlockBehaviour.Properties explosionResistance(float pExplosionResistance) {
+            this.explosionResistance = Math.max(0.0F, pExplosionResistance);
             return this;
         }
 
-        public BlockBehaviour.Properties offsetType(BlockBehaviour.OffsetType p_222980_) {
-            this.offsetFunction = switch (p_222980_) {
+        public BlockBehaviour.Properties offsetType(BlockBehaviour.OffsetType pOffsetType) {
+            this.offsetFunction = switch (pOffsetType) {
                 case NONE -> null;
                 case XZ -> (p_272565_, p_272567_) -> {
                 Block block = p_272565_.getBlock();
@@ -1254,13 +1284,13 @@ public abstract class BlockBehaviour implements FeatureElement {
             return this;
         }
 
-        public BlockBehaviour.Properties requiredFeatures(FeatureFlag... p_248792_) {
-            this.requiredFeatures = FeatureFlags.REGISTRY.subset(p_248792_);
+        public BlockBehaviour.Properties requiredFeatures(FeatureFlag... pRequiredFeatures) {
+            this.requiredFeatures = FeatureFlags.REGISTRY.subset(pRequiredFeatures);
             return this;
         }
 
-        public BlockBehaviour.Properties instrument(NoteBlockInstrument p_282170_) {
-            this.instrument = p_282170_;
+        public BlockBehaviour.Properties instrument(NoteBlockInstrument pInstrument) {
+            this.instrument = pInstrument;
             return this;
         }
 
@@ -1269,13 +1299,13 @@ public abstract class BlockBehaviour implements FeatureElement {
             return this;
         }
 
-        public BlockBehaviour.Properties setId(ResourceKey<Block> p_363491_) {
-            this.id = p_363491_;
+        public BlockBehaviour.Properties setId(ResourceKey<Block> pId) {
+            this.id = pId;
             return this;
         }
 
-        public BlockBehaviour.Properties overrideDescription(String p_367750_) {
-            this.descriptionId = DependantName.fixed(p_367750_);
+        public BlockBehaviour.Properties overrideDescription(String pDescription) {
+            this.descriptionId = DependantName.fixed(pDescription);
             return this;
         }
 
@@ -1286,11 +1316,11 @@ public abstract class BlockBehaviour implements FeatureElement {
 
     @FunctionalInterface
     public interface StateArgumentPredicate<A> {
-        boolean test(BlockState p_61031_, BlockGetter p_61032_, BlockPos p_61033_, A p_61034_);
+        boolean test(BlockState pState, BlockGetter pLevel, BlockPos pPos, A pValue);
     }
 
     @FunctionalInterface
     public interface StatePredicate {
-        boolean test(BlockState p_61036_, BlockGetter p_61037_, BlockPos p_61038_);
+        boolean test(BlockState pState, BlockGetter pLevel, BlockPos pPos);
     }
 }

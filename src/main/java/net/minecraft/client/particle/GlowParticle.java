@@ -13,15 +13,15 @@ public class GlowParticle extends TextureSheetParticle {
     private final SpriteSet sprites;
 
     GlowParticle(
-        ClientLevel p_172136_, double p_172137_, double p_172138_, double p_172139_, double p_172140_, double p_172141_, double p_172142_, SpriteSet p_172143_
+        ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites
     ) {
-        super(p_172136_, p_172137_, p_172138_, p_172139_, p_172140_, p_172141_, p_172142_);
+        super(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
         this.friction = 0.96F;
         this.speedUpWhenYMotionIsBlocked = true;
-        this.sprites = p_172143_;
+        this.sprites = pSprites;
         this.quadSize *= 0.75F;
         this.hasPhysics = false;
-        this.setSpriteFromAge(p_172143_);
+        this.setSpriteFromAge(pSprites);
     }
 
     @Override
@@ -55,8 +55,8 @@ public class GlowParticle extends TextureSheetParticle {
         private final double SPEED_FACTOR = 0.25;
         private final SpriteSet sprite;
 
-        public ElectricSparkProvider(SpriteSet p_172151_) {
-            this.sprite = p_172151_;
+        public ElectricSparkProvider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
@@ -83,8 +83,8 @@ public class GlowParticle extends TextureSheetParticle {
     public static class GlowSquidProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public GlowSquidProvider(SpriteSet p_172172_) {
-            this.sprite = p_172172_;
+        public GlowSquidProvider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
@@ -129,8 +129,8 @@ public class GlowParticle extends TextureSheetParticle {
         private final double SPEED_FACTOR = 0.01;
         private final SpriteSet sprite;
 
-        public ScrapeProvider(SpriteSet p_172194_) {
-            this.sprite = p_172194_;
+        public ScrapeProvider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
@@ -163,8 +163,8 @@ public class GlowParticle extends TextureSheetParticle {
         private final double SPEED_FACTOR = 0.01;
         private final SpriteSet sprite;
 
-        public WaxOffProvider(SpriteSet p_172216_) {
-            this.sprite = p_172216_;
+        public WaxOffProvider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(
@@ -192,8 +192,8 @@ public class GlowParticle extends TextureSheetParticle {
         private final double SPEED_FACTOR = 0.01;
         private final SpriteSet sprite;
 
-        public WaxOnProvider(SpriteSet p_172238_) {
-            this.sprite = p_172238_;
+        public WaxOnProvider(SpriteSet pSprites) {
+            this.sprite = pSprites;
         }
 
         public Particle createParticle(

@@ -7,18 +7,18 @@ public class Target extends Node {
     private Node bestNode;
     private boolean reached;
 
-    public Target(Node p_77502_) {
-        super(p_77502_.x, p_77502_.y, p_77502_.z);
+    public Target(Node pNode) {
+        super(pNode.x, pNode.y, pNode.z);
     }
 
     public Target(int p_77498_, int p_77499_, int p_77500_) {
         super(p_77498_, p_77499_, p_77500_);
     }
 
-    public void updateBest(float p_77504_, Node p_77505_) {
-        if (p_77504_ < this.bestHeuristic) {
-            this.bestHeuristic = p_77504_;
-            this.bestNode = p_77505_;
+    public void updateBest(float pHeuristic, Node pNode) {
+        if (pHeuristic < this.bestHeuristic) {
+            this.bestHeuristic = pHeuristic;
+            this.bestNode = pNode;
         }
     }
 
@@ -34,9 +34,9 @@ public class Target extends Node {
         return this.reached;
     }
 
-    public static Target createFromStream(FriendlyByteBuf p_77507_) {
-        Target target = new Target(p_77507_.readInt(), p_77507_.readInt(), p_77507_.readInt());
-        readContents(p_77507_, target);
+    public static Target createFromStream(FriendlyByteBuf pBuffer) {
+        Target target = new Target(pBuffer.readInt(), pBuffer.readInt(), pBuffer.readInt());
+        readContents(pBuffer, target);
         return target;
     }
 }

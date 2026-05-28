@@ -50,12 +50,12 @@ public class ChatSelectionScreen extends Screen {
     private final Consumer<ChatReport.Builder> onSelected;
     private ChatSelectionLogFiller chatLogFiller;
 
-    public ChatSelectionScreen(@Nullable Screen p_239090_, ReportingContext p_239091_, ChatReport.Builder p_298838_, Consumer<ChatReport.Builder> p_239093_) {
+    public ChatSelectionScreen(@Nullable Screen pLastScreen, ReportingContext pReportingContext, ChatReport.Builder pReport, Consumer<ChatReport.Builder> pOnSelected) {
         super(TITLE);
-        this.lastScreen = p_239090_;
-        this.reportingContext = p_239091_;
-        this.report = p_298838_.copy();
-        this.onSelected = p_239093_;
+        this.lastScreen = pLastScreen;
+        this.reportingContext = pReportingContext;
+        this.report = pReport.copy();
+        this.onSelected = pOnSelected;
     }
 
     @Override
@@ -77,8 +77,8 @@ public class ChatSelectionScreen extends Screen {
         this.chatSelectionList.setScrollAmount((double)this.chatSelectionList.maxScrollAmount());
     }
 
-    private boolean canReport(LoggedChatMessage p_242240_) {
-        return p_242240_.canReport(this.report.reportedProfileId());
+    private boolean canReport(LoggedChatMessage pMessage) {
+        return pMessage.canReport(this.report.reportedProfileId());
     }
 
     private void extendLog() {
@@ -121,8 +121,8 @@ public class ChatSelectionScreen extends Screen {
         @Nullable
         private ChatSelectionScreen.ChatSelectionList.Heading previousHeading;
 
-        public ChatSelectionList(final Minecraft p_239060_, final int p_239061_) {
-            super(p_239060_, ChatSelectionScreen.this.width, ChatSelectionScreen.this.height - p_239061_ - 80, 40, 16);
+        public ChatSelectionList(final Minecraft pMinecraft, final int pHeight) {
+            super(pMinecraft, ChatSelectionScreen.this.width, ChatSelectionScreen.this.height - pHeight - 80, 40, 16);
         }
 
         @Override
@@ -146,13 +146,13 @@ public class ChatSelectionScreen extends Screen {
             this.updateHeading(p_242909_, flag);
         }
 
-        private void updateHeading(LoggedChatMessage.Player p_242229_, boolean p_240019_) {
+        private void updateHeading(LoggedChatMessage.Player pLoggedPlayerChatMessage, boolean pCanReport) {
             ChatSelectionScreen.ChatSelectionList.Entry chatselectionscreen$chatselectionlist$entry = new ChatSelectionScreen.ChatSelectionList.MessageHeadingEntry(
-                p_242229_.profile(), p_242229_.toHeadingComponent(), p_240019_
+                pLoggedPlayerChatMessage.profile(), pLoggedPlayerChatMessage.toHeadingComponent(), pCanReport
             );
             this.addEntryToTop(chatselectionscreen$chatselectionlist$entry);
             ChatSelectionScreen.ChatSelectionList.Heading chatselectionscreen$chatselectionlist$heading = new ChatSelectionScreen.ChatSelectionList.Heading(
-                p_242229_.profileId(), chatselectionscreen$chatselectionlist$entry
+                pLoggedPlayerChatMessage.profileId(), chatselectionscreen$chatselectionlist$entry
             );
             if (this.previousHeading != null && this.previousHeading.canCombine(chatselectionscreen$chatselectionlist$heading)) {
                 this.removeEntryFromTop(this.previousHeading.entry());
@@ -203,12 +203,12 @@ public class ChatSelectionScreen extends Screen {
             );
         }
 
-        private boolean shouldHighlightEntry(ChatSelectionScreen.ChatSelectionList.Entry p_240327_) {
-            if (p_240327_.canSelect()) {
-                boolean flag = this.getSelected() == p_240327_;
+        private boolean shouldHighlightEntry(ChatSelectionScreen.ChatSelectionList.Entry pEntry) {
+            if (pEntry.canSelect()) {
+                boolean flag = this.getSelected() == pEntry;
                 boolean flag1 = this.getSelected() == null;
-                boolean flag2 = this.getHovered() == p_240327_;
-                return flag || flag1 && flag2 && p_240327_.canReport();
+                boolean flag2 = this.getHovered() == pEntry;
+                return flag || flag1 && flag2 && pEntry.canReport();
             } else {
                 return false;
             }
@@ -243,8 +243,8 @@ public class ChatSelectionScreen extends Screen {
         public class DividerEntry extends ChatSelectionScreen.ChatSelectionList.Entry {
             private final Component text;
 
-            public DividerEntry(final Component p_239672_) {
-                this.text = p_239672_;
+            public DividerEntry(final Component pText) {
+                this.text = pText;
             }
 
             @Override
@@ -301,8 +301,8 @@ public class ChatSelectionScreen extends Screen {
 
         @OnlyIn(Dist.CLIENT)
         static record Heading(UUID sender, ChatSelectionScreen.ChatSelectionList.Entry entry) {
-            public boolean canCombine(ChatSelectionScreen.ChatSelectionList.Heading p_239748_) {
-                return p_239748_.sender.equals(this.sender);
+            public boolean canCombine(ChatSelectionScreen.ChatSelectionList.Heading pOther) {
+                return pOther.sender.equals(this.sender);
             }
         }
 
@@ -325,31 +325,31 @@ public class ChatSelectionScreen extends Screen {
             private final boolean playerMessage;
 
             public MessageEntry(
-                final int p_240650_,
-                final Component p_240525_,
-                final Component p_240539_,
-                @Nullable final GuiMessageTag p_240551_,
-                final boolean p_240596_,
-                final boolean p_240615_
+                final int pChatId,
+                final Component pText,
+                final Component pNarration,
+                @Nullable final GuiMessageTag pTagIcon,
+                final boolean pCanReport,
+                final boolean pPlayerMessage
             ) {
-                this.chatId = p_240650_;
-                this.tagIcon = Optionull.map(p_240551_, GuiMessageTag::icon);
-                this.tagHoverText = p_240551_ != null && p_240551_.text() != null
-                    ? ChatSelectionScreen.this.font.split(p_240551_.text(), ChatSelectionList.this.getRowWidth())
+                this.chatId = pChatId;
+                this.tagIcon = Optionull.map(pTagIcon, GuiMessageTag::icon);
+                this.tagHoverText = pTagIcon != null && pTagIcon.text() != null
+                    ? ChatSelectionScreen.this.font.split(pTagIcon.text(), ChatSelectionList.this.getRowWidth())
                     : null;
-                this.canReport = p_240596_;
-                this.playerMessage = p_240615_;
+                this.canReport = pCanReport;
+                this.playerMessage = pPlayerMessage;
                 FormattedText formattedtext = ChatSelectionScreen.this.font
-                    .substrByWidth(p_240525_, this.getMaximumTextWidth() - ChatSelectionScreen.this.font.width(CommonComponents.ELLIPSIS));
-                if (p_240525_ != formattedtext) {
+                    .substrByWidth(pText, this.getMaximumTextWidth() - ChatSelectionScreen.this.font.width(CommonComponents.ELLIPSIS));
+                if (pText != formattedtext) {
                     this.text = FormattedText.composite(formattedtext, CommonComponents.ELLIPSIS);
-                    this.hoverText = ChatSelectionScreen.this.font.split(p_240525_, ChatSelectionList.this.getRowWidth());
+                    this.hoverText = ChatSelectionScreen.this.font.split(pText, ChatSelectionList.this.getRowWidth());
                 } else {
-                    this.text = p_240525_;
+                    this.text = pText;
                     this.hoverText = null;
                 }
 
-                this.narration = p_240539_;
+                this.narration = pNarration;
             }
 
             @Override
@@ -380,23 +380,23 @@ public class ChatSelectionScreen extends Screen {
                 this.renderTag(p_281361_, i + k + 4, p_239597_, p_239600_, p_239601_, p_239602_);
             }
 
-            private void renderTag(GuiGraphics p_281776_, int p_240566_, int p_240565_, int p_240581_, int p_240614_, int p_240612_) {
+            private void renderTag(GuiGraphics pGuiGraphics, int pX, int pY, int pHeight, int pMouseX, int pMouseY) {
                 if (this.tagIcon != null) {
-                    int i = p_240565_ + (p_240581_ - this.tagIcon.height) / 2;
-                    this.tagIcon.draw(p_281776_, p_240566_, i);
+                    int i = pY + (pHeight - this.tagIcon.height) / 2;
+                    this.tagIcon.draw(pGuiGraphics, pX, i);
                     if (this.tagHoverText != null
-                        && p_240614_ >= p_240566_
-                        && p_240614_ <= p_240566_ + this.tagIcon.width
-                        && p_240612_ >= i
-                        && p_240612_ <= i + this.tagIcon.height) {
+                        && pMouseX >= pX
+                        && pMouseX <= pX + this.tagIcon.width
+                        && pMouseY >= i
+                        && pMouseY <= i + this.tagIcon.height) {
                         ChatSelectionScreen.this.setTooltipForNextRenderPass(this.tagHoverText);
                     }
                 }
             }
 
-            private void renderSelectedCheckmark(GuiGraphics p_281342_, int p_281492_, int p_283046_, int p_283458_) {
-                int i = p_281492_ + (p_283458_ - 8) / 2;
-                p_281342_.blitSprite(RenderType::guiTextured, ChatSelectionScreen.CHECKMARK_SPRITE, p_283046_, i, 9, 8);
+            private void renderSelectedCheckmark(GuiGraphics pGuiGraphics, int pTop, int pLeft, int pHeight) {
+                int i = pTop + (pHeight - 8) / 2;
+                pGuiGraphics.blitSprite(RenderType::guiTextured, ChatSelectionScreen.CHECKMARK_SPRITE, pLeft, i, 9, 8);
             }
 
             private int getMaximumTextWidth() {
@@ -458,10 +458,10 @@ public class ChatSelectionScreen extends Screen {
             private final Supplier<PlayerSkin> skin;
             private final boolean canReport;
 
-            public MessageHeadingEntry(final GameProfile p_240080_, final Component p_240081_, final boolean p_240082_) {
-                this.heading = p_240081_;
-                this.canReport = p_240082_;
-                this.skin = ChatSelectionList.this.minecraft.getSkinManager().lookupInsecure(p_240080_);
+            public MessageHeadingEntry(final GameProfile pProfile, final Component pHeading, final boolean pCanReport) {
+                this.heading = pHeading;
+                this.canReport = pCanReport;
+                this.skin = ChatSelectionList.this.minecraft.getSkinManager().lookupInsecure(pProfile);
             }
 
             @Override

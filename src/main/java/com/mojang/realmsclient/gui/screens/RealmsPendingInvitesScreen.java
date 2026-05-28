@@ -52,9 +52,9 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
     private Button acceptButton;
     private Button rejectButton;
 
-    public RealmsPendingInvitesScreen(Screen p_279260_, Component p_279122_) {
-        super(p_279122_);
-        this.lastScreen = p_279260_;
+    public RealmsPendingInvitesScreen(Screen pLastScreen, Component pTitle) {
+        super(pTitle);
+        this.lastScreen = pLastScreen;
     }
 
     @Override
@@ -88,13 +88,13 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
         this.minecraft.setScreen(this.lastScreen);
     }
 
-    void handleInvitation(boolean p_297359_) {
+    void handleInvitation(boolean pAccept) {
         if (this.pendingInvitationSelectionList.getSelected() instanceof RealmsPendingInvitesScreen.Entry realmspendinginvitesscreen$entry) {
             String s = realmspendinginvitesscreen$entry.pendingInvite.invitationId;
             CompletableFuture.<Boolean>supplyAsync(() -> {
                 try {
                     RealmsClient realmsclient = RealmsClient.create();
-                    if (p_297359_) {
+                    if (pAccept) {
                         realmsclient.acceptInvitation(s);
                     } else {
                         realmsclient.rejectInvitation(s);
@@ -110,7 +110,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
                     this.pendingInvitationSelectionList.removeInvitation(realmspendinginvitesscreen$entry);
                     this.updateButtonStates();
                     RealmsDataFetcher realmsdatafetcher = this.minecraft.realmsDataFetcher();
-                    if (p_297359_) {
+                    if (pAccept) {
                         realmsdatafetcher.serverListUpdateTask.reset();
                     }
 
@@ -146,8 +146,8 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
         final PendingInvite pendingInvite;
         private final List<RowButton> rowButtons;
 
-        Entry(final PendingInvite p_88996_) {
-            this.pendingInvite = p_88996_;
+        Entry(final PendingInvite pPendingInvite) {
+            this.pendingInvite = pPendingInvite;
             this.rowButtons = Arrays.asList(new RealmsPendingInvitesScreen.Entry.AcceptRowButton(), new RealmsPendingInvitesScreen.Entry.RejectRowButton());
         }
 
@@ -173,12 +173,12 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
             return super.mouseClicked(p_88998_, p_88999_, p_89000_);
         }
 
-        private void renderPendingInvitationItem(GuiGraphics p_281764_, PendingInvite p_282748_, int p_282810_, int p_282994_, int p_283639_, int p_283659_) {
-            p_281764_.drawString(RealmsPendingInvitesScreen.this.font, p_282748_.realmName, p_282810_ + 38, p_282994_ + 1, -1);
-            p_281764_.drawString(RealmsPendingInvitesScreen.this.font, p_282748_.realmOwnerName, p_282810_ + 38, p_282994_ + 12, 7105644);
-            p_281764_.drawString(RealmsPendingInvitesScreen.this.font, RealmsUtil.convertToAgePresentationFromInstant(p_282748_.date), p_282810_ + 38, p_282994_ + 24, 7105644);
-            RowButton.drawButtonsInRow(p_281764_, this.rowButtons, RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, p_282810_, p_282994_, p_283639_, p_283659_);
-            RealmsUtil.renderPlayerFace(p_281764_, p_282810_, p_282994_, 32, p_282748_.realmOwnerUuid);
+        private void renderPendingInvitationItem(GuiGraphics pGuiGraphics, PendingInvite pPendingInvite, int pX, int pY, int pMouseX, int pMouseY) {
+            pGuiGraphics.drawString(RealmsPendingInvitesScreen.this.font, pPendingInvite.realmName, pX + 38, pY + 1, -1);
+            pGuiGraphics.drawString(RealmsPendingInvitesScreen.this.font, pPendingInvite.realmOwnerName, pX + 38, pY + 12, 7105644);
+            pGuiGraphics.drawString(RealmsPendingInvitesScreen.this.font, RealmsUtil.convertToAgePresentationFromInstant(pPendingInvite.date), pX + 38, pY + 24, 7105644);
+            RowButton.drawButtonsInRow(pGuiGraphics, this.rowButtons, RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, pX, pY, pMouseX, pMouseY);
+            RealmsUtil.renderPlayerFace(pGuiGraphics, pX, pY, 32, pPendingInvite.realmOwnerUuid);
         }
 
         @Override
@@ -265,8 +265,8 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
             return this.getItemCount() == 0;
         }
 
-        public void removeInvitation(RealmsPendingInvitesScreen.Entry p_367374_) {
-            this.removeEntry(p_367374_);
+        public void removeInvitation(RealmsPendingInvitesScreen.Entry pEntry) {
+            this.removeEntry(pEntry);
         }
     }
 }

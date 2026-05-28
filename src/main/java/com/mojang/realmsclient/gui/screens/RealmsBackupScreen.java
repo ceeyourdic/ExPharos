@@ -54,11 +54,11 @@ public class RealmsBackupScreen extends RealmsScreen {
     final RealmsServer serverData;
     boolean noBackups = false;
 
-    public RealmsBackupScreen(RealmsConfigureWorldScreen p_88126_, RealmsServer p_88127_, int p_88128_) {
+    public RealmsBackupScreen(RealmsConfigureWorldScreen pLastScreen, RealmsServer pServerData, int pSlotId) {
         super(TITLE);
-        this.lastScreen = p_88126_;
-        this.serverData = p_88127_;
-        this.slotId = p_88128_;
+        this.lastScreen = pLastScreen;
+        this.serverData = pServerData;
+        this.slotId = pSlotId;
     }
 
     @Override
@@ -194,10 +194,10 @@ public class RealmsBackupScreen extends RealmsScreen {
         private Button changesButton;
         private final List<AbstractWidget> children = new ArrayList<>();
 
-        public Entry(final Backup p_88250_) {
-            this.backup = p_88250_;
-            this.populateChangeList(p_88250_);
-            if (!p_88250_.changeList.isEmpty()) {
+        public Entry(final Backup pBackup) {
+            this.backup = pBackup;
+            this.populateChangeList(pBackup);
+            if (!pBackup.changeList.isEmpty()) {
                 this.changesButton = Button.builder(
                         RealmsBackupScreen.HAS_CHANGES_TOOLTIP,
                         p_340707_ -> RealmsBackupScreen.this.minecraft.setScreen(new RealmsBackupInfoScreen(RealmsBackupScreen.this, this.backup))
@@ -217,14 +217,14 @@ public class RealmsBackupScreen extends RealmsScreen {
             }
         }
 
-        private void populateChangeList(Backup p_279365_) {
-            int i = RealmsBackupScreen.this.backups.indexOf(p_279365_);
+        private void populateChangeList(Backup pBackup) {
+            int i = RealmsBackupScreen.this.backups.indexOf(pBackup);
             if (i != RealmsBackupScreen.this.backups.size() - 1) {
                 Backup backup = RealmsBackupScreen.this.backups.get(i + 1);
 
-                for (String s : p_279365_.metadata.keySet()) {
+                for (String s : pBackup.metadata.keySet()) {
                     if (!s.contains("uploaded") && backup.metadata.containsKey(s)) {
-                        if (!p_279365_.metadata.get(s).equals(backup.metadata.get(s))) {
+                        if (!pBackup.metadata.get(s).equals(backup.metadata.get(s))) {
                             this.addToChangeList(s);
                         }
                     } else {
@@ -234,13 +234,13 @@ public class RealmsBackupScreen extends RealmsScreen {
             }
         }
 
-        private void addToChangeList(String p_279195_) {
-            if (p_279195_.contains("uploaded")) {
+        private void addToChangeList(String pChange) {
+            if (pChange.contains("uploaded")) {
                 String s = DateFormat.getDateTimeInstance(3, 3).format(this.backup.lastModifiedDate);
-                this.backup.changeList.put(p_279195_, s);
+                this.backup.changeList.put(pChange, s);
                 this.backup.setUploadedVersion(true);
             } else {
-                this.backup.changeList.put(p_279195_, this.backup.metadata.get(p_279195_));
+                this.backup.changeList.put(pChange, this.backup.metadata.get(pChange));
             }
         }
 
@@ -315,8 +315,8 @@ public class RealmsBackupScreen extends RealmsScreen {
             }
         }
 
-        private String getMediumDatePresentation(Date p_88276_) {
-            return DateFormat.getDateTimeInstance(3, 3).format(p_88276_);
+        private String getMediumDatePresentation(Date pDate) {
+            return DateFormat.getDateTimeInstance(3, 3).format(pDate);
         }
     }
 }

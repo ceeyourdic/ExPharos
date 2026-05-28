@@ -39,41 +39,41 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
     private final FloatBuffer floatValues;
     private final String name;
 
-    public Uniform(String p_166638_, int p_166639_, int p_166640_) {
-        this.name = p_166638_;
-        this.count = p_166640_;
-        this.type = p_166639_;
-        if (p_166639_ <= 3) {
-            this.intValues = MemoryUtil.memAllocInt(p_166640_);
+    public Uniform(String pName, int pType, int pCount) {
+        this.name = pName;
+        this.count = pCount;
+        this.type = pType;
+        if (pType <= 3) {
+            this.intValues = MemoryUtil.memAllocInt(pCount);
             this.floatValues = null;
         } else {
             this.intValues = null;
-            this.floatValues = MemoryUtil.memAllocFloat(p_166640_);
+            this.floatValues = MemoryUtil.memAllocFloat(pCount);
         }
 
         this.location = -1;
         this.markDirty();
     }
 
-    public static int glGetUniformLocation(int p_85625_, CharSequence p_85626_) {
-        return GlStateManager._glGetUniformLocation(p_85625_, p_85626_);
+    public static int glGetUniformLocation(int pProgram, CharSequence pName) {
+        return GlStateManager._glGetUniformLocation(pProgram, pName);
     }
 
-    public static void uploadInteger(int p_85617_, int p_85618_) {
-        RenderSystem.glUniform1i(p_85617_, p_85618_);
+    public static void uploadInteger(int pLocation, int pValue) {
+        RenderSystem.glUniform1i(pLocation, pValue);
     }
 
-    public void setFromConfig(ShaderProgramConfig.Uniform p_363541_) {
-        this.setFromConfig(p_363541_.values(), p_363541_.count());
+    public void setFromConfig(ShaderProgramConfig.Uniform pUniform) {
+        this.setFromConfig(pUniform.values(), pUniform.count());
     }
 
-    public void setFromConfig(List<Float> p_362869_, int p_365660_) {
-        float[] afloat = new float[Math.max(p_365660_, 16)];
-        if (p_362869_.size() == 1) {
-            Arrays.fill(afloat, p_362869_.getFirst().floatValue());
+    public void setFromConfig(List<Float> pValues, int pCount) {
+        float[] afloat = new float[Math.max(pCount, 16)];
+        if (pValues.size() == 1) {
+            Arrays.fill(afloat, pValues.getFirst().floatValue());
         } else {
-            for (int i = 0; i < p_362869_.size(); i++) {
-                afloat[i] = p_362869_.get(i);
+            for (int i = 0; i < pValues.size(); i++) {
+                afloat[i] = pValues.get(i);
             }
         }
 
@@ -82,7 +82,7 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
         } else if (this.type <= 7) {
             this.setSafe(afloat[0], afloat[1], afloat[2], afloat[3]);
         } else {
-            this.set(Arrays.copyOfRange(afloat, 0, p_365660_));
+            this.set(Arrays.copyOfRange(afloat, 0, pCount));
         }
     }
 
@@ -100,18 +100,18 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
     private void markDirty() {
     }
 
-    public static int getTypeFromString(String p_85630_) {
+    public static int getTypeFromString(String pTypeName) {
         int i = -1;
-        if ("int".equals(p_85630_)) {
+        if ("int".equals(pTypeName)) {
             i = 0;
-        } else if ("float".equals(p_85630_)) {
+        } else if ("float".equals(pTypeName)) {
             i = 4;
-        } else if (p_85630_.startsWith("matrix")) {
-            if (p_85630_.endsWith("2x2")) {
+        } else if (pTypeName.startsWith("matrix")) {
+            if (pTypeName.endsWith("2x2")) {
                 i = 8;
-            } else if (p_85630_.endsWith("3x3")) {
+            } else if (pTypeName.endsWith("3x3")) {
                 i = 9;
-            } else if (p_85630_.endsWith("4x4")) {
+            } else if (pTypeName.endsWith("4x4")) {
                 i = 10;
             }
         }
@@ -119,8 +119,8 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
         return i;
     }
 
-    public void setLocation(int p_85615_) {
-        this.location = p_85615_;
+    public void setLocation(int pLocation) {
+        this.location = pLocation;
     }
 
     public String getName() {
@@ -142,9 +142,9 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
         this.markDirty();
     }
 
-    public final void set(int p_166701_, float p_166702_) {
+    public final void set(int pIndex, float pValue) {
         this.floatValues.position(0);
-        this.floatValues.put(p_166701_, p_166702_);
+        this.floatValues.put(pIndex, pValue);
         this.markDirty();
     }
 

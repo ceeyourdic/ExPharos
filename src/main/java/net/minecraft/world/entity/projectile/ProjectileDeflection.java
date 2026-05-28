@@ -31,5 +31,5 @@ public interface ProjectileDeflection {
         }
     };
 
-    void deflect(Projectile p_332034_, @Nullable Entity p_330319_, RandomSource p_333938_);
+    void deflect(Projectile pProjectile, @Nullable Entity pEntity, RandomSource pRandom);
 }

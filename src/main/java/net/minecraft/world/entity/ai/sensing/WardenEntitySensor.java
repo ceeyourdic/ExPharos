@@ -29,13 +29,13 @@ public class WardenEntitySensor extends NearestLivingEntitySensor<Warden> {
             );
     }
 
-    private static Optional<LivingEntity> getClosest(Warden p_217843_, Predicate<LivingEntity> p_217844_) {
-        return p_217843_.getBrain()
+    private static Optional<LivingEntity> getClosest(Warden pWarden, Predicate<LivingEntity> pPredicate) {
+        return pWarden.getBrain()
             .getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES)
             .stream()
             .flatMap(Collection::stream)
-            .filter(p_217843_::canTargetEntity)
-            .filter(p_217844_)
+            .filter(pWarden::canTargetEntity)
+            .filter(pPredicate)
             .findFirst();
     }
 }

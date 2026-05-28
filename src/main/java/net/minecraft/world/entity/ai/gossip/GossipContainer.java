@@ -61,7 +61,7 @@ public class GossipContainer {
         return this.gossips.entrySet().stream().flatMap(p_26185_ -> p_26185_.getValue().unpack(p_26185_.getKey()));
     }
 
-    private Collection<GossipContainer.GossipEntry> selectGossipsForTransfer(RandomSource p_217760_, int p_217761_) {
+    private Collection<GossipContainer.GossipEntry> selectGossipsForTransfer(RandomSource pRandom, int pAmount) {
         List<GossipContainer.GossipEntry> list = this.unpack().toList();
         if (list.isEmpty()) {
             return Collections.emptyList();
@@ -77,8 +77,8 @@ public class GossipContainer {
 
             Set<GossipContainer.GossipEntry> set = Sets.newIdentityHashSet();
 
-            for (int i1 = 0; i1 < p_217761_; i1++) {
-                int k = p_217760_.nextInt(i);
+            for (int i1 = 0; i1 < pAmount; i1++) {
+                int k = pRandom.nextInt(i);
                 int l = Arrays.binarySearch(aint, k);
                 set.add(list.get(l < 0 ? -l - 1 : l));
             }
@@ -87,12 +87,12 @@ public class GossipContainer {
         }
     }
 
-    private GossipContainer.EntityGossips getOrCreate(UUID p_26190_) {
-        return this.gossips.computeIfAbsent(p_26190_, p_26202_ -> new GossipContainer.EntityGossips());
+    private GossipContainer.EntityGossips getOrCreate(UUID pIdentifier) {
+        return this.gossips.computeIfAbsent(pIdentifier, p_26202_ -> new GossipContainer.EntityGossips());
     }
 
-    public void transferFrom(GossipContainer p_217763_, RandomSource p_217764_, int p_217765_) {
-        Collection<GossipContainer.GossipEntry> collection = p_217763_.selectGossipsForTransfer(p_217764_, p_217765_);
+    public void transferFrom(GossipContainer pContainer, RandomSource pRandomSource, int pAmount) {
+        Collection<GossipContainer.GossipEntry> collection = pContainer.selectGossipsForTransfer(pRandomSource, pAmount);
         collection.forEach(p_26200_ -> {
             int i = p_26200_.value - p_26200_.type.decayPerTransfer;
             if (i >= 2) {
@@ -101,96 +101,96 @@ public class GossipContainer {
         });
     }
 
-    public int getReputation(UUID p_26196_, Predicate<GossipType> p_26197_) {
-        GossipContainer.EntityGossips gossipcontainer$entitygossips = this.gossips.get(p_26196_);
-        return gossipcontainer$entitygossips != null ? gossipcontainer$entitygossips.weightedValue(p_26197_) : 0;
+    public int getReputation(UUID pIdentifier, Predicate<GossipType> pGossip) {
+        GossipContainer.EntityGossips gossipcontainer$entitygossips = this.gossips.get(pIdentifier);
+        return gossipcontainer$entitygossips != null ? gossipcontainer$entitygossips.weightedValue(pGossip) : 0;
     }
 
-    public long getCountForType(GossipType p_148163_, DoublePredicate p_148164_) {
+    public long getCountForType(GossipType pGossipType, DoublePredicate pGossipPredicate) {
         return this.gossips
             .values()
             .stream()
-            .filter(p_148174_ -> p_148164_.test((double)(p_148174_.entries.getOrDefault(p_148163_, 0) * p_148163_.weight)))
+            .filter(p_148174_ -> pGossipPredicate.test((double)(p_148174_.entries.getOrDefault(pGossipType, 0) * pGossipType.weight)))
             .count();
     }
 
-    public void add(UUID p_26192_, GossipType p_26193_, int p_26194_) {
-        GossipContainer.EntityGossips gossipcontainer$entitygossips = this.getOrCreate(p_26192_);
-        gossipcontainer$entitygossips.entries.mergeInt(p_26193_, p_26194_, (p_186096_, p_186097_) -> this.mergeValuesForAddition(p_26193_, p_186096_, p_186097_));
-        gossipcontainer$entitygossips.makeSureValueIsntTooLowOrTooHigh(p_26193_);
+    public void add(UUID pIdentifier, GossipType pGossipType, int pGossipValue) {
+        GossipContainer.EntityGossips gossipcontainer$entitygossips = this.getOrCreate(pIdentifier);
+        gossipcontainer$entitygossips.entries.mergeInt(pGossipType, pGossipValue, (p_186096_, p_186097_) -> this.mergeValuesForAddition(pGossipType, p_186096_, p_186097_));
+        gossipcontainer$entitygossips.makeSureValueIsntTooLowOrTooHigh(pGossipType);
         if (gossipcontainer$entitygossips.isEmpty()) {
-            this.gossips.remove(p_26192_);
+            this.gossips.remove(pIdentifier);
         }
     }
 
-    public void remove(UUID p_148176_, GossipType p_148177_, int p_148178_) {
-        this.add(p_148176_, p_148177_, -p_148178_);
+    public void remove(UUID pIdentifier, GossipType pGossipType, int pGossipValue) {
+        this.add(pIdentifier, pGossipType, -pGossipValue);
     }
 
-    public void remove(UUID p_148169_, GossipType p_148170_) {
-        GossipContainer.EntityGossips gossipcontainer$entitygossips = this.gossips.get(p_148169_);
+    public void remove(UUID pIdentifier, GossipType pGossipType) {
+        GossipContainer.EntityGossips gossipcontainer$entitygossips = this.gossips.get(pIdentifier);
         if (gossipcontainer$entitygossips != null) {
-            gossipcontainer$entitygossips.remove(p_148170_);
+            gossipcontainer$entitygossips.remove(pGossipType);
             if (gossipcontainer$entitygossips.isEmpty()) {
-                this.gossips.remove(p_148169_);
+                this.gossips.remove(pIdentifier);
             }
         }
     }
 
-    public void remove(GossipType p_148161_) {
+    public void remove(GossipType pGossipType) {
         Iterator<GossipContainer.EntityGossips> iterator = this.gossips.values().iterator();
 
         while (iterator.hasNext()) {
             GossipContainer.EntityGossips gossipcontainer$entitygossips = iterator.next();
-            gossipcontainer$entitygossips.remove(p_148161_);
+            gossipcontainer$entitygossips.remove(pGossipType);
             if (gossipcontainer$entitygossips.isEmpty()) {
                 iterator.remove();
             }
         }
     }
 
-    public <T> T store(DynamicOps<T> p_262915_) {
+    public <T> T store(DynamicOps<T> pOps) {
         return GossipContainer.GossipEntry.LIST_CODEC
-            .encodeStart(p_262915_, this.unpack().toList())
+            .encodeStart(pOps, this.unpack().toList())
             .resultOrPartial(p_262900_ -> LOGGER.warn("Failed to serialize gossips: {}", p_262900_))
-            .orElseGet(p_262915_::emptyList);
+            .orElseGet(pOps::emptyList);
     }
 
-    public void update(Dynamic<?> p_26178_) {
+    public void update(Dynamic<?> pDynamic) {
         GossipContainer.GossipEntry.LIST_CODEC
-            .decode(p_26178_)
+            .decode(pDynamic)
             .resultOrPartial(p_262901_ -> LOGGER.warn("Failed to deserialize gossips: {}", p_262901_))
             .stream()
             .flatMap(p_262899_ -> p_262899_.getFirst().stream())
             .forEach(p_26162_ -> this.getOrCreate(p_26162_.target).entries.put(p_26162_.type, p_26162_.value));
     }
 
-    private static int mergeValuesForTransfer(int p_26159_, int p_26160_) {
-        return Math.max(p_26159_, p_26160_);
+    private static int mergeValuesForTransfer(int pValue1, int pValue2) {
+        return Math.max(pValue1, pValue2);
     }
 
-    private int mergeValuesForAddition(GossipType p_26168_, int p_26169_, int p_26170_) {
-        int i = p_26169_ + p_26170_;
-        return i > p_26168_.max ? Math.max(p_26168_.max, p_26169_) : i;
+    private int mergeValuesForAddition(GossipType pGossipType, int pExisting, int pAdditive) {
+        int i = pExisting + pAdditive;
+        return i > pGossipType.max ? Math.max(pGossipType.max, pExisting) : i;
     }
 
     static class EntityGossips {
         final Object2IntMap<GossipType> entries = new Object2IntOpenHashMap<>();
 
-        public int weightedValue(Predicate<GossipType> p_26221_) {
+        public int weightedValue(Predicate<GossipType> pGossipType) {
             return this.entries
                 .object2IntEntrySet()
                 .stream()
-                .filter(p_26224_ -> p_26221_.test(p_26224_.getKey()))
+                .filter(p_26224_ -> pGossipType.test(p_26224_.getKey()))
                 .mapToInt(p_26214_ -> p_26214_.getIntValue() * p_26214_.getKey().weight)
                 .sum();
         }
 
-        public Stream<GossipContainer.GossipEntry> unpack(UUID p_26216_) {
+        public Stream<GossipContainer.GossipEntry> unpack(UUID pIdentifier) {
             return this.entries
                 .object2IntEntrySet()
                 .stream()
-                .map(p_26219_ -> new GossipContainer.GossipEntry(p_26216_, p_26219_.getKey(), p_26219_.getIntValue()));
+                .map(p_26219_ -> new GossipContainer.GossipEntry(pIdentifier, p_26219_.getKey(), p_26219_.getIntValue()));
         }
 
         public void decay() {
@@ -211,19 +211,19 @@ public class GossipContainer {
             return this.entries.isEmpty();
         }
 
-        public void makeSureValueIsntTooLowOrTooHigh(GossipType p_26212_) {
-            int i = this.entries.getInt(p_26212_);
-            if (i > p_26212_.max) {
-                this.entries.put(p_26212_, p_26212_.max);
+        public void makeSureValueIsntTooLowOrTooHigh(GossipType pGossipType) {
+            int i = this.entries.getInt(pGossipType);
+            if (i > pGossipType.max) {
+                this.entries.put(pGossipType, pGossipType.max);
             }
 
             if (i < 2) {
-                this.remove(p_26212_);
+                this.remove(pGossipType);
             }
         }
 
-        public void remove(GossipType p_26227_) {
-            this.entries.removeInt(p_26227_);
+        public void remove(GossipType pGossipType) {
+            this.entries.removeInt(pGossipType);
         }
     }
 

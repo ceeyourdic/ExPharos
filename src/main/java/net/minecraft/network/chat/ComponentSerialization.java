@@ -45,8 +45,8 @@ public class ComponentSerialization {
     public static final StreamCodec<ByteBuf, Component> TRUSTED_CONTEXT_FREE_STREAM_CODEC = ByteBufCodecs.fromCodecTrusted(CODEC);
     public static final Codec<Component> FLAT_CODEC = flatCodec(Integer.MAX_VALUE);
 
-    public static Codec<Component> flatCodec(int p_330224_) {
-        final Codec<String> codec = Codec.string(0, p_330224_);
+    public static Codec<Component> flatCodec(int pMaxSize) {
+        final Codec<String> codec = Codec.string(0, pMaxSize);
         return new Codec<Component>() {
             @Override
             public <T> DataResult<Pair<Component, T>> decode(DynamicOps<T> p_334494_, T p_334478_) {
@@ -78,29 +78,29 @@ public class ComponentSerialization {
         };
     }
 
-    private static MutableComponent createFromList(List<Component> p_312708_) {
-        MutableComponent mutablecomponent = p_312708_.get(0).copy();
+    private static MutableComponent createFromList(List<Component> pComponents) {
+        MutableComponent mutablecomponent = pComponents.get(0).copy();
 
-        for (int i = 1; i < p_312708_.size(); i++) {
-            mutablecomponent.append(p_312708_.get(i));
+        for (int i = 1; i < pComponents.size(); i++) {
+            mutablecomponent.append(pComponents.get(i));
         }
 
         return mutablecomponent;
     }
 
     public static <T extends StringRepresentable, E> MapCodec<E> createLegacyComponentMatcher(
-        T[] p_312620_, Function<T, MapCodec<? extends E>> p_312447_, Function<E, T> p_309774_, String p_311665_
+        T[] pTypes, Function<T, MapCodec<? extends E>> pCodecGetter, Function<E, T> pTypeGetter, String pTypeFieldName
     ) {
         MapCodec<E> mapcodec = new ComponentSerialization.FuzzyCodec<>(
-            Stream.<T>of(p_312620_).map(p_312447_).toList(), p_312251_ -> p_312447_.apply(p_309774_.apply(p_312251_))
+            Stream.<T>of(pTypes).map(pCodecGetter).toList(), p_312251_ -> pCodecGetter.apply(pTypeGetter.apply(p_312251_))
         );
-        Codec<T> codec = StringRepresentable.fromValues((Supplier<T[]>)(() -> p_312620_));
-        MapCodec<E> mapcodec1 = codec.dispatchMap(p_311665_, p_309774_, p_312447_);
-        MapCodec<E> mapcodec2 = new ComponentSerialization.StrictEither<>(p_311665_, mapcodec1, mapcodec);
+        Codec<T> codec = StringRepresentable.fromValues((Supplier<T[]>)(() -> pTypes));
+        MapCodec<E> mapcodec1 = codec.dispatchMap(pTypeFieldName, pTypeGetter, pCodecGetter);
+        MapCodec<E> mapcodec2 = new ComponentSerialization.StrictEither<>(pTypeFieldName, mapcodec1, mapcodec);
         return ExtraCodecs.orCompressed(mapcodec2, mapcodec1);
     }
 
-    private static Codec<Component> createCodec(Codec<Component> p_310353_) {
+    private static Codec<Component> createCodec(Codec<Component> pCodec) {
         ComponentContents.Type<?>[] type = new ComponentContents.Type[]{
             PlainTextContents.TYPE,
             TranslatableContents.TYPE,
@@ -113,12 +113,12 @@ public class ComponentSerialization {
         Codec<Component> codec = RecordCodecBuilder.create(
             p_326064_ -> p_326064_.group(
                         mapcodec.forGetter(Component::getContents),
-                        ExtraCodecs.nonEmptyList(p_310353_.listOf()).optionalFieldOf("extra", List.of()).forGetter(Component::getSiblings),
+                        ExtraCodecs.nonEmptyList(pCodec.listOf()).optionalFieldOf("extra", List.of()).forGetter(Component::getSiblings),
                         Style.Serializer.MAP_CODEC.forGetter(Component::getStyle)
                     )
                     .apply(p_326064_, MutableComponent::new)
         );
-        return Codec.either(Codec.either(Codec.STRING, ExtraCodecs.nonEmptyList(p_310353_.listOf())), codec)
+        return Codec.either(Codec.either(Codec.STRING, ExtraCodecs.nonEmptyList(pCodec.listOf())), codec)
             .xmap(
                 p_312362_ -> p_312362_.map(
                         p_310114_ -> p_310114_.map(Component::literal, ComponentSerialization::createFromList), p_310523_ -> (Component)p_310523_
@@ -134,15 +134,15 @@ public class ComponentSerialization {
         private final List<MapCodec<? extends T>> codecs;
         private final Function<T, MapEncoder<? extends T>> encoderGetter;
 
-        public FuzzyCodec(List<MapCodec<? extends T>> p_313195_, Function<T, MapEncoder<? extends T>> p_313105_) {
-            this.codecs = p_313195_;
-            this.encoderGetter = p_313105_;
+        public FuzzyCodec(List<MapCodec<? extends T>> pCodecs, Function<T, MapEncoder<? extends T>> pEncoderGetter) {
+            this.codecs = pCodecs;
+            this.encoderGetter = pEncoderGetter;
         }
 
         @Override
-        public <S> DataResult<T> decode(DynamicOps<S> p_311662_, MapLike<S> p_310979_) {
+        public <S> DataResult<T> decode(DynamicOps<S> pOps, MapLike<S> pInput) {
             for (MapDecoder<? extends T> mapdecoder : this.codecs) {
-                DataResult<? extends T> dataresult = mapdecoder.decode(p_311662_, p_310979_);
+                DataResult<? extends T> dataresult = mapdecoder.decode(pOps, pInput);
                 if (dataresult.result().isPresent()) {
                     return (DataResult<T>)dataresult;
                 }
@@ -152,14 +152,14 @@ public class ComponentSerialization {
         }
 
         @Override
-        public <S> RecordBuilder<S> encode(T p_310202_, DynamicOps<S> p_312954_, RecordBuilder<S> p_312771_) {
-            MapEncoder<T> mapencoder = (MapEncoder<T>)this.encoderGetter.apply(p_310202_);
-            return mapencoder.encode(p_310202_, p_312954_, p_312771_);
+        public <S> RecordBuilder<S> encode(T pInput, DynamicOps<S> pOps, RecordBuilder<S> pPrefix) {
+            MapEncoder<T> mapencoder = (MapEncoder<T>)this.encoderGetter.apply(pInput);
+            return mapencoder.encode(pInput, pOps, pPrefix);
         }
 
         @Override
-        public <S> Stream<S> keys(DynamicOps<S> p_311118_) {
-            return this.codecs.stream().flatMap(p_310919_ -> p_310919_.keys(p_311118_)).distinct();
+        public <S> Stream<S> keys(DynamicOps<S> pOps) {
+            return this.codecs.stream().flatMap(p_310919_ -> p_310919_.keys(pOps)).distinct();
         }
 
         @Override
@@ -173,25 +173,25 @@ public class ComponentSerialization {
         private final MapCodec<T> typed;
         private final MapCodec<T> fuzzy;
 
-        public StrictEither(String p_310206_, MapCodec<T> p_312028_, MapCodec<T> p_312603_) {
-            this.typeFieldName = p_310206_;
-            this.typed = p_312028_;
-            this.fuzzy = p_312603_;
+        public StrictEither(String pTypeFieldName, MapCodec<T> pTyped, MapCodec<T> pFuzzy) {
+            this.typeFieldName = pTypeFieldName;
+            this.typed = pTyped;
+            this.fuzzy = pFuzzy;
         }
 
         @Override
-        public <O> DataResult<T> decode(DynamicOps<O> p_310941_, MapLike<O> p_311041_) {
-            return p_311041_.get(this.typeFieldName) != null ? this.typed.decode(p_310941_, p_311041_) : this.fuzzy.decode(p_310941_, p_311041_);
+        public <O> DataResult<T> decode(DynamicOps<O> pOps, MapLike<O> pInput) {
+            return pInput.get(this.typeFieldName) != null ? this.typed.decode(pOps, pInput) : this.fuzzy.decode(pOps, pInput);
         }
 
         @Override
-        public <O> RecordBuilder<O> encode(T p_310960_, DynamicOps<O> p_310726_, RecordBuilder<O> p_310170_) {
-            return this.fuzzy.encode(p_310960_, p_310726_, p_310170_);
+        public <O> RecordBuilder<O> encode(T pInput, DynamicOps<O> pOps, RecordBuilder<O> pPrefix) {
+            return this.fuzzy.encode(pInput, pOps, pPrefix);
         }
 
         @Override
-        public <T1> Stream<T1> keys(DynamicOps<T1> p_310134_) {
-            return Stream.concat(this.typed.keys(p_310134_), this.fuzzy.keys(p_310134_)).distinct();
+        public <T1> Stream<T1> keys(DynamicOps<T1> pOps) {
+            return Stream.concat(this.typed.keys(pOps), this.fuzzy.keys(pOps)).distinct();
         }
     }
 }

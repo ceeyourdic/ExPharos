@@ -17,8 +17,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class LecternRenderer implements BlockEntityRenderer<LecternBlockEntity> {
     private final BookModel bookModel;
 
-    public LecternRenderer(BlockEntityRendererProvider.Context p_173621_) {
-        this.bookModel = new BookModel(p_173621_.bakeLayer(ModelLayers.BOOK));
+    public LecternRenderer(BlockEntityRendererProvider.Context pContext) {
+        this.bookModel = new BookModel(pContext.bakeLayer(ModelLayers.BOOK));
     }
 
     public void render(LecternBlockEntity p_112435_, float p_112436_, PoseStack p_112437_, MultiBufferSource p_112438_, int p_112439_, int p_112440_) {

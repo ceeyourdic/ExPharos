@@ -14,12 +14,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class MouseSettingsScreen extends OptionsSubScreen {
     private static final Component TITLE = Component.translatable("options.mouse_settings.title");
 
-    private static OptionInstance<?>[] options(Options p_344227_) {
-        return new OptionInstance[]{p_344227_.sensitivity(), p_344227_.invertYMouse(), p_344227_.mouseWheelSensitivity(), p_344227_.discreteMouseScroll(), p_344227_.touchscreen()};
+    private static OptionInstance<?>[] options(Options pOptions) {
+        return new OptionInstance[]{pOptions.sensitivity(), pOptions.invertYMouse(), pOptions.mouseWheelSensitivity(), pOptions.discreteMouseScroll(), pOptions.touchscreen()};
     }
 
-    public MouseSettingsScreen(Screen p_342435_, Options p_344636_) {
-        super(p_342435_, p_344636_, TITLE);
+    public MouseSettingsScreen(Screen pLastScreen, Options pOptions) {
+        super(pLastScreen, pOptions, TITLE);
     }
 
     @Override

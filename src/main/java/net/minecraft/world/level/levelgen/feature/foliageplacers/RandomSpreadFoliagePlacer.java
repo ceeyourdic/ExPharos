@@ -24,10 +24,10 @@ public class RandomSpreadFoliagePlacer extends FoliagePlacer {
     private final IntProvider foliageHeight;
     private final int leafPlacementAttempts;
 
-    public RandomSpreadFoliagePlacer(IntProvider p_161506_, IntProvider p_161507_, IntProvider p_161508_, int p_161509_) {
-        super(p_161506_, p_161507_);
-        this.foliageHeight = p_161508_;
-        this.leafPlacementAttempts = p_161509_;
+    public RandomSpreadFoliagePlacer(IntProvider pRadius, IntProvider pOffset, IntProvider pFoliageHeight, int pLeafPlacementAttempts) {
+        super(pRadius, pOffset);
+        this.foliageHeight = pFoliageHeight;
+        this.leafPlacementAttempts = pLeafPlacementAttempts;
     }
 
     @Override

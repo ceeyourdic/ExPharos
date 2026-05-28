@@ -63,8 +63,8 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
         this.handleUnknownCustomPayload(p_301281_);
     }
 
-    private void handleUnknownCustomPayload(CustomPacketPayload p_300719_) {
-        LOGGER.warn("Unknown custom packet payload: {}", p_300719_.type().id());
+    private void handleUnknownCustomPayload(CustomPacketPayload pPayload) {
+        LOGGER.warn("Unknown custom packet payload: {}", pPayload.type().id());
     }
 
     @Override
@@ -100,13 +100,13 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
         this.chatState = null;
     }
 
-    private <T> T runWithResources(Function<ResourceProvider, T> p_330303_) {
+    private <T> T runWithResources(Function<ResourceProvider, T> pResources) {
         if (this.knownPacks == null) {
-            return p_330303_.apply(ResourceProvider.EMPTY);
+            return pResources.apply(ResourceProvider.EMPTY);
         } else {
             Object object;
             try (CloseableResourceManager closeableresourcemanager = this.knownPacks.createResourceManager()) {
-                object = p_330303_.apply(closeableresourcemanager);
+                object = pResources.apply(closeableresourcemanager);
             }
 
             return (T)object;

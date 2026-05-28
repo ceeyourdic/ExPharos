@@ -21,10 +21,10 @@ public class AdvancementProvider implements DataProvider {
     private final List<AdvancementSubProvider> subProviders;
     private final CompletableFuture<HolderLookup.Provider> registries;
 
-    public AdvancementProvider(PackOutput p_256529_, CompletableFuture<HolderLookup.Provider> p_255722_, List<AdvancementSubProvider> p_255883_) {
-        this.pathProvider = p_256529_.createRegistryElementsPathProvider(Registries.ADVANCEMENT);
-        this.subProviders = p_255883_;
-        this.registries = p_255722_;
+    public AdvancementProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pRegistries, List<AdvancementSubProvider> pSubProviders) {
+        this.pathProvider = pOutput.createRegistryElementsPathProvider(Registries.ADVANCEMENT);
+        this.subProviders = pSubProviders;
+        this.registries = pRegistries;
     }
 
     @Override

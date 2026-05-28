@@ -11,10 +11,10 @@ public class EntityAttributeBaseValueFix extends NamedEntityFix {
     private final String attributeId;
     private final DoubleUnaryOperator valueFixer;
 
-    public EntityAttributeBaseValueFix(Schema p_376018_, String p_377145_, String p_377550_, String p_378675_, DoubleUnaryOperator p_376118_) {
-        super(p_376018_, false, p_377145_, References.ENTITY, p_377550_);
-        this.attributeId = p_378675_;
-        this.valueFixer = p_376118_;
+    public EntityAttributeBaseValueFix(Schema pOutputSchema, String pName, String pEntityName, String pAttributeId, DoubleUnaryOperator pValueFixer) {
+        super(pOutputSchema, false, pName, References.ENTITY, pEntityName);
+        this.attributeId = pAttributeId;
+        this.valueFixer = pValueFixer;
     }
 
     @Override
@@ -22,8 +22,8 @@ public class EntityAttributeBaseValueFix extends NamedEntityFix {
         return p_378195_.update(DSL.remainderFinder(), this::fixValue);
     }
 
-    private Dynamic<?> fixValue(Dynamic<?> p_377977_) {
-        return p_377977_.update("attributes", p_376705_ -> p_377977_.createList(p_376705_.asStream().map(p_378716_ -> {
+    private Dynamic<?> fixValue(Dynamic<?> pTag) {
+        return pTag.update("attributes", p_376705_ -> pTag.createList(p_376705_.asStream().map(p_378716_ -> {
                 String s = NamespacedSchema.ensureNamespaced(p_378716_.get("id").asString(""));
                 if (!s.equals(this.attributeId)) {
                     return p_378716_;

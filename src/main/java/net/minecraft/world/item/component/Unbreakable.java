@@ -27,7 +27,7 @@ public record Unbreakable(boolean showInTooltip) implements TooltipProvider {
         }
     }
 
-    public Unbreakable withTooltip(boolean p_334168_) {
-        return new Unbreakable(p_334168_);
+    public Unbreakable withTooltip(boolean pShowInTooltip) {
+        return new Unbreakable(pShowInTooltip);
     }
 }

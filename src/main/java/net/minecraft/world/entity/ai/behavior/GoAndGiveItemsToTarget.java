@@ -26,7 +26,7 @@ public class GoAndGiveItemsToTarget<E extends LivingEntity & InventoryCarrier> e
     private final Function<LivingEntity, Optional<PositionTracker>> targetPositionGetter;
     private final float speedModifier;
 
-    public GoAndGiveItemsToTarget(Function<LivingEntity, Optional<PositionTracker>> p_249894_, float p_249937_, int p_249620_) {
+    public GoAndGiveItemsToTarget(Function<LivingEntity, Optional<PositionTracker>> pTargetPositionGetter, float pSpeedModifier, int pDuration) {
         super(
             Map.of(
                 MemoryModuleType.LOOK_TARGET,
@@ -36,10 +36,10 @@ public class GoAndGiveItemsToTarget<E extends LivingEntity & InventoryCarrier> e
                 MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS,
                 MemoryStatus.REGISTERED
             ),
-            p_249620_
+            pDuration
         );
-        this.targetPositionGetter = p_249894_;
-        this.speedModifier = p_249937_;
+        this.targetPositionGetter = pTargetPositionGetter;
+        this.speedModifier = pSpeedModifier;
     }
 
     @Override
@@ -77,31 +77,31 @@ public class GoAndGiveItemsToTarget<E extends LivingEntity & InventoryCarrier> e
         }
     }
 
-    private void triggerDropItemOnBlock(PositionTracker p_217214_, ItemStack p_217215_, ServerPlayer p_217216_) {
-        BlockPos blockpos = p_217214_.currentBlockPosition().below();
-        CriteriaTriggers.ALLAY_DROP_ITEM_ON_BLOCK.trigger(p_217216_, blockpos, p_217215_);
+    private void triggerDropItemOnBlock(PositionTracker pPositionTracker, ItemStack pStack, ServerPlayer pPlayer) {
+        BlockPos blockpos = pPositionTracker.currentBlockPosition().below();
+        CriteriaTriggers.ALLAY_DROP_ITEM_ON_BLOCK.trigger(pPlayer, blockpos, pStack);
     }
 
-    private boolean canThrowItemToTarget(E p_217203_) {
-        if (p_217203_.getInventory().isEmpty()) {
+    private boolean canThrowItemToTarget(E pTarget) {
+        if (pTarget.getInventory().isEmpty()) {
             return false;
         } else {
-            Optional<PositionTracker> optional = this.targetPositionGetter.apply(p_217203_);
+            Optional<PositionTracker> optional = this.targetPositionGetter.apply(pTarget);
             return optional.isPresent();
         }
     }
 
-    private static Vec3 getThrowPosition(PositionTracker p_217212_) {
-        return p_217212_.currentPosition().add(0.0, 1.0, 0.0);
+    private static Vec3 getThrowPosition(PositionTracker pPositionTracker) {
+        return pPositionTracker.currentPosition().add(0.0, 1.0, 0.0);
     }
 
-    public static void throwItem(LivingEntity p_217208_, ItemStack p_217209_, Vec3 p_217210_) {
+    public static void throwItem(LivingEntity pEntity, ItemStack pStack, Vec3 pThrowPos) {
         Vec3 vec3 = new Vec3(0.2F, 0.3F, 0.2F);
-        BehaviorUtils.throwItem(p_217208_, p_217209_, p_217210_, vec3, 0.2F);
-        Level level = p_217208_.level();
+        BehaviorUtils.throwItem(pEntity, pStack, pThrowPos, vec3, 0.2F);
+        Level level = pEntity.level();
         if (level.getGameTime() % 7L == 0L && level.random.nextDouble() < 0.9) {
             float f = Util.getRandom(Allay.THROW_SOUND_PITCHES, level.getRandom());
-            level.playSound(null, p_217208_, SoundEvents.ALLAY_THROW, SoundSource.NEUTRAL, 1.0F, f);
+            level.playSound(null, pEntity, SoundEvents.ALLAY_THROW, SoundSource.NEUTRAL, 1.0F, f);
         }
     }
 }

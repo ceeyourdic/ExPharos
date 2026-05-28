@@ -34,27 +34,27 @@ public class DamageSource {
         return this.causingEntity == this.directEntity;
     }
 
-    private DamageSource(Holder<DamageType> p_270906_, @Nullable Entity p_270796_, @Nullable Entity p_270459_, @Nullable Vec3 p_270623_) {
-        this.type = p_270906_;
-        this.causingEntity = p_270459_;
-        this.directEntity = p_270796_;
-        this.damageSourcePosition = p_270623_;
+    private DamageSource(Holder<DamageType> pType, @Nullable Entity pDirectEntity, @Nullable Entity pCausingEntity, @Nullable Vec3 pDamageSourcePosition) {
+        this.type = pType;
+        this.causingEntity = pCausingEntity;
+        this.directEntity = pDirectEntity;
+        this.damageSourcePosition = pDamageSourcePosition;
     }
 
-    public DamageSource(Holder<DamageType> p_270818_, @Nullable Entity p_270162_, @Nullable Entity p_270115_) {
-        this(p_270818_, p_270162_, p_270115_, null);
+    public DamageSource(Holder<DamageType> pType, @Nullable Entity pDirectEntity, @Nullable Entity pCausingEntity) {
+        this(pType, pDirectEntity, pCausingEntity, null);
     }
 
-    public DamageSource(Holder<DamageType> p_270690_, Vec3 p_270579_) {
-        this(p_270690_, null, null, p_270579_);
+    public DamageSource(Holder<DamageType> pType, Vec3 pDamageSourcePosition) {
+        this(pType, null, null, pDamageSourcePosition);
     }
 
-    public DamageSource(Holder<DamageType> p_270811_, @Nullable Entity p_270660_) {
-        this(p_270811_, p_270660_, p_270660_);
+    public DamageSource(Holder<DamageType> pType, @Nullable Entity pEntity) {
+        this(pType, pEntity, pEntity);
     }
 
-    public DamageSource(Holder<DamageType> p_270475_) {
-        this(p_270475_, null, null, null);
+    public DamageSource(Holder<DamageType> pType) {
+        this(pType, null, null, null);
     }
 
     @Nullable
@@ -72,18 +72,18 @@ public class DamageSource {
         return this.directEntity != null ? this.directEntity.getWeaponItem() : null;
     }
 
-    public Component getLocalizedDeathMessage(LivingEntity p_19343_) {
+    public Component getLocalizedDeathMessage(LivingEntity pLivingEntity) {
         String s = "death.attack." + this.type().msgId();
         if (this.causingEntity == null && this.directEntity == null) {
-            LivingEntity livingentity1 = p_19343_.getKillCredit();
+            LivingEntity livingentity1 = pLivingEntity.getKillCredit();
             String s1 = s + ".player";
-            return livingentity1 != null ? Component.translatable(s1, p_19343_.getDisplayName(), livingentity1.getDisplayName()) : Component.translatable(s, p_19343_.getDisplayName());
+            return livingentity1 != null ? Component.translatable(s1, pLivingEntity.getDisplayName(), livingentity1.getDisplayName()) : Component.translatable(s, pLivingEntity.getDisplayName());
         } else {
             Component component = this.causingEntity == null ? this.directEntity.getDisplayName() : this.causingEntity.getDisplayName();
             ItemStack itemstack = this.causingEntity instanceof LivingEntity livingentity ? livingentity.getMainHandItem() : ItemStack.EMPTY;
             return !itemstack.isEmpty() && itemstack.has(DataComponents.CUSTOM_NAME)
-                ? Component.translatable(s + ".item", p_19343_.getDisplayName(), component, itemstack.getDisplayName())
-                : Component.translatable(s, p_19343_.getDisplayName(), component);
+                ? Component.translatable(s + ".item", pLivingEntity.getDisplayName(), component, itemstack.getDisplayName())
+                : Component.translatable(s, pLivingEntity.getDisplayName(), component);
         }
     }
 
@@ -121,12 +121,12 @@ public class DamageSource {
         return this.damageSourcePosition;
     }
 
-    public boolean is(TagKey<DamageType> p_270890_) {
-        return this.type.is(p_270890_);
+    public boolean is(TagKey<DamageType> pDamageTypeKey) {
+        return this.type.is(pDamageTypeKey);
     }
 
-    public boolean is(ResourceKey<DamageType> p_276108_) {
-        return this.type.is(p_276108_);
+    public boolean is(ResourceKey<DamageType> pDamageTypeKey) {
+        return this.type.is(pDamageTypeKey);
     }
 
     public DamageType type() {

@@ -94,16 +94,16 @@ public class MinecartTNT extends AbstractMinecart {
         return new ItemStack(Items.TNT_MINECART);
     }
 
-    protected void explode(double p_38689_) {
-        this.explode(null, p_38689_);
+    protected void explode(double pRadiusModifier) {
+        this.explode(null, pRadiusModifier);
     }
 
-    protected void explode(@Nullable DamageSource p_259539_, double p_260287_) {
+    protected void explode(@Nullable DamageSource pDamageSource, double pRadiusModifier) {
         if (this.level() instanceof ServerLevel serverlevel) {
-            double d0 = Math.min(Math.sqrt(p_260287_), 5.0);
+            double d0 = Math.min(Math.sqrt(pRadiusModifier), 5.0);
             serverlevel.explode(
                 this,
-                p_259539_,
+                pDamageSource,
                 null,
                 this.getX(),
                 this.getY(),
@@ -127,8 +127,8 @@ public class MinecartTNT extends AbstractMinecart {
     }
 
     @Override
-    public void activateMinecart(int p_38659_, int p_38660_, int p_38661_, boolean p_38662_) {
-        if (p_38662_ && this.fuse < 0) {
+    public void activateMinecart(int pX, int pY, int pZ, boolean pReceivingPower) {
+        if (pReceivingPower && this.fuse < 0) {
             this.primeFuse();
         }
     }
@@ -161,45 +161,45 @@ public class MinecartTNT extends AbstractMinecart {
     }
 
     @Override
-    public float getBlockExplosionResistance(Explosion p_38675_, BlockGetter p_38676_, BlockPos p_38677_, BlockState p_38678_, FluidState p_38679_, float p_38680_) {
-        return !this.isPrimed() || !p_38678_.is(BlockTags.RAILS) && !p_38676_.getBlockState(p_38677_.above()).is(BlockTags.RAILS)
-            ? super.getBlockExplosionResistance(p_38675_, p_38676_, p_38677_, p_38678_, p_38679_, p_38680_)
+    public float getBlockExplosionResistance(Explosion pExplosion, BlockGetter pLevel, BlockPos pPos, BlockState pBlockState, FluidState pFluidState, float pExplosionPower) {
+        return !this.isPrimed() || !pBlockState.is(BlockTags.RAILS) && !pLevel.getBlockState(pPos.above()).is(BlockTags.RAILS)
+            ? super.getBlockExplosionResistance(pExplosion, pLevel, pPos, pBlockState, pFluidState, pExplosionPower)
             : 0.0F;
     }
 
     @Override
-    public boolean shouldBlockExplode(Explosion p_38669_, BlockGetter p_38670_, BlockPos p_38671_, BlockState p_38672_, float p_38673_) {
-        return !this.isPrimed() || !p_38672_.is(BlockTags.RAILS) && !p_38670_.getBlockState(p_38671_.above()).is(BlockTags.RAILS)
-            ? super.shouldBlockExplode(p_38669_, p_38670_, p_38671_, p_38672_, p_38673_)
+    public boolean shouldBlockExplode(Explosion pExplosion, BlockGetter pLevel, BlockPos pPos, BlockState pBlockState, float pExplosionPower) {
+        return !this.isPrimed() || !pBlockState.is(BlockTags.RAILS) && !pLevel.getBlockState(pPos.above()).is(BlockTags.RAILS)
+            ? super.shouldBlockExplode(pExplosion, pLevel, pPos, pBlockState, pExplosionPower)
             : false;
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag p_38682_) {
-        super.readAdditionalSaveData(p_38682_);
-        if (p_38682_.contains("fuse", 99)) {
-            this.fuse = p_38682_.getInt("fuse");
+    protected void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("fuse", 99)) {
+            this.fuse = pCompound.getInt("fuse");
         }
 
-        if (p_38682_.contains("explosion_power", 99)) {
-            this.explosionPowerBase = Mth.clamp(p_38682_.getFloat("explosion_power"), 0.0F, 128.0F);
+        if (pCompound.contains("explosion_power", 99)) {
+            this.explosionPowerBase = Mth.clamp(pCompound.getFloat("explosion_power"), 0.0F, 128.0F);
         }
 
-        if (p_38682_.contains("explosion_speed_factor", 99)) {
-            this.explosionSpeedFactor = Mth.clamp(p_38682_.getFloat("explosion_speed_factor"), 0.0F, 128.0F);
+        if (pCompound.contains("explosion_speed_factor", 99)) {
+            this.explosionSpeedFactor = Mth.clamp(pCompound.getFloat("explosion_speed_factor"), 0.0F, 128.0F);
         }
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag p_38687_) {
-        super.addAdditionalSaveData(p_38687_);
-        p_38687_.putInt("fuse", this.fuse);
+    protected void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("fuse", this.fuse);
         if (this.explosionPowerBase != 4.0F) {
-            p_38687_.putFloat("explosion_power", this.explosionPowerBase);
+            pCompound.putFloat("explosion_power", this.explosionPowerBase);
         }
 
         if (this.explosionSpeedFactor != 1.0F) {
-            p_38687_.putFloat("explosion_speed_factor", this.explosionSpeedFactor);
+            pCompound.putFloat("explosion_speed_factor", this.explosionSpeedFactor);
         }
     }
 
@@ -208,7 +208,7 @@ public class MinecartTNT extends AbstractMinecart {
         return damageSourceIgnitesTnt(p_310072_);
     }
 
-    private static boolean damageSourceIgnitesTnt(DamageSource p_311405_) {
-        return p_311405_.is(DamageTypeTags.IS_FIRE) || p_311405_.is(DamageTypeTags.IS_EXPLOSION);
+    private static boolean damageSourceIgnitesTnt(DamageSource pSource) {
+        return pSource.is(DamageTypeTags.IS_FIRE) || pSource.is(DamageTypeTags.IS_EXPLOSION);
     }
 }

@@ -24,42 +24,42 @@ public record ToolMaterial(TagKey<Block> incorrectBlocksForDrops, int durability
     public static final ToolMaterial GOLD = new ToolMaterial(BlockTags.INCORRECT_FOR_GOLD_TOOL, 32, 12.0F, 0.0F, 22, ItemTags.GOLD_TOOL_MATERIALS);
     public static final ToolMaterial NETHERITE = new ToolMaterial(BlockTags.INCORRECT_FOR_NETHERITE_TOOL, 2031, 9.0F, 4.0F, 15, ItemTags.NETHERITE_TOOL_MATERIALS);
 
-    private Item.Properties applyCommonProperties(Item.Properties p_367813_) {
-        return p_367813_.durability(this.durability).repairable(this.repairItems).enchantable(this.enchantmentValue);
+    private Item.Properties applyCommonProperties(Item.Properties pProperties) {
+        return pProperties.durability(this.durability).repairable(this.repairItems).enchantable(this.enchantmentValue);
     }
 
-    public Item.Properties applyToolProperties(Item.Properties p_364561_, TagKey<Block> p_363347_, float p_365658_, float p_368042_) {
+    public Item.Properties applyToolProperties(Item.Properties pProperties, TagKey<Block> pMineableBlocks, float pAttackDamage, float pAttackSpeed) {
         HolderGetter<Block> holdergetter = BuiltInRegistries.acquireBootstrapRegistrationLookup(BuiltInRegistries.BLOCK);
-        return this.applyCommonProperties(p_364561_)
+        return this.applyCommonProperties(pProperties)
             .component(
                 DataComponents.TOOL,
                 new Tool(
-                    List.of(Tool.Rule.deniesDrops(holdergetter.getOrThrow(this.incorrectBlocksForDrops)), Tool.Rule.minesAndDrops(holdergetter.getOrThrow(p_363347_), this.speed)),
+                    List.of(Tool.Rule.deniesDrops(holdergetter.getOrThrow(this.incorrectBlocksForDrops)), Tool.Rule.minesAndDrops(holdergetter.getOrThrow(pMineableBlocks), this.speed)),
                     1.0F,
                     1
                 )
             )
-            .attributes(this.createToolAttributes(p_365658_, p_368042_));
+            .attributes(this.createToolAttributes(pAttackDamage, pAttackSpeed));
     }
 
-    private ItemAttributeModifiers createToolAttributes(float p_365132_, float p_360987_) {
+    private ItemAttributeModifiers createToolAttributes(float pAttackDamage, float pAttackSpeed) {
         return ItemAttributeModifiers.builder()
             .add(
                 Attributes.ATTACK_DAMAGE,
-                new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID, (double)(p_365132_ + this.attackDamageBonus), AttributeModifier.Operation.ADD_VALUE),
+                new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID, (double)(pAttackDamage + this.attackDamageBonus), AttributeModifier.Operation.ADD_VALUE),
                 EquipmentSlotGroup.MAINHAND
             )
             .add(
                 Attributes.ATTACK_SPEED,
-                new AttributeModifier(Item.BASE_ATTACK_SPEED_ID, (double)p_360987_, AttributeModifier.Operation.ADD_VALUE),
+                new AttributeModifier(Item.BASE_ATTACK_SPEED_ID, (double)pAttackSpeed, AttributeModifier.Operation.ADD_VALUE),
                 EquipmentSlotGroup.MAINHAND
             )
             .build();
     }
 
-    public Item.Properties applySwordProperties(Item.Properties p_365507_, float p_363140_, float p_366527_) {
+    public Item.Properties applySwordProperties(Item.Properties pProperties, float pAttackDamage, float pAttackSpeed) {
         HolderGetter<Block> holdergetter = BuiltInRegistries.acquireBootstrapRegistrationLookup(BuiltInRegistries.BLOCK);
-        return this.applyCommonProperties(p_365507_)
+        return this.applyCommonProperties(pProperties)
             .component(
                 DataComponents.TOOL,
                 new Tool(
@@ -71,19 +71,19 @@ public record ToolMaterial(TagKey<Block> incorrectBlocksForDrops, int durability
                     2
                 )
             )
-            .attributes(this.createSwordAttributes(p_363140_, p_366527_));
+            .attributes(this.createSwordAttributes(pAttackDamage, pAttackSpeed));
     }
 
-    private ItemAttributeModifiers createSwordAttributes(float p_367704_, float p_369087_) {
+    private ItemAttributeModifiers createSwordAttributes(float pAttackDamage, float pAttackSpeed) {
         return ItemAttributeModifiers.builder()
             .add(
                 Attributes.ATTACK_DAMAGE,
-                new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID, (double)(p_367704_ + this.attackDamageBonus), AttributeModifier.Operation.ADD_VALUE),
+                new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID, (double)(pAttackDamage + this.attackDamageBonus), AttributeModifier.Operation.ADD_VALUE),
                 EquipmentSlotGroup.MAINHAND
             )
             .add(
                 Attributes.ATTACK_SPEED,
-                new AttributeModifier(Item.BASE_ATTACK_SPEED_ID, (double)p_369087_, AttributeModifier.Operation.ADD_VALUE),
+                new AttributeModifier(Item.BASE_ATTACK_SPEED_ID, (double)pAttackSpeed, AttributeModifier.Operation.ADD_VALUE),
                 EquipmentSlotGroup.MAINHAND
             )
             .build();

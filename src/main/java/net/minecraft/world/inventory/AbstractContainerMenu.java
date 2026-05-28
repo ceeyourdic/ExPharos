@@ -66,34 +66,34 @@ public abstract class AbstractContainerMenu {
     private ContainerSynchronizer synchronizer;
     private boolean suppressRemoteUpdates;
 
-    protected AbstractContainerMenu(@Nullable MenuType<?> p_38851_, int p_38852_) {
-        this.menuType = p_38851_;
-        this.containerId = p_38852_;
+    protected AbstractContainerMenu(@Nullable MenuType<?> pMenuType, int pContainerId) {
+        this.menuType = pMenuType;
+        this.containerId = pContainerId;
     }
 
-    protected void addInventoryHotbarSlots(Container p_368706_, int p_367313_, int p_367317_) {
+    protected void addInventoryHotbarSlots(Container pContainer, int pX, int pY) {
         for (int i = 0; i < 9; i++) {
-            this.addSlot(new Slot(p_368706_, i, p_367313_ + i * 18, p_367317_));
+            this.addSlot(new Slot(pContainer, i, pX + i * 18, pY));
         }
     }
 
-    protected void addInventoryExtendedSlots(Container p_364073_, int p_361926_, int p_362472_) {
+    protected void addInventoryExtendedSlots(Container pContainer, int pX, int pY) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
-                this.addSlot(new Slot(p_364073_, j + (i + 1) * 9, p_361926_ + j * 18, p_362472_ + i * 18));
+                this.addSlot(new Slot(pContainer, j + (i + 1) * 9, pX + j * 18, pY + i * 18));
             }
         }
     }
 
-    protected void addStandardInventorySlots(Container p_365358_, int p_363774_, int p_366806_) {
-        this.addInventoryExtendedSlots(p_365358_, p_363774_, p_366806_);
+    protected void addStandardInventorySlots(Container pContainer, int pX, int pY) {
+        this.addInventoryExtendedSlots(pContainer, pX, pY);
         int i = 4;
         int j = 58;
-        this.addInventoryHotbarSlots(p_365358_, p_363774_, p_366806_ + 58);
+        this.addInventoryHotbarSlots(pContainer, pX, pY + 58);
     }
 
-    protected static boolean stillValid(ContainerLevelAccess p_38890_, Player p_38891_, Block p_38892_) {
-        return p_38890_.evaluate((p_327069_, p_327070_) -> !p_327069_.getBlockState(p_327070_).is(p_38892_) ? false : p_38891_.canInteractWithBlock(p_327070_, 4.0), true);
+    protected static boolean stillValid(ContainerLevelAccess pAccess, Player pPlayer, Block pTargetBlock) {
+        return pAccess.evaluate((p_327069_, p_327070_) -> !p_327069_.getBlockState(p_327070_).is(pTargetBlock) ? false : pPlayer.canInteractWithBlock(p_327070_, 4.0), true);
     }
 
     public MenuType<?> getType() {
@@ -104,53 +104,53 @@ public abstract class AbstractContainerMenu {
         }
     }
 
-    protected static void checkContainerSize(Container p_38870_, int p_38871_) {
-        int i = p_38870_.getContainerSize();
-        if (i < p_38871_) {
-            throw new IllegalArgumentException("Container size " + i + " is smaller than expected " + p_38871_);
+    protected static void checkContainerSize(Container pContainer, int pMinSize) {
+        int i = pContainer.getContainerSize();
+        if (i < pMinSize) {
+            throw new IllegalArgumentException("Container size " + i + " is smaller than expected " + pMinSize);
         }
     }
 
-    protected static void checkContainerDataCount(ContainerData p_38887_, int p_38888_) {
-        int i = p_38887_.getCount();
-        if (i < p_38888_) {
-            throw new IllegalArgumentException("Container data count " + i + " is smaller than expected " + p_38888_);
+    protected static void checkContainerDataCount(ContainerData pIntArray, int pMinSize) {
+        int i = pIntArray.getCount();
+        if (i < pMinSize) {
+            throw new IllegalArgumentException("Container data count " + i + " is smaller than expected " + pMinSize);
         }
     }
 
-    public boolean isValidSlotIndex(int p_207776_) {
-        return p_207776_ == -1 || p_207776_ == -999 || p_207776_ < this.slots.size();
+    public boolean isValidSlotIndex(int pSlotIndex) {
+        return pSlotIndex == -1 || pSlotIndex == -999 || pSlotIndex < this.slots.size();
     }
 
-    protected Slot addSlot(Slot p_38898_) {
-        p_38898_.index = this.slots.size();
-        this.slots.add(p_38898_);
+    protected Slot addSlot(Slot pSlot) {
+        pSlot.index = this.slots.size();
+        this.slots.add(pSlot);
         this.lastSlots.add(ItemStack.EMPTY);
         this.remoteSlots.add(ItemStack.EMPTY);
-        return p_38898_;
+        return pSlot;
     }
 
-    protected DataSlot addDataSlot(DataSlot p_38896_) {
-        this.dataSlots.add(p_38896_);
+    protected DataSlot addDataSlot(DataSlot pIntValue) {
+        this.dataSlots.add(pIntValue);
         this.remoteDataSlots.add(0);
-        return p_38896_;
+        return pIntValue;
     }
 
-    protected void addDataSlots(ContainerData p_38885_) {
-        for (int i = 0; i < p_38885_.getCount(); i++) {
-            this.addDataSlot(DataSlot.forContainer(p_38885_, i));
+    protected void addDataSlots(ContainerData pArray) {
+        for (int i = 0; i < pArray.getCount(); i++) {
+            this.addDataSlot(DataSlot.forContainer(pArray, i));
         }
     }
 
-    public void addSlotListener(ContainerListener p_38894_) {
-        if (!this.containerListeners.contains(p_38894_)) {
-            this.containerListeners.add(p_38894_);
+    public void addSlotListener(ContainerListener pListener) {
+        if (!this.containerListeners.contains(pListener)) {
+            this.containerListeners.add(pListener);
             this.broadcastChanges();
         }
     }
 
-    public void setSynchronizer(ContainerSynchronizer p_150417_) {
-        this.synchronizer = p_150417_;
+    public void setSynchronizer(ContainerSynchronizer pSynchronizer) {
+        this.synchronizer = pSynchronizer;
         this.sendAllDataToRemote();
     }
 
@@ -173,8 +173,8 @@ public abstract class AbstractContainerMenu {
         }
     }
 
-    public void removeSlotListener(ContainerListener p_38944_) {
-        this.containerListeners.remove(p_38944_);
+    public void removeSlotListener(ContainerListener pListener) {
+        this.containerListeners.remove(pListener);
     }
 
     public NonNullList<ItemStack> getItems() {
@@ -224,44 +224,44 @@ public abstract class AbstractContainerMenu {
         this.sendAllDataToRemote();
     }
 
-    private void updateDataSlotListeners(int p_182421_, int p_182422_) {
+    private void updateDataSlotListeners(int pSlotIndex, int pValue) {
         for (ContainerListener containerlistener : this.containerListeners) {
-            containerlistener.dataChanged(this, p_182421_, p_182422_);
+            containerlistener.dataChanged(this, pSlotIndex, pValue);
         }
     }
 
-    private void triggerSlotListeners(int p_150408_, ItemStack p_150409_, Supplier<ItemStack> p_150410_) {
-        ItemStack itemstack = this.lastSlots.get(p_150408_);
-        if (!ItemStack.matches(itemstack, p_150409_)) {
-            ItemStack itemstack1 = p_150410_.get();
-            this.lastSlots.set(p_150408_, itemstack1);
+    private void triggerSlotListeners(int pSlotIndex, ItemStack pStack, Supplier<ItemStack> pSupplier) {
+        ItemStack itemstack = this.lastSlots.get(pSlotIndex);
+        if (!ItemStack.matches(itemstack, pStack)) {
+            ItemStack itemstack1 = pSupplier.get();
+            this.lastSlots.set(pSlotIndex, itemstack1);
 
             for (ContainerListener containerlistener : this.containerListeners) {
-                containerlistener.slotChanged(this, p_150408_, itemstack1);
+                containerlistener.slotChanged(this, pSlotIndex, itemstack1);
             }
         }
     }
 
-    private void synchronizeSlotToRemote(int p_150436_, ItemStack p_150437_, Supplier<ItemStack> p_150438_) {
+    private void synchronizeSlotToRemote(int pSlotIndex, ItemStack pStack, Supplier<ItemStack> pSupplier) {
         if (!this.suppressRemoteUpdates) {
-            ItemStack itemstack = this.remoteSlots.get(p_150436_);
-            if (!ItemStack.matches(itemstack, p_150437_)) {
-                ItemStack itemstack1 = p_150438_.get();
-                this.remoteSlots.set(p_150436_, itemstack1);
+            ItemStack itemstack = this.remoteSlots.get(pSlotIndex);
+            if (!ItemStack.matches(itemstack, pStack)) {
+                ItemStack itemstack1 = pSupplier.get();
+                this.remoteSlots.set(pSlotIndex, itemstack1);
                 if (this.synchronizer != null) {
-                    this.synchronizer.sendSlotChange(this, p_150436_, itemstack1);
+                    this.synchronizer.sendSlotChange(this, pSlotIndex, itemstack1);
                 }
             }
         }
     }
 
-    private void synchronizeDataSlotToRemote(int p_150441_, int p_150442_) {
+    private void synchronizeDataSlotToRemote(int pSlotIndex, int pValue) {
         if (!this.suppressRemoteUpdates) {
-            int i = this.remoteDataSlots.getInt(p_150441_);
-            if (i != p_150442_) {
-                this.remoteDataSlots.set(p_150441_, p_150442_);
+            int i = this.remoteDataSlots.getInt(pSlotIndex);
+            if (i != pValue) {
+                this.remoteDataSlots.set(pSlotIndex, pValue);
                 if (this.synchronizer != null) {
-                    this.synchronizer.sendDataChange(this, p_150441_, p_150442_);
+                    this.synchronizer.sendDataChange(this, pSlotIndex, pValue);
                 }
             }
         }
@@ -278,42 +278,42 @@ public abstract class AbstractContainerMenu {
         }
     }
 
-    public void setRemoteSlot(int p_150405_, ItemStack p_150406_) {
-        this.remoteSlots.set(p_150405_, p_150406_.copy());
+    public void setRemoteSlot(int pSlot, ItemStack pStack) {
+        this.remoteSlots.set(pSlot, pStack.copy());
     }
 
-    public void setRemoteSlotNoCopy(int p_182415_, ItemStack p_182416_) {
-        if (p_182415_ >= 0 && p_182415_ < this.remoteSlots.size()) {
-            this.remoteSlots.set(p_182415_, p_182416_);
+    public void setRemoteSlotNoCopy(int pSlot, ItemStack pStack) {
+        if (pSlot >= 0 && pSlot < this.remoteSlots.size()) {
+            this.remoteSlots.set(pSlot, pStack);
         } else {
-            LOGGER.debug("Incorrect slot index: {} available slots: {}", p_182415_, this.remoteSlots.size());
+            LOGGER.debug("Incorrect slot index: {} available slots: {}", pSlot, this.remoteSlots.size());
         }
     }
 
-    public void setRemoteCarried(ItemStack p_150423_) {
-        this.remoteCarried = p_150423_.copy();
+    public void setRemoteCarried(ItemStack pRemoteCarried) {
+        this.remoteCarried = pRemoteCarried.copy();
     }
 
-    public boolean clickMenuButton(Player p_38875_, int p_38876_) {
+    public boolean clickMenuButton(Player pPlayer, int pId) {
         return false;
     }
 
-    public Slot getSlot(int p_38854_) {
-        return this.slots.get(p_38854_);
+    public Slot getSlot(int pSlotId) {
+        return this.slots.get(pSlotId);
     }
 
-    public abstract ItemStack quickMoveStack(Player p_38941_, int p_38942_);
+    public abstract ItemStack quickMoveStack(Player pPlayer, int pIndex);
 
-    public void setSelectedBundleItemIndex(int p_361298_, int p_369398_) {
-        if (p_361298_ >= 0 && p_361298_ < this.slots.size()) {
-            ItemStack itemstack = this.slots.get(p_361298_).getItem();
-            BundleItem.toggleSelectedItem(itemstack, p_369398_);
+    public void setSelectedBundleItemIndex(int pSlotIndex, int pBundleItemIndex) {
+        if (pSlotIndex >= 0 && pSlotIndex < this.slots.size()) {
+            ItemStack itemstack = this.slots.get(pSlotIndex).getItem();
+            BundleItem.toggleSelectedItem(itemstack, pBundleItemIndex);
         }
     }
 
-    public void clicked(int p_150400_, int p_150401_, ClickType p_150402_, Player p_150403_) {
+    public void clicked(int pSlotId, int pButton, ClickType pClickType, Player pPlayer) {
         try {
-            this.doClick(p_150400_, p_150401_, p_150402_, p_150403_);
+            this.doClick(pSlotId, pButton, pClickType, pPlayer);
         } catch (Exception exception) {
             CrashReport crashreport = CrashReport.forThrowable(exception, "Container click");
             CrashReportCategory crashreportcategory = crashreport.addCategory("Click info");
@@ -322,32 +322,32 @@ public abstract class AbstractContainerMenu {
             );
             crashreportcategory.setDetail("Menu Class", () -> this.getClass().getCanonicalName());
             crashreportcategory.setDetail("Slot Count", this.slots.size());
-            crashreportcategory.setDetail("Slot", p_150400_);
-            crashreportcategory.setDetail("Button", p_150401_);
-            crashreportcategory.setDetail("Type", p_150402_);
+            crashreportcategory.setDetail("Slot", pSlotId);
+            crashreportcategory.setDetail("Button", pButton);
+            crashreportcategory.setDetail("Type", pClickType);
             throw new ReportedException(crashreport);
         }
     }
 
-    private void doClick(int p_150431_, int p_150432_, ClickType p_150433_, Player p_150434_) {
-        Inventory inventory = p_150434_.getInventory();
-        if (p_150433_ == ClickType.QUICK_CRAFT) {
+    private void doClick(int pSlotId, int pButton, ClickType pClickType, Player pPlayer) {
+        Inventory inventory = pPlayer.getInventory();
+        if (pClickType == ClickType.QUICK_CRAFT) {
             int i = this.quickcraftStatus;
-            this.quickcraftStatus = getQuickcraftHeader(p_150432_);
+            this.quickcraftStatus = getQuickcraftHeader(pButton);
             if ((i != 1 || this.quickcraftStatus != 2) && i != this.quickcraftStatus) {
                 this.resetQuickCraft();
             } else if (this.getCarried().isEmpty()) {
                 this.resetQuickCraft();
             } else if (this.quickcraftStatus == 0) {
-                this.quickcraftType = getQuickcraftType(p_150432_);
-                if (isValidQuickcraftType(this.quickcraftType, p_150434_)) {
+                this.quickcraftType = getQuickcraftType(pButton);
+                if (isValidQuickcraftType(this.quickcraftType, pPlayer)) {
                     this.quickcraftStatus = 1;
                     this.quickcraftSlots.clear();
                 } else {
                     this.resetQuickCraft();
                 }
             } else if (this.quickcraftStatus == 1) {
-                Slot slot = this.slots.get(p_150431_);
+                Slot slot = this.slots.get(pSlotId);
                 ItemStack itemstack = this.getCarried();
                 if (canItemQuickReplace(slot, itemstack, true)
                     && slot.mayPlace(itemstack)
@@ -360,7 +360,7 @@ public abstract class AbstractContainerMenu {
                     if (this.quickcraftSlots.size() == 1) {
                         int i1 = this.quickcraftSlots.iterator().next().index;
                         this.resetQuickCraft();
-                        this.doClick(i1, this.quickcraftType, ClickType.PICKUP, p_150434_);
+                        this.doClick(i1, this.quickcraftType, ClickType.PICKUP, pPlayer);
                         return;
                     }
 
@@ -397,54 +397,54 @@ public abstract class AbstractContainerMenu {
             }
         } else if (this.quickcraftStatus != 0) {
             this.resetQuickCraft();
-        } else if ((p_150433_ == ClickType.PICKUP || p_150433_ == ClickType.QUICK_MOVE) && (p_150432_ == 0 || p_150432_ == 1)) {
-            ClickAction clickaction = p_150432_ == 0 ? ClickAction.PRIMARY : ClickAction.SECONDARY;
-            if (p_150431_ == -999) {
+        } else if ((pClickType == ClickType.PICKUP || pClickType == ClickType.QUICK_MOVE) && (pButton == 0 || pButton == 1)) {
+            ClickAction clickaction = pButton == 0 ? ClickAction.PRIMARY : ClickAction.SECONDARY;
+            if (pSlotId == -999) {
                 if (!this.getCarried().isEmpty()) {
                     if (clickaction == ClickAction.PRIMARY) {
-                        p_150434_.drop(this.getCarried(), true);
+                        pPlayer.drop(this.getCarried(), true);
                         this.setCarried(ItemStack.EMPTY);
                     } else {
-                        p_150434_.drop(this.getCarried().split(1), true);
+                        pPlayer.drop(this.getCarried().split(1), true);
                     }
                 }
-            } else if (p_150433_ == ClickType.QUICK_MOVE) {
-                if (p_150431_ < 0) {
+            } else if (pClickType == ClickType.QUICK_MOVE) {
+                if (pSlotId < 0) {
                     return;
                 }
 
-                Slot slot6 = this.slots.get(p_150431_);
-                if (!slot6.mayPickup(p_150434_)) {
+                Slot slot6 = this.slots.get(pSlotId);
+                if (!slot6.mayPickup(pPlayer)) {
                     return;
                 }
 
-                ItemStack itemstack8 = this.quickMoveStack(p_150434_, p_150431_);
+                ItemStack itemstack8 = this.quickMoveStack(pPlayer, pSlotId);
 
                 while (!itemstack8.isEmpty() && ItemStack.isSameItem(slot6.getItem(), itemstack8)) {
-                    itemstack8 = this.quickMoveStack(p_150434_, p_150431_);
+                    itemstack8 = this.quickMoveStack(pPlayer, pSlotId);
                 }
             } else {
-                if (p_150431_ < 0) {
+                if (pSlotId < 0) {
                     return;
                 }
 
-                Slot slot7 = this.slots.get(p_150431_);
+                Slot slot7 = this.slots.get(pSlotId);
                 ItemStack itemstack9 = slot7.getItem();
                 ItemStack itemstack10 = this.getCarried();
-                p_150434_.updateTutorialInventoryAction(itemstack10, slot7.getItem(), clickaction);
-                if (!this.tryItemClickBehaviourOverride(p_150434_, clickaction, slot7, itemstack9, itemstack10)) {
+                pPlayer.updateTutorialInventoryAction(itemstack10, slot7.getItem(), clickaction);
+                if (!this.tryItemClickBehaviourOverride(pPlayer, clickaction, slot7, itemstack9, itemstack10)) {
                     if (itemstack9.isEmpty()) {
                         if (!itemstack10.isEmpty()) {
                             int i3 = clickaction == ClickAction.PRIMARY ? itemstack10.getCount() : 1;
                             this.setCarried(slot7.safeInsert(itemstack10, i3));
                         }
-                    } else if (slot7.mayPickup(p_150434_)) {
+                    } else if (slot7.mayPickup(pPlayer)) {
                         if (itemstack10.isEmpty()) {
                             int j3 = clickaction == ClickAction.PRIMARY ? itemstack9.getCount() : (itemstack9.getCount() + 1) / 2;
-                            Optional<ItemStack> optional1 = slot7.tryRemove(j3, Integer.MAX_VALUE, p_150434_);
+                            Optional<ItemStack> optional1 = slot7.tryRemove(j3, Integer.MAX_VALUE, pPlayer);
                             optional1.ifPresent(p_150421_ -> {
                                 this.setCarried(p_150421_);
-                                slot7.onTake(p_150434_, p_150421_);
+                                slot7.onTake(pPlayer, p_150421_);
                             });
                         } else if (slot7.mayPlace(itemstack10)) {
                             if (ItemStack.isSameItemSameComponents(itemstack9, itemstack10)) {
@@ -455,10 +455,10 @@ public abstract class AbstractContainerMenu {
                                 slot7.setByPlayer(itemstack10);
                             }
                         } else if (ItemStack.isSameItemSameComponents(itemstack9, itemstack10)) {
-                            Optional<ItemStack> optional = slot7.tryRemove(itemstack9.getCount(), itemstack10.getMaxStackSize() - itemstack10.getCount(), p_150434_);
+                            Optional<ItemStack> optional = slot7.tryRemove(itemstack9.getCount(), itemstack10.getMaxStackSize() - itemstack10.getCount(), pPlayer);
                             optional.ifPresent(p_150428_ -> {
                                 itemstack10.grow(p_150428_.getCount());
-                                slot7.onTake(p_150434_, p_150428_);
+                                slot7.onTake(pPlayer, p_150428_);
                             });
                         }
                     }
@@ -466,17 +466,17 @@ public abstract class AbstractContainerMenu {
 
                 slot7.setChanged();
             }
-        } else if (p_150433_ == ClickType.SWAP && (p_150432_ >= 0 && p_150432_ < 9 || p_150432_ == 40)) {
-            ItemStack itemstack2 = inventory.getItem(p_150432_);
-            Slot slot5 = this.slots.get(p_150431_);
+        } else if (pClickType == ClickType.SWAP && (pButton >= 0 && pButton < 9 || pButton == 40)) {
+            ItemStack itemstack2 = inventory.getItem(pButton);
+            Slot slot5 = this.slots.get(pSlotId);
             ItemStack itemstack7 = slot5.getItem();
             if (!itemstack2.isEmpty() || !itemstack7.isEmpty()) {
                 if (itemstack2.isEmpty()) {
-                    if (slot5.mayPickup(p_150434_)) {
-                        inventory.setItem(p_150432_, itemstack7);
+                    if (slot5.mayPickup(pPlayer)) {
+                        inventory.setItem(pButton, itemstack7);
                         slot5.onSwapCraft(itemstack7.getCount());
                         slot5.setByPlayer(ItemStack.EMPTY);
-                        slot5.onTake(p_150434_, itemstack7);
+                        slot5.onTake(pPlayer, itemstack7);
                     }
                 } else if (itemstack7.isEmpty()) {
                     if (slot5.mayPlace(itemstack2)) {
@@ -484,66 +484,66 @@ public abstract class AbstractContainerMenu {
                         if (itemstack2.getCount() > j2) {
                             slot5.setByPlayer(itemstack2.split(j2));
                         } else {
-                            inventory.setItem(p_150432_, ItemStack.EMPTY);
+                            inventory.setItem(pButton, ItemStack.EMPTY);
                             slot5.setByPlayer(itemstack2);
                         }
                     }
-                } else if (slot5.mayPickup(p_150434_) && slot5.mayPlace(itemstack2)) {
+                } else if (slot5.mayPickup(pPlayer) && slot5.mayPlace(itemstack2)) {
                     int k2 = slot5.getMaxStackSize(itemstack2);
                     if (itemstack2.getCount() > k2) {
                         slot5.setByPlayer(itemstack2.split(k2));
-                        slot5.onTake(p_150434_, itemstack7);
+                        slot5.onTake(pPlayer, itemstack7);
                         if (!inventory.add(itemstack7)) {
-                            p_150434_.drop(itemstack7, true);
+                            pPlayer.drop(itemstack7, true);
                         }
                     } else {
-                        inventory.setItem(p_150432_, itemstack7);
+                        inventory.setItem(pButton, itemstack7);
                         slot5.setByPlayer(itemstack2);
-                        slot5.onTake(p_150434_, itemstack7);
+                        slot5.onTake(pPlayer, itemstack7);
                     }
                 }
             }
-        } else if (p_150433_ == ClickType.CLONE && p_150434_.hasInfiniteMaterials() && this.getCarried().isEmpty() && p_150431_ >= 0) {
-            Slot slot4 = this.slots.get(p_150431_);
+        } else if (pClickType == ClickType.CLONE && pPlayer.hasInfiniteMaterials() && this.getCarried().isEmpty() && pSlotId >= 0) {
+            Slot slot4 = this.slots.get(pSlotId);
             if (slot4.hasItem()) {
                 ItemStack itemstack5 = slot4.getItem();
                 this.setCarried(itemstack5.copyWithCount(itemstack5.getMaxStackSize()));
             }
-        } else if (p_150433_ == ClickType.THROW && this.getCarried().isEmpty() && p_150431_ >= 0) {
-            Slot slot3 = this.slots.get(p_150431_);
-            int j1 = p_150432_ == 0 ? 1 : slot3.getItem().getCount();
-            if (!p_150434_.canDropItems()) {
+        } else if (pClickType == ClickType.THROW && this.getCarried().isEmpty() && pSlotId >= 0) {
+            Slot slot3 = this.slots.get(pSlotId);
+            int j1 = pButton == 0 ? 1 : slot3.getItem().getCount();
+            if (!pPlayer.canDropItems()) {
                 return;
             }
 
-            ItemStack itemstack6 = slot3.safeTake(j1, Integer.MAX_VALUE, p_150434_);
-            p_150434_.drop(itemstack6, true);
-            p_150434_.handleCreativeModeItemDrop(itemstack6);
-            if (p_150432_ == 1) {
+            ItemStack itemstack6 = slot3.safeTake(j1, Integer.MAX_VALUE, pPlayer);
+            pPlayer.drop(itemstack6, true);
+            pPlayer.handleCreativeModeItemDrop(itemstack6);
+            if (pButton == 1) {
                 while (!itemstack6.isEmpty() && ItemStack.isSameItem(slot3.getItem(), itemstack6)) {
-                    if (!p_150434_.canDropItems()) {
+                    if (!pPlayer.canDropItems()) {
                         return;
                     }
 
-                    itemstack6 = slot3.safeTake(j1, Integer.MAX_VALUE, p_150434_);
-                    p_150434_.drop(itemstack6, true);
-                    p_150434_.handleCreativeModeItemDrop(itemstack6);
+                    itemstack6 = slot3.safeTake(j1, Integer.MAX_VALUE, pPlayer);
+                    pPlayer.drop(itemstack6, true);
+                    pPlayer.handleCreativeModeItemDrop(itemstack6);
                 }
             }
-        } else if (p_150433_ == ClickType.PICKUP_ALL && p_150431_ >= 0) {
-            Slot slot2 = this.slots.get(p_150431_);
+        } else if (pClickType == ClickType.PICKUP_ALL && pSlotId >= 0) {
+            Slot slot2 = this.slots.get(pSlotId);
             ItemStack itemstack4 = this.getCarried();
-            if (!itemstack4.isEmpty() && (!slot2.hasItem() || !slot2.mayPickup(p_150434_))) {
-                int l1 = p_150432_ == 0 ? 0 : this.slots.size() - 1;
-                int i2 = p_150432_ == 0 ? 1 : -1;
+            if (!itemstack4.isEmpty() && (!slot2.hasItem() || !slot2.mayPickup(pPlayer))) {
+                int l1 = pButton == 0 ? 0 : this.slots.size() - 1;
+                int i2 = pButton == 0 ? 1 : -1;
 
                 for (int l2 = 0; l2 < 2; l2++) {
                     for (int l3 = l1; l3 >= 0 && l3 < this.slots.size() && itemstack4.getCount() < itemstack4.getMaxStackSize(); l3 += i2) {
                         Slot slot8 = this.slots.get(l3);
-                        if (slot8.hasItem() && canItemQuickReplace(slot8, itemstack4, true) && slot8.mayPickup(p_150434_) && this.canTakeItemForPickAll(itemstack4, slot8)) {
+                        if (slot8.hasItem() && canItemQuickReplace(slot8, itemstack4, true) && slot8.mayPickup(pPlayer) && this.canTakeItemForPickAll(itemstack4, slot8)) {
                             ItemStack itemstack11 = slot8.getItem();
                             if (l2 != 0 || itemstack11.getCount() != itemstack11.getMaxStackSize()) {
-                                ItemStack itemstack12 = slot8.safeTake(itemstack11.getCount(), itemstack4.getMaxStackSize() - itemstack4.getCount(), p_150434_);
+                                ItemStack itemstack12 = slot8.safeTake(itemstack11.getCount(), itemstack4.getMaxStackSize() - itemstack4.getCount(), pPlayer);
                                 itemstack4.grow(itemstack12.getCount());
                             }
                         }
@@ -553,11 +553,11 @@ public abstract class AbstractContainerMenu {
         }
     }
 
-    private boolean tryItemClickBehaviourOverride(Player p_249615_, ClickAction p_250300_, Slot p_249384_, ItemStack p_251073_, ItemStack p_252026_) {
-        FeatureFlagSet featureflagset = p_249615_.level().enabledFeatures();
-        return p_252026_.isItemEnabled(featureflagset) && p_252026_.overrideStackedOnOther(p_249384_, p_250300_, p_249615_)
+    private boolean tryItemClickBehaviourOverride(Player pPlayer, ClickAction pAction, Slot pSlot, ItemStack pClickedItem, ItemStack pCarriedItem) {
+        FeatureFlagSet featureflagset = pPlayer.level().enabledFeatures();
+        return pCarriedItem.isItemEnabled(featureflagset) && pCarriedItem.overrideStackedOnOther(pSlot, pAction, pPlayer)
             ? true
-            : p_251073_.isItemEnabled(featureflagset) && p_251073_.overrideOtherStackedOnMe(p_252026_, p_249384_, p_250300_, p_249615_, this.createCarriedSlotAccess());
+            : pClickedItem.isItemEnabled(featureflagset) && pClickedItem.overrideOtherStackedOnMe(pCarriedItem, pSlot, pAction, pPlayer, this.createCarriedSlotAccess());
     }
 
     private SlotAccess createCarriedSlotAccess() {
@@ -575,26 +575,26 @@ public abstract class AbstractContainerMenu {
         };
     }
 
-    public boolean canTakeItemForPickAll(ItemStack p_38908_, Slot p_38909_) {
+    public boolean canTakeItemForPickAll(ItemStack pStack, Slot pSlot) {
         return true;
     }
 
-    public void removed(Player p_38940_) {
-        if (p_38940_ instanceof ServerPlayer) {
+    public void removed(Player pPlayer) {
+        if (pPlayer instanceof ServerPlayer) {
             ItemStack itemstack = this.getCarried();
             if (!itemstack.isEmpty()) {
-                dropOrPlaceInInventory(p_38940_, itemstack);
+                dropOrPlaceInInventory(pPlayer, itemstack);
                 this.setCarried(ItemStack.EMPTY);
             }
         }
     }
 
-    private static void dropOrPlaceInInventory(Player p_364172_, ItemStack p_363234_) {
+    private static void dropOrPlaceInInventory(Player pPlayer, ItemStack pStack) {
         boolean flag;
         boolean flag2;
         label27: {
-            flag = p_364172_.isRemoved() && p_364172_.getRemovalReason() != Entity.RemovalReason.CHANGED_DIMENSION;
-            if (p_364172_ instanceof ServerPlayer serverplayer && serverplayer.hasDisconnected()) {
+            flag = pPlayer.isRemoved() && pPlayer.getRemovalReason() != Entity.RemovalReason.CHANGED_DIMENSION;
+            if (pPlayer instanceof ServerPlayer serverplayer && serverplayer.hasDisconnected()) {
                 flag2 = true;
                 break label27;
             }
@@ -604,70 +604,70 @@ public abstract class AbstractContainerMenu {
 
         boolean flag1 = flag2;
         if (flag || flag1) {
-            p_364172_.drop(p_363234_, false);
-        } else if (p_364172_ instanceof ServerPlayer) {
-            p_364172_.getInventory().placeItemBackInInventory(p_363234_);
+            pPlayer.drop(pStack, false);
+        } else if (pPlayer instanceof ServerPlayer) {
+            pPlayer.getInventory().placeItemBackInInventory(pStack);
         }
     }
 
-    protected void clearContainer(Player p_150412_, Container p_150413_) {
-        for (int i = 0; i < p_150413_.getContainerSize(); i++) {
-            dropOrPlaceInInventory(p_150412_, p_150413_.removeItemNoUpdate(i));
+    protected void clearContainer(Player pPlayer, Container pContainer) {
+        for (int i = 0; i < pContainer.getContainerSize(); i++) {
+            dropOrPlaceInInventory(pPlayer, pContainer.removeItemNoUpdate(i));
         }
     }
 
-    public void slotsChanged(Container p_38868_) {
+    public void slotsChanged(Container pContainer) {
         this.broadcastChanges();
     }
 
-    public void setItem(int p_182407_, int p_182408_, ItemStack p_182409_) {
-        this.getSlot(p_182407_).set(p_182409_);
-        this.stateId = p_182408_;
+    public void setItem(int pSlotId, int pStateId, ItemStack pStack) {
+        this.getSlot(pSlotId).set(pStack);
+        this.stateId = pStateId;
     }
 
-    public void initializeContents(int p_182411_, List<ItemStack> p_182412_, ItemStack p_182413_) {
-        for (int i = 0; i < p_182412_.size(); i++) {
-            this.getSlot(i).set(p_182412_.get(i));
+    public void initializeContents(int pStateId, List<ItemStack> pItems, ItemStack pCarried) {
+        for (int i = 0; i < pItems.size(); i++) {
+            this.getSlot(i).set(pItems.get(i));
         }
 
-        this.carried = p_182413_;
-        this.stateId = p_182411_;
+        this.carried = pCarried;
+        this.stateId = pStateId;
     }
 
-    public void setData(int p_38855_, int p_38856_) {
-        this.dataSlots.get(p_38855_).set(p_38856_);
+    public void setData(int pId, int pData) {
+        this.dataSlots.get(pId).set(pData);
     }
 
-    public abstract boolean stillValid(Player p_38874_);
+    public abstract boolean stillValid(Player pPlayer);
 
-    protected boolean moveItemStackTo(ItemStack p_38904_, int p_38905_, int p_38906_, boolean p_38907_) {
+    protected boolean moveItemStackTo(ItemStack pStack, int pStartIndex, int pEndIndex, boolean pReverseDirection) {
         boolean flag = false;
-        int i = p_38905_;
-        if (p_38907_) {
-            i = p_38906_ - 1;
+        int i = pStartIndex;
+        if (pReverseDirection) {
+            i = pEndIndex - 1;
         }
 
-        if (p_38904_.isStackable()) {
-            while (!p_38904_.isEmpty() && (p_38907_ ? i >= p_38905_ : i < p_38906_)) {
+        if (pStack.isStackable()) {
+            while (!pStack.isEmpty() && (pReverseDirection ? i >= pStartIndex : i < pEndIndex)) {
                 Slot slot = this.slots.get(i);
                 ItemStack itemstack = slot.getItem();
-                if (!itemstack.isEmpty() && ItemStack.isSameItemSameComponents(p_38904_, itemstack)) {
-                    int j = itemstack.getCount() + p_38904_.getCount();
+                if (!itemstack.isEmpty() && ItemStack.isSameItemSameComponents(pStack, itemstack)) {
+                    int j = itemstack.getCount() + pStack.getCount();
                     int k = slot.getMaxStackSize(itemstack);
                     if (j <= k) {
-                        p_38904_.setCount(0);
+                        pStack.setCount(0);
                         itemstack.setCount(j);
                         slot.setChanged();
                         flag = true;
                     } else if (itemstack.getCount() < k) {
-                        p_38904_.shrink(k - itemstack.getCount());
+                        pStack.shrink(k - itemstack.getCount());
                         itemstack.setCount(k);
                         slot.setChanged();
                         flag = true;
                     }
                 }
 
-                if (p_38907_) {
+                if (pReverseDirection) {
                     i--;
                 } else {
                     i++;
@@ -675,25 +675,25 @@ public abstract class AbstractContainerMenu {
             }
         }
 
-        if (!p_38904_.isEmpty()) {
-            if (p_38907_) {
-                i = p_38906_ - 1;
+        if (!pStack.isEmpty()) {
+            if (pReverseDirection) {
+                i = pEndIndex - 1;
             } else {
-                i = p_38905_;
+                i = pStartIndex;
             }
 
-            while (p_38907_ ? i >= p_38905_ : i < p_38906_) {
+            while (pReverseDirection ? i >= pStartIndex : i < pEndIndex) {
                 Slot slot1 = this.slots.get(i);
                 ItemStack itemstack1 = slot1.getItem();
-                if (itemstack1.isEmpty() && slot1.mayPlace(p_38904_)) {
-                    int l = slot1.getMaxStackSize(p_38904_);
-                    slot1.setByPlayer(p_38904_.split(Math.min(p_38904_.getCount(), l)));
+                if (itemstack1.isEmpty() && slot1.mayPlace(pStack)) {
+                    int l = slot1.getMaxStackSize(pStack);
+                    slot1.setByPlayer(pStack.split(Math.min(pStack.getCount(), l)));
                     slot1.setChanged();
                     flag = true;
                     break;
                 }
 
-                if (p_38907_) {
+                if (pReverseDirection) {
                     i--;
                 } else {
                     i++;
@@ -704,23 +704,23 @@ public abstract class AbstractContainerMenu {
         return flag;
     }
 
-    public static int getQuickcraftType(int p_38929_) {
-        return p_38929_ >> 2 & 3;
+    public static int getQuickcraftType(int pEventButton) {
+        return pEventButton >> 2 & 3;
     }
 
-    public static int getQuickcraftHeader(int p_38948_) {
-        return p_38948_ & 3;
+    public static int getQuickcraftHeader(int pClickedButton) {
+        return pClickedButton & 3;
     }
 
-    public static int getQuickcraftMask(int p_38931_, int p_38932_) {
-        return p_38931_ & 3 | (p_38932_ & 3) << 2;
+    public static int getQuickcraftMask(int pQuickCraftingHeader, int pQuickCraftingType) {
+        return pQuickCraftingHeader & 3 | (pQuickCraftingType & 3) << 2;
     }
 
-    public static boolean isValidQuickcraftType(int p_38863_, Player p_38864_) {
-        if (p_38863_ == 0) {
+    public static boolean isValidQuickcraftType(int pDragMode, Player pPlayer) {
+        if (pDragMode == 0) {
             return true;
         } else {
-            return p_38863_ == 1 ? true : p_38863_ == 2 && p_38864_.hasInfiniteMaterials();
+            return pDragMode == 1 ? true : pDragMode == 2 && pPlayer.hasInfiniteMaterials();
         }
     }
 
@@ -729,50 +729,50 @@ public abstract class AbstractContainerMenu {
         this.quickcraftSlots.clear();
     }
 
-    public static boolean canItemQuickReplace(@Nullable Slot p_38900_, ItemStack p_38901_, boolean p_38902_) {
-        boolean flag = p_38900_ == null || !p_38900_.hasItem();
-        return !flag && ItemStack.isSameItemSameComponents(p_38901_, p_38900_.getItem())
-            ? p_38900_.getItem().getCount() + (p_38902_ ? 0 : p_38901_.getCount()) <= p_38901_.getMaxStackSize()
+    public static boolean canItemQuickReplace(@Nullable Slot pSlot, ItemStack pStack, boolean pStackSizeMatters) {
+        boolean flag = pSlot == null || !pSlot.hasItem();
+        return !flag && ItemStack.isSameItemSameComponents(pStack, pSlot.getItem())
+            ? pSlot.getItem().getCount() + (pStackSizeMatters ? 0 : pStack.getCount()) <= pStack.getMaxStackSize()
             : flag;
     }
 
-    public static int getQuickCraftPlaceCount(Set<Slot> p_279393_, int p_279288_, ItemStack p_279172_) {
-        return switch (p_279288_) {
-            case 0 -> Mth.floor((float)p_279172_.getCount() / (float)p_279393_.size());
+    public static int getQuickCraftPlaceCount(Set<Slot> pSlots, int pType, ItemStack pStack) {
+        return switch (pType) {
+            case 0 -> Mth.floor((float)pStack.getCount() / (float)pSlots.size());
             case 1 -> 1;
-            case 2 -> p_279172_.getMaxStackSize();
-            default -> p_279172_.getCount();
+            case 2 -> pStack.getMaxStackSize();
+            default -> pStack.getCount();
         };
     }
 
-    public boolean canDragTo(Slot p_38945_) {
+    public boolean canDragTo(Slot pSlot) {
         return true;
     }
 
-    public static int getRedstoneSignalFromBlockEntity(@Nullable BlockEntity p_38919_) {
-        return p_38919_ instanceof Container ? getRedstoneSignalFromContainer((Container)p_38919_) : 0;
+    public static int getRedstoneSignalFromBlockEntity(@Nullable BlockEntity pBlockEntity) {
+        return pBlockEntity instanceof Container ? getRedstoneSignalFromContainer((Container)pBlockEntity) : 0;
     }
 
-    public static int getRedstoneSignalFromContainer(@Nullable Container p_38939_) {
-        if (p_38939_ == null) {
+    public static int getRedstoneSignalFromContainer(@Nullable Container pContainer) {
+        if (pContainer == null) {
             return 0;
         } else {
             float f = 0.0F;
 
-            for (int i = 0; i < p_38939_.getContainerSize(); i++) {
-                ItemStack itemstack = p_38939_.getItem(i);
+            for (int i = 0; i < pContainer.getContainerSize(); i++) {
+                ItemStack itemstack = pContainer.getItem(i);
                 if (!itemstack.isEmpty()) {
-                    f += (float)itemstack.getCount() / (float)p_38939_.getMaxStackSize(itemstack);
+                    f += (float)itemstack.getCount() / (float)pContainer.getMaxStackSize(itemstack);
                 }
             }
 
-            f /= (float)p_38939_.getContainerSize();
+            f /= (float)pContainer.getContainerSize();
             return Mth.lerpDiscrete(f, 0, 15);
         }
     }
 
-    public void setCarried(ItemStack p_150439_) {
-        this.carried = p_150439_;
+    public void setCarried(ItemStack pStack) {
+        this.carried = pStack;
     }
 
     public ItemStack getCarried() {
@@ -787,11 +787,11 @@ public abstract class AbstractContainerMenu {
         this.suppressRemoteUpdates = false;
     }
 
-    public void transferState(AbstractContainerMenu p_150415_) {
+    public void transferState(AbstractContainerMenu pMenu) {
         Table<Container, Integer, Integer> table = HashBasedTable.create();
 
-        for (int i = 0; i < p_150415_.slots.size(); i++) {
-            Slot slot = p_150415_.slots.get(i);
+        for (int i = 0; i < pMenu.slots.size(); i++) {
+            Slot slot = pMenu.slots.get(i);
             table.put(slot.container, slot.getContainerSlot(), i);
         }
 
@@ -799,16 +799,16 @@ public abstract class AbstractContainerMenu {
             Slot slot1 = this.slots.get(j);
             Integer integer = table.get(slot1.container, slot1.getContainerSlot());
             if (integer != null) {
-                this.lastSlots.set(j, p_150415_.lastSlots.get(integer));
-                this.remoteSlots.set(j, p_150415_.remoteSlots.get(integer));
+                this.lastSlots.set(j, pMenu.lastSlots.get(integer));
+                this.remoteSlots.set(j, pMenu.remoteSlots.get(integer));
             }
         }
     }
 
-    public OptionalInt findSlot(Container p_182418_, int p_182419_) {
+    public OptionalInt findSlot(Container pContainer, int pSlotIndex) {
         for (int i = 0; i < this.slots.size(); i++) {
             Slot slot = this.slots.get(i);
-            if (slot.container == p_182418_ && p_182419_ == slot.getContainerSlot()) {
+            if (slot.container == pContainer && pSlotIndex == slot.getContainerSlot()) {
                 return OptionalInt.of(i);
             }
         }

@@ -26,8 +26,8 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
     private final Map<ResourceKey<Level>, Map<String, StructuresDebugPayload.PieceInfo>> postPieces = Maps.newIdentityHashMap();
     private static final int MAX_RENDER_DIST = 500;
 
-    public StructureRenderer(Minecraft p_113680_) {
-        this.minecraft = p_113680_;
+    public StructureRenderer(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
     @Override
@@ -107,11 +107,11 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
         }
     }
 
-    public void addBoundingBox(BoundingBox p_113683_, List<StructuresDebugPayload.PieceInfo> p_113684_, ResourceKey<Level> p_297588_) {
-        this.postMainBoxes.computeIfAbsent(p_297588_, p_299944_ -> new HashMap<>()).put(p_113683_.toString(), p_113683_);
-        Map<String, StructuresDebugPayload.PieceInfo> map = this.postPieces.computeIfAbsent(p_297588_, p_298617_ -> new HashMap<>());
+    public void addBoundingBox(BoundingBox pBoundingBox, List<StructuresDebugPayload.PieceInfo> pPieces, ResourceKey<Level> pDimension) {
+        this.postMainBoxes.computeIfAbsent(pDimension, p_299944_ -> new HashMap<>()).put(pBoundingBox.toString(), pBoundingBox);
+        Map<String, StructuresDebugPayload.PieceInfo> map = this.postPieces.computeIfAbsent(pDimension, p_298617_ -> new HashMap<>());
 
-        for (StructuresDebugPayload.PieceInfo structuresdebugpayload$pieceinfo : p_113684_) {
+        for (StructuresDebugPayload.PieceInfo structuresdebugpayload$pieceinfo : pPieces) {
             map.put(structuresdebugpayload$pieceinfo.boundingBox().toString(), structuresdebugpayload$pieceinfo);
         }
     }

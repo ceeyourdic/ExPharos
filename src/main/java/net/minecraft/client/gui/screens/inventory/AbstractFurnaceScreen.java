@@ -21,19 +21,19 @@ public abstract class AbstractFurnaceScreen<T extends AbstractFurnaceMenu> exten
     private final ResourceLocation burnProgressSprite;
 
     public AbstractFurnaceScreen(
-        T p_97825_,
-        Inventory p_97827_,
-        Component p_97828_,
-        Component p_364165_,
-        ResourceLocation p_97829_,
-        ResourceLocation p_300101_,
-        ResourceLocation p_299464_,
-        List<RecipeBookComponent.TabInfo> p_367246_
+        T pMenu,
+        Inventory pPlayerInventory,
+        Component pTitle,
+        Component pRecipeFilterName,
+        ResourceLocation pTexture,
+        ResourceLocation pLitProgressSprite,
+        ResourceLocation pBurnProgressSprite,
+        List<RecipeBookComponent.TabInfo> pTabInfos
     ) {
-        super(p_97825_, new FurnaceRecipeBookComponent(p_97825_, p_364165_, p_367246_), p_97827_, p_97828_);
-        this.texture = p_97829_;
-        this.litProgressSprite = p_300101_;
-        this.burnProgressSprite = p_299464_;
+        super(pMenu, new FurnaceRecipeBookComponent(pMenu, pRecipeFilterName, pTabInfos), pPlayerInventory, pTitle);
+        this.texture = pTexture;
+        this.litProgressSprite = pLitProgressSprite;
+        this.burnProgressSprite = pBurnProgressSprite;
     }
 
     @Override

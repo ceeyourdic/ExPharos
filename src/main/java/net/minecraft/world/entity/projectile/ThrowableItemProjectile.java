@@ -18,19 +18,19 @@ public abstract class ThrowableItemProjectile extends ThrowableProjectile implem
     }
 
     public ThrowableItemProjectile(
-        EntityType<? extends ThrowableItemProjectile> p_37438_, double p_367916_, double p_363262_, double p_370181_, Level p_37440_, ItemStack p_366106_
+        EntityType<? extends ThrowableItemProjectile> pEntityType, double pX, double pY, double pZ, Level pLevel, ItemStack pItem
     ) {
-        super(p_37438_, p_367916_, p_363262_, p_370181_, p_37440_);
-        this.setItem(p_366106_);
+        super(pEntityType, pX, pY, pZ, pLevel);
+        this.setItem(pItem);
     }
 
-    public ThrowableItemProjectile(EntityType<? extends ThrowableItemProjectile> p_37432_, LivingEntity p_364177_, Level p_37436_, ItemStack p_369279_) {
-        this(p_37432_, p_364177_.getX(), p_364177_.getEyeY() - 0.1F, p_364177_.getZ(), p_37436_, p_369279_);
-        this.setOwner(p_364177_);
+    public ThrowableItemProjectile(EntityType<? extends ThrowableItemProjectile> pEntityType, LivingEntity pOwner, Level pLevel, ItemStack pItem) {
+        this(pEntityType, pOwner.getX(), pOwner.getEyeY() - 0.1F, pOwner.getZ(), pLevel, pItem);
+        this.setOwner(pOwner);
     }
 
-    public void setItem(ItemStack p_37447_) {
-        this.getEntityData().set(DATA_ITEM_STACK, p_37447_.copyWithCount(1));
+    public void setItem(ItemStack pStack) {
+        this.getEntityData().set(DATA_ITEM_STACK, pStack.copyWithCount(1));
     }
 
     protected abstract Item getDefaultItem();
@@ -46,16 +46,16 @@ public abstract class ThrowableItemProjectile extends ThrowableProjectile implem
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_37449_) {
-        super.addAdditionalSaveData(p_37449_);
-        p_37449_.put("Item", this.getItem().save(this.registryAccess()));
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.put("Item", this.getItem().save(this.registryAccess()));
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_37445_) {
-        super.readAdditionalSaveData(p_37445_);
-        if (p_37445_.contains("Item", 10)) {
-            this.setItem(ItemStack.parse(this.registryAccess(), p_37445_.getCompound("Item")).orElseGet(() -> new ItemStack(this.getDefaultItem())));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("Item", 10)) {
+            this.setItem(ItemStack.parse(this.registryAccess(), pCompound.getCompound("Item")).orElseGet(() -> new ItemStack(this.getDefaultItem())));
         } else {
             this.setItem(new ItemStack(this.getDefaultItem()));
         }

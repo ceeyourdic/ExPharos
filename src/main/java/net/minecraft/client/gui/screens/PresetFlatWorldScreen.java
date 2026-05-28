@@ -63,14 +63,14 @@ public class PresetFlatWorldScreen extends Screen {
     EditBox export;
     FlatLevelGeneratorSettings settings;
 
-    public PresetFlatWorldScreen(CreateFlatWorldScreen p_96379_) {
+    public PresetFlatWorldScreen(CreateFlatWorldScreen pParent) {
         super(Component.translatable("createWorld.customize.presets.title"));
-        this.parent = p_96379_;
+        this.parent = pParent;
     }
 
     @Nullable
-    private static FlatLayerInfo getLayerInfoFromString(HolderGetter<Block> p_259695_, String p_259185_, int p_259723_) {
-        List<String> list = Splitter.on('*').limit(2).splitToList(p_259185_);
+    private static FlatLayerInfo getLayerInfoFromString(HolderGetter<Block> pBlockGetter, String pLayerInfo, int pCurrentHeight) {
+        List<String> list = Splitter.on('*').limit(2).splitToList(pLayerInfo);
         int i;
         String s;
         if (list.size() == 2) {
@@ -87,12 +87,12 @@ public class PresetFlatWorldScreen extends Screen {
             i = 1;
         }
 
-        int j = Math.min(p_259723_ + i, DimensionType.Y_SIZE);
-        int k = j - p_259723_;
+        int j = Math.min(pCurrentHeight + i, DimensionType.Y_SIZE);
+        int k = j - pCurrentHeight;
 
         Optional<Holder.Reference<Block>> optional;
         try {
-            optional = p_259695_.get(ResourceKey.create(Registries.BLOCK, ResourceLocation.parse(s)));
+            optional = pBlockGetter.get(ResourceKey.create(Registries.BLOCK, ResourceLocation.parse(s)));
         } catch (Exception exception) {
             LOGGER.error("Error while parsing flat world string", (Throwable)exception);
             return null;
@@ -106,13 +106,13 @@ public class PresetFlatWorldScreen extends Screen {
         }
     }
 
-    private static List<FlatLayerInfo> getLayersInfoFromString(HolderGetter<Block> p_259080_, String p_260301_) {
+    private static List<FlatLayerInfo> getLayersInfoFromString(HolderGetter<Block> pBlockGetter, String pLayerInfo) {
         List<FlatLayerInfo> list = Lists.newArrayList();
-        String[] astring = p_260301_.split(",");
+        String[] astring = pLayerInfo.split(",");
         int i = 0;
 
         for (String s : astring) {
-            FlatLayerInfo flatlayerinfo = getLayerInfoFromString(p_259080_, s, i);
+            FlatLayerInfo flatlayerinfo = getLayerInfoFromString(pBlockGetter, s, i);
             if (flatlayerinfo == null) {
                 return Collections.emptyList();
             }
@@ -125,52 +125,52 @@ public class PresetFlatWorldScreen extends Screen {
     }
 
     public static FlatLevelGeneratorSettings fromString(
-        HolderGetter<Block> p_259084_,
-        HolderGetter<Biome> p_259583_,
-        HolderGetter<StructureSet> p_259610_,
-        HolderGetter<PlacedFeature> p_259243_,
-        String p_259508_,
-        FlatLevelGeneratorSettings p_259417_
+        HolderGetter<Block> pBlockGetter,
+        HolderGetter<Biome> pBiomeGetter,
+        HolderGetter<StructureSet> pStructureSetGetter,
+        HolderGetter<PlacedFeature> pPlacedFeatureGetter,
+        String pSettings,
+        FlatLevelGeneratorSettings pLayerGenerationSettings
     ) {
-        Iterator<String> iterator = Splitter.on(';').split(p_259508_).iterator();
+        Iterator<String> iterator = Splitter.on(';').split(pSettings).iterator();
         if (!iterator.hasNext()) {
-            return FlatLevelGeneratorSettings.getDefault(p_259583_, p_259610_, p_259243_);
+            return FlatLevelGeneratorSettings.getDefault(pBiomeGetter, pStructureSetGetter, pPlacedFeatureGetter);
         } else {
-            List<FlatLayerInfo> list = getLayersInfoFromString(p_259084_, iterator.next());
+            List<FlatLayerInfo> list = getLayersInfoFromString(pBlockGetter, iterator.next());
             if (list.isEmpty()) {
-                return FlatLevelGeneratorSettings.getDefault(p_259583_, p_259610_, p_259243_);
+                return FlatLevelGeneratorSettings.getDefault(pBiomeGetter, pStructureSetGetter, pPlacedFeatureGetter);
             } else {
-                Holder.Reference<Biome> reference = p_259583_.getOrThrow(DEFAULT_BIOME);
+                Holder.Reference<Biome> reference = pBiomeGetter.getOrThrow(DEFAULT_BIOME);
                 Holder<Biome> holder = reference;
                 if (iterator.hasNext()) {
                     String s = iterator.next();
                     holder = Optional.ofNullable(ResourceLocation.tryParse(s))
                         .map(p_258126_ -> ResourceKey.create(Registries.BIOME, p_258126_))
-                        .flatMap(p_259583_::get)
+                        .flatMap(pBiomeGetter::get)
                         .orElseGet(() -> {
                             LOGGER.warn("Invalid biome: {}", s);
                             return reference;
                         });
                 }
 
-                return p_259417_.withBiomeAndLayers(list, p_259417_.structureOverrides(), holder);
+                return pLayerGenerationSettings.withBiomeAndLayers(list, pLayerGenerationSettings.structureOverrides(), holder);
             }
         }
     }
 
-    static String save(FlatLevelGeneratorSettings p_205394_) {
+    static String save(FlatLevelGeneratorSettings pLevelGeneratorSettings) {
         StringBuilder stringbuilder = new StringBuilder();
 
-        for (int i = 0; i < p_205394_.getLayersInfo().size(); i++) {
+        for (int i = 0; i < pLevelGeneratorSettings.getLayersInfo().size(); i++) {
             if (i > 0) {
                 stringbuilder.append(",");
             }
 
-            stringbuilder.append(p_205394_.getLayersInfo().get(i));
+            stringbuilder.append(pLevelGeneratorSettings.getLayersInfo().get(i));
         }
 
         stringbuilder.append(";");
-        stringbuilder.append(p_205394_.getBiome().unwrapKey().map(ResourceKey::location).orElseThrow(() -> new IllegalStateException("Biome not registered")));
+        stringbuilder.append(pLevelGeneratorSettings.getBiome().unwrapKey().map(ResourceKey::location).orElseThrow(() -> new IllegalStateException("Biome not registered")));
         return stringbuilder.toString();
     }
 
@@ -219,9 +219,9 @@ public class PresetFlatWorldScreen extends Screen {
     }
 
     @Override
-    public void resize(Minecraft p_96390_, int p_96391_, int p_96392_) {
+    public void resize(Minecraft pMinecraft, int pWidth, int pHeight) {
         String s = this.export.getValue();
-        this.init(p_96390_, p_96391_, p_96392_);
+        this.init(pMinecraft, pWidth, pHeight);
         this.export.setValue(s);
     }
 
@@ -242,22 +242,22 @@ public class PresetFlatWorldScreen extends Screen {
         this.export.render(p_282713_, p_281914_, p_283700_, p_283598_);
     }
 
-    public void updateButtonValidity(boolean p_96450_) {
-        this.selectButton.active = p_96450_ || this.export.getValue().length() > 1;
+    public void updateButtonValidity(boolean pValid) {
+        this.selectButton.active = pValid || this.export.getValue().length() > 1;
     }
 
     @OnlyIn(Dist.CLIENT)
     class PresetsList extends ObjectSelectionList<PresetFlatWorldScreen.PresetsList.Entry> {
-        public PresetsList(final RegistryAccess p_259278_, final FeatureFlagSet p_259076_) {
+        public PresetsList(final RegistryAccess pRegistryAccess, final FeatureFlagSet pFlags) {
             super(PresetFlatWorldScreen.this.minecraft, PresetFlatWorldScreen.this.width, PresetFlatWorldScreen.this.height - 117, 80, 24);
 
-            for (Holder<FlatLevelGeneratorPreset> holder : p_259278_.lookupOrThrow(Registries.FLAT_LEVEL_GENERATOR_PRESET).getTagOrEmpty(FlatLevelGeneratorPresetTags.VISIBLE)) {
+            for (Holder<FlatLevelGeneratorPreset> holder : pRegistryAccess.lookupOrThrow(Registries.FLAT_LEVEL_GENERATOR_PRESET).getTagOrEmpty(FlatLevelGeneratorPresetTags.VISIBLE)) {
                 Set<Block> set = holder.value()
                     .settings()
                     .getLayersInfo()
                     .stream()
                     .map(p_259579_ -> p_259579_.getBlockState().getBlock())
-                    .filter(p_259421_ -> !p_259421_.isEnabled(p_259076_))
+                    .filter(p_259421_ -> !p_259421_.isEnabled(pFlags))
                     .collect(Collectors.toSet());
                 if (!set.isEmpty()) {
                     PresetFlatWorldScreen.LOGGER
@@ -272,17 +272,17 @@ public class PresetFlatWorldScreen extends Screen {
             }
         }
 
-        public void setSelected(@Nullable PresetFlatWorldScreen.PresetsList.Entry p_96472_) {
-            super.setSelected(p_96472_);
-            PresetFlatWorldScreen.this.updateButtonValidity(p_96472_ != null);
+        public void setSelected(@Nullable PresetFlatWorldScreen.PresetsList.Entry pEntry) {
+            super.setSelected(pEntry);
+            PresetFlatWorldScreen.this.updateButtonValidity(pEntry != null);
         }
 
         @Override
-        public boolean keyPressed(int p_96466_, int p_96467_, int p_96468_) {
-            if (super.keyPressed(p_96466_, p_96467_, p_96468_)) {
+        public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+            if (super.keyPressed(pKeyCode, pScanCode, pModifiers)) {
                 return true;
             } else {
-                if (CommonInputs.selected(p_96466_) && this.getSelected() != null) {
+                if (CommonInputs.selected(pKeyCode) && this.getSelected() != null) {
                     this.getSelected().select();
                 }
 
@@ -296,9 +296,9 @@ public class PresetFlatWorldScreen extends Screen {
             private final FlatLevelGeneratorPreset preset;
             private final Component name;
 
-            public Entry(final Holder<FlatLevelGeneratorPreset> p_232758_) {
-                this.preset = p_232758_.value();
-                this.name = p_232758_.unwrapKey()
+            public Entry(final Holder<FlatLevelGeneratorPreset> pPresetHolder) {
+                this.preset = pPresetHolder.value();
+                this.name = pPresetHolder.unwrapKey()
                     .map(p_232760_ -> (Component)Component.translatable(p_232760_.location().toLanguageKey("flat_world_preset")))
                     .orElse(PresetFlatWorldScreen.UNKNOWN_PRESET);
             }
@@ -321,9 +321,9 @@ public class PresetFlatWorldScreen extends Screen {
             }
 
             @Override
-            public boolean mouseClicked(double p_96481_, double p_96482_, int p_96483_) {
+            public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
                 this.select();
-                return super.mouseClicked(p_96481_, p_96482_, p_96483_);
+                return super.mouseClicked(pMouseX, pMouseY, pButton);
             }
 
             void select() {
@@ -333,13 +333,13 @@ public class PresetFlatWorldScreen extends Screen {
                 PresetFlatWorldScreen.this.export.moveCursorToStart(false);
             }
 
-            private void blitSlot(GuiGraphics p_283196_, int p_282036_, int p_281683_, Item p_282242_) {
-                this.blitSlotBg(p_283196_, p_282036_ + 1, p_281683_ + 1);
-                p_283196_.renderFakeItem(new ItemStack(p_282242_), p_282036_ + 2, p_281683_ + 2);
+            private void blitSlot(GuiGraphics pGuiGraphics, int pX, int pY, Item pItem) {
+                this.blitSlotBg(pGuiGraphics, pX + 1, pY + 1);
+                pGuiGraphics.renderFakeItem(new ItemStack(pItem), pX + 2, pY + 2);
             }
 
-            private void blitSlotBg(GuiGraphics p_281359_, int p_282978_, int p_283152_) {
-                p_281359_.blitSprite(RenderType::guiTextured, PresetFlatWorldScreen.SLOT_SPRITE, p_282978_, p_283152_, 18, 18);
+            private void blitSlotBg(GuiGraphics pGuiGraphics, int pX, int pY) {
+                pGuiGraphics.blitSprite(RenderType::guiTextured, PresetFlatWorldScreen.SLOT_SPRITE, pX, pY, 18, 18);
             }
 
             @Override

@@ -31,105 +31,105 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class ItemModelUtils {
-    public static ItemModel.Unbaked plainModel(ResourceLocation p_377053_) {
-        return new BlockModelWrapper.Unbaked(p_377053_, List.of());
+    public static ItemModel.Unbaked plainModel(ResourceLocation pModel) {
+        return new BlockModelWrapper.Unbaked(pModel, List.of());
     }
 
-    public static ItemModel.Unbaked tintedModel(ResourceLocation p_376161_, ItemTintSource... p_377261_) {
-        return new BlockModelWrapper.Unbaked(p_376161_, List.of(p_377261_));
+    public static ItemModel.Unbaked tintedModel(ResourceLocation pModel, ItemTintSource... pTintSources) {
+        return new BlockModelWrapper.Unbaked(pModel, List.of(pTintSources));
     }
 
-    public static ItemTintSource constantTint(int p_375685_) {
-        return new Constant(p_375685_);
+    public static ItemTintSource constantTint(int pValue) {
+        return new Constant(pValue);
     }
 
-    public static ItemModel.Unbaked composite(ItemModel.Unbaked... p_376335_) {
-        return new CompositeModel.Unbaked(List.of(p_376335_));
+    public static ItemModel.Unbaked composite(ItemModel.Unbaked... pModels) {
+        return new CompositeModel.Unbaked(List.of(pModels));
     }
 
-    public static ItemModel.Unbaked specialModel(ResourceLocation p_375704_, SpecialModelRenderer.Unbaked p_378654_) {
-        return new SpecialModelWrapper.Unbaked(p_375704_, p_378654_);
+    public static ItemModel.Unbaked specialModel(ResourceLocation pBase, SpecialModelRenderer.Unbaked pSpecialModel) {
+        return new SpecialModelWrapper.Unbaked(pBase, pSpecialModel);
     }
 
-    public static RangeSelectItemModel.Entry override(ItemModel.Unbaked p_378360_, float p_376445_) {
-        return new RangeSelectItemModel.Entry(p_376445_, p_378360_);
+    public static RangeSelectItemModel.Entry override(ItemModel.Unbaked pThreshold, float pModel) {
+        return new RangeSelectItemModel.Entry(pModel, pThreshold);
     }
 
-    public static ItemModel.Unbaked rangeSelect(RangeSelectItemModelProperty p_377347_, ItemModel.Unbaked p_378776_, RangeSelectItemModel.Entry... p_377688_) {
-        return new RangeSelectItemModel.Unbaked(p_377347_, 1.0F, List.of(p_377688_), Optional.of(p_378776_));
+    public static ItemModel.Unbaked rangeSelect(RangeSelectItemModelProperty pProperty, ItemModel.Unbaked pFallback, RangeSelectItemModel.Entry... pEntries) {
+        return new RangeSelectItemModel.Unbaked(pProperty, 1.0F, List.of(pEntries), Optional.of(pFallback));
     }
 
     public static ItemModel.Unbaked rangeSelect(
-        RangeSelectItemModelProperty p_376332_, float p_378339_, ItemModel.Unbaked p_376666_, RangeSelectItemModel.Entry... p_376006_
+        RangeSelectItemModelProperty pProperty, float pScale, ItemModel.Unbaked pFallback, RangeSelectItemModel.Entry... pEntries
     ) {
-        return new RangeSelectItemModel.Unbaked(p_376332_, p_378339_, List.of(p_376006_), Optional.of(p_376666_));
+        return new RangeSelectItemModel.Unbaked(pProperty, pScale, List.of(pEntries), Optional.of(pFallback));
     }
 
-    public static ItemModel.Unbaked rangeSelect(RangeSelectItemModelProperty p_378056_, ItemModel.Unbaked p_377985_, List<RangeSelectItemModel.Entry> p_378674_) {
-        return new RangeSelectItemModel.Unbaked(p_378056_, 1.0F, p_378674_, Optional.of(p_377985_));
+    public static ItemModel.Unbaked rangeSelect(RangeSelectItemModelProperty pProperty, ItemModel.Unbaked pFallback, List<RangeSelectItemModel.Entry> pEntries) {
+        return new RangeSelectItemModel.Unbaked(pProperty, 1.0F, pEntries, Optional.of(pFallback));
     }
 
-    public static ItemModel.Unbaked rangeSelect(RangeSelectItemModelProperty p_375806_, List<RangeSelectItemModel.Entry> p_376112_) {
-        return new RangeSelectItemModel.Unbaked(p_375806_, 1.0F, p_376112_, Optional.empty());
+    public static ItemModel.Unbaked rangeSelect(RangeSelectItemModelProperty pProperty, List<RangeSelectItemModel.Entry> pEntries) {
+        return new RangeSelectItemModel.Unbaked(pProperty, 1.0F, pEntries, Optional.empty());
     }
 
-    public static ItemModel.Unbaked rangeSelect(RangeSelectItemModelProperty p_376983_, float p_378096_, List<RangeSelectItemModel.Entry> p_378015_) {
-        return new RangeSelectItemModel.Unbaked(p_376983_, p_378096_, p_378015_, Optional.empty());
+    public static ItemModel.Unbaked rangeSelect(RangeSelectItemModelProperty pProperty, float pScale, List<RangeSelectItemModel.Entry> pEntries) {
+        return new RangeSelectItemModel.Unbaked(pProperty, pScale, pEntries, Optional.empty());
     }
 
-    public static ItemModel.Unbaked conditional(ConditionalItemModelProperty p_376924_, ItemModel.Unbaked p_375906_, ItemModel.Unbaked p_378638_) {
-        return new ConditionalItemModel.Unbaked(p_376924_, p_375906_, p_378638_);
+    public static ItemModel.Unbaked conditional(ConditionalItemModelProperty pProperty, ItemModel.Unbaked pOnTrue, ItemModel.Unbaked pOnFalse) {
+        return new ConditionalItemModel.Unbaked(pProperty, pOnTrue, pOnFalse);
     }
 
-    public static <T> SelectItemModel.SwitchCase<T> when(T p_375850_, ItemModel.Unbaked p_375472_) {
-        return new SelectItemModel.SwitchCase<>(List.of(p_375850_), p_375472_);
+    public static <T> SelectItemModel.SwitchCase<T> when(T pValue, ItemModel.Unbaked pModel) {
+        return new SelectItemModel.SwitchCase<>(List.of(pValue), pModel);
     }
 
-    public static <T> SelectItemModel.SwitchCase<T> when(List<T> p_376133_, ItemModel.Unbaked p_377675_) {
-        return new SelectItemModel.SwitchCase<>(p_376133_, p_377675_);
+    public static <T> SelectItemModel.SwitchCase<T> when(List<T> pValues, ItemModel.Unbaked pModel) {
+        return new SelectItemModel.SwitchCase<>(pValues, pModel);
     }
 
     @SafeVarargs
-    public static <T> ItemModel.Unbaked select(SelectItemModelProperty<T> p_377711_, ItemModel.Unbaked p_378198_, SelectItemModel.SwitchCase<T>... p_377556_) {
-        return select(p_377711_, p_378198_, List.of(p_377556_));
+    public static <T> ItemModel.Unbaked select(SelectItemModelProperty<T> pProperty, ItemModel.Unbaked pFallback, SelectItemModel.SwitchCase<T>... pCases) {
+        return select(pProperty, pFallback, List.of(pCases));
     }
 
     public static <T> ItemModel.Unbaked select(
-        SelectItemModelProperty<T> p_377040_, ItemModel.Unbaked p_377564_, List<SelectItemModel.SwitchCase<T>> p_378371_
+        SelectItemModelProperty<T> pProperty, ItemModel.Unbaked pFallback, List<SelectItemModel.SwitchCase<T>> pCases
     ) {
-        return new SelectItemModel.Unbaked(new SelectItemModel.UnbakedSwitch<>(p_377040_, p_378371_), Optional.of(p_377564_));
+        return new SelectItemModel.Unbaked(new SelectItemModel.UnbakedSwitch<>(pProperty, pCases), Optional.of(pFallback));
     }
 
     @SafeVarargs
-    public static <T> ItemModel.Unbaked select(SelectItemModelProperty<T> p_376548_, SelectItemModel.SwitchCase<T>... p_376322_) {
-        return select(p_376548_, List.of(p_376322_));
+    public static <T> ItemModel.Unbaked select(SelectItemModelProperty<T> pProperty, SelectItemModel.SwitchCase<T>... pCases) {
+        return select(pProperty, List.of(pCases));
     }
 
-    public static <T> ItemModel.Unbaked select(SelectItemModelProperty<T> p_375543_, List<SelectItemModel.SwitchCase<T>> p_375408_) {
-        return new SelectItemModel.Unbaked(new SelectItemModel.UnbakedSwitch<>(p_375543_, p_375408_), Optional.empty());
+    public static <T> ItemModel.Unbaked select(SelectItemModelProperty<T> pProperty, List<SelectItemModel.SwitchCase<T>> pCases) {
+        return new SelectItemModel.Unbaked(new SelectItemModel.UnbakedSwitch<>(pProperty, pCases), Optional.empty());
     }
 
     public static ConditionalItemModelProperty isUsingItem() {
         return new IsUsingItem();
     }
 
-    public static ConditionalItemModelProperty hasComponent(DataComponentType<?> p_377139_) {
-        return new HasComponent(p_377139_, false);
+    public static ConditionalItemModelProperty hasComponent(DataComponentType<?> pComponentType) {
+        return new HasComponent(pComponentType, false);
     }
 
-    public static ItemModel.Unbaked inOverworld(ItemModel.Unbaked p_377039_, ItemModel.Unbaked p_377612_) {
-        return select(new ContextDimension(), p_377612_, when(Level.OVERWORLD, p_377039_));
+    public static ItemModel.Unbaked inOverworld(ItemModel.Unbaked pInOverworldModel, ItemModel.Unbaked pNotInOverworldModel) {
+        return select(new ContextDimension(), pNotInOverworldModel, when(Level.OVERWORLD, pInOverworldModel));
     }
 
-    public static <T extends Comparable<T>> ItemModel.Unbaked selectBlockItemProperty(Property<T> p_378359_, ItemModel.Unbaked p_376594_, Map<T, ItemModel.Unbaked> p_377415_) {
-        List<SelectItemModel.SwitchCase<String>> list = p_377415_.entrySet().stream().sorted(Entry.comparingByKey()).map(p_375487_ -> {
-            String s = p_378359_.getName(p_375487_.getKey());
+    public static <T extends Comparable<T>> ItemModel.Unbaked selectBlockItemProperty(Property<T> pProperty, ItemModel.Unbaked pFallback, Map<T, ItemModel.Unbaked> pModelMap) {
+        List<SelectItemModel.SwitchCase<String>> list = pModelMap.entrySet().stream().sorted(Entry.comparingByKey()).map(p_375487_ -> {
+            String s = pProperty.getName(p_375487_.getKey());
             return new SelectItemModel.SwitchCase<>(List.of(s), p_375487_.getValue());
         }).toList();
-        return select(new ItemBlockState(p_378359_.getName()), p_376594_, list);
+        return select(new ItemBlockState(pProperty.getName()), pFallback, list);
     }
 
-    public static ItemModel.Unbaked isXmas(ItemModel.Unbaked p_375496_, ItemModel.Unbaked p_375877_) {
-        return select(LocalTime.create("MM-dd", "", Optional.empty()), p_375877_, List.of(when(List.of("12-24", "12-25", "12-26"), p_375496_)));
+    public static ItemModel.Unbaked isXmas(ItemModel.Unbaked pXmasModel, ItemModel.Unbaked pNormalModel) {
+        return select(LocalTime.create("MM-dd", "", Optional.empty()), pNormalModel, List.of(when(List.of("12-24", "12-25", "12-26"), pXmasModel)));
     }
 }

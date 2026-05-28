@@ -31,10 +31,10 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
     final KeyBindsScreen keyBindsScreen;
     private int maxNameWidth;
 
-    public KeyBindsList(KeyBindsScreen p_344272_, Minecraft p_345192_) {
-        super(p_345192_, p_344272_.width, p_344272_.layout.getContentHeight(), p_344272_.layout.getHeaderHeight(), 20);
-        this.keyBindsScreen = p_344272_;
-        KeyMapping[] akeymapping = ArrayUtils.clone((KeyMapping[])p_345192_.options.keyMappings);
+    public KeyBindsList(KeyBindsScreen pKeyBindsScreen, Minecraft pMinecraft) {
+        super(pMinecraft, pKeyBindsScreen.width, pKeyBindsScreen.layout.getContentHeight(), pKeyBindsScreen.layout.getHeaderHeight(), 20);
+        this.keyBindsScreen = pKeyBindsScreen;
+        KeyMapping[] akeymapping = ArrayUtils.clone((KeyMapping[])pMinecraft.options.keyMappings);
         Arrays.sort((Object[])akeymapping);
         String s = null;
 
@@ -46,7 +46,7 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
             }
 
             Component component = Component.translatable(keymapping.getName());
-            int i = p_345192_.font.width(component);
+            int i = pMinecraft.font.width(component);
             if (i > this.maxNameWidth) {
                 this.maxNameWidth = i;
             }
@@ -74,8 +74,8 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
         final Component name;
         private final int width;
 
-        public CategoryEntry(final Component p_344163_) {
-            this.name = p_344163_;
+        public CategoryEntry(final Component pName) {
+            this.name = pName;
             this.width = KeyBindsList.this.minecraft.font.width(this.name);
         }
 
@@ -143,24 +143,24 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
         private final Button resetButton;
         private boolean hasCollision = false;
 
-        KeyEntry(final KeyMapping p_343088_, final Component p_343976_) {
-            this.key = p_343088_;
-            this.name = p_343976_;
-            this.changeButton = Button.builder(p_343976_, p_342196_ -> {
-                    KeyBindsList.this.keyBindsScreen.selectedKey = p_343088_;
+        KeyEntry(final KeyMapping pKey, final Component pName) {
+            this.key = pKey;
+            this.name = pName;
+            this.changeButton = Button.builder(pName, p_342196_ -> {
+                    KeyBindsList.this.keyBindsScreen.selectedKey = pKey;
                     KeyBindsList.this.resetMappingAndUpdateButtons();
                 })
                 .bounds(0, 0, 75, 20)
                 .createNarration(
-                    p_342179_ -> p_343088_.isUnbound()
-                            ? Component.translatable("narrator.controls.unbound", p_343976_)
-                            : Component.translatable("narrator.controls.bound", p_343976_, p_342179_.get())
+                    p_342179_ -> pKey.isUnbound()
+                            ? Component.translatable("narrator.controls.unbound", pName)
+                            : Component.translatable("narrator.controls.bound", pName, p_342179_.get())
                 )
                 .build();
             this.resetButton = Button.builder(RESET_BUTTON_TITLE, p_357685_ -> {
-                p_343088_.setKey(p_343088_.getDefaultKey());
+                pKey.setKey(pKey.getDefaultKey());
                 KeyBindsList.this.resetMappingAndUpdateButtons();
-            }).bounds(0, 0, 50, 20).createNarration(p_344192_ -> Component.translatable("narrator.controls.reset", p_343976_)).build();
+            }).bounds(0, 0, 50, 20).createNarration(p_344192_ -> Component.translatable("narrator.controls.reset", pName)).build();
             this.refreshEntry();
         }
 

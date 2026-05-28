@@ -63,23 +63,23 @@ public class FarmBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(BlockState p_53272_, LevelReader p_53273_, BlockPos p_53274_) {
-        BlockState blockstate = p_53273_.getBlockState(p_53274_.above());
+    protected boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockState blockstate = pLevel.getBlockState(pPos.above());
         return !blockstate.isSolid() || blockstate.getBlock() instanceof FenceGateBlock || blockstate.getBlock() instanceof MovingPistonBlock;
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_53249_) {
-        return !this.defaultBlockState().canSurvive(p_53249_.getLevel(), p_53249_.getClickedPos()) ? Blocks.DIRT.defaultBlockState() : super.getStateForPlacement(p_53249_);
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return !this.defaultBlockState().canSurvive(pContext.getLevel(), pContext.getClickedPos()) ? Blocks.DIRT.defaultBlockState() : super.getStateForPlacement(pContext);
     }
 
     @Override
-    protected boolean useShapeForLightOcclusion(BlockState p_53295_) {
+    protected boolean useShapeForLightOcclusion(BlockState pState) {
         return true;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_53290_, BlockGetter p_53291_, BlockPos p_53292_, CollisionContext p_53293_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
@@ -117,19 +117,19 @@ public class FarmBlock extends Block {
         super.fallOn(p_153227_, p_153228_, p_153229_, p_153230_, p_153231_);
     }
 
-    public static void turnToDirt(@Nullable Entity p_270981_, BlockState p_270402_, Level p_270568_, BlockPos p_270551_) {
-        BlockState blockstate = pushEntitiesUp(p_270402_, Blocks.DIRT.defaultBlockState(), p_270568_, p_270551_);
-        p_270568_.setBlockAndUpdate(p_270551_, blockstate);
-        p_270568_.gameEvent(GameEvent.BLOCK_CHANGE, p_270551_, GameEvent.Context.of(p_270981_, blockstate));
+    public static void turnToDirt(@Nullable Entity pEntity, BlockState pState, Level pLevel, BlockPos pPos) {
+        BlockState blockstate = pushEntitiesUp(pState, Blocks.DIRT.defaultBlockState(), pLevel, pPos);
+        pLevel.setBlockAndUpdate(pPos, blockstate);
+        pLevel.gameEvent(GameEvent.BLOCK_CHANGE, pPos, GameEvent.Context.of(pEntity, blockstate));
     }
 
-    private static boolean shouldMaintainFarmland(BlockGetter p_279219_, BlockPos p_279209_) {
-        return p_279219_.getBlockState(p_279209_.above()).is(BlockTags.MAINTAINS_FARMLAND);
+    private static boolean shouldMaintainFarmland(BlockGetter pLevel, BlockPos pPos) {
+        return pLevel.getBlockState(pPos.above()).is(BlockTags.MAINTAINS_FARMLAND);
     }
 
-    private static boolean isNearWater(LevelReader p_53259_, BlockPos p_53260_) {
-        for (BlockPos blockpos : BlockPos.betweenClosed(p_53260_.offset(-4, 0, -4), p_53260_.offset(4, 1, 4))) {
-            if (p_53259_.getFluidState(blockpos).is(FluidTags.WATER)) {
+    private static boolean isNearWater(LevelReader pLevel, BlockPos pPos) {
+        for (BlockPos blockpos : BlockPos.betweenClosed(pPos.offset(-4, 0, -4), pPos.offset(4, 1, 4))) {
+            if (pLevel.getFluidState(blockpos).is(FluidTags.WATER)) {
                 return true;
             }
         }
@@ -138,8 +138,8 @@ public class FarmBlock extends Block {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_53283_) {
-        p_53283_.add(MOISTURE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(MOISTURE);
     }
 
     @Override

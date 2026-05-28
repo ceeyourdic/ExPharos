@@ -14,16 +14,16 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class ImageWidget extends AbstractWidget {
-    ImageWidget(int p_275550_, int p_275723_, int p_301266_, int p_297426_) {
-        super(p_275550_, p_275723_, p_301266_, p_297426_, CommonComponents.EMPTY);
+    ImageWidget(int pX, int pY, int pWidth, int pHeight) {
+        super(pX, pY, pWidth, pHeight, CommonComponents.EMPTY);
     }
 
-    public static ImageWidget texture(int p_298293_, int p_301221_, ResourceLocation p_299739_, int p_297694_, int p_300459_) {
-        return new ImageWidget.Texture(0, 0, p_298293_, p_301221_, p_299739_, p_297694_, p_300459_);
+    public static ImageWidget texture(int pWidth, int pHeight, ResourceLocation pTexture, int pTextureWidth, int pTextureHeight) {
+        return new ImageWidget.Texture(0, 0, pWidth, pHeight, pTexture, pTextureWidth, pTextureHeight);
     }
 
-    public static ImageWidget sprite(int p_299633_, int p_299377_, ResourceLocation p_298615_) {
-        return new ImageWidget.Sprite(0, 0, p_299633_, p_299377_, p_298615_);
+    public static ImageWidget sprite(int pWidth, int pHeight, ResourceLocation pSprite) {
+        return new ImageWidget.Sprite(0, 0, pWidth, pHeight, pSprite);
     }
 
     @Override
@@ -49,9 +49,9 @@ public abstract class ImageWidget extends AbstractWidget {
     static class Sprite extends ImageWidget {
         private final ResourceLocation sprite;
 
-        public Sprite(int p_299930_, int p_297218_, int p_298462_, int p_297563_, ResourceLocation p_299269_) {
-            super(p_299930_, p_297218_, p_298462_, p_297563_);
-            this.sprite = p_299269_;
+        public Sprite(int pX, int pY, int pWidth, int pHeight, ResourceLocation pSprite) {
+            super(pX, pY, pWidth, pHeight);
+            this.sprite = pSprite;
         }
 
         @Override
@@ -66,11 +66,11 @@ public abstract class ImageWidget extends AbstractWidget {
         private final int textureWidth;
         private final int textureHeight;
 
-        public Texture(int p_299083_, int p_301299_, int p_299901_, int p_299822_, ResourceLocation p_299550_, int p_298841_, int p_297816_) {
-            super(p_299083_, p_301299_, p_299901_, p_299822_);
-            this.texture = p_299550_;
-            this.textureWidth = p_298841_;
-            this.textureHeight = p_297816_;
+        public Texture(int pX, int pY, int pWidth, int pHeight, ResourceLocation pTexture, int pTextureWidth, int pTextureHeight) {
+            super(pX, pY, pWidth, pHeight);
+            this.texture = pTexture;
+            this.textureWidth = pTextureWidth;
+            this.textureHeight = pTextureHeight;
         }
 
         @Override

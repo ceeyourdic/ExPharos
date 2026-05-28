@@ -67,17 +67,17 @@ public record SpawnData(CompoundTag entityToSpawn, Optional<SpawnData.CustomSpaw
                     .apply(p_286217_, SpawnData.CustomSpawnRules::new)
         );
 
-        private static DataResult<InclusiveRange<Integer>> checkLightBoundaries(InclusiveRange<Integer> p_186593_) {
-            return !LIGHT_RANGE.contains(p_186593_) ? DataResult.error(() -> "Light values must be withing range " + LIGHT_RANGE) : DataResult.success(p_186593_);
+        private static DataResult<InclusiveRange<Integer>> checkLightBoundaries(InclusiveRange<Integer> pLightValues) {
+            return !LIGHT_RANGE.contains(pLightValues) ? DataResult.error(() -> "Light values must be withing range " + LIGHT_RANGE) : DataResult.success(pLightValues);
         }
 
-        private static MapCodec<InclusiveRange<Integer>> lightLimit(String p_286409_) {
-            return InclusiveRange.INT.lenientOptionalFieldOf(p_286409_, LIGHT_RANGE).validate(SpawnData.CustomSpawnRules::checkLightBoundaries);
+        private static MapCodec<InclusiveRange<Integer>> lightLimit(String pFieldName) {
+            return InclusiveRange.INT.lenientOptionalFieldOf(pFieldName, LIGHT_RANGE).validate(SpawnData.CustomSpawnRules::checkLightBoundaries);
         }
 
-        public boolean isValidPosition(BlockPos p_327859_, ServerLevel p_328424_) {
-            return this.blockLightLimit.isValueInRange(p_328424_.getBrightness(LightLayer.BLOCK, p_327859_))
-                && this.skyLightLimit.isValueInRange(p_328424_.getBrightness(LightLayer.SKY, p_327859_));
+        public boolean isValidPosition(BlockPos pPos, ServerLevel pLevel) {
+            return this.blockLightLimit.isValueInRange(pLevel.getBrightness(LightLayer.BLOCK, pPos))
+                && this.skyLightLimit.isValueInRange(pLevel.getBrightness(LightLayer.SKY, pPos));
         }
     }
 }

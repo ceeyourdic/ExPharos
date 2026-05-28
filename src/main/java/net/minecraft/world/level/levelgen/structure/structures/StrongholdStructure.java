@@ -20,29 +20,29 @@ public class StrongholdStructure extends Structure {
         return Optional.of(new Structure.GenerationStub(p_229941_.chunkPos().getWorldPosition(), p_229944_ -> generatePieces(p_229944_, p_229941_)));
     }
 
-    private static void generatePieces(StructurePiecesBuilder p_229946_, Structure.GenerationContext p_229947_) {
+    private static void generatePieces(StructurePiecesBuilder pBuilder, Structure.GenerationContext pContext) {
         int i = 0;
 
         StrongholdPieces.StartPiece strongholdpieces$startpiece;
         do {
-            p_229946_.clear();
-            p_229947_.random().setLargeFeatureSeed(p_229947_.seed() + (long)(i++), p_229947_.chunkPos().x, p_229947_.chunkPos().z);
+            pBuilder.clear();
+            pContext.random().setLargeFeatureSeed(pContext.seed() + (long)(i++), pContext.chunkPos().x, pContext.chunkPos().z);
             StrongholdPieces.resetPieces();
             strongholdpieces$startpiece = new StrongholdPieces.StartPiece(
-                p_229947_.random(), p_229947_.chunkPos().getBlockX(2), p_229947_.chunkPos().getBlockZ(2)
+                pContext.random(), pContext.chunkPos().getBlockX(2), pContext.chunkPos().getBlockZ(2)
             );
-            p_229946_.addPiece(strongholdpieces$startpiece);
-            strongholdpieces$startpiece.addChildren(strongholdpieces$startpiece, p_229946_, p_229947_.random());
+            pBuilder.addPiece(strongholdpieces$startpiece);
+            strongholdpieces$startpiece.addChildren(strongholdpieces$startpiece, pBuilder, pContext.random());
             List<StructurePiece> list = strongholdpieces$startpiece.pendingChildren;
 
             while (!list.isEmpty()) {
-                int j = p_229947_.random().nextInt(list.size());
+                int j = pContext.random().nextInt(list.size());
                 StructurePiece structurepiece = list.remove(j);
-                structurepiece.addChildren(strongholdpieces$startpiece, p_229946_, p_229947_.random());
+                structurepiece.addChildren(strongholdpieces$startpiece, pBuilder, pContext.random());
             }
 
-            p_229946_.moveBelowSeaLevel(p_229947_.chunkGenerator().getSeaLevel(), p_229947_.chunkGenerator().getMinY(), p_229947_.random(), 10);
-        } while (p_229946_.isEmpty() || strongholdpieces$startpiece.portalRoomPiece == null);
+            pBuilder.moveBelowSeaLevel(pContext.chunkGenerator().getSeaLevel(), pContext.chunkGenerator().getMinY(), pContext.random(), 10);
+        } while (pBuilder.isEmpty() || strongholdpieces$startpiece.portalRoomPiece == null);
     }
 
     @Override

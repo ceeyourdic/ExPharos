@@ -45,9 +45,9 @@ public class JigsawBlockEditScreen extends Screen {
     private Button generateButton;
     private JigsawBlockEntity.JointType joint;
 
-    public JigsawBlockEditScreen(JigsawBlockEntity p_98949_) {
+    public JigsawBlockEditScreen(JigsawBlockEntity pJigsawEntity) {
         super(GameNarrator.NO_TITLE);
-        this.jigsawEntity = p_98949_;
+        this.jigsawEntity = pJigsawEntity;
     }
 
     private void onDone() {
@@ -76,9 +76,9 @@ public class JigsawBlockEditScreen extends Screen {
             );
     }
 
-    private int parseAsInt(String p_311580_) {
+    private int parseAsInt(String pString) {
         try {
-            return Integer.parseInt(p_311580_);
+            return Integer.parseInt(pString);
         } catch (NumberFormatException numberformatexception) {
             return 0;
         }
@@ -177,8 +177,8 @@ public class JigsawBlockEditScreen extends Screen {
         this.renderTransparentBackground(p_331164_);
     }
 
-    public static boolean isValidResourceLocation(String p_344108_) {
-        return ResourceLocation.tryParse(p_344108_) != null;
+    public static boolean isValidResourceLocation(String pLocation) {
+        return ResourceLocation.tryParse(pLocation) != null;
     }
 
     private void updateValidity() {
@@ -188,7 +188,7 @@ public class JigsawBlockEditScreen extends Screen {
     }
 
     @Override
-    public void resize(Minecraft p_98960_, int p_98961_, int p_98962_) {
+    public void resize(Minecraft pMinecraft, int pWidth, int pHeight) {
         String s = this.nameEdit.getValue();
         String s1 = this.targetEdit.getValue();
         String s2 = this.poolEdit.getValue();
@@ -197,7 +197,7 @@ public class JigsawBlockEditScreen extends Screen {
         String s5 = this.placementPriorityEdit.getValue();
         int i = this.levels;
         JigsawBlockEntity.JointType jigsawblockentity$jointtype = this.joint;
-        this.init(p_98960_, p_98961_, p_98962_);
+        this.init(pMinecraft, pWidth, pHeight);
         this.nameEdit.setValue(s);
         this.targetEdit.setValue(s1);
         this.poolEdit.setValue(s2);
@@ -210,10 +210,10 @@ public class JigsawBlockEditScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int p_98951_, int p_98952_, int p_98953_) {
-        if (super.keyPressed(p_98951_, p_98952_, p_98953_)) {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (super.keyPressed(pKeyCode, pScanCode, pModifiers)) {
             return true;
-        } else if (!this.doneButton.active || p_98951_ != 257 && p_98951_ != 335) {
+        } else if (!this.doneButton.active || pKeyCode != 257 && pKeyCode != 335) {
             return false;
         } else {
             this.onDone();

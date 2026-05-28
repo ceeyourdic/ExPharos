@@ -34,8 +34,8 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
         super(p_37491_, p_37492_);
     }
 
-    public ThrownEnderpearl(Level p_37499_, LivingEntity p_37500_, ItemStack p_365479_) {
-        super(EntityType.ENDER_PEARL, p_37500_, p_37499_, p_365479_);
+    public ThrownEnderpearl(Level pLevel, LivingEntity pOwner, ItemStack pItem) {
+        super(EntityType.ENDER_PEARL, pOwner, pLevel, pItem);
     }
 
     @Override
@@ -94,14 +94,14 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
     }
 
     @Override
-    protected void onHitEntity(EntityHitResult p_37502_) {
-        super.onHitEntity(p_37502_);
-        p_37502_.getEntity().hurt(this.damageSources().thrown(this, this.getOwner()), 0.0F);
+    protected void onHitEntity(EntityHitResult pResult) {
+        super.onHitEntity(pResult);
+        pResult.getEntity().hurt(this.damageSources().thrown(this, this.getOwner()), 0.0F);
     }
 
     @Override
-    protected void onHit(HitResult p_37504_) {
-        super.onHit(p_37504_);
+    protected void onHit(HitResult pResult) {
+        super.onHit(pResult);
 
         for (int i = 0; i < 32; i++) {
             this.level()
@@ -177,11 +177,11 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
         }
     }
 
-    private static boolean isAllowedToTeleportOwner(Entity p_343823_, Level p_342445_) {
-        if (p_343823_.level().dimension() == p_342445_.dimension()) {
-            return !(p_343823_ instanceof LivingEntity livingentity) ? p_343823_.isAlive() : livingentity.isAlive() && !livingentity.isSleeping();
+    private static boolean isAllowedToTeleportOwner(Entity pEntity, Level pLevel) {
+        if (pEntity.level().dimension() == pLevel.dimension()) {
+            return !(pEntity instanceof LivingEntity livingentity) ? pEntity.isAlive() : livingentity.isAlive() && !livingentity.isSleeping();
         } else {
-            return p_343823_.canUsePortal(true);
+            return pEntity.canUsePortal(true);
         }
     }
 
@@ -211,8 +211,8 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
         }
     }
 
-    private void playSound(Level p_344184_, Vec3 p_345358_) {
-        p_344184_.playSound(null, p_345358_.x, p_345358_.y, p_345358_.z, SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS);
+    private void playSound(Level pLevel, Vec3 pPos) {
+        pLevel.playSound(null, pPos.x, pPos.y, pPos.z, SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS);
     }
 
     @Nullable

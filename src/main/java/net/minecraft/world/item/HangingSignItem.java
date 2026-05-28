@@ -8,8 +8,8 @@ import net.minecraft.world.level.block.WallHangingSignBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class HangingSignItem extends SignItem {
-    public HangingSignItem(Block p_251582_, Block p_250734_, Item.Properties p_250266_) {
-        super(p_250266_, p_251582_, p_250734_, Direction.UP);
+    public HangingSignItem(Block pBlock, Block pWallBlock, Item.Properties pProperties) {
+        super(pProperties, pBlock, pWallBlock, Direction.UP);
     }
 
     @Override

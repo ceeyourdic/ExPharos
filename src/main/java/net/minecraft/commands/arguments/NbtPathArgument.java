@@ -54,83 +54,83 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
         return new NbtPathArgument();
     }
 
-    public static NbtPathArgument.NbtPath getPath(CommandContext<CommandSourceStack> p_99499_, String p_99500_) {
-        return p_99499_.getArgument(p_99500_, NbtPathArgument.NbtPath.class);
+    public static NbtPathArgument.NbtPath getPath(CommandContext<CommandSourceStack> pContext, String pName) {
+        return pContext.getArgument(pName, NbtPathArgument.NbtPath.class);
     }
 
-    public NbtPathArgument.NbtPath parse(StringReader p_99491_) throws CommandSyntaxException {
+    public NbtPathArgument.NbtPath parse(StringReader pReader) throws CommandSyntaxException {
         List<NbtPathArgument.Node> list = Lists.newArrayList();
-        int i = p_99491_.getCursor();
+        int i = pReader.getCursor();
         Object2IntMap<NbtPathArgument.Node> object2intmap = new Object2IntOpenHashMap<>();
         boolean flag = true;
 
-        while (p_99491_.canRead() && p_99491_.peek() != ' ') {
-            NbtPathArgument.Node nbtpathargument$node = parseNode(p_99491_, flag);
+        while (pReader.canRead() && pReader.peek() != ' ') {
+            NbtPathArgument.Node nbtpathargument$node = parseNode(pReader, flag);
             list.add(nbtpathargument$node);
-            object2intmap.put(nbtpathargument$node, p_99491_.getCursor() - i);
+            object2intmap.put(nbtpathargument$node, pReader.getCursor() - i);
             flag = false;
-            if (p_99491_.canRead()) {
-                char c0 = p_99491_.peek();
+            if (pReader.canRead()) {
+                char c0 = pReader.peek();
                 if (c0 != ' ' && c0 != '[' && c0 != '{') {
-                    p_99491_.expect('.');
+                    pReader.expect('.');
                 }
             }
         }
 
-        return new NbtPathArgument.NbtPath(p_99491_.getString().substring(i, p_99491_.getCursor()), list.toArray(new NbtPathArgument.Node[0]), object2intmap);
+        return new NbtPathArgument.NbtPath(pReader.getString().substring(i, pReader.getCursor()), list.toArray(new NbtPathArgument.Node[0]), object2intmap);
     }
 
-    private static NbtPathArgument.Node parseNode(StringReader p_99496_, boolean p_99497_) throws CommandSyntaxException {
-        return (NbtPathArgument.Node)(switch (p_99496_.peek()) {
-            case '"', '\'' -> readObjectNode(p_99496_, p_99496_.readString());
+    private static NbtPathArgument.Node parseNode(StringReader pReader, boolean pFirst) throws CommandSyntaxException {
+        return (NbtPathArgument.Node)(switch (pReader.peek()) {
+            case '"', '\'' -> readObjectNode(pReader, pReader.readString());
             case '[' -> {
-                p_99496_.skip();
-                int i = p_99496_.peek();
+                pReader.skip();
+                int i = pReader.peek();
                 if (i == 123) {
-                    CompoundTag compoundtag1 = new TagParser(p_99496_).readStruct();
-                    p_99496_.expect(']');
+                    CompoundTag compoundtag1 = new TagParser(pReader).readStruct();
+                    pReader.expect(']');
                     yield new NbtPathArgument.MatchElementNode(compoundtag1);
                 } else if (i == 93) {
-                    p_99496_.skip();
+                    pReader.skip();
                     yield NbtPathArgument.AllElementsNode.INSTANCE;
                 } else {
-                    int j = p_99496_.readInt();
-                    p_99496_.expect(']');
+                    int j = pReader.readInt();
+                    pReader.expect(']');
                     yield new NbtPathArgument.IndexedElementNode(j);
                 }
             }
             case '{' -> {
-                if (!p_99497_) {
-                    throw ERROR_INVALID_NODE.createWithContext(p_99496_);
+                if (!pFirst) {
+                    throw ERROR_INVALID_NODE.createWithContext(pReader);
                 }
 
-                CompoundTag compoundtag = new TagParser(p_99496_).readStruct();
+                CompoundTag compoundtag = new TagParser(pReader).readStruct();
                 yield new NbtPathArgument.MatchRootObjectNode(compoundtag);
             }
-            default -> readObjectNode(p_99496_, readUnquotedName(p_99496_));
+            default -> readObjectNode(pReader, readUnquotedName(pReader));
         });
     }
 
-    private static NbtPathArgument.Node readObjectNode(StringReader p_99493_, String p_99494_) throws CommandSyntaxException {
-        if (p_99493_.canRead() && p_99493_.peek() == '{') {
-            CompoundTag compoundtag = new TagParser(p_99493_).readStruct();
-            return new NbtPathArgument.MatchObjectNode(p_99494_, compoundtag);
+    private static NbtPathArgument.Node readObjectNode(StringReader pReader, String pName) throws CommandSyntaxException {
+        if (pReader.canRead() && pReader.peek() == '{') {
+            CompoundTag compoundtag = new TagParser(pReader).readStruct();
+            return new NbtPathArgument.MatchObjectNode(pName, compoundtag);
         } else {
-            return new NbtPathArgument.CompoundChildNode(p_99494_);
+            return new NbtPathArgument.CompoundChildNode(pName);
         }
     }
 
-    private static String readUnquotedName(StringReader p_99509_) throws CommandSyntaxException {
-        int i = p_99509_.getCursor();
+    private static String readUnquotedName(StringReader pReader) throws CommandSyntaxException {
+        int i = pReader.getCursor();
 
-        while (p_99509_.canRead() && isAllowedInUnquotedName(p_99509_.peek())) {
-            p_99509_.skip();
+        while (pReader.canRead() && isAllowedInUnquotedName(pReader.peek())) {
+            pReader.skip();
         }
 
-        if (p_99509_.getCursor() == i) {
-            throw ERROR_INVALID_NODE.createWithContext(p_99509_);
+        if (pReader.getCursor() == i) {
+            throw ERROR_INVALID_NODE.createWithContext(pReader);
         } else {
-            return p_99509_.getString().substring(i, p_99509_.getCursor());
+            return pReader.getString().substring(i, pReader.getCursor());
         }
     }
 
@@ -139,19 +139,19 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
         return EXAMPLES;
     }
 
-    private static boolean isAllowedInUnquotedName(char p_99489_) {
-        return p_99489_ != ' '
-            && p_99489_ != '"'
-            && p_99489_ != '\''
-            && p_99489_ != '['
-            && p_99489_ != ']'
-            && p_99489_ != '.'
-            && p_99489_ != '{'
-            && p_99489_ != '}';
+    private static boolean isAllowedInUnquotedName(char pCh) {
+        return pCh != ' '
+            && pCh != '"'
+            && pCh != '\''
+            && pCh != '['
+            && pCh != ']'
+            && pCh != '.'
+            && pCh != '{'
+            && pCh != '}';
     }
 
-    static Predicate<Tag> createTagPredicate(CompoundTag p_99511_) {
-        return p_99507_ -> NbtUtils.compareNbt(p_99511_, p_99507_, true);
+    static Predicate<Tag> createTagPredicate(CompoundTag pTag) {
+        return p_99507_ -> NbtUtils.compareNbt(pTag, p_99507_, true);
     }
 
     static class AllElementsNode implements NbtPathArgument.Node {
@@ -233,8 +233,8 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
     static class CompoundChildNode implements NbtPathArgument.Node {
         private final String name;
 
-        public CompoundChildNode(String p_99533_) {
-            this.name = p_99533_;
+        public CompoundChildNode(String pName) {
+            this.name = pName;
         }
 
         @Override
@@ -294,8 +294,8 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
     static class IndexedElementNode implements NbtPathArgument.Node {
         private final int index;
 
-        public IndexedElementNode(int p_99549_) {
-            this.index = p_99549_;
+        public IndexedElementNode(int pIndex) {
+            this.index = pIndex;
         }
 
         @Override
@@ -355,9 +355,9 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
         private final CompoundTag pattern;
         private final Predicate<Tag> predicate;
 
-        public MatchElementNode(CompoundTag p_99566_) {
-            this.pattern = p_99566_;
-            this.predicate = NbtPathArgument.createTagPredicate(p_99566_);
+        public MatchElementNode(CompoundTag pPattern) {
+            this.pattern = pPattern;
+            this.predicate = NbtPathArgument.createTagPredicate(pPattern);
         }
 
         @Override
@@ -433,10 +433,10 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
         private final CompoundTag pattern;
         private final Predicate<Tag> predicate;
 
-        public MatchObjectNode(String p_99588_, CompoundTag p_99589_) {
-            this.name = p_99588_;
-            this.pattern = p_99589_;
-            this.predicate = NbtPathArgument.createTagPredicate(p_99589_);
+        public MatchObjectNode(String pName, CompoundTag pPattern) {
+            this.name = pName;
+            this.pattern = pPattern;
+            this.predicate = NbtPathArgument.createTagPredicate(pPattern);
         }
 
         @Override
@@ -501,8 +501,8 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
     static class MatchRootObjectNode implements NbtPathArgument.Node {
         private final Predicate<Tag> predicate;
 
-        public MatchRootObjectNode(CompoundTag p_99605_) {
-            this.predicate = NbtPathArgument.createTagPredicate(p_99605_);
+        public MatchRootObjectNode(CompoundTag pTag) {
+            this.predicate = NbtPathArgument.createTagPredicate(pTag);
         }
 
         @Override
@@ -546,18 +546,18 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
             }
         }, NbtPathArgument.NbtPath::asString);
 
-        public static NbtPathArgument.NbtPath of(String p_333565_) throws CommandSyntaxException {
-            return new NbtPathArgument().parse(new StringReader(p_333565_));
+        public static NbtPathArgument.NbtPath of(String pPath) throws CommandSyntaxException {
+            return new NbtPathArgument().parse(new StringReader(pPath));
         }
 
-        public NbtPath(String p_99623_, NbtPathArgument.Node[] p_99624_, Object2IntMap<NbtPathArgument.Node> p_99625_) {
-            this.original = p_99623_;
-            this.nodes = p_99624_;
-            this.nodeToOriginalPosition = p_99625_;
+        public NbtPath(String pOriginal, NbtPathArgument.Node[] pNodes, Object2IntMap<NbtPathArgument.Node> pNodeToOriginPosition) {
+            this.original = pOriginal;
+            this.nodes = pNodes;
+            this.nodeToOriginalPosition = pNodeToOriginPosition;
         }
 
-        public List<Tag> get(Tag p_99639_) throws CommandSyntaxException {
-            List<Tag> list = Collections.singletonList(p_99639_);
+        public List<Tag> get(Tag pTag) throws CommandSyntaxException {
+            List<Tag> list = Collections.singletonList(pTag);
 
             for (NbtPathArgument.Node nbtpathargument$node : this.nodes) {
                 list = nbtpathargument$node.get(list);
@@ -569,8 +569,8 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
             return list;
         }
 
-        public int countMatching(Tag p_99644_) {
-            List<Tag> list = Collections.singletonList(p_99644_);
+        public int countMatching(Tag pTag) {
+            List<Tag> list = Collections.singletonList(pTag);
 
             for (NbtPathArgument.Node nbtpathargument$node : this.nodes) {
                 list = nbtpathargument$node.get(list);
@@ -582,8 +582,8 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
             return list.size();
         }
 
-        private List<Tag> getOrCreateParents(Tag p_99651_) throws CommandSyntaxException {
-            List<Tag> list = Collections.singletonList(p_99651_);
+        private List<Tag> getOrCreateParents(Tag pTag) throws CommandSyntaxException {
+            List<Tag> list = Collections.singletonList(pTag);
 
             for (int i = 0; i < this.nodes.length - 1; i++) {
                 NbtPathArgument.Node nbtpathargument$node = this.nodes[i];
@@ -597,30 +597,30 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
             return list;
         }
 
-        public List<Tag> getOrCreate(Tag p_99641_, Supplier<Tag> p_99642_) throws CommandSyntaxException {
-            List<Tag> list = this.getOrCreateParents(p_99641_);
+        public List<Tag> getOrCreate(Tag pTag, Supplier<Tag> pSupplier) throws CommandSyntaxException {
+            List<Tag> list = this.getOrCreateParents(pTag);
             NbtPathArgument.Node nbtpathargument$node = this.nodes[this.nodes.length - 1];
-            return nbtpathargument$node.getOrCreate(list, p_99642_);
+            return nbtpathargument$node.getOrCreate(list, pSupplier);
         }
 
-        private static int apply(List<Tag> p_99636_, Function<Tag, Integer> p_99637_) {
-            return p_99636_.stream().map(p_99637_).reduce(0, (p_99633_, p_99634_) -> p_99633_ + p_99634_);
+        private static int apply(List<Tag> pTags, Function<Tag, Integer> pFunction) {
+            return pTags.stream().map(pFunction).reduce(0, (p_99633_, p_99634_) -> p_99633_ + p_99634_);
         }
 
-        public static boolean isTooDeep(Tag p_263392_, int p_263386_) {
-            if (p_263386_ >= 512) {
+        public static boolean isTooDeep(Tag pTag, int pCurrentDepth) {
+            if (pCurrentDepth >= 512) {
                 return true;
             } else {
-                if (p_263392_ instanceof CompoundTag compoundtag) {
+                if (pTag instanceof CompoundTag compoundtag) {
                     for (String s : compoundtag.getAllKeys()) {
                         Tag tag = compoundtag.get(s);
-                        if (tag != null && isTooDeep(tag, p_263386_ + 1)) {
+                        if (tag != null && isTooDeep(tag, pCurrentDepth + 1)) {
                             return true;
                         }
                     }
-                } else if (p_263392_ instanceof ListTag) {
-                    for (Tag tag1 : (ListTag)p_263392_) {
-                        if (isTooDeep(tag1, p_263386_ + 1)) {
+                } else if (pTag instanceof ListTag) {
+                    for (Tag tag1 : (ListTag)pTag) {
+                        if (isTooDeep(tag1, pCurrentDepth + 1)) {
                             return true;
                         }
                     }
@@ -630,12 +630,12 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
             }
         }
 
-        public int set(Tag p_169536_, Tag p_169537_) throws CommandSyntaxException {
-            if (isTooDeep(p_169537_, this.estimatePathDepth())) {
+        public int set(Tag pTag, Tag pOther) throws CommandSyntaxException {
+            if (isTooDeep(pOther, this.estimatePathDepth())) {
                 throw NbtPathArgument.ERROR_DATA_TOO_DEEP.create();
             } else {
-                Tag tag = p_169537_.copy();
-                List<Tag> list = this.getOrCreateParents(p_169536_);
+                Tag tag = pOther.copy();
+                List<Tag> list = this.getOrCreateParents(pTag);
                 if (list.isEmpty()) {
                     return 0;
                 } else {
@@ -657,10 +657,10 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
             return this.nodes.length;
         }
 
-        public int insert(int p_263397_, CompoundTag p_263348_, List<Tag> p_263419_) throws CommandSyntaxException {
-            List<Tag> list = new ArrayList<>(p_263419_.size());
+        public int insert(int pIndex, CompoundTag pRootTag, List<Tag> pTagsToInsert) throws CommandSyntaxException {
+            List<Tag> list = new ArrayList<>(pTagsToInsert.size());
 
-            for (Tag tag : p_263419_) {
+            for (Tag tag : pTagsToInsert) {
                 Tag tag1 = tag.copy();
                 list.add(tag1);
                 if (isTooDeep(tag1, this.estimatePathDepth())) {
@@ -668,7 +668,7 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
                 }
             }
 
-            Collection<Tag> collection = this.getOrCreate(p_263348_, ListTag::new);
+            Collection<Tag> collection = this.getOrCreate(pRootTag, ListTag::new);
             int j = 0;
             boolean flag1 = false;
 
@@ -678,7 +678,7 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
                 }
 
                 boolean flag = false;
-                int i = p_263397_ < 0 ? collectiontag.size() + p_263397_ + 1 : p_263397_;
+                int i = pIndex < 0 ? collectiontag.size() + pIndex + 1 : pIndex;
 
                 for (Tag tag3 : list) {
                     try {
@@ -698,8 +698,8 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
             return j;
         }
 
-        public int remove(Tag p_99649_) {
-            List<Tag> list = Collections.singletonList(p_99649_);
+        public int remove(Tag pTag) {
+            List<Tag> list = Collections.singletonList(pTag);
 
             for (int i = 0; i < this.nodes.length - 1; i++) {
                 list = this.nodes[i].get(list);
@@ -709,8 +709,8 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
             return apply(list, nbtpathargument$node::removeTag);
         }
 
-        private CommandSyntaxException createNotFoundException(NbtPathArgument.Node p_99627_) {
-            int i = this.nodeToOriginalPosition.getInt(p_99627_);
+        private CommandSyntaxException createNotFoundException(NbtPathArgument.Node pNode) {
+            int i = this.nodeToOriginalPosition.getInt(pNode);
             return NbtPathArgument.ERROR_NOTHING_FOUND.create(this.original.substring(0, i));
         }
 
@@ -725,29 +725,29 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
     }
 
     interface Node {
-        void getTag(Tag p_99666_, List<Tag> p_99667_);
+        void getTag(Tag pTag, List<Tag> pTags);
 
-        void getOrCreateTag(Tag p_99670_, Supplier<Tag> p_99671_, List<Tag> p_99672_);
+        void getOrCreateTag(Tag pTag, Supplier<Tag> pSupplier, List<Tag> pTags);
 
         Tag createPreferredParentTag();
 
-        int setTag(Tag p_99668_, Supplier<Tag> p_99669_);
+        int setTag(Tag pTag, Supplier<Tag> pSupplier);
 
-        int removeTag(Tag p_99665_);
+        int removeTag(Tag pTag);
 
-        default List<Tag> get(List<Tag> p_99654_) {
-            return this.collect(p_99654_, this::getTag);
+        default List<Tag> get(List<Tag> pTags) {
+            return this.collect(pTags, this::getTag);
         }
 
-        default List<Tag> getOrCreate(List<Tag> p_99659_, Supplier<Tag> p_99660_) {
-            return this.collect(p_99659_, (p_99663_, p_99664_) -> this.getOrCreateTag(p_99663_, p_99660_, p_99664_));
+        default List<Tag> getOrCreate(List<Tag> pTags, Supplier<Tag> pSupplier) {
+            return this.collect(pTags, (p_99663_, p_99664_) -> this.getOrCreateTag(p_99663_, pSupplier, p_99664_));
         }
 
-        default List<Tag> collect(List<Tag> p_99656_, BiConsumer<Tag, List<Tag>> p_99657_) {
+        default List<Tag> collect(List<Tag> pTags, BiConsumer<Tag, List<Tag>> pConsumer) {
             List<Tag> list = Lists.newArrayList();
 
-            for (Tag tag : p_99656_) {
-                p_99657_.accept(tag, list);
+            for (Tag tag : pTags) {
+                pConsumer.accept(tag, list);
             }
 
             return list;

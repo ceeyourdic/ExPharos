@@ -19,11 +19,11 @@ public class SheetedDecalTextureGenerator implements VertexConsumer {
     private float y;
     private float z;
 
-    public SheetedDecalTextureGenerator(VertexConsumer p_260211_, PoseStack.Pose p_332899_, float p_259312_) {
-        this.delegate = p_260211_;
-        this.cameraInversePose = new Matrix4f(p_332899_.pose()).invert();
-        this.normalInversePose = new Matrix3f(p_332899_.normal()).invert();
-        this.textureScale = p_259312_;
+    public SheetedDecalTextureGenerator(VertexConsumer pDelegate, PoseStack.Pose pPose, float pTextureScale) {
+        this.delegate = pDelegate;
+        this.cameraInversePose = new Matrix4f(pPose.pose()).invert();
+        this.normalInversePose = new Matrix3f(pPose.normal()).invert();
+        this.textureScale = pTextureScale;
     }
 
     @Override

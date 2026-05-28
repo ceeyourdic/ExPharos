@@ -15,25 +15,25 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 
 public interface Aquifer {
     static Aquifer create(
-        NoiseChunk p_223881_,
-        ChunkPos p_223882_,
-        NoiseRouter p_223883_,
-        PositionalRandomFactory p_223884_,
-        int p_223885_,
-        int p_223886_,
-        Aquifer.FluidPicker p_223887_
+        NoiseChunk pChunk,
+        ChunkPos pChunkPos,
+        NoiseRouter pNoiseRouter,
+        PositionalRandomFactory pPositionalRandomFactory,
+        int pMinY,
+        int pHeight,
+        Aquifer.FluidPicker pGlobalFluidPicker
     ) {
-        return new Aquifer.NoiseBasedAquifer(p_223881_, p_223882_, p_223883_, p_223884_, p_223885_, p_223886_, p_223887_);
+        return new Aquifer.NoiseBasedAquifer(pChunk, pChunkPos, pNoiseRouter, pPositionalRandomFactory, pMinY, pHeight, pGlobalFluidPicker);
     }
 
-    static Aquifer createDisabled(final Aquifer.FluidPicker p_188375_) {
+    static Aquifer createDisabled(final Aquifer.FluidPicker pDefaultFluid) {
         return new Aquifer() {
             @Nullable
             @Override
             public BlockState computeSubstance(DensityFunction.FunctionContext p_208172_, double p_208173_) {
                 return p_208173_ > 0.0
                     ? null
-                    : p_188375_.computeFluid(p_208172_.blockX(), p_208172_.blockY(), p_208172_.blockZ()).at(p_208172_.blockY());
+                    : pDefaultFluid.computeFluid(p_208172_.blockX(), p_208172_.blockY(), p_208172_.blockZ()).at(p_208172_.blockY());
             }
 
             @Override
@@ -44,17 +44,17 @@ public interface Aquifer {
     }
 
     @Nullable
-    BlockState computeSubstance(DensityFunction.FunctionContext p_208158_, double p_208159_);
+    BlockState computeSubstance(DensityFunction.FunctionContext pContext, double pSubstance);
 
     boolean shouldScheduleFluidUpdate();
 
     public interface FluidPicker {
-        Aquifer.FluidStatus computeFluid(int p_188397_, int p_188398_, int p_188399_);
+        Aquifer.FluidStatus computeFluid(int pX, int pY, int pZ);
     }
 
     public static record FluidStatus(int fluidLevel, BlockState fluidType) {
-        public BlockState at(int p_188406_) {
-            return p_188406_ < this.fluidLevel ? this.fluidType : Blocks.AIR.defaultBlockState();
+        public BlockState at(int pY) {
+            return pY < this.fluidLevel ? this.fluidType : Blocks.AIR.defaultBlockState();
         }
     }
 
@@ -92,31 +92,31 @@ public interface Aquifer {
         };
 
         NoiseBasedAquifer(
-            NoiseChunk p_223891_,
-            ChunkPos p_223892_,
-            NoiseRouter p_223893_,
-            PositionalRandomFactory p_223894_,
-            int p_223895_,
-            int p_223896_,
-            Aquifer.FluidPicker p_223897_
+            NoiseChunk pNoiseChunk,
+            ChunkPos pChunkPos,
+            NoiseRouter pNoiseRouter,
+            PositionalRandomFactory pPositionalRandomFactory,
+            int pMinY,
+            int pHeight,
+            Aquifer.FluidPicker pGlobalFluidPicker
         ) {
-            this.noiseChunk = p_223891_;
-            this.barrierNoise = p_223893_.barrierNoise();
-            this.fluidLevelFloodednessNoise = p_223893_.fluidLevelFloodednessNoise();
-            this.fluidLevelSpreadNoise = p_223893_.fluidLevelSpreadNoise();
-            this.lavaNoise = p_223893_.lavaNoise();
-            this.erosion = p_223893_.erosion();
-            this.depth = p_223893_.depth();
-            this.positionalRandomFactory = p_223894_;
-            this.minGridX = this.gridX(p_223892_.getMinBlockX()) - 1;
-            this.globalFluidPicker = p_223897_;
-            int i = this.gridX(p_223892_.getMaxBlockX()) + 1;
+            this.noiseChunk = pNoiseChunk;
+            this.barrierNoise = pNoiseRouter.barrierNoise();
+            this.fluidLevelFloodednessNoise = pNoiseRouter.fluidLevelFloodednessNoise();
+            this.fluidLevelSpreadNoise = pNoiseRouter.fluidLevelSpreadNoise();
+            this.lavaNoise = pNoiseRouter.lavaNoise();
+            this.erosion = pNoiseRouter.erosion();
+            this.depth = pNoiseRouter.depth();
+            this.positionalRandomFactory = pPositionalRandomFactory;
+            this.minGridX = this.gridX(pChunkPos.getMinBlockX()) - 1;
+            this.globalFluidPicker = pGlobalFluidPicker;
+            int i = this.gridX(pChunkPos.getMaxBlockX()) + 1;
             this.gridSizeX = i - this.minGridX + 1;
-            this.minGridY = this.gridY(p_223895_) - 1;
-            int j = this.gridY(p_223895_ + p_223896_) + 1;
+            this.minGridY = this.gridY(pMinY) - 1;
+            int j = this.gridY(pMinY + pHeight) + 1;
             int k = j - this.minGridY + 1;
-            this.minGridZ = this.gridZ(p_223892_.getMinBlockZ()) - 1;
-            int l = this.gridZ(p_223892_.getMaxBlockZ()) + 1;
+            this.minGridZ = this.gridZ(pChunkPos.getMinBlockZ()) - 1;
+            int l = this.gridZ(pChunkPos.getMaxBlockZ()) + 1;
             this.gridSizeZ = l - this.minGridZ + 1;
             int i1 = this.gridSizeX * k * this.gridSizeZ;
             this.aquiferCache = new Aquifer.FluidStatus[i1];
@@ -124,10 +124,10 @@ public interface Aquifer {
             Arrays.fill(this.aquiferLocationCache, Long.MAX_VALUE);
         }
 
-        private int getIndex(int p_158028_, int p_158029_, int p_158030_) {
-            int i = p_158028_ - this.minGridX;
-            int j = p_158029_ - this.minGridY;
-            int k = p_158030_ - this.minGridZ;
+        private int getIndex(int pGridX, int pGridY, int pGridZ) {
+            int i = pGridX - this.minGridX;
+            int j = pGridY - this.minGridY;
+            int k = pGridZ - this.minGridZ;
             return (j * this.gridSizeZ + k) * this.gridSizeX + i;
         }
 
@@ -273,24 +273,24 @@ public interface Aquifer {
             return this.shouldScheduleFluidUpdate;
         }
 
-        private static double similarity(int p_158025_, int p_158026_) {
+        private static double similarity(int pFirstDistance, int pSecondDistance) {
             double d0 = 25.0;
-            return 1.0 - (double)Math.abs(p_158026_ - p_158025_) / 25.0;
+            return 1.0 - (double)Math.abs(pSecondDistance - pFirstDistance) / 25.0;
         }
 
         private double calculatePressure(
-            DensityFunction.FunctionContext p_208189_, MutableDouble p_208190_, Aquifer.FluidStatus p_208191_, Aquifer.FluidStatus p_208192_
+            DensityFunction.FunctionContext pContext, MutableDouble pSubstance, Aquifer.FluidStatus pFirstFluid, Aquifer.FluidStatus pSecondFluid
         ) {
-            int i = p_208189_.blockY();
-            BlockState blockstate = p_208191_.at(i);
-            BlockState blockstate1 = p_208192_.at(i);
+            int i = pContext.blockY();
+            BlockState blockstate = pFirstFluid.at(i);
+            BlockState blockstate1 = pSecondFluid.at(i);
             if ((!blockstate.is(Blocks.LAVA) || !blockstate1.is(Blocks.WATER))
                 && (!blockstate.is(Blocks.WATER) || !blockstate1.is(Blocks.LAVA))) {
-                int j = Math.abs(p_208191_.fluidLevel - p_208192_.fluidLevel);
+                int j = Math.abs(pFirstFluid.fluidLevel - pSecondFluid.fluidLevel);
                 if (j == 0) {
                     return 0.0;
                 } else {
-                    double d0 = 0.5 * (double)(p_208191_.fluidLevel + p_208192_.fluidLevel);
+                    double d0 = 0.5 * (double)(pFirstFluid.fluidLevel + pSecondFluid.fluidLevel);
                     double d1 = (double)i + 0.5 - d0;
                     double d2 = (double)j / 2.0;
                     double d3 = 0.0;
@@ -320,10 +320,10 @@ public interface Aquifer {
                     double d16 = 2.0;
                     double d12;
                     if (!(d10 < -2.0) && !(d10 > 2.0)) {
-                        double d13 = p_208190_.getValue();
+                        double d13 = pSubstance.getValue();
                         if (Double.isNaN(d13)) {
-                            double d14 = this.barrierNoise.compute(p_208189_);
-                            p_208190_.setValue(d14);
+                            double d14 = this.barrierNoise.compute(pContext);
+                            pSubstance.setValue(d14);
                             d12 = d14;
                         } else {
                             d12 = d13;
@@ -339,22 +339,22 @@ public interface Aquifer {
             }
         }
 
-        private int gridX(int p_158040_) {
-            return Math.floorDiv(p_158040_, 16);
+        private int gridX(int pX) {
+            return Math.floorDiv(pX, 16);
         }
 
-        private int gridY(int p_158046_) {
-            return Math.floorDiv(p_158046_, 12);
+        private int gridY(int pY) {
+            return Math.floorDiv(pY, 12);
         }
 
-        private int gridZ(int p_158048_) {
-            return Math.floorDiv(p_158048_, 16);
+        private int gridZ(int pZ) {
+            return Math.floorDiv(pZ, 16);
         }
 
-        private Aquifer.FluidStatus getAquiferStatus(long p_188446_) {
-            int i = BlockPos.getX(p_188446_);
-            int j = BlockPos.getY(p_188446_);
-            int k = BlockPos.getZ(p_188446_);
+        private Aquifer.FluidStatus getAquiferStatus(long pPackedPos) {
+            int i = BlockPos.getX(pPackedPos);
+            int j = BlockPos.getY(pPackedPos);
+            int k = BlockPos.getZ(pPackedPos);
             int l = this.gridX(i);
             int i1 = this.gridY(j);
             int j1 = this.gridZ(k);
@@ -369,16 +369,16 @@ public interface Aquifer {
             }
         }
 
-        private Aquifer.FluidStatus computeFluid(int p_188448_, int p_188449_, int p_188450_) {
-            Aquifer.FluidStatus aquifer$fluidstatus = this.globalFluidPicker.computeFluid(p_188448_, p_188449_, p_188450_);
+        private Aquifer.FluidStatus computeFluid(int pX, int pY, int pZ) {
+            Aquifer.FluidStatus aquifer$fluidstatus = this.globalFluidPicker.computeFluid(pX, pY, pZ);
             int i = Integer.MAX_VALUE;
-            int j = p_188449_ + 12;
-            int k = p_188449_ - 12;
+            int j = pY + 12;
+            int k = pY - 12;
             boolean flag = false;
 
             for (int[] aint : SURFACE_SAMPLING_OFFSETS_IN_CHUNKS) {
-                int l = p_188448_ + SectionPos.sectionToBlockCoord(aint[0]);
-                int i1 = p_188450_ + SectionPos.sectionToBlockCoord(aint[1]);
+                int l = pX + SectionPos.sectionToBlockCoord(aint[0]);
+                int i1 = pZ + SectionPos.sectionToBlockCoord(aint[1]);
                 int j1 = this.noiseChunk.preliminarySurfaceLevel(l, i1);
                 int k1 = j1 + 8;
                 boolean flag1 = aint[0] == 0 && aint[1] == 0;
@@ -403,21 +403,21 @@ public interface Aquifer {
                 i = Math.min(i, j1);
             }
 
-            int l1 = this.computeSurfaceLevel(p_188448_, p_188449_, p_188450_, aquifer$fluidstatus, i, flag);
-            return new Aquifer.FluidStatus(l1, this.computeFluidType(p_188448_, p_188449_, p_188450_, aquifer$fluidstatus, l1));
+            int l1 = this.computeSurfaceLevel(pX, pY, pZ, aquifer$fluidstatus, i, flag);
+            return new Aquifer.FluidStatus(l1, this.computeFluidType(pX, pY, pZ, aquifer$fluidstatus, l1));
         }
 
-        private int computeSurfaceLevel(int p_223910_, int p_223911_, int p_223912_, Aquifer.FluidStatus p_223913_, int p_223914_, boolean p_223915_) {
-            DensityFunction.SinglePointContext densityfunction$singlepointcontext = new DensityFunction.SinglePointContext(p_223910_, p_223911_, p_223912_);
+        private int computeSurfaceLevel(int pX, int pY, int pZ, Aquifer.FluidStatus pFluidStatus, int pMaxSurfaceLevel, boolean pFluidPresent) {
+            DensityFunction.SinglePointContext densityfunction$singlepointcontext = new DensityFunction.SinglePointContext(pX, pY, pZ);
             double d0;
             double d1;
             if (OverworldBiomeBuilder.isDeepDarkRegion(this.erosion, this.depth, densityfunction$singlepointcontext)) {
                 d0 = -1.0;
                 d1 = -1.0;
             } else {
-                int i = p_223914_ + 8 - p_223911_;
+                int i = pMaxSurfaceLevel + 8 - pY;
                 int j = 64;
-                double d2 = p_223915_ ? Mth.clampedMap((double)i, 0.0, 64.0, 1.0, 0.0) : 0.0;
+                double d2 = pFluidPresent ? Mth.clampedMap((double)i, 0.0, 64.0, 1.0, 0.0) : 0.0;
                 double d3 = Mth.clamp(this.fluidLevelFloodednessNoise.compute(densityfunction$singlepointcontext), -1.0, 1.0);
                 double d4 = Mth.map(d2, 1.0, 0.0, -0.3, 0.8);
                 double d5 = Mth.map(d2, 1.0, 0.0, -0.8, 0.4);
@@ -427,9 +427,9 @@ public interface Aquifer {
 
             int k;
             if (d1 > 0.0) {
-                k = p_223913_.fluidLevel;
+                k = pFluidStatus.fluidLevel;
             } else if (d0 > 0.0) {
-                k = this.computeRandomizedFluidSurfaceLevel(p_223910_, p_223911_, p_223912_, p_223914_);
+                k = this.computeRandomizedFluidSurfaceLevel(pX, pY, pZ, pMaxSurfaceLevel);
             } else {
                 k = DimensionType.WAY_BELOW_MIN_Y;
             }
@@ -437,28 +437,28 @@ public interface Aquifer {
             return k;
         }
 
-        private int computeRandomizedFluidSurfaceLevel(int p_223899_, int p_223900_, int p_223901_, int p_223902_) {
+        private int computeRandomizedFluidSurfaceLevel(int pX, int pY, int pZ, int pMaxSurfaceLevel) {
             int i = 16;
             int j = 40;
-            int k = Math.floorDiv(p_223899_, 16);
-            int l = Math.floorDiv(p_223900_, 40);
-            int i1 = Math.floorDiv(p_223901_, 16);
+            int k = Math.floorDiv(pX, 16);
+            int l = Math.floorDiv(pY, 40);
+            int i1 = Math.floorDiv(pZ, 16);
             int j1 = l * 40 + 20;
             int k1 = 10;
             double d0 = this.fluidLevelSpreadNoise.compute(new DensityFunction.SinglePointContext(k, l, i1)) * 10.0;
             int l1 = Mth.quantize(d0, 3);
             int i2 = j1 + l1;
-            return Math.min(p_223902_, i2);
+            return Math.min(pMaxSurfaceLevel, i2);
         }
 
-        private BlockState computeFluidType(int p_223904_, int p_223905_, int p_223906_, Aquifer.FluidStatus p_223907_, int p_223908_) {
-            BlockState blockstate = p_223907_.fluidType;
-            if (p_223908_ <= -10 && p_223908_ != DimensionType.WAY_BELOW_MIN_Y && p_223907_.fluidType != Blocks.LAVA.defaultBlockState()) {
+        private BlockState computeFluidType(int pX, int pY, int pZ, Aquifer.FluidStatus pFluidStatus, int pSurfaceLevel) {
+            BlockState blockstate = pFluidStatus.fluidType;
+            if (pSurfaceLevel <= -10 && pSurfaceLevel != DimensionType.WAY_BELOW_MIN_Y && pFluidStatus.fluidType != Blocks.LAVA.defaultBlockState()) {
                 int i = 64;
                 int j = 40;
-                int k = Math.floorDiv(p_223904_, 64);
-                int l = Math.floorDiv(p_223905_, 40);
-                int i1 = Math.floorDiv(p_223906_, 64);
+                int k = Math.floorDiv(pX, 64);
+                int l = Math.floorDiv(pY, 40);
+                int i1 = Math.floorDiv(pZ, 64);
                 double d0 = this.lavaNoise.compute(new DensityFunction.SinglePointContext(k, l, i1));
                 if (Math.abs(d0) > 0.3) {
                     blockstate = Blocks.LAVA.defaultBlockState();

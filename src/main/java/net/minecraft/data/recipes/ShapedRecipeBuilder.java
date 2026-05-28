@@ -35,45 +35,45 @@ public class ShapedRecipeBuilder implements RecipeBuilder {
     private String group;
     private boolean showNotification = true;
 
-    private ShapedRecipeBuilder(HolderGetter<Item> p_364858_, RecipeCategory p_249996_, ItemLike p_251475_, int p_248948_) {
-        this.items = p_364858_;
-        this.category = p_249996_;
-        this.result = p_251475_.asItem();
-        this.count = p_248948_;
+    private ShapedRecipeBuilder(HolderGetter<Item> pItems, RecipeCategory pCategory, ItemLike pResult, int pCount) {
+        this.items = pItems;
+        this.category = pCategory;
+        this.result = pResult.asItem();
+        this.count = pCount;
     }
 
-    public static ShapedRecipeBuilder shaped(HolderGetter<Item> p_364206_, RecipeCategory p_251325_, ItemLike p_250636_) {
-        return shaped(p_364206_, p_251325_, p_250636_, 1);
+    public static ShapedRecipeBuilder shaped(HolderGetter<Item> pItems, RecipeCategory pCategory, ItemLike pResult) {
+        return shaped(pItems, pCategory, pResult, 1);
     }
 
-    public static ShapedRecipeBuilder shaped(HolderGetter<Item> p_364196_, RecipeCategory p_250853_, ItemLike p_249747_, int p_366751_) {
-        return new ShapedRecipeBuilder(p_364196_, p_250853_, p_249747_, p_366751_);
+    public static ShapedRecipeBuilder shaped(HolderGetter<Item> pItems, RecipeCategory pCategory, ItemLike pResult, int pCount) {
+        return new ShapedRecipeBuilder(pItems, pCategory, pResult, pCount);
     }
 
-    public ShapedRecipeBuilder define(Character p_206417_, TagKey<Item> p_206418_) {
-        return this.define(p_206417_, Ingredient.of(this.items.getOrThrow(p_206418_)));
+    public ShapedRecipeBuilder define(Character pSymbol, TagKey<Item> pTag) {
+        return this.define(pSymbol, Ingredient.of(this.items.getOrThrow(pTag)));
     }
 
-    public ShapedRecipeBuilder define(Character p_126128_, ItemLike p_126129_) {
-        return this.define(p_126128_, Ingredient.of(p_126129_));
+    public ShapedRecipeBuilder define(Character pSymbol, ItemLike pItem) {
+        return this.define(pSymbol, Ingredient.of(pItem));
     }
 
-    public ShapedRecipeBuilder define(Character p_126125_, Ingredient p_126126_) {
-        if (this.key.containsKey(p_126125_)) {
-            throw new IllegalArgumentException("Symbol '" + p_126125_ + "' is already defined!");
-        } else if (p_126125_ == ' ') {
+    public ShapedRecipeBuilder define(Character pSymbol, Ingredient pIngredient) {
+        if (this.key.containsKey(pSymbol)) {
+            throw new IllegalArgumentException("Symbol '" + pSymbol + "' is already defined!");
+        } else if (pSymbol == ' ') {
             throw new IllegalArgumentException("Symbol ' ' (whitespace) is reserved and cannot be defined");
         } else {
-            this.key.put(p_126125_, p_126126_);
+            this.key.put(pSymbol, pIngredient);
             return this;
         }
     }
 
-    public ShapedRecipeBuilder pattern(String p_126131_) {
-        if (!this.rows.isEmpty() && p_126131_.length() != this.rows.get(0).length()) {
+    public ShapedRecipeBuilder pattern(String pPattern) {
+        if (!this.rows.isEmpty() && pPattern.length() != this.rows.get(0).length()) {
             throw new IllegalArgumentException("Pattern must be the same width on every line!");
         } else {
-            this.rows.add(p_126131_);
+            this.rows.add(pPattern);
             return this;
         }
     }
@@ -88,8 +88,8 @@ public class ShapedRecipeBuilder implements RecipeBuilder {
         return this;
     }
 
-    public ShapedRecipeBuilder showNotification(boolean p_273326_) {
-        this.showNotification = p_273326_;
+    public ShapedRecipeBuilder showNotification(boolean pShowNotification) {
+        this.showNotification = pShowNotification;
         return this;
     }
 
@@ -118,9 +118,9 @@ public class ShapedRecipeBuilder implements RecipeBuilder {
         );
     }
 
-    private ShapedRecipePattern ensureValid(ResourceKey<Recipe<?>> p_362567_) {
+    private ShapedRecipePattern ensureValid(ResourceKey<Recipe<?>> pRecipe) {
         if (this.criteria.isEmpty()) {
-            throw new IllegalStateException("No way of obtaining recipe " + p_362567_.location());
+            throw new IllegalStateException("No way of obtaining recipe " + pRecipe.location());
         } else {
             return ShapedRecipePattern.of(this.key, this.rows);
         }

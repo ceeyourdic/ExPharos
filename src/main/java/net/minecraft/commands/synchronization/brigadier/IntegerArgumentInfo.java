@@ -46,9 +46,9 @@ public class IntegerArgumentInfo implements ArgumentTypeInfo<IntegerArgumentType
         final int min;
         final int max;
 
-        Template(final int p_235562_, final int p_235563_) {
-            this.min = p_235562_;
-            this.max = p_235563_;
+        Template(final int pMin, final int pMax) {
+            this.min = pMin;
+            this.max = pMax;
         }
 
         public IntegerArgumentType instantiate(CommandBuildContext p_235566_) {

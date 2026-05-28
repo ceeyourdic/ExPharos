@@ -13,8 +13,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class HopperScreen extends AbstractContainerScreen<HopperMenu> {
     private static final ResourceLocation HOPPER_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/hopper.png");
 
-    public HopperScreen(HopperMenu p_98798_, Inventory p_98799_, Component p_98800_) {
-        super(p_98798_, p_98799_, p_98800_);
+    public HopperScreen(HopperMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+        super(pMenu, pPlayerInventory, pTitle);
         this.imageHeight = 133;
         this.inventoryLabelY = this.imageHeight - 94;
     }

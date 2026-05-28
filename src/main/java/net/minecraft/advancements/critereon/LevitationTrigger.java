@@ -15,8 +15,8 @@ public class LevitationTrigger extends SimpleCriterionTrigger<LevitationTrigger.
         return LevitationTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_49117_, Vec3 p_49118_, int p_49119_) {
-        this.trigger(p_49117_, p_49124_ -> p_49124_.matches(p_49117_, p_49118_, p_49119_));
+    public void trigger(ServerPlayer pPlayer, Vec3 pStartPos, int pDuration) {
+        this.trigger(pPlayer, p_49124_ -> p_49124_.matches(pPlayer, pStartPos, pDuration));
     }
 
     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<DistancePredicate> distance, MinMaxBounds.Ints duration)
@@ -32,18 +32,18 @@ public class LevitationTrigger extends SimpleCriterionTrigger<LevitationTrigger.
                     .apply(p_325225_, LevitationTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<LevitationTrigger.TriggerInstance> levitated(DistancePredicate p_49145_) {
+        public static Criterion<LevitationTrigger.TriggerInstance> levitated(DistancePredicate pDistance) {
             return CriteriaTriggers.LEVITATION
-                .createCriterion(new LevitationTrigger.TriggerInstance(Optional.empty(), Optional.of(p_49145_), MinMaxBounds.Ints.ANY));
+                .createCriterion(new LevitationTrigger.TriggerInstance(Optional.empty(), Optional.of(pDistance), MinMaxBounds.Ints.ANY));
         }
 
-        public boolean matches(ServerPlayer p_49141_, Vec3 p_49142_, int p_49143_) {
+        public boolean matches(ServerPlayer pPlayer, Vec3 pStartPos, int pDuration) {
             return this.distance.isPresent()
                     && !this.distance
                         .get()
-                        .matches(p_49142_.x, p_49142_.y, p_49142_.z, p_49141_.getX(), p_49141_.getY(), p_49141_.getZ())
+                        .matches(pStartPos.x, pStartPos.y, pStartPos.z, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ())
                 ? false
-                : this.duration.matches(p_49143_);
+                : this.duration.matches(pDuration);
         }
 
         @Override

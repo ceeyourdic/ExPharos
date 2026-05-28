@@ -29,14 +29,14 @@ public class LanguageManager implements ResourceManagerReloadListener {
     private String currentCode;
     private final Consumer<ClientLanguage> reloadCallback;
 
-    public LanguageManager(String p_118971_, Consumer<ClientLanguage> p_342376_) {
-        this.currentCode = p_118971_;
-        this.reloadCallback = p_342376_;
+    public LanguageManager(String pCurrentCode, Consumer<ClientLanguage> pReloadFallback) {
+        this.currentCode = pCurrentCode;
+        this.reloadCallback = pReloadFallback;
     }
 
-    private static Map<String, LanguageInfo> extractLanguages(Stream<PackResources> p_118982_) {
+    private static Map<String, LanguageInfo> extractLanguages(Stream<PackResources> pPackResources) {
         Map<String, LanguageInfo> map = Maps.newHashMap();
-        p_118982_.forEach(p_374687_ -> {
+        pPackResources.forEach(p_374687_ -> {
             try {
                 LanguageMetadataSection languagemetadatasection = p_374687_.getMetadataSection(LanguageMetadataSection.TYPE);
                 if (languagemetadatasection != null) {
@@ -50,8 +50,8 @@ public class LanguageManager implements ResourceManagerReloadListener {
     }
 
     @Override
-    public void onResourceManagerReload(ResourceManager p_118973_) {
-        this.languages = extractLanguages(p_118973_.listPacks());
+    public void onResourceManagerReload(ResourceManager pResourceManager) {
+        this.languages = extractLanguages(pResourceManager.listPacks());
         List<String> list = new ArrayList<>(2);
         boolean flag = DEFAULT_LANGUAGE.bidirectional();
         list.add("en_us");
@@ -63,14 +63,14 @@ public class LanguageManager implements ResourceManagerReloadListener {
             }
         }
 
-        ClientLanguage clientlanguage = ClientLanguage.loadFrom(p_118973_, list, flag);
+        ClientLanguage clientlanguage = ClientLanguage.loadFrom(pResourceManager, list, flag);
         I18n.setLanguage(clientlanguage);
         Language.inject(clientlanguage);
         this.reloadCallback.accept(clientlanguage);
     }
 
-    public void setSelected(String p_265224_) {
-        this.currentCode = p_265224_;
+    public void setSelected(String pSelected) {
+        this.currentCode = pSelected;
     }
 
     public String getSelected() {
@@ -82,7 +82,7 @@ public class LanguageManager implements ResourceManagerReloadListener {
     }
 
     @Nullable
-    public LanguageInfo getLanguage(String p_118977_) {
-        return this.languages.get(p_118977_);
+    public LanguageInfo getLanguage(String pCode) {
+        return this.languages.get(pCode);
     }
 }

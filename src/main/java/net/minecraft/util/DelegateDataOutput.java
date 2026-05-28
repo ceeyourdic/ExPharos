@@ -6,77 +6,77 @@ import java.io.IOException;
 public class DelegateDataOutput implements DataOutput {
     private final DataOutput parent;
 
-    public DelegateDataOutput(DataOutput p_311826_) {
-        this.parent = p_311826_;
+    public DelegateDataOutput(DataOutput pParent) {
+        this.parent = pParent;
     }
 
     @Override
-    public void write(int p_312870_) throws IOException {
-        this.parent.write(p_312870_);
+    public void write(int pValue) throws IOException {
+        this.parent.write(pValue);
     }
 
     @Override
-    public void write(byte[] p_311646_) throws IOException {
-        this.parent.write(p_311646_);
+    public void write(byte[] pData) throws IOException {
+        this.parent.write(pData);
     }
 
     @Override
-    public void write(byte[] p_309909_, int p_313250_, int p_311853_) throws IOException {
-        this.parent.write(p_309909_, p_313250_, p_311853_);
+    public void write(byte[] pData, int pOffset, int pLength) throws IOException {
+        this.parent.write(pData, pOffset, pLength);
     }
 
     @Override
-    public void writeBoolean(boolean p_310495_) throws IOException {
-        this.parent.writeBoolean(p_310495_);
+    public void writeBoolean(boolean pValue) throws IOException {
+        this.parent.writeBoolean(pValue);
     }
 
     @Override
-    public void writeByte(int p_311940_) throws IOException {
-        this.parent.writeByte(p_311940_);
+    public void writeByte(int pValue) throws IOException {
+        this.parent.writeByte(pValue);
     }
 
     @Override
-    public void writeShort(int p_310680_) throws IOException {
-        this.parent.writeShort(p_310680_);
+    public void writeShort(int pValue) throws IOException {
+        this.parent.writeShort(pValue);
     }
 
     @Override
-    public void writeChar(int p_310364_) throws IOException {
-        this.parent.writeChar(p_310364_);
+    public void writeChar(int pValue) throws IOException {
+        this.parent.writeChar(pValue);
     }
 
     @Override
-    public void writeInt(int p_310767_) throws IOException {
-        this.parent.writeInt(p_310767_);
+    public void writeInt(int pValue) throws IOException {
+        this.parent.writeInt(pValue);
     }
 
     @Override
-    public void writeLong(long p_313222_) throws IOException {
-        this.parent.writeLong(p_313222_);
+    public void writeLong(long pValue) throws IOException {
+        this.parent.writeLong(pValue);
     }
 
     @Override
-    public void writeFloat(float p_311489_) throws IOException {
-        this.parent.writeFloat(p_311489_);
+    public void writeFloat(float pValue) throws IOException {
+        this.parent.writeFloat(pValue);
     }
 
     @Override
-    public void writeDouble(double p_312046_) throws IOException {
-        this.parent.writeDouble(p_312046_);
+    public void writeDouble(double pValue) throws IOException {
+        this.parent.writeDouble(pValue);
     }
 
     @Override
-    public void writeBytes(String p_310549_) throws IOException {
-        this.parent.writeBytes(p_310549_);
+    public void writeBytes(String pValue) throws IOException {
+        this.parent.writeBytes(pValue);
     }
 
     @Override
-    public void writeChars(String p_311977_) throws IOException {
-        this.parent.writeChars(p_311977_);
+    public void writeChars(String pValue) throws IOException {
+        this.parent.writeChars(pValue);
     }
 
     @Override
-    public void writeUTF(String p_309650_) throws IOException {
-        this.parent.writeUTF(p_309650_);
+    public void writeUTF(String pValue) throws IOException {
+        this.parent.writeUTF(pValue);
     }
 }

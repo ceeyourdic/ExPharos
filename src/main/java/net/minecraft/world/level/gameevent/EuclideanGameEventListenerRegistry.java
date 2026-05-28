@@ -21,10 +21,10 @@ public class EuclideanGameEventListenerRegistry implements GameEventListenerRegi
     private final int sectionY;
     private final EuclideanGameEventListenerRegistry.OnEmptyAction onEmptyAction;
 
-    public EuclideanGameEventListenerRegistry(ServerLevel p_281505_, int p_283450_, EuclideanGameEventListenerRegistry.OnEmptyAction p_282325_) {
-        this.level = p_281505_;
-        this.sectionY = p_283450_;
-        this.onEmptyAction = p_282325_;
+    public EuclideanGameEventListenerRegistry(ServerLevel pLevel, int pSectionY, EuclideanGameEventListenerRegistry.OnEmptyAction pOnEmptyAction) {
+        this.level = pLevel;
+        this.sectionY = pSectionY;
+        this.onEmptyAction = pOnEmptyAction;
     }
 
     @Override
@@ -93,19 +93,19 @@ public class EuclideanGameEventListenerRegistry implements GameEventListenerRegi
         return flag;
     }
 
-    private static Optional<Vec3> getPostableListenerPosition(ServerLevel p_249585_, Vec3 p_251333_, GameEventListener p_251051_) {
-        Optional<Vec3> optional = p_251051_.getListenerSource().getPosition(p_249585_);
+    private static Optional<Vec3> getPostableListenerPosition(ServerLevel pLevel, Vec3 pPos, GameEventListener pListener) {
+        Optional<Vec3> optional = pListener.getListenerSource().getPosition(pLevel);
         if (optional.isEmpty()) {
             return Optional.empty();
         } else {
-            double d0 = BlockPos.containing(optional.get()).distSqr(BlockPos.containing(p_251333_));
-            int i = p_251051_.getListenerRadius() * p_251051_.getListenerRadius();
+            double d0 = BlockPos.containing(optional.get()).distSqr(BlockPos.containing(pPos));
+            int i = pListener.getListenerRadius() * pListener.getListenerRadius();
             return d0 > (double)i ? Optional.empty() : optional;
         }
     }
 
     @FunctionalInterface
     public interface OnEmptyAction {
-        void apply(int p_282867_);
+        void apply(int pSectionY);
     }
 }

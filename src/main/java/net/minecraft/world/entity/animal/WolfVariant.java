@@ -46,18 +46,18 @@ public final class WolfVariant {
     private final ResourceLocation angryTextureFull;
     private final HolderSet<Biome> biomes;
 
-    public WolfVariant(ResourceLocation p_329809_, ResourceLocation p_332773_, ResourceLocation p_332065_, HolderSet<Biome> p_330560_) {
-        this.wildTexture = p_329809_;
-        this.wildTextureFull = fullTextureId(p_329809_);
-        this.tameTexture = p_332773_;
-        this.tameTextureFull = fullTextureId(p_332773_);
-        this.angryTexture = p_332065_;
-        this.angryTextureFull = fullTextureId(p_332065_);
-        this.biomes = p_330560_;
+    public WolfVariant(ResourceLocation pWildTexture, ResourceLocation pTameTexture, ResourceLocation pAngryTexture, HolderSet<Biome> pBiomes) {
+        this.wildTexture = pWildTexture;
+        this.wildTextureFull = fullTextureId(pWildTexture);
+        this.tameTexture = pTameTexture;
+        this.tameTextureFull = fullTextureId(pTameTexture);
+        this.angryTexture = pAngryTexture;
+        this.angryTextureFull = fullTextureId(pAngryTexture);
+        this.biomes = pBiomes;
     }
 
-    private static ResourceLocation fullTextureId(ResourceLocation p_335830_) {
-        return p_335830_.withPath(p_331806_ -> "textures/" + p_331806_ + ".png");
+    private static ResourceLocation fullTextureId(ResourceLocation pTexture) {
+        return pTexture.withPath(p_331806_ -> "textures/" + p_331806_ + ".png");
     }
 
     public ResourceLocation wildTexture() {
@@ -77,11 +77,11 @@ public final class WolfVariant {
     }
 
     @Override
-    public boolean equals(Object p_329082_) {
-        if (p_329082_ == this) {
+    public boolean equals(Object pOther) {
+        if (pOther == this) {
             return true;
         } else {
-            return !(p_329082_ instanceof WolfVariant wolfvariant)
+            return !(pOther instanceof WolfVariant wolfvariant)
                 ? false
                 : Objects.equals(this.wildTexture, wolfvariant.wildTexture)
                     && Objects.equals(this.tameTexture, wolfvariant.tameTexture)

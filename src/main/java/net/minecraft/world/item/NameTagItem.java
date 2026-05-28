@@ -14,16 +14,16 @@ public class NameTagItem extends Item {
     }
 
     @Override
-    public InteractionResult interactLivingEntity(ItemStack p_42954_, Player p_42955_, LivingEntity p_42956_, InteractionHand p_42957_) {
-        Component component = p_42954_.get(DataComponents.CUSTOM_NAME);
-        if (component != null && p_42956_.getType().canSerialize() && p_42956_.canBeNameTagged()) {
-            if (!p_42955_.level().isClientSide && p_42956_.isAlive()) {
-                p_42956_.setCustomName(component);
-                if (p_42956_ instanceof Mob mob) {
+    public InteractionResult interactLivingEntity(ItemStack pStack, Player pPlayer, LivingEntity pTarget, InteractionHand pHand) {
+        Component component = pStack.get(DataComponents.CUSTOM_NAME);
+        if (component != null && pTarget.getType().canSerialize() && pTarget.canBeNameTagged()) {
+            if (!pPlayer.level().isClientSide && pTarget.isAlive()) {
+                pTarget.setCustomName(component);
+                if (pTarget instanceof Mob mob) {
                     mob.setPersistenceRequired();
                 }
 
-                p_42954_.shrink(1);
+                pStack.shrink(1);
             }
 
             return InteractionResult.SUCCESS;

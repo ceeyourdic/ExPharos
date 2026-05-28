@@ -14,8 +14,8 @@ public class GridLayoutTab implements Tab {
     private final Component title;
     protected final GridLayout layout = new GridLayout();
 
-    public GridLayoutTab(Component p_268022_) {
-        this.title = p_268022_;
+    public GridLayoutTab(Component pTitle) {
+        this.title = pTitle;
     }
 
     @Override

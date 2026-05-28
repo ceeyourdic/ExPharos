@@ -37,7 +37,7 @@ public record SheepPredicate(Optional<Boolean> sheared, Optional<DyeColor> color
         }
     }
 
-    public static SheepPredicate hasWool(DyeColor p_361420_) {
-        return new SheepPredicate(Optional.of(false), Optional.of(p_361420_));
+    public static SheepPredicate hasWool(DyeColor pColor) {
+        return new SheepPredicate(Optional.of(false), Optional.of(pColor));
     }
 }

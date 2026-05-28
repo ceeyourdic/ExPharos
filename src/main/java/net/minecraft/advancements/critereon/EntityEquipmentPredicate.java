@@ -38,18 +38,18 @@ public record EntityEquipmentPredicate(
                 .apply(p_325209_, EntityEquipmentPredicate::new)
     );
 
-    public static EntityEquipmentPredicate captainPredicate(HolderGetter<Item> p_330893_, HolderGetter<BannerPattern> p_366823_) {
+    public static EntityEquipmentPredicate captainPredicate(HolderGetter<Item> pItemRegistry, HolderGetter<BannerPattern> pPatternRegistry) {
         return EntityEquipmentPredicate.Builder.equipment()
             .head(
                 ItemPredicate.Builder.item()
-                    .of(p_330893_, Items.WHITE_BANNER)
-                    .hasComponents(DataComponentPredicate.someOf(Raid.getOminousBannerInstance(p_366823_).getComponents(), DataComponents.BANNER_PATTERNS, DataComponents.ITEM_NAME))
+                    .of(pItemRegistry, Items.WHITE_BANNER)
+                    .hasComponents(DataComponentPredicate.someOf(Raid.getOminousBannerInstance(pPatternRegistry).getComponents(), DataComponents.BANNER_PATTERNS, DataComponents.ITEM_NAME))
             )
             .build();
     }
 
-    public boolean matches(@Nullable Entity p_32194_) {
-        if (p_32194_ instanceof LivingEntity livingentity) {
+    public boolean matches(@Nullable Entity pEntity) {
+        if (pEntity instanceof LivingEntity livingentity) {
             if (this.head.isPresent() && !this.head.get().test(livingentity.getItemBySlot(EquipmentSlot.HEAD))) {
                 return false;
             } else if (this.chest.isPresent() && !this.chest.get().test(livingentity.getItemBySlot(EquipmentSlot.CHEST))) {
@@ -83,38 +83,38 @@ public record EntityEquipmentPredicate(
             return new EntityEquipmentPredicate.Builder();
         }
 
-        public EntityEquipmentPredicate.Builder head(ItemPredicate.Builder p_298717_) {
-            this.head = Optional.of(p_298717_.build());
+        public EntityEquipmentPredicate.Builder head(ItemPredicate.Builder pHead) {
+            this.head = Optional.of(pHead.build());
             return this;
         }
 
-        public EntityEquipmentPredicate.Builder chest(ItemPredicate.Builder p_301149_) {
-            this.chest = Optional.of(p_301149_.build());
+        public EntityEquipmentPredicate.Builder chest(ItemPredicate.Builder pChest) {
+            this.chest = Optional.of(pChest.build());
             return this;
         }
 
-        public EntityEquipmentPredicate.Builder legs(ItemPredicate.Builder p_300588_) {
-            this.legs = Optional.of(p_300588_.build());
+        public EntityEquipmentPredicate.Builder legs(ItemPredicate.Builder pLegs) {
+            this.legs = Optional.of(pLegs.build());
             return this;
         }
 
-        public EntityEquipmentPredicate.Builder feet(ItemPredicate.Builder p_301104_) {
-            this.feet = Optional.of(p_301104_.build());
+        public EntityEquipmentPredicate.Builder feet(ItemPredicate.Builder pFeet) {
+            this.feet = Optional.of(pFeet.build());
             return this;
         }
 
-        public EntityEquipmentPredicate.Builder body(ItemPredicate.Builder p_330741_) {
-            this.body = Optional.of(p_330741_.build());
+        public EntityEquipmentPredicate.Builder body(ItemPredicate.Builder pBody) {
+            this.body = Optional.of(pBody.build());
             return this;
         }
 
-        public EntityEquipmentPredicate.Builder mainhand(ItemPredicate.Builder p_299261_) {
-            this.mainhand = Optional.of(p_299261_.build());
+        public EntityEquipmentPredicate.Builder mainhand(ItemPredicate.Builder pMainhand) {
+            this.mainhand = Optional.of(pMainhand.build());
             return this;
         }
 
-        public EntityEquipmentPredicate.Builder offhand(ItemPredicate.Builder p_297723_) {
-            this.offhand = Optional.of(p_297723_.build());
+        public EntityEquipmentPredicate.Builder offhand(ItemPredicate.Builder pOffhand) {
+            this.offhand = Optional.of(pOffhand.build());
             return this;
         }
 

@@ -34,42 +34,42 @@ public class TrimPatterns {
     public static final ResourceKey<TrimPattern> FLOW = registryKey("flow");
     public static final ResourceKey<TrimPattern> BOLT = registryKey("bolt");
 
-    public static void bootstrap(BootstrapContext<TrimPattern> p_362921_) {
-        register(p_362921_, Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE, SENTRY);
-        register(p_362921_, Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE, DUNE);
-        register(p_362921_, Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE, COAST);
-        register(p_362921_, Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE, WILD);
-        register(p_362921_, Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE, WARD);
-        register(p_362921_, Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE, EYE);
-        register(p_362921_, Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE, VEX);
-        register(p_362921_, Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE, TIDE);
-        register(p_362921_, Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE, SNOUT);
-        register(p_362921_, Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE, RIB);
-        register(p_362921_, Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE, SPIRE);
-        register(p_362921_, Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE, WAYFINDER);
-        register(p_362921_, Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE, SHAPER);
-        register(p_362921_, Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE, SILENCE);
-        register(p_362921_, Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE, RAISER);
-        register(p_362921_, Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE, HOST);
-        register(p_362921_, Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE, FLOW);
-        register(p_362921_, Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, BOLT);
+    public static void bootstrap(BootstrapContext<TrimPattern> pContext) {
+        register(pContext, Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE, SENTRY);
+        register(pContext, Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE, DUNE);
+        register(pContext, Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE, COAST);
+        register(pContext, Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE, WILD);
+        register(pContext, Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE, WARD);
+        register(pContext, Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE, EYE);
+        register(pContext, Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE, VEX);
+        register(pContext, Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE, TIDE);
+        register(pContext, Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE, SNOUT);
+        register(pContext, Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE, RIB);
+        register(pContext, Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE, SPIRE);
+        register(pContext, Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE, WAYFINDER);
+        register(pContext, Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE, SHAPER);
+        register(pContext, Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE, SILENCE);
+        register(pContext, Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE, RAISER);
+        register(pContext, Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE, HOST);
+        register(pContext, Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE, FLOW);
+        register(pContext, Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, BOLT);
     }
 
-    public static Optional<Holder.Reference<TrimPattern>> getFromTemplate(HolderLookup.Provider p_362285_, ItemStack p_367554_) {
-        return p_362285_.lookupOrThrow(Registries.TRIM_PATTERN).listElements().filter(p_369646_ -> p_367554_.is(p_369646_.value().templateItem())).findFirst();
+    public static Optional<Holder.Reference<TrimPattern>> getFromTemplate(HolderLookup.Provider pRegistries, ItemStack pStack) {
+        return pRegistries.lookupOrThrow(Registries.TRIM_PATTERN).listElements().filter(p_369646_ -> pStack.is(p_369646_.value().templateItem())).findFirst();
     }
 
-    public static void register(BootstrapContext<TrimPattern> p_363436_, Item p_361552_, ResourceKey<TrimPattern> p_366846_) {
+    public static void register(BootstrapContext<TrimPattern> pContext, Item pItem, ResourceKey<TrimPattern> pKey) {
         TrimPattern trimpattern = new TrimPattern(
-            p_366846_.location(),
-            BuiltInRegistries.ITEM.wrapAsHolder(p_361552_),
-            Component.translatable(Util.makeDescriptionId("trim_pattern", p_366846_.location())),
+            pKey.location(),
+            BuiltInRegistries.ITEM.wrapAsHolder(pItem),
+            Component.translatable(Util.makeDescriptionId("trim_pattern", pKey.location())),
             false
         );
-        p_363436_.register(p_366846_, trimpattern);
+        pContext.register(pKey, trimpattern);
     }
 
-    private static ResourceKey<TrimPattern> registryKey(String p_368467_) {
-        return ResourceKey.create(Registries.TRIM_PATTERN, ResourceLocation.withDefaultNamespace(p_368467_));
+    private static ResourceKey<TrimPattern> registryKey(String pName) {
+        return ResourceKey.create(Registries.TRIM_PATTERN, ResourceLocation.withDefaultNamespace(pName));
     }
 }

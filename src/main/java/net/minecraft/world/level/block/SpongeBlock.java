@@ -31,9 +31,9 @@ public class SpongeBlock extends Block {
     }
 
     @Override
-    protected void onPlace(BlockState p_56811_, Level p_56812_, BlockPos p_56813_, BlockState p_56814_, boolean p_56815_) {
-        if (!p_56814_.is(p_56811_.getBlock())) {
-            this.tryAbsorbWater(p_56812_, p_56813_);
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        if (!pOldState.is(pState.getBlock())) {
+            this.tryAbsorbWater(pLevel, pPos);
         }
     }
 
@@ -43,16 +43,16 @@ public class SpongeBlock extends Block {
         super.neighborChanged(p_56801_, p_56802_, p_56803_, p_56804_, p_361333_, p_56806_);
     }
 
-    protected void tryAbsorbWater(Level p_56798_, BlockPos p_56799_) {
-        if (this.removeWaterBreadthFirstSearch(p_56798_, p_56799_)) {
-            p_56798_.setBlock(p_56799_, Blocks.WET_SPONGE.defaultBlockState(), 2);
-            p_56798_.playSound(null, p_56799_, SoundEvents.SPONGE_ABSORB, SoundSource.BLOCKS, 1.0F, 1.0F);
+    protected void tryAbsorbWater(Level pLevel, BlockPos pPos) {
+        if (this.removeWaterBreadthFirstSearch(pLevel, pPos)) {
+            pLevel.setBlock(pPos, Blocks.WET_SPONGE.defaultBlockState(), 2);
+            pLevel.playSound(null, pPos, SoundEvents.SPONGE_ABSORB, SoundSource.BLOCKS, 1.0F, 1.0F);
         }
     }
 
-    private boolean removeWaterBreadthFirstSearch(Level p_56808_, BlockPos p_56809_) {
+    private boolean removeWaterBreadthFirstSearch(Level pLevel, BlockPos pPos) {
         return BlockPos.breadthFirstTraversal(
-                p_56809_,
+                pPos,
                 6,
                 65,
                 (p_277519_, p_277492_) -> {
@@ -61,21 +61,21 @@ public class SpongeBlock extends Block {
                     }
                 },
                 p_296944_ -> {
-                    if (p_296944_.equals(p_56809_)) {
+                    if (p_296944_.equals(pPos)) {
                         return BlockPos.TraversalNodeStatus.ACCEPT;
                     } else {
-                        BlockState blockstate = p_56808_.getBlockState(p_296944_);
-                        FluidState fluidstate = p_56808_.getFluidState(p_296944_);
+                        BlockState blockstate = pLevel.getBlockState(p_296944_);
+                        FluidState fluidstate = pLevel.getFluidState(p_296944_);
                         if (!fluidstate.is(FluidTags.WATER)) {
                             return BlockPos.TraversalNodeStatus.SKIP;
                         } else {
                             if (blockstate.getBlock() instanceof BucketPickup bucketpickup
-                                && !bucketpickup.pickupBlock(null, p_56808_, p_296944_, blockstate).isEmpty()) {
+                                && !bucketpickup.pickupBlock(null, pLevel, p_296944_, blockstate).isEmpty()) {
                                 return BlockPos.TraversalNodeStatus.ACCEPT;
                             }
 
                             if (blockstate.getBlock() instanceof LiquidBlock) {
-                                p_56808_.setBlock(p_296944_, Blocks.AIR.defaultBlockState(), 3);
+                                pLevel.setBlock(p_296944_, Blocks.AIR.defaultBlockState(), 3);
                             } else {
                                 if (!blockstate.is(Blocks.KELP)
                                     && !blockstate.is(Blocks.KELP_PLANT)
@@ -84,9 +84,9 @@ public class SpongeBlock extends Block {
                                     return BlockPos.TraversalNodeStatus.SKIP;
                                 }
 
-                                BlockEntity blockentity = blockstate.hasBlockEntity() ? p_56808_.getBlockEntity(p_296944_) : null;
-                                dropResources(blockstate, p_56808_, p_296944_, blockentity);
-                                p_56808_.setBlock(p_296944_, Blocks.AIR.defaultBlockState(), 3);
+                                BlockEntity blockentity = blockstate.hasBlockEntity() ? pLevel.getBlockEntity(p_296944_) : null;
+                                dropResources(blockstate, pLevel, p_296944_, blockentity);
+                                pLevel.setBlock(p_296944_, Blocks.AIR.defaultBlockState(), 3);
                             }
 
                             return BlockPos.TraversalNodeStatus.ACCEPT;

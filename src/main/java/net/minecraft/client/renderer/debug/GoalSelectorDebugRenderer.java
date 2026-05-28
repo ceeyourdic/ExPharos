@@ -23,16 +23,16 @@ public class GoalSelectorDebugRenderer implements DebugRenderer.SimpleDebugRende
         this.goalSelectors.clear();
     }
 
-    public void addGoalSelector(int p_113549_, BlockPos p_299054_, List<GoalDebugPayload.DebugGoal> p_113550_) {
-        this.goalSelectors.put(p_113549_, new GoalSelectorDebugRenderer.EntityGoalInfo(p_299054_, p_113550_));
+    public void addGoalSelector(int pMobId, BlockPos pEntityPos, List<GoalDebugPayload.DebugGoal> pGoals) {
+        this.goalSelectors.put(pMobId, new GoalSelectorDebugRenderer.EntityGoalInfo(pEntityPos, pGoals));
     }
 
-    public void removeGoalSelector(int p_173889_) {
-        this.goalSelectors.remove(p_173889_);
+    public void removeGoalSelector(int pMobId) {
+        this.goalSelectors.remove(pMobId);
     }
 
-    public GoalSelectorDebugRenderer(Minecraft p_113546_) {
-        this.minecraft = p_113546_;
+    public GoalSelectorDebugRenderer(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
     @Override

@@ -36,7 +36,7 @@ public interface GlyphProviderDefinition {
 
     @OnlyIn(Dist.CLIENT)
     public interface Loader {
-        GlyphProvider load(ResourceManager p_286639_) throws IOException;
+        GlyphProvider load(ResourceManager pResourceManager) throws IOException;
     }
 
     @OnlyIn(Dist.CLIENT)

@@ -2,10 +2,7 @@ package com.mojang.blaze3d.vertex;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import javax.annotation.Nullable;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class BufferUploader {
     @Nullable
     private static VertexBuffer lastImmediateBuffer;
@@ -21,34 +18,39 @@ public class BufferUploader {
         lastImmediateBuffer = null;
     }
 
-    public static void drawWithShader(MeshData p_344650_) {
+    public static void drawWithShader(MeshData pMeshData) {
         RenderSystem.assertOnRenderThread();
-        VertexBuffer vertexbuffer = upload(p_344650_);
+        VertexBuffer vertexbuffer = upload(pMeshData);
         vertexbuffer.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
     }
 
-    public static void draw(MeshData p_342146_) {
+    // Arcane mixin port: compatibility alias for Yarn-era render helpers.
+    public static void drawWithGlobalProgram(MeshData pMeshData) {
+        drawWithShader(pMeshData);
+    }
+
+    public static void draw(MeshData pMeshData) {
         RenderSystem.assertOnRenderThread();
-        VertexBuffer vertexbuffer = upload(p_342146_);
+        VertexBuffer vertexbuffer = upload(pMeshData);
         vertexbuffer.draw();
     }
 
-    private static VertexBuffer upload(MeshData p_342083_) {
-        VertexBuffer vertexbuffer = bindImmediateBuffer(p_342083_.drawState().format());
-        vertexbuffer.upload(p_342083_);
+    private static VertexBuffer upload(MeshData pMeshData) {
+        VertexBuffer vertexbuffer = bindImmediateBuffer(pMeshData.drawState().format());
+        vertexbuffer.upload(pMeshData);
         return vertexbuffer;
     }
 
-    private static VertexBuffer bindImmediateBuffer(VertexFormat p_231207_) {
-        VertexBuffer vertexbuffer = p_231207_.getImmediateDrawVertexBuffer();
+    private static VertexBuffer bindImmediateBuffer(VertexFormat pFormat) {
+        VertexBuffer vertexbuffer = pFormat.getImmediateDrawVertexBuffer();
         bindImmediateBuffer(vertexbuffer);
         return vertexbuffer;
     }
 
-    private static void bindImmediateBuffer(VertexBuffer p_231205_) {
-        if (p_231205_ != lastImmediateBuffer) {
-            p_231205_.bind();
-            lastImmediateBuffer = p_231205_;
+    private static void bindImmediateBuffer(VertexBuffer pBuffer) {
+        if (pBuffer != lastImmediateBuffer) {
+            pBuffer.bind();
+            lastImmediateBuffer = pBuffer;
         }
     }
 }

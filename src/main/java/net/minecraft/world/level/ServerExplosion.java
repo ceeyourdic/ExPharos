@@ -49,31 +49,31 @@ public class ServerExplosion implements Explosion {
     private final Map<Player, Vec3> hitPlayers = new HashMap<>();
 
     public ServerExplosion(
-        ServerLevel p_363225_,
-        @Nullable Entity p_367780_,
-        @Nullable DamageSource p_367845_,
-        @Nullable ExplosionDamageCalculator p_361628_,
-        Vec3 p_364875_,
-        float p_361128_,
-        boolean p_362786_,
-        Explosion.BlockInteraction p_367128_
+        ServerLevel pLevel,
+        @Nullable Entity pSource,
+        @Nullable DamageSource pDamageSource,
+        @Nullable ExplosionDamageCalculator pDamageCalculator,
+        Vec3 pCenter,
+        float pRadius,
+        boolean pFire,
+        Explosion.BlockInteraction pBlockInteraction
     ) {
-        this.level = p_363225_;
-        this.source = p_367780_;
-        this.radius = p_361128_;
-        this.center = p_364875_;
-        this.fire = p_362786_;
-        this.blockInteraction = p_367128_;
-        this.damageSource = p_367845_ == null ? p_363225_.damageSources().explosion(this) : p_367845_;
-        this.damageCalculator = p_361628_ == null ? this.makeDamageCalculator(p_367780_) : p_361628_;
+        this.level = pLevel;
+        this.source = pSource;
+        this.radius = pRadius;
+        this.center = pCenter;
+        this.fire = pFire;
+        this.blockInteraction = pBlockInteraction;
+        this.damageSource = pDamageSource == null ? pLevel.damageSources().explosion(this) : pDamageSource;
+        this.damageCalculator = pDamageCalculator == null ? this.makeDamageCalculator(pSource) : pDamageCalculator;
     }
 
-    private ExplosionDamageCalculator makeDamageCalculator(@Nullable Entity p_362997_) {
-        return (ExplosionDamageCalculator)(p_362997_ == null ? EXPLOSION_DAMAGE_CALCULATOR : new EntityBasedExplosionDamageCalculator(p_362997_));
+    private ExplosionDamageCalculator makeDamageCalculator(@Nullable Entity pEntity) {
+        return (ExplosionDamageCalculator)(pEntity == null ? EXPLOSION_DAMAGE_CALCULATOR : new EntityBasedExplosionDamageCalculator(pEntity));
     }
 
-    public static float getSeenPercent(Vec3 p_367358_, Entity p_369280_) {
-        AABB aabb = p_369280_.getBoundingBox();
+    public static float getSeenPercent(Vec3 pExplosionVector, Entity pEntity) {
+        AABB aabb = pEntity.getBoundingBox();
         double d0 = 1.0 / ((aabb.maxX - aabb.minX) * 2.0 + 1.0);
         double d1 = 1.0 / ((aabb.maxY - aabb.minY) * 2.0 + 1.0);
         double d2 = 1.0 / ((aabb.maxZ - aabb.minZ) * 2.0 + 1.0);
@@ -90,8 +90,8 @@ public class ServerExplosion implements Explosion {
                         double d9 = Mth.lerp(d6, aabb.minY, aabb.maxY);
                         double d10 = Mth.lerp(d7, aabb.minZ, aabb.maxZ);
                         Vec3 vec3 = new Vec3(d8 + d3, d9, d10 + d4);
-                        if (p_369280_.level()
-                                .clip(new ClipContext(vec3, p_367358_, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p_369280_))
+                        if (pEntity.level()
+                                .clip(new ClipContext(vec3, pExplosionVector, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, pEntity))
                                 .getType()
                             == HitResult.Type.MISS) {
                             i++;
@@ -222,11 +222,11 @@ public class ServerExplosion implements Explosion {
         }
     }
 
-    private void interactWithBlocks(List<BlockPos> p_361066_) {
+    private void interactWithBlocks(List<BlockPos> pBlocks) {
         List<ServerExplosion.StackCollector> list = new ArrayList<>();
-        Util.shuffle(p_361066_, this.level.random);
+        Util.shuffle(pBlocks, this.level.random);
 
-        for (BlockPos blockpos : p_361066_) {
+        for (BlockPos blockpos : pBlocks) {
             this.level.getBlockState(blockpos).onExplosionHit(this.level, blockpos, this, (p_369158_, p_366512_) -> addOrAppendStack(list, p_369158_, p_366512_));
         }
 
@@ -235,8 +235,8 @@ public class ServerExplosion implements Explosion {
         }
     }
 
-    private void createFire(List<BlockPos> p_365156_) {
-        for (BlockPos blockpos : p_365156_) {
+    private void createFire(List<BlockPos> pBlocks) {
+        for (BlockPos blockpos : pBlocks) {
             if (this.level.random.nextInt(3) == 0
                 && this.level.getBlockState(blockpos).isAir()
                 && this.level.getBlockState(blockpos.below()).isSolidRender()) {
@@ -261,15 +261,15 @@ public class ServerExplosion implements Explosion {
         }
     }
 
-    private static void addOrAppendStack(List<ServerExplosion.StackCollector> p_364783_, ItemStack p_365928_, BlockPos p_366332_) {
-        for (ServerExplosion.StackCollector serverexplosion$stackcollector : p_364783_) {
-            serverexplosion$stackcollector.tryMerge(p_365928_);
-            if (p_365928_.isEmpty()) {
+    private static void addOrAppendStack(List<ServerExplosion.StackCollector> pStackCollectors, ItemStack pStack, BlockPos pPos) {
+        for (ServerExplosion.StackCollector serverexplosion$stackcollector : pStackCollectors) {
+            serverexplosion$stackcollector.tryMerge(pStack);
+            if (pStack.isEmpty()) {
                 return;
             }
         }
 
-        p_364783_.add(new ServerExplosion.StackCollector(p_366332_, p_365928_));
+        pStackCollectors.add(new ServerExplosion.StackCollector(pPos, pStack));
     }
 
     private boolean interactsWithBlocks() {
@@ -331,14 +331,14 @@ public class ServerExplosion implements Explosion {
         final BlockPos pos;
         ItemStack stack;
 
-        StackCollector(BlockPos p_361613_, ItemStack p_361574_) {
-            this.pos = p_361613_;
-            this.stack = p_361574_;
+        StackCollector(BlockPos pPos, ItemStack pStack) {
+            this.pos = pPos;
+            this.stack = pStack;
         }
 
-        public void tryMerge(ItemStack p_362306_) {
-            if (ItemEntity.areMergable(this.stack, p_362306_)) {
-                this.stack = ItemEntity.merge(this.stack, p_362306_, 16);
+        public void tryMerge(ItemStack pStack) {
+            if (ItemEntity.areMergable(this.stack, pStack)) {
+                this.stack = ItemEntity.merge(this.stack, pStack, 16);
             }
         }
     }

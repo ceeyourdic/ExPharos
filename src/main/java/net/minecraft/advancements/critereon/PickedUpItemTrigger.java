@@ -18,9 +18,9 @@ public class PickedUpItemTrigger extends SimpleCriterionTrigger<PickedUpItemTrig
         return PickedUpItemTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_221299_, ItemStack p_221300_, @Nullable Entity p_221301_) {
-        LootContext lootcontext = EntityPredicate.createContext(p_221299_, p_221301_);
-        this.trigger(p_221299_, p_221306_ -> p_221306_.matches(p_221299_, p_221300_, lootcontext));
+    public void trigger(ServerPlayer pPlayer, ItemStack pStack, @Nullable Entity pEntity) {
+        LootContext lootcontext = EntityPredicate.createContext(pPlayer, pEntity);
+        this.trigger(pPlayer, p_221306_ -> p_221306_.matches(pPlayer, pStack, lootcontext));
     }
 
     public static record TriggerInstance(
@@ -36,21 +36,21 @@ public class PickedUpItemTrigger extends SimpleCriterionTrigger<PickedUpItemTrig
         );
 
         public static Criterion<PickedUpItemTrigger.TriggerInstance> thrownItemPickedUpByEntity(
-            ContextAwarePredicate p_286865_, Optional<ItemPredicate> p_297283_, Optional<ContextAwarePredicate> p_300033_
+            ContextAwarePredicate pPlayer, Optional<ItemPredicate> pItem, Optional<ContextAwarePredicate> pEntity
         ) {
-            return CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.createCriterion(new PickedUpItemTrigger.TriggerInstance(Optional.of(p_286865_), p_297283_, p_300033_));
+            return CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.createCriterion(new PickedUpItemTrigger.TriggerInstance(Optional.of(pPlayer), pItem, pEntity));
         }
 
         public static Criterion<PickedUpItemTrigger.TriggerInstance> thrownItemPickedUpByPlayer(
-            Optional<ContextAwarePredicate> p_299013_, Optional<ItemPredicate> p_299788_, Optional<ContextAwarePredicate> p_299814_
+            Optional<ContextAwarePredicate> pPlayer, Optional<ItemPredicate> pItem, Optional<ContextAwarePredicate> pEntity
         ) {
-            return CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER.createCriterion(new PickedUpItemTrigger.TriggerInstance(p_299013_, p_299788_, p_299814_));
+            return CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER.createCriterion(new PickedUpItemTrigger.TriggerInstance(pPlayer, pItem, pEntity));
         }
 
-        public boolean matches(ServerPlayer p_221323_, ItemStack p_221324_, LootContext p_221325_) {
-            return this.item.isPresent() && !this.item.get().test(p_221324_)
+        public boolean matches(ServerPlayer pPlayer, ItemStack pStack, LootContext pContext) {
+            return this.item.isPresent() && !this.item.get().test(pStack)
                 ? false
-                : !this.entity.isPresent() || this.entity.get().matches(p_221325_);
+                : !this.entity.isPresent() || this.entity.get().matches(pContext);
         }
 
         @Override

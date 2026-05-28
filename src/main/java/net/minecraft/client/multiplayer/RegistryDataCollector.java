@@ -33,34 +33,34 @@ public class RegistryDataCollector {
     @Nullable
     private RegistryDataCollector.TagCollector tagCollector;
 
-    public void appendContents(ResourceKey<? extends Registry<?>> p_331647_, List<RegistrySynchronization.PackedRegistryEntry> p_327881_) {
+    public void appendContents(ResourceKey<? extends Registry<?>> pRegistryKey, List<RegistrySynchronization.PackedRegistryEntry> pRegistryEntries) {
         if (this.contentsCollector == null) {
             this.contentsCollector = new RegistryDataCollector.ContentsCollector();
         }
 
-        this.contentsCollector.append(p_331647_, p_327881_);
+        this.contentsCollector.append(pRegistryKey, pRegistryEntries);
     }
 
-    public void appendTags(Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> p_329188_) {
+    public void appendTags(Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> pTags) {
         if (this.tagCollector == null) {
             this.tagCollector = new RegistryDataCollector.TagCollector();
         }
 
-        p_329188_.forEach(this.tagCollector::append);
+        pTags.forEach(this.tagCollector::append);
     }
 
     private static <T> Registry.PendingTags<T> resolveRegistryTags(
-        RegistryAccess.Frozen p_360841_, ResourceKey<? extends Registry<? extends T>> p_363100_, TagNetworkSerialization.NetworkPayload p_362008_
+        RegistryAccess.Frozen pRegistryAccess, ResourceKey<? extends Registry<? extends T>> pRegistryKey, TagNetworkSerialization.NetworkPayload pPayload
     ) {
-        Registry<T> registry = p_360841_.lookupOrThrow(p_363100_);
-        return registry.prepareTagReload(p_362008_.resolve(registry));
+        Registry<T> registry = pRegistryAccess.lookupOrThrow(pRegistryKey);
+        return registry.prepareTagReload(pPayload.resolve(registry));
     }
 
-    private RegistryAccess loadNewElementsAndTags(ResourceProvider p_367565_, RegistryDataCollector.ContentsCollector p_362016_, boolean p_364598_) {
+    private RegistryAccess loadNewElementsAndTags(ResourceProvider pResourceProvider, RegistryDataCollector.ContentsCollector pContentCollector, boolean pIsMemoryConnection) {
         LayeredRegistryAccess<ClientRegistryLayer> layeredregistryaccess = ClientRegistryLayer.createRegistryAccess();
         RegistryAccess.Frozen registryaccess$frozen = layeredregistryaccess.getAccessForLoading(ClientRegistryLayer.REMOTE);
         Map<ResourceKey<? extends Registry<?>>, RegistryDataLoader.NetworkedRegistryData> map = new HashMap<>();
-        p_362016_.elements
+        pContentCollector.elements
             .forEach(
                 (p_365837_, p_368362_) -> map.put(
                         (ResourceKey<? extends Registry<?>>)p_365837_,
@@ -78,7 +78,7 @@ public class RegistryDataCollector {
                             List<RegistrySynchronization.PackedRegistryEntry> list2 = p_362709_ != null ? p_362709_.elements() : List.of();
                             return new RegistryDataLoader.NetworkedRegistryData(list2, p_361286_);
                         });
-                    } else if (!p_364598_) {
+                    } else if (!pIsMemoryConnection) {
                         list.add(resolveRegistryTags(registryaccess$frozen, (ResourceKey<? extends Registry<?>>)p_369903_, p_361286_));
                     }
                 }
@@ -89,7 +89,7 @@ public class RegistryDataCollector {
 
         RegistryAccess.Frozen registryaccess$frozen1;
         try {
-            registryaccess$frozen1 = RegistryDataLoader.load(map, p_367565_, list1, RegistryDataLoader.SYNCHRONIZED_REGISTRIES).freeze();
+            registryaccess$frozen1 = RegistryDataLoader.load(map, pResourceProvider, list1, RegistryDataLoader.SYNCHRONIZED_REGISTRIES).freeze();
         } catch (Exception exception) {
             CrashReport crashreport = CrashReport.forThrowable(exception, "Network Registry Load");
             addCrashDetails(crashreport, map, list);
@@ -102,14 +102,14 @@ public class RegistryDataCollector {
     }
 
     private static void addCrashDetails(
-        CrashReport p_361122_,
-        Map<ResourceKey<? extends Registry<?>>, RegistryDataLoader.NetworkedRegistryData> p_366915_,
-        List<Registry.PendingTags<?>> p_369882_
+        CrashReport pCrashReport,
+        Map<ResourceKey<? extends Registry<?>>, RegistryDataLoader.NetworkedRegistryData> pDynamicRegistries,
+        List<Registry.PendingTags<?>> pStaticRegistries
     ) {
-        CrashReportCategory crashreportcategory = p_361122_.addCategory("Received Elements and Tags");
+        CrashReportCategory crashreportcategory = pCrashReport.addCategory("Received Elements and Tags");
         crashreportcategory.setDetail(
             "Dynamic Registries",
-            () -> p_366915_.entrySet()
+            () -> pDynamicRegistries.entrySet()
                     .stream()
                     .sorted(Comparator.comparing(p_369666_ -> p_369666_.getKey().location()))
                     .map(
@@ -125,31 +125,31 @@ public class RegistryDataCollector {
         );
         crashreportcategory.setDetail(
             "Static Registries",
-            () -> p_369882_.stream()
+            () -> pStaticRegistries.stream()
                     .sorted(Comparator.comparing(p_365860_ -> p_365860_.key().location()))
                     .map(p_368235_ -> String.format(Locale.ROOT, "\n\t\t%s: tags=%d", p_368235_.key().location(), p_368235_.size()))
                     .collect(Collectors.joining())
         );
     }
 
-    private void loadOnlyTags(RegistryDataCollector.TagCollector p_362263_, RegistryAccess.Frozen p_361181_, boolean p_369477_) {
-        p_362263_.forEach((p_370187_, p_363143_) -> {
-            if (p_369477_ || RegistrySynchronization.isNetworkable((ResourceKey<? extends Registry<?>>)p_370187_)) {
-                resolveRegistryTags(p_361181_, (ResourceKey<? extends Registry<?>>)p_370187_, p_363143_).apply();
+    private void loadOnlyTags(RegistryDataCollector.TagCollector pTagCollector, RegistryAccess.Frozen pRegistryAccess, boolean pIsMemoryConnection) {
+        pTagCollector.forEach((p_370187_, p_363143_) -> {
+            if (pIsMemoryConnection || RegistrySynchronization.isNetworkable((ResourceKey<? extends Registry<?>>)p_370187_)) {
+                resolveRegistryTags(pRegistryAccess, (ResourceKey<? extends Registry<?>>)p_370187_, p_363143_).apply();
             }
         });
     }
 
-    public RegistryAccess.Frozen collectGameRegistries(ResourceProvider p_333941_, RegistryAccess.Frozen p_368312_, boolean p_328462_) {
+    public RegistryAccess.Frozen collectGameRegistries(ResourceProvider pResourceProvider, RegistryAccess.Frozen pRegistryAccess, boolean pIsMemoryConnection) {
         RegistryAccess registryaccess;
         if (this.contentsCollector != null) {
-            registryaccess = this.loadNewElementsAndTags(p_333941_, this.contentsCollector, p_328462_);
+            registryaccess = this.loadNewElementsAndTags(pResourceProvider, this.contentsCollector, pIsMemoryConnection);
         } else {
             if (this.tagCollector != null) {
-                this.loadOnlyTags(this.tagCollector, p_368312_, !p_328462_);
+                this.loadOnlyTags(this.tagCollector, pRegistryAccess, !pIsMemoryConnection);
             }
 
-            registryaccess = p_368312_;
+            registryaccess = pRegistryAccess;
         }
 
         return registryaccess.freeze();
@@ -159,8 +159,8 @@ public class RegistryDataCollector {
     static class ContentsCollector {
         final Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> elements = new HashMap<>();
 
-        public void append(ResourceKey<? extends Registry<?>> p_331127_, List<RegistrySynchronization.PackedRegistryEntry> p_331340_) {
-            this.elements.computeIfAbsent(p_331127_, p_332834_ -> new ArrayList<>()).addAll(p_331340_);
+        public void append(ResourceKey<? extends Registry<?>> pRegistryKey, List<RegistrySynchronization.PackedRegistryEntry> pEntries) {
+            this.elements.computeIfAbsent(pRegistryKey, p_332834_ -> new ArrayList<>()).addAll(pEntries);
         }
     }
 
@@ -168,12 +168,12 @@ public class RegistryDataCollector {
     static class TagCollector {
         private final Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> tags = new HashMap<>();
 
-        public void append(ResourceKey<? extends Registry<?>> p_367185_, TagNetworkSerialization.NetworkPayload p_369486_) {
-            this.tags.put(p_367185_, p_369486_);
+        public void append(ResourceKey<? extends Registry<?>> pRegistryKey, TagNetworkSerialization.NetworkPayload pPayload) {
+            this.tags.put(pRegistryKey, pPayload);
         }
 
-        public void forEach(BiConsumer<? super ResourceKey<? extends Registry<?>>, ? super TagNetworkSerialization.NetworkPayload> p_365146_) {
-            this.tags.forEach(p_365146_);
+        public void forEach(BiConsumer<? super ResourceKey<? extends Registry<?>>, ? super TagNetworkSerialization.NetworkPayload> pAction) {
+            this.tags.forEach(pAction);
         }
     }
 }

@@ -12,20 +12,20 @@ class PlayerScores {
     private final Reference2ObjectOpenHashMap<Objective, Score> scores = new Reference2ObjectOpenHashMap<>(16, 0.5F);
 
     @Nullable
-    public Score get(Objective p_310183_) {
-        return this.scores.get(p_310183_);
+    public Score get(Objective pObjective) {
+        return this.scores.get(pObjective);
     }
 
-    public Score getOrCreate(Objective p_310156_, Consumer<Score> p_310669_) {
-        return this.scores.computeIfAbsent(p_310156_, p_312480_ -> {
+    public Score getOrCreate(Objective pObjective, Consumer<Score> pCreator) {
+        return this.scores.computeIfAbsent(pObjective, p_312480_ -> {
             Score score = new Score();
-            p_310669_.accept(score);
+            pCreator.accept(score);
             return score;
         });
     }
 
-    public boolean remove(Objective p_312444_) {
-        return this.scores.remove(p_312444_) != null;
+    public boolean remove(Objective pObjective) {
+        return this.scores.remove(pObjective) != null;
     }
 
     public boolean hasScores() {
@@ -38,8 +38,8 @@ class PlayerScores {
         return object2intmap;
     }
 
-    void setScore(Objective p_312005_, Score p_312306_) {
-        this.scores.put(p_312005_, p_312306_);
+    void setScore(Objective pObjective, Score pScore) {
+        this.scores.put(pObjective, pScore);
     }
 
     Map<Objective, Score> listRawScores() {

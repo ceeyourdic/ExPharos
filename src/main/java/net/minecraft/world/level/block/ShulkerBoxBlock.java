@@ -80,9 +80,9 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
         return CODEC;
     }
 
-    public ShulkerBoxBlock(@Nullable DyeColor p_56188_, BlockBehaviour.Properties p_56189_) {
-        super(p_56189_);
-        this.color = p_56188_;
+    public ShulkerBoxBlock(@Nullable DyeColor pColor, BlockBehaviour.Properties pProperties) {
+        super(pProperties);
+        this.color = pColor;
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.UP));
     }
 
@@ -110,23 +110,23 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
-    private static boolean canOpen(BlockState p_154547_, Level p_154548_, BlockPos p_154549_, ShulkerBoxBlockEntity p_154550_) {
-        if (p_154550_.getAnimationStatus() != ShulkerBoxBlockEntity.AnimationStatus.CLOSED) {
+    private static boolean canOpen(BlockState pState, Level pLevel, BlockPos pPos, ShulkerBoxBlockEntity pBlockEntity) {
+        if (pBlockEntity.getAnimationStatus() != ShulkerBoxBlockEntity.AnimationStatus.CLOSED) {
             return true;
         } else {
-            AABB aabb = Shulker.getProgressDeltaAabb(1.0F, p_154547_.getValue(FACING), 0.0F, 0.5F, p_154549_.getBottomCenter()).deflate(1.0E-6);
-            return p_154548_.noCollision(aabb);
+            AABB aabb = Shulker.getProgressDeltaAabb(1.0F, pState.getValue(FACING), 0.0F, 0.5F, pPos.getBottomCenter()).deflate(1.0E-6);
+            return pLevel.noCollision(aabb);
         }
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext p_56198_) {
-        return this.defaultBlockState().setValue(FACING, p_56198_.getClickedFace());
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.defaultBlockState().setValue(FACING, pContext.getClickedFace());
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_56249_) {
-        p_56249_.add(FACING);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING);
     }
 
     @Override
@@ -164,12 +164,12 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void onRemove(BlockState p_56234_, Level p_56235_, BlockPos p_56236_, BlockState p_56237_, boolean p_56238_) {
-        if (!p_56234_.is(p_56237_.getBlock())) {
-            BlockEntity blockentity = p_56235_.getBlockEntity(p_56236_);
-            super.onRemove(p_56234_, p_56235_, p_56236_, p_56237_, p_56238_);
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        if (!pState.is(pNewState.getBlock())) {
+            BlockEntity blockentity = pLevel.getBlockEntity(pPos);
+            super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
             if (blockentity instanceof ShulkerBoxBlockEntity) {
-                p_56235_.updateNeighbourForOutputSignal(p_56236_, p_56234_.getBlock());
+                pLevel.updateNeighbourForOutputSignal(pPos, pState.getBlock());
             }
         }
     }
@@ -207,9 +207,9 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_56257_, BlockGetter p_56258_, BlockPos p_56259_, CollisionContext p_56260_) {
-        return p_56258_.getBlockEntity(p_56259_) instanceof ShulkerBoxBlockEntity shulkerboxblockentity
-            ? Shapes.create(shulkerboxblockentity.getBoundingBox(p_56257_))
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return pLevel.getBlockEntity(pPos) instanceof ShulkerBoxBlockEntity shulkerboxblockentity
+            ? Shapes.create(shulkerboxblockentity.getBoundingBox(pState))
             : Shapes.block();
     }
 
@@ -219,20 +219,20 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected boolean hasAnalogOutputSignal(BlockState p_56221_) {
+    protected boolean hasAnalogOutputSignal(BlockState pState) {
         return true;
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState p_56223_, Level p_56224_, BlockPos p_56225_) {
-        return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(p_56224_.getBlockEntity(p_56225_));
+    protected int getAnalogOutputSignal(BlockState pBlockState, Level pLevel, BlockPos pPos) {
+        return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(pLevel.getBlockEntity(pPos));
     }
 
-    public static Block getBlockByColor(@Nullable DyeColor p_56191_) {
-        if (p_56191_ == null) {
+    public static Block getBlockByColor(@Nullable DyeColor pColor) {
+        if (pColor == null) {
             return Blocks.SHULKER_BOX;
         } else {
-            return switch (p_56191_) {
+            return switch (pColor) {
                 case WHITE -> Blocks.WHITE_SHULKER_BOX;
                 case ORANGE -> Blocks.ORANGE_SHULKER_BOX;
                 case MAGENTA -> Blocks.MAGENTA_SHULKER_BOX;
@@ -258,17 +258,17 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
         return this.color;
     }
 
-    public static ItemStack getColoredItemStack(@Nullable DyeColor p_56251_) {
-        return new ItemStack(getBlockByColor(p_56251_));
+    public static ItemStack getColoredItemStack(@Nullable DyeColor pColor) {
+        return new ItemStack(getBlockByColor(pColor));
     }
 
     @Override
-    protected BlockState rotate(BlockState p_56243_, Rotation p_56244_) {
-        return p_56243_.setValue(FACING, p_56244_.rotate(p_56243_.getValue(FACING)));
+    protected BlockState rotate(BlockState pState, Rotation pRot) {
+        return pState.setValue(FACING, pRot.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState p_56240_, Mirror p_56241_) {
-        return p_56240_.rotate(p_56241_.getRotation(p_56240_.getValue(FACING)));
+    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 }

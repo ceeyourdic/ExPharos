@@ -11,12 +11,12 @@ public enum EntityAttachment {
 
     private final EntityAttachment.Fallback fallback;
 
-    private EntityAttachment(final EntityAttachment.Fallback p_333642_) {
-        this.fallback = p_333642_;
+    private EntityAttachment(final EntityAttachment.Fallback pFallback) {
+        this.fallback = pFallback;
     }
 
-    public List<Vec3> createFallbackPoints(float p_330294_, float p_328764_) {
-        return this.fallback.create(p_330294_, p_328764_);
+    public List<Vec3> createFallbackPoints(float pWidth, float pHeight) {
+        return this.fallback.create(pWidth, pHeight);
     }
 
     public interface Fallback {
@@ -25,6 +25,6 @@ public enum EntityAttachment {
         EntityAttachment.Fallback AT_HEIGHT = (p_331649_, p_328299_) -> List.of(new Vec3(0.0, (double)p_328299_, 0.0));
         EntityAttachment.Fallback AT_CENTER = (p_331512_, p_335776_) -> List.of(new Vec3(0.0, (double)p_335776_ / 2.0, 0.0));
 
-        List<Vec3> create(float p_333086_, float p_331694_);
+        List<Vec3> create(float pWidth, float pHeight);
     }
 }

@@ -59,13 +59,13 @@ public class FrostedIceBlock extends IceBlock {
         }
     }
 
-    private boolean slightlyMelt(BlockState p_53593_, Level p_53594_, BlockPos p_53595_) {
-        int i = p_53593_.getValue(AGE);
+    private boolean slightlyMelt(BlockState pState, Level pLevel, BlockPos pPos) {
+        int i = pState.getValue(AGE);
         if (i < 3) {
-            p_53594_.setBlock(p_53595_, p_53593_.setValue(AGE, Integer.valueOf(i + 1)), 2);
+            pLevel.setBlock(pPos, pState.setValue(AGE, Integer.valueOf(i + 1)), 2);
             return false;
         } else {
-            this.melt(p_53593_, p_53594_, p_53595_);
+            this.melt(pState, pLevel, pPos);
             return true;
         }
     }
@@ -79,14 +79,14 @@ public class FrostedIceBlock extends IceBlock {
         super.neighborChanged(p_53579_, p_53580_, p_53581_, p_53582_, p_368711_, p_53584_);
     }
 
-    private boolean fewerNeigboursThan(BlockGetter p_53566_, BlockPos p_53567_, int p_53568_) {
+    private boolean fewerNeigboursThan(BlockGetter pLevel, BlockPos pPos, int pNeighborsRequired) {
         int i = 0;
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
         for (Direction direction : Direction.values()) {
-            blockpos$mutableblockpos.setWithOffset(p_53567_, direction);
-            if (p_53566_.getBlockState(blockpos$mutableblockpos).is(this)) {
-                if (++i >= p_53568_) {
+            blockpos$mutableblockpos.setWithOffset(pPos, direction);
+            if (pLevel.getBlockState(blockpos$mutableblockpos).is(this)) {
+                if (++i >= pNeighborsRequired) {
                     return false;
                 }
             }
@@ -96,8 +96,8 @@ public class FrostedIceBlock extends IceBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_53586_) {
-        p_53586_.add(AGE);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(AGE);
     }
 
     @Override

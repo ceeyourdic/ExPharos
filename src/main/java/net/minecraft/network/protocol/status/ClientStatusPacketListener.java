@@ -10,5 +10,5 @@ public interface ClientStatusPacketListener extends ClientPongPacketListener, Cl
         return ConnectionProtocol.STATUS;
     }
 
-    void handleStatusResponse(ClientboundStatusResponsePacket p_134872_);
+    void handleStatusResponse(ClientboundStatusResponsePacket pPacket);
 }

@@ -34,27 +34,27 @@ public class SmithingMenu extends ItemCombinerMenu {
     private final RecipePropertySet additionItemTest;
     private final DataSlot hasRecipeError = DataSlot.standalone();
 
-    public SmithingMenu(int p_40245_, Inventory p_40246_) {
-        this(p_40245_, p_40246_, ContainerLevelAccess.NULL);
+    public SmithingMenu(int pContainerId, Inventory pPlayerInventory) {
+        this(pContainerId, pPlayerInventory, ContainerLevelAccess.NULL);
     }
 
-    public SmithingMenu(int p_40248_, Inventory p_40249_, ContainerLevelAccess p_40250_) {
-        this(p_40248_, p_40249_, p_40250_, p_40249_.player.level());
+    public SmithingMenu(int pContainerId, Inventory pPlayerInventory, ContainerLevelAccess pAccess) {
+        this(pContainerId, pPlayerInventory, pAccess, pPlayerInventory.player.level());
     }
 
-    private SmithingMenu(int p_363834_, Inventory p_362239_, ContainerLevelAccess p_362692_, Level p_363616_) {
-        super(MenuType.SMITHING, p_363834_, p_362239_, p_362692_, createInputSlotDefinitions(p_363616_.recipeAccess()));
-        this.level = p_363616_;
-        this.baseItemTest = p_363616_.recipeAccess().propertySet(RecipePropertySet.SMITHING_BASE);
-        this.templateItemTest = p_363616_.recipeAccess().propertySet(RecipePropertySet.SMITHING_TEMPLATE);
-        this.additionItemTest = p_363616_.recipeAccess().propertySet(RecipePropertySet.SMITHING_ADDITION);
+    private SmithingMenu(int pContainerId, Inventory pPlayerInventory, ContainerLevelAccess pAccess, Level pLevel) {
+        super(MenuType.SMITHING, pContainerId, pPlayerInventory, pAccess, createInputSlotDefinitions(pLevel.recipeAccess()));
+        this.level = pLevel;
+        this.baseItemTest = pLevel.recipeAccess().propertySet(RecipePropertySet.SMITHING_BASE);
+        this.templateItemTest = pLevel.recipeAccess().propertySet(RecipePropertySet.SMITHING_TEMPLATE);
+        this.additionItemTest = pLevel.recipeAccess().propertySet(RecipePropertySet.SMITHING_ADDITION);
         this.addDataSlot(this.hasRecipeError).set(0);
     }
 
-    private static ItemCombinerMenuSlotDefinition createInputSlotDefinitions(RecipeAccess p_363220_) {
-        RecipePropertySet recipepropertyset = p_363220_.propertySet(RecipePropertySet.SMITHING_BASE);
-        RecipePropertySet recipepropertyset1 = p_363220_.propertySet(RecipePropertySet.SMITHING_TEMPLATE);
-        RecipePropertySet recipepropertyset2 = p_363220_.propertySet(RecipePropertySet.SMITHING_ADDITION);
+    private static ItemCombinerMenuSlotDefinition createInputSlotDefinitions(RecipeAccess pAccess) {
+        RecipePropertySet recipepropertyset = pAccess.propertySet(RecipePropertySet.SMITHING_BASE);
+        RecipePropertySet recipepropertyset1 = pAccess.propertySet(RecipePropertySet.SMITHING_TEMPLATE);
+        RecipePropertySet recipepropertyset2 = pAccess.propertySet(RecipePropertySet.SMITHING_ADDITION);
         return ItemCombinerMenuSlotDefinition.create()
             .withSlot(0, 8, 48, recipepropertyset1::test)
             .withSlot(1, 26, 48, recipepropertyset::test)
@@ -86,11 +86,11 @@ public class SmithingMenu extends ItemCombinerMenu {
         return new SmithingRecipeInput(this.inputSlots.getItem(0), this.inputSlots.getItem(1), this.inputSlots.getItem(2));
     }
 
-    private void shrinkStackInSlot(int p_40271_) {
-        ItemStack itemstack = this.inputSlots.getItem(p_40271_);
+    private void shrinkStackInSlot(int pIndex) {
+        ItemStack itemstack = this.inputSlots.getItem(pIndex);
         if (!itemstack.isEmpty()) {
             itemstack.shrink(1);
-            this.inputSlots.setItem(p_40271_, itemstack);
+            this.inputSlots.setItem(pIndex, itemstack);
         }
     }
 
@@ -124,8 +124,8 @@ public class SmithingMenu extends ItemCombinerMenu {
     }
 
     @Override
-    public boolean canTakeItemForPickAll(ItemStack p_40257_, Slot p_40258_) {
-        return p_40258_.container != this.resultSlots && super.canTakeItemForPickAll(p_40257_, p_40258_);
+    public boolean canTakeItemForPickAll(ItemStack pStack, Slot pSlot) {
+        return pSlot.container != this.resultSlots && super.canTakeItemForPickAll(pStack, pSlot);
     }
 
     @Override

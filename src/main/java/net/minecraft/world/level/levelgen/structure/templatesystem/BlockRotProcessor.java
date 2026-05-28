@@ -25,17 +25,17 @@ public class BlockRotProcessor extends StructureProcessor {
     private final Optional<HolderSet<Block>> rottableBlocks;
     private final float integrity;
 
-    public BlockRotProcessor(HolderSet<Block> p_255622_, float p_256468_) {
-        this(Optional.of(p_255622_), p_256468_);
+    public BlockRotProcessor(HolderSet<Block> pRottableBlocks, float pIntegrity) {
+        this(Optional.of(pRottableBlocks), pIntegrity);
     }
 
-    public BlockRotProcessor(float p_74078_) {
-        this(Optional.empty(), p_74078_);
+    public BlockRotProcessor(float pIntegrity) {
+        this(Optional.empty(), pIntegrity);
     }
 
-    private BlockRotProcessor(Optional<HolderSet<Block>> p_230284_, float p_230285_) {
-        this.integrity = p_230285_;
-        this.rottableBlocks = p_230284_;
+    private BlockRotProcessor(Optional<HolderSet<Block>> pRottableBlocks, float pIntegrity) {
+        this.integrity = pIntegrity;
+        this.rottableBlocks = pRottableBlocks;
     }
 
     @Nullable

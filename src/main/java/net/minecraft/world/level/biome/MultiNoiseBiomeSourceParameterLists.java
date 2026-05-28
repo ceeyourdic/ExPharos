@@ -10,13 +10,13 @@ public class MultiNoiseBiomeSourceParameterLists {
     public static final ResourceKey<MultiNoiseBiomeSourceParameterList> NETHER = register("nether");
     public static final ResourceKey<MultiNoiseBiomeSourceParameterList> OVERWORLD = register("overworld");
 
-    public static void bootstrap(BootstrapContext<MultiNoiseBiomeSourceParameterList> p_327712_) {
-        HolderGetter<Biome> holdergetter = p_327712_.lookup(Registries.BIOME);
-        p_327712_.register(NETHER, new MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset.NETHER, holdergetter));
-        p_327712_.register(OVERWORLD, new MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD, holdergetter));
+    public static void bootstrap(BootstrapContext<MultiNoiseBiomeSourceParameterList> pContext) {
+        HolderGetter<Biome> holdergetter = pContext.lookup(Registries.BIOME);
+        pContext.register(NETHER, new MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset.NETHER, holdergetter));
+        pContext.register(OVERWORLD, new MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD, holdergetter));
     }
 
-    private static ResourceKey<MultiNoiseBiomeSourceParameterList> register(String p_275281_) {
-        return ResourceKey.create(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST, ResourceLocation.withDefaultNamespace(p_275281_));
+    private static ResourceKey<MultiNoiseBiomeSourceParameterList> register(String pName) {
+        return ResourceKey.create(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST, ResourceLocation.withDefaultNamespace(pName));
     }
 }

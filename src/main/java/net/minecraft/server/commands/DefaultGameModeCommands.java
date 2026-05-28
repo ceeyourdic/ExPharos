@@ -11,8 +11,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 
 public class DefaultGameModeCommands {
-    public static void register(CommandDispatcher<CommandSourceStack> p_136927_) {
-        p_136927_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher) {
+        pDispatcher.register(
             Commands.literal("defaultgamemode")
                 .requires(p_136929_ -> p_136929_.hasPermission(2))
                 .then(
@@ -22,10 +22,10 @@ public class DefaultGameModeCommands {
         );
     }
 
-    private static int setMode(CommandSourceStack p_136931_, GameType p_136932_) {
+    private static int setMode(CommandSourceStack pCommandSource, GameType pGamemode) {
         int i = 0;
-        MinecraftServer minecraftserver = p_136931_.getServer();
-        minecraftserver.setDefaultGameType(p_136932_);
+        MinecraftServer minecraftserver = pCommandSource.getServer();
+        minecraftserver.setDefaultGameType(pGamemode);
         GameType gametype = minecraftserver.getForcedGameType();
         if (gametype != null) {
             for (ServerPlayer serverplayer : minecraftserver.getPlayerList().getPlayers()) {
@@ -35,7 +35,7 @@ public class DefaultGameModeCommands {
             }
         }
 
-        p_136931_.sendSuccess(() -> Component.translatable("commands.defaultgamemode.success", p_136932_.getLongDisplayName()), true);
+        pCommandSource.sendSuccess(() -> Component.translatable("commands.defaultgamemode.success", pGamemode.getLongDisplayName()), true);
         return i;
     }
 }

@@ -37,20 +37,20 @@ public record SpawnParticlesEffect(
                 .apply(p_342263_, SpawnParticlesEffect::new)
     );
 
-    public static SpawnParticlesEffect.PositionSource offsetFromEntityPosition(float p_344734_) {
-        return new SpawnParticlesEffect.PositionSource(SpawnParticlesEffect.PositionSourceType.ENTITY_POSITION, p_344734_, 1.0F);
+    public static SpawnParticlesEffect.PositionSource offsetFromEntityPosition(float pOffset) {
+        return new SpawnParticlesEffect.PositionSource(SpawnParticlesEffect.PositionSourceType.ENTITY_POSITION, pOffset, 1.0F);
     }
 
     public static SpawnParticlesEffect.PositionSource inBoundingBox() {
         return new SpawnParticlesEffect.PositionSource(SpawnParticlesEffect.PositionSourceType.BOUNDING_BOX, 0.0F, 1.0F);
     }
 
-    public static SpawnParticlesEffect.VelocitySource movementScaled(float p_342848_) {
-        return new SpawnParticlesEffect.VelocitySource(p_342848_, ConstantFloat.ZERO);
+    public static SpawnParticlesEffect.VelocitySource movementScaled(float pMovementScale) {
+        return new SpawnParticlesEffect.VelocitySource(pMovementScale, ConstantFloat.ZERO);
     }
 
-    public static SpawnParticlesEffect.VelocitySource fixedVelocity(FloatProvider p_344992_) {
-        return new SpawnParticlesEffect.VelocitySource(0.0F, p_344992_);
+    public static SpawnParticlesEffect.VelocitySource fixedVelocity(FloatProvider pVelocity) {
+        return new SpawnParticlesEffect.VelocitySource(0.0F, pVelocity);
     }
 
     @Override
@@ -92,8 +92,8 @@ public record SpawnParticlesEffect(
                         : DataResult.success(p_344468_)
             );
 
-        public double getCoordinate(double p_344146_, double p_344860_, float p_343272_, RandomSource p_344191_) {
-            return this.type.getCoordinate(p_344146_, p_344860_, p_343272_ * this.scale, p_344191_) + (double)this.offset;
+        public double getCoordinate(double pPosition, double pCenter, float pSize, RandomSource pRandom) {
+            return this.type.getCoordinate(pPosition, pCenter, pSize * this.scale, pRandom) + (double)this.offset;
         }
     }
 
@@ -107,13 +107,13 @@ public record SpawnParticlesEffect(
         private final String id;
         private final SpawnParticlesEffect.PositionSourceType.CoordinateSource source;
 
-        private PositionSourceType(final String p_343318_, final SpawnParticlesEffect.PositionSourceType.CoordinateSource p_343028_) {
-            this.id = p_343318_;
-            this.source = p_343028_;
+        private PositionSourceType(final String pId, final SpawnParticlesEffect.PositionSourceType.CoordinateSource pSource) {
+            this.id = pId;
+            this.source = pSource;
         }
 
-        public double getCoordinate(double p_343826_, double p_344958_, float p_345431_, RandomSource p_342492_) {
-            return this.source.getCoordinate(p_343826_, p_344958_, p_345431_, p_342492_);
+        public double getCoordinate(double pPosition, double pCenter, float pSize, RandomSource pRandom) {
+            return this.source.getCoordinate(pPosition, pCenter, pSize, pRandom);
         }
 
         @Override
@@ -123,7 +123,7 @@ public record SpawnParticlesEffect(
 
         @FunctionalInterface
         interface CoordinateSource {
-            double getCoordinate(double p_343199_, double p_343174_, float p_344504_, RandomSource p_342781_);
+            double getCoordinate(double pPosition, double pCenter, float pSize, RandomSource pRandom);
         }
     }
 
@@ -136,8 +136,8 @@ public record SpawnParticlesEffect(
                     .apply(p_343024_, SpawnParticlesEffect.VelocitySource::new)
         );
 
-        public double getVelocity(double p_344775_, RandomSource p_342972_) {
-            return p_344775_ * (double)this.movementScale + (double)this.base.sample(p_342972_);
+        public double getVelocity(double pScale, RandomSource pRandom) {
+            return pScale * (double)this.movementScale + (double)this.base.sample(pRandom);
         }
     }
 }

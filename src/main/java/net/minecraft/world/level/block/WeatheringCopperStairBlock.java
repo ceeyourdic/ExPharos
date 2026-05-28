@@ -25,9 +25,9 @@ public class WeatheringCopperStairBlock extends StairBlock implements Weathering
         return CODEC;
     }
 
-    public WeatheringCopperStairBlock(WeatheringCopper.WeatherState p_154951_, BlockState p_154952_, BlockBehaviour.Properties p_154953_) {
-        super(p_154952_, p_154953_);
-        this.weatherState = p_154951_;
+    public WeatheringCopperStairBlock(WeatheringCopper.WeatherState pWeatherState, BlockState pBaseState, BlockBehaviour.Properties pProperties) {
+        super(pBaseState, pProperties);
+        this.weatherState = pWeatherState;
     }
 
     @Override

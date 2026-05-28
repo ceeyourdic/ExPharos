@@ -12,7 +12,7 @@ public class ItemFrameItem extends HangingEntityItem {
     }
 
     @Override
-    protected boolean mayPlace(Player p_41551_, Direction p_41552_, ItemStack p_41553_, BlockPos p_41554_) {
-        return !p_41551_.level().isOutsideBuildHeight(p_41554_) && p_41551_.mayUseItemAt(p_41554_, p_41552_, p_41553_);
+    protected boolean mayPlace(Player pPlayer, Direction pDirection, ItemStack pItemStack, BlockPos pPos) {
+        return !pPlayer.level().isOutsideBuildHeight(pPos) && pPlayer.mayUseItemAt(pPos, pDirection, pItemStack);
     }
 }

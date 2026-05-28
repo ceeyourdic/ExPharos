@@ -27,13 +27,13 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
     private final NonNullList<ItemStack> items = NonNullList.withSize(6, ItemStack.EMPTY);
     private int lastInteractedSlot = -1;
 
-    public ChiseledBookShelfBlockEntity(BlockPos p_249541_, BlockState p_251752_) {
-        super(BlockEntityType.CHISELED_BOOKSHELF, p_249541_, p_251752_);
+    public ChiseledBookShelfBlockEntity(BlockPos pPos, BlockState pState) {
+        super(BlockEntityType.CHISELED_BOOKSHELF, pPos, pState);
     }
 
-    private void updateState(int p_261806_) {
-        if (p_261806_ >= 0 && p_261806_ < 6) {
-            this.lastInteractedSlot = p_261806_;
+    private void updateState(int pSlot) {
+        if (pSlot >= 0 && pSlot < 6) {
+            this.lastInteractedSlot = pSlot;
             BlockState blockstate = this.getBlockState();
 
             for (int i = 0; i < ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.size(); i++) {
@@ -45,7 +45,7 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
             Objects.requireNonNull(this.level).setBlock(this.worldPosition, blockstate, 3);
             this.level.gameEvent(GameEvent.BLOCK_CHANGE, this.worldPosition, GameEvent.Context.of(blockstate));
         } else {
-            LOGGER.error("Expected slot 0-5, got {}", p_261806_);
+            LOGGER.error("Expected slot 0-5, got {}", pSlot);
         }
     }
 

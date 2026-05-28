@@ -18,11 +18,11 @@ public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigge
         return BredAnimalsTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_147279_, Animal p_147280_, Animal p_147281_, @Nullable AgeableMob p_147282_) {
-        LootContext lootcontext = EntityPredicate.createContext(p_147279_, p_147280_);
-        LootContext lootcontext1 = EntityPredicate.createContext(p_147279_, p_147281_);
-        LootContext lootcontext2 = p_147282_ != null ? EntityPredicate.createContext(p_147279_, p_147282_) : null;
-        this.trigger(p_147279_, p_18653_ -> p_18653_.matches(lootcontext, lootcontext1, lootcontext2));
+    public void trigger(ServerPlayer pPlayer, Animal pParent, Animal pPartner, @Nullable AgeableMob pChild) {
+        LootContext lootcontext = EntityPredicate.createContext(pPlayer, pParent);
+        LootContext lootcontext1 = EntityPredicate.createContext(pPlayer, pPartner);
+        LootContext lootcontext2 = pChild != null ? EntityPredicate.createContext(pPlayer, pChild) : null;
+        this.trigger(pPlayer, p_18653_ -> p_18653_.matches(lootcontext, lootcontext1, lootcontext2));
     }
 
     public static record TriggerInstance(
@@ -46,35 +46,35 @@ public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigge
                 .createCriterion(new BredAnimalsTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
         }
 
-        public static Criterion<BredAnimalsTrigger.TriggerInstance> bredAnimals(EntityPredicate.Builder p_18668_) {
+        public static Criterion<BredAnimalsTrigger.TriggerInstance> bredAnimals(EntityPredicate.Builder pChild) {
             return CriteriaTriggers.BRED_ANIMALS
                 .createCriterion(
                     new BredAnimalsTrigger.TriggerInstance(
-                        Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(EntityPredicate.wrap(p_18668_))
+                        Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(EntityPredicate.wrap(pChild))
                     )
                 );
         }
 
         public static Criterion<BredAnimalsTrigger.TriggerInstance> bredAnimals(
-            Optional<EntityPredicate> p_298213_, Optional<EntityPredicate> p_299258_, Optional<EntityPredicate> p_297439_
+            Optional<EntityPredicate> pParent, Optional<EntityPredicate> pPartner, Optional<EntityPredicate> pChild
         ) {
             return CriteriaTriggers.BRED_ANIMALS
                 .createCriterion(
                     new BredAnimalsTrigger.TriggerInstance(
-                        Optional.empty(), EntityPredicate.wrap(p_298213_), EntityPredicate.wrap(p_299258_), EntityPredicate.wrap(p_297439_)
+                        Optional.empty(), EntityPredicate.wrap(pParent), EntityPredicate.wrap(pPartner), EntityPredicate.wrap(pChild)
                     )
                 );
         }
 
-        public boolean matches(LootContext p_18676_, LootContext p_18677_, @Nullable LootContext p_18678_) {
-            return !this.child.isPresent() || p_18678_ != null && this.child.get().matches(p_18678_)
-                ? matches(this.parent, p_18676_) && matches(this.partner, p_18677_)
-                    || matches(this.parent, p_18677_) && matches(this.partner, p_18676_)
+        public boolean matches(LootContext pParentContext, LootContext pPartnerContext, @Nullable LootContext pChildContext) {
+            return !this.child.isPresent() || pChildContext != null && this.child.get().matches(pChildContext)
+                ? matches(this.parent, pParentContext) && matches(this.partner, pPartnerContext)
+                    || matches(this.parent, pPartnerContext) && matches(this.partner, pParentContext)
                 : false;
         }
 
-        private static boolean matches(Optional<ContextAwarePredicate> p_300266_, LootContext p_300903_) {
-            return p_300266_.isEmpty() || p_300266_.get().matches(p_300903_);
+        private static boolean matches(Optional<ContextAwarePredicate> pPredicate, LootContext pContext) {
+            return pPredicate.isEmpty() || pPredicate.get().matches(pContext);
         }
 
         @Override

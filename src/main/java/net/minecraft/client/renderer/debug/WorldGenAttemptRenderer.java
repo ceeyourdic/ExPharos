@@ -20,13 +20,13 @@ public class WorldGenAttemptRenderer implements DebugRenderer.SimpleDebugRendere
     private final List<Float> greens = Lists.newArrayList();
     private final List<Float> blues = Lists.newArrayList();
 
-    public void addPos(BlockPos p_113738_, float p_113739_, float p_113740_, float p_113741_, float p_113742_, float p_113743_) {
-        this.toRender.add(p_113738_);
-        this.scales.add(p_113739_);
-        this.alphas.add(p_113743_);
-        this.reds.add(p_113740_);
-        this.greens.add(p_113741_);
-        this.blues.add(p_113742_);
+    public void addPos(BlockPos pPos, float pScale, float pRed, float pGreen, float pBlue, float pAlpha) {
+        this.toRender.add(pPos);
+        this.scales.add(pScale);
+        this.alphas.add(pAlpha);
+        this.reds.add(pRed);
+        this.greens.add(pGreen);
+        this.blues.add(pBlue);
     }
 
     @Override

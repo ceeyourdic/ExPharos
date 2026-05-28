@@ -28,10 +28,10 @@ public class SetBannerPatternFunction extends LootItemConditionalFunction {
     private final BannerPatternLayers patterns;
     private final boolean append;
 
-    SetBannerPatternFunction(List<LootItemCondition> p_165276_, BannerPatternLayers p_332596_, boolean p_165277_) {
-        super(p_165276_);
-        this.patterns = p_332596_;
-        this.append = p_165277_;
+    SetBannerPatternFunction(List<LootItemCondition> pConditions, BannerPatternLayers pPatterns, boolean pAppend) {
+        super(pConditions);
+        this.patterns = pPatterns;
+        this.append = pAppend;
     }
 
     @Override
@@ -55,16 +55,16 @@ public class SetBannerPatternFunction extends LootItemConditionalFunction {
         return LootItemFunctions.SET_BANNER_PATTERN;
     }
 
-    public static SetBannerPatternFunction.Builder setBannerPattern(boolean p_165283_) {
-        return new SetBannerPatternFunction.Builder(p_165283_);
+    public static SetBannerPatternFunction.Builder setBannerPattern(boolean pAppend) {
+        return new SetBannerPatternFunction.Builder(pAppend);
     }
 
     public static class Builder extends LootItemConditionalFunction.Builder<SetBannerPatternFunction.Builder> {
         private final BannerPatternLayers.Builder patterns = new BannerPatternLayers.Builder();
         private final boolean append;
 
-        Builder(boolean p_165287_) {
-            this.append = p_165287_;
+        Builder(boolean pAppend) {
+            this.append = pAppend;
         }
 
         protected SetBannerPatternFunction.Builder getThis() {
@@ -76,8 +76,8 @@ public class SetBannerPatternFunction extends LootItemConditionalFunction {
             return new SetBannerPatternFunction(this.getConditions(), this.patterns.build(), this.append);
         }
 
-        public SetBannerPatternFunction.Builder addPattern(Holder<BannerPattern> p_230999_, DyeColor p_231000_) {
-            this.patterns.add(p_230999_, p_231000_);
+        public SetBannerPatternFunction.Builder addPattern(Holder<BannerPattern> pPattern, DyeColor pColor) {
+            this.patterns.add(pPattern, pColor);
             return this;
         }
     }

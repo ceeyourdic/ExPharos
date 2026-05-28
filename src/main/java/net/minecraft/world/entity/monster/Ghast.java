@@ -60,8 +60,8 @@ public class Ghast extends FlyingMob implements Enemy {
         return this.entityData.get(DATA_IS_CHARGING);
     }
 
-    public void setCharging(boolean p_32759_) {
-        this.entityData.set(DATA_IS_CHARGING, p_32759_);
+    public void setCharging(boolean pCharging) {
+        this.entityData.set(DATA_IS_CHARGING, pCharging);
     }
 
     public int getExplosionPower() {
@@ -73,8 +73,8 @@ public class Ghast extends FlyingMob implements Enemy {
         return true;
     }
 
-    private static boolean isReflectedFireball(DamageSource p_238408_) {
-        return p_238408_.getDirectEntity() instanceof LargeFireball && p_238408_.getEntity() instanceof Player;
+    private static boolean isReflectedFireball(DamageSource pDamageSource) {
+        return pDamageSource.getDirectEntity() instanceof LargeFireball && pDamageSource.getEntity() instanceof Player;
     }
 
     @Override
@@ -113,7 +113,7 @@ public class Ghast extends FlyingMob implements Enemy {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_32750_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.GHAST_HURT;
     }
 
@@ -128,9 +128,9 @@ public class Ghast extends FlyingMob implements Enemy {
     }
 
     public static boolean checkGhastSpawnRules(
-        EntityType<Ghast> p_218985_, LevelAccessor p_218986_, EntitySpawnReason p_366739_, BlockPos p_218988_, RandomSource p_218989_
+        EntityType<Ghast> pEntityType, LevelAccessor pLevel, EntitySpawnReason pSpawnReason, BlockPos pPos, RandomSource pRandom
     ) {
-        return p_218986_.getDifficulty() != Difficulty.PEACEFUL && p_218989_.nextInt(20) == 0 && checkMobSpawnRules(p_218985_, p_218986_, p_366739_, p_218988_, p_218989_);
+        return pLevel.getDifficulty() != Difficulty.PEACEFUL && pRandom.nextInt(20) == 0 && checkMobSpawnRules(pEntityType, pLevel, pSpawnReason, pPos, pRandom);
     }
 
     @Override
@@ -139,24 +139,24 @@ public class Ghast extends FlyingMob implements Enemy {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_32744_) {
-        super.addAdditionalSaveData(p_32744_);
-        p_32744_.putByte("ExplosionPower", (byte)this.explosionPower);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putByte("ExplosionPower", (byte)this.explosionPower);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_32733_) {
-        super.readAdditionalSaveData(p_32733_);
-        if (p_32733_.contains("ExplosionPower", 99)) {
-            this.explosionPower = p_32733_.getByte("ExplosionPower");
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("ExplosionPower", 99)) {
+            this.explosionPower = pCompound.getByte("ExplosionPower");
         }
     }
 
     static class GhastLookGoal extends Goal {
         private final Ghast ghast;
 
-        public GhastLookGoal(Ghast p_32762_) {
-            this.ghast = p_32762_;
+        public GhastLookGoal(Ghast pGhast) {
+            this.ghast = pGhast;
             this.setFlags(EnumSet.of(Goal.Flag.LOOK));
         }
 
@@ -193,9 +193,9 @@ public class Ghast extends FlyingMob implements Enemy {
         private final Ghast ghast;
         private int floatDuration;
 
-        public GhastMoveControl(Ghast p_32768_) {
-            super(p_32768_);
-            this.ghast = p_32768_;
+        public GhastMoveControl(Ghast pGhast) {
+            super(pGhast);
+            this.ghast = pGhast;
         }
 
         @Override
@@ -217,11 +217,11 @@ public class Ghast extends FlyingMob implements Enemy {
             }
         }
 
-        private boolean canReach(Vec3 p_32771_, int p_32772_) {
+        private boolean canReach(Vec3 pPos, int pLength) {
             AABB aabb = this.ghast.getBoundingBox();
 
-            for (int i = 1; i < p_32772_; i++) {
-                aabb = aabb.move(p_32771_);
+            for (int i = 1; i < pLength; i++) {
+                aabb = aabb.move(pPos);
                 if (!this.ghast.level().noCollision(this.ghast, aabb)) {
                     return false;
                 }
@@ -235,8 +235,8 @@ public class Ghast extends FlyingMob implements Enemy {
         private final Ghast ghast;
         public int chargeTime;
 
-        public GhastShootFireballGoal(Ghast p_32776_) {
-            this.ghast = p_32776_;
+        public GhastShootFireballGoal(Ghast pGhast) {
+            this.ghast = pGhast;
         }
 
         @Override
@@ -301,8 +301,8 @@ public class Ghast extends FlyingMob implements Enemy {
     static class RandomFloatAroundGoal extends Goal {
         private final Ghast ghast;
 
-        public RandomFloatAroundGoal(Ghast p_32783_) {
-            this.ghast = p_32783_;
+        public RandomFloatAroundGoal(Ghast pGhast) {
+            this.ghast = pGhast;
             this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         }
 

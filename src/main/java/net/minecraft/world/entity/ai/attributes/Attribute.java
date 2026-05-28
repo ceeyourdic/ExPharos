@@ -17,9 +17,9 @@ public class Attribute {
     private final String descriptionId;
     private Attribute.Sentiment sentiment = Attribute.Sentiment.POSITIVE;
 
-    protected Attribute(String p_22080_, double p_22081_) {
-        this.defaultValue = p_22081_;
-        this.descriptionId = p_22080_;
+    protected Attribute(String pDescriptionId, double pDefaultValue) {
+        this.defaultValue = pDefaultValue;
+        this.descriptionId = pDescriptionId;
     }
 
     public double getDefaultValue() {
@@ -30,26 +30,26 @@ public class Attribute {
         return this.syncable;
     }
 
-    public Attribute setSyncable(boolean p_22085_) {
-        this.syncable = p_22085_;
+    public Attribute setSyncable(boolean pWatch) {
+        this.syncable = pWatch;
         return this;
     }
 
-    public Attribute setSentiment(Attribute.Sentiment p_343981_) {
-        this.sentiment = p_343981_;
+    public Attribute setSentiment(Attribute.Sentiment pSentiment) {
+        this.sentiment = pSentiment;
         return this;
     }
 
-    public double sanitizeValue(double p_22083_) {
-        return p_22083_;
+    public double sanitizeValue(double pValue) {
+        return pValue;
     }
 
     public String getDescriptionId() {
         return this.descriptionId;
     }
 
-    public ChatFormatting getStyle(boolean p_343100_) {
-        return this.sentiment.getStyle(p_343100_);
+    public ChatFormatting getStyle(boolean pIsPositive) {
+        return this.sentiment.getStyle(pIsPositive);
     }
 
     public static enum Sentiment {
@@ -57,11 +57,11 @@ public class Attribute {
         NEUTRAL,
         NEGATIVE;
 
-        public ChatFormatting getStyle(boolean p_342401_) {
+        public ChatFormatting getStyle(boolean pIsPositive) {
             return switch (this) {
-                case POSITIVE -> p_342401_ ? ChatFormatting.BLUE : ChatFormatting.RED;
+                case POSITIVE -> pIsPositive ? ChatFormatting.BLUE : ChatFormatting.RED;
                 case NEUTRAL -> ChatFormatting.GRAY;
-                case NEGATIVE -> p_342401_ ? ChatFormatting.RED : ChatFormatting.BLUE;
+                case NEGATIVE -> pIsPositive ? ChatFormatting.RED : ChatFormatting.BLUE;
             };
         }
     }

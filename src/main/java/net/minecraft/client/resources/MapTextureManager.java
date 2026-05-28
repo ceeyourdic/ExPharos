@@ -17,16 +17,16 @@ public class MapTextureManager implements AutoCloseable {
     private final Int2ObjectMap<MapTextureManager.MapInstance> maps = new Int2ObjectOpenHashMap<>();
     final TextureManager textureManager;
 
-    public MapTextureManager(TextureManager p_362721_) {
-        this.textureManager = p_362721_;
+    public MapTextureManager(TextureManager pTextureManager) {
+        this.textureManager = pTextureManager;
     }
 
-    public void update(MapId p_368009_, MapItemSavedData p_365364_) {
-        this.getOrCreateMapInstance(p_368009_, p_365364_).forceUpload();
+    public void update(MapId pId, MapItemSavedData pData) {
+        this.getOrCreateMapInstance(pId, pData).forceUpload();
     }
 
-    public ResourceLocation prepareMapTexture(MapId p_361877_, MapItemSavedData p_361499_) {
-        MapTextureManager.MapInstance maptexturemanager$mapinstance = this.getOrCreateMapInstance(p_361877_, p_361499_);
+    public ResourceLocation prepareMapTexture(MapId pId, MapItemSavedData pData) {
+        MapTextureManager.MapInstance maptexturemanager$mapinstance = this.getOrCreateMapInstance(pId, pData);
         maptexturemanager$mapinstance.updateTextureIfNeeded();
         return maptexturemanager$mapinstance.location;
     }
@@ -39,12 +39,12 @@ public class MapTextureManager implements AutoCloseable {
         this.maps.clear();
     }
 
-    private MapTextureManager.MapInstance getOrCreateMapInstance(MapId p_370051_, MapItemSavedData p_367972_) {
-        return this.maps.compute(p_370051_.id(), (p_366926_, p_369937_) -> {
+    private MapTextureManager.MapInstance getOrCreateMapInstance(MapId pId, MapItemSavedData pData) {
+        return this.maps.compute(pId.id(), (p_366926_, p_369937_) -> {
             if (p_369937_ == null) {
-                return new MapTextureManager.MapInstance(p_366926_, p_367972_);
+                return new MapTextureManager.MapInstance(p_366926_, pData);
             } else {
-                p_369937_.replaceMapData(p_367972_);
+                p_369937_.replaceMapData(pData);
                 return (MapTextureManager.MapInstance)p_369937_;
             }
         });
@@ -62,16 +62,16 @@ public class MapTextureManager implements AutoCloseable {
         private boolean requiresUpload = true;
         final ResourceLocation location;
 
-        MapInstance(final int p_361202_, final MapItemSavedData p_361755_) {
-            this.data = p_361755_;
+        MapInstance(final int pId, final MapItemSavedData pData) {
+            this.data = pData;
             this.texture = new DynamicTexture(128, 128, true);
-            this.location = ResourceLocation.withDefaultNamespace("map/" + p_361202_);
+            this.location = ResourceLocation.withDefaultNamespace("map/" + pId);
             MapTextureManager.this.textureManager.register(this.location, this.texture);
         }
 
-        void replaceMapData(MapItemSavedData p_369715_) {
-            boolean flag = this.data != p_369715_;
-            this.data = p_369715_;
+        void replaceMapData(MapItemSavedData pData) {
+            boolean flag = this.data != pData;
+            this.data = pData;
             this.requiresUpload |= flag;
         }
 

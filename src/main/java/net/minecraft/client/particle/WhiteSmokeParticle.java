@@ -10,17 +10,17 @@ public class WhiteSmokeParticle extends BaseAshSmokeParticle {
     private static final int COLOR_RGB24 = 12235202;
 
     protected WhiteSmokeParticle(
-        ClientLevel p_310197_,
-        double p_309917_,
-        double p_311482_,
-        double p_311581_,
-        double p_311949_,
-        double p_312227_,
-        double p_312663_,
-        float p_313081_,
-        SpriteSet p_311457_
+        ClientLevel pLevel,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed,
+        float pQuadSizeMultiplier,
+        SpriteSet pSprites
     ) {
-        super(p_310197_, p_309917_, p_311482_, p_311581_, 0.1F, 0.1F, 0.1F, p_311949_, p_312227_, p_312663_, p_313081_, p_311457_, 0.3F, 8, -0.1F, true);
+        super(pLevel, pX, pY, pZ, 0.1F, 0.1F, 0.1F, pXSpeed, pYSpeed, pZSpeed, pQuadSizeMultiplier, pSprites, 0.3F, 8, -0.1F, true);
         this.rCol = 0.7294118F;
         this.gCol = 0.69411767F;
         this.bCol = 0.7607843F;
@@ -30,8 +30,8 @@ public class WhiteSmokeParticle extends BaseAshSmokeParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public Provider(SpriteSet p_309673_) {
-            this.sprites = p_309673_;
+        public Provider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(

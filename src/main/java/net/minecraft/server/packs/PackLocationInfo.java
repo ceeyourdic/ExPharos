@@ -11,13 +11,13 @@ import net.minecraft.server.packs.repository.KnownPack;
 import net.minecraft.server.packs.repository.PackSource;
 
 public record PackLocationInfo(String id, Component title, PackSource source, Optional<KnownPack> knownPackInfo) {
-    public Component createChatLink(boolean p_333920_, Component p_329432_) {
+    public Component createChatLink(boolean pEnabled, Component pText) {
         return ComponentUtils.wrapInSquareBrackets(this.source.decorate(Component.literal(this.id)))
             .withStyle(
-                p_333907_ -> p_333907_.withColor(p_333920_ ? ChatFormatting.GREEN : ChatFormatting.RED)
+                p_333907_ -> p_333907_.withColor(pEnabled ? ChatFormatting.GREEN : ChatFormatting.RED)
                         .withInsertion(StringArgumentType.escapeIfRequired(this.id))
                         .withHoverEvent(
-                            new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.empty().append(this.title).append("\n").append(p_329432_))
+                            new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.empty().append(this.title).append("\n").append(pText))
                         )
             );
     }

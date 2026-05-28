@@ -19,8 +19,8 @@ public class BeeNestDestroyedTrigger extends SimpleCriterionTrigger<BeeNestDestr
         return BeeNestDestroyedTrigger.TriggerInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer p_146652_, BlockState p_146653_, ItemStack p_146654_, int p_146655_) {
-        this.trigger(p_146652_, p_146660_ -> p_146660_.matches(p_146653_, p_146654_, p_146655_));
+    public void trigger(ServerPlayer pPlayer, BlockState pState, ItemStack pStack, int pNumBees) {
+        this.trigger(pPlayer, p_146660_ -> p_146660_.matches(pState, pStack, pNumBees));
     }
 
     public static record TriggerInstance(
@@ -38,18 +38,18 @@ public class BeeNestDestroyedTrigger extends SimpleCriterionTrigger<BeeNestDestr
                     .apply(p_357618_, BeeNestDestroyedTrigger.TriggerInstance::new)
         );
 
-        public static Criterion<BeeNestDestroyedTrigger.TriggerInstance> destroyedBeeNest(Block p_17513_, ItemPredicate.Builder p_17514_, MinMaxBounds.Ints p_17515_) {
+        public static Criterion<BeeNestDestroyedTrigger.TriggerInstance> destroyedBeeNest(Block pBlock, ItemPredicate.Builder pItem, MinMaxBounds.Ints pNumBees) {
             return CriteriaTriggers.BEE_NEST_DESTROYED
                 .createCriterion(
-                    new BeeNestDestroyedTrigger.TriggerInstance(Optional.empty(), Optional.of(p_17513_.builtInRegistryHolder()), Optional.of(p_17514_.build()), p_17515_)
+                    new BeeNestDestroyedTrigger.TriggerInstance(Optional.empty(), Optional.of(pBlock.builtInRegistryHolder()), Optional.of(pItem.build()), pNumBees)
                 );
         }
 
-        public boolean matches(BlockState p_146662_, ItemStack p_146663_, int p_146664_) {
-            if (this.block.isPresent() && !p_146662_.is(this.block.get())) {
+        public boolean matches(BlockState pState, ItemStack pStack, int pNumBees) {
+            if (this.block.isPresent() && !pState.is(this.block.get())) {
                 return false;
             } else {
-                return this.item.isPresent() && !this.item.get().test(p_146663_) ? false : this.beesInside.matches(p_146664_);
+                return this.item.isPresent() && !this.item.get().test(pStack) ? false : this.beesInside.matches(pNumBees);
             }
         }
 

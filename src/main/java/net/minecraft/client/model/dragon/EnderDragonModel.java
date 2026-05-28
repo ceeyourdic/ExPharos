@@ -39,28 +39,28 @@ public class EnderDragonModel extends EntityModel<EnderDragonRenderState> {
     private final ModelPart rightRearLegTip;
     private final ModelPart rightRearFoot;
 
-    private static String neckName(int p_367970_) {
-        return "neck" + p_367970_;
+    private static String neckName(int pIndex) {
+        return "neck" + pIndex;
     }
 
-    private static String tailName(int p_361223_) {
-        return "tail" + p_361223_;
+    private static String tailName(int pIndex) {
+        return "tail" + pIndex;
     }
 
-    public EnderDragonModel(ModelPart p_364243_) {
-        super(p_364243_);
-        this.head = p_364243_.getChild("head");
+    public EnderDragonModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
         this.jaw = this.head.getChild("jaw");
 
         for (int i = 0; i < this.neckParts.length; i++) {
-            this.neckParts[i] = p_364243_.getChild(neckName(i));
+            this.neckParts[i] = pRoot.getChild(neckName(i));
         }
 
         for (int j = 0; j < this.tailParts.length; j++) {
-            this.tailParts[j] = p_364243_.getChild(tailName(j));
+            this.tailParts[j] = pRoot.getChild(tailName(j));
         }
 
-        this.body = p_364243_.getChild("body");
+        this.body = pRoot.getChild("body");
         this.leftWing = this.body.getChild("left_wing");
         this.leftWingTip = this.leftWing.getChild("left_wing_tip");
         this.leftFrontLeg = this.body.getChild("left_front_leg");
@@ -290,13 +290,13 @@ public class EnderDragonModel extends EntityModel<EnderDragonRenderState> {
     }
 
     private void poseLimbs(
-        float p_362395_, ModelPart p_366598_, ModelPart p_360960_, ModelPart p_362592_, ModelPart p_369675_, ModelPart p_363576_, ModelPart p_364586_
+        float pFlapAngle, ModelPart pFrontLeg, ModelPart pFrontLegTip, ModelPart pFrontFoot, ModelPart pRearLeg, ModelPart pRearLegTip, ModelPart pRearFoot
     ) {
-        p_369675_.xRot = 1.0F + p_362395_ * 0.1F;
-        p_363576_.xRot = 0.5F + p_362395_ * 0.1F;
-        p_364586_.xRot = 0.75F + p_362395_ * 0.1F;
-        p_366598_.xRot = 1.3F + p_362395_ * 0.1F;
-        p_360960_.xRot = -0.5F - p_362395_ * 0.1F;
-        p_362592_.xRot = 0.75F + p_362395_ * 0.1F;
+        pRearLeg.xRot = 1.0F + pFlapAngle * 0.1F;
+        pRearLegTip.xRot = 0.5F + pFlapAngle * 0.1F;
+        pRearFoot.xRot = 0.75F + pFlapAngle * 0.1F;
+        pFrontLeg.xRot = 1.3F + pFlapAngle * 0.1F;
+        pFrontLegTip.xRot = -0.5F - pFlapAngle * 0.1F;
+        pFrontFoot.xRot = 0.75F + pFlapAngle * 0.1F;
     }
 }

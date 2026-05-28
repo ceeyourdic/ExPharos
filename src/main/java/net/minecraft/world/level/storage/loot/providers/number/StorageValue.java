@@ -27,8 +27,8 @@ public record StorageValue(ResourceLocation storage, NbtPathArgument.NbtPath pat
         return NumberProviders.STORAGE;
     }
 
-    private Optional<NumericTag> getNumericTag(LootContext p_329012_) {
-        CompoundTag compoundtag = p_329012_.getLevel().getServer().getCommandStorage().get(this.storage);
+    private Optional<NumericTag> getNumericTag(LootContext pContext) {
+        CompoundTag compoundtag = pContext.getLevel().getServer().getCommandStorage().get(this.storage);
 
         try {
             List<Tag> list = this.path.get(compoundtag);

@@ -36,10 +36,10 @@ public class PaleMossDecorator extends TreeDecorator {
         return TreeDecoratorType.PALE_MOSS;
     }
 
-    public PaleMossDecorator(float p_362537_, float p_367812_, float p_366658_) {
-        this.leavesProbability = p_362537_;
-        this.trunkProbability = p_367812_;
-        this.groundProbability = p_366658_;
+    public PaleMossDecorator(float pLeavesProbability, float pTrunkProbability, float pGroundProbability) {
+        this.leavesProbability = pLeavesProbability;
+        this.trunkProbability = pTrunkProbability;
+        this.groundProbability = pGroundProbability;
     }
 
     @Override
@@ -84,12 +84,12 @@ public class PaleMossDecorator extends TreeDecorator {
         }
     }
 
-    private static void addMossHanger(BlockPos p_368181_, TreeDecorator.Context p_365451_) {
-        while (p_365451_.isAir(p_368181_.below()) && !((double)p_365451_.random().nextFloat() < 0.5)) {
-            p_365451_.setBlock(p_368181_, Blocks.PALE_HANGING_MOSS.defaultBlockState().setValue(HangingMossBlock.TIP, Boolean.valueOf(false)));
-            p_368181_ = p_368181_.below();
+    private static void addMossHanger(BlockPos pPos, TreeDecorator.Context pContext) {
+        while (pContext.isAir(pPos.below()) && !((double)pContext.random().nextFloat() < 0.5)) {
+            pContext.setBlock(pPos, Blocks.PALE_HANGING_MOSS.defaultBlockState().setValue(HangingMossBlock.TIP, Boolean.valueOf(false)));
+            pPos = pPos.below();
         }
 
-        p_365451_.setBlock(p_368181_, Blocks.PALE_HANGING_MOSS.defaultBlockState().setValue(HangingMossBlock.TIP, Boolean.valueOf(true)));
+        pContext.setBlock(pPos, Blocks.PALE_HANGING_MOSS.defaultBlockState().setValue(HangingMossBlock.TIP, Boolean.valueOf(true)));
     }
 }

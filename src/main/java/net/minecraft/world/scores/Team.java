@@ -10,13 +10,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 public abstract class Team {
-    public boolean isAlliedTo(@Nullable Team p_83537_) {
-        return p_83537_ == null ? false : this == p_83537_;
+    public boolean isAlliedTo(@Nullable Team pOther) {
+        return pOther == null ? false : this == pOther;
     }
 
     public abstract String getName();
 
-    public abstract MutableComponent getFormattedName(Component p_83538_);
+    public abstract MutableComponent getFormattedName(Component pFormattedName);
 
     public abstract boolean canSeeFriendlyInvisibles();
 
@@ -44,13 +44,13 @@ public abstract class Team {
         public final int id;
 
         @Nullable
-        public static Team.CollisionRule byName(String p_83556_) {
-            return BY_NAME.get(p_83556_);
+        public static Team.CollisionRule byName(String pName) {
+            return BY_NAME.get(pName);
         }
 
-        private CollisionRule(final String p_83551_, final int p_83552_) {
-            this.name = p_83551_;
-            this.id = p_83552_;
+        private CollisionRule(final String pName, final int pId) {
+            this.name = pName;
+            this.id = pId;
         }
 
         public Component getDisplayName() {
@@ -74,13 +74,13 @@ public abstract class Team {
         }
 
         @Nullable
-        public static Team.Visibility byName(String p_83580_) {
-            return BY_NAME.get(p_83580_);
+        public static Team.Visibility byName(String pName) {
+            return BY_NAME.get(pName);
         }
 
-        private Visibility(final String p_83575_, final int p_83576_) {
-            this.name = p_83575_;
-            this.id = p_83576_;
+        private Visibility(final String pName, final int pId) {
+            this.name = pName;
+            this.id = pId;
         }
 
         public Component getDisplayName() {

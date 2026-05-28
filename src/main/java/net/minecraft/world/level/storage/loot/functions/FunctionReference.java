@@ -23,9 +23,9 @@ public class FunctionReference extends LootItemConditionalFunction {
     );
     private final ResourceKey<LootItemFunction> name;
 
-    private FunctionReference(List<LootItemCondition> p_298565_, ResourceKey<LootItemFunction> p_327927_) {
-        super(p_298565_);
-        this.name = p_327927_;
+    private FunctionReference(List<LootItemCondition> pConditions, ResourceKey<LootItemFunction> pName) {
+        super(pConditions);
+        this.name = pName;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class FunctionReference extends LootItemConditionalFunction {
         }
     }
 
-    public static LootItemConditionalFunction.Builder<?> functionReference(ResourceKey<LootItemFunction> p_334210_) {
-        return simpleBuilder(p_327575_ -> new FunctionReference(p_327575_, p_334210_));
+    public static LootItemConditionalFunction.Builder<?> functionReference(ResourceKey<LootItemFunction> pKey) {
+        return simpleBuilder(p_327575_ -> new FunctionReference(p_327575_, pKey));
     }
 }

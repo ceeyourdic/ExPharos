@@ -40,8 +40,8 @@ public class FillBiomeCommand {
         (p_308696_, p_308697_) -> Component.translatableEscape("commands.fillbiome.toobig", p_308696_, p_308697_)
     );
 
-    public static void register(CommandDispatcher<CommandSourceStack> p_261867_, CommandBuildContext p_262155_) {
-        p_261867_.register(
+    public static void register(CommandDispatcher<CommandSourceStack> pDispatcher, CommandBuildContext pContext) {
+        pDispatcher.register(
             Commands.literal("fillbiome")
                 .requires(p_261890_ -> p_261890_.hasPermission(2))
                 .then(
@@ -49,7 +49,7 @@ public class FillBiomeCommand {
                         .then(
                             Commands.argument("to", BlockPosArgument.blockPos())
                                 .then(
-                                    Commands.argument("biome", ResourceArgument.resource(p_262155_, Registries.BIOME))
+                                    Commands.argument("biome", ResourceArgument.resource(pContext, Registries.BIOME))
                                         .executes(
                                             p_262554_ -> fill(
                                                     p_262554_.getSource(),
@@ -62,7 +62,7 @@ public class FillBiomeCommand {
                                         .then(
                                             Commands.literal("replace")
                                                 .then(
-                                                    Commands.argument("filter", ResourceOrTagArgument.resourceOrTag(p_262155_, Registries.BIOME))
+                                                    Commands.argument("filter", ResourceOrTagArgument.resourceOrTag(pContext, Registries.BIOME))
                                                         .executes(
                                                             p_262544_ -> fill(
                                                                     p_262544_.getSource(),
@@ -80,49 +80,49 @@ public class FillBiomeCommand {
         );
     }
 
-    private static int quantize(int p_261998_) {
-        return QuartPos.toBlock(QuartPos.fromBlock(p_261998_));
+    private static int quantize(int pValue) {
+        return QuartPos.toBlock(QuartPos.fromBlock(pValue));
     }
 
-    private static BlockPos quantize(BlockPos p_262148_) {
-        return new BlockPos(quantize(p_262148_.getX()), quantize(p_262148_.getY()), quantize(p_262148_.getZ()));
+    private static BlockPos quantize(BlockPos pPos) {
+        return new BlockPos(quantize(pPos.getX()), quantize(pPos.getY()), quantize(pPos.getZ()));
     }
 
     private static BiomeResolver makeResolver(
-        MutableInt p_262615_, ChunkAccess p_262698_, BoundingBox p_262622_, Holder<Biome> p_262705_, Predicate<Holder<Biome>> p_262695_
+        MutableInt pBiomeEntries, ChunkAccess pChunk, BoundingBox pTargetRegion, Holder<Biome> pReplacementBiome, Predicate<Holder<Biome>> pFilter
     ) {
         return (p_262550_, p_262551_, p_262552_, p_262553_) -> {
             int i = QuartPos.toBlock(p_262550_);
             int j = QuartPos.toBlock(p_262551_);
             int k = QuartPos.toBlock(p_262552_);
-            Holder<Biome> holder = p_262698_.getNoiseBiome(p_262550_, p_262551_, p_262552_);
-            if (p_262622_.isInside(i, j, k) && p_262695_.test(holder)) {
-                p_262615_.increment();
-                return p_262705_;
+            Holder<Biome> holder = pChunk.getNoiseBiome(p_262550_, p_262551_, p_262552_);
+            if (pTargetRegion.isInside(i, j, k) && pFilter.test(holder)) {
+                pBiomeEntries.increment();
+                return pReplacementBiome;
             } else {
                 return holder;
             }
         };
     }
 
-    public static Either<Integer, CommandSyntaxException> fill(ServerLevel p_312613_, BlockPos p_311970_, BlockPos p_311934_, Holder<Biome> p_310918_) {
-        return fill(p_312613_, p_311970_, p_311934_, p_310918_, p_262543_ -> true, p_308701_ -> {
+    public static Either<Integer, CommandSyntaxException> fill(ServerLevel pLevel, BlockPos pFrom, BlockPos pTo, Holder<Biome> pBiome) {
+        return fill(pLevel, pFrom, pTo, pBiome, p_262543_ -> true, p_308701_ -> {
         });
     }
 
     public static Either<Integer, CommandSyntaxException> fill(
-        ServerLevel p_312916_,
-        BlockPos p_312866_,
-        BlockPos p_311741_,
-        Holder<Biome> p_311864_,
-        Predicate<Holder<Biome>> p_311950_,
-        Consumer<Supplier<Component>> p_313249_
+        ServerLevel pLevel,
+        BlockPos pFrom,
+        BlockPos pTo,
+        Holder<Biome> pBiome,
+        Predicate<Holder<Biome>> pFilter,
+        Consumer<Supplier<Component>> pMessageOutput
     ) {
-        BlockPos blockpos = quantize(p_312866_);
-        BlockPos blockpos1 = quantize(p_311741_);
+        BlockPos blockpos = quantize(pFrom);
+        BlockPos blockpos1 = quantize(pTo);
         BoundingBox boundingbox = BoundingBox.fromCorners(blockpos, blockpos1);
         int i = boundingbox.getXSpan() * boundingbox.getYSpan() * boundingbox.getZSpan();
-        int j = p_312916_.getGameRules().getInt(GameRules.RULE_COMMAND_MODIFICATION_BLOCK_LIMIT);
+        int j = pLevel.getGameRules().getInt(GameRules.RULE_COMMAND_MODIFICATION_BLOCK_LIMIT);
         if (i > j) {
             return Either.right(ERROR_VOLUME_TOO_LARGE.create(j, i));
         } else {
@@ -130,7 +130,7 @@ public class FillBiomeCommand {
 
             for (int k = SectionPos.blockToSectionCoord(boundingbox.minZ()); k <= SectionPos.blockToSectionCoord(boundingbox.maxZ()); k++) {
                 for (int l = SectionPos.blockToSectionCoord(boundingbox.minX()); l <= SectionPos.blockToSectionCoord(boundingbox.maxX()); l++) {
-                    ChunkAccess chunkaccess = p_312916_.getChunk(l, k, ChunkStatus.FULL, false);
+                    ChunkAccess chunkaccess = pLevel.getChunk(l, k, ChunkStatus.FULL, false);
                     if (chunkaccess == null) {
                         return Either.right(ERROR_NOT_LOADED.create());
                     }
@@ -142,12 +142,12 @@ public class FillBiomeCommand {
             MutableInt mutableint = new MutableInt(0);
 
             for (ChunkAccess chunkaccess1 : list) {
-                chunkaccess1.fillBiomesFromNoise(makeResolver(mutableint, chunkaccess1, boundingbox, p_311864_, p_311950_), p_312916_.getChunkSource().randomState().sampler());
+                chunkaccess1.fillBiomesFromNoise(makeResolver(mutableint, chunkaccess1, boundingbox, pBiome, pFilter), pLevel.getChunkSource().randomState().sampler());
                 chunkaccess1.markUnsaved();
             }
 
-            p_312916_.getChunkSource().chunkMap.resendBiomesForChunks(list);
-            p_313249_.accept(
+            pLevel.getChunkSource().chunkMap.resendBiomesForChunks(list);
+            pMessageOutput.accept(
                 () -> Component.translatable(
                         "commands.fillbiome.success.count",
                         mutableint.getValue(),
@@ -164,10 +164,10 @@ public class FillBiomeCommand {
     }
 
     private static int fill(
-        CommandSourceStack p_262664_, BlockPos p_262651_, BlockPos p_262678_, Holder.Reference<Biome> p_262612_, Predicate<Holder<Biome>> p_262697_
+        CommandSourceStack pSource, BlockPos pFrom, BlockPos pTo, Holder.Reference<Biome> pBiome, Predicate<Holder<Biome>> pFilter
     ) throws CommandSyntaxException {
         Either<Integer, CommandSyntaxException> either = fill(
-            p_262664_.getLevel(), p_262651_, p_262678_, p_262612_, p_262697_, p_308699_ -> p_262664_.sendSuccess(p_308699_, true)
+            pSource.getLevel(), pFrom, pTo, pBiome, pFilter, p_308699_ -> pSource.sendSuccess(p_308699_, true)
         );
         Optional<CommandSyntaxException> optional = either.right();
         if (optional.isPresent()) {

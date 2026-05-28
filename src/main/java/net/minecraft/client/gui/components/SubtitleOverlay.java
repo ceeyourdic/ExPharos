@@ -29,11 +29,11 @@ public class SubtitleOverlay implements SoundEventListener {
     private boolean isListening;
     private final List<SubtitleOverlay.Subtitle> audibleSubtitles = new ArrayList<>();
 
-    public SubtitleOverlay(Minecraft p_94641_) {
-        this.minecraft = p_94641_;
+    public SubtitleOverlay(Minecraft pMinecraft) {
+        this.minecraft = pMinecraft;
     }
 
-    public void render(GuiGraphics p_282562_) {
+    public void render(GuiGraphics pGuiGraphics) {
         SoundManager soundmanager = this.minecraft.getSoundManager();
         if (!this.isListening && this.minecraft.options.showSubtitles().get()) {
             soundmanager.addListener(this);
@@ -94,24 +94,24 @@ public class SubtitleOverlay implements SoundEventListener {
                         int j1 = Mth.floor(
                             Mth.clampedLerp(255.0F, 75.0F, (float)(Util.getMillis() - subtitleoverlay$soundplayedat.time) / (float)(3000.0 * d0))
                         );
-                        p_282562_.pose().pushPose();
-                        p_282562_.pose()
+                        pGuiGraphics.pose().pushPose();
+                        pGuiGraphics.pose()
                             .translate(
-                                (float)p_282562_.guiWidth() - (float)j * 1.0F - 2.0F, (float)(p_282562_.guiHeight() - 35) - (float)(l1 * (k + 1)) * 1.0F, 0.0F
+                                (float)pGuiGraphics.guiWidth() - (float)j * 1.0F - 2.0F, (float)(pGuiGraphics.guiHeight() - 35) - (float)(l1 * (k + 1)) * 1.0F, 0.0F
                             );
-                        p_282562_.pose().scale(1.0F, 1.0F, 1.0F);
-                        p_282562_.fill(-j - 1, -l - 1, j + 1, l + 1, this.minecraft.options.getBackgroundColor(0.8F));
+                        pGuiGraphics.pose().scale(1.0F, 1.0F, 1.0F);
+                        pGuiGraphics.fill(-j - 1, -l - 1, j + 1, l + 1, this.minecraft.options.getBackgroundColor(0.8F));
                         int k1 = ARGB.color(255, j1, j1, j1);
                         if (!flag) {
                             if (d1 > 0.0) {
-                                p_282562_.drawString(this.minecraft.font, ">", j - this.minecraft.font.width(">"), -l, k1);
+                                pGuiGraphics.drawString(this.minecraft.font, ">", j - this.minecraft.font.width(">"), -l, k1);
                             } else if (d1 < 0.0) {
-                                p_282562_.drawString(this.minecraft.font, "<", -j, -l, k1);
+                                pGuiGraphics.drawString(this.minecraft.font, "<", -j, -l, k1);
                             }
                         }
 
-                        p_282562_.drawString(this.minecraft.font, component, -i1 / 2, -l, k1);
-                        p_282562_.pose().popPose();
+                        pGuiGraphics.drawString(this.minecraft.font, component, -i1 / 2, -l, k1);
+                        pGuiGraphics.pose().popPose();
                         l1++;
                     }
                 }
@@ -146,10 +146,10 @@ public class SubtitleOverlay implements SoundEventListener {
         private final float range;
         private final List<SubtitleOverlay.SoundPlayedAt> playedAt = new ArrayList<>();
 
-        public Subtitle(Component p_169072_, float p_312799_, Vec3 p_169073_) {
-            this.text = p_169072_;
-            this.range = p_312799_;
-            this.playedAt.add(new SubtitleOverlay.SoundPlayedAt(p_169073_, Util.getMillis()));
+        public Subtitle(Component pText, float pRange, Vec3 pLocation) {
+            this.text = pText;
+            this.range = pRange;
+            this.playedAt.add(new SubtitleOverlay.SoundPlayedAt(pLocation, Util.getMillis()));
         }
 
         public Component getText() {
@@ -157,35 +157,35 @@ public class SubtitleOverlay implements SoundEventListener {
         }
 
         @Nullable
-        public SubtitleOverlay.SoundPlayedAt getClosest(Vec3 p_344371_) {
+        public SubtitleOverlay.SoundPlayedAt getClosest(Vec3 pLocation) {
             if (this.playedAt.isEmpty()) {
                 return null;
             } else {
                 return this.playedAt.size() == 1
                     ? this.playedAt.getFirst()
-                    : this.playedAt.stream().min(Comparator.comparingDouble(p_344048_ -> p_344048_.location().distanceTo(p_344371_))).orElse(null);
+                    : this.playedAt.stream().min(Comparator.comparingDouble(p_344048_ -> p_344048_.location().distanceTo(pLocation))).orElse(null);
             }
         }
 
-        public void refresh(Vec3 p_94657_) {
-            this.playedAt.removeIf(p_342347_ -> p_94657_.equals(p_342347_.location()));
-            this.playedAt.add(new SubtitleOverlay.SoundPlayedAt(p_94657_, Util.getMillis()));
+        public void refresh(Vec3 pLocation) {
+            this.playedAt.removeIf(p_342347_ -> pLocation.equals(p_342347_.location()));
+            this.playedAt.add(new SubtitleOverlay.SoundPlayedAt(pLocation, Util.getMillis()));
         }
 
-        public boolean isAudibleFrom(Vec3 p_313169_) {
+        public boolean isAudibleFrom(Vec3 pLocation) {
             if (Float.isInfinite(this.range)) {
                 return true;
             } else if (this.playedAt.isEmpty()) {
                 return false;
             } else {
-                SubtitleOverlay.SoundPlayedAt subtitleoverlay$soundplayedat = this.getClosest(p_313169_);
-                return subtitleoverlay$soundplayedat == null ? false : p_313169_.closerThan(subtitleoverlay$soundplayedat.location, (double)this.range);
+                SubtitleOverlay.SoundPlayedAt subtitleoverlay$soundplayedat = this.getClosest(pLocation);
+                return subtitleoverlay$soundplayedat == null ? false : pLocation.closerThan(subtitleoverlay$soundplayedat.location, (double)this.range);
             }
         }
 
-        public void purgeOldInstances(double p_345350_) {
+        public void purgeOldInstances(double pDisplayTime) {
             long i = Util.getMillis();
-            this.playedAt.removeIf(p_342900_ -> (double)(i - p_342900_.time()) > p_345350_);
+            this.playedAt.removeIf(p_342900_ -> (double)(i - p_342900_.time()) > pDisplayTime);
         }
 
         public boolean isStillActive() {

@@ -46,8 +46,8 @@ public abstract class DisplayRenderer<T extends Display, S, ST extends DisplayEn
         return p_365810_.affectedByCulling();
     }
 
-    private static int getBrightnessOverride(Display p_365446_) {
-        Display.RenderState display$renderstate = p_365446_.renderState();
+    private static int getBrightnessOverride(Display pDisplay) {
+        Display.RenderState display$renderstate = pDisplay.renderState();
         return display$renderstate != null ? display$renderstate.brightnessOverride() : -1;
     }
 
@@ -85,34 +85,34 @@ public abstract class DisplayRenderer<T extends Display, S, ST extends DisplayEn
         }
     }
 
-    private Quaternionf calculateOrientation(Display.RenderState p_277846_, ST p_361564_, Quaternionf p_298476_) {
+    private Quaternionf calculateOrientation(Display.RenderState pRenderState, ST pEntityRenderState, Quaternionf pQuaternion) {
         Camera camera = this.entityRenderDispatcher.camera;
 
-        return switch (p_277846_.billboardConstraints()) {
-            case FIXED -> p_298476_.rotationYXZ((float) (-Math.PI / 180.0) * p_361564_.entityYRot, (float) (Math.PI / 180.0) * p_361564_.entityXRot, 0.0F);
-            case HORIZONTAL -> p_298476_.rotationYXZ((float) (-Math.PI / 180.0) * p_361564_.entityYRot, (float) (Math.PI / 180.0) * cameraXRot(camera), 0.0F);
-            case VERTICAL -> p_298476_.rotationYXZ((float) (-Math.PI / 180.0) * cameraYrot(camera), (float) (Math.PI / 180.0) * p_361564_.entityXRot, 0.0F);
-            case CENTER -> p_298476_.rotationYXZ((float) (-Math.PI / 180.0) * cameraYrot(camera), (float) (Math.PI / 180.0) * cameraXRot(camera), 0.0F);
+        return switch (pRenderState.billboardConstraints()) {
+            case FIXED -> pQuaternion.rotationYXZ((float) (-Math.PI / 180.0) * pEntityRenderState.entityYRot, (float) (Math.PI / 180.0) * pEntityRenderState.entityXRot, 0.0F);
+            case HORIZONTAL -> pQuaternion.rotationYXZ((float) (-Math.PI / 180.0) * pEntityRenderState.entityYRot, (float) (Math.PI / 180.0) * cameraXRot(camera), 0.0F);
+            case VERTICAL -> pQuaternion.rotationYXZ((float) (-Math.PI / 180.0) * cameraYrot(camera), (float) (Math.PI / 180.0) * pEntityRenderState.entityXRot, 0.0F);
+            case CENTER -> pQuaternion.rotationYXZ((float) (-Math.PI / 180.0) * cameraYrot(camera), (float) (Math.PI / 180.0) * cameraXRot(camera), 0.0F);
         };
     }
 
-    private static float cameraYrot(Camera p_299213_) {
-        return p_299213_.getYRot() - 180.0F;
+    private static float cameraYrot(Camera pCamera) {
+        return pCamera.getYRot() - 180.0F;
     }
 
-    private static float cameraXRot(Camera p_297923_) {
-        return -p_297923_.getXRot();
+    private static float cameraXRot(Camera pCamera) {
+        return -pCamera.getXRot();
     }
 
-    private static <T extends Display> float entityYRot(T p_297849_, float p_297686_) {
-        return p_297849_.getYRot(p_297686_);
+    private static <T extends Display> float entityYRot(T pEntity, float pPartialTick) {
+        return pEntity.getYRot(pPartialTick);
     }
 
-    private static <T extends Display> float entityXRot(T p_298651_, float p_297691_) {
-        return p_298651_.getXRot(p_297691_);
+    private static <T extends Display> float entityXRot(T pEntity, float pPartialTick) {
+        return pEntity.getXRot(pPartialTick);
     }
 
-    protected abstract void renderInner(ST p_361844_, PoseStack p_277686_, MultiBufferSource p_277429_, int p_278023_, float p_277453_);
+    protected abstract void renderInner(ST pRenderState, PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, float pInterpolationProgress);
 
     public void extractRenderState(T p_364120_, ST p_362498_, float p_362522_) {
         super.extractRenderState(p_364120_, p_362498_, p_362522_);
@@ -197,8 +197,8 @@ public abstract class DisplayRenderer<T extends Display, S, ST extends DisplayEn
             p_366254_.cachedInfo = p_365496_.cacheDisplay(this::splitLines);
         }
 
-        private Display.TextDisplay.CachedInfo splitLines(Component p_270823_, int p_270893_) {
-            List<FormattedCharSequence> list = this.font.split(p_270823_, p_270893_);
+        private Display.TextDisplay.CachedInfo splitLines(Component pText, int pMaxWidth) {
+            List<FormattedCharSequence> list = this.font.split(pText, pMaxWidth);
             List<Display.TextDisplay.CachedLine> list1 = new ArrayList<>(list.size());
             int i = 0;
 

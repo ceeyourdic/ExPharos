@@ -19,13 +19,13 @@ public class WouldSurvivePredicate implements BlockPredicate {
     private final Vec3i offset;
     private final BlockState state;
 
-    protected WouldSurvivePredicate(Vec3i p_190570_, BlockState p_190571_) {
-        this.offset = p_190570_;
-        this.state = p_190571_;
+    protected WouldSurvivePredicate(Vec3i pOffset, BlockState pState) {
+        this.offset = pOffset;
+        this.state = pState;
     }
 
-    public boolean test(WorldGenLevel p_190574_, BlockPos p_190575_) {
-        return this.state.canSurvive(p_190574_, p_190575_.offset(this.offset));
+    public boolean test(WorldGenLevel pLevel, BlockPos pPos) {
+        return this.state.canSurvive(pLevel, pPos.offset(this.offset));
     }
 
     @Override

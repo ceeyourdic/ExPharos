@@ -13,22 +13,22 @@ public class ClientboundContainerSetDataPacket implements Packet<ClientGamePacke
     private final int id;
     private final int value;
 
-    public ClientboundContainerSetDataPacket(int p_131963_, int p_131964_, int p_131965_) {
-        this.containerId = p_131963_;
-        this.id = p_131964_;
-        this.value = p_131965_;
+    public ClientboundContainerSetDataPacket(int pContainerId, int pId, int pValue) {
+        this.containerId = pContainerId;
+        this.id = pId;
+        this.value = pValue;
     }
 
-    private ClientboundContainerSetDataPacket(FriendlyByteBuf p_178825_) {
-        this.containerId = p_178825_.readContainerId();
-        this.id = p_178825_.readShort();
-        this.value = p_178825_.readShort();
+    private ClientboundContainerSetDataPacket(FriendlyByteBuf pBuffer) {
+        this.containerId = pBuffer.readContainerId();
+        this.id = pBuffer.readShort();
+        this.value = pBuffer.readShort();
     }
 
-    private void write(FriendlyByteBuf p_131974_) {
-        p_131974_.writeContainerId(this.containerId);
-        p_131974_.writeShort(this.id);
-        p_131974_.writeShort(this.value);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeContainerId(this.containerId);
+        pBuffer.writeShort(this.id);
+        pBuffer.writeShort(this.value);
     }
 
     @Override
@@ -36,8 +36,8 @@ public class ClientboundContainerSetDataPacket implements Packet<ClientGamePacke
         return GamePacketTypes.CLIENTBOUND_CONTAINER_SET_DATA;
     }
 
-    public void handle(ClientGamePacketListener p_131971_) {
-        p_131971_.handleContainerSetData(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleContainerSetData(this);
     }
 
     public int getContainerId() {

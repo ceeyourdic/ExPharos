@@ -18,25 +18,25 @@ public class ClientboundBlockEventPacket implements Packet<ClientGamePacketListe
     private final int b1;
     private final Block block;
 
-    public ClientboundBlockEventPacket(BlockPos p_131715_, Block p_131716_, int p_131717_, int p_131718_) {
-        this.pos = p_131715_;
-        this.block = p_131716_;
-        this.b0 = p_131717_;
-        this.b1 = p_131718_;
+    public ClientboundBlockEventPacket(BlockPos pPos, Block pBlock, int pB0, int pB1) {
+        this.pos = pPos;
+        this.block = pBlock;
+        this.b0 = pB0;
+        this.b1 = pB1;
     }
 
-    private ClientboundBlockEventPacket(RegistryFriendlyByteBuf p_332473_) {
-        this.pos = p_332473_.readBlockPos();
-        this.b0 = p_332473_.readUnsignedByte();
-        this.b1 = p_332473_.readUnsignedByte();
-        this.block = ByteBufCodecs.registry(Registries.BLOCK).decode(p_332473_);
+    private ClientboundBlockEventPacket(RegistryFriendlyByteBuf pBuffer) {
+        this.pos = pBuffer.readBlockPos();
+        this.b0 = pBuffer.readUnsignedByte();
+        this.b1 = pBuffer.readUnsignedByte();
+        this.block = ByteBufCodecs.registry(Registries.BLOCK).decode(pBuffer);
     }
 
-    private void write(RegistryFriendlyByteBuf p_331626_) {
-        p_331626_.writeBlockPos(this.pos);
-        p_331626_.writeByte(this.b0);
-        p_331626_.writeByte(this.b1);
-        ByteBufCodecs.registry(Registries.BLOCK).encode(p_331626_, this.block);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeBlockPos(this.pos);
+        pBuffer.writeByte(this.b0);
+        pBuffer.writeByte(this.b1);
+        ByteBufCodecs.registry(Registries.BLOCK).encode(pBuffer, this.block);
     }
 
     @Override
@@ -44,8 +44,8 @@ public class ClientboundBlockEventPacket implements Packet<ClientGamePacketListe
         return GamePacketTypes.CLIENTBOUND_BLOCK_EVENT;
     }
 
-    public void handle(ClientGamePacketListener p_131724_) {
-        p_131724_.handleBlockEvent(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleBlockEvent(this);
     }
 
     public BlockPos getPos() {

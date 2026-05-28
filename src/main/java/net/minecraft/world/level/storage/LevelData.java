@@ -19,7 +19,7 @@ public interface LevelData {
 
     boolean isRaining();
 
-    void setRaining(boolean p_78171_);
+    void setRaining(boolean pRaining);
 
     boolean isHardcore();
 
@@ -27,8 +27,8 @@ public interface LevelData {
 
     boolean isDifficultyLocked();
 
-    default void fillCrashReportCategory(CrashReportCategory p_164873_, LevelHeightAccessor p_164874_) {
-        p_164873_.setDetail("Level spawn location", () -> CrashReportCategory.formatLocation(p_164874_, this.getSpawnPos()));
-        p_164873_.setDetail("Level time", () -> String.format(Locale.ROOT, "%d game time, %d day time", this.getGameTime(), this.getDayTime()));
+    default void fillCrashReportCategory(CrashReportCategory pCrashReportCategory, LevelHeightAccessor pLevel) {
+        pCrashReportCategory.setDetail("Level spawn location", () -> CrashReportCategory.formatLocation(pLevel, this.getSpawnPos()));
+        pCrashReportCategory.setDetail("Level time", () -> String.format(Locale.ROOT, "%d game time, %d day time", this.getGameTime(), this.getDayTime()));
     }
 }

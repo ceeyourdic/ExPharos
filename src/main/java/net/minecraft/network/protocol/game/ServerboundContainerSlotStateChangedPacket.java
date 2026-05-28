@@ -10,14 +10,14 @@ public record ServerboundContainerSlotStateChangedPacket(int slotId, int contain
         ServerboundContainerSlotStateChangedPacket::write, ServerboundContainerSlotStateChangedPacket::new
     );
 
-    private ServerboundContainerSlotStateChangedPacket(FriendlyByteBuf p_312822_) {
-        this(p_312822_.readVarInt(), p_312822_.readContainerId(), p_312822_.readBoolean());
+    private ServerboundContainerSlotStateChangedPacket(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readVarInt(), pBuffer.readContainerId(), pBuffer.readBoolean());
     }
 
-    private void write(FriendlyByteBuf p_310021_) {
-        p_310021_.writeVarInt(this.slotId);
-        p_310021_.writeContainerId(this.containerId);
-        p_310021_.writeBoolean(this.newState);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeVarInt(this.slotId);
+        pBuffer.writeContainerId(this.containerId);
+        pBuffer.writeBoolean(this.newState);
     }
 
     @Override

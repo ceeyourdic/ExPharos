@@ -28,19 +28,19 @@ public class EnvironmentScanPlacement extends PlacementModifier {
                 .apply(p_191650_, EnvironmentScanPlacement::new)
     );
 
-    private EnvironmentScanPlacement(Direction p_191645_, BlockPredicate p_191646_, BlockPredicate p_191647_, int p_191648_) {
-        this.directionOfSearch = p_191645_;
-        this.targetCondition = p_191646_;
-        this.allowedSearchCondition = p_191647_;
-        this.maxSteps = p_191648_;
+    private EnvironmentScanPlacement(Direction pDirectionOfSearch, BlockPredicate pTargetCondition, BlockPredicate pAllowedSearchCondition, int pMaxSteps) {
+        this.directionOfSearch = pDirectionOfSearch;
+        this.targetCondition = pTargetCondition;
+        this.allowedSearchCondition = pAllowedSearchCondition;
+        this.maxSteps = pMaxSteps;
     }
 
-    public static EnvironmentScanPlacement scanningFor(Direction p_191658_, BlockPredicate p_191659_, BlockPredicate p_191660_, int p_191661_) {
-        return new EnvironmentScanPlacement(p_191658_, p_191659_, p_191660_, p_191661_);
+    public static EnvironmentScanPlacement scanningFor(Direction pDirectionOfSearch, BlockPredicate pTargetCondition, BlockPredicate pAllowedSearchCondition, int pMaxSteps) {
+        return new EnvironmentScanPlacement(pDirectionOfSearch, pTargetCondition, pAllowedSearchCondition, pMaxSteps);
     }
 
-    public static EnvironmentScanPlacement scanningFor(Direction p_191654_, BlockPredicate p_191655_, int p_191656_) {
-        return scanningFor(p_191654_, p_191655_, BlockPredicate.alwaysTrue(), p_191656_);
+    public static EnvironmentScanPlacement scanningFor(Direction pDirectionOfSearch, BlockPredicate pTargetCondition, int pMaxSteps) {
+        return scanningFor(pDirectionOfSearch, pTargetCondition, BlockPredicate.alwaysTrue(), pMaxSteps);
     }
 
     @Override

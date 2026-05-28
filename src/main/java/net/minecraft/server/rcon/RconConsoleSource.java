@@ -14,8 +14,8 @@ public class RconConsoleSource implements CommandSource {
     private final StringBuffer buffer = new StringBuffer();
     private final MinecraftServer server;
 
-    public RconConsoleSource(MinecraftServer p_11505_) {
-        this.server = p_11505_;
+    public RconConsoleSource(MinecraftServer pServer) {
+        this.server = pServer;
     }
 
     public void prepareForCommand() {

@@ -45,7 +45,7 @@ public abstract class AbstractBoatRenderer extends EntityRenderer<AbstractBoat, 
         super.render(p_367425_, p_366270_, p_367987_, p_363052_);
     }
 
-    protected void renderTypeAdditions(BoatRenderState p_361534_, PoseStack p_362579_, MultiBufferSource p_361820_, int p_361807_) {
+    protected void renderTypeAdditions(BoatRenderState pRenderState, PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight) {
     }
 
     protected abstract EntityModel<BoatRenderState> model();

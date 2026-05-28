@@ -53,8 +53,8 @@ public final class VillagerType {
         p_35834_.put(Biomes.WINDSWEPT_FOREST, TAIGA);
     });
 
-    private VillagerType(String p_35830_) {
-        this.name = p_35830_;
+    private VillagerType(String pName) {
+        this.name = pName;
     }
 
     @Override
@@ -62,11 +62,11 @@ public final class VillagerType {
         return this.name;
     }
 
-    private static VillagerType register(String p_35832_) {
-        return Registry.register(BuiltInRegistries.VILLAGER_TYPE, ResourceLocation.withDefaultNamespace(p_35832_), new VillagerType(p_35832_));
+    private static VillagerType register(String pKey) {
+        return Registry.register(BuiltInRegistries.VILLAGER_TYPE, ResourceLocation.withDefaultNamespace(pKey), new VillagerType(pKey));
     }
 
-    public static VillagerType byBiome(Holder<Biome> p_204074_) {
-        return p_204074_.unwrapKey().map(BY_BIOME::get).orElse(PLAINS);
+    public static VillagerType byBiome(Holder<Biome> pBiome) {
+        return pBiome.unwrapKey().map(BY_BIOME::get).orElse(PLAINS);
     }
 }

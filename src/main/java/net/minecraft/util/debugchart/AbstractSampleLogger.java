@@ -4,12 +4,12 @@ public abstract class AbstractSampleLogger implements SampleLogger {
     protected final long[] defaults;
     protected final long[] sample;
 
-    protected AbstractSampleLogger(int p_330199_, long[] p_328152_) {
-        if (p_328152_.length != p_330199_) {
-            throw new IllegalArgumentException("defaults have incorrect length of " + p_328152_.length);
+    protected AbstractSampleLogger(int pSize, long[] pDefaults) {
+        if (pDefaults.length != pSize) {
+            throw new IllegalArgumentException("defaults have incorrect length of " + pDefaults.length);
         } else {
-            this.sample = new long[p_330199_];
-            this.defaults = p_328152_;
+            this.sample = new long[pSize];
+            this.defaults = pDefaults;
         }
     }
 

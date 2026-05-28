@@ -43,53 +43,53 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
         new DecimalFormat("#.##"), p_334862_ -> p_334862_.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT))
     );
 
-    public ItemAttributeModifiers withTooltip(boolean p_332852_) {
-        return new ItemAttributeModifiers(this.modifiers, p_332852_);
+    public ItemAttributeModifiers withTooltip(boolean pShowInTooltip) {
+        return new ItemAttributeModifiers(this.modifiers, pShowInTooltip);
     }
 
     public static ItemAttributeModifiers.Builder builder() {
         return new ItemAttributeModifiers.Builder();
     }
 
-    public ItemAttributeModifiers withModifierAdded(Holder<Attribute> p_335092_, AttributeModifier p_327974_, EquipmentSlotGroup p_328449_) {
+    public ItemAttributeModifiers withModifierAdded(Holder<Attribute> pAttribute, AttributeModifier pModifier, EquipmentSlotGroup pSlot) {
         ImmutableList.Builder<ItemAttributeModifiers.Entry> builder = ImmutableList.builderWithExpectedSize(this.modifiers.size() + 1);
 
         for (ItemAttributeModifiers.Entry itemattributemodifiers$entry : this.modifiers) {
-            if (!itemattributemodifiers$entry.matches(p_335092_, p_327974_.id())) {
+            if (!itemattributemodifiers$entry.matches(pAttribute, pModifier.id())) {
                 builder.add(itemattributemodifiers$entry);
             }
         }
 
-        builder.add(new ItemAttributeModifiers.Entry(p_335092_, p_327974_, p_328449_));
+        builder.add(new ItemAttributeModifiers.Entry(pAttribute, pModifier, pSlot));
         return new ItemAttributeModifiers(builder.build(), this.showInTooltip);
     }
 
-    public void forEach(EquipmentSlotGroup p_343586_, BiConsumer<Holder<Attribute>, AttributeModifier> p_344914_) {
+    public void forEach(EquipmentSlotGroup pSlotGroup, BiConsumer<Holder<Attribute>, AttributeModifier> pAction) {
         for (ItemAttributeModifiers.Entry itemattributemodifiers$entry : this.modifiers) {
-            if (itemattributemodifiers$entry.slot.equals(p_343586_)) {
-                p_344914_.accept(itemattributemodifiers$entry.attribute, itemattributemodifiers$entry.modifier);
+            if (itemattributemodifiers$entry.slot.equals(pSlotGroup)) {
+                pAction.accept(itemattributemodifiers$entry.attribute, itemattributemodifiers$entry.modifier);
             }
         }
     }
 
-    public void forEach(EquipmentSlot p_334753_, BiConsumer<Holder<Attribute>, AttributeModifier> p_331767_) {
+    public void forEach(EquipmentSlot pEquipmentSlot, BiConsumer<Holder<Attribute>, AttributeModifier> pAction) {
         for (ItemAttributeModifiers.Entry itemattributemodifiers$entry : this.modifiers) {
-            if (itemattributemodifiers$entry.slot.test(p_334753_)) {
-                p_331767_.accept(itemattributemodifiers$entry.attribute, itemattributemodifiers$entry.modifier);
+            if (itemattributemodifiers$entry.slot.test(pEquipmentSlot)) {
+                pAction.accept(itemattributemodifiers$entry.attribute, itemattributemodifiers$entry.modifier);
             }
         }
     }
 
-    public double compute(double p_332865_, EquipmentSlot p_329615_) {
-        double d0 = p_332865_;
+    public double compute(double pBaseValue, EquipmentSlot pEquipmentSlot) {
+        double d0 = pBaseValue;
 
         for (ItemAttributeModifiers.Entry itemattributemodifiers$entry : this.modifiers) {
-            if (itemattributemodifiers$entry.slot.test(p_329615_)) {
+            if (itemattributemodifiers$entry.slot.test(pEquipmentSlot)) {
                 double d1 = itemattributemodifiers$entry.modifier.amount();
 
                 d0 += switch (itemattributemodifiers$entry.modifier.operation()) {
                     case ADD_VALUE -> d1;
-                    case ADD_MULTIPLIED_BASE -> d1 * p_332865_;
+                    case ADD_MULTIPLIED_BASE -> d1 * pBaseValue;
                     case ADD_MULTIPLIED_TOTAL -> d1 * d0;
                 };
             }
@@ -104,8 +104,8 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
         Builder() {
         }
 
-        public ItemAttributeModifiers.Builder add(Holder<Attribute> p_330104_, AttributeModifier p_333549_, EquipmentSlotGroup p_332621_) {
-            this.entries.add(new ItemAttributeModifiers.Entry(p_330104_, p_333549_, p_332621_));
+        public ItemAttributeModifiers.Builder add(Holder<Attribute> pAttribute, AttributeModifier pModifier, EquipmentSlotGroup pSlot) {
+            this.entries.add(new ItemAttributeModifiers.Entry(pAttribute, pModifier, pSlot));
             return this;
         }
 
@@ -133,8 +133,8 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
             ItemAttributeModifiers.Entry::new
         );
 
-        public boolean matches(Holder<Attribute> p_344464_, ResourceLocation p_344217_) {
-            return p_344464_.equals(this.attribute) && this.modifier.is(p_344217_);
+        public boolean matches(Holder<Attribute> pAttribute, ResourceLocation pId) {
+            return pAttribute.equals(this.attribute) && this.modifier.is(pId);
         }
     }
 }

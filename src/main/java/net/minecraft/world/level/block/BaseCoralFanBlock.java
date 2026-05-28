@@ -22,7 +22,7 @@ public class BaseCoralFanBlock extends BaseCoralPlantTypeBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_49108_, BlockGetter p_49109_, BlockPos p_49110_, CollisionContext p_49111_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return AABB;
     }
 }

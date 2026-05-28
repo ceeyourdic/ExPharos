@@ -10,27 +10,27 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class SquidInkParticle extends SimpleAnimatedParticle {
     SquidInkParticle(
-        ClientLevel p_172325_,
-        double p_172326_,
-        double p_172327_,
-        double p_172328_,
-        double p_172329_,
-        double p_172330_,
-        double p_172331_,
-        int p_172332_,
-        SpriteSet p_172333_
+        ClientLevel pLevel,
+        double pX,
+        double pY,
+        double pZ,
+        double pXSpeed,
+        double pYSpeed,
+        double pZSpeed,
+        int pPackedColor,
+        SpriteSet pSprites
     ) {
-        super(p_172325_, p_172326_, p_172327_, p_172328_, p_172333_, 0.0F);
+        super(pLevel, pX, pY, pZ, pSprites, 0.0F);
         this.friction = 0.92F;
         this.quadSize = 0.5F;
         this.setAlpha(1.0F);
-        this.setColor((float)ARGB.red(p_172332_), (float)ARGB.green(p_172332_), (float)ARGB.blue(p_172332_));
+        this.setColor((float)ARGB.red(pPackedColor), (float)ARGB.green(pPackedColor), (float)ARGB.blue(pPackedColor));
         this.lifetime = (int)((double)(this.quadSize * 12.0F) / (Math.random() * 0.8F + 0.2F));
-        this.setSpriteFromAge(p_172333_);
+        this.setSpriteFromAge(pSprites);
         this.hasPhysics = false;
-        this.xd = p_172329_;
-        this.yd = p_172330_;
-        this.zd = p_172331_;
+        this.xd = pXSpeed;
+        this.yd = pYSpeed;
+        this.zd = pZSpeed;
     }
 
     @Override
@@ -52,8 +52,8 @@ public class SquidInkParticle extends SimpleAnimatedParticle {
     public static class GlowInkProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public GlowInkProvider(SpriteSet p_172336_) {
-            this.sprites = p_172336_;
+        public GlowInkProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(
@@ -76,22 +76,22 @@ public class SquidInkParticle extends SimpleAnimatedParticle {
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
-        public Provider(SpriteSet p_107991_) {
-            this.sprites = p_107991_;
+        public Provider(SpriteSet pSprites) {
+            this.sprites = pSprites;
         }
 
         public Particle createParticle(
-            SimpleParticleType p_108002_,
-            ClientLevel p_108003_,
-            double p_108004_,
-            double p_108005_,
-            double p_108006_,
-            double p_108007_,
-            double p_108008_,
-            double p_108009_
+            SimpleParticleType pType,
+            ClientLevel pLevel,
+            double pX,
+            double pY,
+            double pZ,
+            double pXSpeed,
+            double pYSpeed,
+            double pZSpeed
         ) {
             return new SquidInkParticle(
-                p_108003_, p_108004_, p_108005_, p_108006_, p_108007_, p_108008_, p_108009_, ARGB.color(255, 255, 255, 255), this.sprites
+                pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, ARGB.color(255, 255, 255, 255), this.sprites
             );
         }
     }

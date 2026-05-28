@@ -15,8 +15,8 @@ public class LevelLegacyWorldGenSettingsFix extends DataFix {
         "RandomSeed", "generatorName", "generatorOptions", "generatorVersion", "legacy_custom_options", "MapFeatures", "BonusChest"
     );
 
-    public LevelLegacyWorldGenSettingsFix(Schema p_311836_) {
-        super(p_311836_, false);
+    public LevelLegacyWorldGenSettingsFix(Schema pOutputSchema) {
+        super(pOutputSchema, false);
     }
 
     @Override

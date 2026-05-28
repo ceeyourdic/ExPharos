@@ -19,12 +19,12 @@ public class PileFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> PILE_ICE = FeatureUtils.createKey("pile_ice");
     public static final ResourceKey<ConfiguredFeature<?, ?>> PILE_PUMPKIN = FeatureUtils.createKey("pile_pumpkin");
 
-    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> p_329897_) {
-        FeatureUtils.register(p_329897_, PILE_HAY, Feature.BLOCK_PILE, new BlockPileConfiguration(new RotatedBlockProvider(Blocks.HAY_BLOCK)));
-        FeatureUtils.register(p_329897_, PILE_MELON, Feature.BLOCK_PILE, new BlockPileConfiguration(BlockStateProvider.simple(Blocks.MELON)));
-        FeatureUtils.register(p_329897_, PILE_SNOW, Feature.BLOCK_PILE, new BlockPileConfiguration(BlockStateProvider.simple(Blocks.SNOW)));
+    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> pContext) {
+        FeatureUtils.register(pContext, PILE_HAY, Feature.BLOCK_PILE, new BlockPileConfiguration(new RotatedBlockProvider(Blocks.HAY_BLOCK)));
+        FeatureUtils.register(pContext, PILE_MELON, Feature.BLOCK_PILE, new BlockPileConfiguration(BlockStateProvider.simple(Blocks.MELON)));
+        FeatureUtils.register(pContext, PILE_SNOW, Feature.BLOCK_PILE, new BlockPileConfiguration(BlockStateProvider.simple(Blocks.SNOW)));
         FeatureUtils.register(
-            p_329897_,
+            pContext,
             PILE_ICE,
             Feature.BLOCK_PILE,
             new BlockPileConfiguration(
@@ -34,7 +34,7 @@ public class PileFeatures {
             )
         );
         FeatureUtils.register(
-            p_329897_,
+            pContext,
             PILE_PUMPKIN,
             Feature.BLOCK_PILE,
             new BlockPileConfiguration(

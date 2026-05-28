@@ -8,9 +8,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface LayoutElement {
-    void setX(int p_265236_);
+    void setX(int pX);
 
-    void setY(int p_265404_);
+    void setY(int pY);
 
     int getX();
 
@@ -24,10 +24,10 @@ public interface LayoutElement {
         return new ScreenRectangle(this.getX(), this.getY(), this.getWidth(), this.getHeight());
     }
 
-    default void setPosition(int p_265617_, int p_265577_) {
-        this.setX(p_265617_);
-        this.setY(p_265577_);
+    default void setPosition(int pX, int pY) {
+        this.setX(pX);
+        this.setY(pY);
     }
 
-    void visitWidgets(Consumer<AbstractWidget> p_265082_);
+    void visitWidgets(Consumer<AbstractWidget> pConsumer);
 }

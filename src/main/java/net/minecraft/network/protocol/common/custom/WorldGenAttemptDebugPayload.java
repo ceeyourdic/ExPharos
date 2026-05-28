@@ -11,17 +11,17 @@ public record WorldGenAttemptDebugPayload(BlockPos pos, float scale, float red, 
     );
     public static final CustomPacketPayload.Type<WorldGenAttemptDebugPayload> TYPE = CustomPacketPayload.createType("debug/worldgen_attempt");
 
-    private WorldGenAttemptDebugPayload(FriendlyByteBuf p_298227_) {
-        this(p_298227_.readBlockPos(), p_298227_.readFloat(), p_298227_.readFloat(), p_298227_.readFloat(), p_298227_.readFloat(), p_298227_.readFloat());
+    private WorldGenAttemptDebugPayload(FriendlyByteBuf pBuffer) {
+        this(pBuffer.readBlockPos(), pBuffer.readFloat(), pBuffer.readFloat(), pBuffer.readFloat(), pBuffer.readFloat(), pBuffer.readFloat());
     }
 
-    private void write(FriendlyByteBuf p_301372_) {
-        p_301372_.writeBlockPos(this.pos);
-        p_301372_.writeFloat(this.scale);
-        p_301372_.writeFloat(this.red);
-        p_301372_.writeFloat(this.green);
-        p_301372_.writeFloat(this.blue);
-        p_301372_.writeFloat(this.alpha);
+    private void write(FriendlyByteBuf pBuffer) {
+        pBuffer.writeBlockPos(this.pos);
+        pBuffer.writeFloat(this.scale);
+        pBuffer.writeFloat(this.red);
+        pBuffer.writeFloat(this.green);
+        pBuffer.writeFloat(this.blue);
+        pBuffer.writeFloat(this.alpha);
     }
 
     @Override

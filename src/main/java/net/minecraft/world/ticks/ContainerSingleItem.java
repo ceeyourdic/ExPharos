@@ -8,11 +8,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public interface ContainerSingleItem extends Container {
     ItemStack getTheItem();
 
-    default ItemStack splitTheItem(int p_312245_) {
-        return this.getTheItem().split(p_312245_);
+    default ItemStack splitTheItem(int pAmount) {
+        return this.getTheItem().split(pAmount);
     }
 
-    void setTheItem(ItemStack p_310917_);
+    void setTheItem(ItemStack pItem);
 
     default ItemStack removeTheItem() {
         return this.splitTheItem(this.getMaxStackSize());

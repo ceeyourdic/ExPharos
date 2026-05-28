@@ -35,62 +35,62 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
         }
     };
 
-    private ClientboundBossEventPacket(UUID p_178635_, ClientboundBossEventPacket.Operation p_178636_) {
-        this.id = p_178635_;
-        this.operation = p_178636_;
+    private ClientboundBossEventPacket(UUID pId, ClientboundBossEventPacket.Operation pOperation) {
+        this.id = pId;
+        this.operation = pOperation;
     }
 
-    private ClientboundBossEventPacket(RegistryFriendlyByteBuf p_333479_) {
-        this.id = p_333479_.readUUID();
-        ClientboundBossEventPacket.OperationType clientboundbosseventpacket$operationtype = p_333479_.readEnum(ClientboundBossEventPacket.OperationType.class);
-        this.operation = clientboundbosseventpacket$operationtype.reader.decode(p_333479_);
+    private ClientboundBossEventPacket(RegistryFriendlyByteBuf pBuffer) {
+        this.id = pBuffer.readUUID();
+        ClientboundBossEventPacket.OperationType clientboundbosseventpacket$operationtype = pBuffer.readEnum(ClientboundBossEventPacket.OperationType.class);
+        this.operation = clientboundbosseventpacket$operationtype.reader.decode(pBuffer);
     }
 
-    public static ClientboundBossEventPacket createAddPacket(BossEvent p_178640_) {
-        return new ClientboundBossEventPacket(p_178640_.getId(), new ClientboundBossEventPacket.AddOperation(p_178640_));
+    public static ClientboundBossEventPacket createAddPacket(BossEvent pEvent) {
+        return new ClientboundBossEventPacket(pEvent.getId(), new ClientboundBossEventPacket.AddOperation(pEvent));
     }
 
-    public static ClientboundBossEventPacket createRemovePacket(UUID p_178642_) {
-        return new ClientboundBossEventPacket(p_178642_, REMOVE_OPERATION);
+    public static ClientboundBossEventPacket createRemovePacket(UUID pId) {
+        return new ClientboundBossEventPacket(pId, REMOVE_OPERATION);
     }
 
-    public static ClientboundBossEventPacket createUpdateProgressPacket(BossEvent p_178650_) {
-        return new ClientboundBossEventPacket(p_178650_.getId(), new ClientboundBossEventPacket.UpdateProgressOperation(p_178650_.getProgress()));
+    public static ClientboundBossEventPacket createUpdateProgressPacket(BossEvent pEvent) {
+        return new ClientboundBossEventPacket(pEvent.getId(), new ClientboundBossEventPacket.UpdateProgressOperation(pEvent.getProgress()));
     }
 
-    public static ClientboundBossEventPacket createUpdateNamePacket(BossEvent p_178652_) {
-        return new ClientboundBossEventPacket(p_178652_.getId(), new ClientboundBossEventPacket.UpdateNameOperation(p_178652_.getName()));
+    public static ClientboundBossEventPacket createUpdateNamePacket(BossEvent pEvent) {
+        return new ClientboundBossEventPacket(pEvent.getId(), new ClientboundBossEventPacket.UpdateNameOperation(pEvent.getName()));
     }
 
-    public static ClientboundBossEventPacket createUpdateStylePacket(BossEvent p_178654_) {
+    public static ClientboundBossEventPacket createUpdateStylePacket(BossEvent pEvent) {
         return new ClientboundBossEventPacket(
-            p_178654_.getId(), new ClientboundBossEventPacket.UpdateStyleOperation(p_178654_.getColor(), p_178654_.getOverlay())
+            pEvent.getId(), new ClientboundBossEventPacket.UpdateStyleOperation(pEvent.getColor(), pEvent.getOverlay())
         );
     }
 
-    public static ClientboundBossEventPacket createUpdatePropertiesPacket(BossEvent p_178656_) {
+    public static ClientboundBossEventPacket createUpdatePropertiesPacket(BossEvent pEvent) {
         return new ClientboundBossEventPacket(
-            p_178656_.getId(), new ClientboundBossEventPacket.UpdatePropertiesOperation(p_178656_.shouldDarkenScreen(), p_178656_.shouldPlayBossMusic(), p_178656_.shouldCreateWorldFog())
+            pEvent.getId(), new ClientboundBossEventPacket.UpdatePropertiesOperation(pEvent.shouldDarkenScreen(), pEvent.shouldPlayBossMusic(), pEvent.shouldCreateWorldFog())
         );
     }
 
-    private void write(RegistryFriendlyByteBuf p_331755_) {
-        p_331755_.writeUUID(this.id);
-        p_331755_.writeEnum(this.operation.getType());
-        this.operation.write(p_331755_);
+    private void write(RegistryFriendlyByteBuf pBuffer) {
+        pBuffer.writeUUID(this.id);
+        pBuffer.writeEnum(this.operation.getType());
+        this.operation.write(pBuffer);
     }
 
-    static int encodeProperties(boolean p_178646_, boolean p_178647_, boolean p_178648_) {
+    static int encodeProperties(boolean pDarkenScreen, boolean pPlayMusic, boolean pCreateWorldFog) {
         int i = 0;
-        if (p_178646_) {
+        if (pDarkenScreen) {
             i |= 1;
         }
 
-        if (p_178647_) {
+        if (pPlayMusic) {
             i |= 2;
         }
 
-        if (p_178648_) {
+        if (pCreateWorldFog) {
             i |= 4;
         }
 
@@ -102,12 +102,12 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
         return GamePacketTypes.CLIENTBOUND_BOSS_EVENT;
     }
 
-    public void handle(ClientGamePacketListener p_131770_) {
-        p_131770_.handleBossUpdate(this);
+    public void handle(ClientGamePacketListener pHandler) {
+        pHandler.handleBossUpdate(this);
     }
 
-    public void dispatch(ClientboundBossEventPacket.Handler p_178644_) {
-        this.operation.dispatch(this.id, p_178644_);
+    public void dispatch(ClientboundBossEventPacket.Handler pHandler) {
+        this.operation.dispatch(this.id, pHandler);
     }
 
     static class AddOperation implements ClientboundBossEventPacket.Operation {
@@ -119,22 +119,22 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
         private final boolean playMusic;
         private final boolean createWorldFog;
 
-        AddOperation(BossEvent p_178672_) {
-            this.name = p_178672_.getName();
-            this.progress = p_178672_.getProgress();
-            this.color = p_178672_.getColor();
-            this.overlay = p_178672_.getOverlay();
-            this.darkenScreen = p_178672_.shouldDarkenScreen();
-            this.playMusic = p_178672_.shouldPlayBossMusic();
-            this.createWorldFog = p_178672_.shouldCreateWorldFog();
+        AddOperation(BossEvent pEvent) {
+            this.name = pEvent.getName();
+            this.progress = pEvent.getProgress();
+            this.color = pEvent.getColor();
+            this.overlay = pEvent.getOverlay();
+            this.darkenScreen = pEvent.shouldDarkenScreen();
+            this.playMusic = pEvent.shouldPlayBossMusic();
+            this.createWorldFog = pEvent.shouldCreateWorldFog();
         }
 
-        private AddOperation(RegistryFriendlyByteBuf p_331482_) {
-            this.name = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(p_331482_);
-            this.progress = p_331482_.readFloat();
-            this.color = p_331482_.readEnum(BossEvent.BossBarColor.class);
-            this.overlay = p_331482_.readEnum(BossEvent.BossBarOverlay.class);
-            int i = p_331482_.readUnsignedByte();
+        private AddOperation(RegistryFriendlyByteBuf pBuffer) {
+            this.name = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(pBuffer);
+            this.progress = pBuffer.readFloat();
+            this.color = pBuffer.readEnum(BossEvent.BossBarColor.class);
+            this.overlay = pBuffer.readEnum(BossEvent.BossBarOverlay.class);
+            int i = pBuffer.readUnsignedByte();
             this.darkenScreen = (i & 1) > 0;
             this.playMusic = (i & 2) > 0;
             this.createWorldFog = (i & 4) > 0;
@@ -162,39 +162,39 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 
     public interface Handler {
         default void add(
-            UUID p_178689_,
-            Component p_178690_,
-            float p_178691_,
-            BossEvent.BossBarColor p_178692_,
-            BossEvent.BossBarOverlay p_178693_,
-            boolean p_178694_,
-            boolean p_178695_,
-            boolean p_178696_
+            UUID pId,
+            Component pName,
+            float pProgress,
+            BossEvent.BossBarColor pColor,
+            BossEvent.BossBarOverlay pOverlay,
+            boolean pDarkenScreen,
+            boolean pPlayMusic,
+            boolean pCreateWorldFog
         ) {
         }
 
-        default void remove(UUID p_178681_) {
+        default void remove(UUID pId) {
         }
 
-        default void updateProgress(UUID p_178682_, float p_178683_) {
+        default void updateProgress(UUID pId, float pProgress) {
         }
 
-        default void updateName(UUID p_178687_, Component p_178688_) {
+        default void updateName(UUID pId, Component pName) {
         }
 
-        default void updateStyle(UUID p_178684_, BossEvent.BossBarColor p_178685_, BossEvent.BossBarOverlay p_178686_) {
+        default void updateStyle(UUID pId, BossEvent.BossBarColor pColor, BossEvent.BossBarOverlay pOverlay) {
         }
 
-        default void updateProperties(UUID p_178697_, boolean p_178698_, boolean p_178699_, boolean p_178700_) {
+        default void updateProperties(UUID pId, boolean pDarkenScreen, boolean pPlayMusic, boolean pCreateWorldFog) {
         }
     }
 
     interface Operation {
         ClientboundBossEventPacket.OperationType getType();
 
-        void dispatch(UUID p_178701_, ClientboundBossEventPacket.Handler p_178702_);
+        void dispatch(UUID pId, ClientboundBossEventPacket.Handler pHandler);
 
-        void write(RegistryFriendlyByteBuf p_331477_);
+        void write(RegistryFriendlyByteBuf pBuffer);
     }
 
     static enum OperationType {
@@ -207,14 +207,14 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 
         final StreamDecoder<RegistryFriendlyByteBuf, ClientboundBossEventPacket.Operation> reader;
 
-        private OperationType(final StreamDecoder<RegistryFriendlyByteBuf, ClientboundBossEventPacket.Operation> p_328519_) {
-            this.reader = p_328519_;
+        private OperationType(final StreamDecoder<RegistryFriendlyByteBuf, ClientboundBossEventPacket.Operation> pReader) {
+            this.reader = pReader;
         }
     }
 
     static record UpdateNameOperation(Component name) implements ClientboundBossEventPacket.Operation {
-        private UpdateNameOperation(RegistryFriendlyByteBuf p_335508_) {
-            this(ComponentSerialization.TRUSTED_STREAM_CODEC.decode(p_335508_));
+        private UpdateNameOperation(RegistryFriendlyByteBuf pBuffer) {
+            this(ComponentSerialization.TRUSTED_STREAM_CODEC.decode(pBuffer));
         }
 
         @Override
@@ -234,8 +234,8 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
     }
 
     static record UpdateProgressOperation(float progress) implements ClientboundBossEventPacket.Operation {
-        private UpdateProgressOperation(RegistryFriendlyByteBuf p_329547_) {
-            this(p_329547_.readFloat());
+        private UpdateProgressOperation(RegistryFriendlyByteBuf pBuffer) {
+            this(pBuffer.readFloat());
         }
 
         @Override
@@ -259,14 +259,14 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
         private final boolean playMusic;
         private final boolean createWorldFog;
 
-        UpdatePropertiesOperation(boolean p_178751_, boolean p_178752_, boolean p_178753_) {
-            this.darkenScreen = p_178751_;
-            this.playMusic = p_178752_;
-            this.createWorldFog = p_178753_;
+        UpdatePropertiesOperation(boolean pDarkenScreen, boolean pPlayMusic, boolean pCreateWorldFog) {
+            this.darkenScreen = pDarkenScreen;
+            this.playMusic = pPlayMusic;
+            this.createWorldFog = pCreateWorldFog;
         }
 
-        private UpdatePropertiesOperation(RegistryFriendlyByteBuf p_331654_) {
-            int i = p_331654_.readUnsignedByte();
+        private UpdatePropertiesOperation(RegistryFriendlyByteBuf pBuffer) {
+            int i = pBuffer.readUnsignedByte();
             this.darkenScreen = (i & 1) > 0;
             this.playMusic = (i & 2) > 0;
             this.createWorldFog = (i & 4) > 0;
@@ -292,14 +292,14 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
         private final BossEvent.BossBarColor color;
         private final BossEvent.BossBarOverlay overlay;
 
-        UpdateStyleOperation(BossEvent.BossBarColor p_178763_, BossEvent.BossBarOverlay p_178764_) {
-            this.color = p_178763_;
-            this.overlay = p_178764_;
+        UpdateStyleOperation(BossEvent.BossBarColor pColor, BossEvent.BossBarOverlay pOverlay) {
+            this.color = pColor;
+            this.overlay = pOverlay;
         }
 
-        private UpdateStyleOperation(RegistryFriendlyByteBuf p_328394_) {
-            this.color = p_328394_.readEnum(BossEvent.BossBarColor.class);
-            this.overlay = p_328394_.readEnum(BossEvent.BossBarOverlay.class);
+        private UpdateStyleOperation(RegistryFriendlyByteBuf pBuffer) {
+            this.color = pBuffer.readEnum(BossEvent.BossBarColor.class);
+            this.overlay = pBuffer.readEnum(BossEvent.BossBarOverlay.class);
         }
 
         @Override

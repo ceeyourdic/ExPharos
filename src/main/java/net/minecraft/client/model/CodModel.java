@@ -15,9 +15,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class CodModel extends EntityModel<LivingEntityRenderState> {
     private final ModelPart tailFin;
 
-    public CodModel(ModelPart p_170494_) {
-        super(p_170494_);
-        this.tailFin = p_170494_.getChild("tail_fin");
+    public CodModel(ModelPart pRoot) {
+        super(pRoot);
+        this.tailFin = pRoot.getChild("tail_fin");
     }
 
     public static LayerDefinition createBodyLayer() {

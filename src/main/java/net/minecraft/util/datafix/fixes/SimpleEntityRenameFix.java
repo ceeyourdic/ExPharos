@@ -17,5 +17,5 @@ public abstract class SimpleEntityRenameFix extends EntityRenameFix {
         return Pair.of(pair.getFirst(), p_16906_.set(DSL.remainderFinder(), pair.getSecond()));
     }
 
-    protected abstract Pair<String, Dynamic<?>> getNewNameAndTag(String p_16907_, Dynamic<?> p_16908_);
+    protected abstract Pair<String, Dynamic<?>> getNewNameAndTag(String pName, Dynamic<?> pTag);
 }

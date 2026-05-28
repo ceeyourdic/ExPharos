@@ -11,7 +11,7 @@ public class EmptyProfileResults implements ProfileResults {
     }
 
     @Override
-    public List<ResultField> getTimes(String p_18448_) {
+    public List<ResultField> getTimes(String pSectionPath) {
         return Collections.emptyList();
     }
 

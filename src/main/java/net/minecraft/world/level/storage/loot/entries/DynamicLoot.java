@@ -19,9 +19,9 @@ public class DynamicLoot extends LootPoolSingletonContainer {
     );
     private final ResourceLocation name;
 
-    private DynamicLoot(ResourceLocation p_79465_, int p_79466_, int p_79467_, List<LootItemCondition> p_297929_, List<LootItemFunction> p_299695_) {
-        super(p_79466_, p_79467_, p_297929_, p_299695_);
-        this.name = p_79465_;
+    private DynamicLoot(ResourceLocation pName, int pWeight, int pQuality, List<LootItemCondition> pConditions, List<LootItemFunction> pFunctions) {
+        super(pWeight, pQuality, pConditions, pFunctions);
+        this.name = pName;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class DynamicLoot extends LootPoolSingletonContainer {
         p_79482_.addDynamicDrops(this.name, p_79481_);
     }
 
-    public static LootPoolSingletonContainer.Builder<?> dynamicEntry(ResourceLocation p_79484_) {
-        return simpleBuilder((p_297020_, p_297021_, p_297022_, p_297023_) -> new DynamicLoot(p_79484_, p_297020_, p_297021_, p_297022_, p_297023_));
+    public static LootPoolSingletonContainer.Builder<?> dynamicEntry(ResourceLocation pDynamicDropsName) {
+        return simpleBuilder((p_297020_, p_297021_, p_297022_, p_297023_) -> new DynamicLoot(pDynamicDropsName, p_297020_, p_297021_, p_297022_, p_297023_));
     }
 }

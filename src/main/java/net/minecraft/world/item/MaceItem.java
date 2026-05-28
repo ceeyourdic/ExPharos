@@ -85,10 +85,10 @@ public class MaceItem extends Item {
         return true;
     }
 
-    private Vec3 calculateImpactPosition(ServerPlayer p_365711_) {
-        return p_365711_.isIgnoringFallDamageFromCurrentImpulse() && p_365711_.currentImpulseImpactPos != null && p_365711_.currentImpulseImpactPos.y <= p_365711_.position().y
-            ? p_365711_.currentImpulseImpactPos
-            : p_365711_.position();
+    private Vec3 calculateImpactPosition(ServerPlayer pPlayer) {
+        return pPlayer.isIgnoringFallDamageFromCurrentImpulse() && pPlayer.currentImpulseImpactPos != null && pPlayer.currentImpulseImpactPos.y <= pPlayer.position().y
+            ? pPlayer.currentImpulseImpactPos
+            : pPlayer.position();
     }
 
     @Override
@@ -126,11 +126,11 @@ public class MaceItem extends Item {
         }
     }
 
-    private static void knockback(Level p_332228_, Entity p_335011_, Entity p_364373_) {
-        p_332228_.levelEvent(2013, p_364373_.getOnPos(), 750);
-        p_332228_.getEntitiesOfClass(LivingEntity.class, p_364373_.getBoundingBox().inflate(3.5), knockbackPredicate(p_335011_, p_364373_)).forEach(p_341573_ -> {
-            Vec3 vec3 = p_341573_.position().subtract(p_364373_.position());
-            double d0 = getKnockbackPower(p_335011_, p_341573_, vec3);
+    private static void knockback(Level pLevel, Entity pAttacker, Entity pTarget) {
+        pLevel.levelEvent(2013, pTarget.getOnPos(), 750);
+        pLevel.getEntitiesOfClass(LivingEntity.class, pTarget.getBoundingBox().inflate(3.5), knockbackPredicate(pAttacker, pTarget)).forEach(p_341573_ -> {
+            Vec3 vec3 = p_341573_.position().subtract(pTarget.position());
+            double d0 = getKnockbackPower(pAttacker, p_341573_, vec3);
             Vec3 vec31 = vec3.normalize().scale(d0);
             if (d0 > 0.0) {
                 p_341573_.push(vec31.x, 0.7F, vec31.z);
@@ -141,7 +141,7 @@ public class MaceItem extends Item {
         });
     }
 
-    private static Predicate<LivingEntity> knockbackPredicate(Entity p_334480_, Entity p_363363_) {
+    private static Predicate<LivingEntity> knockbackPredicate(Entity pAttacker, Entity pTarget) {
         return p_341576_ -> {
             boolean flag;
             boolean flag1;
@@ -149,9 +149,9 @@ public class MaceItem extends Item {
             boolean flag6;
             label62: {
                 flag = !p_341576_.isSpectator();
-                flag1 = p_341576_ != p_334480_ && p_341576_ != p_363363_;
-                flag2 = !p_334480_.isAlliedTo(p_341576_);
-                if (p_341576_ instanceof TamableAnimal tamableanimal && tamableanimal.isTame() && p_334480_.getUUID().equals(tamableanimal.getOwnerUUID())) {
+                flag1 = p_341576_ != pAttacker && p_341576_ != pTarget;
+                flag2 = !pAttacker.isAlliedTo(p_341576_);
+                if (p_341576_ instanceof TamableAnimal tamableanimal && tamableanimal.isTame() && pAttacker.getUUID().equals(tamableanimal.getOwnerUUID())) {
                     flag6 = true;
                     break label62;
                 }
@@ -171,17 +171,17 @@ public class MaceItem extends Item {
             }
 
             boolean flag4 = flag6;
-            boolean flag5 = p_363363_.distanceToSqr(p_341576_) <= Math.pow(3.5, 2.0);
+            boolean flag5 = pTarget.distanceToSqr(p_341576_) <= Math.pow(3.5, 2.0);
             return flag && flag1 && flag2 && flag3 && flag4 && flag5;
         };
     }
 
-    private static double getKnockbackPower(Entity p_361841_, LivingEntity p_334129_, Vec3 p_335583_) {
-        return (3.5 - p_335583_.length()) * 0.7F * (double)(p_361841_.fallDistance > 5.0F ? 2 : 1) * (1.0 - p_334129_.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+    private static double getKnockbackPower(Entity pAttacker, LivingEntity pEntity, Vec3 pOffset) {
+        return (3.5 - pOffset.length()) * 0.7F * (double)(pAttacker.fallDistance > 5.0F ? 2 : 1) * (1.0 - pEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
     }
 
-    public static boolean canSmashAttack(LivingEntity p_345213_) {
-        return p_345213_.fallDistance > 1.5F && !p_345213_.isFallFlying();
+    public static boolean canSmashAttack(LivingEntity pEntity) {
+        return pEntity.fallDistance > 1.5F && !pEntity.isFallFlying();
     }
 
     @Nullable

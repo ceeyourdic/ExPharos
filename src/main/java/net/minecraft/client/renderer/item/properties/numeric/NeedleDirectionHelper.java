@@ -13,34 +13,34 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public abstract class NeedleDirectionHelper {
     private final boolean wobble;
 
-    protected NeedleDirectionHelper(boolean p_376496_) {
-        this.wobble = p_376496_;
+    protected NeedleDirectionHelper(boolean pWobble) {
+        this.wobble = pWobble;
     }
 
-    public float get(ItemStack p_377286_, @Nullable ClientLevel p_378790_, @Nullable LivingEntity p_375514_, int p_375400_) {
-        Entity entity = (Entity)(p_375514_ != null ? p_375514_ : p_377286_.getEntityRepresentation());
+    public float get(ItemStack pStack, @Nullable ClientLevel pLevel, @Nullable LivingEntity pEntity, int pSeed) {
+        Entity entity = (Entity)(pEntity != null ? pEntity : pStack.getEntityRepresentation());
         if (entity == null) {
             return 0.0F;
         } else {
-            if (p_378790_ == null && entity.level() instanceof ClientLevel clientlevel) {
-                p_378790_ = clientlevel;
+            if (pLevel == null && entity.level() instanceof ClientLevel clientlevel) {
+                pLevel = clientlevel;
             }
 
-            return p_378790_ == null ? 0.0F : this.calculate(p_377286_, p_378790_, p_375400_, entity);
+            return pLevel == null ? 0.0F : this.calculate(pStack, pLevel, pSeed, entity);
         }
     }
 
-    protected abstract float calculate(ItemStack p_378355_, ClientLevel p_377407_, int p_377397_, Entity p_377026_);
+    protected abstract float calculate(ItemStack pStack, ClientLevel pLevel, int pSeed, Entity pEntity);
 
     protected boolean wobble() {
         return this.wobble;
     }
 
-    protected NeedleDirectionHelper.Wobbler newWobbler(float p_376684_) {
-        return this.wobble ? standardWobbler(p_376684_) : nonWobbler();
+    protected NeedleDirectionHelper.Wobbler newWobbler(float pScale) {
+        return this.wobble ? standardWobbler(pScale) : nonWobbler();
     }
 
-    public static NeedleDirectionHelper.Wobbler standardWobbler(final float p_376618_) {
+    public static NeedleDirectionHelper.Wobbler standardWobbler(final float pScale) {
         return new NeedleDirectionHelper.Wobbler() {
             private float rotation;
             private float deltaRotation;
@@ -61,7 +61,7 @@ public abstract class NeedleDirectionHelper {
                 this.lastUpdateTick = p_378620_;
                 float f = Mth.positiveModulo(p_377269_ - this.rotation + 0.5F, 1.0F) - 0.5F;
                 this.deltaRotation += f * 0.1F;
-                this.deltaRotation = this.deltaRotation * p_376618_;
+                this.deltaRotation = this.deltaRotation * pScale;
                 this.rotation = Mth.positiveModulo(this.rotation + this.deltaRotation, 1.0F);
             }
         };
@@ -92,8 +92,8 @@ public abstract class NeedleDirectionHelper {
     public interface Wobbler {
         float rotation();
 
-        boolean shouldUpdate(long p_378139_);
+        boolean shouldUpdate(long pGameTime);
 
-        void update(long p_377073_, float p_376320_);
+        void update(long pGameTime, float pTargetValue);
     }
 }

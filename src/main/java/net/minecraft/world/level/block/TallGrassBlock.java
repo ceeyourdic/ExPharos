@@ -27,7 +27,7 @@ public class TallGrassBlock extends BushBlock implements BonemealableBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState p_57336_, BlockGetter p_57337_, BlockPos p_57338_, CollisionContext p_57339_) {
+    protected VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return SHAPE;
     }
 
@@ -46,7 +46,7 @@ public class TallGrassBlock extends BushBlock implements BonemealableBlock {
         DoublePlantBlock.placeAt(p_222578_, getGrownBlock(p_222581_).defaultBlockState(), p_222580_, 2);
     }
 
-    private static DoublePlantBlock getGrownBlock(BlockState p_362227_) {
-        return (DoublePlantBlock)(p_362227_.is(Blocks.FERN) ? Blocks.LARGE_FERN : Blocks.TALL_GRASS);
+    private static DoublePlantBlock getGrownBlock(BlockState pState) {
+        return (DoublePlantBlock)(pState.is(Blocks.FERN) ? Blocks.LARGE_FERN : Blocks.TALL_GRASS);
     }
 }

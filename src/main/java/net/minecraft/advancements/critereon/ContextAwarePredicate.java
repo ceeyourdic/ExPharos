@@ -15,23 +15,23 @@ public class ContextAwarePredicate {
     private final List<LootItemCondition> conditions;
     private final Predicate<LootContext> compositePredicates;
 
-    ContextAwarePredicate(List<LootItemCondition> p_301186_) {
-        this.conditions = p_301186_;
-        this.compositePredicates = Util.allOf(p_301186_);
+    ContextAwarePredicate(List<LootItemCondition> pConditions) {
+        this.conditions = pConditions;
+        this.compositePredicates = Util.allOf(pConditions);
     }
 
-    public static ContextAwarePredicate create(LootItemCondition... p_286844_) {
-        return new ContextAwarePredicate(List.of(p_286844_));
+    public static ContextAwarePredicate create(LootItemCondition... pConditions) {
+        return new ContextAwarePredicate(List.of(pConditions));
     }
 
-    public boolean matches(LootContext p_286260_) {
-        return this.compositePredicates.test(p_286260_);
+    public boolean matches(LootContext pContext) {
+        return this.compositePredicates.test(pContext);
     }
 
-    public void validate(ValidationContext p_309801_) {
+    public void validate(ValidationContext pContext) {
         for (int i = 0; i < this.conditions.size(); i++) {
             LootItemCondition lootitemcondition = this.conditions.get(i);
-            lootitemcondition.validate(p_309801_.forChild("[" + i + "]"));
+            lootitemcondition.validate(pContext.forChild("[" + i + "]"));
         }
     }
 }

@@ -29,25 +29,25 @@ public class PostPass {
     private final List<PostChainConfig.Uniform> uniforms;
     private final List<PostPass.Input> inputs = new ArrayList<>();
 
-    public PostPass(String p_110062_, CompiledShaderProgram p_363813_, ResourceLocation p_369053_, List<PostChainConfig.Uniform> p_361905_) {
-        this.name = p_110062_;
-        this.shader = p_363813_;
-        this.outputTargetId = p_369053_;
-        this.uniforms = p_361905_;
+    public PostPass(String pName, CompiledShaderProgram pShader, ResourceLocation pOutputTargetId, List<PostChainConfig.Uniform> pUniforms) {
+        this.name = pName;
+        this.shader = pShader;
+        this.outputTargetId = pOutputTargetId;
+        this.uniforms = pUniforms;
     }
 
-    public void addInput(PostPass.Input p_364040_) {
-        this.inputs.add(p_364040_);
+    public void addInput(PostPass.Input pInput) {
+        this.inputs.add(pInput);
     }
 
-    public void addToFrame(FrameGraphBuilder p_369714_, Map<ResourceLocation, ResourceHandle<RenderTarget>> p_365909_, Matrix4f p_363094_) {
-        FramePass framepass = p_369714_.addPass(this.name);
+    public void addToFrame(FrameGraphBuilder pFrameGraphBuilder, Map<ResourceLocation, ResourceHandle<RenderTarget>> pTargets, Matrix4f pProjectionMatrix) {
+        FramePass framepass = pFrameGraphBuilder.addPass(this.name);
 
         for (PostPass.Input postpass$input : this.inputs) {
-            postpass$input.addToPass(framepass, p_365909_);
+            postpass$input.addToPass(framepass, pTargets);
         }
 
-        ResourceHandle<RenderTarget> resourcehandle = p_365909_.computeIfPresent(
+        ResourceHandle<RenderTarget> resourcehandle = pTargets.computeIfPresent(
             this.outputTargetId, (p_366255_, p_363433_) -> framepass.readsAndWrites((ResourceHandle<RenderTarget>)p_363433_)
         );
         if (resourcehandle == null) {
@@ -58,7 +58,7 @@ public class PostPass {
                 RenderSystem.viewport(0, 0, rendertarget.width, rendertarget.height);
 
                 for (PostPass.Input postpass$input1 : this.inputs) {
-                    postpass$input1.bindTo(this.shader, p_365909_);
+                    postpass$input1.bindTo(this.shader, pTargets);
                 }
 
                 this.shader.safeGetUniform("OutSize").set((float)rendertarget.width, (float)rendertarget.height);
@@ -76,7 +76,7 @@ public class PostPass {
                 RenderSystem.depthFunc(519);
                 RenderSystem.setShader(this.shader);
                 RenderSystem.backupProjectionMatrix();
-                RenderSystem.setProjectionMatrix(p_363094_, ProjectionType.ORTHOGRAPHIC);
+                RenderSystem.setProjectionMatrix(pProjectionMatrix, ProjectionType.ORTHOGRAPHIC);
                 BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
                 bufferbuilder.addVertex(0.0F, 0.0F, 500.0F);
                 bufferbuilder.addVertex((float)rendertarget.width, 0.0F, 500.0F);
@@ -88,7 +88,7 @@ public class PostPass {
                 rendertarget.unbindWrite();
 
                 for (PostPass.Input postpass$input2 : this.inputs) {
-                    postpass$input2.cleanup(p_365909_);
+                    postpass$input2.cleanup(pTargets);
                 }
 
                 this.restoreDefaultUniforms();
@@ -113,18 +113,18 @@ public class PostPass {
 
     @OnlyIn(Dist.CLIENT)
     public interface Input {
-        void addToPass(FramePass p_362856_, Map<ResourceLocation, ResourceHandle<RenderTarget>> p_367378_);
+        void addToPass(FramePass pPass, Map<ResourceLocation, ResourceHandle<RenderTarget>> pTargets);
 
-        void bindTo(CompiledShaderProgram p_363848_, Map<ResourceLocation, ResourceHandle<RenderTarget>> p_366076_);
+        void bindTo(CompiledShaderProgram pShaderProgram, Map<ResourceLocation, ResourceHandle<RenderTarget>> pTargets);
 
-        default void cleanup(Map<ResourceLocation, ResourceHandle<RenderTarget>> p_366914_) {
+        default void cleanup(Map<ResourceLocation, ResourceHandle<RenderTarget>> pTargets) {
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     public static record TargetInput(String samplerName, ResourceLocation targetId, boolean depthBuffer, boolean bilinear) implements PostPass.Input {
-        private ResourceHandle<RenderTarget> getHandle(Map<ResourceLocation, ResourceHandle<RenderTarget>> p_369908_) {
-            ResourceHandle<RenderTarget> resourcehandle = p_369908_.get(this.targetId);
+        private ResourceHandle<RenderTarget> getHandle(Map<ResourceLocation, ResourceHandle<RenderTarget>> pTargets) {
+            ResourceHandle<RenderTarget> resourcehandle = pTargets.get(this.targetId);
             if (resourcehandle == null) {
                 throw new IllegalStateException("Missing handle for target " + this.targetId);
             } else {

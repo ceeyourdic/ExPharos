@@ -104,14 +104,14 @@ public class Vex extends Monster implements TraceableEntity {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_34008_) {
-        super.readAdditionalSaveData(p_34008_);
-        if (p_34008_.contains("BoundX")) {
-            this.boundOrigin = new BlockPos(p_34008_.getInt("BoundX"), p_34008_.getInt("BoundY"), p_34008_.getInt("BoundZ"));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("BoundX")) {
+            this.boundOrigin = new BlockPos(pCompound.getInt("BoundX"), pCompound.getInt("BoundY"), pCompound.getInt("BoundZ"));
         }
 
-        if (p_34008_.contains("LifeTicks")) {
-            this.setLimitedLife(p_34008_.getInt("LifeTicks"));
+        if (pCompound.contains("LifeTicks")) {
+            this.setLimitedLife(pCompound.getInt("LifeTicks"));
         }
     }
 
@@ -124,16 +124,16 @@ public class Vex extends Monster implements TraceableEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_34015_) {
-        super.addAdditionalSaveData(p_34015_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
         if (this.boundOrigin != null) {
-            p_34015_.putInt("BoundX", this.boundOrigin.getX());
-            p_34015_.putInt("BoundY", this.boundOrigin.getY());
-            p_34015_.putInt("BoundZ", this.boundOrigin.getZ());
+            pCompound.putInt("BoundX", this.boundOrigin.getX());
+            pCompound.putInt("BoundY", this.boundOrigin.getY());
+            pCompound.putInt("BoundZ", this.boundOrigin.getZ());
         }
 
         if (this.hasLimitedLife) {
-            p_34015_.putInt("LifeTicks", this.limitedLifeTicks);
+            pCompound.putInt("LifeTicks", this.limitedLifeTicks);
         }
     }
 
@@ -147,21 +147,21 @@ public class Vex extends Monster implements TraceableEntity {
         return this.boundOrigin;
     }
 
-    public void setBoundOrigin(@Nullable BlockPos p_34034_) {
-        this.boundOrigin = p_34034_;
+    public void setBoundOrigin(@Nullable BlockPos pBoundOrigin) {
+        this.boundOrigin = pBoundOrigin;
     }
 
-    private boolean getVexFlag(int p_34011_) {
+    private boolean getVexFlag(int pMask) {
         int i = this.entityData.get(DATA_FLAGS_ID);
-        return (i & p_34011_) != 0;
+        return (i & pMask) != 0;
     }
 
-    private void setVexFlag(int p_33990_, boolean p_33991_) {
+    private void setVexFlag(int pMask, boolean pValue) {
         int i = this.entityData.get(DATA_FLAGS_ID);
-        if (p_33991_) {
-            i |= p_33990_;
+        if (pValue) {
+            i |= pMask;
         } else {
-            i &= ~p_33990_;
+            i &= ~pMask;
         }
 
         this.entityData.set(DATA_FLAGS_ID, (byte)(i & 0xFF));
@@ -171,17 +171,17 @@ public class Vex extends Monster implements TraceableEntity {
         return this.getVexFlag(1);
     }
 
-    public void setIsCharging(boolean p_34043_) {
-        this.setVexFlag(1, p_34043_);
+    public void setIsCharging(boolean pCharging) {
+        this.setVexFlag(1, pCharging);
     }
 
-    public void setOwner(Mob p_33995_) {
-        this.owner = p_33995_;
+    public void setOwner(Mob pOwner) {
+        this.owner = pOwner;
     }
 
-    public void setLimitedLife(int p_33988_) {
+    public void setLimitedLife(int pLimitedLifeTicks) {
         this.hasLimitedLife = true;
-        this.limitedLifeTicks = p_33988_;
+        this.limitedLifeTicks = pLimitedLifeTicks;
     }
 
     @Override
@@ -195,7 +195,7 @@ public class Vex extends Monster implements TraceableEntity {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_34023_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.VEX_HURT;
     }
 
@@ -280,8 +280,8 @@ public class Vex extends Monster implements TraceableEntity {
     class VexCopyOwnerTargetGoal extends TargetGoal {
         private final TargetingConditions copyOwnerTargeting = TargetingConditions.forNonCombat().ignoreLineOfSight().ignoreInvisibilityTesting();
 
-        public VexCopyOwnerTargetGoal(final PathfinderMob p_34056_) {
-            super(p_34056_, false);
+        public VexCopyOwnerTargetGoal(final PathfinderMob pMob) {
+            super(pMob, false);
         }
 
         @Override
@@ -297,8 +297,8 @@ public class Vex extends Monster implements TraceableEntity {
     }
 
     class VexMoveControl extends MoveControl {
-        public VexMoveControl(final Vex p_34062_) {
-            super(p_34062_);
+        public VexMoveControl(final Vex pVex) {
+            super(pVex);
         }
 
         @Override

@@ -13,10 +13,10 @@ public class V3818_5 extends NamespacedSchema {
     }
 
     @Override
-    public void registerTypes(Schema p_328796_, Map<String, Supplier<TypeTemplate>> p_329307_, Map<String, Supplier<TypeTemplate>> p_331445_) {
-        super.registerTypes(p_328796_, p_329307_, p_331445_);
-        p_328796_.registerType(
-            true, References.ITEM_STACK, () -> DSL.optionalFields("id", References.ITEM_NAME.in(p_328796_), "components", References.DATA_COMPONENTS.in(p_328796_))
+    public void registerTypes(Schema pSchema, Map<String, Supplier<TypeTemplate>> pEntityTypes, Map<String, Supplier<TypeTemplate>> pBlockEntityTypes) {
+        super.registerTypes(pSchema, pEntityTypes, pBlockEntityTypes);
+        pSchema.registerType(
+            true, References.ITEM_STACK, () -> DSL.optionalFields("id", References.ITEM_NAME.in(pSchema), "components", References.DATA_COMPONENTS.in(pSchema))
         );
     }
 }

@@ -63,7 +63,7 @@ public interface DispenseItemBehavior {
     Logger LOGGER = LogUtils.getLogger();
     DispenseItemBehavior NOOP = (p_123400_, p_123401_) -> p_123401_;
 
-    ItemStack dispense(BlockSource p_123403_, ItemStack p_123404_);
+    ItemStack dispense(BlockSource pBlockSource, ItemStack pItem);
 
     static void bootStrap() {
         DispenserBlock.registerProjectileBehavior(Items.ARROW);

@@ -22,12 +22,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class EquipmentAssetProvider implements DataProvider {
     private final PackOutput.PathProvider pathProvider;
 
-    public EquipmentAssetProvider(PackOutput p_378812_) {
-        this.pathProvider = p_378812_.createPathProvider(PackOutput.Target.RESOURCE_PACK, "equipment");
+    public EquipmentAssetProvider(PackOutput pOutput) {
+        this.pathProvider = pOutput.createPathProvider(PackOutput.Target.RESOURCE_PACK, "equipment");
     }
 
-    private static void bootstrap(BiConsumer<ResourceKey<EquipmentAsset>, EquipmentClientInfo> p_375964_) {
-        p_375964_.accept(
+    private static void bootstrap(BiConsumer<ResourceKey<EquipmentAsset>, EquipmentClientInfo> pOutput) {
+        pOutput.accept(
             EquipmentAssets.LEATHER,
             EquipmentClientInfo.builder()
                 .addHumanoidLayers(ResourceLocation.withDefaultNamespace("leather"), true)
@@ -35,13 +35,13 @@ public class EquipmentAssetProvider implements DataProvider {
                 .addLayers(EquipmentClientInfo.LayerType.HORSE_BODY, EquipmentClientInfo.Layer.leatherDyeable(ResourceLocation.withDefaultNamespace("leather"), true))
                 .build()
         );
-        p_375964_.accept(EquipmentAssets.CHAINMAIL, onlyHumanoid("chainmail"));
-        p_375964_.accept(EquipmentAssets.IRON, humanoidAndHorse("iron"));
-        p_375964_.accept(EquipmentAssets.GOLD, humanoidAndHorse("gold"));
-        p_375964_.accept(EquipmentAssets.DIAMOND, humanoidAndHorse("diamond"));
-        p_375964_.accept(EquipmentAssets.TURTLE_SCUTE, EquipmentClientInfo.builder().addMainHumanoidLayer(ResourceLocation.withDefaultNamespace("turtle_scute"), false).build());
-        p_375964_.accept(EquipmentAssets.NETHERITE, onlyHumanoid("netherite"));
-        p_375964_.accept(
+        pOutput.accept(EquipmentAssets.CHAINMAIL, onlyHumanoid("chainmail"));
+        pOutput.accept(EquipmentAssets.IRON, humanoidAndHorse("iron"));
+        pOutput.accept(EquipmentAssets.GOLD, humanoidAndHorse("gold"));
+        pOutput.accept(EquipmentAssets.DIAMOND, humanoidAndHorse("diamond"));
+        pOutput.accept(EquipmentAssets.TURTLE_SCUTE, EquipmentClientInfo.builder().addMainHumanoidLayer(ResourceLocation.withDefaultNamespace("turtle_scute"), false).build());
+        pOutput.accept(EquipmentAssets.NETHERITE, onlyHumanoid("netherite"));
+        pOutput.accept(
             EquipmentAssets.ARMADILLO_SCUTE,
             EquipmentClientInfo.builder()
                 .addLayers(EquipmentClientInfo.LayerType.WOLF_BODY, EquipmentClientInfo.Layer.onlyIfDyed(ResourceLocation.withDefaultNamespace("armadillo_scute"), false))
@@ -50,7 +50,7 @@ public class EquipmentAssetProvider implements DataProvider {
                 )
                 .build()
         );
-        p_375964_.accept(
+        pOutput.accept(
             EquipmentAssets.ELYTRA,
             EquipmentClientInfo.builder()
                 .addLayers(EquipmentClientInfo.LayerType.WINGS, new EquipmentClientInfo.Layer(ResourceLocation.withDefaultNamespace("elytra"), Optional.empty(), true))
@@ -60,7 +60,7 @@ public class EquipmentAssetProvider implements DataProvider {
         for (Entry<DyeColor, ResourceKey<EquipmentAsset>> entry : EquipmentAssets.CARPETS.entrySet()) {
             DyeColor dyecolor = entry.getKey();
             ResourceKey<EquipmentAsset> resourcekey = entry.getValue();
-            p_375964_.accept(
+            pOutput.accept(
                 resourcekey,
                 EquipmentClientInfo.builder()
                     .addLayers(EquipmentClientInfo.LayerType.LLAMA_BODY, new EquipmentClientInfo.Layer(ResourceLocation.withDefaultNamespace(dyecolor.getSerializedName())))
@@ -68,7 +68,7 @@ public class EquipmentAssetProvider implements DataProvider {
             );
         }
 
-        p_375964_.accept(
+        pOutput.accept(
             EquipmentAssets.TRADER_LLAMA,
             EquipmentClientInfo.builder()
                 .addLayers(EquipmentClientInfo.LayerType.LLAMA_BODY, new EquipmentClientInfo.Layer(ResourceLocation.withDefaultNamespace("trader_llama")))
@@ -76,14 +76,14 @@ public class EquipmentAssetProvider implements DataProvider {
         );
     }
 
-    private static EquipmentClientInfo onlyHumanoid(String p_376219_) {
-        return EquipmentClientInfo.builder().addHumanoidLayers(ResourceLocation.withDefaultNamespace(p_376219_)).build();
+    private static EquipmentClientInfo onlyHumanoid(String pName) {
+        return EquipmentClientInfo.builder().addHumanoidLayers(ResourceLocation.withDefaultNamespace(pName)).build();
     }
 
-    private static EquipmentClientInfo humanoidAndHorse(String p_375668_) {
+    private static EquipmentClientInfo humanoidAndHorse(String pName) {
         return EquipmentClientInfo.builder()
-            .addHumanoidLayers(ResourceLocation.withDefaultNamespace(p_375668_))
-            .addLayers(EquipmentClientInfo.LayerType.HORSE_BODY, EquipmentClientInfo.Layer.leatherDyeable(ResourceLocation.withDefaultNamespace(p_375668_), false))
+            .addHumanoidLayers(ResourceLocation.withDefaultNamespace(pName))
+            .addLayers(EquipmentClientInfo.LayerType.HORSE_BODY, EquipmentClientInfo.Layer.leatherDyeable(ResourceLocation.withDefaultNamespace(pName), false))
             .build();
     }
 

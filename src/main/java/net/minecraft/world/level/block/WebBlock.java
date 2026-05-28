@@ -23,12 +23,12 @@ public class WebBlock extends Block {
     }
 
     @Override
-    protected void entityInside(BlockState p_58180_, Level p_58181_, BlockPos p_58182_, Entity p_58183_) {
+    protected void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
         Vec3 vec3 = new Vec3(0.25, 0.05F, 0.25);
-        if (p_58183_ instanceof LivingEntity livingentity && livingentity.hasEffect(MobEffects.WEAVING)) {
+        if (pEntity instanceof LivingEntity livingentity && livingentity.hasEffect(MobEffects.WEAVING)) {
             vec3 = new Vec3(0.5, 0.25, 0.5);
         }
 
-        p_58183_.makeStuckInBlock(p_58180_, vec3);
+        pEntity.makeStuckInBlock(pState, vec3);
     }
 }

@@ -7,22 +7,22 @@ public class LeveledPriorityQueue {
     private final LongLinkedOpenHashSet[] queues;
     private int firstQueuedLevel;
 
-    public LeveledPriorityQueue(int p_278289_, final int p_278259_) {
-        this.levelCount = p_278289_;
-        this.queues = new LongLinkedOpenHashSet[p_278289_];
+    public LeveledPriorityQueue(int pLevelCount, final int pExpectedSize) {
+        this.levelCount = pLevelCount;
+        this.queues = new LongLinkedOpenHashSet[pLevelCount];
 
-        for (int i = 0; i < p_278289_; i++) {
-            this.queues[i] = new LongLinkedOpenHashSet(p_278259_, 0.5F) {
+        for (int i = 0; i < pLevelCount; i++) {
+            this.queues[i] = new LongLinkedOpenHashSet(pExpectedSize, 0.5F) {
                 @Override
                 protected void rehash(int p_278313_) {
-                    if (p_278313_ > p_278259_) {
+                    if (p_278313_ > pExpectedSize) {
                         super.rehash(p_278313_);
                     }
                 }
             };
         }
 
-        this.firstQueuedLevel = p_278289_;
+        this.firstQueuedLevel = pLevelCount;
     }
 
     public long removeFirstLong() {
@@ -39,26 +39,26 @@ public class LeveledPriorityQueue {
         return this.firstQueuedLevel >= this.levelCount;
     }
 
-    public void dequeue(long p_278232_, int p_278338_, int p_278345_) {
-        LongLinkedOpenHashSet longlinkedopenhashset = this.queues[p_278338_];
-        longlinkedopenhashset.remove(p_278232_);
-        if (longlinkedopenhashset.isEmpty() && this.firstQueuedLevel == p_278338_) {
-            this.checkFirstQueuedLevel(p_278345_);
+    public void dequeue(long pValue, int pLevelIndex, int pEndIndex) {
+        LongLinkedOpenHashSet longlinkedopenhashset = this.queues[pLevelIndex];
+        longlinkedopenhashset.remove(pValue);
+        if (longlinkedopenhashset.isEmpty() && this.firstQueuedLevel == pLevelIndex) {
+            this.checkFirstQueuedLevel(pEndIndex);
         }
     }
 
-    public void enqueue(long p_278311_, int p_278335_) {
-        this.queues[p_278335_].add(p_278311_);
-        if (this.firstQueuedLevel > p_278335_) {
-            this.firstQueuedLevel = p_278335_;
+    public void enqueue(long pValue, int pLevelIndex) {
+        this.queues[pLevelIndex].add(pValue);
+        if (this.firstQueuedLevel > pLevelIndex) {
+            this.firstQueuedLevel = pLevelIndex;
         }
     }
 
-    private void checkFirstQueuedLevel(int p_278303_) {
+    private void checkFirstQueuedLevel(int pEndLevelIndex) {
         int i = this.firstQueuedLevel;
-        this.firstQueuedLevel = p_278303_;
+        this.firstQueuedLevel = pEndLevelIndex;
 
-        for (int j = i + 1; j < p_278303_; j++) {
+        for (int j = i + 1; j < pEndLevelIndex; j++) {
             if (!this.queues[j].isEmpty()) {
                 this.firstQueuedLevel = j;
                 break;

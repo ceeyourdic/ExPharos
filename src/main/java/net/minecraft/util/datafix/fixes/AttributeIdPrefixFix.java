@@ -7,12 +7,12 @@ import net.minecraft.util.datafix.schemas.NamespacedSchema;
 public class AttributeIdPrefixFix extends AttributesRenameFix {
     private static final List<String> PREFIXES = List.of("generic.", "horse.", "player.", "zombie.");
 
-    public AttributeIdPrefixFix(Schema p_365079_) {
-        super(p_365079_, "AttributeIdPrefixFix", AttributeIdPrefixFix::replaceId);
+    public AttributeIdPrefixFix(Schema pOutputSchema) {
+        super(pOutputSchema, "AttributeIdPrefixFix", AttributeIdPrefixFix::replaceId);
     }
 
-    private static String replaceId(String p_361180_) {
-        String s = NamespacedSchema.ensureNamespaced(p_361180_);
+    private static String replaceId(String pId) {
+        String s = NamespacedSchema.ensureNamespaced(pId);
 
         for (String s1 : PREFIXES) {
             String s2 = NamespacedSchema.ensureNamespaced(s1);
@@ -21,6 +21,6 @@ public class AttributeIdPrefixFix extends AttributesRenameFix {
             }
         }
 
-        return p_361180_;
+        return pId;
     }
 }

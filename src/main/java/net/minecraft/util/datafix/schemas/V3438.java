@@ -11,10 +11,10 @@ public class V3438 extends NamespacedSchema {
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_277667_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_277667_);
+    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(pSchema);
         map.put("minecraft:brushable_block", map.remove("minecraft:suspicious_sand"));
-        p_277667_.registerSimple(map, "minecraft:calibrated_sculk_sensor");
+        pSchema.registerSimple(map, "minecraft:calibrated_sculk_sensor");
         return map;
     }
 }

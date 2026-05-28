@@ -17,7 +17,7 @@ public class Giant extends Monster {
     }
 
     @Override
-    public float getWalkTargetValue(BlockPos p_32791_, LevelReader p_32792_) {
-        return p_32792_.getPathfindingCostFromLightLevels(p_32791_);
+    public float getWalkTargetValue(BlockPos pPos, LevelReader pLevel) {
+        return pLevel.getPathfindingCostFromLightLevels(pPos);
     }
 }

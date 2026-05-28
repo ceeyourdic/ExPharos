@@ -57,27 +57,27 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_30716_) {
-        super.addAdditionalSaveData(p_30716_);
-        p_30716_.putInt("Variant", this.getTypeVariant());
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putInt("Variant", this.getTypeVariant());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_30711_) {
-        super.readAdditionalSaveData(p_30711_);
-        this.setTypeVariant(p_30711_.getInt("Variant"));
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setTypeVariant(pCompound.getInt("Variant"));
     }
 
-    private void setTypeVariant(int p_30737_) {
-        this.entityData.set(DATA_ID_TYPE_VARIANT, p_30737_);
+    private void setTypeVariant(int pTypeVariant) {
+        this.entityData.set(DATA_ID_TYPE_VARIANT, pTypeVariant);
     }
 
     private int getTypeVariant() {
         return this.entityData.get(DATA_ID_TYPE_VARIANT);
     }
 
-    private void setVariantAndMarkings(Variant p_30700_, Markings p_30701_) {
-        this.setTypeVariant(p_30700_.getId() & 0xFF | p_30701_.getId() << 8 & 0xFF00);
+    private void setVariantAndMarkings(Variant pVariant, Markings pMarking) {
+        this.setTypeVariant(pVariant.getId() & 0xFF | pMarking.getId() << 8 & 0xFF00);
     }
 
     public Variant getVariant() {
@@ -117,7 +117,7 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_30720_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.HORSE_HURT;
     }
 
@@ -127,13 +127,13 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_30713_, InteractionHand p_30714_) {
-        boolean flag = !this.isBaby() && this.isTamed() && p_30713_.isSecondaryUseActive();
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        boolean flag = !this.isBaby() && this.isTamed() && pPlayer.isSecondaryUseActive();
         if (!this.isVehicle() && !flag) {
-            ItemStack itemstack = p_30713_.getItemInHand(p_30714_);
+            ItemStack itemstack = pPlayer.getItemInHand(pHand);
             if (!itemstack.isEmpty()) {
                 if (this.isFood(itemstack)) {
-                    return this.fedFood(p_30713_, itemstack);
+                    return this.fedFood(pPlayer, itemstack);
                 }
 
                 if (!this.isTamed()) {
@@ -142,18 +142,18 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
                 }
             }
 
-            return super.mobInteract(p_30713_, p_30714_);
+            return super.mobInteract(pPlayer, pHand);
         } else {
-            return super.mobInteract(p_30713_, p_30714_);
+            return super.mobInteract(pPlayer, pHand);
         }
     }
 
     @Override
-    public boolean canMate(Animal p_30698_) {
-        if (p_30698_ == this) {
+    public boolean canMate(Animal pOtherAnimal) {
+        if (pOtherAnimal == this) {
             return false;
         } else {
-            return !(p_30698_ instanceof Donkey) && !(p_30698_ instanceof Horse) ? false : this.canParent() && ((AbstractHorse)p_30698_).canParent();
+            return !(pOtherAnimal instanceof Donkey) && !(pOtherAnimal instanceof Horse) ? false : this.canParent() && ((AbstractHorse)pOtherAnimal).canParent();
         }
     }
 
@@ -233,9 +233,9 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
     public static class HorseGroupData extends AgeableMob.AgeableMobGroupData {
         public final Variant variant;
 
-        public HorseGroupData(Variant p_30740_) {
+        public HorseGroupData(Variant pVariant) {
             super(true);
-            this.variant = p_30740_;
+            this.variant = pVariant;
         }
     }
 }

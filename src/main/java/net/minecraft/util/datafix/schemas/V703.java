@@ -8,35 +8,35 @@ import java.util.function.Supplier;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V703 extends Schema {
-    public V703(int p_18018_, Schema p_18019_) {
-        super(p_18018_, p_18019_);
+    public V703(int pVersionKey, Schema pParent) {
+        super(pVersionKey, pParent);
     }
 
     @Override
-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_18031_) {
-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_18031_);
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema pSchema) {
+        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(pSchema);
         map.remove("EntityHorse");
-        p_18031_.register(
+        pSchema.register(
             map,
             "Horse",
-            () -> DSL.optionalFields("ArmorItem", References.ITEM_STACK.in(p_18031_), "SaddleItem", References.ITEM_STACK.in(p_18031_), V100.equipment(p_18031_))
+            () -> DSL.optionalFields("ArmorItem", References.ITEM_STACK.in(pSchema), "SaddleItem", References.ITEM_STACK.in(pSchema), V100.equipment(pSchema))
         );
-        p_18031_.register(
+        pSchema.register(
             map,
             "Donkey",
             () -> DSL.optionalFields(
-                    "Items", DSL.list(References.ITEM_STACK.in(p_18031_)), "SaddleItem", References.ITEM_STACK.in(p_18031_), V100.equipment(p_18031_)
+                    "Items", DSL.list(References.ITEM_STACK.in(pSchema)), "SaddleItem", References.ITEM_STACK.in(pSchema), V100.equipment(pSchema)
                 )
         );
-        p_18031_.register(
+        pSchema.register(
             map,
             "Mule",
             () -> DSL.optionalFields(
-                    "Items", DSL.list(References.ITEM_STACK.in(p_18031_)), "SaddleItem", References.ITEM_STACK.in(p_18031_), V100.equipment(p_18031_)
+                    "Items", DSL.list(References.ITEM_STACK.in(pSchema)), "SaddleItem", References.ITEM_STACK.in(pSchema), V100.equipment(pSchema)
                 )
         );
-        p_18031_.register(map, "ZombieHorse", () -> DSL.optionalFields("SaddleItem", References.ITEM_STACK.in(p_18031_), V100.equipment(p_18031_)));
-        p_18031_.register(map, "SkeletonHorse", () -> DSL.optionalFields("SaddleItem", References.ITEM_STACK.in(p_18031_), V100.equipment(p_18031_)));
+        pSchema.register(map, "ZombieHorse", () -> DSL.optionalFields("SaddleItem", References.ITEM_STACK.in(pSchema), V100.equipment(pSchema)));
+        pSchema.register(map, "SkeletonHorse", () -> DSL.optionalFields("SaddleItem", References.ITEM_STACK.in(pSchema), V100.equipment(pSchema)));
         return map;
     }
 }

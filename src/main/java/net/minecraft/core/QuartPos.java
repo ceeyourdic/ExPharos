@@ -9,23 +9,23 @@ public final class QuartPos {
     private QuartPos() {
     }
 
-    public static int fromBlock(int p_175401_) {
-        return p_175401_ >> 2;
+    public static int fromBlock(int pValue) {
+        return pValue >> 2;
     }
 
-    public static int quartLocal(int p_198377_) {
-        return p_198377_ & 3;
+    public static int quartLocal(int pValue) {
+        return pValue & 3;
     }
 
-    public static int toBlock(int p_175403_) {
-        return p_175403_ << 2;
+    public static int toBlock(int pValue) {
+        return pValue << 2;
     }
 
-    public static int fromSection(int p_175405_) {
-        return p_175405_ << 2;
+    public static int fromSection(int pValue) {
+        return pValue << 2;
     }
 
-    public static int toSection(int p_175407_) {
-        return p_175407_ >> 2;
+    public static int toSection(int pValue) {
+        return pValue >> 2;
     }
 }

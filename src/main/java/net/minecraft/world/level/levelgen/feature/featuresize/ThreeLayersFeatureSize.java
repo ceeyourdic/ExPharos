@@ -24,13 +24,13 @@ public class ThreeLayersFeatureSize extends FeatureSize {
     private final int middleSize;
     private final int upperSize;
 
-    public ThreeLayersFeatureSize(int p_68314_, int p_68315_, int p_68316_, int p_68317_, int p_68318_, OptionalInt p_68319_) {
-        super(p_68319_);
-        this.limit = p_68314_;
-        this.upperLimit = p_68315_;
-        this.lowerSize = p_68316_;
-        this.middleSize = p_68317_;
-        this.upperSize = p_68318_;
+    public ThreeLayersFeatureSize(int pLimit, int pUpperLimit, int pLowerSize, int pMiddleSize, int pUpperSize, OptionalInt pMinClippedHeight) {
+        super(pMinClippedHeight);
+        this.limit = pLimit;
+        this.upperLimit = pUpperLimit;
+        this.lowerSize = pLowerSize;
+        this.middleSize = pMiddleSize;
+        this.upperSize = pUpperSize;
     }
 
     @Override

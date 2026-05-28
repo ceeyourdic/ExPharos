@@ -80,12 +80,12 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_29480_) {
-        if (DATA_BOOST_TIME.equals(p_29480_) && this.level().isClientSide) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        if (DATA_BOOST_TIME.equals(pKey) && this.level().isClientSide) {
             this.steering.onSynced();
         }
 
-        super.onSyncedDataUpdated(p_29480_);
+        super.onSyncedDataUpdated(pKey);
     }
 
     @Override
@@ -96,15 +96,15 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_29495_) {
-        super.addAdditionalSaveData(p_29495_);
-        this.steering.addAdditionalSaveData(p_29495_);
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.steering.addAdditionalSaveData(pCompound);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_29478_) {
-        super.readAdditionalSaveData(p_29478_);
-        this.steering.readAdditionalSaveData(p_29478_);
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.steering.readAdditionalSaveData(pCompound);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_29502_) {
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
         return SoundEvents.PIG_HURT;
     }
 
@@ -123,24 +123,24 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    protected void playStepSound(BlockPos p_29492_, BlockState p_29493_) {
+    protected void playStepSound(BlockPos pPos, BlockState pBlock) {
         this.playSound(SoundEvents.PIG_STEP, 0.15F, 1.0F);
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_29489_, InteractionHand p_29490_) {
-        boolean flag = this.isFood(p_29489_.getItemInHand(p_29490_));
-        if (!flag && this.isSaddled() && !this.isVehicle() && !p_29489_.isSecondaryUseActive()) {
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        boolean flag = this.isFood(pPlayer.getItemInHand(pHand));
+        if (!flag && this.isSaddled() && !this.isVehicle() && !pPlayer.isSecondaryUseActive()) {
             if (!this.level().isClientSide) {
-                p_29489_.startRiding(this);
+                pPlayer.startRiding(this);
             }
 
             return InteractionResult.SUCCESS;
         } else {
-            InteractionResult interactionresult = super.mobInteract(p_29489_, p_29490_);
+            InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
             if (!interactionresult.consumesAction()) {
-                ItemStack itemstack = p_29489_.getItemInHand(p_29490_);
-                return (InteractionResult)(itemstack.is(Items.SADDLE) ? itemstack.interactLivingEntity(p_29489_, this, p_29490_) : InteractionResult.PASS);
+                ItemStack itemstack = pPlayer.getItemInHand(pHand);
+                return (InteractionResult)(itemstack.is(Items.SADDLE) ? itemstack.interactLivingEntity(pPlayer, this, pHand) : InteractionResult.PASS);
             } else {
                 return interactionresult;
             }
@@ -174,38 +174,38 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    public Vec3 getDismountLocationForPassenger(LivingEntity p_29487_) {
+    public Vec3 getDismountLocationForPassenger(LivingEntity pLivingEntity) {
         Direction direction = this.getMotionDirection();
         if (direction.getAxis() == Direction.Axis.Y) {
-            return super.getDismountLocationForPassenger(p_29487_);
+            return super.getDismountLocationForPassenger(pLivingEntity);
         } else {
             int[][] aint = DismountHelper.offsetsForDirection(direction);
             BlockPos blockpos = this.blockPosition();
             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
-            for (Pose pose : p_29487_.getDismountPoses()) {
-                AABB aabb = p_29487_.getLocalBoundsForPose(pose);
+            for (Pose pose : pLivingEntity.getDismountPoses()) {
+                AABB aabb = pLivingEntity.getLocalBoundsForPose(pose);
 
                 for (int[] aint1 : aint) {
                     blockpos$mutableblockpos.set(blockpos.getX() + aint1[0], blockpos.getY(), blockpos.getZ() + aint1[1]);
                     double d0 = this.level().getBlockFloorHeight(blockpos$mutableblockpos);
                     if (DismountHelper.isBlockFloorValid(d0)) {
                         Vec3 vec3 = Vec3.upFromBottomCenterOf(blockpos$mutableblockpos, d0);
-                        if (DismountHelper.canDismountTo(this.level(), p_29487_, aabb.move(vec3))) {
-                            p_29487_.setPose(pose);
+                        if (DismountHelper.canDismountTo(this.level(), pLivingEntity, aabb.move(vec3))) {
+                            pLivingEntity.setPose(pose);
                             return vec3;
                         }
                     }
                 }
             }
 
-            return super.getDismountLocationForPassenger(p_29487_);
+            return super.getDismountLocationForPassenger(pLivingEntity);
         }
     }
 
     @Override
-    public void thunderHit(ServerLevel p_29473_, LightningBolt p_29474_) {
-        if (p_29473_.getDifficulty() != Difficulty.PEACEFUL) {
+    public void thunderHit(ServerLevel pLevel, LightningBolt pLightning) {
+        if (pLevel.getDifficulty() != Difficulty.PEACEFUL) {
             ZombifiedPiglin zombifiedpiglin = this.convertTo(EntityType.ZOMBIFIED_PIGLIN, ConversionParams.single(this, false, true), p_375111_ -> {
                 if (this.getMainHandItem().isEmpty()) {
                     p_375111_.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
@@ -214,10 +214,10 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
                 p_375111_.setPersistenceRequired();
             });
             if (zombifiedpiglin == null) {
-                super.thunderHit(p_29473_, p_29474_);
+                super.thunderHit(pLevel, pLightning);
             }
         } else {
-            super.thunderHit(p_29473_, p_29474_);
+            super.thunderHit(pLevel, pLightning);
         }
     }
 
@@ -250,8 +250,8 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
     }
 
     @Override
-    public boolean isFood(ItemStack p_29508_) {
-        return p_29508_.is(ItemTags.PIG_FOOD);
+    public boolean isFood(ItemStack pStack) {
+        return pStack.is(ItemTags.PIG_FOOD);
     }
 
     @Override

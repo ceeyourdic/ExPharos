@@ -36,16 +36,16 @@ public class JungleTemplePiece extends ScatteredFeaturePiece {
     private boolean placedTrap2;
     private static final JungleTemplePiece.MossStoneSelector STONE_SELECTOR = new JungleTemplePiece.MossStoneSelector();
 
-    public JungleTemplePiece(RandomSource p_227668_, int p_227669_, int p_227670_) {
-        super(StructurePieceType.JUNGLE_PYRAMID_PIECE, p_227669_, 64, p_227670_, 12, 10, 15, getRandomHorizontalDirection(p_227668_));
+    public JungleTemplePiece(RandomSource pRandom, int pX, int pZ) {
+        super(StructurePieceType.JUNGLE_PYRAMID_PIECE, pX, 64, pZ, 12, 10, 15, getRandomHorizontalDirection(pRandom));
     }
 
-    public JungleTemplePiece(CompoundTag p_227672_) {
-        super(StructurePieceType.JUNGLE_PYRAMID_PIECE, p_227672_);
-        this.placedMainChest = p_227672_.getBoolean("placedMainChest");
-        this.placedHiddenChest = p_227672_.getBoolean("placedHiddenChest");
-        this.placedTrap1 = p_227672_.getBoolean("placedTrap1");
-        this.placedTrap2 = p_227672_.getBoolean("placedTrap2");
+    public JungleTemplePiece(CompoundTag pTag) {
+        super(StructurePieceType.JUNGLE_PYRAMID_PIECE, pTag);
+        this.placedMainChest = pTag.getBoolean("placedMainChest");
+        this.placedHiddenChest = pTag.getBoolean("placedHiddenChest");
+        this.placedTrap1 = pTag.getBoolean("placedTrap1");
+        this.placedTrap2 = pTag.getBoolean("placedTrap2");
     }
 
     @Override

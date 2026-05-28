@@ -9,49 +9,49 @@ import net.minecraft.resources.ResourceLocation;
 public class PackOutput {
     private final Path outputFolder;
 
-    public PackOutput(Path p_252039_) {
-        this.outputFolder = p_252039_;
+    public PackOutput(Path pOutputFolder) {
+        this.outputFolder = pOutputFolder;
     }
 
     public Path getOutputFolder() {
         return this.outputFolder;
     }
 
-    public Path getOutputFolder(PackOutput.Target p_251669_) {
-        return this.getOutputFolder().resolve(p_251669_.directory);
+    public Path getOutputFolder(PackOutput.Target pTarget) {
+        return this.getOutputFolder().resolve(pTarget.directory);
     }
 
-    public PackOutput.PathProvider createPathProvider(PackOutput.Target p_249479_, String p_251050_) {
-        return new PackOutput.PathProvider(this, p_249479_, p_251050_);
+    public PackOutput.PathProvider createPathProvider(PackOutput.Target pTarget, String pKind) {
+        return new PackOutput.PathProvider(this, pTarget, pKind);
     }
 
-    public PackOutput.PathProvider createRegistryElementsPathProvider(ResourceKey<? extends Registry<?>> p_344086_) {
-        return this.createPathProvider(PackOutput.Target.DATA_PACK, Registries.elementsDirPath(p_344086_));
+    public PackOutput.PathProvider createRegistryElementsPathProvider(ResourceKey<? extends Registry<?>> pRegistryKey) {
+        return this.createPathProvider(PackOutput.Target.DATA_PACK, Registries.elementsDirPath(pRegistryKey));
     }
 
-    public PackOutput.PathProvider createRegistryTagsPathProvider(ResourceKey<? extends Registry<?>> p_345128_) {
-        return this.createPathProvider(PackOutput.Target.DATA_PACK, Registries.tagsDirPath(p_345128_));
+    public PackOutput.PathProvider createRegistryTagsPathProvider(ResourceKey<? extends Registry<?>> pRegistryKey) {
+        return this.createPathProvider(PackOutput.Target.DATA_PACK, Registries.tagsDirPath(pRegistryKey));
     }
 
     public static class PathProvider {
         private final Path root;
         private final String kind;
 
-        PathProvider(PackOutput p_249025_, PackOutput.Target p_251200_, String p_251982_) {
-            this.root = p_249025_.getOutputFolder(p_251200_);
-            this.kind = p_251982_;
+        PathProvider(PackOutput pOutput, PackOutput.Target pTarget, String pKind) {
+            this.root = pOutput.getOutputFolder(pTarget);
+            this.kind = pKind;
         }
 
-        public Path file(ResourceLocation p_250940_, String p_251208_) {
-            return this.root.resolve(p_250940_.getNamespace()).resolve(this.kind).resolve(p_250940_.getPath() + "." + p_251208_);
+        public Path file(ResourceLocation pLocation, String pExtension) {
+            return this.root.resolve(pLocation.getNamespace()).resolve(this.kind).resolve(pLocation.getPath() + "." + pExtension);
         }
 
-        public Path json(ResourceLocation p_251634_) {
-            return this.root.resolve(p_251634_.getNamespace()).resolve(this.kind).resolve(p_251634_.getPath() + ".json");
+        public Path json(ResourceLocation pLocation) {
+            return this.root.resolve(pLocation.getNamespace()).resolve(this.kind).resolve(pLocation.getPath() + ".json");
         }
 
-        public Path json(ResourceKey<?> p_376925_) {
-            return this.root.resolve(p_376925_.location().getNamespace()).resolve(this.kind).resolve(p_376925_.location().getPath() + ".json");
+        public Path json(ResourceKey<?> pKey) {
+            return this.root.resolve(pKey.location().getNamespace()).resolve(this.kind).resolve(pKey.location().getPath() + ".json");
         }
     }
 
@@ -62,8 +62,8 @@ public class PackOutput {
 
         final String directory;
 
-        private Target(final String p_251326_) {
-            this.directory = p_251326_;
+        private Target(final String pDirectory) {
+            this.directory = pDirectory;
         }
     }
 }

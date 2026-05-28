@@ -17,8 +17,8 @@ public class RuleProcessor extends StructureProcessor {
         .xmap(RuleProcessor::new, p_74306_ -> p_74306_.rules);
     private final ImmutableList<ProcessorRule> rules;
 
-    public RuleProcessor(List<? extends ProcessorRule> p_74296_) {
-        this.rules = ImmutableList.copyOf(p_74296_);
+    public RuleProcessor(List<? extends ProcessorRule> pRules) {
+        this.rules = ImmutableList.copyOf(pRules);
     }
 
     @Nullable

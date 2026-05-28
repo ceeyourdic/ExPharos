@@ -15,11 +15,11 @@ public class PlainTextButton extends Button {
     private final Component message;
     private final Component underlinedMessage;
 
-    public PlainTextButton(int p_211755_, int p_211756_, int p_211757_, int p_211758_, Component p_211759_, Button.OnPress p_211760_, Font p_211761_) {
-        super(p_211755_, p_211756_, p_211757_, p_211758_, p_211759_, p_211760_, DEFAULT_NARRATION);
-        this.font = p_211761_;
-        this.message = p_211759_;
-        this.underlinedMessage = ComponentUtils.mergeStyles(p_211759_.copy(), Style.EMPTY.withUnderlined(true));
+    public PlainTextButton(int pX, int pY, int pWidth, int pHeight, Component pMessage, Button.OnPress pOnPress, Font pFont) {
+        super(pX, pY, pWidth, pHeight, pMessage, pOnPress, DEFAULT_NARRATION);
+        this.font = pFont;
+        this.message = pMessage;
+        this.underlinedMessage = ComponentUtils.mergeStyles(pMessage.copy(), Style.EMPTY.withUnderlined(true));
     }
 
     @Override

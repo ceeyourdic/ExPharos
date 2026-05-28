@@ -14,9 +14,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class SkullModel extends SkullModelBase {
     protected final ModelPart head;
 
-    public SkullModel(ModelPart p_170945_) {
-        super(p_170945_);
-        this.head = p_170945_.getChild("head");
+    public SkullModel(ModelPart pRoot) {
+        super(pRoot);
+        this.head = pRoot.getChild("head");
     }
 
     public static MeshDefinition createHeadModel() {

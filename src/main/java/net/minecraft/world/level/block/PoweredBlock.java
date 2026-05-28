@@ -20,12 +20,12 @@ public class PoweredBlock extends Block {
     }
 
     @Override
-    protected boolean isSignalSource(BlockState p_55213_) {
+    protected boolean isSignalSource(BlockState pState) {
         return true;
     }
 
     @Override
-    protected int getSignal(BlockState p_55208_, BlockGetter p_55209_, BlockPos p_55210_, Direction p_55211_) {
+    protected int getSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
         return 15;
     }
 }

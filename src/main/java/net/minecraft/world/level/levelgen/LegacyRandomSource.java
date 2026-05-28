@@ -14,8 +14,8 @@ public class LegacyRandomSource implements BitRandomSource {
     private final AtomicLong seed = new AtomicLong();
     private final MarsagliaPolarGaussian gaussianSource = new MarsagliaPolarGaussian(this);
 
-    public LegacyRandomSource(long p_188578_) {
-        this.setSeed(p_188578_);
+    public LegacyRandomSource(long pSeed) {
+        this.setSeed(pSeed);
     }
 
     @Override
@@ -56,8 +56,8 @@ public class LegacyRandomSource implements BitRandomSource {
     public static class LegacyPositionalRandomFactory implements PositionalRandomFactory {
         private final long seed;
 
-        public LegacyPositionalRandomFactory(long p_188588_) {
-            this.seed = p_188588_;
+        public LegacyPositionalRandomFactory(long pSeed) {
+            this.seed = pSeed;
         }
 
         @Override

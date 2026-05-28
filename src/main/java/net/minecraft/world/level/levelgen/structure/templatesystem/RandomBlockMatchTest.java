@@ -20,9 +20,9 @@ public class RandomBlockMatchTest extends RuleTest {
     private final Block block;
     private final float probability;
 
-    public RandomBlockMatchTest(Block p_74263_, float p_74264_) {
-        this.block = p_74263_;
-        this.probability = p_74264_;
+    public RandomBlockMatchTest(Block pBlock, float pProbability) {
+        this.block = pBlock;
+        this.probability = pProbability;
     }
 
     @Override

@@ -21,22 +21,22 @@ public class ZombieRenderer extends AbstractZombieRenderer<Zombie, ZombieRenderS
     }
 
     public ZombieRenderer(
-        EntityRendererProvider.Context p_174458_,
-        ModelLayerLocation p_174459_,
-        ModelLayerLocation p_174460_,
-        ModelLayerLocation p_174461_,
-        ModelLayerLocation p_362643_,
-        ModelLayerLocation p_361704_,
-        ModelLayerLocation p_369873_
+        EntityRendererProvider.Context pContext,
+        ModelLayerLocation pAdultModel,
+        ModelLayerLocation pBabyModel,
+        ModelLayerLocation pInnerModel,
+        ModelLayerLocation pOuterModel,
+        ModelLayerLocation pInnerModelBaby,
+        ModelLayerLocation pOuterModelBaby
     ) {
         super(
-            p_174458_,
-            new ZombieModel<>(p_174458_.bakeLayer(p_174459_)),
-            new ZombieModel<>(p_174458_.bakeLayer(p_174460_)),
-            new ZombieModel<>(p_174458_.bakeLayer(p_174461_)),
-            new ZombieModel<>(p_174458_.bakeLayer(p_362643_)),
-            new ZombieModel<>(p_174458_.bakeLayer(p_361704_)),
-            new ZombieModel<>(p_174458_.bakeLayer(p_369873_))
+            pContext,
+            new ZombieModel<>(pContext.bakeLayer(pAdultModel)),
+            new ZombieModel<>(pContext.bakeLayer(pBabyModel)),
+            new ZombieModel<>(pContext.bakeLayer(pInnerModel)),
+            new ZombieModel<>(pContext.bakeLayer(pOuterModel)),
+            new ZombieModel<>(pContext.bakeLayer(pInnerModelBaby)),
+            new ZombieModel<>(pContext.bakeLayer(pOuterModelBaby))
         );
     }
 }

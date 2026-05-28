@@ -21,12 +21,12 @@ public class LeadItem extends Item {
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext p_42834_) {
-        Level level = p_42834_.getLevel();
-        BlockPos blockpos = p_42834_.getClickedPos();
+    public InteractionResult useOn(UseOnContext pContext) {
+        Level level = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
         BlockState blockstate = level.getBlockState(blockpos);
         if (blockstate.is(BlockTags.FENCES)) {
-            Player player = p_42834_.getPlayer();
+            Player player = pContext.getPlayer();
             if (!level.isClientSide && player != null) {
                 return bindPlayerMobs(player, level, blockpos);
             }
@@ -35,13 +35,13 @@ public class LeadItem extends Item {
         return InteractionResult.PASS;
     }
 
-    public static InteractionResult bindPlayerMobs(Player p_42830_, Level p_42831_, BlockPos p_42832_) {
+    public static InteractionResult bindPlayerMobs(Player pPlayer, Level pLevel, BlockPos pPos) {
         LeashFenceKnotEntity leashfenceknotentity = null;
-        List<Leashable> list = leashableInArea(p_42831_, p_42832_, p_341570_ -> p_341570_.getLeashHolder() == p_42830_);
+        List<Leashable> list = leashableInArea(pLevel, pPos, p_341570_ -> p_341570_.getLeashHolder() == pPlayer);
 
         for (Leashable leashable : list) {
             if (leashfenceknotentity == null) {
-                leashfenceknotentity = LeashFenceKnotEntity.getOrCreateKnot(p_42831_, p_42832_);
+                leashfenceknotentity = LeashFenceKnotEntity.getOrCreateKnot(pLevel, pPos);
                 leashfenceknotentity.playPlacementSound();
             }
 
@@ -49,21 +49,21 @@ public class LeadItem extends Item {
         }
 
         if (!list.isEmpty()) {
-            p_42831_.gameEvent(GameEvent.BLOCK_ATTACH, p_42832_, GameEvent.Context.of(p_42830_));
+            pLevel.gameEvent(GameEvent.BLOCK_ATTACH, pPos, GameEvent.Context.of(pPlayer));
             return InteractionResult.SUCCESS_SERVER;
         } else {
             return InteractionResult.PASS;
         }
     }
 
-    public static List<Leashable> leashableInArea(Level p_342470_, BlockPos p_343183_, Predicate<Leashable> p_342293_) {
+    public static List<Leashable> leashableInArea(Level pLevel, BlockPos pPos, Predicate<Leashable> pPredicate) {
         double d0 = 7.0;
-        int i = p_343183_.getX();
-        int j = p_343183_.getY();
-        int k = p_343183_.getZ();
+        int i = pPos.getX();
+        int j = pPos.getY();
+        int k = pPos.getZ();
         AABB aabb = new AABB((double)i - 7.0, (double)j - 7.0, (double)k - 7.0, (double)i + 7.0, (double)j + 7.0, (double)k + 7.0);
-        return p_342470_.getEntitiesOfClass(Entity.class, aabb, p_341568_ -> {
-            if (p_341568_ instanceof Leashable leashable && p_342293_.test(leashable)) {
+        return pLevel.getEntitiesOfClass(Entity.class, aabb, p_341568_ -> {
+            if (p_341568_ instanceof Leashable leashable && pPredicate.test(leashable)) {
                 return true;
             }
 

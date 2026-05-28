@@ -131,38 +131,38 @@ public class EntitySubPredicates {
         )
     );
 
-    private static <T extends EntitySubPredicate> MapCodec<T> register(String p_328480_, MapCodec<T> p_332441_) {
-        return Registry.register(BuiltInRegistries.ENTITY_SUB_PREDICATE_TYPE, p_328480_, p_332441_);
+    private static <T extends EntitySubPredicate> MapCodec<T> register(String pName, MapCodec<T> pCodec) {
+        return Registry.register(BuiltInRegistries.ENTITY_SUB_PREDICATE_TYPE, pName, pCodec);
     }
 
     private static <V> EntitySubPredicates.EntityVariantPredicateType<V> register(
-        String p_330409_, EntitySubPredicates.EntityVariantPredicateType<V> p_330951_
+        String pName, EntitySubPredicates.EntityVariantPredicateType<V> pPredicateType
     ) {
-        Registry.register(BuiltInRegistries.ENTITY_SUB_PREDICATE_TYPE, p_330409_, p_330951_.codec);
-        return p_330951_;
+        Registry.register(BuiltInRegistries.ENTITY_SUB_PREDICATE_TYPE, pName, pPredicateType.codec);
+        return pPredicateType;
     }
 
     private static <V> EntitySubPredicates.EntityHolderVariantPredicateType<V> register(
-        String p_329374_, EntitySubPredicates.EntityHolderVariantPredicateType<V> p_329883_
+        String pName, EntitySubPredicates.EntityHolderVariantPredicateType<V> pPredicateType
     ) {
-        Registry.register(BuiltInRegistries.ENTITY_SUB_PREDICATE_TYPE, p_329374_, p_329883_.codec);
-        return p_329883_;
+        Registry.register(BuiltInRegistries.ENTITY_SUB_PREDICATE_TYPE, pName, pPredicateType.codec);
+        return pPredicateType;
     }
 
-    public static MapCodec<? extends EntitySubPredicate> bootstrap(Registry<MapCodec<? extends EntitySubPredicate>> p_335865_) {
+    public static MapCodec<? extends EntitySubPredicate> bootstrap(Registry<MapCodec<? extends EntitySubPredicate>> pRegistry) {
         return LIGHTNING;
     }
 
-    public static EntitySubPredicate catVariant(Holder<CatVariant> p_331492_) {
-        return CAT.createPredicate(HolderSet.direct(p_331492_));
+    public static EntitySubPredicate catVariant(Holder<CatVariant> pCatVariant) {
+        return CAT.createPredicate(HolderSet.direct(pCatVariant));
     }
 
-    public static EntitySubPredicate frogVariant(Holder<FrogVariant> p_333799_) {
-        return FROG.createPredicate(HolderSet.direct(p_333799_));
+    public static EntitySubPredicate frogVariant(Holder<FrogVariant> pFrogVariant) {
+        return FROG.createPredicate(HolderSet.direct(pFrogVariant));
     }
 
-    public static EntitySubPredicate wolfVariant(HolderSet<WolfVariant> p_335349_) {
-        return WOLF.createPredicate(p_335349_);
+    public static EntitySubPredicate wolfVariant(HolderSet<WolfVariant> pWolfVariant) {
+        return WOLF.createPredicate(pWolfVariant);
     }
 
     public static class EntityHolderVariantPredicateType<V> {
@@ -170,28 +170,28 @@ public class EntitySubPredicates {
         final Function<Entity, Optional<Holder<V>>> getter;
 
         public static <V> EntitySubPredicates.EntityHolderVariantPredicateType<V> create(
-            ResourceKey<? extends Registry<V>> p_335498_, Function<Entity, Optional<Holder<V>>> p_336153_
+            ResourceKey<? extends Registry<V>> pRegistryKey, Function<Entity, Optional<Holder<V>>> pGetter
         ) {
-            return new EntitySubPredicates.EntityHolderVariantPredicateType<>(p_335498_, p_336153_);
+            return new EntitySubPredicates.EntityHolderVariantPredicateType<>(pRegistryKey, pGetter);
         }
 
-        public EntityHolderVariantPredicateType(ResourceKey<? extends Registry<V>> p_332702_, Function<Entity, Optional<Holder<V>>> p_329584_) {
-            this.getter = p_329584_;
+        public EntityHolderVariantPredicateType(ResourceKey<? extends Registry<V>> pRegistryKey, Function<Entity, Optional<Holder<V>>> pGetter) {
+            this.getter = pGetter;
             this.codec = RecordCodecBuilder.mapCodec(
-                p_330908_ -> p_330908_.group(RegistryCodecs.homogeneousList(p_332702_).fieldOf("variant").forGetter(p_329421_ -> p_329421_.variants))
+                p_330908_ -> p_330908_.group(RegistryCodecs.homogeneousList(pRegistryKey).fieldOf("variant").forGetter(p_329421_ -> p_329421_.variants))
                         .apply(p_330908_, p_331166_ -> new EntitySubPredicates.EntityHolderVariantPredicateType<V>.Instance(p_331166_))
             );
         }
 
-        public EntitySubPredicate createPredicate(HolderSet<V> p_335527_) {
-            return new EntitySubPredicates.EntityHolderVariantPredicateType.Instance(p_335527_);
+        public EntitySubPredicate createPredicate(HolderSet<V> pVariants) {
+            return new EntitySubPredicates.EntityHolderVariantPredicateType.Instance(pVariants);
         }
 
         class Instance implements EntitySubPredicate {
             final HolderSet<V> variants;
 
-            Instance(final HolderSet<V> p_331442_) {
-                this.variants = p_331442_;
+            Instance(final HolderSet<V> pVariants) {
+                this.variants = pVariants;
             }
 
             @Override
@@ -210,31 +210,31 @@ public class EntitySubPredicates {
         final MapCodec<EntitySubPredicates.EntityVariantPredicateType<V>.Instance> codec;
         final Function<Entity, Optional<V>> getter;
 
-        public static <V> EntitySubPredicates.EntityVariantPredicateType<V> create(Registry<V> p_331006_, Function<Entity, Optional<V>> p_335365_) {
-            return new EntitySubPredicates.EntityVariantPredicateType<>(p_331006_.byNameCodec(), p_335365_);
+        public static <V> EntitySubPredicates.EntityVariantPredicateType<V> create(Registry<V> pVariantRegistry, Function<Entity, Optional<V>> pGetter) {
+            return new EntitySubPredicates.EntityVariantPredicateType<>(pVariantRegistry.byNameCodec(), pGetter);
         }
 
-        public static <V> EntitySubPredicates.EntityVariantPredicateType<V> create(Codec<V> p_330954_, Function<Entity, Optional<V>> p_329190_) {
-            return new EntitySubPredicates.EntityVariantPredicateType<>(p_330954_, p_329190_);
+        public static <V> EntitySubPredicates.EntityVariantPredicateType<V> create(Codec<V> pCodec, Function<Entity, Optional<V>> pGetter) {
+            return new EntitySubPredicates.EntityVariantPredicateType<>(pCodec, pGetter);
         }
 
-        public EntityVariantPredicateType(Codec<V> p_329553_, Function<Entity, Optional<V>> p_333059_) {
-            this.getter = p_333059_;
+        public EntityVariantPredicateType(Codec<V> pCodec, Function<Entity, Optional<V>> pGetter) {
+            this.getter = pGetter;
             this.codec = RecordCodecBuilder.mapCodec(
-                p_330838_ -> p_330838_.group(p_329553_.fieldOf("variant").forGetter(p_332763_ -> p_332763_.variant))
+                p_330838_ -> p_330838_.group(pCodec.fieldOf("variant").forGetter(p_332763_ -> p_332763_.variant))
                         .apply(p_330838_, p_327954_ -> new EntitySubPredicates.EntityVariantPredicateType<V>.Instance(p_327954_))
             );
         }
 
-        public EntitySubPredicate createPredicate(V p_335305_) {
-            return new EntitySubPredicates.EntityVariantPredicateType.Instance(p_335305_);
+        public EntitySubPredicate createPredicate(V pVariant) {
+            return new EntitySubPredicates.EntityVariantPredicateType.Instance(pVariant);
         }
 
         class Instance implements EntitySubPredicate {
             final V variant;
 
-            Instance(final V p_332718_) {
-                this.variant = p_332718_;
+            Instance(final V pVariant) {
+                this.variant = pVariant;
             }
 
             @Override

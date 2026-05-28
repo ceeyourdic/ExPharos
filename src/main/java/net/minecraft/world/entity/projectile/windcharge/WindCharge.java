@@ -29,12 +29,12 @@ public class WindCharge extends AbstractWindCharge {
         super(p_330526_, p_330063_);
     }
 
-    public WindCharge(Player p_336321_, Level p_330515_, double p_330095_, double p_333760_, double p_334828_) {
-        super(EntityType.WIND_CHARGE, p_330515_, p_336321_, p_330095_, p_333760_, p_334828_);
+    public WindCharge(Player pPlayer, Level pLevel, double pX, double pY, double pZ) {
+        super(EntityType.WIND_CHARGE, pLevel, pPlayer, pX, pY, pZ);
     }
 
-    public WindCharge(Level p_333074_, double p_329691_, double p_335041_, double p_329004_, Vec3 p_342087_) {
-        super(EntityType.WIND_CHARGE, p_329691_, p_335041_, p_329004_, p_342087_, p_333074_);
+    public WindCharge(Level pLevel, double pX, double pY, double pZ, Vec3 pMovement) {
+        super(EntityType.WIND_CHARGE, pX, pY, pZ, pMovement, pLevel);
     }
 
     @Override

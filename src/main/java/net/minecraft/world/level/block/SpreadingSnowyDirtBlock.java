@@ -16,15 +16,15 @@ public abstract class SpreadingSnowyDirtBlock extends SnowyDirtBlock {
         super(p_56817_);
     }
 
-    private static boolean canBeGrass(BlockState p_56824_, LevelReader p_56825_, BlockPos p_56826_) {
-        BlockPos blockpos = p_56826_.above();
-        BlockState blockstate = p_56825_.getBlockState(blockpos);
+    private static boolean canBeGrass(BlockState pState, LevelReader pLevelReader, BlockPos pPos) {
+        BlockPos blockpos = pPos.above();
+        BlockState blockstate = pLevelReader.getBlockState(blockpos);
         if (blockstate.is(Blocks.SNOW) && blockstate.getValue(SnowLayerBlock.LAYERS) == 1) {
             return true;
         } else if (blockstate.getFluidState().getAmount() == 8) {
             return false;
         } else {
-            int i = LightEngine.getLightBlockInto(p_56824_, blockstate, Direction.UP, blockstate.getLightBlock());
+            int i = LightEngine.getLightBlockInto(pState, blockstate, Direction.UP, blockstate.getLightBlock());
             return i < 15;
         }
     }
@@ -32,9 +32,9 @@ public abstract class SpreadingSnowyDirtBlock extends SnowyDirtBlock {
     @Override
     protected abstract MapCodec<? extends SpreadingSnowyDirtBlock> codec();
 
-    private static boolean canPropagate(BlockState p_56828_, LevelReader p_56829_, BlockPos p_56830_) {
-        BlockPos blockpos = p_56830_.above();
-        return canBeGrass(p_56828_, p_56829_, p_56830_) && !p_56829_.getFluidState(blockpos).is(FluidTags.WATER);
+    private static boolean canPropagate(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockPos blockpos = pPos.above();
+        return canBeGrass(pState, pLevel, pPos) && !pLevel.getFluidState(blockpos).is(FluidTags.WATER);
     }
 
     @Override

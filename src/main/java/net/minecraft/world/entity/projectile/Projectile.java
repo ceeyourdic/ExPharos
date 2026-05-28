@@ -48,10 +48,10 @@ public abstract class Projectile extends Entity implements TraceableEntity {
         super(p_37248_, p_37249_);
     }
 
-    public void setOwner(@Nullable Entity p_37263_) {
-        if (p_37263_ != null) {
-            this.ownerUUID = p_37263_.getUUID();
-            this.cachedOwner = p_37263_;
+    public void setOwner(@Nullable Entity pOwner) {
+        if (pOwner != null) {
+            this.ownerUUID = pOwner.getUUID();
+            this.cachedOwner = pOwner;
         }
     }
 
@@ -69,8 +69,8 @@ public abstract class Projectile extends Entity implements TraceableEntity {
     }
 
     @Nullable
-    protected Entity findOwner(UUID p_365545_) {
-        return this.level() instanceof ServerLevel serverlevel ? serverlevel.getEntity(p_365545_) : null;
+    protected Entity findOwner(UUID pEntityUuid) {
+        return this.level() instanceof ServerLevel serverlevel ? serverlevel.getEntity(pEntityUuid) : null;
     }
 
     public Entity getEffectSource() {
@@ -78,36 +78,36 @@ public abstract class Projectile extends Entity implements TraceableEntity {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag p_37265_) {
+    protected void addAdditionalSaveData(CompoundTag pCompound) {
         if (this.ownerUUID != null) {
-            p_37265_.putUUID("Owner", this.ownerUUID);
+            pCompound.putUUID("Owner", this.ownerUUID);
         }
 
         if (this.leftOwner) {
-            p_37265_.putBoolean("LeftOwner", true);
+            pCompound.putBoolean("LeftOwner", true);
         }
 
-        p_37265_.putBoolean("HasBeenShot", this.hasBeenShot);
+        pCompound.putBoolean("HasBeenShot", this.hasBeenShot);
     }
 
-    protected boolean ownedBy(Entity p_150172_) {
-        return p_150172_.getUUID().equals(this.ownerUUID);
+    protected boolean ownedBy(Entity pEntity) {
+        return pEntity.getUUID().equals(this.ownerUUID);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag p_37262_) {
-        if (p_37262_.hasUUID("Owner")) {
-            this.setOwnerThroughUUID(p_37262_.getUUID("Owner"));
+    protected void readAdditionalSaveData(CompoundTag pCompound) {
+        if (pCompound.hasUUID("Owner")) {
+            this.setOwnerThroughUUID(pCompound.getUUID("Owner"));
         }
 
-        this.leftOwner = p_37262_.getBoolean("LeftOwner");
-        this.hasBeenShot = p_37262_.getBoolean("HasBeenShot");
+        this.leftOwner = pCompound.getBoolean("LeftOwner");
+        this.hasBeenShot = pCompound.getBoolean("HasBeenShot");
     }
 
-    protected void setOwnerThroughUUID(UUID p_369008_) {
-        if (this.ownerUUID != p_369008_) {
-            this.ownerUUID = p_369008_;
-            this.cachedOwner = this.findOwner(p_369008_);
+    protected void setOwnerThroughUUID(UUID pUuid) {
+        if (this.ownerUUID != pUuid) {
+            this.ownerUUID = pUuid;
+            this.cachedOwner = this.findOwner(pUuid);
         }
     }
 
@@ -144,19 +144,19 @@ public abstract class Projectile extends Entity implements TraceableEntity {
         }
     }
 
-    public Vec3 getMovementToShoot(double p_335302_, double p_334829_, double p_334312_, float p_331363_, float p_330173_) {
-        return new Vec3(p_335302_, p_334829_, p_334312_)
+    public Vec3 getMovementToShoot(double pX, double pY, double pZ, float pVelocity, float pInaccuracy) {
+        return new Vec3(pX, pY, pZ)
             .normalize()
             .add(
-                this.random.triangle(0.0, 0.0172275 * (double)p_330173_),
-                this.random.triangle(0.0, 0.0172275 * (double)p_330173_),
-                this.random.triangle(0.0, 0.0172275 * (double)p_330173_)
+                this.random.triangle(0.0, 0.0172275 * (double)pInaccuracy),
+                this.random.triangle(0.0, 0.0172275 * (double)pInaccuracy),
+                this.random.triangle(0.0, 0.0172275 * (double)pInaccuracy)
             )
-            .scale((double)p_331363_);
+            .scale((double)pVelocity);
     }
 
-    public void shoot(double p_37266_, double p_37267_, double p_37268_, float p_37269_, float p_37270_) {
-        Vec3 vec3 = this.getMovementToShoot(p_37266_, p_37267_, p_37268_, p_37269_, p_37270_);
+    public void shoot(double pX, double pY, double pZ, float pVelocity, float pInaccuracy) {
+        Vec3 vec3 = this.getMovementToShoot(pX, pY, pZ, pVelocity, pInaccuracy);
         this.setDeltaMovement(vec3);
         this.hasImpulse = true;
         double d0 = vec3.horizontalDistance();
@@ -166,83 +166,83 @@ public abstract class Projectile extends Entity implements TraceableEntity {
         this.xRotO = this.getXRot();
     }
 
-    public void shootFromRotation(Entity p_37252_, float p_37253_, float p_37254_, float p_37255_, float p_37256_, float p_37257_) {
-        float f = -Mth.sin(p_37254_ * (float) (Math.PI / 180.0)) * Mth.cos(p_37253_ * (float) (Math.PI / 180.0));
-        float f1 = -Mth.sin((p_37253_ + p_37255_) * (float) (Math.PI / 180.0));
-        float f2 = Mth.cos(p_37254_ * (float) (Math.PI / 180.0)) * Mth.cos(p_37253_ * (float) (Math.PI / 180.0));
-        this.shoot((double)f, (double)f1, (double)f2, p_37256_, p_37257_);
-        Vec3 vec3 = p_37252_.getKnownMovement();
-        this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, p_37252_.onGround() ? 0.0 : vec3.y, vec3.z));
+    public void shootFromRotation(Entity pShooter, float pX, float pY, float pZ, float pVelocity, float pInaccuracy) {
+        float f = -Mth.sin(pY * (float) (Math.PI / 180.0)) * Mth.cos(pX * (float) (Math.PI / 180.0));
+        float f1 = -Mth.sin((pX + pZ) * (float) (Math.PI / 180.0));
+        float f2 = Mth.cos(pY * (float) (Math.PI / 180.0)) * Mth.cos(pX * (float) (Math.PI / 180.0));
+        this.shoot((double)f, (double)f1, (double)f2, pVelocity, pInaccuracy);
+        Vec3 vec3 = pShooter.getKnownMovement();
+        this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, pShooter.onGround() ? 0.0 : vec3.y, vec3.z));
     }
 
     public static <T extends Projectile> T spawnProjectileFromRotation(
-        Projectile.ProjectileFactory<T> p_364630_,
-        ServerLevel p_369390_,
-        ItemStack p_367599_,
-        LivingEntity p_361588_,
-        float p_367396_,
-        float p_363677_,
-        float p_365637_
+        Projectile.ProjectileFactory<T> pFactory,
+        ServerLevel pLevel,
+        ItemStack pSpawnedFrom,
+        LivingEntity pOwner,
+        float pZ,
+        float pVelocity,
+        float pInaccuracy
     ) {
         return spawnProjectile(
-            p_364630_.create(p_369390_, p_361588_, p_367599_),
-            p_369390_,
-            p_367599_,
-            p_375173_ -> p_375173_.shootFromRotation(p_361588_, p_361588_.getXRot(), p_361588_.getYRot(), p_367396_, p_363677_, p_365637_)
+            pFactory.create(pLevel, pOwner, pSpawnedFrom),
+            pLevel,
+            pSpawnedFrom,
+            p_375173_ -> p_375173_.shootFromRotation(pOwner, pOwner.getXRot(), pOwner.getYRot(), pZ, pVelocity, pInaccuracy)
         );
     }
 
     public static <T extends Projectile> T spawnProjectileUsingShoot(
-        Projectile.ProjectileFactory<T> p_362783_,
-        ServerLevel p_362807_,
-        ItemStack p_361126_,
-        LivingEntity p_368296_,
-        double p_367312_,
-        double p_361634_,
-        double p_367734_,
-        float p_361151_,
-        float p_368071_
+        Projectile.ProjectileFactory<T> pFactory,
+        ServerLevel pLevel,
+        ItemStack pSpawnedFrom,
+        LivingEntity pOwner,
+        double pX,
+        double pY,
+        double pZ,
+        float pVelocity,
+        float pInaccuracy
     ) {
         return spawnProjectile(
-            p_362783_.create(p_362807_, p_368296_, p_361126_),
-            p_362807_,
-            p_361126_,
-            p_359337_ -> p_359337_.shoot(p_367312_, p_361634_, p_367734_, p_361151_, p_368071_)
+            pFactory.create(pLevel, pOwner, pSpawnedFrom),
+            pLevel,
+            pSpawnedFrom,
+            p_359337_ -> p_359337_.shoot(pX, pY, pZ, pVelocity, pInaccuracy)
         );
     }
 
     public static <T extends Projectile> T spawnProjectileUsingShoot(
-        T p_367886_, ServerLevel p_360818_, ItemStack p_364412_, double p_362828_, double p_361067_, double p_368213_, float p_366268_, float p_361310_
+        T pProjectile, ServerLevel pLevel, ItemStack pSpawnedFrom, double pX, double pY, double pZ, float pVelocity, float pInaccuracy
     ) {
-        return spawnProjectile(p_367886_, p_360818_, p_364412_, p_359347_ -> p_367886_.shoot(p_362828_, p_361067_, p_368213_, p_366268_, p_361310_));
+        return spawnProjectile(pProjectile, pLevel, pSpawnedFrom, p_359347_ -> pProjectile.shoot(pX, pY, pZ, pVelocity, pInaccuracy));
     }
 
-    public static <T extends Projectile> T spawnProjectile(T p_361503_, ServerLevel p_367711_, ItemStack p_361747_) {
-        return spawnProjectile(p_361503_, p_367711_, p_361747_, p_359326_ -> {
+    public static <T extends Projectile> T spawnProjectile(T pProjectile, ServerLevel pLevel, ItemStack pSpawnedFrom) {
+        return spawnProjectile(pProjectile, pLevel, pSpawnedFrom, p_359326_ -> {
         });
     }
 
-    public static <T extends Projectile> T spawnProjectile(T p_365177_, ServerLevel p_365242_, ItemStack p_366479_, Consumer<T> p_360962_) {
-        p_360962_.accept(p_365177_);
-        p_365242_.addFreshEntity(p_365177_);
-        p_365177_.applyOnProjectileSpawned(p_365242_, p_366479_);
-        return p_365177_;
+    public static <T extends Projectile> T spawnProjectile(T pProjectile, ServerLevel pLevel, ItemStack pStack, Consumer<T> pAdapter) {
+        pAdapter.accept(pProjectile);
+        pLevel.addFreshEntity(pProjectile);
+        pProjectile.applyOnProjectileSpawned(pLevel, pStack);
+        return pProjectile;
     }
 
-    public void applyOnProjectileSpawned(ServerLevel p_363701_, ItemStack p_365738_) {
-        EnchantmentHelper.onProjectileSpawned(p_363701_, p_365738_, this, p_359338_ -> {
+    public void applyOnProjectileSpawned(ServerLevel pLevel, ItemStack pSpawnedFrom) {
+        EnchantmentHelper.onProjectileSpawned(pLevel, pSpawnedFrom, this, p_359338_ -> {
         });
         if (this instanceof AbstractArrow abstractarrow) {
             ItemStack itemstack = abstractarrow.getWeaponItem();
-            if (itemstack != null && !itemstack.isEmpty() && !p_365738_.getItem().equals(itemstack.getItem())) {
-                EnchantmentHelper.onProjectileSpawned(p_363701_, itemstack, this, abstractarrow::onItemBreak);
+            if (itemstack != null && !itemstack.isEmpty() && !pSpawnedFrom.getItem().equals(itemstack.getItem())) {
+                EnchantmentHelper.onProjectileSpawned(pLevel, itemstack, this, abstractarrow::onItemBreak);
             }
         }
     }
 
-    protected ProjectileDeflection hitTargetOrDeflectSelf(HitResult p_329816_) {
-        if (p_329816_.getType() == HitResult.Type.ENTITY) {
-            EntityHitResult entityhitresult = (EntityHitResult)p_329816_;
+    protected ProjectileDeflection hitTargetOrDeflectSelf(HitResult pHitResult) {
+        if (pHitResult.getType() == HitResult.Type.ENTITY) {
+            EntityHitResult entityhitresult = (EntityHitResult)pHitResult;
             Entity entity = entityhitresult.getEntity();
             ProjectileDeflection projectiledeflection = entity.deflection(this);
             if (projectiledeflection != ProjectileDeflection.NONE) {
@@ -252,7 +252,7 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 
                 return projectiledeflection;
             }
-        } else if (this.shouldBounceOnWorldBorder() && p_329816_ instanceof BlockHitResult blockhitresult && blockhitresult.isWorldBorderHit()) {
+        } else if (this.shouldBounceOnWorldBorder() && pHitResult instanceof BlockHitResult blockhitresult && blockhitresult.isWorldBorderHit()) {
             ProjectileDeflection projectiledeflection1 = ProjectileDeflection.REVERSE;
             if (this.deflect(projectiledeflection1, null, this.getOwner(), false)) {
                 this.setDeltaMovement(this.getDeltaMovement().scale(0.2));
@@ -260,7 +260,7 @@ public abstract class Projectile extends Entity implements TraceableEntity {
             }
         }
 
-        this.onHit(p_329816_);
+        this.onHit(pHitResult);
         return ProjectileDeflection.NONE;
     }
 
@@ -268,55 +268,55 @@ public abstract class Projectile extends Entity implements TraceableEntity {
         return false;
     }
 
-    public boolean deflect(ProjectileDeflection p_328550_, @Nullable Entity p_330074_, @Nullable Entity p_333528_, boolean p_328333_) {
-        p_328550_.deflect(this, p_330074_, this.random);
+    public boolean deflect(ProjectileDeflection pDeflection, @Nullable Entity pEntity, @Nullable Entity pOwner, boolean pDeflectedByPlayer) {
+        pDeflection.deflect(this, pEntity, this.random);
         if (!this.level().isClientSide) {
-            this.setOwner(p_333528_);
-            this.onDeflection(p_330074_, p_328333_);
+            this.setOwner(pOwner);
+            this.onDeflection(pEntity, pDeflectedByPlayer);
         }
 
         return true;
     }
 
-    protected void onDeflection(@Nullable Entity p_327965_, boolean p_335911_) {
+    protected void onDeflection(@Nullable Entity pEntity, boolean pDeflectedByPlayer) {
     }
 
-    protected void onItemBreak(Item p_366262_) {
+    protected void onItemBreak(Item pItem) {
     }
 
-    protected void onHit(HitResult p_37260_) {
-        HitResult.Type hitresult$type = p_37260_.getType();
+    protected void onHit(HitResult pResult) {
+        HitResult.Type hitresult$type = pResult.getType();
         if (hitresult$type == HitResult.Type.ENTITY) {
-            EntityHitResult entityhitresult = (EntityHitResult)p_37260_;
+            EntityHitResult entityhitresult = (EntityHitResult)pResult;
             Entity entity = entityhitresult.getEntity();
             if (entity.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE) && entity instanceof Projectile projectile) {
                 projectile.deflect(ProjectileDeflection.AIM_DEFLECT, this.getOwner(), this.getOwner(), true);
             }
 
             this.onHitEntity(entityhitresult);
-            this.level().gameEvent(GameEvent.PROJECTILE_LAND, p_37260_.getLocation(), GameEvent.Context.of(this, null));
+            this.level().gameEvent(GameEvent.PROJECTILE_LAND, pResult.getLocation(), GameEvent.Context.of(this, null));
         } else if (hitresult$type == HitResult.Type.BLOCK) {
-            BlockHitResult blockhitresult = (BlockHitResult)p_37260_;
+            BlockHitResult blockhitresult = (BlockHitResult)pResult;
             this.onHitBlock(blockhitresult);
             BlockPos blockpos = blockhitresult.getBlockPos();
             this.level().gameEvent(GameEvent.PROJECTILE_LAND, blockpos, GameEvent.Context.of(this, this.level().getBlockState(blockpos)));
         }
     }
 
-    protected void onHitEntity(EntityHitResult p_37259_) {
+    protected void onHitEntity(EntityHitResult pResult) {
     }
 
-    protected void onHitBlock(BlockHitResult p_37258_) {
-        BlockState blockstate = this.level().getBlockState(p_37258_.getBlockPos());
-        blockstate.onProjectileHit(this.level(), blockstate, p_37258_, this);
+    protected void onHitBlock(BlockHitResult pResult) {
+        BlockState blockstate = this.level().getBlockState(pResult.getBlockPos());
+        blockstate.onProjectileHit(this.level(), blockstate, pResult, this);
     }
 
-    protected boolean canHitEntity(Entity p_37250_) {
-        if (!p_37250_.canBeHitByProjectile()) {
+    protected boolean canHitEntity(Entity pTarget) {
+        if (!pTarget.canBeHitByProjectile()) {
             return false;
         } else {
             Entity entity = this.getOwner();
-            return entity == null || this.leftOwner || !entity.isPassengerOfSameVehicle(p_37250_);
+            return entity == null || this.leftOwner || !entity.isPassengerOfSameVehicle(pTarget);
         }
     }
 
@@ -327,16 +327,16 @@ public abstract class Projectile extends Entity implements TraceableEntity {
         this.setYRot(lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI)));
     }
 
-    protected static float lerpRotation(float p_37274_, float p_37275_) {
-        while (p_37275_ - p_37274_ < -180.0F) {
-            p_37274_ -= 360.0F;
+    protected static float lerpRotation(float pCurrentRotation, float pTargetRotation) {
+        while (pTargetRotation - pCurrentRotation < -180.0F) {
+            pCurrentRotation -= 360.0F;
         }
 
-        while (p_37275_ - p_37274_ >= 180.0F) {
-            p_37274_ += 360.0F;
+        while (pTargetRotation - pCurrentRotation >= 180.0F) {
+            pCurrentRotation += 360.0F;
         }
 
-        return Mth.lerp(0.2F, p_37274_, p_37275_);
+        return Mth.lerp(0.2F, pCurrentRotation, pTargetRotation);
     }
 
     @Override
@@ -362,8 +362,8 @@ public abstract class Projectile extends Entity implements TraceableEntity {
         return entity instanceof Player ? entity.mayInteract(p_364907_, p_150168_) : entity == null || p_364907_.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
     }
 
-    public boolean mayBreak(ServerLevel p_361134_) {
-        return this.getType().is(EntityTypeTags.IMPACT_PROJECTILES) && p_361134_.getGameRules().getBoolean(GameRules.RULE_PROJECTILESCANBREAKBLOCKS);
+    public boolean mayBreak(ServerLevel pLevel) {
+        return this.getType().is(EntityTypeTags.IMPACT_PROJECTILES) && pLevel.getGameRules().getBoolean(GameRules.RULE_PROJECTILESCANBREAKBLOCKS);
     }
 
     @Override
@@ -376,7 +376,7 @@ public abstract class Projectile extends Entity implements TraceableEntity {
         return this.isPickable() ? 1.0F : 0.0F;
     }
 
-    public DoubleDoubleImmutablePair calculateHorizontalHurtKnockbackDirection(LivingEntity p_343703_, DamageSource p_343506_) {
+    public DoubleDoubleImmutablePair calculateHorizontalHurtKnockbackDirection(LivingEntity pEntity, DamageSource pDamageSource) {
         double d0 = this.getDeltaMovement().x;
         double d1 = this.getDeltaMovement().z;
         return DoubleDoubleImmutablePair.of(d0, d1);
@@ -398,6 +398,6 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 
     @FunctionalInterface
     public interface ProjectileFactory<T extends Projectile> {
-        T create(ServerLevel p_369109_, LivingEntity p_369221_, ItemStack p_366597_);
+        T create(ServerLevel pLevel, LivingEntity pOwner, ItemStack pSpawnedFrom);
     }
 }
